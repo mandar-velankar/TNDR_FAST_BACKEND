@@ -1,0 +1,11 @@
+_schema-version: '3.1'
+ID: FAST.extension
+extends: FAST
+
+resources:
+  - name: FAST-db-hdi-container
+    parameters:
+      service: hanatrial
+  - name: uaa_FAST
+    parameters:
+      service-plan: application
