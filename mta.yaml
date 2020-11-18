@@ -1,4 +1,4 @@
-ID: FAST
+ID: FAST-BACKEND
 _schema-version: '2.1'
 version: 0.4.1
 modules:
@@ -23,7 +23,7 @@ modules:
     requires:
       - name: FAST-db-hdi-container
       - name: uaa_FAST
-  - name: FAST-ui
+  - name: FAST-API-AppRouter
     type: html5
     path: app
     requires:

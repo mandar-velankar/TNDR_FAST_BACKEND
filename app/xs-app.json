@@ -32,41 +32,6 @@
       "authenticationType": "xsuaa",
       "destination": "srv_api",
       "csrfProtection": true
-    },
-    {
-      "source": "^/app/(.*)$",
-      "target": "$1",
-      "localDir": "landingspage/dist"
-    },
-    {
-      "source": "^/appdebug/(.*)$",
-      "target": "$1",
-      "localDir": "landingspage/webapp"
-    },
-    {
-      "source": "^/epa/(.*)$",
-      "target": "$1",
-      "localDir": "epa/dist"
-    },
-    {
-      "source": "^/contractsapp/(.*)$",
-      "target": "$1",
-      "localDir": "contractsapp/dist"
-    },
-    {
-      "source": "^/tender/(.*)$",
-      "target": "$1",
-      "localDir": "tender/dist"
-    },
-    {
-      "source": "^/uilib/(.*)$",
-      "target": "$1",
-      "localDir": "uilib/dist/resources/com/bayer/tender/uilib"
-    },
-    {
-      "source": "^/pdf/(.*)$",
-      "target": "$1",
-      "localDir": "pdf"
     }
   ]
 }

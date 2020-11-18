@@ -24,9 +24,8 @@
     "devDependencies": {},
     "scripts": {
         "postinstall": "npm dedupe && node .build.js",
-        "startall": "npm-run-all startv4 startv2",
         "startv4": "node ./node_modules/@sap/cds/bin/cds.js serve gen/csn.json",
-        "start": "node index.js gen/csn.json",
+        "start": "cds run",
         "watch": "nodemon -w . -i node_modules/**,.git/** -e cds -x npm run build"
     },
     "private": true,

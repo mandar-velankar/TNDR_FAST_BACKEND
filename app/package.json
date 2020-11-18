@@ -1,23 +1,9 @@
 {
-  "name": "app",
+  "name": "FAST-API-AppRouter",
   "description": "",
   "devDependencies": {},
   "scripts": {
-    "postinstall": "npm run build",
-    "start": "node node_modules/@sap/approuter/approuter.js",
-    "serve": "ui5 serve",
-    "build": "npm run build:uilib && npm run build:tender && npm run build:epa && npm run build:contractsapp && npm run build:landingspage",
-    "build:tender": "cd tender && npm run build",
-    "build:epa": "cd epa && npm run build",
-    "build:contractsapp": "cd contractsapp && npm run build",
-    "build:landingspage": "cd landingspage && npm run build",
-    "build:uilib": "cd uilib && npm run build",
-    "install": "npm run install:uilib && npm run install:tender && npm run install:epa && npm run install:contractsapp && npm run install:landingspage",
-    "install:tender": "cd tender && npm install",
-    "install:epa": "cd epa && npm install",
-    "install:contractsapp": "cd contractsapp && npm install",
-    "install:landingspage": "cd landingspage && npm install",
-    "install:uilib": "cd uilib && npm install"
+    "start": "node node_modules/@sap/approuter/approuter.js"
   },
   "dependencies": {
     "@ui5/cli": "^2.0.2",
