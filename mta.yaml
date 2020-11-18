@@ -1,6 +1,6 @@
 ID: FAST-BACKEND
 _schema-version: '2.1'
-version: 0.4.1
+version: 0.4.2
 modules:
   - name: FAST-db
     type: hdb
