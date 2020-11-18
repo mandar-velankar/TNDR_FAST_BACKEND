@@ -1,0 +1,125 @@
+GET http://localhost:4004/ODataDev/sxtender.xsodata/PT_TMDLVTR
+Authorization: Basic bmlscw===
+
+###
+
+GET http://localhost:4004/ODataDev/sxtender.xsodata/PT_TMDLVTR(SNo=)
+Authorization: Basic bmlscw===
+
+###
+
+POST http://localhost:4004/ODataDev/sxtender.xsodata/PT_TMDLVTR
+Authorization: Basic bmlscw===
+Content-Type: application/json
+
+{
+   "TenderID" :"1",
+    "OfferID"                : "456",
+        "CountryCode"            : "BE",
+        "InstituteID"            : 123,
+        "Active": 1,
+"ProductCode":12345
+    #     SKUCode                : Integer;
+    #     SubmittedOn            : Date;
+    #     SubmittedBy            : String(255);
+    # key Active                 : Integer not null;
+    #     LocalOrDirectDelivery  : String(255);
+    #     PlannedInAPO           : String(255);
+    #     RequestedDeliveryDate  : Date;
+    #     RequestedQuantity      : Double;
+    #     ActualDeliveryDate     : Date;
+    #     ActualDeliveryQuantity : Double;
+    #     Penalty                : String(255);
+    #     PenaltyValue           : Double;
+    #     Currency               : String(4);
+    #     PenaltyReason          : String(255);
+    #     UndertakingLetters     : String(4);
+    #     Compensated            : String(4);
+    #     CompensationComment    : String(255);
+    # key ProductCode            : Integer not null;
+    #     PaidOrFree             : String(255);
+    #     PO                     : String(255);
+    #     InvoiceNo              : String(255);
+    # key SNo                    : Integer not null;
+}
+
+###
+GET http://localhost:4004/ODataDev/sxtender.xsodata/PT_TMUDLTRS
+Authorization: Basic bmlscw===
+
+###
+POST http://localhost:4004/ODataDev/sxtender.xsodata/PT_TMUDLTRS
+Authorization: Basic bmlscw===
+Content-Type: application/json
+
+{
+   "TENDERID" :"TEST",
+    "OFFERID"                : "456",
+        "COUNTRYCODE"            : "BE",
+        "INSTITUTEID"            : 123,
+        "ACTIVE": 1,
+        "SKUCODE":123
+    #     TENDERID          : String(50);
+    # key OFFERID           : String(30) not null;
+    #     COUNTRYCODE       : String(2);
+    #     INSTITUTEID       : Integer;
+    # key SKUCODE           : Integer not null;
+    #     SUBMITTEDON       : Date;
+    #     SUBMITTEDBY       : String(100);
+    # key ACTIVE            : Integer not null;
+    #     REASONFORLETTER   : String(500);
+    #     QUANTITY          : Integer;
+    #     BATCH             : String(100);
+    #     MANUFACTURINGDATE : Date;
+    #     EXPIRYDATE        : Date;
+    #     RETURNDATE        : Date;
+    #     RETURNEDQTY       : Integer;
+    #     UOM               : String(40);
+    # key SNO               : Integer not null;
+}
+
+### EPA Service - Get approval requets
+GET http://localhost:4004/epa/LatestApprovals?
+    &$expand=CountryApprover
+    &$filter=CountryCode eq 'TH' and InstituteGroupId eq 1 and ProductPackId eq 100120 and Division eq 'Pharma'
+Authorization: Basic bmlscw===
+
+### EPA Service - Create approval requets
+POST http://localhost:4004/epa/LatestApprovals
+Authorization: Basic bmlscw===
+Content-Type: application/json
+
+{
+    "CountryCode": "TH",
+    "InstituteGroupId": 1,
+    "ProductPackId": 100120,
+    "ApproverEmailId": "ahmed.yehya@bayer.com",
+    "ApproverType": "Supply Chain",
+    "StatusTime": "2020-08-20T08:26:10+00:00",
+    "Division": "Pharma",
+    "ApproverTypeSection": 2,
+    "ApprovalStatus": "Processing",
+    "SenderComment": "lorem ipsume",
+    "ApproverComment": "test",
+    "RequiredAction": "Notification"
+}
+
+### Contracts Service - Get Contracts
+GET http://localhost:4004/ctr/Contracts?
+    &$expand=Products
+Authorization: Basic YXJ0aW9t
+
+
+### EPA Service - Create InstituteGroupPrice
+POST http://localhost:4004/epa/InstituteGroupPrice
+Authorization: Basic bmlscw===
+Content-Type: application/json
+
+{
+    "InstituteGroupId": 1,
+    "ProductPackId": 100122,
+    "EffectiveDate": "2020-09-03T10:10:00Z",
+    "UoM": "Pack",
+    "Currency": "BAT",
+    "Price": 110
+}

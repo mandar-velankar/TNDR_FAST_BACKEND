@@ -1,0 +1,72 @@
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "logout": {
+    "logoutEndpoint": "/do/logout"
+  },
+  "routes": [
+    {
+      "source": "/FAST/reporting/(.*)$",
+      "target": "/FAST/reporting/$1",
+      "authenticationType": "basic",
+      "destination": "srv_api",
+      "csrfProtection": true
+    },
+    {
+      "source": "/ODataDev/(.*)$",
+      "target": "/ODataDev/$1",
+      "authenticationType": "basic",
+      "destination": "srv_api",
+      "csrfProtection": true
+    },
+    {
+      "source": "/reporting/(.*)$",
+      "target": "/reporting/$1",
+      "authenticationType": "basic",
+      "destination": "srv_api",
+      "csrfProtection": true
+    },
+    {
+      "source": "/FAST/(.*)$",
+      "target": "/FAST/$1",
+      "authenticationType": "xsuaa",
+      "destination": "srv_api",
+      "csrfProtection": true
+    },
+    {
+      "source": "^/app/(.*)$",
+      "target": "$1",
+      "localDir": "landingspage/dist"
+    },
+    {
+      "source": "^/appdebug/(.*)$",
+      "target": "$1",
+      "localDir": "landingspage/webapp"
+    },
+    {
+      "source": "^/epa/(.*)$",
+      "target": "$1",
+      "localDir": "epa/dist"
+    },
+    {
+      "source": "^/contractsapp/(.*)$",
+      "target": "$1",
+      "localDir": "contractsapp/dist"
+    },
+    {
+      "source": "^/tender/(.*)$",
+      "target": "$1",
+      "localDir": "tender/dist"
+    },
+    {
+      "source": "^/uilib/(.*)$",
+      "target": "$1",
+      "localDir": "uilib/dist/resources/com/bayer/tender/uilib"
+    },
+    {
+      "source": "^/pdf/(.*)$",
+      "target": "$1",
+      "localDir": "pdf"
+    }
+  ]
+}

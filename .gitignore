@@ -1,0 +1,62 @@
+# CAP
+_out
+.cds_gen.log
+*.db
+connection.properties
+# default-*.json
+gen/
+node_modules/
+package-lock.json
+target/
+FAST_ui_deployer
+
+#ignore all dist folders
+ui/dist
+app/dist
+app/dist/
+app/dist/controller/
+app/dist/model/
+app/dist/services/
+app/dist/resources/
+
+#ignore all back-ups
+webapp_bck*/
+
+# Ignore database setting (different on UI/MASTER then on DB)
+default-env.json
+db/default-env.json
+srv/default-env.json
+#default-env.json
+.*/default-env.json
+
+# Web IDE, App Studio
+.gen/
+
+# MTA
+*_mta_build_tmp
+
+
+# Other
+.DS_Store
+*.orig
+
+fioriHtmlRunner.html
+.*/fioriHtmlRunner.html
+visual_ext_index.html
+/webapp/visual_ext_index.html
+extended_runnable_file.html
+.*/extended_runnable_file.html
+sap-ui-cachebuster-info.json
+mock_preview_sapui5.html
+.*/mock_preview_sapui5.html
+UIAdaptation_index.html
+changes_preview.js
+AppVariant_index.html
+AppVariantPreviewPayload.zip
+mergedManifestDescriptor.json
+APIExternalProducer.js
+.*/APIExternalProducer.js
+app/default-env.json
+db/default-env.json
+default-env.json
+srv/default-env.json

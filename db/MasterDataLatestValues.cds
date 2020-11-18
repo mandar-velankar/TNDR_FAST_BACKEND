@@ -1,0 +1,93 @@
+namespace com.bayer.SXTENDER.MasterDataLatestValues;
+
+using { User, Country, managed } from '@sap/cds/common';
+using { com.bayer.SXTENDER.MasterData } from './MasterData';
+
+entity MostRecentRegisteredPrice as SELECT from MasterData.PT_TMREGPR as RegisteredPrice
+{
+    key RegisteredPrice.CountryCode,
+    key RegisteredPrice.ProductPackID,
+    max(RegisteredPrice.EffDate) as MaxEffectiveDate:Date
+}where RegisteredPrice.ActiveRecord = 'Yes'
+group by RegisteredPrice.CountryCode, RegisteredPrice.ProductPackID;
+
+entity CountryRegisteredPrice as SELECT from MasterData.PT_TMREGPR as RegisteredPrice
+INNER JOIN MostRecentRegisteredPrice as l on RegisteredPrice.CountryCode=l.CountryCode and RegisteredPrice.ProductPackID=l.ProductPackID and RegisteredPrice.EffDate=l.MaxEffectiveDate
+{
+    key RegisteredPrice.CountryCode as COUNTRY_CODE,
+    key RegisteredPrice.ProductPackID as PRODUCT_ID,
+    RegisteredPrice.UOM,
+    key RegisteredPrice.Currency as CURRENCY,
+    RegisteredPrice.RegisteredPrice as REGISTERED_PRICE
+}where RegisteredPrice.ActiveRecord = 'Yes';
+
+entity MostRecentCogs as SELECT from MasterData.PT_TMCOGS as Cogs
+{
+    key Cogs.CountryCode,
+    key Cogs.ProductPackID,
+    max(Cogs.EffectiveDate) as MaxEffectiveDate:Date
+}where Cogs.ActiveRecord = 'Yes'
+group by Cogs.CountryCode, Cogs.ProductPackID;
+
+entity CountryCogs as SELECT from MasterData.PT_TMCOGS as Cogs
+INNER JOIN MostRecentCogs as l on Cogs.CountryCode=l.CountryCode and Cogs.ProductPackID=l.ProductPackID and Cogs.EffectiveDate=l.MaxEffectiveDate
+{
+    key Cogs.CountryCode as COUNTRY_CODE,
+    key Cogs.ProductPackID as PRODUCT_ID,
+    key Cogs.COGSType as COGS_TYPE,
+    'Pack' as UOM:String(10),
+    Cogs.Currency as CURRENCY,
+    Cogs.COGS as COGS
+}where Cogs.ActiveRecord = 'Yes';
+
+entity MostRecentExchangeRates as SELECT from MasterData.PT_TMFXRTS as XRates
+{
+    key XRates.CurrencyFrom,
+    key XRates.CurrencyTo,
+    key XRates.ExchangeType,
+    max(XRates.EffDate) as MaxEffectiveDate:Date
+}where XRates.ActiveRecord = 'Yes'
+group by XRates.CurrencyFrom, XRates.CurrencyTo, XRates.ExchangeType;
+
+entity ExchangeRates as SELECT from MasterData.PT_TMFXRTS as XRates
+INNER JOIN MostRecentExchangeRates as l on XRates.CurrencyFrom=l.CurrencyFrom and XRates.CurrencyTo=l.CurrencyTo and XRates.ExchangeType=l.ExchangeType and XRates.EffDate=l.MaxEffectiveDate
+{
+    key XRates.CurrencyFrom as CURRENCY_FROM,
+    key XRates.CurrencyTo as CURRENCY_TO,
+    key XRates.ExchangeType as X_TYPE,
+    XRates.ExchangeRate as X_RATE
+}where XRates.ActiveRecord = 'Yes';
+
+entity MostRecentApprovedPrice as SELECT from MasterData.MASTER_APPROVED_PRICE as ApprovedPrice
+{
+    key ApprovedPrice.COUNTRY_CODE,
+    key ApprovedPrice.PRODUCT_ID,
+    max(ApprovedPrice.EFFECTIVE_DATE) as MaxEffectiveDate:Date
+}
+group by ApprovedPrice.COUNTRY_CODE, ApprovedPrice.PRODUCT_ID;
+
+entity VW_MASTER_APPROVED_PRICE as SELECT from MasterData.MASTER_APPROVED_PRICE as ApprovedPrice
+INNER JOIN MostRecentApprovedPrice as l on ApprovedPrice.COUNTRY_CODE=l.COUNTRY_CODE and ApprovedPrice.PRODUCT_ID=l.PRODUCT_ID and ApprovedPrice.EFFECTIVE_DATE=l.MaxEffectiveDate
+{
+    key ApprovedPrice.COUNTRY_CODE,
+    key ApprovedPrice.PRODUCT_ID,
+    ApprovedPrice.UOM,
+    key ApprovedPrice.CURRENCY,
+    ApprovedPrice.APPROVED_PRICE
+};
+
+entity MostRecentBudgetedProfitability as SELECT from MasterData.BUDGETEDPROFITABILITY as BudgetedProfitability
+{
+    key BudgetedProfitability.COUNTRYCODE,
+    key BudgetedProfitability.HLEVEL4_CODE,
+    max(BudgetedProfitability.EFFECTIVEDATE) as MaxEffectiveDate:Date
+}group by BudgetedProfitability.COUNTRYCODE, BudgetedProfitability.HLEVEL4_CODE;
+
+entity VWBUDGETEDPROFITABILITY AS SELECT from MasterData.BUDGETEDPROFITABILITY as BudgetedProfitability
+INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRYCODE = l.COUNTRYCODE and BudgetedProfitability.HLEVEL4_CODE = l.HLEVEL4_CODE and BudgetedProfitability.EFFECTIVEDATE = l.MaxEffectiveDate
+{
+    key BudgetedProfitability.COUNTRYCODE,
+    key BudgetedProfitability.HLEVEL4_CODE,
+    BudgetedProfitability.PROFITABILITY
+};
+

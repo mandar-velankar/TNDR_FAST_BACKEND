@@ -1,0 +1,192 @@
+#######################
+## Contracts Service ##
+#######################
+
+### Contracts  - Get All Contracts
+GET http://localhost:4004/FAST/ctr/Contracts
+Authorization: Basic YXJ0aW9t
+
+### Contracts  - Get Contract by ID - ODATA V2
+GET http://localhost:4004/FAST/ctr/Contracts(guid'8d5475be-e85b-11ea-adc1-0242ac120002')?
+    &$expand=Products/Deliveries,Products/Letters,Institute,Channel,Distributor,SellingCompany
+Authorization: Basic YXJ0aW9t
+
+### Contracts  - Get Contract by ID - ODATA V4
+GET http://localhost:4004/FAST/ctr/Contracts(8d5475be-e85b-11ea-adc1-0242ac120002)?
+    &$expand=Products/Deliveries,Products/Letters,Institute,Channel,Distributor,SellingCompany
+Authorization: Basic YXJ0aW9t
+
+
+###Contracts  - Create new Contract
+POST http://localhost:4004/FAST/ctr/Contracts
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "ID": "2c0a48ae-e72b-4cc0-86af-7656260f2142",
+    "createdBy": "Artiom Sargesjan",
+    "CountryCode": "SA",
+    "ContractNumber": "SA-20-7777-1",
+    "ChannelId": "f790b7fe-9e1b-4a61-ba38-72fd2cb6f054",
+    "ContractDate": "/Date(1597968000000)/",
+    "Enabled": true,
+    "InstituteId": 100155,
+    "DistributorId": 2024839,
+    "SellingCompanyCode": "BLC",
+    "Currency": "SAR",
+    "Comment": "Lorem ipsum dolor sit anet",
+    "Products" : [{
+        "ProductPackId": 100122,
+        "CountryCode": "SA",
+        "UoM": "Unit",
+        "Deleted": 0
+    }]
+}
+
+###Contracts  - Update Contract
+PUT http://localhost:4004/FAST/ctr/Contracts(guid'8d5475be-e85b-11ea-adc1-0242ac120002')
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "ID": "8d5475be-e85b-11ea-adc1-0242ac120002",
+    "CountryCode": "SA",
+    "ContractNumber": "SA-20-7777-1",
+    "ContractDate": "\/Date(1602115200000)\/",
+    "Enabled": true,
+    "InstituteId": 100155,
+    "DistributorId": 8888888,
+    "SellingCompanyCode": "BAG",
+    "Currency": "SAR",
+    "Comment": "Lorem ipsum dolor",
+    "Products": []
+}
+
+### Contracts  - Delete contract by ID
+DELETE http://localhost:4004/FAST/ctr/Contracts(guid'2c0a48ae-e72b-4cc0-86af-7656260f2142')
+Authorization: Basic YXJ0aW9t
+
+### Products  - Get product by ID
+GET http://localhost:4004/FAST/ctr/Products(ID=guid'76fef7ca-e92e-11ea-adc1-0242ac120002')?
+    &$expand=Deliveries,Letters
+Authorization: Basic YXJ0aW9t
+
+###Products  - Create new Product
+POST http://localhost:4004/FAST/ctr/Products
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "Contract_ID": "2c0a48ae-e72b-4cc0-86af-7656260f2140",
+    "ProductPackId": 100122,
+    "CountryCode": "SA",
+    "UoM": "Unit",
+    "Deleted": 0
+}
+
+### Products  - Remove product by ID
+DELETE http://localhost:4004/FAST/ctr/Products(ID=guid'7a8a46ad-ddbf-49be-81a6-bf8e46787700')
+Authorization: Basic YXJ0aW9t
+
+### Deliveries  - Get all Deliveries
+GET http://localhost:4004/FAST/ctr/Deliveries
+Authorization: Basic YXJ0aW9t
+
+### Deliveries  - Remove delivery by ID
+DELETE http://localhost:4004/FAST/ctr/Deliveries(ID=guid'9ce01dfd-4a45-4e33-890b-6c4beaeff320')
+Authorization: Basic YXJ0aW9t
+
+### Letters  - Get all Letters
+GET http://localhost:4004/FAST/ctr/Letters
+Authorization: Basic YXJ0aW9t
+
+### Letters  - Remove Letter by ID
+DELETE http://localhost:4004/FAST/ctr/Letters(ID=guid'5c90dc38-11f8-4c3f-8858-04acdbdff7b4')
+Authorization: Basic YXJ0aW9t
+
+
+
+
+#############################
+## TenderContracts Service ##
+#############################
+
+### TenderContracts  - Get with expand
+GET http://localhost:4004/FAST/ctr/TenderContracts(ContractNumber='SA-19-612-1073-BLC-11')?
+    &$expand=Products/Deliveries,Products/Letters,SellingCompany,Distributor,Institute
+Authorization: Basic YXJ0aW9t
+
+### TenderProducts  - Get tender product with expand
+GET http://localhost:4004/FAST/ctr/TenderProducts(OfferID='SA-19-612-1073-BLC-11',Active=1,ProductCode=100036)
+Authorization: Basic YXJ0aW9t
+
+###TenderLetters  - Create new Letter. OFFERID and SKUCODE links it to a product
+POST http://localhost:4004/FAST/ctr/TenderLetters
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "TenderID": "SA-19-612-1073",
+    "OfferID": "SA-19-612-1073-BLC-11",
+    "CountryCode": "SA",
+    "InstituteId": 100155,
+    "SkuCode": 100036,
+    "createdAt": "/Date(1597968000000)/",
+    "createdBy": "Artiom Sargesjan",
+    "ACTIVE": 1,
+    "ReasonForLetter": "Lorem ipsum ",
+    "Quantity": 4,
+    "Batch": null,
+    "ManufacturingDate": null,
+    "ExpiryDate": null,
+    "ReturnDate": null,
+    "ReturnedQuantity": 12,
+    "UoM": "pack",
+    "SNO": 5
+}
+
+###TenderLetters  - Get Letter by ID. 
+GET http://localhost:4004/FAST/ctr/TenderLetters(OfferID='SA-19-612-1073-BLC-11',Active=1,SkuCode=100036,SNo=5)
+Authorization: Basic YXJ0aW9t
+
+###TenderDeliveries  - Get Delivery by ID. 
+GET http://localhost:4004/FAST/ctr/TenderDeliveries(OfferID='AE-15-100-1012-BPH-16-A-R1-C1',Active=1,ProductCode=100045,SNo=1)
+Authorization: Basic YXJ0aW9t
+
+### TenderDeliveries  - Remove TenderDeliveries by ID
+DELETE http://localhost:4004/FAST/ctr/TenderDeliveries(OfferID='AE-15-100-1012-BPH-16-A-R1-C1',Active=1,ProductCode=100045,SNo=1)
+Authorization: Basic YXJ0aW9t
+
+###TenderDeliveries  - Create new Delivery. 
+POST http://localhost:4004/FAST/ctr/TenderDeliveries
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "TenderID": "AE-15-100-1012",
+    "OfferID": "AE-15-100-1012-BPH-16-A-R1-C2",
+    "CountryCode": "AE",
+    "InstituteID": 100015,
+    "SKUCode": 84643173,
+    "SubmittedOn": "/Date(1542758400000)/",
+    "SubmittedBy": "Mass Upload",
+    "Active": 1,
+    "LocalOrDirectDelivery": "L",
+    "PlannedInAPO": "No",
+    "RequestedDeliveryDate": null,
+    "RequestedQuantity": "0",
+    "ActualDeliveryDate": null,
+    "ActualDeliveryQuantity": "0",
+    "Penalty": null,
+    "PenaltyValue": "0",
+    "Currency": "USD",
+    "PenaltyReason": null,
+    "UndertakingLetters": null,
+    "Compensated": null,
+    "CompensationComment": null,
+    "ProductCode": 100045,
+    "PaidOrFree": "Paid",
+    "PO": null,
+    "InvoiceNo": null,
+    "SNo": 1
+}

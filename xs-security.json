@@ -1,0 +1,81 @@
+{
+  "xsappname": "FAST",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_admin",
+      "description": "f_tndr_cag_admin"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_tnd_user",
+      "description": "f_tndr_cag_tnd_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_technical_user",
+      "description": "f_tndr_cag_technical_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_epa_user",
+      "description": "f_tndr_cag_epa_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_ext_user",
+      "description": "f_tndr_cag_ext_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_ctr_user",
+      "description": "f_tndr_cag_ctr_user"
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "f_tndr_cag_admin",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_admin"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_tnd_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_tnd_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_technical_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_technical_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_epa_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_epa_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_ext_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_ext_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_ctr_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_ctr_user"
+      ],
+      "attribute-references": []
+    }
+  ]
+}
