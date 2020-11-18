@@ -1,4 +1,4 @@
-ID: FAST-BACKEND
+ID: FAST
 _schema-version: '2.1'
 version: 0.4.2
 modules:
@@ -7,7 +7,7 @@ modules:
     path: db
     parameters:
       memory: 256M
-      disk-quota: 256M
+      disk-quota: 1024M
     requires:
       - name: FAST-db-hdi-container
   - name: FAST-srv
@@ -15,7 +15,7 @@ modules:
     path: srv
     parameters:
       memory: 512M
-      disk-quota: 256M
+      disk-quota: 1024M
     provides:
       - name: srv_api
         public: true
@@ -38,6 +38,8 @@ modules:
 resources:
   - name: FAST-db-hdi-container
     type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
     properties:
       hdi-container-name: '${service-name}'
   - name: uaa_FAST
