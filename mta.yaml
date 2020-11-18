@@ -18,8 +18,9 @@ modules:
       disk-quota: 256M
     provides:
       - name: srv_api
+        public: true
         properties:
-          url: '${default-url}'
+          url: ${default-url}
     requires:
       - name: FAST-db-hdi-container
       - name: uaa_FAST
