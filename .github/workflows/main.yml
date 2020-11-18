@@ -33,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@master	
         with:	
           name: mta
-          path: ./mta_archives/cap-github-actions_1.0.0.mtar
+          path: ./mta_archives/FAST_0.4.2.mtar
