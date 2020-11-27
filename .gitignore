@@ -9,7 +9,6 @@ node_modules/
 package-lock.json
 target/
 FAST_ui_deployer
-mta_archives
 
 #ignore all dist folders
 ui/dist
