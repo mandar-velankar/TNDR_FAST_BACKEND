@@ -32,5 +32,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
-          name: mta
+          name: FASTCAP_Backend
           path: ./mta_archives/FASTCAP_Backend.mtar
