@@ -28,9 +28,9 @@ jobs:
       - name: Install MTA Build Tool
         run: npm install -g mbt
       - name: Build MTA
-        run: mbt build -p=xsa
+        run: npm run build:xsa
       - name: Upload Artifact
-        uses: actions/upload-artifact@master	
-        with:	
+        uses: actions/upload-artifact@master
+        with:
           name: mta
-          path: ./mta_archives/FAST_0.4.2.mtar
+          path: ./mta_archives/FASTCAP_Backend.mtar

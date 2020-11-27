@@ -36,9 +36,9 @@
     "deploy": "cds deploy db --to sqlite:db/sxtender.db",
     "build": "cds build/all --clean",
     "build:xs-security": "cds compile srv/ --to xsuaa  > xs-security.json",
-    "build:xsa": "mbt build -p=xsa",
+    "build:xsa": "mbt build -p=xsa --mtar=FASTCAP-Backend.mtar",
     "build:cf": "mbt build -p=cf",
-    "deploy:cf": "cf deploy mta_archives/FAST-BACKEND_0.4.2.mtar -e cf.mtaext",
+    "deploy:cf": "cf deploy mta_archives/FAST_0.4.2.mtar -e cf.mtaext",
     "debug": "node --inspect node_modules/@sap/cds/bin/cds.js run",
     "start": "cds run"
   },
