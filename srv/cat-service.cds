@@ -10,7 +10,7 @@ using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
 
 
-service CatalogService @(path : 'ODataDev/sxtender.xsodata')
+service CatalogService @(path : 'ODataDev/sxtender')//.xsodata')
 @(requires : [
 'authenticated-user',
 'f_tndr_cag_admin',
