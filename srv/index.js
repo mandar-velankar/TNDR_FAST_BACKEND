@@ -9,25 +9,20 @@ const port = process.env.PORT || 4004;
   const app = express();
   await cds.connect("db");
 
-  const srv = await cds.load("./gen/srv/");
+  const srv = await cds.load("./gen/");
   try{
     await cds.deploy(srv);
   }catch(ex){
     console.log(ex);
   }
   // OData V2
-  app.use(proxy({
-    isoDateTimeOffset:false,
-    isoDate:false,
-    isoDateTime:false,
-    isoTime:false
-  }));
+  app.use(proxy());
   // OData V4
-  await cds.serve("EpaService").from("./gen/srv/").in(app);
-  await cds.serve("CatalogService").from("./gen/srv/").in(app);
+  await cds.serve("EpaService").from("./gen/").in(app);
+  await cds.serve("CatalogService").from("./gen/").in(app);
 //   await cds.serve("PolicyService").from("./gen/srv/").in(app);
-  await cds.serve("ContractService").from("./gen/srv/").in(app);
-  await cds.serve("ExternalService").from("./gen/srv/").in(app);
+  await cds.serve("ContractService").from("./gen/").in(app);
+  await cds.serve("ExternalService").from("./gen/").in(app);
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));
