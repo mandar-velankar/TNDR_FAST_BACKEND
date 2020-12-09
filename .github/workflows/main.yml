@@ -27,6 +27,8 @@ jobs:
           node-version: 12
       - name: Install MTA Build Tool
         run: npm install -g mbt
+      - name: Install CDS tool
+        run: npm i -g @sap/cds-dk
       - name: Build MTA
         run: npm run build:xsa
       - name: Upload Artifact
