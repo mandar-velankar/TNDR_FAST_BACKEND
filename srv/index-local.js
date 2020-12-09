@@ -16,7 +16,7 @@ const port = process.env.PORT || 4004;
     console.log(ex);
   }
   // OData V2
-  app.use(proxy());
+  app.use(proxy({path: "FAST"}));
   // OData V4
   await cds.serve("EpaService").from("./srv/").in(app);
   await cds.serve("CatalogService").from("./srv/").in(app);
