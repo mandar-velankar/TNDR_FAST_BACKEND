@@ -1,4 +1,4 @@
-"HLEVEL1_NAME","HLEVEL1_CODE","HLEVEL2_NAME","HLEVEL2_CODE","HLEVEL3_NAME","HLEVEL3_CODE","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL5_NAME","HLEVEL5_CODE","HLEVEL6_NAME","HLEVEL6_CODE"
+HLEVEL1_NAME,HLEVEL1_CODE,HLEVEL2_NAME,HLEVEL2_CODE,HLEVEL3_NAME,HLEVEL3_CODE,HLEVEL4_NAME,HLEVEL4_CODE,HLEVEL5_NAME,HLEVEL5_CODE,HLEVEL6_NAME,HLEVEL6_CODE
 "Radiology","65","zz_invalid Other Contrast Media(CME)","6544.0","zz_invalid Other Contrast Media(CME)","6544440","zz_invalid TC-99-INSTANTS","6544440F20","zz_invalid TC-99-Instants, Oth.","6544440F200000","zz_invalid TC-99-Instants, Oth.","6544440F200000OXND"
 "Radiology","65","zz_invalid Other Contrast Media(CME)","6544.0","zz_invalid Other Contrast Media(CME)","6544440","zz_invalid TIXOBAR","6544440F21","zz_invalid Tixobar, Others","6544440F210000","zz_invalid Tixobar, Others","6544440F210000OXND"
 "Radiology","65","zz_invalid Other Contrast Media(CME)","6544.0","zz_invalid Other Contrast Media(CME)","6544440","zz_invalid Trazograf","6544440F22","zz_invalid Trazograf, Others","6544440F220000","zz_invalid Trazograf, Others","6544440F220000OXND"
