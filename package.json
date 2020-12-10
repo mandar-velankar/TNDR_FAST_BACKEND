@@ -36,8 +36,8 @@
     "build": "cds build/all --clean",
     "build:xs-security": "cds compile srv/ --to xsuaa  > xs-security.json",
     "build:xsa": "mbt build -p=xsa --mtar=FASTCAP-Backend.mtar",
-    "build:cf": "mbt build -p=cf",
-    "deploy:cf": "cf deploy mta_archives/FAST_0.4.2.mtar -e cf.mtaext",
+    "build:cf": "mbt build -p=cf --mtar=FASTCAP-Backend.mtar",
+    "deploy:cf": "cf deploy mta_archives/FASTCAP-Backend.mtar -e cf.mtaext",
     "debug": "node --inspect node_modules/@sap/cds/bin/cds.js run",
     "start-cds": "cds run",
     "start": "node ./srv/index-local.js"

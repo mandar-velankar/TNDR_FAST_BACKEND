@@ -1,6 +1,6 @@
 ID: FAST
 _schema-version: '2.1'
-version: 0.4.2
+version: 0.4.4
 modules:
   - name: FAST-db
     type: hdb
