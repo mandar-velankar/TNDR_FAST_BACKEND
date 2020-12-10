@@ -20,7 +20,7 @@ const port = process.env.PORT || 4004;
   // OData V4
   await cds.serve("EpaService").from("./gen/").in(app);
   await cds.serve("CatalogService").from("./gen/").in(app);
-//   await cds.serve("PolicyService").from("./gen/srv/").in(app);
+  await cds.serve("PolicyService").from("./gen/").in(app);
   await cds.serve("ContractService").from("./gen/").in(app);
   await cds.serve("ExternalService").from("./gen/").in(app);
   

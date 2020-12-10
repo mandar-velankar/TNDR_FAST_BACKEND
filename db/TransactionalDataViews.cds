@@ -123,6 +123,16 @@ entity TenderResults as select from TransactionalData.PT_TMTEND as tender{
         then 1
         else 1 / tender.Offer.Product.SKU.PACKFACTOR
     end as UNIT_PRICE:Double,
+    tender.Offer.Product.Price.NetofferPrice *
+    case when tender.Offer.Product.UnitPerPack = 'Unit'
+        then tender.Offer.Product.SKU.PACKFACTOR
+        else 1
+    end as PACK_NET_PRICE:Double,
+    tender.Offer.Product.Price.NetofferPrice *
+    case when tender.Offer.Product.UnitPerPack = 'Unit'
+        then 1
+        else 1 / tender.Offer.Product.SKU.PACKFACTOR
+    end as UNIT_NET_PRICE:Double,
     case when tender.Offer.Product.Price.FOC = 0
         then ''
         else
@@ -154,6 +164,26 @@ entity CountryMinPrice as select from TenderResults as results{
     min(results.PACK_PRICE) as MIN_PACK_PRICE:Double,
     min(results.UNIT_PRICE) as MIN_UNIT_PRICE:Double
 }group by results.COUNTRY_CODE,
+    results.BRAND_ID,
+    results.BRAND_NAME,
+    results.PRODUCT_ID,
+    results.PRODUCT_NAME,
+    results.CURRENCY;
+
+entity AccountMinPrice as select from TenderResults as results{
+    key results.COUNTRY_CODE,
+    key results.INSTITUTE_ID,
+    results.BRAND_ID,
+    results.BRAND_NAME,
+    key results.PRODUCT_ID,
+    results.PRODUCT_NAME,
+    key results.CURRENCY,
+    min(results.PACK_PRICE) as MIN_PACK_PRICE:Double,
+    min(results.UNIT_PRICE) as MIN_UNIT_PRICE:Double,
+    min(results.PACK_NET_PRICE) as MIN_PACK_NET_PRICE:Double,
+    min(results.UNIT_NET_PRICE) as MIN_UNIT_NET_PRICE:Double,
+}group by results.COUNTRY_CODE,
+    results.INSTITUTE_ID,
     results.BRAND_ID,
     results.BRAND_NAME,
     results.PRODUCT_ID,
@@ -418,6 +448,11 @@ left outer join CountryMinPrice minPrice
     on offerProduct.ProductCode = minPrice.PRODUCT_ID
     and offerProduct.CountryCode = minPrice.COUNTRY_CODE
     and offerProduct.CURRENCY = minPrice.CURRENCY
+left outer join AccountMinPrice accountPrice
+    on offerProduct.ProductCode = accountPrice.PRODUCT_ID
+    and offerProduct.CountryCode = accountPrice.COUNTRY_CODE
+    and offerProduct.INSTITUTE_ID = accountPrice.INSTITUTE_ID
+    and offerProduct.CURRENCY = accountPrice.CURRENCY
 {
     offerProduct.TenderID as TENDERID,
     key offerProduct.OfferID as OFFERID,
@@ -475,10 +510,12 @@ left outer join CountryMinPrice minPrice
     offerProduct.PreviousApproval.REGIONAL_BUSINESS_APPROVED as REGIONAL_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.REGULATORY_APPROVED as REGULATORY_APPROVED,
     offerProduct.PreviousApproval.SUPPLY_APPROVED as SUPPLY_APPROVED,
-    approved.APPROVED_PRICE
+    ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
-    / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end as APPROVED_PRICE,
-    case when offerProduct.UnitPerPack = 'Unit' then minPrice.MIN_UNIT_PRICE else minPrice.MIN_PACK_PRICE end as MIN_PRICE,
+    / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,
+    ifnull(case when offerProduct.UnitPerPack = 'Unit' then minPrice.MIN_UNIT_PRICE else minPrice.MIN_PACK_PRICE end, 0) as MIN_PRICE,
+    ifnull(case when offerProduct.UnitPerPack = 'Unit' then accountPrice.MIN_UNIT_PRICE else accountPrice.MIN_PACK_PRICE end, 0) as ACCOUNT_OFFER_PRICE,
+    ifnull(case when offerProduct.UnitPerPack = 'Unit' then accountPrice.MIN_UNIT_NET_PRICE else accountPrice.MIN_PACK_NET_PRICE end, 0) as ACCOUNT_NET_OFFER_PRICE,
     0 as FLOOR_PRICE:Double,//Plan for Thailand
     0 as GUIDANCE_PRICE:Double,//Plan for Thailand
     0 as THRESHOLD_VOLUME:Double,//Plan for Mexico
@@ -507,6 +544,7 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
 	'PT_TMTNOFST(TENDERID=''' || offer.TenderID || ''',OFFERID=''' || offer.OfferID || ''',Active=1)' as OFFERSTATUSPATH:String(500),
 	offer.TenderID as TENDERID,
     offer.Tender.Institute.InstituteType as INSTITUTE_TYPE,
+    offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.Institute.InstituteName || ' - ' || offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
@@ -568,6 +606,6 @@ entity PreApprovedPrices as select from PricingAppData.InstituteGroupPriceLatest
     key price.InstituteGroup.Institutes.InstituteId,
     key price.ProductPackId,
     key price.Currency,
-    case when price.UoM = 'Unit' then price.Price else price.Price / price.ProductPack.PACKFACTOR end as PriceUnit:Double,
-    case when price.UoM = 'Unit' then price.Price * price.ProductPack.PACKFACTOR else price.Price end as PricePack:Double
+    case when price.UoM = 'Unit' then price.MSP else price.MSP / price.ProductPack.PACKFACTOR end as PriceUnit:Double,
+    case when price.UoM = 'Unit' then price.MSP * price.ProductPack.PACKFACTOR else price.MSP end as PricePack:Double
 };

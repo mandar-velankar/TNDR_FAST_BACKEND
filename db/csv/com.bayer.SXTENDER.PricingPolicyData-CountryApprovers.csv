@@ -1,0 +1,24 @@
+﻿ID,CountryCode,ApproverType_ID,Division,ApproverName,ApproverEmailID
+ff44386c-1c11-470f-bb64-90cfe1b056c8,TH,28e0dc85-d03e-4bd4-9be8-710716df9067,Radiology,Jonathan,jonathan@bayer.com
+8bdf9423-35a5-432e-a6b5-4ae99c93db75,TH,6d9f914d-9982-41f0-afe7-442c4e612ae5,Pharma,Jonathan Hubeau,jonathan.hubeau@bayer.com
+ffd162c7-5d5c-4605-bba0-2faebe88ccf4,TH,1d22cd42-ff4d-4d80-a2ac-9eb4e9ea8a62,Radiology,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+14ef0346-98fe-42e7-853f-ae00c0784ce7,TH,d7dde1bd-1cab-4a68-b55a-f7c737317870,Pharma,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+14ef0346-98fe-42e7-853f-ae00c0784ce8,TH,d7dde1bd-1cab-4a68-b55a-f7c737317870,Pharma,Artiom Sargesjan pharma,artiom.sargesjan@bayer.com
+14ef0346-98fe-42e7-853f-ae00c0784ce9,TH,d7dde1bd-1cab-4a68-b55a-f7c737317870,Radiology,Artiom Sargesjan radiology,artiom.sargesjan@bayer.com
+14ef0346-98fe-42e7-853f-ae00c0784ce1,AL,d7dde1bd-1cab-4a68-b55a-f7c737317870,Pharma,Artiom Sargesjan pharma,artiom.sargesjan@bayer.com
+5ad297d6-30bf-11eb-adc1-0242ac120002,TH,28e0dc85-d03e-4bd4-9be8-710716df9067,Pharma,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+5ad299e8-30bf-11eb-adc1-0242ac120002,TH,6d9f914d-9982-41f0-afe7-442c4e612ae5,Pharma,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+5ad29ae2-30bf-11eb-adc1-0242ac120002,TH,1d22cd42-ff4d-4d80-a2ac-9eb4e9ea8a62,Pharma,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+5ad29bbe-30bf-11eb-adc1-0242ac120002,TH,d7dde1bd-1cab-4a68-b55a-f7c737317870,Pharma,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+5ad29c90-30bf-11eb-adc1-0242ac120002,TH,28e0dc85-d03e-4bd4-9be8-710716df9067,Radiology,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+5ad29d58-30bf-11eb-adc1-0242ac120002,TH,6d9f914d-9982-41f0-afe7-442c4e612ae5,Radiology,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+5ad29e20-30bf-11eb-adc1-0242ac120002,TH,1d22cd42-ff4d-4d80-a2ac-9eb4e9ea8a62,Radiology,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+5ad29ee8-30bf-11eb-adc1-0242ac120002,TH,d7dde1bd-1cab-4a68-b55a-f7c737317870,Radiology,Jonathan Hubeau Ext,jonathan.hubeau.ext@bayer.com
+5ad2a140-30bf-11eb-adc1-0242ac120002,TH,28e0dc85-d03e-4bd4-9be8-710716df9067,Pharma,Nils Vanderheyden Ext,nils.vanderheyden.ext@bayer.com
+5ad2a21c-30bf-11eb-adc1-0242ac120002,TH,6d9f914d-9982-41f0-afe7-442c4e612ae5,Pharma,Nils Vanderheyden Ext,nils.vanderheyden.ext@bayer.com
+5ad2a2da-30bf-11eb-adc1-0242ac120002,TH,1d22cd42-ff4d-4d80-a2ac-9eb4e9ea8a62,Pharma,Nils Vanderheyden Ext,nils.vanderheyden.ext@bayer.com
+5ad2a398-30bf-11eb-adc1-0242ac120002,TH,d7dde1bd-1cab-4a68-b55a-f7c737317870,Pharma,Nils Vanderheyden Ext,nils.vanderheyden.ext@bayer.com
+5ad2a456-30bf-11eb-adc1-0242ac120002,TH,28e0dc85-d03e-4bd4-9be8-710716df9067,Radiology,Nils Vanderheyden Ext,nils.vanderheyden.ext@bayer.com
+5ad2a514-30bf-11eb-adc1-0242ac120002,TH,6d9f914d-9982-41f0-afe7-442c4e612ae5,Radiology,Nils Vanderheyden Ext,nils.vanderheyden.ext@bayer.com
+5ad2a5dc-30bf-11eb-adc1-0242ac120002,TH,1d22cd42-ff4d-4d80-a2ac-9eb4e9ea8a62,Radiology,Nils Vanderheyden Ext,nils.vanderheyden.ext@bayer.com
+5ad2a852-30bf-11eb-adc1-0242ac120002,TH,d7dde1bd-1cab-4a68-b55a-f7c737317870,Radiology,Nils Vanderheyden Ext,nils.vanderheyden.ext@bayer.com

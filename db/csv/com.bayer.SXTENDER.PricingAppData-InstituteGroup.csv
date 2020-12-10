@@ -1,4 +1,5 @@
 ﻿ID,COUNTRYCODE,CHANNEL,NAME
-1,TH,Government Hospital,Government Group
-2,TH,Private Hospital,Private Group
-3,TH,Other,Other Group
+1,TH,Public,Government
+2,TH,Private,Private
+3,TH,Clinic,Clinics
+4,TH,OTC,OTC

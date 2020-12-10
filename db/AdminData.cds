@@ -42,6 +42,7 @@ entity PT_TMUSERCTRYN{
 
 entity TemplateCountry{
 	key CountryCode:String(2);
+	key Classification: String(50);//Added Classification (db#2)
 	TemplateId:Integer;
 }
 entity Template{

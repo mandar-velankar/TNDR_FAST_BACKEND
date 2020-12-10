@@ -1,5 +1,5 @@
 namespace com.bayer.SXTENDER.MasterData;
-using { User, Country, managed } from '@sap/cds/common';
+using { User, Country, managed, cuid } from '@sap/cds/common';
 using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 using { com.bayer.SXTENDER.AdminData } from './AdminData';
@@ -442,4 +442,16 @@ entity BUDGETEDPROFITABILITY{
 	key EFFECTIVEDATE:Date;
 	ENDDATE:Date;
 	PROFITABILITY:Double;
+}
+
+entity MASTER_COUNTRY_CLASSIFICATION : cuid {
+	COUNTRY_CODE:String(2) not null;
+	CLASSIFICATION:String(50);
+	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
+}
+
+entity MASTER_COUNTRY_CHANNELS: cuid, managed {
+    ChannelName : String(30);
+    ChannelCountry : String(2);
+	Country:Association to PT_TMCTRY on Country.CountryCode = ChannelCountry;
 }

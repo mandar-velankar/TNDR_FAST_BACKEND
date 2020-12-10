@@ -68,7 +68,12 @@ module.exports = {
 
     isDoubleXBelowY: function(x, y){
         const doubleComparisonDigits = 4;
-        return x.toFixed(4) < y.toFixed(4) ? true : false;
+        return Math.round(10000*x) / 10000  < Math.round(10000*y) / 10000 ? true : false;
+    },
+
+    isDoubleXBelowEqualY: function(x, y){
+        const doubleComparisonDigits = 4;
+        return Math.round(10000*x) / 10000  <= Math.round(10000*y) / 10000 ? true : false;
     },
 
     formatNumber: function(num, digits) {

@@ -30,7 +30,8 @@ entity InstituteGroupPrice{
     key EffectiveDate:DateTime;
     UoM:String(4);
     Currency:String(3);
-    Price:Double;
+    MSP:Double;
+    NSP:Double;
     //Associations
     InstituteGroup:Association[1] to InstituteGroup on InstituteGroup.Id = InstituteGroupId;
     ProductPack:Association[1] to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
@@ -86,7 +87,8 @@ inner join MostRecentInstituteGroupPrice as l
     key igp.ProductPackId,
     igp.UoM,
     igp.Currency,
-    igp.Price,
+    igp.MSP,
+    igp.NSP,
     igp.InstituteGroup,
     igp.ProductPack,
     'Approved' as Status:String(50)

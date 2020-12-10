@@ -1,4 +1,5 @@
-CountryCode;TemplateId
-MX;1
-OM;2
-AE;3
+CountryCode;Classification;TemplateId
+MX;Tender;1
+OM;Tender;2
+AE;Tender;3
+SA;RFQ;1

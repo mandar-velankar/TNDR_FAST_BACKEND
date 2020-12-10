@@ -32,7 +32,8 @@ entity PT_TMOFRS as select from TransactionalData.PT_TMOFRS as offer {
         offer.Distributor as Distributor,
         offer.SellingCompanyDetails as SellingCompany,
         offer.TenderID,
-        // offer.Tender.Institute as Institute,
+        // offer.Tender.Institute 
+        '' as Institute, //TODO: Fix ASAP - split app
         offer.Tender.GroupPurchasing as GroupPurchasing,
     
 }where offer.Active = 1;

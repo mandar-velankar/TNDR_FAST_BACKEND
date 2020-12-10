@@ -106,3 +106,9 @@ inner join CountryBrands cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLe
 	dstbr.PaymentTerms as PAYMENT_TERMS,
 	dstbr.CommissionRate as COMMISSION_RATE
 };
+
+//Distinct list of divisions
+entity Divisions as select from MasterData.PT_TMPRDHIER as ProductHierarchy{
+	key ProductHierarchy.HLEVEL1_CODE as DivisionId,
+	ProductHierarchy.HLEVEL1_NAME as DivisionName
+} group by ProductHierarchy.HLEVEL1_CODE, ProductHierarchy.HLEVEL1_NAME;

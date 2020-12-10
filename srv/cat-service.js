@@ -17,7 +17,7 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers
+		PT_TMINST, CountryApprovers, MASTER_COUNTRY_CHANNELS
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
@@ -28,77 +28,9 @@ module.exports = (srv) => {
 	const {
 		Template, TemplateCountry
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
-	/*function getWhereId(req, fieldName){
-		return req.query.SELECT.where.findIndex((filter) => filter && filter.ref && filter.ref.find((field) => field === fieldName));
-	}*/
-
-	/*function getWhereValue(req, fieldName){
-		let idx = getWhereId(req, fieldName);
-		return req.query.SELECT.where[idx + 2].val;
-	}*/
-	/*function buildWhere(req, fieldName) {
-		let result = [];
-		idx = getWhereId(req, fieldName);
-		if (idx !== -1){
-			result.push(req.query.SELECT.where[idx]);
-			result.push(req.query.SELECT.where[idx + 1]);
-			result.push(req.query.SELECT.where[idx + 2]);
-		}
-		return result;
-	}*/
-	/*function buildFullWhere(fieldName, comparisonOperator, fieldValue) {
-		let result = [];
-		result.push({
-			ref: [fieldName]
-		});
-		result.push(comparisonOperator);
-		result.push({
-			val: fieldValue
-		});
-		return result;
-	}*/
-
-	/*
-	function inWords (num) {//TODO: not ok, replace
-		let a = ['','one ','two ','three ','four ', 'five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '];
-		let b = ['', '', 'twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety'];
-		if ((num = num.toString()).length > 9) return 'overflow';
-		n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-		if (!n) return; var str = '';
-		str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'crore ' : '';
-		str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'lakh ' : '';
-		str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
-		str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'hundred ' : '';
-		str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'only ' : '';
-		return str;
-	}
-	}*/
-
-	/*function isEquivalent(a, b) {
-		// Create arrays of property names
-		var aProps = Object.getOwnPropertyNames(a);
-		var bProps = Object.getOwnPropertyNames(b);
-	
-		// If number of properties is different,
-		// objects are not equivalent
-		if (aProps.length != bProps.length) {
-			return false;
-		}
-	
-		for (var i = 0; i < aProps.length; i++) {
-			var propName = aProps[i];
-	
-			// If values of same property are not equal,
-			// objects are not equivalent
-			if (a[propName] !== b[propName]) {
-				return false;
-			}
-		}
-	
-		// If we made it this far, objects
-		// are considered equivalent
-		return true;
-	}*/
+	const {
+		ProductPolicies, PolicyPrices
+	} =cds.entities("com.bayer.SXTENDER.PricingPolicyData");
 
 
 	const arr = x => Array.from(x);
@@ -421,7 +353,7 @@ module.exports = (srv) => {
 		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
 	}*/
 
-	function buildProductValidationForType1(offer, product, productInfo) {
+	function buildProductValidationForType1(offer, product, productInfo) {//MEA (and default)
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -481,15 +413,190 @@ module.exports = (srv) => {
 			LEGAL: legal,
 			COUNTRY_BUSINESS: countryBusiness,
 			REGIONAL_BUSINESS: regionalBusiness,
-			SUPPLY_CHAIN: supply
+			SUPPLY_CHAIN: supply,
+			//Other countries default values
+			NSM_SM_FM: 1,
+			HBU: 1,
+			CDH: 1,
+			//In Policy flag
+			IN_POLICY: true
 		};
 		return results;
 	}
-	function buildProductInfoForCountry(offer, product) {
+
+	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName){
+		let price = 0;
+		productPolicyPrices.forEach(e => {
+			if (e.PricingPolicyName === pricingPolicyName && e.Role === role){
+				price = e.Price;
+			};
+		});
+		return price;
+	}
+
+	async function buildProductValidationForType4(tx, offer, product, productInfo) {//Thailand
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		//Supply chain approval is alway mandatory
+		let supply = 3;
+
+		//Check on offer unit (pack or unit) and get factor to apply on policy prices
+		let uomFactor = 1;
+		if (productInfo.UOM === 'Unit'){
+			uomFactor = product.PACKFACTOR;
+		};
+		
+		//Get ChannelId
+		let whereChannel = {
+			ChannelCountry: offer.COUNTRYCODE,
+			ChannelName: offer.INSTITUTE_TYPE
+		};
+		let channel = await tx.run(SELECT.from(MASTER_COUNTRY_CHANNELS).where(whereChannel));
+		//Get latest approved product pricing policy for country and product
+		let wherePolicy = {
+			CountryCode: offer.COUNTRYCODE,
+			ProductPackId: product.PRODUCTID,
+			MspStatus: 'Approved',
+			NspStatus: 'Approved'
+		};
+		let productPolicy = await tx.run(SELECT.from(ProductPolicies).where(wherePolicy));
+		if (productPolicy.length === 0){//No pricing policy
+			return {
+				//Default values for other countries approver types
+				REGULATORY: 1,
+				LEGAL: 1,
+				COUNTRY_BUSINESS: 1,
+				REGIONAL_BUSINESS: 1,
+				//Thailand approver types
+				NSM_SM_FM: 1,
+				HBU: 1,
+				CDH: 1,
+				SUPPLY_CHAIN: supply,
+				//In Policy flag
+				IN_POLICY: false
+			};
+		}
+		//Get linked product policy prices (MSP and NSP) for Channel
+		let wherePolicyPrices = {
+			ProductPolicy_ID: productPolicy[0].ID,
+			Channel_ID: channel[0].ID
+		};
+		let productPolicyPrices = await tx.run(SELECT.from(PolicyPrices).where(wherePolicyPrices));
+		if (productPolicyPrices.length !== 6){//Incomplete pricing policy
+			return {
+				//Default values for other countries approver types
+				REGULATORY: 1,
+				LEGAL: 1,
+				COUNTRY_BUSINESS: 1,
+				REGIONAL_BUSINESS: 1,
+				//Thailand approver types
+				NSM_SM_FM: 1,
+				HBU: 1,
+				CDH: 1,
+				SUPPLY_CHAIN: supply,
+				//In Policy flag
+				IN_POLICY: false
+			};
+		}
+		//Set variables for policy prices thresholds
+		let nsmMSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'MSP') / uomFactor;
+		let nsmNSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'NSP') / uomFactor;
+		let hbuMSP = extractPolicyValue(productPolicyPrices, 'HBU', 'MSP') / uomFactor;
+		let hbuNSP = extractPolicyValue(productPolicyPrices, 'HBU', 'NSP') / uomFactor;
+		let cdhMSP = extractPolicyValue(productPolicyPrices, 'CDH', 'MSP') / uomFactor;
+		let cdhNSP = extractPolicyValue(productPolicyPrices, 'CDH', 'NSP') / uomFactor;
+
+		//Set initial approvals requirement to "Optional", i.e. 1
+		let nsmLevel = 1;
+		let hbuLevel = 1;
+		let cdhLevel = 1;
+		let inPolicy = true;//Boolean used to specify if product offer and net offer prices are within policy
+
+		let preApprovedAccountOfferPrice = product.ACCOUNT_OFFER_PRICE;
+		let preApprovedAccountNetOfferPrice = product.ACCOUNT_NET_OFFER_PRICE;
+
+		let requiredApprovalLevel = 0;//0: No business approval required; 1:NSM/SM/FM; 2: HBU; 3: CDH; 4: Approval not allowed
+		if (//This means it's first offer for account or offer price is new lowest for account
+			ServiceHelper.isDoubleEqual(preApprovedAccountOfferPrice, 0) ||
+			ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, preApprovedAccountOfferPrice)
+			){
+				if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)){//NSM/SM/FM can approve
+					requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+				}
+				else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)){//HBU can approve
+					requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+				}
+				else if (ServiceHelper.isDoubleXBelowEqualY(cdhMSP, product.OFFER_PRICE)){//CDH can approve
+					requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+				}
+				else{
+					requiredApprovalLevel = 4;
+				};
+		}
+		if (//This means it's first offer for account or net offer price is new lowest for account
+			ServiceHelper.isDoubleEqual(preApprovedAccountNetOfferPrice, 0) ||
+			ServiceHelper.isDoubleXBelowY(product.NET_OFFER_PRICE, preApprovedAccountNetOfferPrice)
+			){
+				if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_OFFER_PRICE)){//NSM/SM/FM can approve
+					requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+				}
+				else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_OFFER_PRICE)){//HBU can approve
+					requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+				}
+				else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_OFFER_PRICE)){//CDH can approve
+					requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+				}
+				else{
+					requiredApprovalLevel = 4;
+				};
+		}
+
+		switch (requiredApprovalLevel) {
+			case 4:
+				inPolicy = false;
+				break;
+			case 3:
+				cdhLevel = 3;
+				break;
+			case 2:
+				hbuLevel = 3;
+				break;
+			case 1:
+				nsmLevel = 3;
+				break;
+		}
+
+		let results = {
+			//Default values for other countries approver types
+			REGULATORY: 1,
+			LEGAL: 1,
+			COUNTRY_BUSINESS: 1,
+			REGIONAL_BUSINESS: 1,
+			//Thailand approver types
+			NSM_SM_FM: nsmLevel,
+			HBU: hbuLevel,
+			CDH: cdhLevel,
+			SUPPLY_CHAIN: supply,
+			//In Policy flag
+			IN_POLICY: inPolicy
+		};
+		return results;
+	}
+
+	async function buildProductInfoForCountry(tx, offer, product) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
+		}
+		else if (offer.APPROVAL_TYPE === 3){//Applicable for Mexico - TODO
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
+		}
+		else if (offer.APPROVAL_TYPE === 4){//Applicable for Thailand
+			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
@@ -511,8 +618,8 @@ module.exports = (srv) => {
 		if (offerProduct.length === 0) {
 			return results;
 		}
-		results = offerProduct.map(function (d) {
-			let productInfo = buildProductInfoForCountry(offer, d);
+		results = offerProduct.map(async function (d) {
+			let productInfo = await buildProductInfoForCountry(tx, offer, d);
 			return {
 				TENDER_ID: offer.TENDERID,
 				COUNTRY_CODE: offer.COUNTRYCODE,
@@ -579,18 +686,24 @@ module.exports = (srv) => {
 				IS_ALTERNATIVE_QUOTED: d.IS_ALTERNATIVE_QUOTED,
 				IS_ALTERNATIVE_REQUESTED: d.IS_ALTERNATIVE_REQUESTED,
 				NEW_APPROVAL: d.NEW_APPROVAL,
-				BUDGETED_PROFITABILITY: d.BUDGETED_PROFITABILITY
+				BUDGETED_PROFITABILITY: d.BUDGETED_PROFITABILITY,
+				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + d.VAT),
+				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * d.VAT,
+				NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
+				HBU: productInfo.ProductValidation.HBU,
+				CDH: productInfo.ProductValidation.CDH,
+				IN_POLICY: productInfo.ProductValidation.IN_POLICY
 			}
 		});
-
-		results.sort((a, b) => (a.SORTER > b.SORTER) ? 1 : -1);
+		let resolvedResults = await Promise.all(results);
+		resolvedResults.sort((a, b) => (a.SORTER > b.SORTER) ? 1 : -1);
 		let sorter = 0;
-		for (let i = 0; i < results.length; i++) {
+		for (let i = 0; i < resolvedResults.length; i++) {
 			sorter = sorter + 1;
-			results[i].SORTER = sorter;
+			resolvedResults[i].SORTER = sorter;
 		}
 
-		return results;
+		return resolvedResults;
 	}
 	async function buildOfferValidation(tx, whereOffer) {
 		let results = {};
@@ -603,13 +716,27 @@ module.exports = (srv) => {
 		if (offerProductValidation.length === 0) {
 			return results;
 		}
-
+		//Shared
+		let supply = Math.max.apply(Math, offerProductValidation.map((d) => { return d.SUPPLY_CHAIN }));
+		//MEA
 		let regulatory = Math.max.apply(Math, offerProductValidation.map((d) => { return d.REGULATORY }));
 		let legal = Math.max.apply(Math, offerProductValidation.map((d) => { return d.LEGAL }));
 		let countryBusiness = Math.max.apply(Math, offerProductValidation.map((d) => { return d.COUNTRY_BUSINESS }));
 		let regionalBusiness = Math.max.apply(Math, offerProductValidation.map((d) => { return d.REGIONAL_BUSINESS }));
-		let supply = Math.max.apply(Math, offerProductValidation.map((d) => { return d.SUPPLY_CHAIN }));
 		countryBusiness = (regionalBusiness !== 1) ? 1 : countryBusiness;//No need for country business approval if regional business approval is required
+		//Thailand
+		let nsmLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.NSM_SM_FM }));
+		let hbuLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.HBU }));
+		let cdhLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.CDH }));
+		if (cdhLevel === 3){//If CDH approval is mandatory, lower levels do not need to approve
+			nsmLevel = 1;
+			hbuLevel = 1;
+		}
+		else if (hbuLevel === 3){//If HBU approval is mandatory, lower levels do not need to approve
+			nsmLevel = 1;
+		}
+		let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => {return d.IN_POLICY ? 1 : 0})) === 1 ? true : false;
+
 
 		let isLowest = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_LOWEST }));
 		let isDefaultTerms = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_DEFAULT_TERMS }));
@@ -619,6 +746,11 @@ module.exports = (srv) => {
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
 		let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
+
+
+		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
+		let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
+		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
 
 		//Division can be Pharma or Radiology, this determines division for country approvers
 		//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
@@ -734,6 +866,7 @@ module.exports = (srv) => {
 		results = {
 			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
 			TENDERID: offer.TENDERID,
+			CLASSIFICATION: offer.CLASSIFICATION,//Added Classification (db#1)
 			TENDER_REFERENCE: offer.TENDER_REFERENCE,
 			OFFERID: offer.OFFERID,
 			INSTITUTENAME: offer.INSTITUTENAME,
@@ -766,7 +899,14 @@ module.exports = (srv) => {
 			SHIPMENTTERMS: shipmentTerms,
 			IS_LOWEST: isLowest,
 			IS_DEFAULT_TERMS: isDefaultTerms,
-			NEW_APPROVAL: isNewApproval
+			NEW_APPROVAL: isNewApproval,
+			AMOUNT_IN_NUMBERS_VAT: totalAmountVat,
+			AMOUNT_IN_WORDS_VAT: totalAmountVatInWords,
+			VAT_TOTAL: vatTotal,
+			NSM_SM_FM: nsmLevel,
+			HBU: hbuLevel,
+			CDH: cdhLevel,
+			IN_POLICY: inPolicy
 		};
 		return results;
 	}
@@ -871,9 +1011,12 @@ module.exports = (srv) => {
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
 
 		//Existing saved approval entries (may not exist)
+		//Shared
+		let approvalSupply = latestApproval.filter((d) => d.ApproverType === "Supply Chain");
+		//MEA
 		let approvalRegulatory = latestApproval.filter((d) => d.ApproverType === "Regulatory");
 		let approvalLegal = latestApproval.filter((d) => d.ApproverType === "Legal");
-		let approvalSupply = latestApproval.filter((d) => d.ApproverType === "Supply Chain");
+		
 		let approvalCountry = latestApproval.filter((d) => d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations");
 		let approvalCountry1 = approvalCountry;
 		let approvalCountry2 = [];
@@ -888,15 +1031,46 @@ module.exports = (srv) => {
 			approvalRegional1 = [approvalRegional[0]];
 			approvalRegional2 = [approvalRegional[1]];
 		}
+		//Thailand
+		let approvalNsm = latestApproval.filter((d) => d.ApproverType === "NSM/SM/FM");
+		let approvalNsm1 = approvalNsm;
+		let approvalNsm2 = [];
+		if (approvalNsm.length > 1){
+			approvalNsm1 = [approvalNsm[0]];
+			approvalNsm2 = [approvalNsm[1]];
+		}
+		let approvalHbu = latestApproval.filter((d) => d.ApproverType === "HBU");
+		let approvalHbu1 = approvalHbu;
+		let approvalHbu2 = [];
+		if (approvalHbu.length > 1){
+			approvalHbu1 = [approvalHbu[0]];
+			approvalHbu2 = [approvalHbu[1]];
+		}
+		let approvalCdh = latestApproval.filter((d) => d.ApproverType === "CDH");
+		let approvalCdh1 = approvalCdh;
+		let approvalCdh2 = [];
+		if (approvalCdh.length > 1){
+			approvalCdh1 = [approvalCdh[0]];
+			approvalCdh2 = [approvalCdh[1]];
+		}
 
 		//Default (first found, if exists) approvers (will be used if none saved)
+		//Shared
+		let defaultSupply = countryApprovers.filter((d) => d.ApproverType === "Supply Chain");
+		//MEA
 		let defaultRegulatory = countryApprovers.filter((d) => d.ApproverType === "Regulatory");
 		let defaultLegal = countryApprovers.filter((d) => d.ApproverType === "Legal");
-		let defaultSupply = countryApprovers.filter((d) => d.ApproverType === "Supply Chain");
 		let defaultCountryPharma = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Pharma");
 		let defaultCountryRadiology = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Radiology");
 		let defaultRegionalPharma = countryApprovers.filter((d) => d.ApproverType === "Regional Business" && d.Division === "Pharma");
 		let defaultRegionalRadiology = countryApprovers.filter((d) => d.ApproverType === "Regional Business" && d.Division === "Radiology");
+		//Thailand
+		let defaultNsmPharma = countryApprovers.filter((d) => d.ApproverType === "NSM/SM/FM" && d.Division === "Pharma");
+		let defaultNsmRadiology = countryApprovers.filter((d) => d.ApproverType === "NSM/SM/FM" && d.Division === "Radiology");
+		let defaultHbuPharma = countryApprovers.filter((d) => d.ApproverType === "HBU" && d.Division === "Pharma");
+		let defaultHbuRadiology = countryApprovers.filter((d) => d.ApproverType === "HBU" && d.Division === "Radiology");
+		let defaultCdhPharma = countryApprovers.filter((d) => d.ApproverType === "CDH" && d.Division === "Pharma");
+		let defaultCdhRadiology = countryApprovers.filter((d) => d.ApproverType === "CDH" && d.Division === "Radiology");
 
 		//Regulatory
 		let regulatory = buildValidationEntry(approvalRegulatory, defaultRegulatory, offerValidation, offerValidation.REGULATORY);
@@ -917,6 +1091,25 @@ module.exports = (srv) => {
 
 			let regionalRadiology = buildValidationEntry(approvalRegional2, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalRadiology) results.push(regionalRadiology);
+
+			let nsmPharma = buildValidationEntry(approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
+			if (nsmPharma) results.push(nsmPharma);
+
+			let nsmRadiology = buildValidationEntry(approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
+			if (nsmRadiology) results.push(nsmRadiology);
+
+			let hbuPharma = buildValidationEntry(approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
+			if (hbuPharma) results.push(hbuPharma);
+
+			let hbuRadiology = buildValidationEntry(approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
+			if (hbuRadiology) results.push(hbuRadiology);
+
+			let cdhPharma = buildValidationEntry(approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
+			if (cdhPharma) results.push(cdhPharma);
+
+			let cdhRadiology = buildValidationEntry(approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
+			if (cdhRadiology) results.push(cdhRadiology);
+
 		}
 		else if (offerValidation.DIVISION === "Pharma") {
 			let countryPharma = buildValidationEntry(approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
@@ -924,6 +1117,15 @@ module.exports = (srv) => {
 
 			let regionalPharma = buildValidationEntry(approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalPharma) results.push(regionalPharma);
+
+			let nsmPharma = buildValidationEntry(approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
+			if (nsmPharma) results.push(nsmPharma);
+
+			let hbuPharma = buildValidationEntry(approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
+			if (hbuPharma) results.push(hbuPharma);
+
+			let cdhPharma = buildValidationEntry(approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
+			if (cdhPharma) results.push(cdhPharma);
 		}
 		else if (offerValidation.DIVISION === "Radiology") {
 			let countryRadiology = buildValidationEntry(approvalCountry1, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
@@ -931,6 +1133,15 @@ module.exports = (srv) => {
 
 			let regionalRadiology = buildValidationEntry(approvalRegional1, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalRadiology) results.push(regionalRadiology);
+
+			let nsmRadiology = buildValidationEntry(approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
+			if (nsmRadiology) results.push(nsmRadiology);
+
+			let hbuRadiology = buildValidationEntry(approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
+			if (hbuRadiology) results.push(hbuRadiology);
+
+			let cdhRadiology = buildValidationEntry(approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
+			if (cdhRadiology) results.push(cdhRadiology);
 		}
 
 		//Supply Chain
@@ -1338,7 +1549,7 @@ module.exports = (srv) => {
 		if (!offerValidation) {
 			return req.reject(404, 'No offer found');
 		}
-		const templatesByCountry = await tx.run(SELECT.from(TemplateCountry).where({ CountryCode: offerValidation.COUNTRYCODE }));
+		const templatesByCountry = await tx.run(SELECT.from(TemplateCountry).where({ CountryCode: offerValidation.COUNTRYCODE , Classification: offerValidation.CLASSIFICATION}));//Added Classification (db#2)
 		if (templatesByCountry.length === 0) {
 			return req.reject(404, 'No template found for offer: ' + offerId + ' and for country: ' + offerValidation.COUNTRYCODE);
 		}
