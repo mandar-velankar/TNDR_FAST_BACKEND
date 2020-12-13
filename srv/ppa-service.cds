@@ -2,18 +2,50 @@ using { com.bayer.SXTENDER.PricingPolicyData } from '../db/PricingPolicyData';
 using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 using { com.bayer.SXTENDER.MasterDataViews } from '../db/./MasterDataViews';
 using { com.bayer.SXTENDER.MasterData } from '../db/MasterData';
+using {User,Country,managed,cuid} from '@sap/cds/common';
 
 
-service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_ppa_user']){
+service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_ppa_user','f_tndr_cag_technical_user','authenticated-user']){
     
     //Brands
     entity Brands as projection on PricingPolicyData.Brands;
 
     entity BrandPolicies as projection on PricingPolicyData.BrandPolicies;
+    entity DraftBrandPolicies as select from PricingPolicyData.BrandPolicies where Status = 'Draft'; 
+    entity LatestApprovedBrandPolicies as select from PricingPolicyData.BrandPolicies as Policy 
+        inner join PricingPolicyData.LatestApprovedBrandPoliciesSegregate as Approved 
+        on Approved.BrandId = Policy.BrandId 
+        and Approved.Status = Policy.Status 
+        and Approved.ValidTo = Policy.ValidTo {
+            key Policy.ID,
+                Policy.ValidFrom,
+                Policy.ValidTo,
+                Policy.CountryCode,
+                Policy.Division,
+                Policy.BrandId,
+                Policy.Status
+        };
+
+    entity AggregatedBrandPolicies as select from PricingPolicyData.BrandPolicies as Policy
+    left outer join DraftBrandPolicies as DraftPolicies on
+         Policy.BrandId = DraftPolicies.BrandId and
+         Policy.CountryCode = DraftPolicies.CountryCode and 
+         Policy.Division = DraftPolicies.Division
+    left outer join LatestApprovedBrandPolicies as ApprovedPolicies on
+         Policy.BrandId = ApprovedPolicies.BrandId and
+         Policy.CountryCode = ApprovedPolicies.CountryCode and 
+         Policy.Division = ApprovedPolicies.Division {
+         key Policy.BrandId,
+         key Policy.CountryCode,
+         key Policy.Division,
+         ApprovedPolicies.ID as IDLatestApproved,
+         DraftPolicies.ID as IDDraft,
+    }group by Policy.BrandId,Policy.CountryCode,Policy.Division,ApprovedPolicies.ID,DraftPolicies.ID;
+
 
     //Products
     entity Products as select from PricingPolicyData.BrandProducts as BrandProduct 
-    left outer join PricingPolicyData.ProductPolicies as Policy on 
+    left outer join PricingPolicyData.ActiveProductPolicies as Policy on 
         BrandProduct.ProductPackId = Policy.ProductPackId and 
         BrandProduct.CountryCode = Policy.CountryCode and 
         BrandProduct.Division = Policy.Division and 
@@ -22,7 +54,7 @@ service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_
             key BrandProduct.CountryCode, 
             key BrandProduct.Division,
             key BrandProduct.ProductPackId,
-            Policy.ID as PolicyId,
+            Policy.ID as PolicyId, //only a check to see if a brand policy already exists
             BrandProduct.ProductName, 
             BrandProduct.ListPrice,
             BrandProduct.Currency,
@@ -34,7 +66,7 @@ service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_
                 when Policy.NspStatus is null then 'No Policy yet' 
                 else Policy.NspStatus
             end as NspStatus : String(100),
-    }order by BrandProduct.ProductName;
+    } order by BrandProduct.ProductName;
 
     //Policies & Policy prices linked
     entity Policies as projection on PricingPolicyData.ProductPolicies;

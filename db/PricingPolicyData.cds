@@ -31,14 +31,28 @@ order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.
 
 
 entity BrandPolicies: cuid, managed {
+    ValidFrom       : Timestamp; //EffectiveDate
+    ValidTo         : Timestamp;
     CountryCode     : String(2);
     Division        : String(200);
     BrandId         : String(50);
-    EffectiveDate   : DateTime;
+    Status          : String(100);
+    ProductPolicies : Composition of many ProductPolicies on ProductPolicies.BrandPolicy = $self;
 }; 
 
+
+entity LatestApprovedBrandPoliciesSegregate as select from PricingPolicyData.BrandPolicies {
+    key BrandId,
+    Status,
+    max(ValidTo) as ValidTo : Timestamp,
+}  where Status = 'Approved'
+    group by BrandId, Status;
+
+//only the active (is not the same as approved) BrandPolicies
+entity ActiveBrandPolicies as select from BrandPolicies where ValidTo = '9999-12-31 00:00:00.000000000'; //only the lastest effective date will be visible
+
 entity Brands as select from CountryBrandProducts as Brand 
-    left outer join BrandPolicies as Policies on 
+    left outer join ActiveBrandPolicies as Policies on 
         Brand.COUNTRY_CODE = Policies.CountryCode and
         Brand.BRAND_ID = Policies.BrandId and
         Brand.DIVISION = Policies.Division {
@@ -46,14 +60,14 @@ entity Brands as select from CountryBrandProducts as Brand
         key Brand.BRAND_ID     as BrandId,
         key Brand.DIVISION     as Division,
         MIN(Brand.BRAND_NAME)   as BrandName : String(500), //we need to use a agregation function here beceause we have different names for same brands(only in test)
-        Policies.EffectiveDate as EffectiveDate
+        Policies.ValidFrom as ValidFrom
 }where
     Brand.BRAND_ID is not null
 group by
     Brand.COUNTRY_CODE,
     Brand.BRAND_ID,
     Brand.DIVISION,
-    Policies.EffectiveDate;
+    Policies.ValidFrom; 
 
 
 entity BrandProducts as select from CountryBrandProducts as Product {
@@ -66,6 +80,7 @@ entity BrandProducts as select from CountryBrandProducts as Product {
         Product.CURRENCY as Currency : String(3)
 };
 
+entity ActiveProductPolicies as select from ProductPolicies where BrandPolicy.ValidTo = '9999-12-31 00:00:00.000000000'; //only the lastest effective date will be visible
 
 entity ProductPolicies: cuid, managed {
     CountryCode  : String(2);
@@ -75,6 +90,7 @@ entity ProductPolicies: cuid, managed {
     Currency : String(3);
     MspStatus : String(100);
     NspStatus : String(100);
+    BrandPolicy: Association to BrandPolicies;
     PolicyPrices : Composition of many PolicyPrices on PolicyPrices.ProductPolicy = $self;
 }
 
@@ -85,8 +101,6 @@ entity PolicyPrices: cuid, managed {
     Price : Double;
     ProductPolicy: Association to ProductPolicies;
 }
-
-
 
 @cds.autoexpose
 entity Channels as projection on MasterData.MASTER_COUNTRY_CHANNELS; //as select from MasterData.MASTER_COUNTRY_CHANNELS;

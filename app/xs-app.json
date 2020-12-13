@@ -6,13 +6,6 @@
   },
   "routes": [
     {
-      "source": "/FAST/reporting/(.*)$",
-      "target": "/FAST/reporting/$1",
-      "authenticationType": "basic",
-      "destination": "srv_api",
-      "csrfProtection": true
-    },
-    {
       "source": "/ODataDev/(.*)$",
       "target": "/ODataDev/$1",
       "authenticationType": "basic",
@@ -21,7 +14,7 @@
     },
     {
       "source": "/reporting/(.*)$",
-      "target": "/reporting/$1",
+      "target": "/FAST/$1",
       "authenticationType": "basic",
       "destination": "srv_api",
       "csrfProtection": true
