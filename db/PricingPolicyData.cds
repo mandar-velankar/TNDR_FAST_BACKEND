@@ -78,7 +78,7 @@ entity BrandProducts as select from CountryBrandProducts as Product {
         Product.PRODUCT_NAME as ProductName   : String(100),
         Product.REGISTERED_PRICE as ListPrice : Double,
         Product.CURRENCY as Currency : String(3)
-};
+}order by ProductPackId;
 
 entity ActiveProductPolicies as select from ProductPolicies where BrandPolicy.ValidTo = '9999-12-31 00:00:00.000000000'; //only the lastest effective date will be visible
 

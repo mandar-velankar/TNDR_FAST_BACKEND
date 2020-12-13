@@ -55,7 +55,7 @@ service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_
             key BrandProduct.Division,
             key BrandProduct.ProductPackId,
             Policy.ID as PolicyId, //only a check to see if a brand policy already exists
-            BrandProduct.ProductName, 
+            BrandProduct.ProductName as ProductName, 
             BrandProduct.ListPrice,
             BrandProduct.Currency,
             case 
@@ -66,7 +66,7 @@ service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_
                 when Policy.NspStatus is null then 'No Policy yet' 
                 else Policy.NspStatus
             end as NspStatus : String(100),
-    } order by BrandProduct.ProductName;
+    } order by ProductName;
 
     //Policies & Policy prices linked
     entity Policies as projection on PricingPolicyData.ProductPolicies;

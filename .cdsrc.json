@@ -1,14 +1,5 @@
 {
     "[development]": {
-        
-    "requires": {
-        "db": {
-            "kind": "hana"
-        },
-        "uaa": {
-            "kind": "xsuaa"
-        }
-    },
         "auth": {
             "passport": {
                 "strategy": "mock",

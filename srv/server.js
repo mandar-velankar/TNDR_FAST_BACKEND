@@ -17,5 +17,5 @@ cds.on("bootstrap", app => app.use(proxy({
   cds.once ('listening', ({server,url})=>{
     console.log("listening")
   })
-  require("./scheduler");
+  // require("./scheduler");
 module.exports = cds.server;
