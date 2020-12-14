@@ -90,7 +90,7 @@ entity ProductPolicies: cuid, managed {
     Currency : String(3);
     MspStatus : String(100);
     NspStatus : String(100);
-    BrandPolicy: Association to BrandPolicies;
+    BrandPolicy: Composition of BrandPolicies;
     PolicyPrices : Composition of many PolicyPrices on PolicyPrices.ProductPolicy = $self;
 }
 
