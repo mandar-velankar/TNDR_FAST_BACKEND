@@ -16,47 +16,35 @@
                             ]
                         }
                     },
-                    "joris": {
-                        "jwt": {
-                            "userInfo": {
-                                "logonName": "ELLTZ",
-                                "email": "P2001081482@example.com"
-                            },
-                            "scopes": [
-                                "authenticated-user",
-                                "f_tndr_cag_admin"
-                            ]
-                        }
-                    },
-                    "nils": {
-                        "jwt": {
-                            "userInfo": {
-                                "logonName": "ELLTZ",
-                                "email": "P2001081482@example.com"
-                            },
-                            "scopes": [
-                                "authenticated-user",
-                                "f_tndr_cag_admin"
-                            ]
-                        }
-                    },
-                    "wouter": {
-                        "password": "pwd",
-                        "jwt": {
-                            "userInfo": {
-                                "logonName": "ELLTZ",
-                                "email": "P2001081482@example.com"
-                            },
-                            "scopes": [
-                                "authenticated-user",
-                                "f_tndr_cag_admin"
-                            ]
-                        }
-                    },
                     "ELLTZ": {
                         "jwt": {
                             "userInfo": {
-                                "logonName": "P2001081482",
+                                "logonName": "ELLTZ",
+                                "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin"
+                            ]
+                        }
+                    },
+                    "ELLUI": {
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "ELLUI",
+                                "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin"
+                            ]
+                        }
+                    },
+                    "ELLUK": {
+                        "password": "pwd",
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "ELLUK",
                                 "email": "P2001081482@example.com"
                             },
                             "scopes": [
