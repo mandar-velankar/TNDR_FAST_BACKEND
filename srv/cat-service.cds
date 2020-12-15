@@ -38,6 +38,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity PT_TMCTPRDPCK                     as projection on MasterData.PT_TMCTPRDPCK;
     entity CountryClassifications            as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION;
     entity CountryChannels                   as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+    entity CountryProcurementMethod          as projection on MasterData.MASTER_COUNTRY_PROCUREMENT_METHOD;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',

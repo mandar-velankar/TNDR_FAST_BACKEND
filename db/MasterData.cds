@@ -355,6 +355,13 @@ entity MASTER_COUNTRY_CONTRACT_TYPE{
 	ContractType:Association to MASTER_CONTRACT_TYPE on ContractType.ID = CONTRACT_TYPE_ID;
 }
 
+entity MASTER_COUNTRY_PROCUREMENT_METHOD{
+	key COUNTRY_CODE:String(2) not null;
+	key PROCUREMENT_METHOD_ID:String not null;
+	//Associations
+	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
+}
+
 entity MASTER_COUNTRY_SALES_TYPE{
 	key COUNTRY_CODE:String(2) not null;
 	key SALES_TYPE_ID:Integer not null;
