@@ -648,17 +648,21 @@ module.exports = (srv) => {
 				PAYMENT_TERMS: d.PAYMENT_TERMS,
 				SHIPMENT_TERMS: d.INCO_TERMS,
 				SAMPLES: d.SAMPLES,
+				SAMPLES_UNIT: d.SAMPLES * toUnitFactor,
+				SAMPLES_PACK: d.SAMPLES * toPackFactor,
 				REGISTERED_PRICE: d.REGISTERED_PRICE,
 				OFFER_PRICE: d.OFFER_PRICE,
 				FOC: productInfo.CommnonProductInfo.FocString,
-				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit,
+				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit, //Total Volume(units) (thailand - new column missing in the screenshot)
 				FOC_QUANTITY_UNITS: productInfo.CommnonProductInfo.FocAmountUnit,
 				PAID_QUANTITY_UNITS: productInfo.CommnonProductInfo.PaidVolumeUnit,
 				REQ_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPriceUnit,
+				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + d.VAT),   //MSP incl VAT (thailand)
 				REQ_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPricePack,
 				REQ_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.OfferPriceUnitEurBudget,
 				REQ_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.OfferPriceUnitEurSpot,
 				NET_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPriceUnit,
+				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + d.VAT),   //NSP incl VAT (thailand)
 				NET_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPricePack,
 				NET_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.NetPriceUnitEurBudget,
 				NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
@@ -870,6 +874,8 @@ module.exports = (srv) => {
 			TENDER_REFERENCE: offer.TENDER_REFERENCE,
 			OFFERID: offer.OFFERID,
 			INSTITUTENAME: offer.INSTITUTENAME,
+			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
+			CUSTOMER_CODE: offer.CUSTOMER_CODE,
 			DIVISION: division,//not correct, should be consolidated from product information
 			OFFERDATE: offer.OFFERDATE,
 			OFFERVALIDITY: offer.OFFERVALIDITY,
