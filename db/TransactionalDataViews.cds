@@ -69,7 +69,8 @@ entity OfferRevisions as select from TransactionalData.PT_TMOFRS as offer{
 entity CountryTenderBrands as select from TransactionalData.PT_TMTEND as tender{
     key tender.CountryCode as COUNTRYCODE,
     key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
-    tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRANDNAME
+    tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRANDNAME,
+    tender.Offer.Product.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME,
 }where tender.Active = 1
 and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1
@@ -465,7 +466,7 @@ left outer join AccountMinPrice accountPrice
     offerProduct.SKU.Product.HLEVEL1_NAME as DIVISION,
 	offerProduct.SKU.Product.HLEVEL4_CODE as BRANDID,
 	offerProduct.SKU.Product.HLEVEL4_NAME as BRANDNAME,
-    //offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
+    offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
     offerProduct.Reference as CODE,
 	offerProduct.SKU.PACKFACTOR as PACKSIZE,
 	offerProduct.SKU.CONCENTRATION as DOSAGE,
