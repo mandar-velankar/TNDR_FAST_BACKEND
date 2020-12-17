@@ -620,6 +620,11 @@ module.exports = (srv) => {
 		}
 		results = offerProduct.map(async function (d) {
 			let productInfo = await buildProductInfoForCountry(tx, offer, d);
+
+			//Get all prices, ammounts and cogs in all units
+			let toUnitFactor = (d.UNIT === "Unit") ? 1 : d.PACKSIZE;
+			let toPackFactor = (d.UNIT === "Unit") ? 1 / d.PACKSIZE : 1;
+
 			return {
 				TENDER_ID: offer.TENDERID,
 				COUNTRY_CODE: offer.COUNTRYCODE,

@@ -465,7 +465,7 @@ left outer join AccountMinPrice accountPrice
     offerProduct.SKU.Product.HLEVEL1_NAME as DIVISION,
 	offerProduct.SKU.Product.HLEVEL4_CODE as BRANDID,
 	offerProduct.SKU.Product.HLEVEL4_NAME as BRANDNAME,
-    offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
+    //offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
     offerProduct.Reference as CODE,
 	offerProduct.SKU.PACKFACTOR as PACKSIZE,
 	offerProduct.SKU.CONCENTRATION as DOSAGE,
@@ -546,7 +546,7 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
 	offer.TenderID as TENDERID,
     offer.Tender.Institute.InstituteType as INSTITUTE_TYPE,
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
-    offer.Tender.Institute.CustomerID as CUSTOMERCODE,
+    //offer.Tender.Institute.CustomerID as CUSTOMERCODE,
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.Institute.InstituteName || ' - ' || offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
