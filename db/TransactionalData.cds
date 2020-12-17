@@ -342,32 +342,34 @@ entity PT_TMQUTO {
 
 
 entity PT_TMTEND {
-    key TenderID            : String(50) not null;
-        CountryCode         : String(2) not null;
-        ToolID              : Integer;
-        TenderNo            : Integer;
-        CloneTenderID       : String(50);
-        SubmittedOn         : Date;
-        SubmittedBy         : String(50);
-        Active              : Integer;
-        Classification      : String(50);
-        TenderName          : String(250);
-        InstituteID         : Integer not null;
-        TenderChannel       : String(255);
-        GroupPurchasing     : Integer;
-        PublicationDate     : Date;
-        BidDueDate          : Date;
-        AwardDate           : Date;
-        NextPublicationDye  : Date;
-        ContractLength      : Integer;
-        ContractExtenseion  : Integer;
-        TenderStatus        : String(255);
-        ManualSaveStatus    : String(50);
-        FoldersCreated      : Integer;
-        TENDER_TYPE_ID      : Integer;
-        CONTRACT_TYPE_ID    : Integer;
-        SALES_TYPE_ID       : Integer;
-        TENDER_ORIGIN_ID    : Integer;
+    key TenderID             : String(50) not null;
+        CountryCode          : String(2) not null;
+        ToolID               : Integer;
+        TenderNo             : Integer;
+        CloneTenderID        : String(50);
+        SubmittedOn          : Date;
+        SubmittedBy          : String(50);
+        Active               : Integer;
+        Classification       : String(50);
+        TenderName           : String(250);
+        InstituteID          : Integer not null;
+        TenderChannel        : String(255);
+        GroupPurchasing      : Integer;
+        PublicationDate      : Date;
+        BidDueDate           : Date;
+        AwardDate            : Date;
+        NextPublicationDye   : Date;
+        ContractLength       : Integer;
+        ContractExtenseion   : Integer;
+        TenderStatus         : String(255);
+        ManualSaveStatus     : String(50);
+        FoldersCreated       : Integer;
+        TENDER_TYPE_ID       : Integer;
+        CONTRACT_TYPE_ID     : Integer;
+        SALES_TYPE_ID        : Integer;
+        TENDER_ORIGIN_ID     : Integer;
+        PROCUREMENT_METHOD_ID: String;
+        PROCUREMENT_REASON   : String;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID; //OK

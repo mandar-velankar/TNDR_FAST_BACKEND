@@ -38,6 +38,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity PT_TMCTPRDPCK                     as projection on MasterData.PT_TMCTPRDPCK;
     entity CountryClassifications            as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION;
     entity CountryChannels                   as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+    entity CountryProcurementMethod          as projection on MasterData.MASTER_COUNTRY_PROCUREMENT_METHOD;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -185,6 +186,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             DIVISION                       : String(100);
             BRANDID                        : String(50);
             BRANDNAME                      : String(100);
+            PRODUCT_UNIT_NAME              : String(100);
         key PRODUCTID                      : Integer not null;
             CODE                           : String(255);
             PRODUCTNAME                    : String(102);
@@ -195,7 +197,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             MANUFACTURER                   : String(500);
             SHELFLIFE                      : Integer;
             PRESENTATION                   : String(50);
-            VAT                            : Double;
+            VAT                            : Double; //percentage VAT (thailand)
             PRODUCT_COMMENT                : String(784);
             UNIT                           : String(255);
             PAID_VOLUME                    : Double;
@@ -206,17 +208,21 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             PAYMENT_TERMS                  : String(255);
             DELIVERY_TERMS                 : String(500);
             SAMPLES                        : Integer;
+            SAMPLES_UNIT                   : Integer; //Thailand
+            SAMPLES_PACK                   : Integer;
             REGISTERED_PRICE               : Double;
             OFFER_PRICE                    : Double;
             FOC                            : String(25);
             TOTAL_QUANTITY_UNITS           : Double;
-            FOC_QUANTITY_UNITS             : Double;
+            FOC_QUANTITY_UNITS             : Double; // FOC Unit (thailand)
             PAID_QUANTITY_UNITS            : Double;
-            REQ_PRICE_UNIT_OFFER_CURRENCY  : Double;
+            REQ_PRICE_UNIT_OFFER_CURRENCY  : Double; //MSP excl VAT (thailand)
+            REQ_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; //MSP incl VAT (thailand)
             REQ_PRICE_PACK_OFFER_CURRENCY  : Double;
             REQ_PRICE_UNIT_EUR_BUDGET      : Double;
             REQ_PRICE_UNIT_EUR_SPOT        : Double;
-            NET_PRICE_UNIT_OFFER_CURRENCY  : Double;
+            NET_PRICE_UNIT_OFFER_CURRENCY  : Double; //NSP excl VAT (thailand)
+            NET_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; //NSP incl VAT (thailand)
             NET_PRICE_PACK_OFFER_CURRENCY  : Double;
             NET_PRICE_UNIT_EUR_BUDGET      : Double;
             NET_PRICE_UNIT_EUR_SPOT        : Double;
@@ -260,6 +266,8 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             TENDER_REFERENCE      : String(753);
         key OFFERID               : String(30) not null;
             INSTITUTENAME         : String(500);
+            INSTITUTE_TYPE        : String(50);
+            CUSTOMER_CODE         : Integer;
             DIVISION              : String(100);
             OFFERDATE             : Date;
             OFFERVALIDITY         : Date not null;
