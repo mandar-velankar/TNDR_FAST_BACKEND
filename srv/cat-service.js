@@ -32,6 +32,10 @@ module.exports = (srv) => {
 		ProductPolicies, PolicyPrices
 	} =cds.entities("com.bayer.SXTENDER.PricingPolicyData");
 
+	const {
+		LatestApprovedBrandPolicies
+	} =cds.entities("PolicyService");
+
 
 	const arr = x => Array.from(x);
 	const num = x => Number(x) || 0;
@@ -455,15 +459,14 @@ module.exports = (srv) => {
 			ChannelName: offer.INSTITUTE_TYPE
 		};
 		let channel = await tx.run(SELECT.from(MASTER_COUNTRY_CHANNELS).where(whereChannel));
-		//Get latest approved product pricing policy for country and product
-		let wherePolicy = {
+
+		let whereLatestApprovedBrandPolicy = {
 			CountryCode: offer.COUNTRYCODE,
-			ProductPackId: product.PRODUCTID,
-			MspStatus: 'Approved',
-			NspStatus: 'Approved'
+			BrandId: product.BRANDID,
 		};
-		let productPolicy = await tx.run(SELECT.from(ProductPolicies).where(wherePolicy));
-		if (productPolicy.length === 0){//No pricing policy
+
+		let latestApprovedBrandPolicy = await tx.run(SELECT.from(LatestApprovedBrandPolicies).where(whereLatestApprovedBrandPolicy));
+		if (latestApprovedBrandPolicy.length === 0){//No pricing policy
 			return {
 				//Default values for other countries approver types
 				REGULATORY: 1,
@@ -479,6 +482,30 @@ module.exports = (srv) => {
 				IN_POLICY: false
 			};
 		}
+
+		//Get latest approved product pricing policy for country and product
+		let wherePolicy = {
+			BrandPolicy_ID: latestApprovedBrandPolicy[0].ID,
+			ProductPackId: product.PRODUCTID
+		};
+
+		let productPolicy = await tx.run(SELECT.from(ProductPolicies).where(wherePolicy));
+		// if (productPolicy.length === 0){//No pricing policy
+		// 	return {
+		// 		//Default values for other countries approver types
+		// 		REGULATORY: 1,
+		// 		LEGAL: 1,
+		// 		COUNTRY_BUSINESS: 1,
+		// 		REGIONAL_BUSINESS: 1,
+		// 		//Thailand approver types
+		// 		NSM_SM_FM: 1,
+		// 		HBU: 1,
+		// 		CDH: 1,
+		// 		SUPPLY_CHAIN: supply,
+		// 		//In Policy flag
+		// 		IN_POLICY: false
+		// 	};
+		// }
 		//Get linked product policy prices (MSP and NSP) for Channel
 		let wherePolicyPrices = {
 			ProductPolicy_ID: productPolicy[0].ID,
