@@ -9,7 +9,8 @@ entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product{
 	Product.ProductPack.Product.HLEVEL1_NAME as DIVISION,
 	Product.ProductPack.Product.HLEVEL4_CODE as BRAND_ID,
 	Product.ProductPack.Product.HLEVEL4_NAME as BRAND_NAME,
-	Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME,
+	Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
+	Product.ProductPack.ProductPackSKUs.SKUCode as SKU_CODE, //thailand
 	key Product.PRODUCTPACKID as PRODUCT_ID,
 	Product.ProductPack.PRODUCTPACKNAME as PRODUCT_NAME,
 	Product.ProductPack.PACKFACTOR as PACK_SIZE,
