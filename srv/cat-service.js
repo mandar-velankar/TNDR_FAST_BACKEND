@@ -32,6 +32,10 @@ module.exports = (srv) => {
 		ProductPolicies, PolicyPrices
 	} =cds.entities("com.bayer.SXTENDER.PricingPolicyData");
 
+	const {
+		LatestApprovedBrandPolicies
+	} =cds.entities("PolicyService");
+
 
 	const arr = x => Array.from(x);
 	const num = x => Number(x) || 0;
@@ -455,15 +459,14 @@ module.exports = (srv) => {
 			ChannelName: offer.INSTITUTE_TYPE
 		};
 		let channel = await tx.run(SELECT.from(MASTER_COUNTRY_CHANNELS).where(whereChannel));
-		//Get latest approved product pricing policy for country and product
-		let wherePolicy = {
+
+		let whereLatestApprovedBrandPolicy = {
 			CountryCode: offer.COUNTRYCODE,
-			ProductPackId: product.PRODUCTID,
-			MspStatus: 'Approved',
-			NspStatus: 'Approved'
+			BrandId: product.BRANDID,
 		};
-		let productPolicy = await tx.run(SELECT.from(ProductPolicies).where(wherePolicy));
-		if (productPolicy.length === 0){//No pricing policy
+
+		let latestApprovedBrandPolicy = await tx.run(SELECT.from(LatestApprovedBrandPolicies).where(whereLatestApprovedBrandPolicy));
+		if (latestApprovedBrandPolicy.length === 0){//No pricing policy
 			return {
 				//Default values for other countries approver types
 				REGULATORY: 1,
@@ -479,6 +482,30 @@ module.exports = (srv) => {
 				IN_POLICY: false
 			};
 		}
+
+		//Get latest approved product pricing policy for country and product
+		let wherePolicy = {
+			BrandPolicy_ID: latestApprovedBrandPolicy[0].ID,
+			ProductPackId: product.PRODUCTID
+		};
+
+		let productPolicy = await tx.run(SELECT.from(ProductPolicies).where(wherePolicy));
+		// if (productPolicy.length === 0){//No pricing policy
+		// 	return {
+		// 		//Default values for other countries approver types
+		// 		REGULATORY: 1,
+		// 		LEGAL: 1,
+		// 		COUNTRY_BUSINESS: 1,
+		// 		REGIONAL_BUSINESS: 1,
+		// 		//Thailand approver types
+		// 		NSM_SM_FM: 1,
+		// 		HBU: 1,
+		// 		CDH: 1,
+		// 		SUPPLY_CHAIN: supply,
+		// 		//In Policy flag
+		// 		IN_POLICY: false
+		// 	};
+		// }
 		//Get linked product policy prices (MSP and NSP) for Channel
 		let wherePolicyPrices = {
 			ProductPolicy_ID: productPolicy[0].ID,
@@ -620,6 +647,11 @@ module.exports = (srv) => {
 		}
 		results = offerProduct.map(async function (d) {
 			let productInfo = await buildProductInfoForCountry(tx, offer, d);
+
+			//Get all prices, ammounts and cogs in all units
+			let toUnitFactor = (d.UNIT === "Unit") ? 1 : d.PACKSIZE;
+			let toPackFactor = (d.UNIT === "Unit") ? 1 / d.PACKSIZE : 1;
+
 			return {
 				TENDER_ID: offer.TENDERID,
 				COUNTRY_CODE: offer.COUNTRYCODE,
@@ -627,6 +659,8 @@ module.exports = (srv) => {
 				DIVISION: d.DIVISION,
 				BRANDID: d.BRANDID,
 				BRANDNAME: d.BRANDNAME,
+				PRODUCT_UNIT_NAME: d.PRODUCT_UNIT_NAME, //thailand
+				SKU: d.SKU, //thailand
 				PRODUCTID: d.PRODUCTID,
 				CODE: d.CODE,
 				PRODUCTNAME: d.PRODUCTNAME,
@@ -648,17 +682,21 @@ module.exports = (srv) => {
 				PAYMENT_TERMS: d.PAYMENT_TERMS,
 				SHIPMENT_TERMS: d.INCO_TERMS,
 				SAMPLES: d.SAMPLES,
+				SAMPLES_UNIT: d.SAMPLES * toUnitFactor,
+				SAMPLES_PACK: d.SAMPLES * toPackFactor,
 				REGISTERED_PRICE: d.REGISTERED_PRICE,
 				OFFER_PRICE: d.OFFER_PRICE,
 				FOC: productInfo.CommnonProductInfo.FocString,
-				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit,
+				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit, //Total Volume(units) (thailand - new column missing in the screenshot)
 				FOC_QUANTITY_UNITS: productInfo.CommnonProductInfo.FocAmountUnit,
 				PAID_QUANTITY_UNITS: productInfo.CommnonProductInfo.PaidVolumeUnit,
 				REQ_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPriceUnit,
+				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + d.VAT),   //MSP incl VAT (thailand)
 				REQ_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPricePack,
 				REQ_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.OfferPriceUnitEurBudget,
 				REQ_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.OfferPriceUnitEurSpot,
 				NET_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPriceUnit,
+				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + d.VAT),   //NSP incl VAT (thailand)
 				NET_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPricePack,
 				NET_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.NetPriceUnitEurBudget,
 				NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
@@ -870,6 +908,8 @@ module.exports = (srv) => {
 			TENDER_REFERENCE: offer.TENDER_REFERENCE,
 			OFFERID: offer.OFFERID,
 			INSTITUTENAME: offer.INSTITUTENAME,
+			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
+			CUSTOMER_CODE: offer.CUSTOMER_CODE,
 			DIVISION: division,//not correct, should be consolidated from product information
 			OFFERDATE: offer.OFFERDATE,
 			OFFERVALIDITY: offer.OFFERVALIDITY,
@@ -1212,6 +1252,7 @@ module.exports = (srv) => {
 				PRODUCTCODE: d.PRODUCTID.toString(),
 				SORTER: d.SORTER,
 				BRANDNAME: d.BRANDNAME,
+				PRODUCT_UNIT_NAME: d.PRODUCT_UNIT_NAME,
 				PRODUCTNAME: d.PRODUCTNAME,
 				PACKSIZE: d.PACKSIZE,
 				DOSAGE: d.DOSAGE,
