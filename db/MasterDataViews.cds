@@ -9,6 +9,8 @@ entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product{
 	Product.ProductPack.Product.HLEVEL1_NAME as DIVISION,
 	Product.ProductPack.Product.HLEVEL4_CODE as BRAND_ID,
 	Product.ProductPack.Product.HLEVEL4_NAME as BRAND_NAME,
+	Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
+	Product.ProductPack.ProductPackSKUs.SKUCode as SKU_CODE, //thailand
 	key Product.PRODUCTPACKID as PRODUCT_ID,
 	Product.ProductPack.PRODUCTPACKNAME as PRODUCT_NAME,
 	Product.ProductPack.PACKFACTOR as PACK_SIZE,
@@ -37,13 +39,13 @@ entity CountryCurrency as select from MasterData.PT_TMCTRY as Country{
 	key Country.CountryCode as COUNTRY_CODE,
 	key 'USD' as CURRENCY:String(3),
 	1 as SORTER:Integer
-}
+} where Country.CountryCode <> 'TH'
 union
 select from MasterData.PT_TMCTRY as Country{
 	Country.CountryCode as COUNTRY_CODE,
 	'EUR' as CURRENCY:String(3),
 	2 as SORTER:Integer
-}
+} where Country.CountryCode <> 'TH'
 union
 select from MasterData.PT_TMCTRY as Country{
 	Country.CountryCode as COUNTRY_CODE,

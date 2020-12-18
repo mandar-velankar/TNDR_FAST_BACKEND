@@ -69,13 +69,15 @@ entity OfferRevisions as select from TransactionalData.PT_TMOFRS as offer{
 entity CountryTenderBrands as select from TransactionalData.PT_TMTEND as tender{
     key tender.CountryCode as COUNTRYCODE,
     key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
-    tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRANDNAME
+    tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRANDNAME,
+    //tender.Offer.Product.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME,
 }where tender.Active = 1
 and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1
 and tender.Offer.Product.SKU.ACTIVERECORD = 'Yes'
 and tender.Offer.Product.SKU.Product.HLEVEL4_CODE is not null
 group by tender.CountryCode, tender.Offer.Product.SKU.Product.HLEVEL4_CODE, tender.Offer.Product.SKU.Product.HLEVEL4_NAME
+//tender.Offer.Product.SKU.Product.HLEVEL6_NAME
 union
 select from MasterData.PT_TMCTRY as country{
     country.CountryCode as COUNTRYCODE,
@@ -465,7 +467,8 @@ left outer join AccountMinPrice accountPrice
     offerProduct.SKU.Product.HLEVEL1_NAME as DIVISION,
 	offerProduct.SKU.Product.HLEVEL4_CODE as BRANDID,
 	offerProduct.SKU.Product.HLEVEL4_NAME as BRANDNAME,
-	offerProduct.Reference as CODE,
+    offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
+    offerProduct.Reference as CODE,
 	offerProduct.SKU.PACKFACTOR as PACKSIZE,
 	offerProduct.SKU.CONCENTRATION as DOSAGE,
 	offerProduct.SKU.UOM as UOM,
@@ -545,6 +548,7 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
 	offer.TenderID as TENDERID,
     offer.Tender.Institute.InstituteType as INSTITUTE_TYPE,
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
+    //offer.Tender.Institute.CustomerID as CUSTOMERCODE,
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.Institute.InstituteName || ' - ' || offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
