@@ -449,8 +449,8 @@ module.exports = (srv) => {
 
 		//Check on offer unit (pack or unit) and get factor to apply on policy prices
 		let uomFactor = 1;
-		if (productInfo.UOM === 'Unit'){
-			uomFactor = product.PACKFACTOR;
+		if (product.UNIT === 'Unit'){
+			uomFactor = product.PACKSIZE;
 		};
 		
 		//Get ChannelId
