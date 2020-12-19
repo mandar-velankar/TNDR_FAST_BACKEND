@@ -151,7 +151,7 @@ entity TenderResults as select from TransactionalData.PT_TMTEND as tender{
     as FOC_DESCRIPTION:String(255)
 }where tender.Active = 1
 and tender.Offer.Active = 1
-and tender.Offer.ActiveOffer = 1
+//and tender.Offer.ActiveOffer = 1
 and tender.Offer.Product.Active = 1
 and tender.Offer.Product.ActiveProduct = 1
 and (tender.Offer.OfferStatusTable.STATUS = 'Quotation Submitted' or tender.Offer.OfferStatusTable.STATUS = 'Results Recorded' or tender.Offer.OfferStatusTable.STATUS = 'Delivery Ongoing');
