@@ -187,7 +187,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             BRANDID                        : String(50);
             BRANDNAME                      : String(100);
             PRODUCT_UNIT_NAME              : String(100); //thailand
-            SKU                            : String(50);
+            SKU                            : Integer;
         key PRODUCTID                      : Integer not null;
             CODE                           : String(255);
             PRODUCTNAME                    : String(102);
