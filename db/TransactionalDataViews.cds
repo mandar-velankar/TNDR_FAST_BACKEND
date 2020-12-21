@@ -455,6 +455,9 @@ left outer join AccountMinPrice accountPrice
     and offerProduct.CountryCode = accountPrice.COUNTRY_CODE
     and offerProduct.INSTITUTE_ID = accountPrice.INSTITUTE_ID
     and offerProduct.CURRENCY = accountPrice.CURRENCY
+left outer join MasterDataViews.MostRecentSkuCodeForProductPack sku 
+    on offerProduct.ProductCode = sku.ProductPackID 
+    and offerProduct.CountryCode = sku.CountryCode
 {
     offerProduct.TenderID as TENDERID,
     key offerProduct.OfferID as OFFERID,
@@ -468,6 +471,7 @@ left outer join AccountMinPrice accountPrice
 	offerProduct.SKU.Product.HLEVEL4_CODE as BRANDID,
 	offerProduct.SKU.Product.HLEVEL4_NAME as BRANDNAME,
     offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
+    sku.SKU,
     offerProduct.Reference as CODE,
 	offerProduct.SKU.PACKFACTOR as PACKSIZE,
 	offerProduct.SKU.CONCENTRATION as DOSAGE,

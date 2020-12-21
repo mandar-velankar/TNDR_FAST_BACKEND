@@ -4,13 +4,20 @@ using { User, Country, managed } from '@sap/cds/common';
 using { com.bayer.SXTENDER.MasterData } from './MasterData';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 
-entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product{
+entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK as sku {
+	sku.ProductPackID,
+	sku.CountryCode,
+	max(sku.SKUCode) as SKU
+}where sku.ActiveRecord='Yes'  group by sku.ProductPackID, sku.CountryCode;
+
+entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product left outer join
+MostRecentSkuCodeForProductPack sku on Product.PRODUCTPACKID = sku.ProductPackID and Product.COUNTRYCODE = sku.CountryCode {
 	key Product.COUNTRYCODE as COUNTRY_CODE,
 	Product.ProductPack.Product.HLEVEL1_NAME as DIVISION,
 	Product.ProductPack.Product.HLEVEL4_CODE as BRAND_ID,
 	Product.ProductPack.Product.HLEVEL4_NAME as BRAND_NAME,
-	Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
-	Product.ProductPack.ProductPackSKUs.SKUCode as SKU_CODE, //thailand
+	//Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
+	//sku.SKU, //thailand
 	key Product.PRODUCTPACKID as PRODUCT_ID,
 	Product.ProductPack.PRODUCTPACKNAME as PRODUCT_NAME,
 	Product.ProductPack.PACKFACTOR as PACK_SIZE,
