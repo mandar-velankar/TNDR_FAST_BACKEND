@@ -60,14 +60,16 @@ entity Brands as select from CountryBrandProducts as Brand
         key Brand.BRAND_ID     as BrandId,
         key Brand.DIVISION     as Division,
         MIN(Brand.BRAND_NAME)   as BrandName : String(500), //we need to use a agregation function here beceause we have different names for same brands(only in test)
-        Policies.ValidFrom as ValidFrom
+        Policies.ValidFrom as ValidFrom,
+        Policies.Status as Status
 }where
     Brand.BRAND_ID is not null
 group by
     Brand.COUNTRY_CODE,
     Brand.BRAND_ID,
     Brand.DIVISION,
-    Policies.ValidFrom; 
+    Policies.ValidFrom,
+    Policies.Status; 
 
 
 entity BrandProducts as select from CountryBrandProducts as Product {
