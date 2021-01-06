@@ -6,11 +6,11 @@
   "license": "ISC",
   "dependencies": {
     "@sap/cds": "^4.3.1",
-    "@sap/cds-odata-v2-adapter-proxy": "^1.4.60",
+    "@sap/cds-odata-v2-adapter-proxy": "^1.5.1",
     "@sap/hana-client": "^2.6.61",
+    "@sap/logging": "^6.0.0",
     "@sap/xsenv": "^3.1.0",
     "@sap/xssec": "^3.0.10",
-    "@sap/logging": "^6.0.0",
     "compression": "^1.7.4",
     "express": "^4.17.1",
     "handlebars": "^4.7.6",
@@ -46,6 +46,9 @@
     "requires": {
       "db": {
         "kind": "hana"
+      },
+      "uaa": {
+        "kind": "xsuaa"
       }
     },
     "odata": {
