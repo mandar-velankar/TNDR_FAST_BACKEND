@@ -22,6 +22,7 @@ const port = process.env.PORT || 4004;
   await cds.serve("CatalogService").from("./srv/").in(app);
   await cds.serve("PolicyService").from("./srv/").in(app);
   await cds.serve("ContractService").from("./srv/").in(app);
+  await cds.serve("AccessService").from("./srv/").in(app);
   await cds.serve("ExternalService").from("./srv/").in(app);
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
