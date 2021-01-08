@@ -140,7 +140,7 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         Products: redirected to TenderProducts,
         Distributor: redirected to TenderDistributor,
         SellingCompany: redirected to TenderSellingCompany,
-        // Institute: redirected to TenderInstitute //TODO: fix this ASAP - split app
+        Institute: redirected to TenderInstitute //TODO: fix this ASAP - split app
     };
 
 }
