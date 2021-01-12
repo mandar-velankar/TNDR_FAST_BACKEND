@@ -33,6 +33,9 @@ entity PT_TMOFRS as select from TransactionalData.PT_TMOFRS as offer {
         offer.SellingCompanyDetails as SellingCompany,
         offer.TenderID,
         // offer.Tender.Institute as Institute,
+        // offer.Tender.InstituteID as InstituteId,
+        offer.Tender.Institute:redirected to MasterData.PT_TMINST
+                              on Institute.InstituteID = InstituteId,
         offer.Tender.GroupPurchasing as GroupPurchasing,
     
 }where offer.Active = 1;
