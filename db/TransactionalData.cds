@@ -168,7 +168,7 @@ entity PT_TMAWRDCR {
 }
 
 entity Specifications : cuid, managed {
-        TenderID    : String(50) not null;
+    key TenderID    : String(50) not null;
         CountryCode	: String(2);   
         Name		: String(50);
         Tender      : Association to PT_TMTEND on Tender.TenderID = TenderID;

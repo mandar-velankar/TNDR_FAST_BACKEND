@@ -134,6 +134,11 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
         * , Tender : redirected to PT_TMTEND
     };
 
+    entity Specifications                    as projection on TransactionalData.Specifications {
+        * , Tender : redirected to PT_TMTEND
+    };
+
+
     entity PT_TMBDPR                         as projection on TransactionalData.PT_TMBDPR {
         * , Product : redirected to PT_TMOFPR
     };
