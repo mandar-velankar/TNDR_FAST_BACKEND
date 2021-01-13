@@ -3,6 +3,7 @@ namespace com.bayer.SXTENDER.TransactionalData;
 using {
     User,
     Country,
+    cuid,
     managed
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
@@ -164,6 +165,13 @@ entity PT_TMAWRDCR {
         //Associations
         Tender        : Association to PT_TMTEND
                             on Tender.TenderID = TENDERID;
+}
+
+entity Specifications : cuid, managed {
+        TenderID    : String(50) not null;
+        CountryCode	: String(2);   
+        Name		: String(50);
+        Tender      : Association to PT_TMTEND on Tender.TenderID = TenderID;
 }
 
 entity PT_TMBDPR {
@@ -351,6 +359,9 @@ entity PT_TMTEND {
         SubmittedBy          : String(50);
         Active               : Integer;
         Classification       : String(50);
+        BindingTypeLevel1    : String(50);
+        BindingTypeLevel2    : String(50);
+        BindingTypeLevel3    : String(50);
         TenderName           : String(250);
         InstituteID          : Integer not null;
         TenderChannel        : String(255);
@@ -382,6 +393,7 @@ entity PT_TMTEND {
         //                           on OfferStatus.TENDER_ID = TenderID;
         Criteria            : Association to many PT_TMAWRDCR
                                   on Criteria.TENDERID = TenderID;
+        Specifications      : Association to many Specifications on Specifications.TenderID = TenderID;
         Brands              : Association to many TransactionalDataViews.BrandsInTender
                                   on Brands.TENDERID = TenderID;
         NextOfferId         : Association to TransactionalDataViews.TenderOffers
