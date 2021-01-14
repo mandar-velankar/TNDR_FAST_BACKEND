@@ -26,7 +26,7 @@ module.exports = (srv) => {
 		PT_TMDLVTR, PT_TMUDLTRS
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry
+		Template, TemplateCountry, MandatoryTableFieldsCountry
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
