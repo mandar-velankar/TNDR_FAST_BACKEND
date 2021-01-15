@@ -1,0 +1,188 @@
+Division,ApproverID,CountryCode,ApproverType,ApproverName,ApproverEmailID
+Pharma,10006,AE,Supply Chain,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
+Pharma,10001,BH,Country Business,Asam Shiraz Khan,asamshiraz.khan@bayer.com
+Pharma,10006,BH,Supply Chain,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
+Pharma,10012,EG,Supply Chain,Alia Ashraf Maher,alia.ashraf@bayer.com
+Both,10003,AE,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10005,AE,Regulatory,Hager Abdel Salam Hatata,hager.hatata@bayer.com
+Pharma,10001,AE,Country Business,Asam Shiraz Khan,asamshiraz.khan@bayer.com
+Radiology,10002,AE,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10003,BH,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10005,BH,Regulatory,Hager Abdel Salam Hatata,hager.hatata@bayer.com
+Pharma,10004,AE,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,AE,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10008,EG,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10009,EG,Regulatory,Eman Abdel Hamid,eman.abdelhamid@bayer.com
+Both,10003,IQ,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Radiology,10002,BH,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10011,IQ,Regulatory,Wadiah Batarseh,wadiah.batarseh@bayer.com
+Pharma,10004,BH,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,BH,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10003,JO,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10011,JO,Regulatory,Wadiah Batarseh,wadiah.batarseh@bayer.com
+Pharma,10012,IQ,Supply Chain,Malak Mseis,malak.mseis@bayer.com
+Both,10003,KW,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Pharma,10007,EG,Country Business,Samer Lezzaiq,samer.lezzaiq@bayer.com
+Radiology,10002,EG,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10005,KW,Regulatory,Hager Abdel Salam Hatata,hager.hatata@bayer.com
+Pharma,10014,JO,Supply Chain,Malak Mseis,malak.mseis@bayer.com
+Pharma,10004,EG,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,EG,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10003,LB,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10011,LB,Regulatory,Wadiah Batarseh,wadiah.batarseh@bayer.com
+Pharma,10010,IQ,Country Business,Anne Moin Babia,anne.babia@bayer.com
+Radiology,10002,IQ,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10006,KW,Supply Chain,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
+Both,10003,LY,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Pharma,10004,IQ,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,IQ,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10009,LY,Regulatory,Eman Abdel Hamid,eman.abdelhamid@bayer.com
+Both,10003,OM,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10005,OM,Regulatory,Hager Abdel Salam Hatata,hager.hatata@bayer.com
+Pharma,10014,LB,Supply Chain,Malak Mseis,malak.mseis@bayer.com
+Pharma,10013,JO,Country Business,Samer Al-Faqih,samer.al-faqih@bayer.com
+Radiology,10002,JO,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10003,QA,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10005,QA,Regulatory,Hager Abdel Salam Hatata,hager.hatata@bayer.com
+Pharma,10004,JO,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,JO,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10012,LY,Supply Chain,Malak Mseis,malak.mseis@bayer.com
+Both,10016,SA,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10017,SA,Regulatory,Ibrahim Mohammed Al Ashban,ibrahim.al-ashban@bayer.com
+Pharma,10006,OM,Supply Chain,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
+Pharma,10001,KW,Country Business,Asam Shiraz Khan,asamshiraz.khan@bayer.com
+Radiology,10002,KW,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10009,SD,Regulatory,Eman Abdel Hamid,eman.abdelhamid@bayer.com
+Both,10003,SY,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Pharma,10004,KW,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,KW,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Both,10011,SY,Regulatory,Wadiah Batarseh,wadiah.batarseh@bayer.com
+Pharma,10006,QA,Supply Chain,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
+Both,10003,YE,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
+Both,10009,YE,Regulatory,Eman Abdel Hamid,eman.abdelhamid@bayer.com
+Pharma,10013,LB,Country Business,Samer Al-Faqih,samer.al-faqih@bayer.com
+Radiology,10002,LB,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10018,SA,Supply Chain,Effat Saddik,effat.saddik@bayer.com
+Pharma,10012,SD,Supply Chain,Alia Ashraf Maher,alia.ashraf@bayer.com
+Pharma,10004,LB,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,LB,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10012,SY,Supply Chain,Malak Mseis,malak.mseis@bayer.com
+Pharma,10012,YE,Supply Chain,Malak Mseis,malak.mseis@bayer.com
+Pharma,10010,LY,Country Business,Anne Moin Babia,anne.babia@bayer.com
+Radiology,10002,LY,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10004,LY,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,LY,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10001,OM,Country Business,Asam Shiraz Khan,asamshiraz.khan@bayer.com
+Radiology,10002,OM,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10004,OM,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,OM,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10001,QA,Country Business,Asam Shiraz Khan,asamshiraz.khan@bayer.com
+Radiology,10002,QA,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10004,QA,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,QA,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10015,SA,Country Business,Hussein El Hakim,hussein.elhakim@bayer.com
+Radiology,10002,SA,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10010,SD,Country Business,Anne Moin Babia,anne.babia@bayer.com
+Radiology,10002,SD,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10004,SD,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,SD,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10010,SY,Country Business,Anne Moin Babia,anne.babia@bayer.com
+Radiology,10002,SY,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10004,SY,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,SY,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10010,YE,Country Business,Anne Moin Babia,anne.babia@bayer.com
+Radiology,10002,YE,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10004,YE,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,YE,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10019,SA,Regional Business,Hussein El Hakim,hussein.elhakim@bayer.com
+Radiology,10002,SA,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
+Pharma,10006,AE,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Pharma,10001,BH,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Pharma,10006,BH,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Pharma,10012,EG,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Both,10003,AE,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Both,10005,AE,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,10001,AE,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,AE,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10003,BH,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Both,10005,BH,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Radiology,10002,AE,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10008,EG,Legal,Mohamed Zaghloul,mohamed.zaghloul@bayer.com
+Both,10009,EG,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Both,10003,IQ,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Radiology,10002,BH,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10011,IQ,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Radiology,10002,BH,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10003,JO,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Both,10011,JO,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,10012,IQ,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Both,10003,KW,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Pharma,10007,EG,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,EG,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10005,KW,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,10014,JO,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Radiology,10002,EG,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10003,LB,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Both,10011,LB,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,10010,IQ,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,IQ,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10006,KW,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Both,10003,LY,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Radiology,10002,IQ,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10009,LY,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Both,10003,OM,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Both,10005,OM,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,10014,LB,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Pharma,10013,JO,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,JO,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10003,QA,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Both,10005,QA,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Radiology,10002,JO,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10012,LY,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Both,10016,SA,Legal,Hamdy Hafez,hamdy.hafez@bayer.com
+Both,10017,SA,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,10006,OM,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Pharma,10001,KW,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,KW,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10009,SD,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Both,10003,SY,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Radiology,10002,KW,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10011,SY,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,10006,QA,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Both,10003,YE,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
+Both,10009,YE,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,10013,LB,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,LB,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10018,SA,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Pharma,10012,SD,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Radiology,10002,LB,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10012,SY,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Pharma,10012,YE,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
+Pharma,10010,LY,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,LY,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Radiology,10002,LY,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10001,OM,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,OM,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Radiology,10002,OM,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10001,QA,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,QA,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Radiology,10002,QA,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10015,SA,Country Business,Alaa Eldin Ali Hassan Nada,alaa.nada@bayer.com
+Radiology,10002,SA,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10010,SD,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,SD,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Radiology,10002,SD,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10010,SY,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,SY,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Radiology,10002,SY,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Pharma,10010,YE,Country Business,Henrik Wulff,henrik.wulff@bayer.com
+Radiology,10002,YE,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Radiology,10002,YE,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Radiology,10002,SA,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
+Both,10026,TH,Supply Chain,Siriporn Noiwan,jonathan.hubeau.ext@bayer.com
+Pharma,10027,TH,NSM/SM/FM,NSM/SM/FM Pharma,jonathan.hubeau.ext@bayer.com
+Pharma,10028,TH,HBU,HBU Pharma,jonathan.hubeau.ext@bayer.com
+Pharma,10029,TH,CDH,CDH Pharma,jonathan.hubeau.ext@bayer.com
+Radiology,10030,TH,NSM/SM/FM,NSM/SM/FM Radiology,jonathan.hubeau.ext@bayer.com
+Radiology,10031,TH,HBU,HBU Radiology,jonathan.hubeau.ext@bayer.com
+Radiology,10032,TH,CDH,CDH Radiology,jonathan.hubeau.ext@bayer.com
