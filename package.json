@@ -33,6 +33,7 @@
     "setup": "npm install && npm run setup:ui",
     "setup:ui": "cd app && npm install",
     "deploy": "cds deploy db --to sqlite:db/sxtender.db",
+    "deploy:hana": "cds deploy --to hana --vcap-file ./default-env.json",
     "build": "cds build/all --clean",
     "build:xs-security": "cds compile srv/ --to xsuaa  > xs-security.json",
     "build:xsa": "mbt build -p=xsa --mtar=FASTCAP-Backend.mtar",
