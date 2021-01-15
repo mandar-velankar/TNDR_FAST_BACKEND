@@ -401,6 +401,7 @@ entity MASTER_TENDER_ORIGIN{
 	CountryTenderOrigin:Association to many MASTER_COUNTRY_TENDER_ORIGIN on CountryTenderOrigin.TenderOrigin = $self;
 }
 
+
 entity MASTER_TENDER_TYPE{
 	key ID:Integer not null;
 	NAME:String(50);
@@ -461,4 +462,36 @@ entity MASTER_COUNTRY_CHANNELS: cuid, managed {
     ChannelName : String(30);
     ChannelCountry : String(2);
 	Country:Association to PT_TMCTRY on Country.CountryCode = ChannelCountry;
+}
+
+entity MasterCountryBindingTypeLevel1: cuid, managed {
+	CountryCode			: String(2);
+	ClassificationID	: UUID not null;
+	Name				: String(50);
+	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+	BindingTypeLevel2	: Association to many MasterCountryBindingTypeLevel2 on BindingTypeLevel2.BindingTypeLevel1 = $self;
+}
+
+entity MasterCountryBindingTypeLevel2: cuid, managed {
+	CountryCode			: String(2);
+	BindingTypeLevel1ID	: UUID not null;
+	Name				: String(50);
+	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+	BindingTypeLevel1	: Association to MasterCountryBindingTypeLevel1 on BindingTypeLevel1.ID = BindingTypeLevel1ID;
+	BindingTypeLevel3	: Association to many MasterCountryBindingTypeLevel3 on BindingTypeLevel3.BindingTypeLevel2 = $self;
+}
+
+entity MasterCountryBindingTypeLevel3: cuid, managed {
+	CountryCode			: String(2);
+	BindingTypeLevel2ID	: UUID not null;
+	Name				: String(50);
+	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+	BindingTypeLevel2	: Association to MasterCountryBindingTypeLevel2 on BindingTypeLevel2.ID = BindingTypeLevel2ID;
+}
+
+entity MasterCountrySpecifications: cuid, managed {
+	CountryCode			: String(2);
+	ClassificationID	: UUID not null;
+	Name				: String(50);
+	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 }
