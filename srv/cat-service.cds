@@ -39,6 +39,10 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity CountryClassifications            as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION;
     entity CountryChannels                   as projection on MasterData.MASTER_COUNTRY_CHANNELS;
     entity CountryProcurementMethod          as projection on MasterData.MASTER_COUNTRY_PROCUREMENT_METHOD;
+    entity CountryBindingTypeLevel1          as projection on MasterData.MasterCountryBindingTypeLevel1;
+    entity CountryBindingTypeLevel2          as projection on MasterData.MasterCountryBindingTypeLevel2;
+    entity CountryBindingTypeLevel3          as projection on MasterData.MasterCountryBindingTypeLevel3;
+    entity CountrySpecifications             as projection on MasterData.MasterCountrySpecifications;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -130,6 +134,11 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
         * , Tender : redirected to PT_TMTEND
     };
 
+    entity Specifications                    as projection on TransactionalData.Specifications {
+        * , Tender : redirected to PT_TMTEND
+    };
+
+
     entity PT_TMBDPR                         as projection on TransactionalData.PT_TMBDPR {
         * , Product : redirected to PT_TMOFPR
     };
@@ -187,7 +196,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             BRANDID                        : String(50);
             BRANDNAME                      : String(100);
             PRODUCT_UNIT_NAME              : String(100); //thailand
-            SKU                            : String(50);
+            SKU                            : Integer;
         key PRODUCTID                      : Integer not null;
             CODE                           : String(255);
             PRODUCTNAME                    : String(102);

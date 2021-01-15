@@ -6,7 +6,7 @@
   "license": "ISC",
   "dependencies": {
     "@sap/cds": "^4.4.6",
-    "@sap/cds-odata-v2-adapter-proxy": "^1.4.60",
+    "@sap/cds-odata-v2-adapter-proxy": "^1.5.1",
     "@sap/hana-client": "^2.6.64",
     "@sap/logging": "^6.0.1",
     "@sap/xsenv": "^3.1.0",
@@ -33,6 +33,7 @@
     "setup": "npm install && npm run setup:ui",
     "setup:ui": "cd app && npm install",
     "deploy": "cds deploy db --to sqlite:db/sxtender.db",
+    "deploy:hana": "cds deploy --to hana --vcap-file ./default-env.json",
     "build": "cds build/all --clean",
     "build:xs-security": "cds compile srv/ --to xsuaa  > xs-security.json",
     "build:xsa": "mbt build -p=xsa --mtar=FASTCAP-Backend.mtar",
@@ -46,6 +47,9 @@
     "requires": {
       "db": {
         "kind": "hana"
+      },
+      "uaa": {
+        "kind": "xsuaa"
       }
     },
     "odata": {
