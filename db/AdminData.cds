@@ -56,3 +56,11 @@ entity Template{
 	Orientation:String;
 	Border:String;
 }
+
+entity MandatoryTableFieldsCountry {
+	key CountryCode:String(2);
+	key View: String(100);
+	key Model: String(100);
+	key Field: String(100);
+	Required:Boolean;
+}
