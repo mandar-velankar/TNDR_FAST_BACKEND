@@ -42,11 +42,16 @@ jobs:
      needs: build
      runs-on: ubuntu-latest
      steps:
+       - uses: actions/checkout@v2
+       - name: Use Node.js
+         uses: actions/setup-node@v1
+         with:
+          node-version: 12
        - name: Download Artifact
          uses: actions/download-artifact@v2
          with:
            name: FASTCAP-Backend-CF
-           path: ./
+           path: ./MTA-CI
        - name: Deploy to Cloud Foundry
          uses: guerric-p/cf-cli-action@master
          with:
@@ -55,4 +60,4 @@ jobs:
            cf_password: ${{ secrets.CF_PASSWORD }}
            cf_org: ${{ secrets.CF_ORG }}
            cf_space: ${{ secrets.CF_SPACE }}
-           command: deploy ./FASTCAP-Backend-CF.mtar -f -e ./cf.mtaext
+           command: deploy ./MTA-CI/FASTCAP-Backend-CF.mtar -f -e ./cf.mtaext
