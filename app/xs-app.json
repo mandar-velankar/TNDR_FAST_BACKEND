@@ -32,7 +32,7 @@
       "target": "/FAST/$1",
       "authenticationType": "xsuaa",
       "destination": "srv_api",
-      "csrfProtection": true
+      "csrfProtection": false
     }
   ]
 }
