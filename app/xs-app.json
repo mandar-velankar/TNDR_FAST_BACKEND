@@ -6,12 +6,20 @@
   },
   "routes": [
     {
+      "source": "/PolicyPricingService/(.*)$",
+      "target": "/ppa/$1",
+      "authenticationType": "basic",
+      "destination": "srv_api",
+      "csrfProtection": false
+    },
+    {
       "source": "/ODataDev/(.*)$",
       "target": "/ODataDev/$1",
       "authenticationType": "basic",
       "destination": "srv_api",
-      "csrfProtection": true
+      "csrfProtection": false
     },
+
     {
       "source": "/reporting/(.*)$",
       "target": "/FAST/$1",
