@@ -424,6 +424,7 @@ entity PT_TMTRRES {
         CountryCode       : String(2);
         InstituteID       : Integer;
     key ProductCode       : Integer not null;
+        ContractNo        : String(50);
         SubmittedOn       : Date;
         SubmittedBy       : String(255);
         Active            : Integer;
@@ -479,4 +480,5 @@ entity TransCompetitorResult {
         LASTUPDATE     : Date;
         UPDATEDBY      : String(255);
         DELETED        : Integer;
+        CONTRACT_NO    : String(50);
 }
