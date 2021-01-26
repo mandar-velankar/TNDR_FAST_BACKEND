@@ -54,9 +54,18 @@ inner join AdminData.PT_TMUSER user
      user.UserEmail
 };
 
+/* Nils: can be deleted later on... This is changed beceause when you delete an offer, the newly created offer is getting same nextofferid (only active offers are taken into account)
 entity TenderOffers as select from TransactionalData.PT_TMTEND as tender{
     key tender.TenderID as TENDERID,
     max(tender.Offer.TenderOfferNo) + 1 as NEXTOFFERID:Integer
+}group by tender.TenderID;
+*/
+
+entity TenderOffers as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as ActiveInactiveOffers
+    on ActiveInactiveOffers.TenderID = tender.TenderID {
+    key tender.TenderID as TENDERID,
+    max(ActiveInactiveOffers.TenderOfferNo) + 1 as NEXTOFFERID:Integer
 }group by tender.TenderID;
 
 entity OfferRevisions as select from TransactionalData.PT_TMOFRS as offer{
