@@ -305,6 +305,8 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
     results.PRODUCT_NAME,
     results.UNIT_PRICE,
     results.PACK_PRICE,
+    results.UNIT_NET_PRICE,
+    results.PACK_NET_PRICE,
     results.COGS,
     results.BUDGET_RATE,
     results.CURRENCY,
