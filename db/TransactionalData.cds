@@ -480,5 +480,4 @@ entity TransCompetitorResult {
         LASTUPDATE     : Date;
         UPDATEDBY      : String(255);
         DELETED        : Integer;
-        CONTRACT_NO    : String(50);
 }
