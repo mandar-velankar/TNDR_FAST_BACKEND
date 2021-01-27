@@ -30,7 +30,7 @@
     {
       "source": "/FAST/(.*)$",
       "target": "/FAST/$1",
-      "authenticationType": "xsuaa",
+      "authenticationType": "basic",
       "destination": "srv_api",
       "csrfProtection": false
     }
