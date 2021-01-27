@@ -7,6 +7,9 @@ using {User,Country,managed,cuid} from '@sap/cds/common';
 
 service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_ppa_user','f_tndr_cag_technical_user','authenticated-user']){
     
+    //OverallStatus
+    entity OverallApprovalStatus as projection on PricingPolicyData.OverallApprovalStatus;
+
     //Brands
     entity Brands as projection on PricingPolicyData.Brands;
 

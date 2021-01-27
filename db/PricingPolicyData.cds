@@ -122,6 +122,11 @@ entity Approvals: cuid, managed {
         CountryApprover    : Association to CountryApprovers;
 }
 
+entity OverallApprovalStatus as select from Approvals {
+    BrandId,
+    ApprovalStatus
+};
+
 @cds.autoexpose
 entity CountryApprovers: cuid, managed{
 	    CountryCode         : String(2);
