@@ -597,7 +597,7 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.STATUS{
-    key 'PT_TMQUTO(OfferID=''' || quotation.OfferID || ''',Active=1,OfferDate=datetime''' || quotation.OfferDate || ''')' as QUOTATION_PATH:String(500),
+    key 'PT_TMQUTO(OfferID=''' || quotation.OfferID || ''',Active=1,OfferDate=datetimeoffset''' || quotation.OfferDate || ''')' as QUOTATION_PATH:String(500),
     quotation.CountryCode as COUNTRY_CODE,
     quotation.TenderID as TENDER_ID,
     quotation.OfferID as OFFER_ID,
