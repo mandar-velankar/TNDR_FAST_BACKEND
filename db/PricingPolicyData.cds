@@ -122,6 +122,7 @@ entity Approvals: cuid, managed {
         CountryApprover    : Association to CountryApprovers;
 }
 
+
 entity OverallApprovalStatus as select from Approvals {
     BrandId,
     ApprovalStatus
