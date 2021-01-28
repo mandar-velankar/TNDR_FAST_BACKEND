@@ -124,10 +124,9 @@ entity Approvals: cuid, managed {
 
 
 entity OverallApprovalStatus as select from Approvals {
-    BrandId,
+    key BrandId,
     ApprovalStatus
 };
-
 @cds.autoexpose
 entity CountryApprovers: cuid, managed{
 	    CountryCode         : String(2);
