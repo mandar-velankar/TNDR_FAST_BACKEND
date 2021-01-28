@@ -358,6 +358,7 @@ entity MASTER_COUNTRY_CONTRACT_TYPE{
 entity MASTER_COUNTRY_PROCUREMENT_METHOD{
 	key COUNTRY_CODE:String(2) not null;
 	key PROCUREMENT_METHOD_ID:String not null;
+	SORTER:Integer;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
 }

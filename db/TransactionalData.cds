@@ -424,6 +424,7 @@ entity PT_TMTRRES {
         CountryCode       : String(2);
         InstituteID       : Integer;
     key ProductCode       : Integer not null;
+        ContractNo        : String(50);
         SubmittedOn       : Date;
         SubmittedBy       : String(255);
         Active            : Integer;
