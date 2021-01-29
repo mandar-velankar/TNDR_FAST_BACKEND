@@ -54,9 +54,18 @@ inner join AdminData.PT_TMUSER user
      user.UserEmail
 };
 
+/* Nils: can be deleted later on... This is changed beceause when you delete an offer, the newly created offer is getting same nextofferid (only active offers are taken into account)
 entity TenderOffers as select from TransactionalData.PT_TMTEND as tender{
     key tender.TenderID as TENDERID,
     max(tender.Offer.TenderOfferNo) + 1 as NEXTOFFERID:Integer
+}group by tender.TenderID;
+*/
+
+entity TenderOffers as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as ActiveInactiveOffers
+    on ActiveInactiveOffers.TenderID = tender.TenderID {
+    key tender.TenderID as TENDERID,
+    max(ActiveInactiveOffers.TenderOfferNo) + 1 as NEXTOFFERID:Integer
 }group by tender.TenderID;
 
 entity OfferRevisions as select from TransactionalData.PT_TMOFRS as offer{
@@ -305,6 +314,8 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
     results.PRODUCT_NAME,
     results.UNIT_PRICE,
     results.PACK_PRICE,
+    results.UNIT_NET_PRICE,
+    results.PACK_NET_PRICE,
     results.COGS,
     results.BUDGET_RATE,
     results.CURRENCY,
@@ -596,8 +607,8 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
 }where offer.Active = 1 and offer.Tender.Active = 1;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
-inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.STATUS{
-    key 'PT_TMQUTO(OfferID=''' || quotation.OfferID || ''',Active=1,OfferDate=datetimeoffset''' || quotation.OfferDate || ''')' as QUOTATION_PATH:String(500),
+inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.OFFER_ID{
+    key 'PT_TMQUTO(OfferID=''' || quotation.OfferID || ''',Active=1,OfferDate=' || quotation.OfferDate || ')' as QUOTATION_PATH:String(500),
     quotation.CountryCode as COUNTRY_CODE,
     quotation.TenderID as TENDER_ID,
     quotation.OfferID as OFFER_ID,
@@ -606,7 +617,7 @@ inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = stat
     quotation.Comment as COMMENT,
     quotation.AS1 as APPROVER1,
     quotation.AS2 as APPROVER2,
-}where quotation.UPDATED = 1
+}where quotation.UPDATED <> 1
 and status.STATUS='Offer Approved'
 and quotation.Active = 1;
 
