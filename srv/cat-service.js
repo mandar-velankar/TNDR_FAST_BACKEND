@@ -1311,8 +1311,8 @@ module.exports = (srv) => {
 				result = result.concat(d.OfferId)
 					.concat("',productcode=")
 					.concat(p.PRODUCTID).concat(",ApproverEmailID='")
-					.concat(d.ApproverEmailID).concat("',Active=1,Statustime=datetimeoffset'")
-					.concat(d.Statustime.replace(" ", "T")).concat("',ApproverType='")
+					.concat(d.ApproverEmailID).concat("',Active=1,Statustime=")
+					.concat(d.Statustime.replace(" ", "T")).concat(",ApproverType='")
 					.concat(d.ApproverType).concat("')");
 				return result;
 			});
