@@ -37,9 +37,11 @@ entity Channels : cuid {
 
 entity Contracts : managed, cuid {
         CountryCode             : String(2) not null;
+        ContractName            : String(50);
         ContractNumber          : String(50);
         ChannelId               : UUID;
         ContractDate            : Date;
+        ContractValidUntil      : Date;
         Enabled                 : Boolean not null;
         InstituteId             : Integer;
         DistributorId           : Integer;
@@ -64,6 +66,7 @@ entity Contracts : managed, cuid {
 
 entity Products : managed, cuid {
         ProductPackId           : Integer;
+        ProductName             : String(255);
         CountryCode             : String(2);
         Enabled                 : Boolean not null;
         Reference               : String(255);
