@@ -66,7 +66,7 @@ entity Contracts : managed, cuid {
 
 entity Products : managed, cuid {
         ProductPackId           : Integer;
-        ProductName             : String(255);
+        //ProductName             : String(255);
         CountryCode             : String(2);
         Enabled                 : Boolean not null;
         Reference               : String(255);
