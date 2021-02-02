@@ -362,6 +362,7 @@ entity PT_TMTEND {
         BindingTypeLevel1    : String(50);
         BindingTypeLevel2    : String(50);
         BindingTypeLevel3    : String(50);
+        HighValue            : Boolean;
         TenderName           : String(250);
         InstituteID          : Integer not null;
         TenderChannel        : String(255);
