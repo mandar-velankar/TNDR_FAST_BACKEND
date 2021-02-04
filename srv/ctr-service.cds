@@ -10,15 +10,15 @@ using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_cag_ctr_user']){
 //service ContractService @(path: 'ctr') @(requires:['all','ctr_user']){ //previously, before CAP integration
 
-    entity Deliveries as projection on ContractsAppData.Deliveries;
-    entity Letters as projection on ContractsAppData.Letters;
+    //entity Deliveries as projection on ContractsAppData.Deliveries;
+    //entity Letters as projection on ContractsAppData.Letters;
     entity Product as projection on MasterData.PT_TMPRDPCK;
     entity PenaltyReasons as projection on MasterData.PT_TMPNLTYRS;
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
 
     entity Products as select from ContractsAppData.Products {
         *,
-        sum(
+        /*sum(
             OfferPrice *
             case when FocType = 'FOC 1'
                 then
@@ -28,15 +28,23 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
                     end
                 else RequestedVolume
             end
-        ) as OfferValue:Double,
-        Deliveries: redirected to Deliveries,
-        Letters: redirected to Letters,
+        ) as OfferValue:Double,*/
+        //Deliveries: redirected to Deliveries,
+        //Letters: redirected to Letters,
         Product: redirected to Product,
     }group by 
         ID,
         ProductPackId,
         CountryCode,
-        Enabled,
+        Unit,
+        MspPerUnit,
+        MspApprovedByName,
+        MspApprovedByRole,
+        FocDiscount,
+        NspPerUnit,
+        NspApprovedByName,
+        NspApprovedByRole,
+        /*Enabled,
         Reference,
         AlternateOffer,
         RequestedVolume,
@@ -65,7 +73,7 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         FocBrandAbsPct,
         CogsBrand,
         BudgetRate,
-        SpotRate,
+        SpotRate,*/
         createdAt,
         createdBy,
         modifiedAt,
@@ -82,12 +90,12 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
     entity TenderDistributor as projection on MasterData.PT_TMDIST;
 
     //TenderDeliveries
-    entity TenderDeliveries as projection on TransactionalDataConversion.PT_TMDLVTR;
-    entity PT_TMDLVTR as projection on TransactionalData.PT_TMDLVTR; //we need this for saving TODO make 1 saving 
+    //entity TenderDeliveries as projection on TransactionalDataConversion.PT_TMDLVTR;
+    //entity PT_TMDLVTR as projection on TransactionalData.PT_TMDLVTR; //we need this for saving TODO make 1 saving 
 
     //TenderLetters
-    entity TenderLetters as projection on TransactionalDataConversion.PT_TMUDLTRS;
-    entity PT_TMUDLTRS as projection on TransactionalData.PT_TMUDLTRS; //we need this for saving TODO make 1 saving 
+    //entity TenderLetters as projection on TransactionalDataConversion.PT_TMUDLTRS;
+    //entity PT_TMUDLTRS as projection on TransactionalData.PT_TMUDLTRS; //we need this for saving TODO make 1 saving 
 
     entity CountryLegalentity as projection on MasterData.PT_TMCTLE;
     entity CountryProductPack as projection on MasterData.PT_TMCTPRDPCK;
@@ -122,8 +130,8 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         INCOTerms as IncoTerms,
         SKU as Product,
         Results: redirected to TenderResults,
-        Deliveries: redirected to TenderDeliveries,
-        Letters: redirected to TenderLetters,
+        //Deliveries: redirected to TenderDeliveries,
+        //Letters: redirected to TenderLetters,
         Price: redirected to TenderPrice,
         GroupPurchasing: redirected to TenderGroupPurchasing,
         Price.RegPrice as RegisteredPrice,
