@@ -18,7 +18,7 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
 
     entity Products as select from ContractsAppData.Products {
         *,
-        sum(
+        /*sum(
             OfferPrice *
             case when FocType = 'FOC 1'
                 then
@@ -28,15 +28,24 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
                     end
                 else RequestedVolume
             end
-        ) as OfferValue:Double,
+        ) as OfferValue:Double,*/
         //Deliveries: redirected to Deliveries,
         //Letters: redirected to Letters,
         Product: redirected to Product,
     }group by 
         ID,
         ProductPackId,
+        ProductName,
         CountryCode,
-        Enabled,
+        Unit,
+        SmallestUnit,
+        mspPerUnit,
+        mspApprovedByName,
+        mspApprovedByPos,
+        focDiscount,
+        nspApprovedByName,
+        nspApprovedByPos,
+        /*Enabled,
         Reference,
         AlternateOffer,
         RequestedVolume,
@@ -65,7 +74,7 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         FocBrandAbsPct,
         CogsBrand,
         BudgetRate,
-        SpotRate,
+        SpotRate,*/
         createdAt,
         createdBy,
         modifiedAt,
