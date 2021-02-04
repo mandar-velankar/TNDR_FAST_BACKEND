@@ -1,4 +1,4 @@
-{
+{ 
   "xsappname": "FAST",
   "tenant-mode": "dedicated",
   "scopes": [
@@ -17,10 +17,6 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_epa_user",
       "description": "f_tndr_cag_epa_user"
-    },
-    {
-      "name": "$XSAPPNAME.f_tndr_cag_ppa_user",
-      "description": "f_tndr_cag_ppa_user"
     },
     {
       "name": "$XSAPPNAME.f_tndr_cag_ext_user",
@@ -66,14 +62,6 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_epa_user"
-      ],
-      "attribute-references": []
-    },
-    {
-      "name": "f_tndr_cag_ppa_user",
-      "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_ppa_user"
       ],
       "attribute-references": []
     },
