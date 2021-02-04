@@ -37,9 +37,11 @@ entity Channels : cuid {
 
 entity Contracts : managed, cuid {
         CountryCode             : String(2) not null;
+        ContractName            : String(50);
         ContractNumber          : String(50);
         ChannelId               : UUID;
         ContractDate            : Date;
+        ContractValidUntil      : Date;
         Enabled                 : Boolean not null;
         InstituteId             : Integer;
         DistributorId           : Integer;
@@ -64,8 +66,18 @@ entity Contracts : managed, cuid {
 
 entity Products : managed, cuid {
         ProductPackId           : Integer;
+        //ProductName             : String(255); assoc to product
         CountryCode             : String(2);
-        Enabled                 : Boolean not null;
+        Unit                    : String(255);
+        //SmallestUnit            : String(255); assoc to product
+        MspPerUnit              : Double;
+        MspApprovedByName       : String(255);
+        MspApprovedByRole       : String(255);
+        FocDiscount             : String(255);
+        NspPerUnit              : Double;
+        NspApprovedByName       : String(255);
+        NspApprovedByRole       : String(255);
+        /*Enabled                 : Boolean not null;
         Reference               : String(255);
         AlternateOffer          : String(255);
         RequestedVolume         : Integer;
@@ -94,18 +106,18 @@ entity Products : managed, cuid {
         FocBrandAbsPct          : String(3);                
         CogsBrand               : Double;
         BudgetRate              : Double;
-        SpotRate                : Double;
+        SpotRate                : Double;**/
         //Associations
-        Deliveries              : Composition of many Deliveries
+       /* Deliveries              : Composition of many Deliveries
                                     on Deliveries.Product = $self;
         Letters                 : Composition of many Letters
-                                    on Letters.Product = $self;
+                                    on Letters.Product = $self;*/
         Contract                : Association to Contracts;
         Product                 : Association to MasterData.PT_TMPRDPCK
                                     on Product.PRODUCTPACKID = ProductPackId;
 }
 
-entity Deliveries : managed, cuid {
+/*entity Deliveries : managed, cuid {
         CountryCode                 : String(2);
         SkuCode                     : String(50);
         InstituteId                 : Integer;
@@ -159,4 +171,4 @@ entity Letters : managed, cuid {
                                 and Sku.SKUCode = SkuCode;
         Product             : Association to Products;
         Contract            : Association to Contracts;
-}
+}*/
