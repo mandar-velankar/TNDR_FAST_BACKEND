@@ -78,6 +78,7 @@ entity CountryTablesCustomization {
     key CountryCode : String(2);
     key TableID     : String(100);
     key Column      : String(100);
+        BindingPath : String(255);
         Visible     : Boolean;
         Required    : Boolean;
 }
