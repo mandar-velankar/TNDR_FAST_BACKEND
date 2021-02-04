@@ -66,16 +66,17 @@ entity Contracts : managed, cuid {
 
 entity Products : managed, cuid {
         ProductPackId           : Integer;
-        ProductName             : String(255);
+        //ProductName             : String(255); assoc to product
         CountryCode             : String(2);
         Unit                    : String(255);
-        SmallestUnit            : String(255);
-        mspPerUnit              : Double;
-        mspApprovedByName       : String(255);
-        mspApprovedByPos        : String(255);
-        focDiscount             : Double;
-        nspApprovedByName       : String(255);
-        nspApprovedByPos        : String(255);
+        //SmallestUnit            : String(255); assoc to product
+        MspPerUnit              : Double;
+        MspApprovedByName       : String(255);
+        MspApprovedByRole       : String(255);
+        FocDiscount             : String(255);
+        NspPerUnit              : Double;
+        NspApprovedByName       : String(255);
+        NspApprovedByRole       : String(255);
         /*Enabled                 : Boolean not null;
         Reference               : String(255);
         AlternateOffer          : String(255);
