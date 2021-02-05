@@ -21,11 +21,7 @@
     "passport-http": "^0.3.0",
     "ramda": "^0.27.0"
   },
-  "devDependencies": {
-    "@sap/cds-dk": "^3.3.3",
-    "mbt": "^1.0.12",
-    "sqlite3": "^4.2.0"
-  },
+  "devDependencies": {},
   "engines": {
     "node": "^12"
   },
@@ -41,8 +37,7 @@
     "deploy:cf": "cf deploy mta_archives/FASTCAP-Backend-CF.mtar -e cf.mtaext",
     "debug": "node --inspect node_modules/@sap/cds/bin/cds.js run",
     "start-cds": "cds run",
-    "start": "node ./srv/index.js",
-    "start:local": "node ./srv/index-local.js"
+    "start": "node ./srv/index.js"
   },
   "cds": {
     "requires": {
