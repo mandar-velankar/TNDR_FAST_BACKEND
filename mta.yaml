@@ -1,10 +1,20 @@
 ID: FAST
 _schema-version: '2.1'
 version: 0.4.4
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+   - builder: custom
+     commands:
+      - npm install --production
+      - npx -p @sap/cds-dk cds build --production
+
 modules:
   - name: FAST-db
     type: hdb
-    path: db
+    path: gen/db
     parameters:
       memory: 256M
       disk-quota: 1024M
@@ -12,7 +22,7 @@ modules:
       - name: FAST-db-hdi-container
   - name: FAST-srv
     type: nodejs
-    path: srv
+    path: gen/srv
     parameters:
       memory: 512M
       disk-quota: 1024M
@@ -35,6 +45,7 @@ modules:
           name: srv_api
           url: '~{url}'
       - name: uaa_FAST
+
 resources:
   - name: FAST-db-hdi-container
     type: com.sap.xs.hdi-container
