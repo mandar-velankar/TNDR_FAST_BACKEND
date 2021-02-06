@@ -14,7 +14,7 @@ build-parameters:
 modules:
   - name: FAST-db
     type: hdb
-    path: gen/db
+    path: db
     parameters:
       memory: 256M
       disk-quota: 1024M
@@ -22,7 +22,7 @@ modules:
       - name: FAST-db-hdi-container
   - name: FAST-srv
     type: nodejs
-    path: gen/srv
+    path: srv
     parameters:
       memory: 512M
       disk-quota: 1024M

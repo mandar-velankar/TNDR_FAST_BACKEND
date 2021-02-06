@@ -82,5 +82,32 @@
         "passport": {
             "strategy": "JWT"
         }
+    },
+    "build": {
+        "target": ".",
+        "tasks": [
+            {
+                "for": "hana",
+                "src": "db",
+                "options": {
+                    "model": [
+                        "db",
+                        "srv",
+                        "app"
+                    ]
+                }
+            },
+            {
+                "for": "node-cf",
+                "src": "srv",
+                "options": {
+                    "model": [
+                        "db",
+                        "srv",
+                        "app"
+                    ]
+                }
+            }
+        ]
     }
 }
