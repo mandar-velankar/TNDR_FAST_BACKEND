@@ -891,8 +891,8 @@ module.exports = (srv) => {
 			? "With reference to the above tender, you must not on-sell the above mentioned products at a price higher than those listed above. However, you are always free to price lower, at your discretion.<br>"
 			: "";
 		//Building full remarks text
-		remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/[\\]+/g, "<br>").concat("<br>") : "");
-		remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/[\\]+/g, "<br>").concat("<br>") : "");
+		remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/\\+/g, "<br>").concat("<br>") : "");
+		remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/\\+/g, "<br>").concat("<br>") : "");
 		remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.SELLING_COMPANY_COUNTRY_COMMENT.concat("<br>") : "");
 		remarks = remarks.concat((registeredRemark !== "") ? registeredRemark.concat("<br>") : "");
 		remarks = remarks.concat((samplesRemark !== "") ? samplesRemark.concat("<br>") : "");
@@ -915,20 +915,20 @@ module.exports = (srv) => {
 			OFFERVALIDITY: offer.OFFERVALIDITY,
 			COUNTRYCODE: offer.COUNTRYCODE,
 			SELLINGCOMPANY: offer.SELLINGCOMPANY,
-			SELLINGCOMPANYBANK: offer.SELLINGCOMPANYBANK.replace(/[\\]+/g, "<br>"),
+			SELLINGCOMPANYBANK: offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>"),
 			SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
 			SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
 			CURRENCY: offer.CURRENCY,
 			AMOUNT_IN_NUMBERS: totalAmount,
 			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
-			LETTERHEAD: offer.LETTERHEAD.replace(/[\\]+/g, "<br>"),
+			LETTERHEAD: offer.LETTERHEAD.replace(/\\+/g, "<br>"),
 			REGULATORY: regulatory,
 			LEGAL: legal,
 			COUNTRY_BUSINESS: countryBusiness,
 			REGIONAL_BUSINESS: regionalBusiness,
 			SUPPLY_CHAIN: supply,
 			DISTRIBUTORNAME: offer.DISTRIBUTORNAME,
-			DISTRIBUTORADDRESS: offer.DISTRIBUTORADDRESS.replace(/[\\]+/g, "<br>"),
+			DISTRIBUTORADDRESS: offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>"),
 			DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
 			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
@@ -1223,22 +1223,22 @@ module.exports = (srv) => {
 			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2),
 			AMOUNT_IN_WORDS: offerValidation.AMOUNT_IN_WORDS,
 			DISTRIBUTORNAME: offerValidation.DISTRIBUTORNAME,
-			DISTRIBUTORADDRESS: (!offerValidation.DISTRIBUTORADDRESS) ? "" : offerValidation.DISTRIBUTORADDRESS.replace(/[<br>]+/g, "</br>"),
+			DISTRIBUTORADDRESS: (!offerValidation.DISTRIBUTORADDRESS) ? "" : offerValidation.DISTRIBUTORADDRESS.replace(/<br>+/g, "</br>"),
 			DISTRIBUTORPHONE: (!offerValidation.DISTRIBUTORPHONE) ? "" : offerValidation.DISTRIBUTORPHONE,
 			DISTRIBUTORFAX: (!offerValidation.DISTRIBUTORFAX) ? "" : offerValidation.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: (!offerValidation.DISTRIBUTORCONTACT) ? "" : offerValidation.DISTRIBUTORCONTACT,
 			OFFERDATE: offerValidation.OFFERDATE,
 			OFFERVALIDITY: offerValidation.OFFERVALIDITY,
 			SELLINGCOMPANY: offerValidation.SELLINGCOMPANY,
-			SELLINGCOMPANYBANK: (!offerValidation.SELLINGCOMPANYBANK) ? "" : offerValidation.SELLINGCOMPANYBANK.replace(/[<br>]+/g, "</br>"),
-			REMARKS: (!offerValidation.REMARKS) ? "" : offerValidation.REMARKS.replace(/[<br>]+/g, "</br>").replace("NULL", ""),
-			APPROVER1: (!offerValidation.SELLING_COMPANY_AS1) ? "" : offerValidation.SELLING_COMPANY_AS1.replace(/[\\]+/g, "</br>"),
-			APPROVER2: (!offerValidation.SELLING_COMPANY_AS2) ? "" : offerValidation.SELLING_COMPANY_AS2.replace(/[\\]+/g, "</br>"),
-			SHIPMENTTERMS: (!offerValidation.SHIPMENTTERMS) ? "" : offerValidation.SHIPMENTTERMS.replace(/[<br>]+/g, "</br>"),
-			PAYMENTTERMS: (!offerValidation.PAYMENTTERMS) ? "" : offerValidation.PAYMENTTERMS.replace(/[<br>]+/g, "</br>"),
-			DELIVERYTERMS: (!offerValidation.DELIVERYTERMS) ? "" : offerValidation.DELIVERYTERMS.replace(/[<br>]+/g, "</br>"),
+			SELLINGCOMPANYBANK: (!offerValidation.SELLINGCOMPANYBANK) ? "" : offerValidation.SELLINGCOMPANYBANK.replace(/<br>+/g, "</br>"),
+			REMARKS: (!offerValidation.REMARKS) ? "" : offerValidation.REMARKS.replace(/<br>+/g, "</br>").replace("NULL", ""),
+			APPROVER1: (!offerValidation.SELLING_COMPANY_AS1) ? "" : offerValidation.SELLING_COMPANY_AS1.replace(/\\+/g, "</br>"),
+			APPROVER2: (!offerValidation.SELLING_COMPANY_AS2) ? "" : offerValidation.SELLING_COMPANY_AS2.replace(/\\+/g, "</br>"),
+			SHIPMENTTERMS: (!offerValidation.SHIPMENTTERMS) ? "" : offerValidation.SHIPMENTTERMS.replace(/<br>+/g, "</br>"),
+			PAYMENTTERMS: (!offerValidation.PAYMENTTERMS) ? "" : offerValidation.PAYMENTTERMS.replace(/<br>+/g, "</br>"),
+			DELIVERYTERMS: (!offerValidation.DELIVERYTERMS) ? "" : offerValidation.DELIVERYTERMS.replace(/<br>+/g, "</br>"),
 			CUSTOM_REMARKS: (!offerValidation.CUSTOM_REMARKS) ? "" : offerValidation.CUSTOM_REMARKS,
-			LETTERHEAD: (!offerValidation.LETTERHEAD) ? "" : offerValidation.LETTERHEAD.replace(/[<br>]+/g, "</br>"),
+			LETTERHEAD: (!offerValidation.LETTERHEAD) ? "" : offerValidation.LETTERHEAD.replace(/<br>+/g, "</br>"),
 			CANCELLED: (approvalStatus === "Processing") ? "No" : "Yes"
 		}
 	}
@@ -1266,7 +1266,7 @@ module.exports = (srv) => {
 				VAT: d.VAT,
 				CURRENCY: d.CURRENCY,
 				NETOFFERPRICE: ServiceHelper.formatNumber(d.NETOFFERPRICE, 2),
-				REQUESTEDVOLUME: d.REQUESTED_QUANTITY.replace(/[<br>]+/g, "</br>"),
+				REQUESTEDVOLUME: d.REQUESTED_QUANTITY.replace(/<br>+/g, "</br>"),
 				PAIDVOLUME: Math.round(d.PAID_VOLUME),
 				FOC: d.FOC,
 				UNIT: d.UNIT,
