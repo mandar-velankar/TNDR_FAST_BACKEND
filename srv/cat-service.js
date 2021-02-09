@@ -997,6 +997,8 @@ module.exports = (srv) => {
 			countryName = approvalForType[0].CountryName;
 			userName = approvalForType[0].UserName;
 			userEmail = approvalForType[0].UserEmail;
+			senderComment = approvalForType[0].SenderComment;
+			approverComment = approvalForType[0].ApproverComment;
 		}
 		else if (defaultForType.length !== 0) {
 			approverName = defaultForType[0].ApproverName;
