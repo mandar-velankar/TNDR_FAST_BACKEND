@@ -10,7 +10,7 @@ TH,offerProductsId,true
 TH,financialOfferId,true
 TH,quotationId,true
 TH,tenderResultsId,true
-TH,deliveryTrackingId,false
+TH,deliveryTrackingId,true
 SA,basicInformationId,true
 SA,offerProductsId,true
 SA,financialOfferId,true
@@ -121,7 +121,7 @@ YE,tenderResultsId,true
 YE,deliveryTrackingId,true
 AR,basicInformationId,true
 AR,offerProductsId,true
-AR,financialOfferId,false
+AR,financialOfferId,true
 AR,quotationId,true
 AR,tenderResultsId,true
 AR,deliveryTrackingId,true
