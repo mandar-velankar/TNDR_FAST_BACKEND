@@ -277,6 +277,7 @@ entity PT_TMOFPR {
         DEFAULT_COMMISSION_RATE  : Double;
         SUPPLY_UPDATE            : Integer;
         PAYMENT_UPDATE           : Integer;
+        Line                     : String;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;

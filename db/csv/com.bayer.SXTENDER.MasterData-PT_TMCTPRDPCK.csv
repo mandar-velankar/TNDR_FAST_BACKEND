@@ -8,12 +8,12 @@ COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECO
 100516,SA,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
 100517,SA,Germany,36,1,Yes,100051,Bayer AG,,0,
 100518,SA,Germany,36,1,Yes,100050,Bayer AG,,0,
-100519,SA,Germany,36,1,Yes,100083,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
+100519,SA,Germany,36,1,Yes,100083,"Bayer AG & Bayer Weimar GmbH und Co. ",,0,
 100520,SA,Germany,36,1,Yes,100054,Bayer AG,,0,
 100521,SA,Germany,36,0,Yes,100055,Bayer AG,,0,
 100522,SA,Germany,36,0,Yes,100057,Bayer AG,,0,
 100523,SA,Germany,60,0,No,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100524,SA,Germany,36,1,Yes,100059,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
+100524,SA,Germany,36,1,Yes,100059,"Bayer AG & Bayer Weimar GmbH und Co. ",,0,
 100525,SA,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
 100526,SA,Germany,60,1,No,100062,Bayer AG,,0,
 100527,SA,Germany,48,1,Yes,100063,Bayer AG,,0,
@@ -358,7 +358,7 @@ COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECO
 100360,LY,Germany,60,0,Yes,100055,Bayer AG,,0,
 100361,LY,Germany,60,0,Yes,100057,Bayer AG,,0,
 100362,LY,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100363,LY,Germany,36,0,Yes,100060,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
+100363,LY,Germany,36,0,Yes,100060,"Bayer AG & Bayer Weimar GmbH und Co. ",,0,
 100364,LY,Finland,36,0,Yes,100061,Bayer Oy Turku,,0,
 100365,LY,Germany,60,0,Yes,100063,Bayer AG,,0,
 100366,LY,Germany,36,0,Yes,100064,Bayer AG,,0,
@@ -403,8 +403,8 @@ COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECO
 100405,OM,Germany,60,0,Yes,100055,Bayer AG,,0,
 100406,OM,Germany,60,0,Yes,100057,Bayer AG,,0,
 100407,OM,Germany,60,1,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100408,OM,Germany,36,0,Yes,100059,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
-100409,OM,Germany,36,0,Yes,100060,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
+100408,OM,Germany,36,0,Yes,100059,"Bayer AG & Bayer Weimar GmbH und Co. ",,0,
+100409,OM,Germany,36,0,Yes,100060,"Bayer AG & Bayer Weimar GmbH und Co. ",,0,
 100410,OM,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
 100411,OM,Germany,36,1,Yes,100064,Bayer AG,,0,
 100412,OM,Germany,36,0,No,100065,Bayer AG,,0,
@@ -483,7 +483,7 @@ COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECO
 100485,SA,Germany,36,1,Yes,100009,Bayer AG,,0,
 100486,SA,Germany,36,1,Yes,100010,Bayer AG,,0,
 100487,SA,Germany,36,1,Yes,100011,Bayer AG,,0,
-100488,SA,Germany ,48,1,Yes,100013,Bayer Weimar GmbH und Co.KG or Delpharm Lille SAS ,,0,
+100488,SA,"Germany ",48,1,Yes,100013,"Bayer Weimar GmbH und Co.KG or Delpharm Lille SAS ",,0,
 100489,SA,Germany,48,1,No,100014,Bayer AG,,0,
 100490,SA,Germany,36,0,No,100015,Bayer AG,,0,
 100491,SA,Germany,36,1,Yes,100016,Bayer AG,,0,
@@ -692,7 +692,7 @@ COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECO
 100142,EG,Germany,36,1,Yes,100087,Bayer AG,,0,
 100143,EG,Spain,48,1,Yes,100089,BerliMed S.A.,,0,
 100144,EG,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100145,EG,Germany ,36,1,Yes,100053,Bayer AG,,0,
+100145,EG,"Germany ",36,1,Yes,100053,Bayer AG,,0,
 100146,EG,Germany,36,1,Yes,100092,Bayer AG,,0,
 100147,EG,Germany,36,1,Yes,100094,Bayer AG,,0,
 100148,EG,Germany,36,1,Yes,100095,Bayer AG,,0,
@@ -856,3 +856,194 @@ COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECO
 100887,TH,DE,1095,1,Yes,100206,Bayer AG,,0.07,
 100888,TH,DE,1095,1,Yes,100207,Bayer AG,,0.07,
 100889,TH,DE,1095,1,Yes,100208,Bayer AG,,0.07,
+100889,AR,Germany,36,1,Yes,100043,Bayer AG,"",0,
+100890,AR,Germany,36,1,Yes,100044,Bayer AG,"",0,
+100891,AR,Germany,24,1,Yes,100037,"Bulk Production: Bayer Weimar GmbH und Co
+  KG, Germany, Final Release Bayer AG","",0,
+100892,AR,Germany,24,0,No,100038,"Bulk Production: Bayer Weimar GmbH und Co
+  KG, Germany, Final Release Bayer AG","",0,
+100893,AR,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley","",0,
+100894,AR,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley","",0,
+100895,AR,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley","",0,
+100896,AR,Germany,36,1,Yes,100051,Bayer AG,"",0,
+100897,AR,Germany,36,1,Yes,100050,Bayer AG,"",0,
+100898,AR,Germany,36,1,Yes,100083,"Bayer AG & Bayer Weimar GmbH und
+  Co. ","",0,
+100899,AR,Germany,36,1,Yes,100054,Bayer AG,"",0,
+100900,AR,Germany,36,0,Yes,100055,Bayer AG,"",0,
+100901,AR,Germany,36,0,Yes,100057,Bayer AG,"",0,
+100902,AR,Germany,60,0,No,100058,"Bulk Production: Bayer Weimar GmbH und Co
+  KG, Germany Final Release: Bayer AG","",0,
+100903,AR,Germany,36,1,Yes,100059,"Bayer AG & Bayer Weimar GmbH und
+  Co. ","",0,
+100904,AR,Finland,36,1,Yes,100061,Bayer Oy Turku,"",0,
+100905,AR,Germany,60,1,No,100062,Bayer AG,"",0,
+100906,AR,Germany,48,1,Yes,100063,Bayer AG,"",0,
+100907,AR,Germany,36,1,Yes,100064,Bayer AG,"",0,
+100908,AR,Germany,36,1,Yes,100065,Bayer AG,"",0,
+100909,AR,Germany,48,1,Yes,100066,Bayer AG,"",0,
+100910,AR,Finland,36,0,No,100067,Bayer Oy Turku,"",0,
+100911,AR,Germany,48,0,No,100069,Bayer Weimar GmbH und Co. KG,"",0,
+100912,AR,Germany,48,1,Yes,100070,Bayer Weimar GmbH und Co. KG,"",0,
+100913,AR,Germany,36,1,Yes,100074,Bayer AG,"",0,
+100914,AR,Germany,24,1,Yes,100076,Bayer AG,"",0,
+100915,AR,Germany,48,1,Yes,100077,Bayer Weimar GmbH und Co. KG,"",0,
+100916,AR,Germany,36,1,Yes,100078,Bayer AG,"",0,
+100917,AR,Italy,36,0,No,100079,"Bulk Manufacturing & Primary
+  Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging &
+  Final Release: Bayer AG Germany","",0,
+100918,AR,Canada,36,0,No,100080,"Bulk Manufacturing & Primary
+  Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer
+  AG Germany","",0,
+100919,AR,Germany,36,1,Yes,100081,Bayer AG,"",0,
+100920,AR,Germany,48,1,Yes,100082,Bayer AG,"",0,
+100921,AR,Germany,36,1,Yes,100084,Bayer AG,"",0,
+100922,AR,Germany,36,1,Yes,100085,Bayer AG,"",0,
+100923,AR,Germany,36,1,Yes,100086,Bayer AG,"",0,
+100924,AR,Germany,36,1,Yes,100087,Bayer AG,"",0,
+100925,AR,Germany,0,0,No,100088,Bayer AG,"",0,
+100926,AR,USA,30,0,Yes,100103,Bayer HealthCare LLC,"",0,
+100927,AR,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,"",0,
+100928,AR,Germany,36,1,Yes,100092,Bayer AG,"",0,
+100929,AR,Germany,36,1,Yes,100093,Bayer AG,"",0,
+100930,AR,Germany,36,1,Yes,100094,Bayer AG,"",0,
+100931,AR,Germany,36,1,Yes,100095,Bayer AG,"",0,
+100932,AR,Norway,1,1,Yes,100096,Institute for Energy Technology (IFE),"",0,
+100933,AR,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co
+  KG, Germany;  Final Release: Bayer AG","",0,
+100934,AR,USA,30,0,Yes,100104,Bayer HealthCare LLC,"",0,
+100935,AR,USA,30,0,Yes,100105,Bayer HealthCare LLC,"",0,
+100936,AR,Spain,48,1,Yes,100090,BerliMed S.A.,"",0,
+100937,AR,Germany,48,1,Yes,100001,Bayer AG,"",0,
+100938,AR,Germany,0,0,No,100002,Bayer AG,"",0,
+100939,AR,Germany,48,1,Yes,100003,Bayer AG,"",0,
+100940,AR,Germany,0,0,No,100004,Bayer AG,"",0,
+100941,AR,Germany,0,0,No,100005,Bayer AG,"",0,
+100942,AR,Germany,36,1,Yes,100006,Bayer AG,"",0,
+100943,AR,Germany,36,1,Yes,100007,Bayer AG,"",0,
+100944,AR,Germany,36,1,Yes,100008,Bayer AG,"",0,
+100945,AR,Germany,36,1,Yes,100009,Bayer AG,"",0,
+100946,AR,Germany,36,1,Yes,100010,Bayer AG,"",0,
+100947,AR,Germany,36,1,Yes,100011,Bayer AG,"",0,
+100948,AR,Germany ,48,1,Yes,100013,"Bayer Weimar GmbH und Co.KG or Delpharm
+  Lille SAS ","",0,
+100949,AR,Germany,48,1,No,100014,Bayer AG,"",0,
+100950,AR,Germany,36,0,No,100015,Bayer AG,"",0,
+100951,AR,Germany,36,1,Yes,100016,Bayer AG,"",0,
+100952,AR,Germany,36,1,Yes,100017,Bayer AG,"",0,
+100953,AR,Germany,36,1,Yes,100018,Bayer AG,"",0,
+100954,AR,Germany,0,0,No,100019,Bayer AG,"",0,
+100955,AR,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer
+  Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin
+  Germany","",0,
+100956,AR,Germany,36,0,No,100099,"Bulk Production: Bayer Weimar GmbH und Co
+  KG, Germany;  Final Release: Bayer AG","",0,
+100957,AR,Germany,48,0,Yes,100021,Bayer AG,"",0,
+100958,AR,Germany,48,1,Yes,100022,Bayer AG,"",0,
+100959,AR,Germany,36,1,Yes,100027,Bayer AG,"",0,
+100960,AR,Germany,36,1,Yes,100028,Bayer AG,"",0,
+100961,AR,Germany,48,1,Yes,100029,Bayer AG,"",0,
+100962,AR,Germany,48,1,Yes,100030,Bayer AG,"",0,
+100963,AR,Germany,48,1,Yes,100031,Bayer AG,"",0,
+100964,AR,,0,0,Yes,100124,"","",0,
+100965,AR,France,36,1,Yes,100033,"","",0,
+100966,AR,Germany,36,1,Yes,100035,"","",0,
+100967,AR,USA,24,1,Yes,100036,"","",0,"Eylea goods will have no more than 50%
+  remaining shelf life at the time of delivery"
+100968,AR,Germany,36,0,Yes,100039,"","",0,""
+100969,AR,Germany,36,0,Yes,100040,"","",0,""
+100970,AR,Spain,24,1,Yes,100041,"","",0,""
+100971,AR,United Kingdom,24,0,Yes,100120,"","",0,""
+100972,AR,Germany,36,1,Yes,100125,"","",0,""
+100973,AR,Germany,24,1,Yes,100127,"","",0,""
+100974,AR,Germany,24,1,Yes,100128,"","",0,""
+100975,AR,Finland,36,0,Yes,100068,"","",0,""
+100976,AR,Germany,36,1,Yes,100100,"","",0,""
+100977,BR,Germany,36,1,Yes,100043,"","",0,""
+100978,BR,Germany,36,1,Yes,100044,"","",0,""
+100979,BR,Germany,24,1,Yes,100037,"","",0,""
+100980,BR,Germany,24,0,No,100038,"","",0,""
+100981,BR,USA,30,1,Yes,100045,"","",0,""
+100982,BR,USA,30,1,Yes,100046,"","",0,""
+100983,BR,USA,30,1,Yes,100047,"","",0,""
+100984,BR,Germany,36,1,Yes,100051,"","",0,""
+100985,BR,Germany,36,1,Yes,100050,"","",0,""
+100986,BR,Germany,36,1,Yes,100083,"","",0,""
+100987,BR,Germany,36,1,Yes,100054,"","",0,""
+100988,BR,Germany,36,0,Yes,100055,"","",0,""
+100989,BR,Germany,36,0,Yes,100057,"","",0,""
+100990,BR,Germany,60,0,No,100058,"","",0,""
+100991,BR,Germany,36,1,Yes,100059,"","",0,""
+100992,BR,Finland,36,1,Yes,100061,"","",0,""
+100993,BR,Germany,60,1,No,100062,"","",0,""
+100994,BR,Germany,48,1,Yes,100063,"","",0,""
+100995,BR,Germany,36,1,Yes,100064,"","",0,""
+100996,BR,Germany,36,1,Yes,100065,"","",0,""
+100997,BR,Germany,48,1,Yes,100066,"","",0,""
+100998,BR,Finland,36,0,No,100067,"","",0,""
+100999,BR,Germany,48,0,No,100069,"","",0,""
+101000,BR,Germany,48,1,Yes,100070,"","",0,""
+101001,BR,Germany,36,1,Yes,100074,"","",0,""
+101002,BR,Germany,24,1,Yes,100076,"","",0,""
+101003,BR,Germany,48,1,Yes,100077,"","",0,""
+101004,BR,Germany,36,1,Yes,100078,"","",0,""
+101005,BR,Italy,36,0,No,100079,"","",0,""
+101006,BR,Canada,36,0,No,100080,"","",0,""
+101007,BR,Germany,36,1,Yes,100081,"","",0,""
+101008,BR,Germany,48,1,Yes,100082,"","",0,""
+101009,BR,Germany,36,1,Yes,100084,"","",0,""
+101010,BR,Germany,36,1,Yes,100085,"","",0,""
+101011,BR,Germany,36,1,Yes,100086,"","",0,""
+101012,BR,Germany,36,1,Yes,100087,"","",0,""
+101013,BR,Germany,0,0,No,100088,"","",0,""
+101014,BR,USA,30,0,Yes,100103,"","",0,""
+101015,BR,Germany,36,1,Yes,100091,"","",0,""
+101016,BR,Germany,36,1,Yes,100092,"","",0,""
+101017,BR,Germany,36,1,Yes,100093,"","",0,""
+101018,BR,Germany,36,1,Yes,100094,"","",0,""
+101019,BR,Germany,36,1,Yes,100095,"","",0,""
+101020,BR,Norway,1,1,Yes,100096,"","",0,""
+101021,BR,Germany,36,1,Yes,100097,"","",0,""
+101022,BR,USA,30,0,Yes,100104,"","",0,""
+101023,BR,USA,30,0,Yes,100105,"","",0,""
+101024,BR,Spain,48,1,Yes,100090,"","",0,""
+101025,BR,Germany,48,1,Yes,100001,"","",0,""
+101026,BR,Germany,0,0,No,100002,"","",0,""
+101027,BR,Germany,48,1,Yes,100003,"","",0,""
+101028,BR,Germany,0,0,No,100004,"","",0,""
+101029,BR,Germany,0,0,No,100005,"","",0,""
+101030,BR,Germany,36,1,Yes,100006,"","",0,""
+101031,BR,Germany,36,1,Yes,100007,"","",0,""
+101032,BR,Germany,36,1,Yes,100008,"","",0,""
+101033,BR,Germany,36,1,Yes,100009,"","",0,""
+101034,BR,Germany,36,1,Yes,100010,"","",0,""
+101035,BR,Germany,36,1,Yes,100011,"","",0,""
+101036,BR,Germany ,48,1,Yes,100013,"","",0,""
+101037,BR,Germany,48,1,No,100014,"","",0,""
+101038,BR,Germany,36,0,No,100015,"","",0,""
+101039,BR,Germany,36,1,Yes,100016,"","",0,""
+101040,BR,Germany,36,1,Yes,100017,"","",0,""
+101041,BR,Germany,36,1,Yes,100018,"","",0,""
+101042,BR,Germany,0,0,No,100019,"","",0,""
+101043,BR,Germany,24,1,Yes,100020,"","",0,""
+101044,BR,Germany,36,0,No,100099,"","",0,""
+101045,BR,Germany,48,0,Yes,100021,"","",0,""
+101046,BR,Germany,48,1,Yes,100022,"","",0,""
+101047,BR,Germany,36,1,Yes,100027,"","",0,""
+101048,BR,Germany,36,1,Yes,100028,"","",0,""
+101049,BR,Germany,48,1,Yes,100029,"","",0,""
+101050,BR,Germany,48,1,Yes,100030,"","",0,""
+101051,BR,Germany,48,1,Yes,100031,"","",0,""
+101052,BR,,0,0,Yes,100124,"","",0,""
+101053,BR,France,36,1,Yes,100033,"","",0,""
+101054,BR,Germany,36,1,Yes,100035,"","",0,""
+101055,BR,USA,24,1,Yes,100036,"","",0,""
+101056,BR,Germany,36,0,Yes,100039,"","",0,""
+101057,BR,Germany,36,0,Yes,100040,"","",0,""
+101058,BR,Spain,24,1,Yes,100041,"","",0,""
+101059,BR,United Kingdom,24,0,Yes,100120,"","",0,""
+101060,BR,Germany,36,1,Yes,100125,"","",0,""
+101061,BR,Germany,24,1,Yes,100127,"","",0,""
+101062,BR,Germany,24,1,Yes,100128,"","",0,""
+101063,BR,Finland,36,0,Yes,100068,"","",0,""
+101064,BR,Germany,36,1,Yes,100100,"","",0,""
