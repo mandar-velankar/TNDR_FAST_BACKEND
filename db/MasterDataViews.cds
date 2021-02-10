@@ -121,3 +121,228 @@ entity Divisions as select from MasterData.PT_TMPRDHIER as ProductHierarchy{
 	key ProductHierarchy.HLEVEL1_CODE as DivisionId,
 	ProductHierarchy.HLEVEL1_NAME as DivisionName
 } group by ProductHierarchy.HLEVEL1_CODE, ProductHierarchy.HLEVEL1_NAME;
+
+entity MasterApproverBrandMap as projection on MasterData.CountryApprovers;
+entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeRates;
+
+
+entity MasterCountries as select from MasterData.PT_TMCTRY as MasterCountries {
+	key CountryID,
+	MasterCountries.Region,
+	key MasterCountries.CountryCode,
+	MasterCountries.CountryName,
+	MasterCountries.LocalCurrency,
+	MasterCountries.COMMENT
+};
+
+entity MasterAuthorizedSignatories as select from MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as MasterAuthorizedSignatories {
+	key MasterAuthorizedSignatories.LEGAL_ENTITY_CODE,
+	key MasterAuthorizedSignatories.AUTHORIZED_SIGNATORY,
+	key MasterAuthorizedSignatories.COUNTRY_CODE,
+	MasterAuthorizedSignatories.NAME,
+	MasterAuthorizedSignatories.TITLE
+};
+
+entity MasterCountryLegalEntityBrandMap as select from MasterData.PT_TMCTLEBR as MasterCountryLegalEntityBrandMap {
+	MasterCountryLegalEntityBrandMap.CountryLegalEntityBrandID,
+	key MasterCountryLegalEntityBrandMap.LegalEntityID,
+	key MasterCountryLegalEntityBrandMap.HLevel4_Code,
+	key MasterCountryLegalEntityBrandMap.CountryCode,
+	MasterCountryLegalEntityBrandMap.Entity.LegalEntityName,
+	min(MasterCountryLegalEntityBrandMap.Brand.HLEVEL4_NAME) as HLEVEL4_NAME
+} group by MasterCountryLegalEntityBrandMap.CountryLegalEntityBrandID,
+		   MasterCountryLegalEntityBrandMap.LegalEntityID,
+		   MasterCountryLegalEntityBrandMap.HLevel4_Code,
+		   MasterCountryLegalEntityBrandMap.CountryCode
+  order by MasterCountryLegalEntityBrandMap.CountryCode,
+  		   MasterCountryLegalEntityBrandMap.Entity.LegalEntityName,
+		   min(MasterCountryLegalEntityBrandMap.Brand.HLEVEL4_NAME);
+
+entity MasterCountryLegalEntityMap as select from MasterData.PT_TMCTLE as MasterCountryLegalEntityMap {
+	MasterCountryLegalEntityMap.CountryLegalEntityID,
+	key MasterCountryLegalEntityMap.LegalEntityID,
+	key MasterCountryLegalEntityMap.CountryCode,
+	MasterCountryLegalEntityMap.LegalEntity.LegalEntityName,
+	MasterCountryLegalEntityMap.Brand
+} order by MasterCountryLegalEntityMap.LegalEntity.Countries.CountryCode,
+		   MasterCountryLegalEntityMap.LegalEntity.LegalEntityName;
+
+entity MasterDistributorBrandMap as select from MasterData.PT_TMDISBRD as MasterDistributorBrandMap {
+	key MasterDistributorBrandMap.DistributorBrandID,
+	MasterDistributorBrandMap.DistributorID,
+	MasterDistributorBrandMap.HLevel4_Code,
+	MasterDistributorBrandMap.CountryCode,
+	MasterDistributorBrandMap.Distributor.DistributorName,
+	min(MasterDistributorBrandMap.Product.HLEVEL4_NAME) as HLEVEL4_NAME,
+	MasterDistributorBrandMap.CommissionRate,
+	MasterDistributorBrandMap.INCOTerms,
+	MasterDistributorBrandMap.PaymentTerms
+} where MasterDistributorBrandMap.ActiveRecord = 'Yes' and MasterDistributorBrandMap.Distributor.ActiveRecord = 'Yes'
+  group by MasterDistributorBrandMap.DistributorBrandID,
+           MasterDistributorBrandMap.DistributorID,
+		   MasterDistributorBrandMap.HLevel4_Code,
+		   MasterDistributorBrandMap.CountryCode,
+		   MasterDistributorBrandMap.Distributor.DistributorName,
+		   MasterDistributorBrandMap.CommissionRate,
+		   MasterDistributorBrandMap.INCOTerms,
+		   MasterDistributorBrandMap.PaymentTerms;
+
+entity MasterDistributors as select from MasterData.PT_TMDIST as MasterDistributors {
+	key MasterDistributors.DistributorID,
+	MasterDistributors.CountryCode,
+	MasterDistributors.DistributorName,
+	MasterDistributors.Address,
+	MasterDistributors.ContactNo,
+	MasterDistributors.Fax,
+	MasterDistributors.ContactPerson
+} where MasterDistributors.ActiveRecord = 'Yes'
+order by MasterDistributors.CountryCode, MasterDistributors.DistributorName;
+
+entity MasterInstituteBrandTerms as select from MasterData.PT_TMINSBRTR as MasterInstituteBrandTerms {
+	key MasterInstituteBrandTerms.InstituteBrandTermsID,
+	MasterInstituteBrandTerms.InstituteID,
+	MasterInstituteBrandTerms.HLevel4_Code,
+	MasterInstituteBrandTerms.CountryCode,
+	MasterInstituteBrandTerms.Institute.InstituteName,
+	MasterInstituteBrandTerms.Product.HLEVEL4_NAME,
+	MasterInstituteBrandTerms.INCOTerms,
+	MasterInstituteBrandTerms.PaymentTerms
+} where MasterInstituteBrandTerms.ActiveRecord = 'Yes'
+	and MasterInstituteBrandTerms.Institute.ActiveRecord = 'Yes'
+  group by MasterInstituteBrandTerms.InstituteBrandTermsID,
+  		   MasterInstituteBrandTerms.InstituteID,
+		   MasterInstituteBrandTerms.HLevel4_Code,
+		   MasterInstituteBrandTerms.CountryCode,
+		   MasterInstituteBrandTerms.Institute.InstituteName,
+		   MasterInstituteBrandTerms.INCOTerms,
+		   MasterInstituteBrandTerms.PaymentTerms
+  order by MasterInstituteBrandTerms.CountryCode,
+  		   min(MasterInstituteBrandTerms.Product.HLEVEL4_NAME);
+
+entity MasterInstituteDistBrandMap as select from MasterData.PT_TMINDSBR as MasterInstituteDistBrandMap {
+	key MasterInstituteDistBrandMap.InstituteDistBrandRelationID,
+	MasterInstituteDistBrandMap.InstituteID,
+	MasterInstituteDistBrandMap.DistributorID,
+	MasterInstituteDistBrandMap.HLevel4_Code,
+	MasterInstituteDistBrandMap.CountryCode,
+	MasterInstituteDistBrandMap.Institute.InstituteName,
+	MasterInstituteDistBrandMap.Distributor.DistributorName,
+	MasterInstituteDistBrandMap.Product.HLEVEL4_NAME,
+	MasterInstituteDistBrandMap.Commissionrate
+} where MasterInstituteDistBrandMap.ActiveRecord = 'Yes'
+	and MasterInstituteDistBrandMap.Institute.ActiveRecord = 'Yes'
+	and MasterInstituteDistBrandMap.Distributor.ActiveRecord = 'Yes'
+  group by MasterInstituteDistBrandMap.InstituteDistBrandRelationID,
+  		   MasterInstituteDistBrandMap.InstituteID,
+		   MasterInstituteDistBrandMap.DistributorID,
+		   MasterInstituteDistBrandMap.HLevel4_Code,
+		   MasterInstituteDistBrandMap.CountryCode,
+		   MasterInstituteDistBrandMap.Institute.InstituteName,
+		   MasterInstituteDistBrandMap.Distributor.DistributorName;
+
+//TODO
+entity MasterInstitutes as select from MasterData.PT_TMINST as MasterInstitutes {
+	MasterInstitutes.InstituteID,
+	MasterInstitutes.CountryCode,
+	MasterInstitutes.InstituteName as GroupName, //TODO : check w/ jonathan
+	MasterInstitutes.CustomerID,
+	MasterInstitutes.InstituteName,
+	MasterInstitutes.InstituteType
+	//MasterInstitutes.
+};
+
+entity MasterLegalEntities as select from MasterData.PT_TMLE as MasterLegalEntities {
+	key MasterLegalEntities.LegalEntityID,
+	MasterLegalEntities.LegalEntityCode,
+	MasterLegalEntities.LegalEntityName,
+	MasterLegalEntities.BankDetails,
+	MasterLegalEntities.Letterhead,
+	MasterLegalEntities.Remarks,
+	MasterLegalEntities.FooterComment,
+	MasterLegalEntities.Countries.CountryCode
+} order by MasterLegalEntities.LegalEntityName;
+
+//TODO
+entity MasterProductPacks as select from MasterData.PT_TMCTRY as MasterProductPacks
+inner join MasterData.PT_TMPRDPCK as P on MasterProductPacks.CountryPacks.PRODUCTPACKID = P.PRODUCTPACKID 
+inner join MasterData.PT_TMPRDHIER as H on P.HLEVEL6_CODE = H.HLEVEL6_CODE {
+	key P.PRODUCTPACKID,
+	key MasterProductPacks.CountryCode,
+	min(H.HLEVEL1_NAME) as HLEVEL1_NAME,
+	min(H.HLEVEL4_CODE) as HLEVEL4_CODE,
+	min(H.HLEVEL4_NAME) as HLEVEL4_NAME,
+	P.HLEVEL6_CODE,
+	min(H.HLEVEL6_NAME) as HLEVEL6_NAME,
+	P.PRODUCTPACKNAME,
+	P.PRESENTATION,
+	P.UOM,
+	P.CONCENTRATION,
+	P.PACKFACTOR,
+	P.PCIName,
+	MasterProductPacks.CountryPacks.COUNTRYOFORIGIN,
+	MasterProductPacks.CountryPacks.SHELFLIFE,
+	case MasterProductPacks.CountryPacks.REGISTERED 
+		when 0 then 'No'
+		when 1 then 'Without Price'
+		when 2 then 'With Price'
+	end as REGISTERED,
+	MasterProductPacks.CountryPacks.MANUFACTURER,
+	MasterProductPacks.CountryPacks.COMMENT,
+	MasterProductPacks.RegisteredPrices.Currency as REGISTERED_PRICE_CURRENCY,
+	MasterProductPacks.RegisteredPrices.UOM as REGISTERED_PRICE_UOM,
+	MasterProductPacks.RegisteredPrices.RegisteredPrice,
+	'' as NEW_REGISTERED,
+	MasterProductPacks.Cogs.Currency,
+	'Pack' as COGS_UOM,
+	MasterProductPacks.Cogs.COGS,
+	'' as NEW_COGS,
+	//TODO: string_agg
+	P.ACTIVERECORD as ACTIVE_PRODUCT,
+	MasterProductPacks.CountryPacks.ACTIVERECORD as ACTIVE_COUNTRY_PRODUCT
+} group by P.PRODUCTPACKID,
+	MasterProductPacks.CountryCode,
+	P.HLEVEL6_CODE,
+	P.PRODUCTPACKNAME,
+	P.PRESENTATION,
+	P.UOM,
+	P.CONCENTRATION,
+	P.PACKFACTOR,
+	MasterProductPacks.CountryPacks.COUNTRYOFORIGIN,
+	MasterProductPacks.CountryPacks.SHELFLIFE,
+	MasterProductPacks.CountryPacks.MANUFACTURER,
+	MasterProductPacks.RegisteredPrices.Currency,
+	MasterProductPacks.RegisteredPrices.RegisteredPrice,
+	P.ACTIVERECORD,
+	MasterProductPacks.CountryPacks.ACTIVERECORD,
+	P.PCIName,
+	MasterProductPacks.CountryPacks.REGISTERED,
+	MasterProductPacks.CountryPacks.COMMENT,
+	MasterProductPacks.RegisteredPrices.UOM,
+	MasterProductPacks.Cogs.Currency,
+	MasterProductPacks.Cogs.COGS
+  order by MasterProductPacks.CountryPacks.COUNTRYCODE,
+  		   P.PRODUCTPACKNAME;
+
+entity MasterTABrandMap as select from MasterData.PT_TMTABRMP as MasterTABrandMap {
+	key MasterTABrandMap.TABrandID,
+	MasterTABrandMap.TA,
+	MasterTABrandMap.TAShort,
+	MasterTABrandMap.Product.HLEVEL4_NAME
+} group by  MasterTABrandMap.TABrandID,
+			MasterTABrandMap.HLevel4_Code,
+			MasterTABrandMap.TA,
+			MasterTABrandMap.TAShort
+order by MasterTABrandMap.TA,
+		 min(MasterTABrandMap.Product.HLEVEL4_NAME);
+
+entity MasterBudgetedProfitability as select from MasterDataLatestValues.VWBUDGETEDPROFITABILITY as MasterBudgetedProfitability
+inner join MasterData.PT_TMPRDHIER as h on MasterBudgetedProfitability.HLEVEL4_CODE = h.HLEVEL4_CODE {
+	key MasterBudgetedProfitability.HLEVEL4_CODE,
+	key MasterBudgetedProfitability.COUNTRYCODE,
+	min(h.HLEVEL4_NAME) as BRAND,
+	MasterBudgetedProfitability.PROFITABILITY
+} group by MasterBudgetedProfitability.HLEVEL4_CODE,
+		   MasterBudgetedProfitability.COUNTRYCODE,
+		   MasterBudgetedProfitability.PROFITABILITY
+  order by MasterBudgetedProfitability.COUNTRYCODE,
+		   min(h.HLEVEL4_NAME);
