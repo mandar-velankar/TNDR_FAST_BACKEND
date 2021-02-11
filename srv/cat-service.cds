@@ -253,6 +253,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             GROSS_PROFIT_EUR_SPOT          : Double;
             REGULATORY                     : Integer not null;
             LEGAL                          : Integer not null;
+            CONTROLLING                    : Integer not null;
             COUNTRY_BUSINESS               : Integer not null;
             REGIONAL_BUSINESS              : Integer not null;
             SUPPLY_CHAIN                   : Integer not null;
@@ -295,6 +296,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             LETTERHEAD            : String(5000);
             REGULATORY            : Integer;
             LEGAL                 : Integer not null;
+            CONTROLLING           : Integer not null;
             COUNTRY_BUSINESS      : Integer;
             REGIONAL_BUSINESS     : Integer not null;
             SUPPLY_CHAIN          : Integer not null;
