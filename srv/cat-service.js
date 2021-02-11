@@ -385,6 +385,13 @@ module.exports = (srv) => {
 			}
 		}
 
+		//Controlling
+		//Notification if OfferPrice below lowest price
+		let controlling = 1;
+		if (!ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) && ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+			controlling = 2;
+		}
+
 		//Country Business
 		//Optional if business approved
 		//Mandatory otherwise
@@ -415,6 +422,7 @@ module.exports = (srv) => {
 		let results = {
 			REGULATORY: regulatory,
 			LEGAL: legal,
+			CONTROLLING: controlling,
 			COUNTRY_BUSINESS: countryBusiness,
 			REGIONAL_BUSINESS: regionalBusiness,
 			SUPPLY_CHAIN: supply,
@@ -471,6 +479,7 @@ module.exports = (srv) => {
 				//Default values for other countries approver types
 				REGULATORY: 1,
 				LEGAL: 1,
+				CONTROLLING: 1,
 				COUNTRY_BUSINESS: 1,
 				REGIONAL_BUSINESS: 1,
 				//Thailand approver types
@@ -517,6 +526,7 @@ module.exports = (srv) => {
 				//Default values for other countries approver types
 				REGULATORY: 1,
 				LEGAL: 1,
+				CONTROLLING: 1,
 				COUNTRY_BUSINESS: 1,
 				REGIONAL_BUSINESS: 1,
 				//Thailand approver types
@@ -600,6 +610,7 @@ module.exports = (srv) => {
 			//Default values for other countries approver types
 			REGULATORY: 1,
 			LEGAL: 1,
+			CONTROLLING: 1,
 			COUNTRY_BUSINESS: 1,
 			REGIONAL_BUSINESS: 1,
 			//Thailand approver types
@@ -715,6 +726,7 @@ module.exports = (srv) => {
 				GROSS_PROFIT_EUR_SPOT: productInfo.CommnonProductInfo.GrossProfitEurSpot,
 				REGULATORY: productInfo.ProductValidation.REGULATORY,
 				LEGAL: productInfo.ProductValidation.LEGAL,
+				CONTROLLING: productInfo.ProductValidation.CONTROLLING,
 				COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
 				REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
 				SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
@@ -759,6 +771,7 @@ module.exports = (srv) => {
 		//MEA
 		let regulatory = Math.max.apply(Math, offerProductValidation.map((d) => { return d.REGULATORY }));
 		let legal = Math.max.apply(Math, offerProductValidation.map((d) => { return d.LEGAL }));
+		let controlling = Math.max.apply(Math, offerProductValidation.map((d) => { return d.CONTROLLING }));
 		let countryBusiness = Math.max.apply(Math, offerProductValidation.map((d) => { return d.COUNTRY_BUSINESS }));
 		let regionalBusiness = Math.max.apply(Math, offerProductValidation.map((d) => { return d.REGIONAL_BUSINESS }));
 		countryBusiness = (regionalBusiness !== 1) ? 1 : countryBusiness;//No need for country business approval if regional business approval is required
@@ -924,6 +937,7 @@ module.exports = (srv) => {
 			LETTERHEAD: offer.LETTERHEAD.replace(/\\+/g, "<br>"),
 			REGULATORY: regulatory,
 			LEGAL: legal,
+			CONTROLLING: controlling,
 			COUNTRY_BUSINESS: countryBusiness,
 			REGIONAL_BUSINESS: regionalBusiness,
 			SUPPLY_CHAIN: supply,
@@ -1058,6 +1072,7 @@ module.exports = (srv) => {
 		//MEA
 		let approvalRegulatory = latestApproval.filter((d) => d.ApproverType === "Regulatory");
 		let approvalLegal = latestApproval.filter((d) => d.ApproverType === "Legal");
+		let approvalControlling = latestApproval.filter((d) => d.ApproverType === "Controlling");
 		
 		let approvalCountry = latestApproval.filter((d) => d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations");
 		let approvalCountry1 = approvalCountry;
@@ -1102,6 +1117,7 @@ module.exports = (srv) => {
 		//MEA
 		let defaultRegulatory = countryApprovers.filter((d) => d.ApproverType === "Regulatory");
 		let defaultLegal = countryApprovers.filter((d) => d.ApproverType === "Legal");
+		let defaultControlling = countryApprovers.filter((d) => d.ApproverType === "Controlling");
 		let defaultCountryPharma = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Pharma");
 		let defaultCountryRadiology = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Radiology");
 		let defaultRegionalPharma = countryApprovers.filter((d) => d.ApproverType === "Regional Business" && d.Division === "Pharma");
@@ -1120,6 +1136,9 @@ module.exports = (srv) => {
 		//Legal
 		let legal = buildValidationEntry(approvalLegal, defaultLegal, offerValidation, offerValidation.LEGAL);
 		if (legal) results.push(legal);
+		//Controlling
+		let controlling = buildValidationEntry(approvalControlling, defaultControlling, offerValidation, offerValidation.CONTROLLING);
+		if (controlling) results.push(controlling);
 		//Country Business & Regional Business
 		if (offerValidation.DIVISION === "Both") {
 			let countryPharma = buildValidationEntry(approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
