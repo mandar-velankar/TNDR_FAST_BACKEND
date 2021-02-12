@@ -89,6 +89,22 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
 
+    //Master Data Views addendum
+    entity MasterApproverBrandMap @readonly as projection on MasterDataViews.MasterApproverBrandMap;
+    entity MasterCountries @readonly as projection on MasterDataViews.MasterCountries;
+    entity MasterAuthorizedSignatories @readonly as projection on MasterDataViews.MasterAuthorizedSignatories;
+    entity MasterCountryLegalEntityBrandMap @readonly as projection on MasterDataViews.MasterCountryLegalEntityBrandMap;
+    entity MasterCountryLegalEntityMap @readonly as projection on MasterDataViews.MasterCountryLegalEntityMap;
+    entity MasterDistributorBrandMap @readonly as projection on MasterDataViews.MasterDistributorBrandMap;
+    entity MasterDistributors @readonly as projection on MasterDataViews.MasterDistributors;
+    entity MasterInstituteBrandTerms @readonly as projection on MasterDataViews.MasterInstituteBrandTerms;
+    entity MasterInstituteDistBrandMap @readonly as projection on MasterDataViews.MasterInstituteDistBrandMap;
+    entity MasterInstitutes @readonly as projection on MasterDataViews.MasterInstitutes;
+    entity MasterLegalEntities @readonly as projection on MasterDataViews.MasterLegalEntities;
+    entity MasterProductPacks @readonly as projection on MasterDataViews.MasterProductPacks;
+    entity MasterTABrandMap @readonly as projection on MasterDataViews.MasterTABrandMap;
+    entity MasterBudgetedProfitability @readonly as projection on MasterDataViews.MasterBudgetedProfitability;
+
     //Master Data Services
     entity InstituteDistributor {
         key COUNTRY_INSTITUTE_DISTRIBUTOR_ID : String(500);
@@ -253,6 +269,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             GROSS_PROFIT_EUR_SPOT          : Double;
             REGULATORY                     : Integer not null;
             LEGAL                          : Integer not null;
+            CONTROLLING                    : Integer not null;
             COUNTRY_BUSINESS               : Integer not null;
             REGIONAL_BUSINESS              : Integer not null;
             SUPPLY_CHAIN                   : Integer not null;
@@ -295,6 +312,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             LETTERHEAD            : String(5000);
             REGULATORY            : Integer;
             LEGAL                 : Integer not null;
+            CONTROLLING           : Integer not null;
             COUNTRY_BUSINESS      : Integer;
             REGIONAL_BUSINESS     : Integer not null;
             SUPPLY_CHAIN          : Integer not null;

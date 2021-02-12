@@ -226,6 +226,8 @@ entity PT_TMCTPRDPCK{//Country Product Pack
 	Presentation_2:String(1000);
 	VTATax:hana.REAL;
 	COMMENT:String(255);
+	GOV_CODE:String(255);
+	QTY_THRESHOLD:Integer;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;

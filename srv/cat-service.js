@@ -385,6 +385,13 @@ module.exports = (srv) => {
 			}
 		}
 
+		//Controlling
+		//Notification if OfferPrice below lowest price
+		let controlling = 1;
+		if (!ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) && ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+			controlling = 2;
+		}
+
 		//Country Business
 		//Optional if business approved
 		//Mandatory otherwise
@@ -415,8 +422,42 @@ module.exports = (srv) => {
 		let results = {
 			REGULATORY: regulatory,
 			LEGAL: legal,
+			CONTROLLING: controlling,
 			COUNTRY_BUSINESS: countryBusiness,
 			REGIONAL_BUSINESS: regionalBusiness,
+			SUPPLY_CHAIN: supply,
+			//Other countries default values
+			NSM_SM_FM: 1,
+			HBU: 1,
+			CDH: 1,
+			//In Policy flag
+			IN_POLICY: true
+		};
+		return results;
+	}
+
+	function buildProductValidationForType3(offer, product, productInfo) {//Mexico
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		//Country Business
+		//Optional if business approved
+		//Mandatory if volume above threshold
+		let countryBusiness = (product.BUSINESS_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
+
+		//Supply
+		//Optional if supply approved
+		//Mandatory otherwise
+		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
+
+		let results = {
+			REGULATORY: 1,
+			LEGAL: 1,
+			CONTROLLING: 1,
+			COUNTRY_BUSINESS: countryBusiness,
+			REGIONAL_BUSINESS: 1,
 			SUPPLY_CHAIN: supply,
 			//Other countries default values
 			NSM_SM_FM: 1,
@@ -437,6 +478,8 @@ module.exports = (srv) => {
 		});
 		return price;
 	}
+
+	
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo) {//Thailand
 		//Legend
@@ -471,6 +514,7 @@ module.exports = (srv) => {
 				//Default values for other countries approver types
 				REGULATORY: 1,
 				LEGAL: 1,
+				CONTROLLING: 1,
 				COUNTRY_BUSINESS: 1,
 				REGIONAL_BUSINESS: 1,
 				//Thailand approver types
@@ -517,6 +561,7 @@ module.exports = (srv) => {
 				//Default values for other countries approver types
 				REGULATORY: 1,
 				LEGAL: 1,
+				CONTROLLING: 1,
 				COUNTRY_BUSINESS: 1,
 				REGIONAL_BUSINESS: 1,
 				//Thailand approver types
@@ -600,6 +645,7 @@ module.exports = (srv) => {
 			//Default values for other countries approver types
 			REGULATORY: 1,
 			LEGAL: 1,
+			CONTROLLING: 1,
 			COUNTRY_BUSINESS: 1,
 			REGIONAL_BUSINESS: 1,
 			//Thailand approver types
@@ -620,7 +666,7 @@ module.exports = (srv) => {
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
 		}
 		else if (offer.APPROVAL_TYPE === 3){//Applicable for Mexico - TODO
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo)
 		}
 		else if (offer.APPROVAL_TYPE === 4){//Applicable for Thailand
 			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo)
@@ -715,6 +761,7 @@ module.exports = (srv) => {
 				GROSS_PROFIT_EUR_SPOT: productInfo.CommnonProductInfo.GrossProfitEurSpot,
 				REGULATORY: productInfo.ProductValidation.REGULATORY,
 				LEGAL: productInfo.ProductValidation.LEGAL,
+				CONTROLLING: productInfo.ProductValidation.CONTROLLING,
 				COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
 				REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
 				SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
@@ -759,6 +806,7 @@ module.exports = (srv) => {
 		//MEA
 		let regulatory = Math.max.apply(Math, offerProductValidation.map((d) => { return d.REGULATORY }));
 		let legal = Math.max.apply(Math, offerProductValidation.map((d) => { return d.LEGAL }));
+		let controlling = Math.max.apply(Math, offerProductValidation.map((d) => { return d.CONTROLLING }));
 		let countryBusiness = Math.max.apply(Math, offerProductValidation.map((d) => { return d.COUNTRY_BUSINESS }));
 		let regionalBusiness = Math.max.apply(Math, offerProductValidation.map((d) => { return d.REGIONAL_BUSINESS }));
 		countryBusiness = (regionalBusiness !== 1) ? 1 : countryBusiness;//No need for country business approval if regional business approval is required
@@ -891,8 +939,8 @@ module.exports = (srv) => {
 			? "With reference to the above tender, you must not on-sell the above mentioned products at a price higher than those listed above. However, you are always free to price lower, at your discretion.<br>"
 			: "";
 		//Building full remarks text
-		remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/[\\]+/g, "<br>").concat("<br>") : "");
-		remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/[\\]+/g, "<br>").concat("<br>") : "");
+		remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/\\+/g, "<br>").concat("<br>") : "");
+		remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/\\+/g, "<br>").concat("<br>") : "");
 		remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.SELLING_COMPANY_COUNTRY_COMMENT.concat("<br>") : "");
 		remarks = remarks.concat((registeredRemark !== "") ? registeredRemark.concat("<br>") : "");
 		remarks = remarks.concat((samplesRemark !== "") ? samplesRemark.concat("<br>") : "");
@@ -915,20 +963,21 @@ module.exports = (srv) => {
 			OFFERVALIDITY: offer.OFFERVALIDITY,
 			COUNTRYCODE: offer.COUNTRYCODE,
 			SELLINGCOMPANY: offer.SELLINGCOMPANY,
-			SELLINGCOMPANYBANK: offer.SELLINGCOMPANYBANK.replace(/[\\]+/g, "<br>"),
+			SELLINGCOMPANYBANK: offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>"),
 			SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
 			SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
 			CURRENCY: offer.CURRENCY,
 			AMOUNT_IN_NUMBERS: totalAmount,
 			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
-			LETTERHEAD: offer.LETTERHEAD.replace(/[\\]+/g, "<br>"),
+			LETTERHEAD: offer.LETTERHEAD.replace(/\\+/g, "<br>"),
 			REGULATORY: regulatory,
 			LEGAL: legal,
+			CONTROLLING: controlling,
 			COUNTRY_BUSINESS: countryBusiness,
 			REGIONAL_BUSINESS: regionalBusiness,
 			SUPPLY_CHAIN: supply,
 			DISTRIBUTORNAME: offer.DISTRIBUTORNAME,
-			DISTRIBUTORADDRESS: offer.DISTRIBUTORADDRESS.replace(/[\\]+/g, "<br>"),
+			DISTRIBUTORADDRESS: offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>"),
 			DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
 			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
@@ -997,6 +1046,8 @@ module.exports = (srv) => {
 			countryName = approvalForType[0].CountryName;
 			userName = approvalForType[0].UserName;
 			userEmail = approvalForType[0].UserEmail;
+			senderComment = approvalForType[0].SenderComment;
+			approverComment = approvalForType[0].ApproverComment;
 		}
 		else if (defaultForType.length !== 0) {
 			approverName = defaultForType[0].ApproverName;
@@ -1056,6 +1107,7 @@ module.exports = (srv) => {
 		//MEA
 		let approvalRegulatory = latestApproval.filter((d) => d.ApproverType === "Regulatory");
 		let approvalLegal = latestApproval.filter((d) => d.ApproverType === "Legal");
+		let approvalControlling = latestApproval.filter((d) => d.ApproverType === "Controlling");
 		
 		let approvalCountry = latestApproval.filter((d) => d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations");
 		let approvalCountry1 = approvalCountry;
@@ -1100,6 +1152,7 @@ module.exports = (srv) => {
 		//MEA
 		let defaultRegulatory = countryApprovers.filter((d) => d.ApproverType === "Regulatory");
 		let defaultLegal = countryApprovers.filter((d) => d.ApproverType === "Legal");
+		let defaultControlling = countryApprovers.filter((d) => d.ApproverType === "Controlling");
 		let defaultCountryPharma = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Pharma");
 		let defaultCountryRadiology = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Radiology");
 		let defaultRegionalPharma = countryApprovers.filter((d) => d.ApproverType === "Regional Business" && d.Division === "Pharma");
@@ -1118,6 +1171,9 @@ module.exports = (srv) => {
 		//Legal
 		let legal = buildValidationEntry(approvalLegal, defaultLegal, offerValidation, offerValidation.LEGAL);
 		if (legal) results.push(legal);
+		//Controlling
+		let controlling = buildValidationEntry(approvalControlling, defaultControlling, offerValidation, offerValidation.CONTROLLING);
+		if (controlling) results.push(controlling);
 		//Country Business & Regional Business
 		if (offerValidation.DIVISION === "Both") {
 			let countryPharma = buildValidationEntry(approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
@@ -1221,22 +1277,22 @@ module.exports = (srv) => {
 			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2),
 			AMOUNT_IN_WORDS: offerValidation.AMOUNT_IN_WORDS,
 			DISTRIBUTORNAME: offerValidation.DISTRIBUTORNAME,
-			DISTRIBUTORADDRESS: (!offerValidation.DISTRIBUTORADDRESS) ? "" : offerValidation.DISTRIBUTORADDRESS.replace(/[<br>]+/g, "</br>"),
+			DISTRIBUTORADDRESS: (!offerValidation.DISTRIBUTORADDRESS) ? "" : offerValidation.DISTRIBUTORADDRESS.replace(/<br>+/g, "</br>"),
 			DISTRIBUTORPHONE: (!offerValidation.DISTRIBUTORPHONE) ? "" : offerValidation.DISTRIBUTORPHONE,
 			DISTRIBUTORFAX: (!offerValidation.DISTRIBUTORFAX) ? "" : offerValidation.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: (!offerValidation.DISTRIBUTORCONTACT) ? "" : offerValidation.DISTRIBUTORCONTACT,
 			OFFERDATE: offerValidation.OFFERDATE,
 			OFFERVALIDITY: offerValidation.OFFERVALIDITY,
 			SELLINGCOMPANY: offerValidation.SELLINGCOMPANY,
-			SELLINGCOMPANYBANK: (!offerValidation.SELLINGCOMPANYBANK) ? "" : offerValidation.SELLINGCOMPANYBANK.replace(/[<br>]+/g, "</br>"),
-			REMARKS: (!offerValidation.REMARKS) ? "" : offerValidation.REMARKS.replace(/[<br>]+/g, "</br>").replace("NULL", ""),
-			APPROVER1: (!offerValidation.SELLING_COMPANY_AS1) ? "" : offerValidation.SELLING_COMPANY_AS1.replace(/[\\]+/g, "</br>"),
-			APPROVER2: (!offerValidation.SELLING_COMPANY_AS2) ? "" : offerValidation.SELLING_COMPANY_AS2.replace(/[\\]+/g, "</br>"),
-			SHIPMENTTERMS: (!offerValidation.SHIPMENTTERMS) ? "" : offerValidation.SHIPMENTTERMS.replace(/[<br>]+/g, "</br>"),
-			PAYMENTTERMS: (!offerValidation.PAYMENTTERMS) ? "" : offerValidation.PAYMENTTERMS.replace(/[<br>]+/g, "</br>"),
-			DELIVERYTERMS: (!offerValidation.DELIVERYTERMS) ? "" : offerValidation.DELIVERYTERMS.replace(/[<br>]+/g, "</br>"),
+			SELLINGCOMPANYBANK: (!offerValidation.SELLINGCOMPANYBANK) ? "" : offerValidation.SELLINGCOMPANYBANK.replace(/<br>+/g, "</br>"),
+			REMARKS: (!offerValidation.REMARKS) ? "" : offerValidation.REMARKS.replace(/<br>+/g, "</br>").replace("NULL", ""),
+			APPROVER1: (!offerValidation.SELLING_COMPANY_AS1) ? "" : offerValidation.SELLING_COMPANY_AS1.replace(/\\+/g, "</br>"),
+			APPROVER2: (!offerValidation.SELLING_COMPANY_AS2) ? "" : offerValidation.SELLING_COMPANY_AS2.replace(/\\+/g, "</br>"),
+			SHIPMENTTERMS: (!offerValidation.SHIPMENTTERMS) ? "" : offerValidation.SHIPMENTTERMS.replace(/<br>+/g, "</br>"),
+			PAYMENTTERMS: (!offerValidation.PAYMENTTERMS) ? "" : offerValidation.PAYMENTTERMS.replace(/<br>+/g, "</br>"),
+			DELIVERYTERMS: (!offerValidation.DELIVERYTERMS) ? "" : offerValidation.DELIVERYTERMS.replace(/<br>+/g, "</br>"),
 			CUSTOM_REMARKS: (!offerValidation.CUSTOM_REMARKS) ? "" : offerValidation.CUSTOM_REMARKS,
-			LETTERHEAD: (!offerValidation.LETTERHEAD) ? "" : offerValidation.LETTERHEAD.replace(/[<br>]+/g, "</br>"),
+			LETTERHEAD: (!offerValidation.LETTERHEAD) ? "" : offerValidation.LETTERHEAD.replace(/<br>+/g, "</br>"),
 			CANCELLED: (approvalStatus === "Processing") ? "No" : "Yes"
 		}
 	}
@@ -1264,7 +1320,7 @@ module.exports = (srv) => {
 				VAT: d.VAT,
 				CURRENCY: d.CURRENCY,
 				NETOFFERPRICE: ServiceHelper.formatNumber(d.NETOFFERPRICE, 2),
-				REQUESTEDVOLUME: d.REQUESTED_QUANTITY.replace(/[<br>]+/g, "</br>"),
+				REQUESTEDVOLUME: d.REQUESTED_QUANTITY.replace(/<br>+/g, "</br>"),
 				PAIDVOLUME: Math.round(d.PAID_VOLUME),
 				FOC: d.FOC,
 				UNIT: d.UNIT,

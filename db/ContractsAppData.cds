@@ -48,6 +48,7 @@ entity Contracts : managed, cuid {
         SellingCompanyCode      : String(3);
         Currency                : String(255);
         Comment                 : String(500);
+        FoldersCreated          : Integer;
         //Associations
         Products                : Composition of many Products
                                     on Products.Contract = $self;
