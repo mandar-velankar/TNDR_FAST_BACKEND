@@ -1,36 +1,36 @@
 TABrandID,TA,TAShort,HLevel4_Code
-1001,Established Products,EP,0811B10005
-1002,Established Products,EP,0871D40A08
-1003,Established Products,EP,0810A10250
-1004,Established Products,EP,0874H10B21
+1001,Cardiovas. Diseases,CD,0811B10005
+1002,Womens HealthCare,WHC,0871D40A08
+1003,Pulmonology,PUL,0810A10250
+1004,Neurology/CNS (NC),NC,0874H10B21
 1005,Established Products,EP,0810A10226
-1006,Established Products,EP,0810A10050
-1007,Established Products,EP,0871D40A16
-1008,Established Products,EP,0871D40A20
-1009,Established Products,EP,0871D30A01
-1010,Established Products,EP,0871D10A27
-1011,Established Products,EP,0811B30048
-1012,Established Products,EP,0810A20211
-1013,Established Products,EP,0810A20210
-1014,Established Products,EP,0871D10A39
-1015,Established Products,EP,0871D10A40
+1006,Pulmonology,PUL,0810A10050
+1007,Womens HealthCare,WHC,0871D40A16
+1008,Womens HealthCare,WHC,0871D40A20
+1009,Womens HealthCare,WHC,0871D30A01
+1010,Womens HealthCare,WHC,0871D10A27
+1011,Cardiovas. Diseases,CD,0811B30048
+1012,Other Business,OB,0810A20211
+1013,Other Business,OB,0810A20210
+1014,Womens HealthCare,WHC,0871D10A39
+1015,Womens HealthCare,WHC,0871D10A40
 1016,Established Products,EP,0810A20A49
-1017,Established Products,EP,0874H20174
-1018,Established Products,EP,0871D20A54
-1019,Established Products,EP,0871D30A59
-1020,Established Products,EP,0871D30A60
-1021,Established Products,EP,0871D30A64
+1017,Neurology/CNS (NC),NC,0874H20174
+1018,Womens HealthCare,WHC,0871D20A54
+1019,Womens HealthCare,WHC,0871D30A59
+1020,Womens HealthCare,WHC,0871D30A60
+1021,Womens HealthCare,WHC,0871D30A64
 1022,Established Products,EP,0810A20A65
 1023,Established Products,EP,0810A10242
 1024,Established Products,EP,0810A20A69
-1025,Established Products,EP,0871D10A70
-1026,Established Products,EP,0871D10A03
-1027,Established Products,EP,0871D10A05
-1028,Established Products,EP,0871D10I51
+1025,Womens HealthCare,WHC,0871D10A70
+1026,Womens HealthCare,WHC,0871D10A03
+1027,Womens HealthCare,WHC,0871D10A05
+1028,Womens HealthCare,WHC,0871D10I51
 1029,Hematology,HEM,0830G10857
-1030,Innovative Womens HealthCare,iWHC,0871D20A02
-1031,Innovative Womens HealthCare,iWHC,0871D30I44
-1032,Oncology,ONC,0871D30A07
+1030,Womens HealthCare,WHC,0871D20A02
+1031,Womens HealthCare,WHC,0871D30I44
+1032,Womens HealthCare,WHC,0871D30A07
 1033,Oncology,ONC,0820F10D11
 1034,Oncology,ONC,0820F10D14
 1035,Oncology,ONC,0820F10884
@@ -46,6 +46,8 @@ TABrandID,TA,TAShort,HLevel4_Code
 1045,Radiology,RAD,6573550D58
 1046,Radiology,RAD,6573510D35
 1047,Radiology,RAD,6573510D73
-1048,Thrombosis,THR,0811B20105
+1048,Cardiovas. Diseases,CD,0811B20105
 1049,Radiology,RAD,6573550D32
 1050,Hematology,HEM,0830G10957
+1051,Oncology,ONC,Vitrakvi
+1052,Radiology,RAD,6573550D33

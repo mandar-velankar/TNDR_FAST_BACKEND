@@ -5,6 +5,9 @@ Pharma,10006,BH,Supply Chain,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
 Pharma,10012,EG,Supply Chain,Alia Ashraf Maher,alia.ashraf@bayer.com
 Both,10003,AE,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
 Both,10005,AE,Regulatory,Hager Abdel Salam Hatata,hager.hatata@bayer.com
+Pharma,2000,MX,Country Business,Jorge Ancona,jorge.ancona@bayer.com
+Both,2001,MX,Supply Chain,Jose Luis Torres,jose.torres4@bayer.com
+Pharma,10018,SA,Supply Chain,Effat Saddik,effat.saddik@bayer.com
 Pharma,10001,AE,Country Business,Asam Shiraz Khan,asamshiraz.khan@bayer.com
 Radiology,10002,AE,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
 Both,10003,BH,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
@@ -62,7 +65,6 @@ Both,10003,YE,Legal,Rachel Cosgrove,rachel.cosgrove@bayer.com
 Both,10009,YE,Regulatory,Eman Abdel Hamid,eman.abdelhamid@bayer.com
 Pharma,10013,LB,Country Business,Samer Al-Faqih,samer.al-faqih@bayer.com
 Radiology,10002,LB,Country Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
-Pharma,10018,SA,Supply Chain,Effat Saddik,effat.saddik@bayer.com
 Pharma,10012,SD,Supply Chain,Alia Ashraf Maher,alia.ashraf@bayer.com
 Pharma,10004,LB,Regional Business,Henrik Wulff,henrik.wulff@bayer.com
 Radiology,10002,LB,Regional Business,Johnny Al Asmar,johnny.al-asmar@bayer.com
@@ -102,6 +104,8 @@ Pharma,10006,BH,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
 Pharma,10012,EG,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
 Both,10003,AE,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
 Both,10005,AE,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
+Pharma,2000,MX,Country Business,Gilberto Mata,gilberto.mata@bayer.com
+Pharma,10018,SA,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
 Pharma,10001,AE,Country Business,Henrik Wulff,henrik.wulff@bayer.com
 Radiology,10002,AE,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
 Both,10003,BH,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
@@ -153,7 +157,6 @@ Both,10003,YE,Legal,Irina Lazarescu,irina.lazarescu@bayer.com
 Both,10009,YE,Regulatory,Adi Mohsin,adi.mohsin@bayer.com
 Pharma,10013,LB,Country Business,Henrik Wulff,henrik.wulff@bayer.com
 Radiology,10002,LB,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-Pharma,10018,SA,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
 Pharma,10012,SD,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
 Radiology,10002,LB,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
 Pharma,10012,SY,Supply Chain,Vipin Mohan,vipin.mohan@bayer.com
@@ -179,10 +182,32 @@ Pharma,10010,YE,Country Business,Henrik Wulff,henrik.wulff@bayer.com
 Radiology,10002,YE,Country Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
 Radiology,10002,YE,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
 Radiology,10002,SA,Regional Business,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-Both,10026,TH,Supply Chain,Siriporn Noiwan,jonathan.hubeau.ext@bayer.com
-Pharma,10027,TH,NSM/SM/FM,NSM/SM/FM Pharma,jonathan.hubeau.ext@bayer.com
-Pharma,10028,TH,HBU,HBU Pharma,jonathan.hubeau.ext@bayer.com
-Pharma,10029,TH,CDH,CDH Pharma,jonathan.hubeau.ext@bayer.com
-Radiology,10030,TH,NSM/SM/FM,NSM/SM/FM Radiology,jonathan.hubeau.ext@bayer.com
-Radiology,10031,TH,HBU,HBU Radiology,jonathan.hubeau.ext@bayer.com
-Radiology,10032,TH,CDH,CDH Radiology,jonathan.hubeau.ext@bayer.com
+Pharma,2000,MX,Country Business,Enrique Zuani,enrique.zuani@bayer.com
+Pharma,10018,SA,Supply Chain,Ahmed Yehya,ahmed.yehya@bayer.com
+Both,10020,AE,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,BH,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,EG,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,GC,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,IQ,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,JO,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,KW,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,LB,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,LY,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,OM,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,QA,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,SA,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,SD,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,SY,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Both,10020,YE,Controlling,Wael Ghareeb,wael.mohamed@bayer.com
+Pharma,1021,TH,HBU,Yamini Prakash,yamini.prakash@bayer.com
+Pharma,1022,TH,HBU,Kornyok Sakkarinkul,kornyok.sakkarinkul@bayer.com
+Pharma,1023,TH,HBU,Sunee Kamalanon,sunee.kamalanon@bayer.com
+Radiology,1024,TH,HBU,Panyamon Passakornpinit,panyamon.passakornpinit@bayer.com
+Pharma,1025,TH,CDH,JinA Lee,jina.lee@bayer.com
+Radiology,1026,TH,CDH,Chavarat Temsakornpun,chavarat.temsakornpun@bayer.com
+Pharma,1027,TH,NSM/SM/FM,Wannapa Krairojananan,wannapa.krairojananan@bayer.com
+Radiology,1027,TH,NSM/SM/FM,Wannapa Krairojananan,wannapa.krairojananan@bayer.com
+Both,1028,TH,Supply Chain,Siriporn Noiwan,siriporn.noiwan@bayer.com
+Radiology,2000,MX,Country Business,Jorge Ancona,jorge.ancona@bayer.com
+Radiology,2000,MX,Country Business,Gilberto Mata,gilberto.mata@bayer.com
+Radiology,2000,MX,Country Business,Enrique Zuani,enrique.zuani@bayer.com
