@@ -436,6 +436,39 @@ module.exports = (srv) => {
 		return results;
 	}
 
+	function buildProductValidationForType3(offer, product, productInfo) {//Mexico
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		//Country Business
+		//Optional if business approved
+		//Mandatory if volume above threshold
+		let countryBusiness = (product.BUSINESS_APPROVED === 1 && product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
+
+		//Supply
+		//Optional if supply approved
+		//Mandatory otherwise
+		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
+
+		let results = {
+			REGULATORY: 1,
+			LEGAL: 1,
+			CONTROLLING: 1,
+			COUNTRY_BUSINESS: countryBusiness,
+			REGIONAL_BUSINESS: 1,
+			SUPPLY_CHAIN: supply,
+			//Other countries default values
+			NSM_SM_FM: 1,
+			HBU: 1,
+			CDH: 1,
+			//In Policy flag
+			IN_POLICY: true
+		};
+		return results;
+	}
+
 	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName){
 		let price = 0;
 		productPolicyPrices.forEach(e => {
@@ -445,6 +478,8 @@ module.exports = (srv) => {
 		});
 		return price;
 	}
+
+	
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo) {//Thailand
 		//Legend
@@ -631,7 +666,7 @@ module.exports = (srv) => {
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
 		}
 		else if (offer.APPROVAL_TYPE === 3){//Applicable for Mexico - TODO
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo)
 		}
 		else if (offer.APPROVAL_TYPE === 4){//Applicable for Thailand
 			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo)
