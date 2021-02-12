@@ -91,7 +91,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
 
     //Master Data Views addendum
     entity MasterApproverBrandMap @readonly as projection on MasterDataViews.MasterApproverBrandMap;
-    entity MasterCountries @readonly as projection on MasterDataViews.MasterCountries; //TODO check error w/ jonathan
+    entity MasterCountries @readonly as projection on MasterDataViews.MasterCountries;
     entity MasterAuthorizedSignatories @readonly as projection on MasterDataViews.MasterAuthorizedSignatories;
     entity MasterCountryLegalEntityBrandMap @readonly as projection on MasterDataViews.MasterCountryLegalEntityBrandMap;
     entity MasterCountryLegalEntityMap @readonly as projection on MasterDataViews.MasterCountryLegalEntityMap;
