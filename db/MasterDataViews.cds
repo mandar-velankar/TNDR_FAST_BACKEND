@@ -271,7 +271,7 @@ left outer join MasterData.PT_TMINDSBR as dsbr on i.InstituteID=dsbr.InstituteID
 left outer join MasterData.PT_TMINSBRTR as br on i.InstituteID=br.InstituteID  {
 	i.InstituteID,
 	i.CountryCode,
-	ifnull(i2.InstituteName, '') as GroupName,
+	ifnull(i2.InstituteName, '') as GroupName:String,
 	i.CustomerID,
 	i.InstituteName,
 	i.InstituteType,
