@@ -29,6 +29,22 @@
       "skipFiles": [ "<node_internals>/**" ],
       "console": "integratedTerminal",
       "autoAttachChildProcesses": true
-    }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug CAP using Proxy",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+      "run",
+      "start"
+      ],
+      "console": "integratedTerminal",
+      "port": 9229,
+      "skipFiles": [
+      "<node_internals>/**"
+      ]
+      }
   ]
 }

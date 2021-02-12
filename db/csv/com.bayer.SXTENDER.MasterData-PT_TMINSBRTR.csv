@@ -508,3 +508,648 @@ InstituteBrandTermsID,CountryCode,INCOTerms,PaymentTerms,ActiveRecord,InstituteI
 100226,QA,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,100011,0811B10005
 100227,QA,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,100011,0880J10351
 100228,QA,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,100011,0820F10D11
+100472,LY,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,100120,6573550D46
+100473,EG,"CIF Alexandria by Sea, CIP Cairo by Air",180 days after BL or AWB,Yes,100053,0820F10N03
+100474,EG,"CIF Alexandria by Sea, CIP Cairo by Air",180 days after BL or AWB,Yes,100053,0830G10N05
+100475,AE,CIF Dubai by Sea / CIP Dubai by Air,Cash Against Delivery,Yes,100014,0820F10N03
+100476,LY,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,100120,0830G10957
+200000,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0810A10083
+200001,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0820F10D11
+200002,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D40A08
+200003,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0811B50016
+200004,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0810A10250
+200005,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0810A10045
+200006,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0874H10B21
+200007,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D40A31
+200008,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0810A10050
+200009,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D40A16
+200010,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D30A01
+200011,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0811B30048
+200012,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D10A36
+200013,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D20A33
+200014,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0830G10857
+200015,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D10A38
+200016,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D10A39
+200017,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D10A40
+200018,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D20A02
+200019,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0820F10884
+200020,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0874H20174
+200021,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D10A52
+200022,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D40A63
+200023,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D40A20
+200024,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D10I40
+200025,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0820F10I88
+200026,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D30I44
+200027,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0876I10I43
+200028,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0811B20105
+200029,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0820F10I89
+200030,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D10A03
+200031,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200000,0871D10A05
+200032,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0810A10083
+200033,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0820F10D11
+200034,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D40A08
+200035,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0811B50016
+200036,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0810A10250
+200037,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0810A10045
+200038,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0874H10B21
+200039,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D40A31
+200040,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0810A10050
+200041,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D40A16
+200042,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D30A01
+200043,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0811B30048
+200044,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D10A36
+200045,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D20A33
+200046,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0830G10857
+200047,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D10A38
+200048,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D10A39
+200049,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D10A40
+200050,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D20A02
+200051,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0820F10884
+200052,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0874H20174
+200053,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D10A52
+200054,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D40A63
+200055,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D40A20
+200056,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D10I40
+200057,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0820F10I88
+200058,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D30I44
+200059,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0876I10I43
+200060,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0811B20105
+200061,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0820F10I89
+200062,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D10A03
+200063,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200001,0871D10A05
+200064,MX,N/A,Y010 120 days,Yes,200002,0810A10083
+200065,MX,N/A,Y010 120 days,Yes,200002,0820F10D11
+200066,MX,N/A,Y010 120 days,Yes,200002,0871D40A08
+200067,MX,N/A,Y010 120 days,Yes,200002,0811B50016
+200068,MX,N/A,Y010 120 days,Yes,200002,0810A10250
+200069,MX,N/A,Y010 120 days,Yes,200002,0810A10045
+200070,MX,N/A,Y010 120 days,Yes,200002,0874H10B21
+200071,MX,N/A,Y010 120 days,Yes,200002,0871D40A31
+200072,MX,N/A,Y010 120 days,Yes,200002,0810A10050
+200073,MX,N/A,Y010 120 days,Yes,200002,0871D40A16
+200074,MX,N/A,Y010 120 days,Yes,200002,0871D30A01
+200075,MX,N/A,Y010 120 days,Yes,200002,0811B30048
+200076,MX,N/A,Y010 120 days,Yes,200002,0871D10A36
+200077,MX,N/A,Y010 120 days,Yes,200002,0871D20A33
+200078,MX,N/A,Y010 120 days,Yes,200002,0830G10857
+200079,MX,N/A,Y010 120 days,Yes,200002,0871D10A38
+200080,MX,N/A,Y010 120 days,Yes,200002,0871D10A39
+200081,MX,N/A,Y010 120 days,Yes,200002,0871D10A40
+200082,MX,N/A,Y010 120 days,Yes,200002,0871D20A02
+200083,MX,N/A,Y010 120 days,Yes,200002,0820F10884
+200084,MX,N/A,Y010 120 days,Yes,200002,0874H20174
+200085,MX,N/A,Y010 120 days,Yes,200002,0871D10A52
+200086,MX,N/A,Y010 120 days,Yes,200002,0871D40A63
+200087,MX,N/A,Y010 120 days,Yes,200002,0871D40A20
+200088,MX,N/A,Y010 120 days,Yes,200002,0871D10I40
+200089,MX,N/A,Y010 120 days,Yes,200002,0820F10I88
+200090,MX,N/A,Y010 120 days,Yes,200002,0871D30I44
+200091,MX,N/A,Y010 120 days,Yes,200002,0876I10I43
+200092,MX,N/A,Y010 120 days,Yes,200002,0811B20105
+200093,MX,N/A,Y010 120 days,Yes,200002,0820F10I89
+200094,MX,N/A,Y010 120 days,Yes,200002,0871D10A03
+200095,MX,N/A,Y010 120 days,Yes,200002,0871D10A05
+200096,MX,N/A,Y010 120 days,Yes,200003,0810A10083
+200097,MX,N/A,Y010 120 days,Yes,200003,0820F10D11
+200098,MX,N/A,Y010 120 days,Yes,200003,0871D40A08
+200099,MX,N/A,Y010 120 days,Yes,200003,0811B50016
+200100,MX,N/A,Y010 120 days,Yes,200003,0810A10250
+200101,MX,N/A,Y010 120 days,Yes,200003,0810A10045
+200102,MX,N/A,Y010 120 days,Yes,200003,0874H10B21
+200103,MX,N/A,Y010 120 days,Yes,200003,0871D40A31
+200104,MX,N/A,Y010 120 days,Yes,200003,0810A10050
+200105,MX,N/A,Y010 120 days,Yes,200003,0871D40A16
+200106,MX,N/A,Y010 120 days,Yes,200003,0871D30A01
+200107,MX,N/A,Y010 120 days,Yes,200003,0811B30048
+200108,MX,N/A,Y010 120 days,Yes,200003,0871D10A36
+200109,MX,N/A,Y010 120 days,Yes,200003,0871D20A33
+200110,MX,N/A,Y010 120 days,Yes,200003,0830G10857
+200111,MX,N/A,Y010 120 days,Yes,200003,0871D10A38
+200112,MX,N/A,Y010 120 days,Yes,200003,0871D10A39
+200113,MX,N/A,Y010 120 days,Yes,200003,0871D10A40
+200114,MX,N/A,Y010 120 days,Yes,200003,0871D20A02
+200115,MX,N/A,Y010 120 days,Yes,200003,0820F10884
+200116,MX,N/A,Y010 120 days,Yes,200003,0874H20174
+200117,MX,N/A,Y010 120 days,Yes,200003,0871D10A52
+200118,MX,N/A,Y010 120 days,Yes,200003,0871D40A63
+200119,MX,N/A,Y010 120 days,Yes,200003,0871D40A20
+200120,MX,N/A,Y010 120 days,Yes,200003,0871D10I40
+200121,MX,N/A,Y010 120 days,Yes,200003,0820F10I88
+200122,MX,N/A,Y010 120 days,Yes,200003,0871D30I44
+200123,MX,N/A,Y010 120 days,Yes,200003,0876I10I43
+200124,MX,N/A,Y010 120 days,Yes,200003,0811B20105
+200125,MX,N/A,Y010 120 days,Yes,200003,0820F10I89
+200126,MX,N/A,Y010 120 days,Yes,200003,0871D10A03
+200127,MX,N/A,Y010 120 days,Yes,200003,0871D10A05
+200128,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0810A10083
+200129,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0820F10D11
+200130,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D40A08
+200131,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0811B50016
+200132,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0810A10250
+200133,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0810A10045
+200134,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0874H10B21
+200135,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D40A31
+200136,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0810A10050
+200137,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D40A16
+200138,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D30A01
+200139,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0811B30048
+200140,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D10A36
+200141,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D20A33
+200142,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0830G10857
+200143,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D10A38
+200144,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D10A39
+200145,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D10A40
+200146,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D20A02
+200147,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0820F10884
+200148,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0874H20174
+200149,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D10A52
+200150,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D40A63
+200151,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D40A20
+200152,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D10I40
+200153,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0820F10I88
+200154,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D30I44
+200155,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0876I10I43
+200156,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0811B20105
+200157,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0820F10I89
+200158,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D10A03
+200159,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200004,0871D10A05
+200160,MX,N/A,Y010 120 days,Yes,200005,0810A10083
+200161,MX,N/A,Y010 120 days,Yes,200005,0820F10D11
+200162,MX,N/A,Y010 120 days,Yes,200005,0871D40A08
+200163,MX,N/A,Y010 120 days,Yes,200005,0811B50016
+200164,MX,N/A,Y010 120 days,Yes,200005,0810A10250
+200165,MX,N/A,Y010 120 days,Yes,200005,0810A10045
+200166,MX,N/A,Y010 120 days,Yes,200005,0874H10B21
+200167,MX,N/A,Y010 120 days,Yes,200005,0871D40A31
+200168,MX,N/A,Y010 120 days,Yes,200005,0810A10050
+200169,MX,N/A,Y010 120 days,Yes,200005,0871D40A16
+200170,MX,N/A,Y010 120 days,Yes,200005,0871D30A01
+200171,MX,N/A,Y010 120 days,Yes,200005,0811B30048
+200172,MX,N/A,Y010 120 days,Yes,200005,0871D10A36
+200173,MX,N/A,Y010 120 days,Yes,200005,0871D20A33
+200174,MX,N/A,Y010 120 days,Yes,200005,0830G10857
+200175,MX,N/A,Y010 120 days,Yes,200005,0871D10A38
+200176,MX,N/A,Y010 120 days,Yes,200005,0871D10A39
+200177,MX,N/A,Y010 120 days,Yes,200005,0871D10A40
+200178,MX,N/A,Y010 120 days,Yes,200005,0871D20A02
+200179,MX,N/A,Y010 120 days,Yes,200005,0820F10884
+200180,MX,N/A,Y010 120 days,Yes,200005,0874H20174
+200181,MX,N/A,Y010 120 days,Yes,200005,0871D10A52
+200182,MX,N/A,Y010 120 days,Yes,200005,0871D40A63
+200183,MX,N/A,Y010 120 days,Yes,200005,0871D40A20
+200184,MX,N/A,Y010 120 days,Yes,200005,0871D10I40
+200185,MX,N/A,Y010 120 days,Yes,200005,0820F10I88
+200186,MX,N/A,Y010 120 days,Yes,200005,0871D30I44
+200187,MX,N/A,Y010 120 days,Yes,200005,0876I10I43
+200188,MX,N/A,Y010 120 days,Yes,200005,0811B20105
+200189,MX,N/A,Y010 120 days,Yes,200005,0820F10I89
+200190,MX,N/A,Y010 120 days,Yes,200005,0871D10A03
+200191,MX,N/A,Y010 120 days,Yes,200005,0871D10A05
+200192,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0810A10083
+200193,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0820F10D11
+200194,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D40A08
+200195,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0811B50016
+200196,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0810A10250
+200197,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0810A10045
+200198,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0874H10B21
+200199,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D40A31
+200200,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0810A10050
+200201,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D40A16
+200202,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D30A01
+200203,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0811B30048
+200204,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D10A36
+200205,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D20A33
+200206,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0830G10857
+200207,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D10A38
+200208,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D10A39
+200209,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D10A40
+200210,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D20A02
+200211,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0820F10884
+200212,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0874H20174
+200213,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D10A52
+200214,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D40A63
+200215,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D40A20
+200216,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D10I40
+200217,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0820F10I88
+200218,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D30I44
+200219,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0876I10I43
+200220,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0811B20105
+200221,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0820F10I89
+200222,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D10A03
+200223,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200006,0871D10A05
+200224,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0810A10083
+200225,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0820F10D11
+200226,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D40A08
+200227,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0811B50016
+200228,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0810A10250
+200229,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0810A10045
+200230,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0874H10B21
+200231,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D40A31
+200232,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0810A10050
+200233,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D40A16
+200234,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D30A01
+200235,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0811B30048
+200236,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D10A36
+200237,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D20A33
+200238,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0830G10857
+200239,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D10A38
+200240,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D10A39
+200241,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D10A40
+200242,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D20A02
+200243,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0820F10884
+200244,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0874H20174
+200245,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D10A52
+200246,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D40A63
+200247,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D40A20
+200248,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D10I40
+200249,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0820F10I88
+200250,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D30I44
+200251,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0876I10I43
+200252,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0811B20105
+200253,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0820F10I89
+200254,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D10A03
+200255,MX,N/A,G09A 60 days after inv date + 5 g.d.,Yes,200007,0871D10A05
+200256,MX,N/A,Y010 120 days,Yes,200008,0810A10083
+200257,MX,N/A,Y010 120 days,Yes,200008,0820F10D11
+200258,MX,N/A,Y010 120 days,Yes,200008,0871D40A08
+200259,MX,N/A,Y010 120 days,Yes,200008,0811B50016
+200260,MX,N/A,Y010 120 days,Yes,200008,0810A10250
+200261,MX,N/A,Y010 120 days,Yes,200008,0810A10045
+200262,MX,N/A,Y010 120 days,Yes,200008,0874H10B21
+200263,MX,N/A,Y010 120 days,Yes,200008,0871D40A31
+200264,MX,N/A,Y010 120 days,Yes,200008,0810A10050
+200265,MX,N/A,Y010 120 days,Yes,200008,0871D40A16
+200266,MX,N/A,Y010 120 days,Yes,200008,0871D30A01
+200267,MX,N/A,Y010 120 days,Yes,200008,0811B30048
+200268,MX,N/A,Y010 120 days,Yes,200008,0871D10A36
+200269,MX,N/A,Y010 120 days,Yes,200008,0871D20A33
+200270,MX,N/A,Y010 120 days,Yes,200008,0830G10857
+200271,MX,N/A,Y010 120 days,Yes,200008,0871D10A38
+200272,MX,N/A,Y010 120 days,Yes,200008,0871D10A39
+200273,MX,N/A,Y010 120 days,Yes,200008,0871D10A40
+200274,MX,N/A,Y010 120 days,Yes,200008,0871D20A02
+200275,MX,N/A,Y010 120 days,Yes,200008,0820F10884
+200276,MX,N/A,Y010 120 days,Yes,200008,0874H20174
+200277,MX,N/A,Y010 120 days,Yes,200008,0871D10A52
+200278,MX,N/A,Y010 120 days,Yes,200008,0871D40A63
+200279,MX,N/A,Y010 120 days,Yes,200008,0871D40A20
+200280,MX,N/A,Y010 120 days,Yes,200008,0871D10I40
+200281,MX,N/A,Y010 120 days,Yes,200008,0820F10I88
+200282,MX,N/A,Y010 120 days,Yes,200008,0871D30I44
+200283,MX,N/A,Y010 120 days,Yes,200008,0876I10I43
+200284,MX,N/A,Y010 120 days,Yes,200008,0811B20105
+200285,MX,N/A,Y010 120 days,Yes,200008,0820F10I89
+200286,MX,N/A,Y010 120 days,Yes,200008,0871D10A03
+200287,MX,N/A,Y010 120 days,Yes,200008,0871D10A05
+200288,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0810A10083
+200289,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0820F10D11
+200290,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D40A08
+200291,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0811B50016
+200292,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0810A10250
+200293,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0810A10045
+200294,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0874H10B21
+200295,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D40A31
+200296,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0810A10050
+200297,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D40A16
+200298,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D30A01
+200299,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0811B30048
+200300,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D10A36
+200301,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D20A33
+200302,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0830G10857
+200303,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D10A38
+200304,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D10A39
+200305,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D10A40
+200306,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D20A02
+200307,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0820F10884
+200308,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0874H20174
+200309,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D10A52
+200310,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D40A63
+200311,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D40A20
+200312,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D10I40
+200313,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0820F10I88
+200314,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D30I44
+200315,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0876I10I43
+200316,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0811B20105
+200317,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0820F10I89
+200318,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D10A03
+200319,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200009,0871D10A05
+200320,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0810A10083
+200321,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0820F10D11
+200322,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D40A08
+200323,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0811B50016
+200324,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0810A10250
+200325,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0810A10045
+200326,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0874H10B21
+200327,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D40A31
+200328,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0810A10050
+200329,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D40A16
+200330,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D30A01
+200331,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0811B30048
+200332,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D10A36
+200333,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D20A33
+200334,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0830G10857
+200335,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D10A38
+200336,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D10A39
+200337,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D10A40
+200338,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D20A02
+200339,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0820F10884
+200340,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0874H20174
+200341,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D10A52
+200342,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D40A63
+200343,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D40A20
+200344,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D10I40
+200345,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0820F10I88
+200346,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D30I44
+200347,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0876I10I43
+200348,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0811B20105
+200349,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0820F10I89
+200350,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D10A03
+200351,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200010,0871D10A05
+200352,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0810A10083
+200353,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0820F10D11
+200354,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D40A08
+200355,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0811B50016
+200356,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0810A10250
+200357,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0810A10045
+200358,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0874H10B21
+200359,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D40A31
+200360,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0810A10050
+200361,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D40A16
+200362,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D30A01
+200363,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0811B30048
+200364,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D10A36
+200365,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D20A33
+200366,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0830G10857
+200367,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D10A38
+200368,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D10A39
+200369,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D10A40
+200370,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D20A02
+200371,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0820F10884
+200372,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0874H20174
+200373,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D10A52
+200374,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D40A63
+200375,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D40A20
+200376,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D10I40
+200377,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0820F10I88
+200378,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D30I44
+200379,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0876I10I43
+200380,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0811B20105
+200381,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0820F10I89
+200382,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D10A03
+200383,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200011,0871D10A05
+200384,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0810A10083
+200385,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0820F10D11
+200386,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D40A08
+200387,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0811B50016
+200388,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0810A10250
+200389,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0810A10045
+200390,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0874H10B21
+200391,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D40A31
+200392,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0810A10050
+200393,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D40A16
+200394,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D30A01
+200395,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0811B30048
+200396,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D10A36
+200397,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D20A33
+200398,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0830G10857
+200399,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D10A38
+200400,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D10A39
+200401,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D10A40
+200402,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D20A02
+200403,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0820F10884
+200404,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0874H20174
+200405,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D10A52
+200406,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D40A63
+200407,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D40A20
+200408,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D10I40
+200409,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0820F10I88
+200410,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D30I44
+200411,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0876I10I43
+200412,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0811B20105
+200413,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0820F10I89
+200414,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D10A03
+200415,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200012,0871D10A05
+200416,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0810A10083
+200417,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0820F10D11
+200418,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D40A08
+200419,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0811B50016
+200420,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0810A10250
+200421,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0810A10045
+200422,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0874H10B21
+200423,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D40A31
+200424,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0810A10050
+200425,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D40A16
+200426,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D30A01
+200427,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0811B30048
+200428,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D10A36
+200429,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D20A33
+200430,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0830G10857
+200431,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D10A38
+200432,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D10A39
+200433,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D10A40
+200434,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D20A02
+200435,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0820F10884
+200436,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0874H20174
+200437,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D10A52
+200438,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D40A63
+200439,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D40A20
+200440,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D10I40
+200441,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0820F10I88
+200442,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D30I44
+200443,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0876I10I43
+200444,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0811B20105
+200445,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0820F10I89
+200446,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D10A03
+200447,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200013,0871D10A05
+200448,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0810A10083
+200449,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0820F10D11
+200450,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D40A08
+200451,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0811B50016
+200452,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0810A10250
+200453,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0810A10045
+200454,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0874H10B21
+200455,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D40A31
+200456,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0810A10050
+200457,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D40A16
+200458,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D30A01
+200459,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0811B30048
+200460,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D10A36
+200461,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D20A33
+200462,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0830G10857
+200463,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D10A38
+200464,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D10A39
+200465,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D10A40
+200466,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D20A02
+200467,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0820F10884
+200468,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0874H20174
+200469,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D10A52
+200470,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D40A63
+200471,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D40A20
+200472,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D10I40
+200473,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0820F10I88
+200474,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D30I44
+200475,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0876I10I43
+200476,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0811B20105
+200477,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0820F10I89
+200478,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D10A03
+200479,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200014,0871D10A05
+200480,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0810A10083
+200481,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0820F10D11
+200482,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D40A08
+200483,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0811B50016
+200484,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0810A10250
+200485,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0810A10045
+200486,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0874H10B21
+200487,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D40A31
+200488,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0810A10050
+200489,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D40A16
+200490,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D30A01
+200491,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0811B30048
+200492,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D10A36
+200493,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D20A33
+200494,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0830G10857
+200495,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D10A38
+200496,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D10A39
+200497,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D10A40
+200498,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D20A02
+200499,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0820F10884
+200500,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0874H20174
+200501,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D10A52
+200502,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D40A63
+200503,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D40A20
+200504,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D10I40
+200505,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0820F10I88
+200506,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D30I44
+200507,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0876I10I43
+200508,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0811B20105
+200509,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0820F10I89
+200510,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D10A03
+200511,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200015,0871D10A05
+200512,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0810A10083
+200513,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0820F10D11
+200514,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D40A08
+200515,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0811B50016
+200516,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0810A10250
+200517,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0810A10045
+200518,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0874H10B21
+200519,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D40A31
+200520,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0810A10050
+200521,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D40A16
+200522,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D30A01
+200523,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0811B30048
+200524,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D10A36
+200525,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D20A33
+200526,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0830G10857
+200527,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D10A38
+200528,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D10A39
+200529,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D10A40
+200530,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D20A02
+200531,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0820F10884
+200532,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0874H20174
+200533,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D10A52
+200534,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D40A63
+200535,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D40A20
+200536,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D10I40
+200537,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0820F10I88
+200538,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D30I44
+200539,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0876I10I43
+200540,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0811B20105
+200541,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0820F10I89
+200542,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D10A03
+200543,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200016,0871D10A05
+200544,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0810A10083
+200545,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0820F10D11
+200546,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D40A08
+200547,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0811B50016
+200548,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0810A10250
+200549,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0810A10045
+200550,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0874H10B21
+200551,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D40A31
+200552,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0810A10050
+200553,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D40A16
+200554,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D30A01
+200555,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0811B30048
+200556,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D10A36
+200557,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D20A33
+200558,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0830G10857
+200559,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D10A38
+200560,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D10A39
+200561,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D10A40
+200562,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D20A02
+200563,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0820F10884
+200564,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0874H20174
+200565,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D10A52
+200566,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D40A63
+200567,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D40A20
+200568,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D10I40
+200569,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0820F10I88
+200570,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D30I44
+200571,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0876I10I43
+200572,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0811B20105
+200573,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0820F10I89
+200574,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D10A03
+200575,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200017,0871D10A05
+200576,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0810A10083
+200577,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0820F10D11
+200578,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D40A08
+200579,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0811B50016
+200580,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0810A10250
+200581,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0810A10045
+200582,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0874H10B21
+200583,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D40A31
+200584,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0810A10050
+200585,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D40A16
+200586,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D30A01
+200587,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0811B30048
+200588,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D10A36
+200589,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D20A33
+200590,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0830G10857
+200591,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D10A38
+200592,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D10A39
+200593,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D10A40
+200594,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D20A02
+200595,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0820F10884
+200596,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0874H20174
+200597,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D10A52
+200598,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D40A63
+200599,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D40A20
+200600,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D10I40
+200601,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0820F10I88
+200602,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D30I44
+200603,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0876I10I43
+200604,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0811B20105
+200605,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0820F10I89
+200606,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D10A03
+200607,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200018,0871D10A05
+200608,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0810A10083
+200609,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0820F10D11
+200610,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D40A08
+200611,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0811B50016
+200612,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0810A10250
+200613,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0810A10045
+200614,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0874H10B21
+200615,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D40A31
+200616,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0810A10050
+200617,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D40A16
+200618,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D30A01
+200619,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0811B30048
+200620,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D10A36
+200621,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D20A33
+200622,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0830G10857
+200623,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D10A38
+200624,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D10A39
+200625,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D10A40
+200626,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D20A02
+200627,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0820F10884
+200628,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0874H20174
+200629,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D10A52
+200630,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D40A63
+200631,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D40A20
+200632,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D10I40
+200633,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0820F10I88
+200634,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D30I44
+200635,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0876I10I43
+200636,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0811B20105
+200637,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0820F10I89
+200638,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D10A03
+200639,MX,N/A,G11A 90 days after inv date + 5 g.d.,Yes,200019,0871D10A05

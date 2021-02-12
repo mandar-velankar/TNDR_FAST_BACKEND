@@ -2,8 +2,8 @@ CountryCode,CountryName,ApprovalType,LocalCurrency,CountryID,Region,COMMENT
 TN,Tunisia,1,USD,17,MAGHREB,
 MO,Morocco,1,MAD,18,MAGHREB,
 AL,Algeria,1,EUR,16,MAGHREB,
-AE,UAE,1,AED,1,MEA,
-BH,Bahrain,1,USD,2,MEA,
+AE,UAE,1,AED,1,MEA,Exchange rate applied is 1USD=3.68AED
+BH,Bahrain,1,BHD,2,MEA,
 EG,Egypt,1,EGP,3,MEA,"Debit notes for price difference compensation against deliveries from local stock are to be based on the three month average bank exchange rate from the offer date supported by documentary evidence, eg.: Bank Letter."
 GC,GCC,1,USD,4,MEA,
 IQ,Iraq,1,USD,5,MEA,

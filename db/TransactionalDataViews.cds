@@ -546,7 +546,8 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack sku
     offerProduct.Price.FOC_ABS_PCT_Bundled_1 as FOC_BUNDLED_1_ABS_PCT,
     offerProduct.Price.Bundled_1_SKU.PRODUCTPACKNAME as FOC_BUNDLED_1_PRODUCT_NAME,
     offerProduct.Price.Bundled_1_SKU.PACKFACTOR as FOC_BUNDLED_1_PACKSIZE,
-    offerProduct.Price.Bundled_1_Cogs.COGS * offerProduct.Price.SpotRate / (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.Price.Bundled_1_SKU.PACKFACTOR else 1 end) as FOC_BUNDLED_1_COGS
+    offerProduct.Price.Bundled_1_Cogs.COGS * offerProduct.Price.SpotRate / (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.Price.Bundled_1_SKU.PACKFACTOR else 1 end) as FOC_BUNDLED_1_COGS,
+    offerProduct.SKUCountry.QTY_THRESHOLD * (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as QTY_THRESHOLD:Double
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
@@ -571,7 +572,7 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
-	ifnull(offer.Quotation.OfferValidity, to_date('2020-12-31')) as OFFERVALIDITY,
+	ifnull(offer.Quotation.OfferValidity, to_date('2021-07-31')) as OFFERVALIDITY,
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
@@ -607,8 +608,8 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
 }where offer.Active = 1 and offer.Tender.Active = 1;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
-inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.STATUS{
-    key 'PT_TMQUTO(OfferID=''' || quotation.OfferID || ''',Active=1,OfferDate=datetimeoffset''' || quotation.OfferDate || ''')' as QUOTATION_PATH:String(500),
+inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.OFFER_ID{
+    key 'PT_TMQUTO(OfferID=''' || quotation.OfferID || ''',Active=1,OfferDate=' || quotation.OfferDate || ')' as QUOTATION_PATH:String(500),
     quotation.CountryCode as COUNTRY_CODE,
     quotation.TenderID as TENDER_ID,
     quotation.OfferID as OFFER_ID,
@@ -617,7 +618,7 @@ inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = stat
     quotation.Comment as COMMENT,
     quotation.AS1 as APPROVER1,
     quotation.AS2 as APPROVER2,
-}where quotation.UPDATED = 1
+}where quotation.UPDATED <> 1
 and status.STATUS='Offer Approved'
 and quotation.Active = 1;
 

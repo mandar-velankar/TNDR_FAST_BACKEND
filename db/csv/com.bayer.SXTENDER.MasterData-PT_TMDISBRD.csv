@@ -39,6 +39,7 @@ CIP Distributor warehouse Beirut by air",150 days from invoice date,Yes,2025053,
 100262,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,0811B30048
 100263,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,0830G10857
 100264,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,0810A20211
+100471,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0810A10050
 100266,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,0871D10A39
 100267,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,0871D10A40
 100268,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,0871D20A02
@@ -398,10 +399,10 @@ CIP Distributor warehouse Beirut by air",150 days from invoice date,Yes,2025053,
 100155,JO,0.05,CIF Aqaba by Sea or CIP Amman Queen Alia Airport by Air,240 days from invoice date,Yes,3148443,0871D30I44
 100156,JO,0.05,CIF Aqaba by Sea or CIP Amman Queen Alia Airport by Air,240 days from invoice date,Yes,3148443,0871D10A03
 100157,JO,0.05,CIF Aqaba by Sea or CIP Amman Queen Alia Airport by Air,240 days from invoice date,Yes,3148443,0871D10A05
-100158,KW,0.05,"CIF Kuwait city port by Sea, CIP Kuwait city Airport by Air",90 days net after invoice date,Yes,1799155,6573550D46
-100159,KW,0.05,"CIF Kuwait city port by Sea, CIP Kuwait city Airport by Air",90 days net after invoice date,Yes,1799155,6573510D32
-100160,KW,0.05,"CIF Kuwait city port by Sea, CIP Kuwait city Airport by Air",90 days net after invoice date,Yes,1799155,6573550D58
-100161,KW,0.05,"CIF Kuwait city port by Sea, CIP Kuwait city Airport by Air",90 days net after invoice date,Yes,1799155,6573510D35
+100158,KW,0.075,"CIF Kuwait city port by Sea, CIP Kuwait city Airport by Air",180 days from invoice date,Yes,1799155,6573550D46
+100159,KW,0.075,"CIF Kuwait city port by Sea, CIP Kuwait city Airport by Air",180 days from invoice date,Yes,1799155,6573510D32
+100160,KW,0.075,"CIF Kuwait city port by Sea, CIP Kuwait city Airport by Air",180 days from invoice date,Yes,1799155,6573550D58
+100161,KW,0.075,"CIF Kuwait city port by Sea, CIP Kuwait city Airport by Air",180 days from invoice date,Yes,1799155,6573510D35
 100162,KW,0.05,CIF Kuwait City,60 days net after invoice date,Yes,1909161,0811B10005
 100163,KW,0.05,CIF Kuwait City,150 days net after invoice date,No,1909161,0820F10D11
 100164,KW,0.05,CIF Kuwait City,60 days net after invoice date,Yes,1909161,0810A10250
@@ -479,102 +480,667 @@ CIP Distributor warehouse Beirut by air",150 days from invoice date,Yes,2025053,
 100468,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,6573550D46
 100469,SA,0.05,CIF Jeddah by Sea; CIP Jeddah / Riyadh by Air,360 days from invoice date,Yes,8039883,0830G10957
 100470,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,6573550D32
-100472,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0811B10005
-100473,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0820F10D11
-100476,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D40A08
-100479,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0810A10250
-100483,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0874H10B21
-100484,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0810A10050
-100486,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D40A14
-100487,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D40A20
-100488,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D30A01
-100491,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0876I10I43
-100493,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D10A27
-100495,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,6573550D46
-100497,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0811B30048
-100498,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0810B70B37
-100500,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D20A33
-100502,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0878A20211
-100504,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,6573550D32
-100505,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D10A36
-100508,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D10A39
-100511,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D20A02
-100513,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D30A47
-100516,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0878A20A49
-100519,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0820F10884
-100523,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0874H20174
-100526,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D30A59
-100527,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,6573550D58
-100528,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D40A63
-100531,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D30A64
-100534,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0878A20A65
-100537,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0820F10I88
-100541,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0878A20A69
-100543,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D10A70
-100545,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,6573510D35
-100549,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0810B70B59
-100551,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D30I44
-100553,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0811B20105
-100554,TH,0,DDP-Delivery Duty Paid,60 Days,Yes,4411546,0820F10I89
-100556,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D10A03
-100558,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411545,0871D10A05
-100558,AR,"0.075",Dummy,Dummy,Yes,4411545,0880J10351
-100559,AR,"0.075",Dummy,Dummy,Yes,4411545,0820F10D11
-100560,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D40A08
-100561,AR,"0.075",Dummy,Dummy,Yes,4411545,0874H10B21
-100562,AR,"0.075",Dummy,Dummy,Yes,4411545,0820F10D14
-100563,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D40A16
-100564,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D40A20
-100565,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D30A01
-100566,AR,"0.075",Dummy,Dummy,Yes,4411545,0876I10I43
-100567,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D10A27
-100568,AR,"0.075",Dummy,Dummy,Yes,4411545,6573550D46
-100569,AR,"0.075",Dummy,Dummy,Yes,4411545,6573510D47
-100570,AR,"0.075",Dummy,Dummy,Yes,4411545,6573510D32
-100571,AR,"0.075",Dummy,Dummy,Yes,4411546,0871D10A39
-100572,AR,"0.075",Dummy,Dummy,Yes,4411546,0871D10A40
-100573,AR,"0.075",Dummy,Dummy,Yes,4411546,0871D20A02
-100574,AR,"0.075",Dummy,Dummy,Yes,4411546,0810A20A49
-100575,AR,"0.075",Dummy,Dummy,Yes,4411546,0871D20A54
-100576,AR,"0.075",Dummy,Dummy,Yes,4411546,0871D30A59
-100577,AR,"0.075",Dummy,Dummy,Yes,4411546,6573550D58
-100578,AR,"0.075",Dummy,Dummy,Yes,4411546,0871D30A64
-100579,AR,"0.075",Dummy,Dummy,Yes,4411546,0810A20A65
-100580,AR,"0.075",Dummy,Dummy,Yes,4411546,0810A20A69
-100581,AR,"0.075",Dummy,Dummy,Yes,4411546,0871D10A70
-100582,AR,"0.075",Dummy,Dummy,Yes,4411546,6573510D35
-100583,AR,"0.075",Dummy,Dummy,Yes,4411545,0811B70B59
-100584,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D30I44
-100585,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D10A03
-100586,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D10A05
-100587,AR,"0.075",Dummy,Dummy,Yes,4411545,0871D10I51
-100588,BR,"0.075",Dummy,Dummy,Yes,4411545,0880J10351
-100589,BR,"0.075",Dummy,Dummy,Yes,4411545,0820F10D11
-100590,BR,"0.075",Dummy,Dummy,Yes,4411545,0871D40A08
-100591,BR,"0.075",Dummy,Dummy,Yes,4411545,0874H10B21
-100592,BR,"0.075",Dummy,Dummy,Yes,4411545,0820F10D14
-100593,BR,"0.075",Dummy,Dummy,Yes,4411545,0871D40A16
-100594,BR,"0.075",Dummy,Dummy,Yes,4411545,0871D40A20
-100595,BR,"0.075",Dummy,Dummy,Yes,4411546,0871D30A01
-100596,BR,"0.075",Dummy,Dummy,Yes,4411546,0876I10I43
-100597,BR,"0.075",Dummy,Dummy,Yes,4411546,0871D10A27
-100598,BR,"0.075",Dummy,Dummy,Yes,4411546,6573550D46
-100599,BR,"0.075",Dummy,Dummy,Yes,4411546,6573510D47
-100600,BR,"0.075",Dummy,Dummy,Yes,4411546,6573510D32
-100601,BR,"0.075",Dummy,Dummy,Yes,4411546,0871D10A39
-100602,BR,"0.075",Dummy,Dummy,Yes,4411546,0871D10A40
-100603,BR,"0.075",Dummy,Dummy,Yes,4411546,0871D20A02
-100604,BR,"0.075",Dummy,Dummy,Yes,4411546,0810A20A49
-100605,BR,"0.075",Dummy,Dummy,Yes,4411546,0871D20A54
-100606,BR,"0.075",Dummy,Dummy,Yes,4411546,0871D30A59
-100607,BR,"0.075",Dummy,Dummy,Yes,4411546,6573550D58
-100608,BR,"0.075",Dummy,Dummy,Yes,4411546,0871D30A64
-100609,BR,"0.075",Dummy,Dummy,Yes,4411545,0810A20A65
-100610,BR,"0.075",Dummy,Dummy,Yes,4411545,0810A20A69
-100611,BR,"0.075",Dummy,Dummy,Yes,4411545,0871D10A70
-100612,BR,"0.075",Dummy,Dummy,Yes,4411545,6573510D35
-100613,BR,"0.075",Dummy,Dummy,Yes,4411545,0811B70B59
-100614,BR,"0.075",Dummy,Dummy,Yes,4411545,0871D30I44
-100615,BR,"0.075",Dummy,Dummy,Yes,4411545,0871D10A03
-100616,BR,"0.075",Dummy,Dummy,Yes,4411545,0871D10A05
-100617,BR,"0.075",Dummy,Dummy,Yes,4411545,0871D10I51
+100472,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0810A10250
+100473,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0810A20210
+100474,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0810A20211
+100475,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0810A20A49
+100476,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0810A20A65
+100477,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0811B10005
+100478,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0811B20105
+100479,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0811B30048
+100480,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0811B70B59
+100481,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0820F10884
+100482,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0820F10D11
+100483,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0820F10I88
+100484,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0830G10857
+100485,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D10A03
+100486,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D10A05
+100487,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D10A27
+100488,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D10A39
+100489,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D20A02
+100490,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D30A01
+100491,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D30A59
+100492,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D30A60
+100493,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D30A64
+100494,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D30I44
+100495,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0871D40A20
+100496,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0874H10B21
+100497,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0876I10I43
+100498,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,0880J10351
+100499,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,6573510D35
+100500,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,6573550D32
+100501,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,6573550D46
+100502,BH,0.05,"CIF Bahrain for Sea, CIP Bahrain for Air (Incoterms 2010)",90 days from date of invoice,Yes,4411545,6573550D58
+100503,MO,0.1,INCOTerms,PaymentTerms,Yes,99999999,0810A20211
+100504,AE,0.075,CIF Dubai by Sea / CIP Dubai by Air,180 days from BL or AWB date,Yes,9349695,0820F10N03
+100505,LB,0.05,CIF Distributor warehouse Beirut by sea / CIP Distributor warehouse Beirut by air,150 days from invoice date,Yes,2025053,0820F10N03
+100506,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",180 days from BL date,Yes,2046036,0820F10N03
+100507,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",180 days from BL date,Yes,3148436,0820F10N03
+100508,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",180 days from BL date,Yes,2046036,0830G10N05
+100508,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",180 days from BL date,Yes,3148436,0830G10N05
+100510,SA,0.098,CIF Jeddah by Sea; CIP Jeddah / Riyadh by Air,360 days from invoice date,Yes,8039883,0830G10N05
+100511,LY,0.075,"CFR Tripoli by Sea, CPT Tripoli by Air",180 days from invoice date,Yes,3147647,0830G10957
+100511,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0811B10005
+100512,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0820F10I88
+100513,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0810A10250
+100514,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0874H10B21
+100515,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0810A10050
+100516,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0871D40A20
+100517,EG,0,DAP Cairo,LC payable 180 days from invoice date,Yes,4411546,0876I10I43
+100518,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0871D10A27
+100519,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0811B30048
+100520,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0830G10857
+100521,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0810A20211
+100522,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,6573510D32
+100523,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0871D10A40
+100524,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0871D20A02
+100525,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0810A20A49
+100526,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0820F10884
+100527,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0871D30A60
+100528,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0810A20A65
+100529,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,6573510D35
+100530,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,6573510D73
+100531,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0871D30I44
+100532,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0811B20105
+100533,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0871D10A03
+100534,EG,0,"CIF Alexandria by Sea, CIP Cairo by Air",LC payable 180 days from invoice date,Yes,4411546,0871D10A05
+100535,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ",120 days net after invoice date ,Yes,164390,0830G10N05
+200000,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0810A10083
+200001,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0820F10D11
+200002,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D40A08
+200003,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0811B50016
+200004,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0810A10250
+200005,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0810A10045
+200006,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0874H10B21
+200007,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D40A31
+200008,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0810A10050
+200009,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D40A16
+200010,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D30A01
+200011,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0811B30048
+200012,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D10A36
+200013,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D20A33
+200014,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0830G10857
+200015,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D10A38
+200016,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D10A39
+200017,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D10A40
+200018,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D20A02
+200019,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0820F10884
+200020,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0874H20174
+200021,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D10A52
+200022,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D40A63
+200023,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D40A20
+200024,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D10I40
+200025,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0820F10I88
+200026,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D30I44
+200027,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0876I10I43
+200028,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0811B20105
+200029,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0820F10I89
+200030,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D10A03
+200031,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000001,0871D10A05
+200032,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0810A10083
+200033,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0820F10D11
+200034,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D40A08
+200035,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0811B50016
+200036,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0810A10250
+200037,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0810A10045
+200038,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0874H10B21
+200039,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D40A31
+200040,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0810A10050
+200041,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D40A16
+200042,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D30A01
+200043,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0811B30048
+200044,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D10A36
+200045,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D20A33
+200046,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0830G10857
+200047,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D10A38
+200048,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D10A39
+200049,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D10A40
+200050,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D20A02
+200051,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0820F10884
+200052,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0874H20174
+200053,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D10A52
+200054,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D40A63
+200055,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D40A20
+200056,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D10I40
+200057,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0820F10I88
+200058,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D30I44
+200059,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0876I10I43
+200060,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0811B20105
+200061,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0820F10I89
+200062,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D10A03
+200063,MX,0,N/A,Z477 Due 27th of 1st month after invoice,Yes,5000002,0871D10A05
+200064,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0810A10083
+200065,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0820F10D11
+200066,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D40A08
+200067,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0811B50016
+200068,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0810A10250
+200069,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0810A10045
+200070,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0874H10B21
+200071,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D40A31
+200072,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0810A10050
+200073,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D40A16
+200074,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D30A01
+200075,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0811B30048
+200076,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D10A36
+200077,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D20A33
+200078,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0830G10857
+200079,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D10A38
+200080,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D10A39
+200081,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D10A40
+200082,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D20A02
+200083,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0820F10884
+200084,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0874H20174
+200085,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D10A52
+200086,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D40A63
+200087,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D40A20
+200088,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D10I40
+200089,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0820F10I88
+200090,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D30I44
+200091,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0876I10I43
+200092,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0811B20105
+200093,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0820F10I89
+200094,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D10A03
+200095,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000003,0871D10A05
+200096,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0810A10083
+200097,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0820F10D11
+200098,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D40A08
+200099,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0811B50016
+200100,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0810A10250
+200101,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0810A10045
+200102,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0874H10B21
+200103,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D40A31
+200104,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0810A10050
+200105,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D40A16
+200106,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D30A01
+200107,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0811B30048
+200108,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D10A36
+200109,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D20A33
+200110,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0830G10857
+200111,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D10A38
+200112,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D10A39
+200113,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D10A40
+200114,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D20A02
+200115,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0820F10884
+200116,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0874H20174
+200117,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D10A52
+200118,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D40A63
+200119,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D40A20
+200120,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D10I40
+200121,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0820F10I88
+200122,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D30I44
+200123,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0876I10I43
+200124,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0811B20105
+200125,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0820F10I89
+200126,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D10A03
+200127,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000004,0871D10A05
+200128,MX,0,N/A,Z494 Contado,Yes,5000005,0810A10083
+200129,MX,0,N/A,Z494 Contado,Yes,5000005,0820F10D11
+200130,MX,0,N/A,Z494 Contado,Yes,5000005,0871D40A08
+200131,MX,0,N/A,Z494 Contado,Yes,5000005,0811B50016
+200132,MX,0,N/A,Z494 Contado,Yes,5000005,0810A10250
+200133,MX,0,N/A,Z494 Contado,Yes,5000005,0810A10045
+200134,MX,0,N/A,Z494 Contado,Yes,5000005,0874H10B21
+200135,MX,0,N/A,Z494 Contado,Yes,5000005,0871D40A31
+200136,MX,0,N/A,Z494 Contado,Yes,5000005,0810A10050
+200137,MX,0,N/A,Z494 Contado,Yes,5000005,0871D40A16
+200138,MX,0,N/A,Z494 Contado,Yes,5000005,0871D30A01
+200139,MX,0,N/A,Z494 Contado,Yes,5000005,0811B30048
+200140,MX,0,N/A,Z494 Contado,Yes,5000005,0871D10A36
+200141,MX,0,N/A,Z494 Contado,Yes,5000005,0871D20A33
+200142,MX,0,N/A,Z494 Contado,Yes,5000005,0830G10857
+200143,MX,0,N/A,Z494 Contado,Yes,5000005,0871D10A38
+200144,MX,0,N/A,Z494 Contado,Yes,5000005,0871D10A39
+200145,MX,0,N/A,Z494 Contado,Yes,5000005,0871D10A40
+200146,MX,0,N/A,Z494 Contado,Yes,5000005,0871D20A02
+200147,MX,0,N/A,Z494 Contado,Yes,5000005,0820F10884
+200148,MX,0,N/A,Z494 Contado,Yes,5000005,0874H20174
+200149,MX,0,N/A,Z494 Contado,Yes,5000005,0871D10A52
+200150,MX,0,N/A,Z494 Contado,Yes,5000005,0871D40A63
+200151,MX,0,N/A,Z494 Contado,Yes,5000005,0871D40A20
+200152,MX,0,N/A,Z494 Contado,Yes,5000005,0871D10I40
+200153,MX,0,N/A,Z494 Contado,Yes,5000005,0820F10I88
+200154,MX,0,N/A,Z494 Contado,Yes,5000005,0871D30I44
+200155,MX,0,N/A,Z494 Contado,Yes,5000005,0876I10I43
+200156,MX,0,N/A,Z494 Contado,Yes,5000005,0811B20105
+200157,MX,0,N/A,Z494 Contado,Yes,5000005,0820F10I89
+200158,MX,0,N/A,Z494 Contado,Yes,5000005,0871D10A03
+200159,MX,0,N/A,Z494 Contado,Yes,5000005,0871D10A05
+200160,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0810A10083
+200161,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0820F10D11
+200162,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D40A08
+200163,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0811B50016
+200164,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0810A10250
+200165,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0810A10045
+200166,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0874H10B21
+200167,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D40A31
+200168,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0810A10050
+200169,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D40A16
+200170,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D30A01
+200171,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0811B30048
+200172,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D10A36
+200173,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D20A33
+200174,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0830G10857
+200175,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D10A38
+200176,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D10A39
+200177,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D10A40
+200178,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D20A02
+200179,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0820F10884
+200180,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0874H20174
+200181,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D10A52
+200182,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D40A63
+200183,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D40A20
+200184,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D10I40
+200185,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0820F10I88
+200186,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D30I44
+200187,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0876I10I43
+200188,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0811B20105
+200189,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0820F10I89
+200190,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D10A03
+200191,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000006,0871D10A05
+200192,MX,0,N/A,Z494 Contado,Yes,5000007,0810A10083
+200193,MX,0,N/A,Z494 Contado,Yes,5000007,0820F10D11
+200194,MX,0,N/A,Z494 Contado,Yes,5000007,0871D40A08
+200195,MX,0,N/A,Z494 Contado,Yes,5000007,0811B50016
+200196,MX,0,N/A,Z494 Contado,Yes,5000007,0810A10250
+200197,MX,0,N/A,Z494 Contado,Yes,5000007,0810A10045
+200198,MX,0,N/A,Z494 Contado,Yes,5000007,0874H10B21
+200199,MX,0,N/A,Z494 Contado,Yes,5000007,0871D40A31
+200200,MX,0,N/A,Z494 Contado,Yes,5000007,0810A10050
+200201,MX,0,N/A,Z494 Contado,Yes,5000007,0871D40A16
+200202,MX,0,N/A,Z494 Contado,Yes,5000007,0871D30A01
+200203,MX,0,N/A,Z494 Contado,Yes,5000007,0811B30048
+200204,MX,0,N/A,Z494 Contado,Yes,5000007,0871D10A36
+200205,MX,0,N/A,Z494 Contado,Yes,5000007,0871D20A33
+200206,MX,0,N/A,Z494 Contado,Yes,5000007,0830G10857
+200207,MX,0,N/A,Z494 Contado,Yes,5000007,0871D10A38
+200208,MX,0,N/A,Z494 Contado,Yes,5000007,0871D10A39
+200209,MX,0,N/A,Z494 Contado,Yes,5000007,0871D10A40
+200210,MX,0,N/A,Z494 Contado,Yes,5000007,0871D20A02
+200211,MX,0,N/A,Z494 Contado,Yes,5000007,0820F10884
+200212,MX,0,N/A,Z494 Contado,Yes,5000007,0874H20174
+200213,MX,0,N/A,Z494 Contado,Yes,5000007,0871D10A52
+200214,MX,0,N/A,Z494 Contado,Yes,5000007,0871D40A63
+200215,MX,0,N/A,Z494 Contado,Yes,5000007,0871D40A20
+200216,MX,0,N/A,Z494 Contado,Yes,5000007,0871D10I40
+200217,MX,0,N/A,Z494 Contado,Yes,5000007,0820F10I88
+200218,MX,0,N/A,Z494 Contado,Yes,5000007,0871D30I44
+200219,MX,0,N/A,Z494 Contado,Yes,5000007,0876I10I43
+200220,MX,0,N/A,Z494 Contado,Yes,5000007,0811B20105
+200221,MX,0,N/A,Z494 Contado,Yes,5000007,0820F10I89
+200222,MX,0,N/A,Z494 Contado,Yes,5000007,0871D10A03
+200223,MX,0,N/A,Z494 Contado,Yes,5000007,0871D10A05
+200224,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0810A10083
+200225,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0820F10D11
+200226,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D40A08
+200227,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0811B50016
+200228,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0810A10250
+200229,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0810A10045
+200230,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0874H10B21
+200231,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D40A31
+200232,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0810A10050
+200233,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D40A16
+200234,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D30A01
+200235,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0811B30048
+200236,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D10A36
+200237,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D20A33
+200238,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0830G10857
+200239,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D10A38
+200240,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D10A39
+200241,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D10A40
+200242,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D20A02
+200243,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0820F10884
+200244,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0874H20174
+200245,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D10A52
+200246,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D40A63
+200247,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D40A20
+200248,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D10I40
+200249,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0820F10I88
+200250,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D30I44
+200251,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0876I10I43
+200252,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0811B20105
+200253,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0820F10I89
+200254,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D10A03
+200255,MX,0,N/A,Z505 60 DIAS,Yes,5000009,0871D10A05
+200256,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0810A10083
+200257,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0820F10D11
+200258,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D40A08
+200259,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0811B50016
+200260,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0810A10250
+200261,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0810A10045
+200262,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0874H10B21
+200263,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D40A31
+200264,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0810A10050
+200265,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D40A16
+200266,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D30A01
+200267,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0811B30048
+200268,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D10A36
+200269,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D20A33
+200270,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0830G10857
+200271,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D10A38
+200272,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D10A39
+200273,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D10A40
+200274,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D20A02
+200275,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0820F10884
+200276,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0874H20174
+200277,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D10A52
+200278,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D40A63
+200279,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D40A20
+200280,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D10I40
+200281,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0820F10I88
+200282,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D30I44
+200283,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0876I10I43
+200284,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0811B20105
+200285,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0820F10I89
+200286,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D10A03
+200287,MX,0,N/A,G10A 75 days after inv date + 5 g.d.,Yes,5000010,0871D10A05
+200288,MX,0,N/A,Z494 Contado,Yes,5000012,0810A10083
+200289,MX,0,N/A,Z494 Contado,Yes,5000012,0820F10D11
+200290,MX,0,N/A,Z494 Contado,Yes,5000012,0871D40A08
+200291,MX,0,N/A,Z494 Contado,Yes,5000012,0811B50016
+200292,MX,0,N/A,Z494 Contado,Yes,5000012,0810A10250
+200293,MX,0,N/A,Z494 Contado,Yes,5000012,0810A10045
+200294,MX,0,N/A,Z494 Contado,Yes,5000012,0874H10B21
+200295,MX,0,N/A,Z494 Contado,Yes,5000012,0871D40A31
+200296,MX,0,N/A,Z494 Contado,Yes,5000012,0810A10050
+200297,MX,0,N/A,Z494 Contado,Yes,5000012,0871D40A16
+200298,MX,0,N/A,Z494 Contado,Yes,5000012,0871D30A01
+200299,MX,0,N/A,Z494 Contado,Yes,5000012,0811B30048
+200300,MX,0,N/A,Z494 Contado,Yes,5000012,0871D10A36
+200301,MX,0,N/A,Z494 Contado,Yes,5000012,0871D20A33
+200302,MX,0,N/A,Z494 Contado,Yes,5000012,0830G10857
+200303,MX,0,N/A,Z494 Contado,Yes,5000012,0871D10A38
+200304,MX,0,N/A,Z494 Contado,Yes,5000012,0871D10A39
+200305,MX,0,N/A,Z494 Contado,Yes,5000012,0871D10A40
+200306,MX,0,N/A,Z494 Contado,Yes,5000012,0871D20A02
+200307,MX,0,N/A,Z494 Contado,Yes,5000012,0820F10884
+200308,MX,0,N/A,Z494 Contado,Yes,5000012,0874H20174
+200309,MX,0,N/A,Z494 Contado,Yes,5000012,0871D10A52
+200310,MX,0,N/A,Z494 Contado,Yes,5000012,0871D40A63
+200311,MX,0,N/A,Z494 Contado,Yes,5000012,0871D40A20
+200312,MX,0,N/A,Z494 Contado,Yes,5000012,0871D10I40
+200313,MX,0,N/A,Z494 Contado,Yes,5000012,0820F10I88
+200314,MX,0,N/A,Z494 Contado,Yes,5000012,0871D30I44
+200315,MX,0,N/A,Z494 Contado,Yes,5000012,0876I10I43
+200316,MX,0,N/A,Z494 Contado,Yes,5000012,0811B20105
+200317,MX,0,N/A,Z494 Contado,Yes,5000012,0820F10I89
+200318,MX,0,N/A,Z494 Contado,Yes,5000012,0871D10A03
+200319,MX,0,N/A,Z494 Contado,Yes,5000012,0871D10A05
+200320,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0810A10083
+200321,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0820F10D11
+200322,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D40A08
+200323,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0811B50016
+200324,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0810A10250
+200325,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0810A10045
+200326,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0874H10B21
+200327,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D40A31
+200328,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0810A10050
+200329,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D40A16
+200330,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D30A01
+200331,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0811B30048
+200332,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D10A36
+200333,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D20A33
+200334,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0830G10857
+200335,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D10A38
+200336,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D10A39
+200337,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D10A40
+200338,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D20A02
+200339,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0820F10884
+200340,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0874H20174
+200341,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D10A52
+200342,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D40A63
+200343,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D40A20
+200344,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D10I40
+200345,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0820F10I88
+200346,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D30I44
+200347,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0876I10I43
+200348,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0811B20105
+200349,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0820F10I89
+200350,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D10A03
+200351,MX,0,N/A,G07A 30 days after inv date + 5 g.d.,Yes,5000013,0871D10A05
+200352,MX,0,N/A,Z494 Contado,Yes,5000014,0810A10083
+200353,MX,0,N/A,Z494 Contado,Yes,5000014,0820F10D11
+200354,MX,0,N/A,Z494 Contado,Yes,5000014,0871D40A08
+200355,MX,0,N/A,Z494 Contado,Yes,5000014,0811B50016
+200356,MX,0,N/A,Z494 Contado,Yes,5000014,0810A10250
+200357,MX,0,N/A,Z494 Contado,Yes,5000014,0810A10045
+200358,MX,0,N/A,Z494 Contado,Yes,5000014,0874H10B21
+200359,MX,0,N/A,Z494 Contado,Yes,5000014,0871D40A31
+200360,MX,0,N/A,Z494 Contado,Yes,5000014,0810A10050
+200361,MX,0,N/A,Z494 Contado,Yes,5000014,0871D40A16
+200362,MX,0,N/A,Z494 Contado,Yes,5000014,0871D30A01
+200363,MX,0,N/A,Z494 Contado,Yes,5000014,0811B30048
+200364,MX,0,N/A,Z494 Contado,Yes,5000014,0871D10A36
+200365,MX,0,N/A,Z494 Contado,Yes,5000014,0871D20A33
+200366,MX,0,N/A,Z494 Contado,Yes,5000014,0830G10857
+200367,MX,0,N/A,Z494 Contado,Yes,5000014,0871D10A38
+200368,MX,0,N/A,Z494 Contado,Yes,5000014,0871D10A39
+200369,MX,0,N/A,Z494 Contado,Yes,5000014,0871D10A40
+200370,MX,0,N/A,Z494 Contado,Yes,5000014,0871D20A02
+200371,MX,0,N/A,Z494 Contado,Yes,5000014,0820F10884
+200372,MX,0,N/A,Z494 Contado,Yes,5000014,0874H20174
+200373,MX,0,N/A,Z494 Contado,Yes,5000014,0871D10A52
+200374,MX,0,N/A,Z494 Contado,Yes,5000014,0871D40A63
+200375,MX,0,N/A,Z494 Contado,Yes,5000014,0871D40A20
+200376,MX,0,N/A,Z494 Contado,Yes,5000014,0871D10I40
+200377,MX,0,N/A,Z494 Contado,Yes,5000014,0820F10I88
+200378,MX,0,N/A,Z494 Contado,Yes,5000014,0871D30I44
+200379,MX,0,N/A,Z494 Contado,Yes,5000014,0876I10I43
+200380,MX,0,N/A,Z494 Contado,Yes,5000014,0811B20105
+200381,MX,0,N/A,Z494 Contado,Yes,5000014,0820F10I89
+200382,MX,0,N/A,Z494 Contado,Yes,5000014,0871D10A03
+200383,MX,0,N/A,Z494 Contado,Yes,5000014,0871D10A05
+200384,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0810A10083
+200385,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0820F10D11
+200386,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D40A08
+200387,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0811B50016
+200388,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0810A10250
+200389,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0810A10045
+200390,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0874H10B21
+200391,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D40A31
+200392,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0810A10050
+200393,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D40A16
+200394,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D30A01
+200395,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0811B30048
+200396,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D10A36
+200397,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D20A33
+200398,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0830G10857
+200399,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D10A38
+200400,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D10A39
+200401,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D10A40
+200402,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D20A02
+200403,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0820F10884
+200404,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0874H20174
+200405,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D10A52
+200406,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D40A63
+200407,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D40A20
+200408,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D10I40
+200409,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0820F10I88
+200410,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D30I44
+200411,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0876I10I43
+200412,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0811B20105
+200413,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0820F10I89
+200414,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D10A03
+200415,MX,0,N/A,G08A 45 days after inv date + 5 g.d.,Yes,5000015,0871D10A05
+200416,MX,0,N/A,Z494 Contado,Yes,5000017,0810A10083
+200417,MX,0,N/A,Z494 Contado,Yes,5000017,0820F10D11
+200418,MX,0,N/A,Z494 Contado,Yes,5000017,0871D40A08
+200419,MX,0,N/A,Z494 Contado,Yes,5000017,0811B50016
+200420,MX,0,N/A,Z494 Contado,Yes,5000017,0810A10250
+200421,MX,0,N/A,Z494 Contado,Yes,5000017,0810A10045
+200422,MX,0,N/A,Z494 Contado,Yes,5000017,0874H10B21
+200423,MX,0,N/A,Z494 Contado,Yes,5000017,0871D40A31
+200424,MX,0,N/A,Z494 Contado,Yes,5000017,0810A10050
+200425,MX,0,N/A,Z494 Contado,Yes,5000017,0871D40A16
+200426,MX,0,N/A,Z494 Contado,Yes,5000017,0871D30A01
+200427,MX,0,N/A,Z494 Contado,Yes,5000017,0811B30048
+200428,MX,0,N/A,Z494 Contado,Yes,5000017,0871D10A36
+200429,MX,0,N/A,Z494 Contado,Yes,5000017,0871D20A33
+200430,MX,0,N/A,Z494 Contado,Yes,5000017,0830G10857
+200431,MX,0,N/A,Z494 Contado,Yes,5000017,0871D10A38
+200432,MX,0,N/A,Z494 Contado,Yes,5000017,0871D10A39
+200433,MX,0,N/A,Z494 Contado,Yes,5000017,0871D10A40
+200434,MX,0,N/A,Z494 Contado,Yes,5000017,0871D20A02
+200435,MX,0,N/A,Z494 Contado,Yes,5000017,0820F10884
+200436,MX,0,N/A,Z494 Contado,Yes,5000017,0874H20174
+200437,MX,0,N/A,Z494 Contado,Yes,5000017,0871D10A52
+200438,MX,0,N/A,Z494 Contado,Yes,5000017,0871D40A63
+200439,MX,0,N/A,Z494 Contado,Yes,5000017,0871D40A20
+200440,MX,0,N/A,Z494 Contado,Yes,5000017,0871D10I40
+200441,MX,0,N/A,Z494 Contado,Yes,5000017,0820F10I88
+200442,MX,0,N/A,Z494 Contado,Yes,5000017,0871D30I44
+200443,MX,0,N/A,Z494 Contado,Yes,5000017,0876I10I43
+200444,MX,0,N/A,Z494 Contado,Yes,5000017,0811B20105
+200445,MX,0,N/A,Z494 Contado,Yes,5000017,0820F10I89
+200446,MX,0,N/A,Z494 Contado,Yes,5000017,0871D10A03
+200447,MX,0,N/A,Z494 Contado,Yes,5000017,0871D10A05
+200448,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0810A10083
+200449,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0820F10D11
+200450,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D40A08
+200451,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0811B50016
+200452,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0810A10250
+200453,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0810A10045
+200454,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0874H10B21
+200455,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D40A31
+200456,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0810A10050
+200457,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D40A16
+200458,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D30A01
+200459,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0811B30048
+200460,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D10A36
+200461,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D20A33
+200462,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0830G10857
+200463,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D10A38
+200464,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D10A39
+200465,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D10A40
+200466,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D20A02
+200467,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0820F10884
+200468,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0874H20174
+200469,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D10A52
+200470,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D40A63
+200471,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D40A20
+200472,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D10I40
+200473,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0820F10I88
+200474,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D30I44
+200475,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0876I10I43
+200476,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0811B20105
+200477,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0820F10I89
+200478,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D10A03
+200479,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000018,0871D10A05
+200480,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0810A10083
+200481,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0820F10D11
+200482,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D40A08
+200483,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0811B50016
+200484,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0810A10250
+200485,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0810A10045
+200486,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0874H10B21
+200487,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D40A31
+200488,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0810A10050
+200489,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D40A16
+200490,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D30A01
+200491,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0811B30048
+200492,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D10A36
+200493,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D20A33
+200494,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0830G10857
+200495,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D10A38
+200496,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D10A39
+200497,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D10A40
+200498,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D20A02
+200499,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0820F10884
+200500,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0874H20174
+200501,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D10A52
+200502,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D40A63
+200503,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D40A20
+200504,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D10I40
+200505,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0820F10I88
+200506,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D30I44
+200507,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0876I10I43
+200508,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0811B20105
+200509,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0820F10I89
+200510,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D10A03
+200511,MX,0,N/A,G09A 60 days after inv date + 5 g.d.,Yes,5000019,0871D10A05
+100536,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0811B10005
+100537,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0820F10D11
+100538,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D40A08
+100539,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0810A10250
+100540,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0874H10B21
+100541,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0810A10050
+100542,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D40A14
+100543,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D40A20
+100544,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D30A01
+100545,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0876I10I43
+100546,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D10A27
+100547,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,6573550D46
+100548,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0811B30048
+100549,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0810B70B37
+100550,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D20A33
+100551,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0878A20211
+100552,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,6573550D32
+100553,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D10A36
+100554,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D10A39
+100555,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D20A02
+100556,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D30A47
+100557,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0878A20A49
+100558,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0820F10884
+100559,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0874H20174
+100560,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D30A59
+100561,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,6573550D58
+100562,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D40A63
+100563,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D30A64
+100564,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0878A20A65
+100565,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0820F10I88
+100566,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0878A20A69
+100567,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D10A70
+100568,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,6573510D35
+100569,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0810B70B59
+100570,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D30I44
+100571,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0811B20105
+100572,TH,0,DDP-Delivery Duty Paid,60 Days,Yes,4411548,0820F10I89
+100573,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D10A03
+100574,TH,0,DDP-Delivery Duty Paid,90 Days,Yes,4411547,0871D10A05
+100575,AR,0,Dummy,Dummy,Yes,4411549,0810A20210
+100576,AR,0,Dummy,Dummy,Yes,4411549,0820F10884
+100577,AR,0,Dummy,Dummy,Yes,4411549,0874H20174
+100578,AR,0,Dummy,Dummy,Yes,4411549,0820F10I88
+100579,AR,0,Dummy,Dummy,Yes,4411549,0811B20105
+100580,AR,0,Dummy,Dummy,Yes,4411549,0880J10351
+100581,AR,0,Dummy,Dummy,Yes,4411549,0871D30A07
+100582,AR,0,Dummy,Dummy,Yes,4411549,0820F10D11
+100583,AR,0,Dummy,Dummy,Yes,4411549,0874H10B21
+100584,AR,0,Dummy,Dummy,Yes,4411549,0871D40A16
+100585,AR,0,Dummy,Dummy,Yes,4411549,0871D40A20
+100586,AR,0,Dummy,Dummy,Yes,4411549,0871D30A01
+100587,AR,0,Dummy,Dummy,Yes,4411549,6573550D46
+100588,AR,0,Dummy,Dummy,Yes,4411549,6573510D32
+100589,AR,0,Dummy,Dummy,Yes,4411549,0871D10A39
+100590,AR,0,Dummy,Dummy,Yes,4411549,0871D20A02
+100591,AR,0,Dummy,Dummy,Yes,4411549,0871D30A60
+100592,AR,0,Dummy,Dummy,Yes,4411549,0871D30A64
+100593,AR,0,Dummy,Dummy,Yes,4411549,0810A20A65
+100594,AR,0,Dummy,Dummy,Yes,4411549,0810A20A69
+100595,AR,0,Dummy,Dummy,Yes,4411549,6573510D35
+100596,AR,0,Dummy,Dummy,Yes,4411549,0871D30I44
+100597,AR,0,Dummy,Dummy,Yes,4411549,0871D10A03
+100598,AR,0,Dummy,Dummy,Yes,4411549,0871D10A05
+100599,BR,0,Dummy,Dummy,Yes,4411550,0810A20210
+100600,BR,0,Dummy,Dummy,Yes,4411550,0820F10884
+100601,BR,0,Dummy,Dummy,Yes,4411550,0874H20174
+100602,BR,0,Dummy,Dummy,Yes,4411550,0820F10I88
+100603,BR,0,Dummy,Dummy,Yes,4411550,0811B20105
+100604,BR,0,Dummy,Dummy,Yes,4411550,0880J10351
+100605,BR,0,Dummy,Dummy,Yes,4411550,0871D30A07
+100606,BR,0,Dummy,Dummy,Yes,4411550,0820F10D11
+100607,BR,0,Dummy,Dummy,Yes,4411550,0874H10B21
+100608,BR,0,Dummy,Dummy,Yes,4411550,0871D40A16
+100609,BR,0,Dummy,Dummy,Yes,4411550,0871D40A20
+100610,BR,0,Dummy,Dummy,Yes,4411550,0871D30A01
+100611,BR,0,Dummy,Dummy,Yes,4411550,6573550D46
+100612,BR,0,Dummy,Dummy,Yes,4411550,6573510D32
+100613,BR,0,Dummy,Dummy,Yes,4411550,0871D10A39
+100614,BR,0,Dummy,Dummy,Yes,4411550,0871D20A02
+100615,BR,0,Dummy,Dummy,Yes,4411550,0871D30A60
+100616,BR,0,Dummy,Dummy,Yes,4411550,0871D30A64
+100617,BR,0,Dummy,Dummy,Yes,4411550,0810A20A65
+100618,BR,0,Dummy,Dummy,Yes,4411550,0810A20A69
+100619,BR,0,Dummy,Dummy,Yes,4411550,6573510D35
+100620,BR,0,Dummy,Dummy,Yes,4411550,0871D30I44
+100621,BR,0,Dummy,Dummy,Yes,4411550,0871D10A03
+100622,BR,0,Dummy,Dummy,Yes,4411550,0871D10A05
