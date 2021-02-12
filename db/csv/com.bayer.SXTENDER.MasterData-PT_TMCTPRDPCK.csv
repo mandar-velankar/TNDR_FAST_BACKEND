@@ -1,858 +1,1097 @@
-COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECORD,PRODUCTPACKID,MANUFACTURER,Presentation_2,VTATax,COMMENT
-100510,SA,Germany,36,1,Yes,100043,Bayer AG,,0,
-100511,SA,Germany,36,1,Yes,100044,Bayer AG,,0,
-100512,SA,Germany,24,1,Yes,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100513,SA,Germany,24,0,No,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100514,SA,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,
-100515,SA,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100516,SA,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100517,SA,Germany,36,1,Yes,100051,Bayer AG,,0,
-100518,SA,Germany,36,1,Yes,100050,Bayer AG,,0,
-100519,SA,Germany,36,1,Yes,100083,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
-100520,SA,Germany,36,1,Yes,100054,Bayer AG,,0,
-100521,SA,Germany,36,0,Yes,100055,Bayer AG,,0,
-100522,SA,Germany,36,0,Yes,100057,Bayer AG,,0,
-100523,SA,Germany,60,0,No,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100524,SA,Germany,36,1,Yes,100059,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
-100525,SA,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
-100526,SA,Germany,60,1,No,100062,Bayer AG,,0,
-100527,SA,Germany,48,1,Yes,100063,Bayer AG,,0,
-100528,SA,Germany,36,1,Yes,100064,Bayer AG,,0,
-100529,SA,Germany,36,1,Yes,100065,Bayer AG,,0,
-100530,SA,Germany,48,1,Yes,100066,Bayer AG,,0,
-100531,SA,Finland,36,0,No,100067,Bayer Oy Turku,,0,
-100804,LB,Germany,36,0,Yes,100126,"Orion Corporation ,  Orion Pharma – Finland ",,0,
-100533,SA,Germany,48,0,No,100069,Bayer Weimar GmbH und Co. KG,,0,
-100534,SA,Germany,48,1,Yes,100070,Bayer Weimar GmbH und Co. KG,,0,
-100535,SA,Germany,36,1,Yes,100074,Bayer AG,,0,
-100591,SA,Germany,24,1,Yes,100076,Bayer AG,,0,
-100537,SA,Germany,48,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100538,SA,Germany,36,1,Yes,100078,Bayer AG,,0,
-100539,SA,Italy,36,0,No,100079,Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany,,0,
-100540,SA,Canada,36,0,No,100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,0,
-100541,SA,Germany,36,1,Yes,100081,Bayer AG,,0,
-100542,SA,Germany,48,1,Yes,100082,Bayer AG,,0,
-100543,SA,Germany,36,1,Yes,100084,Bayer AG,,0,
-100544,SA,Germany,36,1,Yes,100085,Bayer AG,,0,
-100545,SA,Germany,36,1,Yes,100086,Bayer AG,,0,
-100546,SA,Germany,36,1,Yes,100087,Bayer AG,,0,
-100547,SA,Germany,0,0,No,100088,Bayer AG,,0,
-100687,SA,USA,30,0,Yes,100103,Bayer HealthCare LLC,,0,
-100549,SA,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100550,SA,Germany,36,1,Yes,100092,Bayer AG,,0,
-100551,SA,Germany,36,1,Yes,100093,Bayer AG,,0,
-100552,SA,Germany,36,1,Yes,100094,Bayer AG,,0,
-100553,SA,Germany,36,1,Yes,100095,Bayer AG,,0,
-100554,SA,Norway,1,1,Yes,100096,Institute for Energy Technology (IFE),,0,
-100555,SA,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100805,EG,Germany,36,0,Yes,100126,"Orion Corporation ,  Orion Pharma – Finland ",,0,
-100557,SD,Germany,60,0,Yes,100055,Bayer AG,,0,
-100558,SD,Germany,36,0,Yes,100085,Bayer AG,,0,
-100559,SD,Germany,36,0,Yes,100087,Bayer AG,,0,
-100560,SY,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100561,SY,Germany,36,0,Yes,100028,Bayer AG,,0,
-100562,SY,Germany,60,0,Yes,100029,Bayer AG,,0,
-100563,SY,Germany,60,0,Yes,100031,Bayer AG,,0,
-100564,SY,France,36,0,No,100033,Delpharm Lille SAS,,0,
-100565,SY,Germany,60,1,No,100035,Bayer Weimar GmbH und Co. KG,,0,
-100566,SY,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100567,SY,Germany,60,1,No,100058,Bayer AG,,0,
-100568,SY,Finland,36,1,No,100061,Bayer Oy Turku,,0,
-100569,SY,Germany,36,1,Yes,100064,Bayer AG,,0,
-100570,SY,Finland,36,0,No,100067,Bayer Oy Turku,,0,
-100571,SY,Germany,60,1,No,100034,Bayer Weimar GmbH und Co. KG,,0,
-100572,SY,Germany,36,1,Yes,100081,Bayer AG,,0,
-100573,SY,Spain,24,1,Yes,100090,BerliMed S.A.,,0,
-100574,SY,Germany,36,1,Yes,100092,Bayer AG,,0,
-100575,SY,Germany,36,1,No,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100576,YE,Germany,48,0,Yes,100001,Bayer AG,,0,
-100577,YE,Germany,36,0,Yes,100016,Bayer AG,,0,
-100578,YE,Germany,36,0,Yes,100017,Bayer AG,,0,
-100579,YE,Germany,60,0,Yes,100029,Bayer AG,,0,
-100580,YE,Germany,60,0,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100581,YE,Germany,24,0,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100582,YE,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100583,YE,Germany,60,0,Yes,100070,Bayer Weimar GmbH und Co. KG,,0,
-100584,YE,Germany,60,0,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100585,YE,Germany,60,0,Yes,100076,Bayer AG,,0,
-100586,YE,Germany,60,0,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100587,YE,Germany,60,0,Yes,100082,Bayer AG,,0,
-100588,YE,Germany,36,0,Yes,100086,Bayer AG,,0,
-100589,YE,Germany,36,0,Yes,100087,Bayer AG,,0,
-100590,YE,Germany,36,0,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100592,LY,Germany,36,0,Yes,100093,Bayer AG,,0,
-100593,LY,Germany,36,0,Yes,100094,Bayer AG,,0,
-100594,LY,Germany,36,0,Yes,100095,Bayer AG,,0,
-100595,GC,,0,0,Yes,100005,,,0,
-100595,EG,Germany,48,1,Yes,100101,Bayer Weimar GmbH und Co. KG,,0,
-100596,GC,,0,0,Yes,100006,,,0,
-100596,LB,Germany,60,1,Yes,100101,Bayer Weimar GmbH und Co. KG,,0,
-100597,GC,,0,0,Yes,100007,,,0,
-100597,QA,,0,0,No,100102,,,0,
-100598,GC,,0,0,Yes,100008,,,0,
-100599,GC,,0,0,Yes,100009,,,0,
-100600,GC,,0,0,Yes,100010,,,0,
-100601,GC,,0,0,Yes,100011,,,0,
-100602,GC,,0,0,Yes,100013,,,0,
-100603,GC,,0,0,Yes,100014,,,0,
-100604,GC,,0,0,Yes,100015,,,0,
-100605,GC,,0,0,Yes,100016,,,0,
-100606,GC,,0,0,Yes,100017,,,0,
-100607,GC,,0,0,Yes,100018,,,0,
-100608,GC,,0,0,Yes,100019,,,0,
-100609,GC,,0,0,Yes,100020,,,0,
-100610,GC,,0,0,Yes,100021,,,0,
-100611,GC,,0,0,Yes,100022,,,0,
-100612,GC,,0,0,Yes,100023,,,0,
-100613,GC,,0,0,Yes,100024,,,0,
-100614,GC,,0,0,Yes,100026,,,0,
-100615,GC,,0,0,Yes,100027,,,0,
-100616,GC,,0,0,Yes,100028,,,0,
-100617,GC,,0,0,Yes,100029,,,0,
-100618,GC,,0,0,Yes,100030,,,0,
-100619,GC,,0,0,Yes,100031,,,0,
-100620,GC,,0,0,Yes,100033,,,0,
-100621,GC,,0,0,Yes,100035,,,0,
-100622,GC,,0,0,Yes,100036,,,0,
-100623,GC,,0,0,Yes,100039,,,0,
-100624,GC,,0,0,Yes,100040,,,0,
-100625,GC,,0,0,Yes,100041,,,0,
-100626,GC,,0,0,Yes,100043,,,0,
-100627,GC,,0,0,Yes,100044,,,0,
-100628,GC,,0,0,Yes,100037,,,0,
-100629,GC,,0,0,Yes,100038,,,0,
-100630,GC,,0,0,Yes,100045,,,0,
-100631,GC,,0,0,Yes,100102,,,0,
-100632,GC,,0,0,Yes,100046,,,0,
-100633,GC,,0,0,Yes,100047,,,0,
-100634,GC,,0,0,Yes,100051,,,0,
-100635,GC,,0,0,Yes,100052,,,0,
-100636,GC,,0,0,Yes,100048,,,0,
-100637,GC,,0,0,Yes,100049,,,0,
-100638,GC,,0,0,Yes,100050,,,0,
-100639,GC,,0,0,Yes,100083,,,0,
-100640,GC,,0,0,Yes,100054,,,0,
-100641,GC,,0,0,Yes,100055,,,0,
-100642,GC,,0,0,Yes,100056,,,0,
-100643,GC,,0,0,Yes,100057,,,0,
-100644,GC,,0,0,Yes,100058,,,0,
-100645,GC,,0,0,Yes,100059,,,0,
-100646,GC,,0,0,Yes,100060,,,0,
-100647,GC,,0,0,Yes,100061,,,0,
-100648,GC,,0,0,Yes,100062,,,0,
-100649,GC,,0,0,Yes,100063,,,0,
-100650,GC,,0,0,Yes,100064,,,0,
-100651,GC,,0,0,Yes,100065,,,0,
-100652,GC,,0,0,Yes,100066,,,0,
-100653,GC,,0,0,Yes,100067,,,0,
-100654,GC,,0,0,Yes,100068,,,0,
-100655,GC,,0,0,Yes,100075,,,0,
-100656,GC,,0,0,Yes,100069,,,0,
-100657,GC,,0,0,Yes,100070,,,0,
-100658,GC,,0,0,Yes,100071,,,0,
-100659,GC,,0,0,Yes,100073,,,0,
-100660,GC,,0,0,Yes,100074,,,0,
-100661,GC,,0,0,Yes,100034,,,0,
-100662,GC,,0,0,Yes,100076,,,0,
-100663,GC,,0,0,Yes,100077,,,0,
-100664,GC,,0,0,Yes,100078,,,0,
-100665,GC,0,0,0,No,100079,0,,0,
-100666,GC,0,0,0,No,100080,0,,0,
-100667,GC,,0,0,Yes,100081,,,0,
-100668,GC,,0,0,Yes,100082,,,0,
-100669,GC,,0,0,Yes,100084,,,0,
-100670,GC,,0,0,Yes,100085,,,0,
-100671,GC,,0,0,Yes,100086,,,0,
-100672,GC,,0,0,Yes,100087,,,0,
-100673,GC,,0,0,Yes,100088,,,0,
-100674,GC,,0,0,Yes,100090,,,0,
-100675,GC,,0,0,Yes,100091,,,0,
-100676,GC,,0,0,Yes,100092,,,0,
-100677,GC,,0,0,Yes,100093,,,0,
-100678,GC,,0,0,Yes,100094,,,0,
-100679,GC,,0,0,Yes,100095,,,0,
-100680,GC,,0,0,Yes,100096,,,0,
-100681,GC,,0,0,Yes,100097,,,0,
-100682,GC,,0,0,Yes,100098,,,0,
-100683,GC,,0,0,Yes,100099,,,0,
-100684,GC,,0,0,Yes,100100,,,0,
-100685,IQ,USA,30,0,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100686,LY,USA,30,0,Yes,100103,Bayer Healthcare LLC,,0,
-100688,SA,USA,30,0,Yes,100104,Bayer HealthCare LLC,,0,
-100689,SA,USA,30,0,Yes,100105,Bayer HealthCare LLC,,0,
-100548,SA,Spain,48,1,Yes,100090,BerliMed S.A.,,0,
-100690,BH,Germany,36,0,Yes,100086,Bayer AG,,0,
-100691,QA,USA,30,0,Yes,100107,"Bayer Healthcare LLC, Berkeley",,0,
-100692,QA,USA,30,0,Yes,100108,"Bayer Healthcare LLC, Berkeley",,0,
-100693,JO,,0,1,Yes,100018,,,0,
-100694,JO,,0,1,Yes,100109,,,0,
-100695,JO,Germany,36,2,Yes,100040,Bayer AG,,0,
-100696,BH,Spain,24,1,Yes,100090,BerliMed S.A.,,0,
-100697,BH,Germany,36,1,Yes,100007,Bayer AG,,0,
-100698,BH,Germany,36,1,Yes,100008,Bayer AG,,0,
-100699,BH,Germany,36,1,Yes,100009,Bayer AG,,0,
-100700,BH,Germany,36,1,Yes,100010,Bayer AG,,0,
-100701,BH,Germany,36,1,Yes,100011,Bayer AG,,0,
-100702,AL,,0,1,Yes,100020,,B/15,0,
-100703,AL,,0,1,Yes,100091,,B/2*14,0,
-100704,AL,,0,0,Yes,100065,,B/1flacon,0,
-100705,AL,,0,1,Yes,100090,,B/30 AMP,0,
-100706,AL,,0,1,Yes,100085,,B/10,0,
-100707,AL,,0,1,Yes,100087,,B/10,0,
-100708,AL,,0,1,Yes,100039,,B/1,0,
-100709,AL,,0,1,Yes,100040,,B/1,0,
-100710,AL,,0,1,Yes,100064,,B/60 COMP,0,
-100711,AL,,0,1,Yes,100081,,B/3*28,0,
-100712,AL,,0,1,Yes,100045,,B/1,0,
-100713,AL,,0,1,Yes,100046,,B/1,0,
-100714,AL,,0,1,Yes,100047,,B/1,0,
-100715,AL,,0,1,Yes,100036,,B/1,0,
-100716,AL,,0,1,Yes,100094,,B/42,0,
-100717,AL,,0,1,Yes,100095,,B/28,0,
-100718,AL,,0,1,Yes,100092,,B/100,0,
-100719,AL,,0,1,Yes,100055,,B/1,0,
-100720,TN,,0,1,Yes,100046,,box of one pre-filled syringe and powder + one set of administration devices,0,
-100721,TN,,0,1,Yes,100047,,box of one pre-filled syringe and powder + one set of administration devices,0,
-100722,TN,,0,1,Yes,100045,,box of one pre-filled syringe and powder + one set of administration devices,0,
-100723,MO,,0,1,Yes,100109,,,0,
-100724,MO,,0,1,Yes,100110,,,0,
-100725,MO,,0,1,Yes,100018,,,0,
-100726,MO,,0,1,Yes,100045,,,0,
-100727,MO,,0,1,Yes,100047,,,0,
-100728,MO,,0,1,Yes,100046,,,0,
-100729,MO,,0,1,Yes,100058,,,0,
-100730,MO,,0,1,Yes,100111,,,0,
-100731,MO,,0,1,Yes,100112,,,0,
-100732,MO,,0,1,Yes,100113,,,0,
-100733,MO,,0,1,Yes,100114,,,0,
-100734,MO,,0,1,Yes,100115,,,0,
-100735,MO,,0,1,Yes,100039,,,0,
-100736,MO,,0,1,Yes,100020,,,0,
-100737,MO,,0,1,Yes,100013,,,0,
-100738,MO,,0,1,Yes,100064,,,0,
-100739,MO,,0,1,Yes,100040,,,0,
-100740,MO,,0,1,Yes,100041,,,0,
-100741,MO,,0,1,Yes,100017,,,0,
-100742,MO,,0,1,Yes,100092,,,0,
-100743,MO,,0,1,Yes,100116,,,0,
-100744,MO,,0,1,Yes,100095,,,0,
-100745,MO,,0,1,Yes,100036,,,0,
-100746,MO,,0,1,Yes,100119,,,0,
-100747,QA,Germany,36,1,Yes,100009,Bayer AG,,0,
-100748,QA,Germany,36,1,Yes,100010,Bayer AG,,0,
-100749,QA,Germany,36,1,Yes,100011,Bayer AG,,0,
-100755,EG,Germany,36,0,Yes,100007,Bayer AG,,0,
-100756,EG,Germany,36,0,Yes,100008,Bayer AG,,0,
-100757,EG,Germany,36,0,Yes,100009,Bayer AG,,0,
-100758,EG,Germany,36,0,Yes,100010,Bayer AG,,0,
-100759,EG,Germany,36,0,Yes,100011,Bayer AG,,0,
-100477,IQ,Germany,48,1,Yes,100001,Bayer AG,,0,
-100526,KW,Germany,60,1,No,100062,Bayer AG,,0,
-100526,BH,Germany,60,1,No,100062,Bayer AG,,0,
-100531,QA,Finland,36,0,No,100067,Bayer Oy Turku,,0,
-100551,IQ,Germany,36,1,Yes,100093,Bayer AG,,0,
-100553,IQ,Germany,36,1,Yes,100095,Bayer AG,,0,
-100555,IQ,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100798,BH,Finland,36,2,Yes,100061,Bayer Oy Turku,,0,
-100789,OM,Germany,60,1,Yes,100122,Bayer Weimar GmbH und Co. KG,,0,
-100260,KW,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100261,KW,Germany,48,0,Yes,100021,Bayer AG,,0,
-100262,KW,Italy,24,0,Yes,100026,Bayer Health Care S.R.L Italy,,0,
-100263,KW,Germany,36,1,Yes,100028,Bayer AG,,0,
-100264,KW,Germany,60,1,Yes,100029,Bayer AG,,0,
-100265,KW,Germany,60,1,Yes,100030,Bayer AG,,0,
-100266,KW,Germany,60,1,No,100031,Bayer AG,,0,
-100267,KW,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100268,KW,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100269,KW,Germany,36,2,Yes,100040,Bayer AG,,0,
-100270,KW,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100271,KW,USA,30,2,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,
-100272,KW,USA,30,2,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100273,KW,Germany,36,1,Yes,100052,Bayer AG,,0,
-100274,KW,Germany,36,1,Yes,100048,Bayer AG,,0,
-100275,KW,Germany,60,0,Yes,100056,Bayer AG,,0,
-100276,KW,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
-100277,KW,Germany,60,1,Yes,100063,Bayer AG,,0,
-100278,KW,Germany,36,1,Yes,100064,Bayer AG,,0,
-100279,KW,Finland,36,1,Yes,100067,Bayer Oy Turku,,0,
-100280,KW,Germany,60,1,Yes,100075,Bayer AG,,0,
-100281,KW,Germany,60,1,No,100071,Bayer Weimar GmbH und Co. KG,,0,
-100282,KW,Germany,36,2,Yes,100073,Bayer AG,,0,
-100283,KW,Germany,36,0,Yes,100074,Bayer AG,,0,
-100284,KW,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100285,KW,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100286,KW,Italy,36,0,No,100079,Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany,,0,
-100287,KW,Canada,36,0,No,100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,0,
-100288,KW,Germany,36,1,Yes,100081,Bayer AG,,0,
-100289,KW,Germany,60,0,Yes,100082,Bayer AG,,0,
-100290,KW,Germany,36,0,Yes,100087,Bayer AG,,0,
-100291,KW,Spain,24,2,Yes,100090,BerliMed S.A.,,0,
-100292,KW,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100293,KW,Germany,36,1,Yes,100092,Bayer AG,,0,
-100294,KW,Germany,36,1,Yes,100093,Bayer AG,,0,
-100295,KW,Germany,36,1,Yes,100095,Bayer AG,,0,
-100296,KW,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100297,KW,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100298,LB,Germany,48,1,Yes,100001,Bayer AG,,0,
-100299,LB,Germany,48,1,Yes,100003,Bayer AG,,0,
-100300,LB,Germany,36,1,Yes,100007,Bayer AG,,0,
-100301,LB,Germany,36,1,Yes,100008,Bayer AG,,0,
-100302,LB,Germany,36,1,Yes,100009,Bayer AG,,0,
-100303,LB,Germany,36,1,Yes,100010,Bayer AG,,0,
-100304,LB,Germany,36,1,Yes,100011,Bayer AG,,0,
-100305,LB,Germany,60,1,Yes,100012,Bayer Weimar GmbH und Co. KG,,0,
-100306,LB,Germany,36,1,Yes,100016,Bayer AG,,0,
-100307,LB,Germany,36,1,Yes,100017,Bayer AG,,0,
-100308,LB,Germany,36,1,Yes,100018,Bayer AG,,0,
-100309,LB,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100310,LB,Germany,36,0,Yes,100027,Bayer AG,,0,
-100311,LB,Germany,36,1,Yes,100028,Bayer AG,,0,
-100312,LB,Germany,60,1,Yes,100029,Bayer AG,,0,
-100313,LB,Germany,60,1,Yes,100031,Bayer AG,,0,
-100314,LB,France,60,1,No,100033,Delpharm Lille SAS,,0,
-100315,LB,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100316,LB,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100317,LB,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100318,LB,Germany,36,1,Yes,100039,Bayer AG,,0,
-100319,LB,Germany,36,1,Yes,100043,Bayer AG,,0,
-100320,LB,Germany,36,1,Yes,100044,Bayer AG,,0,
-100321,LB,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100322,LB,Germany,36,1,Yes,100051,Bayer AG,,0,
-100323,LB,Germany,36,1,Yes,100050,Bayer AG,,0,
-100324,LB,Germany,60,0,Yes,100057,Bayer AG,,0,
-100325,LB,Germany,60,1,Yes,100058,Bayer AG,,0,
-100326,LB,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
-100327,LB,Germany,36,1,Yes,100064,Bayer AG,,0,
-100328,LB,Germany,48,1,Yes,100066,Bayer AG,,0,
-100329,LB,Germany,60,0,Yes,100072,Bayer Weimar GmbH und Co. KG,,0,
-100330,LB,Germany,60,1,Yes,100076,Bayer AG,,0,
-100331,LB,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100332,LB,Germany,36,1,Yes,100081,Bayer AG,,0,
-100333,LB,Germany,60,1,Yes,100082,Bayer AG,,0,
-100334,LB,Germany,36,1,Yes,100085,Bayer AG,,0,
-100335,LB,Germany,36,0,Yes,100086,Bayer AG,,0,
-100336,LB,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100337,LB,Germany,36,1,Yes,100092,Bayer AG,,0,
-100338,LB,Germany,36,1,Yes,100093,Bayer AG,,0,
-100339,LB,Germany,36,1,Yes,100094,Bayer AG,,0,
-100340,LB,Germany,36,1,Yes,100095,Bayer AG,,0,
-100341,LB,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100342,LB,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100343,LY,Germany,48,0,Yes,100001,Bayer AG,,0,
-100344,LY,Germany,48,0,Yes,100003,Bayer AG,,0,
-100345,LY,Germany,36,0,No,100006,Bayer AG,,0,
-100346,LY,Germany,60,0,Yes,100013,Bayer Weimar GmbH und Co. KG,,0,
-100347,LY,Germany,36,0,Yes,100016,Bayer AG,,0,
-100348,LY,Germany,36,0,Yes,100017,Bayer AG,,0,
-100349,LY,Germany,24,0,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100350,LY,Finland,36,0,Yes,100023,Bayer Oy Turku,,0,
-100351,LY,Germany,36,0,Yes,100028,Bayer AG,,0,
-100352,LY,Germany,60,0,Yes,100029,Bayer AG,,0,
-100353,LY,Germany,36,0,Yes,100030,Bayer AG,,0,
-100354,LY,Germany,60,0,Yes,100031,Bayer AG,,0,
-100355,LY,Germany,60,0,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100356,LY,Germany,36,0,Yes,100044,Bayer AG,,0,
-100357,LY,USA,30,0,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,
-100358,LY,USA,30,0,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100359,LY,USA,30,0,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100360,LY,Germany,60,0,Yes,100055,Bayer AG,,0,
-100361,LY,Germany,60,0,Yes,100057,Bayer AG,,0,
-100362,LY,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100363,LY,Germany,36,0,Yes,100060,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
-100364,LY,Finland,36,0,Yes,100061,Bayer Oy Turku,,0,
-100365,LY,Germany,60,0,Yes,100063,Bayer AG,,0,
-100366,LY,Germany,36,0,Yes,100064,Bayer AG,,0,
-100367,LY,Finland,36,0,Yes,100067,Bayer Oy Turku,,0,
-100368,LY,Germany,60,0,Yes,100070,Bayer Weimar GmbH und Co. KG,,0,
-100369,LY,Germany,60,0,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100370,LY,Germany,60,0,Yes,100076,Bayer AG,,0,
-100371,LY,Germany,60,0,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100372,LY,Germany,36,0,Yes,100081,Bayer AG,,0,
-100373,LY,Germany,60,0,Yes,100082,Bayer AG,,0,
-100374,LY,Germany,36,0,Yes,100085,Bayer AG,,0,
-100375,LY,Germany,36,0,Yes,100087,Bayer AG,,0,
-100376,LY,Spain,24,0,Yes,100090,BerliMed S.A.,,0,
-100377,LY,Germany,36,0,Yes,100092,Bayer AG,,0,
-100378,LY,Germany,36,0,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100379,OM,Germany,48,1,Yes,100001,Bayer AG,,0,
-100380,OM,Germany,48,1,Yes,100003,Bayer AG,,0,
-100381,OM,Germany,36,1,No,100006,Bayer AG,,0,
-100382,OM,Germany,36,1,Yes,100007,Bayer AG,,0,
-100383,OM,Germany,36,1,Yes,100008,Bayer AG,,0,
-100384,OM,Germany,36,1,Yes,100009,Bayer AG,,0,
-100385,OM,Germany,36,1,Yes,100010,Bayer AG,,0,
-100386,OM,Germany,36,1,Yes,100011,Bayer AG,,0,
-100387,OM,Germany,60,0,No,100013,Bayer Weimar GmbH und Co. KG,,0,
-100388,OM,Germany,36,1,Yes,100016,Bayer AG,,0,
-100389,OM,Germany,36,1,Yes,100017,Bayer AG,,0,
-100390,OM,Germany,36,1,Yes,100018,Bayer AG,,0,
-100391,OM,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100392,OM,Finland,36,0,No,100023,Bayer Oy Turku,,0,
-100393,OM,Finland,36,0,No,100024,Bayer Oy Turku,,0,
-100394,OM,Germany,36,1,Yes,100028,Bayer AG,,0,
-100395,OM,Germany,60,1,Yes,100029,Bayer AG,,0,
-100396,OM,Germany,60,1,Yes,100030,Bayer AG,,0,
-100397,OM,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100398,OM,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100399,OM,Germany,36,0,Yes,100040,Bayer AG,,0,
-100400,OM,Germany,36,0,No,100044,Bayer AG,,0,
-100401,OM,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100402,OM,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,
-100403,OM,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100404,OM,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100405,OM,Germany,60,0,Yes,100055,Bayer AG,,0,
-100406,OM,Germany,60,0,Yes,100057,Bayer AG,,0,
-100407,OM,Germany,60,1,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100408,OM,Germany,36,0,Yes,100059,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
-100409,OM,Germany,36,0,Yes,100060,Bayer AG & Bayer Weimar GmbH und Co. ,,0,
-100410,OM,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
-100411,OM,Germany,36,1,Yes,100064,Bayer AG,,0,
-100412,OM,Germany,36,0,No,100065,Bayer AG,,0,
-100413,OM,Germany,48,0,No,100066,Bayer AG,,0,
-100414,OM,Germany,60,1,Yes,100075,Bayer AG,,0,
-100415,OM,Germany,60,1,No,100070,Bayer Weimar GmbH und Co. KG,,0,
-100416,OM,Germany,36,0,Yes,100073,Bayer AG,,0,
-100417,OM,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100418,OM,Germany,60,1,Yes,100076,Bayer AG,,0,
-100419,OM,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100420,OM,Germany,36,1,Yes,100081,Bayer AG,,0,
-100421,OM,Germany,60,1,Yes,100082,Bayer AG,,0,
-100422,OM,Germany,36,0,Yes,100084,Bayer AG,,0,
-100423,OM,Germany,36,1,Yes,100085,Bayer AG,,0,
-100424,OM,Germany,36,0,Yes,100086,Bayer AG,,0,
-100425,OM,Germany,36,0,Yes,100087,Bayer AG,,0,
-100426,OM,Spain,24,0,Yes,100090,BerliMed S.A.,,0,
-100427,OM,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100428,OM,Germany,36,1,Yes,100092,Bayer AG,,0,
-100429,OM,Germany,36,1,Yes,100093,Bayer AG,,0,
-100430,OM,Germany,36,1,Yes,100095,Bayer AG,,0,
-100431,OM,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100432,OM,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100433,QA,Germany,48,1,Yes,100001,Bayer AG,,0,
-100434,QA,Germany,48,1,Yes,100003,Bayer AG,,0,
-100435,QA,Germany,36,1,Yes,100006,Bayer AG,,0,
-100436,QA,Germany,36,1,Yes,100007,Bayer AG,,0,
-100437,QA,Germany,36,1,Yes,100008,Bayer AG,,0,
-100438,QA,Germany,36,1,Yes,100016,Bayer AG,,0,
-100439,QA,Germany,36,1,Yes,100018,Bayer AG,,0,
-100440,QA,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100441,QA,Germany,36,1,Yes,100028,Bayer AG,,0,
-100442,QA,Germany,60,1,Yes,100029,Bayer AG,,0,
-100443,QA,Germany,60,1,Yes,100030,Bayer AG,,0,
-100444,QA,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100445,QA,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100446,QA,Germany,36,0,Yes,100039,Bayer AG,,0,
-100447,QA,Germany,36,0,Yes,100040,Bayer AG,,0,
-100448,QA,Spain,36,0,Yes,100041,BerliMed S.A.,,0,
-100449,QA,Germany,36,0,Yes,100044,Bayer AG,,0,
-100450,QA,Germany,24,0,Yes,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100451,QA,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100452,QA,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,
-100453,QA,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100454,QA,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100455,QA,Germany,36,1,Yes,100052,Bayer AG,,0,
-100456,QA,Germany,36,1,Yes,100050,Bayer AG,,0,
-100457,QA,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100458,QA,Finland,36,0,Yes,100061,Bayer Oy Turku,,0,
-100459,QA,Germany,60,0,No,100062,Bayer AG,,0,
-100460,QA,Germany,60,1,Yes,100063,Bayer AG,,0,
-100461,QA,Germany,36,1,Yes,100064,Bayer AG,,0,
-100462,QA,Germany,60,1,No,100070,Bayer Weimar GmbH und Co. KG,,0,
-100463,QA,Germany,60,0,Yes,100071,Bayer Weimar GmbH und Co. KG,,0,
-100464,QA,Germany,36,0,Yes,100073,Bayer AG,,0,
-100465,QA,Germany,36,0,Yes,100074,Bayer AG,,0,
-100466,QA,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100467,QA,Germany,60,1,Yes,100076,Bayer AG,,0,
-100468,QA,Germany,36,1,Yes,100081,Bayer AG,,0,
-100469,QA,Germany,60,1,Yes,100082,Bayer AG,,0,
-100470,QA,Spain,24,0,Yes,100090,BerliMed S.A.,,0,
-100471,QA,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100472,QA,Germany,36,1,Yes,100092,Bayer AG,,0,
-100473,QA,Germany,36,1,Yes,100093,Bayer AG,,0,
-100474,QA,Germany,36,1,Yes,100095,Bayer AG,,0,
-100475,QA,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100476,QA,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100477,SA,Germany,48,1,Yes,100001,Bayer AG,,0,
-100478,SA,Germany,0,0,No,100002,Bayer AG,,0,
-100479,SA,Germany,48,1,Yes,100003,Bayer AG,,0,
-100480,SA,Germany,0,0,No,100004,Bayer AG,,0,
-100481,SA,Germany,0,0,No,100005,Bayer AG,,0,
-100482,SA,Germany,36,1,Yes,100006,Bayer AG,,0,
-100483,SA,Germany,36,1,Yes,100007,Bayer AG,,0,
-100484,SA,Germany,36,1,Yes,100008,Bayer AG,,0,
-100485,SA,Germany,36,1,Yes,100009,Bayer AG,,0,
-100486,SA,Germany,36,1,Yes,100010,Bayer AG,,0,
-100487,SA,Germany,36,1,Yes,100011,Bayer AG,,0,
-100488,SA,Germany ,48,1,Yes,100013,Bayer Weimar GmbH und Co.KG or Delpharm Lille SAS ,,0,
-100489,SA,Germany,48,1,No,100014,Bayer AG,,0,
-100490,SA,Germany,36,0,No,100015,Bayer AG,,0,
-100491,SA,Germany,36,1,Yes,100016,Bayer AG,,0,
-100492,SA,Germany,36,1,Yes,100017,Bayer AG,,0,
-100493,SA,Germany,36,1,Yes,100018,Bayer AG,,0,
-100494,SA,Germany,0,0,No,100019,Bayer AG,,0,
-100495,SA,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100496,SA,Germany,36,0,No,100099,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100497,SA,Germany,48,0,Yes,100021,Bayer AG,,0,
-100498,SA,Germany,48,1,Yes,100022,Bayer AG,,0,
-100499,SA,Germany,36,1,Yes,100027,Bayer AG,,0,
-100500,SA,Germany,36,1,Yes,100028,Bayer AG,,0,
-100501,SA,Germany,48,1,Yes,100029,Bayer AG,,0,
-100502,SA,Germany,48,1,Yes,100030,Bayer AG,,0,
-100503,SA,Germany,48,1,Yes,100031,Bayer AG,,0,
-100791,SA,,0,0,Yes,100124,,,0,
-100792,QA,Germany,36,1,Yes,100125,Bayer AG,,0,
-100793,BH,Germany,36,1,Yes,100125,Bayer AG,,0,
-100794,LB,Germany,36,1,Yes,100125,Bayer AG,,0,
-100795,JO,Germany,36,1,Yes,100125,Bayer AG,,0,
-100796,OM,Germany,36,1,Yes,100125,Bayer AG,,0,
-100797,AE,Germany,36,1,Yes,100125,Bayer AG,,0,
-100504,SA,France,36,1,Yes,100033,Delpharm Lille SAS,,0,
-100505,SA,Germany,36,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100506,SA,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,Eylea goods will have no more than 50% remaining shelf life at the time of delivery
-100507,SA,Germany,36,0,Yes,100039,Bayer AG,,0,
-100508,SA,Germany,36,0,Yes,100040,Bayer AG,,0,
-100509,SA,Spain,24,1,Yes,100041,BerliMed S.A.,,0,
-100750,QA,Germany,48,0,Yes,100021,Bayer AG,,0,
-100751,QA,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100752,OM,Germany,60,0,Yes,100063,Bayer AG,,0,
-100753,SA,United Kingdom,24,0,Yes,100120,Penn Pharmaceutical Services Ltd,,0,
-100754,LY,USA,24,0,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100763,KW,Germany,36,2,Yes,100007,Bayer AG,,0,
-100764,KW,Germany,36,2,Yes,100008,Bayer AG,,0,
-100765,KW,Germany,36,2,Yes,100009,Bayer AG,,0,
-100766,KW,Germany,36,2,Yes,100039,Bayer AG,,0,
-100767,KW,USA,30,2,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100769,BH,Gemany,36,1,Yes,100048,Bayer AG,,0,
-100770,BH,Germany,36,1,Yes,100049,Bayer AG,,0,
-100801,JO,Germany,36,1,Yes,100085,Bayer AG,,0,
-100772,BH,Germany,60,1,Yes,100123,Bayer Weimar GmbH und Co. KG,,0,
-100773,BH,Germany,36,1,Yes,100087,Bayer AG,,0,
-100799,SA,Germany,36,1,Yes,100125,Bayer AG,,0,
-100788,AE,Germany,30,1,Yes,100103,Bulk :Bayer AG,,0,
-100789,AE,Germany,30,1,Yes,100104,Bulk :Bayer AG,,0,
-100790,AE,Germany,30,1,Yes,100105,Bulk :Bayer AG,,0,
-100115,EG,Finland,36,1,No,100024,Bayer Oy Turku,,0,
-100783,QA,Germany,36,1,Yes,100049,Bayer AG,,0,
-100784,QA,Germany,36,1,Yes,100048,Bayer AG,,0,
-100785,QA,Germany,60,1,Yes,100123,Bayer Weimar GmbH und Co. KG,,0,
-100800,KW,USA,30,1,Yes,100104,Bayer Healthcare LLC,,0,
-100787,QA,Germany,60,1,Yes,100031,Bayer AG,,0,
-100760,AE,Germany,36,1,Yes,100048,Bayer AG,,0,
-100116,EG,Finland,36,0,No,100025,Bayer Oy Turku,,0,
-100774,BH,Germany,36,1,No,100121,Bayer AG,,0,
-100768,AE,Germany,60,1,Yes,100122,Bayer Weimar GmbH und Co. KG,,0,
-100761,AE,Germany,36,1,No,100109,Bayer AG,,0,
-100776,KW,Germany,36,1,Yes,100049,Bayer AG,,0,
-100777,KW,Germany,36,1,Yes,100050,Bayer AG,,0,
-100778,KW,Germany,60,1,Yes,100122,Bayer Weimar GmbH und Co. KG,,0,
-100779,KW,Germany,36,1,Yes,100119,Bayer AG,,0,
-100780,OM,Germany,60,1,Yes,100123,Bayer Weimar GmbH und Co. KG,,0,
-100786,QA,Germany,36,1,No,100121,Bayer AG,,0,
-100001,AE,Germany,48,1,Yes,100001,Bayer AG,,0,
-100002,AE,Germany,48,1,Yes,100003,Bayer AG,,0,
-100003,AE,Germany,36,1,Yes,100006,Bayer AG,,0,
-100004,AE,Germany,36,1,Yes,100007,Bayer AG,,0,
-100005,AE,Germany,36,1,Yes,100008,Bayer AG,,0,
-100006,AE,Germany,36,1,Yes,100009,Bayer AG,,0,
-100007,AE,Germany,36,1,Yes,100010,Bayer AG,,0,
-100008,AE,Germany,36,1,Yes,100011,Bayer AG,,0,
-100009,AE,Germany,60,1,Yes,100013,Bayer Weimar GmbH und Co. KG,,0,
-100010,AE,Germany,36,1,Yes,100016,Bayer AG,,0,
-100011,AE,Germany,36,1,Yes,100017,Bayer AG,,0,
-100012,AE,Germany,36,1,Yes,100018,Bayer AG,,0,
-100013,AE,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100014,AE,Germany,60,0,Yes,100027,Bayer AG,,0,
-100015,AE,Germany,36,1,Yes,100028,Bayer AG,,0,
-100016,AE,Germany,60,1,Yes,100029,Bayer AG,,0,
-100017,AE,Germany,60,0,Yes,100030,Bayer AG,,0,
-100018,AE,Germany,60,1,Yes,100031,Bayer AG,,0,
-100019,AE,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100020,AE,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100021,AE,Germany,36,1,Yes,100039,Bayer AG,,0,
-100022,AE,Germany,36,1,Yes,100040,Bayer AG,,0,
-100023,AE,Germany,36,1,Yes,100043,Bayer AG,,0,
-100024,AE,Germany,36,1,Yes,100044,Bayer AG,,0,
-100025,AE,Germany,24,0,Yes,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100026,AE,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100027,AE,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,
-100028,AE,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100029,AE,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100030,AE,Germany,36,1,Yes,100052,Bayer AG,,0,
-100031,AE,Germany,36,1,Yes,100049,Bayer AG,,0,
-100032,AE,Germany,36,1,Yes,100050,Bayer AG,,0,
-100033,AE,Germany,60,0,Yes,100055,Bayer AG,,0,
-100034,AE,Germany,60,0,Yes,100057,Bayer AG,,0,
-100035,AE,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
-100036,AE,Germany,60,0,No,100062,Bayer AG,,0,
-100037,AE,Germany,60,1,Yes,100063,Bayer AG,,0,
-100038,AE,Germany,36,1,Yes,100064,Bayer AG,,0,
-100039,AE,Germany,48,0,No,100066,Bayer AG,,0,
-100040,AE,Finland,36,1,Yes,100067,Bayer Oy Turku,,0,
-100041,AE,Germany,60,1,Yes,100075,Bayer AG,,0,
-100042,AE,Germany,60,0,Yes,100069,Bayer Weimar GmbH und Co. KG,,0,
-100043,AE,Germany,60,1,No,100071,Bayer Weimar GmbH und Co. KG,,0,
-100044,AE,Germany,36,0,Yes,100073,Bayer AG,,0,
-100045,AE,Germany,60,1,Yes,100074,Bayer AG,,0,
-100046,AE,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100047,AE,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100048,AE,Italy,36,0,No,100079,Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany,,0,
-100049,AE,Canada,36,0,No,100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,0,
-100050,AE,Germany,36,1,Yes,100081,Bayer AG,,0,
-100051,AE,Germany,60,0,Yes,100082,Bayer AG,,0,
-100052,AE,Germany,36,1,Yes,100085,Bayer AG,,0,
-100053,AE,Germany,36,1,Yes,100086,Bayer AG,,0,
-100054,AE,Germany,36,1,Yes,100087,Bayer AG,,0,
-100055,AE,Spain,24,1,Yes,100090,BerliMed S.A.,,0,
-100056,AE,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100057,AE,Germany,36,1,Yes,100092,Bayer AG,,0,
-100058,AE,Germany,36,1,Yes,100093,Bayer AG,,0,
-100059,AE,Germany,36,1,Yes,100094,Bayer AG,,0,
-100060,AE,Germany,36,1,Yes,100095,Bayer AG,,0,
-100061,AE,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100062,AE,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100063,BH,Germany,48,1,Yes,100001,Bayer AG,,0,
-100064,BH,Germany,48,1,Yes,100003,Bayer AG,,0,
-100065,BH,Germany,36,0,No,100006,Bayer AG,,0,
-100066,BH,Germany,36,1,Yes,100016,Bayer AG,,0,
-100067,BH,Germany,36,1,Yes,100017,Bayer AG,,0,
-100068,BH,Germany,36,1,Yes,100018,Bayer AG,,0,
-100069,BH,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100070,BH,Germany,48,0,Yes,100022,Bayer AG,,0,
-100071,BH,Finland,36,0,Yes,100023,Bayer Oy Turku,,0,
-100072,BH,Germany,36,0,Yes,100027,Bayer AG,,0,
-100073,BH,Germany,36,1,Yes,100028,Bayer AG,,0,
-100074,BH,Germany,60,1,Yes,100029,Bayer AG,,0,
-100075,BH,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100076,BH,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100077,BH,Germany,36,0,Yes,100039,Bayer AG,,0,
-100078,BH,Germany,36,0,Yes,100040,Bayer AG,,0,
-100079,BH,Spain,36,0,Yes,100041,BerliMed S.A.,,0,
-100080,BH,Germany,24,0,Yes,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100081,BH,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100082,BH,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,
-100083,BH,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100084,BH,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100085,BH,Germany,36,1,Yes,100052,Bayer AG,,0,
-100086,BH,Germany,36,1,Yes,100050,Bayer AG,,0,
-100087,BH,Germany,60,0,Yes,100055,Bayer AG,,0,
-100088,BH,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,
-100089,BH,Germany,60,1,Yes,100063,Bayer AG,,0,
-100090,BH,Germany,36,1,Yes,100064,Bayer AG,,0,
-100091,BH,Germany,36,0,No,100065,Bayer AG,,0,
-100092,BH,Germany,60,0,Yes,100069,Bayer Weimar GmbH und Co. KG,,0,
-100093,BH,Germany,60,1,No,100070,Bayer Weimar GmbH und Co. KG,,0,
-100094,BH,Germany,36,0,Yes,100073,Bayer AG,,0,
-100095,BH,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100096,BH,Germany,60,1,Yes,100076,Bayer AG,,0,
-100097,BH,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100098,BH,Italy,36,0,No,100079,Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany,,0,
-100099,BH,Canada,36,0,No,100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,0,
-100100,BH,Germany,36,1,Yes,100081,Bayer AG,,0,
-100101,BH,Germany,60,0,No,100082,Bayer AG,,0,
-100102,BH,Germany,36,0,Yes,100084,Bayer AG,,0,
-100103,BH,Germany,36,1,Yes,100085,Bayer AG,,0,
-100104,BH,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100105,BH,Germany,36,1,Yes,100092,Bayer AG,,0,
-100106,BH,Germany,36,1,Yes,100093,Bayer AG,,0,
-100107,BH,Germany,36,1,Yes,100095,Bayer AG,,0,
-100108,BH,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100109,BH,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100110,EG,,0,0,Yes,100042,,,0,
-100111,EG,Germany,48,1,Yes,100001,Bayer AG,,0,
-100112,EG,Germany,60,1,Yes,100013,Bayer Weimar GmbH und Co. KG,,0,
-100113,EG,Germany,36,1,Yes,100017,Bayer AG,,0,
-100114,EG,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100771,BH,Germany,36,1,No,100109,Bayer AG,,0,
-100775,KW,Germany,36,1,No,100109,Bayer AG,,0,
-100117,EG,Egypt,36,0,Yes,100029,Hikma Pharma,,0,
-100118,EG,Egypt,36,0,Yes,100030,Hikma Pharma,,0,
-100119,EG,Egypt,36,0,Yes,100031,Hikma Pharma,,0,
-100120,EG,,0,0,Yes,100032,,,0,
-100121,EG,Germany,48,0,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100122,EG,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100123,EG,Egypt,36,0,Yes,100044,Hikma Pharma,,0,
-100124,EG,Germany,24,0,No,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100125,EG,Germany,24,0,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,
-100126,EG,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100127,EG,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100128,EG,Germany,36,1,Yes,100050,Bayer AG,,0,
-100129,EG,Germany,48,1,Yes,100055,Bayer AG,,0,
-100130,EG,Germany,48,1,Yes,100057,Bayer AG,,0,
-100131,EG,Germany,48,1,Yes,100059,Bayer AG,,0,
-100132,EG,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
-100133,EG,Germany,60,1,Yes,100063,Bayer AG,,0,
-100134,EG,Germany,36,1,Yes,100064,Bayer AG,,0,
-100135,EG,Finland,60,1,Yes,100067,Bayer Oy Turku,,0,
-100806,EG,Germany,24,0,Yes,100127,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,0,
-100137,EG,Germany,60,1,Yes,100071,Bayer Weimar GmbH und Co. KG,,0,
-100138,EG,Germany,60,0,No,100072,Bayer Weimar GmbH und Co. KG,,0,
-100139,EG,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100140,EG,Germany,36,1,Yes,100081,Bayer AG,,0,
-100141,EG,Germany,36,1,Yes,100085,Bayer AG,,0,
-100142,EG,Germany,36,1,Yes,100087,Bayer AG,,0,
-100143,EG,Spain,48,1,Yes,100089,BerliMed S.A.,,0,
-100144,EG,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100145,EG,Germany ,36,1,Yes,100053,Bayer AG,,0,
-100146,EG,Germany,36,1,Yes,100092,Bayer AG,,0,
-100147,EG,Germany,36,1,Yes,100094,Bayer AG,,0,
-100148,EG,Germany,36,1,Yes,100095,Bayer AG,,0,
-100149,EG,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100150,EG,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100782,QA,Germany,36,1,No,100109,Bayer AG,,0,
-100190,IQ,Germany,60,0,No,100012,Bayer Weimar GmbH und Co. KG,,0,
-100191,IQ,Germany,36,0,No,100017,Bayer AG,,0,
-100192,IQ,Germany,24,0,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100193,IQ,Germany,60,0,No,100029,Bayer AG,,0,
-100194,IQ,Germany,60,0,No,100035,Bayer Weimar GmbH und Co. KG,,0,
-100195,IQ,USA,24,0,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100196,IQ,USA,30,0,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100197,IQ,Germany,36,0,No,100050,Bayer AG,,0,
-100198,IQ,Germany,60,0,Yes,100055,Bayer AG,,0,
-100199,IQ,Germany,60,0,Yes,100057,Bayer AG,,0,
-100200,IQ,Finland,36,0,Yes,100061,Bayer Oy Turku,,0,
-100201,IQ,Germany,36,0,Yes,100064,Bayer AG,,0,
-100202,IQ,Germany,48,0,No,100066,Bayer AG,,0,
-100807,EG,Germany,24,0,Yes,100128,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,0,
-100204,IQ,Germany,60,0,No,100075,Bayer AG,,0,
-100205,IQ,Germany,60,0,No,100070,Bayer Weimar GmbH und Co. KG,,0,
-100206,IQ,Germany,60,0,No,100034,Bayer Weimar GmbH und Co. KG,,0,
-100207,IQ,Germany,60,0,No,100077,Bayer Weimar GmbH und Co. KG,,0,
-100208,IQ,Germany,36,0,Yes,100086,Bayer AG,,0,
-100209,IQ,Spain,24,0,Yes,100090,BerliMed S.A.,,0,
-100210,IQ,Germany,36,0,No,100091,Bayer Weimar GmbH und Co. KG,,0,
-100802,LY,Germany,36,0,Yes,100040,Bayer AG,,0,
-100803,AE,Germany,36,0,Yes,100126,"Orion Corporation ,  Orion Pharma – Finland ",,0,
-100808,SA,Germany,24,1,Yes,100127,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,0,
-100214,JO,Germany,48,1,No,100001,Bayer AG,,0,
-100215,JO,Germany,48,1,No,100003,Bayer AG,,0,
-100216,JO,Germany,60,1,Yes,100012,Bayer Weimar GmbH und Co. KG,,0,
-100217,JO,Germany,36,1,Yes,100016,Bayer AG,,0,
-100218,JO,Germany,36,1,Yes,100017,Bayer AG,,0,
-100219,JO,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,
-100220,JO,Germany,60,1,Yes,100029,Bayer AG,,0,
-100221,JO,France,36,1,Yes,100033,Delpharm Lille SAS,,0,
-100222,JO,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,
-100223,JO,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,
-100224,JO,Germany,36,0,Yes,100039,Bayer AG,,0,
-100225,JO,USA,30,2,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,
-100226,JO,USA,30,2,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,
-100227,JO,USA,30,2,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,
-100228,JO,Germany,36,1,Yes,100051,Bayer AG,,0,
-100229,JO,Germany,36,1,Yes,100050,Bayer AG,,0,
-100230,JO,Germany,60,0,Yes,100055,Bayer AG,,0,
-100231,JO,Germany,60,0,Yes,100057,Bayer AG,,0,
-100232,JO,Germany,60,1,Yes,100058,Bayer AG,,0,
-100233,JO,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,
-100234,JO,Germany,36,1,Yes,100064,Bayer AG,,0,
-100235,JO,Germany,48,1,No,100066,Bayer AG,,0,
-100236,JO,Finland,36,0,Yes,100067,Bayer Oy Turku,,0,
-100237,JO,Germany,60,0,Yes,100075,Bayer AG,,0,
-100238,JO,Germany,60,1,Yes,100072,Bayer Weimar GmbH und Co. KG,,0,
-100239,JO,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,
-100240,JO,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,
-100241,JO,Germany,36,1,Yes,100081,Bayer AG,,0,
-100242,JO,Germany,60,1,Yes,100082,Bayer AG,,0,
-100243,JO,Germany,36,2,Yes,100086,Bayer AG,,0,
-100244,JO,Germany,36,2,Yes,100087,Bayer AG,,0,
-100245,JO,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,
-100246,JO,Germany,36,1,Yes,100092,Bayer AG,,0,
-100247,JO,Germany,36,1,Yes,100093,Bayer AG,,0,
-100248,JO,Germany,36,1,Yes,100094,Bayer AG,,0,
-100249,JO,Germany,36,1,Yes,100095,Bayer AG,,0,
-100250,JO,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100251,JO,Germany,36,1,No,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,
-100252,KW,Germany,48,1,Yes,100001,Bayer AG,,0,
-100253,KW,Germany,48,1,Yes,100003,Bayer AG,,0,
-100254,KW,Germany,36,2,Yes,100010,Bayer AG,,0,
-100255,KW,Germany,36,2,Yes,100011,Bayer AG,,0,
-100256,KW,Germany,60,0,No,100013,Bayer Weimar GmbH und Co. KG,,0,
-100257,KW,Germany,36,1,Yes,100016,Bayer Pharma AG,,0,
-100258,KW,Germany,36,1,Yes,100017,Bayer AG,,0,
-100259,KW,Germany,36,1,Yes,100018,Bayer AG,,0,
-100762,AE,Germany,36,1,No,100121,Bayer AG,,0,
-100781,OM,Germany,36,1,No,100121,Bayer AG,,0,
-100809,SA,Germany,24,1,Yes,100128,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,0,
-100532,SA,Finland,36,0,Yes,100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,0,
-100556,SA,Germany,36,1,Yes,100100,"Manufacturer : Bayer Weimar GmbH und Co. KG. Weimar / Germany Marketing Authorization Holder Bayer AG, Leverkusen, Germany.",,0,
-100136,EG,Finland,36,1,Yes,100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,0,
-100203,IQ,Finland,36,0,Yes,100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,0,
-100810,LY,USA,30,0,Yes,100104,Bayer Healthcare LLC,,0,
-100811,TH,DE,1460,1,Yes,100130,Bayer AG,,0.07,
-100812,TH,DE,1460,1,Yes,100131,Bayer AG,,0.07,
-100813,TH,DE,1460,1,Yes,100132,Bayer AG,,0.07,
-100814,TH,FR,1095,1,Yes,100133,Delpharm Lille S.A.S.,,0.07,
-100815,TH,FR,1095,1,Yes,100134,Delpharm Lille S.A.S.,,0.07,
-100816,TH,FR,1095,1,Yes,100135,Delpharm Lille S.A.S.,,0.07,
-100817,TH,DE,1095,1,Yes,100136,Bayer Weimar GmbH,,0.07,
-100818,TH,DE,1825,1,Yes,100137,Bayer AG,,0.07,
-100819,TH,DE,1825,1,Yes,100138,Bayer AG,,0.07,
-100820,TH,DE,730,1,Yes,100139,Boehringer Ingelheim Pharma GmbH,,0.07,
-100821,TH,DE,730,1,Yes,100140,Boehringer Ingelheim Pharma GmbH,,0.07,
-100822,TH,DE,1460,1,Yes,100141,Bayer AG,,0.07,
-100823,TH,DE,1460,1,Yes,100142,Bayer AG,,0.07,
-100824,TH,DE,1825,1,Yes,100143,Bayer AG,,0.07,
-100825,TH,DE,1825,1,Yes,100144,Bayer AG,,0.07,
-100826,TH,US,1095,1,Yes,100145,3 M drug delivery systems (repack by Bayer Weimar GmbH),,0.07,
-100827,TH,US,1095,1,Yes,100146,3 M drug delivery systems (repack by Bayer Weimar GmbH),,0.07,
-100828,TH,DE,1825,1,Yes,100147,Schering AG,,0.07,
-100829,TH,DE,1825,1,Yes,100148,Schering AG,,0.07,
-100830,TH,BR,1095,1,Yes,100149,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,
-100831,TH,BR,1095,1,Yes,100150,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,
-100832,TH,BR,1095,1,Yes,100151,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,
-100833,TH,DE,730,1,Yes,100152,Bayer AG,,0.07,
-100834,TH,DE,1095,1,Yes,100153,Bayer AG,,0.07,
-100835,TH,DE,1095,1,Yes,100154,Bayer AG,,0.07,
-100836,TH,DE,1095,1,Yes,100155,Bayer AG,,0.07,
-100837,TH,DE,1095,1,Yes,100156,Bayer AG,,0.07,
-100838,TH,ES,1460,1,Yes,100157,Berlimed S.A.,,0.07,
-100839,TH,FI,1825,1,Yes,100158,Bayer OY,,0.07,
-100840,TH,DE,1825,1,Yes,100159,SFM medical device GmbH,,0.07,
-100841,TH,DE,1825,1,Yes,100160,SFM medical device GmbH,,0.07,
-100842,TH,DE,1095,1,Yes,100161,Bayer AG,,0.07,
-100843,TH,FR,1095,1,Yes,100162,Delpharm Lille S.A.S.,,0.07,
-100844,TH,FR,1095,1,Yes,100163,Delpharm Lille S.A.S. (repack by Bayer AG),,0.07,
-100845,TH,BR,730,1,Yes,100164,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,
-100846,TH,FI,1095,1,Yes,100165,Bayer OY,,0.07,
-100847,TH,IT,1095,1,Yes,100166,"Patheon Italia S.p.A (Packed by Bayer Pharma AG, Berlin, Germany).",,0.07,
-100848,TH,IT,1095,1,Yes,100167,"Patheon Italia S.p.A (Packed by Bayer Pharma AG, Berlin, Germany).",,0.07,
-100849,TH,DE,0,1,Yes,100168,Berlimed S.A.,,0.07,
-100850,TH,DE,0,1,Yes,100169,Berlimed S.A.,,0.07,
-100851,TH,DE,1095,1,Yes,100170,Bayer AG,,0.07,
-100852,TH,DE,0,1,Yes,100171,Berlimed S.A.,,0.07,
-100853,TH,DE,1460,1,Yes,100172,Bayer AG,,0.07,
-100854,TH,DE,1825,1,Yes,100173,Bayer Weimar GmbH,,0.07,
-100855,TH,FR,730,1,Yes,100174,Delpharm Lille S.A.S.,,0.07,
-100856,TH,FR,730,1,Yes,100175,Delpharm Lille S.A.S.,,0.07,
-100857,TH,DE,1825,1,Yes,100176,Bayer AG,,0.07,
-100858,TH,BR,1825,1,Yes,100177,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,
-100859,TH,DE,1095,1,Yes,100178,Bayer AG,,0.07,
-100860,TH,DE,1095,1,Yes,100179,Bayer AG,,0.07,
-100861,TH,DE,0,1,Yes,100180,Berlimed S.A.,,0.07,
-100862,TH,DE,1825,1,Yes,100181,Bayer AG,,0.07,
-100863,TH,DE,1825,1,Yes,100182,Bayer AG,,0.07,
-100864,TH,ES,730,1,Yes,100183,Berlimed S.A.,,0.07,
-100865,TH,DE,1095,1,Yes,100184,Bayer Weimar GmbH,,0.07,
-100866,TH,DE,1095,1,Yes,100185,Bayer Weimar GmbH,,0.07,
-100867,TH,DE,1095,1,Yes,100186,Bayer AG,,0.07,
-100868,TH,DE,1095,1,Yes,100187,Bayer AG,,0.07,
-100869,TH,DE,1095,1,Yes,100188,Bayer AG,,0.07,
-100870,TH,DE,1095,1,Yes,100189,Bayer AG,,0.07,
-100871,TH,DE,1095,1,Yes,100190,Bayer AG,,0.07,
-100872,TH,DE,1095,1,Yes,100191,Bayer AG,,0.07,
-100873,TH,DE,1095,1,Yes,100192,Bayer AG,,0.07,
-100874,TH,DE,1095,1,Yes,100193,Bayer AG,,0.07,
-100875,TH,DE,1095,1,Yes,100194,Bayer Weimar GmbH,,0.07,
-100876,TH,DE,1095,1,Yes,100195,Bayer AG,,0.07,
-100877,TH,DE,1095,1,Yes,100196,Bayer AG,,0.07,
-100878,TH,0,1825,1,Yes,100197,0,,0.07,
-100879,TH,0,1825,1,Yes,100198,0,,0.07,
-100880,TH,DE,1825,1,Yes,100199,Bayer AG,,0.07,
-100881,TH,0,1825,1,Yes,100200,0,,0.07,
-100882,TH,DE,1095,1,Yes,100201,Bayer AG,,0.07,
-100883,TH,DE,1095,1,Yes,100202,Bayer AG,,0.07,
-100884,TH,DE,1095,1,Yes,100203,Bayer AG,,0.07,
-100885,TH,DE,1095,1,Yes,100204,Bayer AG,,0.07,
-100886,TH,DE,1095,1,Yes,100205,Bayer AG,,0.07,
-100887,TH,DE,1095,1,Yes,100206,Bayer AG,,0.07,
-100888,TH,DE,1095,1,Yes,100207,Bayer AG,,0.07,
-100889,TH,DE,1095,1,Yes,100208,Bayer AG,,0.07,
+COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECORD,PRODUCTPACKID,MANUFACTURER,Presentation_2,VTATax,COMMENT,GOV_CODE,QTY_THRESHOLD
+100510,SA,Germany,36,1,Yes,100043,Bayer AG,,0,,,0
+100511,SA,Germany,36,1,Yes,100044,Bayer AG,,0,,,0
+100512,SA,Germany,24,1,No,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100261,KW,Germany,48,0,No,100021,Bayer AG,,0,,,0
+100514,SA,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100515,SA,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100516,SA,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100517,SA,Germany,36,1,Yes,100051,Bayer AG,,0,,,0
+100518,SA,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100519,SA,Germany,36,1,Yes,100083,Bayer AG & Bayer Weimar GmbH und Co. ,,0,,,0
+100520,SA,Germany,36,1,Yes,100054,Bayer AG,,0,,,0
+100521,SA,Germany,36,0,Yes,100055,Bayer AG,,0,,,0
+100522,SA,Germany,36,0,Yes,100057,Bayer AG,,0,,,0
+100523,SA,Germany,60,0,No,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,,,0
+100524,SA,Germany,36,1,Yes,100059,Bayer AG & Bayer Weimar GmbH und Co. ,,0,,,0
+100525,SA,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100526,SA,Germany,60,1,No,100062,Bayer AG,,0,,,0
+100527,SA,Germany,48,1,Yes,100063,Bayer AG,,0,,,0
+100528,SA,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100529,SA,Germany,36,1,Yes,100065,Bayer AG,,0,,,0
+100530,SA,Germany,48,1,Yes,100066,Bayer AG,,0,,,0
+100531,SA,Finland,36,0,No,100067,Bayer Oy Turku,,0,,,0
+100804,LB,Germany,36,0,Yes,100126,"Orion Corporation ,  Orion Pharma – Finland ",,0,,,0
+100810,LY,USA,30,0,Yes,100104,Bayer Healthcare LLC,,0,,,0
+100534,SA,Germany,48,1,Yes,100070,Bayer Weimar GmbH und Co. KG,,0,,,0
+100535,SA,Germany,36,1,Yes,100074,Bayer AG,,0,,,0
+100591,SA,Germany,24,1,Yes,100076,Bayer AG,,0,,,0
+100537,SA,Germany,48,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100538,SA,Germany,36,1,Yes,100078,Bayer AG,,0,,,0
+100539,SA,Italy,36,0,No,100079,Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany,,0,,,0
+100540,SA,Canada,36,0,No,100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,0,,,0
+100541,SA,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100542,SA,Germany,48,1,Yes,100082,Bayer AG,,0,,,0
+100543,SA,Germany,36,1,Yes,100084,Bayer AG,,0,,,0
+100544,SA,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+100545,SA,Germany,36,1,Yes,100086,Bayer AG,,0,,,0
+100546,SA,Germany,36,1,Yes,100087,Bayer AG,,0,,,0
+100547,SA,Germany,0,0,No,100088,Bayer AG,,0,,,0
+100687,SA,USA,30,0,Yes,100103,Bayer HealthCare LLC,,0,,,0
+100549,SA,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100550,SA,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100551,SA,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100552,SA,Germany,36,1,Yes,100094,Bayer AG,,0,,,0
+100553,SA,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100554,SA,Norway,1,1,Yes,100096,Institute for Energy Technology (IFE),,0,,,0
+100555,SA,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100805,EG,Germany,36,0,Yes,100126,"Orion Corporation ,  Orion Pharma – Finland ",,0,,,0
+100557,SD,Germany,60,0,Yes,100055,Bayer AG,,0,,,0
+100558,SD,Germany,36,0,Yes,100085,Bayer AG,,0,,,0
+100559,SD,Germany,36,0,Yes,100087,Bayer AG,,0,,,0
+100560,SY,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100561,SY,Germany,36,0,Yes,100028,Bayer AG,,0,,,0
+100562,SY,Germany,60,0,Yes,100029,Bayer AG,,0,,,0
+100563,SY,Germany,60,0,Yes,100031,Bayer AG,,0,,,0
+100564,SY,France,36,0,No,100033,Delpharm Lille SAS,,0,,,0
+100262,KW,Italy,24,0,No,100026,Bayer Health Care S.R.L Italy,,0,,,0
+100566,SY,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100305,LB,Germany,60,1,No,100012,Bayer Weimar GmbH und Co. KG,,0,,,0
+100450,QA,Germany,24,0,No,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100569,SY,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100570,SY,Finland,36,0,No,100067,Bayer Oy Turku,,0,,,0
+100025,AE,Germany,24,0,No,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100572,SY,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100573,SY,Spain,24,1,Yes,100090,BerliMed S.A.,,0,,,0
+100574,SY,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100042,AE,Germany,60,0,No,100069,Bayer Weimar GmbH und Co. KG,,0,,,0
+100576,YE,Germany,48,0,Yes,100001,Bayer AG,,0,,,0
+100577,YE,Germany,36,0,Yes,100016,Bayer AG,,0,,,0
+100578,YE,Germany,36,0,Yes,100017,Bayer AG,,0,,,0
+100579,YE,Germany,60,0,Yes,100029,Bayer AG,,0,,,0
+100580,YE,Germany,60,0,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100581,YE,Germany,24,0,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100582,YE,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,,,0
+100583,YE,Germany,60,0,Yes,100070,Bayer Weimar GmbH und Co. KG,,0,,,0
+100584,YE,Germany,60,0,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100585,YE,Germany,60,0,Yes,100076,Bayer AG,,0,,,0
+100586,YE,Germany,60,0,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100587,YE,Germany,60,0,Yes,100082,Bayer AG,,0,,,0
+100588,YE,Germany,36,0,Yes,100086,Bayer AG,,0,,,0
+100589,YE,Germany,36,0,Yes,100087,Bayer AG,,0,,,0
+100590,YE,Germany,36,0,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100592,LY,Germany,36,0,Yes,100093,Bayer AG,,0,,,0
+100593,LY,Germany,36,0,Yes,100094,Bayer AG,,0,,,0
+100594,LY,Germany,36,0,Yes,100095,Bayer AG,,0,,,0
+100595,GC,,0,0,Yes,100005,,,0,,,0
+100595,EG,Germany,48,1,Yes,100101,Bayer Weimar GmbH und Co. KG,,0,,,0
+100596,GC,,0,0,Yes,100006,,,0,,,0
+100596,LB,Germany,60,1,Yes,100101,Bayer Weimar GmbH und Co. KG,,0,,,0
+100597,GC,,0,0,Yes,100007,,,0,,,0
+100597,QA,,0,0,No,100102,,,0,,,0
+100598,GC,,0,0,Yes,100008,,,0,,,0
+100599,GC,,0,0,Yes,100009,,,0,,,0
+100600,GC,,0,0,Yes,100010,,,0,,,0
+100601,GC,,0,0,Yes,100011,,,0,,,0
+100602,GC,,0,0,Yes,100013,,,0,,,0
+100603,GC,,0,0,Yes,100014,,,0,,,0
+100604,GC,,0,0,Yes,100015,,,0,,,0
+100605,GC,,0,0,Yes,100016,,,0,,,0
+100606,GC,,0,0,Yes,100017,,,0,,,0
+100607,GC,,0,0,Yes,100018,,,0,,,0
+100608,GC,,0,0,Yes,100019,,,0,,,0
+100609,GC,,0,0,Yes,100020,,,0,,,0
+100610,GC,,0,0,Yes,100021,,,0,,,0
+100611,GC,,0,0,Yes,100022,,,0,,,0
+100612,GC,,0,0,Yes,100023,,,0,,,0
+100613,GC,,0,0,Yes,100024,,,0,,,0
+100614,GC,,0,0,Yes,100026,,,0,,,0
+100615,GC,,0,0,Yes,100027,,,0,,,0
+100616,GC,,0,0,Yes,100028,,,0,,,0
+100617,GC,,0,0,Yes,100029,,,0,,,0
+100618,GC,,0,0,Yes,100030,,,0,,,0
+100619,GC,,0,0,Yes,100031,,,0,,,0
+100620,GC,,0,0,Yes,100033,,,0,,,0
+100621,GC,,0,0,Yes,100035,,,0,,,0
+100622,GC,,0,0,Yes,100036,,,0,,,0
+100623,GC,,0,0,Yes,100039,,,0,,,0
+100624,GC,,0,0,Yes,100040,,,0,,,0
+100625,GC,,0,0,Yes,100041,,,0,,,0
+100626,GC,,0,0,Yes,100043,,,0,,,0
+100627,GC,,0,0,Yes,100044,,,0,,,0
+100628,GC,,0,0,Yes,100037,,,0,,,0
+100629,GC,,0,0,Yes,100038,,,0,,,0
+100630,GC,,0,0,Yes,100045,,,0,,,0
+100631,GC,,0,0,Yes,100102,,,0,,,0
+100632,GC,,0,0,Yes,100046,,,0,,,0
+100633,GC,,0,0,Yes,100047,,,0,,,0
+100634,GC,,0,0,Yes,100051,,,0,,,0
+100635,GC,,0,0,Yes,100052,,,0,,,0
+100636,GC,,0,0,Yes,100048,,,0,,,0
+100637,GC,,0,0,Yes,100049,,,0,,,0
+100638,GC,,0,0,Yes,100050,,,0,,,0
+100639,GC,,0,0,Yes,100083,,,0,,,0
+100640,GC,,0,0,Yes,100054,,,0,,,0
+100641,GC,,0,0,Yes,100055,,,0,,,0
+100642,GC,,0,0,Yes,100056,,,0,,,0
+100643,GC,,0,0,Yes,100057,,,0,,,0
+100644,GC,,0,0,Yes,100058,,,0,,,0
+100645,GC,,0,0,Yes,100059,,,0,,,0
+100646,GC,,0,0,Yes,100060,,,0,,,0
+100647,GC,,0,0,Yes,100061,,,0,,,0
+100648,GC,,0,0,Yes,100062,,,0,,,0
+100649,GC,,0,0,Yes,100063,,,0,,,0
+100650,GC,,0,0,Yes,100064,,,0,,,0
+100651,GC,,0,0,Yes,100065,,,0,,,0
+100652,GC,,0,0,Yes,100066,,,0,,,0
+100653,GC,,0,0,Yes,100067,,,0,,,0
+100654,GC,,0,0,Yes,100068,,,0,,,0
+100655,GC,,0,0,Yes,100075,,,0,,,0
+100656,GC,,0,0,Yes,100069,,,0,,,0
+100657,GC,,0,0,Yes,100070,,,0,,,0
+100658,GC,,0,0,Yes,100071,,,0,,,0
+100659,GC,,0,0,Yes,100073,,,0,,,0
+100660,GC,,0,0,Yes,100074,,,0,,,0
+100661,GC,,0,0,Yes,100034,,,0,,,0
+100662,GC,,0,0,Yes,100076,,,0,,,0
+100663,GC,,0,0,Yes,100077,,,0,,,0
+100664,GC,,0,0,Yes,100078,,,0,,,0
+100665,GC,0,0,0,No,100079,0,,0,,,0
+100666,GC,0,0,0,No,100080,0,,0,,,0
+100667,GC,,0,0,Yes,100081,,,0,,,0
+100668,GC,,0,0,Yes,100082,,,0,,,0
+100669,GC,,0,0,Yes,100084,,,0,,,0
+100670,GC,,0,0,Yes,100085,,,0,,,0
+100671,GC,,0,0,Yes,100086,,,0,,,0
+100672,GC,,0,0,Yes,100087,,,0,,,0
+100673,GC,,0,0,Yes,100088,,,0,,,0
+100674,GC,,0,0,Yes,100090,,,0,,,0
+100675,GC,,0,0,Yes,100091,,,0,,,0
+100676,GC,,0,0,Yes,100092,,,0,,,0
+100677,GC,,0,0,Yes,100093,,,0,,,0
+100678,GC,,0,0,Yes,100094,,,0,,,0
+100679,GC,,0,0,Yes,100095,,,0,,,0
+100680,GC,,0,0,Yes,100096,,,0,,,0
+100681,GC,,0,0,Yes,100097,,,0,,,0
+100682,GC,,0,0,Yes,100098,,,0,,,0
+100683,GC,,0,0,Yes,100099,,,0,,,0
+100684,GC,,0,0,Yes,100100,,,0,,,0
+100685,IQ,USA,30,0,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100686,LY,USA,30,0,Yes,100103,Bayer Healthcare LLC,,0,,,0
+100688,SA,USA,30,0,Yes,100104,Bayer HealthCare LLC,,0,,,0
+100689,SA,USA,30,0,Yes,100105,Bayer HealthCare LLC,,0,,,0
+100548,SA,Spain,48,1,Yes,100090,BerliMed S.A.,,0,,,0
+100690,BH,Germany,36,0,Yes,100086,Bayer AG,,0,,,0
+100691,QA,USA,30,0,Yes,100107,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100692,QA,USA,30,0,Yes,100108,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100693,JO,,0,1,Yes,100018,,,0,,,0
+100694,JO,,0,1,Yes,100109,,,0,,,0
+100695,JO,Germany,36,2,Yes,100040,Bayer AG,,0,,,0
+100696,BH,Spain,24,1,Yes,100090,BerliMed S.A.,,0,,,0
+100697,BH,Germany,36,1,Yes,100007,Bayer AG,,0,,,0
+100698,BH,Germany,36,1,Yes,100008,Bayer AG,,0,,,0
+100699,BH,Germany,36,1,Yes,100009,Bayer AG,,0,,,0
+100700,BH,Germany,36,1,Yes,100010,Bayer AG,,0,,,0
+100701,BH,Germany,36,1,Yes,100011,Bayer AG,,0,,,0
+100702,AL,,0,1,Yes,100020,,B/15,0,,,0
+100703,AL,,0,1,Yes,100091,,B/2*14,0,,,0
+100704,AL,,0,0,Yes,100065,,B/1flacon,0,,,0
+100705,AL,,0,1,Yes,100090,,B/30 AMP,0,,,0
+100706,AL,,0,1,Yes,100085,,B/10,0,,,0
+100707,AL,,0,1,Yes,100087,,B/10,0,,,0
+100708,AL,,0,1,Yes,100039,,B/1,0,,,0
+100709,AL,,0,1,Yes,100040,,B/1,0,,,0
+100710,AL,,0,1,Yes,100064,,B/60 COMP,0,,,0
+100711,AL,,0,1,Yes,100081,,B/3*28,0,,,0
+100712,AL,,0,1,Yes,100045,,B/1,0,,,0
+100713,AL,,0,1,Yes,100046,,B/1,0,,,0
+100714,AL,,0,1,Yes,100047,,B/1,0,,,0
+100715,AL,,0,1,Yes,100036,,B/1,0,,,0
+100716,AL,,0,1,Yes,100094,,B/42,0,,,0
+100717,AL,,0,1,Yes,100095,,B/28,0,,,0
+100718,AL,,0,1,Yes,100092,,B/100,0,,,0
+100719,AL,,0,1,Yes,100055,,B/1,0,,,0
+100720,TN,,0,1,Yes,100046,,box of one pre-filled syringe and powder + one set of administration devices,0,,,0
+100721,TN,,0,1,Yes,100047,,box of one pre-filled syringe and powder + one set of administration devices,0,,,0
+100722,TN,,0,1,Yes,100045,,box of one pre-filled syringe and powder + one set of administration devices,0,,,0
+100723,MO,,0,1,Yes,100109,,,0,,,0
+100724,MO,,0,1,Yes,100110,,,0,,,0
+100725,MO,,0,1,Yes,100018,,,0,,,0
+100726,MO,,0,1,Yes,100045,,,0,,,0
+100727,MO,,0,1,Yes,100047,,,0,,,0
+100728,MO,,0,1,Yes,100046,,,0,,,0
+100729,MO,,0,1,Yes,100058,,,0,,,0
+100730,MO,,0,1,Yes,100111,,,0,,,0
+100731,MO,,0,1,Yes,100112,,,0,,,0
+100732,MO,,0,1,Yes,100113,,,0,,,0
+100733,MO,,0,1,Yes,100114,,,0,,,0
+100734,MO,,0,1,Yes,100115,,,0,,,0
+100735,MO,,0,1,Yes,100039,,,0,,,0
+100736,MO,,0,1,Yes,100020,,,0,,,0
+100737,MO,,0,1,Yes,100013,,,0,,,0
+100738,MO,,0,1,Yes,100064,,,0,,,0
+100739,MO,,0,1,Yes,100040,,,0,,,0
+100740,MO,,0,1,Yes,100041,,,0,,,0
+100741,MO,,0,1,Yes,100017,,,0,,,0
+100742,MO,,0,1,Yes,100092,,,0,,,0
+100743,MO,,0,1,Yes,100116,,,0,,,0
+100744,MO,,0,1,Yes,100095,,,0,,,0
+100745,MO,,0,1,Yes,100036,,,0,,,0
+100746,MO,,0,1,Yes,100119,,,0,,,0
+100747,QA,Germany,36,1,Yes,100009,Bayer AG,,0,,,0
+100748,QA,Germany,36,1,Yes,100010,Bayer AG,,0,,,0
+100749,QA,Germany,36,1,Yes,100011,Bayer AG,,0,,,0
+100755,EG,Germany,36,0,Yes,100007,Bayer AG,,0,,,0
+100756,EG,Germany,36,0,Yes,100008,Bayer AG,,0,,,0
+100757,EG,Germany,36,0,Yes,100009,Bayer AG,,0,,,0
+100758,EG,Germany,36,0,Yes,100010,Bayer AG,,0,,,0
+100759,EG,Germany,36,0,Yes,100011,Bayer AG,,0,,,0
+100477,IQ,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100526,KW,Germany,60,1,No,100062,Bayer AG,,0,,,0
+100526,BH,Germany,60,1,No,100062,Bayer AG,,0,,,0
+100531,QA,Finland,36,0,No,100067,Bayer Oy Turku,,0,,,0
+100551,IQ,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100553,IQ,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100555,IQ,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100798,BH,Finland,36,2,Yes,100061,Bayer Oy Turku,,0,,,0
+100789,OM,Germany,60,1,Yes,100122,Bayer Weimar GmbH und Co. KG,,0,,,0
+100260,KW,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100080,BH,Germany,24,0,No,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100112,EG,Germany,60,1,No,100013,Bayer Weimar GmbH und Co. KG,,0,,,0
+100263,KW,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+100264,KW,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+100265,KW,Germany,60,1,Yes,100030,Bayer AG,,0,,,0
+100145,EG,Germany ,36,1,No,100053,Bayer AG,,0,,,0
+100267,KW,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100268,KW,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100269,KW,Germany,36,2,Yes,100040,Bayer AG,,0,,,0
+100270,KW,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100271,KW,USA,30,2,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100272,KW,USA,30,2,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100273,KW,Germany,36,1,Yes,100052,Bayer AG,,0,,,0
+100274,KW,Germany,36,1,Yes,100048,Bayer AG,,0,,,0
+100275,KW,Germany,60,0,Yes,100056,Bayer AG,,0,,,0
+100276,KW,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100277,KW,Germany,60,1,Yes,100063,Bayer AG,,0,,,0
+100278,KW,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100279,KW,Finland,36,1,Yes,100067,Bayer Oy Turku,,0,,,0
+100280,KW,Germany,60,1,Yes,100075,Bayer AG,,0,,,0
+100281,KW,Germany,60,1,No,100071,Bayer Weimar GmbH und Co. KG,,0,,,0
+100282,KW,Germany,36,2,Yes,100073,Bayer AG,,0,,,0
+100283,KW,Germany,36,0,Yes,100074,Bayer AG,,0,,,0
+100284,KW,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100285,KW,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100286,KW,Italy,36,0,No,100079,Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany,,0,,,0
+100287,KW,Canada,36,0,No,100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,0,,,0
+100288,KW,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100289,KW,Germany,60,0,Yes,100082,Bayer AG,,0,,,0
+100290,KW,Germany,36,0,Yes,100087,Bayer AG,,0,,,0
+100291,KW,Spain,24,2,Yes,100090,BerliMed S.A.,,0,,,0
+100292,KW,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100293,KW,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100294,KW,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100295,KW,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100296,KW,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100297,KW,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100298,LB,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100299,LB,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100300,LB,Germany,36,1,Yes,100007,Bayer AG,,0,,,0
+100301,LB,Germany,36,1,Yes,100008,Bayer AG,,0,,,0
+100302,LB,Germany,36,1,Yes,100009,Bayer AG,,0,,,0
+100303,LB,Germany,36,1,Yes,100010,Bayer AG,,0,,,0
+100304,LB,Germany,36,1,Yes,100011,Bayer AG,,0,,,0
+100216,JO,Germany,60,1,No,100012,Bayer Weimar GmbH und Co. KG,,0,,,0
+100306,LB,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+100307,LB,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100308,LB,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+100309,LB,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100310,LB,Germany,36,0,Yes,100027,Bayer AG,,0,,,0
+100311,LB,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+100312,LB,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+100313,LB,Germany,60,1,Yes,100031,Bayer AG,,0,,,0
+100314,LB,France,60,1,No,100033,Delpharm Lille SAS,,0,,,0
+100315,LB,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100316,LB,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100317,LB,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100318,LB,Germany,36,1,Yes,100039,Bayer AG,,0,,,0
+100319,LB,Germany,36,1,Yes,100043,Bayer AG,,0,,,0
+100320,LB,Germany,36,1,Yes,100044,Bayer AG,,0,,,0
+100321,LB,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100322,LB,Germany,36,1,Yes,100051,Bayer AG,,0,,,0
+100323,LB,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100324,LB,Germany,60,0,Yes,100057,Bayer AG,,0,,,0
+100325,LB,Germany,60,1,Yes,100058,Bayer AG,,0,,,0
+100326,LB,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100327,LB,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100328,LB,Germany,48,1,Yes,100066,Bayer AG,,0,,,0
+100329,LB,Germany,60,0,Yes,100072,Bayer Weimar GmbH und Co. KG,,0,,,0
+100330,LB,Germany,60,1,Yes,100076,Bayer AG,,0,,,0
+100331,LB,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100332,LB,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100333,LB,Germany,60,1,Yes,100082,Bayer AG,,0,,,0
+100334,LB,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+100335,LB,Germany,36,0,Yes,100086,Bayer AG,,0,,,0
+100336,LB,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100337,LB,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100338,LB,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100339,LB,Germany,36,1,Yes,100094,Bayer AG,,0,,,0
+100340,LB,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100341,LB,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100342,LB,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100343,LY,Germany,48,0,Yes,100001,Bayer AG,,0,,,0
+100344,LY,Germany,48,0,Yes,100003,Bayer AG,,0,,,0
+100345,LY,Germany,36,0,No,100006,Bayer AG,,0,,,0
+100346,LY,Germany,60,0,Yes,100013,Bayer Weimar GmbH und Co. KG,,0,,,0
+100347,LY,Germany,36,0,Yes,100016,Bayer AG,,0,,,0
+100348,LY,Germany,36,0,Yes,100017,Bayer AG,,0,,,0
+100349,LY,Germany,24,0,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100350,LY,Finland,36,0,Yes,100023,Bayer Oy Turku,,0,,,0
+100351,LY,Germany,36,0,Yes,100028,Bayer AG,,0,,,0
+100352,LY,Germany,60,0,Yes,100029,Bayer AG,,0,,,0
+100353,LY,Germany,36,0,Yes,100030,Bayer AG,,0,,,0
+100354,LY,Germany,60,0,Yes,100031,Bayer AG,,0,,,0
+100355,LY,Germany,60,0,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100356,LY,Germany,36,0,Yes,100044,Bayer AG,,0,,,0
+100357,LY,USA,30,0,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100358,LY,USA,30,0,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100359,LY,USA,30,0,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100360,LY,Germany,60,0,Yes,100055,Bayer AG,,0,,,0
+100361,LY,Germany,60,0,Yes,100057,Bayer AG,,0,,,0
+100362,LY,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,,,0
+100363,LY,Germany,36,0,Yes,100060,Bayer AG & Bayer Weimar GmbH und Co. ,,0,,,0
+100364,LY,Finland,36,0,Yes,100061,Bayer Oy Turku,,0,,,0
+100365,LY,Germany,60,0,Yes,100063,Bayer AG,,0,,,0
+100366,LY,Germany,36,0,Yes,100064,Bayer AG,,0,,,0
+100367,LY,Finland,36,0,Yes,100067,Bayer Oy Turku,,0,,,0
+100368,LY,Germany,60,0,Yes,100070,Bayer Weimar GmbH und Co. KG,,0,,,0
+100369,LY,Germany,60,0,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100370,LY,Germany,60,0,Yes,100076,Bayer AG,,0,,,0
+100371,LY,Germany,60,0,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100372,LY,Germany,36,0,Yes,100081,Bayer AG,,0,,,0
+100373,LY,Germany,60,0,Yes,100082,Bayer AG,,0,,,0
+100374,LY,Germany,36,0,Yes,100085,Bayer AG,,0,,,0
+100375,LY,Germany,36,0,Yes,100087,Bayer AG,,0,,,0
+100376,LY,Spain,24,0,Yes,100090,BerliMed S.A.,,0,,,0
+100377,LY,Germany,36,0,Yes,100092,Bayer AG,,0,,,0
+100378,LY,Germany,36,0,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100379,OM,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100380,OM,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100221,JO,France,36,1,No,100033,Delpharm Lille SAS,,0,,,0
+100382,OM,Germany,36,1,Yes,100007,Bayer AG,,0,,,0
+100383,OM,Germany,36,1,Yes,100008,Bayer AG,,0,,,0
+100384,OM,Germany,36,1,Yes,100009,Bayer AG,,0,,,0
+100385,OM,Germany,36,1,Yes,100010,Bayer AG,,0,,,0
+100386,OM,Germany,36,1,Yes,100011,Bayer AG,,0,,,0
+100387,OM,Germany,60,0,No,100013,Bayer Weimar GmbH und Co. KG,,0,,,0
+100388,OM,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+100389,OM,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100390,OM,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+100391,OM,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100392,OM,Finland,36,0,No,100023,Bayer Oy Turku,,0,,,0
+100393,OM,Finland,36,0,No,100024,Bayer Oy Turku,,0,,,0
+100394,OM,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+100395,OM,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+100396,OM,Germany,60,1,Yes,100030,Bayer AG,,0,,,0
+100397,OM,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100398,OM,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100399,OM,Germany,36,0,Yes,100040,Bayer AG,,0,,,0
+100400,OM,Germany,36,0,No,100044,Bayer AG,,0,,,0
+100401,OM,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100402,OM,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100403,OM,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100404,OM,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100405,OM,Germany,60,0,Yes,100055,Bayer AG,,0,,,0
+100406,OM,Germany,60,0,Yes,100057,Bayer AG,,0,,,0
+100407,OM,Germany,60,1,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,,,0
+100408,OM,Germany,36,0,Yes,100059,Bayer AG & Bayer Weimar GmbH und Co. ,,0,,,0
+100409,OM,Germany,36,0,Yes,100060,Bayer AG & Bayer Weimar GmbH und Co. ,,0,,,0
+100410,OM,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100411,OM,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100412,OM,Germany,36,0,No,100065,Bayer AG,,0,,,0
+100413,OM,Germany,48,0,No,100066,Bayer AG,,0,,,0
+100414,OM,Germany,60,1,Yes,100075,Bayer AG,,0,,,0
+100415,OM,Germany,60,1,No,100070,Bayer Weimar GmbH und Co. KG,,0,,,0
+100416,OM,Germany,36,0,Yes,100073,Bayer AG,,0,,,0
+100417,OM,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100418,OM,Germany,60,1,Yes,100076,Bayer AG,,0,,,0
+100419,OM,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100420,OM,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100421,OM,Germany,60,1,Yes,100082,Bayer AG,,0,,,0
+100422,OM,Germany,36,0,Yes,100084,Bayer AG,,0,,,0
+100423,OM,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+100424,OM,Germany,36,0,Yes,100086,Bayer AG,,0,,,0
+100425,OM,Germany,36,0,Yes,100087,Bayer AG,,0,,,0
+100426,OM,Spain,24,0,Yes,100090,BerliMed S.A.,,0,,,0
+100427,OM,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100428,OM,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100429,OM,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100430,OM,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100431,OM,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100432,OM,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100433,QA,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100434,QA,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100435,QA,Germany,36,1,Yes,100006,Bayer AG,,0,,,0
+100436,QA,Germany,36,1,Yes,100007,Bayer AG,,0,,,0
+100437,QA,Germany,36,1,Yes,100008,Bayer AG,,0,,,0
+100438,QA,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+100439,QA,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+100440,QA,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100441,QA,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+100442,QA,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+100443,QA,Germany,60,1,Yes,100030,Bayer AG,,0,,,0
+100444,QA,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100445,QA,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100446,QA,Germany,36,0,Yes,100039,Bayer AG,,0,,,0
+100447,QA,Germany,36,0,Yes,100040,Bayer AG,,0,,,0
+100448,QA,Spain,36,0,Yes,100041,BerliMed S.A.,,0,,,0
+100449,QA,Germany,36,0,Yes,100044,Bayer AG,,0,,,0
+100818,JO,Germany,36,0,Yes,100028,Bayer AG,,0,,,0
+100451,QA,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100452,QA,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100453,QA,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100454,QA,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100455,QA,Germany,36,1,Yes,100052,Bayer AG,,0,,,0
+100456,QA,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100457,QA,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,,,0
+100458,QA,Finland,36,0,Yes,100061,Bayer Oy Turku,,0,,,0
+100459,QA,Germany,60,0,No,100062,Bayer AG,,0,,,0
+100460,QA,Germany,60,1,Yes,100063,Bayer AG,,0,,,0
+100461,QA,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100462,QA,Germany,60,1,No,100070,Bayer Weimar GmbH und Co. KG,,0,,,0
+100463,QA,Germany,60,0,Yes,100071,Bayer Weimar GmbH und Co. KG,,0,,,0
+100464,QA,Germany,36,0,Yes,100073,Bayer AG,,0,,,0
+100465,QA,Germany,36,0,Yes,100074,Bayer AG,,0,,,0
+100466,QA,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100467,QA,Germany,60,1,Yes,100076,Bayer AG,,0,,,0
+100468,QA,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100469,QA,Germany,60,1,Yes,100082,Bayer AG,,0,,,0
+100470,QA,Spain,24,0,Yes,100090,BerliMed S.A.,,0,,,0
+100471,QA,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100472,QA,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100473,QA,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100474,QA,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100475,QA,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100476,QA,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100477,SA,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100478,SA,Germany,0,0,No,100002,Bayer AG,,0,,,0
+100479,SA,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100480,SA,Germany,0,0,No,100004,Bayer AG,,0,,,0
+100481,SA,Germany,0,0,No,100005,Bayer AG,,0,,,0
+100482,SA,Germany,36,1,Yes,100006,Bayer AG,,0,,,0
+100483,SA,Germany,36,1,Yes,100007,Bayer AG,,0,,,0
+100484,SA,Germany,36,1,Yes,100008,Bayer AG,,0,,,0
+100485,SA,Germany,36,1,Yes,100009,Bayer AG,,0,,,0
+100486,SA,Germany,36,1,Yes,100010,Bayer AG,,0,,,0
+100487,SA,Germany,36,1,Yes,100011,Bayer AG,,0,,,0
+100488,SA,Germany ,48,1,Yes,100013,Bayer Weimar GmbH und Co.KG or Delpharm Lille SAS ,,0,,,0
+100819,SY,Germany,36,0,Yes,100007,Bayer AG,,0,,,0
+100490,SA,Germany,36,0,No,100015,Bayer AG,,0,,,0
+100491,SA,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+100492,SA,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100493,SA,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+100494,SA,Germany,0,0,No,100019,Bayer AG,,0,,,0
+100495,SA,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100496,SA,Germany,36,0,No,100099,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100497,SA,Germany,48,0,Yes,100021,Bayer AG,,0,,,0
+100498,SA,Germany,48,1,Yes,100022,Bayer AG,,0,,,0
+100499,SA,Germany,36,1,Yes,100027,Bayer AG,,0,,,0
+100500,SA,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+100501,SA,Germany,48,1,Yes,100029,Bayer AG,,0,,,0
+100502,SA,Germany,48,1,Yes,100030,Bayer AG,,0,,,0
+100503,SA,Germany,48,1,Yes,100031,Bayer AG,,0,,,0
+100791,SA,,0,0,Yes,100124,,,0,,,0
+100792,QA,Germany,36,1,Yes,100125,Bayer AG,,0,,,0
+100793,BH,Germany,36,1,Yes,100125,Bayer AG,,0,,,0
+100794,LB,Germany,36,1,Yes,100125,Bayer AG,,0,,,0
+100795,JO,Germany,36,1,Yes,100125,Bayer AG,,0,,,0
+100796,OM,Germany,36,1,Yes,100125,Bayer AG,,0,,,0
+100797,AE,Germany,36,1,Yes,100125,Bayer AG,,0,,,0
+100504,SA,France,36,1,Yes,100033,Delpharm Lille SAS,,0,,,0
+100505,SA,Germany,36,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100506,SA,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,Eylea goods will have no more than 50% remaining shelf life at the time of delivery,,0
+100507,SA,Germany,36,0,Yes,100039,Bayer AG,,0,,,0
+100508,SA,Germany,36,0,Yes,100040,Bayer AG,,0,,,0
+100509,SA,Spain,24,1,Yes,100041,BerliMed S.A.,,0,,,0
+100750,QA,Germany,48,0,Yes,100021,Bayer AG,,0,,,0
+100751,QA,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100752,OM,Germany,60,0,Yes,100063,Bayer AG,,0,,,0
+100753,SA,United Kingdom,24,0,Yes,100120,Penn Pharmaceutical Services Ltd,,0,,,0
+100754,LY,USA,24,0,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100763,KW,Germany,36,2,Yes,100007,Bayer AG,,0,,,0
+100764,KW,Germany,36,2,Yes,100008,Bayer AG,,0,,,0
+100765,KW,Germany,36,2,Yes,100009,Bayer AG,,0,,,0
+100766,KW,Germany,36,2,Yes,100039,Bayer AG,,0,,,0
+100767,KW,USA,30,2,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100769,BH,Gemany,36,1,Yes,100048,Bayer AG,,0,,,0
+100770,BH,Germany,36,1,Yes,100049,Bayer AG,,0,,,0
+100801,JO,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+100772,BH,Germany,60,1,Yes,100123,Bayer Weimar GmbH und Co. KG,,0,,,0
+100773,BH,Germany,36,1,Yes,100087,Bayer AG,,0,,,0
+100799,SA,Germany,36,1,Yes,100125,Bayer AG,,0,,,0
+100788,AE,Germany,30,1,Yes,100103,Bulk :Bayer AG,,0,,,0
+100789,AE,Germany,30,1,Yes,100104,Bulk :Bayer AG,,0,,,0
+100790,AE,Germany,30,1,Yes,100105,Bulk :Bayer AG,,0,,,0
+100820,SY,Germany,36,0,Yes,100008,Bayer AG,,0,,,0
+100783,QA,Germany,36,1,Yes,100049,Bayer AG,,0,,,0
+100784,QA,Germany,36,1,Yes,100048,Bayer AG,,0,,,0
+100785,QA,Germany,60,1,Yes,100123,Bayer Weimar GmbH und Co. KG,,0,,,0
+100800,KW,USA,30,1,Yes,100104,Bayer Healthcare LLC,,0,,,0
+100787,QA,Germany,60,1,Yes,100031,Bayer AG,,0,,,0
+100760,AE,Germany,36,1,Yes,100048,Bayer AG,,0,,,0
+100116,EG,Finland,36,0,No,100025,Bayer Oy Turku,,0,,,0
+100774,BH,Germany,36,1,No,100121,Bayer AG,,0,,,0
+100768,AE,Germany,60,1,Yes,100122,Bayer Weimar GmbH und Co. KG,,0,,,0
+100761,AE,Germany,36,1,No,100109,Bayer AG,,0,,,0
+100776,KW,Germany,36,1,Yes,100049,Bayer AG,,0,,,0
+100777,KW,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100778,KW,Germany,60,1,Yes,100122,Bayer Weimar GmbH und Co. KG,,0,,,0
+100779,KW,Germany,36,1,Yes,100119,Bayer AG,,0,,,0
+100780,OM,Germany,60,1,Yes,100123,Bayer Weimar GmbH und Co. KG,,0,,,0
+100786,QA,Germany,36,1,No,100121,Bayer AG,,0,,,0
+100001,AE,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100002,AE,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100003,AE,Germany,36,1,Yes,100006,Bayer AG,,0,,,0
+100004,AE,Germany,36,1,Yes,100007,Bayer AG,,0,,,0
+100005,AE,Germany,36,1,Yes,100008,Bayer AG,,0,,,0
+100006,AE,Germany,36,1,Yes,100009,Bayer AG,,0,,,0
+100007,AE,Germany,36,1,Yes,100010,Bayer AG,,0,,,0
+100008,AE,Germany,36,1,Yes,100011,Bayer AG,,0,,,0
+100009,AE,Germany,60,1,Yes,100013,Bayer Weimar GmbH und Co. KG,,0,,,0
+100010,AE,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+100011,AE,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100012,AE,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+100013,AE,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100014,AE,Germany,60,0,Yes,100027,Bayer AG,,0,,,0
+100015,AE,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+100016,AE,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+100017,AE,Germany,60,0,Yes,100030,Bayer AG,,0,,,0
+100018,AE,Germany,60,1,Yes,100031,Bayer AG,,0,,,0
+100019,AE,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100020,AE,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100021,AE,Germany,36,1,Yes,100039,Bayer AG,,0,,,0
+100022,AE,Germany,36,1,Yes,100040,Bayer AG,,0,,,0
+100023,AE,Germany,36,1,Yes,100043,Bayer AG,,0,,,0
+100024,AE,Germany,36,1,Yes,100044,Bayer AG,,0,,,0
+100821,SY,Germany,36,0,Yes,100009,Bayer AG,,0,,,0
+100026,AE,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100027,AE,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100028,AE,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100029,AE,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100030,AE,Germany,36,1,Yes,100052,Bayer AG,,0,,,0
+100031,AE,Germany,36,1,Yes,100049,Bayer AG,,0,,,0
+100032,AE,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100033,AE,Germany,60,0,Yes,100055,Bayer AG,,0,,,0
+100034,AE,Germany,60,0,Yes,100057,Bayer AG,,0,,,0
+100035,AE,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100036,AE,Germany,60,0,No,100062,Bayer AG,,0,,,0
+100037,AE,Germany,60,1,Yes,100063,Bayer AG,,0,,,0
+100038,AE,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100039,AE,Germany,48,0,No,100066,Bayer AG,,0,,,0
+100040,AE,Finland,36,1,Yes,100067,Bayer Oy Turku,,0,,,0
+100041,AE,Germany,60,1,Yes,100075,Bayer AG,,0,,,0
+100822,SY,Germany,36,0,Yes,100010,Bayer AG,,0,,,0
+100043,AE,Germany,60,1,No,100071,Bayer Weimar GmbH und Co. KG,,0,,,0
+100044,AE,Germany,36,0,Yes,100073,Bayer AG,,0,,,0
+100045,AE,Germany,60,1,Yes,100074,Bayer AG,,0,,,0
+100046,AE,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100047,AE,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100048,AE,Italy,36,0,No,100079,Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany,,0,,,0
+100049,AE,Canada,36,0,No,100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,0,,,0
+100050,AE,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100051,AE,Germany,60,0,Yes,100082,Bayer AG,,0,,,0
+100052,AE,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+100053,AE,Germany,36,1,Yes,100086,Bayer AG,,0,,,0
+100054,AE,Germany,36,1,Yes,100087,Bayer AG,,0,,,0
+100055,AE,Spain,24,1,Yes,100090,BerliMed S.A.,,0,,,0
+100056,AE,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100057,AE,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100058,AE,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100059,AE,Germany,36,1,Yes,100094,Bayer AG,,0,,,0
+100060,AE,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100061,AE,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100062,AE,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100063,BH,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100064,BH,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100065,BH,Germany,36,0,No,100006,Bayer AG,,0,,,0
+100066,BH,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+100067,BH,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100068,BH,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+100069,BH,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100070,BH,Germany,48,0,Yes,100022,Bayer AG,,0,,,0
+100071,BH,Finland,36,0,Yes,100023,Bayer Oy Turku,,0,,,0
+100072,BH,Germany,36,0,Yes,100027,Bayer AG,,0,,,0
+100073,BH,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+100074,BH,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+100075,BH,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100076,BH,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100077,BH,Germany,36,0,Yes,100039,Bayer AG,,0,,,0
+100078,BH,Germany,36,0,Yes,100040,Bayer AG,,0,,,0
+100079,BH,Spain,36,0,Yes,100041,BerliMed S.A.,,0,,,0
+100823,SY,Germany,36,0,Yes,100011,Bayer AG,,0,,,0
+100081,BH,Germany,24,1,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100082,BH,USA,30,1,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100083,BH,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100084,BH,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100085,BH,Germany,36,1,Yes,100052,Bayer AG,,0,,,0
+100086,BH,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100087,BH,Germany,60,0,Yes,100055,Bayer AG,,0,,,0
+100088,BH,Germany,21,0,Yes,100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,0,,,0
+100089,BH,Germany,60,1,Yes,100063,Bayer AG,,0,,,0
+100090,BH,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100824,QA,Germany,60,0,Yes,100013,Bayer Weimar GmbH und Co. KG,,0,,,0
+100092,BH,Germany,60,0,Yes,100069,Bayer Weimar GmbH und Co. KG,,0,,,0
+100093,BH,Germany,60,1,No,100070,Bayer Weimar GmbH und Co. KG,,0,,,0
+100094,BH,Germany,36,0,Yes,100073,Bayer AG,,0,,,0
+100095,BH,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100096,BH,Germany,60,1,Yes,100076,Bayer AG,,0,,,0
+100097,BH,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100098,BH,Italy,36,0,No,100079,Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany,,0,,,0
+100099,BH,Canada,36,0,No,100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,0,,,0
+100100,BH,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100101,BH,Germany,60,0,No,100082,Bayer AG,,0,,,0
+100102,BH,Germany,36,0,Yes,100084,Bayer AG,,0,,,0
+100103,BH,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+100104,BH,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100105,BH,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100106,BH,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100107,BH,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100108,BH,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100109,BH,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100110,EG,,0,0,Yes,100042,,,0,,,0
+100111,EG,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100825,QA,Germany,36,0,Yes,100017,Bayer AG,,0,,,0
+100113,EG,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100114,EG,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100771,BH,Germany,36,1,No,100109,Bayer AG,,0,,,0
+100775,KW,Germany,36,1,No,100109,Bayer AG,,0,,,0
+100117,EG,Egypt,36,0,Yes,100029,Hikma Pharma,,0,,,0
+100118,EG,Egypt,36,0,Yes,100030,Hikma Pharma,,0,,,0
+100119,EG,Egypt,36,0,Yes,100031,Hikma Pharma,,0,,,0
+100120,EG,,0,0,Yes,100032,,,0,,,0
+100121,EG,Germany,48,0,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100122,EG,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100123,EG,Egypt,36,0,Yes,100044,Hikma Pharma,,0,,,0
+100124,EG,Germany,24,0,No,100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100125,EG,Germany,24,0,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100126,EG,USA,30,1,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100127,EG,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100128,EG,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100129,EG,Germany,48,1,Yes,100055,Bayer AG,,0,,,0
+100130,EG,Germany,48,1,Yes,100057,Bayer AG,,0,,,0
+100131,EG,Germany,48,1,Yes,100059,Bayer AG,,0,,,0
+100132,EG,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100133,EG,Germany,60,1,Yes,100063,Bayer AG,,0,,,0
+100134,EG,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100135,EG,Finland,60,1,Yes,100067,Bayer Oy Turku,,0,,,0
+100806,EG,Germany,24,0,Yes,100127,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,0,,,0
+100137,EG,Germany,60,1,Yes,100071,Bayer Weimar GmbH und Co. KG,,0,,,0
+100138,EG,Germany,60,0,No,100072,Bayer Weimar GmbH und Co. KG,,0,,,0
+100139,EG,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100140,EG,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100141,EG,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+100142,EG,Germany,36,1,Yes,100087,Bayer AG,,0,,,0
+100143,EG,Spain,48,1,Yes,100089,BerliMed S.A.,,0,,,0
+100144,EG,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100826,SY,Germany,36,0,Yes,100039,Bayer AG,,0,,,0
+100146,EG,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100147,EG,Germany,36,1,Yes,100094,Bayer AG,,0,,,0
+100148,EG,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100149,EG,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100150,EG,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100782,QA,Germany,36,1,No,100109,Bayer AG,,0,,,0
+100190,IQ,Germany,60,0,No,100012,Bayer Weimar GmbH und Co. KG,,0,,,0
+100191,IQ,Germany,36,0,No,100017,Bayer AG,,0,,,0
+100192,IQ,Germany,24,0,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100193,IQ,Germany,60,0,No,100029,Bayer AG,,0,,,0
+100194,IQ,Germany,60,0,No,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100195,IQ,USA,24,0,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100196,IQ,USA,30,0,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100197,IQ,Germany,36,0,No,100050,Bayer AG,,0,,,0
+100198,IQ,Germany,60,0,Yes,100055,Bayer AG,,0,,,0
+100199,IQ,Germany,60,0,Yes,100057,Bayer AG,,0,,,0
+100200,IQ,Finland,36,0,Yes,100061,Bayer Oy Turku,,0,,,0
+100201,IQ,Germany,36,0,Yes,100064,Bayer AG,,0,,,0
+100202,IQ,Germany,48,0,No,100066,Bayer AG,,0,,,0
+100807,EG,Germany,24,0,Yes,100128,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,0,,,0
+100204,IQ,Germany,60,0,No,100075,Bayer AG,,0,,,0
+100205,IQ,Germany,60,0,No,100070,Bayer Weimar GmbH und Co. KG,,0,,,0
+100206,IQ,Germany,60,0,No,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100207,IQ,Germany,60,0,No,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100208,IQ,Germany,36,0,Yes,100086,Bayer AG,,0,,,0
+100209,IQ,Spain,24,0,Yes,100090,BerliMed S.A.,,0,,,0
+100210,IQ,Germany,36,0,No,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100802,LY,Germany,36,0,Yes,100040,Bayer AG,,0,,,0
+100803,AE,Germany,36,0,Yes,100126,"Orion Corporation ,  Orion Pharma – Finland ",,0,,,0
+100808,SA,Germany,24,1,Yes,100127,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,0,,,0
+100827,SY,USA,30,0,Yes,100046,Bayer Healthcare LLC,,0,,,0
+100828,SY,USA,30,0,Yes,100047,Bayer Healthcare LLC,,0,,,0
+100829,JO,Germany,36,0,Yes,100044,Bayer AG,,0,,,0
+100217,JO,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+100218,JO,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100219,JO,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100220,JO,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+100830,KW,Germany,36,0,Yes,100043,Bayer AG,,0,,,0
+100222,JO,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100223,JO,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100224,JO,Germany,36,0,Yes,100039,Bayer AG,,0,,,0
+100225,JO,USA,30,2,Yes,100045,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100226,JO,USA,30,2,Yes,100046,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100227,JO,USA,30,2,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100228,JO,Germany,36,1,Yes,100051,Bayer AG,,0,,,0
+100229,JO,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100230,JO,Germany,60,0,Yes,100055,Bayer AG,,0,,,0
+100231,JO,Germany,60,0,Yes,100057,Bayer AG,,0,,,0
+100232,JO,Germany,60,1,Yes,100058,Bayer AG,,0,,,0
+100233,JO,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100234,JO,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100831,BH,Germany,36,0,Yes,100043,Bayer AG,,0,,,0
+100236,JO,Finland,36,0,Yes,100067,Bayer Oy Turku,,0,,,0
+100237,JO,Germany,60,0,Yes,100075,Bayer AG,,0,,,0
+100238,JO,Germany,60,1,Yes,100072,Bayer Weimar GmbH und Co. KG,,0,,,0
+100239,JO,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100240,JO,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+100241,JO,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+100242,JO,Germany,60,1,Yes,100082,Bayer AG,,0,,,0
+100243,JO,Germany,36,2,Yes,100086,Bayer AG,,0,,,0
+100244,JO,Germany,36,2,Yes,100087,Bayer AG,,0,,,0
+100245,JO,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100246,JO,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+100247,JO,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+100248,JO,Germany,36,1,Yes,100094,Bayer AG,,0,,,0
+100249,JO,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+100250,JO,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100832,BH,Germany,36,0,Yes,100044,Bayer AG,,0,,,0
+100252,KW,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100253,KW,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100254,KW,Germany,36,2,Yes,100010,Bayer AG,,0,,,0
+100255,KW,Germany,36,2,Yes,100011,Bayer AG,,0,,,0
+100256,KW,Germany,60,0,No,100013,Bayer Weimar GmbH und Co. KG,,0,,,0
+100257,KW,Germany,36,1,Yes,100016,Bayer Pharma AG,,0,,,0
+100258,KW,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100259,KW,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+100762,AE,Germany,36,1,No,100121,Bayer AG,,0,,,0
+100781,OM,Germany,36,1,No,100121,Bayer AG,,0,,,0
+100809,SA,Germany,24,1,Yes,100128,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,0,,,0
+100532,SA,Finland,36,0,Yes,100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,0,,,0
+100556,SA,Germany,36,1,Yes,100100,"Manufacturer : Bayer Weimar GmbH und Co. KG. Weimar / Germany Marketing Authorization Holder Bayer AG, Leverkusen, Germany.",,0,,,0
+100136,EG,Finland,36,1,Yes,100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,0,,,0
+100203,IQ,Finland,36,0,Yes,100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,0,,,0
+100811,AE,Germany,60,0,Yes,100130,Bayer Weimar GmbH und Co. KG,,0,,,0
+100812,OM,Germany,60,0,Yes,100130,Bayer Weimar GmbH und Co. KG,,0,,,0
+100813,BH,Germany,60,0,Yes,100130,Bayer Weimar GmbH und Co. KG,,0,,,0
+100814,KW,Germany,60,0,Yes,100130,Bayer Weimar GmbH und Co. KG,,0,,,0
+100815,QA,Germany,60,0,Yes,100130,Bayer Weimar GmbH und Co. KG,,0,,,0
+100533,SA,Germany,48,0,Yes,100069,Bayer Weimar GmbH und Co. KG,,0,,,0
+100816,SA,Germany,48,0,Yes,100123,Bayer Weimar GmbH und Co. KG,,0,,,0
+200000,MX,México,0,1,Yes,200000,,,0,,,10000
+200001,MX,México,0,1,Yes,200001,,,0,,,10000
+200002,MX,México,0,1,Yes,200002,,,0,,,5000
+200003,MX,México,0,1,Yes,200003,,,0,,,8000
+200004,MX,México,0,1,Yes,200004,,,0,,,10000
+200005,MX,Germany,0,1,Yes,200005,,,0,,,300
+200006,MX,Germany,0,1,Yes,200006,,,0,,,365
+200007,MX,Germany,0,1,Yes,200007,,,0,,,300
+200008,MX,Germany,0,1,Yes,200008,,,0,,,3305
+200009,MX,Germany,0,1,Yes,200009,,,0,,,2060
+200010,MX,México,0,1,Yes,200010,,,0,,,150000
+200011,MX,México,0,1,Yes,200011,,,0,,,150000
+200012,MX,Austria,0,1,Yes,200012,,,0,,,150000
+200013,MX,Austria,0,1,Yes,200013,,,0,,,1500000
+200014,MX,Germany,0,1,Yes,200014,,,0,,,13999
+200015,MX,Germany,0,1,Yes,200015,,,0,,,80579
+200016,MX,Germany,0,1,Yes,200016,,,0,,,500000
+200017,MX,Germany,0,1,Yes,200017,,,0,,,100000
+200018,MX,Germany,0,1,Yes,200018,,,0,,,10000
+200019,MX,Germany,0,1,Yes,200019,,,0,,,150000
+200020,MX,El Salvador,0,1,Yes,200020,,,0,,,10000
+200021,MX,Argentina,0,1,Yes,200021,,,0,,,80000
+200022,MX,El Salvador,0,1,Yes,200022,,,0,,,5000
+200023,MX,El Salvador,0,1,Yes,200023,,,0,,,5000
+200024,MX,México,0,1,Yes,200024,,,0,,,7500
+200025,MX,México,0,1,Yes,200025,,,0,,,7500
+200026,MX,Germany,0,1,Yes,200026,,,0,,,18000
+200027,MX,Germany,0,1,Yes,200027,,,0,,,150000
+200028,MX,Germany,0,1,Yes,200028,,,0,,,5000
+200029,MX,Germany,0,1,Yes,200029,,,0,,,70000
+200030,MX,Italy,0,1,Yes,200030,,,0,,,407486
+200031,MX,Germany,0,1,Yes,200031,,,0,,,5000
+200032,MX,Brazil,0,1,Yes,200032,,,0,,,7500
+200033,MX,Brazil,0,1,Yes,200033,,,0,,,84972
+200034,MX,Germany,0,1,Yes,200034,,,0,,,1500000
+200035,MX,Brazil,0,1,Yes,200035,,,0,,,2000
+200036,MX,Finland,0,1,Yes,200036,,,0,,,105821
+200037,MX,United States,0,1,Yes,200037,,,0,,,3700
+200038,MX,Germany,0,1,Yes,200038,,,0,,,16000
+200039,MX,México,0,1,Yes,200039,,,0,,,1730429
+200040,MX,Germany,0,1,Yes,200040,,,0,,,1733216
+200041,MX,Germany,0,1,Yes,200041,,,0,,,35000
+200042,MX,Germany,0,1,Yes,200042,,,0,,,2018645
+200043,MX,Germany,0,1,Yes,200043,,,0,,,124567
+200044,MX,Finland,0,1,Yes,200044,,,0,,,225484
+200045,MX,Finland,0,1,Yes,200045,,,0,,,225484
+200046,MX,Germany,0,1,Yes,200046,,,0,,,1500
+200047,MX,Germany,0,1,Yes,200047,,,0,,,9435
+200048,MX,Germany,0,1,Yes,200048,,,0,,,45000
+200049,MX,México,0,1,Yes,200049,,,0,,,1524072
+200050,MX,Germany,0,1,Yes,200050,,,0,,,45000
+200051,MX,Germany,0,1,Yes,200051,,,0,,,45000
+200052,MX,México,0,1,Yes,200052,,,0,,,60000
+200053,MX,Germany,0,1,Yes,200053,,,0,,,10000
+200054,MX,Brazil,0,1,Yes,200054,,,0,,,1500
+200055,MX,Germany,0,1,Yes,200055,,,0,,,7500
+200056,MX,Germany,0,1,Yes,200056,,,0,,,810
+200057,MX,Spain,0,1,Yes,200057,,,0,,,8587
+200058,MX,Germany,0,1,Yes,200058,,,0,,,10841
+200059,MX,Germany,0,1,Yes,200059,,,0,,,11539
+200060,MX,Germany,0,1,Yes,200060,,,0,,,533690
+200061,MX,Germany,0,1,Yes,200061,,,0,,,52473
+200062,MX,Germany,0,1,Yes,200062,,,0,,,227508
+200063,MX,Germany,0,1,Yes,200063,,,0,,,11731
+200064,MX,Germany,0,1,Yes,200064,,,0,,,444889
+200065,MX,Norway,0,1,Yes,200065,,,0,,,770
+200066,MX,Norway,0,1,Yes,200066,,,0,,,655
+200067,MX,Germany,0,1,Yes,200067,,,0,,,25000
+200068,MX,Germany,0,1,Yes,200068,,,0,,,25000
+100817,EG,Spain,48,0,Yes,100131,BerliMed S.A.,,0,,,0
+100833,JO,Germany,36,0,Yes,100048,Bayer AG,,0,,,0
+100834,KW,Germany,36,0,Yes,100044,Bayer AG,,0,,,0
+100835,BH,USA,30,0,Yes,100103,Bayer Healthcare LLC,,0,,,0
+100836,KW,USA,30,0,Yes,100103,Bayer Healthcare LLC,,0,,,0
+100837,SY,Germany,60,0,Yes,100054,Bayer AG,,0,,,0
+100838,LB,USA,30,0,Yes,100045,Bayer Healthcare LLC,,0,,,0
+100839,LB,USA,30,0,Yes,100046,Bayer Healthcare LLC,,0,,,0
+100840,QA,USA,30,0,Yes,100103,Bayer Healthcare LLC,,0,,,0
+100841,SY,Germany,36,0,Yes,100085,Bayer AG,,0,,,0
+100842,SY,Germany,36,0,Yes,100087,Bayer AG,,0,,,0
+100843,SY,Germany,36,0,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+100844,SY,Germany,36,0,Yes,100093,Bayer AG,,0,,,0
+100845,SY,Germany,36,0,Yes,100094,Bayer AG,,0,,,0
+100846,SY,Germany,36,0,Yes,100095,Bayer AG,,0,,,0
+100847,BH,Germany,48,0,Yes,100066,Bayer AG,,0,,,0
+100848,JO,Germany,60,0,Yes,100076,Bayer AG,,0,,,0
+100849,LB,Germany,60,0,Yes,100054,Bayer AG,,0,,,0
+100850,KW,Germany,36,0,Yes,100084,Bayer AG,,0,,,0
+100851,KW,Germany,36,0,Yes,100085,Bayer AG,,0,,,0
+100852,KW,Germany,36,0,Yes,100086,Bayer AG,,0,,,0
+100853,SA,Germany,36,0,Yes,100048,Bayer AG,,0,,,0
+100855,AE,Germany,60,0,Yes,100076,Bayer AG,,0,,,0
+100856,LB,Germany,36,0,Yes,100074,Bayer AG,,0,,,0
+100857,BH,Germany,36,0,Yes,100094,Bayer AG,,0,,,0
+100858,EG,Germany,36,0,Yes,100093,Bayer AG,,0,,,0
+100859,LB,Germany,36,0,Yes,100087,Bayer AG,,0,,,0
+100860,OM,Germany,36,0,Yes,100094,Bayer AG,,0,,,0
+100861,QA,Germany,36,0,Yes,100085,Bayer AG,,0,,,0
+100862,QA,Germany,36,0,Yes,100087,Bayer AG,,0,,,0
+100863,QA,Germany,36,0,Yes,100094,Bayer AG,,0,,,0
+100864,SA,Germany,36,0,Yes,100098,Bulk Production: Bayer Weimar GmbH und Co KG;  Final Release: Bayer AG,,0,,,0
+100865,SY,Germany,36,0,Yes,100098,Bulk Production: Bayer Weimar GmbH und Co KG;  Final Release: Bayer AG,,0,,,0
+100866,AE,USA,24,0,Yes,100127,Bayer Healthcare LLC,,0,,,0
+100867,AE,USA,24,0,Yes,100128,Bayer Healthcare LLC,,0,,,0
+100868,BH,USA,30,0,Yes,100104,Bayer Healthcare LLC,,0,,,0
+100869,BH,USA,30,0,Yes,100105,Bayer Healthcare LLC,,0,,,0
+100870,KW,Germany,36,0,Yes,100125,Bayer AG,,0,,,0
+100871,QA,USA,30,0,Yes,100104,Bayer Healthcare LLC,,0,,,0
+100872,QA,USA,30,0,Yes,100105,Bayer Healthcare LLC,,0,,,0
+100873,EG,Germany,36,0,Yes,100125,Bayer AG,,0,,,0
+100874,EG,Germany,60,0,Yes,100122,Bayer Weimar GmbH und Co. KG,,0,,,0
+100875,SA,Germany,24,0,Yes,100129,"Bayer Health Care  LLC , Berkeley – USA Batch releaser: Bayer AG, Leverkusen - Germany",,0,,,0
+100876,JO,Germany,60,0,Yes,100063,Bayer AG,,0,,,0
+100877,LB,Germany,60,0,Yes,100063,Bayer AG,,0,,,0
+100513,SA,Germany,24,0,Yes,100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,0,,,0
+100565,SY,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100567,SY,Germany,60,1,Yes,100058,Bayer AG,,0,,,0
+100568,SY,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100571,SY,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100575,SY,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100266,KW,Germany,60,1,Yes,100031,Bayer AG,,0,,,0
+100381,OM,Germany,36,1,Yes,100006,Bayer AG,,0,,,0
+100489,SA,Germany,48,1,Yes,100014,Bayer AG,,0,,,0
+100115,EG,Finland,36,1,Yes,100024,Bayer Oy Turku,,0,,,0
+100091,BH,Germany,36,0,Yes,100065,Bayer AG,,0,,,0
+100214,JO,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100215,JO,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100235,JO,Germany,48,1,Yes,100066,Bayer AG,,0,,,0
+100251,JO,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+100878,AE,Germany,36,2,Yes,100119,Bayer AG,,0,,,0
+100879,SA,Germany,36,0,Yes,100119,Bayer AG,,1,,,0
+100880,JO,Germany,60,2,Yes,100132,Bayer Weimar GmbH und Co. KG,,2,,,0
+100881,LB,Germany,60,2,Yes,100132,Bayer Weimar GmbH und Co. KG,,3,,,0
+100882,OM,Germany,36,0,Yes,100074,Bayer AG,,4,,,0
+100883,AE,Germany,60,2,Yes,100123,Bayer Weimar GmbH und Co. KG,,5,,,0
+100884,YE,Germany,60,0,Yes,100123,Bayer Weimar GmbH und Co. KG,,6,,,0
+100885,JO,Germany,60,0,Yes,100123,Bayer Weimar GmbH und Co. KG,,7,,,0
+100886,TH,DE,1460,1,Yes,100133,Bayer AG,,0.07,,,0
+100887,TH,DE,1460,1,Yes,100134,Bayer AG,,0.07,,,0
+100888,TH,DE,1460,1,Yes,100135,Bayer AG,,0.07,,,0
+100889,TH,FR,1095,1,Yes,100136,Delpharm Lille S.A.S.,,0.07,,,0
+100890,TH,FR,1095,1,Yes,100137,Delpharm Lille S.A.S.,,0.07,,,0
+100891,TH,FR,1095,1,Yes,100138,Delpharm Lille S.A.S.,,0.07,,,0
+100892,TH,DE,1095,1,Yes,100139,Bayer Weimar GmbH,,0.07,,,0
+100893,TH,DE,1825,1,Yes,100140,Bayer AG,,0.07,,,0
+100894,TH,DE,1825,1,Yes,100141,Bayer AG,,0.07,,,0
+100895,TH,DE,730,1,Yes,100142,Boehringer Ingelheim Pharma GmbH,,0.07,,,0
+100896,TH,DE,730,1,Yes,100143,Boehringer Ingelheim Pharma GmbH,,0.07,,,0
+100897,TH,DE,1460,1,Yes,100144,Bayer AG,,0.07,,,0
+100898,TH,DE,1460,1,Yes,100145,Bayer AG,,0.07,,,0
+100899,TH,DE,1825,1,Yes,100146,Bayer AG,,0.07,,,0
+100900,TH,DE,1825,1,Yes,100147,Bayer AG,,0.07,,,0
+100901,TH,US,1095,1,Yes,100148,3 M drug delivery systems (repack by Bayer Weimar GmbH),,0.07,,,0
+100902,TH,US,1095,1,Yes,100149,3 M drug delivery systems (repack by Bayer Weimar GmbH),,0.07,,,0
+100903,TH,DE,1825,1,Yes,100150,Schering AG,,0.07,,,0
+100904,TH,DE,1825,1,Yes,100151,Schering AG,,0.07,,,0
+100905,TH,BR,1095,1,Yes,100152,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,,,0
+100906,TH,BR,1095,1,Yes,100153,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,,,0
+100907,TH,BR,1095,1,Yes,100154,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,,,0
+100908,TH,DE,730,1,Yes,100155,Bayer AG,,0.07,,,0
+100909,TH,DE,1095,1,Yes,100156,Bayer AG,,0.07,,,0
+100910,TH,DE,1095,1,Yes,100157,Bayer AG,,0.07,,,0
+100911,TH,DE,1095,1,Yes,100158,Bayer AG,,0.07,,,0
+100912,TH,DE,1095,1,Yes,100159,Bayer AG,,0.07,,,0
+100913,TH,ES,1460,1,Yes,100160,Berlimed S.A.,,0.07,,,0
+100914,TH,FI,1825,1,Yes,100161,Bayer OY,,0.07,,,0
+100915,TH,DE,1825,1,Yes,100162,SFM medical device GmbH,,0.07,,,0
+100916,TH,DE,1825,1,Yes,100163,SFM medical device GmbH,,0.07,,,0
+100917,TH,DE,1095,1,Yes,100164,Bayer AG,,0.07,,,0
+100918,TH,FR,1095,1,Yes,100165,Delpharm Lille S.A.S.,,0.07,,,0
+100919,TH,FR,1095,1,Yes,100166,Delpharm Lille S.A.S. (repack by Bayer AG),,0.07,,,0
+100920,TH,BR,730,1,Yes,100167,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,,,0
+100921,TH,FI,1095,1,Yes,100168,Bayer OY,,0.07,,,0
+100922,TH,IT,1095,1,Yes,100169,"Patheon Italia S.p.A (Packed by Bayer Pharma AG, Berlin, Germany).",,0.07,,,0
+100923,TH,IT,1095,1,Yes,100170,"Patheon Italia S.p.A (Packed by Bayer Pharma AG, Berlin, Germany).",,0.07,,,0
+100924,TH,DE,0,1,Yes,100171,Berlimed S.A.,,0.07,,,0
+100925,TH,DE,0,1,Yes,100172,Berlimed S.A.,,0.07,,,0
+100926,TH,DE,1095,1,Yes,100173,Bayer AG,,0.07,,,0
+100927,TH,DE,0,1,Yes,100174,Berlimed S.A.,,0.07,,,0
+100928,TH,DE,1460,1,Yes,100175,Bayer AG,,0.07,,,0
+100929,TH,DE,1825,1,Yes,100176,Bayer Weimar GmbH,,0.07,,,0
+100930,TH,FR,730,1,Yes,100177,Delpharm Lille S.A.S.,,0.07,,,0
+100931,TH,FR,730,1,Yes,100178,Delpharm Lille S.A.S.,,0.07,,,0
+100932,TH,DE,1825,1,Yes,100179,Bayer AG,,0.07,,,0
+100933,TH,BR,1825,1,Yes,100180,Schering DO Brasil Quimica E Farmaceutica Ltda.,,0.07,,,0
+100934,TH,DE,1095,1,Yes,100181,Bayer AG,,0.07,,,0
+100935,TH,DE,1095,1,Yes,100182,Bayer AG,,0.07,,,0
+100936,TH,DE,0,1,Yes,100183,Berlimed S.A.,,0.07,,,0
+100937,TH,DE,1825,1,Yes,100184,Bayer AG,,0.07,,,0
+100938,TH,DE,1825,1,Yes,100185,Bayer AG,,0.07,,,0
+100939,TH,ES,730,1,Yes,100186,Berlimed S.A.,,0.07,,,0
+100940,TH,DE,1095,1,Yes,100187,Bayer Weimar GmbH,,0.07,,,0
+100941,TH,DE,1095,1,Yes,100188,Bayer Weimar GmbH,,0.07,,,0
+100942,TH,DE,1095,1,Yes,100189,Bayer AG,,0.07,,,0
+100943,TH,DE,1095,1,Yes,100190,Bayer AG,,0.07,,,0
+100944,TH,DE,1095,1,Yes,100191,Bayer AG,,0.07,,,0
+100945,TH,DE,1095,1,Yes,100192,Bayer AG,,0.07,,,0
+100946,TH,DE,1095,1,Yes,100193,Bayer AG,,0.07,,,0
+100947,TH,DE,1095,1,Yes,100194,Bayer AG,,0.07,,,0
+100948,TH,DE,1095,1,Yes,100195,Bayer AG,,0.07,,,0
+100949,TH,DE,1095,1,Yes,100196,Bayer AG,,0.07,,,0
+100950,TH,DE,1095,1,Yes,100197,Bayer Weimar GmbH,,0.07,,,0
+100951,TH,DE,1095,1,Yes,100198,Bayer AG,,0.07,,,0
+100952,TH,DE,1095,1,Yes,100199,Bayer AG,,0.07,,,0
+100953,TH,0,1825,1,Yes,100200,0,,0.07,,,0
+100954,TH,0,1825,1,Yes,100201,0,,0.07,,,0
+100955,TH,DE,1825,1,Yes,100202,Bayer AG,,0.07,,,0
+100956,TH,0,1825,1,Yes,100203,0,,0.07,,,0
+100957,TH,DE,1095,1,Yes,100204,Bayer AG,,0.07,,,0
+100958,TH,DE,1095,1,Yes,100205,Bayer AG,,0.07,,,0
+100959,TH,DE,1095,1,Yes,100206,Bayer AG,,0.07,,,0
+100960,TH,DE,1095,1,Yes,100207,Bayer AG,,0.07,,,0
+100961,TH,DE,1095,1,Yes,100208,Bayer AG,,0.07,,,0
+100962,TH,DE,1095,1,Yes,100209,Bayer AG,,0.07,,,0
+100963,TH,DE,1095,1,Yes,100210,Bayer AG,,0.07,,,0
+100964,TH,DE,1095,1,Yes,100211,Bayer AG,,0.07,,,0
+100965,AR,Germany,36,0,Yes,100126,"Orion Corporation ,  Orion Pharma – Finland ",,0,,,0
+100966,AR,Germany,60,1,Yes,100101,Bayer Weimar GmbH und Co. KG,,0,,,0
+100967,AR,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+100968,AR,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+100969,AR,Germany,36,1,Yes,100007,Bayer AG,,0,,,0
+100970,AR,Germany,36,1,Yes,100008,Bayer AG,,0,,,0
+100971,AR,Germany,36,1,Yes,100009,Bayer AG,,0,,,0
+100972,AR,Germany,36,1,Yes,100010,Bayer AG,,0,,,0
+100973,AR,Germany,36,1,Yes,100011,Bayer AG,,0,,,0
+100974,AR,Germany,60,1,Yes,100012,Bayer Weimar GmbH und Co. KG,,0,,,0
+100975,AR,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+100976,AR,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+100977,AR,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+100978,AR,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+100979,AR,Germany,36,0,Yes,100027,Bayer AG,,0,,,0
+100980,AR,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+100981,AR,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+100982,AR,Germany,60,1,Yes,100031,Bayer AG,,0,,,0
+100983,AR,France,60,1,No,100033,Delpharm Lille SAS,,0,,,0
+100984,AR,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+100985,AR,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+100986,AR,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+100987,AR,Germany,36,1,Yes,100039,Bayer AG,,0,,,0
+100988,AR,Germany,36,1,Yes,100043,Bayer AG,,0,,,0
+100989,AR,Germany,36,1,Yes,100044,Bayer AG,,0,,,0
+100990,AR,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+100991,AR,Germany,36,1,Yes,100051,Bayer AG,,0,,,0
+100992,AR,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+100993,AR,Germany,60,0,Yes,100057,Bayer AG,,0,,,0
+100994,AR,Germany,60,1,Yes,100058,Bayer AG,,0,,,0
+100995,AR,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+100996,AR,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+100997,AR,Germany,48,1,Yes,100066,Bayer AG,,0,,,0
+100998,AR,Germany,60,0,Yes,100072,Bayer Weimar GmbH und Co. KG,,0,,,0
+100999,AR,Germany,60,1,Yes,100076,Bayer AG,,0,,,0
+101000,AR,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+101001,AR,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+101002,AR,Germany,60,1,Yes,100082,Bayer AG,,0,,,0
+101003,AR,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+101004,AR,Germany,36,0,Yes,100086,Bayer AG,,0,,,0
+101005,AR,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+101006,AR,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+101007,AR,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+101008,AR,Germany,36,1,Yes,100094,Bayer AG,,0,,,0
+101009,AR,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+101010,AR,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+101011,AR,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+101012,AR,Germany,36,1,Yes,100125,Bayer AG,,0,,,0
+101013,BR,Germany,36,0,Yes,100126,"Orion Corporation ,  Orion Pharma – Finland ",,0,,,0
+101014,BR,Germany,60,1,Yes,100101,Bayer Weimar GmbH und Co. KG,,0,,,0
+101015,BR,Germany,48,1,Yes,100001,Bayer AG,,0,,,0
+101016,BR,Germany,48,1,Yes,100003,Bayer AG,,0,,,0
+101017,BR,Germany,36,1,Yes,100007,Bayer AG,,0,,,0
+101018,BR,Germany,36,1,Yes,100008,Bayer AG,,0,,,0
+101019,BR,Germany,36,1,Yes,100009,Bayer AG,,0,,,0
+101020,BR,Germany,36,1,Yes,100010,Bayer AG,,0,,,0
+101021,BR,Germany,36,1,Yes,100011,Bayer AG,,0,,,0
+101022,BR,Germany,60,1,Yes,100012,Bayer Weimar GmbH und Co. KG,,0,,,0
+101023,BR,Germany,36,1,Yes,100016,Bayer AG,,0,,,0
+101024,BR,Germany,36,1,Yes,100017,Bayer AG,,0,,,0
+101025,BR,Germany,36,1,Yes,100018,Bayer AG,,0,,,0
+101026,BR,Germany,24,1,Yes,100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,0,,,0
+101027,BR,Germany,36,0,Yes,100027,Bayer AG,,0,,,0
+101028,BR,Germany,36,1,Yes,100028,Bayer AG,,0,,,0
+101029,BR,Germany,60,1,Yes,100029,Bayer AG,,0,,,0
+101030,BR,Germany,60,1,Yes,100031,Bayer AG,,0,,,0
+101031,BR,France,60,1,No,100033,Delpharm Lille SAS,,0,,,0
+101032,BR,Germany,60,1,Yes,100034,Bayer Weimar GmbH und Co. KG,,0,,,0
+101033,BR,Germany,60,1,Yes,100035,Bayer Weimar GmbH und Co. KG,,0,,,0
+101034,BR,USA,24,1,Yes,100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,0,,,0
+101035,BR,Germany,36,1,Yes,100039,Bayer AG,,0,,,0
+101036,BR,Germany,36,1,Yes,100043,Bayer AG,,0,,,0
+101037,BR,Germany,36,1,Yes,100044,Bayer AG,,0,,,0
+101038,BR,USA,30,1,Yes,100047,"Bayer Healthcare LLC, Berkeley",,0,,,0
+101039,BR,Germany,36,1,Yes,100051,Bayer AG,,0,,,0
+101040,BR,Germany,36,1,Yes,100050,Bayer AG,,0,,,0
+101041,BR,Germany,60,0,Yes,100057,Bayer AG,,0,,,0
+101042,BR,Germany,60,1,Yes,100058,Bayer AG,,0,,,0
+101043,BR,Finland,36,1,Yes,100061,Bayer Oy Turku,,0,,,0
+101044,BR,Germany,36,1,Yes,100064,Bayer AG,,0,,,0
+101045,BR,Germany,48,1,Yes,100066,Bayer AG,,0,,,0
+101046,BR,Germany,60,0,Yes,100072,Bayer Weimar GmbH und Co. KG,,0,,,0
+101047,BR,Germany,60,1,Yes,100076,Bayer AG,,0,,,0
+101048,BR,Germany,60,1,Yes,100077,Bayer Weimar GmbH und Co. KG,,0,,,0
+101049,BR,Germany,36,1,Yes,100081,Bayer AG,,0,,,0
+101050,BR,Germany,60,1,Yes,100082,Bayer AG,,0,,,0
+101051,BR,Germany,36,1,Yes,100085,Bayer AG,,0,,,0
+101052,BR,Germany,36,0,Yes,100086,Bayer AG,,0,,,0
+101053,BR,Germany,36,1,Yes,100091,Bayer Weimar GmbH und Co. KG,,0,,,0
+101054,BR,Germany,36,1,Yes,100092,Bayer AG,,0,,,0
+101055,BR,Germany,36,1,Yes,100093,Bayer AG,,0,,,0
+101056,BR,Germany,36,1,Yes,100094,Bayer AG,,0,,,0
+101057,BR,Germany,36,1,Yes,100095,Bayer AG,,0,,,0
+101058,BR,Germany,36,1,Yes,100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+101059,BR,Germany,36,1,Yes,100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,0,,,0
+101060,BR,Germany,36,1,Yes,100125,Bayer AG,,0,,,0

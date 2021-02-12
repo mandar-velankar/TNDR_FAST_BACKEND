@@ -547,7 +547,7 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack sku
     offerProduct.Price.Bundled_1_SKU.PRODUCTPACKNAME as FOC_BUNDLED_1_PRODUCT_NAME,
     offerProduct.Price.Bundled_1_SKU.PACKFACTOR as FOC_BUNDLED_1_PACKSIZE,
     offerProduct.Price.Bundled_1_Cogs.COGS * offerProduct.Price.SpotRate / (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.Price.Bundled_1_SKU.PACKFACTOR else 1 end) as FOC_BUNDLED_1_COGS,
-    offerProduct.SKU.CountryPacks.QTY_THRESHOLD * (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as QTY_THRESHOLD:Double
+    offerProduct.SKUCountry.QTY_THRESHOLD * (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as QTY_THRESHOLD:Double
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
@@ -572,7 +572,7 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
-	ifnull(offer.Quotation.OfferValidity, to_date('2020-12-31')) as OFFERVALIDITY,
+	ifnull(offer.Quotation.OfferValidity, to_date('2021-07-31')) as OFFERVALIDITY,
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,

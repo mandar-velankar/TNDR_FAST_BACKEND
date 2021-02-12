@@ -445,7 +445,7 @@ module.exports = (srv) => {
 		//Country Business
 		//Optional if business approved
 		//Mandatory if volume above threshold
-		let countryBusiness = (product.BUSINESS_APPROVED === 1 && product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
+		let countryBusiness = (product.BUSINESS_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
 
 		//Supply
 		//Optional if supply approved
