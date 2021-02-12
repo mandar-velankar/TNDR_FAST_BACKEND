@@ -388,7 +388,10 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
         name : String;
     };
 
-    entity MandatoryProductFields @readonly  as projection on AdminData.MandatoryTableFieldsCountry; 
+    // entity MandatoryProductFields @readonly  as projection on AdminData.MandatoryTableFieldsCountry; 
+
+    entity CountryTablesCustomization @readonly  as projection on AdminData.CountryTablesCustomization; 
+    entity CountryTabsCustomization @readonly as projection on AdminData.CountryTabsCustomization;
 
     function getCurrentUser() returns User;
     //Office365 PowerAutomate Approval Workflow Views

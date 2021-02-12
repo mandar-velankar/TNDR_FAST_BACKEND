@@ -90,43 +90,43 @@ CIP Distributor warehouse Beirut by air",150 days from invoice date,Yes,2025053,
 100313,OM,0.075,"CIF Muscat for Air, CIP Muscat for Sea ",210 days after invoice date,Yes,2033919,0811B20105
 100314,OM,0.075,"CIF Muscat for Air, CIP Muscat for Sea ",210 days after invoice date,Yes,2033919,0871D10A03
 100315,OM,0.075,"CIF Muscat for Air, CIP Muscat for Sea ",210 days after invoice date,Yes,2033919,0871D10A05
-100316,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0811B10005
-100317,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0880J10351
-100318,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0820F10D11
-100319,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0810A10250
-100320,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0874H10B21
-100321,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0810A10226
-100322,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0810A10050
-100323,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D40A20
-100324,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D30A01
-100325,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0876I10I43
-100326,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D10A27
-100327,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,6573550D46
-100328,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,6573510D47
-100329,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0811B30048
-100330,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0830G10857
-100331,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0830G10957
-100332,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0810A20211
-100333,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0810A20210
-100334,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D10A39
-100335,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D20A02
-100336,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0810A20A49
-100337,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0820F10884
-100338,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,No,1731868,0874H20174
-100339,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D20A54
-100340,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D30A59
-100341,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D30A60
-100342,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,6573550D58
-100343,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D30A64
-100344,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0810A20A65
-100345,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0820F10I88
-100346,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0810A20A69
-100347,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0811B70B59
-100348,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D30I44
-100349,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0811B20105
-100350,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D10A03
-100351,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D10A05
-100352,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ",120 days net after invoice date ,Yes,1731868,0871D10I51
+100316,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0811B10005
+100317,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0880J10351
+100318,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0820F10D11
+100319,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0810A10250
+100320,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0874H10B21
+100321,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0810A10226
+100322,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0810A10050
+100323,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D40A20
+100324,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D30A01
+100325,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0876I10I43
+100326,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D10A27
+100327,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,6573550D46
+100328,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,6573510D47
+100329,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0811B30048
+100330,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0830G10857
+100331,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0830G10957
+100332,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0810A20211
+100333,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0810A20210
+100334,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D10A39
+100335,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D20A02
+100336,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0810A20A49
+100337,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0820F10884
+100338,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",No,1731868,0874H20174
+100339,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D20A54
+100340,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D30A59
+100341,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D30A60
+100342,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,6573550D58
+100343,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D30A64
+100344,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0810A20A65
+100345,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0820F10I88
+100346,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0810A20A69
+100347,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0811B70B59
+100348,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D30I44
+100349,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0811B20105
+100350,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D10A03
+100351,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D10A05
+100352,QA,0.05,"CIF Doha for Sea, CIP Doha for Air ","120 days net after invoice date ",Yes,1731868,0871D10I51
 100353,SA,0.07,CIF Riyadh / Jeddah Airport,180 days from date of invoice,Yes,8888888,0820F10I89
 100354,SA,0.075,CIF Jeddah,365 days after receipt of goods,Yes,3147458,0880J10351
 100355,SA,0.075,CIF Jeddah,365 days after receipt of goods,Yes,3147458,0820F10D11
@@ -251,11 +251,11 @@ CIP Distributor warehouse Beirut by air",150 days from invoice date,Yes,2025053,
 100007,AE,0.075,CIF Dubai by Sea / CIP Dubai by Air,180 days from BL or AWB date,No,9349695,0874H20174
 100008,AE,0.075,CIF Dubai by Sea / CIP Dubai by Air,180 days from BL or AWB date,Yes,9349695,0810A10888
 100009,AE,0.075,CIF Dubai by Sea / CIP Dubai by Air,180 days from BL or AWB date,Yes,9349695,0811B20105
-100010,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ",120 days net after invoice date ,Yes,164390,0880J10351
-100011,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ",120 days net after invoice date ,Yes,164390,0830G10857
-100012,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ",120 days net after invoice date ,Yes,164390,0830G10957
-100013,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ",120 days net after invoice date ,Yes,164390,0820F10884
-100014,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ",120 days net after invoice date ,Yes,164390,0820F10I88
+100010,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ","120 days net after invoice date ",Yes,164390,0880J10351
+100011,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ","120 days net after invoice date ",Yes,164390,0830G10857
+100012,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ","120 days net after invoice date ",Yes,164390,0830G10957
+100013,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ","120 days net after invoice date ",Yes,164390,0820F10884
+100014,AE,0.075,"CIF Dubai by Sea, CIP Dubai by Air ","120 days net after invoice date ",Yes,164390,0820F10I88
 100015,AE,0.075,CIF Dubai by Sea / CIP Dubai by Air,120 days from invoice date,No,3147448,0820F10D11
 100016,AE,0.075,CIF Dubai by Sea / CIP Dubai by Air,180 days from invoice date,Yes,3147448,0874H10B21
 100017,AE,0.075,CIF Dubai by Sea / CIP Dubai by Air,120 days from invoice date,Yes,3147448,0871D40A20
@@ -437,33 +437,33 @@ CIP Distributor warehouse Beirut by air",150 days from invoice date,Yes,2025053,
 100193,KW,0.05,CIF Kuwait City,60 days net after invoice date,Yes,1909161,0811B20105
 100194,KW,0.05,CIF Kuwait City,150 days net after invoice date,Yes,1909161,0871D10A03
 100195,KW,0.05,CIF Kuwait City,150 days net after invoice date,Yes,1909161,0871D10A05
-100196,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0811B10005
-100197,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0820F10D11
-100198,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0810A10250
-100199,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0874H10B21
-100200,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0820F10D14
-100201,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0810A10050
-100202,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D40A20
-100203,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D30A01
-100204,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0876I10I43
-100205,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D10A27
-100206,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0811B30048
-100207,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0830G10857
-100208,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0810A20211
-100209,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0810A20210
-100210,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,6573510D32
-100211,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D20A02
-100212,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0820F10884
-100213,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D30A60
-100214,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D30A64
-100215,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0810A20A65
-100216,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0820F10I88
-100217,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D10A70
-100218,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,6573510D35
-100219,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0811B70B59
-100220,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D30I44
-100221,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D10A03
-100222,KW,0.075,CIF Kuwait by Sea or CIP Kuwait by Air ,120 days after invoice date,No,1493568,0871D10A05
+100196,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0811B10005
+100197,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0820F10D11
+100198,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0810A10250
+100199,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0874H10B21
+100200,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0820F10D14
+100201,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0810A10050
+100202,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D40A20
+100203,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D30A01
+100204,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0876I10I43
+100205,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D10A27
+100206,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0811B30048
+100207,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0830G10857
+100208,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0810A20211
+100209,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0810A20210
+100210,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,6573510D32
+100211,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D20A02
+100212,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0820F10884
+100213,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D30A60
+100214,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D30A64
+100215,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0810A20A65
+100216,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0820F10I88
+100217,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D10A70
+100218,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,6573510D35
+100219,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0811B70B59
+100220,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D30I44
+100221,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D10A03
+100222,KW,0.075,"CIF Kuwait by Sea or CIP Kuwait by Air ",120 days after invoice date,No,1493568,0871D10A05
 100223,LB,0.05,"CIF Distributor warehouse Beirut by sea 
 CIP Distributor warehouse Beirut by air",150 days from invoice date,Yes,2025053,0811B10005
 100224,LB,0.05,"CIF Distributor warehouse Beirut by sea 
