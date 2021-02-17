@@ -109,8 +109,10 @@ AE,100286,0,SKMC - Ajman,Public,,,,,Yes,,,1,,
 LB,100287,0,Ain Wazein,Private,,,,,Yes,,,1,,
 SA,100302,0,Security Forces Hospital (SFH) - Riyadh,Public,,,,,Yes,,,1,,
 SA,100303,0,Security Forces Hospital (SFH) - Mecca,Public,,,,,Yes,,,1,,
-JO,100304,0,United Nations Relief and Works Agency,Aid Agency,"UNRWA Headquarters (Amman)
-Bayader Wadi Seer, Industrial Street Building # 136
+JO,100304,0,United Nations Relief and Works Agency,Aid Agency,"UNRWA Headquarters (Amman)
+
+Bayader Wadi Seer, Industrial Street Building # 136
+
 P.O. Box 140157, Amman 11814 Jordan",,,,Yes,,,1,,
 EG,100307,0,El Galaa military hospital,Public,,,,,Yes,,,1,,
 EG,100308,0,Egyptian Sugar and Integrated Industries Company,Public,,,,,Yes,,,1,,
@@ -5451,5 +5453,5 @@ TH,105437,170228661,"SUANDORK PHARMA LTD.,PART.",OTC,,,,,Yes,,,1,,
 TH,105438,170024473,RANYA JATUPORN,OTC,,,,,Yes,,,1,,
 TH,105439,170025915,LEE YONG HUI,OTC,,,,,Yes,,,1,,
 TH,105440,170024930,RUAM YA BHASAJ,OTC,,,,,Yes,,,1,,
-AR,105441,0,Argentina Institute,Government,,,,,Yes,,,1,,
-BR,105442,0,Brazil Institute,Government,,,,,Yes,,,1,,
+AR,105441,0,Argentina Institute,Public,,,,,Yes,,,1,,
+BR,105442,0,Brazil Institute,Public,,,,,Yes,,,1,,
