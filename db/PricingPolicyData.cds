@@ -38,6 +38,7 @@ entity BrandPolicies: cuid, managed {
     BrandId         : String(50);
     Status          : String(100);
     ProductPolicies : Composition of many ProductPolicies on ProductPolicies.BrandPolicy = $self;
+    Approvals       : Composition of many Approvals on Approvals.BrandPolicy = $self;
 }; 
 
 
@@ -119,7 +120,8 @@ entity Approvals: cuid, managed {
         FlowId              : String(255);
         RequiredAction      : String(12);
         //Associations
-        CountryApprover    : Association to CountryApprovers;
+        CountryApprover     : Association to CountryApprovers;
+        BrandPolicy         : Composition of BrandPolicies;
 }
 
 
