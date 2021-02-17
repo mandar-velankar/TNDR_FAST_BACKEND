@@ -5,11 +5,10 @@
   "repository": "<Add your repository here>",
   "license": "ISC",
   "dependencies": {
-    "@sap/audit-logging": "^3.2.0",
-    "@sap/cds": "^4.4.6",
-    "@sap/cds-odata-v2-adapter-proxy": "^1.5.1",
-    "@sap/hana-client": "^2.6.64",
-    "@sap/logging": "^6.0.1",
+    "@sap/cds": "^4.5.1",
+    "@sap/cds-odata-v2-adapter-proxy": "^1.5.4",
+    "@sap/hana-client": "^2.7.21",
+    "@sap/logging": "^6.0.2",
     "@sap/xsenv": "^3.1.0",
     "@sap/xssec": "^3.0.10",
     "compression": "^1.7.4",
@@ -22,7 +21,6 @@
     "passport": "^0.4.1",
     "ramda": "^0.27.0"
   },
-  "devDependencies": {},
   "engines": {
     "node": "^10 || ^12"
   },
@@ -57,5 +55,8 @@
   "files": [
     "db",
     "srv"
-  ]
+  ],
+  "devDependencies": {
+    "@sap/cds-dk": "^3.4.0"
+  }
 }
