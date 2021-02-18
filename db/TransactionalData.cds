@@ -296,7 +296,7 @@ entity PT_TMOFPR {
         Cogs                     : Association to MasterDataLatestValues.CountryCogs
                                        on  Cogs.COUNTRY_CODE = CountryCode
                                        and Cogs.PRODUCT_ID   = ProductCode;
-        Results                  : Association to many PT_TMTRRES
+        Results                  : Association to PT_TMTRRES
                                        on  Results.OfferID     = OfferID
                                        and Results.ProductCode = ProductCode
                                        and Results.Active = Active;
