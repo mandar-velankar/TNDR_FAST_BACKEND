@@ -70,6 +70,7 @@ entity Products : managed, cuid {
         //ProductName             : String(255); assoc to product
         CountryCode             : String(2);
         Unit                    : String(255);
+        Quantity                : Integer;
         //SmallestUnit            : String(255); assoc to product
         MspPerUnit              : Double;
         MspApprovedByName       : String(255);
@@ -78,6 +79,13 @@ entity Products : managed, cuid {
         NspPerUnit              : Double;
         NspApprovedByName       : String(255);
         NspApprovedByRole       : String(255);
+        Comment                 : String(500);
+        FOC                     : Double;
+        FOCType                 : String(255);
+        FOC_ABS_PCT             : String(4);
+        FOC_Bundled_1           : Double;
+        FOC_ABS_PCT_Bundled_1   : String(4);
+        FOCProduct_Bundled_1    : Integer;
         /*Enabled                 : Boolean not null;
         Reference               : String(255);
         AlternateOffer          : String(255);
