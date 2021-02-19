@@ -350,6 +350,11 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                     when count(offer.Product.ApprovalStatus.ApprovalStatus) = 0 then 'Offer Created'
                     else 'Offer Approved'
                 end
+        when offer.OfferStatusTable.STATUS = 'Results Recorded'
+            then case 
+                    when sum(case when offer.Product.Results.Outcome = 'FOC Negotiation' then 1 else 0 end) <> 0 then 'Awaiting FOC Negotiation' 
+                    else offer.OfferStatusTable.STATUS 
+                end
         else offer.OfferStatusTable.STATUS
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
