@@ -86,8 +86,8 @@ entity Products : managed, cuid {
         FOC_Bundled_1           : Double;
         FOC_ABS_PCT_Bundled_1   : String(4);
         FOCProduct_Bundled_1    : Integer;
-        /*Enabled                 : Boolean not null;
-        Reference               : String(255);
+        Enabled                 : Boolean;
+        /*Reference               : String(255);
         AlternateOffer          : String(255);
         RequestedVolume         : Integer;
         UoM                     : String(255);
