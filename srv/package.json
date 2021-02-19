@@ -3,10 +3,9 @@
     "description": "Generated from ../package.json, do not change!",
     "version": "1.0.0",
     "dependencies": {
-        "@sap/audit-logging": "^3.2.0",
-        "@sap/cds": "^4.4.6",
-        "@sap/cds-odata-v2-adapter-proxy": "^1.5.1",
-        "@sap/hana-client": "^2.6.64",
+        "@sap/cds": "^4.5.1",
+        "@sap/cds-odata-v2-adapter-proxy": "^1.5.4",
+        "@sap/hana-client": "^2.7.21",
         "@sap/logging": "^6.0.1",
         "@sap/xsenv": "^3.1.0",
         "@sap/xssec": "^3.0.10",
@@ -23,7 +22,6 @@
     "engines": {
         "node": "^10 || ^12"
     },
-    "devDependencies": {},
     "scripts": {
         "start": "node ./index.js",
         "watch": "nodemon -w . -i node_modules/**,.git/** -e cds -x npm run build"
