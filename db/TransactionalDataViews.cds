@@ -326,7 +326,7 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
     key institute.PARENT_ID
 };
 
-entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC Negotiation';
+entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC negotiation';
 
 entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     key offer.OfferID as OFFER_ID,
@@ -355,7 +355,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
         when offer.OfferStatusTable.STATUS = 'Results Recorded'
             then 
                 case 
-                    when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID and ProductCode = offer.Product.ProductCode) then 'Awaiting FOC Negotiation'
+                    when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID) then 'In FOC Negotiation'
                     else offer.OfferStatusTable.STATUS 
                 end
         else offer.OfferStatusTable.STATUS 
