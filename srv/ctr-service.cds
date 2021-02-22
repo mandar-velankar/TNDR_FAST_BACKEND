@@ -12,7 +12,12 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
 
     //entity Deliveries as projection on ContractsAppData.Deliveries;
     //entity Letters as projection on ContractsAppData.Letters;
-    entity Product as projection on MasterData.PT_TMPRDPCK;
+
+    entity ProductHierarchy as projection on MasterData.PT_TMPRDHIER;
+    entity Product as projection on MasterData.PT_TMPRDPCK {
+        *,
+        Product: redirected to ProductHierarchy
+    };
     entity PenaltyReasons as projection on MasterData.PT_TMPNLTYRS;
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
 
@@ -31,12 +36,13 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         ) as OfferValue:Double,*/
         //Deliveries: redirected to Deliveries,
         //Letters: redirected to Letters,
-        Product: redirected to Product,
+        Product: redirected to Product
     }group by 
         ID,
         ProductPackId,
         CountryCode,
         Unit,
+        Quantity,
         MspPerUnit,
         MspApprovedByName,
         MspApprovedByRole,
@@ -44,8 +50,15 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         NspPerUnit,
         NspApprovedByName,
         NspApprovedByRole,
-        /*Enabled,
-        Reference,
+        Comment,
+        FOC,
+        FOCType,
+        FOC_ABS_PCT,
+        FOC_Bundled_1,
+        FOC_ABS_PCT_Bundled_1,
+        FOCProduct_Bundled_1,
+        Enabled,
+        /*Reference,
         AlternateOffer,
         RequestedVolume,
         UoM,
@@ -84,6 +97,23 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         *,
         null as OfferValue: Double,
         Products: redirected to Products
+    };
+
+    entity CountryContractBrands as select from Contracts {
+        key CountryCode,
+        key Products.Product.Product.HLEVEL4_CODE as BrandID,
+        Products.Product.Product.HLEVEL4_NAME as BrandName
+    }
+    where Enabled = true
+    and Products.Enabled = true
+    and Products.Product.ACTIVERECORD = 'Yes'
+    and Products.Product.Product.HLEVEL4_CODE is not null
+    group by CountryCode, Products.Product.Product.HLEVEL4_CODE, Products.Product.Product.HLEVEL4_NAME
+    union
+    select from MasterData.PT_TMCTRY as country{
+        country.CountryCode,
+        'All_Brands' as BrandID,
+        ' All' as BrandName
     };
 
 
