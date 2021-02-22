@@ -7,7 +7,7 @@ using { com.bayer.SXTENDER.TransactionalData } from '../db/TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/TransactionalDataConversion';
 using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 
-service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_cag_ctr_user']){
+service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_cag_ctr_user','f_tndr_cag_technical_user']){
 //service ContractService @(path: 'ctr') @(requires:['all','ctr_user']){ //previously, before CAP integration
 
     //entity Deliveries as projection on ContractsAppData.Deliveries;

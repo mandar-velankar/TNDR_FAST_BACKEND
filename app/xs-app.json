@@ -13,6 +13,13 @@
       "csrfProtection": false
     },
     {
+      "source": "/ContractService/(.*)$",
+      "target": "/ctr/$1",
+      "authenticationType": "basic",
+      "destination": "srv_api",
+      "csrfProtection": false
+    },
+    {
       "source": "/ODataDev/(.*)$",
       "target": "/ODataDev/$1",
       "authenticationType": "basic",
