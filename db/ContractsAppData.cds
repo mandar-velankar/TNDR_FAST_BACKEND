@@ -82,7 +82,7 @@ entity Products : managed, cuid {
         Comment                 : String(500);
         FOC                     : Double;
         FOCType                 : String(255);
-        FOC_ABS_PCT             : String(4);
+        FOC_ABS_PCT             : String(5);
         FOC_Bundled_1           : Double;
         FOC_ABS_PCT_Bundled_1   : String(4);
         FOCProduct_Bundled_1    : Integer;

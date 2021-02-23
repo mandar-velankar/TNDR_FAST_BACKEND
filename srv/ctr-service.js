@@ -114,7 +114,7 @@ module.exports = (srv) => {
             const whereContract = ServiceHelper.buildFullWhere("Contract_ID", "=", contract.ID);
             const products = contract.Products || await tx.run(SELECT.from(Products).where(whereContract));
 
-            const offerValue = products && products.reduce((total, product) => total + product.OfferValue, 0);
+            const offerValue = products && products.reduce((total, product) => total + product.NspPerUnit + product.Quantity, 0);
             contract.OfferValue = offerValue;
         });
         
