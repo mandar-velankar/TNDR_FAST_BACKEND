@@ -37,7 +37,8 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         //Deliveries: redirected to Deliveries,
         //Letters: redirected to Letters,
         Product: redirected to Product
-    }group by 
+    }where Enabled = true 
+    group by 
         ID,
         ProductPackId,
         CountryCode,
