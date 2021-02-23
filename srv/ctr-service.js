@@ -112,7 +112,7 @@ module.exports = (srv) => {
 
             // TODO: when Products is not expanded this code breaks. Eg: ctr/Contracts?$expand=Institute%2CDistributor
             const whereContract = ServiceHelper.buildFullWhere("Contract_ID", "=", contract.ID);
-            const whereEnabled = ServiceHelper.buildFullWhere("Enabled", "=", "true");
+            const whereEnabled = ServiceHelper.buildFullWhere("Enabled", "=", true);
             const products = contract.Products || await tx.run(SELECT.from(Products).where(whereContract).where(whereEnabled));
 
             const offerValue = products && products.reduce((total, product) => total + product.NspPerUnit + product.Quantity, 0);
