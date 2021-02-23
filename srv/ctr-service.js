@@ -102,6 +102,7 @@ module.exports = (srv) => {
 
     /**
      * Calculate Contract.OfferValue
+     * OfferValue = sum of product.NspPerUnit + product.Quantity of each product for the contract
      * OfferValue = sum of Product.OfferValue
      */
     srv.after('READ', 'Contracts', (contracts, req) => {
@@ -110,11 +111,17 @@ module.exports = (srv) => {
 
         contracts.map(async contract => {
 
+/*
             // TODO: when Products is not expanded this code breaks. Eg: ctr/Contracts?$expand=Institute%2CDistributor
             const whereContract = ServiceHelper.buildFullWhere("Contract_ID", "=", contract.ID);
-            const products = contract.Products || await tx.run(SELECT.from(Products).where(whereContract));
+            const whereEnabled = ServiceHelper.buildFullWhere("Enabled", "=", true);
+            const products = contract.Products || await tx.run(SELECT.from(Products).where(whereContract).where(whereEnabled));
+            */
+            
+            //Calculate offervalue
+            const products = contract.Products;
 
-            const offerValue = products && products.reduce((total, product) => total + product.OfferValue, 0);
+            const offerValue = products && products.reduce((total, product) => total + product.NspPerUnit + product.Quantity, 0);
             contract.OfferValue = offerValue;
         });
         
