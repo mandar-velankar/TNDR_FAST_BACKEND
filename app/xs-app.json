@@ -11,35 +11,14 @@
       "target": "$1",
       "authenticationType": "basic",
       "destination": "srv_api",
-      "csrfProtection": true
-    },
-    {
-      "source": "/PolicyPricingService/(.*)$",
-      "target": "/ppa/$1",
-      "authenticationType": "basic",
-      "destination": "srv_api",
       "csrfProtection": false
     },
     {
-      "source": "/ODataDev/(.*)$",
-      "target": "/ODataDev/$1",
+      "source": "/v2/(.*)$",
+      "target": "/v2/$1",
       "authenticationType": "basic",
       "destination": "srv_api",
       "csrfProtection": false
-    },
-    {
-      "source": "/FAST/(.*)$",
-      "target": "/FAST/$1",
-      "authenticationType": "basic",
-      "destination": "srv_api",
-      "csrfProtection": false
-    },
-    {
-      "source": "^/reporting/(.*)$",
-      "target": "/FAST/$1",
-      "authenticationType": "basic",
-      "destination": "srv_api",
-      "csrfProtection": true
     },
     {
       "source": "^/(.*)$",
