@@ -360,7 +360,7 @@ left outer join MasterDataLatestValues.CountryCogs cogs on CP.COUNTRYCODE=cogs.C
 	'Pack' as COGS_UOM:String,
 	cogs.COGS,
 	'' as NEW_COGS:String,
-	sku.SKUCode as MaterialNumbers,
+	sku.SKUCode as MaterialNumbers:String,
 	P.ACTIVERECORD as ACTIVE_PRODUCT,
 	CP.ACTIVERECORD as ACTIVE_COUNTRY_PRODUCT
 } group by P.PRODUCTPACKID,
