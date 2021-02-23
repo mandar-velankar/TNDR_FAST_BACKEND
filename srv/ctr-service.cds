@@ -8,32 +8,22 @@ using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/Transactiona
 using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 
 service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_cag_ctr_user','f_tndr_cag_technical_user']){
-    //Brands info for product
-    entity ProductHierarchy as projection on MasterData.PT_TMPRDHIER;
+//service ContractService @(path: 'ctr') @(requires:['all','ctr_user']){ //previously, before CAP integration
 
-    //single product info for link to Product hierarchie (Brand info)
+    //entity Deliveries as projection on ContractsAppData.Deliveries;
+    //entity Letters as projection on ContractsAppData.Letters;
+
+    entity ProductHierarchy as projection on MasterData.PT_TMPRDHIER;
     entity Product as projection on MasterData.PT_TMPRDPCK {
         *,
         Product: redirected to ProductHierarchy
     };
-
-    //Penalty Reasons
     entity PenaltyReasons as projection on MasterData.PT_TMPNLTYRS;
-
-    //Country link with Currency
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
-
-    //The contracts (this is overwritten in the node.js layer to calculate the offer value)
-    entity Contracts as select from ContractsAppData.Contracts{
-        *,
-        null as OfferValue: Double,
-        Products: redirected to Products
-    };
 
     entity Products as select from ContractsAppData.Products {
         *,
-        /*if in the future we need again an offervalue calculation on product level we can reuse this logic
-        sum(
+        /*sum(
             OfferPrice *
             case when FocType = 'FOC 1'
                 then
@@ -43,11 +33,11 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
                     end
                 else RequestedVolume
             end
-        ) as OfferValue:Double,
-        */
+        ) as OfferValue:Double,*/
+        //Deliveries: redirected to Deliveries,
+        //Letters: redirected to Letters,
         Product: redirected to Product
-    }where Enabled = true 
-    group by 
+    }group by 
         ID,
         ProductPackId,
         CountryCode,
@@ -68,13 +58,47 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         FOC_ABS_PCT_Bundled_1,
         FOCProduct_Bundled_1,
         Enabled,
+        /*Reference,
+        AlternateOffer,
+        RequestedVolume,
+        UoM,
+        Samples,
+        DocumentsRequired,
+        FirstShipment,
+        NoofLots,
+        IntervalBetweenShipments,
+        PaymentTerms,
+        Comment,
+        IncoTerms,
+        Sorter,
+        RegisteredPrice,
+        WholesalePrice,
+        OfferPrice,
+        Foc,
+        FocType,
+        FocAbsPct,
+        NetOfferPrice,
+        CommissionRate,
+        NetPrice,
+        Cogs,
+        FocBrandProductId,
+        FocBrand,
+        FocBrandAbsPct,
+        CogsBrand,
+        BudgetRate,
+        SpotRate,*/
         createdAt,
         createdBy,
         modifiedAt,
         modifiedBy,
         Contract;
 
-    //List of brands that are existing within a specific country
+    entity Contracts as select from ContractsAppData.Contracts{
+        *,
+        null as OfferValue: Double,
+        Products: redirected to Products
+    };
+
     entity CountryContractBrands as select from Contracts {
         key CountryCode,
         key Products.Product.Product.HLEVEL4_CODE as BrandID,

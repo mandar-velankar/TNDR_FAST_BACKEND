@@ -51,8 +51,7 @@ entity Contracts : managed, cuid {
         FoldersCreated          : Integer;
         //Associations
         Products                : Composition of many Products
-                                    on Products.Contract = $self
-                                    and Products.Enabled = true;
+                                    on Products.Contract = $self;
         Country                 : Association to MasterData.PT_TMCTRY
                                     on Country.CountryCode = CountryCode;
         Channel                 : Association to Channels
