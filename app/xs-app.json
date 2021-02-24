@@ -22,7 +22,7 @@
     },
     {
       "source": "^/(.*)$",
-      "target": "/FAST/$1",
+      "target": "/v2/$1",
       "authenticationType": "basic",
       "destination": "srv_api",
       "csrfProtection": true
