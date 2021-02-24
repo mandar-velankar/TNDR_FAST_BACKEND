@@ -139,6 +139,7 @@ entity PT_TMAPPRST {
         SenderComment       : String(500);
         ApproverComment     : String(500);
     key Active              : Integer not null;
+        Hierarchy           : Integer;
         AP_ID               : String(10);
         RestoreKey          : String(100);
     key Statustime          : DateTime not null;

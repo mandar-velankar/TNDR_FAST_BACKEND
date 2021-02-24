@@ -189,6 +189,7 @@ entity CountryApprovers{
 	ApproverID:String(100);//remove
 	ApproverName:String(200);
 	key ApproverEmailID:String(200);
+	Hierarchy:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 }
