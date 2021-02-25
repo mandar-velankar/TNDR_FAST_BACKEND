@@ -121,7 +121,7 @@ module.exports = (srv) => {
             //Calculate offervalue
             const products = contract.Products;
 
-            const offerValue = products && products.reduce((total, product) => total + product.NspPerUnit + product.Quantity, 0);
+            const offerValue = products && products.reduce((total, product) => (total + product.NspPerUnit) * product.Quantity, 0);
             contract.OfferValue = offerValue;
         });
         
