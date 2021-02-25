@@ -23,7 +23,7 @@ module.exports = (srv) => {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMDLVTR, PT_TMUDLTRS
+		PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry
@@ -1022,7 +1022,7 @@ module.exports = (srv) => {
 				return "Approval"
 		}
 	}
-	function buildValidationEntry(approverTypes, approvalForType, defaultForType, offerValidation, requiredActionCode) {
+	function buildValidationEntry(approvals, approverTypes, approvalForType, defaultForType, offerValidation, requiredActionCode) {
 		let approverName = "";
 		let approverEmailID = "";
 		let senderComment = "";
@@ -1059,6 +1059,12 @@ module.exports = (srv) => {
 		approverType = defaultForType[0].ApproverType;
 		division = defaultForType[0].Division;
 
+		let aApproval = approvals.filter((a) => a.ApproverType === approverType);
+		let aApproverType = approverTypes.filter((d) => d.ApproverType === approverType);
+		if(aApproval.length > 0){
+			aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
+		}
+
 		return {
 			TenderID: offerValidation.TENDERID,
 			OfferId: offerValidation.OFFERID,
@@ -1081,7 +1087,7 @@ module.exports = (srv) => {
 			Division: division,
 			FLOW_ID: flowId,
 			ApproverList: defaultForType,
-			ApproverTypes: approverTypes.filter((d) => d.ApproverType === approverType),
+			ApproverTypes: aApproverType,
 			CountryName: countryName,
 			UserName: userName,
 			UserEmail: userEmail
@@ -1104,11 +1110,15 @@ module.exports = (srv) => {
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
 
 		let whereApproverType = {
-			//ApproverType: approverType,
 			CountryCode: offerValidation.COUNTRYCODE
 		}
-		
 		let approverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+		
+		let whereOfferId = {
+			OfferId: offerValidation.OFFERID
+		} 
+		let approvals = await tx.run(SELECT.from(PT_TMAPPRST).where(whereOfferId))
+		
 
 		//Existing saved approval entries (may not exist)
 		//Shared
@@ -1175,82 +1185,82 @@ module.exports = (srv) => {
 		let defaultCdhRadiology = countryApprovers.filter((d) => d.ApproverType === "CDH" && d.Division === "Radiology");
 
 		//Regulatory
-		let regulatory = buildValidationEntry(approverTypes, approvalRegulatory, defaultRegulatory, offerValidation, offerValidation.REGULATORY);
+		let regulatory = buildValidationEntry(approvals, approverTypes, approvalRegulatory, defaultRegulatory, offerValidation, offerValidation.REGULATORY);
 		if (regulatory) results.push(regulatory);
 		//Legal
-		let legal = buildValidationEntry(approverTypes, approvalLegal, defaultLegal, offerValidation, offerValidation.LEGAL);
+		let legal = buildValidationEntry(approvals, approverTypes, approvalLegal, defaultLegal, offerValidation, offerValidation.LEGAL);
 		if (legal) results.push(legal);
 		//Controlling
-		let controlling = buildValidationEntry(approverTypes, approvalControlling, defaultControlling, offerValidation, offerValidation.CONTROLLING);
+		let controlling = buildValidationEntry(approvals, approverTypes, approvalControlling, defaultControlling, offerValidation, offerValidation.CONTROLLING);
 		if (controlling) results.push(controlling);
 		//Country Business & Regional Business
 		if (offerValidation.DIVISION === "Both") {
-			let countryPharma = buildValidationEntry(approverTypes, approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
+			let countryPharma = buildValidationEntry(approvals, approverTypes, approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
 			if (countryPharma) results.push(countryPharma);
 
-			let countryRadiology = buildValidationEntry(approverTypes, approvalCountry2, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
+			let countryRadiology = buildValidationEntry(approvals, approverTypes, approvalCountry2, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
 			if (countryRadiology) results.push(countryRadiology);
 
-			let regionalPharma = buildValidationEntry(approverTypes, approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
+			let regionalPharma = buildValidationEntry(approvals, approverTypes, approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalPharma) results.push(regionalPharma);
 
-			let regionalRadiology = buildValidationEntry(approverTypes, approvalRegional2, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
+			let regionalRadiology = buildValidationEntry(approvals, approverTypes, approvalRegional2, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalRadiology) results.push(regionalRadiology);
 
-			let nsmPharma = buildValidationEntry(approverTypes, approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
+			let nsmPharma = buildValidationEntry(approvals, approverTypes, approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
 			if (nsmPharma) results.push(nsmPharma);
 
-			let nsmRadiology = buildValidationEntry(approverTypes, approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
+			let nsmRadiology = buildValidationEntry(approvals, approverTypes, approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
 			if (nsmRadiology) results.push(nsmRadiology);
 
-			let hbuPharma = buildValidationEntry(approverTypes, approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
+			let hbuPharma = buildValidationEntry(approvals, approverTypes, approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
 			if (hbuPharma) results.push(hbuPharma);
 
-			let hbuRadiology = buildValidationEntry(approverTypes, approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
+			let hbuRadiology = buildValidationEntry(approvals, approverTypes, approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
 			if (hbuRadiology) results.push(hbuRadiology);
 
-			let cdhPharma = buildValidationEntry(approverTypes, approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
+			let cdhPharma = buildValidationEntry(approvals, approverTypes, approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
 			if (cdhPharma) results.push(cdhPharma);
 
-			let cdhRadiology = buildValidationEntry(approverTypes, approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
+			let cdhRadiology = buildValidationEntry(approvals, approverTypes, approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
 			if (cdhRadiology) results.push(cdhRadiology);
 
 		}
 		else if (offerValidation.DIVISION === "Pharma") {
-			let countryPharma = buildValidationEntry(approverTypes, approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
+			let countryPharma = buildValidationEntry(approvals, approverTypes, approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
 			if (countryPharma) results.push(countryPharma);
 
-			let regionalPharma = buildValidationEntry(approverTypes, approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
+			let regionalPharma = buildValidationEntry(approvals, approverTypes, approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalPharma) results.push(regionalPharma);
 
-			let nsmPharma = buildValidationEntry(approverTypes, approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
+			let nsmPharma = buildValidationEntry(approvals, approverTypes, approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
 			if (nsmPharma) results.push(nsmPharma);
 
-			let hbuPharma = buildValidationEntry(approverTypes, approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
+			let hbuPharma = buildValidationEntry(approvals, approverTypes, approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
 			if (hbuPharma) results.push(hbuPharma);
 
-			let cdhPharma = buildValidationEntry(approverTypes, approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
+			let cdhPharma = buildValidationEntry(approvals, approverTypes, approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
 			if (cdhPharma) results.push(cdhPharma);
 		}
 		else if (offerValidation.DIVISION === "Radiology") {
-			let countryRadiology = buildValidationEntry(approverTypes, approvalCountry1, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
+			let countryRadiology = buildValidationEntry(approvals, approverTypes, approvalCountry1, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
 			if (countryRadiology) results.push(countryRadiology);
 
-			let regionalRadiology = buildValidationEntry(approverTypes, approvalRegional1, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
+			let regionalRadiology = buildValidationEntry(approvals, approverTypes, approvalRegional1, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalRadiology) results.push(regionalRadiology);
 
-			let nsmRadiology = buildValidationEntry(approverTypes, approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
+			let nsmRadiology = buildValidationEntry(approvals, approverTypes, approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
 			if (nsmRadiology) results.push(nsmRadiology);
 
-			let hbuRadiology = buildValidationEntry(approverTypes, approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
+			let hbuRadiology = buildValidationEntry(approvals, approverTypes, approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
 			if (hbuRadiology) results.push(hbuRadiology);
 
-			let cdhRadiology = buildValidationEntry(approverTypes, approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
+			let cdhRadiology = buildValidationEntry(approvals, approverTypes, approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
 			if (cdhRadiology) results.push(cdhRadiology);
 		}
 
 		//Supply Chain
-		let supply = buildValidationEntry(approverTypes, approvalSupply, defaultSupply, offerValidation, offerValidation.SUPPLY_CHAIN);
+		let supply = buildValidationEntry(approvals, approverTypes, approvalSupply, defaultSupply, offerValidation, offerValidation.SUPPLY_CHAIN);
 		if (supply) results.push(supply);
 
 		return results;
