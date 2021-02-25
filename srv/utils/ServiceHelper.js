@@ -80,8 +80,7 @@ module.exports = {
         if (!num){
             num = 0;
         }
-        num = num.toFixed(digits);
-        return num.toLocaleString();
+        return num.toLocaleString('en-US', { minimumFractionDigits: digits });
     }
 }
 
