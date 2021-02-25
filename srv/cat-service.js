@@ -941,7 +941,7 @@ module.exports = (srv) => {
 		//Building full remarks text
 		remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/\\+/g, "<br>").concat("<br>") : "");
 		remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/\\+/g, "<br>").concat("<br>") : "");
-		remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.SELLING_COMPANY_COUNTRY_COMMENT.concat("<br>") : "");
+		remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.COUNTRY_COMMENT.concat("<br>") : "");
 		remarks = remarks.concat((registeredRemark !== "") ? registeredRemark.concat("<br>") : "");
 		remarks = remarks.concat((samplesRemark !== "") ? samplesRemark.concat("<br>") : "");
 		remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
