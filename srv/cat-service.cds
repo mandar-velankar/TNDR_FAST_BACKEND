@@ -416,6 +416,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
         key OFFERID                       : String(50);
             COUNTRYCODE                   : String(2);
         key PRODUCTCODE                   : String(500);
+            PRODUCT_UNIT_NAME             : String(500);
             SORTER                        : Integer;
             BRANDNAME                     : String(500);
             PRODUCTNAME                   : String(500);
@@ -433,9 +434,9 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             PAIDVOLUME                    : Double;
             FOC                           : String(500);
             UNIT                          : String(500);
-            TOTAL_QUANTITY_UNITS          : Double;
-            FOC_QUANTITY_UNITS            : Double;
-            PAID_QUANTITY_UNITS           : Double;
+            TOTAL_QUANTITY_UNITS          : String(1000);
+            FOC_QUANTITY_UNITS            : String(1000);
+            PAID_QUANTITY_UNITS           : String(1000);
             REQ_PRICE_UNIT_OFFER_CURRENCY : String(1000);
             REQ_PRICE_PACK_OFFER_CURRENCY : String(1000);
             REQ_PRICE_UNIT_EUR_BUDGET     : String(1000);

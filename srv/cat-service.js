@@ -1324,9 +1324,9 @@ module.exports = (srv) => {
 				PAIDVOLUME: Math.round(d.PAID_VOLUME),
 				FOC: d.FOC,
 				UNIT: d.UNIT,
-				TOTAL_QUANTITY_UNITS: Math.round(d.TOTAL_QUANTITY_UNITS),
-				FOC_QUANTITY_UNITS: Math.round(d.FOC_QUANTITY_UNITS),
-				PAID_QUANTITY_UNITS: Math.round(d.PAID_QUANTITY_UNITS),
+				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS,0),
+				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS,0),
+				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS,0),
 				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4),
 				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2),
 				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4),
@@ -1338,16 +1338,16 @@ module.exports = (srv) => {
 				COGS_EUR_UNIT: ServiceHelper.formatNumber(d.COGS_EUR_UNIT, 2),
 				GROSS_MARGIN_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_BUDGET, 2),
 				GROSS_MARGIN_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_SPOT, 2),
-				GROSS_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.GROSS_SALES_OFFER_CURRENCY, 2),
-				NET_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_SALES_OFFER_CURRENCY, 2),
-				NET_SALES_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_SALES_EUR_BUDGET, 2),
-				NET_SALES_EUR_SPOT: ServiceHelper.formatNumber(d.NET_SALES_EUR_SPOT, 2),
-				GROSS_PROFIT_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_BUDGET, 2),
-				GROSS_PROFIT_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_SPOT, 2),
+				GROSS_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.GROSS_SALES_OFFER_CURRENCY, 0),
+				NET_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_SALES_OFFER_CURRENCY, 0),
+				NET_SALES_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_SALES_EUR_BUDGET, 0),
+				NET_SALES_EUR_SPOT: ServiceHelper.formatNumber(d.NET_SALES_EUR_SPOT, 0),
+				GROSS_PROFIT_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_BUDGET, 0),
+				GROSS_PROFIT_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_SPOT, 0),
 				DIVISION: d.DIVISION,
-				BUDGETEDPROFITABILITY: (d.BUDGETEDPROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETEDPROFITABILITY, 2).concat("%"),
-				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 2).concat("%"),
-				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 2).concat("%")
+				BUDGETEDPROFITABILITY: (d.BUDGETEDPROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETEDPROFITABILITY, 0).concat("%"),
+				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 0).concat("%"),
+				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 0).concat("%")
 			}
 		});
 	}
