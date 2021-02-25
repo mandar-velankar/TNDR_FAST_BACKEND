@@ -32,6 +32,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity TenderOrigin                      as projection on MasterData.MASTER_TENDER_ORIGIN;
     entity TenderType                        as projection on MasterData.MASTER_TENDER_TYPE;
     entity CountryApprovers                  as projection on MasterData.CountryApprovers;
+    entity ApproverTypes                     as projection on MasterData.ApproverTypes;
     entity PT_TMCOGS                         as projection on MasterData.PT_TMCOGS;
     entity PT_TMCTLE                         as projection on MasterData.PT_TMCTLE;
     entity PT_TMCTLEBR                       as projection on MasterData.PT_TMCTLEBR;
@@ -332,7 +333,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             SenderComment       : String(500);
             ApproverComment     : String(500);
             Active              : Integer not null;
-            Hierarchy           : Integer;
+            //Hierarchy           : Integer;
             AP_ID               : String(10);
             RestoreKey          : String(100);
             Statustime          : DateTime;
@@ -349,6 +350,9 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
                                       on  ApproverList.CountryCode  = CountryCode
                                       and ApproverList.ApproverType = ApproverType
                                       and ApproverList.Division     = Division;
+            ApproverTypes       : Association to many ApproverTypes
+                                      on  ApproverTypes.CountryCode  = CountryCode
+                                      and ApproverTypes.ApproverType = ApproverType;
     };
 
     //Admin Data Tables

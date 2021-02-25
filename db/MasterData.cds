@@ -181,7 +181,7 @@ entity PT_TMFXRTS{//FX Rates
 	//Associations
 	RegisteredPrices:Association to many PT_TMREGPR on RegisteredPrices.CurrencyRate = $self;
 }
-
+//@cds.autoexpose
 entity CountryApprovers{
 	key CountryCode:String(2) not null;
 	key ApproverType:String(200) not null;
@@ -189,9 +189,16 @@ entity CountryApprovers{
 	ApproverID:String(100);//remove
 	ApproverName:String(200);
 	key ApproverEmailID:String(200);
-	Hierarchy:Integer not null;
+	//Hierarchy:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+}
+
+entity ApproverTypes {
+    key ApproverType            : String(200);
+    key CountryCode             : String(2);
+    Hierarchy				: Integer;
+    CountryApprovers        : Association to many CountryApprovers on CountryApprovers.ApproverType = ApproverType;
 }
 
 
