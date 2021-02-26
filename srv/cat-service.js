@@ -17,13 +17,13 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, MASTER_COUNTRY_CHANNELS
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMDLVTR, PT_TMUDLTRS
+		PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry
@@ -941,7 +941,7 @@ module.exports = (srv) => {
 		//Building full remarks text
 		remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/\\+/g, "<br>").concat("<br>") : "");
 		remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/\\+/g, "<br>").concat("<br>") : "");
-		remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.SELLING_COMPANY_COUNTRY_COMMENT.concat("<br>") : "");
+		remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.COUNTRY_COMMENT.concat("<br>") : "");
 		remarks = remarks.concat((registeredRemark !== "") ? registeredRemark.concat("<br>") : "");
 		remarks = remarks.concat((samplesRemark !== "") ? samplesRemark.concat("<br>") : "");
 		remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
@@ -1022,7 +1022,7 @@ module.exports = (srv) => {
 				return "Approval"
 		}
 	}
-	function buildValidationEntry(approvalForType, defaultForType, offerValidation, requiredActionCode) {
+	function buildValidationEntry(approvals, approverTypes, approvalForType, defaultForType, offerValidation, requiredActionCode) {
 		let approverName = "";
 		let approverEmailID = "";
 		let senderComment = "";
@@ -1058,6 +1058,13 @@ module.exports = (srv) => {
 		}
 		approverType = defaultForType[0].ApproverType;
 		division = defaultForType[0].Division;
+
+		let aApproval = approvals.filter((a) => a.ApproverType === approverType);
+		let aApproverType = approverTypes.filter((d) => d.ApproverType === approverType);
+		if(aApproval.length > 0){
+			aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
+		}
+
 		return {
 			TenderID: offerValidation.TENDERID,
 			OfferId: offerValidation.OFFERID,
@@ -1080,6 +1087,7 @@ module.exports = (srv) => {
 			Division: division,
 			FLOW_ID: flowId,
 			ApproverList: defaultForType,
+			ApproverTypes: aApproverType,
 			CountryName: countryName,
 			UserName: userName,
 			UserEmail: userEmail
@@ -1100,6 +1108,17 @@ module.exports = (srv) => {
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
+
+		let whereApproverType = {
+			CountryCode: offerValidation.COUNTRYCODE
+		}
+		let approverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+		
+		let whereOfferId = {
+			OfferId: offerValidation.OFFERID
+		} 
+		let approvals = await tx.run(SELECT.from(PT_TMAPPRST).where(whereOfferId))
+		
 
 		//Existing saved approval entries (may not exist)
 		//Shared
@@ -1166,82 +1185,82 @@ module.exports = (srv) => {
 		let defaultCdhRadiology = countryApprovers.filter((d) => d.ApproverType === "CDH" && d.Division === "Radiology");
 
 		//Regulatory
-		let regulatory = buildValidationEntry(approvalRegulatory, defaultRegulatory, offerValidation, offerValidation.REGULATORY);
+		let regulatory = buildValidationEntry(approvals, approverTypes, approvalRegulatory, defaultRegulatory, offerValidation, offerValidation.REGULATORY);
 		if (regulatory) results.push(regulatory);
 		//Legal
-		let legal = buildValidationEntry(approvalLegal, defaultLegal, offerValidation, offerValidation.LEGAL);
+		let legal = buildValidationEntry(approvals, approverTypes, approvalLegal, defaultLegal, offerValidation, offerValidation.LEGAL);
 		if (legal) results.push(legal);
 		//Controlling
-		let controlling = buildValidationEntry(approvalControlling, defaultControlling, offerValidation, offerValidation.CONTROLLING);
+		let controlling = buildValidationEntry(approvals, approverTypes, approvalControlling, defaultControlling, offerValidation, offerValidation.CONTROLLING);
 		if (controlling) results.push(controlling);
 		//Country Business & Regional Business
 		if (offerValidation.DIVISION === "Both") {
-			let countryPharma = buildValidationEntry(approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
+			let countryPharma = buildValidationEntry(approvals, approverTypes, approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
 			if (countryPharma) results.push(countryPharma);
 
-			let countryRadiology = buildValidationEntry(approvalCountry2, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
+			let countryRadiology = buildValidationEntry(approvals, approverTypes, approvalCountry2, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
 			if (countryRadiology) results.push(countryRadiology);
 
-			let regionalPharma = buildValidationEntry(approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
+			let regionalPharma = buildValidationEntry(approvals, approverTypes, approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalPharma) results.push(regionalPharma);
 
-			let regionalRadiology = buildValidationEntry(approvalRegional2, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
+			let regionalRadiology = buildValidationEntry(approvals, approverTypes, approvalRegional2, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalRadiology) results.push(regionalRadiology);
 
-			let nsmPharma = buildValidationEntry(approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
+			let nsmPharma = buildValidationEntry(approvals, approverTypes, approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
 			if (nsmPharma) results.push(nsmPharma);
 
-			let nsmRadiology = buildValidationEntry(approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
+			let nsmRadiology = buildValidationEntry(approvals, approverTypes, approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
 			if (nsmRadiology) results.push(nsmRadiology);
 
-			let hbuPharma = buildValidationEntry(approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
+			let hbuPharma = buildValidationEntry(approvals, approverTypes, approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
 			if (hbuPharma) results.push(hbuPharma);
 
-			let hbuRadiology = buildValidationEntry(approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
+			let hbuRadiology = buildValidationEntry(approvals, approverTypes, approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
 			if (hbuRadiology) results.push(hbuRadiology);
 
-			let cdhPharma = buildValidationEntry(approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
+			let cdhPharma = buildValidationEntry(approvals, approverTypes, approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
 			if (cdhPharma) results.push(cdhPharma);
 
-			let cdhRadiology = buildValidationEntry(approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
+			let cdhRadiology = buildValidationEntry(approvals, approverTypes, approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
 			if (cdhRadiology) results.push(cdhRadiology);
 
 		}
 		else if (offerValidation.DIVISION === "Pharma") {
-			let countryPharma = buildValidationEntry(approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
+			let countryPharma = buildValidationEntry(approvals, approverTypes, approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
 			if (countryPharma) results.push(countryPharma);
 
-			let regionalPharma = buildValidationEntry(approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
+			let regionalPharma = buildValidationEntry(approvals, approverTypes, approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalPharma) results.push(regionalPharma);
 
-			let nsmPharma = buildValidationEntry(approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
+			let nsmPharma = buildValidationEntry(approvals, approverTypes, approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
 			if (nsmPharma) results.push(nsmPharma);
 
-			let hbuPharma = buildValidationEntry(approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
+			let hbuPharma = buildValidationEntry(approvals, approverTypes, approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
 			if (hbuPharma) results.push(hbuPharma);
 
-			let cdhPharma = buildValidationEntry(approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
+			let cdhPharma = buildValidationEntry(approvals, approverTypes, approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
 			if (cdhPharma) results.push(cdhPharma);
 		}
 		else if (offerValidation.DIVISION === "Radiology") {
-			let countryRadiology = buildValidationEntry(approvalCountry1, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
+			let countryRadiology = buildValidationEntry(approvals, approverTypes, approvalCountry1, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
 			if (countryRadiology) results.push(countryRadiology);
 
-			let regionalRadiology = buildValidationEntry(approvalRegional1, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
+			let regionalRadiology = buildValidationEntry(approvals, approverTypes, approvalRegional1, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
 			if (regionalRadiology) results.push(regionalRadiology);
 
-			let nsmRadiology = buildValidationEntry(approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
+			let nsmRadiology = buildValidationEntry(approvals, approverTypes, approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
 			if (nsmRadiology) results.push(nsmRadiology);
 
-			let hbuRadiology = buildValidationEntry(approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
+			let hbuRadiology = buildValidationEntry(approvals, approverTypes, approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
 			if (hbuRadiology) results.push(hbuRadiology);
 
-			let cdhRadiology = buildValidationEntry(approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
+			let cdhRadiology = buildValidationEntry(approvals, approverTypes, approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
 			if (cdhRadiology) results.push(cdhRadiology);
 		}
 
 		//Supply Chain
-		let supply = buildValidationEntry(approvalSupply, defaultSupply, offerValidation, offerValidation.SUPPLY_CHAIN);
+		let supply = buildValidationEntry(approvals, approverTypes, approvalSupply, defaultSupply, offerValidation, offerValidation.SUPPLY_CHAIN);
 		if (supply) results.push(supply);
 
 		return results;
@@ -1324,9 +1343,9 @@ module.exports = (srv) => {
 				PAIDVOLUME: Math.round(d.PAID_VOLUME),
 				FOC: d.FOC,
 				UNIT: d.UNIT,
-				TOTAL_QUANTITY_UNITS: Math.round(d.TOTAL_QUANTITY_UNITS),
-				FOC_QUANTITY_UNITS: Math.round(d.FOC_QUANTITY_UNITS),
-				PAID_QUANTITY_UNITS: Math.round(d.PAID_QUANTITY_UNITS),
+				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS,0),
+				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS,0),
+				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS,0),
 				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4),
 				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2),
 				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4),
@@ -1338,16 +1357,16 @@ module.exports = (srv) => {
 				COGS_EUR_UNIT: ServiceHelper.formatNumber(d.COGS_EUR_UNIT, 2),
 				GROSS_MARGIN_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_BUDGET, 2),
 				GROSS_MARGIN_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_SPOT, 2),
-				GROSS_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.GROSS_SALES_OFFER_CURRENCY, 2),
-				NET_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_SALES_OFFER_CURRENCY, 2),
-				NET_SALES_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_SALES_EUR_BUDGET, 2),
-				NET_SALES_EUR_SPOT: ServiceHelper.formatNumber(d.NET_SALES_EUR_SPOT, 2),
-				GROSS_PROFIT_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_BUDGET, 2),
-				GROSS_PROFIT_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_SPOT, 2),
+				GROSS_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.GROSS_SALES_OFFER_CURRENCY, 0),
+				NET_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_SALES_OFFER_CURRENCY, 0),
+				NET_SALES_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_SALES_EUR_BUDGET, 0),
+				NET_SALES_EUR_SPOT: ServiceHelper.formatNumber(d.NET_SALES_EUR_SPOT, 0),
+				GROSS_PROFIT_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_BUDGET, 0),
+				GROSS_PROFIT_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_SPOT, 0),
 				DIVISION: d.DIVISION,
-				BUDGETEDPROFITABILITY: (d.BUDGETEDPROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETEDPROFITABILITY, 2).concat("%"),
-				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 2).concat("%"),
-				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 2).concat("%")
+				BUDGETEDPROFITABILITY: (d.BUDGETEDPROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETEDPROFITABILITY, 0).concat("%"),
+				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 0).concat("%"),
+				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 0).concat("%")
 			}
 		});
 	}
