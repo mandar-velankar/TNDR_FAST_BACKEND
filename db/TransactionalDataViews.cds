@@ -41,6 +41,7 @@ inner join AdminData.PT_TMUSER user
 	 approvals.SenderComment,
 	 approvals.ApproverComment,
 	 approvals.Active,
+     approvals.Hierarchy,
 	 approvals.AP_ID,
 	 approvals.RestoreKey,
 	 approvals.Statustime,
