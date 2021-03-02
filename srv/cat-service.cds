@@ -89,7 +89,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity CountryBrands @readonly           as projection on MasterDataViews.CountryBrands;
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
-
+    
     //Master Data Services
     entity InstituteDistributor {
         key COUNTRY_INSTITUTE_DISTRIBUTOR_ID : String(500);
