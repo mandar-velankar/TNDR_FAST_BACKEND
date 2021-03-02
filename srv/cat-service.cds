@@ -32,6 +32,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity TenderOrigin                      as projection on MasterData.MASTER_TENDER_ORIGIN;
     entity TenderType                        as projection on MasterData.MASTER_TENDER_TYPE;
     entity CountryApprovers                  as projection on MasterData.CountryApprovers;
+    entity ApproverTypes                     as projection on MasterData.ApproverTypes;
     entity PT_TMCOGS                         as projection on MasterData.PT_TMCOGS;
     entity PT_TMCTLE                         as projection on MasterData.PT_TMCTLE;
     entity PT_TMCTLEBR                       as projection on MasterData.PT_TMCTLEBR;
@@ -88,6 +89,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity CountryBrands @readonly           as projection on MasterDataViews.CountryBrands;
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
+    
     //Master Data Services
     entity InstituteDistributor {
         key COUNTRY_INSTITUTE_DISTRIBUTOR_ID : String(500);
@@ -331,6 +333,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             SenderComment       : String(500);
             ApproverComment     : String(500);
             Active              : Integer not null;
+            //Hierarchy           : Integer;
             AP_ID               : String(10);
             RestoreKey          : String(100);
             Statustime          : DateTime;
@@ -347,6 +350,9 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
                                       on  ApproverList.CountryCode  = CountryCode
                                       and ApproverList.ApproverType = ApproverType
                                       and ApproverList.Division     = Division;
+            ApproverTypes       : Association to many ApproverTypes
+                                      on  ApproverTypes.CountryCode  = CountryCode
+                                      and ApproverTypes.ApproverType = ApproverType;
     };
 
     //Admin Data Tables
@@ -371,7 +377,10 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
         name : String;
     };
 
-    entity MandatoryProductFields @readonly  as projection on AdminData.MandatoryTableFieldsCountry; 
+    // entity MandatoryProductFields @readonly  as projection on AdminData.MandatoryTableFieldsCountry; 
+
+    entity CountryTablesCustomization @readonly  as projection on AdminData.CountryTablesCustomization; 
+    entity CountryTabsCustomization @readonly as projection on AdminData.CountryTabsCustomization;
 
     function getCurrentUser() returns User;
     //Office365 PowerAutomate Approval Workflow Views
@@ -412,6 +421,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
         key OFFERID                       : String(50);
             COUNTRYCODE                   : String(2);
         key PRODUCTCODE                   : String(500);
+            PRODUCT_UNIT_NAME             : String(500);
             SORTER                        : Integer;
             BRANDNAME                     : String(500);
             PRODUCTNAME                   : String(500);
@@ -429,9 +439,9 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             PAIDVOLUME                    : Double;
             FOC                           : String(500);
             UNIT                          : String(500);
-            TOTAL_QUANTITY_UNITS          : Double;
-            FOC_QUANTITY_UNITS            : Double;
-            PAID_QUANTITY_UNITS           : Double;
+            TOTAL_QUANTITY_UNITS          : String(1000);
+            FOC_QUANTITY_UNITS            : String(1000);
+            PAID_QUANTITY_UNITS           : String(1000);
             REQ_PRICE_UNIT_OFFER_CURRENCY : String(1000);
             REQ_PRICE_PACK_OFFER_CURRENCY : String(1000);
             REQ_PRICE_UNIT_EUR_BUDGET     : String(1000);

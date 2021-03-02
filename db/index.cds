@@ -12,6 +12,7 @@ using from './AdminDataViews';
 using from './TransactionalData';
 using from './TransactionalDataViews';
 using from './IntegrationData';
+using from './SAP';
 
 // 2) In addition, generic service providers need views for exposed entities
 

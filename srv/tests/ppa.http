@@ -10,16 +10,16 @@ Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "ID": "2c0a48ae-e72b-4cc0-86af-7656260f2141",
     "CountryCode": "TH",
-    "ProductPackId": 100138,
-    "BrandId": "0871D30A47",
-    "Division": "Radiology",
-    "ApprovalStatus": null,
-    "SenderComment": null,
-    "ApproverComment": null,
-    "SentBy": "Nils",
+    "BrandId": "0811B10005",
+    "Division": "Pharma",
+    "ApprovalStatus": "Processing",
+    "SenderComment": "",
+    "ApproverComment": "",
+    "SentBy": "",
     "ApprovalDate": null,
-    "FlowId": null,
-    "RequiredAction": null
+    "FlowId": "",
+    "RequiredAction": "",
+    "CountryApprover_ID": "ff44386c-1c11-470f-bb64-90cfe1b056c8",
+    "BrandPolicy_ID": "0d07b00c-e798-4ab3-93da-63b00037acb5"
 }

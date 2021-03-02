@@ -5,29 +5,24 @@
   "repository": "<Add your repository here>",
   "license": "ISC",
   "dependencies": {
-    "@sap/cds": "^4.4.6",
-    "@sap/cds-odata-v2-adapter-proxy": "^1.5.1",
-    "@sap/hana-client": "^2.6.64",
-    "@sap/logging": "^6.0.1",
+    "@sap/cds": "^4.5.1",
+    "@sap/cds-odata-v2-adapter-proxy": "^1.5.4",
+    "@sap/hana-client": "^2.7.21",
+    "@sap/logging": "^6.0.2",
     "@sap/xsenv": "^3.1.0",
     "@sap/xssec": "^3.0.10",
     "compression": "^1.7.4",
+    "dynamic-html-pdf": "^1.0.2",
     "express": "^4.17.1",
     "handlebars": "^4.7.6",
     "helmet": "^4.2.0",
     "html-pdf": "^2.2.0",
     "mysql": "^2.18.1",
     "passport": "^0.4.1",
-    "passport-http": "^0.3.0",
     "ramda": "^0.27.0"
   },
-  "devDependencies": {
-    "@sap/cds-dk": "^3.3.3",
-    "mbt": "^1.0.12",
-    "sqlite3": "^4.2.0"
-  },
   "engines": {
-    "node": "^12"
+    "node": "^10 || ^12"
   },
   "scripts": {
     "setup": "npm install && npm run setup:ui",
@@ -40,9 +35,10 @@
     "build:cf": "mbt build -p=cf --mtar=FASTCAP-Backend-CF.mtar",
     "deploy:cf": "cf deploy mta_archives/FASTCAP-Backend-CF.mtar -e cf.mtaext",
     "debug": "node --inspect node_modules/@sap/cds/bin/cds.js run",
-    "start-cds": "cds run",
+    "start:cds": "cds run",
     "start": "node ./srv/index-local.js"
   },
+  "private": true,
   "cds": {
     "requires": {
       "db": {
@@ -59,5 +55,8 @@
   "files": [
     "db",
     "srv"
-  ]
+  ],
+  "devDependencies": {
+    "@sap/cds-dk": "^3.4.0"
+  }
 }

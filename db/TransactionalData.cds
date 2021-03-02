@@ -139,6 +139,7 @@ entity PT_TMAPPRST {
         SenderComment       : String(500);
         ApproverComment     : String(500);
     key Active              : Integer not null;
+        Hierarchy           : Integer;
         AP_ID               : String(10);
         RestoreKey          : String(100);
     key Statustime          : DateTime not null;
@@ -277,6 +278,7 @@ entity PT_TMOFPR {
         DEFAULT_COMMISSION_RATE  : Double;
         SUPPLY_UPDATE            : Integer;
         PAYMENT_UPDATE           : Integer;
+        Line                     : String;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
