@@ -520,12 +520,12 @@ left outer join Offers o2 on o1.RootId = o2.RootId and o2.ActiveOffer = 1
     o1.TenderOfferNo,
     o1.RevisedOfferNo,
     o1.ContinuationOfferNo,
-    o1.RootId,
-    o1.CheckId,
+    o1.RootId:String,
+    o1.CheckId:String,
     case when o2.OfferID is null
         then 'Not Found'
         else o2.OfferID
-    end as ActiveForRoot
+    end as ActiveForRoot:String
 }; // WITH READ ONLY => check this with Jonathan
 
 entity OfferProductInfo as select from PT_TMOFPR as offerProduct {
@@ -538,7 +538,7 @@ entity OfferProductInfo as select from PT_TMOFPR as offerProduct {
     offerProduct.RequestedVolume,
     offerProduct.UnitPerPack,
     offerProduct.SKU.PRODUCTPACKNAME as Product,
-    offerProduct.OfferID || '_' || upper(left(offerProduct.SKU.PRODUCTPACKNAME,3)) as ID_Prod
+    offerProduct.OfferID || '_' || upper(left(offerProduct.SKU.PRODUCTPACKNAME,3)) as ID_Prod:String
 };
 
 

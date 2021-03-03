@@ -285,13 +285,12 @@ left outer join MasterData.PT_TMINSBRTR as br on i.InstituteID=br.InstituteID  {
 	i.Address,
 	i.ContactNo,
 	i.Fax,
-	i.ContactPerson,
+	i.ContactPerson, 
 	i.Comment,
 	i.City,
-	h.ParentInstituteID:String,
 	case when h.ParentInstituteID is null 
 		then '' 
-		else h.ParentInstituteID
+		else h.ParentInstituteID || ''
 	end as GroupID:String,
 	i.INSTITUTE_HIERARCHY_ID,
 	ih.NAME as INSTITUTE_HIERARCHY
