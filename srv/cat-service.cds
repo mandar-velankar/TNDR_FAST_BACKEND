@@ -381,6 +381,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
 
     entity CountryTablesCustomization @readonly  as projection on AdminData.CountryTablesCustomization; 
     entity CountryTabsCustomization @readonly as projection on AdminData.CountryTabsCustomization;
+    entity CountryFragmentsCustomization @readonly as projection on AdminData.CountryFragmentsCustomization;
 
     function getCurrentUser() returns User;
     //Office365 PowerAutomate Approval Workflow Views
