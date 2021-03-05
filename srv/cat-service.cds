@@ -485,6 +485,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             FLOW_ID            : String(500);
             DIVISION           : String(500);
             COUNTRYNAME        : String(50);
+            HIERARCHY          : Integer;           
     };
 
     entity Templates        as projection on AdminData.Template;
