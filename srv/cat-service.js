@@ -1631,7 +1631,7 @@ module.exports = (srv) => {
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
 	});
-//http://localhost:4004/FAST/ODataDev/sxtender.xsodata/Attachment('AE-16-100-1049-BPH-11')/content
+//http://localhost:4004/v2/tender/Attachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'Attachment', async (req, next) => {
 		//OfferID => get CountryCode => get Template by Country => get template
 		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
