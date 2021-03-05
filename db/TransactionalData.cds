@@ -139,6 +139,7 @@ entity PT_TMAPPRST {
         SenderComment       : String(500);
         ApproverComment     : String(500);
     key Active              : Integer not null;
+        Hierarchy           : Integer;
         AP_ID               : String(10);
         RestoreKey          : String(100);
     key Statustime          : DateTime not null;
@@ -296,7 +297,7 @@ entity PT_TMOFPR {
         Cogs                     : Association to MasterDataLatestValues.CountryCogs
                                        on  Cogs.COUNTRY_CODE = CountryCode
                                        and Cogs.PRODUCT_ID   = ProductCode;
-        Results                  : Association to PT_TMTRRES
+        Results                  : Association to many PT_TMTRRES
                                        on  Results.OfferID     = OfferID
                                        and Results.ProductCode = ProductCode
                                        and Results.Active = Active;

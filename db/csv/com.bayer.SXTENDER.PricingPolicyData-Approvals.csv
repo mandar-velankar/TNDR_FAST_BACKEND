@@ -1,5 +1,1 @@
 ﻿ID,CountryCode,BrandId,Division,ApprovalStatus,SenderComment,ApproverComment,SentBy,ApprovalDate,FlowId,RequiredAction,COUNTRYAPPROVER_ID
-44fd65cd-d70b-426b-b971-fbc36aa662b8,TH,0810A10050,Pharma,"","","",Artiom,"","","",ff44386c-1c11-470f-bb64-90cfe1b056c8
-0080f098-2b0b-11eb-adc1-0242ac120002,TH,0810A10050,Pharma,"","","",Artiom,"","","",8bdf9423-35a5-432e-a6b5-4ae99c93db75
-0080f3f4-2b0b-11eb-adc1-0242ac120002,TH,0810A10050,Pharma,"","","",Artiom,"","","",ffd162c7-5d5c-4605-bba0-2faebe88ccf4
-0080f6d8-2b0b-11eb-adc1-0242ac120002,TH,0810A10050,Pharma,"","","",Artiom,"","","",14ef0346-98fe-42e7-853f-ae00c0784ce7

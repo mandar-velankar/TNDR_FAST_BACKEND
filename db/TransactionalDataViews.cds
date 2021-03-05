@@ -41,6 +41,7 @@ inner join AdminData.PT_TMUSER user
 	 approvals.SenderComment,
 	 approvals.ApproverComment,
 	 approvals.Active,
+     approvals.Hierarchy,
 	 approvals.AP_ID,
 	 approvals.RestoreKey,
 	 approvals.Statustime,
@@ -326,6 +327,8 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
     key institute.PARENT_ID
 };
 
+entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC negotiation';
+
 entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     key offer.OfferID as OFFER_ID,
     case
@@ -351,14 +354,15 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                     else 'Offer Approved'
                 end
         when offer.OfferStatusTable.STATUS = 'Results Recorded'
-            then case 
-                    when sum(case when offer.Product.Results.Outcome = 'FOC Negotiation' then 1 else 0 end) <> 0 then 'Awaiting FOC Negotiation' 
+            then 
+                case 
+                    when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID) then 'In FOC Negotiation'
                     else offer.OfferStatusTable.STATUS 
                 end
-        else offer.OfferStatusTable.STATUS
+        else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
-group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS;
+group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS; //group by missing?
 
 entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.TenderID as TENDER_ID,
