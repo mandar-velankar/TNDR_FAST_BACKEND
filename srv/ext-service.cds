@@ -1,6 +1,7 @@
 using { com.bayer.SXTENDER.ExternalDataViews } from '../db/ExternalDataViews';
 using {com.bayer.SXTENDER.MasterDataViews} from '../db/MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from '../db/MasterDataLatestValues';
+using {com.bayer.SXTENDER.TransactionalData} from '../db/TransactionalData';
 
 @cds.query.limit: { default: 1000000, max: 1000000 }
 service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_ext_user','f_tndr_cag_technical_user']){
@@ -24,7 +25,7 @@ service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     @cov2ap.isoDateTimeOffset:true
     entity TENDER_PRICING @readonly as projection on ExternalDataViews.TENDER_PRICING;
 
-        //Master Data Views addendum
+    //Master Data Views addendum
     entity MasterApproverBrandMap @readonly as projection on MasterDataViews.MasterApproverBrandMap;
     entity MasterCountries @readonly as projection on MasterDataViews.MasterCountries;
     entity MasterAuthorizedSignatories @readonly as projection on MasterDataViews.MasterAuthorizedSignatories;
@@ -40,4 +41,8 @@ service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     entity MasterTABrandMap @readonly as projection on MasterDataViews.MasterTABrandMap;
     entity MasterBudgetedProfitability @readonly as projection on MasterDataViews.MasterBudgetedProfitability;
     entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeRates;
+
+    entity OfferInfo @readonly as projection on TransactionalData.OfferInfo;
+    entity OfferProductInfo @readonly as projection on TransactionalData.OfferProductInfo;
+    entity ProductInfo @readonly as projection on TransactionalData.ProductInfo;
 }
