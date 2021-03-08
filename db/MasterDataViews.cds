@@ -269,9 +269,12 @@ left outer join MasterData.PT_TMINSHIER as h on (i.InstituteID = h.InstituteID  
 left outer join MasterData.PT_TMINST as i2 on h.ParentInstituteID =i2.InstituteID
 left outer join MasterData.PT_TMINDSBR as dsbr on i.InstituteID=dsbr.InstituteID
 left outer join MasterData.PT_TMINSBRTR as br on i.InstituteID=br.InstituteID  {
-	i.InstituteID,
-	i.CountryCode,
-	ifnull(i2.InstituteName, '') as GroupName:String,
+	key i.InstituteID,
+	key i.CountryCode,
+	case when i2.InstituteName is null 
+		then '' 
+		else i2.InstituteName 
+	end as GroupName:String,
 	i.CustomerID,
 	i.InstituteName,
 	i.InstituteType,
@@ -282,10 +285,13 @@ left outer join MasterData.PT_TMINSBRTR as br on i.InstituteID=br.InstituteID  {
 	i.Address,
 	i.ContactNo,
 	i.Fax,
-	i.ContactPerson,
+	i.ContactPerson, 
 	i.Comment,
 	i.City,
-	h.ParentInstituteID as GroupID:String,
+	case when h.ParentInstituteID is null 
+		then '' 
+		else h.ParentInstituteID || ''
+	end as GroupID:String,
 	i.INSTITUTE_HIERARCHY_ID,
 	ih.NAME as INSTITUTE_HIERARCHY
 } group by i.InstituteID,
