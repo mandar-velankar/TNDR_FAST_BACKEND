@@ -8,6 +8,8 @@ using {
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
 
+//Autorization tables
+//-------------------
 entity CONDITIONAL_ACCESS {
     key Id               : Integer not null;
         CWIDs_COGS       : String(5000);
@@ -48,6 +50,8 @@ entity PT_TMUSERCTRYN {
         CWIDs       : String(500);
 }
 
+//PDF templates
+//-------------
 entity TemplateCountry {
     key CountryCode    : String(2);
     key Classification : String(50); //Added Classification (db#2)
@@ -74,6 +78,10 @@ entity Template {
 //         Required    : Boolean;
 // }
 
+//Customizing tables
+//------------------
+
+//Customizing for: tables (sap.m.Table...)
 entity CountryTablesCustomization {
     key CountryCode : String(2);
     key TableID     : String(100);
@@ -83,14 +91,16 @@ entity CountryTablesCustomization {
         Required    : Boolean;
 }
 
+//Customizing for: tabs
 entity CountryTabsCustomization {
     key CountryCode : String(2);
     key TabID       : String(100);
         Visible     : Boolean;
 }
 
+//Customizing for: fragments
 entity CountryFragmentsCustomization {
-    key CountryCode : String(2);
-    key FragmentID  : String(100);
-        Visible     : Boolean;
+    key CountryCode   : String(2);
+    key FragmentID    : String(100);
+    key FragmentName  : String(100);
 }
