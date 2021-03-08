@@ -89,7 +89,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity CountryBrands @readonly           as projection on MasterDataViews.CountryBrands;
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
-
+    
     //Master Data Services
     entity InstituteDistributor {
         key COUNTRY_INSTITUTE_DISTRIBUTOR_ID : String(500);
@@ -381,6 +381,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
 
     entity CountryTablesCustomization @readonly  as projection on AdminData.CountryTablesCustomization; 
     entity CountryTabsCustomization @readonly as projection on AdminData.CountryTabsCustomization;
+    entity CountryFragmentsCustomization @readonly as projection on AdminData.CountryFragmentsCustomization;
 
     function getCurrentUser() returns User;
     //Office365 PowerAutomate Approval Workflow Views
@@ -484,6 +485,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
             FLOW_ID            : String(500);
             DIVISION           : String(500);
             COUNTRYNAME        : String(50);
+            HIERARCHY          : Integer;           
     };
 
     entity Templates        as projection on AdminData.Template;
