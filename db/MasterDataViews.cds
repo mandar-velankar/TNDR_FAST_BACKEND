@@ -275,7 +275,7 @@ left outer join MasterData.PT_TMINSBRTR as br on i.InstituteID=br.InstituteID  {
 		then '' 
 		else i2.InstituteName 
 	end as GroupName:String,
-	key i.CustomerID,
+	i.CustomerID,
 	i.InstituteName,
 	i.InstituteType,
 	case when count(dsbr.InstituteID) <> 0 and count(br.InstituteID) <> 0
