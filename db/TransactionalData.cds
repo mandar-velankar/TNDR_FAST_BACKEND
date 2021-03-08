@@ -510,7 +510,7 @@ entity Offers as select from PT_TMOFRS as offer {
 entity OfferInfo as select from Offers as o1 
 left outer join Offers o2 on o1.RootId = o2.RootId and o2.ActiveOffer = 1
 {
-    o1.OfferID,
+    key o1.OfferID,
     o1.PFINo,
     o1.TenderID,
     o1.CountryCode,
@@ -531,9 +531,9 @@ left outer join Offers o2 on o1.RootId = o2.RootId and o2.ActiveOffer = 1
 entity OfferProductInfo as select from PT_TMOFPR as offerProduct {
     offerProduct.OfferID || '_' || offerProduct.ProductCode as ID:String(50),
     offerProduct.TenderID,
-    offerProduct.OfferID,
+    key offerProduct.OfferID,
     offerProduct.Active,
-    offerProduct.ProductCode,
+    key offerProduct.ProductCode,
     offerProduct.AlternateOfferYN,
     offerProduct.RequestedVolume,
     offerProduct.UnitPerPack,
@@ -543,11 +543,11 @@ entity OfferProductInfo as select from PT_TMOFPR as offerProduct {
 
 
 entity ProductInfo as select from MasterData.PT_TMPRDPCK as product {
-    product.PRODUCTPACKID,
+    key product.PRODUCTPACKID,
     product.PRODUCTPACKNAME,
     product.HLEVEL6_CODE,
     CountryPacks.COUNTRYCODE,
-    case when ProductPackSKUs.SKUCode is null 
+    key case when ProductPackSKUs.SKUCode is null 
         then '-1' 
         else ProductPackSKUs.SKUCode 
     end as SKUCode:String,
