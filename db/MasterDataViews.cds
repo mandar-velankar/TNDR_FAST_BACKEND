@@ -269,13 +269,13 @@ left outer join MasterData.PT_TMINSHIER as h on (i.InstituteID = h.InstituteID  
 left outer join MasterData.PT_TMINST as i2 on h.ParentInstituteID =i2.InstituteID
 left outer join MasterData.PT_TMINDSBR as dsbr on i.InstituteID=dsbr.InstituteID
 left outer join MasterData.PT_TMINSBRTR as br on i.InstituteID=br.InstituteID  {
-	i.InstituteID,
-	i.CountryCode,
+	key i.InstituteID,
+	key i.CountryCode,
 	case when i2.InstituteName is null 
 		then '' 
 		else i2.InstituteName 
 	end as GroupName:String,
-	i.CustomerID,
+	key i.CustomerID,
 	i.InstituteName,
 	i.InstituteType,
 	case when count(dsbr.InstituteID) <> 0 and count(br.InstituteID) <> 0
