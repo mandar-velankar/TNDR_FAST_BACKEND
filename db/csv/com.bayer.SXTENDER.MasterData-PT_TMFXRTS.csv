@@ -88,3 +88,5 @@ FxID,CurrencyFrom,CurrencyTo,ExchangeType,EffDate,EndDate,ExchangeRate,ActiveRec
 100317,ARS,EUR,Budget,2021-01-01,4000-12-31,107.27,Yes,,,,,
 100318,BRL,EUR,Monthly Average,2021-01-01,4000-12-31,6.53,Yes,,,,,
 100319,BRL,EUR,Budget,2021-01-01,4000-12-31,6.53,Yes,,,,,
+100320,USD,USD,Monthly Average,2021-01-01,4000-12-31,1,Yes,,,,,
+100321,USD,USD,Budget,2021-01-01,4000-12-31,1,Yes,,,,,
