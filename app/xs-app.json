@@ -5,41 +5,27 @@
     "logoutEndpoint": "/do/logout"
   },
   "routes": [
+    
     {
-      "source": "/PolicyPricingService/(.*)$",
-      "target": "/ppa/$1",
+      "source": "/v4/(.*)$",
+      "target": "$1",
       "authenticationType": "basic",
       "destination": "srv_api",
       "csrfProtection": false
     },
     {
-      "source": "/ContractService/(.*)$",
-      "target": "/ctr/$1",
+      "source": "/v2/(.*)$",
+      "target": "/v2/$1",
       "authenticationType": "basic",
       "destination": "srv_api",
       "csrfProtection": false
     },
     {
-      "source": "/ODataDev/(.*)$",
-      "target": "/ODataDev/$1",
-      "authenticationType": "basic",
-      "destination": "srv_api",
-      "csrfProtection": false
-    },
-
-    {
-      "source": "/reporting/(.*)$",
-      "target": "/FAST/$1",
+      "source": "^/(.*)$",
+      "target": "/v2/$1",
       "authenticationType": "basic",
       "destination": "srv_api",
       "csrfProtection": true
-    },
-    {
-      "source": "/FAST/(.*)$",
-      "target": "/FAST/$1",
-      "authenticationType": "basic",
-      "destination": "srv_api",
-      "csrfProtection": false
     }
   ]
 }
