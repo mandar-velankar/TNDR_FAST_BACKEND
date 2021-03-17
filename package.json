@@ -17,7 +17,6 @@
     "handlebars": "^4.7.6",
     "helmet": "^4.2.0",
     "html-pdf": "^2.2.0",
-    "mbt": "^1.1.0",
     "mysql": "^2.18.1",
     "passport": "^0.4.1",
     "ramda": "^0.27.0"
