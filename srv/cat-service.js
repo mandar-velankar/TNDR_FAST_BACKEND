@@ -1291,7 +1291,7 @@ module.exports = (srv) => {
 		return {
 			OFFERSTATUSPATH: offerValidation.OFFERSTATUSPATH,
 			COUNTRYCODE: offerValidation.COUNTRYCODE,
-			TENDERID: offerValidation.TENDERID,
+			TENDERID: offerValidation.TENDER_REFERENCE, //offerValidation.TENDERID,
 			OFFERID: offerValidation.OFFERID,
 			INSTITUTENAME: offerValidation.INSTITUTENAME,
 			CURRENCY: offerValidation.CURRENCY,
