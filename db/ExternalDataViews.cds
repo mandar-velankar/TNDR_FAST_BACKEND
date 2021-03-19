@@ -193,72 +193,94 @@ and offerProduct.Offer.Active = 1
 and offerProduct.Active =1
 and offerProduct.Offer.Tender.Country.Region = 'MEA';
 
-entity VW_TENDER_MANAGER_DASHBOARD as select from TransactionalData.PT_TMOFPR offerProduct{
-    offerProduct.Offer.Tender.CountryCode as CountryCode_Tenders,
-    offerProduct.Offer.Tender.TenderID as TenderID,
-    offerProduct.Offer.Tender.TenderName as TenderName,
-    offerProduct.Offer.Tender.InstituteID as InstituteID,
-    offerProduct.Offer.Tender.PublicationDate as PublicationDate,
-    offerProduct.Offer.Tender.BidDueDate as BidDueDate,
-    offerProduct.Offer.Tender.SubmittedOn as SubmittedOn,
+entity VW_TENDER_MANAGER_DASHBOARD as select from TransactionalData.PT_TMOFPR offerProduct
+left outer join TransactionalData.PT_TMQUTO quotation on offerProduct.OfferID = quotation.OfferID
+left outer join AdminData.PT_TMUSER user on quotation.SubmittedBy = user.CWID{
+    ifnull(offerProduct.Offer.Tender.CountryCode, '') as CountryCode_Tenders:String,
+    ifnull(offerProduct.Offer.Tender.TenderID, '') as TenderID:String,
+    ifnull(offerProduct.Offer.Tender.TenderName, '') as TenderName:String,
+    ifnull(offerProduct.Offer.Tender.InstituteID, 0) as InstituteID:Integer,
+    case when offerProduct.Offer.Tender.PublicationDate = '' then null else offerProduct.Offer.Tender.PublicationDate end as PublicationDate:DateTime,
+    case when offerProduct.Offer.Tender.BidDueDate = '' then null else offerProduct.Offer.Tender.BidDueDate end as BidDueDate:DateTime,
+    
+    case
+        when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null then
+            case when offerProduct.Offer.Quotation.SubmittedOn = '' then null else offerProduct.Offer.Quotation.SubmittedOn end
+        else offerProduct.Offer.SubmissionDate
+    end as SubmittedOn:DateTime,
+    
+    
     case when offerProduct.Offer.OfferStatus.STATUS = 'Quotation Submitted' or offerProduct.Offer.OfferStatus.STATUS = 'Results Recorded' or offerProduct.Offer.OfferStatus.STATUS = 'Delivery Ongoing'
-        then ifnull(offerProduct.Offer.Quotation.SubmittedBy, '')
+        then ifnull(user.UserName, ifnull(offerProduct.Offer.Quotation.SubmittedBy, ''))
         else ''
-    end as SubmittedBy:String(500),
-    offerProduct.Offer.Tender.TenderID as TenderID_Custom_SQL_Query,
-    key offerProduct.Offer.OfferID as OfferID,
-    offerProduct.Offer.WholesaleOffer as WholesaleOfferYN,
-    offerProduct.Offer.RevisedOfferNo as RevisedOfferNo,
-    offerProduct.Offer.ContinuationOfferNo as ContinuationOfferNo,
+    end as SubmittedBy:String,
+    ifnull(offerProduct.Offer.Tender.TenderID, '') as TenderID_Custom_SQL_Query:String,
+    key ifnull(offerProduct.Offer.OfferID, '') as OfferID:String,
+    ifnull(offerProduct.Offer.WholesaleOffer, 'No') as WholesaleOfferYN:String,
+    ifnull(offerProduct.Offer.RevisedOfferNo, 0) as RevisedOfferNo:Integer,
+    ifnull(offerProduct.Offer.ContinuationOfferNo, 0) as ContinuationOfferNo:Integer,
     case when offerProduct.Offer.OfferStatus.STATUS = 'Quotation Submitted' or offerProduct.Offer.OfferStatus.STATUS = 'Results Recorded' or offerProduct.Offer.OfferStatus.STATUS = 'Delivery Ongoing'
-        then ifnull(offerProduct.Offer.SubmissionDate, '')
-        else ''
-    end as SubmissionDate:Date,
-    offerProduct.Offer.NewOfferDueDate as NewOfferDueDate,
-    offerProduct.Offer.ActiveOffer as ActiveOffer,
-    offerProduct.Offer.Tender.CountryCode as CountryCode,
-    offerProduct.Offer.Tender.Country.CountryName as CountryName,
-    offerProduct.Offer.Tender.Country.ApprovalType as ApprovalType,
-    offerProduct.Offer.Tender.Country.LocalCurrency as LocalCurrency,
-    offerProduct.Offer.Tender.Country.CountryID as CountryID,
-    offerProduct.Offer.Tender.Country.Region as Region,
-    offerProduct.Offer.Tender.Institute.CountryCode as CountryCode_Institutes,
-    offerProduct.Offer.Tender.InstituteID as InstituteID_Institutes,
-    offerProduct.Offer.Tender.Institute.CustomerID as CustomerID,
-    offerProduct.Offer.Tender.Institute.InstituteName as InstituteName,
-    offerProduct.Offer.Tender.Institute.InstituteType as InstituteType,
-    offerProduct.Offer.Tender.Institute.Address as Address,
-    offerProduct.Offer.Tender.Institute.ContactNo as ContactNo,
-    offerProduct.Offer.Tender.Institute.Fax as Fax,
-    offerProduct.Offer.Tender.Institute.ContactPerson as ContactPerson,
-    offerProduct.Offer.Tender.Institute.ActiveRecord as ActiveRecord,
-    offerProduct.Offer.Tender.Institute.Comment as Comment,
-    offerProduct.Offer.Tender.Institute.City as City,
-    offerProduct.Offer.OfferID as OfferID_Custom_SQL_Query,
-    key offerProduct.ProductCode as ProductCode,
-    offerProduct.ActiveProduct as ActiveProduct:Double,
-    offerProduct.AlternateOfferYN as AlternateOfferYN,
-    offerProduct.ProductCode as ProductPackID,
-    offerProduct.SKU.PRODUCTPACKNAME as ProductPackName,
-    offerProduct.SKU.PRESENTATION as Presentation,
-    offerProduct.SKU.CONCENTRATION as Concentration:String(500),
-    offerProduct.SKU.UOM as UoM,
-    offerProduct.SKU.PACKFACTOR as Packfactor,
-    offerProduct.SKU.PCIName as PCIName:String(500),
-    offerProduct.SKUCountry.ACTIVERECORD as ActiveRecord_ProductPacks,
-    offerProduct.SKU.HLEVEL6_CODE as HLevel6_Code,
-    offerProduct.Offer.PfiNumber.OfferID as OfferID_PFIOfferMap,
-    offerProduct.Offer.PfiNumber.PFINo as PFINo,
-    offerProduct.Offer.Quotation.OfferID as OfferID_Custom_SQL_Query_1,
-    offerProduct.Offer.Quotation.DelayInSubmission as DelayInSubmission,
-    offerProduct.Results.OfferID as OfferID_Custom_SQL_Query_2,
-    offerProduct.Results.ProductCode as ProductCode_Custom_SQL_Query,
-    offerProduct.Results.ErrorInSubmission as ErrorInSubmission,
-    offerProduct.Results.Outcome as Outcome,
-    offerProduct.Price.OfferID as OfferID_Custom_SQL_Query_3,
-    offerProduct.Price.ProductCode as ProductCode_Custom_SQL_Query_1,
-    offerProduct.Price.WholesalePrice as WholeSalePrice,
-    offerProduct.Offer.Tender.Classification as Classification
+        then
+            case
+                when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null then
+                    case when offerProduct.Offer.Quotation.SubmittedOn = '' then null else offerProduct.Offer.Quotation.SubmittedOn end
+                else offerProduct.Offer.SubmissionDate
+            end
+        else null
+    end as SubmissionDate:DateTime,
+    case when offerProduct.Offer.NewOfferDueDate = '' then null else offerProduct.Offer.NewOfferDueDate end as NewOfferDueDate:DateTime,
+    case 
+        when offerProduct.Offer.ActiveOffer is null then 1
+        when offerProduct.Offer.ActiveOffer <> 1 then 2
+        else offerProduct.Offer.ActiveOffer
+    end as ActiveOffer:Integer,
+    ifnull(offerProduct.Offer.Tender.CountryCode, '') as CountryCode:String,
+    ifnull(offerProduct.Offer.Tender.Country.CountryName, '') as CountryName:String,
+    ifnull(offerProduct.Offer.Tender.Country.ApprovalType, 0) as ApprovalType:Integer,
+    ifnull(offerProduct.Offer.Tender.Country.LocalCurrency, '') as LocalCurrency:String,
+    ifnull(offerProduct.Offer.Tender.Country.CountryID, 0) as CountryID:Integer,
+    ifnull(offerProduct.Offer.Tender.Country.Region, '') as Region:String,
+    ifnull(offerProduct.Offer.Tender.Institute.CountryCode, '') as CountryCode_Institutes:String,
+    ifnull(offerProduct.Offer.Tender.InstituteID, 0) as InstituteID_Institutes:Integer,
+    ifnull(offerProduct.Offer.Tender.Institute.CustomerID, 0) as CustomerID:Integer,
+    ifnull(offerProduct.Offer.Tender.Institute.InstituteName, '') as InstituteName:String,
+    ifnull(offerProduct.Offer.Tender.Institute.InstituteType, '') as InstituteType:String,
+    ifnull(offerProduct.Offer.Tender.Institute.Address, '') as Address:String,
+    ifnull(offerProduct.Offer.Tender.Institute.ContactNo, '') as ContactNo:String,
+    ifnull(offerProduct.Offer.Tender.Institute.Fax, '') as Fax:String,
+    ifnull(offerProduct.Offer.Tender.Institute.ContactPerson, '') as ContactPerson:String,
+    ifnull(offerProduct.Offer.Tender.Institute.ActiveRecord, 1) as ActiveRecord:Integer,
+    ifnull(offerProduct.Offer.Tender.Institute.Comment, '') as Comment:String,
+    ifnull(offerProduct.Offer.Tender.Institute.City, '') as City:String,
+    ifnull(offerProduct.Offer.OfferID, '') as OfferID_Custom_SQL_Query:String,
+    key ifnull(offerProduct.ProductCode, 0) as ProductCode:Integer,
+    case
+        when offerProduct.ActiveProduct is null then 1
+        when offerProduct.ActiveProduct <> 1 then 2
+        else offerProduct.ActiveProduct
+    end as ActiveProduct:Double,
+    ifnull(offerProduct.AlternateOfferYN, '') as AlternateOfferYN:String,
+    ifnull(offerProduct.ProductCode, 0) as ProductPackID:Integer,
+    ifnull(offerProduct.SKU.PRODUCTPACKNAME, '') as ProductPackName:String,
+    ifnull(offerProduct.SKU.PRESENTATION, '') as Presentation:String,
+    ifnull(offerProduct.SKU.CONCENTRATION, 0) as Concentration:Integer,
+    ifnull(offerProduct.SKU.UOM, '') as UoM:String,
+    ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Integer,
+    ifnull(offerProduct.SKU.PCIName, '') as PCIName:String,
+    ifnull(offerProduct.SKUCountry.ACTIVERECORD, '') as ActiveRecord_ProductPacks:String,
+    ifnull(offerProduct.SKU.HLEVEL6_CODE, '') as HLevel6_Code:String,
+    ifnull(offerProduct.Offer.PfiNumber.OfferID, '') as OfferID_PFIOfferMap:String,
+    ifnull(offerProduct.Offer.PfiNumber.PFINo, '') as PFINo:String,
+    ifnull(offerProduct.Offer.Quotation.OfferID, '') as OfferID_Custom_SQL_Query_1:String,
+    ifnull(offerProduct.Offer.Quotation.DelayInSubmission, '') as DelayInSubmission:String,
+    ifnull(offerProduct.Results.OfferID, '') as OfferID_Custom_SQL_Query_2:String,
+    ifnull(offerProduct.Results.ProductCode, 0) as ProductCode_Custom_SQL_Query:Integer,
+    case when offerProduct.Results.ErrorInSubmission is null or offerProduct.Results.ErrorInSubmission = 'NULL' then 'No' else offerProduct.Results.ErrorInSubmission end as ErrorInSubmission:String,
+    ifnull(offerProduct.Results.Outcome, '') as Outcome:String,
+    ifnull(offerProduct.Price.OfferID, '') as OfferID_Custom_SQL_Query_3:String,
+    ifnull(offerProduct.Price.ProductCode, 0) as ProductCode_Custom_SQL_Query_1:Integer,
+    ifnull(offerProduct.Offer.WholesaleOffer, 'No') as WholeSalePrice:String,
+    ifnull(offerProduct.Offer.Tender.Classification, '') as Classification:String
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
 and offerProduct.Active = 1
