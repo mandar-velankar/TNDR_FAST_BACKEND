@@ -19,25 +19,36 @@ entity Dashboard as select from TransactionalDataViews.OfferProductPlus offerPro
 inner join MasterData.PT_TMTABRMP ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
 inner join MasterData.PT_TMRCM region on offerProduct.CountryCode = region.CountryCode
 left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.OFFERID and offerProduct.ProductCode = delivery.PRODUCTID {
-    year(ifnull(offerProduct.Offer.SubmissionDate, offerProduct.Offer.Tender.PublicationDate)) as YEAR:Integer,
-    ta.TA as TA,
-    offerProduct.SKU.Product.HLEVEL4_NAME as Brand,
-    region.SubRegion as Subregion,
-    offerProduct.Offer.Tender.Country.CountryName as CountryName,
-    offerProduct.Offer.Tender.Institute.InstituteName as InstituteName,
-    offerProduct.Offer.Tender.TenderName as TenderName,
-    offerProduct.Offer.Tender.Classification as Classification,
-    offerProduct.Offer.Tender.TenderID as TenderID,
-    offerProduct.Offer.Tender.TenderChannel as TenderChannel, 
-    key ifnull(offerProduct.Offer.PfiNumber.PFINo, offerProduct.Offer.OfferID) as OfferNumber:String(500),
-    offerProduct.Offer.Distributor.DistributorName as DistributorName,
-    key offerProduct.SKU.PRODUCTPACKNAME as ProductPackName,
-    offerProduct.Offer.Currency as Currency,
-    offerProduct.Price.OfferPrice as OfferPrice,
-    offerProduct.Price.FOC as FOC,
-    offerProduct.Price.FOC_ABS_PCT as FOC_ABS_PCT,
-    offerProduct.Price.FOCType as FOCType,
-    offerProduct.RequestedVolume as RequestedVolume,
+    ifnull(
+        year(
+                case when offerProduct.Offer.Tender.Offer.SubmissionDate = '' or offerProduct.Offer.Tender.Offer.SubmissionDate is null
+                    then
+                         case when offerProduct.Offer.Quotation.SubmittedOn = '' or offerProduct.Offer.Quotation.SubmittedOn is null then offerProduct.Offer.Tender.PublicationDate
+                         else offerProduct.Offer.Quotation.SubmittedOn
+                         end
+                else offerProduct.Offer.Tender.Offer.SubmissionDate
+                end
+        ),
+        0
+    ) as YEAR:Integer,
+    ifnull(ta.TA, '') as TA:String,
+    ifnull(offerProduct.SKU.Product.HLEVEL4_NAME, '') as Brand:String,
+    ifnull(region.SubRegion, '') as Subregion:String,
+    ifnull(offerProduct.Offer.Tender.Country.CountryName, '') as CountryName:String,
+    ifnull(offerProduct.Offer.Tender.Institute.InstituteName, '') as InstituteName:String,
+    ifnull(offerProduct.Offer.Tender.TenderName, '') as TenderName:String,
+    ifnull(offerProduct.Offer.Tender.Classification, '') as Classification:String,
+    ifnull(offerProduct.Offer.Tender.TenderID, '') as TenderID:String,
+    ifnull(offerProduct.Offer.Tender.TenderChannel, '') as TenderChannel:String, 
+    key ifnull(offerProduct.Offer.PfiNumber.PFINo, ifnull(offerProduct.Offer.OfferID, '')) as OfferNumber:String(500),
+    ifnull(offerProduct.Offer.Distributor.DistributorName, '') as DistributorName:String,
+    key ifnull(offerProduct.SKU.PRODUCTPACKNAME, '') as ProductPackName:String,
+    ifnull(offerProduct.Offer.Currency, '') as Currency:String,
+    ifnull(offerProduct.Price.OfferPrice, 0) as OfferPrice:Double,
+    ifnull(offerProduct.Price.FOC, 0) as FOC:Double,
+    ifnull(offerProduct.Price.FOC_ABS_PCT, '') as FOC_ABS_PCT:String,
+    ifnull(offerProduct.Price.FOCType, '') as FOCType:String,
+    ifnull(offerProduct.RequestedVolume, 0) as RequestedVolume:Integer,
     case when offerProduct.Price.FOCType = 'FOC 1'
         then offerProduct.RequestedVolume - case when offerProduct.Price.FOC_ABS_PCT = 'PCT' then round(offerProduct.Price.FOC * offerProduct.RequestedVolume) else round(offerProduct.Price.FOC) end
         else offerProduct.RequestedVolume
@@ -50,30 +61,46 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
     end
     *
     offerProduct.Price.OfferPrice / offerProduct.Price.BudgetRate as TotalValue_EUR:Double,
-    offerProduct.Offer.Quotation.OfferDate as OfferDate,
-    offerProduct.Offer.Quotation.OfferValidity as OfferValidity,
-    offerProduct.Offer.Tender.PublicationDate as PublicationDate,
-    offerProduct.Offer.SubmissionDate as SubmissionDate,
-    offerProduct.Offer.Tender.BidDueDate as BidDueDate,
-    offerProduct.Offer.NewOfferDueDate as NewOfferDueDate,
-    offerProduct.Results.SubmittedOn as FeedBackDate,
-    offerProduct.Results.AwardedQty as AwardedQty,
-    delivery.RequestedQuantity as RequestedQuantity,
-    delivery.ActualDeliveredQuantity as ActualDeliveredQuantity,
-    offerProduct.Results.AwardedCompany as Participant,
-    offerProduct.Results.AwardedPrice as ParticipantPrice,
-    offerProduct.Results.Currency as ParticipantCurrency,
-    offerProduct.Results.UoM as ParticipantUoM,
-    offerProduct.Results.Outcome as PaticipantOutcome,
-    offerProduct.Offer.ActiveOffer as ActiveOffer,
-    offerProduct.ActiveProduct as ActiveProduct:Integer,
-    offerProduct.AlternateOfferYN as AlternateOfferYN,
-    offerProduct.Price.WholesalePrice as WholeSalePrice,
-    offerProduct.Price.RegPrice as RegisteredPrice,
-    offerProduct.Price.Discount as Discount,
-    offerProduct.Offer.Currency as RegisteredPriceCurrency,
-    offerProduct.SKU.PACKFACTOR as Packfactor,
-    offerProduct.Offer.OfferStatus.STATUS as CurrentStatus
+    case when offerProduct.Offer.Quotation.OfferDate = '' or offerProduct.Offer.Quotation.OfferDate is null then to_date('1970-01-01') else offerProduct.Offer.Quotation.OfferDate end as OfferDate:DateTime,
+    case when offerProduct.Offer.Quotation.OfferValidity = '' or offerProduct.Offer.Quotation.OfferValidity is null then to_date('1970-01-01') else offerProduct.Offer.Quotation.OfferValidity end as OfferValidity:DateTime,
+    case when offerProduct.Offer.Tender.PublicationDate = '' or offerProduct.Offer.Tender.PublicationDate is null then to_date('1970-01-01') else offerProduct.Offer.Tender.PublicationDate end as PublicationDate:DateTime,
+    case when offerProduct.Offer.OfferStatus.STATUS = 'Quotation Submitted' or offerProduct.Offer.OfferStatus.STATUS = 'Results Recorded' or offerProduct.Offer.OfferStatus.STATUS = 'Delivery Ongoing'
+        then
+            case
+                when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null then
+                    case when offerProduct.Offer.Quotation.SubmittedOn = '' then to_date('1970-01-01') else offerProduct.Offer.Quotation.SubmittedOn end
+                else offerProduct.Offer.SubmissionDate
+            end
+        else to_date('1970-01-01')
+    end as SubmissionDate:DateTime,
+    case when offerProduct.Offer.Tender.BidDueDate = '' or offerProduct.Offer.Tender.BidDueDate is null then to_date('1970-01-01') else offerProduct.Offer.Tender.BidDueDate end as BidDueDate:DateTime,
+    case when offerProduct.Offer.NewOfferDueDate = '' or offerProduct.Offer.NewOfferDueDate is null then to_date('1970-01-01') else offerProduct.Offer.NewOfferDueDate end as NewOfferDueDate:DateTime,
+    case when offerProduct.Results.SubmittedOn = '' or offerProduct.Results.SubmittedOn is null then to_date('1970-01-01') else offerProduct.Results.SubmittedOn end as FeedBackDate:DateTime,
+    ifnull(offerProduct.Results.AwardedQty, 0) as AwardedQty:Integer,
+    ifnull(delivery.RequestedQuantity, 0) as RequestedQuantity:Integer,
+    ifnull(delivery.ActualDeliveredQuantity, '') as ActualDeliveredQuantity:String,
+    ifnull(offerProduct.Results.AwardedCompany, '') as Participant:String,
+    ifnull(offerProduct.Results.AwardedPrice, 0) as ParticipantPrice:Double,
+    ifnull(offerProduct.Results.Currency, '') as ParticipantCurrency:String,
+    ifnull(offerProduct.Results.UoM, '') as ParticipantUoM:String,
+    ifnull(offerProduct.Results.Outcome, '') as PaticipantOutcome:String,
+    case 
+        when offerProduct.Offer.ActiveOffer is null then 1
+        when offerProduct.Offer.ActiveOffer <> 1 then 2
+        else offerProduct.Offer.ActiveOffer
+    end as ActiveOffer:Integer,
+    case
+        when offerProduct.ActiveProduct is null then 1
+        when offerProduct.ActiveProduct <> 1 then 2
+        else offerProduct.ActiveProduct
+    end as ActiveProduct:Integer,
+    ifnull(offerProduct.AlternateOfferYN, '' ) as AlternateOfferYN:String,
+    ifnull(offerProduct.Offer.WholesaleOffer, 'No') as WholeSalePrice:String,
+    ifnull(offerProduct.Price.RegPrice, 0) as RegisteredPrice:Double,
+    ifnull(offerProduct.Price.Discount, 0) as Discount:Double,
+    ifnull(offerProduct.Offer.Currency, '') as RegisteredPriceCurrency:String,
+    ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Integer,
+    ifnull(offerProduct.Offer.OfferStatus.STATUS, '') as CurrentStatus:String
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
 and offerProduct.Active = 1 
@@ -117,10 +144,14 @@ inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = '
     ifnull(offerProduct.Offer.DistributorID, 0) as DistributorID:Integer,
     ifnull(offerProduct.Offer.Currency, '') as Currency:String,
     ifnull(offerProduct.Offer.Tender.Classification, '') as Classification:String,
-    case
-        when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null then
-            case when offerProduct.Offer.Quotation.SubmittedOn = '' then null else offerProduct.Offer.Quotation.SubmittedOn end
-        else offerProduct.Offer.SubmissionDate
+    case when offerProduct.Offer.OfferStatus.STATUS = 'Quotation Submitted' or offerProduct.Offer.OfferStatus.STATUS = 'Results Recorded' or offerProduct.Offer.OfferStatus.STATUS = 'Delivery Ongoing'
+        then
+            case
+                when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null then
+                    case when offerProduct.Offer.Quotation.SubmittedOn = '' then null else offerProduct.Offer.Quotation.SubmittedOn end
+                else offerProduct.Offer.SubmissionDate
+            end
+        else null
     end as SubmissionDate:DateTime,
     case when offerProduct.Offer.InternalBidDueDate = '' then null else offerProduct.Offer.InternalBidDueDate end as InternalBidDueDate:DateTime,
     case 
@@ -203,10 +234,14 @@ left outer join AdminData.PT_TMUSER user on quotation.SubmittedBy = user.CWID{
     case when offerProduct.Offer.Tender.PublicationDate = '' then null else offerProduct.Offer.Tender.PublicationDate end as PublicationDate:DateTime,
     case when offerProduct.Offer.Tender.BidDueDate = '' then null else offerProduct.Offer.Tender.BidDueDate end as BidDueDate:DateTime,
     
-    case
-        when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null then
-            case when offerProduct.Offer.Quotation.SubmittedOn = '' then null else offerProduct.Offer.Quotation.SubmittedOn end
-        else offerProduct.Offer.SubmissionDate
+    case when offerProduct.Offer.OfferStatus.STATUS = 'Quotation Submitted' or offerProduct.Offer.OfferStatus.STATUS = 'Results Recorded' or offerProduct.Offer.OfferStatus.STATUS = 'Delivery Ongoing'
+        then
+            case
+                when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null then
+                    case when offerProduct.Offer.Quotation.SubmittedOn = '' then null else offerProduct.Offer.Quotation.SubmittedOn end
+                else offerProduct.Offer.SubmissionDate
+            end
+        else null
     end as SubmittedOn:DateTime,
     
     
