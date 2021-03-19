@@ -18,6 +18,7 @@ group by delivery.OfferID, delivery.ProductCode;
 entity Dashboard as select from TransactionalDataViews.OfferProductPlus offerProduct
 inner join MasterData.PT_TMTABRMP ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
 inner join MasterData.PT_TMRCM region on offerProduct.CountryCode = region.CountryCode
+left outer join MasterDataLatestValues.ExchangeRates rates on offerProduct.CURRENCY = rates.CURRENCY_FROM and rates.CURRENCY_TO = 'EUR' and rates.X_TYPE = 'Budget'
 left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.OFFERID and offerProduct.ProductCode = delivery.PRODUCTID {
     ifnull(
         year(
@@ -30,17 +31,17 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
                 end
         ),
         0
-    ) as YEAR:Integer,
+    ) as Year:Integer,
     ifnull(ta.TA, '') as TA:String,
     ifnull(offerProduct.SKU.Product.HLEVEL4_NAME, '') as Brand:String,
     ifnull(region.SubRegion, '') as Subregion:String,
     ifnull(offerProduct.Offer.Tender.Country.CountryName, '') as CountryName:String,
     ifnull(offerProduct.Offer.Tender.Institute.InstituteName, '') as InstituteName:String,
+    ifnull(offerProduct.Offer.Tender.TenderID, '') as TenderID:String,
     ifnull(offerProduct.Offer.Tender.TenderName, '') as TenderName:String,
     ifnull(offerProduct.Offer.Tender.Classification, '') as Classification:String,
-    ifnull(offerProduct.Offer.Tender.TenderID, '') as TenderID:String,
     ifnull(offerProduct.Offer.Tender.TenderChannel, '') as TenderChannel:String, 
-    key ifnull(offerProduct.Offer.PfiNumber.PFINo, ifnull(offerProduct.Offer.OfferID, '')) as OfferNumber:String(500),
+    key ifnull(offerProduct.Offer.PfiNumber.PFINo, ifnull(offerProduct.Offer.OfferID, '')) as OfferNumber:String,
     ifnull(offerProduct.Offer.Distributor.DistributorName, '') as DistributorName:String,
     key ifnull(offerProduct.SKU.PRODUCTPACKNAME, '') as ProductPackName:String,
     ifnull(offerProduct.Offer.Currency, '') as Currency:String,
@@ -48,6 +49,7 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
     ifnull(offerProduct.Price.FOC, 0) as FOC:Double,
     ifnull(offerProduct.Price.FOC_ABS_PCT, '') as FOC_ABS_PCT:String,
     ifnull(offerProduct.Price.FOCType, '') as FOCType:String,
+    ifnull(offerProduct.UnitPerPack, '') as UoM:String,
     ifnull(offerProduct.RequestedVolume, 0) as RequestedVolume:Integer,
     case when offerProduct.Price.FOCType = 'FOC 1'
         then offerProduct.RequestedVolume - case when offerProduct.Price.FOC_ABS_PCT = 'PCT' then round(offerProduct.Price.FOC * offerProduct.RequestedVolume) else round(offerProduct.Price.FOC) end
@@ -60,9 +62,10 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
         else offerProduct.RequestedVolume
     end
     *
-    offerProduct.Price.OfferPrice / offerProduct.Price.BudgetRate as TotalValue_EUR:Double,
+    offerProduct.Price.OfferPrice / rates.X_RATE as TotalValue_EUR:Double,
     case when offerProduct.Offer.Quotation.OfferDate = '' or offerProduct.Offer.Quotation.OfferDate is null then to_date('1970-01-01') else offerProduct.Offer.Quotation.OfferDate end as OfferDate:DateTime,
     case when offerProduct.Offer.Quotation.OfferValidity = '' or offerProduct.Offer.Quotation.OfferValidity is null then to_date('1970-01-01') else offerProduct.Offer.Quotation.OfferValidity end as OfferValidity:DateTime,
+    ifnull(offerProduct.Offer.OfferStatus.STATUS, '') as CurrentStatus:String,
     case when offerProduct.Offer.Tender.PublicationDate = '' or offerProduct.Offer.Tender.PublicationDate is null then to_date('1970-01-01') else offerProduct.Offer.Tender.PublicationDate end as PublicationDate:DateTime,
     case when offerProduct.Offer.OfferStatus.STATUS = 'Quotation Submitted' or offerProduct.Offer.OfferStatus.STATUS = 'Results Recorded' or offerProduct.Offer.OfferStatus.STATUS = 'Delivery Ongoing'
         then
@@ -76,14 +79,16 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
     case when offerProduct.Offer.Tender.BidDueDate = '' or offerProduct.Offer.Tender.BidDueDate is null then to_date('1970-01-01') else offerProduct.Offer.Tender.BidDueDate end as BidDueDate:DateTime,
     case when offerProduct.Offer.NewOfferDueDate = '' or offerProduct.Offer.NewOfferDueDate is null then to_date('1970-01-01') else offerProduct.Offer.NewOfferDueDate end as NewOfferDueDate:DateTime,
     case when offerProduct.Results.SubmittedOn = '' or offerProduct.Results.SubmittedOn is null then to_date('1970-01-01') else offerProduct.Results.SubmittedOn end as FeedBackDate:DateTime,
+    ifnull(offerProduct.Results.Outcome, '') as Outcome:String,
     ifnull(offerProduct.Results.AwardedQty, 0) as AwardedQty:Integer,
+    ifnull(offerProduct.Results.Reason, '') as Reason:String,
     ifnull(delivery.RequestedQuantity, 0) as RequestedQuantity:Integer,
-    ifnull(delivery.ActualDeliveredQuantity, '') as ActualDeliveredQuantity:String,
-    ifnull(offerProduct.Results.AwardedCompany, '') as Participant:String,
-    ifnull(offerProduct.Results.AwardedPrice, 0) as ParticipantPrice:Double,
-    ifnull(offerProduct.Results.Currency, '') as ParticipantCurrency:String,
-    ifnull(offerProduct.Results.UoM, '') as ParticipantUoM:String,
-    ifnull(offerProduct.Results.Outcome, '') as PaticipantOutcome:String,
+    ifnull(delivery.ActualDeliveredQuantity, 0) as ActualDeliveredQuantity:Integer,
+    ifnull(offerProduct.Results.CompetitorResult.AWARDEDCOMPANY, '') as Participant:String,
+    ifnull(offerProduct.Results.CompetitorResult.AWARDEDPRICE, 0) as ParticipantPrice:Double,
+    ifnull(offerProduct.Results.CompetitorResult.CURRENCY, '') as ParticipantCurrency:String,
+    ifnull(offerProduct.Results.CompetitorResult.UOM, '') as ParticipantUoM:String,
+    ifnull(offerProduct.Results.CompetitorResult.OUTCOME, '') as PaticipantOutcome:String,
     case 
         when offerProduct.Offer.ActiveOffer is null then 1
         when offerProduct.Offer.ActiveOffer <> 1 then 2
@@ -99,12 +104,10 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
     ifnull(offerProduct.Price.RegPrice, 0) as RegisteredPrice:Double,
     ifnull(offerProduct.Price.Discount, 0) as Discount:Double,
     ifnull(offerProduct.Offer.Currency, '') as RegisteredPriceCurrency:String,
-    ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Integer,
-    ifnull(offerProduct.Offer.OfferStatus.STATUS, '') as CurrentStatus:String
+    ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Integer
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
 and offerProduct.Active = 1 
-and offerProduct.Price.BudgetRate <> 0
 and offerProduct.Offer.Tender.Country.Region = 'MEA';
 
 entity TENDER_DATA as select from TransactionalDataViews.OfferProductPlus offerProduct
@@ -284,7 +287,7 @@ left outer join AdminData.PT_TMUSER user on quotation.SubmittedBy = user.CWID{
     ifnull(offerProduct.Offer.Tender.Institute.ContactNo, '') as ContactNo:String,
     ifnull(offerProduct.Offer.Tender.Institute.Fax, '') as Fax:String,
     ifnull(offerProduct.Offer.Tender.Institute.ContactPerson, '') as ContactPerson:String,
-    ifnull(offerProduct.Offer.Tender.Institute.ActiveRecord, 1) as ActiveRecord:Integer,
+    ifnull(offerProduct.Offer.Tender.Institute.ActiveRecord, '') as ActiveRecord:String,
     ifnull(offerProduct.Offer.Tender.Institute.Comment, '') as Comment:String,
     ifnull(offerProduct.Offer.Tender.Institute.City, '') as City:String,
     ifnull(offerProduct.Offer.OfferID, '') as OfferID_Custom_SQL_Query:String,
@@ -293,7 +296,7 @@ left outer join AdminData.PT_TMUSER user on quotation.SubmittedBy = user.CWID{
         when offerProduct.ActiveProduct is null then 1
         when offerProduct.ActiveProduct <> 1 then 2
         else offerProduct.ActiveProduct
-    end as ActiveProduct:Double,
+    end as ActiveProduct:Integer,
     ifnull(offerProduct.AlternateOfferYN, '') as AlternateOfferYN:String,
     ifnull(offerProduct.ProductCode, 0) as ProductPackID:Integer,
     ifnull(offerProduct.SKU.PRODUCTPACKNAME, '') as ProductPackName:String,
