@@ -72,7 +72,8 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
     offerProduct.Price.RegPrice as RegisteredPrice,
     offerProduct.Price.Discount as Discount,
     offerProduct.Offer.Currency as RegisteredPriceCurrency,
-    offerProduct.SKU.PACKFACTOR as Packfactor
+    offerProduct.SKU.PACKFACTOR as Packfactor,
+    offerProduct.Offer.OfferStatus.STATUS as CurrentStatus
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
 and offerProduct.Active = 1 
@@ -84,7 +85,7 @@ inner join AdminData.PT_TMUSERCTRYN ctryCWID on offerProduct.CountryCode = ctryC
 inner join AdminData.CONDITIONAL_ACCESS access on access.Id = access.Id
 inner join MasterData.PT_TMTABRMP ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
 inner join MasterData.PT_TMRCM region on offerProduct.CountryCode = region.CountryCode
-inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = 'USD' and rates.CURRENCY_TO = 'EUR' and rates.X_TYPE = 'Budget'{
+inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = offerProduct.CURRENCY and rates.CURRENCY_TO = 'EUR' and rates.X_TYPE = 'Budget'{
     offerProduct.Offer.CountryCode as CountryCode,
     offerProduct.Offer.Tender.Country.CountryName as CountryName,
     offerProduct.Offer.Tender.Country.CountryName as Country,
@@ -109,6 +110,7 @@ inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = '
     offerProduct.Offer.InternalBidDueDate as InternalBidDueDate,
     offerProduct.Offer.ActiveOffer as ActiveOffer,
     offerProduct.Offer.RevisedOfferNo as RevisedOfferNo,
+    offerProduct.Offer.ContinuationOfferNo as ContinuationOfferNo,
     offerProduct.Offer.NewOfferDueDate as NewOfferDueDate,
     offerProduct.SORTER as SNo,
     offerProduct.SKU.Product.HLEVEL4_NAME as Brand,
@@ -125,7 +127,7 @@ inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = '
     offerProduct.Price.FOC as FOC,
     offerProduct.Price.FOCType as FOCType,
     offerProduct.Price.FOC_ABS_PCT as FOC_ABS_PCT,
-    offerProduct.Price.WholesalePrice as WholesalePrice,
+    ifnull(offerProduct.Offer.WholesaleOffer, 'No') as WholesalePrice:String,
     offerProduct.Offer.Quotation.OfferDate as OfferDate,
     offerProduct.Offer.Quotation.OfferValidity as OfferValidity,
     offerProduct.Offer.Quotation.DelayInSubmission as DelayInSubmission,
