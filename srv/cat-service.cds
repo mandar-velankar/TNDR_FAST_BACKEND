@@ -44,7 +44,7 @@ service CatalogService @(path : 'tender')
     entity CountryBindingTypeLevel2          as projection on MasterData.MasterCountryBindingTypeLevel2;
     entity CountryBindingTypeLevel3          as projection on MasterData.MasterCountryBindingTypeLevel3;
     entity CountrySpecifications             as projection on MasterData.MasterCountrySpecifications;
-
+     entity MasterCompetitors                as projection on MasterData.MasterCompetitors;
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
         to    : 'authenticated-user',

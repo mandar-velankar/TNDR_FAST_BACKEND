@@ -507,3 +507,10 @@ entity MasterCountrySpecifications: cuid, managed {
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 }
+
+entity MasterCompetitors: cuid, managed {
+	CountryCode			: String(2); //Bayer
+	ProductCode			: Integer;  //Bayer
+	CompetitorProduct	: String(300); 
+	CompetitorCompany	: String(300);
+}
