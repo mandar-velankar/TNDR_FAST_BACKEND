@@ -29,9 +29,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
-      - name: Install MTA Build Tool
-        run: npm install -g mbt
-      - name: Install CDS tool
-        run: npm i -g @sap/cds-dk
+      - name: Install NPM dependencies
+        run: npm install
       - name: Build MTA
         run: npm run build:xsa
