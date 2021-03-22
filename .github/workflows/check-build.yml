@@ -9,6 +9,7 @@ on:
     branches:
       - 'DEVELOPMENT'
       - '*RELEASE'
+      - 'fix-*'
   pull_request:
     branches:
       - 'DEVELOPMENT'
