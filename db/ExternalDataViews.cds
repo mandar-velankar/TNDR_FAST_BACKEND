@@ -22,12 +22,12 @@ left outer join MasterDataLatestValues.ExchangeRates rates on offerProduct.CURRE
 left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.OFFERID and offerProduct.ProductCode = delivery.PRODUCTID {
     ifnull(
         year(
-                case when offerProduct.Offer.Tender.Offer.SubmissionDate = '' or offerProduct.Offer.Tender.Offer.SubmissionDate is null
+                case when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null
                     then
                          case when offerProduct.Offer.Quotation.SubmittedOn = '' or offerProduct.Offer.Quotation.SubmittedOn is null then offerProduct.Offer.Tender.PublicationDate
                          else offerProduct.Offer.Quotation.SubmittedOn
                          end
-                else offerProduct.Offer.Tender.Offer.SubmissionDate
+                else offerProduct.Offer.SubmissionDate
                 end
         ),
         0
@@ -129,12 +129,12 @@ inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = '
     ifnull(offerProduct.Offer.Tender.Institute.InstituteName, '') as InstituteName:String,
     ifnull(
         year(
-                case when offerProduct.Offer.Tender.Offer.SubmissionDate = '' or offerProduct.Offer.Tender.Offer.SubmissionDate is null
+                case when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null
                     then
                          case when offerProduct.Offer.Quotation.SubmittedOn = '' or offerProduct.Offer.Quotation.SubmittedOn is null then offerProduct.Offer.Tender.PublicationDate
                          else offerProduct.Offer.Quotation.SubmittedOn
                          end
-                else offerProduct.Offer.Tender.Offer.SubmissionDate
+                else offerProduct.Offer.SubmissionDate
                 end
         ),
         0
