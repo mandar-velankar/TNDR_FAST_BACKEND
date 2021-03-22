@@ -245,6 +245,8 @@ entity PT_TMDLVTR {
         PO                     : String(255);
         InvoiceNo              : String(255);
     key SNo                    : Integer not null;
+    //Associations
+    Institute                  : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
 
 
