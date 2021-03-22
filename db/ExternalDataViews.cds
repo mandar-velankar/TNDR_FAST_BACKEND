@@ -84,7 +84,10 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
     ifnull(offerProduct.Results.Reason, '') as Reason:String,
     ifnull(delivery.RequestedQuantity, 0) as RequestedQuantity:Integer,
     ifnull(delivery.ActualDeliveredQuantity, 0) as ActualDeliveredQuantity:Integer,
-    ifnull(offerProduct.Results.CompetitorResult.AWARDEDCOMPANY, '') as Participant:String,
+    case when offerProduct.Results.CompetitorResult.AWARDEDCOMPANY is null
+        then ''
+        else offerProduct.Results.CompetitorResult.AWARDEDCOMPANY || ' - ' || offerProduct.Results.CompetitorResult.AWARDEDPRODUCT
+    end as Participant:String,
     ifnull(offerProduct.Results.CompetitorResult.AWARDEDPRICE, 0) as ParticipantPrice:Double,
     ifnull(offerProduct.Results.CompetitorResult.CURRENCY, '') as ParticipantCurrency:String,
     ifnull(offerProduct.Results.CompetitorResult.UOM, '') as ParticipantUoM:String,
