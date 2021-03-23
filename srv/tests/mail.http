@@ -1,0 +1,3 @@
+POST http://localhost:4004/FAST/tender/sendMail
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json

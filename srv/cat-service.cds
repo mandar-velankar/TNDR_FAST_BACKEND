@@ -493,4 +493,14 @@ service CatalogService @(path : 'tender')
         key OfferId : String(50);
         content   : LargeBinary @Core.MediaType : 'application/pdf';
     }
+
+    entity MailBody {
+        key TemplateId: String(50);
+        Language: String(2);
+        Template: LargeString;
+    }
+
+    //action sendMail (sRecipient:String, sBody:String) returns Boolean;
+    action sendMail (sRecipient:String, sSubject:String, sTemplate:String) returns Boolean;
+
 }

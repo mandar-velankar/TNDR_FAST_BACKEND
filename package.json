@@ -19,7 +19,8 @@
     "html-pdf": "^2.2.0",
     "mysql": "^2.18.1",
     "passport": "^0.4.1",
-    "ramda": "^0.27.0"
+    "ramda": "^0.27.0",
+    "sap-cf-mailer": "0.0.3"
   },
   "engines": {
     "node": "^10 || ^12"
