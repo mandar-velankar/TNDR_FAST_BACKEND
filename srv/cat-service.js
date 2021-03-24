@@ -1746,11 +1746,8 @@ module.exports = (srv) => {
 
 	//srv.on('sendMail', (req, sRecipient, sBody) => {
 	srv.on('sendMail', async (req) => {
-		//let sRecipient = req.data.sRecipient;
-		//let sBody = req.data.sBody;
 		let sSubject = req.data.sSubject;
 		let sRecipient = 'joris.vd.bogaert@gmail.com';
-		let sBody = 'test';
 
 		const mailer = new SapCfMailer.default("MAIL");
 		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', 'quotation_AR.html'), {encoding:'utf-8'});
@@ -1760,9 +1757,6 @@ module.exports = (srv) => {
 			subject: sSubject,
 			html: htmlMail
 		});
-		if(test){
-			console.log("mail ok");
-		}
 
 		return true;
 	})
