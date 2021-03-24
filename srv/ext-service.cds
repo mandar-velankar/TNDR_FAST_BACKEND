@@ -26,23 +26,23 @@ service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     entity TENDER_PRICING @readonly as projection on ExternalDataViews.TENDER_PRICING;
 
     //Master Data Views addendum
-    entity MasterApproverBrandMap @readonly as projection on MasterDataViews.MasterApproverBrandMap;
-    entity MasterCountries @readonly as projection on MasterDataViews.MasterCountries;
-    entity MasterAuthorizedSignatories @readonly as projection on MasterDataViews.MasterAuthorizedSignatories;
-    entity MasterCountryLegalEntityBrandMap @readonly as projection on MasterDataViews.MasterCountryLegalEntityBrandMap;
-    entity MasterCountryLegalEntityMap @readonly as projection on MasterDataViews.MasterCountryLegalEntityMap;
-    entity MasterDistributorBrandMap @readonly as projection on MasterDataViews.MasterDistributorBrandMap;
-    entity MasterDistributors @readonly as projection on MasterDataViews.MasterDistributors;
-    entity MasterInstituteBrandTerms @readonly as projection on MasterDataViews.MasterInstituteBrandTerms;
-    entity MasterInstituteDistBrandMap @readonly as projection on MasterDataViews.MasterInstituteDistBrandMap;
-    entity MasterInstitutes @readonly as projection on MasterDataViews.MasterInstitutes;
-    entity MasterLegalEntities @readonly as projection on MasterDataViews.MasterLegalEntities;
-    entity MasterProductPacks @readonly as projection on MasterDataViews.MasterProductPacks;
-    entity MasterTABrandMap @readonly as projection on MasterDataViews.MasterTABrandMap;
-    entity MasterBudgetedProfitability @readonly as projection on MasterDataViews.MasterBudgetedProfitability;
+    entity MasterApproverBrandMap @readonly as projection on ExternalDataViews.MasterApproverBrandMap;
+    entity MasterCountries @readonly as projection on ExternalDataViews.MasterCountries;
+    entity MasterAuthorizedSignatories @readonly as projection on ExternalDataViews.MasterAuthorizedSignatories;
+    entity MasterCountryLegalEntityBrandMap @readonly as projection on ExternalDataViews.MasterCountryLegalEntityBrandMap;
+    entity MasterCountryLegalEntityMap @readonly as projection on ExternalDataViews.MasterCountryLegalEntityMap;
+    entity MasterDistributorBrandMap @readonly as projection on ExternalDataViews.MasterDistributorBrandMap;
+    entity MasterDistributors @readonly as projection on ExternalDataViews.MasterDistributors;
+    entity MasterInstituteBrandTerms @readonly as projection on ExternalDataViews.MasterInstituteBrandTerms;
+    entity MasterInstituteDistBrandMap @readonly as projection on ExternalDataViews.MasterInstituteDistBrandMap;
+    entity MasterInstitutes @readonly as projection on ExternalDataViews.MasterInstitutes;
+    entity MasterLegalEntities @readonly as projection on ExternalDataViews.MasterLegalEntities;
+    entity MasterProductPacks @readonly as projection on ExternalDataViews.MasterProductPacks;
+    entity MasterTABrandMap @readonly as projection on ExternalDataViews.MasterTABrandMap;
+    entity MasterBudgetedProfitability @readonly as projection on ExternalDataViews.MasterBudgetedProfitability;
     entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeRates;
 
-    entity OfferInfo @readonly as projection on TransactionalData.OfferInfo;
-    entity OfferProductInfo @readonly as projection on TransactionalData.OfferProductInfo;
-    entity ProductInfo @readonly as projection on TransactionalData.ProductInfo;
+    entity OfferInfo @readonly as projection on ExternalDataViews.OfferInfo;
+    entity OfferProductInfo @readonly as projection on ExternalDataViews.OfferProductInfo;
+    entity ProductInfo @readonly as projection on ExternalDataViews.ProductInfo;
 }
