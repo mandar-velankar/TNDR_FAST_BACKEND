@@ -57,6 +57,7 @@
     "srv"
   ],
   "devDependencies": {
-    "@sap/cds-dk": "^3.4.0"
+    "@sap/cds-dk": "~3.4.0",
+    "mbt": "~1.0.17"
   }
 }
