@@ -4,11 +4,13 @@ const ServiceHelper = require('./utils/ServiceHelper');
 const pdf = require("html-pdf");
 const fs = require("fs");
 const Handlebars = require("handlebars");
+const SapCfMailer = require("sap-cf-mailer");
 // const escape = require('escape-html');
 // const html = require('html-escaper');
 // const escapeStringRegexp = require('escape-string-regexp');
 // const resolveWhen = require('special-escape');
 const { Readable } = require('stream');
+const path = require("path");
 
 module.exports = (srv) => {
 
@@ -1740,5 +1742,22 @@ module.exports = (srv) => {
 		// 	.catch(error => {
 		// 		console.error(error)
 		// 	});
+	});
+
+	//srv.on('sendMail', (req, sRecipient, sBody) => {
+	srv.on('sendMail', async (req) => {
+		let sSubject = req.data.sSubject;
+		let sRecipient = 'joris.vd.bogaert@gmail.com';
+
+		const mailer = new SapCfMailer.default("MAIL");
+		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', 'quotation_AR.html'), {encoding:'utf-8'});
+
+		let test = await mailer.sendMailTemplate({
+			to: sRecipient,
+			subject: sSubject,
+			html: htmlMail
+		});
+
+		return true;
 	})
 }
