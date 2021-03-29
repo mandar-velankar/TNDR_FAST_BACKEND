@@ -1,4 +1,4 @@
-ID,CountryCode,ProductCode,CompetitorProduct,CompetitorCompany
+ID,createdAt,createdBy,modifiedAt,modifiedBy,CountryCode,ProductCode,CompetitorProduct,CompetitorCompany
 "fdbc6de8-5e90-4837-897a-f64d05f7aad8",,,,,"SA",100082,"CompetitorProduct1","CompetitorCompany1"
 "202b1ab3-00c6-44fa-8e6c-191f99e4e92c",,,,,"SA",100082,"CompetitorProduct2","CompetitorCompany1"
 "04e4401b-1765-4351-8b5e-96d8819b480c",,,,,"SA",100082,"CompetitorProduct3","CompetitorCompany1"
