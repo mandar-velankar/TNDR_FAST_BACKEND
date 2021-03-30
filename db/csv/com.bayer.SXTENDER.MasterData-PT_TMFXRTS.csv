@@ -100,3 +100,9 @@ FXID,CURRENCYFROM,CURRENCYTO,EXCHANGETYPE,EFFDATE,ENDDATE,EXCHANGERATE,ACTIVEREC
 100329,"QAR","EUR","Monthly Average","2021-03-01","4000-12-31","4.44136","Yes","",""
 100330,"SAR","EUR","Monthly Average","2021-03-01","4000-12-31","4.53742","Yes","",""
 100331,"USD","EUR","Monthly Average","2021-03-01","4000-12-31","1.20972","Yes","",""
+100331,"ARS","EUR","Budget","2021-03-01","4000-12-31","108.35","Yes",,
+100332,"ARS","EUR","Monthly Average","2021-03-01","4000-12-31","108.35","Yes",,
+100333,"ARS","USD","Budget","2021-03-01","4000-12-31","91.64","Yes",,
+100334,"ARS","USD","Monthly Average","2021-03-01","4000-12-31","91.64","Yes",,
+100335,"USD","USD","Monthly Average","2021-03-01","4000-12-31","1.0","Yes",,
+100336,"USD","USD","Budget","2021-03-01","4000-12-31","1.0","Yes",,
