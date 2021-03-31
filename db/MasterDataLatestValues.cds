@@ -91,3 +91,39 @@ INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRY
     BudgetedProfitability.PROFITABILITY
 };
 
+//What is the most recent BrandPolicy
+entity MostRecentBrandPolicies as SELECT from MasterData.BrandPolicies as BrandPolicies
+{
+    key BrandPolicies.CountryCode,
+    key BrandPolicies.BrandId,
+    max(BrandPolicies.ValidFrom) as MaxValidFrom:Date
+}group by BrandPolicies.CountryCode, BrandPolicies.BrandId;
+
+entity LatestBrandPolicies as SELECT from MasterData.BrandPolicies as BrandPolicies
+inner join MostRecentBrandPolicies  
+    on BrandPolicies.CountryCode = MostRecentBrandPolicies.CountryCode 
+    and BrandPolicies.BrandId = MostRecentBrandPolicies.BrandId
+{
+    key BrandPolicies.CountryCode,
+    key BrandPolicies.BrandId,
+    BrandPolicies.StandardDiscount
+};
+entity MostRecentDistributorBrandPolicies as SELECT from MasterData.DistributorBrandPolicies as DistributorBrandPolicies
+{
+    key DistributorBrandPolicies.CountryCode,
+    key DistributorBrandPolicies.DistributorId,
+    key DistributorBrandPolicies.BrandId,
+    max(DistributorBrandPolicies.ValidFrom) as MaxValidFrom:Date
+}group by DistributorBrandPolicies.CountryCode, DistributorBrandPolicies.BrandId, DistributorBrandPolicies.DistributorId;
+
+entity LatestDistributorBrandPolicies as SELECT from MasterData.DistributorBrandPolicies as DistributorBrandPolicies
+inner join MostRecentDistributorBrandPolicies  
+    on DistributorBrandPolicies.CountryCode = MostRecentDistributorBrandPolicies.CountryCode
+    and DistributorBrandPolicies.DistributorId = MostRecentDistributorBrandPolicies.DistributorId
+    and DistributorBrandPolicies.BrandId = MostRecentDistributorBrandPolicies.BrandId
+{
+    key DistributorBrandPolicies.CountryCode,
+    key DistributorBrandPolicies.DistributorId,
+    key DistributorBrandPolicies.BrandId,
+    DistributorBrandPolicies.StandardDiscount
+};
