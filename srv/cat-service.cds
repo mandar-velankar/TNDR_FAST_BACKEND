@@ -44,7 +44,9 @@ service CatalogService @(path : 'tender')
     entity CountryBindingTypeLevel2          as projection on MasterData.MasterCountryBindingTypeLevel2;
     entity CountryBindingTypeLevel3          as projection on MasterData.MasterCountryBindingTypeLevel3;
     entity CountrySpecifications             as projection on MasterData.MasterCountrySpecifications;
-     entity MasterCompetitors                as projection on MasterData.MasterCompetitors;
+    entity MasterCompetitors                 as projection on MasterData.MasterCompetitors;
+    entity BrandPolicies                     as projection on MasterData.BrandPolicies;
+    entity DistributorBrandPolicies          as projection on MasterData.DistributorBrandPolicies;
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
         to    : 'authenticated-user',
@@ -79,16 +81,21 @@ service CatalogService @(path : 'tender')
     entity PT_TMSKUPRDPCK                    as projection on MasterData.PT_TMSKUPRDPCK;
     entity PT_TMTABRMP                       as projection on MasterData.PT_TMTABRMP;
     entity BUDGETEDPROFITABILITY             as projection on MasterData.BUDGETEDPROFITABILITY;
+
     //Master Data Latest Values
     entity CountryRegisteredPrice @readonly  as projection on MasterDataLatestValues.CountryRegisteredPrice;
     entity CountryCogs @readonly             as projection on MasterDataLatestValues.CountryCogs;
     entity ExchangeRates @readonly           as projection on MasterDataLatestValues.ExchangeRates;
     entity VWBUDGETEDPROFITABILITY @readonly as projection on MasterDataLatestValues.VWBUDGETEDPROFITABILITY;
+    entity MostRecentBrandPolicies @readonly as projection on MasterDataLatestValues.MostRecentBrandPolicies;
+    entity MostRecentDistributorBrandPolicies @readonly as projection on MasterDataLatestValues.MostRecentDistributorBrandPolicies;
+
     //Master Data Views
     entity CountryBrandProducts @readonly    as projection on MasterDataViews.CountryBrandProducts;
     entity CountryBrands @readonly           as projection on MasterDataViews.CountryBrands;
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
+    entity DistributorBrandPoliciesComposite @readonly as projection on MasterDataViews.DistributorBrandPoliciesComposite;
     
     //Master Data Services
     entity InstituteDistributor {
