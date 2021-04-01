@@ -95,7 +95,7 @@ service CatalogService @(path : 'tender')
     entity CountryBrands @readonly           as projection on MasterDataViews.CountryBrands;
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
-    entity DistributorBrandPoliciesComposite @readonly as projection on MasterDataViews.DistributorBrandPoliciesComposite;
+    entity AggregatedDistributorBrandPolicies @readonly as projection on MasterDataViews.AggregatedDistributorBrandPolicies;
     
     //Master Data Services
     entity InstituteDistributor {

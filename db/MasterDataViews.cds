@@ -116,8 +116,8 @@ inner join CountryBrands cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLe
 	dstbr.CommissionRate as COMMISSION_RATE
 };
 
-//Distributor brand policy 
-entity DistributorBrandPoliciesComposite as SELECT from MasterData.PT_TMDISBRD as DistributorBrands
+//Distributor brand policy with aggregated data for front-end
+entity AggregatedDistributorBrandPolicies as SELECT from MasterData.PT_TMDISBRD as DistributorBrands
 left outer join MasterDataLatestValues.LatestDistributorBrandPolicies as LatestDistributorBrandPolicies 
 	on DistributorBrands.CountryCode = LatestDistributorBrandPolicies.CountryCode
 	and DistributorBrands.HLevel4_Code = LatestDistributorBrandPolicies.BrandId
