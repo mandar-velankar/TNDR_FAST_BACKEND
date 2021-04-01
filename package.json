@@ -5,9 +5,9 @@
   "repository": "<Add your repository here>",
   "license": "ISC",
   "dependencies": {
-    "@sap/cds": "^4.5.1",
-    "@sap/cds-odata-v2-adapter-proxy": "^1.5.4",
-    "@sap/hana-client": "^2.7.21",
+    "@sap/cds": "4.6.5",
+    "@sap/cds-odata-v2-adapter-proxy": "1.5.10",
+    "@sap/hana-client": "2.7.21",
     "@sap/logging": "^6.0.2",
     "@sap/xsenv": "^3.1.0",
     "@sap/xssec": "^3.0.10",
@@ -59,7 +59,7 @@
     "srv"
   ],
   "devDependencies": {
-    "@sap/cds-dk": "~3.4.0",
-    "mbt": "~1.0.17"
+    "@sap/cds-dk": "~3.5.0",
+    "mbt": "~1.1.1"
   }
 }
