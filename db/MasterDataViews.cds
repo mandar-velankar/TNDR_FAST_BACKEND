@@ -121,6 +121,7 @@ entity AggregatedDistributorBrandPolicies as SELECT from MasterData.PT_TMDISBRD 
 left outer join MasterDataLatestValues.LatestDistributorBrandPolicies as LatestDistributorBrandPolicies 
 	on DistributorBrands.CountryCode = LatestDistributorBrandPolicies.CountryCode
 	and DistributorBrands.HLevel4_Code = LatestDistributorBrandPolicies.BrandId
+	and DistributorBrands.DistributorID = LatestDistributorBrandPolicies.DistributorId
 left outer join MasterDataLatestValues.LatestBrandPolicies as LatestBrandPolicies
 	on DistributorBrands.CountryCode = LatestBrandPolicies.CountryCode
 	and DistributorBrands.HLevel4_Code = LatestBrandPolicies.BrandId{

@@ -91,8 +91,11 @@ INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRY
     BudgetedProfitability.PROFITABILITY
 };
 
+//only the active (is not the same as approved) BrandPolicies
+entity ActiveBrandPolicies as select from MasterData.BrandPolicies where ValidTo = '9999-12-31 00:00:00.000000000'; 
+
 //What is the most recent BrandPolicy
-entity MostRecentBrandPolicies as SELECT from MasterData.BrandPolicies as BrandPolicies
+entity MostRecentBrandPolicies as SELECT from ActiveBrandPolicies as BrandPolicies
 {
     key BrandPolicies.CountryCode,
     key BrandPolicies.BrandId,
@@ -108,7 +111,11 @@ inner join MostRecentBrandPolicies
     key BrandPolicies.BrandId,
     BrandPolicies.StandardDiscount
 };
-entity MostRecentDistributorBrandPolicies as SELECT from MasterData.DistributorBrandPolicies as DistributorBrandPolicies
+
+//only the active (is not the same as approved) BrandPolicies
+entity ActiveDistributorBrandPolicies as select from MasterData.DistributorBrandPolicies where ValidTo = '9999-12-31 00:00:00.000000000'; 
+
+entity MostRecentDistributorBrandPolicies as SELECT from ActiveDistributorBrandPolicies as DistributorBrandPolicies
 {
     key DistributorBrandPolicies.CountryCode,
     key DistributorBrandPolicies.DistributorId,
