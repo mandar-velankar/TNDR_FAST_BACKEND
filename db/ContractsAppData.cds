@@ -56,7 +56,7 @@ entity Contracts : managed, cuid {
                                     on Country.CountryCode = CountryCode;
         Channel                 : Association to Channels
                                     on Channel.ID = ChannelId;
-        Institutes              : Association to many ContractInstitutes
+        Institutes              : Composition of many ContractInstitutes
                                     on Institutes.Contract = $self;
         Distributor             : Association to MasterData.PT_TMDIST
                                     on Distributor.DistributorID = DistributorId;
@@ -66,8 +66,10 @@ entity Contracts : managed, cuid {
 
 entity ContractInstitutes {
         key CountryCode         : String(2);
-	key InstituteID         : Integer;
-        Contract                : Association to Contracts;
+	key InstituteID         : Integer;    
+        key Contract_ID         : UUID;  
+        InstituteName           : String;
+        Contract                : Association to Contracts on Contract.ID = Contract_ID;
         Institute               : Association to MasterData.PT_TMINST
                                     on Institute.InstituteID = InstituteID
                                     and Institute.CountryCode = CountryCode;
