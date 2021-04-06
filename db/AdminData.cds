@@ -70,6 +70,19 @@ entity Template {
         Border         : String;
 }
 
+//Mail Templates
+//---------------
+entity MailTemplateCountry {
+    key CountryCode    : String(2);
+    key TemplateId     : Integer;
+}
+
+entity MailTemplate {
+    key TemplateId: String(50);
+        Language: String(2);
+        Template: LargeString;
+}
+
 // entity MandatoryTableFieldsCountry {
 //     key CountryCode : String(2);
 //     key View        : String(100);
