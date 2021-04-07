@@ -3,7 +3,8 @@ namespace com.bayer.SXTENDER.AdminData;
 using {
     User,
     Country,
-    managed
+    managed, 
+    cuid
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
@@ -72,15 +73,15 @@ entity Template {
 
 //Mail Templates
 //---------------
-entity MailTemplateCountry {
+/*entity MailTemplateCountry {
     key CountryCode    : String(2);
     key TemplateId     : Integer;
-}
+}*/
 
 entity MailTemplate {
-    key TemplateId: String(50);
-        Language: String(2);
-        Template: LargeString;
+    key CountryCode    : String(2);
+    key Language       : String(2);
+        TemplateId     : String(100);
 }
 
 // entity MandatoryTableFieldsCountry {
