@@ -10,7 +10,7 @@ entity PT_TMCTRY{
 	CountryName:String(50);
 	ApprovalType:Integer;
 	LocalCurrency:hana.NCHAR(3);//String(3);
-	ReportingCurreny:String(3);
+	ReportingCurrency:String(3);
 	CountryID:Integer;//delete
 	Region:String(50);
 	COMMENT:String(255);
