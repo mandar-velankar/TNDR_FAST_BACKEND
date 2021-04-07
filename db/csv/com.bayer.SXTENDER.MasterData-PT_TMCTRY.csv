@@ -1,4 +1,4 @@
-CountryCode,CountryName,ApprovalType,LocalCurrency,ReportingCurreny,CountryID,Region,COMMENT
+CountryCode,CountryName,ApprovalType,LocalCurrency,ReportingCurrency,CountryID,Region,COMMENT
 TN,Tunisia,1,USD,EUR,17,MAGHREB,""
 MO,Morocco,1,MAD,EUR,18,MAGHREB,""
 AL,Algeria,1,EUR,EUR,16,MAGHREB,""
