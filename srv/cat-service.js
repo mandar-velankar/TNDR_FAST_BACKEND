@@ -28,7 +28,7 @@ module.exports = (srv) => {
 		PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -1475,7 +1475,8 @@ module.exports = (srv) => {
 
 	srv.on('getCurrentUser', (req) => {
 		return {
-			name: req.user.id
+			name: req.user.id,
+			email: req.user.attr.email,
 		};
 	})
 	srv.on('READ', 'InstituteDistributor', async (req) => {
@@ -1759,5 +1760,17 @@ module.exports = (srv) => {
 		});
 
 		return true;
-	})
+	});
+
+	srv.on('getMailTemplate', async (req) => {
+		const tx = cds.transaction(req);
+		const sLanguage = req.data.language ? req.data.language : "ES";
+		const templates = await tx.run(SELECT.from(MailTemplate).where({ CountryCode: req.data.countryCode , Language: sLanguage}));
+		if (templates.length === 0) {
+			return req.reject(404, 'No mail template found for country:' + req.data.countryCode + ' and Language:' + req.data.language);
+		}
+		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', templates[0].TemplateId + '.html'), {encoding:'utf-8'});
+
+		return htmlMail;
+	});
 }
