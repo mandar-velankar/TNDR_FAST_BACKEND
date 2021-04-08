@@ -43,7 +43,7 @@ entity Contracts : managed, cuid {
         ContractDate            : Date;
         ContractValidUntil      : Date;
         Enabled                 : Boolean not null;
-        InstituteId             : Integer;
+        //InstituteId             : Integer;
         DistributorId           : Integer;
         SellingCompanyCode      : String(3);
         Currency                : String(255);
@@ -56,13 +56,24 @@ entity Contracts : managed, cuid {
                                     on Country.CountryCode = CountryCode;
         Channel                 : Association to Channels
                                     on Channel.ID = ChannelId;
-        Institute               : Association to MasterData.PT_TMINST
-                                    on Institute.InstituteID = InstituteId;
+        Institutes              : Composition of many ContractInstitutes
+                                    on Institutes.Contract = $self;
         Distributor             : Association to MasterData.PT_TMDIST
                                     on Distributor.DistributorID = DistributorId;
         SellingCompany          : Association to MasterData.PT_TMLE
                                     on SellingCompany.LegalEntityCode = SellingCompanyCode;
 }
+
+entity ContractInstitutes {
+        key CountryCode         : String(2);
+	key InstituteID         : Integer;    
+        key Contract_ID         : UUID;  
+        InstituteName           : String;
+        Contract                : Association to Contracts on Contract.ID = Contract_ID;
+        Institute               : Association to MasterData.PT_TMINST
+                                    on Institute.InstituteID = InstituteID
+                                    and Institute.CountryCode = CountryCode;
+};
 
 
 entity Products : managed, cuid {
