@@ -182,7 +182,8 @@ entity CountryMinPrice as select from TenderResults as results{
     results.PRODUCT_NAME,
     results.CURRENCY;
 
-entity AccountMinPrice as select from TenderResults as results{
+entity AccountMinPrice as select from MasterData.AccountPreApprovedPrices as a left outer join
+TenderResults as results on results.COUNTRY_CODE = a.COUNTRY_CODE and results.INSTITUTE_ID = a.INSTITUTE_ID and results.PRODUCT_ID = a.PRODUCT_ID and results.CURRENCY = a.CURRENCY {
     key results.COUNTRY_CODE,
     key results.INSTITUTE_ID,
     results.BRAND_ID,
@@ -190,10 +191,26 @@ entity AccountMinPrice as select from TenderResults as results{
     key results.PRODUCT_ID,
     results.PRODUCT_NAME,
     key results.CURRENCY,
-    min(results.PACK_PRICE) as MIN_PACK_PRICE:Double,
-    min(results.UNIT_PRICE) as MIN_UNIT_PRICE:Double,
-    min(results.PACK_NET_PRICE) as MIN_PACK_NET_PRICE:Double,
-    min(results.UNIT_NET_PRICE) as MIN_UNIT_NET_PRICE:Double,
+    case
+        when min(ifnull(results.PACK_PRICE, 0)) = 0 then min(ifnull(a.MIN_PACK_PRICE, 0))
+        when min(ifnull(a.MIN_PACK_PRICE, 0)) = 0 then min(results.PACK_PRICE)
+        when min(results.PACK_PRICE) < min(a.MIN_PACK_PRICE) then min(results.PACK_PRICE) else min(a.MIN_PACK_PRICE)
+    end as MIN_PACK_PRICE:Double,
+    case
+        when min(ifnull(results.UNIT_PRICE, 0)) = 0 then min(ifnull(a.MIN_UNIT_PRICE, 0))
+        when min(ifnull(a.MIN_UNIT_PRICE, 0)) = 0 then min(results.UNIT_PRICE)
+        when min(results.UNIT_PRICE) < min(a.MIN_UNIT_PRICE) then min(results.UNIT_PRICE) else min(a.MIN_UNIT_PRICE)
+    end as MIN_UNIT_PRICE:Double,
+    case
+        when min(ifnull(results.PACK_NET_PRICE, 0)) = 0 then min(ifnull(a.MIN_PACK_NET_PRICE, 0))
+        when min(ifnull(a.MIN_PACK_NET_PRICE, 0)) = 0 then min(results.PACK_NET_PRICE)
+        when min(results.PACK_NET_PRICE) < min(a.MIN_PACK_NET_PRICE) then min(results.PACK_NET_PRICE) else min(a.MIN_PACK_NET_PRICE)
+    end as MIN_PACK_NET_PRICE:Double,
+    case
+        when min(ifnull(results.UNIT_NET_PRICE, 0)) = 0 then min(ifnull(a.MIN_UNIT_NET_PRICE, 0))
+        when min(ifnull(a.MIN_UNIT_NET_PRICE, 0)) = 0 then min(results.UNIT_NET_PRICE)
+        when min(results.UNIT_NET_PRICE) < min(a.MIN_UNIT_NET_PRICE) then min(results.UNIT_NET_PRICE) else min(a.MIN_UNIT_NET_PRICE)
+    end as MIN_UNIT_NET_PRICE:Double,
 }group by results.COUNTRY_CODE,
     results.INSTITUTE_ID,
     results.BRAND_ID,

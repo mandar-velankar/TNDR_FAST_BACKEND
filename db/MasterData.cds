@@ -506,3 +506,14 @@ entity MasterCountrySpecifications: cuid, managed {
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 }
+
+entity AccountPreApprovedPrices: cuid, managed {
+	COUNTRY_CODE		: String(2);
+	INSTITUTE_ID		: Integer;
+	PRODUCT_ID			: Integer;
+	CURRENCY			: String(3);
+	MIN_PACK_PRICE		: Double;
+	MIN_UNIT_PRICE		: Double;
+	MIN_PACK_NET_PRICE	: Double;
+	MIN_UNIT_NET_PRICE	: Double;
+}
