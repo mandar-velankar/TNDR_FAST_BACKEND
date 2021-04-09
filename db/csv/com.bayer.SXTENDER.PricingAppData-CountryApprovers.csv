@@ -1,7 +1,1 @@
-﻿CountryCode,ApproverType,Division,ApproverName,ApproverEmailID
-TH,Country Business,Radiology,TH Country Radiology,jonathan.hubeau.ext@bayer.com
-TH,Country Business,Pharma,TH Country Pharma,jonathan.hubeau.ext@bayer.com
-TH,Legal,Radiology,TH Legal Radiology,jonathan.hubeau.ext@bayer.com
-TH,Legal,Pharma,TH Legal Pharma,jonathan.hubeau.ext@bayer.com
-TH,Regulatory,Radiology,TH Regulatory Radiology,jonathan.hubeau.ext@bayer.com
-TH,Regulatory,Pharma,TH Regulatory Pharma,jonathan.hubeau.ext@bayer.com
+COUNTRYCODE,APPROVERTYPE,DIVISION,APPROVEREMAILID,APPROVERNAME

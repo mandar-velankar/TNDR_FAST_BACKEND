@@ -10,7 +10,7 @@ using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
 
 
-service CatalogService @(path : 'ODataDev/sxtender.xsodata')
+service CatalogService @(path : 'tender')
 @(requires : [
 'authenticated-user',
 'f_tndr_cag_admin',
@@ -44,7 +44,7 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
     entity CountryBindingTypeLevel2          as projection on MasterData.MasterCountryBindingTypeLevel2;
     entity CountryBindingTypeLevel3          as projection on MasterData.MasterCountryBindingTypeLevel3;
     entity CountrySpecifications             as projection on MasterData.MasterCountrySpecifications;
-
+     entity MasterCompetitors                as projection on MasterData.MasterCompetitors;
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
         to    : 'authenticated-user',
@@ -493,4 +493,14 @@ service CatalogService @(path : 'ODataDev/sxtender.xsodata')
         key OfferId : String(50);
         content   : LargeBinary @Core.MediaType : 'application/pdf';
     }
+
+    entity MailBody {
+        key TemplateId: String(50);
+        Language: String(2);
+        Template: LargeString;
+    }
+
+    //action sendMail (sRecipient:String, sBody:String) returns Boolean;
+    action sendMail (sRecipient:String, sSubject:String, sTemplate:String) returns Boolean;
+
 }

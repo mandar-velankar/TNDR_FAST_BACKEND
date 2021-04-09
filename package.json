@@ -19,7 +19,8 @@
     "html-pdf": "^2.2.0",
     "mysql": "^2.18.1",
     "passport": "^0.4.1",
-    "ramda": "^0.27.0"
+    "ramda": "^0.27.0",
+    "sap-cf-mailer": "0.0.3"
   },
   "engines": {
     "node": "^10 || ^12"
@@ -30,13 +31,14 @@
     "deploy": "cds deploy db --to sqlite:db/sxtender.db",
     "deploy:hana": "cds deploy --to hana --vcap-file ./default-env.json",
     "build": "cds build/all --clean",
+    "build:local": "rm -rf ./srv/node_modules && cds build/all --clean ",
     "build:xs-security": "cds compile srv/ --to xsuaa  > xs-security.json",
     "build:xsa": "mbt build -p=xsa --mtar=FASTCAP-Backend.mtar",
     "build:cf": "mbt build -p=cf --mtar=FASTCAP-Backend-CF.mtar",
     "deploy:cf": "cf deploy mta_archives/FASTCAP-Backend-CF.mtar -e cf.mtaext",
     "debug": "node --inspect node_modules/@sap/cds/bin/cds.js run",
     "start:cds": "cds run",
-    "start": "node ./srv/index-local.js"
+    "start": "cds -v && node ./srv/index-local.js"
   },
   "private": true,
   "cds": {
@@ -57,6 +59,7 @@
     "srv"
   ],
   "devDependencies": {
-    "@sap/cds-dk": "^3.4.0"
+    "@sap/cds-dk": "~3.4.0",
+    "mbt": "~1.0.17"
   }
 }

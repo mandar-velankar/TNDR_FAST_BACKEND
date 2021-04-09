@@ -4,11 +4,13 @@ const ServiceHelper = require('./utils/ServiceHelper');
 const pdf = require("html-pdf");
 const fs = require("fs");
 const Handlebars = require("handlebars");
+const SapCfMailer = require("sap-cf-mailer");
 // const escape = require('escape-html');
 // const html = require('html-escaper');
 // const escapeStringRegexp = require('escape-string-regexp');
 // const resolveWhen = require('special-escape');
 const { Readable } = require('stream');
+const path = require("path");
 
 module.exports = (srv) => {
 
@@ -965,13 +967,13 @@ module.exports = (srv) => {
 			OFFERVALIDITY: offer.OFFERVALIDITY,
 			COUNTRYCODE: offer.COUNTRYCODE,
 			SELLINGCOMPANY: offer.SELLINGCOMPANY,
-			SELLINGCOMPANYBANK: offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>"),
+			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
 			SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
 			SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
 			CURRENCY: offer.CURRENCY,
 			AMOUNT_IN_NUMBERS: totalAmount,
 			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
-			LETTERHEAD: offer.LETTERHEAD.replace(/\\+/g, "<br>"),
+			LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
 			REGULATORY: regulatory,
 			LEGAL: legal,
 			CONTROLLING: controlling,
@@ -979,7 +981,7 @@ module.exports = (srv) => {
 			REGIONAL_BUSINESS: regionalBusiness,
 			SUPPLY_CHAIN: supply,
 			DISTRIBUTORNAME: offer.DISTRIBUTORNAME,
-			DISTRIBUTORADDRESS: offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>"),
+			DISTRIBUTORADDRESS: offer && offer.DISTRIBUTORADDRESS ? offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>") : '',
 			DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
 			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
@@ -1657,7 +1659,7 @@ module.exports = (srv) => {
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
 	});
-//http://localhost:4004/FAST/ODataDev/sxtender.xsodata/Attachment('AE-16-100-1049-BPH-11')/content
+//http://localhost:4004/v2/tender/Attachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'Attachment', async (req, next) => {
 		//OfferID => get CountryCode => get Template by Country => get template
 		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
@@ -1744,5 +1746,22 @@ module.exports = (srv) => {
 		// 	.catch(error => {
 		// 		console.error(error)
 		// 	});
+	});
+
+	//srv.on('sendMail', (req, sRecipient, sBody) => {
+	srv.on('sendMail', async (req) => {
+		let sSubject = req.data.sSubject;
+		let sRecipient = 'joris.vd.bogaert@gmail.com';
+
+		const mailer = new SapCfMailer.default("MAIL");
+		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', 'quotation_AR.html'), {encoding:'utf-8'});
+
+		let test = await mailer.sendMailTemplate({
+			to: sRecipient,
+			subject: sSubject,
+			html: htmlMail
+		});
+
+		return true;
 	})
 }

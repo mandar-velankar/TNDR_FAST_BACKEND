@@ -7,8 +7,8 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch via NPM",
-      "cwd": "${workspaceFolder}/srv",
+      "name": "Debug CAP using Proxy",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",

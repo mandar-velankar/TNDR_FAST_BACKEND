@@ -1,13 +1,13 @@
-ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,CountryCode,BindingTypeLevel1ID,Name
-4d974df3-beab-45da-b5e8-8bac1fd4ada8,,,,,AR,c613f49d-61de-431e-b285-eddeaba8fec3,Etapa única
-096aa49c-dda8-40b9-a7fb-a8dcf6577f4e,,,,,AR,c613f49d-61de-431e-b285-eddeaba8fec3,Etapa múltiple
-0472beec-2da0-4441-84a4-04b04e59207b,,,,,AR,01cc5c62-f657-4a04-9cb2-92c551f5956c,Etapa única
-5e4fb059-8053-4bd5-b438-4688882bc826,,,,,AR,01cc5c62-f657-4a04-9cb2-92c551f5956c,Etapa múltiple
-8420f182-37e4-433f-9117-d8a624f60048,,,,,AR,030b0716-926c-43ac-863c-5ea1bb9e8fe8,Reglementación
-3c351ed0-3416-4b8c-b6dc-8d13253583cd,,,,,AR,030b0716-926c-43ac-863c-5ea1bb9e8fe8,Licitación / Concurso desierto
-442bf94f-3bfd-4a58-9b37-0b27f9bb3bdc,,,,,AR,030b0716-926c-43ac-863c-5ea1bb9e8fe8,Desarrollo local / Econ. social
-c872726c-0061-4899-a5fd-78afae8f77e5,,,,,AR,dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a,Por Especialidad
-eb68bb85-be1d-4ca9-97de-ccfadb2144e6,,,,,AR,dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a,Por Exclusividad
-3c36c0f8-dda5-4061-a763-59c193ce82bb,,,,,AR,dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a,"Por desarme, traslado, …"
-447992fb-7dc7-4f01-87dc-034f9554ca45,,,,,AR,dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a,Interadministrativa
-3680c437-7793-4c43-bf47-98015eee2e40,,,,,AR,dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a,Con Universadades
+ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,BINDINGTYPELEVEL1ID,NAME
+"4d974df3-beab-45da-b5e8-8bac1fd4ada8",,,,,"AR","c613f49d-61de-431e-b285-eddeaba8fec3","Etapa única"
+"096aa49c-dda8-40b9-a7fb-a8dcf6577f4e",,,,,"AR","c613f49d-61de-431e-b285-eddeaba8fec3","Etapa múltiple"
+"0472beec-2da0-4441-84a4-04b04e59207b",,,,,"AR","01cc5c62-f657-4a04-9cb2-92c551f5956c","Etapa única"
+"5e4fb059-8053-4bd5-b438-4688882bc826",,,,,"AR","01cc5c62-f657-4a04-9cb2-92c551f5956c","Etapa múltiple"
+"8420f182-37e4-433f-9117-d8a624f60048",,,,,"AR","030b0716-926c-43ac-863c-5ea1bb9e8fe8","Reglementación"
+"3c351ed0-3416-4b8c-b6dc-8d13253583cd",,,,,"AR","030b0716-926c-43ac-863c-5ea1bb9e8fe8","Licitación / Concurso desierto"
+"442bf94f-3bfd-4a58-9b37-0b27f9bb3bdc",,,,,"AR","030b0716-926c-43ac-863c-5ea1bb9e8fe8","Desarrollo local / Econ. social"
+"c872726c-0061-4899-a5fd-78afae8f77e5",,,,,"AR","dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a","Por Especialidad"
+"eb68bb85-be1d-4ca9-97de-ccfadb2144e6",,,,,"AR","dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a","Por Exclusividad"
+"3c36c0f8-dda5-4061-a763-59c193ce82bb",,,,,"AR","dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a","Por desarme, traslado, …"
+"447992fb-7dc7-4f01-87dc-034f9554ca45",,,,,"AR","dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a","Interadministrativa"
+"3680c437-7793-4c43-bf47-98015eee2e40",,,,,"AR","dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a","Con Universadades"

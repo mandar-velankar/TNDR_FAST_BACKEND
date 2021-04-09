@@ -9,6 +9,7 @@ entity PT_TMCTRY{//Country
 	CountryName:String(50);
 	ApprovalType:Integer;
 	LocalCurrency:hana.NCHAR(3);//String(3);
+	ReportingCurreny:String(3);
 	CountryID:Integer;//delete
 	Region:String(50);
 	COMMENT:String(255);
@@ -516,4 +517,10 @@ entity AccountPreApprovedPrices: cuid, managed {
 	MIN_UNIT_PRICE		: Double;
 	MIN_PACK_NET_PRICE	: Double;
 	MIN_UNIT_NET_PRICE	: Double;
+
+entity MasterCompetitors: cuid, managed {
+	CountryCode			: String(2); //Bayer
+	ProductCode			: Integer;  //Bayer
+	CompetitorProduct	: String(300); 
+	CompetitorCompany	: String(300);
 }
