@@ -93,7 +93,7 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         modifiedAt,
         modifiedBy,
         Contract;
-
+        
     entity MspApprovers as select from ContractsAppData.Products {
         key CountryCode,
         key MspApprovedByName
@@ -104,10 +104,13 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
         key NspApprovedByName
     }group by CountryCode, NspApprovedByName;
 
+    entity ContractInstitutes as projection on ContractsAppData.ContractInstitutes;
+
     entity Contracts as select from ContractsAppData.Contracts{
         *,
         null as OfferValue: Double,
-        Products: redirected to Products
+        Products: redirected to Products,
+        Institutes: redirected to ContractInstitutes
     };
 
     entity CountryContractBrands as select from Contracts {

@@ -1,3 +1,5 @@
+const cds = require('@sap/cds');
+
 module.exports = {
     _getWhereId: function(req, fieldName){
         return req.query.SELECT.where.findIndex((filter) => filter && filter.ref && filter.ref.find((field) => field === fieldName));
@@ -10,6 +12,34 @@ module.exports = {
     getWhereValue: function(req, fieldName) {
         let idx = this._getWhereId(req, fieldName);
         return req.query.SELECT.where[idx + 2].val;
+    },
+
+    getWhereValues: function(req, fieldName) {
+        let results = [];
+        req.query.SELECT.where.forEach((item, index, arr) => {
+            if(item.ref && item.ref[0] === fieldName) { 
+                results.push(arr[index + 2].val);
+            }
+        })
+        return results;
+    },
+
+    buildWhereExpression: function(fieldName, operator, fieldValues) {
+
+        let expr = '';
+        
+        fieldValues.forEach((value, idx, arr) => {
+
+            const last  = arr.length - 1;
+            expr += `${fieldName} = ${value}`; 
+
+            if(idx != last){
+                expr += ` ${operator} `;
+            }
+
+        });
+
+        return cds.parse.expr(expr).xpr;
     },
 
     buildWhere: function(req, fieldName) {
