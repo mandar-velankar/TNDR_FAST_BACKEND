@@ -174,31 +174,33 @@ module.exports = (srv) => {
 		});
 		return results;
 	}
-	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteId) {
+	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds) {
 		let results = [];
 		entityBrands.forEach(entityBrand => {
 			distributorBrand = distributorBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
 			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
 			if (distributorBrand && countryProductsList.length !== 0) {
 				countryProductsList.forEach((countryProduct) => {
-					results.push({
-						COUNTRY_CODE: entityBrand.COUNTRY_CODE,
-						INSTITUTE_ID: instituteId,
-						INSTITUTE_NAME: 'NA',
-						DISTRIBUTOR_ID: distributorBrand.DISTRIBUTOR_ID,
-						DISTRIBUTOR_NAME: distributorBrand.DISTRIBUTOR_NAME,
-						BRAND_ID: entityBrand.BRAND_ID,
-						BRAND_NAME: countryProduct.BRAND_NAME,
-						PRODUCT_ID: countryProduct.PRODUCT_ID,
-						PRODUCT_NAME: countryProduct.PRODUCT_NAME,
-						INCO_TERMS: distributorBrand.INCO_TERMS,
-						PAYMENT_TERMS: distributorBrand.PAYMENT_TERMS,
-						COMMISSION_RATE: distributorBrand.COMMISSION_RATE,
-						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
-						CHANNEL: 'Distributor',
-						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
-						COGS: countryProduct.COGS,
-						PACKFACTOR: countryProduct.PACK_SIZE
+					instituteIds.forEach(instituteId => {
+						results.push({
+							COUNTRY_CODE: entityBrand.COUNTRY_CODE,
+							INSTITUTE_ID: instituteId,
+							INSTITUTE_NAME: 'NA',
+							DISTRIBUTOR_ID: distributorBrand.DISTRIBUTOR_ID,
+							DISTRIBUTOR_NAME: distributorBrand.DISTRIBUTOR_NAME,
+							BRAND_ID: entityBrand.BRAND_ID,
+							BRAND_NAME: countryProduct.BRAND_NAME,
+							PRODUCT_ID: countryProduct.PRODUCT_ID,
+							PRODUCT_NAME: countryProduct.PRODUCT_NAME,
+							INCO_TERMS: distributorBrand.INCO_TERMS,
+							PAYMENT_TERMS: distributorBrand.PAYMENT_TERMS,
+							COMMISSION_RATE: distributorBrand.COMMISSION_RATE,
+							LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
+							CHANNEL: 'Distributor',
+							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+							COGS: countryProduct.COGS,
+							PACKFACTOR: countryProduct.PACK_SIZE
+						});
 					});
 				});
 			}
@@ -1368,7 +1370,7 @@ module.exports = (srv) => {
 				GROSS_PROFIT_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_BUDGET, 0),
 				GROSS_PROFIT_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_SPOT, 0),
 				DIVISION: d.DIVISION,
-				BUDGETEDPROFITABILITY: (d.BUDGETEDPROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETEDPROFITABILITY, 0).concat("%"),
+				BUDGETEDPROFITABILITY: (d.BUDGETED_PROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETED_PROFITABILITY, 0).concat("%"),
 				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 0).concat("%"),
 				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 0).concat("%")
 			}
@@ -1539,10 +1541,12 @@ module.exports = (srv) => {
 		if (req.query.SELECT.where) {
 			//Get non-filter information
 			let channel = ServiceHelper.getWhereValue(req, "CHANNEL");
-			let instituteId = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
+			// let instituteId = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
+			let instituteIds = ServiceHelper.getWhereValues(req, "INSTITUTE_ID");
 			//Get filters
 			let whereCountry = ServiceHelper.buildWhere(req, "COUNTRY_CODE");
-			let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
+			//  let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
+			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID","or",instituteIds);
 			let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
 			let whereProduct = ServiceHelper.buildWhere(req, "PRODUCT_ID");
 			let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
@@ -1583,7 +1587,7 @@ module.exports = (srv) => {
 			}
 			else if (channel === "Distributor") {
 				let distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
-				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteId);
+				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds);
 			}
 		}
 		return results;

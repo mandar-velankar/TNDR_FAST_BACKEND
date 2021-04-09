@@ -182,25 +182,46 @@ entity CountryMinPrice as select from TenderResults as results{
     results.PRODUCT_NAME,
     results.CURRENCY;
 
-entity AccountMinPrice as select from TenderResults as results{
-    key results.COUNTRY_CODE,
-    key results.INSTITUTE_ID,
+entity AccountMinPrice as select from MasterData.AccountPreApprovedPrices as a full outer join
+TenderResults as results on results.COUNTRY_CODE = a.COUNTRY_CODE and results.INSTITUTE_ID = a.INSTITUTE_ID and results.PRODUCT_ID = a.PRODUCT_ID and results.CURRENCY = a.CURRENCY {
+    key ifnull(results.COUNTRY_CODE, a.COUNTRY_CODE) as COUNTRY_CODE:String,
+    key ifnull(results.INSTITUTE_ID, a.INSTITUTE_ID) as INSTITUTE_ID:String,
     results.BRAND_ID,
     results.BRAND_NAME,
-    key results.PRODUCT_ID,
+    key ifnull(results.PRODUCT_ID, a.PRODUCT_ID) as PRODUCT_ID:String,
     results.PRODUCT_NAME,
-    key results.CURRENCY,
-    min(results.PACK_PRICE) as MIN_PACK_PRICE:Double,
-    min(results.UNIT_PRICE) as MIN_UNIT_PRICE:Double,
-    min(results.PACK_NET_PRICE) as MIN_PACK_NET_PRICE:Double,
-    min(results.UNIT_NET_PRICE) as MIN_UNIT_NET_PRICE:Double,
+    key ifnull(results.CURRENCY, a.CURRENCY) as CURRENCY:String,
+    case
+        when min(ifnull(results.PACK_PRICE, 0)) = 0 then min(ifnull(a.MIN_PACK_PRICE, 0))
+        when min(ifnull(a.MIN_PACK_PRICE, 0)) = 0 then min(results.PACK_PRICE)
+        when min(results.PACK_PRICE) < min(a.MIN_PACK_PRICE) then min(results.PACK_PRICE) else min(a.MIN_PACK_PRICE)
+    end as MIN_PACK_PRICE:Double,
+    case
+        when min(ifnull(results.UNIT_PRICE, 0)) = 0 then min(ifnull(a.MIN_UNIT_PRICE, 0))
+        when min(ifnull(a.MIN_UNIT_PRICE, 0)) = 0 then min(results.UNIT_PRICE)
+        when min(results.UNIT_PRICE) < min(a.MIN_UNIT_PRICE) then min(results.UNIT_PRICE) else min(a.MIN_UNIT_PRICE)
+    end as MIN_UNIT_PRICE:Double,
+    case
+        when min(ifnull(results.PACK_NET_PRICE, 0)) = 0 then min(ifnull(a.MIN_PACK_NET_PRICE, 0))
+        when min(ifnull(a.MIN_PACK_NET_PRICE, 0)) = 0 then min(results.PACK_NET_PRICE)
+        when min(results.PACK_NET_PRICE) < min(a.MIN_PACK_NET_PRICE) then min(results.PACK_NET_PRICE) else min(a.MIN_PACK_NET_PRICE)
+    end as MIN_PACK_NET_PRICE:Double,
+    case
+        when min(ifnull(results.UNIT_NET_PRICE, 0)) = 0 then min(ifnull(a.MIN_UNIT_NET_PRICE, 0))
+        when min(ifnull(a.MIN_UNIT_NET_PRICE, 0)) = 0 then min(results.UNIT_NET_PRICE)
+        when min(results.UNIT_NET_PRICE) < min(a.MIN_UNIT_NET_PRICE) then min(results.UNIT_NET_PRICE) else min(a.MIN_UNIT_NET_PRICE)
+    end as MIN_UNIT_NET_PRICE:Double,
 }group by results.COUNTRY_CODE,
+    a.COUNTRY_CODE,
     results.INSTITUTE_ID,
+    a.INSTITUTE_ID,
     results.BRAND_ID,
     results.BRAND_NAME,
     results.PRODUCT_ID,
+    a.PRODUCT_ID,
     results.PRODUCT_NAME,
-    results.CURRENCY;
+    results.CURRENCY,
+    a.CURRENCY;
 
 entity PreviousApprovalTemp as select from TransactionalData.PT_TMAPPRST as approvals
 inner join LatestApprovalRequests as latestApprovals
@@ -581,7 +602,7 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
-	ifnull(offer.Quotation.OfferValidity, to_date('2021-07-31')) as OFFERVALIDITY,
+	ifnull(offer.Quotation.OfferValidity, to_date('2021-10-31')) as OFFERVALIDITY,
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
