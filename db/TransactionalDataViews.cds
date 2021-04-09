@@ -182,15 +182,15 @@ entity CountryMinPrice as select from TenderResults as results{
     results.PRODUCT_NAME,
     results.CURRENCY;
 
-entity AccountMinPrice as select from MasterData.AccountPreApprovedPrices as a left outer join
+entity AccountMinPrice as select from MasterData.AccountPreApprovedPrices as a full outer join
 TenderResults as results on results.COUNTRY_CODE = a.COUNTRY_CODE and results.INSTITUTE_ID = a.INSTITUTE_ID and results.PRODUCT_ID = a.PRODUCT_ID and results.CURRENCY = a.CURRENCY {
-    key results.COUNTRY_CODE,
-    key results.INSTITUTE_ID,
+    key ifnull(results.COUNTRY_CODE, a.COUNTRY_CODE) as COUNTRY_CODE:String,
+    key ifnull(results.INSTITUTE_ID, a.INSTITUTE_ID) as INSTITUTE_ID:String,
     results.BRAND_ID,
     results.BRAND_NAME,
-    key results.PRODUCT_ID,
+    key ifnull(results.PRODUCT_ID, a.PRODUCT_ID) as PRODUCT_ID:String,
     results.PRODUCT_NAME,
-    key results.CURRENCY,
+    key ifnull(results.CURRENCY, a.CURRENCY) as CURRENCY:String,
     case
         when min(ifnull(results.PACK_PRICE, 0)) = 0 then min(ifnull(a.MIN_PACK_PRICE, 0))
         when min(ifnull(a.MIN_PACK_PRICE, 0)) = 0 then min(results.PACK_PRICE)
@@ -212,12 +212,16 @@ TenderResults as results on results.COUNTRY_CODE = a.COUNTRY_CODE and results.IN
         when min(results.UNIT_NET_PRICE) < min(a.MIN_UNIT_NET_PRICE) then min(results.UNIT_NET_PRICE) else min(a.MIN_UNIT_NET_PRICE)
     end as MIN_UNIT_NET_PRICE:Double,
 }group by results.COUNTRY_CODE,
+    a.COUNTRY_CODE,
     results.INSTITUTE_ID,
+    a.INSTITUTE_ID,
     results.BRAND_ID,
     results.BRAND_NAME,
     results.PRODUCT_ID,
+    a.PRODUCT_ID,
     results.PRODUCT_NAME,
-    results.CURRENCY;
+    results.CURRENCY,
+    a.CURRENCY;
 
 entity PreviousApprovalTemp as select from TransactionalData.PT_TMAPPRST as approvals
 inner join LatestApprovalRequests as latestApprovals
