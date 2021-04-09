@@ -23,47 +23,64 @@ Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "ID": "2c0a48ae-e72b-4cc0-86af-7656260f2142",
+    "ID": "2c0a48ae-e72b-4cc0-86af-7656260f2121",
     "createdBy": "Artiom Sargesjan",
     "CountryCode": "SA",
     "ContractNumber": "SA-20-7777-1",
     "ChannelId": "f790b7fe-9e1b-4a61-ba38-72fd2cb6f054",
     "ContractDate": "/Date(1597968000000)/",
     "Enabled": true,
-    "InstituteId": 100155,
     "DistributorId": 2024839,
     "SellingCompanyCode": "BLC",
     "Currency": "SAR",
     "Comment": "Lorem ipsum dolor sit anet",
     "Products" : [{
         "ProductPackId": 100122,
-        "CountryCode": "SA",
-        "UoM": "Unit",
-        "Deleted": 0
-    }]
+        "CountryCode": "SA"
+    }],
+    "Institutes": [
+        {
+            "CountryCode": "TH",
+            "InstituteID": 100336
+        }
+    ]
 }
 
 ###Contracts  - Update Contract
-PUT http://localhost:4004/FAST/ctr/Contracts(guid'8d5475be-e85b-11ea-adc1-0242ac120002')
+PUT http://localhost:4004/FAST/ctr/Contracts(guid'2c0a48ae-e72b-4cc0-86af-7656260f2142')
 Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "ID": "8d5475be-e85b-11ea-adc1-0242ac120002",
-    "CountryCode": "SA",
-    "ContractNumber": "SA-20-7777-1",
-    "ContractDate": "\/Date(1602115200000)\/",
+    "ID": "25e01f26-cbbf-4a22-817e-4cbc14cb58f3",
+    "CountryCode": "TH",
+    "ContractName": "TEST_333",
+    "ContractNumber": "666666666666",
+    "ChannelId": "f790b7fe-9e1b-4a61-ba38-72fd2cb6f054",
+    "ContractDate": "\/Date(1617926400000)\/",
+    "ContractValidUntil": "\/Date(1619654400000)\/",
     "Enabled": true,
-    "InstituteId": 100155,
-    "DistributorId": 8888888,
-    "SellingCompanyCode": "BAG",
-    "Currency": "SAR",
-    "Comment": "Lorem ipsum dolor",
+    "DistributorId": 4411547,
+    "SellingCompanyCode": "BTH",
+    "Currency": "THB",
+    "Comment": "",
+    "Institutes": [
+        {
+            "CountryCode": "TH",
+            "InstituteID": 100843,
+            "InstituteName": "21 SATTAWATVEJKIJ CO.,LTD."
+        },
+        {
+            "CountryCode": "TH",
+            "InstituteID": 101198,
+            "InstituteName": "ABSOLUTE WELLNESS CO.,LTD."
+        }
+    ],
     "Products": []
 }
 
 ### Contracts  - Delete contract by ID
-DELETE http://localhost:4004/FAST/ctr/Contracts(guid'2c0a48ae-e72b-4cc0-86af-7656260f2142')
+DELETE http://localhost:4004/FAST/ctr/Contracts(guid'8512e1ce-a990-4d90-b958-a5526c08a689')
 Authorization: Basic YXJ0aW9t
 
 ### Products  - Get product by ID
