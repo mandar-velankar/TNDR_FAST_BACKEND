@@ -517,6 +517,7 @@ entity AccountPreApprovedPrices: cuid, managed {
 	MIN_UNIT_PRICE		: Double;
 	MIN_PACK_NET_PRICE	: Double;
 	MIN_UNIT_NET_PRICE	: Double;
+}
 
 entity MasterCompetitors: cuid, managed {
 	CountryCode			: String(2); //Bayer
