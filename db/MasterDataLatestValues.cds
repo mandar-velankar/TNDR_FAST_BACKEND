@@ -91,3 +91,46 @@ INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRY
     BudgetedProfitability.PROFITABILITY
 };
 
+//only the active (is not the same as approved) BrandPolicies
+entity ActiveBrandPolicies as select from MasterData.BrandPolicies where ValidTo = '9999-12-31 00:00:00.000000000'; 
+
+//What is the most recent BrandPolicy
+entity MostRecentBrandPolicies as SELECT from ActiveBrandPolicies as BrandPolicies
+{
+    key BrandPolicies.CountryCode,
+    key BrandPolicies.BrandId,
+    max(BrandPolicies.ValidFrom) as MaxValidFrom:Date
+}group by BrandPolicies.CountryCode, BrandPolicies.BrandId;
+
+entity LatestBrandPolicies as SELECT from MasterData.BrandPolicies as BrandPolicies
+inner join MostRecentBrandPolicies  
+    on BrandPolicies.CountryCode = MostRecentBrandPolicies.CountryCode 
+    and BrandPolicies.BrandId = MostRecentBrandPolicies.BrandId
+{
+    key BrandPolicies.CountryCode,
+    key BrandPolicies.BrandId,
+    BrandPolicies.StandardDiscount
+};
+
+//only the active (is not the same as approved) BrandPolicies
+entity ActiveDistributorBrandPolicies as select from MasterData.DistributorBrandPolicies where ValidTo = '9999-12-31 00:00:00.000000000'; 
+
+entity MostRecentDistributorBrandPolicies as SELECT from ActiveDistributorBrandPolicies as DistributorBrandPolicies
+{
+    key DistributorBrandPolicies.CountryCode,
+    key DistributorBrandPolicies.DistributorId,
+    key DistributorBrandPolicies.BrandId,
+    max(DistributorBrandPolicies.ValidFrom) as MaxValidFrom:Date
+}group by DistributorBrandPolicies.CountryCode, DistributorBrandPolicies.BrandId, DistributorBrandPolicies.DistributorId;
+
+entity LatestDistributorBrandPolicies as SELECT from MasterData.DistributorBrandPolicies as DistributorBrandPolicies
+inner join MostRecentDistributorBrandPolicies  
+    on DistributorBrandPolicies.CountryCode = MostRecentDistributorBrandPolicies.CountryCode
+    and DistributorBrandPolicies.DistributorId = MostRecentDistributorBrandPolicies.DistributorId
+    and DistributorBrandPolicies.BrandId = MostRecentDistributorBrandPolicies.BrandId
+{
+    key DistributorBrandPolicies.CountryCode,
+    key DistributorBrandPolicies.DistributorId,
+    key DistributorBrandPolicies.BrandId,
+    DistributorBrandPolicies.StandardDiscount
+};

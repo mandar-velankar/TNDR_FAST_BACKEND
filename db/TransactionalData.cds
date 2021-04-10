@@ -491,3 +491,11 @@ entity TransCompetitorResult {
         UPDATEDBY      : String(255);
         DELETED        : Integer;
 }
+
+entity OutgoingMails : managed, cuid {
+    Sender: LargeString;
+    Recipients: LargeString;
+    Subject: LargeString;
+    MailBody: LargeString;
+    Sent: Boolean;
+}

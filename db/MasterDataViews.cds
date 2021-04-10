@@ -116,6 +116,21 @@ inner join CountryBrands cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLe
 	dstbr.CommissionRate as COMMISSION_RATE
 };
 
+//Distributor brand policy with aggregated data for front-end
+entity AggregatedDistributorBrandPolicies as SELECT from MasterData.PT_TMDISBRD as DistributorBrands
+left outer join MasterDataLatestValues.LatestDistributorBrandPolicies as LatestDistributorBrandPolicies 
+	on DistributorBrands.CountryCode = LatestDistributorBrandPolicies.CountryCode
+	and DistributorBrands.HLevel4_Code = LatestDistributorBrandPolicies.BrandId
+	and DistributorBrands.DistributorID = LatestDistributorBrandPolicies.DistributorId
+left outer join MasterDataLatestValues.LatestBrandPolicies as LatestBrandPolicies
+	on DistributorBrands.CountryCode = LatestBrandPolicies.CountryCode
+	and DistributorBrands.HLevel4_Code = LatestBrandPolicies.BrandId{
+		key DistributorBrands.CountryCode,
+		key DistributorBrands.DistributorID as DistributorId,
+		key DistributorBrands.HLevel4_Code as BrandId,
+		ifnull(LatestDistributorBrandPolicies.StandardDiscount, ifnull(LatestBrandPolicies.StandardDiscount, 0)) as StandardDiscount:Double
+}group by DistributorBrands.CountryCode, DistributorBrands.DistributorID, DistributorBrands.HLevel4_Code, LatestDistributorBrandPolicies.StandardDiscount, LatestBrandPolicies.StandardDiscount;
+
 //Distinct list of divisions
 entity Divisions as select from MasterData.PT_TMPRDHIER as ProductHierarchy{
 	key ProductHierarchy.HLEVEL1_CODE as DivisionId,

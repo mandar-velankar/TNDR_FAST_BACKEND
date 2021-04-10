@@ -4,12 +4,13 @@ using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 using { com.bayer.SXTENDER.AdminData } from './AdminData';
 
-entity PT_TMCTRY{//Country
+//Country
+entity PT_TMCTRY{
 	key CountryCode:String(2) not null;
 	CountryName:String(50);
 	ApprovalType:Integer;
 	LocalCurrency:hana.NCHAR(3);//String(3);
-	ReportingCurreny:String(3);
+	ReportingCurrency:String(3);
 	CountryID:Integer;//delete
 	Region:String(50);
 	COMMENT:String(255);
@@ -38,8 +39,8 @@ entity PT_TMCTRY{//Country
 	User:Association to AdminData.PT_TMUSERCTRY on User.CountryCode = CountryCode and User.ActiveRecord = 'Yes';
 }
 
-
-entity PT_TMINST{//Institute
+//Institute
+entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
 	key InstituteID:Integer not null;
 	CustomerID:Integer;//delete
@@ -62,15 +63,16 @@ entity PT_TMINST{//Institute
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
 }
 
-entity MASTER_INSTITUTE_HIERARCHY {//Institute Hierarchy Level
+//Institute Hierarchy Level
+entity MASTER_INSTITUTE_HIERARCHY {
 	key ID:Integer not null;
 	NAME:String(50);
 	//Associations
 	Institute:Association to PT_TMINST on Institute.INSTITUTE_HIERARCHY_ID = ID;
 }
 
-
-entity PT_TMDIST{//Distributor
+//Distributor
+entity PT_TMDIST{
 	key CountryCode:String(2) not null;//remove from key
 	key DistributorID:Integer not null;
 	DistributorName:String(500);
@@ -86,7 +88,8 @@ entity PT_TMDIST{//Distributor
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Distributor = $self;
 }
 
-entity PT_TMPRDPCK{//Product Pack
+//Product Pack
+entity PT_TMPRDPCK{
 	key PRODUCTPACKID:Integer not null;
 	PRODUCTPACKNAME:String(100);
 	PRESENTATION:String(50);
@@ -104,7 +107,8 @@ entity PT_TMPRDPCK{//Product Pack
 	ProductPackSKUs:Association to many PT_TMSKUPRDPCK on ProductPackSKUs.ProductPack = $self;
 }
 
-entity PT_TMLE{//Legal Entities (Selling Company)
+//Legal Entities (Selling Company)
+entity PT_TMLE{
 	LegalEntityID:Integer; //TODO: to be discussed if still needed -> still used for association
 	key LegalEntityCode:String(3) not null;
 	LegalEntityName:String(300);
@@ -123,7 +127,8 @@ entity PT_TMLE{//Legal Entities (Selling Company)
 	Countries:Association to many PT_TMCTLE on Countries.LegalEntity = $self;
 }
 
-entity COUNTRY_LEGAL_ENTITY_SIGNATORIES {//Legal Entity Signatories
+//Legal Entity Signatories
+entity COUNTRY_LEGAL_ENTITY_SIGNATORIES {
 	key LEGAL_ENTITY_CODE:String(3) not null;
 	key COUNTRY_CODE:String(2) not null;
 	key AUTHORIZED_SIGNATORY:String(5000) not null;
@@ -135,7 +140,8 @@ entity COUNTRY_LEGAL_ENTITY_SIGNATORIES {//Legal Entity Signatories
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
 }
 
-entity PT_TMREGPR{//Registered Prices
+//Registered Prices
+entity PT_TMREGPR{
 	RegisteredPriceID:Integer;//TODO: check if needed?
 	key CountryCode:String(2) not null;
 	key ProductPackID:Integer not null;
@@ -152,7 +158,8 @@ entity PT_TMREGPR{//Registered Prices
 	CurrencyRate:Association to many PT_TMFXRTS on CurrencyRate.CurrencyFrom = Currency;
 }
 
-entity PT_TMCOGS{//COGS
+//COGS
+entity PT_TMCOGS{
 	key COGSID:Integer not null;//delete and change key
 	CountryCode:String(2) not null;
 	ProductPackID:Integer not null;
@@ -168,7 +175,8 @@ entity PT_TMCOGS{//COGS
 	ProductPack: Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackID;
 }
 
-entity PT_TMFXRTS{//FX Rates
+//FX Rates
+entity PT_TMFXRTS{
 	FxID:Integer;
 	key CurrencyFrom:String(3);
     key CurrencyTo:String(3);
@@ -182,7 +190,9 @@ entity PT_TMFXRTS{//FX Rates
 	//Associations
 	RegisteredPrices:Association to many PT_TMREGPR on RegisteredPrices.CurrencyRate = $self;
 }
+
 //@cds.autoexpose
+//Country Approvers
 entity CountryApprovers{
 	key CountryCode:String(2) not null;
 	key ApproverType:String(200) not null;
@@ -195,6 +205,7 @@ entity CountryApprovers{
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 }
 
+//ApproverTypes (type of approvers & there corresponding values)
 entity ApproverTypes {
     key ApproverType            : String(200);
     key CountryCode             : String(2);
@@ -203,7 +214,8 @@ entity ApproverTypes {
 }
 
 
-entity PT_TMCTLE{//Country legal entity
+//Country legal entity
+entity PT_TMCTLE{
 	CountryLegalEntityID:Integer;//TODO: discuss with Jonathan
 	key CountryCode:String(2)  not null;
 	Brand:String(50);
@@ -212,7 +224,8 @@ entity PT_TMCTLE{//Country legal entity
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	LegalEntity: Association to PT_TMLE on LegalEntity.LegalEntityID = LegalEntityID;
 }
-entity PT_TMCTLEBR{//Country Legal Entity Brand
+//Country Legal Entity Brand
+entity PT_TMCTLEBR{
 	CountryLegalEntityBrandID:Integer; //TODO: discuss with Jonathan
 	key CountryCode:String(2) not null;
 	key LegalEntityID:Integer not null;
@@ -223,7 +236,8 @@ entity PT_TMCTLEBR{//Country Legal Entity Brand
 	Brand:Association to PT_TMPRDHIER on Brand.HLEVEL4_CODE = HLevel4_Code;
 }
 
-entity PT_TMCTPRDPCK{//Country Product Pack
+//Country Product Pack
+entity PT_TMCTPRDPCK{
 	COUNTRYPRODUCTPACKID:Integer;//TODO: discuss with Jonathan
 	key COUNTRYCODE:String(2) not null;
 	COUNTRYOFORIGIN:String(120);
@@ -243,7 +257,8 @@ entity PT_TMCTPRDPCK{//Country Product Pack
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = PRODUCTPACKID;
 	COGS:Association to MasterDataLatestValues.CountryCogs on COGS.PRODUCT_ID = PRODUCTPACKID and COGS.COUNTRY_CODE = COUNTRYCODE;
 }
-entity PT_TMPRDHIER{//Brand
+//Brand
+entity PT_TMPRDHIER{
 	HLEVEL1_NAME:String(100);
 	HLEVEL1_CODE:String(50);
 	HLEVEL2_NAME:String(100);
@@ -265,7 +280,8 @@ entity PT_TMPRDHIER{//Brand
 	TA:Association to many PT_TMTABRMP on TA.Product = $self;
 }
 
-entity PT_TMDISBRD{//Distributor Brand
+//Distributor Brand
+entity PT_TMDISBRD{
 	DistributorBrandID:Integer;//TODO: to be discussed if still needed
 	key CountryCode:String(2) not null;
 	CommissionRate:Double;
@@ -280,7 +296,8 @@ entity PT_TMDISBRD{//Distributor Brand
 	Product:Association to many PT_TMPRDHIER on Product.HLEVEL4_CODE = HLevel4_Code;
 }
 
-entity PT_TMINDSBR{//InstituteDistributorBrand
+//InstituteDistributorBrand
+entity PT_TMINDSBR{
 	InstituteDistBrandRelationID:Integer;//TODO: discuss if still needed
     key CountryCode:String(2) not null;
     Commissionrate:Double;
@@ -295,7 +312,8 @@ entity PT_TMINDSBR{//InstituteDistributorBrand
     Product:Association to many PT_TMPRDHIER on Product.HLEVEL4_CODE = HLevel4_Code;
 }
 
-entity PT_TMINSBRTR{//Institute Brand Terms
+//Institute Brand Terms
+entity PT_TMINSBRTR{
 	InstituteBrandTermsID:Integer;//TODO: discuss if needed
     key CountryCode:String(2) not null;
     INCOTerms:String(500);
@@ -309,7 +327,8 @@ entity PT_TMINSBRTR{//Institute Brand Terms
 	Product:Association to many PT_TMPRDHIER on Product.HLEVEL4_CODE = HLevel4_Code;
 }
 
-entity PT_TMINSHIER{//Institute Hierarchy
+//Institute Hierarchy
+entity PT_TMINSHIER{
 	InstituteRelationID:Integer;//TODO: Check if needed?
 	key ActiveRecord:String(10) not null;
     key ParentInstituteID:Integer not null;
@@ -319,7 +338,8 @@ entity PT_TMINSHIER{//Institute Hierarchy
     Institute: Association to PT_TMINST on Institute.InstituteID = InstituteID;
 }
 
-entity PT_TMSKUPRDPCK{//Product Pack SKU
+//Product Pack SKU
+entity PT_TMSKUPRDPCK{
     CountrySKUID:Integer;//TODO: check if needed?
     key CountryCode:String(2) not null;
     key ActiveRecord:String(10) not null;
@@ -330,6 +350,7 @@ entity PT_TMSKUPRDPCK{//Product Pack SKU
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackID;
 }
 
+//Approved prices
 entity MASTER_APPROVED_PRICE{
 	key COUNTRY_CODE:String(2) not null;
 	key PRODUCT_ID:Integer not null;
@@ -525,3 +546,22 @@ entity MasterCompetitors: cuid, managed {
 	CompetitorProduct	: String(300); 
 	CompetitorCompany	: String(300);
 }
+
+//Brand specific Policy settings
+entity BrandPolicies: cuid, managed {
+    ValidFrom       	: Timestamp; //temphttps://cap.cloud.sap/docs/guides/temporal-data#serving-temporal-data
+    ValidTo         	: Timestamp;
+    CountryCode     	: String(2);
+    BrandId         	: String(50);
+	StandardDiscount 	: Double;
+}; 
+
+//Distributor specific Policy
+entity DistributorBrandPolicies: cuid, managed {
+	ValidFrom       	: Timestamp; //temphttps://cap.cloud.sap/docs/guides/temporal-data#serving-temporal-data
+    ValidTo         	: Timestamp;
+    CountryCode     	: String(2);
+    BrandId         	: String(50);
+	DistributorId   	: Integer not null;
+	StandardDiscount 	: Double;
+}; 

@@ -8,6 +8,7 @@ using {com.bayer.SXTENDER.MasterDataLatestValues} from '../db/MasterDataLatestVa
 using {com.bayer.SXTENDER.TransactionalDataViews} from '../db/TransactionalDataViews';
 using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
+using { User, Country, managed, cuid } from '@sap/cds/common';
 
 
 service CatalogService @(path : 'tender')
@@ -44,7 +45,9 @@ service CatalogService @(path : 'tender')
     entity CountryBindingTypeLevel2          as projection on MasterData.MasterCountryBindingTypeLevel2;
     entity CountryBindingTypeLevel3          as projection on MasterData.MasterCountryBindingTypeLevel3;
     entity CountrySpecifications             as projection on MasterData.MasterCountrySpecifications;
-     entity MasterCompetitors                as projection on MasterData.MasterCompetitors;
+    entity MasterCompetitors                 as projection on MasterData.MasterCompetitors;
+    entity BrandPolicies                     as projection on MasterData.BrandPolicies;
+    entity DistributorBrandPolicies          as projection on MasterData.DistributorBrandPolicies;
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
         to    : 'authenticated-user',
@@ -79,16 +82,21 @@ service CatalogService @(path : 'tender')
     entity PT_TMSKUPRDPCK                    as projection on MasterData.PT_TMSKUPRDPCK;
     entity PT_TMTABRMP                       as projection on MasterData.PT_TMTABRMP;
     entity BUDGETEDPROFITABILITY             as projection on MasterData.BUDGETEDPROFITABILITY;
+
     //Master Data Latest Values
     entity CountryRegisteredPrice @readonly  as projection on MasterDataLatestValues.CountryRegisteredPrice;
     entity CountryCogs @readonly             as projection on MasterDataLatestValues.CountryCogs;
     entity ExchangeRates @readonly           as projection on MasterDataLatestValues.ExchangeRates;
     entity VWBUDGETEDPROFITABILITY @readonly as projection on MasterDataLatestValues.VWBUDGETEDPROFITABILITY;
+    entity MostRecentBrandPolicies @readonly as projection on MasterDataLatestValues.MostRecentBrandPolicies;
+    entity MostRecentDistributorBrandPolicies @readonly as projection on MasterDataLatestValues.MostRecentDistributorBrandPolicies;
+
     //Master Data Views
     entity CountryBrandProducts @readonly    as projection on MasterDataViews.CountryBrandProducts;
     entity CountryBrands @readonly           as projection on MasterDataViews.CountryBrands;
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
+    entity AggregatedDistributorBrandPolicies @readonly as projection on MasterDataViews.AggregatedDistributorBrandPolicies;
     
     //Master Data Services
     entity InstituteDistributor {
@@ -375,6 +383,7 @@ service CatalogService @(path : 'tender')
 
     type User {
         name : String;
+        email: String;
     };
 
     // entity MandatoryProductFields @readonly  as projection on AdminData.MandatoryTableFieldsCountry; 
@@ -489,18 +498,15 @@ service CatalogService @(path : 'tender')
     };
 
     entity Templates        as projection on AdminData.Template;
+    entity MailTemplates    as projection on AdminData.MailTemplate;
+    entity Outbox           as projection on TransactionalData.OutgoingMails;
     entity Attachment {
         key OfferId : String(50);
         content   : LargeBinary @Core.MediaType : 'application/pdf';
     }
 
-    entity MailBody {
-        key TemplateId: String(50);
-        Language: String(2);
-        Template: LargeString;
-    }
 
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail (sRecipient:String, sSubject:String, sTemplate:String) returns Boolean;
-
+    function getMailTemplate (countryCode:String, language:String) returns LargeString;
 }
