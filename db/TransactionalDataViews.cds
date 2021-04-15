@@ -30,9 +30,9 @@ inner join MasterData.PT_TMCTRY as country
 inner join AdminData.PT_TMUSER user
     on approvals.Submittedby = user.CWID
 {
-     key approvals.TenderID,
-	 key approvals.OfferId,
-	 key approvals.CountryCode,
+     approvals.TenderID,
+	 approvals.OfferId,
+	 approvals.CountryCode,
 	 approvals.ApprovalContent,
 	 approvals.ApproverTypeSection,
 	 approvals.ApprovalStatus,
