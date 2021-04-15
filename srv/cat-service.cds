@@ -260,12 +260,12 @@ service CatalogService @(path : 'tender')
             GROSS_MARGIN_EUR_SPOT          : Double;
             GROSS_PROFIT_EUR_BUDGET        : Double;
             GROSS_PROFIT_EUR_SPOT          : Double;
-            REGULATORY                     : Integer not null;
-            LEGAL                          : Integer not null;
-            CONTROLLING                    : Integer not null;
-            COUNTRY_BUSINESS               : Integer not null;
-            REGIONAL_BUSINESS              : Integer not null;
-            SUPPLY_CHAIN                   : Integer not null;
+            REGULATORY                     : Integer not null;//MEA only
+            LEGAL                          : Integer not null;//MEA only
+            CONTROLLING                    : Integer not null;//MEA only
+            COUNTRY_BUSINESS               : Integer not null;//MEA and MX
+            REGIONAL_BUSINESS              : Integer not null;//MEA only
+            SUPPLY_CHAIN                   : Integer not null;//All countries
             IS_LOWEST                      : Integer not null;
             IS_DEFAULT_TERMS               : Integer not null;
             IS_REGISTERED                  : Integer not null;
@@ -273,10 +273,18 @@ service CatalogService @(path : 'tender')
             IS_ALTERNATIVE_REQUESTED       : Integer not null;
             NEW_APPROVAL                   : Integer;
             BUDGETED_PROFITABILITY         : Double;
-            NSM_SM_FM                      : Integer not null;
-			HBU                            : Integer not null;
-			CDH                            : Integer not null;
+            NSM_SM_FM                      : Integer not null;//TH only
+			HBU                            : Integer not null;//TH only
+			CDH                            : Integer not null;//TH and AR
 			IN_POLICY                      : Boolean;
+            MACS                           : Integer not null;//AR only
+            TA                             : Integer not null;//AR only
+            FBP                            : Integer not null;//AR only
+            LPC                            : Integer not null;//AR only
+            COM_PGA                        : Integer not null;//AR only
+            International_Trade            : Integer not null;//AR only
+            Transfer_Pricing               : Integer not null;//AR only
+            SBR                            : Integer not null;//AR only
     };
 
     entity OfferValidation {
@@ -303,12 +311,12 @@ service CatalogService @(path : 'tender')
             AMOUNT_IN_WORDS_VAT   : String(1024);
             VAT_TOTAL             : Double;
             LETTERHEAD            : String(5000);
-            REGULATORY            : Integer;
-            LEGAL                 : Integer not null;
-            CONTROLLING           : Integer not null;
-            COUNTRY_BUSINESS      : Integer;
-            REGIONAL_BUSINESS     : Integer not null;
-            SUPPLY_CHAIN          : Integer not null;
+            REGULATORY            : Integer;//MEA only
+            LEGAL                 : Integer not null;//MEA only
+            CONTROLLING           : Integer not null;//MEA only
+            COUNTRY_BUSINESS      : Integer;//MEA and MX
+            REGIONAL_BUSINESS     : Integer not null;//MEA only
+            SUPPLY_CHAIN          : Integer not null;//All countries
             DISTRIBUTORNAME       : String(500);
             DISTRIBUTORADDRESS    : String(5000);
             DISTRIBUTORPHONE      : String(500);
@@ -322,10 +330,18 @@ service CatalogService @(path : 'tender')
             IS_LOWEST             : Integer not null;
             IS_DEFAULT_TERMS      : Integer not null;
             NEW_APPROVAL          : Integer;
-            NSM_SM_FM             : Integer not null;
-			HBU                   : Integer not null;
-			CDH                   : Integer not null;
+            NSM_SM_FM             : Integer not null;//TH only
+			HBU                   : Integer not null;//TH only
+			CDH                   : Integer not null;//TH and AR
 			IN_POLICY             : Boolean;
+            MACS                           : Integer not null;//AR only
+            TA                             : Integer not null;//AR only
+            FBP                            : Integer not null;//AR only
+            LPC                            : Integer not null;//AR only
+            COM_PGA                        : Integer not null;//AR only
+            International_Trade            : Integer not null;//AR only
+            Transfer_Pricing               : Integer not null;//AR only
+            SBR                            : Integer not null;//AR only
     };
 
     entity OfferProductOfferStatus {
