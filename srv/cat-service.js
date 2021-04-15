@@ -1769,12 +1769,38 @@ module.exports = (srv) => {
 	srv.on('getMailTemplate', async (req) => {
 		const tx = cds.transaction(req);
 		const sLanguage = req.data.language ? req.data.language : "ES";
+		const sOfferId = req.data.offerId;
+
+		//quotation data retrieval for filling template
+		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
+		let offerConsolidation = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
+		let offerProductConsolidation = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+		if (offerConsolidation.length === 0) {
+			return req.reject(404, 'No offer found');
+		}
+
 		const templates = await tx.run(SELECT.from(MailTemplate).where({ CountryCode: req.data.countryCode , Language: sLanguage}));
 		if (templates.length === 0) {
 			return req.reject(404, 'No mail template found for country:' + req.data.countryCode + ' and Language:' + req.data.language);
 		}
 		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', templates[0].TemplateId + '.html'), {encoding:'utf-8'});
 
-		return htmlMail;
+		var document = {
+			type: "buffer",
+			template: htmlMail,
+			context: {
+				data: {
+					offerConsolidation: offerConsolidation,
+					offerProductConsolidation: offerProductConsolidation
+				}
+			}
+		};
+		const htmlTemplate = Handlebars.compile((htmlMail||""));
+
+		var options = {
+			
+		};
+
+		return htmlTemplate(document.context);
 	});
 }

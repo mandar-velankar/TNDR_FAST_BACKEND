@@ -107,7 +107,7 @@
 				<th colspan="5" align="left" style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;color:#000000;">Bayer S.A.</th>
 				</tr>
 				<tr>
-				<th colspan="5" align="center" style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;color:#000000;">Division Pharmaceuticals</th>
+				<th colspan="5" align="center" style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;color:#000000;">Division {{data.offerConsolidation.OFFERID}}</th>
 				</tr>
 				<tr>
 				<th colspan="3">Lista de Precios N° 1151
@@ -122,48 +122,26 @@
 				Hoja N° 1
 				</td>
 				</tr>
-				<tr>
-				<th>Certif.</th>
-				<th>Producto</th>
-				<th>Descripcion</th>
-				<th>Pcio. Salida Laboratorio sin I.V.A</th>
-				<th>Pcio. Sugerido al Publico con I.V.A</th>
-				</tr>
-				<tr>
-				<td>45.442</td>
-				<td>BETAFERON</td>
-				<td>15 env. indiv.c/vial+jga.prell.c/disc</td>
-				<td>114.346,67</td>
-				<td>200.621,23</td>
-				</tr>
-				<tr>
-				<td>57.215</td>
-				<td>STIVARGA</td>
-				<td>40 mg 3 x 28 tabletas</td>
-				<td>289.902,54</td>
-				<td>508.634,01</td>
-				</tr>
-				<tr>
-				<td>53.101</td>
-				<td>NEXAVAR</td>
-				<td>ENY. 112 COMP. X 200MG.</td>
-				<td>245.574,41</td>
-				<td>430.860,30</td>
-				</tr>
-				<tr>
-				<td>57.114</td>
-				<td>EYLIA</td>
-				<td>Vial Aflibercept 40mg x ml</td>
-				<td>52.664,19</td>
-				<td>92.399,31</td>
-				</tr>
-				<tr>
-				<td>51.645</td>
-				<td>VENTAVIS</td>
-				<td>42 AMP. X 1 ML. (10 MCG,ML)</td>
-				<td>93.226,73</td>
-				<td>163.566,30</td>
-				</tr>
+				<thead>
+					<tr>
+						<th>Certif.</th>
+						<th>Producto</th>
+						<th>Descripcion</th>
+						<th>Pcio. Salida Laboratorio sin I.V.A</th>
+						<th>Pcio. Sugerido al Publico con I.V.A</th>
+					</tr>
+				</thead>
+				<tbody>
+				{{#each data.offerProductConsolidation}}
+					<tr>
+						<td>45.442</td>
+						<td>BETAFERON</td>
+						<td>15 env. indiv.c/vial+jga.prell.c/disc</td>
+						<td>114.346,67</td>
+						<td>200.621,23</td>
+					</tr>
+				{{/each}}
+				</tbody>
 				</table>
 							
 				</div>
@@ -171,18 +149,18 @@
 				<div class="mj-column-per-100 outlook-group-fix" style="font-size:13px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
 				<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%">
 										
-				<tr>
-				<td align="left" style="font-size:0px;padding:15px 15px 15px 15px;word-break:break-word;">
-												
-				<div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;">
-				<ul>
-				<li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Imprescindible adjuntar el pliego/documento de condiciones de la licitacion/compra de referencia para podder dar cumplimiento al descuento cotizado.</span></li>
-				</ul>
-				<p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Cualquier duda o consulta no dejes de contactarme<br /><br /></p>
-				<p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Gracias!</span></p>
-				</div>
-				</td>
-				</tr>
+					<tr>
+					<td align="left" style="font-size:0px;padding:15px 15px 15px 15px;word-break:break-word;">
+													
+					<div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;">
+					<ul>
+					<li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Imprescindible adjuntar el pliego/documento de condiciones de la licitacion/compra de referencia para podder dar cumplimiento al descuento cotizado.</span></li>
+					</ul>
+					<p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Cualquier duda o consulta no dejes de contactarme<br /><br /></p>
+					<p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Gracias!</span></p>
+					</div>
+					</td>
+					</tr>
 				</table>
 				</div>
 				</td>
