@@ -84,13 +84,11 @@
                         <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;">
                         <p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">A continuacion detallo la cotizaction para los productos Bayer afectados a la cotizacion de ferencia.</span></p>
                         <ul>
-                        <li><span style="font-size: 12px;"><span style="font-family: Roboto, Tahoma, sans-serif;"><strong>Betaferon - PSL -8% + Impuestos </strong></span><span style="font-family: Roboto, Tahoma, sans-serif;">sobrre Lista <strong>1151.</strong></span></span></li>
-                        <li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;"><strong>Stivarga    - PSL -8% + Impuestos </strong>sobrre Lista<strong> 1151.</strong></span></li>
-                        <li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;"><strong>Nesavar    - PSL -8% + Impuestos </strong>sobrre Lista<strong> 1151.</strong></span></li>
-                        <li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;"><strong>Eylia           - PSL -8% + Impuestos </strong>sobrre Lista<strong> 1151.</strong></span></li>
-                        <li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;"><strong>Ventavis    - PSL -8% + Impuestos </strong>sobrre Lista<strong> 1151.</strong></span></li>
-                        </ul>
-                        <p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Mantenlimiento de condiction - <strong>31/10/2020</strong></span></p>
+							{{#each data.offerProductConsolidation}}
+                        	<li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;"><strong>{{BRANDNAME}}    &rarr; PSL -{{PSL}}% + Impuestos </strong>sobrre Lista<strong> 1151.</strong></span></li>
+							{{/each}}
+						</ul>
+                        <p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Mantenlimiento de condiction - <strong>{{data.offerConsolidation.OFFER_VALIDITY}}</strong></span></p>
                         <p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Condicion de pago                     - <strong>Condicion habitual.</strong></span></p>
                         </div>
                         </td>
@@ -104,66 +102,44 @@
 								
 				<table border="1" cellpadding="0" cellspacing="0" role="presentation" style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;" width="100%">
 				<tr>
-				<th colspan="5" align="left" style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;color:#000000;">Bayer S.A.</th>
+					<th colspan="5" align="left" style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;color:#000000;">Bayer S.A.</th>
 				</tr>
 				<tr>
-				<th colspan="5" align="center" style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;color:#000000;">Division Pharmaceuticals</th>
+					<th colspan="5" align="center" style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;color:#000000;">Division {{data.offerConsolidation.DIVISION}}</th>
 				</tr>
 				<tr>
-				<th colspan="3">Lista de Precios N° 1151
-				<br />
-				<br />
-				Incremento de Precios
-				</th>
-				<td colspan="2" align="right">Vigencia desde: 1 de Marzo de 2020
-				<br />
-				Esta lista anula las anteriores
-				<br />
-				Hoja N° 1
-				</td>
+					<th colspan="3">Lista de Precios N° {{data.offerConsolidation.OFFER_ID}}
+						<br />
+						<br />
+						Incremento de Precios
+					</th>
+					<td colspan="2" align="right">Vigencia desde: {{data.offerConsolidation.OFFER_DATE}}
+						<br />
+						Esta lista anula las anteriores
+						<br />
+						Hoja N° 1
+					</td>
 				</tr>
-				<tr>
-				<th>Certif.</th>
-				<th>Producto</th>
-				<th>Descripcion</th>
-				<th>Pcio. Salida Laboratorio sin I.V.A</th>
-				<th>Pcio. Sugerido al Publico con I.V.A</th>
-				</tr>
-				<tr>
-				<td>45.442</td>
-				<td>BETAFERON</td>
-				<td>15 env. indiv.c/vial+jga.prell.c/disc</td>
-				<td>114.346,67</td>
-				<td>200.621,23</td>
-				</tr>
-				<tr>
-				<td>57.215</td>
-				<td>STIVARGA</td>
-				<td>40 mg 3 x 28 tabletas</td>
-				<td>289.902,54</td>
-				<td>508.634,01</td>
-				</tr>
-				<tr>
-				<td>53.101</td>
-				<td>NEXAVAR</td>
-				<td>ENY. 112 COMP. X 200MG.</td>
-				<td>245.574,41</td>
-				<td>430.860,30</td>
-				</tr>
-				<tr>
-				<td>57.114</td>
-				<td>EYLIA</td>
-				<td>Vial Aflibercept 40mg x ml</td>
-				<td>52.664,19</td>
-				<td>92.399,31</td>
-				</tr>
-				<tr>
-				<td>51.645</td>
-				<td>VENTAVIS</td>
-				<td>42 AMP. X 1 ML. (10 MCG,ML)</td>
-				<td>93.226,73</td>
-				<td>163.566,30</td>
-				</tr>
+				<thead>
+					<tr>
+						<th>Certif.</th>
+						<th>Producto</th>
+						<th>Descripcion</th>
+						<th>Pcio. Salida Laboratorio sin I.V.A</th>
+						<th>Pcio. Sugerido al Publico con I.V.A</th>
+					</tr>
+				</thead>
+				<tbody>
+				{{#each data.offerProductConsolidation}}
+					<tr>
+						<td>{{CODE}}</td>
+						<td>{{BRANDNAME}}</td>
+						<td>{{PRODUCTNAME}}</td>
+						<td>{{NET_PRICE_TOTAL}}</td>
+						<td>{{NET_PRICE_TOTAL_VAT}}</td>
+					</tr>
+				{{/each}}
+				</tbody>
 				</table>
 							
 				</div>
@@ -171,18 +147,18 @@
 				<div class="mj-column-per-100 outlook-group-fix" style="font-size:13px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
 				<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%">
 										
-				<tr>
-				<td align="left" style="font-size:0px;padding:15px 15px 15px 15px;word-break:break-word;">
-												
-				<div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;">
-				<ul>
-				<li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Imprescindible adjuntar el pliego/documento de condiciones de la licitacion/compra de referencia para podder dar cumplimiento al descuento cotizado.</span></li>
-				</ul>
-				<p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Cualquier duda o consulta no dejes de contactarme<br /><br /></p>
-				<p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Gracias!</span></p>
-				</div>
-				</td>
-				</tr>
+					<tr>
+					<td align="left" style="font-size:0px;padding:15px 15px 15px 15px;word-break:break-word;">
+													
+					<div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;">
+					<ul>
+					<li><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Imprescindible adjuntar el pliego/documento de condiciones de la licitacion/compra de referencia para podder dar cumplimiento al descuento cotizado.</span></li>
+					</ul>
+					<p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Cualquier duda o consulta no dejes de contactarme<br /><br /></p>
+					<p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">Gracias!</span></p>
+					</div>
+					</td>
+					</tr>
 				</table>
 				</div>
 				</td>

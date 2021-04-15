@@ -8,7 +8,8 @@ entity Users as select from AdminData.PT_TMUSER as User{
     key User.UserID as USER_ID,
     User.CWID as CWID,
     0 as NEXT_TENDER_NO:Integer,
-    User.toUserCountries
+    User.toUserCountries,
+    User.UserEmail as UserEmail
 };
 
 entity UserCountries as select from AdminData.PT_TMUSERCTRY as UserCountries{

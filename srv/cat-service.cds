@@ -524,5 +524,5 @@ service CatalogService @(path : 'tender')
 
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail (sRecipient:String, sSubject:String, sTemplate:String) returns Boolean;
-    function getMailTemplate (countryCode:String, language:String) returns LargeString;
+    function getMailTemplate (countryCode:String, language:String, offerId:String) returns LargeString;
 }
