@@ -1785,21 +1785,26 @@ module.exports = (srv) => {
 		}
 		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', templates[0].TemplateId + '.html'), {encoding:'utf-8'});
 
+		//execute required calculations for data to be displayed and add it to the product object
+		offerProductConsolidation.forEach(function(product){
+			product.NET_PRICE_TOTAL		= product.NET_OFFER_PRICE * product.REQUESTED_VOLUME;
+			product.NET_PRICE_TOTAL_VAT = product.NET_OFFER_PRICE * product.REQUESTED_VOLUME * (1 + product.VAT);
+			product.PSL 				= (product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE; 
+		});
+
+		//OfferConsolidation.DIVISION = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
 		var document = {
 			type: "buffer",
 			template: htmlMail,
 			context: {
 				data: {
 					offerConsolidation: offerConsolidation,
-					offerProductConsolidation: offerProductConsolidation
+					offerProductConsolidation: offerProductConsolidation,
+					offerProductValidation: await buildOfferProductValidation(tx, whereOffer)
 				}
 			}
 		};
 		const htmlTemplate = Handlebars.compile((htmlMail||""));
-
-		var options = {
-			
-		};
 
 		return htmlTemplate(document.context);
 	});

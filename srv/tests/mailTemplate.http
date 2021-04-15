@@ -1,3 +1,3 @@
-GET http://localhost:4004/FAST/tender/getMailTemplate?countryCode='AR'&offerId='AR-21-1003-1'&language='ES'
+GET http://localhost:4004/v2/tender/getMailTemplate?countryCode='AR'&offerId='AR-21-1003-1'&language='ES'
 Authorization: Basic YXJ0aW9t
 Content-Type: application/json
