@@ -2012,6 +2012,8 @@ module.exports = (srv) => {
 			product.PSL 				= (product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE; 
 		});
 
+		offerConsolidation = offerConsolidation[0];
+
 		//OfferConsolidation.DIVISION = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
 		var document = {
 			type: "buffer",
@@ -2019,8 +2021,7 @@ module.exports = (srv) => {
 			context: {
 				data: {
 					offerConsolidation: offerConsolidation,
-					offerProductConsolidation: offerProductConsolidation,
-					offerProductValidation: await buildOfferProductValidation(tx, whereOffer)
+					offerProductConsolidation: offerProductConsolidation
 				}
 			}
 		};
