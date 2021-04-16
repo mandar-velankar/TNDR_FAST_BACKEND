@@ -1995,6 +1995,7 @@ module.exports = (srv) => {
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
 		let offerConsolidation = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
 		let offerProductConsolidation = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		if (offerConsolidation.length === 0) {
 			return req.reject(404, 'No offer found');
 		}
@@ -2012,9 +2013,15 @@ module.exports = (srv) => {
 			product.PSL 				= (product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE; 
 		});
 
+		
 		offerConsolidation = offerConsolidation[0];
+		if(offerProductValidation.length > 0){
+			let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
+			if(divisions.length > 0){
+				offerConsolidation.DIVISION = divisions[0];
+			}
+		}
 
-		//OfferConsolidation.DIVISION = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
 		var document = {
 			type: "buffer",
 			template: htmlMail,
