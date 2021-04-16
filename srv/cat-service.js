@@ -2009,8 +2009,8 @@ module.exports = (srv) => {
 		//execute required calculations for data to be displayed and add it to the product object
 		offerProductConsolidation.forEach(function(product){
 			product.NET_PRICE_TOTAL		= product.NET_OFFER_PRICE * product.REQUESTED_VOLUME;
-			product.NET_PRICE_TOTAL_VAT = product.NET_OFFER_PRICE * product.REQUESTED_VOLUME * (1 + product.VAT);
-			product.PSL 				= (product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE; 
+			product.NET_PRICE_TOTAL_VAT = product.REGISTERED_PRICE * product.REQUESTED_VOLUME * (1 + product.VAT);
+			product.PSL 				= ((product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE) * 100; 
 		});
 
 		
