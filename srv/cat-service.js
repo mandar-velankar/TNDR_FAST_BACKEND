@@ -1995,6 +1995,7 @@ module.exports = (srv) => {
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
 		let offerConsolidation = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
 		let offerProductConsolidation = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		if (offerConsolidation.length === 0) {
 			return req.reject(404, 'No offer found');
 		}
@@ -2008,19 +2009,26 @@ module.exports = (srv) => {
 		//execute required calculations for data to be displayed and add it to the product object
 		offerProductConsolidation.forEach(function(product){
 			product.NET_PRICE_TOTAL		= product.NET_OFFER_PRICE * product.REQUESTED_VOLUME;
-			product.NET_PRICE_TOTAL_VAT = product.NET_OFFER_PRICE * product.REQUESTED_VOLUME * (1 + product.VAT);
-			product.PSL 				= (product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE; 
+			product.NET_PRICE_TOTAL_VAT = product.REGISTERED_PRICE * product.REQUESTED_VOLUME * (1 + product.VAT);
+			product.PSL 				= ((product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE) * 100; 
 		});
 
-		//OfferConsolidation.DIVISION = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
+		
+		offerConsolidation = offerConsolidation[0];
+		if(offerProductValidation.length > 0){
+			let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
+			if(divisions.length > 0){
+				offerConsolidation.DIVISION = divisions[0];
+			}
+		}
+
 		var document = {
 			type: "buffer",
 			template: htmlMail,
 			context: {
 				data: {
 					offerConsolidation: offerConsolidation,
-					offerProductConsolidation: offerProductConsolidation,
-					offerProductValidation: await buildOfferProductValidation(tx, whereOffer)
+					offerProductConsolidation: offerProductConsolidation
 				}
 			}
 		};
