@@ -443,6 +443,13 @@ entity MASTER_TENDER_TYPE{
 	CommercialAgreement:Association to many MASTER_COMMERCIAL_AGREEMENT on CommercialAgreement.TenderType = $self;
 }
 
+entity MASTER_COUNTRY_STATUS{
+	key CountryCode:String(2);
+	key Status:String(60);
+	Sorter:Integer;
+	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+}
+
 entity PT_TMOUTRS{
 	key TenderOutcomeReasons:String(255) not null;
 	key Outcome:String(4) not null;
