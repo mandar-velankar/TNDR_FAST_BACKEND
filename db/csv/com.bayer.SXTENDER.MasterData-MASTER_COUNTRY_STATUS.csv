@@ -1,0 +1,287 @@
+CountryCode,Status,Sorter
+AR,Awaiting Approval,1
+AR,Offer Created,2
+AR,Offer Approved,3
+AR,Offer Rejected,4
+AR,Quotation Submitted,5
+AR,In FOC negotiation,6
+AR,Results Recorded,7
+AR,Delivery Ongoing,8
+AR,Wholesale Offer,9
+AR,Offer Declined,10
+AR,Tender Closed,11
+AR,Cancelled,12
+AR,All,13
+TH,Awaiting Approval,1
+TH,Offer Created,2
+TH,Offer Approved,3
+TH,Offer Rejected,4
+TH,Quotation Submitted,5
+TH,In FOC negotiation,6
+TH,Results Recorded,7
+TH,Delivery Ongoing,8
+TH,Wholesale Offer,9
+TH,Offer Declined,10
+TH,Tender Closed,11
+TH,Cancelled,12
+TH,All,13
+AE,Awaiting Approval,1
+AE,Offer Created,2
+AE,Offer Approved,3
+AE,Offer Rejected,4
+AE,Quotation Submitted,5
+AE,In FOC negotiation,6
+AE,Results Recorded,7
+AE,Delivery Ongoing,8
+AE,Wholesale Offer,9
+AE,Offer Declined,10
+AE,Tender Closed,11
+AE,Cancelled,12
+AE,All,13
+AL,Awaiting Approval,1
+AL,Offer Created,2
+AL,Offer Approved,3
+AL,Offer Rejected,4
+AL,Quotation Submitted,5
+AL,In FOC negotiation,6
+AL,Results Recorded,7
+AL,Delivery Ongoing,8
+AL,Wholesale Offer,9
+AL,Offer Declined,10
+AL,Tender Closed,11
+AL,Cancelled,12
+AL,All,13
+TN,Awaiting Approval,1
+TN,Offer Created,2
+TN,Offer Approved,3
+TN,Offer Rejected,4
+TN,Quotation Submitted,5
+TN,In FOC negotiation,6
+TN,Results Recorded,7
+TN,Delivery Ongoing,8
+TN,Wholesale Offer,9
+TN,Offer Declined,10
+TN,Tender Closed,11
+TN,Cancelled,12
+TN,All,13
+MO,Awaiting Approval,1
+MO,Offer Created,2
+MO,Offer Approved,3
+MO,Offer Rejected,4
+MO,Quotation Submitted,5
+MO,In FOC negotiation,6
+MO,Results Recorded,7
+MO,Delivery Ongoing,8
+MO,Wholesale Offer,9
+MO,Offer Declined,10
+MO,Tender Closed,11
+MO,Cancelled,12
+MO,All,13
+BH,Awaiting Approval,1
+BH,Offer Created,2
+BH,Offer Approved,3
+BH,Offer Rejected,4
+BH,Quotation Submitted,5
+BH,In FOC negotiation,6
+BH,Results Recorded,7
+BH,Delivery Ongoing,8
+BH,Wholesale Offer,9
+BH,Offer Declined,10
+BH,Tender Closed,11
+BH,Cancelled,12
+BH,All,13
+EG,Awaiting Approval,1
+EG,Offer Created,2
+EG,Offer Approved,3
+EG,Offer Rejected,4
+EG,Quotation Submitted,5
+EG,In FOC negotiation,6
+EG,Results Recorded,7
+EG,Delivery Ongoing,8
+EG,Wholesale Offer,9
+EG,Offer Declined,10
+EG,Tender Closed,11
+EG,Cancelled,12
+EG,All,13
+GC,Awaiting Approval,1
+GC,Offer Created,2
+GC,Offer Approved,3
+GC,Offer Rejected,4
+GC,Quotation Submitted,5
+GC,In FOC negotiation,6
+GC,Results Recorded,7
+GC,Delivery Ongoing,8
+GC,Wholesale Offer,9
+GC,Offer Declined,10
+GC,Tender Closed,11
+GC,Cancelled,12
+GC,All,13
+IQ,Awaiting Approval,1
+IQ,Offer Created,2
+IQ,Offer Approved,3
+IQ,Offer Rejected,4
+IQ,Quotation Submitted,5
+IQ,In FOC negotiation,6
+IQ,Results Recorded,7
+IQ,Delivery Ongoing,8
+IQ,Wholesale Offer,9
+IQ,Offer Declined,10
+IQ,Tender Closed,11
+IQ,Cancelled,12
+IQ,All,13
+JO,Awaiting Approval,1
+JO,Offer Created,2
+JO,Offer Approved,3
+JO,Offer Rejected,4
+JO,Quotation Submitted,5
+JO,In FOC negotiation,6
+JO,Results Recorded,7
+JO,Delivery Ongoing,8
+JO,Wholesale Offer,9
+JO,Offer Declined,10
+JO,Tender Closed,11
+JO,Cancelled,12
+JO,All,13
+KW,Awaiting Approval,1
+KW,Offer Created,2
+KW,Offer Approved,3
+KW,Offer Rejected,4
+KW,Quotation Submitted,5
+KW,In FOC negotiation,6
+KW,Results Recorded,7
+KW,Delivery Ongoing,8
+KW,Wholesale Offer,9
+KW,Offer Declined,10
+KW,Tender Closed,11
+KW,Cancelled,12
+KW,All,13
+LB,Awaiting Approval,1
+LB,Offer Created,2
+LB,Offer Approved,3
+LB,Offer Rejected,4
+LB,Quotation Submitted,5
+LB,In FOC negotiation,6
+LB,Results Recorded,7
+LB,Delivery Ongoing,8
+LB,Wholesale Offer,9
+LB,Offer Declined,10
+LB,Tender Closed,11
+LB,Cancelled,12
+LB,All,13
+LY,Awaiting Approval,1
+LY,Offer Created,2
+LY,Offer Approved,3
+LY,Offer Rejected,4
+LY,Quotation Submitted,5
+LY,In FOC negotiation,6
+LY,Results Recorded,7
+LY,Delivery Ongoing,8
+LY,Wholesale Offer,9
+LY,Offer Declined,10
+LY,Tender Closed,11
+LY,Cancelled,12
+LY,All,13
+OM,Awaiting Approval,1
+OM,Offer Created,2
+OM,Offer Approved,3
+OM,Offer Rejected,4
+OM,Quotation Submitted,5
+OM,In FOC negotiation,6
+OM,Results Recorded,7
+OM,Delivery Ongoing,8
+OM,Wholesale Offer,9
+OM,Offer Declined,10
+OM,Tender Closed,11
+OM,Cancelled,12
+OM,All,13
+QA,Awaiting Approval,1
+QA,Offer Created,2
+QA,Offer Approved,3
+QA,Offer Rejected,4
+QA,Quotation Submitted,5
+QA,In FOC negotiation,6
+QA,Results Recorded,7
+QA,Delivery Ongoing,8
+QA,Wholesale Offer,9
+QA,Offer Declined,10
+QA,Tender Closed,11
+QA,Cancelled,12
+QA,All,13
+SA,Awaiting Approval,1
+SA,Offer Created,2
+SA,Offer Approved,3
+SA,Offer Rejected,4
+SA,Quotation Submitted,5
+SA,In FOC negotiation,6
+SA,Results Recorded,7
+SA,Delivery Ongoing,8
+SA,Wholesale Offer,9
+SA,Offer Declined,10
+SA,Tender Closed,11
+SA,Cancelled,12
+SA,All,13
+SD,Awaiting Approval,1
+SD,Offer Created,2
+SD,Offer Approved,3
+SD,Offer Rejected,4
+SD,Quotation Submitted,5
+SD,In FOC negotiation,6
+SD,Results Recorded,7
+SD,Delivery Ongoing,8
+SD,Wholesale Offer,9
+SD,Offer Declined,10
+SD,Tender Closed,11
+SD,Cancelled,12
+SD,All,13
+SY,Awaiting Approval,1
+SY,Offer Created,2
+SY,Offer Approved,3
+SY,Offer Rejected,4
+SY,Quotation Submitted,5
+SY,In FOC negotiation,6
+SY,Results Recorded,7
+SY,Delivery Ongoing,8
+SY,Wholesale Offer,9
+SY,Offer Declined,10
+SY,Tender Closed,11
+SY,Cancelled,12
+SY,All,13
+YE,Awaiting Approval,1
+YE,Offer Created,2
+YE,Offer Approved,3
+YE,Offer Rejected,4
+YE,Quotation Submitted,5
+YE,In FOC negotiation,6
+YE,Results Recorded,7
+YE,Delivery Ongoing,8
+YE,Wholesale Offer,9
+YE,Offer Declined,10
+YE,Tender Closed,11
+YE,Cancelled,12
+YE,All,13
+MX,Awaiting Approval,1
+MX,Offer Created,2
+MX,Offer Approved,3
+MX,Offer Rejected,4
+MX,Quotation Submitted,5
+MX,In FOC negotiation,6
+MX,Results Recorded,7
+MX,Delivery Ongoing,8
+MX,Wholesale Offer,9
+MX,Offer Declined,10
+MX,Tender Closed,11
+MX,Cancelled,12
+MX,All,13
+BR,Awaiting Approval,1
+BR,Offer Created,2
+BR,Offer Approved,3
+BR,Offer Rejected,4
+BR,Quotation Submitted,5
+BR,In FOC negotiation,6
+BR,Results Recorded,7
+BR,Delivery Ongoing,8
+BR,Wholesale Offer,9
+BR,Offer Declined,10
+BR,Tender Closed,11
+BR,Cancelled,12
+BR,All,13
