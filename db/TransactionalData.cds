@@ -418,6 +418,9 @@ entity PT_TMTEND {
                                   and CommercialAgreement.TENDER_TYPE_ID = TENDER_TYPE_ID; //OK
         Country               : Association to MasterData.PT_TMCTRY
                                     on Country.CountryCode = CountryCode;
+        CountrySpecificInformation : Association to CountrySpecificTenderInfo
+                                        on CountrySpecificInformation.TenderID = TenderID
+                                        and CountrySpecificInformation.CountryCode = CountryCode;
 }
 
 entity PT_TMTNOFST {
@@ -499,4 +502,13 @@ entity OutgoingMails : managed, cuid {
     Subject: LargeString;
     MailBody: LargeString;
     Sent: Boolean;
+}
+
+entity CountrySpecificTenderInfo: managed {
+    key TenderID             : String(50);
+    key CountryCode          : String(2);
+        Institute            : String(255); // TODO: check if this should be a refference to the Institute entity? 
+        TenderReference      : String(255); 
+        PublicationDate      : Date;
+        ClosingDate          : Date;
 }

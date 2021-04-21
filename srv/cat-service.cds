@@ -167,6 +167,10 @@ service CatalogService @(path : 'tender')
         * , Tender : redirected to PT_TMTEND
     };
 
+    entity CountrySpecificInformation as projection on TransactionalData.CountrySpecificTenderInfo {
+        *
+    };
+
     entity OfferStatus                       as projection on TransactionalDataViews.OfferStatus;
     entity PT_TMPFIOM                        as projection on TransactionalData.PT_TMPFIOM;
 
@@ -175,7 +179,10 @@ service CatalogService @(path : 'tender')
     };
 
     entity PT_TMTEND                         as projection on TransactionalData.PT_TMTEND {
-        * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView
+        * , 
+        Offer : redirected to PT_TMOFRS, 
+        OfferView : redirected to OfferView,
+        CountrySpecificInformation: redirected to CountrySpecificInformation
     };
 
     entity PT_TMTNOFST                       as projection on TransactionalData.PT_TMTNOFST;
