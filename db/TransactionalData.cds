@@ -507,7 +507,7 @@ entity OutgoingMails : managed, cuid {
 entity CountrySpecificTenderInfo: managed {
     key TenderID             : String(50);
     key CountryCode          : String(2);
-        Institute            : String(255); // TODO: check if this should be a refference to the Institute entity? 
+        Institute            : String(255);
         TenderReference      : String(255); 
         PublicationDate      : Date;
         ClosingDate          : Date;
