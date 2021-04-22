@@ -20,6 +20,7 @@ MX,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 MX,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 MX,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 MX,editofferProductId,Brand,Brand,0,0,brandnme
+MX,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 TH,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 TH,editofferProductId,Requested,RequestedVolume,1,1,Requested
 TH,editofferProductId,Reference,Reference,1,0,reference
@@ -41,6 +42,7 @@ TH,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 TH,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 TH,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 TH,editofferProductId,Brand,Brand,0,0,brandnme
+TH,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 SA,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 SA,editofferProductId,Requested,RequestedVolume,1,1,Requested
 SA,editofferProductId,Reference,Reference,1,0,reference
@@ -62,6 +64,7 @@ SA,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 SA,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 SA,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 SA,editofferProductId,Brand,Brand,0,0,brandnme
+SA,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 TN,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 TN,editofferProductId,Requested,RequestedVolume,1,1,Requested
 TN,editofferProductId,Reference,Reference,1,0,reference
@@ -83,6 +86,7 @@ TN,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 TN,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 TN,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 TN,editofferProductId,Brand,Brand,0,0,brandnme
+TN,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 MO,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 MO,editofferProductId,Requested,RequestedVolume,1,1,Requested
 MO,editofferProductId,Reference,Reference,1,0,reference
@@ -104,6 +108,7 @@ MO,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 MO,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 MO,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 MO,editofferProductId,Brand,Brand,0,0,brandnme
+MO,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 AL,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 AL,editofferProductId,Requested,RequestedVolume,1,1,Requested
 AL,editofferProductId,Reference,Reference,1,0,reference
@@ -125,6 +130,7 @@ AL,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 AL,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 AL,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 AL,editofferProductId,Brand,Brand,0,0,brandnme
+AL,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 AE,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 AE,editofferProductId,Requested,RequestedVolume,1,1,Requested
 AE,editofferProductId,Reference,Reference,1,0,reference
@@ -146,6 +152,7 @@ AE,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 AE,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 AE,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 AE,editofferProductId,Brand,Brand,0,0,brandnme
+AE,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 BH,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 BH,editofferProductId,Requested,RequestedVolume,1,1,Requested
 BH,editofferProductId,Reference,Reference,1,0,reference
@@ -167,6 +174,7 @@ BH,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 BH,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 BH,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 BH,editofferProductId,Brand,Brand,0,0,brandnme
+BH,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 EG,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 EG,editofferProductId,Requested,RequestedVolume,1,1,Requested
 EG,editofferProductId,Reference,Reference,1,0,reference
@@ -188,6 +196,7 @@ EG,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 EG,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 EG,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 EG,editofferProductId,Brand,Brand,0,0,brandnme
+EG,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 GC,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 GC,editofferProductId,Requested,RequestedVolume,1,1,Requested
 GC,editofferProductId,Reference,Reference,1,0,reference
@@ -209,6 +218,7 @@ GC,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 GC,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 GC,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 GC,editofferProductId,Brand,Brand,0,0,brandnme
+GC,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 IQ,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 IQ,editofferProductId,Requested,RequestedVolume,1,1,Requested
 IQ,editofferProductId,Reference,Reference,1,0,reference
@@ -230,6 +240,7 @@ IQ,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 IQ,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 IQ,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 IQ,editofferProductId,Brand,Brand,0,0,brandnme
+IQ,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 JO,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 JO,editofferProductId,Requested,RequestedVolume,1,1,Requested
 JO,editofferProductId,Reference,Reference,1,0,reference
@@ -251,6 +262,7 @@ JO,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 JO,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 JO,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 JO,editofferProductId,Brand,Brand,0,0,brandnme
+JO,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 KW,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 KW,editofferProductId,Requested,RequestedVolume,1,1,Requested
 KW,editofferProductId,Reference,Reference,1,0,reference
@@ -272,6 +284,7 @@ KW,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 KW,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 KW,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 KW,editofferProductId,Brand,Brand,0,0,brandnme
+KW,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 LB,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 LB,editofferProductId,Requested,RequestedVolume,1,1,Requested
 LB,editofferProductId,Reference,Reference,1,0,reference
@@ -293,6 +306,7 @@ LB,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 LB,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 LB,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 LB,editofferProductId,Brand,Brand,0,0,brandnme
+LB,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 LY,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 LY,editofferProductId,Requested,RequestedVolume,1,1,Requested
 LY,editofferProductId,Reference,Reference,1,0,reference
@@ -314,6 +328,7 @@ LY,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 LY,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 LY,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 LY,editofferProductId,Brand,Brand,0,0,brandnme
+LY,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 OM,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 OM,editofferProductId,Requested,RequestedVolume,1,1,Requested
 OM,editofferProductId,Reference,Reference,1,0,reference
@@ -335,6 +350,7 @@ OM,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 OM,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 OM,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 OM,editofferProductId,Brand,Brand,0,0,brandnme
+OM,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 QA,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 QA,editofferProductId,Requested,RequestedVolume,1,1,Requested
 QA,editofferProductId,Reference,Reference,1,0,reference
@@ -356,6 +372,7 @@ QA,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 QA,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 QA,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 QA,editofferProductId,Brand,Brand,0,0,brandnme
+QA,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 SD,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 SD,editofferProductId,Requested,RequestedVolume,1,1,Requested
 SD,editofferProductId,Reference,Reference,1,0,reference
@@ -377,6 +394,7 @@ SD,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 SD,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 SD,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 SD,editofferProductId,Brand,Brand,0,0,brandnme
+SD,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 SY,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 SY,editofferProductId,Requested,RequestedVolume,1,1,Requested
 SY,editofferProductId,Reference,Reference,1,0,reference
@@ -398,6 +416,7 @@ SY,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 SY,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 SY,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 SY,editofferProductId,Brand,Brand,0,0,brandnme
+SY,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 YE,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 YE,editofferProductId,Requested,RequestedVolume,1,1,Requested
 YE,editofferProductId,Reference,Reference,1,0,reference
@@ -419,6 +438,7 @@ YE,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 YE,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 YE,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 YE,editofferProductId,Brand,Brand,0,0,brandnme
+YE,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 AR,editofferProductId,Product,SKU/Product/HLEVEL6_NAME,1,1,product
 AR,editofferProductId,Requested,RequestedVolume,1,1,Requested
 AR,editofferProductId,Reference,Reference,0,0,reference
@@ -440,6 +460,7 @@ AR,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 AR,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 AR,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 AR,editofferProductId,Brand,Brand,0,0,brandnme
+AR,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 BR,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 BR,editofferProductId,Requested,RequestedVolume,1,1,Requested
 BR,editofferProductId,Reference,Reference,1,0,reference
@@ -461,6 +482,7 @@ BR,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,0,0,pricingPolic
 BR,editofferProductId,DeliveryConditions,DeliveryConditions,0,0,deliveryConditions
 BR,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,0,0,minInvoiceAmount
 BR,editofferProductId,Brand,Brand,0,0,brandnme
+BR,editofferProductId,MoleculeName,MoleculeName,0,0,moleculeName
 CL,editofferProductId,Product,SKU/PRODUCTPACKNAME,1,0,product
 CL,editofferProductId,Requested,RequestedVolume,1,1,Requested
 CL,editofferProductId,Reference,Reference,1,0,reference
@@ -482,3 +504,4 @@ CL,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,1,1,pricingPolic
 CL,editofferProductId,DeliveryConditions,DeliveryConditions,1,1,deliveryConditions
 CL,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,1,1,minInvoiceAmount
 CL,editofferProductId,Brand,Brand,1,1,brandnme
+CL,editofferProductId,MoleculeName,MoleculeName,1,1,moleculeName
