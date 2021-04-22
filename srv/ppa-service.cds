@@ -14,8 +14,8 @@ service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     entity Brands as projection on PricingPolicyData.Brands;
 
     entity BrandPolicies as projection on PricingPolicyData.BrandPolicies;
-    entity DraftBrandPolicies as select from PricingPolicyData.BrandPolicies where Status = 'Draft'; 
-    entity LatestApprovedBrandPolicies as select from PricingPolicyData.BrandPolicies as Policy 
+    entity DraftBrandPolicies as select from BrandPolicies where Status = 'Draft'; 
+    entity LatestApprovedBrandPolicies as select from BrandPolicies as Policy 
         inner join PricingPolicyData.LatestApprovedBrandPoliciesSegregate as Approved 
         on Approved.BrandId = Policy.BrandId 
         and Approved.Status = Policy.Status 
@@ -29,7 +29,7 @@ service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_
                 Policy.Status
         };
 
-    entity AggregatedBrandPolicies as select from PricingPolicyData.BrandPolicies as Policy
+    entity AggregatedBrandPolicies as select from BrandPolicies as Policy
     left outer join DraftBrandPolicies as DraftPolicies on
          Policy.BrandId = DraftPolicies.BrandId and
          Policy.CountryCode = DraftPolicies.CountryCode and 
