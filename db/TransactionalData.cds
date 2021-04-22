@@ -195,6 +195,7 @@ entity PT_TMBDPR {
         StandardDiscount      : Double;
         AdditionalDiscount    : Double;
         NetofferPrice         : Double;
+        BusinessCasePrice     : Double;
         WholesalePrice        : String(50);
         COGS                  : Double;
         SpotRate              : Double;
