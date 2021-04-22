@@ -284,6 +284,9 @@ entity PT_TMOFPR {
         SUPPLY_UPDATE            : Integer;
         PAYMENT_UPDATE           : Integer;
         Line                     : String;
+        DeliveryConditions       : String;
+        MinInvoiceAmount         : Double;
+        PricingPolicyCluster     : String;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
