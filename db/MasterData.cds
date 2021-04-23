@@ -99,7 +99,7 @@ entity PT_TMPRDPCK{
 	CONCENTRATION:hana.REAL;
 	PACKFACTOR:hana.REAL;
 	PCIName:String(255);
-	MOLECULE_NAME:String(255);
+	MoleculeName:String(255);
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
