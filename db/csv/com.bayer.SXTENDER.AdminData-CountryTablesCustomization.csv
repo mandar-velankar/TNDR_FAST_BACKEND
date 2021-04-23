@@ -503,5 +503,5 @@ CL,editofferProductId,Package,SKU/PRODUCTPACKNAME,1,1,package
 CL,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,1,1,pricingPolicyCluster
 CL,editofferProductId,DeliveryConditions,DeliveryConditions,1,1,deliveryConditions
 CL,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,1,1,minInvoiceAmount
-CL,editofferProductId,Brand,Brand,1,1,brandnme
+CL,editofferProductId,Brand,SKU/Product/HLEVEL4_NAME,1,1,brandnme
 CL,editofferProductId,MoleculeName,MoleculeName,1,1,moleculeName
