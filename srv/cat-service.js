@@ -1102,7 +1102,8 @@ module.exports = (srv) => {
 	}
 	function getRequiredAction(requiredActionCode) {
 		switch (requiredActionCode) {
-			case 1:
+			case 1: 
+				return "Approval"
 			case 2:
 				return "Notification"
 			default:
@@ -1160,7 +1161,7 @@ module.exports = (srv) => {
 			CountryCode: offerValidation.COUNTRYCODE,
 			ApprovalContent: getApprovalContent(approverType),
 			ApproverTypeSection: (requiredActionCode === 1) ? 2 : 1,
-			REQUIRED_ACTION: getRequiredAction(requiredActionCode),
+			REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredActionCode),
 			ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
 			ApproverName: approverName,
 			ApproverEmailID: approverEmailID,
