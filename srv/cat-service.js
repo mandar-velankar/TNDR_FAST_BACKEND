@@ -151,24 +151,26 @@ module.exports = (srv) => {
 		let results = [];
 		entityBrands.forEach(entityBrand => {
 			directBrand = directBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
-			countryProduct = countryProducts.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
-			if (directBrand && countryProduct) {
-				results.push({
-					COUNTRY_CODE: entityBrand.COUNTRY_CODE,
-					INSTITUTE_ID: directBrand.INSTITUTE_ID,
-					INSTITUTE_NAME: directBrand.INSTITUTE_NAME,
-					DISTRIBUTOR_ID: directBrand.DISTRIBUTOR_ID,
-					DISTRIBUTOR_NAME: directBrand.DISTRIBUTOR_NAME,
-					BRAND_ID: entityBrand.BRAND_ID,
-					BRAND_NAME: countryProduct.BRAND_NAME,
-					PRODUCT_ID: countryProduct.PRODUCT_ID,
-					PRODUCT_NAME: countryProduct.PRODUCT_NAME,
-					INCO_TERMS: directBrand.INCO_TERMS,
-					PAYMENT_TERMS: directBrand.PAYMENT_TERMS,
-					COMMISSION_RATE: directBrand.COMMISSION_RATE,
-					LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
-					CHANNEL: 'Direct',
-					COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN
+			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			if (directBrand && countryProductsList.length !== 0) {
+				countryProductsList.forEach((countryProduct) => {
+					results.push({
+						COUNTRY_CODE: entityBrand.COUNTRY_CODE,
+						INSTITUTE_ID: directBrand.INSTITUTE_ID,
+						INSTITUTE_NAME: directBrand.INSTITUTE_NAME,
+						DISTRIBUTOR_ID: directBrand.DISTRIBUTOR_ID,
+						DISTRIBUTOR_NAME: directBrand.DISTRIBUTOR_NAME,
+						BRAND_ID: entityBrand.BRAND_ID,
+						BRAND_NAME: countryProduct.BRAND_NAME,
+						PRODUCT_ID: countryProduct.PRODUCT_ID,
+						PRODUCT_NAME: countryProduct.PRODUCT_NAME,
+						INCO_TERMS: directBrand.INCO_TERMS,
+						PAYMENT_TERMS: directBrand.PAYMENT_TERMS,
+						COMMISSION_RATE: directBrand.COMMISSION_RATE,
+						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
+						CHANNEL: 'Direct',
+						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN
+					});
 				});
 			}
 		});
