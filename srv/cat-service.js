@@ -692,10 +692,6 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
- 
-		if(product.BUSINESS_CASE_PRICE === undefined || product.BUSINESS_CASE_PRICE === ""){
-			product.BUSINESS_CASE_PRICE = 0;
-		}
 
 		let results = {
 			//Default values for other countries approver types
