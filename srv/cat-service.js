@@ -705,15 +705,15 @@ module.exports = (srv) => {
 			NSM_SM_FM: 1,
 			HBU: 1,
 			//Argentina approver types
-			MACS: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
-			TA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
-			FBP: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
-			LPC: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
-			COM_PGA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
-			International_Trade: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
-			Transfer_Pricing: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
-			SBR: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
-			CDH: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : 3,
+			MACS: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
+			TA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
+			FBP: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3,
+			LPC: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
+			COM_PGA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
+			International_Trade: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3,
+			Transfer_Pricing: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3,
+			SBR: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3,
+			CDH: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
 			SUPPLY_CHAIN: 3,
 			//In Policy flag
 			IN_POLICY: true
@@ -1104,7 +1104,8 @@ module.exports = (srv) => {
 	}
 	function getRequiredAction(requiredActionCode) {
 		switch (requiredActionCode) {
-			case 1:
+			case 1: 
+				return "Approval"
 			case 2:
 				return "Notification"
 			default:
@@ -1162,7 +1163,7 @@ module.exports = (srv) => {
 			CountryCode: offerValidation.COUNTRYCODE,
 			ApprovalContent: getApprovalContent(approverType),
 			ApproverTypeSection: (requiredActionCode === 1) ? 2 : 1,
-			REQUIRED_ACTION: getRequiredAction(requiredActionCode),
+			REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredActionCode),
 			ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
 			ApproverName: approverName,
 			ApproverEmailID: approverEmailID,
