@@ -435,7 +435,8 @@ group by
 entity BrandsInTender as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRYCODE,
     key tender.TenderID as TENDERID,
-    key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID
+    key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
+    key tender.Offer.OfferID as OFFERID
 }
 where tender.Active = 1
 and tender.Offer.Active = 1
@@ -642,6 +643,23 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
     offer.FOCType as FOC_TYPE,
     ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT
 }where offer.Active = 1 and offer.Tender.Active = 1;
+ /*group by offer.TenderID,
+          //offer.Tender.Institute.InstituteType,
+          offer.Tender.Classification,
+          offer.OfferID,
+          //offer.Tender.TenderChannel,
+          offer.Tender.Institute.InstituteName,
+          offer.OfferStatus.STATUS,
+          offer.Tender.Country.ApprovalType,
+          offer.CountryCode,
+          ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY),
+          ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY),
+          offer.SellingCompanyDetails.LegalEntityName,
+          offer.SellingCompanyDetails.BankDetails,
+          offer.Currency,
+          min(offer.Product.Price.BudgetRate),
+          min(offer.Product.Price.SpotRate),
+          offer.FOCType;*/
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.OFFER_ID{
