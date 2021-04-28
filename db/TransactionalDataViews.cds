@@ -435,7 +435,8 @@ group by
 entity BrandsInTender as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRYCODE,
     key tender.TenderID as TENDERID,
-    key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID
+    key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
+    key tender.Offer.OfferID as OFFERID
 }
 where tender.Active = 1
 and tender.Offer.Active = 1
@@ -641,7 +642,42 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
 	ifnull(offer.Quotation.Comment, '') as CUSTOM_REMARKS:String(500),
     offer.FOCType as FOC_TYPE,
     ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT
-}where offer.Active = 1 and offer.Tender.Active = 1;
+}where offer.Active = 1 and offer.Tender.Active = 1
+ group by offer.TenderID,
+          offer.OfferID,
+          offer.Tender.TenderChannel,
+          offer.Tender.Institute.InstituteType,
+          offer.Tender.Classification,
+          offer.Tender.TenderChannel,
+          offer.Tender.Institute.InstituteName,
+          offer.Tender.TenderName,
+          offer.OfferStatus.STATUS,
+          offer.Tender.Country.ApprovalType,
+          offer.Quotation.OfferDate,
+          offer.Quotation.OfferValidity,
+          offer.CountryCode,
+          offer.SellingCompanyDetails.LegalEntityName,
+          offer.SellingCompanyDetails.BankDetails,
+          offer.Quotation.AS1,
+          signatory1.AUTHORIZED_SIGNATORY,
+          offer.Quotation.AS2,
+          signatory2.AUTHORIZED_SIGNATORY,
+          offer.Currency,
+          offer.SellingCompanyDetails.Letterhead,
+          offer.SellingCompanyDetails.Remarks,
+          offer.SellingCompanyDetails.FooterComment,
+          offer.Distributor.DistributorName,
+          offer.Tender.Institute.Address,
+          offer.Distributor.Address,
+          offer.Tender.Institute.ContactNo,
+          offer.Distributor.ContactNo,
+          offer.Tender.Institute.Fax,
+          offer.Distributor.Fax,
+          offer.Tender.Institute.ContactPerson,
+          offer.Distributor.ContactPerson,
+          offer.Quotation.Comment,
+          offer.FOCType,
+          offer.Country.COMMENT;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.OFFER_ID{
