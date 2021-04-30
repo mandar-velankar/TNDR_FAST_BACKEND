@@ -103,6 +103,7 @@ entity CountryTablesCustomization {
         BindingPath : String(255);
         Visible     : Boolean;
         Required    : Boolean;
+        Description : String(255);
 }
 
 //Customizing for: tabs
