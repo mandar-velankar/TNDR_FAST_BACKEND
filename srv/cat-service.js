@@ -1469,8 +1469,8 @@ module.exports = (srv) => {
 		
 		//get ApproverTypes
 		let approverTypes = [];
-		if (offerValidation.length !== 0) {
-			approverTypes = offerValidation[0].ApproverTypes;
+		if (offerValidation) {
+			approverTypes = offerValidation.ApproverTypes;
 		}
 
 		let whereOfferId = {
