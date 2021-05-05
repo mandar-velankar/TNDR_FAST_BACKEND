@@ -28,7 +28,7 @@ module.exports = (srv) => {
 		PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -850,7 +850,8 @@ module.exports = (srv) => {
 				COM_PGA: productInfo.ProductValidation.COM_PGA,
 				International_Trade: productInfo.ProductValidation.International_Trade,
 				Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
-				SBR: productInfo.ProductValidation.SBR
+				SBR: productInfo.ProductValidation.SBR,
+				ACTIVE_SUBSTANCE: d.ACTIVE_SUBSTANCE
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1030,6 +1031,10 @@ module.exports = (srv) => {
 		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
 		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
 
+		// get SUBMITTED_BY user info 
+		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
+		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+
 		results = {
 			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
 			TENDERID: offer.TENDERID,
@@ -1062,6 +1067,7 @@ module.exports = (srv) => {
 			DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
 			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
+			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
 			REMARKS: remarks,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
 			DELIVERYTERMS: deliveryTerms,
@@ -1084,7 +1090,10 @@ module.exports = (srv) => {
 			COM_PGA: comPgaLevel,
 			International_Trade: internationTradeLevel,
 			Transfer_Pricing: transferPricingLevel,
-			SBR: sbrLevel
+			SBR: sbrLevel,
+			PUBLICATION_DATE: offer.PUBLICATION_DATE,
+			BID_DUE_DATE: offer.BID_DUE_DATE,
+			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName
 		};
 		return results;
 	}

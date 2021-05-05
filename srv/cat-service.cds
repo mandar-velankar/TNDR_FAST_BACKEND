@@ -293,6 +293,7 @@ service CatalogService @(path : 'tender')
             International_Trade            : Integer not null;//AR only
             Transfer_Pricing               : Integer not null;//AR only
             SBR                            : Integer not null;//AR only
+            ACTIVE_SUBSTANCE               : String; // Chile
     };
 
     entity OfferValidation {
@@ -330,6 +331,10 @@ service CatalogService @(path : 'tender')
             DISTRIBUTORPHONE      : String(500);
             DISTRIBUTORFAX        : String(500);
             DISTRIBUTORCONTACT    : String(500);
+            DISTRIBUTOREMAIL      : String(500); // Chile
+            PUBLICATION_DATE      : Date; // Chile 
+            BID_DUE_DATE          : Date; // Chile
+            TENDER_SUBMITTED_BY   : String; // Chile
             REMARKS               : String(5000);
             CUSTOM_REMARKS        : String(500) not null;
             DELIVERYTERMS         : String(5000);
@@ -342,14 +347,14 @@ service CatalogService @(path : 'tender')
 			HBU                   : Integer not null;//TH only
 			CDH                   : Integer not null;//TH and AR
 			IN_POLICY             : Boolean;
-            MACS                           : Integer not null;//AR only
-            TA                             : Integer not null;//AR only
-            FBP                            : Integer not null;//AR only
-            LPC                            : Integer not null;//AR only
-            COM_PGA                        : Integer not null;//AR only
-            International_Trade            : Integer not null;//AR only
-            Transfer_Pricing               : Integer not null;//AR only
-            SBR                            : Integer not null;//AR only
+            MACS                  : Integer not null;//AR only
+            TA                    : Integer not null;//AR only
+            FBP                   : Integer not null;//AR only
+            LPC                   : Integer not null;//AR only
+            COM_PGA               : Integer not null;//AR only
+            International_Trade   : Integer not null;//AR only
+            Transfer_Pricing      : Integer not null;//AR only
+            SBR                   : Integer not null;//AR only
     };
 
     entity OfferProductOfferStatus {
