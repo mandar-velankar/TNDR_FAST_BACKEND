@@ -1147,7 +1147,7 @@ module.exports = (srv) => {
 				
 				//check if a product is found with a higher calculated validation type for the same approverType as the current
 				if(oApproverType.ValidationType < productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType){
-					iValidationType = productValidation.ApproverTypes[sApproverTypeAttrName].ValidationType;
+					iValidationType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType;
 				};
 
 				oApproverType.ValidationType = iValidationType;
