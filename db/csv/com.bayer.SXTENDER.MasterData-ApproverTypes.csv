@@ -1,101 +1,101 @@
-APPROVERTYPE,COUNTRYCODE,HIERARCHY
-Supply Chain,AE,1
-Legal,AE,1
-Regulatory,AE,1
-Country Business,AE,1
-Regional Business,AE,1
-Controlling,AE,1
-Country Business,BH,1
-Supply Chain,BH,1
-Legal,BH,1
-Regulatory,BH,1
-Regional Business,BH,1
-Controlling,BH,1
-Supply Chain,EG,1
-Legal,EG,1
-Regulatory,EG,1
-Country Business,EG,1
-Regional Business,EG,1
-Controlling,EG,1
-Controlling,GC,1
-Legal,IQ,1
-Regulatory,IQ,1
-Supply Chain,IQ,1
-Country Business,IQ,1
-Regional Business,IQ,1
-Controlling,IQ,1
-Legal,JO,1
-Regulatory,JO,1
-Supply Chain,JO,1
-Country Business,JO,1
-Regional Business,JO,1
-Controlling,JO,1
-Legal,KW,1
-Regulatory,KW,1
-Supply Chain,KW,1
-Country Business,KW,1
-Regional Business,KW,1
-Controlling,KW,1
-Legal,LB,1
-Regulatory,LB,1
-Supply Chain,LB,1
-Country Business,LB,1
-Regional Business,LB,1
-Controlling,LB,1
-Legal,LY,1
-Regulatory,LY,1
-Supply Chain,LY,1
-Country Business,LY,1
-Regional Business,LY,1
-Controlling,LY,1
-Country Business,MX,1
-Supply Chain,MX,1
-Legal,OM,1
-Regulatory,OM,1
-Supply Chain,OM,1
-Country Business,OM,1
-Regional Business,OM,1
-Controlling,OM,1
-Legal,QA,1
-Regulatory,QA,1
-Supply Chain,QA,1
-Country Business,QA,1
-Regional Business,QA,1
-Controlling,QA,1
-Supply Chain,SA,1
-Legal,SA,1
-Regulatory,SA,1
-Country Business,SA,1
-Regional Business,SA,1
-Controlling,SA,1
-Regulatory,SD,1
-Supply Chain,SD,1
-Country Business,SD,1
-Regional Business,SD,1
-Controlling,SD,1
-Legal,SY,1
-Regulatory,SY,1
-Supply Chain,SY,1
-Country Business,SY,1
-Regional Business,SY,1
-Controlling,SY,1
-HBU,TH,1
-CDH,TH,1
-NSM/SM/FM,TH,1
-Supply Chain,TH,1
-Legal,YE,1
-Regulatory,YE,1
-Supply Chain,YE,1
-Country Business,YE,1
-Regional Business,YE,1
-Controlling,YE,1
-MACS,AR,1
-TA,AR,1
-FBP,AR,1
-LPC,AR,1
-COM/PGA,AR,1
-Supply Chain,AR,1
-International Trade,AR,1
-Transfer Pricing,AR,1
-CDH,AR,2
-SBR,AR,3
+APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE
+Supply Chain,AE,1,0
+Legal,AE,1,0
+Regulatory,AE,1,0
+Country Business,AE,1,0
+Regional Business,AE,1,0
+Controlling,AE,1,0
+Country Business,BH,1,0
+Supply Chain,BH,1,0
+Legal,BH,1,0
+Regulatory,BH,1,0
+Regional Business,BH,1,0
+Controlling,BH,1,0
+Supply Chain,EG,1,0
+Legal,EG,1,0
+Regulatory,EG,1,0
+Country Business,EG,1,0
+Regional Business,EG,1,0
+Controlling,EG,1,0
+Controlling,GC,1,0
+Legal,IQ,1,0
+Regulatory,IQ,1,0
+Supply Chain,IQ,1,0
+Country Business,IQ,1,0
+Regional Business,IQ,1,0
+Controlling,IQ,1,0
+Legal,JO,1,0
+Regulatory,JO,1,0
+Supply Chain,JO,1,0
+Country Business,JO,1,0
+Regional Business,JO,1,0
+Controlling,JO,1,0
+Legal,KW,1,0
+Regulatory,KW,1,0
+Supply Chain,KW,1,0
+Country Business,KW,1,0
+Regional Business,KW,1,0
+Controlling,KW,1,0
+Legal,LB,1,0
+Regulatory,LB,1,0
+Supply Chain,LB,1,0
+Country Business,LB,1,0
+Regional Business,LB,1,0
+Controlling,LB,1,0
+Legal,LY,1,0
+Regulatory,LY,1,0
+Supply Chain,LY,1,0
+Country Business,LY,1,0
+Regional Business,LY,1,0
+Controlling,LY,1,0
+Country Business,MX,1,0
+Supply Chain,MX,1,0
+Legal,OM,1,0
+Regulatory,OM,1,0
+Supply Chain,OM,1,0
+Country Business,OM,1,0
+Regional Business,OM,1,0
+Controlling,OM,1,0
+Legal,QA,1,0
+Regulatory,QA,1,0
+Supply Chain,QA,1,0
+Country Business,QA,1,0
+Regional Business,QA,1,0
+Controlling,QA,1,0
+Supply Chain,SA,1,0
+Legal,SA,1,0
+Regulatory,SA,1,0
+Country Business,SA,1,0
+Regional Business,SA,1,0
+Controlling,SA,1,0
+Regulatory,SD,1,0
+Supply Chain,SD,1,0
+Country Business,SD,1,0
+Regional Business,SD,1,0
+Controlling,SD,1,0
+Legal,SY,1,0
+Regulatory,SY,1,0
+Supply Chain,SY,1,0
+Country Business,SY,1,0
+Regional Business,SY,1,0
+Controlling,SY,1,0
+HBU,TH,1,0
+CDH,TH,1,0
+NSM/SM/FM,TH,1,0
+Supply Chain,TH,1,0
+Legal,YE,1,0
+Regulatory,YE,1,0
+Supply Chain,YE,1,0
+Country Business,YE,1,0
+Regional Business,YE,1,0
+Controlling,YE,1,0
+MACS,AR,1,0
+TA,AR,1,0
+FBP,AR,1,0
+LPC,AR,1,0
+COM/PGA,AR,1,0
+Supply Chain,AR,1,0
+International Trade,AR,1,0
+Transfer Pricing,AR,1,0
+CDH,AR,2,0
+SBR,AR,3,0

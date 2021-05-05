@@ -721,7 +721,7 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
@@ -739,81 +739,102 @@ module.exports = (srv) => {
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
 		}
+		
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			//convert to name of property (space = _ + all CAPITALS --> e.a Supply Chain = SUPPLY_CHAIN)
+			let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
+			//change ValidationType with corresponding ApproverType value in productValidation
+			oApproverType.ValidationType = productValidation[sApproverTypeAttrName];
+		});
+
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
 		};
 	}
 	async function buildOfferProductValidation(tx, whereOffer) {
+
 		let results = [];
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
 		if (offer.length !== 1) {
 			return results;
 		}
+
 		offer = offer[0];
-		let offerProduct = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
-		if (offerProduct.length === 0) {
+		let aOfferProduct = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+		if (aOfferProduct.length === 0) {
 			return results;
 		}
-		results = offerProduct.map(async function (d) {
-			let productInfo = await buildProductInfoForCountry(tx, offer, d);
+
+		//where statement
+		let whereApproverType = {
+			CountryCode: offer.COUNTRYCODE
+		}
+
+		//Get corresponding approvertypes
+		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+		
+		results = aOfferProduct.map(async function (offerProduct) {
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aApproverTypes);
 
 			//Get all prices, ammounts and cogs in all units
-			let toUnitFactor = (d.UNIT === "Unit") ? 1 : d.PACKSIZE;
-			let toPackFactor = (d.UNIT === "Unit") ? 1 / d.PACKSIZE : 1;
+			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
+			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
 
 			return {
 				TENDER_ID: offer.TENDERID,
 				COUNTRY_CODE: offer.COUNTRYCODE,
 				OFFER_ID: offer.OFFERID,
-				DIVISION: d.DIVISION,
-				BRANDID: d.BRANDID,
-				BRANDNAME: d.BRANDNAME,
-				PRODUCT_UNIT_NAME: d.PRODUCT_UNIT_NAME, //thailand
-				SKU: d.SKU, //thailand
-				PRODUCTID: d.PRODUCTID,
-				CODE: d.CODE,
-				PRODUCTNAME: d.PRODUCTNAME,
-				PACKSIZE: d.PACKSIZE,
-				DOSAGE: d.DOSAGE,
-				UOM: d.UOM,
-				COUNTRYOFORIGIN: d.COUNTRYOFORIGIN,
-				MANUFACTURER: d.MANUFACTURER,
-				SHELFLIFE: d.SHELFLIFE,
-				PRESENTATION: d.PRESENTATION,
-				VAT: d.VAT,
+				DIVISION: offerProduct.DIVISION,
+				BRANDID: offerProduct.BRANDID,
+				BRANDNAME: offerProduct.BRANDNAME,
+				PRODUCT_UNIT_NAME: offerProduct.PRODUCT_UNIT_NAME, //thailand
+				SKU: offerProduct.SKU, //thailand
+				PRODUCTID: offerProduct.PRODUCTID,
+				CODE: offerProduct.CODE,
+				PRODUCTNAME: offerProduct.PRODUCTNAME,
+				PACKSIZE: offerProduct.PACKSIZE,
+				DOSAGE: offerProduct.DOSAGE,
+				UOM: offerProduct.UOM,
+				COUNTRYOFORIGIN: offerProduct.COUNTRYOFORIGIN,
+				MANUFACTURER: offerProduct.MANUFACTURER,
+				SHELFLIFE: offerProduct.SHELFLIFE,
+				PRESENTATION: offerProduct.PRESENTATION,
+				VAT: offerProduct.VAT,
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
-				UNIT: d.UNIT,
+				UNIT: offerProduct.UNIT,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
-				SORTER: d.SORTER,
+				SORTER: offerProduct.SORTER,
 				CURRENCY: offer.CURRENCY,
 				REQUESTED_QUANTITY: productInfo.CommnonProductInfo.RequestedQuantityString,
 				DELIVERY_TERMS: productInfo.CommnonProductInfo.DeliveryTerms,
-				PAYMENT_TERMS: d.PAYMENT_TERMS,
-				SHIPMENT_TERMS: d.INCO_TERMS,
-				SAMPLES: d.SAMPLES,
-				SAMPLES_UNIT: d.SAMPLES * toUnitFactor,
-				SAMPLES_PACK: d.SAMPLES * toPackFactor,
-				REGISTERED_PRICE: d.REGISTERED_PRICE,
-				OFFER_PRICE: d.OFFER_PRICE,
+				PAYMENT_TERMS: offerProduct.PAYMENT_TERMS,
+				SHIPMENT_TERMS: offerProduct.INCO_TERMS,
+				SAMPLES: offerProduct.SAMPLES,
+				SAMPLES_UNIT: offerProduct.SAMPLES * toUnitFactor,
+				SAMPLES_PACK: offerProduct.SAMPLES * toPackFactor,
+				REGISTERED_PRICE: offerProduct.REGISTERED_PRICE,
+				OFFER_PRICE: offerProduct.OFFER_PRICE,
 				FOC: productInfo.CommnonProductInfo.FocString,
 				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit, //Total Volume(units) (thailand - new column missing in the screenshot)
 				FOC_QUANTITY_UNITS: productInfo.CommnonProductInfo.FocAmountUnit,
 				PAID_QUANTITY_UNITS: productInfo.CommnonProductInfo.PaidVolumeUnit,
 				REQ_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPriceUnit,
-				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + d.VAT),   //MSP incl VAT (thailand)
+				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + offerProduct.VAT),   //MSP incl VAT (thailand)
 				REQ_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPricePack,
 				REQ_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.OfferPriceUnitEurBudget,
 				REQ_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.OfferPriceUnitEurSpot,
 				NET_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPriceUnit,
-				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + d.VAT),   //NSP incl VAT (thailand)
+				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT),   //NSP incl VAT (thailand)
 				NET_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPricePack,
 				NET_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.NetPriceUnitEurBudget,
 				NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
-				NET_OFFER_PRICE: d.NET_OFFER_PRICE,
-				NET_PRICE: d.NET_PRICE,
-				COGS: d.COGS,//This is now in offer currency (used to be EUR)
+				NET_OFFER_PRICE: offerProduct.NET_OFFER_PRICE,
+				NET_PRICE: offerProduct.NET_PRICE,
+				COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
 				COGS_EUR_UNIT: productInfo.CommnonProductInfo.CogsEurUnit,
 				COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
 				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
@@ -824,33 +845,34 @@ module.exports = (srv) => {
 				GROSS_MARGIN_EUR_SPOT: productInfo.CommnonProductInfo.GrossMarginEurSpot,
 				GROSS_PROFIT_EUR_BUDGET: productInfo.CommnonProductInfo.GrossProfitEurBudget,
 				GROSS_PROFIT_EUR_SPOT: productInfo.CommnonProductInfo.GrossProfitEurSpot,
-				REGULATORY: productInfo.ProductValidation.REGULATORY,
-				LEGAL: productInfo.ProductValidation.LEGAL,
-				CONTROLLING: productInfo.ProductValidation.CONTROLLING,
-				COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
-				REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
-				SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
+				//REGULATORY: productInfo.ProductValidation.REGULATORY,
+				//LEGAL: productInfo.ProductValidation.LEGAL,
+				//CONTROLLING: productInfo.ProductValidation.CONTROLLING,
+				//COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
+				//REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
+				//SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
 				IS_LOWEST: (productInfo.CommnonProductInfo.IsMinPrice) ? 1 : 0,
-				IS_DEFAULT_TERMS: d.IS_DEFAULT_TERMS,
-				IS_REGISTERED: d.IS_REGISTERED,
-				IS_ALTERNATIVE_QUOTED: d.IS_ALTERNATIVE_QUOTED,
-				IS_ALTERNATIVE_REQUESTED: d.IS_ALTERNATIVE_REQUESTED,
-				NEW_APPROVAL: d.NEW_APPROVAL,
-				BUDGETED_PROFITABILITY: d.BUDGETED_PROFITABILITY,
-				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + d.VAT),
-				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * d.VAT,
-				NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
-				HBU: productInfo.ProductValidation.HBU,
-				CDH: productInfo.ProductValidation.CDH,
+				IS_DEFAULT_TERMS: offerProduct.IS_DEFAULT_TERMS,
+				IS_REGISTERED: offerProduct.IS_REGISTERED,
+				IS_ALTERNATIVE_QUOTED: offerProduct.IS_ALTERNATIVE_QUOTED,
+				IS_ALTERNATIVE_REQUESTED: offerProduct.IS_ALTERNATIVE_REQUESTED,
+				NEW_APPROVAL: offerProduct.NEW_APPROVAL,
+				BUDGETED_PROFITABILITY: offerProduct.BUDGETED_PROFITABILITY,
+				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT),
+				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * offerProduct.VAT,
+				//NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
+				//HBU: productInfo.ProductValidation.HBU,
+				//CDH: productInfo.ProductValidation.CDH,
 				IN_POLICY: productInfo.ProductValidation.IN_POLICY,
-				MACS: productInfo.ProductValidation.MACS,
-				TA: productInfo.ProductValidation.TA,
-				FBP: productInfo.ProductValidation.FBP,
-				LPC: productInfo.ProductValidation.LPC,
-				COM_PGA: productInfo.ProductValidation.COM_PGA,
-				International_Trade: productInfo.ProductValidation.International_Trade,
-				Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
-				SBR: productInfo.ProductValidation.SBR
+				//MACS: productInfo.ProductValidation.MACS,
+				//TA: productInfo.ProductValidation.TA,
+				//FBP: productInfo.ProductValidation.FBP,
+				//LPC: productInfo.ProductValidation.LPC,
+				//COM_PGA: productInfo.ProductValidation.COM_PGA,
+				//International_Trade: productInfo.ProductValidation.International_Trade,
+				//Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
+				//SBR: productInfo.ProductValidation.SBR,
+				ApproverTypes: aApproverTypes
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -871,9 +893,26 @@ module.exports = (srv) => {
 		}
 		offer = offer[0];
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
+		let aApproverTypes = [];
+
+		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
+			//no products
 			return results;
+		}else{
+
+			//only keep 1 approvertypes array (an array exists for each product)
+			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;			
+			
+			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
+			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation);
+
 		}
+
+		//convert IN_POLICY to true or false
+		let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => {return d.IN_POLICY ? 1 : 0})) === 1 ? true : false;
+
+/*
 		//Shared
 		let supply = Math.max.apply(Math, offerProductValidation.map((d) => { return d.SUPPLY_CHAIN }));
 		//MEA
@@ -904,7 +943,7 @@ module.exports = (srv) => {
 		let internationTradeLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.International_Trade }));
 		let transferPricingLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.Transfer_Pricing }));
 		let sbrLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.SBR }));
-
+*/
 		let isLowest = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_LOWEST }));
 		let isDefaultTerms = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_DEFAULT_TERMS }));
 		let isNewApproval = Math.max.apply(Math, offerProductValidation.map((d) => { return d.NEW_APPROVAL }));
@@ -1051,12 +1090,12 @@ module.exports = (srv) => {
 			AMOUNT_IN_NUMBERS: totalAmount,
 			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
 			LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
-			REGULATORY: regulatory,
-			LEGAL: legal,
-			CONTROLLING: controlling,
-			COUNTRY_BUSINESS: countryBusiness,
-			REGIONAL_BUSINESS: regionalBusiness,
-			SUPPLY_CHAIN: supply,
+			//REGULATORY: regulatory,
+			//LEGAL: legal,
+			//CONTROLLING: controlling,
+			//COUNTRY_BUSINESS: countryBusiness,
+			//REGIONAL_BUSINESS: regionalBusiness,
+			//SUPPLY_CHAIN: supply,
 			DISTRIBUTORNAME: offer.DISTRIBUTORNAME,
 			DISTRIBUTORADDRESS: offer && offer.DISTRIBUTORADDRESS ? offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>") : '',
 			DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
@@ -1073,21 +1112,79 @@ module.exports = (srv) => {
 			AMOUNT_IN_NUMBERS_VAT: totalAmountVat,
 			AMOUNT_IN_WORDS_VAT: totalAmountVatInWords,
 			VAT_TOTAL: vatTotal,
-			NSM_SM_FM: nsmLevel,
-			HBU: hbuLevel,
-			CDH: cdhLevel,
+			//NSM_SM_FM: nsmLevel,
+			//HBU: hbuLevel,
+			//CDH: cdhLevel,
 			IN_POLICY: inPolicy,
-			MACS: macsLevel,
-			TA: taLevel,
-			FBP: fbpLevel,
-			LPC: lpcLevel,
-			COM_PGA: comPgaLevel,
-			International_Trade: internationTradeLevel,
-			Transfer_Pricing: transferPricingLevel,
-			SBR: sbrLevel
+			//MACS: macsLevel,
+			//TA: taLevel,
+			//FBP: fbpLevel,
+			//LPC: lpcLevel,
+			//COM_PGA: comPgaLevel,
+			//International_Trade: internationTradeLevel,
+			//Transfer_Pricing: transferPricingLevel,
+			//SBR: sbrLevel,
+			ApproverTypes: aApproverTypes
 		};
 		return results;
 	}
+
+	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
+	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation) {
+
+		//Calculate max validation type for each type in each product
+		aApproverTypes.map(async function (oApproverType) {
+
+			//convert to name of property (space = _ + all CAPITALS --> e.a Supply Chain = SUPPLY_CHAIN)
+			let sApproverType = oApproverType.ApproverType;
+			let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
+
+			//get max ValidationType
+			offerProductValidation.map((productValidation) => { 
+
+				//keep current validation type
+				let iValidationType = oApproverType.ValidationType;
+				
+				//check if a product is found with a higher calculated validation type for the same approverType as the current
+				if(oApproverType.ValidationType < productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType){
+					iValidationType = productValidation.ApproverTypes[sApproverTypeAttrName].ValidationType;
+				};
+
+				oApproverType.ValidationType = iValidationType;
+
+			});
+
+		});
+
+		//For MEA specific
+		//No need for country business approval if regional business approval is required
+		let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
+		let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
+		if(oCountryBusiness && oRegionalBusiness){
+			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
+		}
+
+		//For Thailand specific
+		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
+		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM');
+		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
+		if(oCDH && oNSM && oHBU){
+			//If CDH approval is mandatory, lower levels do not need to approve
+			if (oCDH.ValidationType === 3){
+				oNSM.ValidationType = 1;
+				oHBU.ValidationType = 1;
+			}
+			//If HBU approval is mandatory, lower levels do not need to approve
+			else if (oHBU.ValidationType === 3){
+				oNSM.ValidationType = 1;
+			}
+		}
+
+		//return the unique approvertypes for the offer & there re-calculated validation type
+		return aApproverTypes;
+
+	}
+
 	function getApprovalContent(ApproverType) {
 		switch (ApproverType) {
 			case "Country Business":
@@ -1200,12 +1297,13 @@ module.exports = (srv) => {
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
-
-		let whereApproverType = {
-			CountryCode: offerValidation.COUNTRYCODE
-		}
-		let approverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
 		
+		//get ApproverTypes
+		let approverTypes = [];
+		if (offerValidation.length !== 0) {
+			approverTypes = offerValidation[0].ApproverTypes;
+		}
+
 		let whereOfferId = {
 			OfferId: offerValidation.OFFERID
 		} 
