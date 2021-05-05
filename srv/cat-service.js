@@ -363,7 +363,7 @@ module.exports = (srv) => {
 		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
 	}*/
 
-	function buildProductValidationForType1(offer, product, productInfo) {//MEA (and default)
+	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes) {//MEA (and default)
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -425,6 +425,39 @@ module.exports = (srv) => {
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
 
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+				case "Regulatory": 
+					oApproverType.ValidationType = regulatory;
+					break;
+				case "Legal": 
+					oApproverType.ValidationType = legal;
+					break;
+				case "Controlling":
+					oApproverType.ValidationType = controlling;
+					break;
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Regional Business":
+					oApproverType.ValidationType = regionalBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = 1;	
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		/*
 		let results = {
 			REGULATORY: regulatory,
 			LEGAL: legal,
@@ -447,10 +480,11 @@ module.exports = (srv) => {
 			//In Policy flag
 			IN_POLICY: true
 		};
+		*/
 		return results;
 	}
 
-	function buildProductValidationForType3(offer, product, productInfo) {//Mexico
+	function buildProductValidationForType3(offer, product, productInfo, aApproverTypes) {//Mexico
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -466,6 +500,27 @@ module.exports = (srv) => {
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
 
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = 1;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		/*
 		let results = {
 			REGULATORY: 1,
 			LEGAL: 1,
@@ -488,6 +543,8 @@ module.exports = (srv) => {
 			//In Policy flag
 			IN_POLICY: true
 		};
+		*/
+
 		return results;
 	}
 
@@ -503,7 +560,7 @@ module.exports = (srv) => {
 
 	
 
-	async function buildProductValidationForType4(tx, offer, product, productInfo) {//Thailand
+	async function buildProductValidationForType4(tx, offer, product, productInfo, aAopproverTypes) {//Thailand
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -532,6 +589,33 @@ module.exports = (srv) => {
 
 		let latestApprovedBrandPolicy = await tx.run(SELECT.from(LatestApprovedBrandPolicies).where(whereLatestApprovedBrandPolicy));
 		if (latestApprovedBrandPolicy.length === 0){//No pricing policy
+			//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+			//based upon the country the correct approverType will be handled 
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "HBU":
+						oApproverType.ValidationType = 1;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = 1;
+						break;
+					case "NSM/SM/FM":
+						oApproverType.ValidationType = 1;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+
+			return results = {
+				//In Policy flag
+				IN_POLICY: false
+			};
+
+			/*
 			return {
 				//Default values for other countries approver types
 				REGULATORY: 1,
@@ -555,6 +639,7 @@ module.exports = (srv) => {
 				//In Policy flag
 				IN_POLICY: false
 			};
+			*/
 		}
 
 		//Get latest approved product pricing policy for country and product
@@ -571,6 +656,34 @@ module.exports = (srv) => {
 		};
 		let productPolicyPrices = await tx.run(SELECT.from(PolicyPrices).where(wherePolicyPrices));
 		if (productPolicyPrices.length !== 6){//Incomplete pricing policy
+
+			//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+			//based upon the country the correct approverType will be handled 
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "HBU":
+						oApproverType.ValidationType = 1;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = 1;
+						break;
+					case "NSM/SM/FM":
+						oApproverType.ValidationType = 1;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+
+			return results = {
+				//In Policy flag
+				IN_POLICY: true
+			};
+
+			/*
 			return {
 				//Default values for other countries approver types
 				REGULATORY: 1,
@@ -594,6 +707,7 @@ module.exports = (srv) => {
 				//In Policy flag
 				IN_POLICY: false
 			};
+			*/
 		}
 		//Set variables for policy prices thresholds
 		let nsmMSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'MSP') / uomFactor;
@@ -663,6 +777,23 @@ module.exports = (srv) => {
 				break;
 		}
 
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType){
+					case "HBU":oApproverType.ValidationType = hbuLevel;
+					case "CDH":oApproverType.ValidationType = cdhLevel;
+					case "NSM/SM/FM":oApproverType.ValidationType = nsmLevel;
+					case "Supply Chain":oApproverType.ValidationType = supply;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		/*
 		let results = {
 			//Default values for other countries approver types
 			REGULATORY: 1,
@@ -686,15 +817,61 @@ module.exports = (srv) => {
 			//In Policy flag
 			IN_POLICY: inPolicy
 		};
+		*/
+
 		return results;
 	}
 
-	function buildProductValidationForType5(offer, product, productInfo) {//Argentina
+	function buildProductValidationForType5(offer, product, productInfo, aApproverTypes) {//Argentina
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
 
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+					case "MACS":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "TA":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "FBP":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+						break;
+					case "LPC":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "COM/PGA":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = 3;
+						break;
+					case "International Trade":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+						break;
+					case "Transfer Pricing":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "SBR":
+						ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+/*
 		let results = {
 			//Default values for other countries approver types
 			REGULATORY: 1,
@@ -705,19 +882,20 @@ module.exports = (srv) => {
 			NSM_SM_FM: 1,
 			HBU: 1,
 			//Argentina approver types
-			MACS: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
-			TA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
-			FBP: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3,
-			LPC: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
-			COM_PGA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
-			International_Trade: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3,
-			Transfer_Pricing: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3,
-			SBR: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3,
-			CDH: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3,
-			SUPPLY_CHAIN: 3,
+			MACS: 
+			TA: 
+			FBP: ,
+			LPC: ,
+			COM_PGA: ,
+			International_Trade: ,
+			Transfer_Pricing: ,
+			SBR: ,
+			CDH: ,
+			SUPPLY_CHAIN: ,
 			//In Policy flag
 			IN_POLICY: true
 		};
+*/
 		return results;
 	}
 
@@ -725,29 +903,20 @@ module.exports = (srv) => {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else if (offer.APPROVAL_TYPE === 3){//Applicable for Mexico
-			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else if (offer.APPROVAL_TYPE === 4){//Applicable for Thailand
-			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo)
+			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else if (offer.APPROVAL_TYPE === 5){//Applicable for Argentina
-			productValidation = buildProductValidationForType5(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType5(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
 		}
-		
-		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
-		//based upon the country the correct approverType will be handled 
-		aApproverTypes.map(async function (oApproverType) {
-			//convert to name of property (space = _ + all CAPITALS --> e.a Supply Chain = SUPPLY_CHAIN)
-			let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
-			//change ValidationType with corresponding ApproverType value in productValidation
-			oApproverType.ValidationType = productValidation[sApproverTypeAttrName];
-		});
 
 		return {
 			CommnonProductInfo: commnonProductInfo,
