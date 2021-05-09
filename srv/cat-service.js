@@ -596,7 +596,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 1;
 				}
 			});
-		} else if(offer.DIVISION === 'Radiology'){
+		} else if(product.DIVISION === 'Radiology'){
 			aApproverTypes.map(async function (oApproverType) {
 				switch(oApproverType.ApproverType){
 					case "SBR RA ConoSur": 
@@ -608,6 +608,16 @@ module.exports = (srv) => {
 					default:
 						oApproverType.ValidationType = 1;
 				}	
+			});
+		} else {
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "Supply Chain": 
+						oApproverType.ValidationType = 2;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
 			});
 		}
 
