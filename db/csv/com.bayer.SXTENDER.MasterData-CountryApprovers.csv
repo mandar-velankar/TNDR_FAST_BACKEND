@@ -353,3 +353,7 @@ AR,International Trade,Pharma,1,Robert Henning,robert.henning@bayer.com
 AR,Transfer Pricing,Pharma,1,Fabian Deck,fabian.deck@bayer.com
 AR,CDH,Pharma,1,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
 AR,SBR,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com
+"CL","International Trade Head","Pharma","1","Robert Henning","robert.henning@bayer.com"
+"CL","Transfer Pricing","Pharma","1","Fabian Deck","fabian.deck@bayer.com"
+"CL","CDH","Pharma","1","Jonathan Hubeau","jonathan.hubeau.ext@bayer.com"
+"CL","SBR","Pharma","1","Frank Schmitt","frank.schmitt1@bayer.com"

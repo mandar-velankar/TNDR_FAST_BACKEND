@@ -285,3 +285,16 @@ BR,Offer Declined,10
 BR,Tender Closed,11
 BR,Cancelled,12
 BR,All,13
+CL,Awaiting Approval,1
+CL,Offer Created,2
+CL,Offer Approved,3
+CL,Offer Rejected,4
+CL,Quotation Submitted,5
+CL,In FOC negotiation,6
+CL,Results Recorded,7
+CL,Delivery Ongoing,8
+CL,Wholesale Offer,9
+CL,Offer Declined,10
+CL,Tender Closed,11
+CL,Cancelled,12
+CL,All,13

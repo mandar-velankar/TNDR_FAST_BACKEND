@@ -11,8 +11,8 @@ using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from './MasterDataLatestValues';
 
 
-entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product inner join
-MasterDataLatestValues.CountryRegisteredPrice as RegisteredPrice on 
+entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product 
+left outer join MasterDataLatestValues.CountryRegisteredPrice as RegisteredPrice on 
     Product.COUNTRYCODE = RegisteredPrice.COUNTRY_CODE and 
     Product.PRODUCTPACKID = RegisteredPrice.PRODUCT_ID {
 	key Product.COUNTRYCODE as COUNTRY_CODE,
