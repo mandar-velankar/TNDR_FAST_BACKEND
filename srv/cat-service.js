@@ -548,6 +548,114 @@ module.exports = (srv) => {
 		return results;
 	}
 
+	function buildProductValidationForType7(offer, product, productInfo, aApproverTypes) {//Chile
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		if(offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)){
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "Supply Chain": 
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+		} else if(offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)){
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "MACS Head": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "Supply Chain": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "Business Service": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "Law and Patents": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "CDH": 
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}	
+			});
+		} else if(!offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma'){
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "Supply Chain": 
+						oApproverType.ValidationType = 2;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+		} else if(product.DIVISION === 'Radiology'){
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "SBR RA ConoSur": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "CDH-Chile (signature)": 
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}	
+			});
+		} else {
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "Supply Chain": 
+						oApproverType.ValidationType = 2;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+		}
+
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		/*aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+				case "Regulatory": 
+					oApproverType.ValidationType = regulatory;
+					break;
+				case "Legal": 
+					oApproverType.ValidationType = legal;
+					break;
+				case "Controlling":
+					oApproverType.ValidationType = controlling;
+					break;
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Regional Business":
+					oApproverType.ValidationType = regionalBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = 1;	
+			}
+		});*/
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
 	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName){
 		let price = 0;
 		productPolicyPrices.forEach(e => {
@@ -913,6 +1021,9 @@ module.exports = (srv) => {
 		}
 		else if (offer.APPROVAL_TYPE === 5){//Applicable for Argentina
 			productValidation = buildProductValidationForType5(offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 7){ //Applicable for Chile
+			productValidation = buildProductValidationForType7(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -1582,6 +1693,46 @@ module.exports = (srv) => {
 			approvalSbr2 = [approvalSbr[1]];
 		}
 
+		//chile
+		let approvalMacsHead = latestApproval.filter((d) => d.ApproverType === "MACS Head");
+		let approvalMacsHead1 = approvalMacsHead;
+		let approvalMacsHead2 = [];
+		if (approvalMacsHead.length > 1){
+			approvalMacsHead1 = [approvalMacsHead[0]];
+			approvalMacsHead2 = [approvalMacsHead[1]];
+		}
+
+		let approvalBusinessService = latestApproval.filter((d) => d.ApproverType === "Business Service");
+		let approvalBusinessService1 = approvalBusinessService;
+		let approvalBusinessService2 = [];
+		if (approvalBusinessService.length > 1){
+			approvalBusinessService1 = [approvalBusinessService[0]];
+			approvalBusinessService2 = [approvalBusinessService[1]];
+		}
+
+		let approvalLawAndPatents = latestApproval.filter((d) => d.ApproverType === "Law and Patents");
+		let approvalLawAndPatents1 = approvalLawAndPatents;
+		let approvalLawAndPatents2 = [];
+		if (approvalLawAndPatents.length > 1){
+			approvalLawAndPatents1 = [approvalLawAndPatents[0]];
+			approvalLawAndPatents2 = [approvalLawAndPatents[1]];
+		}
+
+		let approvalSbrRa = latestApproval.filter((d) => d.ApproverType === "SBR RA ConoSur");
+		let approvalSbrRa1 = approvalMacs;
+		let approvalSbrRa2 = [];
+		if (approvalSbrRa.length > 1){
+			approvalSbrRa1 = [approvalSbrRa[0]];
+			approvalSbrRa2 = [approvalSbrRa[1]];
+		}
+
+		let approvalCdhChile = latestApproval.filter((d) => d.ApproverType === "CDH-Chile (signature)");
+		let approvalCdhChile1 = approvalCdhChile;
+		let approvalCdhChile2 = [];
+		if (approvalCdhChile.length > 1){
+			approvalCdhChile1 = [approvalCdhChile[0]];
+			approvalCdhChile2 = [approvalCdhChile[1]];
+		}
 		//Default (first found, if exists) approvers (will be used if none saved)
 		//Shared
 		let defaultSupply = countryApprovers.filter((d) => d.ApproverType === "Supply Chain");
@@ -1619,6 +1770,16 @@ module.exports = (srv) => {
 		defaultInternationalTradeRadiology = countryApprovers.filter((d) => d.ApproverType === "International_Trade" && d.Division === "Radiology");
 		defaultTransferPricingRadiology = countryApprovers.filter((d) => d.ApproverType === "Transfer_Pricing" && d.Division === "Radiology");
 		defaultSbrRadiology = countryApprovers.filter((d) => d.ApproverType === "SBR" && d.Division === "Radiology");
+
+		//Chile
+		//Pharma
+		defaultMacsHeadPharma 	   		 = countryApprovers.filter((d) => d.ApproverType === "MACS Head" && d.Division === "Pharma");
+		defaultBusinessServicePharma     = countryApprovers.filter((d) => d.ApproverType === "Business Service" && d.Division === "Pharma");
+		defaultLawAndPatentsPharma 		 = countryApprovers.filter((d) => d.ApproverType === "Law and Patents" && d.Division === "Pharma");
+		defaultCdhPharma				 = countryApprovers.filter((d) => d.ApproverType === "CDH" && d.Division === "Pharma");
+		//Radiology
+		defaultSbrRaRadiology 	   		 = countryApprovers.filter((d) => d.ApproverType === "SBR RA ConoSur" && d.Division === "Radiology");
+		defaultCdhChileRadiology		 = countryApprovers.filter((d) => d.ApproverType === "CDH-Chile (signature)" && d.Division === "Radiology");
 
 		//Regulatory
 		let regulatory = buildValidationEntry(approverTypes, approvalRegulatory, defaultRegulatory, offerValidation, offerValidation.REGULATORY);
@@ -1729,6 +1890,16 @@ module.exports = (srv) => {
 			if (transferPricingPharma) results.push(transferPricingPharma);
 			let sbrPharma = buildValidationEntry(approverTypes, approvalSbr1, defaultSbrPharma, offerValidation, offerValidation.SBR);
 			if (sbrPharma) results.push(sbrPharma);
+
+			//Chile
+			let macsHeadPharma = buildValidationEntry(approverTypes, approvalMacsHead1, defaultMacsHeadPharma, offerValidation, offerValidation.MACS_HEAD);
+			if(macsHeadPharma) results.push(macsHeadPharma);
+
+			let businessServicePharma = buildValidationEntry(approverTypes, approvalBusinessService1, defaultBusinessServicePharma, offerValidation, offerValidation.BUSS);
+			if(businessServicePharma) results.push(businessServicePharma);
+
+			let lawAndPatentsPharma = buildValidationEntry(approverTypes, approvalLawAndPatents1, defaultLawAndPatentsPharma, offerValidation, offerValidation.LAWS);
+			if(lawAndPatentsPharma) results.push(lawAndPatentsPharma);
 		}
 		else if (offerValidation.DIVISION === "Radiology") {
 			let countryRadiology = buildValidationEntry(approverTypes, approvalCountry1, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
@@ -1762,6 +1933,14 @@ module.exports = (srv) => {
 			if (transferPricingRadiology) results.push(transferPricingRadiology);
 			let sbrRadiology = buildValidationEntry(approverTypes, approvalSbr1, defaultSbrRadiology, offerValidation, offerValidation.SBR);
 			if (sbrRadiology) results.push(sbrRadiology);
+
+			//Chile
+			let sbrRaRadiology = buildValidationEntry(approverTypes, approvalSbrRa1, defaultSbrRaRadiology, offerValidation, offerValidation.SBR_RA);
+			if(sbrRaRadiology) results.push(sbrRaRadiology);
+
+			let cdhChileRadiology = buildValidationEntry(approverTypes, approvalCdhChile1, defaultCdhChileRadiology, offerValidation, offerValidation.CDH_CL);
+			if(cdhChileRadiology) results.push(cdhChileRadiology);
+
 		}
 
 		//Supply Chain
