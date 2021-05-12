@@ -3,9 +3,11 @@ TH,Decision Pending,1
 TH,FOC Negotiation,2
 TH,Won,3
 TH,Lost,4
-CL,Partially Won,1
-CL,Won,2
-CL,Lost,3
+CL,Won,1
+CL,Lost,2
+CL,Appeal in Progress,3
+CL,Lost after Appeal,3
+CL,Won after Appeal,3
 TN,Decision Pending,1
 TN,Won,2
 TN,Lost,3
