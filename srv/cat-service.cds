@@ -33,6 +33,7 @@ service CatalogService @(path : 'tender')
     entity TenderOrigin                      as projection on MasterData.MASTER_TENDER_ORIGIN;
     entity TenderType                        as projection on MasterData.MASTER_TENDER_TYPE;
     entity MASTER_COUNTRY_STATUS             as projection on MasterData.MASTER_COUNTRY_STATUS;
+    entity MASTER_COUNTRY_OUTCOMES           as projection on MasterData.MASTER_COUNTRY_OUTCOMES;
     entity CountryApprovers                  as projection on MasterData.CountryApprovers;
     entity ApproverTypes                     as projection on MasterData.ApproverTypes;
     entity PT_TMCOGS                         as projection on MasterData.PT_TMCOGS;

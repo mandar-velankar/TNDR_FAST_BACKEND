@@ -1,0 +1,71 @@
+CountryCode,Outcome,Sorter
+TH,Decision Pending,1
+TH,FOC Negotiation,2
+TH,Won,3
+TH,Lost,4
+CL,Partially Won,1
+CL,Won,2
+CL,Lost,3
+TN,Decision Pending,1
+TN,Won,2
+TN,Lost,3
+MO,Decision Pending,1
+MO,Won,2
+MO,Lost,3
+AL,Decision Pending,1
+AL,Won,2
+AL,Lost,3
+AE,Decision Pending,1
+AE,Won,2
+AE,Lost,3
+BH,Decision Pending,1
+BH,Won,2
+BH,Lost,3
+EG,Decision Pending,1
+EG,Won,2
+EG,Lost,3
+GC,Decision Pending,1
+GC,Won,2
+GC,Lost,3
+IQ,Decision Pending,1
+IQ,Won,2
+IQ,Lost,3
+JO,Decision Pending,1
+JO,Won,2
+JO,Lost,3
+KW,Decision Pending,1
+KW,Won,2
+KW,Lost,3
+LB,Decision Pending,1
+LB,Won,2
+LB,Lost,3
+LY,Decision Pending,1
+LY,Won,2
+LY,Lost,3
+OM,Decision Pending,1
+OM,Won,2
+OM,Lost,3
+QA,Decision Pending,1
+QA,Won,2
+QA,Lost,3
+SA,Decision Pending,1
+SA,Won,2
+SA,Lost,3
+SD,Decision Pending,1
+SD,Won,2
+SD,Lost,3
+SY,Decision Pending,1
+SY,Won,2
+SY,Lost,3
+YE,Decision Pending,1
+YE,Won,2
+YE,Lost,3
+MX,Decision Pending,1
+MX,Won,2
+MX,Lost,3
+AR,Decision Pending,1
+AR,Won,2
+AR,Lost,3
+BR,Decision Pending,1
+BR,Won,2
+BR,Lost,3
