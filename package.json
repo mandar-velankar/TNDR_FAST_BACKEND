@@ -12,6 +12,7 @@
     "@sap/xsenv": "^3.1.0",
     "@sap/xssec": "^3.0.10",
     "compression": "^1.7.4",
+    "cron": "^1.8.2",
     "dynamic-html-pdf": "^1.0.2",
     "express": "^4.17.1",
     "handlebars": "^4.7.6",

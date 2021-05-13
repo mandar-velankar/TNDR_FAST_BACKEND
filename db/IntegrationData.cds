@@ -3,7 +3,7 @@ namespace com.bayer.SXTENDER.IntegrationData;
 using { User, Country, cuid, managed } from '@sap/cds/common';
 
 // Mercado Publico Tenders
-entity MercadoPublicoLicitacione {
+entity MercadoPublicoLicitacione : managed {
     key CodigoExterno                   : String;
         Nombre                          : String;
         CodigoEstado                    : Integer;
@@ -74,6 +74,7 @@ entity MercadoPublicoLicitacione {
         AdjudicacionNumeroOferentes     : Integer;
         AdjudicacionUrlActa             : String;
         Comprador                       : Association to MercadoPublicoComprador;
+        Items                           : Association to many MercadoPublicoProducto on Items.Licitacione = $self;
 };
 
 entity MercadoPublicoComprador {
@@ -95,7 +96,7 @@ entity MercadoPublicoComprador {
 // Mercado Publico Products
 entity MercadoPublicoProducto {
         Correlativo                     : Integer;
-        CodigoProducto                  : Integer;
+    key CodigoProducto                  : Integer;
         CodigoCategoria                 : String;
         Categoria                       : String;
         NombreProducto                  : String;
@@ -106,4 +107,5 @@ entity MercadoPublicoProducto {
         AdjudicacionNombreProveedor     : String;
         AdjudicacionCantidad            : Double;
         AdjudicacionMontoUnitario       : Double;
+        Licitacione                     : Association to MercadoPublicoLicitacione;
 };
