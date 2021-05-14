@@ -1,9 +1,12 @@
-var XlsxTemplate = require('xlsx-template');
+const XlsxTemplate = require('xlsx-template');
+const { Readable } = require('stream');
+const fs = require('fs');
+const path = require('path');
 
-export async function getTemplate(templatename, values) {
+exports.generateXLSX = (templatename, values)=>{
 
     // Load an XLSX file into memory
-    const filedata = await fs.readFile(path.join(__dirname, 'xlsx-templates', templatename);
+    const filedata = fs.readFileSync(path.join(__dirname, '../xlsx-templates', templatename));
 
     // Create a template
     var template = new XlsxTemplate(filedata);
@@ -12,8 +15,17 @@ export async function getTemplate(templatename, values) {
     var sheetNumber = 1;
 
     // Perform substitution
-    template.substitute(sheetNumber, davaluesta);
+    template.substitute(sheetNumber, values);
 
     // Get binary data
-    return template.generate();
+    let excel =  template.generate({type:'uint8array'});
+    const readableInstanceStream = new Readable({
+        read() {
+            this.push(excel);
+            this.push(null);
+        }
+    });
+    return {
+        value: readableInstanceStream
+    };
 };

@@ -11,6 +11,7 @@ const SapCfMailer = require("sap-cf-mailer");
 // const resolveWhen = require('special-escape');
 const { Readable } = require('stream');
 const path = require("path");
+const XLSXHelper = require("./utils/XLSXHelper");
 
 module.exports = (srv) => {
 
@@ -32,11 +33,11 @@ module.exports = (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
-	} =cds.entities("com.bayer.SXTENDER.PricingPolicyData");
+	} = cds.entities("com.bayer.SXTENDER.PricingPolicyData");
 
 	const {
 		LatestApprovedBrandPolicies
-	} =cds.entities("PolicyService");
+	} = cds.entities("PolicyService");
 
 
 	const arr = x => Array.from(x);
@@ -491,17 +492,17 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName){
+	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName) {
 		let price = 0;
 		productPolicyPrices.forEach(e => {
-			if (e.PricingPolicyName === pricingPolicyName && e.Role === role){
+			if (e.PricingPolicyName === pricingPolicyName && e.Role === role) {
 				price = e.Price;
 			};
 		});
 		return price;
 	}
 
-	
+
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo) {//Thailand
 		//Legend
@@ -514,10 +515,10 @@ module.exports = (srv) => {
 
 		//Check on offer unit (pack or unit) and get factor to apply on policy prices
 		let uomFactor = 1;
-		if (product.UNIT === 'Unit'){
+		if (product.UNIT === 'Unit') {
 			uomFactor = product.PACKSIZE;
 		};
-		
+
 		//Get ChannelId
 		let whereChannel = {
 			ChannelCountry: offer.COUNTRYCODE,
@@ -531,7 +532,7 @@ module.exports = (srv) => {
 		};
 
 		let latestApprovedBrandPolicy = await tx.run(SELECT.from(LatestApprovedBrandPolicies).where(whereLatestApprovedBrandPolicy));
-		if (latestApprovedBrandPolicy.length === 0){//No pricing policy
+		if (latestApprovedBrandPolicy.length === 0) {//No pricing policy
 			return {
 				//Default values for other countries approver types
 				REGULATORY: 1,
@@ -570,7 +571,7 @@ module.exports = (srv) => {
 			Channel_ID: channel[0].ID
 		};
 		let productPolicyPrices = await tx.run(SELECT.from(PolicyPrices).where(wherePolicyPrices));
-		if (productPolicyPrices.length !== 6){//Incomplete pricing policy
+		if (productPolicyPrices.length !== 6) {//Incomplete pricing policy
 			return {
 				//Default values for other countries approver types
 				REGULATORY: 1,
@@ -616,36 +617,36 @@ module.exports = (srv) => {
 		if (//This means it's first offer for account or offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountOfferPrice, 0) ||
 			ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, preApprovedAccountOfferPrice)
-			){
-				if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)){//NSM/SM/FM can approve
-					requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
-				}
-				else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)){//HBU can approve
-					requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
-				}
-				else if (ServiceHelper.isDoubleXBelowEqualY(cdhMSP, product.OFFER_PRICE)){//CDH can approve
-					requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
-				}
-				else{
-					requiredApprovalLevel = 4;
-				};
+		) {
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)) {//NSM/SM/FM can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+			}
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)) {//HBU can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+			}
+			else if (ServiceHelper.isDoubleXBelowEqualY(cdhMSP, product.OFFER_PRICE)) {//CDH can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+			}
+			else {
+				requiredApprovalLevel = 4;
+			};
 		}
 		if (//This means it's first offer for account or net offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountNetOfferPrice, 0) ||
 			ServiceHelper.isDoubleXBelowY(product.NET_OFFER_PRICE, preApprovedAccountNetOfferPrice)
-			){
-				if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_OFFER_PRICE)){//NSM/SM/FM can approve
-					requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
-				}
-				else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_OFFER_PRICE)){//HBU can approve
-					requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
-				}
-				else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_OFFER_PRICE)){//CDH can approve
-					requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
-				}
-				else{
-					requiredApprovalLevel = 4;
-				};
+		) {
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_OFFER_PRICE)) {//NSM/SM/FM can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+			}
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_OFFER_PRICE)) {//HBU can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+			}
+			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_OFFER_PRICE)) {//CDH can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+			}
+			else {
+				requiredApprovalLevel = 4;
+			};
 		}
 
 		switch (requiredApprovalLevel) {
@@ -705,15 +706,15 @@ module.exports = (srv) => {
 			NSM_SM_FM: 1,
 			HBU: 1,
 			//Argentina approver types
-			MACS: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
-			TA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
-			FBP: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
-			LPC: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
-			COM_PGA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
-			International_Trade: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
-			Transfer_Pricing: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
-			SBR: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
-			CDH: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+			MACS: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+			TA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+			FBP: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
+			LPC: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+			COM_PGA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+			International_Trade: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
+			Transfer_Pricing: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
+			SBR: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
+			CDH: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
 			SUPPLY_CHAIN: 3,
 			//In Policy flag
 			IN_POLICY: true
@@ -727,13 +728,13 @@ module.exports = (srv) => {
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
 		}
-		else if (offer.APPROVAL_TYPE === 3){//Applicable for Mexico
+		else if (offer.APPROVAL_TYPE === 3) {//Applicable for Mexico
 			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo)
 		}
-		else if (offer.APPROVAL_TYPE === 4){//Applicable for Thailand
+		else if (offer.APPROVAL_TYPE === 4) {//Applicable for Thailand
 			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo)
 		}
-		else if (offer.APPROVAL_TYPE === 5){//Applicable for Argentina
+		else if (offer.APPROVAL_TYPE === 5) {//Applicable for Argentina
 			productValidation = buildProductValidationForType5(offer, product, commnonProductInfo)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
@@ -887,14 +888,14 @@ module.exports = (srv) => {
 		let nsmLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.NSM_SM_FM }));
 		let hbuLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.HBU }));
 		let cdhLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.CDH }));
-		if (cdhLevel === 3){//If CDH approval is mandatory, lower levels do not need to approve
+		if (cdhLevel === 3) {//If CDH approval is mandatory, lower levels do not need to approve
 			nsmLevel = 1;
 			hbuLevel = 1;
 		}
-		else if (hbuLevel === 3){//If HBU approval is mandatory, lower levels do not need to approve
+		else if (hbuLevel === 3) {//If HBU approval is mandatory, lower levels do not need to approve
 			nsmLevel = 1;
 		}
-		let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => {return d.IN_POLICY ? 1 : 0})) === 1 ? true : false;
+		let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IN_POLICY ? 1 : 0 })) === 1 ? true : false;
 		//Argentina
 		let macsLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.MACS }));
 		let taLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.TA }));
@@ -1104,7 +1105,7 @@ module.exports = (srv) => {
 	}
 	function getRequiredAction(requiredActionCode) {
 		switch (requiredActionCode) {
-			case 1: 
+			case 1:
 				return "Approval"
 			case 2:
 				return "Notification"
@@ -1138,7 +1139,7 @@ module.exports = (srv) => {
 			userEmail = approvalForType[0].UserEmail;
 			senderComment = approvalForType[0].SenderComment;
 			approverComment = approvalForType[0].ApproverComment;
-//			hierarchy = approvalForType[0].Hierarchy;
+			//			hierarchy = approvalForType[0].Hierarchy;
 		}
 		else if (defaultForType.length !== 0) {
 			approverName = defaultForType[0].ApproverName;
@@ -1153,9 +1154,9 @@ module.exports = (srv) => {
 		//let aApproval = approvals.filter((a) => a.ApproverType === approverType);
 		let aApproval = approvalForType.filter((a) => a.ApproverType === approverType);
 		let aApproverType = approverTypes.filter((d) => d.ApproverType === approverType);
-		if(aApproval.length > 0 && aApproval[0].Hierarchy !== null){
+		if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
 			aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
-		} 
+		}
 
 		return {
 			TenderID: offerValidation.TENDERID,
@@ -1205,12 +1206,12 @@ module.exports = (srv) => {
 			CountryCode: offerValidation.COUNTRYCODE
 		}
 		let approverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
-		
+
 		let whereOfferId = {
 			OfferId: offerValidation.OFFERID
-		} 
+		}
 		//let approvals = await tx.run(SELECT.from(PT_TMAPPRST).where(whereOfferId))
-		
+
 
 		//Existing saved approval entries (may not exist)
 		//Shared
@@ -1219,7 +1220,7 @@ module.exports = (srv) => {
 		let approvalRegulatory = latestApproval.filter((d) => d.ApproverType === "Regulatory");
 		let approvalLegal = latestApproval.filter((d) => d.ApproverType === "Legal");
 		let approvalControlling = latestApproval.filter((d) => d.ApproverType === "Controlling");
-		
+
 		let approvalCountry = latestApproval.filter((d) => d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations");
 		let approvalCountry1 = approvalCountry;
 		let approvalCountry2 = [];
@@ -1238,21 +1239,21 @@ module.exports = (srv) => {
 		let approvalNsm = latestApproval.filter((d) => d.ApproverType === "NSM/SM/FM");
 		let approvalNsm1 = approvalNsm;
 		let approvalNsm2 = [];
-		if (approvalNsm.length > 1){
+		if (approvalNsm.length > 1) {
 			approvalNsm1 = [approvalNsm[0]];
 			approvalNsm2 = [approvalNsm[1]];
 		}
 		let approvalHbu = latestApproval.filter((d) => d.ApproverType === "HBU");
 		let approvalHbu1 = approvalHbu;
 		let approvalHbu2 = [];
-		if (approvalHbu.length > 1){
+		if (approvalHbu.length > 1) {
 			approvalHbu1 = [approvalHbu[0]];
 			approvalHbu2 = [approvalHbu[1]];
 		}
 		let approvalCdh = latestApproval.filter((d) => d.ApproverType === "CDH");
 		let approvalCdh1 = approvalCdh;
 		let approvalCdh2 = [];
-		if (approvalCdh.length > 1){
+		if (approvalCdh.length > 1) {
 			approvalCdh1 = [approvalCdh[0]];
 			approvalCdh2 = [approvalCdh[1]];
 		}
@@ -1261,56 +1262,56 @@ module.exports = (srv) => {
 		let approvalMacs = latestApproval.filter((d) => d.ApproverType === "MACS");
 		let approvalMacs1 = approvalMacs;
 		let approvalMacs2 = [];
-		if (approvalMacs.length > 1){
+		if (approvalMacs.length > 1) {
 			approvalMacs1 = [approvalMacs[0]];
 			approvalMacs2 = [approvalMacs[1]];
 		}
 		let approvalTa = latestApproval.filter((d) => d.ApproverType === "TA");
 		let approvalTa1 = approvalTa;
 		let approvalTa2 = [];
-		if (approvalTa.length > 1){
+		if (approvalTa.length > 1) {
 			approvalTa1 = [approvalTa[0]];
 			approvalTa2 = [approvalTa[1]];
 		}
 		let approvalFbp = latestApproval.filter((d) => d.ApproverType === "FBP");
 		let approvalFbp1 = approvalFbp;
 		let approvalFbp2 = [];
-		if (approvalFbp.length > 1){
+		if (approvalFbp.length > 1) {
 			approvalFbp1 = [approvalFbp[0]];
 			approvalFbp2 = [approvalFbp[1]];
 		}
 		let approvalLpc = latestApproval.filter((d) => d.ApproverType === "LPC");
 		let approvalLpc1 = approvalLpc;
 		let approvalLpc2 = [];
-		if (approvalLpc.length > 1){
+		if (approvalLpc.length > 1) {
 			approvalLpc1 = [approvalLpc[0]];
 			approvalLpc2 = [approvalLpc[1]];
 		}
 		let approvalComPga = latestApproval.filter((d) => d.ApproverType === "COM_PGA");
 		let approvalComPga1 = approvalComPga;
 		let approvalComPga2 = [];
-		if (approvalComPga.length > 1){
+		if (approvalComPga.length > 1) {
 			approvalComPga1 = [approvalComPga[0]];
 			approvalComPga2 = [approvalComPga[1]];
 		}
 		let approvalInternationalTrade = latestApproval.filter((d) => d.ApproverType === "International_Trade");
 		let approvalInternationalTrade1 = approvalInternationalTrade;
 		let approvalInternationalTrade2 = [];
-		if (approvalInternationalTrade.length > 1){
+		if (approvalInternationalTrade.length > 1) {
 			approvalInternationalTrade1 = [approvalInternationalTrade[0]];
 			approvalInternationalTrade2 = [approvalInternationalTrade[1]];
 		}
 		let approvalTransferPricing = latestApproval.filter((d) => d.ApproverType === "Transfer_Pricing");
 		let approvalTransferPricing1 = approvalTransferPricing;
 		let approvalTransferPricing2 = [];
-		if (approvalTransferPricing.length > 1){
+		if (approvalTransferPricing.length > 1) {
 			approvalTransferPricing1 = [approvalTransferPricing[0]];
 			approvalTransferPricing2 = [approvalTransferPricing[1]];
 		}
 		let approvalSbr = latestApproval.filter((d) => d.ApproverType === "SBR");
 		let approvalSbr1 = approvalSbr;
 		let approvalSbr2 = [];
-		if (approvalSbr.length > 1){
+		if (approvalSbr.length > 1) {
 			approvalSbr1 = [approvalSbr[0]];
 			approvalSbr2 = [approvalSbr[1]];
 		}
@@ -1572,9 +1573,9 @@ module.exports = (srv) => {
 				PAIDVOLUME: Math.round(d.PAID_VOLUME),
 				FOC: d.FOC,
 				UNIT: d.UNIT,
-				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS,0),
-				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS,0),
-				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS,0),
+				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS, 0),
+				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS, 0),
+				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS, 0),
 				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4),
 				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2),
 				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4),
@@ -1770,7 +1771,7 @@ module.exports = (srv) => {
 			//Get filters
 			let whereCountry = ServiceHelper.buildWhere(req, "COUNTRY_CODE");
 			//  let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
-			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID","or",instituteIds);
+			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID", "or", instituteIds);
 			let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
 			let whereProduct = ServiceHelper.buildWhere(req, "PRODUCT_ID");
 			let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
@@ -1883,7 +1884,7 @@ module.exports = (srv) => {
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
 	});
-//http://localhost:4004/v2/tender/Attachment('AE-16-100-1049-BPH-11')/content
+	//http://localhost:4004/v2/tender/Attachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'Attachment', async (req, next) => {
 		//OfferID => get CountryCode => get Template by Country => get template
 		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
@@ -1898,7 +1899,7 @@ module.exports = (srv) => {
 		if (!offerValidation) {
 			return req.reject(404, 'No offer found');
 		}
-		const templatesByCountry = await tx.run(SELECT.from(TemplateCountry).where({ CountryCode: offerValidation.COUNTRYCODE , Classification: offerValidation.CLASSIFICATION}));//Added Classification (db#2)
+		const templatesByCountry = await tx.run(SELECT.from(TemplateCountry).where({ CountryCode: offerValidation.COUNTRYCODE, Classification: offerValidation.CLASSIFICATION }));//Added Classification (db#2)
 		if (templatesByCountry.length === 0) {
 			return req.reject(404, 'No template found for offer: ' + offerId + ' and for country: ' + offerValidation.COUNTRYCODE);
 		}
@@ -1921,9 +1922,9 @@ module.exports = (srv) => {
 				baseurl: req._.req.protocol + '://' + req._.req.get('host')
 			}
 		};
-		const htmlTemplate = Handlebars.compile((template.Template||""));
-		const headerTemplate = Handlebars.compile((template.HeaderTemplate||""));
-		const footerTemplate = Handlebars.compile((template.FooterTemplate||""));
+		const htmlTemplate = Handlebars.compile((template.Template || ""));
+		const headerTemplate = Handlebars.compile((template.HeaderTemplate || ""));
+		const footerTemplate = Handlebars.compile((template.FooterTemplate || ""));
 		var options = {
 			format: template.Format,
 			orientation: template.Orientation,
@@ -1941,7 +1942,7 @@ module.exports = (srv) => {
 		req._.res.setHeader('Content-disposition', 'attachment; filename=output.pdf');
 		req._.res.setHeader('Content-type', 'application/pdf');
 		return new Promise((resolve, reject) => {
-		pdf.create(htmlTemplate(document.context),options).toBuffer(function(err,buffer){
+			pdf.create(htmlTemplate(document.context), options).toBuffer(function (err, buffer) {
 				const readableInstanceStream = new Readable({
 					read() {
 						this.push(buffer);
@@ -1951,8 +1952,9 @@ module.exports = (srv) => {
 				resolve({
 					value: readableInstanceStream
 				});
+			});
 		});
-	});
+
 		// return pdf.create(document, options)
 		// 	.then(res => {
 		// 		// console.log(fs.createReadStream("../output.pdf"))
@@ -1971,6 +1973,29 @@ module.exports = (srv) => {
 		// 		console.error(error)
 		// 	});
 	});
+	//http://localhost:4004/v2/tender/ExcelAttachment('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'ExcelAttachment', async (req, next) => {
+		const tx = cds.transaction(req);
+		var offerId = req.data.OfferId;
+		if (!offerId) {
+			return next();
+		}
+
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		if (!offerValidation) {
+			return req.reject(404, 'No offer found');
+		}
+
+		let excelStreamValue = XLSXHelper.generateXLSX("Book1.xlsx",
+			{
+				offerValidation: offerValidation,
+				offerProductValidation: await buildOfferProductValidation(tx, whereOffer)
+			});
+		req._.res.setHeader('Content-disposition', 'attachment; filename=output.xlsx');
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+	});
 
 	//srv.on('sendMail', (req, sRecipient, sBody) => {
 	srv.on('sendMail', async (req) => {
@@ -1978,7 +2003,7 @@ module.exports = (srv) => {
 		let sRecipient = 'joris.vd.bogaert@gmail.com';
 
 		const mailer = new SapCfMailer.default("MAIL");
-		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', 'quotation_AR.html'), {encoding:'utf-8'});
+		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', 'quotation_AR.html'), { encoding: 'utf-8' });
 
 		let test = await mailer.sendMailTemplate({
 			to: sRecipient,
@@ -2003,24 +2028,24 @@ module.exports = (srv) => {
 			return req.reject(404, 'No offer found');
 		}
 
-		const templates = await tx.run(SELECT.from(MailTemplate).where({ CountryCode: req.data.countryCode , Language: sLanguage}));
+		const templates = await tx.run(SELECT.from(MailTemplate).where({ CountryCode: req.data.countryCode, Language: sLanguage }));
 		if (templates.length === 0) {
 			return req.reject(404, 'No mail template found for country:' + req.data.countryCode + ' and Language:' + req.data.language);
 		}
-		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', templates[0].TemplateId + '.html'), {encoding:'utf-8'});
+		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', templates[0].TemplateId + '.html'), { encoding: 'utf-8' });
 
 		//execute required calculations for data to be displayed and add it to the product object
-		offerProductConsolidation.forEach(function(product){
-			product.NET_PRICE_TOTAL		= product.NET_OFFER_PRICE * product.REQUESTED_VOLUME;
+		offerProductConsolidation.forEach(function (product) {
+			product.NET_PRICE_TOTAL = product.NET_OFFER_PRICE * product.REQUESTED_VOLUME;
 			product.NET_PRICE_TOTAL_VAT = product.REGISTERED_PRICE * product.REQUESTED_VOLUME * (1 + product.VAT);
-			product.PSL 				= ((product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE) * 100; 
+			product.PSL = ((product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE) * 100;
 		});
 
-		
+
 		offerConsolidation = offerConsolidation[0];
-		if(offerProductValidation.length > 0){
+		if (offerProductValidation.length > 0) {
 			let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
-			if(divisions.length > 0){
+			if (divisions.length > 0) {
 				offerConsolidation.DIVISION = divisions[0];
 			}
 		}
@@ -2035,7 +2060,7 @@ module.exports = (srv) => {
 				}
 			}
 		};
-		const htmlTemplate = Handlebars.compile((htmlMail||""));
+		const htmlTemplate = Handlebars.compile((htmlMail || ""));
 
 		return htmlTemplate(document.context);
 	});
