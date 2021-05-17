@@ -452,6 +452,13 @@ entity MASTER_COUNTRY_STATUS{
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 }
 
+entity MASTER_COUNTRY_OUTCOMES {
+	key CountryCode:String(2);
+	key Outcome:String(60);
+	Sorter:Integer;
+	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+}
+
 entity PT_TMOUTRS{
 	key TenderOutcomeReasons:String(255) not null;
 	key Outcome:String(4) not null;
