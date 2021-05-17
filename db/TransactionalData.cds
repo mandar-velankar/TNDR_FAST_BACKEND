@@ -369,9 +369,9 @@ entity PT_TMTEND {
         SubmittedBy          : String(50);
         Active               : Integer;
         Classification       : String(50);
-        BindingTypeLevel1    : String(50);
-        BindingTypeLevel2    : String(50);
-        BindingTypeLevel3    : String(50);
+        BiddingTypeLevel1    : String(50);
+        BiddingTypeLevel2    : String(50);
+        BiddingTypeLevel3    : String(50);
         HighValue            : Boolean;
         OfferStartDate       : Date;
         IbizID               : String(50);

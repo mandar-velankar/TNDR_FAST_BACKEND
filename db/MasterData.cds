@@ -506,29 +506,29 @@ entity MASTER_COUNTRY_CHANNELS: cuid, managed {
 	Country:Association to PT_TMCTRY on Country.CountryCode = ChannelCountry;
 }
 
-entity MasterCountryBindingTypeLevel1: cuid, managed {
+entity MasterCountryBiddingTypeLevel1: cuid, managed {
 	CountryCode			: String(2);
 	ClassificationID	: UUID not null;
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
-	BindingTypeLevel2	: Association to many MasterCountryBindingTypeLevel2 on BindingTypeLevel2.BindingTypeLevel1 = $self;
+	BiddingTypeLevel2	: Association to many MasterCountryBiddingTypeLevel2 on BiddingTypeLevel2.BiddingTypeLevel1 = $self;
 }
 
-entity MasterCountryBindingTypeLevel2: cuid, managed {
+entity MasterCountryBiddingTypeLevel2: cuid, managed {
 	CountryCode			: String(2);
-	BindingTypeLevel1ID	: UUID not null;
+	BiddingTypeLevel1ID	: UUID not null;
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
-	BindingTypeLevel1	: Association to MasterCountryBindingTypeLevel1 on BindingTypeLevel1.ID = BindingTypeLevel1ID;
-	BindingTypeLevel3	: Association to many MasterCountryBindingTypeLevel3 on BindingTypeLevel3.BindingTypeLevel2 = $self;
+	BiddingTypeLevel1	: Association to MasterCountryBiddingTypeLevel1 on BiddingTypeLevel1.ID = BiddingTypeLevel1ID;
+	BiddingTypeLevel3	: Association to many MasterCountryBiddingTypeLevel3 on BiddingTypeLevel3.BiddingTypeLevel2 = $self;
 }
 
-entity MasterCountryBindingTypeLevel3: cuid, managed {
+entity MasterCountryBiddingTypeLevel3: cuid, managed {
 	CountryCode			: String(2);
-	BindingTypeLevel2ID	: UUID not null;
+	BiddingTypeLevel2ID	: UUID not null;
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
-	BindingTypeLevel2	: Association to MasterCountryBindingTypeLevel2 on BindingTypeLevel2.ID = BindingTypeLevel2ID;
+	BiddingTypeLevel2	: Association to MasterCountryBiddingTypeLevel2 on BiddingTypeLevel2.ID = BiddingTypeLevel2ID;
 }
 
 entity MasterCountrySpecifications: cuid, managed {

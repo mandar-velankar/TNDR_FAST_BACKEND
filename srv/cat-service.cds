@@ -42,9 +42,9 @@ service CatalogService @(path : 'tender')
     entity CountryClassifications            as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION;
     entity CountryChannels                   as projection on MasterData.MASTER_COUNTRY_CHANNELS;
     entity CountryProcurementMethod          as projection on MasterData.MASTER_COUNTRY_PROCUREMENT_METHOD;
-    entity CountryBindingTypeLevel1          as projection on MasterData.MasterCountryBindingTypeLevel1;
-    entity CountryBindingTypeLevel2          as projection on MasterData.MasterCountryBindingTypeLevel2;
-    entity CountryBindingTypeLevel3          as projection on MasterData.MasterCountryBindingTypeLevel3;
+    entity CountryBiddingTypeLevel1          as projection on MasterData.MasterCountryBiddingTypeLevel1;
+    entity CountryBiddingTypeLevel2          as projection on MasterData.MasterCountryBiddingTypeLevel2;
+    entity CountryBiddingTypeLevel3          as projection on MasterData.MasterCountryBiddingTypeLevel3;
     entity CountrySpecifications             as projection on MasterData.MasterCountrySpecifications;
     entity MasterCompetitors                 as projection on MasterData.MasterCompetitors;
     entity BrandPolicies                     as projection on MasterData.BrandPolicies;
