@@ -11,6 +11,7 @@
     "@sap/logging": "^6.0.2",
     "@sap/xsenv": "^3.1.0",
     "@sap/xssec": "^3.0.10",
+    "axios": "^0.21.1",
     "compression": "^1.7.4",
     "cron": "^1.8.2",
     "dynamic-html-pdf": "^1.0.2",
@@ -21,6 +22,7 @@
     "mysql": "^2.18.1",
     "passport": "^0.4.1",
     "ramda": "^0.27.0",
+    "retry-axios": "^2.4.0",
     "sap-cf-mailer": "0.0.3"
   },
   "engines": {
