@@ -295,6 +295,7 @@ service CatalogService @(path : 'tender')
             Transfer_Pricing               : Integer not null;//AR only
             SBR                            : Integer not null;//AR only
             ACTIVE_SUBSTANCE               : String; // Chile
+            OFFER_PRICE_VAT                : Double;
     };
 
     entity OfferValidation {
