@@ -27,7 +27,7 @@ module.exports = async () => {
       this.resources = {
         tenders: 'licitaciones.json'
       };
-      this.consultationDate = '16052021'; //this.dateToDDMMYYYY(new Date());
+      this.consultationDate = this.dateToDDMMYYYY(new Date());
 
     }
 
@@ -35,9 +35,9 @@ module.exports = async () => {
      * Fetches Tenders and saves them to the DB
      * @returns {CronJob}
      */
-    getTenders(){
+     fetchTenders(cronTime){
 
-      return new CronJob('*/40 * * * * *', async () => {
+      return new CronJob(cronTime, async () => {
 
         const url = `${this.host}/${this.serviceUrl}/${this.resources.tenders}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
 

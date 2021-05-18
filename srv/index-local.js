@@ -26,9 +26,9 @@ const jobScheduler = require("./jobs/scheduler");
   await cds.serve("AccessService").from("./srv/").in(app);
   await cds.serve("ExternalService").from("./srv/").in(app);
 
-  // Scheduler Jobs
+  // Jobs Scheduler
   const scheduler = await jobScheduler();
-  scheduler.mercadoPublico.getTenders().start();
+  scheduler.mercadoPublico.fetchTenders('*/50 * * * * *').start();
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));
