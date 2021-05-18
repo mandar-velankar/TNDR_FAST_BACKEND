@@ -3,6 +3,7 @@ const { CronJob } = require('cron');
 const rax = require('retry-axios');
 const axios = require('axios');
 const cds = require('@sap/cds');
+const { v4:uuidv4 } = require('uuid');
 
 
 module.exports = async () => {
@@ -41,53 +42,152 @@ module.exports = async () => {
 
         const url = `${this.host}/${this.serviceUrl}/${this.resources.tenders}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
 
-        console.log(`\n\n-----------------\nFetching Tenders from ${url} \n`);
+        console.log(`\n------------------------------------------------------\n`);
+        console.log(`Fetching data from ${url} \n`);
   
         try {
-  
-          const results = await axios.get(url);
+
+          const results = await this.fetchWithRetry(url);
           const tenders = results.data.Listado;
-          const tenderDetails = [];
-
-
-         for(let i = 0; i < tenders.length; i++){
-            try {         
-
-              const detail = await this.getTenderDetail(tenders[i].CodigoExterno);
-              tenderDetails.push(detail.data.Listado[0]);
-             
-              console.log(`Data received: ${i}`);
-            } catch (error) {
-              console.log(`FAILED: ${i}`);
-            }
-
-         }
-
-debugger;
-        for(let a = 0; a < tenderDetails.length; a++){
-            const ent = this.createTenderEntity(tenderDetails[a]);
-
-            debugger;
-        }
-
-          // const affectedRows = await cds.run(INSERT.into(MercadoPublicoLicitacione).entries(newTenders));
-    
-          // console.log(`Tender ${tenderDetails.CodigoExterno} successfully created in the DB`);
-
+          
+          const tenderDetails = await this.getTendersWithDetails(tenders);
+          await this.saveTenders(tenderDetails);
+         
 
         }catch(err){
-          if(err.response){
-            console.log(`\n\nERROR: \n ${err.response.data.Mensaje} for \n ${err.response.config.url}\n`);
-          }
-          
+          console.log(err);
         }
         
       }); 
 
     }
 
-    createTenderEntity(tender){
+    /**
+     * Fetches data from a given entpoint. In case of failure, the request will be retried.
+     * @param {String} url 
+     * @returns {Promise}
+     */
+    fetchWithRetry(url){
+
+      const MAX_RETRY = 5;
+      let currentRetry = 0;
+
+      function successHandler(response) {
+        return response;
+      }
+
+      async function errorHandler(error) {
+        if (currentRetry < MAX_RETRY) {
+          currentRetry++;
+          console.log(`Retrying... \n ${url}`);
+          return sendWithRetry();
+        } else {
+          console.log(`Retried ${currentRetry} times but still failed to fetch from: \n${url}`);
+          return error;
+        }
+      }
+
+      function sendWithRetry() {
+        return axios.get(url).then(successHandler).catch(errorHandler);
+      }
+
+      return sendWithRetry();
+    }
+
+    /**
+     * Fetches Tenders with details
+     * @param {Array} tenders 
+     * @returns {Promise <Array>}
+     */
+    async getTendersWithDetails(tenders){
+      const tenderDetails = [];
+      
+      for(let i = 0; i < tenders.length; i++){
+         try {         
+           const url = `${this.host}/${this.serviceUrl}/${this.resources.tenders}?codigo=${tenders[i].CodigoExterno}&ticket=${this.ticket}`;
+          
+           const detail = await this.fetchWithRetry(url);
+           tenderDetails.push(detail.data.Listado[0]);
+          
+           console.log(`Data received: ${i}`);
+         } catch (error) {
+           console.log(`FAILED: ${i}`);
+         }
+      }
+
+      return tenderDetails;
+
+    }
+
+    async saveTenders(tenders){
+
+      if(tenders && tenders.length > 0){
+
+        for(let a = 0; a < tenders.length; a++ ){
+
+          const mappedTenderObj = this.mapMercadoFields(tenders[a]);
+          const licitacione = this.getEntity(mappedTenderObj, 'licitacione');
+          const comprador = this.getEntity(mappedTenderObj, 'comprador');
+          const items = this.getEntity(mappedTenderObj, 'items');
+
+          const insertPromises = [];
+  
+          insertPromises.push(cds.run(INSERT.into('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione', licitacione)));
+          insertPromises.push(cds.run(INSERT.into('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador', comprador)));
+          insertPromises.push(cds.run(INSERT.into('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto', items)));
+
+          await Promise.all(insertPromises);
+  
+          console.log(`Tender ${mappedTenderObj.CodigoExterno} successfully created in the DB`);
+  
+        }
+
+      }
+
+    }
+
+
+    /**
+     * Return only a part of the tender object
+     * @param {Object} tender 
+     * @param {String} entityType 
+     * @returns {Object}
+     */
+    getEntity(tender, entityType){
+
+      if(entityType === "licitacione"){
+        const obj =  {
+          ...tender
+        };
+        delete obj['Comprador'];
+        delete obj['Items'];
+        return obj;
+      }
+
+      if(entityType === "comprador"){
+        const obj =  {
+          ...tender
+        };
+        return obj['Comprador'];
+      }
+
+      if(entityType === "items"){
+        const obj =  {
+          ...tender
+        };
+        return obj['Items'];
+      }
+
+    }
+
+    /**
+     * Maps the fields from the API response to the entity fields
+     * @param {Object} tender 
+     * @returns {Object}
+     */
+    mapMercadoFields(tender){
       if(tender){
+        const compradorUUID =  uuidv4();
 
         const newTender = {
           ...tender,
@@ -112,8 +212,15 @@ debugger;
           "AdjudicacionNumero": tender.Adjudicacion && tender.Adjudicacion.Numero,
           "AdjudicacionNumeroOferentes": tender.Adjudicacion && tender.Adjudicacion.NumeroOferentes,
           "AdjudicacionUrlActa": tender.Adjudicacion && tender.Adjudicacion.UrlActa,
+          "Comprador_ID": compradorUUID,
+          "Comprador": {
+              "ID": compradorUUID,
+              ...tender.Comprador
+          },
           "Items": tender.Items && tender.Items.Listado.map(item => {
             return {
+              "ID": uuidv4(),
+              "Licitacione_CodigoExterno": tender.CodigoExterno,
               "Correlativo" : item.Correlativo,
               "CodigoProducto": item.CodigoProducto,
               "CodigoCategoria": item.CodigoCategoria,
@@ -122,57 +229,20 @@ debugger;
               "Descripcion": item.Descripcion,
               "UnidadMedida": item.UnidadMedida,
               "Cantidad": item.Cantidad,
-              "AdjudicacionRutProveedor": item.Adjudicacion.RutProveedor,
-              "AdjudicacionNombreProveedor": item.Adjudicacion.NombreProveedor,
-              "AdjudicacionCantidad": item.Adjudicacion.Cantidad,
-              "AdjudicacionMontoUnitario": item.Adjudicacion.MontoUnitario
+              "AdjudicacionRutProveedor": item.Adjudicacion && item.Adjudicacion.RutProveedor,
+              "AdjudicacionNombreProveedor": item.Adjudicacion && item.Adjudicacion.NombreProveedor,
+              "AdjudicacionCantidad": item.Adjudicacion && item.Adjudicacion.Cantidad,
+              "AdjudicacionMontoUnitario": item.Adjudicacion && item.Adjudicacion.MontoUnitario
             }
           })
         };
 
         delete newTender['Fechas'];
         delete newTender['Adjudicacion'];
-        delete newTender['Items'];
 
         return newTender;
 
       }
-    }
-
-    
-    /**
-     * Fetches Tender details for a given tender
-     * @param {object} tender 
-     * @returns {promise}
-     */
-    async getTenderDetail(tenderId) {
-
-      if(tenderId){
-        
-        const ms = 2000;
-        const url = `${this.host}/${this.serviceUrl}/${this.resources.tenders}?codigo=${tenderId}&ticket=${this.ticket}`;
-
-        console.log(`Fetching detail from ${url}`);
-
-        try {
-
-          await this.delay(ms);
-          return await axios.get(url);
-
-        }
-        catch(err){
-
-          if(err.response){
-            await this.delay(ms);
-            console.log(err);
-          }
-
-          console.log(err);
-
-        }
-
-      }
-
     }
 
     /**

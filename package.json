@@ -23,7 +23,8 @@
     "passport": "^0.4.1",
     "ramda": "^0.27.0",
     "retry-axios": "^2.4.0",
-    "sap-cf-mailer": "0.0.3"
+    "sap-cf-mailer": "0.0.3",
+    "uuid": "^8.3.2"
   },
   "engines": {
     "node": "^10 || ^12"

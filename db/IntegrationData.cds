@@ -73,12 +73,12 @@ entity MercadoPublicoLicitacione : managed {
         AdjudicacionNumero              : String;
         AdjudicacionNumeroOferentes     : Integer;
         AdjudicacionUrlActa             : String;
-        Comprador                       : Association to MercadoPublicoComprador;
-        Items                           : Association to many MercadoPublicoProducto on Items.Licitacione = $self;
+        Comprador                       : Composition of MercadoPublicoComprador;
+        Items                           : Composition of many MercadoPublicoProducto on Items.Licitacione = $self;
 };
 
-entity MercadoPublicoComprador {
-    key CodigoOrganismo                 : String;
+entity MercadoPublicoComprador: cuid {
+        CodigoOrganismo                 : String;
         NombreOrganismo                 : String;
         RutUnidad                       : String;
         CodigoUnidad                    : String;
@@ -94,9 +94,9 @@ entity MercadoPublicoComprador {
 
 
 // Mercado Publico Products
-entity MercadoPublicoProducto {
+entity MercadoPublicoProducto: cuid {
         Correlativo                     : Integer;
-    key CodigoProducto                  : Integer;
+        CodigoProducto                  : Integer;
         CodigoCategoria                 : String;
         Categoria                       : String;
         NombreProducto                  : String;
