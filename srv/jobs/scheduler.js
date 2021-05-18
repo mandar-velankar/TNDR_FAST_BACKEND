@@ -1,6 +1,5 @@
 //const CronJob = require('cron').CronJob;
 const { CronJob } = require('cron');
-const rax = require('retry-axios');
 const axios = require('axios');
 const cds = require('@sap/cds');
 const { v4:uuidv4 } = require('uuid');
