@@ -209,9 +209,10 @@ entity CountryApprovers{
 
 //ApproverTypes (type of approvers & there corresponding values)
 entity ApproverTypes {
-    key ApproverType            : String(200);
-    key CountryCode             : String(2);
+    key ApproverType        : String(200);
+    key CountryCode         : String(2);
     Hierarchy				: Integer;
+	ValidationType			: Integer; //filled in node.js layer based upon other fields (1: Optional 2: Mandatory Notification 3: Mandatory Approval)
     CountryApprovers        : Association to many CountryApprovers on CountryApprovers.ApproverType = ApproverType;
 }
 
