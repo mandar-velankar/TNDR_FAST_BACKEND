@@ -668,7 +668,7 @@ module.exports = (srv) => {
 
 	
 
-	async function buildProductValidationForType4(tx, offer, product, productInfo, aAopproverTypes) {//Thailand
+	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -1572,11 +1572,20 @@ module.exports = (srv) => {
 	}
 
 	function mapApprovalForType(approverType, latestApproval, division){
+		aApprovalForTypeResult = [];
 		oApprovalForType = latestApproval.filter((d => d.ApproverType === approverType));
 		if(oApprovalForType.length > 1 && approverType != 'Supply Chain' && approverType != 'Regulatory' && approverType != 'Legal' && approverType != 'Controlling') {
 			switch (division){
-				case 'Pharma': return oApprovalForType[0];
-				case 'Radiology': return oApprovalForType[1];
+				case 'Pharma': 
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					return aApprovalForTypeResult;
+				case 'Radiology': 
+					aApprovalForTypeResult.push(oApprovalForType[1]);
+					return aApprovalForTypeResult;
+				case 'Both':
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					aApprovalForTypeResult.push(oApprovalForType[1]);
+					return aApprovalForTypeResult;
 			}
 		} else {
 			return oApprovalForType;
@@ -1619,6 +1628,8 @@ module.exports = (srv) => {
 				approverComment = approvalForType[0].ApproverComment;
 	//			hierarchy 		= approvalForType[0].Hierarchy;
 				requiredAction 	= type.ValidationType;
+				approverType	= defaultForType.length !== 0 ? defaultForType[0].ApproverType : "";
+				division     	= defaultForType.length !== 0 ? defaultForType[0].Division : "";
 			}
 			else if (defaultForType.length !== 0) {
 				approverName 	= defaultForType[0].ApproverName;
@@ -1626,13 +1637,11 @@ module.exports = (srv) => {
 				approverType 	= defaultForType[0].ApproverType;
 				division 		= defaultForType[0].Division;
 				requiredAction  = approverTypes.filter((d) => d.ApproverType === defaultForType[0].ApproverType)[0].ValidationType
+				approverType	= defaultForType[0].ApproverType;
+				division 	 	= defaultForType[0].Division;
 			}
 			else {
 				return null;
-			}
-			if(defaultForType){
-				approverType 	= defaultForType[0].ApproverType;
-				division 	 	= defaultForType[0].Division;
 			}
 
 			let aApproval 		= approvalForType.filter((a) => a.ApproverType === approverType);
