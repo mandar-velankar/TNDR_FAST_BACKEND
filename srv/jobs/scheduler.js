@@ -68,8 +68,13 @@ module.exports = async () => {
      */
     fetchWithRetry(url){
 
+      const REQUEST_DELAY = 1000;
       const MAX_RETRY = 5;
       let currentRetry = 0;
+
+      function wait(ms){
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
 
       function successHandler(response) {
         return response;
@@ -86,7 +91,8 @@ module.exports = async () => {
         }
       }
 
-      function sendWithRetry() {
+      async function sendWithRetry() {
+        await wait(REQUEST_DELAY);
         return axios.get(url).then(successHandler).catch(errorHandler);
       }
 
@@ -108,9 +114,9 @@ module.exports = async () => {
            const detail = await this.fetchWithRetry(url);
            tenderDetails.push(detail.data.Listado[0]);
           
-           console.log(`Data received: ${i}`);
+           console.log(`Tender detail received: ${i}`);
          } catch (error) {
-           console.log(`FAILED: ${i}`);
+           console.log(`Failed fetching tender detail: ${i}`);
          }
       }
 
@@ -254,15 +260,6 @@ module.exports = async () => {
         var m = date.getMonth() + 1;
         var y = date.getFullYear();
         return `${(d <= 9 ? '0' + d : d)}${(m<=9 ? '0' + m : m)}${y}`;
-    }
-
-    /**
-     * 
-     * @param {*} ms 
-     * @returns Promise
-     */
-    delay(ms){
-      return new Promise(resolve => setTimeout(resolve, ms));
     }
 
   }

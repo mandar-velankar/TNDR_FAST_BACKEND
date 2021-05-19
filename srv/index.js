@@ -28,7 +28,7 @@ const jobScheduler = require("./jobs/scheduler");
   
   // Scheduler Jobs
   const scheduler = await jobScheduler();
-  scheduler.mercadoPublico.fetchTenders('00 00 * * *').start(); // runs every day at midnight server time -> not sure how to handle timezone
+  scheduler.mercadoPublico.fetchTenders('00 00 * * *').start(); // runs every day at midnight server time
     
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));
