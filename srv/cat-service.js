@@ -1152,8 +1152,8 @@ module.exports = (srv) => {
 				//International_Trade: productInfo.ProductValidation.International_Trade,
 				//Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
 				//SBR: productInfo.ProductValidation.SBR,
-				ACTIVE_SUBSTANCE: d.ACTIVE_SUBSTANCE,
-				OFFER_PRICE_VAT: d.OFFER_PRICE * (1 + d.VAT),
+				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
+				OFFER_PRICE_VAT: offerProduct.OFFER_PRICE * (1 + offerProduct.VAT),
 				ApproverTypes: aApproverTypes
 			}
 		});
