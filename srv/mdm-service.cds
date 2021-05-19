@@ -19,6 +19,8 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMREGPR @readonly     as projection on MasterData.PT_TMREGPR;
     entity PT_TMCOGS @readonly      as projection on MasterData.PT_TMCOGS;
     entity PT_TMPRDHIER @insertonly as projection on MasterData.PT_TMPRDHIER;
+    entity COUNTRY_APPROVERS @readonly as projection on MasterData.CountryApprovers;
+    entity APPROVERTYPES @readonly as projection on MasterData.ApproverTypes;
 
 
 }
