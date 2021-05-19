@@ -28,7 +28,7 @@ module.exports = (srv) => {
 		PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -363,7 +363,7 @@ module.exports = (srv) => {
 		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
 	}*/
 
-	function buildProductValidationForType1(offer, product, productInfo) {//MEA (and default)
+	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes) {//MEA (and default)
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -425,6 +425,39 @@ module.exports = (srv) => {
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
 
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+				case "Regulatory": 
+					oApproverType.ValidationType = regulatory;
+					break;
+				case "Legal": 
+					oApproverType.ValidationType = legal;
+					break;
+				case "Controlling":
+					oApproverType.ValidationType = controlling;
+					break;
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Regional Business":
+					oApproverType.ValidationType = regionalBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = 1;	
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		/*
 		let results = {
 			REGULATORY: regulatory,
 			LEGAL: legal,
@@ -447,10 +480,11 @@ module.exports = (srv) => {
 			//In Policy flag
 			IN_POLICY: true
 		};
+		*/
 		return results;
 	}
 
-	function buildProductValidationForType3(offer, product, productInfo) {//Mexico
+	function buildProductValidationForType3(offer, product, productInfo, aApproverTypes) {//Mexico
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -466,6 +500,27 @@ module.exports = (srv) => {
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
 
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = 1;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		/*
 		let results = {
 			REGULATORY: 1,
 			LEGAL: 1,
@@ -488,6 +543,116 @@ module.exports = (srv) => {
 			//In Policy flag
 			IN_POLICY: true
 		};
+		*/
+
+		return results;
+	}
+
+	function buildProductValidationForType7(offer, product, productInfo, aApproverTypes) {//Chile
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		if(offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)){
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "Supply Chain": 
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+		} else if(offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)){
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "MACS Head": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "Supply Chain": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "Business Service": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "Law and Patents": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "CDH": 
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}	
+			});
+		} else if(!offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma'){
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "Supply Chain": 
+						oApproverType.ValidationType = 2;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+		} else if(product.DIVISION === 'Radiology'){
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "SBR RA ConoSur": 
+						oApproverType.ValidationType = 3;
+						break;
+					case "CDH-Chile (signature)": 
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}	
+			});
+		} else {
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "Supply Chain": 
+						oApproverType.ValidationType = 2;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+		}
+
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		/*aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+				case "Regulatory": 
+					oApproverType.ValidationType = regulatory;
+					break;
+				case "Legal": 
+					oApproverType.ValidationType = legal;
+					break;
+				case "Controlling":
+					oApproverType.ValidationType = controlling;
+					break;
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Regional Business":
+					oApproverType.ValidationType = regionalBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = 1;	
+			}
+		});*/
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
 		return results;
 	}
 
@@ -503,7 +668,7 @@ module.exports = (srv) => {
 
 	
 
-	async function buildProductValidationForType4(tx, offer, product, productInfo) {//Thailand
+	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -532,6 +697,33 @@ module.exports = (srv) => {
 
 		let latestApprovedBrandPolicy = await tx.run(SELECT.from(LatestApprovedBrandPolicies).where(whereLatestApprovedBrandPolicy));
 		if (latestApprovedBrandPolicy.length === 0){//No pricing policy
+			//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+			//based upon the country the correct approverType will be handled 
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "HBU":
+						oApproverType.ValidationType = 1;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = 1;
+						break;
+					case "NSM/SM/FM":
+						oApproverType.ValidationType = 1;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+
+			return results = {
+				//In Policy flag
+				IN_POLICY: false
+			};
+
+			/*
 			return {
 				//Default values for other countries approver types
 				REGULATORY: 1,
@@ -555,6 +747,7 @@ module.exports = (srv) => {
 				//In Policy flag
 				IN_POLICY: false
 			};
+			*/
 		}
 
 		//Get latest approved product pricing policy for country and product
@@ -571,6 +764,34 @@ module.exports = (srv) => {
 		};
 		let productPolicyPrices = await tx.run(SELECT.from(PolicyPrices).where(wherePolicyPrices));
 		if (productPolicyPrices.length !== 6){//Incomplete pricing policy
+
+			//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+			//based upon the country the correct approverType will be handled 
+			aApproverTypes.map(async function (oApproverType) {
+				switch(oApproverType.ApproverType){
+					case "HBU":
+						oApproverType.ValidationType = 1;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = 1;
+						break;
+					case "NSM/SM/FM":
+						oApproverType.ValidationType = 1;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+				}
+			});
+
+			return results = {
+				//In Policy flag
+				IN_POLICY: true
+			};
+
+			/*
 			return {
 				//Default values for other countries approver types
 				REGULATORY: 1,
@@ -594,6 +815,7 @@ module.exports = (srv) => {
 				//In Policy flag
 				IN_POLICY: false
 			};
+			*/
 		}
 		//Set variables for policy prices thresholds
 		let nsmMSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'MSP') / uomFactor;
@@ -663,6 +885,23 @@ module.exports = (srv) => {
 				break;
 		}
 
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType){
+					case "HBU":oApproverType.ValidationType = hbuLevel;
+					case "CDH":oApproverType.ValidationType = cdhLevel;
+					case "NSM/SM/FM":oApproverType.ValidationType = nsmLevel;
+					case "Supply Chain":oApproverType.ValidationType = supply;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		/*
 		let results = {
 			//Default values for other countries approver types
 			REGULATORY: 1,
@@ -686,15 +925,61 @@ module.exports = (srv) => {
 			//In Policy flag
 			IN_POLICY: inPolicy
 		};
+		*/
+
 		return results;
 	}
 
-	function buildProductValidationForType5(offer, product, productInfo) {//Argentina
+	function buildProductValidationForType5(offer, product, productInfo, aApproverTypes) {//Argentina
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
 
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+					case "MACS":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "TA":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "FBP":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+						break;
+					case "LPC":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "COM/PGA":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = 3;
+						break;
+					case "International Trade":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+						break;
+					case "Transfer Pricing":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						break;
+					case "SBR":
+						ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+						break;
+					default:
+						oApproverType.ValidationType = 1;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+/*
 		let results = {
 			//Default values for other countries approver types
 			REGULATORY: 1,
@@ -718,102 +1003,118 @@ module.exports = (srv) => {
 			//In Policy flag
 			IN_POLICY: true
 		};
+*/
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else if (offer.APPROVAL_TYPE === 3){//Applicable for Mexico
-			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else if (offer.APPROVAL_TYPE === 4){//Applicable for Thailand
-			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo)
+			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else if (offer.APPROVAL_TYPE === 5){//Applicable for Argentina
-			productValidation = buildProductValidationForType5(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType5(offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 7){ //Applicable for Chile
+			productValidation = buildProductValidationForType7(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
 		}
+
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
 		};
 	}
 	async function buildOfferProductValidation(tx, whereOffer) {
+
 		let results = [];
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
 		if (offer.length !== 1) {
 			return results;
 		}
+
 		offer = offer[0];
-		let offerProduct = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
-		if (offerProduct.length === 0) {
+		let aOfferProduct = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+		if (aOfferProduct.length === 0) {
 			return results;
 		}
-		results = offerProduct.map(async function (d) {
-			let productInfo = await buildProductInfoForCountry(tx, offer, d);
+
+		//where statement
+		let whereApproverType = {
+			CountryCode: offer.COUNTRYCODE
+		}
+
+		//Get corresponding approvertypes
+		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+		
+		results = aOfferProduct.map(async function (offerProduct) {
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aApproverTypes);
 
 			//Get all prices, ammounts and cogs in all units
-			let toUnitFactor = (d.UNIT === "Unit") ? 1 : d.PACKSIZE;
-			let toPackFactor = (d.UNIT === "Unit") ? 1 / d.PACKSIZE : 1;
+			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
+			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
 
 			return {
 				TENDER_ID: offer.TENDERID,
 				COUNTRY_CODE: offer.COUNTRYCODE,
 				OFFER_ID: offer.OFFERID,
-				DIVISION: d.DIVISION,
-				BRANDID: d.BRANDID,
-				BRANDNAME: d.BRANDNAME,
-				PRODUCT_UNIT_NAME: d.PRODUCT_UNIT_NAME, //thailand
-				SKU: d.SKU, //thailand
-				PRODUCTID: d.PRODUCTID,
-				CODE: d.CODE,
-				PRODUCTNAME: d.PRODUCTNAME,
-				PACKSIZE: d.PACKSIZE,
-				DOSAGE: d.DOSAGE,
-				UOM: d.UOM,
-				COUNTRYOFORIGIN: d.COUNTRYOFORIGIN,
-				MANUFACTURER: d.MANUFACTURER,
-				SHELFLIFE: d.SHELFLIFE,
-				PRESENTATION: d.PRESENTATION,
-				VAT: d.VAT,
+				DIVISION: offerProduct.DIVISION,
+				BRANDID: offerProduct.BRANDID,
+				BRANDNAME: offerProduct.BRANDNAME,
+				PRODUCT_UNIT_NAME: offerProduct.PRODUCT_UNIT_NAME, //thailand
+				SKU: offerProduct.SKU, //thailand
+				PRODUCTID: offerProduct.PRODUCTID,
+				CODE: offerProduct.CODE,
+				PRODUCTNAME: offerProduct.PRODUCTNAME,
+				PACKSIZE: offerProduct.PACKSIZE,
+				DOSAGE: offerProduct.DOSAGE,
+				UOM: offerProduct.UOM,
+				COUNTRYOFORIGIN: offerProduct.COUNTRYOFORIGIN,
+				MANUFACTURER: offerProduct.MANUFACTURER,
+				SHELFLIFE: offerProduct.SHELFLIFE,
+				PRESENTATION: offerProduct.PRESENTATION,
+				VAT: offerProduct.VAT,
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
-				UNIT: d.UNIT,
+				UNIT: offerProduct.UNIT,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
-				SORTER: d.SORTER,
+				SORTER: offerProduct.SORTER,
 				CURRENCY: offer.CURRENCY,
 				REQUESTED_QUANTITY: productInfo.CommnonProductInfo.RequestedQuantityString,
 				DELIVERY_TERMS: productInfo.CommnonProductInfo.DeliveryTerms,
-				PAYMENT_TERMS: d.PAYMENT_TERMS,
-				SHIPMENT_TERMS: d.INCO_TERMS,
-				SAMPLES: d.SAMPLES,
-				SAMPLES_UNIT: d.SAMPLES * toUnitFactor,
-				SAMPLES_PACK: d.SAMPLES * toPackFactor,
-				REGISTERED_PRICE: d.REGISTERED_PRICE,
-				OFFER_PRICE: d.OFFER_PRICE,
+				PAYMENT_TERMS: offerProduct.PAYMENT_TERMS,
+				SHIPMENT_TERMS: offerProduct.INCO_TERMS,
+				SAMPLES: offerProduct.SAMPLES,
+				SAMPLES_UNIT: offerProduct.SAMPLES * toUnitFactor,
+				SAMPLES_PACK: offerProduct.SAMPLES * toPackFactor,
+				REGISTERED_PRICE: offerProduct.REGISTERED_PRICE,
+				OFFER_PRICE: offerProduct.OFFER_PRICE,
 				FOC: productInfo.CommnonProductInfo.FocString,
 				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit, //Total Volume(units) (thailand - new column missing in the screenshot)
 				FOC_QUANTITY_UNITS: productInfo.CommnonProductInfo.FocAmountUnit,
 				PAID_QUANTITY_UNITS: productInfo.CommnonProductInfo.PaidVolumeUnit,
 				REQ_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPriceUnit,
-				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + d.VAT),   //MSP incl VAT (thailand)
+				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + offerProduct.VAT),   //MSP incl VAT (thailand)
 				REQ_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPricePack,
 				REQ_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.OfferPriceUnitEurBudget,
 				REQ_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.OfferPriceUnitEurSpot,
 				NET_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPriceUnit,
-				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + d.VAT),   //NSP incl VAT (thailand)
+				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT),   //NSP incl VAT (thailand)
 				NET_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPricePack,
 				NET_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.NetPriceUnitEurBudget,
 				NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
-				NET_OFFER_PRICE: d.NET_OFFER_PRICE,
-				NET_PRICE: d.NET_PRICE,
-				COGS: d.COGS,//This is now in offer currency (used to be EUR)
+				NET_OFFER_PRICE: offerProduct.NET_OFFER_PRICE,
+				NET_PRICE: offerProduct.NET_PRICE,
+				COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
 				COGS_EUR_UNIT: productInfo.CommnonProductInfo.CogsEurUnit,
 				COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
 				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
@@ -824,33 +1125,36 @@ module.exports = (srv) => {
 				GROSS_MARGIN_EUR_SPOT: productInfo.CommnonProductInfo.GrossMarginEurSpot,
 				GROSS_PROFIT_EUR_BUDGET: productInfo.CommnonProductInfo.GrossProfitEurBudget,
 				GROSS_PROFIT_EUR_SPOT: productInfo.CommnonProductInfo.GrossProfitEurSpot,
-				REGULATORY: productInfo.ProductValidation.REGULATORY,
-				LEGAL: productInfo.ProductValidation.LEGAL,
-				CONTROLLING: productInfo.ProductValidation.CONTROLLING,
-				COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
-				REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
-				SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
+				//REGULATORY: productInfo.ProductValidation.REGULATORY,
+				//LEGAL: productInfo.ProductValidation.LEGAL,
+				//CONTROLLING: productInfo.ProductValidation.CONTROLLING,
+				//COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
+				//REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
+				//SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
 				IS_LOWEST: (productInfo.CommnonProductInfo.IsMinPrice) ? 1 : 0,
-				IS_DEFAULT_TERMS: d.IS_DEFAULT_TERMS,
-				IS_REGISTERED: d.IS_REGISTERED,
-				IS_ALTERNATIVE_QUOTED: d.IS_ALTERNATIVE_QUOTED,
-				IS_ALTERNATIVE_REQUESTED: d.IS_ALTERNATIVE_REQUESTED,
-				NEW_APPROVAL: d.NEW_APPROVAL,
-				BUDGETED_PROFITABILITY: d.BUDGETED_PROFITABILITY,
-				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + d.VAT),
-				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * d.VAT,
-				NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
-				HBU: productInfo.ProductValidation.HBU,
-				CDH: productInfo.ProductValidation.CDH,
+				IS_DEFAULT_TERMS: offerProduct.IS_DEFAULT_TERMS,
+				IS_REGISTERED: offerProduct.IS_REGISTERED,
+				IS_ALTERNATIVE_QUOTED: offerProduct.IS_ALTERNATIVE_QUOTED,
+				IS_ALTERNATIVE_REQUESTED: offerProduct.IS_ALTERNATIVE_REQUESTED,
+				NEW_APPROVAL: offerProduct.NEW_APPROVAL,
+				BUDGETED_PROFITABILITY: offerProduct.BUDGETED_PROFITABILITY,
+				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT),
+				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * offerProduct.VAT,
+				//NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
+				//HBU: productInfo.ProductValidation.HBU,
+				//CDH: productInfo.ProductValidation.CDH,
 				IN_POLICY: productInfo.ProductValidation.IN_POLICY,
-				MACS: productInfo.ProductValidation.MACS,
-				TA: productInfo.ProductValidation.TA,
-				FBP: productInfo.ProductValidation.FBP,
-				LPC: productInfo.ProductValidation.LPC,
-				COM_PGA: productInfo.ProductValidation.COM_PGA,
-				International_Trade: productInfo.ProductValidation.International_Trade,
-				Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
-				SBR: productInfo.ProductValidation.SBR
+				//MACS: productInfo.ProductValidation.MACS,
+				//TA: productInfo.ProductValidation.TA,
+				//FBP: productInfo.ProductValidation.FBP,
+				//LPC: productInfo.ProductValidation.LPC,
+				//COM_PGA: productInfo.ProductValidation.COM_PGA,
+				//International_Trade: productInfo.ProductValidation.International_Trade,
+				//Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
+				//SBR: productInfo.ProductValidation.SBR,
+				ACTIVE_SUBSTANCE: d.ACTIVE_SUBSTANCE,
+				OFFER_PRICE_VAT: d.OFFER_PRICE * (1 + d.VAT),
+				ApproverTypes: aApproverTypes
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -871,9 +1175,26 @@ module.exports = (srv) => {
 		}
 		offer = offer[0];
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
+		let aApproverTypes = [];
+
+		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
+			//no products
 			return results;
+		}else{
+
+			//only keep 1 approvertypes array (an array exists for each product)
+			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;			
+			
+			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
+			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation);
+
 		}
+
+		//convert IN_POLICY to true or false
+		let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => {return d.IN_POLICY ? 1 : 0})) === 1 ? true : false;
+
+/*
 		//Shared
 		let supply = Math.max.apply(Math, offerProductValidation.map((d) => { return d.SUPPLY_CHAIN }));
 		//MEA
@@ -904,7 +1225,7 @@ module.exports = (srv) => {
 		let internationTradeLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.International_Trade }));
 		let transferPricingLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.Transfer_Pricing }));
 		let sbrLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.SBR }));
-
+*/
 		let isLowest = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_LOWEST }));
 		let isDefaultTerms = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_DEFAULT_TERMS }));
 		let isNewApproval = Math.max.apply(Math, offerProductValidation.map((d) => { return d.NEW_APPROVAL }));
@@ -1030,6 +1351,10 @@ module.exports = (srv) => {
 		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
 		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
 
+		// get SUBMITTED_BY user info 
+		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
+		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+
 		results = {
 			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
 			TENDERID: offer.TENDERID,
@@ -1051,17 +1376,18 @@ module.exports = (srv) => {
 			AMOUNT_IN_NUMBERS: totalAmount,
 			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
 			LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
-			REGULATORY: regulatory,
-			LEGAL: legal,
-			CONTROLLING: controlling,
-			COUNTRY_BUSINESS: countryBusiness,
-			REGIONAL_BUSINESS: regionalBusiness,
-			SUPPLY_CHAIN: supply,
+			//REGULATORY: regulatory,
+			//LEGAL: legal,
+			//CONTROLLING: controlling,
+			//COUNTRY_BUSINESS: countryBusiness,
+			//REGIONAL_BUSINESS: regionalBusiness,
+			//SUPPLY_CHAIN: supply,
 			DISTRIBUTORNAME: offer.DISTRIBUTORNAME,
 			DISTRIBUTORADDRESS: offer && offer.DISTRIBUTORADDRESS ? offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>") : '',
 			DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
 			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
+			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
 			REMARKS: remarks,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
 			DELIVERYTERMS: deliveryTerms,
@@ -1073,21 +1399,82 @@ module.exports = (srv) => {
 			AMOUNT_IN_NUMBERS_VAT: totalAmountVat,
 			AMOUNT_IN_WORDS_VAT: totalAmountVatInWords,
 			VAT_TOTAL: vatTotal,
-			NSM_SM_FM: nsmLevel,
-			HBU: hbuLevel,
-			CDH: cdhLevel,
+			//NSM_SM_FM: nsmLevel,
+			//HBU: hbuLevel,
+			//CDH: cdhLevel,
 			IN_POLICY: inPolicy,
-			MACS: macsLevel,
-			TA: taLevel,
-			FBP: fbpLevel,
-			LPC: lpcLevel,
-			COM_PGA: comPgaLevel,
-			International_Trade: internationTradeLevel,
-			Transfer_Pricing: transferPricingLevel,
-			SBR: sbrLevel
+			//MACS: macsLevel,
+			//TA: taLevel,
+			//FBP: fbpLevel,
+			//LPC: lpcLevel,
+			//COM_PGA: comPgaLevel,
+			//International_Trade: internationTradeLevel,
+			//Transfer_Pricing: transferPricingLevel,
+			//SBR: sbrLevel,
+			PUBLICATION_DATE: offer.PUBLICATION_DATE,
+			BID_DUE_DATE: offer.BID_DUE_DATE,
+			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
+			ApproverTypes: aApproverTypes
 		};
 		return results;
 	}
+
+	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
+	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation) {
+
+		//Calculate max validation type for each type in each product
+		aApproverTypes.map(async function (oApproverType) {
+
+			//convert to name of property (space = _ + all CAPITALS --> e.a Supply Chain = SUPPLY_CHAIN)
+			let sApproverType = oApproverType.ApproverType;
+			let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
+
+			//get max ValidationType
+			offerProductValidation.map((productValidation) => { 
+
+				//keep current validation type
+				let iValidationType = oApproverType.ValidationType;
+				
+				//check if a product is found with a higher calculated validation type for the same approverType as the current
+				if(oApproverType.ValidationType < productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType){
+					iValidationType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType;
+				};
+
+				oApproverType.ValidationType = iValidationType;
+
+			});
+
+		});
+
+		//For MEA specific
+		//No need for country business approval if regional business approval is required
+		let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
+		let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
+		if(oCountryBusiness && oRegionalBusiness){
+			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
+		}
+
+		//For Thailand specific
+		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
+		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM');
+		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
+		if(oCDH && oNSM && oHBU){
+			//If CDH approval is mandatory, lower levels do not need to approve
+			if (oCDH.ValidationType === 3){
+				oNSM.ValidationType = 1;
+				oHBU.ValidationType = 1;
+			}
+			//If HBU approval is mandatory, lower levels do not need to approve
+			else if (oHBU.ValidationType === 3){
+				oNSM.ValidationType = 1;
+			}
+		}
+
+		//return the unique approvertypes for the offer & there re-calculated validation type
+		return aApproverTypes;
+
+	}
+
 	function getApprovalContent(ApproverType) {
 		switch (ApproverType) {
 			case "Country Business":
@@ -1185,15 +1572,134 @@ module.exports = (srv) => {
 			UserEmail: userEmail
 		};
 	}
+
+	function mapDefaultCountryApprovers(countryApprovers, approverType, offerValidation){
+		if(!offerValidation.DIVISION){
+			return countryApprovers.filter((d) => d.ApproverType === approverType);
+		} else {
+			return countryApprovers.filter((d) => d.ApproverType === approverType && d.Division === offerValidation.DIVISION);
+		}
+	}
+
+	function mapApprovalForType(approverType, latestApproval, division){
+		aApprovalForTypeResult = [];
+		oApprovalForType = latestApproval.filter((d => d.ApproverType === approverType));
+		if(oApprovalForType.length > 1 && approverType != 'Supply Chain' && approverType != 'Regulatory' && approverType != 'Legal' && approverType != 'Controlling') {
+			switch (division){
+				case 'Pharma': 
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					return aApprovalForTypeResult;
+				case 'Radiology': 
+					aApprovalForTypeResult.push(oApprovalForType[1]);
+					return aApprovalForTypeResult;
+				case 'Both':
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					aApprovalForTypeResult.push(oApprovalForType[1]);
+					return aApprovalForTypeResult;
+			}
+		} else {
+			return oApprovalForType;
+		}
+	}
+
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers){
+		
+		let aResults = [];
+		let approverName = "";
+		let approverEmailID = "";
+		let senderComment = "";
+		let approverComment = "";
+		let statusTime = null;
+		let submittedBy = null;
+		let approverDate = null;
+		let flowId = null;
+		let approverType = "";
+		let division = "";
+		let countryName = "";
+		let userName = "";
+		let userEmail = "";
+		let requiredAction = "";
+
+		approverTypes.forEach(function(type, index ){
+			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
+			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation);
+			
+			if (approvalForType.length !== 0) {
+				approverName 	= approvalForType[0].ApproverName;
+				approverEmailID = approvalForType[0].ApproverEmailID;
+				statusTime		= approvalForType[0].Statustime;
+				submittedBy 	= approvalForType[0].Submittedby;
+				approverDate 	= approvalForType[0].ApproverDate;
+				flowId 			= approvalForType[0].FLOW_ID;
+				countryName 	= approvalForType[0].CountryName;
+				userName 		= approvalForType[0].UserName;
+				userEmail 		= approvalForType[0].UserEmail;
+				senderComment 	= approvalForType[0].SenderComment;
+				approverComment = approvalForType[0].ApproverComment;
+	//			hierarchy 		= approvalForType[0].Hierarchy;
+				requiredAction 	= type.ValidationType;
+				approverType	= defaultForType.length !== 0 ? defaultForType[0].ApproverType : "";
+				division     	= defaultForType.length !== 0 ? defaultForType[0].Division : "";
+			}
+			else if (defaultForType.length !== 0) {
+				approverName 	= defaultForType[0].ApproverName;
+				approverEmailID = defaultForType[0].ApproverEmailID;
+				approverType 	= defaultForType[0].ApproverType;
+				division 		= defaultForType[0].Division;
+				requiredAction  = approverTypes.filter((d) => d.ApproverType === defaultForType[0].ApproverType)[0].ValidationType
+				approverType	= defaultForType[0].ApproverType;
+				division 	 	= defaultForType[0].Division;
+			}
+			else {
+				return null;
+			}
+
+			let aApproval 		= approvalForType.filter((a) => a.ApproverType === approverType);
+			let aApproverType	= approverTypes.filter((d) => d.ApproverType === approverType);
+			if(aApproval.length > 0 && aApproval[0].Hierarchy !== null){
+				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
+			} 
+
+			aResults.push({
+				TenderID: offerValidation.TENDERID,
+				OfferId: offerValidation.OFFERID,
+				CountryCode: offerValidation.COUNTRYCODE,
+				ApprovalContent: getApprovalContent(approverType),
+				ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
+				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
+				ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
+				ApproverName: approverName,
+				ApproverEmailID: approverEmailID,
+				SenderComment: senderComment,
+				ApproverComment: approverComment,
+				Active: 1,
+				AP_ID: null,
+				RestoreKey: null,
+				Statustime: statusTime,
+				Submittedby: submittedBy,
+				ApproverDate: approverDate,
+				ApproverType: approverType,
+				Division: division,
+				FLOW_ID: flowId,
+				ApproverList: defaultForType,
+				ApproverTypes: aApproverType,
+				CountryName: countryName,
+				UserName: userName,
+				UserEmail: userEmail
+			});
+
+		});
+
+		return aResults;
+	}
+
 	async function buildOfferApproval(tx, whereOffer) {
 		let results = [];
-
+		let approverTypes = [];
 		let latestApproval = await tx.run(SELECT.from(ApprovalRequests).where(whereOffer));
 
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offerValidation = await buildOfferValidation(tx, whereOffer);
-
-		if (!offerValidation.COUNTRYCODE) return results;
 
 		let whereCountry = whereOffer;
 		whereCountry[0].ref[0] = 'CountryCode';
@@ -1201,307 +1707,15 @@ module.exports = (srv) => {
 
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
 
-		let whereApproverType = {
-			CountryCode: offerValidation.COUNTRYCODE
-		}
-		let approverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+		if (!offerValidation.COUNTRYCODE) return results;
 		
-		let whereOfferId = {
-			OfferId: offerValidation.OFFERID
-		} 
-		//let approvals = await tx.run(SELECT.from(PT_TMAPPRST).where(whereOfferId))
+		//get ApproverTypes
+		if (offerValidation) {
+			approverTypes = offerValidation.ApproverTypes;
+		}
 		
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers);
 
-		//Existing saved approval entries (may not exist)
-		//Shared
-		let approvalSupply = latestApproval.filter((d) => d.ApproverType === "Supply Chain");
-		//MEA
-		let approvalRegulatory = latestApproval.filter((d) => d.ApproverType === "Regulatory");
-		let approvalLegal = latestApproval.filter((d) => d.ApproverType === "Legal");
-		let approvalControlling = latestApproval.filter((d) => d.ApproverType === "Controlling");
-		
-		let approvalCountry = latestApproval.filter((d) => d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations");
-		let approvalCountry1 = approvalCountry;
-		let approvalCountry2 = [];
-		if (approvalCountry.length > 1) {
-			approvalCountry1 = [approvalCountry[0]];
-			approvalCountry2 = [approvalCountry[1]];
-		}
-		let approvalRegional = latestApproval.filter((d) => d.ApproverType === "Regional Business");
-		let approvalRegional1 = approvalRegional;
-		let approvalRegional2 = [];
-		if (approvalRegional.length > 1) {
-			approvalRegional1 = [approvalRegional[0]];
-			approvalRegional2 = [approvalRegional[1]];
-		}
-		//Thailand
-		let approvalNsm = latestApproval.filter((d) => d.ApproverType === "NSM/SM/FM");
-		let approvalNsm1 = approvalNsm;
-		let approvalNsm2 = [];
-		if (approvalNsm.length > 1){
-			approvalNsm1 = [approvalNsm[0]];
-			approvalNsm2 = [approvalNsm[1]];
-		}
-		let approvalHbu = latestApproval.filter((d) => d.ApproverType === "HBU");
-		let approvalHbu1 = approvalHbu;
-		let approvalHbu2 = [];
-		if (approvalHbu.length > 1){
-			approvalHbu1 = [approvalHbu[0]];
-			approvalHbu2 = [approvalHbu[1]];
-		}
-		let approvalCdh = latestApproval.filter((d) => d.ApproverType === "CDH");
-		let approvalCdh1 = approvalCdh;
-		let approvalCdh2 = [];
-		if (approvalCdh.length > 1){
-			approvalCdh1 = [approvalCdh[0]];
-			approvalCdh2 = [approvalCdh[1]];
-		}
-		//Argentina
-		//1 and 2 variables is used for cases where we have products from both Pharma and Radiology in offer as we have different approvers for SAME TYPE in each division
-		let approvalMacs = latestApproval.filter((d) => d.ApproverType === "MACS");
-		let approvalMacs1 = approvalMacs;
-		let approvalMacs2 = [];
-		if (approvalMacs.length > 1){
-			approvalMacs1 = [approvalMacs[0]];
-			approvalMacs2 = [approvalMacs[1]];
-		}
-		let approvalTa = latestApproval.filter((d) => d.ApproverType === "TA");
-		let approvalTa1 = approvalTa;
-		let approvalTa2 = [];
-		if (approvalTa.length > 1){
-			approvalTa1 = [approvalTa[0]];
-			approvalTa2 = [approvalTa[1]];
-		}
-		let approvalFbp = latestApproval.filter((d) => d.ApproverType === "FBP");
-		let approvalFbp1 = approvalFbp;
-		let approvalFbp2 = [];
-		if (approvalFbp.length > 1){
-			approvalFbp1 = [approvalFbp[0]];
-			approvalFbp2 = [approvalFbp[1]];
-		}
-		let approvalLpc = latestApproval.filter((d) => d.ApproverType === "LPC");
-		let approvalLpc1 = approvalLpc;
-		let approvalLpc2 = [];
-		if (approvalLpc.length > 1){
-			approvalLpc1 = [approvalLpc[0]];
-			approvalLpc2 = [approvalLpc[1]];
-		}
-		let approvalComPga = latestApproval.filter((d) => d.ApproverType === "COM_PGA");
-		let approvalComPga1 = approvalComPga;
-		let approvalComPga2 = [];
-		if (approvalComPga.length > 1){
-			approvalComPga1 = [approvalComPga[0]];
-			approvalComPga2 = [approvalComPga[1]];
-		}
-		let approvalInternationalTrade = latestApproval.filter((d) => d.ApproverType === "International_Trade");
-		let approvalInternationalTrade1 = approvalInternationalTrade;
-		let approvalInternationalTrade2 = [];
-		if (approvalInternationalTrade.length > 1){
-			approvalInternationalTrade1 = [approvalInternationalTrade[0]];
-			approvalInternationalTrade2 = [approvalInternationalTrade[1]];
-		}
-		let approvalTransferPricing = latestApproval.filter((d) => d.ApproverType === "Transfer_Pricing");
-		let approvalTransferPricing1 = approvalTransferPricing;
-		let approvalTransferPricing2 = [];
-		if (approvalTransferPricing.length > 1){
-			approvalTransferPricing1 = [approvalTransferPricing[0]];
-			approvalTransferPricing2 = [approvalTransferPricing[1]];
-		}
-		let approvalSbr = latestApproval.filter((d) => d.ApproverType === "SBR");
-		let approvalSbr1 = approvalSbr;
-		let approvalSbr2 = [];
-		if (approvalSbr.length > 1){
-			approvalSbr1 = [approvalSbr[0]];
-			approvalSbr2 = [approvalSbr[1]];
-		}
-
-		//Default (first found, if exists) approvers (will be used if none saved)
-		//Shared
-		let defaultSupply = countryApprovers.filter((d) => d.ApproverType === "Supply Chain");
-		//MEA
-		let defaultRegulatory = countryApprovers.filter((d) => d.ApproverType === "Regulatory");
-		let defaultLegal = countryApprovers.filter((d) => d.ApproverType === "Legal");
-		let defaultControlling = countryApprovers.filter((d) => d.ApproverType === "Controlling");
-		let defaultCountryPharma = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Pharma");
-		let defaultCountryRadiology = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Radiology");
-		let defaultRegionalPharma = countryApprovers.filter((d) => d.ApproverType === "Regional Business" && d.Division === "Pharma");
-		let defaultRegionalRadiology = countryApprovers.filter((d) => d.ApproverType === "Regional Business" && d.Division === "Radiology");
-		//Thailand
-		let defaultNsmPharma = countryApprovers.filter((d) => d.ApproverType === "NSM/SM/FM" && d.Division === "Pharma");
-		let defaultNsmRadiology = countryApprovers.filter((d) => d.ApproverType === "NSM/SM/FM" && d.Division === "Radiology");
-		let defaultHbuPharma = countryApprovers.filter((d) => d.ApproverType === "HBU" && d.Division === "Pharma");
-		let defaultHbuRadiology = countryApprovers.filter((d) => d.ApproverType === "HBU" && d.Division === "Radiology");
-		let defaultCdhPharma = countryApprovers.filter((d) => d.ApproverType === "CDH" && d.Division === "Pharma");
-		let defaultCdhRadiology = countryApprovers.filter((d) => d.ApproverType === "CDH" && d.Division === "Radiology");
-		//Argentina
-		//Pharma
-		defaultMacsPharma = countryApprovers.filter((d) => d.ApproverType === "MACS" && d.Division === "Pharma");
-		defaultTaPharma = countryApprovers.filter((d) => d.ApproverType === "TA" && d.Division === "Pharma");
-		defaultFbpPharma = countryApprovers.filter((d) => d.ApproverType === "FBP" && d.Division === "Pharma");
-		defaultLpcPharma = countryApprovers.filter((d) => d.ApproverType === "LPC" && d.Division === "Pharma");
-		defaultComPgaPharma = countryApprovers.filter((d) => d.ApproverType === "COM_PGA" && d.Division === "Pharma");
-		defaultInternationalTradePharma = countryApprovers.filter((d) => d.ApproverType === "International_Trade" && d.Division === "Pharma");
-		defaultTransferPricingPharma = countryApprovers.filter((d) => d.ApproverType === "Transfer_Pricing" && d.Division === "Pharma");
-		defaultSbrPharma = countryApprovers.filter((d) => d.ApproverType === "SBR" && d.Division === "Pharma");
-		//Radiology
-		defaultMacsRadiology = countryApprovers.filter((d) => d.ApproverType === "MACS" && d.Division === "Radiology");
-		defaultTaRadiology = countryApprovers.filter((d) => d.ApproverType === "TA" && d.Division === "Radiology");
-		defaultFbpRadiology = countryApprovers.filter((d) => d.ApproverType === "FBP" && d.Division === "Radiology");
-		defaultLpcRadiology = countryApprovers.filter((d) => d.ApproverType === "LPC" && d.Division === "Radiology");
-		defaultComPgaRadiology = countryApprovers.filter((d) => d.ApproverType === "COM_PGA" && d.Division === "Radiology");
-		defaultInternationalTradeRadiology = countryApprovers.filter((d) => d.ApproverType === "International_Trade" && d.Division === "Radiology");
-		defaultTransferPricingRadiology = countryApprovers.filter((d) => d.ApproverType === "Transfer_Pricing" && d.Division === "Radiology");
-		defaultSbrRadiology = countryApprovers.filter((d) => d.ApproverType === "SBR" && d.Division === "Radiology");
-
-		//Regulatory
-		let regulatory = buildValidationEntry(approverTypes, approvalRegulatory, defaultRegulatory, offerValidation, offerValidation.REGULATORY);
-		if (regulatory) results.push(regulatory);
-		//Legal
-		let legal = buildValidationEntry(approverTypes, approvalLegal, defaultLegal, offerValidation, offerValidation.LEGAL);
-		if (legal) results.push(legal);
-		//Controlling
-		let controlling = buildValidationEntry(approverTypes, approvalControlling, defaultControlling, offerValidation, offerValidation.CONTROLLING);
-		if (controlling) results.push(controlling);
-		//Country Business & Regional Business
-		if (offerValidation.DIVISION === "Both") {
-			let countryPharma = buildValidationEntry(approverTypes, approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
-			if (countryPharma) results.push(countryPharma);
-
-			let countryRadiology = buildValidationEntry(approverTypes, approvalCountry2, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
-			if (countryRadiology) results.push(countryRadiology);
-
-			let regionalPharma = buildValidationEntry(approverTypes, approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
-			if (regionalPharma) results.push(regionalPharma);
-
-			let regionalRadiology = buildValidationEntry(approverTypes, approvalRegional2, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
-			if (regionalRadiology) results.push(regionalRadiology);
-
-			let nsmPharma = buildValidationEntry(approverTypes, approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
-			if (nsmPharma) results.push(nsmPharma);
-
-			let nsmRadiology = buildValidationEntry(approverTypes, approvalNsm2, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
-			if (nsmRadiology) results.push(nsmRadiology);
-
-			let hbuPharma = buildValidationEntry(approverTypes, approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
-			if (hbuPharma) results.push(hbuPharma);
-
-			let hbuRadiology = buildValidationEntry(approverTypes, approvalHbu2, defaultHbuRadiology, offerValidation, offerValidation.HBU);
-			if (hbuRadiology) results.push(hbuRadiology);
-
-			let cdhPharma = buildValidationEntry(approverTypes, approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
-			if (cdhPharma) results.push(cdhPharma);
-
-			let cdhRadiology = buildValidationEntry(approverTypes, approvalCdh2, defaultCdhRadiology, offerValidation, offerValidation.CDH);
-			if (cdhRadiology) results.push(cdhRadiology);
-			//Argentina
-			//Pharma
-			let macsPharma = buildValidationEntry(approverTypes, approvalMacs1, defaultMacsPharma, offerValidation, offerValidation.MACS);
-			if (macsPharma) results.push(macsPharma);
-			let taPharma = buildValidationEntry(approverTypes, approvalTa1, defaultTaPharma, offerValidation, offerValidation.TA);
-			if (taPharma) results.push(taPharma);
-			let fbpPharma = buildValidationEntry(approverTypes, approvalFbp1, defaultFbpPharma, offerValidation, offerValidation.FBP);
-			if (fbpPharma) results.push(fbpPharma);
-			let lpcPharma = buildValidationEntry(approverTypes, approvalLpc1, defaultLpcPharma, offerValidation, offerValidation.LPC);
-			if (lpcPharma) results.push(lpcPharma);
-			let comPgaPharma = buildValidationEntry(approverTypes, approvalComPga1, defaultComPgaPharma, offerValidation, offerValidation.COM_PGA);
-			if (comPgaPharma) results.push(comPgaPharma);
-			let internationalTradePharma = buildValidationEntry(approverTypes, approvalInternationalTrade1, defaultInternationalTradePharma, offerValidation, offerValidation.International_Trade);
-			if (internationalTradePharma) results.push(internationalTradePharma);
-			let transferPricingPharma = buildValidationEntry(approverTypes, approvalTransferPricing1, defaultTransferPricingPharma, offerValidation, offerValidation.Transfer_Pricing);
-			if (transferPricingPharma) results.push(transferPricingPharma);
-			let sbrPharma = buildValidationEntry(approverTypes, approvalSbr1, defaultSbrPharma, offerValidation, offerValidation.SBR);
-			if (sbrPharma) results.push(sbrPharma);
-
-			//Radiology
-			let macsRadiology = buildValidationEntry(approverTypes, approvalMacs2, defaultMacsRadiology, offerValidation, offerValidation.MACS);
-			if (macsRadiology) results.push(macsRadiology);
-			let taRadiology = buildValidationEntry(approverTypes, approvalTa2, defaultTaRadiology, offerValidation, offerValidation.TA);
-			if (taRadiology) results.push(taRadiology);
-			let fbpRadiology = buildValidationEntry(approverTypes, approvalFbp2, defaultFbpRadiology, offerValidation, offerValidation.FBP);
-			if (fbpRadiology) results.push(fbpRadiology);
-			let lpcRadiology = buildValidationEntry(approverTypes, approvalLpc2, defaultLpcRadiology, offerValidation, offerValidation.LPC);
-			if (lpcRadiology) results.push(lpcRadiology);
-			let comPgaRadiology = buildValidationEntry(approverTypes, approvalComPga2, defaultComPgaRadiology, offerValidation, offerValidation.COM_PGA);
-			if (comPgaRadiology) results.push(comPgaRadiology);
-			let internationalTradeRadiology = buildValidationEntry(approverTypes, approvalInternationalTrade2, defaultInternationalTradeRadiology, offerValidation, offerValidation.International_Trade);
-			if (internationalTradeRadiology) results.push(internationalTradeRadiology);
-			let transferPricingRadiology = buildValidationEntry(approverTypes, approvalTransferPricing2, defaultTransferPricingRadiology, offerValidation, offerValidation.Transfer_Pricing);
-			if (transferPricingRadiology) results.push(transferPricingRadiology);
-			let sbrRadiology = buildValidationEntry(approverTypes, approvalSbr2, defaultSbrRadiology, offerValidation, offerValidation.SBR);
-			if (sbrRadiology) results.push(sbrRadiology);
-		}
-		else if (offerValidation.DIVISION === "Pharma") {
-			let countryPharma = buildValidationEntry(approverTypes, approvalCountry1, defaultCountryPharma, offerValidation, offerValidation.COUNTRY_BUSINESS);
-			if (countryPharma) results.push(countryPharma);
-
-			let regionalPharma = buildValidationEntry(approverTypes, approvalRegional1, defaultRegionalPharma, offerValidation, offerValidation.REGIONAL_BUSINESS);
-			if (regionalPharma) results.push(regionalPharma);
-
-			let nsmPharma = buildValidationEntry(approverTypes, approvalNsm1, defaultNsmPharma, offerValidation, offerValidation.NSM_SM_FM);
-			if (nsmPharma) results.push(nsmPharma);
-
-			let hbuPharma = buildValidationEntry(approverTypes, approvalHbu1, defaultHbuPharma, offerValidation, offerValidation.HBU);
-			if (hbuPharma) results.push(hbuPharma);
-
-			let cdhPharma = buildValidationEntry(approverTypes, approvalCdh1, defaultCdhPharma, offerValidation, offerValidation.CDH);
-			if (cdhPharma) results.push(cdhPharma);
-			//Argentina
-			let macsPharma = buildValidationEntry(approverTypes, approvalMacs1, defaultMacsPharma, offerValidation, offerValidation.MACS);
-			if (macsPharma) results.push(macsPharma);
-			let taPharma = buildValidationEntry(approverTypes, approvalTa1, defaultTaPharma, offerValidation, offerValidation.TA);
-			if (taPharma) results.push(taPharma);
-			let fbpPharma = buildValidationEntry(approverTypes, approvalFbp1, defaultFbpPharma, offerValidation, offerValidation.FBP);
-			if (fbpPharma) results.push(fbpPharma);
-			let lpcPharma = buildValidationEntry(approverTypes, approvalLpc1, defaultLpcPharma, offerValidation, offerValidation.LPC);
-			if (lpcPharma) results.push(lpcPharma);
-			let comPgaPharma = buildValidationEntry(approverTypes, approvalComPga1, defaultComPgaPharma, offerValidation, offerValidation.COM_PGA);
-			if (comPgaPharma) results.push(comPgaPharma);
-			let internationalTradePharma = buildValidationEntry(approverTypes, approvalInternationalTrade1, defaultInternationalTradePharma, offerValidation, offerValidation.International_Trade);
-			if (internationalTradePharma) results.push(internationalTradePharma);
-			let transferPricingPharma = buildValidationEntry(approverTypes, approvalTransferPricing1, defaultTransferPricingPharma, offerValidation, offerValidation.Transfer_Pricing);
-			if (transferPricingPharma) results.push(transferPricingPharma);
-			let sbrPharma = buildValidationEntry(approverTypes, approvalSbr1, defaultSbrPharma, offerValidation, offerValidation.SBR);
-			if (sbrPharma) results.push(sbrPharma);
-		}
-		else if (offerValidation.DIVISION === "Radiology") {
-			let countryRadiology = buildValidationEntry(approverTypes, approvalCountry1, defaultCountryRadiology, offerValidation, offerValidation.COUNTRY_BUSINESS);
-			if (countryRadiology) results.push(countryRadiology);
-
-			let regionalRadiology = buildValidationEntry(approverTypes, approvalRegional1, defaultRegionalRadiology, offerValidation, offerValidation.REGIONAL_BUSINESS);
-			if (regionalRadiology) results.push(regionalRadiology);
-
-			let nsmRadiology = buildValidationEntry(approverTypes, approvalNsm1, defaultNsmRadiology, offerValidation, offerValidation.NSM_SM_FM);
-			if (nsmRadiology) results.push(nsmRadiology);
-
-			let hbuRadiology = buildValidationEntry(approverTypes, approvalHbu1, defaultHbuRadiology, offerValidation, offerValidation.HBU);
-			if (hbuRadiology) results.push(hbuRadiology);
-
-			let cdhRadiology = buildValidationEntry(approverTypes, approvalCdh1, defaultCdhRadiology, offerValidation, offerValidation.CDH);
-			if (cdhRadiology) results.push(cdhRadiology);
-			//Argentina
-			let macsRadiology = buildValidationEntry(approverTypes, approvalMacs1, defaultMacsRadiology, offerValidation, offerValidation.MACS);
-			if (macsRadiology) results.push(macsRadiology);
-			let taRadiology = buildValidationEntry(approverTypes, approvalTa1, defaultTaRadiology, offerValidation, offerValidation.TA);
-			if (taRadiology) results.push(taRadiology);
-			let fbpRadiology = buildValidationEntry(approverTypes, approvalFbp1, defaultFbpRadiology, offerValidation, offerValidation.FBP);
-			if (fbpRadiology) results.push(fbpRadiology);
-			let lpcRadiology = buildValidationEntry(approverTypes, approvalLpc1, defaultLpcRadiology, offerValidation, offerValidation.LPC);
-			if (lpcRadiology) results.push(lpcRadiology);
-			let comPgaRadiology = buildValidationEntry(approverTypes, approvalComPga1, defaultComPgaRadiology, offerValidation, offerValidation.COM_PGA);
-			if (comPgaRadiology) results.push(comPgaRadiology);
-			let internationalTradeRadiology = buildValidationEntry(approverTypes, approvalInternationalTrade1, defaultInternationalTradeRadiology, offerValidation, offerValidation.International_Trade);
-			if (internationalTradeRadiology) results.push(internationalTradeRadiology);
-			let transferPricingRadiology = buildValidationEntry(approverTypes, approvalTransferPricing1, defaultTransferPricingRadiology, offerValidation, offerValidation.Transfer_Pricing);
-			if (transferPricingRadiology) results.push(transferPricingRadiology);
-			let sbrRadiology = buildValidationEntry(approverTypes, approvalSbr1, defaultSbrRadiology, offerValidation, offerValidation.SBR);
-			if (sbrRadiology) results.push(sbrRadiology);
-		}
-
-		//Supply Chain
-		let supply = buildValidationEntry(approverTypes, approvalSupply, defaultSupply, offerValidation, offerValidation.SUPPLY_CHAIN);
-		if (supply) results.push(supply);
-
-		return results;
 	}
 
 	async function getOffersForWorkflow(tx, approvalStatus) {

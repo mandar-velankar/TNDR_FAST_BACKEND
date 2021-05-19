@@ -522,6 +522,7 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack sku
 	offerProduct.SKUCountry.MANUFACTURER as MANUFACTURER,
 	offerProduct.SKUCountry.SHELFLIFE as SHELFLIFE,
 	offerProduct.SKU.PRESENTATION as PRESENTATION,
+    offerProduct.SKU.ACTIVE_SUBSTANCE as ACTIVE_SUBSTANCE,
 	offerProduct.SKUCountry.VTATax as VAT,
     ifnull(offerProduct.SKUCountry.COMMENT, '') as PRODUCT_COMMENT:String(500),
 	offerProduct.UnitPerPack as UNIT,
@@ -639,9 +640,16 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
         when 'Direct' then offer.Tender.Institute.ContactPerson
         else offer.Distributor.ContactPerson
     end as DISTRIBUTORCONTACT:String(500),
+    case offer.Tender.TenderChannel
+        when 'Direct' then '' // TODO: check this with Jonathan -> what field to use in case of Direct tender
+        else offer.Distributor.CONTACT_EMAIL
+    end as DISTRIBUTOREMAIL:String(500),
 	ifnull(offer.Quotation.Comment, '') as CUSTOM_REMARKS:String(500),
     offer.FOCType as FOC_TYPE,
-    ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT
+    ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT,
+    offer.Tender.PublicationDate as PUBLICATION_DATE,
+    offer.Tender.BidDueDate as BID_DUE_DATE,
+    offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -675,9 +683,13 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
           offer.Distributor.Fax,
           offer.Tender.Institute.ContactPerson,
           offer.Distributor.ContactPerson,
+          offer.Distributor.CONTACT_EMAIL,
           offer.Quotation.Comment,
           offer.FOCType,
-          offer.Country.COMMENT;
+          offer.Country.COMMENT,
+          offer.Tender.PublicationDate,
+          offer.Tender.BidDueDate,
+          offer.Quotation.SubmittedBy;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.OFFER_ID{
