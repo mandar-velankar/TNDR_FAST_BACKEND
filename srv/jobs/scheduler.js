@@ -41,16 +41,24 @@ module.exports = async () => {
 
         const url = `${this.host}/${this.serviceUrl}/${this.resources.tenders}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
 
-        console.log(`\n------------------------------------------------------\n`);
-        console.log(`Fetching data from ${url} \n`);
+        const start = new Date().getTime();
+        console.log(`\n Job started : ${new Date()}\n`);
   
         try {
+
+          console.log(`Fetching data from ${url} \n`);
 
           const results = await this.fetchWithRetry(url);
           const tenders = results.data.Listado;
           
           const tenderDetails = await this.getTendersWithDetails(tenders);
           await this.saveTenders(tenderDetails);
+
+          const end = new Date().getTime();
+          const time = end - start;
+
+          console.log(`\n Job completed successfully : ${new Date()}`);
+          console.log(`\n Execution time: ${time}ms`);
          
 
         }catch(err){
@@ -83,11 +91,11 @@ module.exports = async () => {
       async function errorHandler(error) {
         if (currentRetry < MAX_RETRY) {
           currentRetry++;
-          console.log(`Retrying... \n ${url}`);
+          // console.log(`Retrying ... \n\t [${currentRetry}] - ${url}`);
           return sendWithRetry();
         } else {
           console.log(`Retried ${currentRetry} times but still failed to fetch from: \n${url}`);
-          return error;
+          throw new Error(error);
         }
       }
 
@@ -114,9 +122,9 @@ module.exports = async () => {
            const detail = await this.fetchWithRetry(url);
            tenderDetails.push(detail.data.Listado[0]);
           
-           console.log(`Tender detail received: ${i}`);
-         } catch (error) {
-           console.log(`Failed fetching tender detail: ${i}`);
+           console.log(`[${i}] - ${detail.data.Listado[0].CodigoExterno} - fetch successful`);
+         }catch (error) {
+           console.log(`[${i}] - ${detail.data.Listado[0].CodigoExterno} - fetch failed`);
          }
       }
 
