@@ -7,25 +7,31 @@ const { v4:uuidv4 } = require('uuid');
 
 module.exports = async () => {
 
-  const model = await cds.load(['db', 'srv']);
+  // const model = await cds.load(['db', 'srv']);
+  // let db = cds.reflect(model);
 
-  let db = cds.reflect(model);
-  // const db = await cds.connect.to('db'); // connect to database service
+  const db = await cds.connect.to('db'); // connect to database service
 
-  const {
-    MercadoPublicoLicitacione
-  } = db.entities("com.bayer.SXTENDER.IntegrationData");
+  // const {
+  //   MercadoPublicoLicitacione,
+  //   MercadoPublicoComprador,
+  //   MercadoPublicoProducto
+  // } = db.entities("com.bayer.SXTENDER.IntegrationData");
 
+  const { SchedulerApiConfig } = db.entities("com.bayer.SXTENDER.AdminData");
+
+  // get api config
+  const mercadoApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}).where({Resource: 'Tender'}));
 
   class MercadoPublico {
 
     constructor(){
 
-      this.host = 'http://api.mercadopublico.cl';
-      this.serviceUrl = 'servicios/v1/publico';
-      this.ticket = '902EA5FB-1628-4220-8F75-4ABC4EEC569F';
+      this.host = mercadoApi.Host; 
+      this.serviceUrl = mercadoApi.BasePath; 
+      this.ticket = mercadoApi.ApiKey; 
       this.resources = {
-        tenders: 'licitaciones.json'
+        tenders: mercadoApi.ResourcePath
       };
       this.consultationDate = this.dateToDDMMYYYY(new Date());
 
@@ -39,7 +45,7 @@ module.exports = async () => {
 
       return new CronJob(cronTime, async () => {
 
-        const url = `${this.host}/${this.serviceUrl}/${this.resources.tenders}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
+        const url = `${this.host}${this.serviceUrl}${this.resources.tenders}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
 
         const start = new Date().getTime();
         console.log(`\n Job started : ${new Date()}\n`);
@@ -52,6 +58,8 @@ module.exports = async () => {
           const tenders = results.data.Listado;
           
           const tenderDetails = await this.getTendersWithDetails(tenders);
+
+          console.log(`\nSaving data into DB \n`);
           await this.saveTenders(tenderDetails);
 
           const end = new Date().getTime();
@@ -117,7 +125,7 @@ module.exports = async () => {
       
       for(let i = 0; i < tenders.length; i++){
          try {         
-           const url = `${this.host}/${this.serviceUrl}/${this.resources.tenders}?codigo=${tenders[i].CodigoExterno}&ticket=${this.ticket}`;
+           const url = `${this.host}${this.serviceUrl}${this.resources.tenders}?codigo=${tenders[i].CodigoExterno}&ticket=${this.ticket}`;
           
            const detail = await this.fetchWithRetry(url);
            tenderDetails.push(detail.data.Listado[0]);
@@ -149,10 +157,13 @@ module.exports = async () => {
           insertPromises.push(cds.run(INSERT.into('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador', comprador)));
           insertPromises.push(cds.run(INSERT.into('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto', items)));
 
-          await Promise.all(insertPromises);
-  
-          console.log(`Tender ${mappedTenderObj.CodigoExterno} successfully created in the DB`);
-  
+          try{
+            await Promise.all(insertPromises);
+            console.log(`Tender ${mappedTenderObj.CodigoExterno} successfully created in the DB`);
+          }catch(error){
+            console.log(`Tender ${mappedTenderObj.CodigoExterno} could not be created in the DB - ${error.message} `);
+          }
+          
         }
 
       }
