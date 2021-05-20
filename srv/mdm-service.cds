@@ -2,7 +2,7 @@ using {com.bayer.SXTENDER.MasterData} from '../db/MasterData';
 using {com.bayer.SXTENDER.TransactionalData} from '../db/TransactionalData';
 
 
-service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_admin']) {
+service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_admin','f_tndr_cag_mdm_user','f_tndr_cag_technical_user']) {
 
 
     entity PT_TMLE @readonly        as projection on MasterData.PT_TMLE;
