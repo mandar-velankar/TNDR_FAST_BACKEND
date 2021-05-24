@@ -129,4 +129,18 @@ entity SchedulerApiConfig: cuid {
     Resource         : String;
     ResourcePath     : String;
     ApiKey           : String;
+    RequestDelay     : Integer;
+    RequestMaxRetry  : Integer;
 }
+
+// entity SchedulerJobs: cuid {
+//     JobName          : String; 
+//     StartedAt        : Timestamp;
+//     FinishedAt       : Timestamp;
+//     Status           : String;
+// }
+
+// entity SchedulerErrorLog: cuid {
+//     ErrorMessage    : String;
+//     Resource        : String;
+// }
