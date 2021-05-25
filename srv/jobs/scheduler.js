@@ -37,7 +37,7 @@ module.exports = async () => {
           requestMaxRetry: mercadoApi.RequestMaxRetry
         }
       };
-      this.consultationDate = this.dateToDDMMYYYY(new Date());
+      this.consultationDate = '23052021'; //this.dateToDDMMYYYY(new Date());
 
     }
 
@@ -52,33 +52,38 @@ module.exports = async () => {
         const url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
 
         const start = new Date().getTime();
-        console.log(`\n Job started : ${new Date()}\n`);
+        console.log(` `);
+        console.log(`Job started : ${new Date()}`);
   
         try {
 
-          console.log(`Fetching data from ${url} \n`);
-
+          console.log(` `);
+          console.log(`Fetching data from ${url} `);
+          
           const results = await this.fetchWithRetry(url);
           const tenders = results.data.Listado;
           
           const tenderDetails = await this.getTendersWithDetails(tenders);
 
           if(tenderDetails && tenderDetails.length > 0){
-
-            console.log(`\nSaving data into DB \n`);
+            console.log(` `);
+            console.log(`${tenderDetails.length} tenders successfully fetched`);
+            console.log(` `);
+            console.log(`Saving data ...`);
             await this.saveTenders(tenderDetails);
-
           }
+
+        }catch(err) {
+          console.log(err);
+        }finally {
 
           const end = new Date().getTime();
           const time = end - start;
 
-          console.log(`\n Job completed successfully : ${new Date()}`);
-          console.log(`\n Execution time: ${time}ms`);
-         
+          console.log(` `);
+          console.log(`Job completed successfully : ${new Date()}`);
+          console.log(`Execution time: ${time}ms`);
 
-        }catch(err){
-          console.log(err);
         }
         
       }); 
@@ -94,6 +99,7 @@ module.exports = async () => {
 
       const REQUEST_DELAY = this.resources.tenders.requestDelay;
       const MAX_RETRY = this.resources.tenders.requestMaxRetry;
+      const _that = this;
 
       let currentRetry = 0;
 
@@ -106,13 +112,16 @@ module.exports = async () => {
       }
 
       async function errorHandler(error) {
+
         if (currentRetry < MAX_RETRY) {
           currentRetry++;
           // console.log(`Retrying ... \n\t [${currentRetry}] - ${url}`);
           return sendWithRetry();
         } else {
-          console.log(`Retried ${currentRetry} times but still failed to fetch from: \n${url}`);
-          throw new Error(error);
+          // console.log(`Retried ${currentRetry} times but still failed to fetch from: \n${url}`);
+          const errLog = await _that.saveError(error, url);
+          throw new Error(errLog);
+         
         }
       }
 
@@ -139,9 +148,9 @@ module.exports = async () => {
            const detail = await this.fetchWithRetry(url);
            tenderDetails.push(detail.data.Listado[0]);
           
-           console.log(`[${i}] - ${detail.data.Listado[0].CodigoExterno} - fetch successful`);
+           console.log(`Tender ${detail.data.Listado[0].CodigoExterno} -> success`);
          }catch (error) {
-           console.log(`[${i}] - ${detail.data.Listado[0].CodigoExterno} - fetch failed`);
+           console.log(`Tender ${error.message}`);
          }
       }
 
@@ -168,13 +177,44 @@ module.exports = async () => {
 
           try{
             await Promise.all(insertPromises);
-            console.log(`Tender ${mappedTenderObj.CodigoExterno} successfully created in the DB`);
+            console.log(`Tender ${mappedTenderObj.CodigoExterno} success`);
           }catch(error){
-            console.log(`Tender ${mappedTenderObj.CodigoExterno} could not be created in the DB - ${error.message} `);
+            console.log(`Tender ${mappedTenderObj.CodigoExterno} -> failed - ${error.message}`);
           }
           
         }
 
+      }
+
+    }
+
+    /**
+     * Saves the error in the DB.
+     * @param {Object} error 
+     * @returns {Promise}
+     */
+    async saveError(error, url){
+
+      if(error){
+
+        try{
+
+          const errorEntity = {
+            ErrorMessage: error.message,
+            ResourceURL: url,
+            ConsultationDate: new Date().toJSON()
+          };
+
+          await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
+
+          const tenderId = url.match(/=(.*?)&/)[1];
+
+          return `${tenderId} -> failed. See 'SchedulerErrorLog'`;
+
+        }catch(err){
+          return err.message;
+        }
+        
       }
 
     }

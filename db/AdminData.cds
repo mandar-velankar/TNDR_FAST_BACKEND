@@ -140,7 +140,8 @@ entity SchedulerApiConfig: cuid {
 //     Status           : String;
 // }
 
-// entity SchedulerErrorLog: cuid {
-//     ErrorMessage    : String;
-//     Resource        : String;
-// }
+entity SchedulerErrorLog: cuid {
+    ErrorMessage     : String;
+    ResourceURL      : String;
+    ConsultationDate : Timestamp;
+}
