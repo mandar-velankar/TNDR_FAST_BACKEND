@@ -31,7 +31,11 @@ module.exports = async () => {
       this.serviceUrl = mercadoApi.BasePath; 
       this.ticket = mercadoApi.ApiKey; 
       this.resources = {
-        tenders: mercadoApi.ResourcePath
+        tenders: {
+          path: mercadoApi.ResourcePath,
+          requestDelay: mercadoApi.RequestDelay,
+          requestMaxRetry: mercadoApi.RequestMaxRetry
+        }
       };
       this.consultationDate = this.dateToDDMMYYYY(new Date());
 
@@ -45,7 +49,7 @@ module.exports = async () => {
 
       return new CronJob(cronTime, async () => {
 
-        const url = `${this.host}${this.serviceUrl}${this.resources.tenders}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
+        const url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
 
         const start = new Date().getTime();
         console.log(`\n Job started : ${new Date()}\n`);
@@ -59,8 +63,12 @@ module.exports = async () => {
           
           const tenderDetails = await this.getTendersWithDetails(tenders);
 
-          console.log(`\nSaving data into DB \n`);
-          await this.saveTenders(tenderDetails);
+          if(tenderDetails && tenderDetails.length > 0){
+
+            console.log(`\nSaving data into DB \n`);
+            await this.saveTenders(tenderDetails);
+
+          }
 
           const end = new Date().getTime();
           const time = end - start;
@@ -84,8 +92,9 @@ module.exports = async () => {
      */
     fetchWithRetry(url){
 
-      const REQUEST_DELAY = 1000;
-      const MAX_RETRY = 5;
+      const REQUEST_DELAY = this.resources.tenders.requestDelay;
+      const MAX_RETRY = this.resources.tenders.requestMaxRetry;
+
       let currentRetry = 0;
 
       function wait(ms){
@@ -125,7 +134,7 @@ module.exports = async () => {
       
       for(let i = 0; i < tenders.length; i++){
          try {         
-           const url = `${this.host}${this.serviceUrl}${this.resources.tenders}?codigo=${tenders[i].CodigoExterno}&ticket=${this.ticket}`;
+           const url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?codigo=${tenders[i].CodigoExterno}&ticket=${this.ticket}`;
           
            const detail = await this.fetchWithRetry(url);
            tenderDetails.push(detail.data.Listado[0]);
@@ -258,7 +267,9 @@ module.exports = async () => {
               "AdjudicacionCantidad": item.Adjudicacion && item.Adjudicacion.Cantidad,
               "AdjudicacionMontoUnitario": item.Adjudicacion && item.Adjudicacion.MontoUnitario
             }
-          })
+          }),
+          createdAt: new Date().toJSON(),
+          createdBy: "system"
         };
 
         delete newTender['Fechas'];
