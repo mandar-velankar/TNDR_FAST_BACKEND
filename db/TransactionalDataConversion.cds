@@ -77,7 +77,9 @@ entity PT_TMDLVTR as select from TransactionalData.PT_TMDLVTR as delivery {
         delivery.PO as PO,
         delivery.InvoiceNo as InvoiceNo,
         delivery.SNo as SNo, //keep beceause its a key
-        delivery.OfferID as OfferID //keep beceause its a key
+        delivery.OfferID as OfferID, //keep beceause its a key
+        delivery.Contract as Contract,
+        delivery.PoDate as PoDate
 }excluding {SKUCode,InstituteID,RequestedQuantity};
 
 //converting letters

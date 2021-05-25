@@ -345,8 +345,29 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
     results.FOC_DESCRIPTION as FOC:String(255),
     results.UOM,
     results.OUTCOME,
-    key institute.PARENT_ID
-};
+    key max(institute.PARENT_ID) as PARENT_ID:Integer
+} group by results.COUNTRY_CODE,
+           results.TENDER_ID,
+           results.OFFER_ID,
+           results.TENDER_NAME,
+            results.INSTITUTE_ID,
+            results.INSTITUTE_NAME,
+            results.OFFER_DATE,
+            results.BRAND_ID,
+            results.BRAND_NAME,
+            results.PRODUCT_ID,
+            results.PRODUCT_NAME,
+            results.UNIT_PRICE,
+            results.PACK_PRICE,
+            results.UNIT_NET_PRICE,
+            results.PACK_NET_PRICE,
+            results.COGS,
+            results.BUDGET_RATE,
+            results.CURRENCY,
+            results.QUANTITY,
+            results.FOC_DESCRIPTION,
+            results.UOM,
+            results.OUTCOME;
 
 entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC negotiation';
 
