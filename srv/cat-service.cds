@@ -464,6 +464,8 @@ service CatalogService @(path : 'tender')
             CUSTOM_REMARKS     : String(5000);
             LETTERHEAD         : String(5000);
             CANCELLED          : String(3);
+            BUDGET_RATE        : Double;
+            SPOT_RATE          : Double;
     };
 
     entity ApprovalProducts {
