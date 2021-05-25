@@ -296,6 +296,9 @@ service CatalogService @(path : 'tender')
             //SBR                            : Integer not null;//AR only
             ACTIVE_SUBSTANCE               : String; // Chile
             OFFER_PRICE_VAT                : Double;
+            BUDGET_RATE                    : Double;
+            SPOT_RATE                      : Double;
+            BUSINESS_CASE_PRICE            : Double;
             ApproverTypes                   : Association to many ApproverTypes
                                                 on  ApproverTypes.CountryCode  = $self.COUNTRY_CODE;
     };
@@ -359,6 +362,8 @@ service CatalogService @(path : 'tender')
             //International_Trade            : Integer not null;//AR only
             //Transfer_Pricing               : Integer not null;//AR only
             //SBR                            : Integer not null;//AR only
+            BUDGET_RATE         : Double;
+            SPOT_RATE           : Double;
             ApproverTypes       : Association to many ApproverTypes
                                       on  ApproverTypes.CountryCode  = $self.COUNTRYCODE;
     };
@@ -508,6 +513,9 @@ service CatalogService @(path : 'tender')
             BUDGETEDPROFITABILITY         : String(1000);
             PROFITABILITYBUDGET           : String(1000);
             PROFITABILITYSPOT             : String(1000);
+            BUDGET_RATE                   : Double;
+            SPOT_RATE                     : Double;
+            BUSINESS_CASE_PRICE           : Double;
     };
 
     entity ApprovalApprovers {
