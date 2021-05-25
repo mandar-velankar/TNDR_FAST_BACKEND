@@ -73,16 +73,17 @@ module.exports = async () => {
             await this.saveTenders(tenderDetails);
           }
 
+        }catch(err) {
+          console.log(err);
+        }finally {
+
           const end = new Date().getTime();
           const time = end - start;
 
           console.log(` `);
           console.log(`Job completed successfully : ${new Date()}`);
           console.log(`Execution time: ${time}ms`);
-         
 
-        }catch(err){
-          console.log(err);
         }
         
       }); 
