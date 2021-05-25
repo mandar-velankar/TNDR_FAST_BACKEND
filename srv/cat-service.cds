@@ -459,6 +459,8 @@ service CatalogService @(path : 'tender')
             CUSTOM_REMARKS     : String(5000);
             LETTERHEAD         : String(5000);
             CANCELLED          : String(3);
+            BUDGET_RATE        : Double;
+            SPOT_RATE          : Double;
     };
 
     entity ApprovalProducts {
@@ -508,6 +510,9 @@ service CatalogService @(path : 'tender')
             BUDGETEDPROFITABILITY         : String(1000);
             PROFITABILITYBUDGET           : String(1000);
             PROFITABILITYSPOT             : String(1000);
+            BUDGETRATE                    : Double;
+            SPOTRATE                      : Double;
+            BUSINESSCASEPRICE             : Double;
     };
 
     entity ApprovalApprovers {

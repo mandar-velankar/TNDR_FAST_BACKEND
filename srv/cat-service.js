@@ -1154,7 +1154,10 @@ module.exports = (srv) => {
 				//SBR: productInfo.ProductValidation.SBR,
 				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
 				OFFER_PRICE_VAT: offerProduct.OFFER_PRICE * (1 + offerProduct.VAT),
-				ApproverTypes: aApproverTypes
+				ApproverTypes: aApproverTypes,
+				BUDGET_RATE: offerProduct.BUDGET_RATE,
+				SPOT_RATE: offerProduct.SPOT_RATE,
+				BUSINESS_CASE_PRICE: offerProduct.BUSINESS_CASE_PRICE,
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1235,6 +1238,8 @@ module.exports = (srv) => {
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
 		let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
 
+		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
+		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
 
 		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
 		let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
@@ -1414,7 +1419,9 @@ module.exports = (srv) => {
 			PUBLICATION_DATE: offer.PUBLICATION_DATE,
 			BID_DUE_DATE: offer.BID_DUE_DATE,
 			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
-			ApproverTypes: aApproverTypes
+			ApproverTypes: aApproverTypes,
+			BUDGET_RATE: budgetRate,
+			SPOT_RATE: spotRate
 		};
 		return results;
 	}
@@ -1755,7 +1762,9 @@ module.exports = (srv) => {
 			DELIVERYTERMS: (!offerValidation.DELIVERYTERMS) ? "" : offerValidation.DELIVERYTERMS.replace(/<br>+/g, "</br>"),
 			CUSTOM_REMARKS: (!offerValidation.CUSTOM_REMARKS) ? "" : offerValidation.CUSTOM_REMARKS,
 			LETTERHEAD: (!offerValidation.LETTERHEAD) ? "" : offerValidation.LETTERHEAD.replace(/<br>+/g, "</br>"),
-			CANCELLED: (approvalStatus === "Processing") ? "No" : "Yes"
+			CANCELLED: (approvalStatus === "Processing") ? "No" : "Yes",
+			BUDGET_RATE: offerValidation.BUDGET_RATE,
+			SPOT_RATE: offerValidation.SPOT_RATE
 		}
 	}
 
@@ -1809,7 +1818,10 @@ module.exports = (srv) => {
 				DIVISION: d.DIVISION,
 				BUDGETEDPROFITABILITY: (d.BUDGETED_PROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETED_PROFITABILITY, 0).concat("%"),
 				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 0).concat("%"),
-				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 0).concat("%")
+				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 0).concat("%"),
+				BUDGET_RATE: ServiceHelper.formatNumber(d.BUDGET_RATE, 2),
+				SPOT_RATE: ServiceHelper.formatNumber(d.SPOT_RATE, 2),
+				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2)
 			}
 		});
 	}
