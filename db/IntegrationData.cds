@@ -69,7 +69,7 @@ entity MercadoPublicoLicitacione : managed {
         PeriodoTiempoRenovacion         : String;
         EsRenovable                     : Integer;
         AdjudicacionTipo                : Integer;
-        AdjudicacionFecha               : DateTime;
+        AdjudicacionFecha               : DateTime; // duplicate (see FechaAdjudicacion)
         AdjudicacionNumero              : String;
         AdjudicacionNumeroOferentes     : Integer;
         AdjudicacionUrlActa             : String;
