@@ -12,22 +12,20 @@ module.exports = async () => {
 
   const db = await cds.connect.to('db'); // connect to database service
 
-  // const {
-  //   MercadoPublicoLicitacione,
-  //   MercadoPublicoComprador,
-  //   MercadoPublicoProducto
-  // } = db.entities("com.bayer.SXTENDER.IntegrationData");
 
   const { SchedulerApiConfig } = db.entities("com.bayer.SXTENDER.AdminData");
 
   // get api config
   const mercadoApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}).where({Resource: 'Tender'}));
 
+  const classification_search_terms = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationKeywords'));
+  const classification_products = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationProducts'));
+
   class MercadoPublico {
 
     constructor(){
 
-      this.host = mercadoApi.Host; 
+      this.host = mercadoApi.Host;
       this.serviceUrl = mercadoApi.BasePath; 
       this.ticket = mercadoApi.ApiKey; 
       this.resources = {
@@ -37,7 +35,7 @@ module.exports = async () => {
           requestMaxRetry: mercadoApi.RequestMaxRetry
         }
       };
-      this.consultationDate = '23052021'; //this.dateToDDMMYYYY(new Date());
+      this.consultationDate = this.dateToDDMMYYYY(new Date());
 
     }
 
@@ -65,9 +63,10 @@ module.exports = async () => {
           
           const tenderDetails = await this.getTendersWithDetails(tenders);
 
+          console.log(` `);
+          console.log(`${tenderDetails.length} tenders fetched`);
+
           if(tenderDetails && tenderDetails.length > 0){
-            console.log(` `);
-            console.log(`${tenderDetails.length} tenders successfully fetched`);
             console.log(` `);
             console.log(`Saving data ...`);
             await this.saveTenders(tenderDetails);
@@ -134,9 +133,9 @@ module.exports = async () => {
     }
 
     /**
-     * Fetches Tenders with details
-     * @param {Array} tenders 
-     * @returns {Promise <Array>}
+     * Fetches Tenders with details for a given list of tenders
+     * @param {Array} - list of tenders  
+     * @returns {Promise <Array>} - list of tenders with details
      */
     async getTendersWithDetails(tenders){
       const tenderDetails = [];
@@ -165,9 +164,11 @@ module.exports = async () => {
         for(let a = 0; a < tenders.length; a++ ){
 
           const mappedTenderObj = this.mapMercadoFields(tenders[a]);
-          const licitacione = this.getEntity(mappedTenderObj, 'licitacione');
-          const comprador = this.getEntity(mappedTenderObj, 'comprador');
-          const items = this.getEntity(mappedTenderObj, 'items');
+          const classifiedTender = this.classifyTender(mappedTenderObj);
+
+          const licitacione = this.getEntity(classifiedTender, 'licitacione');
+          const comprador = this.getEntity(classifiedTender, 'comprador');
+          const items = this.getEntity(classifiedTender, 'items');
 
           const insertPromises = [];
   
@@ -177,9 +178,9 @@ module.exports = async () => {
 
           try{
             await Promise.all(insertPromises);
-            console.log(`Tender ${mappedTenderObj.CodigoExterno} success`);
+            console.log(`Tender ${classifiedTender.CodigoExterno} success`);
           }catch(error){
-            console.log(`Tender ${mappedTenderObj.CodigoExterno} -> failed - ${error.message}`);
+            console.log(`Tender ${classifiedTender.CodigoExterno} -> failed - ${error.message}`);
           }
           
         }
@@ -286,11 +287,13 @@ module.exports = async () => {
           "AdjudicacionNumeroOferentes": tender.Adjudicacion && tender.Adjudicacion.NumeroOferentes,
           "AdjudicacionUrlActa": tender.Adjudicacion && tender.Adjudicacion.UrlActa,
           "Comprador_ID": compradorUUID,
+          "Status": "",
           "Comprador": {
               "ID": compradorUUID,
               ...tender.Comprador
           },
           "Items": tender.Items && tender.Items.Listado.map(item => {
+
             return {
               "ID": uuidv4(),
               "Licitacione_CodigoExterno": tender.CodigoExterno,
@@ -305,7 +308,9 @@ module.exports = async () => {
               "AdjudicacionRutProveedor": item.Adjudicacion && item.Adjudicacion.RutProveedor,
               "AdjudicacionNombreProveedor": item.Adjudicacion && item.Adjudicacion.NombreProveedor,
               "AdjudicacionCantidad": item.Adjudicacion && item.Adjudicacion.Cantidad,
-              "AdjudicacionMontoUnitario": item.Adjudicacion && item.Adjudicacion.MontoUnitario
+              "AdjudicacionMontoUnitario": item.Adjudicacion && item.Adjudicacion.MontoUnitario,
+              "MatchedProductName": "",
+              "MatchedProductKeyword": ""
             }
           }),
           createdAt: new Date().toJSON(),
@@ -317,7 +322,71 @@ module.exports = async () => {
 
         return newTender;
 
+      }      
+    }
+
+    /**
+     * Classifies a tender by adding a status with the value 'In' or 'Out'
+     * In = a product with keyword was found, 
+     * Out = a product with keyword was not found
+     * @param {Object} tender 
+     * @returns {Object} new tender object
+     */
+    classifyTender(tender){
+
+      const { Items:products } = tender; 
+
+      const classifiedProducts = products.map(product => this.classifyProduct(product));
+
+      // Checks if some of the products got mached.
+      // if matched -> MatchedProductName will have a value
+      const isTenderClassified = classifiedProducts.some(prd => prd.MatchedProductName);
+
+      return {
+        ...tender,
+        "Status": isTenderClassified ? "In" : "Out", 
+        "Items" : classifiedProducts
+      };
+
+    }
+
+    /**
+     * Classifies and enriches a product with additional data by matching 
+     * the Product Name or Product Description to a list of keywords.
+     * @param {Object} Product 
+     * @returns {Object} - new Product object
+     */
+    classifyProduct(product){
+
+      const _search_keywords = classification_search_terms;
+      const _keyword_products = classification_products;
+
+      let matchedProductName = "";
+      let matchedProductKeyword = "";
+      
+      const _search_text_product = product.NombreProducto.toLowerCase();
+      const _search_text_desc = product.Descripcion.toLowerCase();
+
+      // search the keyword in the text
+      const _keyword_found_in_product = _search_keywords.find( _term => _search_text_product.indexOf(_term.KEYWORD) > -1);
+      const _keyword_found_in_description =  _search_keywords.find( _term => _search_text_desc.indexOf(_term.KEYWORD) > -1);
+
+      if(_keyword_found_in_product){
+        const prd = _keyword_products.find(prod => prod.PRODUCTID === _keyword_found_in_product.PRODUCT_PRODUCTID );
+        matchedProductName = prd.PRODUCTNAME;
+        matchedProductKeyword = _keyword_found_in_product.KEYWORD;
+      }else if(_keyword_found_in_description){
+        const prd = _keyword_products.find(prod => prod.PRODUCTID === _keyword_found_in_description.PRODUCT_PRODUCTID );
+        matchedProductName = prd.PRODUCTNAME;
+        matchedProductKeyword = _keyword_found_in_description.KEYWORD;
       }
+
+      return {
+        ...product,
+        "MatchedProductName" : matchedProductName,
+        "MatchedProductKeyword" : matchedProductKeyword
+      };
+
     }
 
     /**
