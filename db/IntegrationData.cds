@@ -73,7 +73,7 @@ entity MercadoPublicoLicitacione : managed {
         AdjudicacionNumero              : String;
         AdjudicacionNumeroOferentes     : Integer;
         AdjudicacionUrlActa             : String;
-        Status                          : String;
+        Status                          : String; // (IN = keyword found, OUT = keyword not found)
         Comprador                       : Composition of MercadoPublicoComprador;
         Items                           : Composition of many MercadoPublicoProducto on Items.Licitacione = $self;
 };
@@ -108,6 +108,8 @@ entity MercadoPublicoProducto: cuid {
         AdjudicacionNombreProveedor     : String;
         AdjudicacionCantidad            : Double;
         AdjudicacionMontoUnitario       : Double;
+        MatchedProductName              : String;
+        MatchedProductKeyword           : String;
         Licitacione                     : Association to MercadoPublicoLicitacione;
 };
 
