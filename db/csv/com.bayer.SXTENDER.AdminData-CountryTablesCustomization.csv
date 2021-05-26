@@ -526,5 +526,5 @@ CL,editofferProductId,PricingPolicyCluster,PricingPolicyCluster,1,1,pricingPolic
 CL,editofferProductId,DeliveryConditions,DeliveryConditions,1,0,deliveryConditions
 CL,editofferProductId,MinInvoiceAmount,MinInvoiceAmount,1,1,minInvoiceAmount
 CL,editofferProductId,Brand,SKU/Product/HLEVEL4_NAME,1,1,brandnme
-CL,editofferProductId,MoleculeName,SKU/MoleculeName,1,1,moleculeName
+CL,editofferProductId,MoleculeName,SKU/MoleculeName,1,0,moleculeName
 CL,editofferProductId,SapNo,SKU/PRODUCTPACKID,1,1,sapNo
