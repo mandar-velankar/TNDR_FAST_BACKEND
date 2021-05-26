@@ -73,6 +73,7 @@ entity MercadoPublicoLicitacione : managed {
         AdjudicacionNumero              : String;
         AdjudicacionNumeroOferentes     : Integer;
         AdjudicacionUrlActa             : String;
+        Status                          : String;
         Comprador                       : Composition of MercadoPublicoComprador;
         Items                           : Composition of many MercadoPublicoProducto on Items.Licitacione = $self;
 };
@@ -109,3 +110,15 @@ entity MercadoPublicoProducto: cuid {
         AdjudicacionMontoUnitario       : Double;
         Licitacione                     : Association to MercadoPublicoLicitacione;
 };
+
+
+
+entity MercadoPublicoClassificationProducts: managed {
+    key ProductID                       : Integer;
+        ProductName                     : String;
+        Keywords                        : Composition of many MercadoPublicoClassificationKeywords on Keywords.Product = $self;
+}
+entity MercadoPublicoClassificationKeywords: managed {
+        Keyword                         : String;
+        Product                         : Association to MercadoPublicoClassificationProducts;
+}
