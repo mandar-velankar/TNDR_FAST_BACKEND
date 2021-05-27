@@ -370,6 +370,7 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
             results.OUTCOME;
 
 entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC negotiation';
+entity ResultsWithAppealInProgress as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'Appeal in Progress';
 
 entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     key offer.OfferID as OFFER_ID,
@@ -399,8 +400,9 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
             then 
                 case 
                     when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID) then 'In FOC Negotiation'
+                    when exists (select * from ResultsWithAppealInProgress where OfferID = offer.OfferID) then 'Appeal in Progress'
                     else offer.OfferStatusTable.STATUS 
-                end
+            end
         else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
