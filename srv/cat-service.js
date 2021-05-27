@@ -939,10 +939,11 @@ module.exports = (srv) => {
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
+
 		aApproverTypes.map(async function (oApproverType) {
 			switch(oApproverType.ApproverType){
 					case "MACS":
-						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
 						break;
 					case "TA":
 						oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE)? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
@@ -1059,7 +1060,8 @@ module.exports = (srv) => {
 		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
 		
 		results = aOfferProduct.map(async function (offerProduct) {
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aApproverTypes);
+			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes);
 
 			//Get all prices, ammounts and cogs in all units
 			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
@@ -1155,7 +1157,7 @@ module.exports = (srv) => {
 				//SBR: productInfo.ProductValidation.SBR,
 				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
 				OFFER_PRICE_VAT: offerProduct.OFFER_PRICE * (1 + offerProduct.VAT),
-				ApproverTypes: aApproverTypes,
+				ApproverTypes: aTempApproverTypes,
 				BUDGET_RATE: offerProduct.BUDGET_RATE,
 				SPOT_RATE: offerProduct.SPOT_RATE,
 				BUSINESS_CASE_PRICE: offerProduct.BUSINESS_CASE_PRICE,
