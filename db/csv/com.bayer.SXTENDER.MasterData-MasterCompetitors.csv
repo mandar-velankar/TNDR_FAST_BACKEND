@@ -1,6 +1,2 @@
-ID,createdAt,createdBy,modifiedAt,modifiedBy,CountryCode,ProductCode,CompetitorProduct,CompetitorCompany
-"fdbc6de8-5e90-4837-897a-f64d05f7aad8",,,,,"SA",100082,"CompetitorProduct1","CompetitorCompany1"
-"202b1ab3-00c6-44fa-8e6c-191f99e4e92c",,,,,"SA",100082,"CompetitorProduct2","CompetitorCompany1"
-"04e4401b-1765-4351-8b5e-96d8819b480c",,,,,"SA",100082,"CompetitorProduct3","CompetitorCompany1"
-"228ca331-2be7-4ca3-ae30-59e831b1238e",,,,,"SA",100082,"CompetitorProduct10","CompetitorCompany2"
-"f8024928-a504-4b81-aa21-b87513331a3c",,,,,"SA",100082,"CompetitorProduct11","CompetitorCompany2"
+ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,PRODUCTCODE,COMPETITORPRODUCT,COMPETITORCOMPANY
+"fdbc6de8-5e90-4837-897a-f64d05f7aad8",,,,,"AR",200069,"CompetitorProduct1","CompetitorCompany1"

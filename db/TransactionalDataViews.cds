@@ -345,10 +345,32 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
     results.FOC_DESCRIPTION as FOC:String(255),
     results.UOM,
     results.OUTCOME,
-    key institute.PARENT_ID
-};
+    key max(institute.PARENT_ID) as PARENT_ID:Integer
+} group by results.COUNTRY_CODE,
+           results.TENDER_ID,
+           results.OFFER_ID,
+           results.TENDER_NAME,
+            results.INSTITUTE_ID,
+            results.INSTITUTE_NAME,
+            results.OFFER_DATE,
+            results.BRAND_ID,
+            results.BRAND_NAME,
+            results.PRODUCT_ID,
+            results.PRODUCT_NAME,
+            results.UNIT_PRICE,
+            results.PACK_PRICE,
+            results.UNIT_NET_PRICE,
+            results.PACK_NET_PRICE,
+            results.COGS,
+            results.BUDGET_RATE,
+            results.CURRENCY,
+            results.QUANTITY,
+            results.FOC_DESCRIPTION,
+            results.UOM,
+            results.OUTCOME;
 
 entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC negotiation';
+entity ResultsWithAppealInProgress as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'Appeal in Progress';
 
 entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     key offer.OfferID as OFFER_ID,
@@ -378,8 +400,9 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
             then 
                 case 
                     when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID) then 'In FOC Negotiation'
+                    when exists (select * from ResultsWithAppealInProgress where OfferID = offer.OfferID) then 'Appeal in Progress'
                     else offer.OfferStatusTable.STATUS 
-                end
+            end
         else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
@@ -522,6 +545,7 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack sku
 	offerProduct.SKUCountry.MANUFACTURER as MANUFACTURER,
 	offerProduct.SKUCountry.SHELFLIFE as SHELFLIFE,
 	offerProduct.SKU.PRESENTATION as PRESENTATION,
+    offerProduct.SKU.ACTIVE_SUBSTANCE as ACTIVE_SUBSTANCE,
 	offerProduct.SKUCountry.VTATax as VAT,
     ifnull(offerProduct.SKUCountry.COMMENT, '') as PRODUCT_COMMENT:String(500),
 	offerProduct.UnitPerPack as UNIT,
@@ -639,9 +663,16 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
         when 'Direct' then offer.Tender.Institute.ContactPerson
         else offer.Distributor.ContactPerson
     end as DISTRIBUTORCONTACT:String(500),
+    case offer.Tender.TenderChannel
+        when 'Direct' then '' // TODO: check this with Jonathan -> what field to use in case of Direct tender
+        else offer.Distributor.CONTACT_EMAIL
+    end as DISTRIBUTOREMAIL:String(500),
 	ifnull(offer.Quotation.Comment, '') as CUSTOM_REMARKS:String(500),
     offer.FOCType as FOC_TYPE,
-    ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT
+    ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT,
+    offer.Tender.PublicationDate as PUBLICATION_DATE,
+    offer.Tender.BidDueDate as BID_DUE_DATE,
+    offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -675,9 +706,13 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
           offer.Distributor.Fax,
           offer.Tender.Institute.ContactPerson,
           offer.Distributor.ContactPerson,
+          offer.Distributor.CONTACT_EMAIL,
           offer.Quotation.Comment,
           offer.FOCType,
-          offer.Country.COMMENT;
+          offer.Country.COMMENT,
+          offer.Tender.PublicationDate,
+          offer.Tender.BidDueDate,
+          offer.Quotation.SubmittedBy;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.OFFER_ID{

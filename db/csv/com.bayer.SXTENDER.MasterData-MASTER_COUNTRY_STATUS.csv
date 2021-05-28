@@ -1,16 +1,12 @@
-CountryCode,Status,Sorter
+COUNTRYCODE,STATUS,SORTER
 AR,Awaiting Approval,1
 AR,Offer Created,2
 AR,Offer Approved,3
 AR,Offer Rejected,4
 AR,Quotation Submitted,5
-AR,In FOC negotiation,6
 AR,Results Recorded,7
 AR,Delivery Ongoing,8
-AR,Wholesale Offer,9
 AR,Offer Declined,10
-AR,Tender Closed,11
-AR,Cancelled,12
 AR,All,13
 TH,Awaiting Approval,1
 TH,Offer Created,2
@@ -20,10 +16,7 @@ TH,Quotation Submitted,5
 TH,In FOC negotiation,6
 TH,Results Recorded,7
 TH,Delivery Ongoing,8
-TH,Wholesale Offer,9
 TH,Offer Declined,10
-TH,Tender Closed,11
-TH,Cancelled,12
 TH,All,13
 AE,Awaiting Approval,1
 AE,Offer Created,2
@@ -290,11 +283,8 @@ CL,Offer Created,2
 CL,Offer Approved,3
 CL,Offer Rejected,4
 CL,Quotation Submitted,5
-CL,In FOC negotiation,6
+CL,Appeal in Progress,6
 CL,Results Recorded,7
 CL,Delivery Ongoing,8
-CL,Wholesale Offer,9
 CL,Offer Declined,10
-CL,Tender Closed,11
-CL,Cancelled,12
 CL,All,13

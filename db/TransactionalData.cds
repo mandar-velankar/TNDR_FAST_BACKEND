@@ -248,8 +248,10 @@ entity PT_TMDLVTR {
         PO                     : String(255);
         InvoiceNo              : String(255);
     key SNo                    : Integer not null;
+        Contract               : String(10);
+        PoDate                 : Date;
     //Associations
-    Institute                  : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
+        Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
 
 
@@ -369,9 +371,9 @@ entity PT_TMTEND {
         SubmittedBy          : String(50);
         Active               : Integer;
         Classification       : String(50);
-        BindingTypeLevel1    : String(50);
-        BindingTypeLevel2    : String(50);
-        BindingTypeLevel3    : String(50);
+        BiddingTypeLevel1    : String(50);
+        BiddingTypeLevel2    : String(50);
+        BiddingTypeLevel3    : String(50);
         HighValue            : Boolean;
         OfferStartDate       : Date;
         IbizID               : String(50);
