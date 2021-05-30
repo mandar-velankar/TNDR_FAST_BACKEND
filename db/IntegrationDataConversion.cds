@@ -1,7 +1,5 @@
 
-/* Currently not being used, translations available */
-
-/*namespace com.bayer.SXTENDER.IntegrationData;
+namespace com.bayer.SXTENDER.IntegrationData;
 
 using { User, Country, cuid, managed } from '@sap/cds/common';
 using { com.bayer.SXTENDER.IntegrationData } from './IntegrationData';
@@ -108,4 +106,4 @@ entity PublicMarketProducts as select from IntegrationData.MercadoPublicoProduct
     product.AdjudicacionCantidad            as AwardAmount,
     product.AdjudicacionMontoUnitario       as AwardCurrency,
     product.Licitacione                     as Tenders
-};*/
+};
