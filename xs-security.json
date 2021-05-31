@@ -29,6 +29,10 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_ctr_user",
       "description": "f_tndr_cag_ctr_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_cpi_user",
+      "description": "f_tndr_cag_cpi_user"
     }
   ],
   "attributes": [],
@@ -86,6 +90,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_ctr_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_cpi_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_cpi_user"
       ],
       "attribute-references": []
     }
