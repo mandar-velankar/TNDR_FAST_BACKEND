@@ -352,7 +352,8 @@ module.exports = async () => {
 
     /**
      * Classifies and enriches a product with additional data by matching 
-     * the Product Name or Product Description to a list of keywords.
+     * the Product Name or Product Description to a list of keywords. 
+     * The keyword is first searched in the Product Name and when not found it is searched in the description.
      * @param {Object} Product 
      * @returns {Object} - new Product object
      */
@@ -360,12 +361,11 @@ module.exports = async () => {
 
       const _search_keywords = classification_search_terms;
       const _keyword_products = classification_products;
+      const _search_text_product = product.NombreProducto.toLowerCase();
+      const _search_text_desc = product.Descripcion.toLowerCase();
 
       let matchedProductName = "";
       let matchedProductKeyword = "";
-      
-      const _search_text_product = product.NombreProducto.toLowerCase();
-      const _search_text_desc = product.Descripcion.toLowerCase();
 
       // search the keyword in the text
       const _keyword_found_in_product = _search_keywords.find( _term => _search_text_product.indexOf(_term.KEYWORD) > -1);
