@@ -24,6 +24,7 @@ const jobScheduler = require("./jobs/scheduler");
   await cds.serve("PolicyService").from("./gen/").in(app);
   await cds.serve("ContractService").from("./gen/").in(app);
   await cds.serve("AccessService").from("./gen/").in(app);
+  await cds.serve("SalesOpportunityService").from("./gen/").in(app);
   await cds.serve("ExternalService").from("./gen/").in(app);
   
   // Scheduler Jobs
