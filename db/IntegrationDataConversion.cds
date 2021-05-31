@@ -1,15 +1,15 @@
 
-namespace com.bayer.SXTENDER.IntegrationData;
+namespace com.bayer.SXTENDER.IntegrationDataConversion;
 
 using { User, Country, cuid, managed } from '@sap/cds/common';
 using { com.bayer.SXTENDER.IntegrationData } from './IntegrationData';
 
 entity PublicMarketTenders as select from IntegrationData.MercadoPublicoLicitacione as tender {
-    tender.CodigoExterno                    as ExternalCode,
+    key tender.CodigoExterno                as CodigoExterno,
     tender.Nombre                           as Name,
     tender.CodigoEstado                     as StateCode,
     tender.Descripcion                      as Description,
-    tender.Estado                           as Condition,
+    tender.Estado                           as Status,
     tender.DiasCierreLicitacion             as BidClosingDays,
     tender.Informada                        as Notified,
     tender.CodigoTipo                       as CodeType,
@@ -19,7 +19,7 @@ entity PublicMarketTenders as select from IntegrationData.MercadoPublicoLicitaci
     tender.Etapas                           as Stages,
     tender.EstadoEtapas                     as StateSteps,
     tender.TomaRazon                        as Reason,
-    tender.EstadoPublicidadOfertas          as Status,
+    tender.EstadoPublicidadOfertas          as AdvertisingOfferStatus,
     tender.JustificacionPublicidad          as JustificationAdvertising,
     tender.Contrato                         as Contract,
     tender.Obras                            as Works,
@@ -73,8 +73,8 @@ entity PublicMarketTenders as select from IntegrationData.MercadoPublicoLicitaci
     tender.AdjudicacionNumero               as AwardNumber,
     tender.AdjudicacionNumeroOferentes      as AwardNumberOfBidders,
     tender.AdjudicacionUrlActa              as AwardMinutesURL,
-    tender.Comprador                        as Buyers,
-    tender.Items                            as TenderItems
+    Comprador:redirected to IntegrationData.MercadoPublicoComprador,
+    Items:redirected to IntegrationData.MercadoPublicoProducto
 };
 
 entity PublicMarketBuyers as select from IntegrationData.MercadoPublicoComprador as buyer {
