@@ -73,8 +73,8 @@ entity PublicMarketTenders as select from IntegrationData.MercadoPublicoLicitaci
     tender.AdjudicacionNumero               as AwardNumber,
     tender.AdjudicacionNumeroOferentes      as AwardNumberOfBidders,
     tender.AdjudicacionUrlActa              as AwardMinutesURL,
-    Comprador:redirected to IntegrationData.MercadoPublicoComprador,
-    Items:redirected to IntegrationData.MercadoPublicoProducto
+    Comprador                               as Buyer : redirected to IntegrationData.MercadoPublicoComprador,
+    Items                                            : redirected to IntegrationData.MercadoPublicoProducto
 };
 
 entity PublicMarketBuyers as select from IntegrationData.MercadoPublicoComprador as buyer {
