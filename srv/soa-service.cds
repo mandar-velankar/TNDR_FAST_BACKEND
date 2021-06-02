@@ -7,10 +7,10 @@ using { com.bayer.SXTENDER.IntegrationData } from '../db/IntegrationData';
 //using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 
 service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_cag_admin','f_tndr_cag_salesopportunity_user','f_tndr_cag_technical_user','authenticated-user']){
-   entity Buyers as projection on IntegrationData.MercadoPublicoComprador;
-    entity Products as projection on IntegrationData.MercadoPublicoProducto;
+    entity Buyers as projection on IntegrationDataConversion.PublicMarketBuyers;
+    entity Products as projection on IntegrationDataConversion.PublicMarketProducts;
 
-    entity PublicMarketTenders as projection on IntegrationData.MercadoPublicoLicitacione{
+    entity PublicMarketTenders as projection on IntegrationDataConversion.PublicMarketTenders{
         *,
         Comprador: redirected to Buyers,
         Items: redirected to Products
