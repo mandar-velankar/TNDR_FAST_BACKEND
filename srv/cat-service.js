@@ -2216,7 +2216,7 @@ module.exports = (srv) => {
 			return req.reject(404, 'No offer found');
 		}
 
-		let excelStreamValue = XLSXHelper.generateXLSX("Book1.xlsx",
+		let excelStreamValue = XLSXHelper.generateXLSX("TH - Quotation Template.xlsx",
 			{
 				offerValidation: offerValidation,
 				offerProductValidation: await buildOfferProductValidation(tx, whereOffer)
