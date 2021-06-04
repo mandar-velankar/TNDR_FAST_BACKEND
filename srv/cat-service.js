@@ -1155,7 +1155,7 @@ module.exports = (srv) => {
 				//International_Trade: productInfo.ProductValidation.International_Trade,
 				//Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
 				//SBR: productInfo.ProductValidation.SBR,
-				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
+				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
 				OFFER_PRICE_VAT: offerProduct.OFFER_PRICE * (1 + offerProduct.VAT),
 				ApproverTypes: aTempApproverTypes,
 				BUDGET_RATE: offerProduct.BUDGET_RATE,
@@ -1371,6 +1371,7 @@ module.exports = (srv) => {
 			OFFERID: offer.OFFERID,
 			INSTITUTENAME: offer.INSTITUTENAME,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
+			INSTITUTE_STATE: offer.INSTITUTE_STATE,
 			CUSTOMER_CODE: offer.CUSTOMER_CODE,
 			DIVISION: division,//not correct, should be consolidated from product information
 			OFFERDATE: offer.OFFERDATE,
