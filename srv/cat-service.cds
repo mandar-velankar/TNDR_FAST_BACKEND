@@ -294,7 +294,7 @@ service CatalogService @(path : 'tender')
             //International_Trade            : Integer not null;//AR only
             //Transfer_Pricing               : Integer not null;//AR only
             //SBR                            : Integer not null;//AR only
-            ACTIVE_SUBSTANCE               : String; // Chile
+            MOLECULE_NAME               : String; // Chile
             OFFER_PRICE_VAT                : Double;
             BUDGET_RATE                    : Double;
             SPOT_RATE                      : Double;
@@ -311,6 +311,7 @@ service CatalogService @(path : 'tender')
         key OFFERID               : String(30) not null;
             INSTITUTENAME         : String(500);
             INSTITUTE_TYPE        : String(50);
+            INSTITUTE_STATE       : String;
             CUSTOMER_CODE         : Integer;
             DIVISION              : String(100);
             OFFERDATE             : Date;

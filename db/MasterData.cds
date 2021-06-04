@@ -54,6 +54,7 @@ entity PT_TMINST{
 	Comment:String(500);
 	City:String(255);
 	INSTITUTE_HIERARCHY_ID:Integer;
+	State:String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
