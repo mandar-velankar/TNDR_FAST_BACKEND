@@ -5,8 +5,8 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         ppa:Boolean;
         contract:Boolean;
         epa:Boolean;
-        masterdata:Boolean
-
+        masterdata:Boolean;
+        salesopportunity:Boolean;
     };
 
     function getAccess() returns Access;

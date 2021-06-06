@@ -119,3 +119,29 @@ entity CountryFragmentsCustomization {
     key FragmentID    : String(100);
     key FragmentName  : String(100);
 }
+
+
+// Scheduler configuration
+entity SchedulerApiConfig: cuid {
+    Provider         : String; 
+    Host             : String;
+    BasePath         : String;
+    Resource         : String;
+    ResourcePath     : String;
+    ApiKey           : String;
+    RequestDelay     : Integer;
+    RequestMaxRetry  : Integer;
+}
+
+// entity SchedulerJobs: cuid {
+//     JobName          : String; 
+//     StartedAt        : Timestamp;
+//     FinishedAt       : Timestamp;
+//     Status           : String;
+// }
+
+entity SchedulerErrorLog: cuid {
+    ErrorMessage     : String;
+    ResourceURL      : String;
+    ConsultationDate : Timestamp;
+}
