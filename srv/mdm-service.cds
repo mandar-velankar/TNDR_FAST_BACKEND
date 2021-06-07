@@ -16,7 +16,30 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMPRDPCK @readonly    as projection on MasterData.PT_TMPRDPCK;
     entity PT_TMCTPRDPCK @readonly  as projection on MasterData.PT_TMCTPRDPCK;
     entity PT_TMSKUPRDPCK @readonly as projection on MasterData.PT_TMSKUPRDPCK;
+
+
     entity PT_TMREGPR @readonly     as projection on MasterData.PT_TMREGPR;
+
+   
+
+    entity Prices as select from PT_TMREGPR as RegPrices inner join
+    MasterData.PT_TMPRDPCK as ProductPack 
+        on ProductPack.PRODUCTPACKID = RegPrices.ProductPackID 
+        {
+           	key RegPrices.CountryCode,
+	        key RegPrices.ProductPackID,
+	        key RegPrices.EffDate,
+            RegPrices.RegisteredPrice,
+            RegPrices.Currency,
+            RegPrices.UOM,
+            ProductPack.PRODUCTPACKNAME
+            
+
+        };
+
+   
+
+
     entity PT_TMCOGS @readonly      as projection on MasterData.PT_TMCOGS;
     entity PT_TMPRDHIER @insertonly as projection on MasterData.PT_TMPRDHIER;
     entity COUNTRY_APPROVERS @readonly as projection on MasterData.CountryApprovers;
