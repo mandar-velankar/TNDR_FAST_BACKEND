@@ -99,7 +99,7 @@ entity PublicMarketProducts as select from IntegrationData.MercadoPublicoProduct
     product.CodigoProducto                  as ProductCode,
     product.CodigoCategoria                 as CategoryCode,
     product.Categoria                       as Category,
-    product.NombreProducto                  as ProductNumber,
+    product.NombreProducto                  as ProductName,
     product.Descripcion                     as Description,
     product.UnidadMedida                    as UoM,
     product.Cantidad                        as Quantity,
