@@ -73,6 +73,7 @@ entity PublicMarketTenders as select from IntegrationData.MercadoPublicoLicitaci
     tender.AdjudicacionNumero               as AwardNumber,
     tender.AdjudicacionNumeroOferentes      as AwardNumberOfBidders,
     tender.AdjudicacionUrlActa              as AwardMinutesURL,
+    tender.Status                           as TenderMatchingStatus,
     Comprador                               as Buyer : redirected to IntegrationData.MercadoPublicoComprador,
     Items                                            : redirected to IntegrationData.MercadoPublicoProducto
 };
