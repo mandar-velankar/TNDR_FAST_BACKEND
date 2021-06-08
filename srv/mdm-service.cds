@@ -23,49 +23,34 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
 
    
 
-    entity Prices as select from PT_TMREGPR as RegPrices inner join
-    MasterData.PT_TMPRDPCK as ProductPack 
-        on ProductPack.PRODUCTPACKID = RegPrices.ProductPackID 
-        {
-           	key RegPrices.CountryCode,
-	        key RegPrices.ProductPackID,
-	        key RegPrices.EffDate,
-            RegPrices.RegisteredPrice,
-            RegPrices.Currency,
-            RegPrices.UOM,
-            ProductPack.PRODUCTPACKNAME
-            
-
-        };
-
         entity CountryRegisteredPrice as SELECT from MasterData.PT_TMREGPR as RegisteredPrice
 
-INNER JOIN MasterDataLatestValues.MostRecentRegisteredPrice as l 
-on RegisteredPrice.CountryCode=l.CountryCode 
-and RegisteredPrice.ProductPackID=l.ProductPackID 
-and RegisteredPrice.EffDate=l.MaxEffectiveDate
+        INNER JOIN MasterDataLatestValues.MostRecentRegisteredPrice as l 
+        on RegisteredPrice.CountryCode=l.CountryCode 
+        and RegisteredPrice.ProductPackID=l.ProductPackID 
+        and RegisteredPrice.EffDate=l.MaxEffectiveDate
 
-inner join MasterData.PT_TMPRDPCK as ProductPack 
-        on  RegisteredPrice.ProductPackID = ProductPack.PRODUCTPACKID 
+        inner join MasterData.PT_TMPRDPCK as ProductPack 
+                on  RegisteredPrice.ProductPackID = ProductPack.PRODUCTPACKID 
 
-inner join MasterDataLatestValues.CountryCogs as Cogs
-on  RegisteredPrice.CountryCode=Cogs.COUNTRY_CODE
-and RegisteredPrice.ProductPackID=Cogs.PRODUCT_ID
+        inner join MasterDataLatestValues.CountryCogs as Cogs
+        on  RegisteredPrice.CountryCode=Cogs.COUNTRY_CODE
+        and RegisteredPrice.ProductPackID=Cogs.PRODUCT_ID
 
 
 
-{
+        {
     
-    key RegisteredPrice.CountryCode as COUNTRY_CODE,
-    key RegisteredPrice.ProductPackID as PRODUCT_ID,
-    RegisteredPrice.UOM,
-    key RegisteredPrice.Currency as CURRENCY,
-    RegisteredPrice.RegisteredPrice as REGISTERED_PRICE,
-    ProductPack.PRODUCTPACKNAME,
-    Cogs.COGS,
-    Cogs.CURRENCY as COGS_CURRENCY,
-    Cogs.UOM as COGS_UOM
-}where RegisteredPrice.ActiveRecord = 'Yes';
+            key RegisteredPrice.CountryCode as CountryCode,
+            key RegisteredPrice.ProductPackID as PRODUCT_ID,
+            RegisteredPrice.UOM as Uom,
+            key RegisteredPrice.Currency as Currency,
+            RegisteredPrice.RegisteredPrice as Price,
+            ProductPack.PRODUCTPACKNAME as ProductPackName,
+            Cogs.COGS as CogsPrice,
+            Cogs.CURRENCY as CogsCurrency,
+            Cogs.UOM as CogsUom
+        }where RegisteredPrice.ActiveRecord = 'Yes';
 
    
 
