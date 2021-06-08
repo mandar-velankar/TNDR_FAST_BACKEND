@@ -1,4 +1,5 @@
 using {com.bayer.SXTENDER.MasterData} from '../db/MasterData';
+using { com.bayer.SXTENDER.MasterDataLatestValues } from '../db/MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalData} from '../db/TransactionalData';
 
 
@@ -36,6 +37,35 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
             
 
         };
+
+        entity CountryRegisteredPrice as SELECT from MasterData.PT_TMREGPR as RegisteredPrice
+
+INNER JOIN MasterDataLatestValues.MostRecentRegisteredPrice as l 
+on RegisteredPrice.CountryCode=l.CountryCode 
+and RegisteredPrice.ProductPackID=l.ProductPackID 
+and RegisteredPrice.EffDate=l.MaxEffectiveDate
+
+inner join MasterData.PT_TMPRDPCK as ProductPack 
+        on  RegisteredPrice.ProductPackID = ProductPack.PRODUCTPACKID 
+
+inner join MasterDataLatestValues.CountryCogs as Cogs
+on  RegisteredPrice.CountryCode=Cogs.COUNTRY_CODE
+and RegisteredPrice.ProductPackID=Cogs.PRODUCT_ID
+
+
+
+{
+    
+    key RegisteredPrice.CountryCode as COUNTRY_CODE,
+    key RegisteredPrice.ProductPackID as PRODUCT_ID,
+    RegisteredPrice.UOM,
+    key RegisteredPrice.Currency as CURRENCY,
+    RegisteredPrice.RegisteredPrice as REGISTERED_PRICE,
+    ProductPack.PRODUCTPACKNAME,
+    Cogs.COGS,
+    Cogs.CURRENCY as COGS_CURRENCY,
+    Cogs.UOM as COGS_UOM
+}where RegisteredPrice.ActiveRecord = 'Yes';
 
    
 
