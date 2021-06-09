@@ -15,7 +15,7 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
 
     entity PublicMarketTenders as projection on IntegrationDataConversion.PublicMarketTenders{
         *,
-        Buyer: redirected to Buyers,
+        Comprador: redirected to Buyers,
         Items: redirected to Products
     };
 
