@@ -79,7 +79,7 @@ entity PublicMarketTenders as select from IntegrationData.MercadoPublicoLicitaci
 };
 
 entity PublicMarketBuyers as select from IntegrationData.MercadoPublicoComprador as buyer {
-    *,
+    key ID,
     buyer.CodigoOrganismo                   as OrganismCode,
     buyer.NombreOrganismo                   as OrganismNumber,
     buyer.RutUnidad                         as UnitID,
@@ -95,7 +95,7 @@ entity PublicMarketBuyers as select from IntegrationData.MercadoPublicoComprador
 };
 
 entity PublicMarketProducts as select from IntegrationData.MercadoPublicoProducto as product {
-    *,
+    key ID,
     product.Correlativo                     as Correlative,
     product.CodigoProducto                  as ProductCode,
     product.CodigoCategoria                 as CategoryCode,
