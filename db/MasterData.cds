@@ -151,7 +151,7 @@ entity PT_TMREGPR{
 	key EffDate:Date not null;
 	EndDate:Date;
 	UOM:String(50);
-	Currency:String(3);
+	key Currency:String(3);
 	RegisteredPrice:Double;
 	RegisteredPriceSource:String(50);
 	ActiveRecord:String(10);
