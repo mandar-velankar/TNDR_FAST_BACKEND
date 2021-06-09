@@ -108,5 +108,7 @@ entity PublicMarketProducts as select from IntegrationData.MercadoPublicoProduct
     product.AdjudicacionNombreProveedor     as SupplierAwardName,
     product.AdjudicacionCantidad            as AwardAmount,
     product.AdjudicacionMontoUnitario       as AwardCurrency,
+    product.MatchedProductName              as MatchedProductName,
+    product.MatchedProductKeyword           as MatchedProductKeyword,
     product.Licitacione                     as Tenders
 };
