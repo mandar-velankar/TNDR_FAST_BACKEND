@@ -618,6 +618,8 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
     on offer.SellingCompany = signatory2.LEGAL_ENTITY_CODE
     and offer.CountryCode = signatory2.COUNTRY_CODE
     and signatory2.SORTER = 2
+left outer join AdminData.NextDateSettings as date_settings
+    on MONTH(CURRENT_DATE) = date_settings.CurrentMonth
 {	
 	'PT_TMTNOFST(TENDERID=''' || offer.TenderID || ''',OFFERID=''' || offer.OfferID || ''',Active=1)' as OFFERSTATUSPATH:String(500),
 	offer.TenderID as TENDERID,
@@ -628,11 +630,11 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.Institute.InstituteName || ' - ' || offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
-    offer.Tender.Institute.InstituteName as INSTITUTENAME,
+    offer.Tender.Institute.InstituteName as INSTITUTENAME, 
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
-	ifnull(offer.Quotation.OfferValidity, to_date('2021-10-31')) as OFFERVALIDITY,
+	ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay))) as OFFERVALIDITY,
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
@@ -714,7 +716,10 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
           offer.Country.COMMENT,
           offer.Tender.PublicationDate,
           offer.Tender.BidDueDate,
-          offer.Quotation.SubmittedBy;
+          offer.Quotation.SubmittedBy,
+          date_settings.NextYearDelta,
+          date_settings.NextDay,
+          date_settings.NextMonth;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.OFFER_ID{

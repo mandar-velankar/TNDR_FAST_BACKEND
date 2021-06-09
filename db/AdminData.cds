@@ -145,3 +145,11 @@ entity SchedulerErrorLog: cuid {
     ResourceURL      : String;
     ConsultationDate : Timestamp;
 }
+
+// Settings for the OfferValidity
+entity NextDateSettings {
+    CurrentMonth      : Integer;
+    NextDay           : Integer;
+    NextMonth         : Integer;
+    NextYearDelta     : Integer;
+}
