@@ -99,7 +99,8 @@ service CatalogService @(path : 'tender')
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
     entity AggregatedDistributorBrandPolicies @readonly as projection on MasterDataViews.AggregatedDistributorBrandPolicies;
-    
+    entity ChannelProductPolicies @readonly as projection on MasterDataLatestValues.ActiveChannelProductPolicies;
+
     //Master Data Services
     entity InstituteDistributor {
         key COUNTRY_INSTITUTE_DISTRIBUTOR_ID : String(500);

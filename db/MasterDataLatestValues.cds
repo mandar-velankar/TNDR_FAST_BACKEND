@@ -94,6 +94,9 @@ INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRY
 //only the active (is not the same as approved) BrandPolicies
 entity ActiveBrandPolicies as select from MasterData.BrandPolicies where ValidTo = '9999-12-31 00:00:00.000000000'; 
 
+//only the active ChannelProductPolicies
+entity ActiveChannelProductPolicies as select from MasterData.ChannelProductPolicies where ValidTo = '9999-12-31 00:00:00.000000000'; 
+
 //What is the most recent BrandPolicy
 entity MostRecentBrandPolicies as SELECT from ActiveBrandPolicies as BrandPolicies
 {
