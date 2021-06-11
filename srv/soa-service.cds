@@ -31,5 +31,5 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity PT_TMTEND as projection on TransactionalData.PT_TMTEND {
         * ,
     };
-
+    entity CountrySpecificInformation as projection on TransactionalData.CountrySpecificTenderInfo;
 }
