@@ -1585,10 +1585,12 @@ module.exports = (srv) => {
 	}
 
 	function mapDefaultCountryApprovers(countryApprovers, approverType, offerValidation){
-		if(!offerValidation.DIVISION){
+		if(!offerValidation.DIVISION || offerValidation.DIVISION === "Both"){
+			//take all approver types
 			return countryApprovers.filter((d) => d.ApproverType === approverType);
 		} else {
-			return countryApprovers.filter((d) => d.ApproverType === approverType && d.Division === offerValidation.DIVISION);
+			//take approver types division which maches the offervalidation Division + division = both
+			return countryApprovers.filter((d) => d.ApproverType === approverType && (d.Division === offerValidation.DIVISION || d.Division === "Both"));
 		}
 	}
 
