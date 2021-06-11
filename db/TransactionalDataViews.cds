@@ -370,7 +370,7 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
             results.OUTCOME;
 
 entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC negotiation';
-entity ResultsWithAppealInProgress as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'Appeal in Progress';
+entity ResultsWithAppealInProgress as select TenderID, OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'Appeal in Progress';
 
 entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     key offer.OfferID as OFFER_ID,
