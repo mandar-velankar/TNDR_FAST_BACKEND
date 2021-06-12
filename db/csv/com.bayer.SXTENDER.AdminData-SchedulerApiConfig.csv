@@ -1,0 +1,2 @@
+ID,Provider,Host,BasePath,Resource,ResourcePath,ApiKey,RequestDelay,RequestMaxRetry
+2697bc04-916c-11eb-a8b3-0242ac130004,MercadoPublco,http://api.mercadopublico.cl,/servicios/v1/publico,Tender,/licitaciones.json,902EA5FB-1628-4220-8F75-4ABC4EEC569F,1000,5
