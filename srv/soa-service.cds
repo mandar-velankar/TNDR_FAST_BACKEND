@@ -22,7 +22,8 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity Buyers as projection on IntegrationDataConversion.PublicMarketBuyers;
     entity Products as projection on IntegrationDataConversion.PublicMarketProducts;
 
-    entity PublicMarketTenders as projection on IntegrationDataConversion.PublicMarketTenders{
+    entity PublicMarketTenders as projection on IntegrationDataConversion.PublicMarketTenders
+    {
         *,
         Comprador: redirected to Buyers,
         Items: redirected to Products
@@ -31,5 +32,106 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity PT_TMTEND as projection on TransactionalData.PT_TMTEND {
         * ,
     };
+    entity CountrySpecificInformation as projection on TransactionalData.CountrySpecificTenderInfo;
+    
+
+    entity PublicMarketTenderStatuses as select from PublicMarketTenders as opp
+    left outer join TransactionalData.CountrySpecificTenderInfo as info 
+        on opp.CodigoExterno = info.TenderReference
+    {
+        key opp.CodigoExterno,
+        case 
+            when info.TenderReference is null then opp.TenderMatchingStatus else 'Participated' 
+        end as Status:String,
+        case 
+            when info.TenderReference is null then 'NA'
+            when not exists (select TenderID from TransactionalData.PT_TMQUTO as tmqt where info.TenderID = tmqt.TenderID) then 'Draft'
+            when exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres where info.TenderID = trres.TenderID and trres.Outcome = 'Won') 
+                and not exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip where info.TenderID = rwaip.TenderID) then 'Won'
+            when exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip2 where info.TenderID = rwaip2.TenderID) then 'AppealInProgress'
+            when exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres2 where info.TenderID = trres2.TenderID and trres2.Outcome <> 'Won') 
+                or exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip3 where info.TenderID = rwaip3.TenderID) then 'Lost'
+            when exists (select TenderID, OfferID from TransactionalData.PT_TMOFRS as offer inner join TransactionalDataViews.OfferStatus as stoffer on offer.OfferID = stoffer.OFFER_ID where offer.TenderID = info.TenderID and stoffer.STATUS = 'Quotation Submitted' and offer.Active = 1) then 'Submitted'
+        end as SubStatus:String,
+    };
+
+    entity PublicMarketOpportunities as select from PublicMarketTenders as opp
+    left outer join PublicMarketTenderStatuses as st 
+        on opp.CodigoExterno = st.CodigoExterno
+    {
+        key opp.CodigoExterno,
+        opp.Name,
+        opp.StateCode,
+        opp.Description,
+        opp.Status,
+        opp.BidClosingDays,
+        opp.Notified,
+        opp.CodeType,
+        opp.TenderType,
+        opp.CallType,
+        opp.Currency,
+        opp.Stages,
+        opp.StateSteps,
+        opp.Reason,
+        opp.AdvertisingOfferStatus,
+        opp.JustificationAdvertising,
+        opp.Contract,
+        opp.Works,
+        opp.ClaimsAmount,
+        opp.CreatedAt,
+        opp.ClosingDate,
+        opp.StartDate,
+        opp.FinalDate,
+        opp.DatePubAnswers,
+        opp.TechnicalOpeningActDate,
+        opp.EconomicOpeningActDate,
+        opp.PublicationDate,
+        opp.AwardDate,
+        opp.EstimatedAwardDate,
+        opp.PhysicalSupportDate,
+        opp.DateTimeEvaluation,
+        opp.EstimatedSignatureDate,
+        opp.UserDate,
+        opp.FieldVisitTab,
+        opp.DeliveryBackgroundDate,
+        opp.UnitEvaluationTime,
+        opp.VisitAddress,
+        opp.DeliveryAddress,
+        opp.Estimate,
+        opp.FinancingSource,
+        opp.VisibilityAmount,
+        opp.EstimatedAmount,
+        opp.TenderTime,
+        opp.UnitTime,
+        opp.Modality,
+        opp.PaymentType,
+        opp.ResponsiblePaymentName,
+        opp.ResponsiblePaymentEmail,
+        opp.ResponsibleContractName,
+        opp.ResponsibleContractEmail,
+        opp.ResponsibleContractPhone,
+        opp.ContractingProhibition,
+        opp.Outsourcing,
+        opp.UnitTimeContractDuration,
+        opp.ContractDurationTime,
+        opp.ContractDurationType,
+        opp.EstimatedJustificationAmount,
+        opp.ContractObservation,
+        opp.TermExtension,
+        opp.IsBaseType,
+        opp.TenderContractUnitTime,
+        opp.RenewalTimeValue,
+        opp.RenewalTimePeriod,
+        opp.IsRenewable,
+        opp.AwardType,
+        opp.AwardNumber,
+        opp.AwardNumberOfBidders,
+        opp.AwardMinutesURL,
+        opp.TenderMatchingStatus,
+        st.Status as MainStatus,
+        st.SubStatus,
+        opp.Comprador: redirected to Buyers,
+        opp.Items: redirected to Products
+    }
 
 }
