@@ -40,6 +40,7 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
         on opp.CodigoExterno = info.TenderReference
     {
         key opp.CodigoExterno,
+        info.TenderID as TenderID,
         case 
             when info.TenderReference is null then opp.TenderMatchingStatus else 'Participated' 
         end as Status:String,
@@ -128,6 +129,7 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
         opp.AwardNumberOfBidders,
         opp.AwardMinutesURL,
         opp.TenderMatchingStatus,
+        st.TenderID as TenderID,
         st.Status as MainStatus,
         st.SubStatus,
         opp.Comprador: redirected to Buyers,
