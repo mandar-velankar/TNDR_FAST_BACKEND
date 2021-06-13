@@ -110,10 +110,10 @@
       "attribute-references": []
     },
     {
-      "name": " f_tndr_cag_mdm_user",
+      "name": "f_tndr_cag_mdm_user",
       "description": "generated",
       "scope-references": [
-        "$XSAPPNAME. f_tndr_cag_mdm_user"
+        "$XSAPPNAME.f_tndr_cag_mdm_user"
       ],
       "attribute-references": []
     },
