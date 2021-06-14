@@ -151,7 +151,7 @@ entity PT_TMREGPR{
 	key EffDate:Date not null;
 	EndDate:Date;
 	UOM:String(50);
-	Currency:String(3);
+	key Currency:String(3);
 	RegisteredPrice:Double;
 	RegisteredPriceSource:String(50);
 	ActiveRecord:String(10);
@@ -583,3 +583,13 @@ entity DistributorBrandPolicies: cuid, managed {
 	DistributorId   	: Integer not null;
 	StandardDiscount 	: Double;
 }; 
+
+//Channel/Product specific Policy
+entity ChannelProductPolicies: cuid, managed {
+	ValidFrom       	: Timestamp; //temphttps://cap.cloud.sap/docs/guides/temporal-data#serving-temporal-data
+    ValidTo         	: Timestamp;
+    CountryCode     	: String(2);
+    ChannelName 		: String(30);
+	ProductPackID		:Integer not null;
+	StandardDiscount 	: Double;	
+};

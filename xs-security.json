@@ -1,4 +1,4 @@
-{ 
+{
   "xsappname": "FAST",
   "tenant-mode": "dedicated",
   "scopes": [
@@ -27,8 +27,20 @@
       "description": "f_tndr_cag_ppa_user"
     },
     {
+      "name": "$XSAPPNAME.f_tndr_cag_salesopportunity_user",
+      "description": "f_tndr_cag_salesopportunity_user"
+    },
+    {
       "name": "$XSAPPNAME.f_tndr_cag_ctr_user",
       "description": "f_tndr_cag_ctr_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_mdm_user",
+      "description": "f_tndr_cag_mdm_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_cpi_user",
+      "description": "f_tndr_cag_cpi_user"
     }
   ],
   "attributes": [],
@@ -82,10 +94,34 @@
       "attribute-references": []
     },
     {
+      "name": "f_tndr_cag_salesopportunity_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_salesopportunity_user"
+      ],
+      "attribute-references": []
+    },
+    {
       "name": "f_tndr_cag_ctr_user",
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_ctr_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_mdm_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_mdm_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_cpi_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_cpi_user"
       ],
       "attribute-references": []
     }

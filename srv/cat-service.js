@@ -889,11 +889,19 @@ module.exports = (srv) => {
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
 		aApproverTypes.map(async function (oApproverType) {
-			switch(oApproverType){
-					case "HBU":oApproverType.ValidationType = hbuLevel;
-					case "CDH":oApproverType.ValidationType = cdhLevel;
-					case "NSM/SM/FM":oApproverType.ValidationType = nsmLevel;
-					case "Supply Chain":oApproverType.ValidationType = supply;
+			switch(oApproverType.ApproverType){
+					case "HBU":
+						oApproverType.ValidationType = hbuLevel;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = cdhLevel;
+						break;
+					case "NSM/SM/FM":
+						oApproverType.ValidationType = nsmLevel;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
 			}
 		});
 
@@ -1585,10 +1593,12 @@ module.exports = (srv) => {
 	}
 
 	function mapDefaultCountryApprovers(countryApprovers, approverType, offerValidation){
-		if(!offerValidation.DIVISION){
+		if(!offerValidation.DIVISION || offerValidation.DIVISION === "Both"){
+			//take all approver types
 			return countryApprovers.filter((d) => d.ApproverType === approverType);
 		} else {
-			return countryApprovers.filter((d) => d.ApproverType === approverType && d.Division === offerValidation.DIVISION);
+			//take approver types division which maches the offervalidation Division + division = both
+			return countryApprovers.filter((d) => d.ApproverType === approverType && (d.Division === offerValidation.DIVISION || d.Division === "Both"));
 		}
 	}
 
@@ -1780,7 +1790,7 @@ module.exports = (srv) => {
 				TENDERID: d.TENDER_ID,
 				OFFERID: d.OFFER_ID,
 				COUNTRYCODE: d.COUNTRY_CODE,
-				PRODUCTCODE: d.PRODUCTID.toString(),
+				PRODUCTCODE: d.CODE.toString(),
 				SORTER: d.SORTER,
 				BRANDNAME: d.BRANDNAME,
 				PRODUCT_UNIT_NAME: d.PRODUCT_UNIT_NAME,

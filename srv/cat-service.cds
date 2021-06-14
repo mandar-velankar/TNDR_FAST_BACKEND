@@ -6,6 +6,7 @@ using {com.bayer.SXTENDER.TransactionalData} from '../db/TransactionalData';
 using {com.bayer.SXTENDER.MasterDataViews} from '../db/MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from '../db/MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalDataViews} from '../db/TransactionalDataViews';
+using {com.bayer.SXTENDER.IntegrationDataConversion} from '../db/IntegrationDataConversion';
 using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
 using { User, Country, managed, cuid } from '@sap/cds/common';
@@ -99,7 +100,8 @@ service CatalogService @(path : 'tender')
     entity CountryCurrency @readonly         as projection on MasterDataViews.CountryCurrency;
     entity CountryLegalEntity @readonly      as projection on MasterDataViews.CountryLegalEntity;
     entity AggregatedDistributorBrandPolicies @readonly as projection on MasterDataViews.AggregatedDistributorBrandPolicies;
-    
+    entity ChannelProductPolicies @readonly as projection on MasterDataLatestValues.ActiveChannelProductPolicies;
+
     //Master Data Services
     entity InstituteDistributor {
         key COUNTRY_INSTITUTE_DISTRIBUTOR_ID : String(500);
@@ -543,6 +545,16 @@ service CatalogService @(path : 'tender')
             HIERARCHY          : Integer;           
     };
 
+    //SALES OPPORTUNINTY
+    entity Buyers as projection on IntegrationDataConversion.PublicMarketBuyers;
+    entity Products as projection on IntegrationDataConversion.PublicMarketProducts;
+    entity PublicMarketTenders as projection on IntegrationDataConversion.PublicMarketTenders{
+        *,
+        Comprador: redirected to Buyers,
+        Items: redirected to Products
+    };
+
+    //OTHER
     entity Templates        as projection on AdminData.Template;
     entity MailTemplates    as projection on AdminData.MailTemplate;
     entity Outbox           as projection on TransactionalData.OutgoingMails;
