@@ -889,11 +889,19 @@ module.exports = (srv) => {
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
 		aApproverTypes.map(async function (oApproverType) {
-			switch(oApproverType){
-					case "HBU":oApproverType.ValidationType = hbuLevel;
-					case "CDH":oApproverType.ValidationType = cdhLevel;
-					case "NSM/SM/FM":oApproverType.ValidationType = nsmLevel;
-					case "Supply Chain":oApproverType.ValidationType = supply;
+			switch(oApproverType.ApproverType){
+					case "HBU":
+						oApproverType.ValidationType = hbuLevel;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = cdhLevel;
+						break;
+					case "NSM/SM/FM":
+						oApproverType.ValidationType = nsmLevel;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
 			}
 		});
 
