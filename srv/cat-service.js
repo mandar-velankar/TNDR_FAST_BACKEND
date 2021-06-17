@@ -899,7 +899,7 @@ module.exports = (srv) => {
 
 		let results = {
 			//In Policy flag
-			IN_POLICY: true
+			IN_POLICY: inPolicy
 		};
 
 		/*
