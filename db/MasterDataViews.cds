@@ -46,13 +46,13 @@ entity CountryCurrency as select from MasterData.PT_TMCTRY as Country{
 	key Country.CountryCode as COUNTRY_CODE,
 	key 'USD' as CURRENCY:String(3),
 	1 as SORTER:Integer
-} where Country.CountryCode <> 'TH' and Country.CountryCode <> 'CL'
+} where Country.CountryCode <> 'TH' and Country.CountryCode <> 'CL' and Country.CountryCode <> 'AR'
 union
 select from MasterData.PT_TMCTRY as Country{
 	Country.CountryCode as COUNTRY_CODE,
 	'EUR' as CURRENCY:String(3),
 	2 as SORTER:Integer
-} where Country.CountryCode <> 'TH' and Country.CountryCode <> 'CL'
+} where Country.CountryCode <> 'TH' and Country.CountryCode <> 'CL' and Country.CountryCode <> 'AR'
 union
 select from MasterData.PT_TMCTRY as Country{
 	Country.CountryCode as COUNTRY_CODE,
