@@ -970,7 +970,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
 					break;
 				case "SBR":
-					ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
 					break;
 				default:
 					oApproverType.ValidationType = 1;
