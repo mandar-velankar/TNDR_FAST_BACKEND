@@ -789,7 +789,7 @@ module.exports = (srv) => {
 
 			return results = {
 				//In Policy flag
-				IN_POLICY: true
+				IN_POLICY: false
 			};
 
 			/*
