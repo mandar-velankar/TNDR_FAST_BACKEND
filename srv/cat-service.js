@@ -2225,7 +2225,7 @@ module.exports = (srv) => {
 				offerValidation: offerValidation,
 				offerProductValidation: await buildOfferProductValidation(tx, whereOffer)
 			});
-		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerID + '.xlsx');
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		return excelStreamValue;
 	});
