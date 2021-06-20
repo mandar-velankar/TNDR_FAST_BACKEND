@@ -11,10 +11,14 @@ exports.generateXLSX = (templatename, values)=>{
     // Create a template
     var template = new XlsxTemplate(filedata);
 
-    // Replacements take place on first sheet
-    var sheetNumber = 1;
+    // Replacements take place on second sheet
+    var sheetNumber = 2;
 
     // Perform substitution
+    template.substitute(sheetNumber, values);
+
+    // Refresh first sheet so that references to replaced tags on sheet2 are refreshed
+    var sheetNumber = 1;
     template.substitute(sheetNumber, values);
 
     // Get binary data
