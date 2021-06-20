@@ -227,8 +227,7 @@ inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = '
     ifnull(ctryCWID.CWIDs, '') as CWIDs_Country:String
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
-and offerProduct.Active =1
-and offerProduct.Offer.Tender.Country.Region = 'MEA';
+and offerProduct.Active =1;
 
 entity VW_TENDER_MANAGER_DASHBOARD as select from TransactionalData.PT_TMOFPR offerProduct
 left outer join TransactionalData.PT_TMQUTO quotation on offerProduct.OfferID = quotation.OfferID
