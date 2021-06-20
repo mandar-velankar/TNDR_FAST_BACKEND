@@ -15,7 +15,7 @@ const XLSXHelper = require("./utils/XLSXHelper");
 
 module.exports = (srv) => {
 
-	// Use reflection to get the csn definition of Books
+	// Use reflection to get the csn definition
 	const {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
@@ -26,7 +26,7 @@ module.exports = (srv) => {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER
@@ -1175,11 +1175,20 @@ module.exports = (srv) => {
 	}
 	async function buildOfferValidation(tx, whereOffer) {
 		let results = {};
+
+		//get offer info
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
 		if (offer.length !== 1) {
 			return results;
 		}
 		offer = offer[0];
+
+		
+		//get tender info
+		const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
+		let tender = await tx.run(SELECT.from(PT_TMTEND).where(whereTender));
+		tender = tender[0];
+
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		let aApproverTypes = [];
 
@@ -1368,6 +1377,7 @@ module.exports = (srv) => {
 			TENDERID: offer.TENDERID,
 			CLASSIFICATION: offer.CLASSIFICATION,//Added Classification (db#1)
 			TENDER_REFERENCE: offer.TENDER_REFERENCE,
+			PROCUREMENT_REASON: tender.PROCUREMENT_METHOD_ID,
 			OFFERID: offer.OFFERID,
 			INSTITUTENAME: offer.INSTITUTENAME,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
@@ -2214,16 +2224,25 @@ module.exports = (srv) => {
 			return next();
 		}
 
+		//Get offer data
 		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
 		let offerValidation = await buildOfferValidation(tx, whereOffer);
 		if (!offerValidation) {
 			return req.reject(404, 'No offer found');
 		}
 
+		//Get product data
+		let productValidation  = await buildOfferProductValidation(tx, whereOffer);
+
+		//TODO convert prices
+		//offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.price(offerValidation.AMOUNT_IN_NUMBERS);
+		//offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.price(offerValidation.AMOUNT_IN_NUMBERS_VAT);
+
+		//generate XLSX
 		let excelStreamValue = XLSXHelper.generateXLSX("TH - Quotation Template.xlsx",
 			{
 				offerValidation: offerValidation,
-				offerProductValidation: await buildOfferProductValidation(tx, whereOffer)
+				offerProductValidation: productValidation
 			});
 		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

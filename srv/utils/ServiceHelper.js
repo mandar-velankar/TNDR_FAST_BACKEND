@@ -1,4 +1,5 @@
 const cds = require('@sap/cds');
+// const NumberFormat = require('./sap/ui/core/format/NumberFormat'); TODO how to include a javascript lib in node.js?
 
 module.exports = {
     _getWhereId: function(req, fieldName){
@@ -112,6 +113,45 @@ module.exports = {
         }
         return num.toLocaleString('en-US', { minimumFractionDigits: digits });
     }
+
+/*
+    //format price
+	price: function (price) {
+		if (!price){
+			return "";
+		}
+		var oNumberFormat = NumberFormat.getFloatInstance({
+			maxFractionDigits: 2,
+			groupingEnabled: true,
+			groupingSeparator: ",",
+			decimalSeparator: "."
+		});
+		var oValue = oNumberFormat.format(parseFloat(price));
+		if (currency === undefined){
+			return oValue;
+		}
+		return oValue;
+	},
+
+	//format price depending on Pack or Unit
+	priceTwoOrFour: function (price, unit) {
+		if (!price){
+			return "";
+		}
+		var oNumberFormat = NumberFormat.getFloatInstance({
+			maxFractionDigits: unit !== "Pack" ? 4 : 2,
+			groupingEnabled: true,
+			groupingSeparator: ",",
+			decimalSeparator: "."
+		});
+		var oValue = oNumberFormat.format(parseFloat(price));
+		if (!currency){
+			return oValue;
+		}
+		return oValue;
+	}
+*/
+
 }
 
 

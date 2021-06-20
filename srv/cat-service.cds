@@ -310,6 +310,7 @@ service CatalogService @(path : 'tender')
             TENDERID              : String(50) not null;
             CLASSIFICATION        : String(50) not null;//Added Classification (db#1)
             TENDER_REFERENCE      : String(753);
+            PROCUREMENT_REASON    : String;
         key OFFERID               : String(30) not null;
             INSTITUTENAME         : String(500);
             INSTITUTE_TYPE        : String(50);
