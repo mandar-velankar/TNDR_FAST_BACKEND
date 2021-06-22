@@ -20,7 +20,7 @@ entity SalesOpportunities: cuid, managed {
     NextPublicationDate: Date;
     ContractLength: Integer;
     ExtensionPeriod: Integer;
-    Institute: association to SalesOpportunityInstitute;
+    Institute: association to MasterData.PT_TMINST;
     Products: Composition of many SalesOpportunityProducts on Products.Opportunity = $self;
 }
 
@@ -30,4 +30,4 @@ entity SalesOpportunityProducts: cuid, managed {
     Opportunity: Association to SalesOpportunities;
 }
 
-entity SalesOpportunityInstitute as projection on MasterData.PT_TMINST;
+//entity SalesOpportunityInstitute as projection on MasterData.PT_TMINST;

@@ -23,9 +23,12 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity Buyers as projection on IntegrationDataConversion.PublicMarketBuyers;
     entity Products as projection on IntegrationDataConversion.PublicMarketProducts;
 
-    entity SalesOpportunities as projection on SalesOpportunityData.SalesOpportunities;
+    entity SalesOpportunities as projection on SalesOpportunityData.SalesOpportunities{
+        *,
+        Institute: redirected to PT_TMINST,
+        Products: redirected to SalesOpportunityProducts
+    };
     entity SalesOpportunityProducts as projection on SalesOpportunityData.SalesOpportunityProducts;
-    entity SalesOpportunityInstitute as projection on SalesOpportunityData.SalesOpportunityInstitute;
 
     entity PublicMarketTenders as projection on IntegrationDataConversion.PublicMarketTenders
     {
