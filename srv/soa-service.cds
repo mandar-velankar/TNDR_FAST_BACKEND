@@ -3,6 +3,7 @@ using { com.bayer.SXTENDER.IntegrationData } from '../db/IntegrationData';
 using { com.bayer.SXTENDER.TransactionalData } from '../db/TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataViews } from '../db/TransactionalDataViews';
 using { com.bayer.SXTENDER.MasterData } from '../db/./MasterData';
+using { com.bayer.SXTENDER.SalesOpportunityData } from '../db/SalesOpportunityData';
 //using { com.bayer.SXTENDER.MasterDataViews } from '../db/./MasterDataViews';
 //using { com.bayer.SXTENDER.TransactionalData } from '../db/TransactionalData';
 //using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/TransactionalDataConversion';
@@ -21,6 +22,10 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
 
     entity Buyers as projection on IntegrationDataConversion.PublicMarketBuyers;
     entity Products as projection on IntegrationDataConversion.PublicMarketProducts;
+
+    entity SalesOpportunities as projection on SalesOpportunityData.SalesOpportunities;
+    entity SalesOpportunityProducts as projection on SalesOpportunityData.SalesOpportunityProducts;
+    entity SalesOpportunityInstitute as projection on SalesOpportunityData.SalesOpportunityInstitute;
 
     entity PublicMarketTenders as projection on IntegrationDataConversion.PublicMarketTenders
     {
