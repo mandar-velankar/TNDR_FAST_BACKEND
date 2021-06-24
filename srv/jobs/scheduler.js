@@ -35,7 +35,7 @@ module.exports = async () => {
           requestMaxRetry: mercadoApi.RequestMaxRetry
         }
       };
-      this.consultationDate = this.dateToDDMMYYYY(new Date());
+      this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
 
     }
 
