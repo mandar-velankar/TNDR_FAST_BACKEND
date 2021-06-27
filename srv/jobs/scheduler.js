@@ -38,7 +38,7 @@ module.exports = async () => {
           requestMaxRetry: mercadoApi.RequestMaxRetry
         }
       };
-      this.consultationDate = "24062021" //this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
+      this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
 
     }
 
@@ -124,10 +124,10 @@ module.exports = async () => {
 
         if (currentRetry < MAX_RETRY) {
           currentRetry++;
-          // console.log(`Retrying ... \n\t [${currentRetry}] - ${url}`);
+          console.log(`Retrying ... \n\t [${currentRetry}] of [${MAX_RETRY}] - ${url}`);
           return sendWithRetry();
         } else {
-          // console.log(`Retried ${currentRetry} times but still failed to fetch from: \n${url}`);
+          console.log(`Retried ${currentRetry} times but still failed to fetch from: \n${url}`);
           const errLog = await _that.saveError(error, url);
           throw new Error(errLog);
          
@@ -141,10 +141,11 @@ module.exports = async () => {
         if(_that.authenticationType === "token"){
           return axios.get(url).then(successHandler).catch(errorHandler);
         }else{
+          console.log(`Sending basic auth request to ${url} with [${CPI_USER}] - [${CPI_PASSWORD}]`);
           return axios.get(url, {
             auth:{
-              username: CPI_USER,
-              password: CPI_PASSWORD
+              username: 'S0021213202', //CPI_USER,
+              password: 'C0mpli@nT', //CPI_PASSWORD
             }
           }).then(successHandler).catch(errorHandler);
         }
