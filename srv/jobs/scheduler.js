@@ -142,7 +142,7 @@ module.exports = async () => {
           return axios.get(url).then(successHandler).catch(errorHandler);
         }else{
           console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
-          return axios.get(url, {}, {
+          return axios.get(url, {
             auth:{
               username: API_USER,
               password: API_PASSWORD
