@@ -28,8 +28,8 @@ module.exports = async () => {
       this.host = mercadoApi.Host;
       this.authenticationType = mercadoApi.AuthenticationType; //Basic vs Token
       this.serviceUrl = mercadoApi.BasePath; 
-      this.cpiUser = mercadoApi.CpiUser;
-      this.cpiPassword = mercadoApi.CpiPassword;
+      this.apiUser = mercadoApi.ApiUser;
+      this.apiPassword = mercadoApi.ApiPassword;
       this.ticket = mercadoApi.ApiKey; 
       this.resources = {
         tenders: {
@@ -106,8 +106,8 @@ module.exports = async () => {
 
       const REQUEST_DELAY = this.resources.tenders.requestDelay;
       const MAX_RETRY = this.resources.tenders.requestMaxRetry;
-      const CPI_USER = this.cpiUser;
-      const CPI_PASSWORD = this.cpiPassword;
+      const API_USER = this.apiUser;
+      const API_PASSWORD = this.apiPassword;
       const _that = this;
 
       let currentRetry = 0;
@@ -141,11 +141,11 @@ module.exports = async () => {
         if(_that.authenticationType === "token"){
           return axios.get(url).then(successHandler).catch(errorHandler);
         }else{
-          console.log(`Sending basic auth request to ${url} with [${CPI_USER}] - [${CPI_PASSWORD}]`);
+          console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
           return axios.get(url, {
             auth:{
-              username: 'S0021213202', //CPI_USER,
-              password: 'C0mpli@nT', //CPI_PASSWORD
+              username: 'S0021213202', //API_USER,
+              password: 'C0mpli@nT', //API_PASSWORD
             }
           }).then(successHandler).catch(errorHandler);
         }
