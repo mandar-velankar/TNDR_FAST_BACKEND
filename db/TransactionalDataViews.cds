@@ -441,6 +441,7 @@ entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
 }where offer.Active = 1
 and (offer.Product.Active = 1 or offer.Product.Active is null)
 and (offer.Product.Price.Active = 1 or offer.Product.Price.Active is null)
+and (offer.Product.ActiveProduct = 1)
 group by
     offer.TenderID, 
     offer.OfferID, 
