@@ -127,7 +127,7 @@ module.exports = async () => {
           console.log(`Retrying ... \n\t [${currentRetry}] of [${MAX_RETRY}] - ${url}`);
           return sendWithRetry();
         } else {
-          console.log(`Retried ${currentRetry} times but still failed to fetch from: \n${url}`);
+          console.log(`Retried ${currentRetry} times but still failed to fetch from: ${url}`);
           const errLog = await _that.saveError(error, url);
           throw new Error(errLog);
          
@@ -142,12 +142,23 @@ module.exports = async () => {
           return axios.get(url).then(successHandler).catch(errorHandler);
         }else{
           console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
+
+          //get using header with basic auth.
+          /*return axios.get(url, {
+            headers: {
+              'Authorization': 'Basic UzAwMjEyMTMyMDI6QzBtcGxpQG5U'
+            }
+          }).then(successHandler).catch(errorHandler);
+          */
+
+          //get using basic auth setting that configures the API header
           return axios.get(url, {
             auth:{
               username: API_USER,
               password: API_PASSWORD
             }
           }).then(successHandler).catch(errorHandler);
+          
         }
         
       }
@@ -234,7 +245,7 @@ module.exports = async () => {
             ConsultationDate: new Date().toJSON()
           };
 
-          console.log(`Tender ${error.response.status}`);
+          console.log(`Failed with error: ${error}`);
           await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
 
           const tenderId = url.match(/=(.*?)&/)[1];
