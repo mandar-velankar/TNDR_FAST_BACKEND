@@ -38,11 +38,13 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity PublicMarketTenderStatuses as select from PublicMarketTenders as opp
     left outer join TransactionalData.CountrySpecificTenderInfo as info 
         on opp.CodigoExterno = info.TenderReference
+    left outer join TransactionalData.PT_TMTEND as TMTEND
+        on info.TenderID = TMTEND.TenderID
     {
         key opp.CodigoExterno,
         info.TenderID as TenderID,
         case 
-            when info.TenderReference is null then opp.TenderMatchingStatus else 'Participated' 
+            when info.TenderReference is null or TMTEND.Active = 0 then opp.TenderMatchingStatus else 'Participated' 
         end as Status:String,
         case 
             when info.TenderReference is null then 'NA'

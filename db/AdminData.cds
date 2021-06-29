@@ -123,14 +123,17 @@ entity CountryFragmentsCustomization {
 
 // Scheduler configuration
 entity SchedulerApiConfig: cuid {
-    Provider         : String; 
-    Host             : String;
-    BasePath         : String;
-    Resource         : String;
-    ResourcePath     : String;
-    ApiKey           : String;
-    RequestDelay     : Integer;
-    RequestMaxRetry  : Integer;
+    Provider            : String; 
+    Host                : String;
+    BasePath            : String;
+    Resource            : String;
+    ResourcePath        : String;
+    AuthenticationType  : String;
+    ApiUser             : String;
+    ApiPassword         : String;
+    ApiKey              : String;
+    RequestDelay        : Integer;
+    RequestMaxRetry     : Integer;
 }
 
 // entity SchedulerJobs: cuid {

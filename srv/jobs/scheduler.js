@@ -26,7 +26,10 @@ module.exports = async () => {
     constructor(){
 
       this.host = mercadoApi.Host;
+      this.authenticationType = mercadoApi.AuthenticationType; //Basic vs Token
       this.serviceUrl = mercadoApi.BasePath; 
+      this.apiUser = mercadoApi.ApiUser;
+      this.apiPassword = mercadoApi.ApiPassword;
       this.ticket = mercadoApi.ApiKey; 
       this.resources = {
         tenders: {
@@ -35,7 +38,7 @@ module.exports = async () => {
           requestMaxRetry: mercadoApi.RequestMaxRetry
         }
       };
-      this.consultationDate = this.dateToDDMMYYYY(new Date());
+      this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
 
     }
 
@@ -47,7 +50,12 @@ module.exports = async () => {
 
       return new CronJob(cronTime, async () => {
 
-        const url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?fecha=${this.consultationDate}&ticket=${this.ticket}`;
+
+        let url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?fecha=${this.consultationDate}`;
+
+        if(this.authenticationType === 'token'){
+          url = url + `&ticket=${this.ticket}`;
+        }
 
         const start = new Date().getTime();
         console.log(` `);
@@ -98,6 +106,8 @@ module.exports = async () => {
 
       const REQUEST_DELAY = this.resources.tenders.requestDelay;
       const MAX_RETRY = this.resources.tenders.requestMaxRetry;
+      const API_USER = this.apiUser;
+      const API_PASSWORD = this.apiPassword;
       const _that = this;
 
       let currentRetry = 0;
@@ -114,19 +124,43 @@ module.exports = async () => {
 
         if (currentRetry < MAX_RETRY) {
           currentRetry++;
-          // console.log(`Retrying ... \n\t [${currentRetry}] - ${url}`);
+          console.log(`Retrying ... \n\t [${currentRetry}] of [${MAX_RETRY}] - ${url}`);
           return sendWithRetry();
         } else {
-          // console.log(`Retried ${currentRetry} times but still failed to fetch from: \n${url}`);
+          console.log(`Retried ${currentRetry} times but still failed to fetch from: ${url}`);
           const errLog = await _that.saveError(error, url);
           throw new Error(errLog);
          
         }
       }
-
+      
       async function sendWithRetry() {
+
         await wait(REQUEST_DELAY);
-        return axios.get(url).then(successHandler).catch(errorHandler);
+
+        if(_that.authenticationType === "token"){
+          return axios.get(url).then(successHandler).catch(errorHandler);
+        }else{
+          console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
+
+          //get using header with basic auth.
+          /*return axios.get(url, {
+            headers: {
+              'Authorization': 'Basic UzAwMjEyMTMyMDI6QzBtcGxpQG5U'
+            }
+          }).then(successHandler).catch(errorHandler);
+          */
+
+          //get using basic auth setting that configures the API header
+          return axios.get(url, {
+            auth:{
+              username: API_USER,
+              password: API_PASSWORD
+            }
+          }).then(successHandler).catch(errorHandler);
+          
+        }
+        
       }
 
       return sendWithRetry();
@@ -141,9 +175,14 @@ module.exports = async () => {
       const tenderDetails = [];
       
       for(let i = 0; i < tenders.length; i++){
-         try {         
-           const url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?codigo=${tenders[i].CodigoExterno}&ticket=${this.ticket}`;
-          
+         try {  
+
+          let url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?codigo=${tenders[i].CodigoExterno}`;
+
+          if(this.authenticationType === 'token'){
+            url = url + `&ticket=${this.ticket}`;
+          }
+
            const detail = await this.fetchWithRetry(url);
            tenderDetails.push(detail.data.Listado[0]);
           
@@ -206,6 +245,7 @@ module.exports = async () => {
             ConsultationDate: new Date().toJSON()
           };
 
+          console.log(`Failed with error: ${error}`);
           await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
 
           const tenderId = url.match(/=(.*?)&/)[1];
