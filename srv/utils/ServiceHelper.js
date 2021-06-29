@@ -112,7 +112,15 @@ module.exports = {
             num = 0;
         }
         return num.toLocaleString('en-US', { minimumFractionDigits: digits });
+    },
+
+    formatNumberTo_EN_US_String: function(num, minDigits, maxDigits) {
+        if (!num){
+            num = 0;
+        }
+        return num.toLocaleString('en-US', { minimumFractionDigits: minDigits, maximumFractionDigits: maxDigits });
     }
+
 
 /*
     //format price
