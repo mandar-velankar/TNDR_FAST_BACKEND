@@ -2242,9 +2242,23 @@ module.exports = (srv) => {
 		//Get product data
 		let productValidation  = await buildOfferProductValidation(tx, whereOffer);
 
-		//TODO convert prices
-		//offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.price(offerValidation.AMOUNT_IN_NUMBERS);
-		//offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.price(offerValidation.AMOUNT_IN_NUMBERS_VAT);
+		//format prices
+		productValidation.forEach(prd => {
+			prd.PAID_VOLUME = ServiceHelper.formatNumberTo_EN_US_String(prd.PAID_VOLUME, 0, 0);
+			prd.PACKSIZE = ServiceHelper.formatNumberTo_EN_US_String(prd.PACKSIZE, 0, 0);
+			prd.OFFER_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE_VAT, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+			prd.SAMPLES = ServiceHelper.formatNumberTo_EN_US_String(prd.SAMPLES, 0, 0);
+			prd.FOC = ServiceHelper.formatNumberTo_EN_US_String(prd.FOC, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.NET_PRICE, 0, 0);
+		});
+		
+		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
+		offerValidation.VAT_TOTAL = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.VAT_TOTAL, 2, 2);
+		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+
 
 		//generate XLSX
 		let excelStreamValue = XLSXHelper.generateXLSX("TH - Quotation Template.xlsx",
