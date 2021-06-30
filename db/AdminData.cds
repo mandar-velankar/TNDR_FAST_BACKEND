@@ -128,10 +128,10 @@ entity SchedulerApiConfig: cuid {
     BasePath            : String;
     Resource            : String;
     ResourcePath        : String;
-    AuthenticationType  : String;
     ApiUser             : String;
     ApiPassword         : String;
-    ApiKey              : String;
+    ProxyHost           : String;
+    ProxyPort           : Integer;
     RequestDelay        : Integer;
     RequestMaxRetry     : Integer;
 }
