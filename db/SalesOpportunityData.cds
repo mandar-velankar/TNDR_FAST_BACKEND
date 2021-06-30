@@ -15,9 +15,9 @@ entity SalesOpportunities: cuid, managed {
     TenderReference: String;
     Classification: String;
     TenderChannel: String;
-    PublicationDate: Date;
-    OfferDueDate: Date;
-    NextPublicationDate: Date;
+    PublicationDate: DateTime;
+    OfferDueDate: DateTime;
+    NextPublicationDate: DateTime;
     ContractLength: Integer;
     ExtensionPeriod: Integer;
     Institute: association to MasterData.PT_TMINST;
