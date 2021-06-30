@@ -26,11 +26,12 @@ module.exports = async () => {
     constructor(){
 
       this.host = mercadoApi.Host;
-      this.authenticationType = mercadoApi.AuthenticationType; //Basic vs Token
       this.serviceUrl = mercadoApi.BasePath; 
       this.apiUser = mercadoApi.ApiUser;
       this.apiPassword = mercadoApi.ApiPassword;
-      this.ticket = mercadoApi.ApiKey; 
+      this.proxyHost = mercadoApi.ProxyHost; 
+      this.proxyPort = mercadoApi.ProxyPort; 
+
       this.resources = {
         tenders: {
           path: mercadoApi.ResourcePath,
@@ -52,10 +53,6 @@ module.exports = async () => {
 
 
         let url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?fecha=${this.consultationDate}`;
-
-        if(this.authenticationType === 'token'){
-          url = url + `&ticket=${this.ticket}`;
-        }
 
         const start = new Date().getTime();
         console.log(` `);
@@ -108,7 +105,10 @@ module.exports = async () => {
       const MAX_RETRY = this.resources.tenders.requestMaxRetry;
       const API_USER = this.apiUser;
       const API_PASSWORD = this.apiPassword;
-      const _that = this;
+      const PROXY_HOST = this.proxyHost;
+      const PROXY_PORT = this.proxyPort;
+
+      const that = this;
 
       let currentRetry = 0;
 
@@ -127,9 +127,9 @@ module.exports = async () => {
           console.log(`Retrying ... \n\t [${currentRetry}] of [${MAX_RETRY}] - ${url}`);
           return sendWithRetry();
         } else {
-          console.log(`Retried ${currentRetry} times but still failed to fetch from: ${url}`);
-          const errLog = await _that.saveError(error, url);
-          throw new Error(errLog);
+          console.log(`\nRetried ${currentRetry} times but still failed to fetch from: ${url}\n`);
+          const errLog = await that.saveError(error, url);
+          throw new Error(error);
          
         }
       }
@@ -137,29 +137,22 @@ module.exports = async () => {
       async function sendWithRetry() {
 
         await wait(REQUEST_DELAY);
-
-        if(_that.authenticationType === "token"){
-          return axios.get(url).then(successHandler).catch(errorHandler);
-        }else{
-          console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
-
-          //get using header with basic auth.
-          /*return axios.get(url, {
-            headers: {
-              'Authorization': 'Basic UzAwMjEyMTMyMDI6QzBtcGxpQG5U'
-            }
-          }).then(successHandler).catch(errorHandler);
-          */
+          
+        // console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
 
           //get using basic auth setting that configures the API header
           return axios.get(url, {
             auth:{
               username: API_USER,
               password: API_PASSWORD
+            },
+            proxy: {
+              host: PROXY_HOST,
+              port: PROXY_PORT
             }
           }).then(successHandler).catch(errorHandler);
           
-        }
+        // }
         
       }
 
@@ -178,10 +171,6 @@ module.exports = async () => {
          try {  
 
           let url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?codigo=${tenders[i].CodigoExterno}`;
-
-          if(this.authenticationType === 'token'){
-            url = url + `&ticket=${this.ticket}`;
-          }
 
            const detail = await this.fetchWithRetry(url);
            tenderDetails.push(detail.data.Listado[0]);
@@ -248,9 +237,10 @@ module.exports = async () => {
           console.log(`Failed with error: ${error}`);
           await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
 
-          const tenderId = url.match(/=(.*?)&/)[1];
+          const urlParts = url.match(/=(.*?)&/);
+          const msg = urlParts && urlParts.length > 0 && urlParts[1] || "Request";
 
-          return `${tenderId} -> failed. See 'SchedulerErrorLog'`;
+          return `${msg} -> failed. See 'SchedulerErrorLog'`;
 
         }catch(err){
           return err.message;
