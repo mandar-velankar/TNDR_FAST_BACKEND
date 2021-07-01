@@ -18,6 +18,7 @@ entity SalesOpportunities: cuid, managed {
     PublicationDate: DateTime;
     OfferDueDate: DateTime;
     NextPublicationDate: DateTime;
+    ExpectedAwardDate: DateTime;
     ContractLength: Integer;
     ExtensionPeriod: Integer;
     Institute: association to MasterData.PT_TMINST;
