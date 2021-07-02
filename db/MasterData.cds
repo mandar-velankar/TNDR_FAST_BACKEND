@@ -200,7 +200,6 @@ entity CountryApprovers {
 	key CountryCode:String(2) not null;
 	key ApproverType:String(200) not null;
 	key Division:String(200) not null;
-	ApproverID:String(100);//remove
 	ApproverName:String(200);
 	key ApproverEmailID:String(200);
 	//Hierarchy:Integer not null;
