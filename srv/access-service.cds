@@ -7,6 +7,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         epa:Boolean;
         masterdata:Boolean;
         salesopportunity:Boolean;
+        createsalesopportunity:Boolean;
         cpi:Boolean;
     };
 
