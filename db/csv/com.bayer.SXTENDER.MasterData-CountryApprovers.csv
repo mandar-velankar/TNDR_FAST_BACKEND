@@ -1,362 +1,362 @@
-COUNTRYCODE,APPROVERTYPE,DIVISION,APPROVERNAME,APPROVEREMAILID
-AE,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
-BH,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com
-BH,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
-EG,Supply Chain,Pharma,Alia Ashraf Maher,alia.ashraf@bayer.com
-AE,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-AE,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com
-MX,Country Business,Pharma,Jorge Ancona,jorge.ancona@bayer.com
-MX,Supply Chain,Both,Jose Luis Torres,jose.torres4@bayer.com
-SA,Supply Chain,Pharma,Effat Saddik,effat.saddik@bayer.com
-AE,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com
-AE,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-BH,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-BH,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com
-AE,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-AE,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-EG,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-EG,Regulatory,Both,Eman Abdel Hamid,eman.abdelhamid@bayer.com
-IQ,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-BH,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-IQ,Regulatory,Both,Wadiah Batarseh,wadiah.batarseh@bayer.com
-BH,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-BH,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-JO,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-JO,Regulatory,Both,Wadiah Batarseh,wadiah.batarseh@bayer.com
-IQ,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com
-KW,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-EG,Country Business,Pharma,Samer Lezzaiq,samer.lezzaiq@bayer.com
-EG,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-KW,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com
-JO,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com
-EG,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-EG,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-LB,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-LB,Regulatory,Both,Wadiah Batarseh,wadiah.batarseh@bayer.com
-IQ,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com
-IQ,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-KW,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
-LY,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-IQ,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-IQ,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-LY,Regulatory,Both,Eman Abdel Hamid,eman.abdelhamid@bayer.com
-OM,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-OM,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com
-LB,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com
-JO,Country Business,Pharma,Samer Al-Faqih,samer.al-faqih@bayer.com
-JO,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-QA,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-QA,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com
-JO,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-JO,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-LY,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com
-SA,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-SA,Regulatory,Both,Ibrahim Mohammed Al Ashban,ibrahim.al-ashban@bayer.com
-OM,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
-KW,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com
-KW,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SD,Regulatory,Both,Eman Abdel Hamid,eman.abdelhamid@bayer.com
-SY,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-KW,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-KW,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SY,Regulatory,Both,Wadiah Batarseh,wadiah.batarseh@bayer.com
-QA,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com
-YE,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com
-YE,Regulatory,Both,Eman Abdel Hamid,eman.abdelhamid@bayer.com
-LB,Country Business,Pharma,Samer Al-Faqih,samer.al-faqih@bayer.com
-LB,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SD,Supply Chain,Pharma,Alia Ashraf Maher,alia.ashraf@bayer.com
-LB,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-LB,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SY,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com
-YE,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com
-LY,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com
-LY,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-LY,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-LY,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-OM,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com
-OM,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-OM,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-OM,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-QA,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com
-QA,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-QA,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-QA,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SA,Country Business,Pharma,Hussein El Hakim,hussein.elhakim@bayer.com
-SA,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SD,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com
-SD,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SD,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-SD,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SY,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com
-SY,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SY,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-SY,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-YE,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com
-YE,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-YE,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-YE,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-SA,Regional Business,Pharma,Hussein El Hakim,hussein.elhakim@bayer.com
-SA,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com
-AE,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-BH,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-BH,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-EG,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-AE,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-AE,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-MX,Country Business,Pharma,Gilberto Mata,gilberto.mata@bayer.com
-SA,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-AE,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-AE,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-BH,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-BH,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-AE,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-EG,Legal,Both,Mohamed Zaghloul,mohamed.zaghloul@bayer.com
-EG,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-IQ,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-BH,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-IQ,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-BH,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-JO,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-JO,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-IQ,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-KW,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-EG,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-EG,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-KW,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-JO,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-EG,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-LB,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-LB,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-IQ,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-IQ,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-KW,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-LY,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-IQ,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-LY,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-OM,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-OM,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-LB,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-JO,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-JO,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-QA,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-QA,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-JO,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-LY,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-SA,Legal,Both,Hamdy Hafez,hamdy.hafez@bayer.com
-SA,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-OM,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-KW,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-KW,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SD,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-SY,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-KW,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SY,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-QA,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-YE,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com
-YE,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com
-LB,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-LB,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SD,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-LB,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SY,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-YE,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com
-LY,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-LY,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-LY,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-OM,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-OM,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-OM,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-QA,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-QA,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-QA,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SA,Country Business,Pharma,Alaa Eldin Ali Hassan Nada,alaa.nada@bayer.com
-SA,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SD,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-SD,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SD,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SY,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-SY,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SY,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-YE,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com
-YE,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-YE,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-SA,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com
-MX,Country Business,Pharma,Enrique Zuani,enrique.zuani@bayer.com
-SA,Supply Chain,Pharma,Ahmed Yehya,ahmed.yehya@bayer.com
-AE,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-BH,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-EG,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-GC,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-IQ,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-JO,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-KW,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-LB,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-LY,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-OM,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-QA,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-SA,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-SD,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-SY,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-YE,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com
-TH,HBU,Pharma,Yamini Prakash,yamini.prakash@bayer.com
-TH,HBU,Pharma,Kornyok Sakkarinkul,kornyok.sakkarinkul@bayer.com
-TH,HBU,Pharma,Sunee Kamalanon,sunee.kamalanon@bayer.com
-TH,HBU,Radiology,Panyamon Passakornpinit,panyamon.passakornpinit@bayer.com
-TH,CDH,Pharma,JinA Lee,jina.lee@bayer.com
-TH,CDH,Radiology,Chavarat Temsakornpun,chavarat.temsakornpun@bayer.com
-TH,NSM/SM/FM,Pharma,Wannapa Krairojananan,wannapa.krairojananan@bayer.com
-TH,NSM/SM/FM,Radiology,Wannapa Krairojananan,wannapa.krairojananan@bayer.com
-TH,Supply Chain,Both,Siriporn Noiwan,siriporn.noiwan@bayer.com
-MX,Country Business,Radiology,Jorge Ancona,jorge.ancona@bayer.com
-MX,Country Business,Radiology,Gilberto Mata,gilberto.mata@bayer.com
-MX,Country Business,Radiology,Enrique Zuani,enrique.zuani@bayer.com
-AE,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-BH,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-BH,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-EG,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AE,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AE,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-MX,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-MX,Supply Chain,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SA,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AE,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AE,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-BH,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-BH,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AE,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AE,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-EG,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-EG,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-IQ,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-BH,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-IQ,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-BH,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-BH,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-JO,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-JO,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-IQ,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-KW,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-EG,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-EG,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-KW,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-JO,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-EG,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-EG,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LB,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LB,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-IQ,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-IQ,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-KW,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LY,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-IQ,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-IQ,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LY,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-OM,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-OM,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LB,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-JO,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-JO,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-QA,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-QA,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-JO,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-JO,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LY,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SA,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SA,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-OM,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-KW,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-KW,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SD,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SY,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-KW,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-KW,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SY,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-QA,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-YE,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-YE,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LB,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LB,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SD,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LB,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LB,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SY,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-YE,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LY,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LY,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LY,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LY,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-OM,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-OM,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-OM,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-OM,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-QA,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-QA,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-QA,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-QA,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SA,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SA,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SD,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SD,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SD,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SD,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SY,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SY,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SY,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SY,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-YE,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-YE,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-YE,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-YE,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SA,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SA,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AE,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-BH,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-EG,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-GC,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-IQ,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-JO,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-KW,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LB,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-LY,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-OM,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-QA,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SA,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SD,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-SY,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-YE,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-TH,HBU,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-TH,HBU,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-TH,CDH,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-TH,CDH,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-TH,NSM/SM/FM,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-TH,NSM/SM/FM,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-TH,Supply Chain,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-MX,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AR,MACS,Pharma,Guadalupe Roel,guadalupe.roel@bayer.com
-AR,TA,Pharma,TBD,jonathan.hubeau.ext@bayer.com
-AR,FBP,Pharma,Mariela Orandi,mariela.orandi@bayer.com
-AR,LPC,Pharma,Thomas Henshaw,thomas.henshaw@bayer.com
-AR,COM/PGA,Pharma,Marialaura Lopez,marialaura.lopez@bayer.com
-AR,Supply Chain,Pharma,Santiago Pettigrew,santiago.pettigrew@bayer.com
-AR,International Trade,Pharma,Alejandro Terzian,alejandro.terzian@bayer.com
-AR,Transfer Pricing,Pharma,Guillermo Escosteguy,guillermo.escosteguy@bayer.com
-AR,CDH,Pharma,Pierina Rossetti,pierina.rossetti@bayer.com
-AR,SBR,Pharma,Christophe Dumont,christophe.dumont@bayer.com
-AR,MACS,Pharma,Andre Jacobs,andre.jacobs@bayer.com
-AR,TA,Pharma,Robert Henning,robert.henning@bayer.com
-AR,FBP,Pharma,Fabian Deck,fabian.deck@bayer.com
-AR,LPC,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AR,COM/PGA,Pharma,Frank Schmitt,frank.schmitt1@bayer.com
-AR,Supply Chain,Pharma,Andre Jacobs,andre.jacobs@bayer.com
-AR,International Trade,Pharma,Robert Henning,robert.henning@bayer.com
-AR,Transfer Pricing,Pharma,Fabian Deck,fabian.deck@bayer.com
-AR,CDH,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-AR,SBR,Pharma,Frank Schmitt,frank.schmitt1@bayer.com
-CL,MACS Head,Pharma,Robert Henning,robert.henning@bayer.com
-CL,Supply Chain,Pharma,Fabian Deck,fabian.deck@bayer.com
-CL,Business Service,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com
-CL,Law and Patents,Pharma,Frank Schmitt,frank.schmitt1@bayer.com
-CL,CDH,Pharma,Frank Schmitt,frank.schmitt1@bayer.com
-CL,SBR RA ConoSur,Radiology,Frank Schmitt,frank.schmitt1@bayer.com
-CL,CDH-Chile (signature),Radiology,Frank Schmitt,frank.schmitt1@bayer.com
+CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,APPROVERTYPE,DIVISION,APPROVERNAME,APPROVEREMAILID,ENABLED
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Supply Chain,Pharma,Alia Ashraf Maher,alia.ashraf@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Country Business,Pharma,Jorge Ancona,jorge.ancona@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Supply Chain,Both,Jose Luis Torres,jose.torres4@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Supply Chain,Pharma,Effat Saddik,effat.saddik@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Regulatory,Both,Eman Abdel Hamid,eman.abdelhamid@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Regulatory,Both,Wadiah Batarseh,wadiah.batarseh@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Regulatory,Both,Wadiah Batarseh,wadiah.batarseh@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Country Business,Pharma,Samer Lezzaiq,samer.lezzaiq@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Regulatory,Both,Wadiah Batarseh,wadiah.batarseh@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Regulatory,Both,Eman Abdel Hamid,eman.abdelhamid@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Country Business,Pharma,Samer Al-Faqih,samer.al-faqih@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Regulatory,Both,Hager Abdel Salam Hatata,hager.hatata@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Regulatory,Both,Ibrahim Mohammed Al Ashban,ibrahim.al-ashban@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Regulatory,Both,Eman Abdel Hamid,eman.abdelhamid@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Regulatory,Both,Wadiah Batarseh,wadiah.batarseh@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Supply Chain,Pharma,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Legal,Both,Rachel Cosgrove,rachel.cosgrove@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Regulatory,Both,Eman Abdel Hamid,eman.abdelhamid@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Country Business,Pharma,Samer Al-Faqih,samer.al-faqih@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Supply Chain,Pharma,Alia Ashraf Maher,alia.ashraf@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Supply Chain,Pharma,Malak Mseis,malak.mseis@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Country Business,Pharma,Asam Shiraz Khan,asamshiraz.khan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Country Business,Pharma,Hussein El Hakim,hussein.elhakim@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Country Business,Pharma,Anne Moin Babia,anne.babia@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Country Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Regional Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Regional Business,Pharma,Hussein El Hakim,hussein.elhakim@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Regional Business,Radiology,Johnny Al Asmar,johnny.al-asmar@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Country Business,Pharma,Gilberto Mata,gilberto.mata@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Legal,Both,Mohamed Zaghloul,mohamed.zaghloul@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Legal,Both,Hamdy Hafez,hamdy.hafez@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Legal,Both,Irina Lazarescu,irina.lazarescu@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Regulatory,Both,Adi Mohsin,adi.mohsin@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Supply Chain,Pharma,Vipin Mohan,vipin.mohan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Country Business,Pharma,Alaa Eldin Ali Hassan Nada,alaa.nada@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Country Business,Pharma,Henrik Wulff,henrik.wulff@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Country Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Regional Business,Radiology,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Country Business,Pharma,Enrique Zuani,enrique.zuani@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Supply Chain,Pharma,Ahmed Yehya,ahmed.yehya@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,GC,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Controlling,Both,Wael Ghareeb,wael.mohamed@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,HBU,Pharma,Yamini Prakash,yamini.prakash@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,HBU,Pharma,Kornyok Sakkarinkul,kornyok.sakkarinkul@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,HBU,Pharma,Sunee Kamalanon,sunee.kamalanon@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,HBU,Radiology,Panyamon Passakornpinit,panyamon.passakornpinit@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,CDH,Pharma,JinA Lee,jina.lee@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,CDH,Radiology,Chavarat Temsakornpun,chavarat.temsakornpun@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,NSM/SM/FM,Pharma,Wannapa Krairojananan,wannapa.krairojananan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,NSM/SM/FM,Radiology,Wannapa Krairojananan,wannapa.krairojananan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,Supply Chain,Both,Siriporn Noiwan,siriporn.noiwan@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Country Business,Radiology,Jorge Ancona,jorge.ancona@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Country Business,Radiology,Gilberto Mata,gilberto.mata@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Country Business,Radiology,Enrique Zuani,enrique.zuani@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Supply Chain,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Legal,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Regulatory,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Supply Chain,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Country Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Regional Business,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Regional Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AE,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,BH,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,EG,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,GC,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,IQ,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,JO,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,KW,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LB,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,LY,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,OM,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,QA,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SA,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SD,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,SY,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,YE,Controlling,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,HBU,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,HBU,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,CDH,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,CDH,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,NSM/SM/FM,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,NSM/SM/FM,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,TH,Supply Chain,Both,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,MX,Country Business,Radiology,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,MACS,Pharma,Guadalupe Roel,guadalupe.roel@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,TA,Pharma,TBD,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,FBP,Pharma,Mariela Orandi,mariela.orandi@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,LPC,Pharma,Thomas Henshaw,thomas.henshaw@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,COM/PGA,Pharma,Marialaura Lopez,marialaura.lopez@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,Supply Chain,Pharma,Santiago Pettigrew,santiago.pettigrew@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,International Trade,Pharma,Alejandro Terzian,alejandro.terzian@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,Transfer Pricing,Pharma,Guillermo Escosteguy,guillermo.escosteguy@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,CDH,Pharma,Pierina Rossetti,pierina.rossetti@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,SBR,Pharma,Christophe Dumont,christophe.dumont@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,MACS,Pharma,Andre Jacobs,andre.jacobs@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,TA,Pharma,Robert Henning,robert.henning@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,FBP,Pharma,Fabian Deck,fabian.deck@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,LPC,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,COM/PGA,Pharma,Frank Schmitt,frank.schmitt1@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,Supply Chain,Pharma,Andre Jacobs,andre.jacobs@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,International Trade,Pharma,Robert Henning,robert.henning@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,Transfer Pricing,Pharma,Fabian Deck,fabian.deck@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,CDH,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,AR,SBR,Pharma,Frank Schmitt,frank.schmitt1@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,CL,MACS Head,Pharma,Robert Henning,robert.henning@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,CL,Supply Chain,Pharma,Fabian Deck,fabian.deck@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,CL,Business Service,Pharma,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,CL,Law and Patents,Pharma,Frank Schmitt,frank.schmitt1@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,CL,CDH,Pharma,Frank Schmitt,frank.schmitt1@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,CL,SBR RA ConoSur,Radiology,Frank Schmitt,frank.schmitt1@bayer.com,1
+2021-06-29 00:00:00,EIRVT,2021-06-29 00:00:00,EIRVT,CL,CDH-Chile (signature),Radiology,Frank Schmitt,frank.schmitt1@bayer.com,1
