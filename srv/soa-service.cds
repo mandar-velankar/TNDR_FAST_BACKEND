@@ -41,6 +41,8 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
         * ,
     };
     entity CountrySpecificInformation as projection on TransactionalData.CountrySpecificTenderInfo;
+
+    entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     
 
     entity PublicMarketTenderStatuses as select from PublicMarketTenders as opp
@@ -144,6 +146,24 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
         st.SubStatus,
         opp.Comprador: redirected to Buyers,
         opp.Items: redirected to Products
-    }
+    };
+
+
+    entity ParticipatedPublicMarketOpportunities as select from CountrySpecificInformation countryInfo
+    left outer join PT_TMTEND as tndr 
+        on countryInfo.TenderID = tndr.TenderID 
+    left outer join PT_TMTNOFST as status 
+        on countryInfo.TenderID = status.TenderID 
+    {
+        countryInfo.CountryCode,
+        countryInfo.TenderID,
+        countryInfo.TenderReference as CodigoExterno,
+        status.STATUS as Status
+        
+    }where countryInfo.CountryCode = 'CL' 
+    and tndr.Active = 1
+    and status.STATUS = 'Quotation Submitted'
+    and status.Active = 1
+    and status.CountryCode = 'CL'
 
 }
