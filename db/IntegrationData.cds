@@ -124,3 +124,94 @@ entity MercadoPublicoClassificationKeywords: managed {
         Keyword                         : String;
         Product                         : Association to MercadoPublicoClassificationProducts;
 }
+
+
+
+entity MercadoPublicoOrdenesDeCompra: managed {
+    key Codigo                          : String;
+        Nombre                          : String;
+        CodigoEstado                    : Integer;
+        Estado                          : String;
+        CodigoLicitacion                : String;
+        Descripcion                     : String;
+        CodigoTipo                      : Integer;
+        Tipo                            : String;
+        TipoMoneda                      : String;
+        CodigoEstadoProveedor           : Integer;
+        EstadoProveedor                 : String;
+        FechaCreacion                   : DateTime;
+        FechaEnvio                      : DateTime;
+        FechaAceptacion                 : DateTime;
+        FechaCancelacion                : DateTime;
+        FechaUltimaModificacion         : DateTime;
+        TieneItems                      : String;
+        PromedioCalificacion            : Double;
+        CantidadEvaluacion              : Integer;
+        Descuentos                      : Double;
+        Cargos                          : Double;
+        TotalNeto                       : Double;
+        PorcentajeIva                   : Double;
+        Impuestos                       : Double;
+        Total                           : Double;
+        Financiamiento                  : String;
+        Pais                            : String;
+        TipoDespacho                    : String;
+        FormaPago                       : String;
+        Comprador                       : Composition of MercadoPublicoOrdenesDeCompraComprador;
+        Proveedor                       : Composition of MercadoPublicoOrdenesDeCompraProveedor;
+        Items                           : Composition of many MercadoPublicoOrdenesDeCompraProducto on Items.OrdenesDeCompra = $self;        
+}
+
+
+entity MercadoPublicoOrdenesDeCompraComprador: cuid {
+        CodigoOrganismo                 : String;
+        NombreOrganismo                 : String;
+        RutUnidad                       : String;
+        CodigoUnidad                    : String;
+        NombreUnidad                    : String;
+        Actividad                       : String;
+        DireccionUnidad                 : String;
+        ComunaUnidad                    : String;
+        RegionUnidad                    : String;
+        Pais                            : String;
+        NombreContacto                  : String;
+        CargoContacto                   : String;
+        FonoContacto                    : String;
+        MailContacto                    : String;
+};
+
+entity MercadoPublicoOrdenesDeCompraProveedor: cuid {
+        Codigo                          : String;
+        Nombre                          : String;
+        Actividad                       : String;
+        CodigoSucursal                  : String;
+        NombreSucursal                  : String;
+        RutSucursal                     : String;
+        Direccion                       : String;
+        Comuna                          : String;
+        Region                          : String;
+        Pais                            : String;
+        NombreContacto                  : String;
+        CargoContacto                   : String;
+        FonoContacto                    : String;
+        MailContacto                    : String;
+};
+
+entity MercadoPublicoOrdenesDeCompraProducto: cuid {
+        Correlativo                     : Integer;
+        CodigoCategoria                 : Integer;
+        Categoria                       : String;
+        CodigoProducto                  : Integer;
+        Producto                        : String;
+        EspecificacionComprador         : String;
+        EspecificacionProveedor         : Double;
+        Cantidad                        : Double;
+        Unidad                          : String;
+        Moneda                          : Double;
+        PrecioNeto                      : Double;
+        TotalCargos                     : Double;
+        TotalDescuentos                 : Double;
+        TotalImpuestos                  : Double;
+        Total                           : Double;
+        OrdenesDeCompra                 : Association to MercadoPublicoOrdenesDeCompra;
+};

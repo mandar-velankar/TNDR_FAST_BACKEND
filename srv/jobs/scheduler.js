@@ -18,7 +18,7 @@ module.exports = async () => {
   const { ParticipatedPublicMarketOpportunities } = srv.entities;
 
   // get api config
-  const mercadoApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}).where({Resource: 'Tender'}));
+  const mercadoApi = await cds.run(SELECT.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}));
 
   const classification_search_terms = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationKeywords'));
   const classification_products = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationProducts'));
@@ -27,20 +27,30 @@ module.exports = async () => {
 
     constructor(){
 
-      this.host = mercadoApi.Host;
-      this.serviceUrl = mercadoApi.BasePath; 
-      this.apiUser = mercadoApi.ApiUser;
-      this.apiPassword = mercadoApi.ApiPassword;
-      this.proxyHost = mercadoApi.ProxyHost; 
-      this.proxyPort = mercadoApi.ProxyPort; 
+      this.host = mercadoApi[0].Host;
+      this.serviceUrl = mercadoApi[0].BasePath; 
+      this.apiUser = mercadoApi[0].ApiUser;
+      this.apiPassword = mercadoApi[0].ApiPassword;
+      this.proxyHost = mercadoApi[0].ProxyHost; 
+      this.proxyPort = mercadoApi[0].ProxyPort; 
+
+      let tendersConfig = mercadoApi.find(item => item.Resource.indexOf("Tender") > -1);
+      let poConfig = mercadoApi.find(item => item.Resource.indexOf("PurchaseOrder") > -1);
 
       this.resources = {
         tenders: {
-          path: mercadoApi.ResourcePath,
-          requestDelay: mercadoApi.RequestDelay,
-          requestMaxRetry: mercadoApi.RequestMaxRetry
+          path: tendersConfig.ResourcePath,
+          requestDelay: tendersConfig.RequestDelay,
+          requestMaxRetry: tendersConfig.RequestMaxRetry
+          
+        },
+        purchaseOrders: {
+          path: poConfig.ResourcePath,
+          requestDelay: poConfig.RequestDelay,
+          requestMaxRetry: poConfig.RequestMaxRetry
         }
       };
+
       this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
 
     }
