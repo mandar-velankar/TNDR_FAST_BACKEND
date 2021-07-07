@@ -32,7 +32,7 @@ const jobScheduler = require("./jobs/scheduler");
   // Jobs Scheduler
   const scheduler = await jobScheduler();
   scheduler.mercadoPublico.fetchTenders('00 00 * * *').start();
-  scheduler.mercadoPublico.fetchTenderResults('*/1 * * * *').start();
+  scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));

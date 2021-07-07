@@ -294,25 +294,31 @@ module.exports = async () => {
             comprador.ID = oldLicitacione.Comprador_ID
 
 
-            const insertPromises = [];
+            const updatePromises = [];
     
             // Update Licitacione + Comprador
-            insertPromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({CodigoExterno:licitacione.CodigoExterno}).with(licitacione)));
-            insertPromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador').where({ID:oldLicitacione.Comprador_ID}).with(comprador)));
+            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({CodigoExterno:licitacione.CodigoExterno}).with(licitacione)));
+            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador').where({ID:oldLicitacione.Comprador_ID}).with(comprador)));
            
 
             // Update Items
-            for(let i = 0; i <= items.length; i++){
-                delete items[i]['ID']; // remove the new ID from the object. We need to reuse the old ID
+            for(let i = 0; i < items.length; i++){
                 const oldProduct = oldProducts.find(oldP => oldP.Correlativo === items[i].Correlativo);
-                insertPromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({ID:oldProduct.ID}).with(items[i])));
+
+                // We need to reuse the old ID therefore we delete the new ID
+                // We also need to copy over the old values for MatchedProductName and MatchedProductKeyword
+                delete items[i]['ID']; 
+                items[i].MatchedProductName = oldProduct.MatchedProductName;
+                items[i].MatchedProductKeyword = oldProduct.MatchedProductKeyword;
+
+                updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({ID:oldProduct.ID}).with(items[i])));
             }
 
-            await Promise.all(insertPromises);
+            await Promise.all(updatePromises);
             console.log(`Tender ${classifiedTender.CodigoExterno} successfully updated`);
 
           }catch(error){
-            console.log(`Tender ${classifiedTender.CodigoExterno} -> update failed - ${error.message}`);
+            console.log(`Tender ${classifiedTender.CodigoExterno} update failed - ${error.message}`);
           }
           
         }
