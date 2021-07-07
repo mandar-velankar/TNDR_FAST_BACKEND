@@ -134,7 +134,7 @@ entity MercadoPublicoOrdenesDeCompra: managed {
         Estado                          : String;
         CodigoLicitacion                : String;
         Descripcion                     : String;
-        CodigoTipo                      : Integer;
+        CodigoTipo                      : String;
         Tipo                            : String;
         TipoMoneda                      : String;
         CodigoEstadoProveedor           : Integer;
@@ -204,10 +204,10 @@ entity MercadoPublicoOrdenesDeCompraProducto: cuid {
         CodigoProducto                  : Integer;
         Producto                        : String;
         EspecificacionComprador         : String;
-        EspecificacionProveedor         : Double;
+        EspecificacionProveedor         : String;
         Cantidad                        : Double;
         Unidad                          : String;
-        Moneda                          : Double;
+        Moneda                          : String;
         PrecioNeto                      : Double;
         TotalCargos                     : Double;
         TotalDescuentos                 : Double;

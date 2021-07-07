@@ -15,7 +15,10 @@ module.exports = async () => {
 
   // connect to service
   const srv = await cds.connect.to('SalesOpportunityService');
-  const { ParticipatedPublicMarketOpportunities } = srv.entities;
+  const { 
+    ParticipatedPublicMarketOpportunities, 
+    MercadoPublicoOrdenesDeCompra
+   } = srv.entities;
 
   // get api config
   const mercadoApi = await cds.run(SELECT.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}));
@@ -42,7 +45,7 @@ module.exports = async () => {
           path: tendersConfig.ResourcePath,
           requestDelay: tendersConfig.RequestDelay,
           requestMaxRetry: tendersConfig.RequestMaxRetry
-          
+
         },
         purchaseOrders: {
           path: poConfig.ResourcePath,
@@ -159,6 +162,57 @@ module.exports = async () => {
     }
 
     /**
+     * Fetches Purchase orders from MercadoPublico API and saves them in the DB
+     * @returns {CronJob}
+     */
+     fetchPurchaseOrders(cronTime){
+
+      return new CronJob(cronTime, async () => {
+
+
+        let url = `${this.host}${this.serviceUrl}${this.resources.purchaseOrders.path}?fecha=${this.consultationDate}`;
+
+        const start = new Date().getTime();
+        console.log(` `);
+        console.log(`Job "FetchPurchaseOrders" started : ${new Date()}`);
+  
+        try {
+
+          console.log(` `);
+          console.log(`Fetching data from ${url} `);
+          
+          const results = await this.fetchWithRetry(url);
+          const purchaseOrders = results.data.Listado;
+          
+          const poWithDetails = await this.getPurchaseOrdersWithDetails(purchaseOrders);
+
+          console.log(` `);
+          console.log(`${poWithDetails.length} purchase orders fetched`);
+
+          if(poWithDetails && poWithDetails.length > 0){
+            console.log(` `);
+            console.log(`Saving data ...`);
+            await this.createPurchaseOrders(poWithDetails);
+          }
+
+        }catch(err) {
+          console.log(err);
+        }finally {
+
+          const end = new Date().getTime();
+          const time = end - start;
+
+          console.log(` `);
+          console.log(`Job "FetchPurchaseOrders" completed successfully : ${new Date()}`);
+          console.log(`Execution time: ${time}ms`);
+
+        }
+        
+      }); 
+
+    }
+
+    /**
      * Fetches data from a given entpoint. In case of failure, the request will be retried.
      * @param {String} url 
      * @returns {Promise}
@@ -210,10 +264,10 @@ module.exports = async () => {
               username: API_USER,
               password: API_PASSWORD
             }, // when testing locally, comment out the proxy
-            // proxy: {
-            //   host: PROXY_HOST,
-            //   port: PROXY_PORT
-            // }
+            proxy: {
+              host: PROXY_HOST,
+              port: PROXY_PORT
+            }
           }).then(successHandler).catch(errorHandler);
           
         // }
@@ -336,6 +390,57 @@ module.exports = async () => {
       }
 
     }
+
+
+    /**
+   * Fetches Purchase orders with details for a given list of purchase orders
+   * @param {Array} - list of purchase orders  
+   * @returns {Promise <Array>} - list of purchase orders with details
+   */
+    async getPurchaseOrdersWithDetails(porders){
+      const poWithDetails = [];
+      
+      for(let i = 0; i < porders.length; i++){
+          try {  
+
+          let url = `${this.host}${this.serviceUrl}${this.resources.purchaseOrders.path}?codigo=${porders[i].Codigo}`;
+
+            const detail = await this.fetchWithRetry(url);
+            poWithDetails.push(detail.data.Listado[0]);
+          
+            console.log(`PO ${detail.data.Listado[0].Codigo} -> success`);
+          }catch (error) {
+            console.log(`PO ${error.message}`);
+          }
+      }
+
+      return poWithDetails;
+
+    }
+
+
+    async createPurchaseOrders(poWithDetails){
+
+      if(poWithDetails && poWithDetails.length > 0){
+
+        for(let a = 0; a < poWithDetails.length; a++ ){
+
+          const mappedPurchaseOrderObj = this.mapMercadoPurchaseOrderFields(poWithDetails[a]);
+
+          let query = INSERT.into(MercadoPublicoOrdenesDeCompra, mappedPurchaseOrderObj);
+
+          try{
+            await srv.run(query);
+            console.log(`PO ${mappedPurchaseOrderObj.Codigo} successfully created in the DB`);
+          }catch(error){
+            console.log(`PO ${mappedPurchaseOrderObj.Codigo} creation failed - ${error.message}`);
+          }
+          
+        }
+
+      }
+
+    }  
 
     /**
      * Saves the error in the DB.
@@ -471,6 +576,55 @@ module.exports = async () => {
         delete newTender['Adjudicacion'];
 
         return newTender;
+
+      }      
+    }
+
+    /**
+     * Maps the fields of purchase order from the API response to the entity fields
+     * @param {Object} purchase order 
+     * @returns {Object}
+     */
+     mapMercadoPurchaseOrderFields(purchaseOrder){
+      if(purchaseOrder){
+
+        const compradorUUID = uuidv4();
+        const proveedorUUID = uuidv4();
+
+        const newPurchaseOrder = {
+          ...purchaseOrder,
+          "FechaCreacion": purchaseOrder.Fechas.FechaCreacion,
+          "FechaEnvio": purchaseOrder.Fechas.FechaEnvio,
+          "FechaAceptacion": purchaseOrder.Fechas.FechaAceptacion,
+          "FechaCancelacion": purchaseOrder.Fechas.FechaCancelacion,
+          "FechaUltimaModificacion": purchaseOrder.Fechas.FechaUltimaModificacion,
+          "Comprador_ID": compradorUUID,
+          "Comprador": {
+              "ID": compradorUUID,
+              ...purchaseOrder.Comprador
+          },
+          "Proveedor_ID": proveedorUUID,
+          "Proveedor": {
+            "ID": proveedorUUID,
+            ...purchaseOrder.Proveedor
+        },
+          "Items": purchaseOrder.Items && purchaseOrder.Items.Listado.map(item => {
+
+            return {
+              "ID": uuidv4(),
+              "OrdenesDeCompra_Codigo": purchaseOrder.Codigo,
+              ...item
+
+            }
+          }),
+
+          createdAt: new Date().toJSON(),
+          createdBy: "system"
+        };
+
+        delete newPurchaseOrder['Fechas'];
+
+        return newPurchaseOrder;
 
       }      
     }

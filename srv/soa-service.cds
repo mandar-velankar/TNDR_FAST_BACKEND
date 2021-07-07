@@ -164,6 +164,10 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     and tndr.Active = 1
     and status.STATUS = 'Quotation Submitted'
     and status.Active = 1
-    and status.CountryCode = 'CL'
+    and status.CountryCode = 'CL';
+
+
+    entity MercadoPublicoOrdenesDeCompra as projection on IntegrationData.MercadoPublicoOrdenesDeCompra;
+
 
 }
