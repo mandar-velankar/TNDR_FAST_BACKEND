@@ -11,9 +11,11 @@ module.exports = async () => {
   // let db = cds.reflect(model);
 
   const db = await cds.connect.to('db'); // connect to database service
-
-
   const { SchedulerApiConfig } = db.entities("com.bayer.SXTENDER.AdminData");
+
+  // connect to service
+  const srv = await cds.connect.to('SalesOpportunityService');
+  const { ParticipatedPublicMarketOpportunities } = srv.entities;
 
   // get api config
   const mercadoApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}).where({Resource: 'Tender'}));
@@ -56,7 +58,7 @@ module.exports = async () => {
 
         const start = new Date().getTime();
         console.log(` `);
-        console.log(`Job started : ${new Date()}`);
+        console.log(`Job "FetchTenders" started : ${new Date()}`);
   
         try {
 
@@ -74,7 +76,7 @@ module.exports = async () => {
           if(tenderDetails && tenderDetails.length > 0){
             console.log(` `);
             console.log(`Saving data ...`);
-            await this.saveTenders(tenderDetails);
+            await this.createTenders(tenderDetails);
           }
 
         }catch(err) {
@@ -85,11 +87,63 @@ module.exports = async () => {
           const time = end - start;
 
           console.log(` `);
-          console.log(`Job completed successfully : ${new Date()}`);
+          console.log(`Job "FetchTenders" completed successfully : ${new Date()}`);
           console.log(`Execution time: ${time}ms`);
 
         }
         
+      }); 
+
+    }
+
+
+    /**
+     * Fetches tender results and saves them to the DB
+     * the Mercado API periodically updates the opportunties with results.
+     * we need to get those results and update the opportunity in the backend.
+     * @returns {CronJob}
+     */
+     fetchTenderResults(cronTime){
+
+      return new CronJob(cronTime, async () => {
+
+        const start = new Date().getTime();
+        console.log(` `);
+        console.log(`Job "FetchTenderResults" started : ${new Date()}`);
+
+        try {
+
+         let query = SELECT.from(ParticipatedPublicMarketOpportunities).where({CountryCode:'CL'})
+         const participatedOpportunities = await srv.run(query);
+
+         console.log(` `);
+         console.log(`Fetching results ...`);
+
+         const opportunitiesWithDetails = await this.getTendersWithDetails(participatedOpportunities);
+
+         console.log(` `);
+         console.log(`Fetching results complete.`);
+
+          if(opportunitiesWithDetails && opportunitiesWithDetails.length > 0){
+            console.log(` `);
+            console.log(`Saving results ...`);
+            await this.updateTenders(opportunitiesWithDetails);
+          }
+
+        }catch(err) {
+          console.log(err);
+        }finally {
+
+          const end = new Date().getTime();
+          const time = end - start;
+
+          console.log(` `);
+          console.log(`Job "FetchTenderResults" completed successfully : ${new Date()}`);
+          console.log(`Execution time: ${time}ms`);
+
+        }
+
+          
       }); 
 
     }
@@ -145,11 +199,11 @@ module.exports = async () => {
             auth:{
               username: API_USER,
               password: API_PASSWORD
-            },
-            proxy: {
-              host: PROXY_HOST,
-              port: PROXY_PORT
-            }
+            }, // when testing locally, comment out the proxy
+            // proxy: {
+            //   host: PROXY_HOST,
+            //   port: PROXY_PORT
+            // }
           }).then(successHandler).catch(errorHandler);
           
         // }
@@ -185,7 +239,7 @@ module.exports = async () => {
 
     }
 
-    async saveTenders(tenders){
+    async createTenders(tenders){
 
       if(tenders && tenders.length > 0){
 
@@ -209,6 +263,62 @@ module.exports = async () => {
             console.log(`Tender ${classifiedTender.CodigoExterno} success`);
           }catch(error){
             console.log(`Tender ${classifiedTender.CodigoExterno} -> failed - ${error.message}`);
+          }
+          
+        }
+
+      }
+
+    }
+
+
+    async updateTenders(tenders){
+
+      if(tenders && tenders.length > 0){
+
+        for(let a = 0; a < tenders.length; a++ ){
+          try{
+
+            const mappedTenderObj = this.mapMercadoFields(tenders[a]);
+            const classifiedTender = this.classifyTender(mappedTenderObj);
+
+            const licitacione = this.getEntity(classifiedTender, 'licitacione');
+            const comprador = this.getEntity(classifiedTender, 'comprador');
+            const items = this.getEntity(classifiedTender, 'items');
+
+            const oldLicitacione = await cds.run(SELECT.one.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({CodigoExterno:licitacione.CodigoExterno}));
+            const oldProducts = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({Licitacione_CodigoExterno:licitacione.CodigoExterno}));
+
+            // copy over the old ID's
+            licitacione.Comprador_ID = oldLicitacione.Comprador_ID
+            comprador.ID = oldLicitacione.Comprador_ID
+
+
+            const updatePromises = [];
+    
+            // Update Licitacione + Comprador
+            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({CodigoExterno:licitacione.CodigoExterno}).with(licitacione)));
+            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador').where({ID:oldLicitacione.Comprador_ID}).with(comprador)));
+           
+
+            // Update Items
+            for(let i = 0; i < items.length; i++){
+                const oldProduct = oldProducts.find(oldP => oldP.Correlativo === items[i].Correlativo);
+
+                // We need to reuse the old ID therefore we delete the new ID
+                // We also need to copy over the old values for MatchedProductName and MatchedProductKeyword
+                delete items[i]['ID']; 
+                items[i].MatchedProductName = oldProduct.MatchedProductName;
+                items[i].MatchedProductKeyword = oldProduct.MatchedProductKeyword;
+
+                updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({ID:oldProduct.ID}).with(items[i])));
+            }
+
+            await Promise.all(updatePromises);
+            console.log(`Tender ${classifiedTender.CodigoExterno} successfully updated`);
+
+          }catch(error){
+            console.log(`Tender ${classifiedTender.CodigoExterno} update failed - ${error.message}`);
           }
           
         }
