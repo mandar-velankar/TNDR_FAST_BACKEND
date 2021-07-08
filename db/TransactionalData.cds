@@ -516,4 +516,5 @@ entity CountrySpecificTenderInfo: managed {
         TenderReference      : String(255); 
         PublicationDate      : Date;
         ClosingDate          : Date;
+        MercadoPublicoIssuer : Integer;
 }
