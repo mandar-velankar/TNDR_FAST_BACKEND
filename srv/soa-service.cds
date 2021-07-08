@@ -12,7 +12,10 @@ using { com.bayer.SXTENDER.SalesOpportunityData } from '../db/SalesOpportunityDa
 service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_cag_admin','f_tndr_cag_salesopportunity_user','f_tndr_cag_technical_user','authenticated-user']){
     entity CountryTenderNo @readonly         as projection on TransactionalDataViews.CountryTenderNo;
     @cds.autoexpose
-    entity CountryChannels @readonly         as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+    //entity CountryChannels @readonly         as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+    entity CountryChannels @readonly         as select from MasterData.MASTER_COUNTRY_CHANNELS {
+        *
+    } where ChannelName != 'Private';
     @cds.autoexpose
     entity CountryClassifications @readonly  as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION;
     @cds.autoexpose
