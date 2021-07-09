@@ -484,7 +484,8 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     ifnull(tender.Origin.CODE, 'NA') as ORIGIN_CODE:String(10),
     tender.Offer.InternalBidDueDate as OFFER_DATE,
     tender.Offer.Distributor.DistributorName as DISTRIBUTOR,
-    tender.Offer.OfferValue.SUBMISSION_DATE as SUBMISSION_DATE
+    tender.Offer.OfferValue.SUBMISSION_DATE as SUBMISSION_DATE,
+    tender.CountrySpecificInformation.TenderReference as TENDER_REFERENCE
 }where tender.Active = 1
 and ifnull(Offer.Active, 1) = 1;
 
