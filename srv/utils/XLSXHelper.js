@@ -3,13 +3,13 @@ const { Readable } = require('stream');
 const fs = require('fs');
 const path = require('path');
 
-exports.generateXLSX = (templatename, values)=>{
+exports.generateXLSX = (templateBinary, values)=>{
 
     // Load an XLSX file into memory
-    const filedata = fs.readFileSync(path.join(__dirname, '../xlsx-templates', templatename));
+    // const filedata = fs.readFileSync(path.join(__dirname, '../xlsx-templates', templatename));
 
     // Create a template
-    var template = new XlsxTemplate(filedata);
+    var template = new XlsxTemplate(templateBinary);
 
     // Replacements take place on second sheet
     var sheetNumber = 2;
