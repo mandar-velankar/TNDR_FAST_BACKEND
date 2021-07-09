@@ -159,7 +159,7 @@ entity NextDateSettings {
 
 
 entity ExcelAttachment {
-    key template : String(10);
+    key template : String(100);
     key OfferId : String(50);
     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     mediaType:String @Core.IsMediaType;

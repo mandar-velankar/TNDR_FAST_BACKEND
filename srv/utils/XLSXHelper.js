@@ -12,7 +12,7 @@ exports.generateXLSX = (templateBinary, values)=>{
     var template = new XlsxTemplate(templateBinary);
 
     // Replacements take place on second sheet
-    var sheetNumber = 2;
+    var sheetNumber = 1;
 
     // Perform substitution
     template.substitute(sheetNumber, values);

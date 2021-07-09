@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER,ExcelAttachment
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -2235,41 +2235,46 @@ module.exports = (srv) => {
 		if (!offerId || !template) {
 			return next();
 		}
-		
-		const templates = await tx.run(SELECT.from(ExcelAttachment).where({ template: template, OfferId:"*" }));
+
+		const templates = await tx.run(SELECT.from(ExcelAttachment).where({ template: template, OfferId: "*" }));
 		if (templates.length === 0) {
 			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + template);
 		}
 		const templateContent = templates[0].content;
-
+		let excelData = {};
 		//Get offer data
-		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
-		let offerValidation = await buildOfferValidation(tx, whereOffer);
-		if (!offerValidation) {
-			return req.reject(404, 'No offer found');
+		if (offerId !== "*") {
+			let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+			let offerValidation = await buildOfferValidation(tx, whereOffer);
+			if (!offerValidation) {
+				return req.reject(404, 'No offer found');
+			}
+
+			//Get product data
+			let productValidation = await buildOfferProductValidation(tx, whereOffer);
+
+			//format prices
+			productValidation.forEach(prd => {
+				prd.PAID_VOLUME = ServiceHelper.formatNumberTo_EN_US_String(prd.PAID_VOLUME, 0, 0);
+				prd.PACKSIZE = ServiceHelper.formatNumberTo_EN_US_String(prd.PACKSIZE, 0, 0);
+				prd.OFFER_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE, 2, 2);
+				prd.OFFER_PRICE_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE_VAT, 2, 2);
+				prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+				prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+				prd.SAMPLES = ServiceHelper.formatNumberTo_EN_US_String(prd.SAMPLES, 0, 0);
+				prd.FOC = ServiceHelper.formatNumberTo_EN_US_String(prd.FOC, 0, 0);
+				prd.NET_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.NET_PRICE, 0, 0);
+			});
+
+			offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
+			offerValidation.VAT_TOTAL = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.VAT_TOTAL, 2, 2);
+			offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+
+			excelData = {
+				offerValidation: offerValidation,
+				offerProductValidation: productValidation
+			};
 		}
-
-		//Get product data
-		let productValidation = await buildOfferProductValidation(tx, whereOffer);
-
-		//format prices
-		productValidation.forEach(prd => {
-			prd.PAID_VOLUME = ServiceHelper.formatNumberTo_EN_US_String(prd.PAID_VOLUME, 0, 0);
-			prd.PACKSIZE = ServiceHelper.formatNumberTo_EN_US_String(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE, 2, 2);
-			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE_VAT, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
-			prd.SAMPLES = ServiceHelper.formatNumberTo_EN_US_String(prd.SAMPLES, 0, 0);
-			prd.FOC = ServiceHelper.formatNumberTo_EN_US_String(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.NET_PRICE, 0, 0);
-		});
-
-		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
-		offerValidation.VAT_TOTAL = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.VAT_TOTAL, 2, 2);
-		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
-
-
 		//generate XLSX
 
 		// const fileBlob = await streamToBlob(data.value,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -2281,17 +2286,14 @@ module.exports = (srv) => {
 		// 	});
 		// });
 		// let buf = await buffer(templateContent.value);
-		let excelStreamValue = XLSXHelper.generateXLSX(templateContent,
-			{
-				offerValidation: offerValidation,
-				offerProductValidation: productValidation
-			});
+		let excelStreamValue = XLSXHelper.generateXLSX(templateContent,excelData);
 		// let excelStreamValue = XLSXHelper.generateXLSX(fileBlob,
 		// 	{
 		// 		offerValidation: offerValidation,
 		// 		offerProductValidation: productValidation
 		// 	});
-		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
+		const filename = offerId === "*" ? template : offerId+'.xlsx';
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		return excelStreamValue;
 	});
