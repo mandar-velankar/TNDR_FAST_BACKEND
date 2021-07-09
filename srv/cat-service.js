@@ -583,6 +583,9 @@ module.exports = (srv) => {
 					case "CDH":
 						oApproverType.ValidationType = 3;
 						break;
+					case "Marketing":
+						oApproverType.ValidationType = 3;
+						break;
 					default:
 						oApproverType.ValidationType = 1;
 				}
