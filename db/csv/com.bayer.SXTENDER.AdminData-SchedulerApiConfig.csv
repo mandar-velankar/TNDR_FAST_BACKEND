@@ -1,2 +1,3 @@
 ID,Provider,Host,BasePath,Resource,ResourcePath,ApiUser,ApiPassword,ProxyHost,ProxyPort,RequestDelay,RequestMaxRetry
 858fabec-d599-11eb-b8bc-0242ac130003,MercadoPublco,https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com,/http/mercado_publico,Tender,/getTenders,S0021213202,C0mpli@nT,10.185.190.100,8080,1000,5
+957946ad-47f2-4990-ad11-fde1d9bf9223,MercadoPublco,https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com,/http/mercado_publico,PurchaseOrder,/getPurchaseOrders,S0021213202,C0mpli@nT,10.185.190.100,8080,1000,5

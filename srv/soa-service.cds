@@ -12,7 +12,10 @@ using { com.bayer.SXTENDER.SalesOpportunityData } from '../db/SalesOpportunityDa
 service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_cag_admin','f_tndr_cag_salesopportunity_user','f_tndr_cag_technical_user','authenticated-user']){
     entity CountryTenderNo @readonly         as projection on TransactionalDataViews.CountryTenderNo;
     @cds.autoexpose
-    entity CountryChannels @readonly         as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+    //entity CountryChannels @readonly         as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+    entity CountryChannels @readonly         as select from MasterData.MASTER_COUNTRY_CHANNELS {
+        *
+    } where ChannelName != 'Private';
     @cds.autoexpose
     entity CountryClassifications @readonly  as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION;
     @cds.autoexpose
@@ -41,6 +44,8 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
         * ,
     };
     entity CountrySpecificInformation as projection on TransactionalData.CountrySpecificTenderInfo;
+
+    entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     
 
     entity PublicMarketTenderStatuses as select from PublicMarketTenders as opp
@@ -190,6 +195,28 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
         st.SubStatus,
         opp.Comprador: redirected to Buyers,
         opp.Items: redirected to Products
-    }
+    };
+
+
+    entity ParticipatedPublicMarketOpportunities as select from CountrySpecificInformation countryInfo
+    left outer join PT_TMTEND as tndr 
+        on countryInfo.TenderID = tndr.TenderID 
+    left outer join PT_TMTNOFST as status 
+        on countryInfo.TenderID = status.TenderID 
+    {
+        countryInfo.CountryCode,
+        countryInfo.TenderID,
+        countryInfo.TenderReference as CodigoExterno,
+        status.STATUS as Status
+        
+    }where countryInfo.CountryCode = 'CL' 
+    and tndr.Active = 1
+    and status.STATUS = 'Quotation Submitted'
+    and status.Active = 1
+    and status.CountryCode = 'CL';
+
+
+    entity MercadoPublicoOrdenesDeCompra as projection on IntegrationData.MercadoPublicoOrdenesDeCompra;
+
 
 };
