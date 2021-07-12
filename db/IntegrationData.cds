@@ -2,7 +2,20 @@ namespace com.bayer.SXTENDER.IntegrationData;
 
 using { User, Country, cuid, managed } from '@sap/cds/common';
 
-// Mercado Publico Tenders
+//Product & matching keywords (Mercado Publico - Chile)
+entity MercadoPublicoClassificationProducts: managed {
+    key ProductID                       : Integer;
+        ProductName                     : String;
+        Keywords                        : Composition of many MercadoPublicoClassificationKeywords on Keywords.Product = $self;
+}
+
+//Key words (Mercado Publico - Chile)
+entity MercadoPublicoClassificationKeywords: managed {
+        Keyword                         : String;
+        Product                         : Association to MercadoPublicoClassificationProducts;
+}
+
+// Sales opportunities (MercadoPublico - Chile)
 entity MercadoPublicoLicitacione : managed {
     key CodigoExterno                   : String;
         Nombre                          : String;
@@ -78,6 +91,7 @@ entity MercadoPublicoLicitacione : managed {
         Items                           : Composition of many MercadoPublicoProducto on Items.Licitacione = $self;
 };
 
+//Buyers (MercadoPublico - Chile)
 entity MercadoPublicoComprador: cuid {
         CodigoOrganismo                 : String;
         NombreOrganismo                 : String;
@@ -94,7 +108,7 @@ entity MercadoPublicoComprador: cuid {
 };
 
 
-// Mercado Publico Products
+// Products (MercadoPublico - Chile)
 entity MercadoPublicoProducto: cuid {
         Correlativo                     : Integer;
         CodigoProducto                  : Integer;
@@ -114,19 +128,7 @@ entity MercadoPublicoProducto: cuid {
 };
 
 
-
-entity MercadoPublicoClassificationProducts: managed {
-    key ProductID                       : Integer;
-        ProductName                     : String;
-        Keywords                        : Composition of many MercadoPublicoClassificationKeywords on Keywords.Product = $self;
-}
-entity MercadoPublicoClassificationKeywords: managed {
-        Keyword                         : String;
-        Product                         : Association to MercadoPublicoClassificationProducts;
-}
-
-
-
+//Purchase Orders (Mercado Publico - Chile)
 entity MercadoPublicoOrdenesDeCompra: managed {
     key Codigo                          : String;
         Nombre                          : String;
@@ -162,7 +164,7 @@ entity MercadoPublicoOrdenesDeCompra: managed {
         Items                           : Composition of many MercadoPublicoOrdenesDeCompraProducto on Items.OrdenesDeCompra = $self;        
 }
 
-
+// Buyers Purchase Orders (Mercado Publico - Chile)
 entity MercadoPublicoOrdenesDeCompraComprador: cuid {
         CodigoOrganismo                 : String;
         NombreOrganismo                 : String;
@@ -180,6 +182,7 @@ entity MercadoPublicoOrdenesDeCompraComprador: cuid {
         MailContacto                    : String;
 };
 
+//Vendor Purchase Orders (Mercado Publico - Chile)
 entity MercadoPublicoOrdenesDeCompraProveedor: cuid {
         Codigo                          : String;
         Nombre                          : String;
@@ -197,6 +200,7 @@ entity MercadoPublicoOrdenesDeCompraProveedor: cuid {
         MailContacto                    : String;
 };
 
+//Product Purchase Orders (Mercado Publico - Chile)
 entity MercadoPublicoOrdenesDeCompraProducto: cuid {
         Correlativo                     : Integer;
         CodigoCategoria                 : Integer;

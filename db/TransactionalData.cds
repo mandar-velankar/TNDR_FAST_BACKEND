@@ -336,6 +336,7 @@ entity PT_TMPFIOM {
         PFINo   : String(255);
 }
 
+//Qoutation Submitted
 entity PT_TMQUTO {
         TenderID          : String(50);
     key OfferID           : String(30) not null;
