@@ -7,11 +7,11 @@ using {com.bayer.SXTENDER.TransactionalData} from '../db/TransactionalData';
 service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_admin','f_tndr_cag_mdm_user','f_tndr_cag_technical_user']) {
 
 
-    entity PT_TMLE @readonly        as projection on MasterData.PT_TMLE;
+    entity PT_TMLE         as projection on MasterData.PT_TMLE;
     /*entity PT_TMLE                           as projection on MasterData.PT_TMLE {
         * , EntityBrands : redirected to PT_TMCTLEBR
     };*/
-    entity PT_TMCTLE @readonly      as projection on MasterData.PT_TMCTLE;
+    entity PT_TMCTLE       as projection on MasterData.PT_TMCTLE;
     entity PT_TMCTLEBR @readonly    as projection on MasterData.PT_TMCTLEBR;
     entity CountryBrands @readonly    as projection on MasterDataViews.CountryBrands;
     entity PT_TMINST @readonly      as projection on MasterData.PT_TMINST;

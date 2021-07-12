@@ -124,6 +124,7 @@ entity PT_TMLE{
 	AuthorizedSignatory4:String(300);//delete
 	AuthorizedSignatory5:String(300);//delete
 	FooterComment:String(300);
+	Enabled                 : Boolean not null;
 	//Associations
 	EntityBrands:Association to many PT_TMCTLEBR on EntityBrands.Entity = $self;
 	Signatories:Association to many COUNTRY_LEGAL_ENTITY_SIGNATORIES on Signatories.LEGAL_ENTITY_CODE = LegalEntityCode;
