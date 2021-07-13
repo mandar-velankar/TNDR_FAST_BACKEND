@@ -68,6 +68,9 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
             when exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres2 where info.TenderID = trres2.TenderID and trres2.Outcome <> 'Won') 
                 or exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip3 where info.TenderID = rwaip3.TenderID) then 'Lost'
             when exists (select TenderID, OfferID from TransactionalData.PT_TMOFRS as offer inner join TransactionalDataViews.OfferStatus as stoffer on offer.OfferID = stoffer.OFFER_ID where offer.TenderID = info.TenderID and stoffer.STATUS = 'Quotation Submitted' and offer.Active = 1) then 'Submitted'
+            when exists (select TenderID from TransactionalData.PT_TMQUTO as tmqt2 where info.TenderID = tmqt2.TenderID)
+                and not exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres2 where info.TenderID = trres2.TenderID)
+                and exists (select AdjudicacionRutProveedor from IntegrationData.MercadoPublicoProducto where AdjudicacionRutProveedor != null and Licitacione.CodigoExterno = info.TenderReference) then 'Results Available'
         end as SubStatus:String,
     };
 
