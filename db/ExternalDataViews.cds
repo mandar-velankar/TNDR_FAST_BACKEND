@@ -18,7 +18,6 @@ group by delivery.OfferID, delivery.ProductCode;
 entity Dashboard as select from TransactionalDataViews.OfferProductPlus offerProduct
 inner join MasterData.PT_TMTABRMP ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
 inner join MasterData.PT_TMRCM region on offerProduct.CountryCode = region.CountryCode
-left outer join MasterDataLatestValues.ExchangeRates rates on offerProduct.CURRENCY = rates.CURRENCY_FROM and rates.CURRENCY_TO = 'EUR' and rates.X_TYPE = 'Budget'
 left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.OFFERID and offerProduct.ProductCode = delivery.PRODUCTID {
     ifnull(
         year(
@@ -62,7 +61,7 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
         else offerProduct.RequestedVolume
     end
     *
-    offerProduct.Price.OfferPrice / rates.X_RATE as TotalValue_EUR:Double,
+    offerProduct.Price.OfferPrice / (case when ifnull(offerProduct.Price.BudgetRate, 1)<>0 then ifnull(offerProduct.Price.BudgetRate, 1) else 1 end) as TotalValue_EUR:Double,
     case when offerProduct.Offer.Quotation.OfferDate = '' or offerProduct.Offer.Quotation.OfferDate is null then to_date('1970-01-01') else offerProduct.Offer.Quotation.OfferDate end as OfferDate:DateTime,
     case when offerProduct.Offer.Quotation.OfferValidity = '' or offerProduct.Offer.Quotation.OfferValidity is null then to_date('1970-01-01') else offerProduct.Offer.Quotation.OfferValidity end as OfferValidity:DateTime,
     ifnull(offerProduct.Offer.OfferStatus.STATUS, '') as CurrentStatus:String,
