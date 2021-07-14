@@ -63,11 +63,19 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
             when info.TenderReference is null then 'NA'
             when not exists (select TenderID from TransactionalData.PT_TMQUTO as tmqt where info.TenderID = tmqt.TenderID) then 'Draft'
             when exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres where info.TenderID = trres.TenderID and trres.Outcome = 'Won') 
+                and not exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip where info.TenderID = rwaip.TenderID) 
+                and exists (select lic.CodigoExterno, lic.CreatedAt as licCreatedAt, lic.StateCode, compra.CodigoLicitacion, compra.FechaCreacion as compraCreatedAt, compra.Estado from IntegrationDataConversion.PublicMarketTenders as lic
+                                inner join IntegrationData.MercadoPublicoOrdenesDeCompra as compra on lic.CodigoExterno = compra.CodigoLicitacion)
+                    then 'PO'
+            when exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres where info.TenderID = trres.TenderID and trres.Outcome = 'Won') 
                 and not exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip where info.TenderID = rwaip.TenderID) then 'Won'
             when exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip2 where info.TenderID = rwaip2.TenderID) then 'AppealInProgress'
             when exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres2 where info.TenderID = trres2.TenderID and trres2.Outcome <> 'Won') 
                 or exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip3 where info.TenderID = rwaip3.TenderID) then 'Lost'
             when exists (select TenderID, OfferID from TransactionalData.PT_TMOFRS as offer inner join TransactionalDataViews.OfferStatus as stoffer on offer.OfferID = stoffer.OFFER_ID where offer.TenderID = info.TenderID and stoffer.STATUS = 'Quotation Submitted' and offer.Active = 1) then 'Submitted'
+            when exists (select TenderID from TransactionalData.PT_TMQUTO as tmqt2 where info.TenderID = tmqt2.TenderID)
+                and not exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres2 where info.TenderID = trres2.TenderID)
+                and exists (select AdjudicacionRutProveedor from IntegrationData.MercadoPublicoProducto where AdjudicacionRutProveedor != null and Licitacione.CodigoExterno = info.TenderReference) then 'Results Available'
         end as SubStatus:String,
     };
 
