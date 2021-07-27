@@ -1,0 +1,88 @@
+###
+
+PUT http://localhost:4004/salesopportunity/MercadoPublicoOrdenesDeCompra(Codigo='1057439-3012-AG21')
+Authorization: Basic bmlscw===
+Content-Type: application/json
+
+{
+    "Codigo": "1057439-3012-AG21",
+    "Nombre": "INSTALACIÓ DE TV LED ",
+    "CodigoEstado": 6,
+    "Estado": "Aceptada",
+    "CodigoLicitacion": "",
+    "Descripcion": "INSTALACIÓ DE TV LED \r\nMARIO ARACENA  UNIDAD DE OPERACIONES\r\n“Sr. Proveedor:\r\nSera de carácter obligatorio para el trámite de PAGO CENTRALIZADO, seguir las siguientes indicaciones:\r\n1.\tEnviar factura electrónica de cobro a correo: dipresrecepcion@custodium.com en formato XML \r\n2.\tLa orden de compra deberá ser ACEPTADA por proveedor a través del portal www.mercadopublico.cl \r\n3.\tLas facturas de cobro deberán venir señaladas en su apartado “folio” con el número de orden de compra respectivo.”\r\nREQ. YWD-NXB-7QRW",
+    "CodigoTipo": "13",
+    "Tipo": "AG",
+    "TipoMoneda": "CLP",
+    "CodigoEstadoProveedor": 4,
+    "EstadoProveedor": "Aceptada",
+    "FechaCreacion": "2021-06-18T14:57:49.000Z",
+    "FechaEnvio": "2021-06-23T11:44:58.000Z",
+    "FechaAceptacion": "2021-06-29T01:51:47.000Z",
+    "FechaCancelacion": null,
+    "FechaUltimaModificacion": "2021-06-18T15:06:00.000Z",
+    "TieneItems": "1",
+    "PromedioCalificacion": 0.0,
+    "CantidadEvaluacion": 0,
+    "Descuentos": 0.0,
+    "Cargos": 10000.0,
+    "TotalNeto": 1000000.0,
+    "PorcentajeIva": 19.0,
+    "Impuestos": 191900.0,
+    "Total": 1201900.0,
+    "Financiamiento": "",
+    "Pais": "CL",
+    "TipoDespacho": "12",
+    "FormaPago": "48",
+    "Comprador": {
+        "CodigoOrganismo": "7312",
+        "NombreOrganismo": "SERVICIO DE SALUD COQUIMBO HOSPITAL LA SERENA",
+        "RutUnidad": "61.606.402-9",
+        "CodigoUnidad": "1057439",
+        "NombreUnidad": "Bienes y Servicios",
+        "Actividad": "Servicio Público",
+        "DireccionUnidad": "JOSE M. BALMACEDA 916",
+        "ComunaUnidad": "La Serena",
+        "RegionUnidad": "Región de Coquimbo ",
+        "Pais": "CL",
+        "NombreContacto": "Sergio Rojas",
+        "CargoContacto": "Operador Compras",
+        "FonoContacto": "56-51-2333568",
+        "MailContacto": "abastcompras1.hls@redsalud.gov.cl"
+    },
+    "Proveedor": {
+        "Codigo": "1591877",
+        "Nombre": "TIENDAPUBLICITARIA.CL - FÁBRICA, DISEÑO GRÁFICO E INSTALACIONES PUBLIC",
+        "Actividad": "Publicidad e Instalaciones Graficas",
+        "CodigoSucursal": "1144132",
+        "NombreSucursal": "Unidad de Talleres Gráficos",
+        "RutSucursal": "76.806.123-8",
+        "Direccion": "Los Almendros 517",
+        "Comuna": "Coquimbo",
+        "Region": "Región de Coquimbo ",
+        "Pais": "CL",
+        "NombreContacto": "Cristobal Veliz",
+        "CargoContacto": "Publicidad e Instalaciones Graficas",
+        "FonoContacto": "949241566",
+        "MailContacto": "licitaciones@tiendapublicitaria.cl"
+    },
+    "Items": [
+        {
+            "Correlativo": 1,
+            "CodigoCategoria": 72131700,
+            "Categoria": "Servicios de construcción y mantenimiento / Construcción de edificios en general / Construcción de obras civiles y infraestructuras",
+            "CodigoProducto": 72131702,
+            "Producto": "Construcción de obras civiles",
+            "EspecificacionComprador": "OBRAS MENORES VARIAS PARA INSTALACIÓN DE TV LED DE 75\" EN PASILLO CENTRAL",
+            "EspecificacionProveedor": "",
+            "Cantidad": 1.0,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 1000000.0,
+            "TotalCargos": 0.0,
+            "TotalDescuentos": 0.0,
+            "TotalImpuestos": 0.0,
+            "Total": 1000000.0
+        }
+    ]
+}

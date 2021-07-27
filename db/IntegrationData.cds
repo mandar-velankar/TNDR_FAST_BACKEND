@@ -2,7 +2,20 @@ namespace com.bayer.SXTENDER.IntegrationData;
 
 using { User, Country, cuid, managed } from '@sap/cds/common';
 
-// Mercado Publico Tenders
+//Product & matching keywords (Mercado Publico - Chile)
+entity MercadoPublicoClassificationProducts: managed {
+    key ProductID                       : Integer;
+        ProductName                     : String;
+        Keywords                        : Composition of many MercadoPublicoClassificationKeywords on Keywords.Product = $self;
+}
+
+//Key words (Mercado Publico - Chile)
+entity MercadoPublicoClassificationKeywords: managed {
+        Keyword                         : String;
+        Product                         : Association to MercadoPublicoClassificationProducts;
+}
+
+// Sales opportunities (MercadoPublico - Chile)
 entity MercadoPublicoLicitacione : managed {
     key CodigoExterno                   : String;
         Nombre                          : String;
@@ -78,6 +91,7 @@ entity MercadoPublicoLicitacione : managed {
         Items                           : Composition of many MercadoPublicoProducto on Items.Licitacione = $self;
 };
 
+//Buyers (MercadoPublico - Chile)
 entity MercadoPublicoComprador: cuid {
         CodigoOrganismo                 : String;
         NombreOrganismo                 : String;
@@ -94,7 +108,7 @@ entity MercadoPublicoComprador: cuid {
 };
 
 
-// Mercado Publico Products
+// Products (MercadoPublico - Chile)
 entity MercadoPublicoProducto: cuid {
         Correlativo                     : Integer;
         CodigoProducto                  : Integer;
@@ -114,13 +128,94 @@ entity MercadoPublicoProducto: cuid {
 };
 
 
+//Purchase Orders (Mercado Publico - Chile)
+entity MercadoPublicoOrdenesDeCompra: managed {
+    key Codigo                          : String;
+        Nombre                          : String;
+        CodigoEstado                    : Integer;
+        Estado                          : String;
+        CodigoLicitacion                : String;
+        Descripcion                     : String;
+        CodigoTipo                      : String;
+        Tipo                            : String;
+        TipoMoneda                      : String;
+        CodigoEstadoProveedor           : Integer;
+        EstadoProveedor                 : String;
+        FechaCreacion                   : DateTime;
+        FechaEnvio                      : DateTime;
+        FechaAceptacion                 : DateTime;
+        FechaCancelacion                : DateTime;
+        FechaUltimaModificacion         : DateTime;
+        TieneItems                      : String;
+        PromedioCalificacion            : Double;
+        CantidadEvaluacion              : Integer;
+        Descuentos                      : Double;
+        Cargos                          : Double;
+        TotalNeto                       : Double;
+        PorcentajeIva                   : Double;
+        Impuestos                       : Double;
+        Total                           : Double;
+        Financiamiento                  : String;
+        Pais                            : String;
+        TipoDespacho                    : String;
+        FormaPago                       : String;
+        Comprador                       : Composition of MercadoPublicoOrdenesDeCompraComprador;
+        Proveedor                       : Composition of MercadoPublicoOrdenesDeCompraProveedor;
+        Items                           : Composition of many MercadoPublicoOrdenesDeCompraProducto on Items.OrdenesDeCompra = $self;        
+}
 
-entity MercadoPublicoClassificationProducts: managed {
-    key ProductID                       : Integer;
-        ProductName                     : String;
-        Keywords                        : Composition of many MercadoPublicoClassificationKeywords on Keywords.Product = $self;
-}
-entity MercadoPublicoClassificationKeywords: managed {
-        Keyword                         : String;
-        Product                         : Association to MercadoPublicoClassificationProducts;
-}
+// Buyers Purchase Orders (Mercado Publico - Chile)
+entity MercadoPublicoOrdenesDeCompraComprador: cuid {
+        CodigoOrganismo                 : String;
+        NombreOrganismo                 : String;
+        RutUnidad                       : String;
+        CodigoUnidad                    : String;
+        NombreUnidad                    : String;
+        Actividad                       : String;
+        DireccionUnidad                 : String;
+        ComunaUnidad                    : String;
+        RegionUnidad                    : String;
+        Pais                            : String;
+        NombreContacto                  : String;
+        CargoContacto                   : String;
+        FonoContacto                    : String;
+        MailContacto                    : String;
+};
+
+//Vendor Purchase Orders (Mercado Publico - Chile)
+entity MercadoPublicoOrdenesDeCompraProveedor: cuid {
+        Codigo                          : String;
+        Nombre                          : String;
+        Actividad                       : String;
+        CodigoSucursal                  : String;
+        NombreSucursal                  : String;
+        RutSucursal                     : String;
+        Direccion                       : String;
+        Comuna                          : String;
+        Region                          : String;
+        Pais                            : String;
+        NombreContacto                  : String;
+        CargoContacto                   : String;
+        FonoContacto                    : String;
+        MailContacto                    : String;
+};
+
+//Product Purchase Orders (Mercado Publico - Chile)
+entity MercadoPublicoOrdenesDeCompraProducto: cuid {
+        Correlativo                     : Integer;
+        CodigoCategoria                 : Integer;
+        Categoria                       : String;
+        CodigoProducto                  : Integer;
+        Producto                        : String;
+        EspecificacionComprador         : String;
+        EspecificacionProveedor         : String;
+        Cantidad                        : Double;
+        Unidad                          : String;
+        Moneda                          : String;
+        PrecioNeto                      : Double;
+        TotalCargos                     : Double;
+        TotalDescuentos                 : Double;
+        TotalImpuestos                  : Double;
+        Total                           : Double;
+        OrdenesDeCompra                 : Association to MercadoPublicoOrdenesDeCompra;
+};

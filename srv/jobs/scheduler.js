@@ -11,12 +11,17 @@ module.exports = async () => {
   // let db = cds.reflect(model);
 
   const db = await cds.connect.to('db'); // connect to database service
-
-
   const { SchedulerApiConfig } = db.entities("com.bayer.SXTENDER.AdminData");
 
+  // connect to service
+  const srv = await cds.connect.to('SalesOpportunityService');
+  const { 
+    ParticipatedPublicMarketOpportunities, 
+    MercadoPublicoOrdenesDeCompra
+   } = srv.entities;
+
   // get api config
-  const mercadoApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}).where({Resource: 'Tender'}));
+  const mercadoApi = await cds.run(SELECT.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}));
 
   const classification_search_terms = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationKeywords'));
   const classification_products = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationProducts'));
@@ -25,19 +30,30 @@ module.exports = async () => {
 
     constructor(){
 
-      this.host = mercadoApi.Host;
-      this.authenticationType = mercadoApi.AuthenticationType; //Basic vs Token
-      this.serviceUrl = mercadoApi.BasePath; 
-      this.apiUser = mercadoApi.ApiUser;
-      this.apiPassword = mercadoApi.ApiPassword;
-      this.ticket = mercadoApi.ApiKey; 
+      this.host = mercadoApi[0].Host;
+      this.serviceUrl = mercadoApi[0].BasePath; 
+      this.apiUser = mercadoApi[0].ApiUser;
+      this.apiPassword = mercadoApi[0].ApiPassword;
+      this.proxyHost = mercadoApi[0].ProxyHost; 
+      this.proxyPort = mercadoApi[0].ProxyPort; 
+
+      let tendersConfig = mercadoApi.find(item => item.Resource.indexOf("Tender") > -1);
+      let poConfig = mercadoApi.find(item => item.Resource.indexOf("PurchaseOrder") > -1);
+
       this.resources = {
         tenders: {
-          path: mercadoApi.ResourcePath,
-          requestDelay: mercadoApi.RequestDelay,
-          requestMaxRetry: mercadoApi.RequestMaxRetry
+          path: tendersConfig.ResourcePath,
+          requestDelay: tendersConfig.RequestDelay,
+          requestMaxRetry: tendersConfig.RequestMaxRetry
+
+        },
+        purchaseOrders: {
+          path: poConfig.ResourcePath,
+          requestDelay: poConfig.RequestDelay,
+          requestMaxRetry: poConfig.RequestMaxRetry
         }
       };
+
       this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
 
     }
@@ -53,13 +69,9 @@ module.exports = async () => {
 
         let url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?fecha=${this.consultationDate}`;
 
-        if(this.authenticationType === 'token'){
-          url = url + `&ticket=${this.ticket}`;
-        }
-
         const start = new Date().getTime();
         console.log(` `);
-        console.log(`Job started : ${new Date()}`);
+        console.log(`Job "FetchTenders" started : ${new Date()}`);
   
         try {
 
@@ -77,7 +89,7 @@ module.exports = async () => {
           if(tenderDetails && tenderDetails.length > 0){
             console.log(` `);
             console.log(`Saving data ...`);
-            await this.saveTenders(tenderDetails);
+            await this.createTenders(tenderDetails);
           }
 
         }catch(err) {
@@ -88,7 +100,110 @@ module.exports = async () => {
           const time = end - start;
 
           console.log(` `);
-          console.log(`Job completed successfully : ${new Date()}`);
+          console.log(`Job "FetchTenders" completed successfully : ${new Date()}`);
+          console.log(`Execution time: ${time}ms`);
+
+        }
+        
+      }); 
+
+    }
+
+
+    /**
+     * Fetches tender results and saves them to the DB
+     * the Mercado API periodically updates the opportunties with results.
+     * we need to get those results and update the opportunity in the backend.
+     * @returns {CronJob}
+     */
+     fetchTenderResults(cronTime){
+
+      return new CronJob(cronTime, async () => {
+
+        const start = new Date().getTime();
+        console.log(` `);
+        console.log(`Job "FetchTenderResults" started : ${new Date()}`);
+
+        try {
+
+         let query = SELECT.from(ParticipatedPublicMarketOpportunities).where({CountryCode:'CL'})
+         const participatedOpportunities = await srv.run(query);
+
+         console.log(` `);
+         console.log(`Fetching results ...`);
+
+         const opportunitiesWithDetails = await this.getTendersWithDetails(participatedOpportunities);
+
+         console.log(` `);
+         console.log(`Fetching results complete.`);
+
+          if(opportunitiesWithDetails && opportunitiesWithDetails.length > 0){
+            console.log(` `);
+            console.log(`Saving results ...`);
+            await this.updateTenders(opportunitiesWithDetails);
+          }
+
+        }catch(err) {
+          console.log(err);
+        }finally {
+
+          const end = new Date().getTime();
+          const time = end - start;
+
+          console.log(` `);
+          console.log(`Job "FetchTenderResults" completed successfully : ${new Date()}`);
+          console.log(`Execution time: ${time}ms`);
+
+        }
+
+          
+      }); 
+
+    }
+
+    /**
+     * Fetches Purchase orders from MercadoPublico API and saves them in the DB
+     * @returns {CronJob}
+     */
+     fetchPurchaseOrders(cronTime){
+
+      return new CronJob(cronTime, async () => {
+
+
+        let url = `${this.host}${this.serviceUrl}${this.resources.purchaseOrders.path}?fecha=${this.consultationDate}`;
+
+        const start = new Date().getTime();
+        console.log(` `);
+        console.log(`Job "FetchPurchaseOrders" started : ${new Date()}`);
+  
+        try {
+
+          console.log(` `);
+          console.log(`Fetching data from ${url} `);
+          
+          const results = await this.fetchWithRetry(url);
+          const purchaseOrders = results.data.Listado;
+          
+          const poWithDetails = await this.getPurchaseOrdersWithDetails(purchaseOrders);
+
+          console.log(` `);
+          console.log(`${poWithDetails.length} purchase orders fetched`);
+
+          if(poWithDetails && poWithDetails.length > 0){
+            console.log(` `);
+            console.log(`Saving data ...`);
+            await this.createPurchaseOrders(poWithDetails);
+          }
+
+        }catch(err) {
+          console.log(err);
+        }finally {
+
+          const end = new Date().getTime();
+          const time = end - start;
+
+          console.log(` `);
+          console.log(`Job "FetchPurchaseOrders" completed successfully : ${new Date()}`);
           console.log(`Execution time: ${time}ms`);
 
         }
@@ -108,7 +223,10 @@ module.exports = async () => {
       const MAX_RETRY = this.resources.tenders.requestMaxRetry;
       const API_USER = this.apiUser;
       const API_PASSWORD = this.apiPassword;
-      const _that = this;
+      const PROXY_HOST = this.proxyHost;
+      const PROXY_PORT = this.proxyPort;
+
+      const that = this;
 
       let currentRetry = 0;
 
@@ -127,9 +245,9 @@ module.exports = async () => {
           console.log(`Retrying ... \n\t [${currentRetry}] of [${MAX_RETRY}] - ${url}`);
           return sendWithRetry();
         } else {
-          console.log(`Retried ${currentRetry} times but still failed to fetch from: ${url}`);
-          const errLog = await _that.saveError(error, url);
-          throw new Error(errLog);
+          console.log(`\nRetried ${currentRetry} times but still failed to fetch from: ${url}\n`);
+          const errLog = await that.saveError(error, url);
+          throw new Error(error);
          
         }
       }
@@ -137,29 +255,22 @@ module.exports = async () => {
       async function sendWithRetry() {
 
         await wait(REQUEST_DELAY);
-
-        if(_that.authenticationType === "token"){
-          return axios.get(url).then(successHandler).catch(errorHandler);
-        }else{
-          console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
-
-          //get using header with basic auth.
-          /*return axios.get(url, {
-            headers: {
-              'Authorization': 'Basic UzAwMjEyMTMyMDI6QzBtcGxpQG5U'
-            }
-          }).then(successHandler).catch(errorHandler);
-          */
+          
+        // console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
 
           //get using basic auth setting that configures the API header
           return axios.get(url, {
             auth:{
               username: API_USER,
               password: API_PASSWORD
+            }, // when testing locally, comment out the proxy
+            proxy: {
+              host: PROXY_HOST,
+              port: PROXY_PORT
             }
           }).then(successHandler).catch(errorHandler);
           
-        }
+        // }
         
       }
 
@@ -179,10 +290,6 @@ module.exports = async () => {
 
           let url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?codigo=${tenders[i].CodigoExterno}`;
 
-          if(this.authenticationType === 'token'){
-            url = url + `&ticket=${this.ticket}`;
-          }
-
            const detail = await this.fetchWithRetry(url);
            tenderDetails.push(detail.data.Listado[0]);
           
@@ -196,7 +303,7 @@ module.exports = async () => {
 
     }
 
-    async saveTenders(tenders){
+    async createTenders(tenders){
 
       if(tenders && tenders.length > 0){
 
@@ -228,6 +335,113 @@ module.exports = async () => {
 
     }
 
+
+    async updateTenders(tenders){
+
+      if(tenders && tenders.length > 0){
+
+        for(let a = 0; a < tenders.length; a++ ){
+          try{
+
+            const mappedTenderObj = this.mapMercadoFields(tenders[a]);
+            const classifiedTender = this.classifyTender(mappedTenderObj);
+
+            const licitacione = this.getEntity(classifiedTender, 'licitacione');
+            const comprador = this.getEntity(classifiedTender, 'comprador');
+            const items = this.getEntity(classifiedTender, 'items');
+
+            const oldLicitacione = await cds.run(SELECT.one.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({CodigoExterno:licitacione.CodigoExterno}));
+            const oldProducts = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({Licitacione_CodigoExterno:licitacione.CodigoExterno}));
+
+            // copy over the old ID's
+            licitacione.Comprador_ID = oldLicitacione.Comprador_ID
+            comprador.ID = oldLicitacione.Comprador_ID
+
+
+            const updatePromises = [];
+    
+            // Update Licitacione + Comprador
+            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({CodigoExterno:licitacione.CodigoExterno}).with(licitacione)));
+            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador').where({ID:oldLicitacione.Comprador_ID}).with(comprador)));
+           
+
+            // Update Items
+            for(let i = 0; i < items.length; i++){
+                const oldProduct = oldProducts.find(oldP => oldP.Correlativo === items[i].Correlativo);
+
+                // We need to reuse the old ID therefore we delete the new ID
+                // We also need to copy over the old values for MatchedProductName and MatchedProductKeyword
+                delete items[i]['ID']; 
+                items[i].MatchedProductName = oldProduct.MatchedProductName;
+                items[i].MatchedProductKeyword = oldProduct.MatchedProductKeyword;
+
+                updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({ID:oldProduct.ID}).with(items[i])));
+            }
+
+            await Promise.all(updatePromises);
+            console.log(`Tender ${classifiedTender.CodigoExterno} successfully updated`);
+
+          }catch(error){
+            console.log(`Tender ${classifiedTender.CodigoExterno} update failed - ${error.message}`);
+          }
+          
+        }
+
+      }
+
+    }
+
+
+    /**
+   * Fetches Purchase orders with details for a given list of purchase orders
+   * @param {Array} - list of purchase orders  
+   * @returns {Promise <Array>} - list of purchase orders with details
+   */
+    async getPurchaseOrdersWithDetails(porders){
+      const poWithDetails = [];
+      
+      for(let i = 0; i < porders.length; i++){
+          try {  
+
+          let url = `${this.host}${this.serviceUrl}${this.resources.purchaseOrders.path}?codigo=${porders[i].Codigo}`;
+
+            const detail = await this.fetchWithRetry(url);
+            poWithDetails.push(detail.data.Listado[0]);
+          
+            console.log(`PO ${detail.data.Listado[0].Codigo} -> success`);
+          }catch (error) {
+            console.log(`PO ${error.message}`);
+          }
+      }
+
+      return poWithDetails;
+
+    }
+
+
+    async createPurchaseOrders(poWithDetails){
+
+      if(poWithDetails && poWithDetails.length > 0){
+
+        for(let a = 0; a < poWithDetails.length; a++ ){
+
+          const mappedPurchaseOrderObj = this.mapMercadoPurchaseOrderFields(poWithDetails[a]);
+
+          let query = INSERT.into(MercadoPublicoOrdenesDeCompra, mappedPurchaseOrderObj);
+
+          try{
+            await srv.run(query);
+            console.log(`PO ${mappedPurchaseOrderObj.Codigo} successfully created in the DB`);
+          }catch(error){
+            console.log(`PO ${mappedPurchaseOrderObj.Codigo} creation failed - ${error.message}`);
+          }
+          
+        }
+
+      }
+
+    }  
+
     /**
      * Saves the error in the DB.
      * @param {Object} error 
@@ -248,9 +462,10 @@ module.exports = async () => {
           console.log(`Failed with error: ${error}`);
           await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
 
-          const tenderId = url.match(/=(.*?)&/)[1];
+          const urlParts = url.match(/=(.*?)&/);
+          const msg = urlParts && urlParts.length > 0 && urlParts[1] || "Request";
 
-          return `${tenderId} -> failed. See 'SchedulerErrorLog'`;
+          return `${msg} -> failed. See 'SchedulerErrorLog'`;
 
         }catch(err){
           return err.message;
@@ -361,6 +576,55 @@ module.exports = async () => {
         delete newTender['Adjudicacion'];
 
         return newTender;
+
+      }      
+    }
+
+    /**
+     * Maps the fields of purchase order from the API response to the entity fields
+     * @param {Object} purchase order 
+     * @returns {Object}
+     */
+     mapMercadoPurchaseOrderFields(purchaseOrder){
+      if(purchaseOrder){
+
+        const compradorUUID = uuidv4();
+        const proveedorUUID = uuidv4();
+
+        const newPurchaseOrder = {
+          ...purchaseOrder,
+          "FechaCreacion": purchaseOrder.Fechas.FechaCreacion,
+          "FechaEnvio": purchaseOrder.Fechas.FechaEnvio,
+          "FechaAceptacion": purchaseOrder.Fechas.FechaAceptacion,
+          "FechaCancelacion": purchaseOrder.Fechas.FechaCancelacion,
+          "FechaUltimaModificacion": purchaseOrder.Fechas.FechaUltimaModificacion,
+          "Comprador_ID": compradorUUID,
+          "Comprador": {
+              "ID": compradorUUID,
+              ...purchaseOrder.Comprador
+          },
+          "Proveedor_ID": proveedorUUID,
+          "Proveedor": {
+            "ID": proveedorUUID,
+            ...purchaseOrder.Proveedor
+        },
+          "Items": purchaseOrder.Items && purchaseOrder.Items.Listado.map(item => {
+
+            return {
+              "ID": uuidv4(),
+              "OrdenesDeCompra_Codigo": purchaseOrder.Codigo,
+              ...item
+
+            }
+          }),
+
+          createdAt: new Date().toJSON(),
+          createdBy: "system"
+        };
+
+        delete newPurchaseOrder['Fechas'];
+
+        return newPurchaseOrder;
 
       }      
     }

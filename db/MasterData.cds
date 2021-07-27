@@ -55,6 +55,7 @@ entity PT_TMINST{
 	City:String(255);
 	INSTITUTE_HIERARCHY_ID:Integer;
 	State:String;
+	MercadoPublicoIssuer:String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -196,24 +197,26 @@ entity PT_TMFXRTS{
 
 //@cds.autoexpose
 //Country Approvers
-entity CountryApprovers{
+entity CountryApprovers : managed {
 	key CountryCode:String(2) not null;
 	key ApproverType:String(200) not null;
 	key Division:String(200) not null;
-	ApproverID:String(100);//remove
+	ApproverID:String(100);//remove TODO
 	ApproverName:String(200);
 	key ApproverEmailID:String(200);
 	//Hierarchy:Integer not null;
+	Enabled                 : Boolean; //TODO Boolean not null;
 	//Associations
-	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode
 }
 
 //ApproverTypes (type of approvers & there corresponding values)
-entity ApproverTypes {
+entity ApproverTypes: managed {
     key ApproverType        : String(200);
     key CountryCode         : String(2);
     Hierarchy				: Integer;
 	ValidationType			: Integer; //filled in node.js layer based upon other fields (1: Optional 2: Mandatory Notification 3: Mandatory Approval)
+	Enabled                 : Boolean; //TODO Boolean not null;
     CountryApprovers        : Association to many CountryApprovers on CountryApprovers.ApproverType = ApproverType;
 }
 
