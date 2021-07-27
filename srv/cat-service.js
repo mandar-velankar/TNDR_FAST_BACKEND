@@ -1770,7 +1770,7 @@ module.exports = (srv) => {
 			OFFERID: offerValidation.OFFERID,
 			INSTITUTENAME: offerValidation.INSTITUTENAME,
 			CURRENCY: offerValidation.CURRENCY,
-			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2),
+			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2),
 			AMOUNT_IN_WORDS: offerValidation.AMOUNT_IN_WORDS,
 			DISTRIBUTORNAME: offerValidation.DISTRIBUTORNAME,
 			DISTRIBUTORADDRESS: (!offerValidation.DISTRIBUTORADDRESS) ? "" : offerValidation.DISTRIBUTORADDRESS.replace(/<br>+/g, "</br>"),
@@ -1817,38 +1817,38 @@ module.exports = (srv) => {
 				PRESENTATION: d.PRESENTATION,
 				VAT: d.VAT,
 				CURRENCY: d.CURRENCY,
-				NETOFFERPRICE: ServiceHelper.formatNumber(d.NETOFFERPRICE, 2),
+				NETOFFERPRICE: ServiceHelper.formatNumber(d.NETOFFERPRICE, 2, 2),
 				REQUESTEDVOLUME: d.REQUESTED_QUANTITY.replace(/<br>+/g, "</br>"),
 				PAIDVOLUME: Math.round(d.PAID_VOLUME),
 				FOC: d.FOC,
 				UNIT: d.UNIT,
-				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS, 0),
-				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS, 0),
-				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS, 0),
-				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4),
-				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2),
-				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4),
-				REQ_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_SPOT, 4),
-				NET_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_OFFER_CURRENCY, 4),
-				NET_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_PRICE_PACK_OFFER_CURRENCY, 2),
-				NET_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_EUR_BUDGET, 4),
-				NET_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_EUR_SPOT, 4),
-				COGS_EUR_UNIT: ServiceHelper.formatNumber(d.COGS_EUR_UNIT, 2),
-				GROSS_MARGIN_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_BUDGET, 2),
-				GROSS_MARGIN_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_SPOT, 2),
-				GROSS_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.GROSS_SALES_OFFER_CURRENCY, 0),
-				NET_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_SALES_OFFER_CURRENCY, 0),
-				NET_SALES_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_SALES_EUR_BUDGET, 0),
-				NET_SALES_EUR_SPOT: ServiceHelper.formatNumber(d.NET_SALES_EUR_SPOT, 0),
-				GROSS_PROFIT_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_BUDGET, 0),
-				GROSS_PROFIT_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_SPOT, 0),
+				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS, 0, 0),
+				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS, 0, 0),
+				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS, 0, 0),
+				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
+				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2),
+				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4, 4),
+				REQ_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_SPOT, 4, 4),
+				NET_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
+				NET_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_PRICE_PACK_OFFER_CURRENCY, 2, 2),
+				NET_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_EUR_BUDGET, 4, 4),
+				NET_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_EUR_SPOT, 4, 4),
+				COGS_EUR_UNIT: ServiceHelper.formatNumber(d.COGS_EUR_UNIT, 2, 2),
+				GROSS_MARGIN_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_BUDGET, 2, 2),
+				GROSS_MARGIN_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_SPOT, 2, 2),
+				GROSS_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.GROSS_SALES_OFFER_CURRENCY, 0, 0),
+				NET_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_SALES_OFFER_CURRENCY, 0, 0),
+				NET_SALES_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_SALES_EUR_BUDGET, 0, 0),
+				NET_SALES_EUR_SPOT: ServiceHelper.formatNumber(d.NET_SALES_EUR_SPOT, 0, 0),
+				GROSS_PROFIT_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_BUDGET, 0, 0),
+				GROSS_PROFIT_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_SPOT, 0, 0),
 				DIVISION: d.DIVISION,
-				BUDGETEDPROFITABILITY: (d.BUDGETED_PROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETED_PROFITABILITY, 0).concat("%"),
-				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 0).concat("%"),
-				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 0).concat("%"),
-				BUDGET_RATE: ServiceHelper.formatNumber(d.BUDGET_RATE, 2),
-				SPOT_RATE: ServiceHelper.formatNumber(d.SPOT_RATE, 2),
-				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2)
+				BUDGETEDPROFITABILITY: (d.BUDGETED_PROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETED_PROFITABILITY, 0, 0).concat("%"),
+				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 0, 0).concat("%"),
+				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 0, 0).concat("%"),
+				BUDGET_RATE: ServiceHelper.formatNumber(d.BUDGET_RATE, 2, 2),
+				SPOT_RATE: ServiceHelper.formatNumber(d.SPOT_RATE, 2, 2),
+				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2)
 			}
 		});
 	}
@@ -2247,20 +2247,20 @@ module.exports = (srv) => {
 
 		//format prices
 		productValidation.forEach(prd => {
-			prd.PAID_VOLUME = ServiceHelper.formatNumberTo_EN_US_String(prd.PAID_VOLUME, 0, 0);
-			prd.PACKSIZE = ServiceHelper.formatNumberTo_EN_US_String(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE, 2, 2);
-			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE_VAT, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
-			prd.SAMPLES = ServiceHelper.formatNumberTo_EN_US_String(prd.SAMPLES, 0, 0);
-			prd.FOC = ServiceHelper.formatNumberTo_EN_US_String(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.NET_PRICE, 0, 0);
+			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
+			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
+			prd.OFFER_PRICE = ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
+			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
 		});
 		
-		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
-		offerValidation.VAT_TOTAL = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.VAT_TOTAL, 2, 2);
-		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
+		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
+		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
 
 
 		//generate XLSX
