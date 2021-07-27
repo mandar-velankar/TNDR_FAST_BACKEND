@@ -55,6 +55,8 @@ entity PT_TMINST{
 	City:String(255);
 	INSTITUTE_HIERARCHY_ID:Integer;
 	State:String;
+	INCOTerms:String(500);
+	PaymentTerms:String(500);
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -124,6 +126,7 @@ entity PT_TMLE{
 	AuthorizedSignatory4:String(300);//delete
 	AuthorizedSignatory5:String(300);//delete
 	FooterComment:String(300);
+	Enabled                 : Boolean not null;
 	//Associations
 	EntityBrands:Association to many PT_TMCTLEBR on EntityBrands.Entity = $self;
 	Signatories:Association to many COUNTRY_LEGAL_ENTITY_SIGNATORIES on Signatories.LEGAL_ENTITY_CODE = LegalEntityCode;
