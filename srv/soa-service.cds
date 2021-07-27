@@ -118,6 +118,7 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
         opp.ContractLength,
         opp.ExtensionPeriod,
         opp.TenderMatchingStatus,
+        opp.Description,
         st.Status as MainStatus,
         st.SubStatus,
         opp.Institute: redirected to PT_TMINST,

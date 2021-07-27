@@ -22,6 +22,7 @@ entity SalesOpportunities: cuid, managed {
     ContractLength: Integer;
     ExtensionPeriod: Integer;
     TenderMatchingStatus: String;
+    Description: String;
     Institute: association to MasterData.PT_TMINST;
     Products: Composition of many SalesOpportunityProducts on Products.Opportunity = $self;
 }
