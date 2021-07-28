@@ -88,6 +88,7 @@ entity PT_TMDIST{
 	PaymentTerms:String(500);
 	INCOTerms:String(500);
 	CommisionRate:Double;
+	ForAllBrands:Boolean; // All = true / Few = false
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
