@@ -2,11 +2,10 @@ const cds = require('@sap/cds');
 
 module.exports = (srv) => {
 
-	//srv.on('CREATE', 'PT_TMDIST', async (req) => {
 
-		const {
-			PT_TMDIST
-		} = cds.entities("com.bayer.SXTENDER.MasterData");
+	const {
+		PT_TMDIST
+	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
 
 
@@ -25,8 +24,6 @@ module.exports = (srv) => {
 	});
 
 
-
-	//});
 
 
 };
