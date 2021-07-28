@@ -12,6 +12,7 @@ entity PublicMarketBuyers as projection on IntegrationDataConversion.PublicMarke
 entity PublicMarketProducts as projection on IntegrationDataConversion.PublicMarketProducts;
 
 entity SalesOpportunities: cuid, managed {
+    CountryCode: String;
     TenderReference: String;
     Classification: String;
     TenderChannel: String;

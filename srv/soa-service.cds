@@ -4,8 +4,9 @@ using { com.bayer.SXTENDER.TransactionalData } from '../db/TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataViews } from '../db/TransactionalDataViews';
 using { com.bayer.SXTENDER.MasterData } from '../db/./MasterData';
 using { com.bayer.SXTENDER.SalesOpportunityData } from '../db/SalesOpportunityData';
+using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 using { com.bayer.SXTENDER.AdminDataViews } from '../db/AdminDataViews';
-//using { com.bayer.SXTENDER.MasterDataViews } from '../db/./MasterDataViews';
+using { com.bayer.SXTENDER.MasterDataViews } from '../db/./MasterDataViews';
 //using { com.bayer.SXTENDER.TransactionalData } from '../db/TransactionalData';
 //using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/TransactionalDataConversion';
 
@@ -22,6 +23,8 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity CountryTenderType @readonly       as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE;
     entity TenderType @readonly              as projection on MasterData.MASTER_TENDER_TYPE;
     entity PT_TMINST @readonly               as projection on MasterData.PT_TMINST;
+    entity CountryBrands @readonly           as projection on MasterDataViews.CountryBrands;
+    entity CountryBrandProducts @readonly    as projection on MasterDataViews.CountryBrandProducts;
 
     entity Buyers as projection on IntegrationDataConversion.PublicMarketBuyers;
     entity Products as projection on IntegrationDataConversion.PublicMarketProducts;
@@ -34,11 +37,13 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity SalesOpportunityProducts as projection on SalesOpportunityData.SalesOpportunityProducts;
 
     //Admin Data Views
-    entity UserCountries @readonly           as projection on AdminDataViews.UserCountries;
-    entity Users @readonly                   as projection on AdminDataViews.Users {
-        * , toUserCountries : redirected to UserCountries
-    };
-
+    entity UserCountry as projection on AdminData.PT_TMUSERCTRY;
+    entity TenderCountriesUser @(restrict: [
+		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
+	]) as projection on MasterData.PT_TMCTRY{
+		*,
+		User: redirected to UserCountry
+	};
 
     entity PublicMarketTenders as projection on IntegrationDataConversion.PublicMarketTenders
     {
@@ -115,6 +120,7 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
         on opp.ID = st.TenderReference
     {
         key opp.ID,
+        opp.CountryCode,
         opp.TenderReference,
         opp.Classification,
         opp.TenderChannel,
