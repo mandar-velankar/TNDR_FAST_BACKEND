@@ -85,10 +85,10 @@ entity PT_TMDIST{
 	ContactPerson:String(500);
 	ActiveRecord:String(10);
 	CONTACT_EMAIL:String(100);
-	PaymentTerms:String(500);
+	CommissionRate:Double;
 	INCOTerms:String(500);
-	CommisionRate:Double;
-	ForAllBrands:Boolean; // All = true / Few = false
+	PaymentTerms:String(500);
+	ForAllBrands:Boolean;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
@@ -230,7 +230,7 @@ entity ApproverTypes: managed {
 entity PT_TMCTLE{
 	CountryLegalEntityID:Integer;//TODO: discuss with Jonathan
 	key CountryCode:String(2)  not null;
-	Brand:String(50);
+	ForAllBrands:Boolean;
 	key LegalEntityID:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;

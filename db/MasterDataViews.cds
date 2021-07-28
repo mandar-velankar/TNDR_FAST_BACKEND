@@ -81,7 +81,7 @@ inner join MasterData.PT_TMCTLE as cle on cb.COUNTRY_CODE = cle.CountryCode{
 	cb.BRAND_ID as BRAND_ID,
 	cle.LegalEntity.LegalEntityCode as LEGAL_ENTITY_CODE,
 	cb.BRAND_NAME as BRAND_NAME
-}where cle.Brand = 'All'
+}where cle.ForAllBrands = true
 and cle.LegalEntity.LegalEntityCode is not null;
 
 entity DirectBrand as select from MasterData.PT_TMINSBRTR as itr
@@ -104,17 +104,34 @@ and itr.Institute.ActiveRecord = 'Yes'
 and idst.Distributor.ActiveRecord = 'Yes';
 
 entity DistributorBrand as select from MasterData.PT_TMDISBRD as dstbr
-inner join CountryBrands cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLevel4_Code = cb.BRAND_ID{
+inner join CountryBrands cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLevel4_Code = cb.BRAND_ID
+inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode{
 	key dstbr.CountryCode as COUNTRY_CODE,
 	key dstbr.DistributorID as DISTRIBUTOR_ID,
 	dstbr.Distributor.DistributorName as DISTRIBUTOR_NAME,
 	key cb.BRAND_ID as BRAND_ID,
 	cb.BRAND_NAME as BRAND_NAME,
 	'Distributor' as CHANNEL:String(11),
-	dstbr.INCOTerms as INCO_TERMS,
-	dstbr.PaymentTerms as PAYMENT_TERMS,
-	dstbr.CommissionRate as COMMISSION_RATE
-};
+	dst.INCOTerms as INCO_TERMS,
+	dst.PaymentTerms as PAYMENT_TERMS,
+	dst.CommissionRate as COMMISSION_RATE
+	//dstbr.INCOTerms as INCO_TERMS,
+	//dstbr.PaymentTerms as PAYMENT_TERMS,
+	//dstbr.CommissionRate as COMMISSION_RATE
+}
+union
+select from CountryBrands as cb 
+inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode{
+	dst.CountryCode as COUNTRY_CODE,
+	dst.DistributorID as DISTRIBUTOR_ID,
+	dst.DistributorName as DISTRIBUTOR_NAME,
+	cb.BRAND_ID as BRAND_ID,
+	cb.BRAND_NAME as BRAND_NAME,
+	'Distributor' as CHANNEL:String(11),
+	dst.INCOTerms as INCO_TERMS,
+	dst.PaymentTerms as PAYMENT_TERMS,
+	dst.CommissionRate as COMMISSION_RATE
+}where dst.ForAllBrands = true;
 
 //Distributor brand policy with aggregated data for front-end
 entity AggregatedDistributorBrandPolicies as SELECT from MasterData.PT_TMDISBRD as DistributorBrands

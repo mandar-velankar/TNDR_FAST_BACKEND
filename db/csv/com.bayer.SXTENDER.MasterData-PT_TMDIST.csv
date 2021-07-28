@@ -1,62 +1,62 @@
-COUNTRYCODE,DISTRIBUTORID,DISTRIBUTORNAME,ADDRESS,CONTACTNO,FAX,CONTACTPERSON,ACTIVERECORD,CONTACT_EMAIL
-"EG",4411546,"Ibn Sina Pharma","Obour City, 1st Indusrial District, Area 2&3, Block 12015 Cairo Egypt","+202 4 489 1102","+202 44891137","Mr. Ahmed Samy","Yes","Ahmed.samy@ibnsina-pharma.com.eg"
-"KW",1493568,"YIACO Medical Co. K.S.C.C.","Amr Bin Al Aas Street, Block 5, Sama Tower, P.O. Box 435, Safat, 13005","+965 22230600 ","","Ms. Zeenat Mohammed Sharif","No",
-"AE",164390,"Alphamed Drug Store","Dubai Investment Park, Al Khayyat Investment P.O. Box 11245","+971 4 8105555","","Ms. Marwan Dawood","Yes","marwan.m@akigroup.com"
-"KW",1799155,"Advanced Technology Company KSC","Salmiya, Salem Al-mubarak Str., block 62A, PO Box 44558 Hawalli, 32060","+965 22247204","+965 25711759","Mr. Aiman Pathan","Yes",
-"QA",1731868,"Ahmed Khalil AL-Baker & Sons","Albaker Building, Airport Rd, P.O. Box 9","+974 44551764","+974 44550621","Mr. Madhab Dhakal","Yes","tender.qatar@al-baker.com"
-"SA",2024839,"Batterjee National Pharmaceuticals","Batterjee Building, Palestine Street, Post Box 2,  Jeddah 21411","+966 12 660 2933 ","+966 12 668 7165","Mr. Moustafa Shaltout","No",
-"KW",1909161,"Alghanim Healthcare","Shuwaikh Industrial Area 2, Block 1, Street 4, Plot 124H, PO Box 856 Code 13009","+965 22059000","+965 22059009","Mr. Gregory Dsouza","Yes","gregory.dsouza@alghanimhc.com"
-"LB",2025053,"Droguerie R.Pharaon & Fils S.A.L","Pharaon Bldg.-Pasteur St.Medawar Quarter, P.O. Box 11-0022 - Riad el Solh 11072010","+961 1 580303","+961 1 563841","Ms. Jisele Saliba","Yes","jisele.saliba@ph-lb.com"
-"JO",2026793,"Khoury Drug Store Co","Umm Mutawe Al-Aslamiyah St. Bldg no.8, Al Jandawil, Wadi Seer, P. O. Box 306 11118","+ 962 6 5827015","","Ms. Amneh Alkhalaileh","Yes","amneh.alkhalaileh@khds.jo"
-"OM",2033919,"Muscat Pharmacy & Stores LLC","Post Box 438, PC 100, Muscat, Sultanate of Oman.","+968 2481 4501","+968 2481 5201","Mr. Munzir Baig","Yes","mbaig@mpmct.com"
-"EG",2046036,"United Company for Distribution & Pharmacies Supplies","5, Samir Sayed Ahmed Street, El Manial","+202 2 364 4052","","Ms. Mona Lotfy","Yes","mona.lotfy@ho-ucp.com"
-"SY",3147434,"Maatouk Drugstores","Abou Remaneh, Beside Al Jahez park, P.O. Box 695","+963 11 3325070","+ 963 11 3325079","Mr. Anas Maatouk","Yes","maatouk@gmail.com"
-"LB",3147445,"Khalil Fattal & Fils S.A.L.","Dany Chamoun Street, Jisr El-Wati-Sin El-Fil, PO Box 110-773 Riad El Solh","+961 1 51 20 02","+961 1 49 48 20","Mr. Jack Haddad","Yes","jack.haddad@fattal.com.lb"
-"AE",3147448,"Pharmaworld","Belhoul Group Building, Garhoud, Dubai, PO. Box 5527","+971 4 282 3737","+971 4 2822447","Mr. Mamdouh Meniawi","Yes","mmeniawi@pharmaworld-uae.com"
-"YE",3147468,"Natco Al-Razi Co Ltd","Zubiry St. near UNICEF",,"+ 967 1 530718",,"Yes",
-"SA",3147458,"Alkamal Import Office Co. Ltd.","Beside United Doctors Hospital, P.O.BOX 405, jeddah 21411","+966 12 288 9445","+966 12 651 3759","Mr. Mohammed AbdulJawad Sulaiman","Yes","abduljawad.mohamad@alkamal-sa.com"
-"SD",3148435,"Shibeika Pharmaceutical Co.","Al-Sherif Alhindi Street, West of Alfayha Bldg, 3006","+249183 792545","","Dr. Ahmed ","Yes",
-"LY",3147647,"Al Elmia Company for Pharmaceuticals & Medical Supplies","Sedi Slim in front of Oil Tanks, P.O Box 83467","+218 4802433","+218 4802438","Dr. Ali Shibl","Yes","shibl@alelmiapharma.com"
-"EG",3148436,"Soficopharm","12, Ismail El-Kabbani St. Nasr City P.O. Box 11371","+202 2 402 5942","","Mr. Nasser Kassem","Yes","nasser_kassem@hotmail.com"
-"BH",4411545,"Bahrain Pharmacy","P.O. Box: 403, Manama, Kingdom of Bahrain","+973 1726 4088","+973 1726 4099","Mr. Ashraf","Yes","bpmedic@bahrainpharmacy.com"
-"YE",3391329,"National Pharma Company Ltd.","Djibouti Street, P.O. Box 1187",,"",,"Yes",
-"JO",3148443,"The Jordan Drugstore Co.","48 Isam Ajlouni St.  Shmaisani P.O. Box:  422 Amman 11118","+962 6 5665125","+962 6 5665126","Ms. Diala Hindeleh","Yes","diala@jdsco.net"
-"IQ",4411544,"Najat Pharma","King Abdullah II St. #320 | P.O.Box 852098 Amman 11185 | Jordan","+962 6 585 8970","+962 6 582 7019","Ms. Ghada Nazzal","Yes","ghada.nazzal@najat-pharma.com"
-"SA",8039883,"Saudi International Trading Company Limited","P.O. Box 5132, Riyadh 11422","+966 1 4757500","+966 1 4730525","Mr. Maher Adwan","Yes","maher@sitcopharma.com"
-"SA",8888888,"Abdulla Fouad Holding Co.","Dammam Khobar Highway, Besides Al Jazeera Ford Showroom, P.O. Box 257, 31411","+966 13 814 1414","+966 13 810 2100","Mr. Rasem Adib","Yes","rasem.adib@abdulla-fouad.com"
-"GC",9999990,,"Not available",,"",,"No",
-"BH",3148437,"Jaffar Pharmacy","Bldg No.2616, Road 855, P.O. Box 122 Wadyan 608","+973 17 731316","+973 17 732533 ","Mr. Vijay","No",
-"AE",9349695,"Al Ittihad Drug Store","P.O. Box 5374, Dubai Investment Park 2, Plot No. 597-254","+971 4 899 2222","+971 4 899 2223","Mr. Wesam Al Sayed","Yes","wesam.alsayed@ids.ae"
-"MO",99999999,"TEST JH Distributor",,,"",,"Yes",
-"GC",9999999,"All","Gulf Health Council\Diplomatic Quarter - opp. Saudi\Commission for Health Specialties\Riyadh 11462, PO Box 7431, KSA","9.66E+11","9.66E+11","Mr. Fatthi Alkathiry","Yes","g.purchase@ghc.sa"
-"MX",5000000,"ABASTECEDORA DE INSUMOS PARA LA SALUD S.A. DE C.V.","CALLE NORTE 31 A GUSTAVO A. MADERO CP 07700",,"","José Antonio Higareda","Yes","antonio.higareda@abisalud.com"
-"MX",5000001,"ACCESOFARM S.A. DE C.V. ","Dr. FEDERICO GOMEZ SANTOS CUAUHTEMOC CP 06720",,"","Enrique Guadarrama","Yes","enrique.guadarrama@accesofarm.com"
-"MX",5000002,"CASA MARZAM, S.A. DE C.V. ","AV. CIRCUNVALACIÓN ECATEPEC CP 55420",,"","Jaqueline Dimas","Yes","jdimas@marzam.com.mx"
-"MX",5000003,"COMERCIALIZADORA PENTAMED S.A. DE C.V.","ANTOINE LAVOISIER CUAUTITLAN IZCALLI CP 54730",,"","Monica Oloarte","Yes","monica.oloarte@pentamed.com.mx"
-"MX",5000004,"DAYAR DISTRIBUCIONES MEDICAS S.A. DE C.V.","13VA PRIVADA DE YAÑEZ HERMOSILLO CP 83190",,"","Paola Morales","Yes","pmorales@dayar.com.mx"
-"MX",5000005,"DIMEJAL, S.A. DE C.V. ","ORION ZAPOPAN CP 45070",,"","Josefina Navarro","Yes","dimejalsadecv@outlook.com"
-"MX",5000006,"DISTRIBUCION ESPECIALIZADA DE MEDICAMENTOS, S.A. DE C.V.","ATOTONILCO MONTERREY CP 64020",,"","Cesar Ramos","Yes","cramos@demsa.mx"
-"MX",5000007,"DISTRIBUIDORA DE FARMACOS Y FRAGANCIAS S.A. DE C.V.","TABLAJE CATASTRAL MERIDA CP 97302",,"","Gabriela Lira","Yes","mlira@difasa.com.mx"
-"MX",5000008,"DISTRIBUIDORA DE FARMACOS Y FRAGANCIAS S.A. DE C.V.","AV LAGUNA DE LAS ILUSIONES VILLAHERMOSA CP 86019",,"","Gabriela Lira","Yes","mlira@difasa.com.mx"
-"MX",5000009,"DISTRIBUIDORA ESPECIALIDADES 2001 S.A. DE C.V.","PRIVADA ALFREDO BONFIL COYOACÁN CP 04470",,"","Selene Escobar","Yes","selene.escobar@especialidades2001.com"
-"MX",5000010,"DISTRIBUIDORA INTERNACIONAL DE MEDICAMENTOS Y EQUIPO MEDICO SA CV","AV PASEO DE LA REFORMA CUAUHTEMOC CP 06600",,"","Manuel Capetillo","Yes","macapetillo@dimesa.com.mx"
-"MX",5000011,"DROGUERIA Y FARMACIA EL GLOBO S.A. DE C.V.","NOGAL 47 CUAUHTEMOC CP 06400",,"","Cristian Calvillo","Yes","ccalvillo@dfg.com.mx"
-"MX",5000012,"FARMACEUTICA ALTHOS S.A. DE C.V. ","SANTA CRUZ NORTE CIUDAD DE MEXICO CP 03103",,"","Elsa Fuentes","Yes","e.fuentes@althos.com.mx"
-"MX",5000013,"FARMACEUTICOS MAYPO, S.A. DE C.V. ","VIADUCTO TLALPAN COYOACAN CP 04980",,"","Karib Cabello","Yes","apoyos@maypo.com"
-"MX",5000014,"LABORATORIOS MECCH SA DE CV ","AMEYALCO HUIXQUILUCAN DE DEGOLLADO CP 03100",,"","Lizbeth Tovar","Yes","ltovar@laboratoriosmecch.com"
-"MX",5000015,"NADRO, S.A.P.I. DE C.V. ","AV. VASCO DE QUIROGA ALVARO OBREGON CP 01290",,"","Oscar Flores","Yes","oscar_flores@nadro.com.mx"
-"MX",5000016,"ONCOMEDIC DISTRIBUIDORA DE MEDICAMENTOS S.A. DE C.V.","CUAUHTEMOC TLALPAN CP 14050",,"","Efrén Palacios","Yes","compras@oncomedicmexico.com"
-"MX",5000017,"PVH DISTRIBUCIO S.A. DE C.V. ","BRASIL MEXICALI CP 21200",,"","Paul Ojeda","Yes","paul.ojeda@grupopvh.com"
-"MX",5000018,"RALCA S.A. DE C.V. ","BOSQUE DE RADIATAS CUAJIMALPA CP 05120",,"","Ivonne de la Presa","Yes","ivillegas@ralca.com.mx"
-"MX",5000019,"SALUBOX S.A.P.I. DE C.V. ","CORAS GUADALAJARA CP 44690",,"","Emmanuel Ysita","Yes","emmanuel.ysita@salubox.com"
-"TH",4411547,"DKSH (Thailand) Limited","2106 Sukhumvit Road, Phrakhanong-Tai, Phrakhanong, Bangkok 10260, Thailand","6622209317","6622209880","Suntree Phasuphasutha(Senior Executive Manager, Client Management)","Yes","suntree.p@dksh.com"
-"TH",4411548,"Global Medical Solutions (Thailand) Co., Ltd.","1201/81 Soi Ladprao 94 (Panjamith), Ladprao Road, Plubpla, Wangthonglang, Bangkok 10310 Thailand","6625592740","6625307455","Nutthawuth Nainanont(Production Manager)","Yes","nutthawuth.nainanont@globalmedicalsolutions.com"
-"AR",4411549,"Polyquimica","Salta 505, Mendoza, Argentina","2614238408","","Farm. Diego Ferlaza","Yes","polyquimica@gmail.com"
-"BR",4411550,"Brazil Distributor","Dummy","Dummy","Dummy","Dummy","Yes","jh@pythia-consulting.com"
-"EG",5000020,"PharmaOverseas","14 - Building Pharmacy - No-5- first floor. Smouha. Alexandria, Egypt","+202 3 424 4600","","Mr. Aboulgoud Hassan Ahmed","Yes","Aboulgoud.Hassan@pharmaoverseas.com"
-"AR",100000000,"Bellandi & Barrera","Carola Lorenzini 48, Godoy Cruz, Mendoza, Argentina","2614222428","","Cintia Masi (Licitaciones)","Yes","cmasi@lbybsrl.com.ar"
-"AR",100000001,"Drogueria 20 de Junio","Pte. Roca 1553/55, Rosario, Santa Fe, Argentina","3414210222","","Sandra Baiochi","Yes","sbaiochi@drogueria20dejunio.com.ar; adminstituciones@drogueria20dejunio.com.ar"
-"AR",100000002,"Cía. Farmaceutica (Ciafarma)","Av. Condarco 327 BIS, Rosario, Santa Fe, Argentina","3414261277","","Ezequiel Semino","Yes","gestionesinstituciones@ciafarma.com.ar"
-"AR",100000003,"Drofar - Redimer","Av. Juan B. Justo 2713, CABA, Argentina","1148553564","","Juan Pablo Accoroni","Yes","juanpablo.accoroni@drofar.com.ar "
-"AR",100000004,"No Distributor","","","","","Yes",""
-"CL",100000039,"No Distributor","","","","","Yes",""
+COUNTRYCODE,DISTRIBUTORID,DISTRIBUTORNAME,ADDRESS,CONTACTNO,FAX,CONTACTPERSON,ACTIVERECORD,CONTACT_EMAIL,CommissionRate,INCOTerms,PaymentTerms,ForAllBrands
+EG,4411546,Ibn Sina Pharma,"Obour City, 1st Indusrial District, Area 2&3, Block 12015 Cairo Egypt",+202 4 489 1102,+202 44891137,Mr. Ahmed Samy,Yes,Ahmed.samy@ibnsina-pharma.com.eg,,,,true
+KW,1493568,YIACO Medical Co. K.S.C.C.,"Amr Bin Al Aas Street, Block 5, Sama Tower, P.O. Box 435, Safat, 13005","+965 22230600 ",,Ms. Zeenat Mohammed Sharif,No,,,,,true
+AE,164390,Alphamed Drug Store,"Dubai Investment Park, Al Khayyat Investment P.O. Box 11245",+971 4 8105555,,Ms. Marwan Dawood,Yes,marwan.m@akigroup.com,,,,true
+KW,1799155,Advanced Technology Company KSC,"Salmiya, Salem Al-mubarak Str., block 62A, PO Box 44558 Hawalli, 32060",+965 22247204,+965 25711759,Mr. Aiman Pathan,Yes,,,,,true
+QA,1731868,Ahmed Khalil AL-Baker & Sons,"Albaker Building, Airport Rd, P.O. Box 9",+974 44551764,+974 44550621,Mr. Madhab Dhakal,Yes,tender.qatar@al-baker.com,,,,true
+SA,2024839,Batterjee National Pharmaceuticals,"Batterjee Building, Palestine Street, Post Box 2,  Jeddah 21411","+966 12 660 2933 ",+966 12 668 7165,Mr. Moustafa Shaltout,No,,,,,true
+KW,1909161,Alghanim Healthcare,"Shuwaikh Industrial Area 2, Block 1, Street 4, Plot 124H, PO Box 856 Code 13009",+965 22059000,+965 22059009,Mr. Gregory Dsouza,Yes,gregory.dsouza@alghanimhc.com,,,,true
+LB,2025053,Droguerie R.Pharaon & Fils S.A.L,"Pharaon Bldg.-Pasteur St.Medawar Quarter, P.O. Box 11-0022 - Riad el Solh 11072010",+961 1 580303,+961 1 563841,Ms. Jisele Saliba,Yes,jisele.saliba@ph-lb.com,,,,true
+JO,2026793,Khoury Drug Store Co,"Umm Mutawe Al-Aslamiyah St. Bldg no.8, Al Jandawil, Wadi Seer, P. O. Box 306 11118",+ 962 6 5827015,,Ms. Amneh Alkhalaileh,Yes,amneh.alkhalaileh@khds.jo,,,,true
+OM,2033919,Muscat Pharmacy & Stores LLC,"Post Box 438, PC 100, Muscat, Sultanate of Oman.",+968 2481 4501,+968 2481 5201,Mr. Munzir Baig,Yes,mbaig@mpmct.com,,,,true
+EG,2046036,United Company for Distribution & Pharmacies Supplies,"5, Samir Sayed Ahmed Street, El Manial",+202 2 364 4052,,Ms. Mona Lotfy,Yes,mona.lotfy@ho-ucp.com,,,,true
+SY,3147434,Maatouk Drugstores,"Abou Remaneh, Beside Al Jahez park, P.O. Box 695",+963 11 3325070,+ 963 11 3325079,Mr. Anas Maatouk,Yes,maatouk@gmail.com,,,,true
+LB,3147445,Khalil Fattal & Fils S.A.L.,"Dany Chamoun Street, Jisr El-Wati-Sin El-Fil, PO Box 110-773 Riad El Solh",+961 1 51 20 02,+961 1 49 48 20,Mr. Jack Haddad,Yes,jack.haddad@fattal.com.lb,,,,true
+AE,3147448,Pharmaworld,"Belhoul Group Building, Garhoud, Dubai, PO. Box 5527",+971 4 282 3737,+971 4 2822447,Mr. Mamdouh Meniawi,Yes,mmeniawi@pharmaworld-uae.com,,,,true
+YE,3147468,Natco Al-Razi Co Ltd,Zubiry St. near UNICEF,,+ 967 1 530718,,Yes,,,,,true
+SA,3147458,Alkamal Import Office Co. Ltd.,"Beside United Doctors Hospital, P.O.BOX 405, jeddah 21411",+966 12 288 9445,+966 12 651 3759,Mr. Mohammed AbdulJawad Sulaiman,Yes,abduljawad.mohamad@alkamal-sa.com,,,,true
+SD,3148435,Shibeika Pharmaceutical Co.,"Al-Sherif Alhindi Street, West of Alfayha Bldg, 3006",+249183 792545,,"Dr. Ahmed ",Yes,,,,,true
+LY,3147647,Al Elmia Company for Pharmaceuticals & Medical Supplies,"Sedi Slim in front of Oil Tanks, P.O Box 83467",+218 4802433,+218 4802438,Dr. Ali Shibl,Yes,shibl@alelmiapharma.com,,,,true
+EG,3148436,Soficopharm,"12, Ismail El-Kabbani St. Nasr City P.O. Box 11371",+202 2 402 5942,,Mr. Nasser Kassem,Yes,nasser_kassem@hotmail.com,,,,true
+BH,4411545,Bahrain Pharmacy,"P.O. Box: 403, Manama, Kingdom of Bahrain",+973 1726 4088,+973 1726 4099,Mr. Ashraf,Yes,bpmedic@bahrainpharmacy.com,,,,true
+YE,3391329,National Pharma Company Ltd.,"Djibouti Street, P.O. Box 1187",,,,Yes,,,,,true
+JO,3148443,The Jordan Drugstore Co.,48 Isam Ajlouni St.  Shmaisani P.O. Box:  422 Amman 11118,+962 6 5665125,+962 6 5665126,Ms. Diala Hindeleh,Yes,diala@jdsco.net,,,,true
+IQ,4411544,Najat Pharma,King Abdullah II St. #320 | P.O.Box 852098 Amman 11185 | Jordan,+962 6 585 8970,+962 6 582 7019,Ms. Ghada Nazzal,Yes,ghada.nazzal@najat-pharma.com,,,,true
+SA,8039883,Saudi International Trading Company Limited,"P.O. Box 5132, Riyadh 11422",+966 1 4757500,+966 1 4730525,Mr. Maher Adwan,Yes,maher@sitcopharma.com,,,,true
+SA,8888888,Abdulla Fouad Holding Co.,"Dammam Khobar Highway, Besides Al Jazeera Ford Showroom, P.O. Box 257, 31411",+966 13 814 1414,+966 13 810 2100,Mr. Rasem Adib,Yes,rasem.adib@abdulla-fouad.com,,,,true
+GC,9999990,,Not available,,,,No,,,,,true
+BH,3148437,Jaffar Pharmacy,"Bldg No.2616, Road 855, P.O. Box 122 Wadyan 608",+973 17 731316,"+973 17 732533 ",Mr. Vijay,No,,,,,true
+AE,9349695,Al Ittihad Drug Store,"P.O. Box 5374, Dubai Investment Park 2, Plot No. 597-254",+971 4 899 2222,+971 4 899 2223,Mr. Wesam Al Sayed,Yes,wesam.alsayed@ids.ae,,,,true
+MO,99999999,TEST JH Distributor,,,,,Yes,,,,,true
+GC,9999999,All,"Gulf Health Council\Diplomatic Quarter - opp. Saudi\Commission for Health Specialties\Riyadh 11462, PO Box 7431, KSA",9.66E+11,9.66E+11,Mr. Fatthi Alkathiry,Yes,g.purchase@ghc.sa,,,,true
+MX,5000000,ABASTECEDORA DE INSUMOS PARA LA SALUD S.A. DE C.V.,CALLE NORTE 31 A GUSTAVO A. MADERO CP 07700,,,José Antonio Higareda,Yes,antonio.higareda@abisalud.com,,,,true
+MX,5000001,"ACCESOFARM S.A. DE C.V. ",Dr. FEDERICO GOMEZ SANTOS CUAUHTEMOC CP 06720,,,Enrique Guadarrama,Yes,enrique.guadarrama@accesofarm.com,,,,true
+MX,5000002,"CASA MARZAM, S.A. DE C.V. ",AV. CIRCUNVALACIÓN ECATEPEC CP 55420,,,Jaqueline Dimas,Yes,jdimas@marzam.com.mx,,,,true
+MX,5000003,COMERCIALIZADORA PENTAMED S.A. DE C.V.,ANTOINE LAVOISIER CUAUTITLAN IZCALLI CP 54730,,,Monica Oloarte,Yes,monica.oloarte@pentamed.com.mx,,,,true
+MX,5000004,DAYAR DISTRIBUCIONES MEDICAS S.A. DE C.V.,13VA PRIVADA DE YAÑEZ HERMOSILLO CP 83190,,,Paola Morales,Yes,pmorales@dayar.com.mx,,,,true
+MX,5000005,"DIMEJAL, S.A. DE C.V. ",ORION ZAPOPAN CP 45070,,,Josefina Navarro,Yes,dimejalsadecv@outlook.com,,,,true
+MX,5000006,"DISTRIBUCION ESPECIALIZADA DE MEDICAMENTOS, S.A. DE C.V.",ATOTONILCO MONTERREY CP 64020,,,Cesar Ramos,Yes,cramos@demsa.mx,,,,true
+MX,5000007,DISTRIBUIDORA DE FARMACOS Y FRAGANCIAS S.A. DE C.V.,TABLAJE CATASTRAL MERIDA CP 97302,,,Gabriela Lira,Yes,mlira@difasa.com.mx,,,,true
+MX,5000008,DISTRIBUIDORA DE FARMACOS Y FRAGANCIAS S.A. DE C.V.,AV LAGUNA DE LAS ILUSIONES VILLAHERMOSA CP 86019,,,Gabriela Lira,Yes,mlira@difasa.com.mx,,,,true
+MX,5000009,DISTRIBUIDORA ESPECIALIDADES 2001 S.A. DE C.V.,PRIVADA ALFREDO BONFIL COYOACÁN CP 04470,,,Selene Escobar,Yes,selene.escobar@especialidades2001.com,,,,true
+MX,5000010,DISTRIBUIDORA INTERNACIONAL DE MEDICAMENTOS Y EQUIPO MEDICO SA CV,AV PASEO DE LA REFORMA CUAUHTEMOC CP 06600,,,Manuel Capetillo,Yes,macapetillo@dimesa.com.mx,,,,true
+MX,5000011,DROGUERIA Y FARMACIA EL GLOBO S.A. DE C.V.,NOGAL 47 CUAUHTEMOC CP 06400,,,Cristian Calvillo,Yes,ccalvillo@dfg.com.mx,,,,true
+MX,5000012,"FARMACEUTICA ALTHOS S.A. DE C.V. ",SANTA CRUZ NORTE CIUDAD DE MEXICO CP 03103,,,Elsa Fuentes,Yes,e.fuentes@althos.com.mx,,,,true
+MX,5000013,"FARMACEUTICOS MAYPO, S.A. DE C.V. ",VIADUCTO TLALPAN COYOACAN CP 04980,,,Karib Cabello,Yes,apoyos@maypo.com,,,,true
+MX,5000014,"LABORATORIOS MECCH SA DE CV ",AMEYALCO HUIXQUILUCAN DE DEGOLLADO CP 03100,,,Lizbeth Tovar,Yes,ltovar@laboratoriosmecch.com,,,,true
+MX,5000015,"NADRO, S.A.P.I. DE C.V. ",AV. VASCO DE QUIROGA ALVARO OBREGON CP 01290,,,Oscar Flores,Yes,oscar_flores@nadro.com.mx,,,,true
+MX,5000016,ONCOMEDIC DISTRIBUIDORA DE MEDICAMENTOS S.A. DE C.V.,CUAUHTEMOC TLALPAN CP 14050,,,Efrén Palacios,Yes,compras@oncomedicmexico.com,,,,true
+MX,5000017,"PVH DISTRIBUCIO S.A. DE C.V. ",BRASIL MEXICALI CP 21200,,,Paul Ojeda,Yes,paul.ojeda@grupopvh.com,,,,true
+MX,5000018,"RALCA S.A. DE C.V. ",BOSQUE DE RADIATAS CUAJIMALPA CP 05120,,,Ivonne de la Presa,Yes,ivillegas@ralca.com.mx,,,,true
+MX,5000019,"SALUBOX S.A.P.I. DE C.V. ",CORAS GUADALAJARA CP 44690,,,Emmanuel Ysita,Yes,emmanuel.ysita@salubox.com,,,,true
+TH,4411547,DKSH (Thailand) Limited,"2106 Sukhumvit Road, Phrakhanong-Tai, Phrakhanong, Bangkok 10260, Thailand",6622209317,6622209880,"Suntree Phasuphasutha(Senior Executive Manager, Client Management)",Yes,suntree.p@dksh.com,,,,true
+TH,4411548,"Global Medical Solutions (Thailand) Co., Ltd.","1201/81 Soi Ladprao 94 (Panjamith), Ladprao Road, Plubpla, Wangthonglang, Bangkok 10310 Thailand",6625592740,6625307455,Nutthawuth Nainanont(Production Manager),Yes,nutthawuth.nainanont@globalmedicalsolutions.com,,,,true
+AR,4411549,Polyquimica,"Salta 505, Mendoza, Argentina",2614238408,,Farm. Diego Ferlaza,Yes,polyquimica@gmail.com,,,,true
+BR,4411550,Brazil Distributor,Dummy,Dummy,Dummy,Dummy,Yes,jh@pythia-consulting.com,,,,true
+EG,5000020,PharmaOverseas,"14 - Building Pharmacy - No-5- first floor. Smouha. Alexandria, Egypt",+202 3 424 4600,,Mr. Aboulgoud Hassan Ahmed,Yes,Aboulgoud.Hassan@pharmaoverseas.com,,,,true
+AR,100000000,Bellandi & Barrera,"Carola Lorenzini 48, Godoy Cruz, Mendoza, Argentina",2614222428,,Cintia Masi (Licitaciones),Yes,cmasi@lbybsrl.com.ar,,,,true
+AR,100000001,Drogueria 20 de Junio,"Pte. Roca 1553/55, Rosario, Santa Fe, Argentina",3414210222,,Sandra Baiochi,Yes,sbaiochi@drogueria20dejunio.com.ar; adminstituciones@drogueria20dejunio.com.ar,,,,true
+AR,100000002,Cía. Farmaceutica (Ciafarma),"Av. Condarco 327 BIS, Rosario, Santa Fe, Argentina",3414261277,,Ezequiel Semino,Yes,gestionesinstituciones@ciafarma.com.ar,,,,true
+AR,100000003,Drofar - Redimer,"Av. Juan B. Justo 2713, CABA, Argentina",1148553564,,Juan Pablo Accoroni,Yes,"juanpablo.accoroni@drofar.com.ar ",,,,true
+AR,100000004,No Distributor,,,,,Yes,,,,,true
+CL,100000039,No Distributor,,,,,Yes,,,,,true

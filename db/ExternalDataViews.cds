@@ -431,7 +431,7 @@ entity MasterCountryLegalEntityMap as select from MasterData.PT_TMCTLE as Master
 	key MasterCountryLegalEntityMap.LegalEntityID,
 	key MasterCountryLegalEntityMap.CountryCode,
 	MasterCountryLegalEntityMap.LegalEntity.LegalEntityName,
-	MasterCountryLegalEntityMap.Brand
+	MasterCountryLegalEntityMap.ForAllBrands
 } order by MasterCountryLegalEntityMap.CountryCode,
 		   MasterCountryLegalEntityMap.LegalEntity.LegalEntityName;
 
