@@ -85,6 +85,9 @@ entity PT_TMDIST{
 	ContactPerson:String(500);
 	ActiveRecord:String(10);
 	CONTACT_EMAIL:String(100);
+	PaymentTerms:String(500);
+	INCOTerms:String(500);
+	CommisionRate:Double;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
