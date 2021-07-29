@@ -30,6 +30,9 @@ entity SalesOpportunities: cuid, managed {
 
 entity SalesOpportunityProducts: cuid, managed {
     BrandID: Integer;
+    BrandName: String;
+    ProductPackName: String;
+    ProductPackId: Integer;
     Comment: String;
     RecommendedPrice: Double;
     RequestedQuantity: Integer;
