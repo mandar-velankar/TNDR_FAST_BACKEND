@@ -39,6 +39,15 @@ entity PT_TMCTRY{
 	User:Association to AdminData.PT_TMUSERCTRY on User.CountryCode = CountryCode and User.ActiveRecord = 'Yes';
 }
 
+//Country Currency
+entity CountryCurrency : managed {
+	key CountryCode:String(2) not null;
+	key Currency:String(3) not null;
+	Sorter:Integer;
+	//Associations
+	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode
+}
+
 //Institute
 entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
@@ -209,6 +218,7 @@ entity CountryApprovers : managed {
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode
 }
+
 
 //ApproverTypes (type of approvers & there corresponding values)
 entity ApproverTypes: managed {
