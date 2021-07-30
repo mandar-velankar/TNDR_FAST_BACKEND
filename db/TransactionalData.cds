@@ -38,6 +38,7 @@ entity PT_TMOFRS { //Offers
         APPROVALS_SENT        : Integer;
         FOCType               : String(255);
         DEFAULT_FOC_ABS_PCT   : String(4);
+        Division              : String;
         //Associations
         Tender                : Association to PT_TMTEND
                                     on Tender.TenderID = TenderID;
