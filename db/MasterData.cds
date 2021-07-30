@@ -299,7 +299,7 @@ entity PT_TMDISBRD{
 	CommissionRate:Double;
 	INCOTerms:String(500);
 	PaymentTerms:String(500);
-	key ActiveRecord:String(10);
+	ActiveRecord:String(10);
 	key DistributorID:Integer not null;
 	key HLevel4_Code:String(50) not null;
 	//Associations
