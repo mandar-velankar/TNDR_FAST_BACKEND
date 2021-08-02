@@ -31,6 +31,10 @@
       "description": "f_tndr_cag_salesopportunity_user"
     },
     {
+      "name": "$XSAPPNAME.f_tndr_cag_createopportunity_user",
+      "description": "f_tndr_cag_createopportunity_user"
+    },
+    {
       "name": "$XSAPPNAME.f_tndr_cag_ctr_user",
       "description": "f_tndr_cag_ctr_user"
     },
@@ -98,6 +102,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_salesopportunity_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_createopportunity_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_createopportunity_user"
       ],
       "attribute-references": []
     },

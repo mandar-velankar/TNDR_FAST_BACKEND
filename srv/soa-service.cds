@@ -29,13 +29,6 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity Buyers as projection on IntegrationDataConversion.PublicMarketBuyers;
     entity Products as projection on IntegrationDataConversion.PublicMarketProducts;
 
-    entity SalesOpportunities as projection on SalesOpportunityData.SalesOpportunities{
-        *,
-        Institute: redirected to PT_TMINST,
-        Products: redirected to SalesOpportunityProducts
-    };
-    entity SalesOpportunityProducts as projection on SalesOpportunityData.SalesOpportunityProducts;
-
     //Admin Data Views
     entity UserCountry as projection on AdminData.PT_TMUSERCTRY;
     entity TenderCountriesUser @(restrict: [
@@ -90,55 +83,6 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
                 and exists (select AdjudicacionRutProveedor from IntegrationData.MercadoPublicoProducto where AdjudicacionRutProveedor != null and Licitacione.CodigoExterno = info.TenderReference) then 'Results Available'
         end as SubStatus:String,
     };
-
-    entity OpportunityTenderStatus as select from SalesOpportunities as opp
-    left outer join TransactionalData.CountrySpecificTenderInfo as info 
-        on opp.ID = info.TenderReference
-    left outer join TransactionalData.PT_TMTEND as TMTEND
-        on info.TenderID = TMTEND.TenderID
-    {
-        key opp.ID as TenderReference,
-        info.TenderID as TenderID,
-        case 
-            when info.TenderReference is null or TMTEND.Active = 0 then opp.TenderMatchingStatus else 'Participated' 
-        end as Status:String,
-        case 
-            when info.TenderReference is null then 'NA'
-            when not exists (select TenderID from TransactionalData.PT_TMQUTO as tmqt where info.TenderID = tmqt.TenderID) then 'Draft'
-            when exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres where info.TenderID = trres.TenderID and trres.Outcome = 'Won') 
-                and not exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip where info.TenderID = rwaip.TenderID) then 'Won'
-            when exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip2 where info.TenderID = rwaip2.TenderID) then 'AppealInProgress'
-            when exists (select TenderID, Outcome from TransactionalData.PT_TMTRRES as trres2 where info.TenderID = trres2.TenderID and trres2.Outcome <> 'Won') 
-                or exists (select TenderID from TransactionalDataViews.ResultsWithAppealInProgress as rwaip3 where info.TenderID = rwaip3.TenderID) then 'Lost'
-            when exists (select TenderID, OfferID from TransactionalData.PT_TMOFRS as offer inner join TransactionalDataViews.OfferStatus as stoffer on offer.OfferID = stoffer.OFFER_ID where offer.TenderID = info.TenderID and stoffer.STATUS = 'Quotation Submitted' and offer.Active = 1) then 'Submitted'
-        end as SubStatus:String,
-    };
-
-
-    entity PublicSalesOpportunities as select from SalesOpportunities as opp
-    left outer join OpportunityTenderStatus as st 
-        on opp.ID = st.TenderReference
-    {
-        key opp.ID,
-        opp.CountryCode,
-        opp.TenderReference,
-        opp.Classification,
-        opp.TenderChannel,
-        opp.PublicationDate,
-        opp.OfferDueDate,
-        opp.NextPublicationDate,
-        opp.ExpectedAwardDate,
-        opp.ContractLength,
-        opp.ExtensionPeriod,
-        opp.TenderMatchingStatus,
-        opp.Description,
-        st.Status as MainStatus,
-        st.SubStatus,
-        opp.Institute: redirected to PT_TMINST,
-        opp.Products: redirected to SalesOpportunityProducts
-    };
-
-
     entity PublicMarketOpportunities as select from PublicMarketTenders as opp
     left outer join PublicMarketTenderStatuses as st 
         on opp.CodigoExterno = st.CodigoExterno
