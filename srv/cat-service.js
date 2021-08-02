@@ -2029,6 +2029,12 @@ module.exports = (srv) => {
 			let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
 			let whereLegalEntity = ServiceHelper.buildWhere(req, "LEGAL_ENTITY_CODE");
 			let whereOrigin = ServiceHelper.buildWhere(req, "COUNTRY_OF_ORIGIN");
+
+			let sDivision = ServiceHelper.getWhereId(req, "DIVISION");
+			if (sDivision && sDivision !== ""){
+				var whereDivision = ServiceHelper.buildWhere(req, "DIVISION");
+			}
+
 			//Get available brands in legal entity
 			let entityBrands = [];
 			if (whereLegalEntity.length !== 0 && whereBrand.length !== 0) {
@@ -2059,11 +2065,19 @@ module.exports = (srv) => {
 			}
 			//Get products available to institute either Direct or through Distributor
 			if (channel === "Direct") {
-				let directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
+				if(whereDivision && whereDivision.length > 0){
+					var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor).where(whereDivision));
+				} else {
+					var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
+				}
 				results = buildDirectProducts(entityBrands, directBrands, countryProducts);
 			}
 			else if (channel === "Distributor") {
-				let distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
+				if(whereDivision && whereDivision.length > 0){
+					var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor).where(whereDivision));
+				} else {
+					var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
+				}
 				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds);
 			}
 		}
