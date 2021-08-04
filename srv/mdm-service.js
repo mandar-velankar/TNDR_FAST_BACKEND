@@ -4,7 +4,7 @@ module.exports = (srv) => {
 
 
 	const {
-		PT_TMDIST
+		PT_TMDIST,PT_TMINST
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
 
