@@ -4,7 +4,7 @@ module.exports = (srv) => {
 
 
 	const {
-		PT_TMDIST
+		PT_TMDIST,PT_TMINST
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
 
@@ -19,7 +19,11 @@ module.exports = (srv) => {
 	}
 	srv.before('CREATE', 'PT_TMDIST', async (req) => {
 		req.data.DistributorID = await getNextValue(PT_TMDIST, "DistributorID");
-		//req.data.DistributorID = 100000040;
+		return req;
+	});
+
+	srv.before('CREATE', 'PT_TMINST', async (req) => {
+		req.data.InstituteID = await getNextValue(PT_TMINST, "InstituteID");
 		return req;
 	});
 
