@@ -342,7 +342,7 @@ entity PT_TMINSBRTR{
 //Institute Hierarchy
 entity PT_TMINSHIER{
 	InstituteRelationID:Integer;//TODO: Check if needed?
-	key ActiveRecord:String(10) not null;
+	ActiveRecord:String(10) not null;
     key ParentInstituteID:Integer not null;
     key InstituteID:Integer not null;
 	//Associations

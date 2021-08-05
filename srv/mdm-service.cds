@@ -12,7 +12,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMCTLEBR @readonly    as projection on MasterData.PT_TMCTLEBR;
     entity CountryBrands @readonly  as projection on MasterDataViews.CountryBrands;
     entity PT_TMINST                as projection on MasterData.PT_TMINST;
-    entity PT_TMINSHIER @readonly   as projection on MasterData.PT_TMINSHIER;
+    entity PT_TMINSHIER             as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINSBRTR @readonly   as projection on MasterData.PT_TMINSBRTR;
     entity PT_TMDIST                as projection on MasterData.PT_TMDIST;
     entity PT_TMDISBRD              as projection on MasterData.PT_TMDISBRD;
