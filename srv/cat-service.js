@@ -12,6 +12,7 @@ const SapCfMailer = require("sap-cf-mailer");
 const { Readable } = require('stream');
 const path = require("path");
 const XLSXHelper = require("./utils/XLSXHelper");
+const wordTemplate = require("easy-template-x");
 
 module.exports = (srv) => {
 
@@ -2272,6 +2273,61 @@ module.exports = (srv) => {
 		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		return excelStreamValue;
+	});
+		//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'WordAttachment', async (req, next) => {
+		const tx = cds.transaction(req);
+		var offerId = req.data.OfferId;
+		if (!offerId) {
+			return next();
+		}
+
+		//Get offer data
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		if (!offerValidation) {
+			return req.reject(404, 'No offer found');
+		}
+
+		//Get product data
+		let productValidation  = await buildOfferProductValidation(tx, whereOffer);
+
+		//format prices
+		productValidation.forEach(prd => {
+			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
+			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
+			prd.OFFER_PRICE = ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
+			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+		});
+		
+		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
+		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
+		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+
+		const templateFile = fs.readFileSync(path.join(__dirname, './word-templates', "demotemplate.docx"));
+
+		const handler = new wordTemplate.TemplateHandler();
+		const doc = await handler.process(templateFile, {
+			offerValidation: offerValidation,
+			test:offerValidation.INSTITUTENAME,
+			offerProductValidation: productValidation
+		});
+		const readableInstanceStream = new Readable({
+			read() {
+				this.push(doc);
+				this.push(null);
+			}
+		});
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.docx');
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingm');
+		return {
+			value: readableInstanceStream
+		};
 	});
 
 	//srv.on('sendMail', (req, sRecipient, sBody) => {
