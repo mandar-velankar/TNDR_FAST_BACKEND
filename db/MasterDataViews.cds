@@ -16,7 +16,8 @@ MostRecentSkuCodeForProductPack sku on Product.PRODUCTPACKID = sku.ProductPackID
 	Product.ProductPack.Product.HLEVEL1_NAME as DIVISION,
 	Product.ProductPack.Product.HLEVEL4_CODE as BRAND_ID,
 	Product.ProductPack.Product.HLEVEL4_NAME as BRAND_NAME,
-	//Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
+	Product.ProductPack.Product.HLEVEL6_CODE as PRODUCT_UNIT_ID,
+	Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
 	//sku.SKU, //thailand
 	key Product.PRODUCTPACKID as PRODUCT_ID,
 	Product.ProductPack.PRODUCTPACKNAME as PRODUCT_NAME,
