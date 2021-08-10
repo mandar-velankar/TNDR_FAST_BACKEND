@@ -2052,32 +2052,40 @@ module.exports = (srv) => {
 			//Get available products in country
 			let countryProducts = [];
 			if (whereProduct.length !== 0 && whereOrigin.length !== 0) {
-				countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin));
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin));
+				}
 			}
 			else if (whereOrigin.length !== 0) {
-				countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin));
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin));
+				}
 			}
 			else if (whereProduct.length !== 0) {
-				countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct));
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct));
+				}
 			}
 			else {
-				countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
+				}
 			}
 			//Get products available to institute either Direct or through Distributor
 			if (channel === "Direct") {
-				if(whereDivision && whereDivision.length > 0){
-					var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor).where(whereDivision));
-				} else {
-					var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
-				}
+				var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
 				results = buildDirectProducts(entityBrands, directBrands, countryProducts);
 			}
 			else if (channel === "Distributor") {
-				if(whereDivision && whereDivision.length > 0){
-					var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor).where(whereDivision));
-				} else {
-					var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
-				}
+				var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
 				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds);
 			}
 		}
