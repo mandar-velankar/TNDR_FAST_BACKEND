@@ -10,9 +10,13 @@ entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK 
 	max(sku.SKUCode) as SKU
 }where sku.ActiveRecord='Yes'  group by sku.ProductPackID, sku.CountryCode;
 
+
+entity ProductPackSKUs as select from MasterData.PT_TMSKUPRDPCK;
+
 entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product left outer join
 MostRecentSkuCodeForProductPack sku on Product.PRODUCTPACKID = sku.ProductPackID and Product.COUNTRYCODE = sku.CountryCode {
 	key Product.COUNTRYCODE as COUNTRY_CODE,
+	Product.COUNTRYCODE,
 	Product.ProductPack.Product.HLEVEL1_NAME as DIVISION,
 	Product.ProductPack.Product.HLEVEL4_CODE as BRAND_ID,
 	Product.ProductPack.Product.HLEVEL4_NAME as BRAND_NAME,
@@ -20,6 +24,7 @@ MostRecentSkuCodeForProductPack sku on Product.PRODUCTPACKID = sku.ProductPackID
 	Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
 	//sku.SKU, //thailand
 	key Product.PRODUCTPACKID as PRODUCT_ID,
+	Product.PRODUCTPACKID,
 	Product.ProductPack.PRODUCTPACKNAME as PRODUCT_NAME,
 	Product.ProductPack.PACKFACTOR as PACK_SIZE,
 	Product.ProductPack.CONCENTRATION as DOSAGE,
@@ -31,7 +36,8 @@ MostRecentSkuCodeForProductPack sku on Product.PRODUCTPACKID = sku.ProductPackID
 	Product.VTATax as VAT,
 	case when Product.REGISTERED=0 then 0 else 1 end as REGISTERED:Integer,
 	Product.COMMENT as COMMENT,
-	Product.COGS.COGS
+	Product.COGS.COGS,
+	Product.ProductPackSKU: redirected to ProductPackSKUs
 }where Product.ACTIVERECORD = 'Yes'
 and Product.ProductPack.ACTIVERECORD = 'Yes'
 order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.ProductPack.PRODUCTPACKNAME;
