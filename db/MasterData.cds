@@ -268,6 +268,7 @@ entity PT_TMCTPRDPCK{
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = PRODUCTPACKID;
 	COGS:Association to MasterDataLatestValues.CountryCogs on COGS.PRODUCT_ID = PRODUCTPACKID and COGS.COUNTRY_CODE = COUNTRYCODE;
+	ProductPackSKU:Association to many PT_TMSKUPRDPCK on ProductPackSKU.CountryProductPack = $self;
 }
 //Brand
 entity PT_TMPRDHIER{
@@ -360,6 +361,8 @@ entity PT_TMSKUPRDPCK{
 	//Associations
     Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackID;
+	CountryProductPack: Association to PT_TMCTPRDPCK on CountryProductPack.COUNTRYCODE = CountryCode 
+										and CountryProductPack.PRODUCTPACKID = ProductPackID;
 }
 
 //Approved prices
