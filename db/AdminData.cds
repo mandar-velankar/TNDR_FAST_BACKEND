@@ -156,3 +156,10 @@ entity NextDateSettings {
     NextMonth         : Integer;
     NextYearDelta     : Integer;
 }
+
+entity WordAttachment {
+    key template : String(100);
+    key OfferId : String(50);
+    content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    mediaType:String @Core.IsMediaType;
+}

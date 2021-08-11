@@ -570,11 +570,12 @@ service CatalogService @(path : 'tender')
     }
 
         
-    entity WordAttachment {
-        key OfferId : String(50);
-        content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        mediaType:String @Core.IsMediaType;
-    }
+    entity WordAttachment as projection on AdminData.WordAttachment;
+    // {
+    //     key OfferId : String(50);
+    //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    //     mediaType:String @Core.IsMediaType;
+    // }
 
 
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
