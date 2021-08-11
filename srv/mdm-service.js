@@ -4,7 +4,7 @@ module.exports = (srv) => {
 
 
 	const {
-		PT_TMDIST,PT_TMINST
+		PT_TMDIST,PT_TMINST,PT_TMLE,PT_TMCTLE
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
 
@@ -24,6 +24,15 @@ module.exports = (srv) => {
 
 	srv.before('CREATE', 'PT_TMINST', async (req) => {
 		req.data.InstituteID = await getNextValue(PT_TMINST, "InstituteID");
+		return req;
+	});
+
+	srv.before('CREATE', 'PT_TMLE', async (req) => {
+		req.data.LegalEntityID = await getNextValue(PT_TMLE, "LegalEntityID");
+		return req;
+	});
+	srv.before('CREATE', 'PT_TMCTLE', async (req) => {
+		req.data.CountryLegalEntityID = await getNextValue(PT_TMCTLE, "CountryLegalEntityID");
 		return req;
 	});
 
