@@ -622,6 +622,8 @@ left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
     and signatory2.SORTER = 2
 left outer join AdminData.NextDateSettings as date_settings
     on MONTH(CURRENT_DATE) = date_settings.CurrentMonth
+left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
+    on offer.OfferID = approvalRequests.OfferId
 {	
 	'PT_TMTNOFST(TENDERID=''' || offer.TenderID || ''',OFFERID=''' || offer.OfferID || ''',Active=1)' as OFFERSTATUSPATH:String(500),
 	offer.TenderID as TENDERID,
