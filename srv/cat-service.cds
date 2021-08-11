@@ -132,6 +132,7 @@ service CatalogService @(path : 'tender')
             COUNTRY_OF_ORIGIN : String(120);
             COGS              : Double;
             PACKFACTOR        : Integer;
+            DIVISION          : String;
     };
 
     //Transactional Data Tables
