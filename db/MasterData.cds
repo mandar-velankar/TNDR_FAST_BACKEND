@@ -104,6 +104,7 @@ entity PT_TMPRDPCK{
 	key ACTIVERECORD:String(10);
 	HLEVEL6_CODE:String(50);
 	CONCENTRATION:hana.REAL;
+	
 	PACKFACTOR:hana.REAL;
 	PCIName:String(255);
 	MoleculeName:String(255);
