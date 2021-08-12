@@ -4,8 +4,12 @@ module.exports = (srv) => {
 
 
 	const {
-		PT_TMDIST,PT_TMINST
+		PT_TMDIST,
+		PT_TMINST,
+		PT_TMCTPRDPCK,
+		PT_TMPRDPCK
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
+
 
 
 
@@ -17,12 +21,109 @@ module.exports = (srv) => {
 		}
 		return nextValue
 	}
+
+	const getCountryBrandProductEntities = function(data){
+		// PT_TMCTPRDPCK
+		const product = {
+			"COUNTRYCODE": data.COUNTRYCODE || data.COUNTRY_CODE,
+			"COUNTRYOFORIGIN": data.COUNTRY_OF_ORIGIN,
+			"SHELFLIFE": data.SHELFLIFE,
+			"REGISTERED": data.REGISTERED,
+			"ACTIVERECORD": data.ACTIVERECORD,
+			"PRODUCTPACKID": data.PRODUCT_ID || data.PRODUCTPACKID,
+			"MANUFACTURER": data.MANUFACTURER,
+			"Presentation_2": null,
+			"VTATax": data.VAT,
+			"COMMENT": data.COMMENT,
+			"GOV_CODE": null,
+			"QTY_THRESHOLD": null
+		};
+
+		// PT_TMPRDPCK
+		const productPack = {
+			"PRODUCTPACKID": data.PRODUCT_ID || data.PRODUCTPACKID,
+			"PRODUCTPACKNAME": data.PRODUCT_NAME,
+			"PRESENTATION": data.PRESENTATION,
+			"UOM": data.UOM,
+			"ACTIVERECORD": data.ACTIVERECORD,
+			"HLEVEL6_CODE": data.PRODUCT_UNIT_ID,
+			"CONCENTRATION": data.DOSAGE,
+			"PACKFACTOR": data.PACK_SIZE,
+			"PCIName": null,
+			"MoleculeName": null,
+			"ACTIVE_SUBSTANCE": null,
+		};
+
+		return {
+			Product: product,
+			ProductPack: productPack
+		}
+	};
+
 	srv.before('CREATE', 'PT_TMDIST', async (req) => {
 		req.data.DistributorID = await getNextValue(PT_TMDIST, "DistributorID");
 		return req;
 	});
 
 	srv.before('CREATE', 'PT_TMINST', async (req) => {
+		req.data.InstituteID = await getNextValue(PT_TMINST, "InstituteID");
+		return req;
+	});
+
+	srv.before('CREATE', 'CountryBrandProducts', async (req) => {
+		const nextProductID = await getNextValue(PT_TMCTPRDPCK, "PRODUCTPACKID");
+		req.data.PRODUCT_ID = nextProductID;
+		req.data.PRODUCTPACKID = nextProductID;
+		req.data.COUNTRYCODE = req.data.COUNTRY_CODE; // this is needed because of an error message.
+		return req;
+	});
+
+	srv.on('CREATE', 'CountryBrandProducts', async (req) => {
+
+		const tx = cds.transaction(req);
+
+		const {
+			Product, 
+			ProductPack
+		} = getCountryBrandProductEntities(req.data);
+
+		// check if PK's are set
+		if(Product.COUNTRYCODE && Product.ACTIVERECORD && Product.PRODUCTPACKID){
+
+			try{
+				const results = await tx.run(
+					INSERT.into(PT_TMCTPRDPCK).entries(Product)
+				);
+
+				tx.commit(results);
+
+			}catch(err){
+				console.log(err);
+			};
+			
+		}
+
+		if(ProductPack.PRODUCTPACKID && ProductPack.ACTIVERECORD){
+
+			try{
+				const results = await tx.run(
+					INSERT.into(PT_TMPRDPCK).entries(ProductPack)
+				);
+
+				tx.commit(results);
+
+			}catch(err){
+				console.log(err);
+			};
+
+		}
+
+
+		return req.data;
+
+	});
+
+	srv.on('UPDATE', 'CountryBrandProducts', async (req) => {
 		req.data.InstituteID = await getNextValue(PT_TMINST, "InstituteID");
 		return req;
 	});

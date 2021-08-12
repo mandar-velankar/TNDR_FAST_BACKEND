@@ -11,19 +11,20 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMCTLE                as projection on MasterData.PT_TMCTLE;
     entity PT_TMCTLEBR @readonly    as projection on MasterData.PT_TMCTLEBR;
     entity CountryBrands @readonly  as projection on MasterDataViews.CountryBrands;
+    entity CountryProductUnits @readonly  as projection on MasterDataViews.CountryProductUnits;
     entity PT_TMINST                as projection on MasterData.PT_TMINST;
     entity PT_TMINSHIER             as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINSBRTR @readonly   as projection on MasterData.PT_TMINSBRTR;
     entity PT_TMDIST                as projection on MasterData.PT_TMDIST;
     entity PT_TMDISBRD              as projection on MasterData.PT_TMDISBRD;
     entity PT_TMPRDPCK @readonly    as projection on MasterData.PT_TMPRDPCK;
-    entity PT_TMCTPRDPCK @readonly  as projection on MasterData.PT_TMCTPRDPCK;
+    entity PT_TMCTPRDPCK            as projection on MasterData.PT_TMCTPRDPCK;
     entity PT_TMSKUPRDPCK @readonly as projection on MasterData.PT_TMSKUPRDPCK;
 
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
 
     entity ProductPackSKUs as projection on MasterDataViews.ProductPackSKUs;
-    entity CountryBrandProducts @readonly    as select from MasterDataViews.CountryBrandProducts {
+    entity CountryBrandProducts    as select from MasterDataViews.CountryBrandProducts {
         *,
         ProductPackSKU: redirected to ProductPackSKUs
     };

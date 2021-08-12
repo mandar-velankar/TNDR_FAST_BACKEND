@@ -17,6 +17,7 @@ entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product l
 MostRecentSkuCodeForProductPack sku on Product.PRODUCTPACKID = sku.ProductPackID and Product.COUNTRYCODE = sku.CountryCode {
 	key Product.COUNTRYCODE as COUNTRY_CODE,
 	Product.COUNTRYCODE,
+	Product.ACTIVERECORD,
 	Product.ProductPack.Product.HLEVEL1_NAME as DIVISION,
 	Product.ProductPack.Product.HLEVEL4_CODE as BRAND_ID,
 	Product.ProductPack.Product.HLEVEL4_NAME as BRAND_NAME,
@@ -45,9 +46,18 @@ order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.
 entity CountryBrands as select from CountryBrandProducts as Product{
 	key Product.COUNTRY_CODE,
 	key Product.BRAND_ID,
-	min(Product.BRAND_NAME) as BRAND_NAME:String(500)
+	min(Product.BRAND_NAME) as BRAND_NAME:String(500),
 }where Product.BRAND_ID is not null
 group by Product.COUNTRY_CODE, Product.BRAND_ID;
+
+entity CountryProductUnits as select from CountryBrandProducts as Product{
+	key Product.COUNTRY_CODE,
+	key Product.PRODUCT_UNIT_ID,
+	min(Product.PRODUCT_UNIT_NAME) as PRODUCT_UNIT_NAME:String(500),
+	min(Product.BRAND_ID) as BRAND_ID:String(500), 
+	min(Product.BRAND_NAME) as BRAND_NAME:String(500)
+}where Product.PRODUCT_UNIT_ID is not null
+group by Product.COUNTRY_CODE, Product.PRODUCT_UNIT_ID;
 
 entity CountryCurrency as select from MasterData.PT_TMCTRY as Country{
 	key Country.CountryCode as COUNTRY_CODE,
