@@ -7,7 +7,9 @@ module.exports = (srv) => {
 		PT_TMDIST,
 		PT_TMINST,
 		PT_TMCTPRDPCK,
-		PT_TMPRDPCK
+		PT_TMPRDPCK,
+    PT_TMLE,
+    PT_TMCTLE
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
 
@@ -70,6 +72,7 @@ module.exports = (srv) => {
 		return req;
 	});
 
+
 	srv.before('CREATE', 'CountryBrandProducts', async (req) => {
 		const nextProductID = await getNextValue(PT_TMCTPRDPCK, "PRODUCTPACKID");
 		req.data.PRODUCT_ID = nextProductID;
@@ -125,6 +128,15 @@ module.exports = (srv) => {
 
 	srv.on('UPDATE', 'CountryBrandProducts', async (req) => {
 		req.data.InstituteID = await getNextValue(PT_TMINST, "InstituteID");
+  });
+
+	srv.before('CREATE', 'PT_TMLE', async (req) => {
+		req.data.LegalEntityID = await getNextValue(PT_TMLE, "LegalEntityID");
+		return req;
+	});
+  
+	srv.before('CREATE', 'PT_TMCTLE', async (req) => {
+		req.data.CountryLegalEntityID = await getNextValue(PT_TMCTLE, "CountryLegalEntityID");
 		return req;
 	});
 
