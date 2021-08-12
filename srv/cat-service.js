@@ -2306,37 +2306,33 @@ module.exports = (srv) => {
 		//Get offer data
 		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
 		let offerValidation = await buildOfferValidation(tx, whereOffer);
-		if (!offerValidation) {
+		if (offerValidation) {
+			var offerDeliveries = await tx.run(SELECT.from(PT_TMDLVTR).where(whereOffer));
+			if (!offerDeliveries) {
+				return req.reject(404, 'No deliveries found');
+			}
+		} else {
 			return req.reject(404, 'No offer found');
 		}
 
-		//Get product data
-		let productValidation  = await buildOfferProductValidation(tx, whereOffer);
-
 		//format prices
-		productValidation.forEach(prd => {
-			prd.PAID_VOLUME = ServiceHelper.formatNumberTo_EN_US_String(prd.PAID_VOLUME, 0, 0);
-			prd.PACKSIZE = ServiceHelper.formatNumberTo_EN_US_String(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE, 2, 2);
-			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.OFFER_PRICE_VAT, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumberTo_EN_US_String(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
-			prd.SAMPLES = ServiceHelper.formatNumberTo_EN_US_String(prd.SAMPLES, 0, 0);
-			prd.FOC = ServiceHelper.formatNumberTo_EN_US_String(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumberTo_EN_US_String(prd.NET_PRICE, 0, 0);
+		offerDeliveries.forEach(delivery => {
+			delivery.InstituteID = delivery.InstituteID.toString();
+			delivery.SKUCode = delivery.InstituteID.toString();
+			delivery.RequestedQuantity = ServiceHelper.formatNumberTo_EN_US_String(delivery.RequestedQuantity, 2, 2);
+			delivery.ActualDeliveryQuantity = ServiceHelper.formatNumberTo_EN_US_String(delivery.ActualDeliveryQuantity, 2, 2);
+			delivery.PenaltyValue = ServiceHelper.formatNumberTo_EN_US_String(delivery.PenaltyValue, 2, 2);
+			delivery.ProductCode = delivery.InstituteID.toString();
+			delivery.SNo = delivery.InstituteID.toString();
+			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : '';
 		});
-		
-		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
-		offerValidation.VAT_TOTAL = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.VAT_TOTAL, 2, 2);
-		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumberTo_EN_US_String(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
-
 
 		const filedata = fs.readFileSync(path.join(__dirname, './xlsx-templates', "DeliveryTemplate.xlsx"));
 		//generate XLSX
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(filedata,
 			{
 				offerValidation: offerValidation,
-				offerProductValidation: productValidation
+				deliveries: offerDeliveries
 			},1);
 		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
