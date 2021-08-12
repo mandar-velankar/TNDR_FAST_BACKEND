@@ -47,6 +47,7 @@ entity CountryBrands as select from CountryBrandProducts as Product{
 	key Product.COUNTRY_CODE,
 	key Product.BRAND_ID,
 	min(Product.BRAND_NAME) as BRAND_NAME:String(500),
+	min(Product.DIVISION) as DIVISION:String(500),
 }where Product.BRAND_ID is not null
 group by Product.COUNTRY_CODE, Product.BRAND_ID;
 
