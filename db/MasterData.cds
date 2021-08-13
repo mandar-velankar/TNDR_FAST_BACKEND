@@ -101,7 +101,7 @@ entity PT_TMPRDPCK{
 	PRODUCTPACKNAME:String(100);
 	PRESENTATION:String(50);
 	UOM:String(10);
-	key ACTIVERECORD:String(10);
+	ACTIVERECORD:String(10);
 	HLEVEL6_CODE:String(50);
 	CONCENTRATION:hana.REAL;
 	
@@ -256,7 +256,7 @@ entity PT_TMCTPRDPCK{
 	COUNTRYOFORIGIN:String(120);
 	SHELFLIFE:Integer;
 	REGISTERED:Integer;//rename
-	key ACTIVERECORD:String(10);
+	ACTIVERECORD:String(10);
 	key PRODUCTPACKID:Integer;
 	MANUFACTURER:String(500);
 	Presentation_2:String(1000);

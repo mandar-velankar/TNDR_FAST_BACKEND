@@ -27,16 +27,16 @@ module.exports = (srv) => {
 	const getCountryBrandProductEntities = function(data){
 		// PT_TMCTPRDPCK
 		const product = {
-			"COUNTRYCODE": data.COUNTRYCODE || data.COUNTRY_CODE,
-			"COUNTRYOFORIGIN": data.COUNTRY_OF_ORIGIN,
-			"SHELFLIFE": data.SHELFLIFE,
-			"REGISTERED": data.REGISTERED,
-			"ACTIVERECORD": data.ACTIVERECORD,
-			"PRODUCTPACKID": data.PRODUCT_ID || data.PRODUCTPACKID,
-			"MANUFACTURER": data.MANUFACTURER,
+			"COUNTRYCODE": data.COUNTRYCODE || data.COUNTRY_CODE || null,
+			"COUNTRYOFORIGIN": data.COUNTRY_OF_ORIGIN || null,
+			"SHELFLIFE": data.SHELFLIFE || null,
+			"REGISTERED": data.REGISTERED || null,
+			"ACTIVERECORD": data.ACTIVERECORD || null,
+			"PRODUCTPACKID": data.PRODUCT_ID || data.PRODUCTPACKID || null,
+			"MANUFACTURER": data.MANUFACTURER || null,
 			"Presentation_2": null,
-			"VTATax": data.VAT,
-			"COMMENT": data.COMMENT,
+			"VTATax": data.VAT || null,
+			"COMMENT": data.COMMENT || null,
 			"GOV_CODE": null,
 			"QTY_THRESHOLD": null
 		};
@@ -81,6 +81,7 @@ module.exports = (srv) => {
 		return req;
 	});
 
+
 	srv.on('CREATE', 'CountryBrandProducts', async (req) => {
 
 		const tx = cds.transaction(req);
@@ -91,7 +92,7 @@ module.exports = (srv) => {
 		} = getCountryBrandProductEntities(req.data);
 
 		// check if PK's are set
-		if(Product.COUNTRYCODE && Product.ACTIVERECORD && Product.PRODUCTPACKID){
+		if(Product.COUNTRYCODE && Product.PRODUCTPACKID){
 
 			try{
 				const results = await tx.run(
@@ -106,7 +107,7 @@ module.exports = (srv) => {
 			
 		}
 
-		if(ProductPack.PRODUCTPACKID && ProductPack.ACTIVERECORD){
+		if(ProductPack.PRODUCTPACKID){
 
 			try{
 				const results = await tx.run(
@@ -126,9 +127,61 @@ module.exports = (srv) => {
 
 	});
 
+	srv.before('UPDATE', 'CountryBrandProducts', async (req) => {
+		req.data.COUNTRYCODE = req.data.COUNTRY_CODE; // this is needed because of an error message.
+		return req;
+	});
+
 	srv.on('UPDATE', 'CountryBrandProducts', async (req) => {
-		req.data.InstituteID = await getNextValue(PT_TMINST, "InstituteID");
-  });
+		const tx = cds.transaction(req);
+
+		const {
+			Product, 
+			ProductPack
+		} = getCountryBrandProductEntities(req.data);
+
+		const productData = {
+			...Product
+		}
+
+		delete productData['COUNTRYCODE'];
+		delete productData['PRODUCTPACKID'];
+
+		// check if PK's are set
+		if(Product.COUNTRYCODE && Product.PRODUCTPACKID){
+
+			try{
+
+				const results = await tx.run(
+					UPDATE(PT_TMCTPRDPCK, Product.COUNTRYCODE, Product.PRODUCTPACKID).data(productData)
+				);
+
+				tx.commit(results);
+
+			}catch(err){
+				console.log(err);
+			};
+			
+		}
+
+		if(ProductPack.PRODUCTPACKID){
+
+			try{
+				const results = await tx.run(
+					UPDATE.entity(PT_TMPRDPCK, ProductPack.PRODUCTPACKID).data(ProductPack)
+				);
+
+				tx.commit(results);
+
+			}catch(err){
+				console.log(err);
+			};
+
+		}
+
+
+		return req.data;
+    });
 
 	srv.before('CREATE', 'PT_TMLE', async (req) => {
 		req.data.LegalEntityID = await getNextValue(PT_TMLE, "LegalEntityID");
