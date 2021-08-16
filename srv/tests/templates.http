@@ -1,0 +1,28 @@
+POST http://localhost:4004/v2/tender/ExcelAttachment
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "template" : "test",
+    "OfferId":"*",
+    "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+}
+
+###
+PUT http://localhost:4004/v2/tender/ExcelAttachment(template='bytes.xlsx',OfferId='*')/content
+Authorization: Basic YXJ0aW9t
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+< ./template.xlsx
+
+###
+GET http://localhost:4004/v2/tender/ExcelAttachment
+Authorization: Basic YXJ0aW9t
+
+###
+GET http://localhost:4004/v2/tender/ExcelAttachment(template='test',OfferId='*')/content
+Authorization: Basic YXJ0aW9t
+
+###
+DELETE http://localhost:4004/v2/tender/ExcelAttachment(template='h.xlsx',OfferId='*')
+Authorization: Basic YXJ0aW9t

@@ -563,11 +563,12 @@ service CatalogService @(path : 'tender')
         key OfferId : String(50);
         content   : LargeBinary @Core.MediaType : 'application/pdf';
     }
-    entity ExcelAttachment {
-        key OfferId : String(50);
-        content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        mediaType:String @Core.IsMediaType;
-    }
+    entity ExcelAttachment as projection on AdminData.ExcelAttachment;
+    // {
+    //     key OfferId : String(50);
+    //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    //     mediaType:String @Core.IsMediaType;
+    // }
 
 
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
