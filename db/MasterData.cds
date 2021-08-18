@@ -243,6 +243,7 @@ entity PT_TMCTLEBR{
 	key CountryCode:String(2) not null;
 	key LegalEntityID:Integer not null;
 	key HLevel4_Code:String(50) not null;
+	ActiveRecord:String(10);
 	//Associations
 	Country: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	Entity: Association to PT_TMLE on Entity.LegalEntityID = LegalEntityID;
