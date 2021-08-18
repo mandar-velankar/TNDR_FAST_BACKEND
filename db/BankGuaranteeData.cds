@@ -18,6 +18,7 @@ entity BankGuarantees: cuid, managed {
     Status:  String;
     Type: String;
     GuaranteedAmount: Double;
+    Currency: String;
     Comment: String;
     Tender: association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderID;
 }
