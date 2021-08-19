@@ -2063,6 +2063,12 @@ module.exports = (srv) => {
 			let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
 			let whereLegalEntity = ServiceHelper.buildWhere(req, "LEGAL_ENTITY_CODE");
 			let whereOrigin = ServiceHelper.buildWhere(req, "COUNTRY_OF_ORIGIN");
+
+			let sDivision = ServiceHelper.getWhereId(req, "DIVISION");
+			if (sDivision && sDivision !== ""){
+				var whereDivision = ServiceHelper.buildWhere(req, "DIVISION");
+			}
+
 			//Get available brands in legal entity
 			let entityBrands = [];
 			if (whereLegalEntity.length !== 0 && whereBrand.length !== 0) {
@@ -2080,24 +2086,40 @@ module.exports = (srv) => {
 			//Get available products in country
 			let countryProducts = [];
 			if (whereProduct.length !== 0 && whereOrigin.length !== 0) {
-				countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin));
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin));
+				}
 			}
 			else if (whereOrigin.length !== 0) {
-				countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin));
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin));
+				}
 			}
 			else if (whereProduct.length !== 0) {
-				countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct));
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct));
+				}
 			}
 			else {
-				countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
+				}
 			}
 			//Get products available to institute either Direct or through Distributor
 			if (channel === "Direct") {
-				let directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
+				var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
 				results = buildDirectProducts(entityBrands, directBrands, countryProducts);
 			}
 			else if (channel === "Distributor") {
-				let distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
+				var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
 				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds);
 			}
 		}
@@ -2321,7 +2343,49 @@ module.exports = (srv) => {
 			value: readableInstanceStream
 		};
 	});
+	//http://localhost:4004/v2/tender/DeliveryExcel('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'DeliveryExcel', async (req, next) => {
+		const tx = cds.transaction(req);
+		var offerId = req.data.OfferId;
+		if (!offerId) {
+			return next();
+		}
 
+		//Get offer data
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		if (offerValidation) {
+			var offerDeliveries = await tx.run(SELECT.from(PT_TMDLVTR).where(whereOffer));
+			if (!offerDeliveries) {
+				return req.reject(404, 'No deliveries found');
+			}
+		} else {
+			return req.reject(404, 'No offer found');
+		}
+
+		//format prices
+		offerDeliveries.forEach(delivery => {
+			delivery.InstituteID = delivery.InstituteID.toString();
+			delivery.SKUCode = delivery.InstituteID.toString();
+			delivery.RequestedQuantity = ServiceHelper.formatNumberTo_EN_US_String(delivery.RequestedQuantity, 2, 2);
+			delivery.ActualDeliveryQuantity = ServiceHelper.formatNumberTo_EN_US_String(delivery.ActualDeliveryQuantity, 2, 2);
+			delivery.PenaltyValue = ServiceHelper.formatNumberTo_EN_US_String(delivery.PenaltyValue, 2, 2);
+			delivery.ProductCode = delivery.InstituteID.toString();
+			delivery.SNo = delivery.InstituteID.toString();
+			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : '';
+		});
+
+		const filedata = fs.readFileSync(path.join(__dirname, './xlsx-templates', "DeliveryTemplate.xlsx"));
+		//generate XLSX
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(filedata,
+			{
+				offerValidation: offerValidation,
+				deliveries: offerDeliveries
+			},1);
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+	});
 	//srv.on('sendMail', (req, sRecipient, sBody) => {
 	srv.on('sendMail', async (req) => {
 		let sSubject = req.data.sSubject;

@@ -7,7 +7,7 @@ module.exports = {
     },
 
     getWhereId: function (req, fieldName) {
-        return _getWhereId(req, fieldName);
+        return this._getWhereId(req, fieldName);
     },
 
     getWhereValue: function(req, fieldName) {
