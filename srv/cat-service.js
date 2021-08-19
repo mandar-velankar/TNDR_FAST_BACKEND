@@ -2295,7 +2295,49 @@ module.exports = (srv) => {
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		return excelStreamValue;
 	});
+	//http://localhost:4004/v2/tender/DeliveryExcel('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'DeliveryExcel', async (req, next) => {
+		const tx = cds.transaction(req);
+		var offerId = req.data.OfferId;
+		if (!offerId) {
+			return next();
+		}
 
+		//Get offer data
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		if (offerValidation) {
+			var offerDeliveries = await tx.run(SELECT.from(PT_TMDLVTR).where(whereOffer));
+			if (!offerDeliveries) {
+				return req.reject(404, 'No deliveries found');
+			}
+		} else {
+			return req.reject(404, 'No offer found');
+		}
+
+		//format prices
+		offerDeliveries.forEach(delivery => {
+			delivery.InstituteID = delivery.InstituteID.toString();
+			delivery.SKUCode = delivery.InstituteID.toString();
+			delivery.RequestedQuantity = ServiceHelper.formatNumberTo_EN_US_String(delivery.RequestedQuantity, 2, 2);
+			delivery.ActualDeliveryQuantity = ServiceHelper.formatNumberTo_EN_US_String(delivery.ActualDeliveryQuantity, 2, 2);
+			delivery.PenaltyValue = ServiceHelper.formatNumberTo_EN_US_String(delivery.PenaltyValue, 2, 2);
+			delivery.ProductCode = delivery.InstituteID.toString();
+			delivery.SNo = delivery.InstituteID.toString();
+			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : '';
+		});
+
+		const filedata = fs.readFileSync(path.join(__dirname, './xlsx-templates', "DeliveryTemplate.xlsx"));
+		//generate XLSX
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(filedata,
+			{
+				offerValidation: offerValidation,
+				deliveries: offerDeliveries
+			},1);
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+	});
 	//srv.on('sendMail', (req, sRecipient, sBody) => {
 	srv.on('sendMail', async (req) => {
 		let sSubject = req.data.sSubject;
