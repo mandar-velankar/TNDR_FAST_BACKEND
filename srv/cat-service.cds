@@ -558,7 +558,10 @@ service CatalogService @(path : 'tender')
     };
 
     //BANK GUARANTEE
-    entity BankGuarantees as projection on BankGuaranteeData.BankGuarantees;
+    entity BankGuarantees as projection on BankGuaranteeData.BankGuarantees{
+        *,
+        Tender: redirected to PT_TMTEND
+    };
 
     //OTHER
     entity Templates        as projection on AdminData.Template;
