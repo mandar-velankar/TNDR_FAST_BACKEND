@@ -133,9 +133,9 @@ entity PT_TMLE{
 	FooterComment:String(300);
 	Enabled                 : Boolean not null;
 	//Associations
-	EntityBrands:Association to many PT_TMCTLEBR on EntityBrands.Entity = $self;
-	Signatories:Association to many COUNTRY_LEGAL_ENTITY_SIGNATORIES on Signatories.LEGAL_ENTITY_CODE = LegalEntityCode;
-	Countries:Association to many PT_TMCTLE on Countries.LegalEntity = $self;
+	//EntityBrands:Association to many PT_TMCTLEBR on EntityBrands.Entity = $self;
+	Signatories:Association to many COUNTRY_LEGAL_ENTITY_SIGNATORIES on Signatories.LEGAL_ENTITY_CODE = LegalEntityCode;//check if used, otherwise remove
+	Countries:Association to many PT_TMCTLE on Countries.LegalEntity = $self;//keep
 }
 
 //Legal Entity Signatories
@@ -236,6 +236,10 @@ entity PT_TMCTLE{
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	LegalEntity: Association to PT_TMLE on LegalEntity.LegalEntityID = LegalEntityID;
+	EntityBrands:Association to many PT_TMCTLEBR on EntityBrands.LegalEntityID = LegalEntityID and EntityBrands.CountryCode = CountryCode ;
+	// link to signatories
+
+
 }
 //Country Legal Entity Brand
 entity PT_TMCTLEBR{
