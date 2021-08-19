@@ -6,6 +6,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         contract:Boolean;
         epa:Boolean;
         masterdata:Boolean;
+        bankguarantees:Boolean;
         salesopportunity:Boolean;
         createsalesopportunity:Boolean;
         cpi:Boolean;
