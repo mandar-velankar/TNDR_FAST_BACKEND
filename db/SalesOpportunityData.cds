@@ -12,6 +12,7 @@ entity PublicMarketBuyers as projection on IntegrationDataConversion.PublicMarke
 entity PublicMarketProducts as projection on IntegrationDataConversion.PublicMarketProducts;
 
 entity SalesOpportunities: cuid, managed {
+    CountryCode: String;
     TenderReference: String;
     Classification: String;
     TenderChannel: String;
@@ -22,13 +23,19 @@ entity SalesOpportunities: cuid, managed {
     ContractLength: Integer;
     ExtensionPeriod: Integer;
     TenderMatchingStatus: String;
+    Description: String;
     Institute: association to MasterData.PT_TMINST;
     Products: Composition of many SalesOpportunityProducts on Products.Opportunity = $self;
 }
 
 entity SalesOpportunityProducts: cuid, managed {
     BrandID: Integer;
+    BrandName: String;
+    ProductPackName: String;
+    ProductPackId: Integer;
     Comment: String;
+    RecommendedPrice: Double;
+    RequestedQuantity: Integer;
     Opportunity: Association to SalesOpportunities;
 }
 
