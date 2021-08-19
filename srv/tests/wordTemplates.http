@@ -1,0 +1,32 @@
+POST http://localhost:4004/v2/tender/WordAttachment
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "template" : "word-template.docx",
+    "OfferId":"*",
+    "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+}
+
+###
+PUT http://localhost:4004/v2/tender/WordAttachment(template='word-template.docx',OfferId='*')/content
+Authorization: Basic YXJ0aW9t
+Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+< ./word-template.docx
+
+###
+GET http://localhost:4004/v2/tender/WordAttachment
+Authorization: Basic YXJ0aW9t
+
+###
+GET http://localhost:4004/v2/tender/WordAttachment(template='word-template.docx',OfferId='*')/content
+Authorization: Basic YXJ0aW9t
+
+###
+GET http://localhost:4004/v2/tender/WordAttachment(template='word-template.docx',OfferId='AE-16-100-1049-BPH-11')/content
+Authorization: Basic YXJ0aW9t
+
+###
+DELETE http://localhost:4004/v2/tender/WordAttachment(template='word-template.docx',OfferId='*')
+Authorization: Basic YXJ0aW9t
