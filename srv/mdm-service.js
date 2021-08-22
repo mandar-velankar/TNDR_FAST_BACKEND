@@ -195,7 +195,7 @@ module.exports = (srv) => {
 	});
 
 	srv.before('CREATE', 'PT_TMSKUPRDPCK', async (req) => {
-		req.data.SKUCode = await getNextValue(PT_TMSKUPRDPCK, "SKUCode");
+		req.data.CountrySKUID = await getNextValue(PT_TMSKUPRDPCK, "CountrySKUID");
 		return req;
 	});
 
