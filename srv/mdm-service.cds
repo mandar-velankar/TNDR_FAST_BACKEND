@@ -19,7 +19,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMDISBRD              as projection on MasterData.PT_TMDISBRD;
     entity PT_TMPRDPCK @readonly    as projection on MasterData.PT_TMPRDPCK;
     entity PT_TMCTPRDPCK            as projection on MasterData.PT_TMCTPRDPCK;
-    entity PT_TMSKUPRDPCK @readonly as projection on MasterData.PT_TMSKUPRDPCK;
+    entity PT_TMSKUPRDPCK  as projection on MasterData.PT_TMSKUPRDPCK;
 
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
 
