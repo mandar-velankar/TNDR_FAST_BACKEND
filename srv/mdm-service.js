@@ -141,12 +141,6 @@ module.exports = (srv) => {
 			ProductPack
 		} = getCountryBrandProductEntities(req.data);
 
-		const productData = {
-			...Product
-		}
-
-		delete productData['COUNTRYCODE'];
-		delete productData['PRODUCTPACKID'];
 
 		// check if PK's are set
 		if(Product.COUNTRYCODE && Product.PRODUCTPACKID){
@@ -154,7 +148,7 @@ module.exports = (srv) => {
 			try{
 
 				const results = await tx.run(
-					UPDATE(PT_TMCTPRDPCK, Product.COUNTRYCODE, Product.PRODUCTPACKID).data(productData)
+					UPDATE(PT_TMCTPRDPCK, {"COUNTRYCODE":Product.COUNTRYCODE, "PRODUCTPACKID":Product.PRODUCTPACKID}).with(Product)
 				);
 
 				tx.commit(results);
