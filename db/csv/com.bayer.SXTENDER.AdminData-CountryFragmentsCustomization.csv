@@ -69,3 +69,9 @@ TN,deliveryTrackingId,DeliveryTracking
 YE,financialOfferId,financialOffer
 YE,quotationViewId,QuotationView
 YE,deliveryTrackingId,DeliveryTracking
+ES,financialOfferId,financialOffer
+ES,quotationViewId,QuotationView
+ES,deliveryTrackingId,DeliveryTracking
+IT,financialOfferId,financialOffer
+IT,quotationViewId,QuotationView
+IT,deliveryTrackingId,DeliveryTracking
