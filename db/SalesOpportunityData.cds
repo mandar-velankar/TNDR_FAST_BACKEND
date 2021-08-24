@@ -24,6 +24,7 @@ entity SalesOpportunities: cuid, managed {
     ExtensionPeriod: Integer;
     TenderMatchingStatus: String;
     Description: String;
+    FoldersCreated: Boolean;
     Institute: association to MasterData.PT_TMINST;
     Products: Composition of many SalesOpportunityProducts on Products.Opportunity = $self;
 }
