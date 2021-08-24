@@ -31,7 +31,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity Divisions @readonly      as projection on MasterDataViews.Divisions;
 
 
-    entity PT_TMREGPR @readonly     as projection on MasterData.PT_TMREGPR;
+    entity PT_TMREGPR      as projection on MasterData.PT_TMREGPR;
 
    
 
@@ -53,11 +53,20 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
 
     {
 
-        key RegisteredPrice.CountryCode as CountryCode,
-        key RegisteredPrice.ProductPackID as PRODUCT_ID,
-        RegisteredPrice.UOM as Uom,
-        key RegisteredPrice.Currency as Currency,
-        RegisteredPrice.RegisteredPrice as Price,
+        key RegisteredPrice.CountryCode ,
+        key RegisteredPrice.ProductPackID,
+        RegisteredPrice.UOM,
+        key RegisteredPrice.EffDate as PriceEffDate ,
+        key RegisteredPrice.Currency as PriceCurrency ,
+        RegisteredPrice.RegisteredPrice,
+        RegisteredPrice.ActiveRecord as PriceActiveRecord,
+        RegisteredPrice.EndDate as PriceEndDate,
+        RegisteredPrice.RegisteredPriceSource,
+        RegisteredPrice.RegisteredPriceID
+        
+        
+        
+        ,
         ProductPack.PRODUCTPACKNAME as ProductPackName,
         Cogs.COGS as CogsPrice,
         Cogs.CURRENCY as CogsCurrency,
