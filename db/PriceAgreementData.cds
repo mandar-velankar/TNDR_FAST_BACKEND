@@ -29,7 +29,7 @@ entity PriceAgreements: cuid, managed {
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
                                                      and Product.COUNTRYCODE = CountryCode
                                                      and Product.ACTIVERECORD = 1;
-    //Candidates:
+    Candidates: Association to many Candidates on Candidates.PriceAgreementId = ID;
 }
 
 entity CustomerPrices: cuid, managed {
@@ -39,7 +39,23 @@ entity CustomerPrices: cuid, managed {
     InstituteId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     MaterialId: String;
-    //Material:
+    Material: Association to Materials on Material.ID = MaterialId;
     Synchronized: Boolean;
     Price: Double;
+}
+
+entity Candidates: cuid, managed {
+    InstituteId: String;
+    PriceAgreementId: String;
+    ValidFrom: DateTime;
+    ValidTo: DateTime;
+}
+
+entity Materials: cuid, managed {
+    ProductPackId: String;
+    Description: String;
+    MaterialNumber: String;
+    ValidFrom: DateTime;
+    ValidTo: DateTime;
+    CountryCode: String;
 }
