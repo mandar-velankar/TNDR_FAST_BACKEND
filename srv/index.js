@@ -27,6 +27,7 @@ const jobScheduler = require("./jobs/scheduler");
   await cds.serve("MasterDataManagementService").from("./gen/").in(app);
   await cds.serve("SalesOpportunityService").from("./gen/").in(app);
   await cds.serve("BankGuaranteeService").from("./srv").in(app);
+  await cds.serve("PriceAgreementService").from("./srv").in(app);
   await cds.serve("CpiService").from("./gen/").in(app);
   await cds.serve("ExternalService").from("./gen/").in(app);
   
