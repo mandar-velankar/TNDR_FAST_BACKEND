@@ -111,3 +111,15 @@ APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE
 "Regulatory","GC",1,0
 "Country Business","GC",1,0
 "Regional Business","GC",1,0
+"Supply Chain","ES",1,0
+"Legal","ES",1,0
+"Regulatory","ES",1,0
+"Country Business","ES",1,0
+"Regional Business","ES",1,0
+"Controlling","ES",1,0
+"Supply Chain","IT",1,0
+"Legal","IT",1,0
+"Regulatory","IT",1,0
+"Country Business","IT",1,0
+"Regional Business","IT",1,0
+"Controlling","IT",1,0
