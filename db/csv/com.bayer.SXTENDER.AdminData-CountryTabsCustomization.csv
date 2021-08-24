@@ -137,15 +137,3 @@ COUNTRYCODE,TABID,VISIBLE
 "CL","quotationId",1
 "CL","tenderResultsId",1
 "CL","deliveryTrackingId",1
-"ES","basicInformationId",1
-"ES","offerProductsId",1
-"ES","financialOfferId",1
-"ES","quotationId",1
-"ES","tenderResultsId",1
-"ES","deliveryTrackingId",1
-"IT","basicInformationId",1
-"IT","offerProductsId",1
-"IT","financialOfferId",1
-"IT","quotationId",1
-"IT","tenderResultsId",1
-"IT","deliveryTrackingId",1
