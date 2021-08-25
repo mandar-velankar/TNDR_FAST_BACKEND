@@ -28,7 +28,7 @@ entity PriceAgreements: cuid, managed {
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
                                                      and Product.COUNTRYCODE = CountryCode
-                                                     and Product.ACTIVERECORD = 1;
+                                                     and Product.ACTIVERECORD = 'Yes';
     Candidates: Association to many Candidates on Candidates.PriceAgreementId = ID;
 }
 
