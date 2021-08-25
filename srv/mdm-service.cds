@@ -62,21 +62,31 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
         RegisteredPrice.ActiveRecord as PriceActiveRecord,
         RegisteredPrice.EndDate as PriceEndDate,
         RegisteredPrice.RegisteredPriceSource,
-        RegisteredPrice.RegisteredPriceID
-        
-        
-        
-        ,
-        ProductPack.PRODUCTPACKNAME as ProductPackName,
+        RegisteredPrice.RegisteredPriceID,
+
+
+        Cogs.COGSID,
         Cogs.COGS as CogsPrice,
         Cogs.CURRENCY as CogsCurrency,
-        Cogs.UOM as CogsUom
+        //Cogs.UOM as CogsUom,
+        Cogs.EffectiveDate as CogsEffDate,
+        Cogs.EndDate as CogsEndDate,
+        Cogs.COGSType,
+        Cogs.ActiveRecord as CogsActiveRecord,
+
+
+        
+        
+        
+        
+        ProductPack.PRODUCTPACKNAME as ProductPackName,
+
     }where RegisteredPrice.ActiveRecord = 'Yes';
 
    
 
 
-    entity PT_TMCOGS @readonly      as projection on MasterData.PT_TMCOGS;
+    entity PT_TMCOGS       as projection on MasterData.PT_TMCOGS;
     entity PT_TMPRDHIER @readonly as projection on MasterData.PT_TMPRDHIER;
     entity COUNTRY_APPROVERS  as projection on MasterData.CountryApprovers;
     entity APPROVERTYPES  as projection on MasterData.ApproverTypes;
