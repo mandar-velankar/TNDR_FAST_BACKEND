@@ -2367,9 +2367,9 @@ module.exports = (srv) => {
 		offerDeliveries.forEach(delivery => {
 			delivery.InstituteID = delivery.InstituteID.toString();
 			delivery.SKUCode = delivery.InstituteID.toString();
-			delivery.RequestedQuantity = ServiceHelper.formatNumberTo_EN_US_String(delivery.RequestedQuantity, 2, 2);
-			delivery.ActualDeliveryQuantity = ServiceHelper.formatNumberTo_EN_US_String(delivery.ActualDeliveryQuantity, 2, 2);
-			delivery.PenaltyValue = ServiceHelper.formatNumberTo_EN_US_String(delivery.PenaltyValue, 2, 2);
+			delivery.RequestedQuantity = ServiceHelper.formatNumber(delivery.RequestedQuantity, 2, 2);
+			delivery.ActualDeliveryQuantity = ServiceHelper.formatNumber(delivery.ActualDeliveryQuantity, 2, 2);
+			delivery.PenaltyValue = ServiceHelper.formatNumber(delivery.PenaltyValue, 2, 2);
 			delivery.ProductCode = delivery.InstituteID.toString();
 			delivery.SNo = delivery.InstituteID.toString();
 			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : '';
