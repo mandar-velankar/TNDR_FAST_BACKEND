@@ -42,24 +42,12 @@ entity CountryBrands as select from CountryBrandProducts as Product{
 }where Product.BRAND_ID is not null
 group by Product.COUNTRY_CODE, Product.BRAND_ID;
 
-entity CountryCurrency as select from MasterData.PT_TMCTRY as Country{
+//TODO no need to do a select here... there could be just a projection... but if we do this.. we need to rename the places where SORTER instead of Sorter & COUNTRY_CODE instead of CountryCode & CURRENCY instead of Currency
+entity CountryCurrency as select from MasterData.CountryCurrency as Country{
 	key Country.CountryCode as COUNTRY_CODE,
-	key 'USD' as CURRENCY:String(3),
-	1 as SORTER:Integer
-} where Country.CountryCode <> 'TH' and Country.CountryCode <> 'CL' and Country.CountryCode <> 'AR'
-union
-select from MasterData.PT_TMCTRY as Country{
-	Country.CountryCode as COUNTRY_CODE,
-	'EUR' as CURRENCY:String(3),
-	2 as SORTER:Integer
-} where Country.CountryCode <> 'TH' and Country.CountryCode <> 'CL' and Country.CountryCode <> 'AR'
-union
-select from MasterData.PT_TMCTRY as Country{
-	Country.CountryCode as COUNTRY_CODE,
-	Country.LocalCurrency as CURRENCY,
-	3 as SORTER
-}where Country.LocalCurrency<>'EUR'
-and Country.LocalCurrency<>'USD';
+	key Country.Currency as CURRENCY:String(3),
+	Country.Sorter as SORTER:Integer
+};
 
 entity CountryLegalEntity as select from MasterData.PT_TMCTLE as Country{
 	key Country.CountryCode,

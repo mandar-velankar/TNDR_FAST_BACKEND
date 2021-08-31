@@ -1,24 +1,26 @@
-CountryCode,CountryName,ApprovalType,LocalCurrency,ReportingCurrency,CountryID,Region,COMMENT
-TN,Tunisia,1,USD,EUR,17,MAGHREB,
-MO,Morocco,1,MAD,EUR,18,MAGHREB,
-AL,Algeria,1,EUR,EUR,16,MAGHREB,
-AE,UAE,1,AED,EUR,1,MEA,Exchange rate applied is 1USD=3.68AED
-BH,Bahrain,1,BHD,EUR,2,MEA,
-EG,Egypt,1,EGP,EUR,3,MEA,"Debit notes for price difference compensation against deliveries from local stock are to be based on the three month average bank exchange rate from the offer date supported by documentary evidence, eg.: Bank Letter."
-GC,GCC,1,USD,EUR,4,MEA,
-IQ,Iraq,1,USD,EUR,5,MEA,
-JO,Jordan,1,JOD,EUR,6,MEA,
-KW,Kuwait,1,KWD,EUR,7,MEA,
-LB,Lebanon,1,EUR,EUR,8,MEA,
-LY,Libya,1,EUR,EUR,9,MEA,
-OM,Oman,1,OMR,EUR,10,MEA,
-QA,Qatar,1,QAR,EUR,11,MEA,
-SA,Saudi Arabia,2,SAR,EUR,12,MEA,
-SD,Sudan,1,EUR,EUR,13,MEA,
-SY,Syria,1,EUR,EUR,14,MEA,
-YE,Yemen,1,EUR,EUR,15,MEA,
-MX,Mexico,3,MXN,EUR,19,LATAM,
-TH,Thailand,4,THB,EUR,20,ASIA,
-AR,Argentina,5,ARS,USD,21,LATAM,
-BR,Brazil,6,BRL,EUR,22,LATAM,
-CL,Chile,7,CLP,EUR,23,LATAM,
+COUNTRYCODE,COUNTRYNAME,APPROVALTYPE,LOCALCURRENCY,COUNTRYID,REGION,COMMENT,REPORTINGCURRENCY
+"TN","Tunisia",1,"USD",17,"MAGHREB","","EUR"
+"MO","Morocco",1,"MAD",18,"MAGHREB","","EUR"
+"AL","Algeria",1,"EUR",16,"MAGHREB","","EUR"
+"AE","UAE",1,"AED",1,"MEA","Exchange rate applied is 1USD=3.68AED","EUR"
+"BH","Bahrain",1,"BHD",2,"MEA","","EUR"
+"EG","Egypt",1,"EGP",3,"MEA","Debit notes for price difference compensation against deliveries from local stock are to be based on the three month average bank exchange rate from the offer date supported by documentary evidence, eg.: Bank Letter.","EUR"
+"GC","GCC",1,"USD",4,"MEA","","EUR"
+"IQ","Iraq",1,"USD",5,"MEA","","EUR"
+"JO","Jordan",1,"JOD",6,"MEA","","EUR"
+"KW","Kuwait",1,"KWD",7,"MEA","","EUR"
+"LB","Lebanon",1,"EUR",8,"MEA","","EUR"
+"LY","Libya",1,"EUR",9,"MEA","","EUR"
+"OM","Oman",1,"OMR",10,"MEA","","EUR"
+"QA","Qatar",1,"QAR",11,"MEA","","EUR"
+"SA","Saudi Arabia",2,"SAR",12,"MEA","","EUR"
+"SD","Sudan",1,"EUR",13,"MEA","","EUR"
+"SY","Syria",1,"EUR",14,"MEA","","EUR"
+"YE","Yemen",1,"EUR",15,"MEA","","EUR"
+"MX","Mexico",3,"MXN",19,"LATAM","","EUR"
+"TH","Thailand",4,"THB",20,"ASIA","","EUR"
+"BR","Brazil",4,"BRL",22,"LATAM","","EUR"
+"AR","Argentina",5,"ARS",21,"LATAM","","USD"
+"CL","Chile",7,"CLP",22,"LATAM","","USD"
+"ES","Spain",1,"EUR",23,"EUR",,
+"IT","Italy",1,"EUR",24,"EUR",,

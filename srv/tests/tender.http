@@ -1,0 +1,43 @@
+#######################
+## Tender Service ##
+#######################
+
+### Tenders  - Get All Tenders
+GET http://localhost:8080/v2/tender/PT_TMTEND
+Authorization: Basic YXJ0aW9t
+
+###Delivery  - Create a new delivery in the delivery table
+POST http://localhost:8080/v2/tender/PT_TMDLVTR
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "TenderID":"MX-21-1007",
+    "OfferID":"MX-21-1007-1",
+    "CountryCode":"MX",
+    "InstituteID":200046,
+    "SKUCode":200011,
+    "SubmittedOn":"\/Date(1629909803637)\/",
+    "SubmittedBy":"ELLUI",
+    "Active":1,
+    "LocalOrDirectDelivery":"D",
+    "PlannedInAPO":"Yes",
+    "RequestedDeliveryDate":"\/Date(1629504000000)\/",
+    "RequestedQuantity":"5",
+    "ActualDeliveryDate":"\/Date(1629849600000)\/",
+    "ActualDeliveryQuantity":"5",
+    "Penalty":"No",
+    "PenaltyValue":null,
+    "Currency":null,
+    "PenaltyReason":null,
+    "UndertakingLetters":"No",
+    "Compensated":"No",
+    "CompensationComment":null,
+    "ProductCode":200011,
+    "PaidOrFree":"Paid",
+    "PO":"5",
+    "InvoiceNo":"5",
+    "SNo":0,
+    "Contract":"",
+    "PoDate":null
+}

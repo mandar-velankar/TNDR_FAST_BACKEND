@@ -440,9 +440,9 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "BH-18-468-1001","BH-18-468-1001-BME-11","BH",100027,100046,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","KOGENATE FS 250 IU","0.0",,0,,"Not Specified",,0
 "BH-18-100-1001","BH-18-100-1001-BPH-11","BH",100027,100038,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","Gynera SCT 1x21","0.0",,0,,"Not Specified",,0
 "BH-17-101-1001","BH-17-101-1001-BPH-11","BH",100027,100064,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","NEXAVAR TABL 200MG 60ST","0.0",,0,,"Not Specified",,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100020,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","0.0",,0,,"Not Specified",,0
-"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100034,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","Progyluton SCT 1x21","0.0",,0,,"Not Specified",,0
-"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100098,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","Yaz 1x28","0.0",,0,,"Not Specified",,0
+"JO-20-1006","JO-20-1006-1-C1","JO",100087,100086,,"2021-05-19","GCXYS",1,"No","Won","Bayer","Ultravist 370 10 BT X 100ML","10.9","EUR",115600,"Unit","Not Specified","",0
+"BH-20-1024","BH-20-1024-1","BH",100027,100064,,"2021-07-08","GCXYS",1,"No","Won","Bayer","NEXAVAR TABL 200MG 60ST","38.52","USD",0,"Unit","Not Specified","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100001,"","2021-07-08","GCXYS",1,,,"Bayer","ADALAT LA TABL 30 MG 30 ST","0.3517","USD",0,"Unit",,,0
 "BH-15-100-1012","BH-15-100-1012-BPH-11","BH",100022,100028,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","CIPROBAY 200 MG 5X100 ML","0.0",,0,,"Not Specified",,0
 "BH-17-100-1023","BH-17-100-1023-BPH-11","BH",100026,100093,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","XARELTO 15MG 28TABL","0.0",,0,,"Not Specified",,0
 "JO-18-310-1004","JO-18-310-1004-BME-11","JO",100087,100039,"","2019-05-28","Dadwal, Gajjendar",1,,"Won","Bayer","GADOVIST 1,0 FSP 1x7,5ML","0.0",,0,,"Not Specified",,0
@@ -606,12 +606,12 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "SA-18-531-1001","SA-18-531-1001-BLC-11-A-R1","SA",100220,100087,"","2019-01-28","Sidharth Dhas, Sheryl",1,,,"Bayer","Ultravist 370 BT 10X50ML","29.55","SAR",0,"Unit",,,0
 "QA-18-519-1001","QA-18-519-1001-BPH-11-A-R1","QA",100132,100028,"","2019-05-05","Sidharth Dhas, Sheryl",1,,,"Bayer","CIPROBAY 200 MG 5X100 ML","8.4","EUR",0,"Unit",,,0
 "SA-18-531-1001","SA-18-531-1001-BLC-12-A-R1","SA",100220,100020,"","2019-01-28","Sidharth Dhas, Sheryl",1,,,"Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","234.43","SAR",0,"Unit",,,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100001,"","2018-09-20","Sidharth Dhas, Sheryl",1,,,"Bayer","ADALAT LA TABL 30 MG 30 ST","0.3517","USD",0,"Unit",,,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100003,"","2018-09-20","Sidharth Dhas, Sheryl",1,,,"Bayer","ADALAT LA TABL 60 MG 30 ST","0.44","USD",0,"Unit",,,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100006,"","2018-09-20","Sidharth Dhas, Sheryl",1,,,"Bayer","ADALAT RETARD TABL 20 MG 30ST","0.089","USD",0,"Unit",,,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100064,"","2018-09-20","Sidharth Dhas, Sheryl",1,,,"Bayer","NEXAVAR TABL 200MG 60ST","39.55","USD",0,"Unit",,,0
+"JO-20-1006","JO-20-1006-1-C1","JO",100087,100087,,"2021-05-19","GCXYS",1,"No","Won","Bayer","Ultravist 370 BT 10X50ML","5.9","EUR",96000,"Unit","Not Specified","",0
+"JO-20-1006","JO-20-1006-1-C1","JO",100087,100085,,"2021-05-19","GCXYS",1,"No","Won","Bayer","Ultravist 300 FL 10X50ML","6.0","EUR",1000,"Unit","Not Specified","",0
+"JO-20-1006","JO-20-1006-1-C1","JO",100087,100039,,"2021-05-19","GCXYS",1,"No","Won","Bayer","GADOVIST 1,0 FSP 1x7,5ML","29.0","EUR",1200,"Unit","Not Specified","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100003,"","2021-07-08","GCXYS",1,,,"Bayer","ADALAT LA TABL 60 MG 30 ST","0.44","USD",0,"Unit",,,0
 "AE-16-100-1057","AE-16-100-1057-BPH-11","AE",100002,100030,"","2018-04-24","System",1,,"Lost","Bayer","CIPROBAY TABL 250 MG 10 ST","9.7","USD",0,"Pack","Not Specified",,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100081,"","2018-09-20","Sidharth Dhas, Sheryl",1,,,"Bayer","STIVARGA 40MG 3x28TAB","44.92","USD",0,"Unit",,,0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100006,"","2021-07-08","GCXYS",1,,,"Bayer","ADALAT RETARD TABL 20 MG 30ST","0.089","USD",0,"Unit",,,0
 "SA-18-531-1001","SA-18-531-1001-BLC-12-A-R1","SA",100220,100036,"","2019-01-28","Sidharth Dhas, Sheryl",1,,,"Bayer","Eylea 2MG VL 1x2ML","2807.42","SAR",0,"Unit",,,0
 "SA-18-531-1001","SA-18-531-1001-BLC-12-A-R1","SA",100220,100057,"","2019-01-28","Sidharth Dhas, Sheryl",1,,,"Bayer","Magnevist VL 1X20ML","40.0","SAR",0,"Unit",,,0
 "SA-18-531-1001","SA-18-531-1001-BLC-12-A-R1","SA",100220,100061,"","2019-01-28","Sidharth Dhas, Sheryl",1,,,"Bayer","Mirena 1x1 EVO","313.6875","SAR",0,"Unit",,,0
@@ -624,7 +624,7 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "SA-18-531-1001","SA-18-531-1001-BLC-12-A-R1","SA",100220,100087,"","2019-01-28","Sidharth Dhas, Sheryl",1,,,"Bayer","Ultravist 370 BT 10X50ML","29.55","SAR",0,"Unit",,,0
 "SA-18-531-1001","SA-18-531-1001-BLC-12-A-R1","SA",100220,100090,"","2019-01-28","Sidharth Dhas, Sheryl",1,,,"Bayer","VENTAVIS 10mcg 30x2ml","87.65","SAR",0,"Unit",,,0
 "OM-19-604-1001","OM-19-604-1001-BAG-11","OM",100130,100020,"","2019-07-10","Sidharth Dhas, Sheryl",1,,,"Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","62.0","USD",0,"Unit",,,0
-"BH-19-608-1001","BH-19-608-1001-BME-11","BH",100027,100095,"","2019-07-11","Sidharth Dhas, Sheryl",1,,,"Bayer","XARELTO 20MG 28TABL","2.9","USD",0,"Unit",,,0
+"SA-20-1066","SA-20-1066-2-R1","SA",100220,100091,,"2021-07-01","GCXYS",1,"No","Won","Bayer","Visanne TAB 2x14","6.733","SAR",4000,"Unit","Not Specified","",0
 "AE-16-100-1064","AE-16-100-1064-BPH-11","AE",100010,100029,"","2018-04-24","System",1,,"Lost","Bayer","CIPROBAY 500MG TABL 10 ST","1.08","USD",0,"Unit","Not Specified",,0
 "AE-19-575-1001","AE-19-575-1001-BME-11","AE",100014,100094,"","2019-07-10","Mass Upload",1,"No","Cancelled","Bayer","XARELTO 15MG 42 TABL","3.4421","USD",0,"Unit",,,0
 "QA-15-100-1017","QA-15-100-1017-BPH-11","QA",100132,100091,"","2018-04-24","System",1,,"Cancelled","Bayer","Visanne TAB 2x14","1.4","EUR",0,"Unit",,"Price Proposal for listing of the product",0
@@ -654,11 +654,11 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "BH-16-100-1004","BH-16-100-1004-BPH-11","BH",100027,100047,"","2018-04-24","System",1,,"Lost","Bayer","KOGENATE FS 500 IU","200.0","USD",0,"Unit","Not Specified",,0
 "BH-16-100-1004","BH-16-100-1004-BPH-11","BH",100027,100045,"","2018-04-24","System",1,,"Lost","Bayer","KOGENATE FS 1000 IU","400.0","USD",0,"Unit","Not Specified",,0
 "SA-18-531-1001","SA-18-531-1001-BLC-13-A-R1","SA",100220,100081,"","2019-01-28","Sidharth Dhas, Sheryl",1,,,"Bayer","STIVARGA 40MG 3x28TAB","132.8","SAR",0,"Unit",,,0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100067,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No",,"Bayer","NOVA T 200 IUD BLI 1x1","16.1","USD",0,"Unit",,,0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100020,"","2021-07-08","GCXYS",1,"No","Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","67.22","USD",0,"Unit","Not Specified",,0
 "BH-16-100-1008","BH-16-100-1008-BPH-11","BH",100027,100016,"","2018-04-24","System",1,,"Lost","Bayer","AVALOX I.V. 400 MG 5 ST","30.753","USD",0,"Unit","Not Specified",,0
 "EG-16-100-1011","EG-16-100-1011-BPH-11","EG",100045,100029,"","2018-04-24","System",1,,"Lost","Bayer","CIPROBAY 500MG TABL 10 ST","2.9704","EGP",0,"Unit","Not Specified",,0
 "EG-16-100-1012","EG-16-100-1012-BPH-11","EG",100036,100029,"","2018-04-24","System",1,,"Lost","Bayer","CIPROBAY 500MG TABL 10 ST","2.9704","EGP",0,"Unit","Not Specified",,0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100069,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No",,"Bayer","Primolut N 5MG TAB 20x10","0.1183","USD",0,"Unit",,,0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100036,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","800.69","USD",0,"Unit","Not Specified",,0
 "AE-15-100-1053","AE-15-100-1053-BPH-11","AE",100017,100045,"","2018-04-24","System",1,,"Cancelled","Bayer","KOGENATE FS 1000 IU","550.0","USD",0,"Pack",,"This offer was not communicated to costumer. The FOC was not advised by the distributor",0
 "AE-15-100-1053","AE-15-100-1053-BPH-11","AE",100017,100046,"","2018-04-24","System",1,,"Cancelled","Bayer","KOGENATE FS 250 IU","137.5","USD",0,"Pack",,"This offer was not communicated to costumer. The FOC was not advised by the distributor",0
 "AE-15-100-1053","AE-15-100-1053-BPH-11","AE",100017,100047,"","2018-04-24","System",1,,"Cancelled","Bayer","KOGENATE FS 500 IU","275.0","USD",0,"Pack",,"This offer was not communicated to costumer. The FOC was not advised by the distributor",0
@@ -3056,7 +3056,7 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "AE-19-578-1002","AE-19-578-1002-BME-11-A-R1","AE",100008,100040,"","2019-07-29","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","GADOVIST 1,0 VL 1x15ML","105.0","USD",0,"Pack","Not Specified",,0
 "AE-19-578-1006","AE-19-578-1006-BME-11-A-R1","AE",100008,100036,"","2019-07-29","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","1096.0","USD",0,"Unit","Not Specified",,0
 "OM-19-604-1001","OM-19-604-1001-BAG-11","OM",100130,100093,"","2019-07-10","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.9","USD",1150,"Unit","Not Specified",,0
-"BH-19-608-1001","BH-19-608-1001-BME-11","BH",100027,100093,"","2019-07-11","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.9","USD",18000,"Unit","Not Specified",,0
+"SA-20-1066","SA-20-1066-2-R1","SA",100220,100123,,"2021-07-01","GCXYS",1,"No","Won","Bayer","Primolut N 5MG TAB 2X15 ","0.4443","SAR",0,"Unit","Not Specified","",0
 "JO-18-310-1002","JO-18-310-1002-BME-11-A-R1","JO",100087,100036,"","2018-09-05","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","738.73","USD",2500,"Unit","Not Specified",,0
 "QA-19-608-1002","QA-19-608-1002-BAG-11","QA",100132,100093,"","2019-08-28","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.75","USD",40012,"Unit","Not Specified",,0
 "IQ-18-101-1001","IQ-18-101-1001-BHC-11-C-R2","IQ",100082,100047,"","2019-07-21","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","KOGENATE FS 500 IU","105.0","USD",98874,"Unit","Not Specified",,0
@@ -3109,34 +3109,34 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "SA-17-100-1082","SA-17-100-1082-BPH-11","SA",100219,100010,"","2018-04-24","System",1,,"Lost","Broker",,"0.0","SAR",0,"Pack","Not Specified",,0
 "SA-17-100-1082","SA-17-100-1082-BPH-11","SA",100219,100011,"","2018-04-24","System",1,,"Lost","Broker",,"0.0","SAR",0,"Pack","Not Specified",,0
 "QA-18-310-1001","QA-18-310-1001-BCC-11","QA",100132,100036,"","2018-07-09","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","800.69","USD",2900,"Unit","Not Specified",,0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100020,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","63.8583","USD",0,"Unit","Not Specified","Primary",0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100064,"","2021-07-08","GCXYS",1,,,"Bayer","NEXAVAR TABL 200MG 60ST","39.55","USD",0,"Unit",,,0
 "SA-17-100-1201","SA-17-100-1201-BPH-11","SA",100220,100087,"","2018-04-24","System",1,,"Lost","G.E. Health Care",,"21.0","SAR",0,"Unit","Not Specified",,0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100034,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Progyluton SCT 1x21","0.0733","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100035,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Diane 35 1x21","0.227619048","USD",0,"Unit","Not Specified","Primary Conditional",0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100081,"","2021-07-08","GCXYS",1,"No","Won","Bayer","STIVARGA 40MG 3x28TAB","44.92","USD",0,"Unit","Not Specified",,0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100093,"","2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.9","USD",0,"Unit","Not Specified",,0
 "AE-18-284-1001","AE-18-284-1001-BME-11","AE",100014,100028,"","2018-06-20","Sidharth Dhas, Sheryl",1,,"Lost","Bayer","CIPROBAY 200 MG 5X100 ML","8.0","USD",0,"Unit","Not Specified",,0
 "SA-17-100-1201","SA-17-100-1201-BPH-11","SA",100220,100041,"","2018-04-24","System",1,,"Lost","G.E. Health Care",,"60.0","SAR",0,"Unit","Not Specified",,0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100036,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","1096.85","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100061,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Mirena 1x1 EVO","103.54","USD",0,"Unit","Not Specified","Primary Conditional",0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100071,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Primolut Nor 10MG TAB 3x10","0.4467","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100075,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Primolut Dep 250MG AMP 1X1ML","4.05","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100090,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","VENTAVIS 10mcg 30x2ml","15.2","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100091,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Visanne TAB 2x14","1.724642857","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100097,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Yasmin FTB 1x21","0.259","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100098,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Yaz 1x28","0.3275","USD",0,"Unit","Not Specified","Primary Conditional",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100001,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","ADALAT LA TABL 30 MG 30 ST","0.3517","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100003,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","ADALAT LA TABL 60 MG 30 ST","0.46","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100016,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","AVALOX I.V. 400 MG 5 ST","23.6736","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100018,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","AVALOX TABL 400 MG 7 TAB","0.857142857","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100028,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","CIPROBAY 200 MG 5X100 ML","8.0","USD",0,"Unit","Not Specified","Primary Conditional",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100029,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","CIPROBAY 500MG TABL 10 ST","0.6","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100030,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","CIPROBAY TABL 250 MG 10 ST","0.58","USD",0,"Unit","Not Specified","Primary Conditional",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100043,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","GLUCOBAY 100 MG TABL 30 ST","0.17","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100044,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","GLUCOBAY 50 MG 30 ST","0.13","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100049,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","LEVITRA TABL 20MG 12ST","8.0","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100050,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","LEVITRA TABL 20MG 4ST","8.0","USD",0,"Unit","Not Specified","Secondary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100052,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","LEVITRA ODT 10MG 8ST","5.3","USD",0,"Unit","Not Specified","Primary",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100092,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","XARELTO 10 MG 10 TABL","2.7","USD",0,"Unit","Not Specified","Primary Conditional",0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100093,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.7","USD",0,"Unit","Not Specified","Primary Conditional",0
+"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100095,"","2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.9","USD",0,"Unit","Not Specified",,0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100017,,"2021-07-08","GCXYS",1,"","","Bayer","AVALOX TABL 400 MG 5 ST","1.833","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100018,,"2021-07-08","GCXYS",1,"","","Bayer","AVALOX TABL 400 MG 7 TAB","1.833","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100028,,"2021-07-08","GCXYS",1,"","","Bayer","CIPROBAY 200 MG 5X100 ML","7.0","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100029,,"2021-07-08","GCXYS",1,"","","Bayer","CIPROBAY 500MG TABL 10 ST","0.6","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100045,,"2021-07-08","GCXYS",1,"","","Bayer","KOGENATE FS 1000 IU","355.0","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100046,,"2021-07-08","GCXYS",1,"","","Bayer","KOGENATE FS 250 IU","95.0","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100047,,"2021-07-08","GCXYS",1,"No","Won","Bayer","KOGENATE FS 500 IU","185.0","USD",0,"Unit","Not Specified","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100070,,"2021-07-08","GCXYS",1,"","","Bayer","Primolut N 5MG TAB 3x10","0.12","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100076,,"2021-07-08","GCXYS",1,"","","Bayer","Proluton Dep 250MG AMP 1X1ML","3.95","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100097,,"2021-07-08","GCXYS",1,"","","Bayer","Yasmin FTB 1x21","0.189047619","USD",0,"Unit","","",0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100034,"","2021-07-08","GCXYS",1,,"Won","Bayer","Progyluton SCT 1x21","0.0733","USD",0,"Unit","Not Specified",,0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100038,"","2021-07-08","GCXYS",1,"No","Won","Bayer","GYNERA TASC BLI 1X21 AME","0.189047619","USD",0,"Unit","Not Specified",,0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100077,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Proviron 25MG TAB 2x10","0.1985","USD",0,"Unit","Not Specified",,0
+"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100098,"","2021-07-08","GCXYS",1,,"Won","Bayer","Yaz 1x28","0.3275","USD",0,"Unit","Not Specified",,0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100020,"","2021-07-08","GCXYS",1,"No","Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","63.8583","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100034,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Progyluton SCT 1x21","0.0733","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100035,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Diane 35 1x21","0.227619048","USD",0,"Unit","Not Specified","Primary Conditional",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100036,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","1096.85","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100061,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Mirena 1x1 EVO","103.54","USD",0,"Unit","Not Specified","Primary Conditional",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100067,"","2021-07-08","GCXYS",1,"No","Won","Bayer","NOVA T 200 IUD BLI 1x1","16.1","USD",0,"Unit","Not Specified",,0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100069,"","2021-07-08","GCXYS",1,"No",,"Bayer","Primolut N 5MG TAB 20x10","0.1183","USD",0,"Unit",,,0
 "JO-17-100-1005","JO-17-100-1005-BPH-11","JO",100087,100035,"","2018-08-02","Sidharth Dhas, Sheryl",1,,"Won","Bayer","Diane 35 1x21","3.51","USD",3224,"Pack","Not Specified","Diane 35 SCT 1x21 - JOD 2.715",0
 "JO-17-100-1005","JO-17-100-1005-BPH-11","JO",100087,100061,"","2018-08-02","Sidharth Dhas, Sheryl",1,,"Won","Bayer","Mirena 1x1 EVO","87.95","USD",80,"Pack","Not Specified","MIRENA 1x1 - JOD 68.113",0
 "JO-17-100-1005","JO-17-100-1005-BPH-11","JO",100087,100072,"","2018-08-02","Sidharth Dhas, Sheryl",1,,"Won","Bayer","Primolut Nor 5MG TAB 2x10","1.29","USD",0,"Pack","Not Specified","Primolut Nor 5MG TAB 2x10 - JOD 0.988",0
@@ -3146,7 +3146,7 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "KW-17-100-1014","KW-17-100-1014-BPH-11","KW",100096,100036,"","2018-07-08","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","800.686","USD",2000,"Unit","Not Specified",,0
 "KW-18-310-1001","KW-18-310-1001-BME-11","KW",100096,100035,"","2018-07-08","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","Diane 35 1x21","0.20152","USD",0,"Unit","Not Specified",,0
 "OM-18-446-1001","OM-18-446-1001-BPH-11","OM",100130,100018,"","2018-07-24","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","AVALOX TABL 400 MG 7 TAB","1.93","USD",1500,"Unit","Not Specified",,0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100095,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.7","USD",0,"Unit","Not Specified","Primary Conditional",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100071,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Primolut Nor 10MG TAB 3x10","0.4467","USD",0,"Unit","Not Specified","Primary",0
 "AE-17-100-1019","AE-17-100-1019-BPH-13-A-R2","AE",100015,100045,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","KOGENATE FS 1000 IU","290.0","USD",0,"Unit","Not Specified","Primary",0
 "AE-17-100-1019","AE-17-100-1019-BPH-13-A-R2","AE",100015,100046,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","KOGENATE FS 250 IU","72.5","USD",0,"Unit","Not Specified","Primary",0
 "AE-17-100-1019","AE-17-100-1019-BPH-13-A-R2","AE",100015,100047,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No","Won","Bayer","KOGENATE FS 500 IU","145.0","USD",0,"Unit","Not Specified","Primary",0
@@ -3356,9 +3356,9 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "JO-19-575-1002","JO-19-575-1002-BME-11","JO",100087,100058,"","2019-07-15","Sidharth Dhas, Sheryl",1,,"Lost",,"Marvelon Tablets","0.546","JOD",324000,"Pack",,,0
 "AE-19-GCXYS-1001","AE-19-GCXYS-1001-BME-1","AE",100008,100016,"",,"xxx",1,"no","Won","Bayer","AVALOX I.V. 400 MG 5 ST","34.0","USD",1000,"Unit","Not Specified",,0
 "OM-18-100-1004","OM-18-100-1004-BPH-11-A-R1","OM",100130,100064,"","2018-11-21","System",1,,"Lost",,,"0.0","EUR",0,"Pack",,,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100036,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","800.69","USD",0,"Unit","Not Specified",,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100093,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.9","USD",0,"Unit","Not Specified",,0
-"BH-17-100-1013","BH-17-100-1013-BPH-11","BH",100029,100095,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.9","USD",0,"Unit","Not Specified",,0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100075,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Primolut Dep 250MG AMP 1X1ML","4.05","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100090,"","2021-07-08","GCXYS",1,"No","Won","Bayer","VENTAVIS 10mcg 30x2ml","15.2","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100091,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Visanne TAB 2x14","1.724642857","USD",0,"Unit","Not Specified","Primary",0
 "LB-17-100-1007","LB-17-100-1007-BPH-12","LB",100110,100001,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","ADALAT LA TABL 30 MG 30 ST","4.32","EUR",0,"Pack","Not Specified",,0
 "LB-17-100-1007","LB-17-100-1007-BPH-12","LB",100110,100003,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","ADALAT LA TABL 60 MG 30 ST","8.62","EUR",0,"Pack","Not Specified",,0
 "LB-17-100-1007","LB-17-100-1007-BPH-12","LB",100110,100043,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","GLUCOBAY 100 MG TABL 30 ST","3.79","EUR",0,"Pack","Not Specified",,0
@@ -3369,8 +3369,8 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "LY-17-100-1003","LY-17-100-1003-BPH-11","LY",100120,100046,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","KOGENATE FS 250 IU","100.0","EUR",0,"Unit","Not Specified",,0
 "LY-17-100-1003","LY-17-100-1003-BPH-11","LY",100120,100047,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","KOGENATE FS 500 IU","200.0","EUR",0,"Unit","Not Specified",,0
 "LY-17-100-1003","LY-17-100-1003-BPH-11","LY",100120,100064,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","NEXAVAR TABL 200MG 60ST","31.667","EUR",0,"Unit","Not Specified",,0
-"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100038,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","Gynera SCT 1x21","0.189047619","USD",0,"Unit","Not Specified",,0
-"BH-17-100-1013","BH-17-100-1013-BPH-12-A-R1","BH",100029,100077,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","Proviron 25MG TAB 2x10","0.1985","USD",0,"Unit","Not Specified",,0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100097,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Yasmin FTB 1x21","0.259","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-11-A-R2","AE",100015,100098,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Yaz 1x28","0.3275","USD",0,"Unit","Not Specified","Primary Conditional",0
 "EG-18-512-1006","EG-18-512-1006-BME-11","EG",100069,100064,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","NEXAVAR TABL 200MG 60ST","15873.0","EGP",0,"Pack","Not Specified",,0
 "EG-18-512-1007","EG-18-512-1007-BME-11","EG",100069,100064,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","NEXAVAR TABL 200MG 60ST","15873.0","EGP",0,"Pack","Not Specified",,0
 "JO-18-490-1002","JO-18-490-1002-BME-11","JO",100086,100093,"","2019-05-16","Mass Upload",1,"No","Won","Bayer","XARELTO 15MG 28TABL","62.5","USD",0,"Pack","Not Specified",,0
@@ -3772,7 +3772,7 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "IQ-16-100-1002","IQ-16-100-1002-BPH-14","IQ",100082,100064,"","2018-04-24","System",1,,"Cancelled","Bayer","NEXAVAR TABL 200MG 60ST","2311.0","USD",0,"Pack",,"Classified as Level 2 items, donâ€™t expect them to be awarded now. Working on getting it classified as a Level 1 item",0
 "IQ-16-100-1003","IQ-16-100-1003-BPH-11","IQ",100082,100068,"","2018-04-24","System",1,,"Cancelled","Bayer","NOVA T 380 IUD BLI 1x1","12.0","USD",0,"Unit",,,0
 "JO-17-100-1001","JO-17-100-1001-BPH-11","JO",100086,100064,"","2018-04-24","System",1,,"Cancelled","Bayer","NEXAVAR TABL 200MG 60ST","1778.12","EUR",0,"Pack",,,0
-"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100094,"","2018-07-30","Sidharth Dhas, Sheryl",1,"No",,"Bayer","XARELTO 15MG 42 TABL","2.7","USD",0,"Unit",,,0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100001,"","2021-07-08","GCXYS",1,"No","Won","Bayer","ADALAT LA TABL 30 MG 30 ST","0.3517","USD",0,"Unit","Not Specified","Primary",0
 "AE-18-468-1009","AE-18-468-1009-BME-11-A-R1","AE",100015,100007,"","2018-08-01","Sidharth Dhas, Sheryl",1,,,"Bayer","ADEMPAS 0,5MG 42TAB","26.0","USD",0,"Unit",,,0
 "AE-18-468-1009","AE-18-468-1009-BME-11-A-R1","AE",100015,100008,"","2018-08-01","Sidharth Dhas, Sheryl",1,,,"Bayer","ADEMPAS 1,0MG 42TAB","26.0","USD",0,"Unit",,,0
 "AE-18-468-1009","AE-18-468-1009-BME-11-A-R1","AE",100015,100009,"","2018-08-01","Sidharth Dhas, Sheryl",1,,,"Bayer","ADEMPAS 1,5MG 42TAB","26.0","USD",0,"Unit",,,0
@@ -4144,14 +4144,14 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "AE-17-100-1019","AE-17-100-1019-BME-12-A-R3","AE",100015,100044,"","2020-06-30","GCXYS",1,,,"Bayer","GLUCOBAY 50 MG 30 ST","0.13","USD",79500,"Unit",,,0
 "AE-17-100-1019","AE-17-100-1019-BME-12-A-R3","AE",100015,100049,"","2020-06-30","GCXYS",1,,,"Bayer","LEVITRA TABL 20MG 12ST","8.0","USD",6804,"Unit",,,0
 "AE-17-100-1019","AE-17-100-1019-BME-12-A-R3","AE",100015,100050,"","2020-06-30","GCXYS",1,,,"Bayer","LEVITRA TABL 20MG 4ST","8.0","USD",6804,"Unit",,,0
-"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100001,"","2020-06-30","GCXYS",1,"No","Lost","Bayer","ADALAT LA TABL 30 MG 30 ST","0.3517","USD",76440,"Unit","Not Specified",,0
-"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100016,"","2020-06-30","GCXYS",1,,,"Bayer","AVALOX I.V. 400 MG 5 ST","23.6732","USD",45,"Unit",,,0
-"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100018,"","2020-06-30","GCXYS",1,,,"Bayer","AVALOX TABL 400 MG 7 TAB","0.8571","USD",1070,"Unit",,,0
-"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100027,"","2020-06-30","GCXYS",1,,,"Bayer","CIPROBAY 200 MG 1X100 ML","8.0","USD",1781,"Unit",,,0
-"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100029,"","2020-06-30","GCXYS",1,,,"Bayer","CIPROBAY 500MG TABL 10 ST","0.6","USD",53600,"Unit",,,0
-"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100030,"","2020-06-30","GCXYS",1,,,"Bayer","CIPROBAY TABL 250 MG 10 ST","0.58","USD",5490,"Unit",,,0
-"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100043,"","2020-06-30","GCXYS",1,,,"Bayer","GLUCOBAY 100 MG TABL 30 ST","0.17","USD",2730,"Unit",,,0
-"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100044,"","2020-06-30","GCXYS",1,,,"Bayer","GLUCOBAY 50 MG 30 ST","0.13","USD",5880,"Unit",,,0
+"SA-21-1006","SA-21-1006-1","SA",100220,100039,,"2021-07-04","GCXYS",1,"No","Cancelled","Bayer","GADOVIST 1,0 FSP 1x7,5ML","175.0","SAR",32200,"Unit","","",0
+"SA-21-1006","SA-21-1006-1","SA",100220,100040,,"2021-07-04","GCXYS",1,"No","Cancelled","Bayer","GADOVIST 1,0 VL 1x15ML","319.07","SAR",32200,"Unit","","",0
+"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100001,"","2021-07-08","GCXYS",1,"No","Lost","Bayer","ADALAT LA TABL 30 MG 30 ST","0.3517","USD",0,"Unit","Not Specified",,0
+"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100016,"","2021-07-08","GCXYS",1,"No","Won","Bayer","AVALOX I.V. 400 MG 250ML x 5","23.6732","USD",0,"Unit","Not Specified",,0
+"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100018,"","2021-07-08","GCXYS",1,"No","Won","Bayer","AVALOX TABL 400 MG 7 TAB","0.8571","USD",0,"Unit","Not Specified",,0
+"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100027,"","2021-07-08","GCXYS",1,"No","Won","Bayer","CIPROBAY 200 MG 1X100 ML","8.0","USD",0,"Unit","Not Specified",,0
+"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100029,"","2021-07-08","GCXYS",1,"No","Won","Bayer","CIPROBAY 500MG TABL 10 ST","0.6","USD",0,"Unit","Not Specified",,0
+"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100030,"","2021-07-08","GCXYS",1,"No","Won","Bayer","CIPROBAY TABL 250 MG 10 ST","0.58","USD",0,"Unit","Not Specified",,0
 "AE-18-512-1009","AE-18-512-1009-BME-11-A-R2","AE",100010,100093,"","2020-06-30","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.9","USD",112,"Unit","Not Specified",,0
 "AE-18-512-1009","AE-18-512-1009-BME-11-A-R2","AE",100010,100095,"","2020-06-30","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.9","USD",11956,"Unit","Not Specified",,0
 "AE-19-575-1003","AE-19-575-1003-BME-11-A-R1","AE",100008,100067,"","2020-06-30","GCXYS",1,"No","Won","Bayer","NOVA T 200 IUD BLI 1x1","16.1","USD",200,"Unit","Not Specified",,0
@@ -4240,34 +4240,34 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "BH-20-1019","BH-20-1019-1","BH",100027,100036,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Eylea 2MG VL 1x2ML","800.69","USD",700,"Unit",,,0
 "BH-20-1019","BH-20-1019-1","BH",100027,100047,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","KOGENATE FS 500 IU","95.0","USD",1000,"Unit",,,0
 "BH-20-1019","BH-20-1019-1","BH",100027,100045,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","KOGENATE FS 1000 IU","190.0","USD",3000,"Unit",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100093,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 15MG 28TABL","81.2","USD",2435,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100095,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 20MG 28TABL","81.2","USD",7094,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100036,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Eylea 2MG VL 1x2ML","800.68","USD",111,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100076,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Proluton Dep 250MG AMP 1X1ML","3.95","USD",5446,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100123,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Primolut N 5MG TAB 2X15 ","3.56","USD",3806,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100063,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","NEBIDO 1000MG VIAL 1X4ML","73.5699999999999","USD",11,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100034,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Progyluton SCT 1x21","1.54","USD",2560,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100029,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","CIPROBAY 500MG TABL 10 ST","19.23","USD",9000,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100028,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","CIPROBAY 200 MG 5X100 ML","112.73","USD",1216,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100018,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","AVALOX TABL 400 MG 7 TAB","21.79","USD",740,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100037,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Gynera DRA 1x21","3.97","USD",12080,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100098,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Yaz 1x28","9.17","USD",818,"Pack",,,0
-"BH-20-1021","BH-20-1021-1","BH",100022,100091,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Visanne TAB 2x14","37.5","USD",252,"Pack",,,0
+"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100043,"","2021-07-08","GCXYS",1,"No",,"Bayer","GLUCOBAY 100 MG TABL 30 ST","0.17","USD",0,"Unit",,,0
+"AE-18-512-1006","AE-18-512-1006-BME-11-A-R1","AE",100010,100044,"","2021-07-08","GCXYS",1,"No","Won","Bayer","GLUCOBAY 50 MG 30 ST","0.13","USD",0,"Unit","Not Specified",,0
+"AE-18-468-1002","AE-18-468-1002-BME-11","AE",100009,100092,,"2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 10 MG 10 TABL","29.0","USD",0,"Pack","Not Specified","",0
+"AE-18-468-1002","AE-18-468-1002-BME-11","AE",100009,100093,,"2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 28TABL","81.2","USD",0,"Pack","Not Specified","",0
+"AE-18-468-1002","AE-18-468-1002-BME-11","AE",100009,100095,,"2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","81.2","USD",0,"Pack","Not Specified","",0
+"AE-18-512-1016","AE-18-512-1016-BME-11","AE",100010,100018,,"2021-07-08","GCXYS",1,"","","Bayer","AVALOX TABL 400 MG 7 TAB","0.8571","USD",0,"Unit","","",0
+"AE-18-512-1016","AE-18-512-1016-BME-11","AE",100010,100029,,"2021-07-08","GCXYS",1,"No","Won","Bayer","CIPROBAY 500MG TABL 10 ST","0.6","USD",0,"Unit","Not Specified","",0
+"AE-18-512-1016","AE-18-512-1016-BME-11","AE",100010,100030,,"2021-07-08","GCXYS",1,"","","Bayer","CIPROBAY TABL 250 MG 10 ST","0.58","USD",0,"Unit","","",0
+"AE-18-519-1004","AE-18-519-1004-BME-11","AE",100017,100095,,"2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.7","USD",0,"Unit","Not Specified","",0
+"AE-18-519-1007","AE-18-519-1007-BME-11","AE",100013,100092,,"2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 10 MG 10 TABL","2.7","USD",0,"Unit","Not Specified","",0
+"AE-21-1001","AE-21-1001-1","AE",100014,100092,,"2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 10 MG 10 TABL","3.305","USD",0,"Unit","Not Specified","",0
+"BH-19-608-1001","BH-19-608-1001-BME-11","BH",100027,100093,"","2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.9","USD",18000,"Unit","Not Specified",,0
+"BH-19-608-1001","BH-19-608-1001-BME-11","BH",100027,100095,"","2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.9","USD",0,"Unit","Not Specified",,0
 "BH-19-608-1003","BH-19-608-1003-BME-11","BH",100026,100028,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","CIPROBAY 200 MG 5X100 ML","7.0","USD",5000,"Unit",,,0
 "BH-19-1082","BH-19-1082-1","BH",100026,100037,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Gynera DRA 1x21","3.97","USD",8400,"Pack",,,0
 "OM-19-1093","OM-19-1093-1","OM",100130,100063,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","NEBIDO 1000MG VIAL 1X4ML","73.0","USD",900,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100018,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","AVALOX TABL 400 MG 7 TAB","1.83","USD",8001,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100063,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","NEBIDO 1000MG VIAL 1X4ML","70.0","USD",3350,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100076,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Proluton Dep 250MG AMP 1X1ML","3.95","USD",12000,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100020,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","64.0","USD",3000,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100034,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Progyluton SCT 1x21","1.84","USD",4515,"Pack",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100061,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Mirena 1x1 EVO","103.54","USD",250,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100029,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","CIPROBAY 500MG TABL 10 ST","0.5","USD",1390000,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100058,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Microgynon 30 1x21","2.02","USD",123025,"Pack",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100091,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Visanne TAB 2x14","1.25","USD",12012,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100123,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","Primolut N 5MG TAB 2X15 ","0.118","USD",435000,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100093,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 15MG 28TABL","2.1","USD",67004,"Unit",,,0
-"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100095,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 20MG 28TABL","2.1","USD",125020,"Unit",,,0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100003,"","2021-07-08","GCXYS",1,"No","Won","Bayer","ADALAT LA TABL 60 MG 30 ST","0.46","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100016,"","2021-07-08","GCXYS",1,"No","Won","Bayer","AVALOX I.V. 400 MG 250ML x 5","23.6736","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100018,"","2021-07-08","GCXYS",1,"No","Won","Bayer","AVALOX TABL 400 MG 7 TAB","0.857142857","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100028,"","2021-07-08","GCXYS",1,"No","Won","Bayer","CIPROBAY 200 MG 5X100 ML","8.0","USD",0,"Unit","Not Specified","Primary Conditional",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100029,"","2021-07-08","GCXYS",1,"No","Won","Bayer","CIPROBAY 500MG TABL 10 ST","0.6","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100030,"","2021-07-08","GCXYS",1,"No","Won","Bayer","CIPROBAY TABL 250 MG 10 ST","0.58","USD",0,"Unit","Not Specified","Primary Conditional",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100043,"","2021-07-08","GCXYS",1,"No","Won","Bayer","GLUCOBAY 100 MG TABL 30 ST","0.17","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100044,"","2021-07-08","GCXYS",1,"No","Won","Bayer","GLUCOBAY 50 MG 30 ST","0.13","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100049,"","2021-07-08","GCXYS",1,"No","Won","Bayer","LEVITRA TABL 20MG 12ST","8.0","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100050,"","2021-07-08","GCXYS",1,"No","Won","Bayer","LEVITRA TABL 20MG 4ST","8.0","USD",0,"Unit","Not Specified","Secondary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100052,"","2021-07-08","GCXYS",1,"No","Won","Bayer","LEVITRA ODT 10MG 8ST","5.3","USD",0,"Unit","Not Specified","Primary",0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100092,"","2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 10 MG 10 TABL","2.7","USD",0,"Unit","Not Specified","Primary Conditional",0
 "OM-20-1010","OM-20-1010-1","OM",100127,100123,"","2020-09-28","GCXYS",1,"No","Won","Bayer","Primolut N 5MG TAB 2X15 ","3.56","USD",400,"Pack","Not Specified",,0
 "OM-18-262-1001","OM-18-262-1001-BME-13","OM",100127,100087,"","2018-10-07","Sidharth Dhas, Sheryl",1,"No",,"Bayer","Ultravist 370 BT 10X50ML","5.31","USD",0,"Unit",,,0
 "OM-20-1012","OM-20-1012-1","OM",100127,100091,"","2020-10-21","GCXYS",1,"No","Won","Bayer","Visanne TAB 2x14","1.25","USD",17500,"Unit","Not Specified",,0
@@ -4298,20 +4298,20 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "OM-20-1028","OM-20-1028-2","OM",100127,100081,"","2020-09-28","GCXYS",1,"No","Won","Bayer","STIVARGA 40MG 3x28TAB","1750.0","USD",14,"Pack","Not Specified",,0
 "OM-20-1029","OM-20-1029-1","OM",100127,100010,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","ADEMPAS 2,0MG 42TAB","31.0499","USD",336,"Unit",,,0
 "OM-20-1029","OM-20-1029-1","OM",100127,100011,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","ADEMPAS 2,5MG 42TAB","31.0499","USD",336,"Unit",,,0
-"OM-20-1030","OM-20-1030-1","OM",100320,100092,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 10 MG 10 TABL","2.89","USD",800,"Unit",,,0
-"OM-20-1030","OM-20-1030-1","OM",100320,100095,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 20MG 28TABL","2.89","USD",8000,"Unit",,,0
+"OM-20-1036","OM-20-1036-1","OM",100320,100018,"","2021-04-18","GCXYS",1,"No","Won","Bayer","AVALOX TABL 400 MG 7 TAB","3.458","USD",644,"Unit","Not Specified",,0
+"OM-20-1035","OM-20-1035-1","OM",100129,100098,,"2021-04-18","GCXYS",1,"","","Bayer","Yaz 1x28","9.17","USD",45,"Pack","","",0
 "OM-20-1031","OM-20-1031-1","OM",100320,100093,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 15MG 28TABL","2.89","USD",8000,"Unit",,,0
 "OM-20-1032","OM-20-1032-1","OM",100320,100064,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","NEXAVAR TABL 200MG 60ST","1955.0","USD",132,"Pack",,,0
-"OM-20-1033","OM-20-1033-1","OM",100320,100081,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","STIVARGA 40MG 3x28TAB","1750.0","USD",67,"Pack",,,0
+"OM-20-1033","OM-20-1033-1","OM",100320,100081,"","2021-06-14","GCXYS",1,"No","Won","Bayer","STIVARGA 40MG 3x28TAB","1750.0","USD",23,"Pack","Not Specified",,0
 "OM-20-1034","OM-20-1034-1","OM",100128,100020,"","2020-09-28","GCXYS",1,"No","Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","63.87","USD",420,"Unit","Not Specified",,0
-"OM-20-1036","OM-20-1036-1","OM",100320,100018,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","AVALOX TABL 400 MG 7 TAB","3.458","USD",640,"Unit",,,0
+"OM-20-1035","OM-20-1035-1","OM",100129,100058,,"2021-04-18","GCXYS",1,"","","Bayer","Microgynon 30 1x21","2.02","USD",250,"Pack","","",0
 "OM-20-1038","OM-20-1038-1","OM",100321,100020,"","2020-09-28","GCXYS",1,"No","Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","63.86","USD",2010,"Unit","Not Specified",,0
-"OM-20-1039","OM-20-1039-1","OM",100320,100073,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","PRIMOVIST PFS 1x10ML","212.0","USD",100,"Unit",,,0
+"IQ-21-1003","IQ-21-1003-2","IQ",100082,100020,,"2021-06-06","GCXYS",1,"No","Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","600.0","USD",16410,"Pack","Not Specified","Contract # 40-2021-89",0
 "OM-18-562-1002","OM-18-562-1002-BHC-11","OM",100130,100047,"","2020-09-28","GCXYS",1,"No","Lost","Bayer","KOGENATE FS 500 IU","95.0","USD",1499,"Unit","Not Specified",,0
 "OM-18-562-1003","OM-18-562-1003-BPH-11","OM",100130,100095,"","2020-09-28","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.9","USD",84000,"Unit","Not Specified",,0
 "OM-19-1081","OM-19-1081-1","OM",100130,100036,"","2020-09-28","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","800.69","USD",120,"Unit","Not Specified",,0
 "OM-19-564-1002","OM-19-564-1002-BHC-11","OM",100127,100046,"","2020-09-28","GCXYS",1,"No","Lost","Bayer","KOGENATE FS 250 IU","47.5","USD",200,"Unit","Not Specified",,0
-"OM-19-575-1001","OM-19-575-1001-14-C1","OM",100127,100064,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","NEXAVAR TABL 200MG 60ST","32.58339999999999","USD",14040,"Unit",,,0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100093,"","2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.7","USD",0,"Unit","Not Specified","Primary Conditional",0
 "OM-19-575-1001","OM-19-575-1001-BHC-11","OM",100127,100046,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","KOGENATE FS 250 IU","47.5","USD",29000,"Unit",,,0
 "OM-19-575-1001","OM-19-575-1001-BHC-11","OM",100127,100047,"","2020-09-28","GCXYS",1,"No","Decision Pending","Bayer","KOGENATE FS 500 IU","95.0","USD",600,"Unit",,,0
 "OM-19-575-1002","OM-19-575-1002-BCC-11","OM",100130,100036,"","2020-09-28","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","800.69","USD",120,"Unit","Not Specified",,0
@@ -4898,23 +4898,23 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "EG-20-1051","EG-20-1051-1","EG",100053,100036,"","2021-01-19","GCXYS",1,"No","Cancelled","Bayer","Eylea 2MG VL 1x2ML","7810.0","EGP",1,"Pack",,"Shifted to UCD",0
 "EG-20-1052","EG-20-1052-1","EG",100073,100036,"","2021-01-19","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","7810.0","EGP",4,"Pack","Not Specified",,0
 "EG-21-1002","EG-21-1002-1","EG",100317,100064,"","2021-01-19","GCXYS",1,"No","Cancelled","Bayer","NEXAVAR TABL 200MG 60ST","7711.5","EGP",100,"Pack",,"Shifted to UCD",0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100063,"","2021-01-27","GCXYS",1,"No","Won","Bayer","NEBIDO 1000MG VIAL 1X4ML","275.85","SAR",5880,"Unit","Not Specified",,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100035,"","2021-01-27","GCXYS",1,"No","Won","Bayer","Diane 35 1x21","0.7557","SAR",177200,"Unit","Not Specified",,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100008,"","2021-01-27","GCXYS",1,"No","Won","Bayer","ADEMPAS 1,0MG 42TAB","120.0","SAR",12892,"Unit","Not Specified",,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100009,"","2021-01-27","GCXYS",1,"No","Won","Bayer","ADEMPAS 1,5MG 42TAB","120.0","SAR",14224,"Unit","Not Specified",,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100010,"","2021-01-27","GCXYS",1,"No","Won","Bayer","ADEMPAS 2,0MG 42TAB","120.0","SAR",22332,"Unit","Not Specified",,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100011,"","2021-01-27","GCXYS",1,"No","Won","Bayer","ADEMPAS 2,5MG 42TAB","120.0","SAR",42688,"Unit","Not Specified",,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100007,"","2021-01-27","GCXYS",1,"No","Won","Bayer","ADEMPAS 0,5MG 42TAB","120.0","SAR",5000,"Unit","Not Specified",,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100036,"","2021-01-27","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","2807.42","SAR",45150,"Unit","Not Specified",,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100020,"","2021-01-27","GCXYS",1,,,"Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","234.43","SAR",245200,"Unit",,,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100097,"","2021-01-27","GCXYS",1,,,"Bayer","Yasmin FTB 1x21","0.8201","SAR",371670,"Unit",,,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100033,"","2021-01-27","GCXYS",1,,,"Bayer","Climen SCT 1x21","0.8178","SAR",345200,"Unit",,,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100090,"","2021-01-27","GCXYS",1,,,"Bayer","VENTAVIS 10mcg 30x2ml","72.2906","SAR",98790,"Unit",,,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100091,"","2021-01-27","GCXYS",1,,,"Bayer","Visanne TAB 2x14","6.4673","SAR",380940,"Unit",,,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100076,"","2021-01-27","GCXYS",1,,,"Bayer","Proluton Dep 250MG AMP 1X1ML","14.81","SAR",309620,"Unit",,,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100100,"","2021-01-27","GCXYS",1,,,"Bayer","Yaz Plus FTB 1x28","1.1504","SAR",502700,"Unit",,,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100123,"","2021-01-27","GCXYS",1,,,"Bayer","Primolut N 5MG TAB 2X15 ","0.4442999999999999","SAR",1216020,"Unit",,,0
-"SA-20-1075","SA-20-1075-3-C1","SA",100220,100061,"","2021-01-27","GCXYS",1,,,"Bayer","Mirena 1x1 EVO","313.705","SAR",8127,"Unit",,,0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100094,"","2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 42 TABL","2.7","USD",0,"Unit","Not Specified",,0
+"AE-17-100-1019","AE-17-100-1019-BPH-12-A-R2","AE",100015,100095,"","2021-07-08","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.7","USD",0,"Unit","Not Specified","Primary Conditional",0
+"KW-19-ETSSV-1001","KW-19-ETSSV-1001-2","KW",100096,100034,,"2021-07-08","GCXYS",1,"No","Won","Bayer","Progyluton SCT 1x21","0.0731","USD",0,"Unit","Not Specified","",0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100018,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","AVALOX TABL 400 MG 7 TAB","1.83","USD",0,"Unit",,,0
+"SA-20-1075","SA-20-1075-2-R1","SA",100220,100039,,"2021-07-01","GCXYS",1,"No","","Bayer","GADOVIST 1,0 FSP 1x7,5ML","175.0","SAR",0,"Unit","","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100029,,"2021-07-01","GCXYS",1,"No","Lost","Bayer","CIPROBAY 500MG TABL 10 ST","2.0","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100001,,"2021-07-01","GCXYS",1,"No","Won","Bayer","ADALAT LA TABL 30 MG 30 ST","1.3193","SAR",70000,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100066,,"2021-07-01","GCXYS",1,"No","Won","Bayer","NIMOTOP TABL 30 MG 30 ST","1.1235","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100092,,"2021-07-01","GCXYS",1,"No","Lost","Bayer","XARELTO 10 MG 10 TABL","6.9","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100093,,"2021-07-01","GCXYS",1,"No","Lost","Bayer","XARELTO 15MG 28TABL","6.9","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100095,,"2021-07-01","GCXYS",1,"No","Lost","Bayer","XARELTO 20MG 28TABL","6.9","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100027,,"2021-07-01","GCXYS",1,"No","Lost","Bayer","CIPROBAY 200 MG 1X100 ML","59.63","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100018,,"2021-07-01","GCXYS",1,"No","Lost","Bayer","AVALOX TABL 400 MG 7 TAB","2.0","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100016,,"2021-07-01","GCXYS",1,"No","Won","Bayer","AVALOX I.V. 400 MG 250ML x 5","50.0","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100081,,"2021-07-01","GCXYS",1,"No","Won","Bayer","STIVARGA 40MG 3x28TAB","132.8","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100064,,"2021-07-01","GCXYS",1,"No","Won","Bayer","NEXAVAR TABL 200MG 60ST","130.0","SAR",0,"Unit","Not Specified","",0
+"SA-20-1075","SA-20-1075-1-R1","SA",100220,100022,,"2021-07-01","GCXYS",1,"No","Won","Bayer","BILTRICIDE TBL 0,6G 4 ST","12.551","SAR",0,"Unit","Not Specified","",0
 "OM-20-1037","OM-20-1037-1","OM",100124,100035,"","2021-02-01","GCXYS",1,,,"Bayer","Diane 35 1x21","0.2014","USD",600,"Unit",,,0
 "OM-20-1037","OM-20-1037-1","OM",100124,100097,"","2021-02-01","GCXYS",1,"No","Won","Bayer","Yasmin FTB 1x21","0.259","USD",850,"Unit","Not Specified",,0
 "OM-20-1037","OM-20-1037-1","OM",100124,100018,"","2021-02-01","GCXYS",1,,,"Bayer","AVALOX TABL 400 MG 7 TAB","1.83","USD",3400,"Unit",,,0
@@ -4940,3 +4940,98 @@ TENDERID,OFFERID,COUNTRYCODE,INSTITUTEID,PRODUCTCODE,CONTRACTNO,SUBMITTEDON,SUBM
 "SA-20-1094","SA-20-1094-1","SA",100178,100092,,"2021-03-08","GCXYS",1,"No","Won","Bayer","XARELTO 10 MG 10 TABL","4.66","SAR",24000,"Unit","Not Specified","",0
 "SA-20-1094","SA-20-1094-1","SA",100178,100093,,"2021-03-08","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 28TABL","4.66","SAR",108000,"Unit","Not Specified","",0
 "SA-20-1094","SA-20-1094-1","SA",100178,100095,,"2021-03-08","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","4.66","SAR",96000,"Unit","Not Specified","",0
+"JO-20-1002","JO-20-1002-1","JO",100087,100036,,"2021-03-25","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","735.0","USD",4050,"Unit","Not Specified","",0
+"IQ-21-1001","IQ-21-1001-1","IQ",100082,100055,,"2021-03-30","GCXYS",1,"No","Won","Bayer","Magnevist VL 1X10ML","5.5","USD",41270,"Unit","Not Specified","Contract 40-2021-45",0
+"IQ-21-1001","IQ-21-1001-1","IQ",100082,100057,,"2021-03-30","GCXYS",1,"No","Won","Bayer","Magnevist VL 1X20ML","9.9","USD",42325,"Unit","Not Specified","Contract 40-2021-45",0
+"QA-20-1010","QA-20-1010-1-R1","QA",100132,100073,,"2021-04-06","GCXYS",1,"No","Won","Bayer","PRIMOVIST PFS 1x10ML","212.0","USD",250,"Unit","Not Specified","",0
+"OM-20-1046","OM-20-1046-1","OM",100127,100045,,"2021-04-13","ETSSV",1,"","Won","Bayer","KOGENATE FS 1000 IU","190.0","USD",100,"Unit","Not Specified","",0
+"LY-20-1004","LY-20-1004-1","LY",100120,100087,,"2021-04-13","GCXYS",1,"No","Won","Bayer","Ultravist 370 BT 10X50ML","6.8","EUR",18750,"Unit","Not Specified","7-21-Tripoli/X-Ray",0
+"LY-20-1004","LY-20-1004-1","LY",100120,100055,,"2021-04-13","GCXYS",1,"No","Won","Bayer","Magnevist VL 1X10ML","8.0","EUR",9375,"Unit","Not Specified","7-21-Tripoli/X-Ray",0
+"LY-20-1004","LY-20-1004-1","LY",100120,100057,,"2021-04-13","GCXYS",1,"No","Won","Bayer","Magnevist VL 1X20ML","16.0","EUR",6250,"Unit","Not Specified","7-21-Tripoli/X-Ray",0
+"OM-20-1035","OM-20-1035-1","OM",100129,100097,,"2021-04-18","GCXYS",1,"No","Won","Bayer","Yasmin FTB 1x21","5.44","USD",10,"Pack","Not Specified","",0
+"OM-20-1035","OM-20-1035-1","OM",100129,100091,,"2021-04-18","GCXYS",1,"No","Won","Bayer","Visanne TAB 2x14","48.29","USD",2,"Pack","Not Specified","",0
+"OM-20-1035","OM-20-1035-1","OM",100129,100123,,"2021-04-18","GCXYS",1,"No","Won","Bayer","Primolut N 5MG TAB 2X15 ","0.1187","USD",6990,"Unit","Not Specified","",0
+"OM-20-1035","OM-20-1035-1","OM",100129,100028,,"2021-04-18","GCXYS",1,"No","Won","Bayer","CIPROBAY 200 MG 5X100 ML","25.052","USD",700,"Unit","Not Specified","",0
+"OM-20-1035","OM-20-1035-1","OM",100129,100092,,"2021-04-18","GCXYS",1,"No","Won","Bayer","XARELTO 10 MG 10 TABL","2.899","USD",1000,"Unit","Not Specified","",0
+"OM-20-1035","OM-20-1035-1","OM",100129,100093,,"2021-04-18","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 28TABL","2.9","USD",2800,"Unit","Not Specified","",0
+"OM-20-1035","OM-20-1035-1","OM",100129,100095,,"2021-04-18","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.9","USD",5992,"Unit","Not Specified","",0
+"OM-20-1030","OM-20-1030-1","OM",100320,100092,"","2021-04-18","GCXYS",1,"No","Won","Bayer","XARELTO 10 MG 10 TABL","2.89","USD",800,"Unit","Not Specified",,0
+"OM-20-1030","OM-20-1030-1","OM",100320,100095,"","2021-04-18","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","2.89","USD",3024,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100063,"","2021-07-01","GCXYS",1,"No","Won","Bayer","NEBIDO 1000MG VIAL 1X4ML","275.85","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100035,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Diane 35 1x21","0.7557","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100008,"","2021-07-01","GCXYS",1,"No","Won","Bayer","ADEMPAS 1,0MG 42TAB","120.0","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100009,"","2021-07-01","GCXYS",1,"No","Won","Bayer","ADEMPAS 1,5MG 42TAB","120.0","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100010,"","2021-07-01","GCXYS",1,"No","Won","Bayer","ADEMPAS 2,0MG 42TAB","120.0","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100011,"","2021-07-01","GCXYS",1,"No","Won","Bayer","ADEMPAS 2,5MG 42TAB","120.0","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100007,"","2021-07-01","GCXYS",1,"No","Won","Bayer","ADEMPAS 0,5MG 42TAB","120.0","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100036,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","2807.42","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100020,"","2021-07-01","GCXYS",1,"No","Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","234.43","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100097,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Yasmin FTB 1x21","0.8201","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100033,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Climen SCT 1x21","0.8178","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100090,"","2021-07-01","GCXYS",1,"No","Won","Bayer","VENTAVIS 10mcg 30x2ml","72.2906","SAR",0,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100091,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Visanne TAB 2x14","6.4673","SAR",0,"Unit","Not Specified",,0
+"QA-21-1002","QA-21-1002-1","QA",100132,100001,,"2021-05-03","ETSSV",1,"","Won","Bayer","ADALAT LA TABL 30 MG 30 ST","0.3517","USD",760000,"Unit","Not Specified","",0
+"QA-21-1001","QA-21-1001-1","QA",100132,100090,,"2021-05-17","GCXYS",1,"No","Won","Bayer","VENTAVIS 10mcg 30x2ml","23.37","USD",5820,"Unit","Not Specified","",0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100063,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","NEBIDO 1000MG VIAL 1X4ML","70.0","USD",0,"Unit",,,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100076,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","Proluton Dep 250MG AMP 1X1ML","3.95","USD",0,"Unit",,,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100020,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","64.0","USD",0,"Unit",,,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100034,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Progyluton SCT 1x21","1.84","USD",0,"Pack","Not Specified",,0
+"AE-21-1015","AE-21-1015-1","AE",100014,100008,,"2021-05-23","GCXYS",1,"No","Won","Bayer","ADEMPAS 1,0MG 42TAB","39.9762","USD",42,"Unit","Not Specified","",0
+"AE-21-1015","AE-21-1015-1","AE",100014,100009,,"2021-05-23","GCXYS",1,"No","Won","Bayer","ADEMPAS 1,5MG 42TAB","39.9762","USD",42,"Unit","Not Specified","",0
+"AE-21-1015","AE-21-1015-1","AE",100014,100010,,"2021-05-23","GCXYS",1,"No","Won","Bayer","ADEMPAS 2,0MG 42TAB","39.9762","USD",42,"Unit","Not Specified","",0
+"AE-21-1015","AE-21-1015-1","AE",100014,100011,,"2021-05-23","GCXYS",1,"No","Won","Bayer","ADEMPAS 2,5MG 42TAB","39.9762","USD",462,"Unit","Not Specified","",0
+"IQ-21-1003","IQ-21-1003-3","IQ",100082,100064,,"2021-05-25","GCXYS",1,"No","Won","Bayer","NEXAVAR TABL 200MG 60ST","2311.0","USD",1737,"Pack","Not Specified","40-2021-86",0
+"LB-19-612-1003","LB-19-612-1003-BME-11","LB",100108,100020,,"2021-05-26","ETSSV",1,"","Won","Bayer","BETAFERON LYO VIAL 15+SOLU PFS 15SP","572.49","EUR",45,"Pack","Not Specified","",0
+"EG-21-1008","EG-21-1008-1","EG",100069,100064,,"2021-05-30","GCXYS",1,"No","Cancelled","Bayer","NEXAVAR TABL 200MG 60ST","5900.0","EGP",15000,"Pack","","Offer Submitted through Ibn Sina instead.",0
+"EG-21-1008","EG-21-1008-1","EG",100069,100081,,"2021-05-30","GCXYS",1,"No","Cancelled","Bayer","STIVARGA 40MG 3x28TAB","14670.0","EGP",3000,"Pack","","Offer Submitted through Ibn Sina instead.",0
+"TH-21-1102","TH-21-1102-1","TH",100967,100216,,"2021-05-31","TACPK",1,"","Won","Bayer","NIMOTOP TAB 30MG 5X6","417.0","THB",1,"Pack","Not Specified","",0
+"TH-21-1106","TH-21-1106-1","TH",100540,100216,,"2021-05-31","TACPK",1,"","Won","Bayer","NIMOTOP TAB 30MG 5X6","417.0","THB",1,"Pack","Not Specified","",0
+"TH-21-1103","TH-21-1103-1","TH",100700,100182,,"2021-05-31","TACPK",1,"","Won","Bayer","STIVARGA TAB 40MG 1X28/BOX","47547.0","THB",1,"Pack","Not Specified","",0
+"TH-21-1093","TH-21-1093-1","TH",100435,100182,,"2021-05-31","TACPK",1,"","Won","Bayer","STIVARGA TAB 40MG 1X28/BOX","47547.0","THB",6,"Pack","Not Specified","",0
+"TH-21-1081","TH-21-1081-1","TH",100695,100142,,"2021-05-31","TACPK",1,"","Won","Bayer","BETAFERON INJ CMBP 0.3MG+1.2ML,15X SUP-M","28000.0","THB",1,"Pack","Not Specified","",0
+"TH-21-1080","TH-21-1080-1","TH",100411,100155,,"2021-05-31","TACPK",1,"","Won","Bayer","EYLEA INJ 2MG VIA TH","33680.0","THB",100,"Unit","Not Specified","",0
+"TH-21-1075","TH-21-1075-1","TH",100334,100155,,"2021-05-31","TACPK",1,"","Won","Bayer","EYLEA INJ 2MG VIA TH","33680.0","THB",1380,"Unit","Not Specified","",0
+"TH-21-1066","TH-21-1066-1","TH",100435,100173,,"2021-05-31","TACPK",1,"","Won","Bayer","NEXAVAR TAB 200MG 6X10FOIL","39060.0","THB",11,"Pack","Not Specified","",0
+"TH-21-1067","TH-21-1067-1","TH",100435,100182,,"2021-05-31","TACPK",1,"","Won","Bayer","STIVARGA TAB 40MG 1X28/BOX","47547.0","THB",6,"Pack","Not Specified","",0
+"OM-20-1039","OM-20-1039-1","OM",100320,100073,"","2021-06-06","GCXYS",1,"No","Won","Bayer","PRIMOVIST PFS 1x10ML","212.0","USD",65,"Unit","Not Specified",,0
+"EG-20-1045","EG-20-1045-1-C1","EG",100319,100036,,"2021-06-17","ETSSV",1,"","Won","Bayer","Eylea 2MG VL 1x2ML","7810.0","EGP",1,"Pack","Not Specified","",0
+"KW-21-1006","KW-21-1006-1","KW",100096,100126,,"2021-06-22","GCXYS",1,"No","Won","Bayer","NUBEQA 300MG TAFI 7X16","3041.74","EUR",4,"Pack","Not Specified","",0
+"AE-21-1009","AE-21-1009-1","AE",100010,100036,,"2021-06-23","ETSSV",1,"","Won","Bayer","Eylea 2MG VL 1x2ML","1096.0","USD",1,"Pack","Not Specified","",0
+"EG-21-1010","EG-21-1010-1","EG",100319,100061,,"2021-06-23","GCXYS",1,"No","Won","Bayer","Mirena 1x1 EVO","376.0","EGP",170000,"Unit","Not Specified","",0
+"QA-21-1003","QA-21-1003-1","QA",100132,100063,,"2021-06-24","GCXYS",1,"No","Won","Bayer","NEBIDO 1000MG VIAL 1X4ML","70.0","USD",500,"Unit","Not Specified","",0
+"TH-21-1141","TH-21-1141-1","TH",100534,100155,,"2021-06-25","TACPK",1,"","Won","Bayer","EYLEA INJ 2MG VIA TH","33680.0","THB",10,"Unit","Not Specified","",0
+"TH-21-1142","TH-21-1142-1","TH",100471,100216,,"2021-06-25","TACPK",1,"","Won","Bayer","NIMOTOP TAB 30MG 5X6","417.0","THB",200,"Pack","Not Specified","",0
+"TH-21-1127","TH-21-1127-1","TH",101260,100155,,"2021-06-25","TACPK",1,"","Won","Bayer","EYLEA INJ 2MG VIA TH","33680.0","THB",270,"Unit","Not Specified","",0
+"TH-21-1120","TH-21-1120-1","TH",100471,100182,,"2021-06-25","TACPK",1,"","Won","Bayer","STIVARGA TAB 40MG 1X28/BOX","47547.0","THB",3,"Pack","Not Specified","",0
+"JO-21-1002","JO-21-1002-1","JO",100087,100058,,"2021-06-27","GCXYS",1,"No","Won","Bayer","Microgynon 30 1x21","0.65","USD",500000,"Pack","Not Specified","",0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100076,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Proluton Dep 250MG AMP 1X1ML","14.81","SAR",300,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100100,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Yaz Plus FTB 1x28","1.1504","SAR",5600,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100123,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Primolut N 5MG TAB 2X15 ","0.4443","SAR",9600,"Unit","Not Specified",,0
+"SA-20-1075","SA-20-1075-3-C1","SA",100220,100061,"","2021-07-01","GCXYS",1,"No","Won","Bayer","Mirena 1x1 EVO","313.705","SAR",0,"Unit","Not Specified",,0
+"SA-20-1066","SA-20-1066-1-R1","SA",100220,100029,,"2021-07-01","GCXYS",1,"No","Lost","Bayer","CIPROBAY 500MG TABL 10 ST","2.0","SAR",0,"Unit","Not Specified","",0
+"SA-20-1066","SA-20-1066-1-R1","SA",100220,100018,,"2021-07-01","GCXYS",1,"","Lost","Bayer","AVALOX TABL 400 MG 7 TAB","4.0","SAR",0,"Unit","Not Specified","",0
+"SA-20-1066","SA-20-1066-1-R1","SA",100220,100001,,"2021-07-01","GCXYS",1,"No","Won","Bayer","ADALAT LA TABL 30 MG 30 ST","1.3193","SAR",1810000,"Unit","Not Specified","",0
+"SA-20-1066","SA-20-1066-1-R1","SA",100220,100022,,"2021-07-01","GCXYS",1,"No","Won","Bayer","BILTRICIDE TBL 0,6G 4 ST","12.551","SAR",0,"Unit","Not Specified","",0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100061,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","Mirena 1x1 EVO","103.54","USD",0,"Unit",,,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100029,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","CIPROBAY 500MG TABL 10 ST","0.5","USD",0,"Unit",,,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100058,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","Microgynon 30 1x21","2.02","USD",0,"Pack",,,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100091,"","2021-07-08","GCXYS",1,"No","Won","Bayer","Visanne TAB 2x14","1.25","USD",0,"Unit","Not Specified",,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100123,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","Primolut N 5MG TAB 2X15 ","0.118","USD",0,"Unit",,,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100093,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 15MG 28TABL","2.1","USD",0,"Unit",,,0
+"OM-19-575-1001","OM-19-575-1001-13-C1","OM",100127,100095,"","2021-07-08","GCXYS",1,"No","Decision Pending","Bayer","XARELTO 20MG 28TABL","2.1","USD",0,"Unit",,,0
+"OM-19-575-1001","OM-19-575-1001-14-C1","OM",100127,100064,"","2021-07-08","GCXYS",1,"No","Won","Bayer","NEXAVAR TABL 200MG 60ST","32.58339999999999","USD",0,"Unit","Not Specified",,0
+"OM-21-1012","OM-21-1012-1","OM",100127,100045,,"2021-07-11","GCXYS",1,"No","Won","Bayer","KOGENATE FS 1000 IU","190.0","USD",94,"Unit","Not Specified","",0
+"BH-20-1021","BH-20-1021-1","BH",100022,100093,"","2021-07-11","GCXYS",1,"No","Won","Bayer","XARELTO 15MG 28TABL","81.2","USD",0,"Pack","Not Specified",,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100095,"","2021-07-11","GCXYS",1,"No","Won","Bayer","XARELTO 20MG 28TABL","81.2","USD",0,"Pack","Not Specified",,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100036,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","Eylea 2MG VL 1x2ML","800.68","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100076,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","Proluton Dep 250MG AMP 1X1ML","3.95","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100123,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","Primolut N 5MG TAB 2X15 ","3.56","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100063,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","NEBIDO 1000MG VIAL 1X4ML","73.57","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100034,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","Progyluton SCT 1x21","1.54","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100029,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","CIPROBAY 500MG TABL 10 ST","19.23","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100028,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","CIPROBAY 200 MG 5X100 ML","112.73","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100018,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","AVALOX TABL 400 MG 7 TAB","21.79","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100037,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","Gynera DRA 1x21","3.97","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100098,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","Yaz 1x28","9.17","USD",0,"Pack",,,0
+"BH-20-1021","BH-20-1021-1","BH",100022,100091,"","2021-07-11","GCXYS",1,"No","Decision Pending","Bayer","Visanne TAB 2x14","37.5","USD",0,"Pack",,,0
+"IQ-21-1002","IQ-21-1002-2-R1","IQ",100082,100036,,"2021-07-11","GCXYS",1,"No","Won","Bayer","Eylea 2MG VL 1x2ML","666.1","USD",14239,"Unit","Not Specified","Contract No.: 40-2021-138",0
