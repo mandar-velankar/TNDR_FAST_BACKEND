@@ -40,6 +40,7 @@ entity SalesOpportunityProducts: cuid, managed {
     Comment: String;
     RecommendedPrice: Double;
     RequestedQuantity: Integer;
+    Uom: String;
     Opportunity: Association to SalesOpportunities;
 }
 
