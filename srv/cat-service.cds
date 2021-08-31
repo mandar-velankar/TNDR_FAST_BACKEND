@@ -132,6 +132,7 @@ service CatalogService @(path : 'tender')
             COUNTRY_OF_ORIGIN : String(120);
             COGS              : Double;
             PACKFACTOR        : Integer;
+            DIVISION          : String;
     };
 
     //Transactional Data Tables
@@ -563,12 +564,26 @@ service CatalogService @(path : 'tender')
         key OfferId : String(50);
         content   : LargeBinary @Core.MediaType : 'application/pdf';
     }
-    entity ExcelAttachment {
+    entity ExcelAttachment as projection on AdminData.ExcelAttachment;
+    // {
+    //     key OfferId : String(50);
+    //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    //     mediaType:String @Core.IsMediaType;
+    // }
+
+        
+    entity WordAttachment as projection on AdminData.WordAttachment;
+    // {
+    //     key OfferId : String(50);
+    //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    //     mediaType:String @Core.IsMediaType;
+    // }
+
+    entity DeliveryExcel {
         key OfferId : String(50);
         content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         mediaType:String @Core.IsMediaType;
     }
-
 
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail (sRecipient:String, sSubject:String, sTemplate:String) returns Boolean;

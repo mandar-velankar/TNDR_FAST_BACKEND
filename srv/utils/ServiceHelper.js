@@ -7,7 +7,7 @@ module.exports = {
     },
 
     getWhereId: function (req, fieldName) {
-        return _getWhereId(req, fieldName);
+        return this._getWhereId(req, fieldName);
     },
 
     getWhereValue: function(req, fieldName) {
@@ -107,14 +107,7 @@ module.exports = {
         return Math.round(10000*x) / 10000  <= Math.round(10000*y) / 10000 ? true : false;
     },
 
-    formatNumber: function(num, digits) {
-        if (!num){
-            num = 0;
-        }
-        return num.toLocaleString('en-US', { minimumFractionDigits: digits });
-    },
-
-    formatNumberTo_EN_US_String: function(num, minDigits, maxDigits) {
+    formatNumber: function(num, minDigits, maxDigits) {
         if (!num){
             num = 0;
         }

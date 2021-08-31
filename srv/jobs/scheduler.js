@@ -264,10 +264,10 @@ module.exports = async () => {
               username: API_USER,
               password: API_PASSWORD
             }, // when testing locally, comment out the proxy
-            proxy: {
+            /*proxy: {
               host: PROXY_HOST,
               port: PROXY_PORT
-            }
+            }*/
           }).then(successHandler).catch(errorHandler);
           
         // }
