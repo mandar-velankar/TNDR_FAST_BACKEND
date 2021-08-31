@@ -87,6 +87,8 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
         opp.ExtensionPeriod,
         opp.TenderMatchingStatus,
         opp.Description,
+        opp.FoldersCreated,
+        opp.OpportunityValue,
         st.Status as MainStatus,
         st.SubStatus,
         opp.Institute: redirected to PT_TMINST,
