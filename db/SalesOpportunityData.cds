@@ -26,6 +26,7 @@ entity SalesOpportunities: cuid, managed {
     Description: String;
     FoldersCreated: Boolean;
     OpportunityValue: Double;
+    Division: String(100);
     Institute: association to MasterData.PT_TMINST;
     Products: Composition of many SalesOpportunityProducts on Products.Opportunity = $self;
 }
