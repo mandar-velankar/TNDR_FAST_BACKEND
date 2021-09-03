@@ -78,6 +78,7 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
         opp.CountryCode,
         opp.TenderReference,
         opp.Classification,
+        opp.Division,
         opp.TenderChannel,
         opp.PublicationDate,
         opp.OfferDueDate,
