@@ -55,7 +55,13 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
         key opp.ID as TenderReference,
         info.TenderID as TenderID,
         case 
-            when info.TenderReference is null or TMTEND.Active = 0 then opp.TenderMatchingStatus else 'Participated' 
+            when info.TenderReference is null or TMTEND.Active = 0 
+            then 
+                case 
+                    when opp.TenderMatchingStatus = 'In' then 'New' 
+                    when opp.TenderMatchingStatus = 'Out' then 'Declined' 
+                end
+            else 'Active' 
         end as Status:String,
         case 
             when info.TenderReference is null then 'NA'
