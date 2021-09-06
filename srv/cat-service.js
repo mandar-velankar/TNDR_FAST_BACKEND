@@ -10,7 +10,6 @@ const SapCfMailer = require("sap-cf-mailer");
 // const escapeStringRegexp = require('escape-string-regexp');
 // const resolveWhen = require('special-escape');
 const { Readable } = require('stream');
-const streamToBlob = require('stream-to-blob');
 const path = require("path");
 const XLSXHelper = require("./utils/XLSXHelper");
 const wordTemplate = require("easy-template-x");

@@ -30,11 +30,13 @@ entity PriceAgreements: cuid, managed {
                                                      and Product.COUNTRYCODE = CountryCode
                                                      and Product.ACTIVERECORD = 'Yes';
     Candidates: Association to many Candidates on Candidates.PriceAgreementId = ID;
+    CustomerPrices: Association to many CustomerPrices on CustomerPrices.PriceAgreementId = ID;
 }
 
 entity CustomerPrices: cuid, managed {
     ValidFrom: DateTime;
     ValidTo: DateTime;
+    PriceAgreementId: String;
     PriceAgreement: Association to PriceAgreements;
     InstituteId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
