@@ -265,7 +265,7 @@ module.exports = (srv) => {
 		let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
 
 		let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
-		let grossMarginEurBudget = grossProfitEurBudget / netSalesEurSpot;
+		let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
 
 		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(netOfferPrice, product.MIN_PRICE) : 0;
 
