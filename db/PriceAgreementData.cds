@@ -24,6 +24,7 @@ entity PriceAgreements: cuid, managed {
     InstituteId: Integer;
     TenderId: String;
     ProductPackId: String;
+    Synchronized: Boolean;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId

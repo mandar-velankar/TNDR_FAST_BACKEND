@@ -10,4 +10,5 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity PT_TMINST as projection on MasterData.PT_TMINST;
     entity PT_TMCTPRDPCK as projection on MasterData.PT_TMCTPRDPCK;
     entity PT_TMTEND as projection on TransactionalData.PT_TMTEND;
+    entity PT_TMPRDPCK as projection on MasterData.PT_TMPRDPCK;
 }
