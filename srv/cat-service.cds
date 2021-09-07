@@ -463,6 +463,8 @@ service CatalogService @(path : 'tender')
             REMARKS            : String(5000);
             APPROVER1          : String(5000);
             APPROVER2          : String(5000);
+            E_SIGNATURE1       : Boolean;
+            E_SIGNATURE2       : Boolean;
             SHIPMENTTERMS      : String(5000);
             PAYMENTTERMS       : String(5000);
             DELIVERYTERMS      : String(5000);

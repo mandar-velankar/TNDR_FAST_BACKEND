@@ -612,14 +612,34 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack sku
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
+left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory1Default
+    on offer.SellingCompany = signatory1Default.LEGAL_ENTITY_CODE
+    and offer.CountryCode = signatory1Default.COUNTRY_CODE
+    and signatory1Default.SORTER = 1
 left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory1
     on offer.SellingCompany = signatory1.LEGAL_ENTITY_CODE
     and offer.CountryCode = signatory1.COUNTRY_CODE
-    and signatory1.SORTER = 1
+    and signatory1.SIGNATORY = 1
+    and (signatory1.DIVISION = offer.Division or signatory1.DIVISION = 'Both')
+left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2Default
+    on offer.SellingCompany = signatory2Default.LEGAL_ENTITY_CODE
+    and offer.CountryCode = signatory2Default.COUNTRY_CODE
+    and signatory2Default.SORTER = 2
 left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
     on offer.SellingCompany = signatory2.LEGAL_ENTITY_CODE
     and offer.CountryCode = signatory2.COUNTRY_CODE
-    and signatory2.SORTER = 2
+    and signatory1.SIGNATORY = 2
+    and (signatory1.DIVISION = offer.Division or signatory1.DIVISION = 'Both')
+left outer join ApprovalRequests as approvalRequest1
+    on  approvalRequest1.TenderID = offer.TenderID
+	and approvalRequest1.OfferId = offer.OfferID
+	and approvalRequest1.CountryCode = offer.CountryCode
+    and approvalRequest1.ApproverName = signatory1.NAME
+left outer join ApprovalRequests as approvalRequest2
+    on  approvalRequest2.TenderID = offer.TenderID
+	and approvalRequest2.OfferId = offer.OfferID
+	and approvalRequest2.CountryCode = offer.CountryCode
+    and approvalRequest2.ApproverName = signatory2.NAME
 left outer join AdminData.NextDateSettings as date_settings
     on MONTH(CURRENT_DATE) = date_settings.CurrentMonth
 {	
@@ -640,8 +660,10 @@ left outer join AdminData.NextDateSettings as date_settings
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
-    ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS1:String(500),
-	ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS2:String(500),
+    ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS1:String(500),
+	ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS2:String(500),
+    case when signatory1.AUTHORIZED_SIGNATORY is null then false else true end as E_SIGNATURE1:Boolean,
+    case when signatory2.AUTHORIZED_SIGNATORY is null then false else true end as E_SIGNATURE2:Boolean,
 	offer.Currency as CURRENCY,
     min(offer.Product.Price.BudgetRate) as BUDGET_RATE,
     min(offer.Product.Price.SpotRate) as SPOT_RATE,
@@ -697,8 +719,10 @@ left outer join AdminData.NextDateSettings as date_settings
           offer.SellingCompanyDetails.BankDetails,
           offer.Quotation.AS1,
           signatory1.AUTHORIZED_SIGNATORY,
+          signatory1Default.AUTHORIZED_SIGNATORY,
           offer.Quotation.AS2,
           signatory2.AUTHORIZED_SIGNATORY,
+          signatory2Default.AUTHORIZED_SIGNATORY,
           offer.Currency,
           offer.SellingCompanyDetails.Letterhead,
           offer.SellingCompanyDetails.Remarks,
