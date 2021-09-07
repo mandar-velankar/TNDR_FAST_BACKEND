@@ -1854,7 +1854,8 @@ module.exports = (srv) => {
 				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 2, 2).concat("%"),
 				BUDGET_RATE: ServiceHelper.formatNumber(d.BUDGET_RATE, 2, 2),
 				SPOT_RATE: ServiceHelper.formatNumber(d.SPOT_RATE, 2, 2),
-				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2)
+				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2),
+				IS_LOWEST: d.IS_LOWEST
 			}
 		});
 	}

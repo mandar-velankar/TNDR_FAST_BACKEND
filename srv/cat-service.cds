@@ -525,6 +525,7 @@ service CatalogService @(path : 'tender')
             BUDGET_RATE                   : Double;
             SPOT_RATE                     : Double;
             BUSINESS_CASE_PRICE           : Double;
+            IS_LOWEST                     : Integer;
     };
 
     entity ApprovalApprovers {
