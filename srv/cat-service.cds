@@ -325,6 +325,8 @@ service CatalogService @(path : 'tender')
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
             SELLING_COMPANY_AS2   : String(300);
+            E_SIGNATURE1          : Boolean;
+            E_SIGNATURE2          : Boolean;
             CURRENCY              : String(255);
             AMOUNT_IN_NUMBERS     : Double;
             AMOUNT_IN_WORDS       : String(1024);
