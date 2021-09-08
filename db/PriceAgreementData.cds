@@ -31,6 +31,7 @@ entity PriceAgreements: cuid, managed {
                                                      and Product.COUNTRYCODE = CountryCode
                                                      and Product.ACTIVERECORD = 'Yes';
     Candidates: Association to many Candidates on Candidates.PriceAgreementId = ID;
+    Materials: Association to many Materials on Materials.PriceAgreementId = ID;
     CustomerPrices: Association to many CustomerPrices on CustomerPrices.PriceAgreementId = ID;
 }
 
@@ -50,12 +51,14 @@ entity CustomerPrices: cuid, managed {
 entity Candidates: cuid, managed {
     InstituteId: String;
     PriceAgreementId: String;
+    CustomerPricesId: String;
     ValidFrom: DateTime;
     ValidTo: DateTime;
 }
 
 entity Materials: cuid, managed {
     ProductPackId: String;
+    PriceAgreementId: String;
     Description: String;
     MaterialNumber: String;
     ValidFrom: DateTime;
