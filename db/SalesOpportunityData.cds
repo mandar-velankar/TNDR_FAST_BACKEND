@@ -28,6 +28,8 @@ entity SalesOpportunities: cuid, managed {
     Description: String;
     FoldersCreated: Boolean;
     Currency: String;
+    OpportunityValue: Double;
+    Division: String(100);
     Institute: association to MasterData.PT_TMINST;
     Products: Composition of many SalesOpportunityProducts on Products.Opportunity = $self;
 }
@@ -35,6 +37,7 @@ entity SalesOpportunities: cuid, managed {
 entity SalesOpportunityProducts: cuid, managed {
     BrandID: Integer;
     BrandName: String;
+    Division: String(100);
     ProductPackName: String;
     ProductPackId: Integer;
     Comment: String;

@@ -56,7 +56,13 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
         key opp.ID as TenderReference,
         info.TenderID as TenderID,
         case 
-            when info.TenderReference is null or TMTEND.Active = 0 then opp.TenderMatchingStatus else 'Participated' 
+            when info.TenderReference is null or TMTEND.Active = 0 
+            then 
+                case 
+                    when opp.TenderMatchingStatus = 'In' then 'New' 
+                    when opp.TenderMatchingStatus = 'Out' then 'Declined' 
+                end
+            else 'Active' 
         end as Status:String,
         case 
             when info.TenderReference is null then 'NA'
@@ -79,6 +85,7 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
         opp.CountryCode,
         opp.TenderReference,
         opp.Classification,
+        opp.Division,
         opp.TenderChannel,
         opp.PublicationDate,
         opp.OfferDueDate,
@@ -89,6 +96,8 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
         opp.TenderMatchingStatus,
         opp.Description,
         opp.Currency,
+        opp.FoldersCreated,
+        opp.OpportunityValue,
         st.Status as MainStatus,
         st.SubStatus,
         opp.Institute: redirected to PT_TMINST,
