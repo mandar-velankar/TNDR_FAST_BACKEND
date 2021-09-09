@@ -17,13 +17,15 @@ entity PriceAgreements: cuid, managed {
     ListPrice: Double;
     RetailPrice: Double;
     Price: Double;
+    Currency: String;
+    UoM: String;
     Discount: Double;
     DeliveredVolume: Integer;
     AwardedVolume: Integer;
     CountryCode: String;
     InstituteId: Integer;
     TenderId: String;
-    ProductPackId: String;
+    ProductPackId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
