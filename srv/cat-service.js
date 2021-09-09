@@ -1852,8 +1852,8 @@ module.exports = (srv) => {
 				BUDGETEDPROFITABILITY: (d.BUDGETED_PROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETED_PROFITABILITY, 2, 2).concat("%"),
 				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 2, 2).concat("%"),
 				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 2, 2).concat("%"),
-				BUDGET_RATE: ServiceHelper.formatNumber(d.BUDGET_RATE, 2, 2),
-				SPOT_RATE: ServiceHelper.formatNumber(d.SPOT_RATE, 2, 2),
+				BUDGET_RATE: d.BUDGET_RATE,
+				SPOT_RATE: d.SPOT_RATE,
 				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2),
 				IS_LOWEST: d.IS_LOWEST
 			}

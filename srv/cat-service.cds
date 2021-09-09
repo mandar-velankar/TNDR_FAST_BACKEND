@@ -526,7 +526,7 @@ service CatalogService @(path : 'tender')
             PROFITABILITYSPOT             : String(1000);
             BUDGET_RATE                   : Double;
             SPOT_RATE                     : Double;
-            BUSINESS_CASE_PRICE           : Double;
+            BUSINESS_CASE_PRICE           : String(1000);
             IS_LOWEST                     : Integer;
     };
 
