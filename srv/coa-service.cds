@@ -21,6 +21,7 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
     entity PT_TMINST              @readonly as projection on MasterData.PT_TMINST;
     entity CountryBrands          @readonly as projection on MasterDataViews.CountryBrands;
     entity CountryBrandProducts   @readonly as projection on MasterDataViews.CountryBrandProducts;
+    entity CountryCurrency        @readonly as projection on MasterDataViews.CountryCurrency;
 
     entity SalesOpportunities       as projection on SalesOpportunityData.SalesOpportunities{
         *,
@@ -94,6 +95,7 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
         opp.ExtensionPeriod,
         opp.TenderMatchingStatus,
         opp.Description,
+        opp.Currency,
         opp.FoldersCreated,
         opp.OpportunityValue,
         st.Status as MainStatus,
