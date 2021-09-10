@@ -27,11 +27,11 @@ entity PriceAgreements: cuid, managed {
     Synchronized: Boolean;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
-    Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
+    Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId // TODO: change this to link with PT_TMSKUPRDPCK and rename 'Product' to 'Materials' -> see refinement ticket
                                                      and Product.COUNTRYCODE = CountryCode
                                                      and Product.ACTIVERECORD = 'Yes';
     // Candidates: Association to many Candidates on Candidates.PriceAgreementId = ID;
-    Materials: Association to many Materials on Materials.PriceAgreementId = ID;
+    Materials: Association to many Materials on Materials.PriceAgreementId = ID; // remove this
     CustomerPrices: Association to many CustomerPrices on CustomerPrices.PriceAgreementId = ID;
 }
 
