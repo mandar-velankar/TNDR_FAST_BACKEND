@@ -13,6 +13,9 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity PT_TMTEND as projection on TransactionalData.PT_TMTEND;
     entity PT_TMPRDPCK as projection on MasterData.PT_TMPRDPCK;
 
+
+
+    // TODO: this should probably change
     entity DistinctPriceAgreementMaterialNumbers as select from Materials as mat {
         key mat.PriceAgreementId,
         mat.ProductPackId,
@@ -34,10 +37,10 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
         key c.PriceAgreementId,
         key c.TenderId,
         key c.InstituteId,
-        // ifnull(pa.CustomerPrices.Applied, false) as Applied:Boolean,
         case
             when pa.CustomerPrices.Price is null then false else true 
         end as Applied:Boolean,
+        ifnull(pa.CustomerPrices.Synchronized, false) as Synchronized:Boolean,
         ifnull(pa.CustomerPrices.Price, pa.Price) as Price:Double,
         ifnull(pa.CustomerPrices.ValidFrom, pa.EffectiveDate) as ValidFrom:DateTime,
         ifnull(pa.CustomerPrices.ValidTo, pa.ExpiryDate) as ValidTo:DateTime
