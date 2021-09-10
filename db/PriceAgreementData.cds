@@ -25,12 +25,12 @@ entity PriceAgreements: cuid, managed {
     TenderId: String;
     ProductPackId: String;
     Synchronized: Boolean;
-    Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
+    Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
                                                      and Product.COUNTRYCODE = CountryCode
                                                      and Product.ACTIVERECORD = 'Yes';
-    Candidates: Association to many Candidates on Candidates.PriceAgreementId = ID;
+    // Candidates: Association to many Candidates on Candidates.PriceAgreementId = ID;
     Materials: Association to many Materials on Materials.PriceAgreementId = ID;
     CustomerPrices: Association to many CustomerPrices on CustomerPrices.PriceAgreementId = ID;
 }
@@ -38,7 +38,7 @@ entity PriceAgreements: cuid, managed {
 entity CustomerPrices: cuid, managed {
     ValidFrom: DateTime;
     ValidTo: DateTime;
-    PriceAgreementId: String;
+    PriceAgreementId: String not null;
     PriceAgreement: Association to PriceAgreements;
     InstituteId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
@@ -46,15 +46,16 @@ entity CustomerPrices: cuid, managed {
     Material: Association to Materials on Material.ID = MaterialId;
     Synchronized: Boolean;
     Price: Double;
+    Applied: Boolean;
 }
 
-entity Candidates: cuid, managed {
-    InstituteId: String;
-    PriceAgreementId: String;
-    CustomerPricesId: String;
-    ValidFrom: DateTime;
-    ValidTo: DateTime;
-}
+// entity Candidates: cuid, managed {
+//     InstituteId: String;
+//     PriceAgreementId: String;
+//     CustomerPricesId: String;
+//     ValidFrom: DateTime;
+//     ValidTo: DateTime;
+// }
 
 entity Materials: cuid, managed {
     ProductPackId: String;
