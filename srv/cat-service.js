@@ -22,7 +22,7 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
@@ -2369,15 +2369,25 @@ module.exports = (srv) => {
 		}
 
 		//format prices
-		offerDeliveries.forEach(delivery => {
-			delivery.InstituteID = delivery.InstituteID.toString();
-			delivery.SKUCode = delivery.InstituteID.toString();
-			delivery.RequestedQuantity = ServiceHelper.formatNumber(delivery.RequestedQuantity, 2, 2);
-			delivery.ActualDeliveryQuantity = ServiceHelper.formatNumber(delivery.ActualDeliveryQuantity, 2, 2);
-			delivery.PenaltyValue = ServiceHelper.formatNumber(delivery.PenaltyValue, 2, 2);
-			delivery.ProductCode = delivery.InstituteID.toString();
-			delivery.SNo = delivery.InstituteID.toString();
-			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : '';
+		offerDeliveries.forEach(async delivery => {
+			let whereProduct = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", delivery.ProductCode);
+			let product = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProduct));
+
+			delivery.InstituteID = delivery.InstituteID ? delivery.InstituteID.toString() : 'NA';
+			delivery.SKUCode = delivery.SKUCode ? delivery.SKUCode.toString() : 'NA';
+			delivery.RequestedQuantity = delivery.RequestedQuantity ? ServiceHelper.formatNumber(delivery.RequestedQuantity, 2, 2) : 0;
+			delivery.ActualDeliveryQuantity = delivery.ActualDeliveryQuantity ? ServiceHelper.formatNumber(delivery.ActualDeliveryQuantity, 2, 2) : 0;
+			delivery.PenaltyValue = delivery.PenaltyValue ? ServiceHelper.formatNumber(delivery.PenaltyValue, 2, 2) : 0;
+			delivery.ProductCode = delivery.ProductCode ? delivery.InstituteID.toString() : 'NA';
+			delivery.SNo = delivery.SNo ? delivery.SNo.toString() : 'NA';
+			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : 'NA';
+			delivery.PlannedInAPO = delivery.PlannedInAPO ? delivery.PlannedInAPO : 'NA';
+			delivery.RequestedDeliveryDate = delivery.RequestedDeliveryDate ? delivery.RequestedDeliveryDate : '1970-01-01';
+			delivery.ActualDeliveryDate = delivery.ActualDeliveryDate ? delivery.ActualDeliveryDate : '1970-01-01';
+			delivery.PaidOrFree = delivery.PaidOrFree ? delivery.PaidOrFree : 'NA';
+			delivery.Penalty = delivery.Penalty ? delivery.Penalty : 'NA';
+			delivery.Compensated = delivery.Compensated ? delivery.Compensated : 'NA';
+			delivery.ProductName = product[0].PRODUCTPACKNAME;
 		});
 
 		const filedata = fs.readFileSync(path.join(__dirname, './xlsx-templates', "DeliveryTemplate.xlsx"));
