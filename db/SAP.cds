@@ -80,8 +80,8 @@ entity BrazilEmpenho : cuid, managed {
 }
 
 
-entity ItalyMaterials: managed {
-	key MATNR  			: String(18);			// Material Number
+entity ItalyMaterials: cuid, managed {
+	MATNR  				: String(18);			// Material Number
 	HLEVEL1_NAME    	: String(40);			// Description
 	HLEVEL4_CODE    	: String(4);			// Version Number Component
 	HLEVEL4_NAME    	: String;				// Description
@@ -97,13 +97,13 @@ entity ItalyMaterials: managed {
 	EAN11    			: String(1); 			// EAN number
 }
 
-entity ItalyCustomers: managed {
+entity ItalyCustomers: cuid, managed {
 	E1KNA1M				: E1KNA1M;				// Master customer master basic data (KNA1 - SAP table)
 	E1KNA11				: E1KNA11;				// Customer Master: Additional General Fields  (KNA1 - SAP table)
 	E1KNB1M				: E1KNB1M;				// Master Customer Master Company Code (KNB1- SAP table )
 }
 
-entity SpainMaterials: managed {
+entity SpainMaterials: cuid, managed {
 	E1MARAM				: E1MARAM;				// Master material general data (MARA- SAP table)
     E1MARA1				: E1MARA1;				// Additional Fields for E1MARAM segment  - MARA sap table additional fields
     E1MAKTM				: E1MAKTM;				// Master material short texts (MAKT - SAP table) : material description
@@ -117,8 +117,8 @@ entity SpainMaterials: managed {
     E1MTXLM				: E1MTXLM;				// Master material long text line item
 }
 
-entity SpainCustomers: managed {
-	E1KNA1M				: E1KNA1M;			// Master customer master basic data (KNA1 - SAP table)
-    E1KNA11				: E1KNA11;			// Customer Master: Additional General Fields  (KNA1 - SAP table)
-    E1KNB1M				: E1KNB1M;			// Master Customer Master Company Code (KNB1- SAP table )
+entity SpainCustomers: cuid, managed {
+	E1KNA1M				: E1KNA1M;				// Master customer master basic data (KNA1 - SAP table)
+    E1KNA11				: E1KNA11;				// Customer Master: Additional General Fields  (KNA1 - SAP table)
+    E1KNB1M				: E1KNB1M;				// Master Customer Master Company Code (KNB1- SAP table )
 }
