@@ -217,6 +217,20 @@ type E1KNB1M {
 	CVP_XBLCK_B			: String(1);			// Business Purpose Completed Flag
 }
 
+entity SpainMaterials: managed {
+	E1MARAM				: E1MARAM;				// Master material general data (MARA- SAP table)
+    E1MARA1				: E1MARA1;				// Additional Fields for E1MARAM segment  - MARA sap table additional fields
+    E1MAKTM				: E1MAKTM;				// Master material short texts (MAKT - SAP table) : material description
+    E1MARCM				: E1MARCM;				// Master material C segment (MARC : SAP table) :Plant Data for Material
+    E1MARDM				: E1MARDM;				// Master material warehouse/batch segment (MARD : SAP table) -Storage Location Data for Material
+    E1MARMM				: E1MARMM;				// Master material units of measure (MARM - SAP table ):Units of Measure for Material
+    E1MBEWM				: E1MBEWM;				// Master material material valuation (MBEW : SAP table) :Material Valuation
+    E1MVKEM				: E1MVKEM;				// Master material sales data (MVKE : SAP table) Sales Data for Material
+    E1MLANM				: E1MLANM;				// Master material tax classification (MLAN : SAP table)
+    E1MTXHM				: E1MTXHM;				// Master material long text header
+    E1MTXLM				: E1MTXLM;				// Master material long text line item
+}
+
 type E1MARAM {
 	MSGFN				: String(3);			// Function
 	MATNR				: String(18);			// Material Number
