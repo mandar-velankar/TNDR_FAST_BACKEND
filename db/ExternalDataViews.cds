@@ -401,8 +401,8 @@ entity MasterAuthorizedSignatories as select from MasterData.COUNTRY_LEGAL_ENTIT
 	MasterAuthorizedSignatories.NAME,
 	MasterAuthorizedSignatories.TITLE,
 	case MasterAuthorizedSignatories.SORTER 
-		when 1 then 'Company Stamp'
-		when 2 then 'Issued By'
+		when 2 then 'Company Stamp'
+		when 1 then 'Issued By'
 		else ''
 	end as Default:String
 } order by MasterAuthorizedSignatories.LEGAL_ENTITY_CODE,
