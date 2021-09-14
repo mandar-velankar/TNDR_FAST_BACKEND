@@ -12,7 +12,6 @@
     "@sap/xsenv": "^3.1.0",
     "@sap/xssec": "^3.0.10",
     "axios": "^0.21.1",
-    "cloudfoundry-cli": "^0.8.0",
     "compression": "^1.7.4",
     "cron": "^1.8.2",
     "dynamic-html-pdf": "^1.0.2",
@@ -49,9 +48,6 @@
   },
   "private": true,
   "cds": {
-    "hana": {
-      "deploy-format": "hdbtable"
-      },
     "requires": {
       "db": {
         "kind": "hana"
@@ -70,10 +66,6 @@
   ],
   "devDependencies": {
     "@sap/cds-dk": "~3.5.0",
-    "mbt": "~1.1.1",
-    "ui5-middleware-livereload": "^0.5.5",
-    "ui5-middleware-route-proxy": "^1.0.9",
-    "ui5-middleware-simpleproxy": "^0.7.3",
-    "ui5-task-transpile-gen": "^1.0.4"
+    "mbt": "~1.1.1"
   }
 }
