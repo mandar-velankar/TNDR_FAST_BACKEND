@@ -267,7 +267,7 @@ module.exports = (srv) => {
 		let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
 		let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
 
-		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(netOfferPrice, product.MIN_PRICE) : 0;
+		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
 
 		//Product Comment: master data product comment + info on additional brand FOC, if any
 		let productComment = product.PRODUCT_COMMENT;
@@ -397,7 +397,7 @@ module.exports = (srv) => {
 		//Controlling
 		//Notification if OfferPrice below lowest price
 		let controlling = 1;
-		if (!ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) && ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
 			controlling = 2;
 		}
 
@@ -415,7 +415,7 @@ module.exports = (srv) => {
 		//Mandatory if not default payment terms
 		let regionalBusiness = 1;
 		if (product.BUSINESS_APPROVED !== 1) {
-			if (!ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) && ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+			if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
 				regionalBusiness = 3;
 			}
 			else if (product.IS_DEFAULT_TERMS === 0) {
