@@ -1,3 +1,3 @@
-ID,ValidFrom,ValidTo,PriceAgreementId,InstituteId,MaterialId,Synchronized,Price,Applied
-5fd80d35-4997-4ea9-aba8-c580550fde39,2021-08-25T09:28:43.000Z,2021-09-27T09:28:43.000Z,5fd80d35-4997-4ea9-aba8-c580550fde39,100229,5fd80d35-4997-4ea9-aba8-c580550fde40,true,5,true
-5fd80d35-4997-4ea9-aba8-c580550fde80,,,f7dbd562-5c5b-4348-9d46-c15a3c14c21c,100236,5fd80d35-4997-4ea9-aba8-c580550fda90,false,,false
+ID,ValidFrom,ValidTo,PriceAgreementId,InstituteId,CountryCode,ProductPackId,MaterialNumber,Synchronized,Price,Applied
+5fd80d35-4997-4ea9-aba8-c580550fde39,2021-08-25T09:28:43.000Z,2021-09-27T09:28:43.000Z,5fd80d35-4997-4ea9-aba8-c580550fde39,100229,SA,100044,280880,true,5,true
+5fd80d35-4997-4ea9-aba8-c580550fde80,,,f7dbd562-5c5b-4348-9d46-c15a3c14c21c,100236,SA,100043,87108023,false,55,true
