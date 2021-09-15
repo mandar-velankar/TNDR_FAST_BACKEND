@@ -13,9 +13,34 @@ module.exports = (srv) => {
     
     srv.on('READ', 'PriceAgreements', async (req, next) => {
 
-        const data = await next();
+        
         const tx = cds.transaction(req);
 
+        /**
+         * As virtual/calculated elements are not persisted on the database, incoming filter requests cannot be delegated to the database to get the requested filter results. 
+         * The filter for virtual/calculated elements must be implemented in the NodeJS layer. 
+         * For each calculated filter element, we first remove the filter, get the date and filter the results in the Nodejs layer.
+         */
+
+
+        // 1. remove the hasNewMaterials filter from the request if it exists 
+        let hasNewMaterialsFilterIndex = null; 
+        let hasNewMaterialsFilterValues = null;
+        if(req.query.SELECT.where){
+
+            hasNewMaterialsFilterIndex = ServiceHelper.getWhereId(req, 'hasNewMaterials');
+            hasNewMaterialsFilterValues = ServiceHelper.getWhereValues(req, 'hasNewMaterials');
+
+            if(hasNewMaterialsFilterIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'hasNewMaterials');
+            }
+        }
+
+
+        const data = await next();
+
+
+        // 2. calculate the fields
         const calculateFields = async priceAgreement => {
 
             let customerPrices = priceAgreement.CustomerPrices;
@@ -47,6 +72,12 @@ module.exports = (srv) => {
         const promises = Array.isArray(data) ? data.map(calculateFields) : [calculateFields(data)];
 
         const result = await Promise.all(promises);
+
+        //3. return the filtered results if calculated filter is used
+        if(hasNewMaterialsFilterValues && hasNewMaterialsFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]);
+            return req.reply(filteredResult);
+        }
 
         return req.reply(result);
 
