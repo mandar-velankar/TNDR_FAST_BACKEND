@@ -2381,7 +2381,9 @@ module.exports = (srv) => {
 		}
 
 		//format prices
-		offerDeliveries.forEach(async delivery => {
+		for (let i = 0; i < offerDeliveries.length; i++){
+
+		    let delivery = offerDeliveries[i];
 			let whereProduct = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", delivery.ProductCode);
 			let product = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProduct));
 
@@ -2400,7 +2402,10 @@ module.exports = (srv) => {
 			delivery.Penalty = delivery.Penalty ? delivery.Penalty : 'NA';
 			delivery.Compensated = delivery.Compensated ? delivery.Compensated : 'NA';
 			delivery.ProductName = product[0].PRODUCTPACKNAME;
-		});
+
+			offerDeliveries[i] = delivery;
+
+		};
 
 		const filedata = fs.readFileSync(path.join(__dirname, './xlsx-templates', "DeliveryTemplate.xlsx"));
 		//generate XLSX
