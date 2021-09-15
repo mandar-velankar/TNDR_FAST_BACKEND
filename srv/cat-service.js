@@ -1316,7 +1316,13 @@ module.exports = (srv) => {
 
 		//Payment Terms need to be specified by item number if not same for all
 		let paymentTerms = "";
-		let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.PAYMENT_TERMS }));
+		let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+			if(d && d.PAYMENT_TERMS){
+				return d.PAYMENT_TERMS;
+			}else{
+				return 'NA';
+			}		
+		}));
 		if (paymentTermsDistinct.length === 1) {
 			paymentTerms = paymentTermsDistinct[0];
 		}
@@ -1331,7 +1337,13 @@ module.exports = (srv) => {
 
 		//Delivery Terms need to be specified by item number if not same for all
 		let deliveryTerms = "";
-		let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DELIVERY_TERMS }));
+		let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+			if(d && d.DELIVERY_TERMS){
+				return d.DELIVERY_TERMS;
+			}else{
+				return 'NA';
+			}	
+		}));
 		if (deliveryTermsDistinct.length === 1) {
 			deliveryTerms = deliveryTermsDistinct[0];
 		}
