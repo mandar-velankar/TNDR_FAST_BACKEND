@@ -100,3 +100,9 @@ left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.Material
         ifnull(cp.ValidFrom, pa.EffectiveDate) as ValidFrom:DateTime,
         ifnull(cp.ValidTo, pa.ExpiryDate) as ValidTo:DateTime
 };
+
+
+//Distinct list of productPackId's
+entity ProductPackIds as select from PriceAgreements {
+	key ProductPackId,
+} group by ProductPackId;
