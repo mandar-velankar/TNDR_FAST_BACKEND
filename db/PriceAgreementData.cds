@@ -76,28 +76,27 @@ left outer join CustomerPrices cp
         key sku.CountryCode,
         key sku.ProductPackID as ProductPackId:String,
         key sku.SKUCode as MaterialNumber:Integer,
-        cp.Price,
         case
-            when cp.Price is null then true else false 
+            when min(cp.Price) is null then true else false 
         end as isNew: Boolean
-};
+} group by sku.CountryCode, sku.ProductPackID, sku.SKUCode;
 
 
 entity CandidatePrices as select from PriceAgreements pa
-left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId 
-left outer join Candidates ca on ca.InstituteId = cp.InstituteId 
-left outer join Materials ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode {
+left outer join Candidates ca on ca.PriceAgreementId = pa.ID 
+left outer join Materials ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
+left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.MaterialNumber and cp.InstituteId = ca.InstituteId {
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
         key ca.InstituteId,
         pa.CountryCode,
         pa.ProductPackId, 
-        ma.MaterialNumber,
+        key ma.MaterialNumber,
         case
-            when ma.Price is null then false else true 
+            when cp.Price is null then false else true 
         end as Applied:Boolean,
         ifnull(cp.Synchronized, false) as Synchronized:Boolean,
-        ifnull(ma.Price, pa.Price) as Price:Double,
+        ifnull(cp.Price, pa.Price) as Price:Double,
         ifnull(cp.ValidFrom, pa.EffectiveDate) as ValidFrom:DateTime,
         ifnull(cp.ValidTo, pa.ExpiryDate) as ValidTo:DateTime
 };
