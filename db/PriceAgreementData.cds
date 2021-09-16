@@ -102,7 +102,8 @@ left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.Material
 };
 
 
-//Distinct list of productPackId's
-entity ProductPackIds as select from PriceAgreements {
+//Distinct list of Products
+entity PriceAgreementProductNames as select from PriceAgreements {
 	key ProductPackId,
-} group by ProductPackId;
+    Product.ProductPack.PRODUCTPACKNAME as ProductName
+} group by ProductPackId, Product.ProductPack.PRODUCTPACKNAME;
