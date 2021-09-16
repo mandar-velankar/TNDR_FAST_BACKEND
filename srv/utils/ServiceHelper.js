@@ -25,6 +25,29 @@ module.exports = {
         return results;
     },
 
+    /**
+     * Deletes a filter from the request
+     * @param {Object} req 
+     * @param {string} fieldName 
+     */
+     deleteFilter: function(req, fieldName){
+        const index = this.getWhereId(req, fieldName);
+        if(index >= 0 ){
+            req.query.SELECT.where.splice(index,3);
+
+            // remove trailing "and" && "or" if any
+            if(req.query.SELECT.where[index] === "and" || req.query.SELECT.where[index] === "or"){
+                req.query.SELECT.where.splice(index,1);
+            }
+
+            // remove leading "and" && "or" if any
+            if(req.query.SELECT.where[index-1] === "and" || req.query.SELECT.where[index-1] === "or"){
+                req.query.SELECT.where.splice(index-1,1);
+            }
+        }
+
+    },
+
     buildWhereExpression: function(fieldName, operator, fieldValues) {
 
         let expr = '';
