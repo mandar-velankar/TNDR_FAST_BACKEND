@@ -51,7 +51,7 @@ entity CustomerPrices: cuid, managed {
     MaterialNumber: String not null;
     Synchronized: Boolean;
     Price: Double;
-    Applied: Boolean;
+    Applied: Boolean; // not needed? 
 }
 
 
@@ -92,6 +92,7 @@ left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.Material
         pa.CountryCode,
         pa.ProductPackId, 
         key ma.MaterialNumber,
+        cp.ID as CustomerPriceId,
         case
             when cp.Price is null then false else true 
         end as Applied:Boolean,
