@@ -30,7 +30,7 @@ module.exports = {
      * @param {Object} req 
      * @param {string} fieldName 
      */
-    deleteFilter: function(req, fieldName){
+     deleteFilter: function(req, fieldName){
         const index = this.getWhereId(req, fieldName);
         if(index >= 0 ){
             req.query.SELECT.where.splice(index,3);
