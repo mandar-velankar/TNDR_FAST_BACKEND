@@ -1301,7 +1301,13 @@ module.exports = (srv) => {
 
 		//Shipment Terms need to be specified by item number if not same for all
 		let shipmentTerms = "";
-		let shipmentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.SHIPMENT_TERMS }));
+		let shipmentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
+			if(d && d.SHIPMENT_TERMS){
+				return d.SHIPMENT_TERMS;
+			}else{
+				return 'NA';
+			}	
+		}));
 		if (shipmentTermsDistinct.length === 1) {
 			shipmentTerms = shipmentTermsDistinct[0];
 		}
