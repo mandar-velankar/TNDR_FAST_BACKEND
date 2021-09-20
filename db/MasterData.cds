@@ -148,6 +148,8 @@ entity COUNTRY_LEGAL_ENTITY_SIGNATORIES {
 	NAME:String(5000);
 	TITLE:String(5000);
 	SORTER:Integer;
+	SIGNATORY:Integer;
+	DIVISION:String(50);
 	//Associations
 	LegalEntity:Association to PT_TMLE on LegalEntity.LegalEntityCode = LEGAL_ENTITY_CODE;
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
