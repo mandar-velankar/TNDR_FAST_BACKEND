@@ -25,6 +25,7 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     entity PT_TMINST @readonly               as projection on MasterData.PT_TMINST;
     entity CountryBrands @readonly           as projection on MasterDataViews.CountryBrands;
     entity CountryBrandProducts @readonly    as projection on MasterDataViews.CountryBrandProducts;
+    entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
 
     entity Buyers as projection on IntegrationDataConversion.PublicMarketBuyers;
     entity Products as projection on IntegrationDataConversion.PublicMarketProducts;
