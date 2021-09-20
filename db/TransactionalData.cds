@@ -11,6 +11,7 @@ using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from './MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews';
 using {com.bayer.SXTENDER.BankGuaranteeData} from './BankGuaranteeData';
+using {com.bayer.SXTENDER.PriceAgreementData} from './PriceAgreementData';
 
 entity PT_TMOFRS { //Offers
         TenderID              : String(50) not null;
@@ -431,6 +432,8 @@ entity PT_TMTEND {
                                         and CountrySpecificInformation.CountryCode = CountryCode;
         BankGuarantees: Association to BankGuaranteeData.BankGuarantees
                                         on BankGuarantees.TenderID = TenderID;
+        PriceAgreements: Association to PriceAgreementData.PriceAgreements
+                                         on PriceAgreements.TenderId  = TenderID;
 }
 
 entity PT_TMTNOFST {

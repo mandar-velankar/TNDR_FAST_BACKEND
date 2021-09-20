@@ -10,6 +10,7 @@ using {com.bayer.SXTENDER.IntegrationDataConversion} from '../db/IntegrationData
 using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
 using {com.bayer.SXTENDER.BankGuaranteeData} from '../db/BankGuaranteeData';
+using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using { User, Country, managed, cuid } from '@sap/cds/common';
 
 
@@ -559,6 +560,12 @@ service CatalogService @(path : 'tender')
 
     //BANK GUARANTEE
     entity BankGuarantees as projection on BankGuaranteeData.BankGuarantees{
+        *,
+        Tender: redirected to PT_TMTEND
+    };
+
+     //PRICE AGREEMENT
+    entity PriceAgreements as projection on PriceAgreementData.PriceAgreements{
         *,
         Tender: redirected to PT_TMTEND
     };

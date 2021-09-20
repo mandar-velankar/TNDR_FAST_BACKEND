@@ -17,6 +17,8 @@ entity PriceAgreements: cuid, managed {
     ListPrice: Double;
     RetailPrice: Double;
     Price: Double;
+    Currency: String;
+    UoM: String;
     Discount: Double;
     DeliveredVolume: Integer;
     AwardedVolume: Integer;
