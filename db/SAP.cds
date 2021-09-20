@@ -1,6 +1,9 @@
 namespace com.bayer.SXTENDER.MasterData.SAP;
 
 using { User, Country, managed, cuid } from '@sap/cds/common';
+using { 
+	E1KNA1M, E1KNA11, E1KNB1M, E1MARAM, E1MARA1, E1MAKTM, E1MARCM, E1MARDM, E1MARMM,E1MBEWM, E1MVKEM, E1MLANM, E1MTXHM, E1MTXLM
+} from './SAPTypes';
 
 
 entity BrazilMaterials: managed {
@@ -74,4 +77,144 @@ entity BrazilEmpenho : cuid, managed {
 	EMPENHO				: String(15);			// PO number in sales order
 	PEDIDO				: String(10);			// Sales order number
 	TOTAL_UNITARIO		: Double;				// Total item value in "Nota Fiscal"
+}
+
+
+entity ItalyMaterials: cuid, managed {
+	MATNR  				: String(18);			// Material Number
+	HLEVEL1_NAME    	: String(40);			// Description
+	HLEVEL4_CODE    	: String(4);			// Version Number Component
+	HLEVEL4_NAME    	: String;				// Description
+	HLEVEL6_CODE   		: String(4);			// Version Number Component
+	HLEVEL6_NAME   		: String(2);			// Description            Distribution channel
+	UOM   				: String(2);			// Base Unit of Measure
+	COUNTRYOFORIG    	: String(13);			// Country of origin of the material
+	COGS    			: Double;				// Standard price
+	COGS_UOM    		: String(3);			// Base Unit of Measure
+	PRICE_UNIT    		: String(2);			// Price Unit
+	MAKTX    			: String(3);			// Material Description
+	DIVISION_DESC    	: String(1);			// Division description
+	EAN11    			: String(1); 			// EAN number
+}
+
+entity ItalyCustomers: cuid, managed {
+	E1KNA1M				: E1KNA1M;				// Master customer master basic data (KNA1 - SAP table)
+	E1KNA11				: E1KNA11;				// Customer Master: Additional General Fields  (KNA1 - SAP table)
+	E1KNB1M				: E1KNB1M;				// Master Customer Master Company Code (KNB1- SAP table )
+}
+
+entity ItalyDeliveries: cuid, managed {
+	VBELN				: String(10); 			// Delivery
+	POSNR				: Integer(6); 			// Delivery Item
+	VKBUR				: String(4); 			// Sales Office
+	BUKRS				: String(4); 			// Company Code
+	KUNNR				: String(10); 			// Ship-to party
+	ERNAM				: String(12); 			// Name of Person who Created the Object
+	ERDAT				: DateTime; 			// Date on Which Record Was Created
+	XABLN				: String(10); 			// Goods Receipt/Issue Slip Number
+	WADAT				: DateTime; 			// Goods Issue Date
+	WADAT_IST			: DateTime; 			// Actual Goods Movement Date
+	ANZPK				: Double; 				// Total number of packages in delivery
+	INCO1				: String(3); 			// Incoterms (Part 1)
+	INCO2				: String(28); 			// Incoterms (Part 2)
+	VSTEL				: String(4); 			// Shipping Point/Receiving Point
+	VSBED				: String(2); 			// Shipping Conditions
+	LFART				: String(4); 			// Delivery Type
+	MATNR				: String(18); 			// Material Number
+	WERKS				: String(4); 			// Plant
+	LGORT				: String(4); 			// Storage Location
+	CHARG				: String(10); 			// Batch Number
+	PSTYV				: String(4); 			// Delivery item category
+	LFIMG				: Double; 				// Actual quantity delivered (in sales units)
+	VRKME				: String(3); 			// Sales unit
+	BWART				: String(3); 			// Movement Type (Inventory Management)
+	BRGEW				: Double; 				// Gross weight
+	NTGEW				: Double; 			    // Net weight
+	GEWEI				: String(3); 			// Weight Unit
+	VOLUM				: Double; 				// Volume
+	VGBEL				: String(10); 			// Document number of the reference document
+	VGPOS				: Integer; 				// Item number of the reference item
+	PARTNER_ADDR		: Association to PARTNER_ADDR;		// Delivery Document Partner address
+	PLANT_ADDR			: Association to PLANT_ADDR;		// Delivery Document Address of plants
+}
+
+entity SpainMaterials: cuid, managed {
+	E1MARAM				: E1MARAM;				// Master material general data (MARA- SAP table)
+    E1MARA1				: E1MARA1;				// Additional Fields for E1MARAM segment  - MARA sap table additional fields
+    E1MAKTM				: E1MAKTM;				// Master material short texts (MAKT - SAP table) : material description
+    E1MARCM				: E1MARCM;				// Master material C segment (MARC : SAP table) :Plant Data for Material
+    E1MARDM				: E1MARDM;				// Master material warehouse/batch segment (MARD : SAP table) -Storage Location Data for Material
+    E1MARMM				: E1MARMM;				// Master material units of measure (MARM - SAP table ):Units of Measure for Material
+    E1MBEWM				: E1MBEWM;				// Master material material valuation (MBEW : SAP table) :Material Valuation
+    E1MVKEM				: E1MVKEM;				// Master material sales data (MVKE : SAP table) Sales Data for Material
+    E1MLANM				: E1MLANM;				// Master material tax classification (MLAN : SAP table)
+    E1MTXHM				: E1MTXHM;				// Master material long text header
+    E1MTXLM				: E1MTXLM;				// Master material long text line item
+}
+
+entity SpainCustomers: cuid, managed {
+	E1KNA1M				: E1KNA1M;				// Master customer master basic data (KNA1 - SAP table)
+    E1KNA11				: E1KNA11;				// Customer Master: Additional General Fields  (KNA1 - SAP table)
+    E1KNB1M				: E1KNB1M;				// Master Customer Master Company Code (KNB1- SAP table )
+}
+
+
+entity SpainDeliveries: cuid, managed {
+	VBELN				: String(10); 			// Delivery
+	POSNR				: Integer(6); 			// Delivery Item
+	VKBUR				: String(4); 			// Sales Office
+	BUKRS				: String(4); 			// Company Code
+	KUNNR				: String(10); 			// Ship-to party
+	ERNAM				: String(12); 			// Name of Person who Created the Object
+	ERDAT				: DateTime; 			// Date on Which Record Was Created
+	XABLN				: String(10); 			// Goods Receipt/Issue Slip Number
+	WADAT				: DateTime; 			// Goods Issue Date
+	WADAT_IST			: DateTime; 			// Actual Goods Movement Date
+	ANZPK				: Double; 				// Total number of packages in delivery
+	INCO1				: String(3); 			// Incoterms (Part 1)
+	INCO2				: String(28); 			// Incoterms (Part 2)
+	VSTEL				: String(4); 			// Shipping Point/Receiving Point
+	VSBED				: String(2); 			// Shipping Conditions
+	LFART				: String(4); 			// Delivery Type
+	MATNR				: String(18); 			// Material Number
+	WERKS				: String(4); 			// Plant
+	LGORT				: String(4); 			// Storage Location
+	CHARG				: String(10); 			// Batch Number
+	PSTYV				: String(4); 			// Delivery item category
+	LFIMG				: Double; 				// Actual quantity delivered (in sales units)
+	VRKME				: String(3); 			// Sales unit
+	BWART				: String(3); 			// Movement Type (Inventory Management)
+	BRGEW				: Double; 				// Gross weight
+	NTGEW				: Double; 			    // Net weight
+	GEWEI				: String(3); 			// Weight Unit
+	VOLUM				: Double; 				// Volume
+	VGBEL				: String(10); 			// Document number of the reference document
+	VGPOS				: Integer;	 			// Item number of the reference item
+	PARTNER_ADDR		: Association to PARTNER_ADDR;		// Delivery Document Partner address
+	PLANT_ADDR			: Association to PLANT_ADDR;		// Delivery Document Address of plants
+}
+
+
+entity PARTNER_ADDR : cuid {
+	TYPE0				: String(1);			// Single-Character Indicator
+	ADRNR				: String(10);			// Address
+	NAME1				: String(35);			// Name 1
+	NAME2				: String(35);			// Name 2
+	STRAS				: String(35);			// House number and street
+	HAUSN				: String(6);			// House number
+	PSTLZ				: String(10);			// Postal code
+	ORT01				: String(35);			// City
+	REGIO				: String(3);			// Region (State, Province, County)
+	LAND1				: String(3);			// Country Key
+	XEGLD				: String(1);			// Indicator: European Union Member?
+}
+
+entity PLANT_ADDR : cuid{
+	WERKS				: String(4);			// Plant
+	NAME1				: String(30);			// Name
+	STRAS				: String(30);			// House number and street
+	PSTLZ				: String(10);			// Postal Code
+	ORT01				: String(25);			// City
+	LAND1				: String(3);			// Country Key
+	REGIO				: String(3);			// Region (State, Province, County)
 }
