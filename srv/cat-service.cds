@@ -326,6 +326,8 @@ service CatalogService @(path : 'tender')
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
             SELLING_COMPANY_AS2   : String(300);
+            E_SIGNATURE1          : Boolean;
+            E_SIGNATURE2          : Boolean;
             CURRENCY              : String(255);
             AMOUNT_IN_NUMBERS     : Double;
             AMOUNT_IN_WORDS       : String(1024);
@@ -464,6 +466,8 @@ service CatalogService @(path : 'tender')
             REMARKS            : String(5000);
             APPROVER1          : String(5000);
             APPROVER2          : String(5000);
+            E_SIGNATURE1       : Boolean;
+            E_SIGNATURE2       : Boolean;
             SHIPMENTTERMS      : String(5000);
             PAYMENTTERMS       : String(5000);
             DELIVERYTERMS      : String(5000);
@@ -523,7 +527,8 @@ service CatalogService @(path : 'tender')
             PROFITABILITYSPOT             : String(1000);
             BUDGET_RATE                   : Double;
             SPOT_RATE                     : Double;
-            BUSINESS_CASE_PRICE           : Double;
+            BUSINESS_CASE_PRICE           : String(1000);
+            IS_LOWEST                     : Integer;
     };
 
     entity ApprovalApprovers {

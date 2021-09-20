@@ -22,7 +22,7 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
@@ -265,9 +265,9 @@ module.exports = (srv) => {
 		let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
 
 		let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
-		let grossMarginEurBudget = grossProfitEurBudget / netSalesEurSpot;
+		let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
 
-		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(netOfferPrice, product.MIN_PRICE) : 0;
+		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
 
 		//Product Comment: master data product comment + info on additional brand FOC, if any
 		let productComment = product.PRODUCT_COMMENT;
@@ -397,7 +397,7 @@ module.exports = (srv) => {
 		//Controlling
 		//Notification if OfferPrice below lowest price
 		let controlling = 1;
-		if (!ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) && ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
 			controlling = 2;
 		}
 
@@ -415,7 +415,7 @@ module.exports = (srv) => {
 		//Mandatory if not default payment terms
 		let regionalBusiness = 1;
 		if (product.BUSINESS_APPROVED !== 1) {
-			if (!ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) && ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+			if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
 				regionalBusiness = 3;
 			}
 			else if (product.IS_DEFAULT_TERMS === 0) {
@@ -1316,7 +1316,13 @@ module.exports = (srv) => {
 
 		//Payment Terms need to be specified by item number if not same for all
 		let paymentTerms = "";
-		let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.PAYMENT_TERMS }));
+		let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+			if(d && d.PAYMENT_TERMS){
+				return d.PAYMENT_TERMS;
+			}else{
+				return 'NA';
+			}		
+		}));
 		if (paymentTermsDistinct.length === 1) {
 			paymentTerms = paymentTermsDistinct[0];
 		}
@@ -1331,7 +1337,13 @@ module.exports = (srv) => {
 
 		//Delivery Terms need to be specified by item number if not same for all
 		let deliveryTerms = "";
-		let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DELIVERY_TERMS }));
+		let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+			if(d && d.DELIVERY_TERMS){
+				return d.DELIVERY_TERMS;
+			}else{
+				return 'NA';
+			}	
+		}));
 		if (deliveryTermsDistinct.length === 1) {
 			deliveryTerms = deliveryTermsDistinct[0];
 		}
@@ -1404,6 +1416,8 @@ module.exports = (srv) => {
 			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
 			SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
 			SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
+			E_SIGNATURE1: offer.E_SIGNATURE1,
+			E_SIGNATURE2: offer.E_SIGNATURE2,
 			CURRENCY: offer.CURRENCY,
 			AMOUNT_IN_NUMBERS: totalAmount,
 			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
@@ -1786,6 +1800,8 @@ module.exports = (srv) => {
 			REMARKS: (!offerValidation.REMARKS) ? "" : offerValidation.REMARKS.replace(/<br>+/g, "</br>").replace("NULL", ""),
 			APPROVER1: (!offerValidation.SELLING_COMPANY_AS1) ? "" : offerValidation.SELLING_COMPANY_AS1.replace(/\\+/g, "</br>"),
 			APPROVER2: (!offerValidation.SELLING_COMPANY_AS2) ? "" : offerValidation.SELLING_COMPANY_AS2.replace(/\\+/g, "</br>"),
+			E_SIGNATURE1: offerValidation.E_SIGNATURE1,
+			E_SIGNATURE2: offerValidation.E_SIGNATURE2,
 			SHIPMENTTERMS: (!offerValidation.SHIPMENTTERMS) ? "" : offerValidation.SHIPMENTTERMS.replace(/<br>+/g, "</br>"),
 			PAYMENTTERMS: (!offerValidation.PAYMENTTERMS) ? "" : offerValidation.PAYMENTTERMS.replace(/<br>+/g, "</br>"),
 			DELIVERYTERMS: (!offerValidation.DELIVERYTERMS) ? "" : offerValidation.DELIVERYTERMS.replace(/<br>+/g, "</br>"),
@@ -1848,9 +1864,10 @@ module.exports = (srv) => {
 				BUDGETEDPROFITABILITY: (d.BUDGETED_PROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETED_PROFITABILITY, 2, 2).concat("%"),
 				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 2, 2).concat("%"),
 				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 2, 2).concat("%"),
-				BUDGET_RATE: ServiceHelper.formatNumber(d.BUDGET_RATE, 2, 2),
-				SPOT_RATE: ServiceHelper.formatNumber(d.SPOT_RATE, 2, 2),
-				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2)
+				BUDGET_RATE: d.BUDGET_RATE,
+				SPOT_RATE: d.SPOT_RATE,
+				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2),
+				IS_LOWEST: d.IS_LOWEST
 			}
 		});
 	}
@@ -2364,16 +2381,31 @@ module.exports = (srv) => {
 		}
 
 		//format prices
-		offerDeliveries.forEach(delivery => {
-			delivery.InstituteID = delivery.InstituteID.toString();
-			delivery.SKUCode = delivery.InstituteID.toString();
-			delivery.RequestedQuantity = ServiceHelper.formatNumber(delivery.RequestedQuantity, 2, 2);
-			delivery.ActualDeliveryQuantity = ServiceHelper.formatNumber(delivery.ActualDeliveryQuantity, 2, 2);
-			delivery.PenaltyValue = ServiceHelper.formatNumber(delivery.PenaltyValue, 2, 2);
-			delivery.ProductCode = delivery.InstituteID.toString();
-			delivery.SNo = delivery.InstituteID.toString();
-			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : '';
-		});
+		for (let i = 0; i < offerDeliveries.length; i++){
+
+		    let delivery = offerDeliveries[i];
+			let whereProduct = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", delivery.ProductCode);
+			let product = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProduct));
+
+			delivery.InstituteID = delivery.InstituteID ? delivery.InstituteID.toString() : 'NA';
+			delivery.SKUCode = delivery.SKUCode ? delivery.SKUCode.toString() : 'NA';
+			delivery.RequestedQuantity = delivery.RequestedQuantity ? ServiceHelper.formatNumber(delivery.RequestedQuantity, 2, 2) : 0;
+			delivery.ActualDeliveryQuantity = delivery.ActualDeliveryQuantity ? ServiceHelper.formatNumber(delivery.ActualDeliveryQuantity, 2, 2) : 0;
+			delivery.PenaltyValue = delivery.PenaltyValue ? ServiceHelper.formatNumber(delivery.PenaltyValue, 2, 2) : 0;
+			delivery.ProductCode = delivery.ProductCode ? delivery.InstituteID.toString() : 'NA';
+			delivery.SNo = delivery.SNo ? delivery.SNo.toString() : 'NA';
+			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : 'NA';
+			delivery.PlannedInAPO = delivery.PlannedInAPO ? delivery.PlannedInAPO : 'NA';
+			delivery.RequestedDeliveryDate = delivery.RequestedDeliveryDate ? delivery.RequestedDeliveryDate : '1970-01-01';
+			delivery.ActualDeliveryDate = delivery.ActualDeliveryDate ? delivery.ActualDeliveryDate : '1970-01-01';
+			delivery.PaidOrFree = delivery.PaidOrFree ? delivery.PaidOrFree : 'NA';
+			delivery.Penalty = delivery.Penalty ? delivery.Penalty : 'NA';
+			delivery.Compensated = delivery.Compensated ? delivery.Compensated : 'NA';
+			delivery.ProductName = product[0].PRODUCTPACKNAME;
+
+			offerDeliveries[i] = delivery;
+
+		};
 
 		const filedata = fs.readFileSync(path.join(__dirname, './xlsx-templates', "DeliveryTemplate.xlsx"));
 		//generate XLSX
