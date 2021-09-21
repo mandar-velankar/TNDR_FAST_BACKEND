@@ -365,7 +365,7 @@ entity PT_TMQUTO {
 }
 
 
-entity PT_TMTEND {
+entity PT_TMTEND: managed {
     key TenderID             : String(50) not null;
         CountryCode          : String(2) not null;
         ToolID               : Integer;
