@@ -1,4 +1,4 @@
-COUNTRYCODE,INSTITUTEID,CUSTOMERID,INSTITUTENAME,INSTITUTETYPE,ADDRESS,CONTACTNO,FAX,CONTACTPERSON,ACTIVERECORD,COMMENT,CITY,INSTITUTE_HIERARCHY_ID,STATE,,
+COUNTRYCODE,INSTITUTEID,CUSTOMERID,INSTITUTENAME,INSTITUTETYPE,ADDRESS,CONTACTNO,FAX,CONTACTPERSON,ACTIVERECORD,COMMENT,CITY,INSTITUTE_HIERARCHY_ID,STATE,MercadoPublicoIssuer,RegionID
 MO,100292,0,INST MO Public - 100292,Public,"Cit? Riad, Rabat",2.13E+11,2.13E+11,Responsible Pharmacist,Yes,,Rabat,1,,,
 MO,100296,0,INST MO Public - 100296,Public,"5?me Hopital Militaire de Guelmim 81000, Maroc",528770011,528770065,Responsible Pharmacist,Yes,,Guelmim,1,,,
 MO,100297,0,INST MO Public - 100297,Public,8 Rue Lahcan El Arjoune Casablanca,2.13E+11,2.13E+11,Responsible Pharmacist,Yes,,Casablanca,1,,,
@@ -6065,7 +6065,7 @@ CL,200659,3122246,INST CL Public - 200659,Public,SIMON BOLIVAR 2200,228700085,,,
 CL,200660,3126351,INST CL Public - 200660,Public,BROWN NORTE N° 235,#,,,Yes,,SANTIAGO,1,,,
 CL,200661,3189744,INST CL Public - 200661,Public,GENERAL BORGOÑO N° 1154,225657927,,,Yes,,SANTIAGO,1,,,
 CL,200662,3121705,INST CL Public - 200662,Public,Santos Dumont 999,229788688,,,Yes,,SANTIAGO,1,,,
-CL,200663,3565731,INST CL Public - 200663,Public,  Av. Independencia Nº 1027,#,,,Yes,,SANTIAGO,1,,,
+CL,200663,3565731,INST CL Public - 200663,Public,"  Av. Independencia Nº 1027",#,,,Yes,,SANTIAGO,1,,,
 CL,200664,3597765,INST CL Public - 200664,Public,Av. Independencia 1027,#,,,Yes,,SANTIAGO,1,,,
 CL,200665,3122011,INST CL Public - 200665,Public,Av.Alc. Fdo Castillo Velasco 9100,223653466,,,Yes,,SANTIAGO,1,,,
 CL,200666,3391332,INST CL Public - 200666,Public,ZENTENO 45 ED. DE FZAS ARMADAS,6932844,,,Yes,,SANTIAGO,1,,,
@@ -6696,7 +6696,7 @@ CL,201292,4488894,INST CL Private - 201292,Private,AV. DEPARTAMENTAL 1455,,,,Yes
 CL,201293,4532960,INST CL Public - 201293,Public,CALLE BUIN #300,,,,Yes,Price list 8,MAIPO,1,,,
 CL,201294,4563722,INST CL Public - 201294,Public,PEDRO LAGOS N° 200,,,,Yes,Price list 8,MULCHÉN,1,,,
 CL,201295,4593690,INST CL Public - 201295,Public,DEL CONSISTORIAL 6645,,,,Yes,Price list 8,SANTIAGO,1,,,
-CL,201296,4635905,INST CL Public - 201296,Public,GRAL. DEL CANTO 398 PLAYA ANCHA ,,,,Yes,Price list 8,VALPARAÍSO,1,,,
+CL,201296,4635905,INST CL Public - 201296,Public,"GRAL. DEL CANTO 398 PLAYA ANCHA ",,,,Yes,Price list 8,VALPARAÍSO,1,,,
 CL,200878,3121952,INST CL Cenabast - 200878,Cenabast,José Domingo Cañas 2681,225748231,,,Yes,,SANTIAGO,1,,,
 CL,200915,1896690,INST CL Cenabast - 200915,Cenabast,AV. MATTA 670,227849938,,,Yes,,SANTIAGO,1,,,
 TH,201297,170230024,INST TH Private - 201297,Private,,,,,Yes,,,1,,,
@@ -6879,121 +6879,121 @@ ES,201473,0,INST SA Private - 100151,Private,,,,,Yes,,,1,,,
 ES,201474,0,INST SA Private - 100152,Private,,,,,Yes,,,1,,,
 ES,201475,0,INST SA Private - 100153,Private,,,,,Yes,,,1,,,
 ES,201476,0,INST SA Private - 100154,Private,,,,,Yes,,,1,,,
-IT,201477,0,INST SA Private - 100155,Private,,,,,Yes,,,1,,,
-IT,201478,0,INST SA Private - 100156,Private,,,,,Yes,,,1,,,
-IT,201479,0,INST SA Public - 100157,Public,,,,,Yes,,,1,,,
-IT,201480,0,INST SA Private - 100158,Private,,,,,Yes,,,1,,,
-IT,201481,0,INST SA Private - 100159,Private,,,,,Yes,,,1,,,
-IT,201482,0,INST SA Public - 100160,Public,,,,,Yes,,,1,,,
-IT,201483,0,INST SA Private - 100161,Private,,,,,Yes,,,1,,,
-IT,201484,0,INST SA Public - 100162,Public,,,,,Yes,,,1,,,
-IT,201485,0,INST SA Private - 100163,Private,,,,,Yes,,,1,,,
-IT,201486,0,INST SA Private - 100164,Private,,,,,Yes,,,1,,,
-IT,201487,0,INST SA Private - 100165,Private,,,,,Yes,,,1,,,
-IT,201488,0,INST SA Private - 100166,Private,,,,,Yes,,,1,,,
-IT,201489,0,INST SA Private - 100168,Private,,,,,Yes,,,1,,,
-IT,201490,0,INST SA Public - 100169,Public,,,,,Yes,,,1,,,
-IT,201491,0,INST SA Private - 100170,Private,,,,,Yes,,,1,,,
-IT,201492,0,INST SA Private - 100172,Private,,,,,Yes,,,1,,,
-IT,201493,0,INST SA Private - 100173,Private,,,,,Yes,,,1,,,
-IT,201494,0,INST SA Public - 100174,Public,,,,,Yes,,,1,,,
-IT,201495,0,INST SA Public - 100175,Public,,,,,Yes,,,1,,,
-IT,201496,0,INST SA Private - 100176,Private,,,,,Yes,,,1,,,
-IT,201497,0,INST SA Private - 100177,Private,,,,,Yes,,,1,,,
-IT,201498,0,INST SA Public - 100178,Public,,,,,Yes,,,1,,,
-IT,201499,0,INST SA Private - 100179,Private,,,,,Yes,,,1,,,
-IT,201500,0,INST SA Private - 100180,Private,,,,,Yes,,,1,,,
-IT,201501,0,INST SA Public - 100181,Public,,,,,Yes,,,1,,,
-IT,201502,0,INST SA Public - 100182,Public,,,,,Yes,,,1,,,
-IT,201503,0,INST SA Public - 100183,Public,,,,,Yes,,,1,,,
-IT,201504,0,INST SA Public - 100184,Public,,,,,Yes,,,1,,,
-IT,201505,0,INST SA Public - 100185,Public,,,,,Yes,,,1,,,
-IT,201506,0,INST SA Public - 100188,Public,,,,,Yes,,,1,,,
-IT,201507,0,INST SA Public - 100190,Public,,,,,Yes,,,1,,,
-IT,201508,0,INST SA Public - 100191,Public,,,,,Yes,,,1,,,
-IT,201509,0,INST SA Public - 100192,Public,,,,,Yes,,,1,,,
-IT,201510,0,INST SA Public - 100193,Public,,,,,Yes,,,1,,,
-IT,201511,0,INST SA Public - 100194,Public,,,,,Yes,,,1,,,
-IT,201512,0,INST SA Public - 100195,Public,,,,,Yes,,,1,,,
-IT,201513,0,INST SA Public - 100196,Public,,,,,Yes,,,1,,,
-IT,201514,0,INST SA Public - 100197,Public,,,,,Yes,,,1,,,
-IT,201515,0,INST SA Public - 100199,Public,,,,,Yes,,,1,,,
-IT,201516,0,INST SA Public - 100200,Public,,,,,Yes,,,1,,,
-IT,201517,0,INST SA Public - 100201,Public,,,,,Yes,,,1,,,
-IT,201518,0,INST SA Public - 100202,Public,,,,,Yes,,,1,,,
-IT,201519,0,INST SA Public - 100204,Public,,,,,Yes,,,1,,,
-IT,201520,0,INST SA Public - 100205,Public,,,,,Yes,,,1,,,
-IT,201521,0,INST SA Public - 100206,Public,,,,,Yes,,,1,,,
-IT,201522,0,INST SA Public - 100207,Public,,,,,Yes,,,1,,,
-IT,201523,0,INST SA Public - 100209,Public,,,,,Yes,,,1,,,
-IT,201524,0,INST SA Public - 100210,Public,,,,,Yes,,,1,,,
-IT,201525,0,INST SA Private - 100211,Private,,,,,Yes,,,1,,,
-IT,201526,0,INST SA Private - 100212,Private,,,,,Yes,,,1,,,
-IT,201527,0,INST SA Public - 100213,Public,,,,,Yes,,,1,,,
-IT,201528,0,INST SA Public - 100214,Public,,,,,Yes,,,1,,,
-IT,201529,0,INST SA Public - 100215,Public,,,,,Yes,,,1,,,
-IT,201530,0,INST SA Public - 100216,Public,,,,,Yes,,,1,,,
-IT,201531,0,INST SA Public - 100217,Public,,,,,Yes,,,1,,,
-IT,201532,0,INST SA Private - 100218,Private,,,,,Yes,,,1,,,
-IT,201533,0,INST SA Public - 100219,Public,,,,,Yes,,,1,,,
-IT,201534,0,INST SA Public - 100220,Public,,,,,Yes,,,1,,,
-IT,201535,0,INST SA Private - 100221,Private,,,,,Yes,,,1,,,
-IT,201536,0,INST SA Public - 100222,Public,,,,,Yes,,,1,,,
-IT,201537,0,INST SA Private - 100223,Private,,,,,Yes,,,1,,,
-IT,201538,0,INST SA Private - 100224,Private,,,,,Yes,,,1,,,
-IT,201539,0,INST SA Public - 100225,Public,,,,,Yes,,,1,,,
-IT,201540,0,INST SA Public - 100227,Public,,,,,Yes,,,1,,,
-IT,201541,0,INST SA Public - 100228,Public,,,,,Yes,,,1,,,
-IT,201542,0,INST SA Public - 100229,Public,,,,,Yes,,,1,,,
-IT,201543,0,INST SA Public - 100230,Public,,,,,Yes,,,1,,,
-IT,201544,0,INST SA Public - 100231,Public,,,,,Yes,,,1,,,
-IT,201545,0,INST SA Public - 100232,Public,,,,,Yes,,,1,,,
-IT,201546,0,INST SA Private - 100233,Private,,,,,Yes,,,1,,,
-IT,201547,0,INST SA Private - 100235,Private,,,,,Yes,,,1,,,
-IT,201548,0,INST SA Public - 100236,Public,,,,,Yes,,,1,,,
-IT,201549,0,INST SA Private - 100237,Private,,,,,Yes,,,1,,,
-IT,201550,0,INST SA Public - 100238,Public,,,,,Yes,,,1,,,
-IT,201551,0,INST SA Private - 100239,Private,,,,,Yes,,,1,,,
-IT,201552,0,INST SA Public - 100240,Public,,,,,Yes,,,1,,,
-IT,201553,0,INST SA Public - 100241,Public,,,,,Yes,,,1,,,
-IT,201554,0,INST SA Private - 100242,Private,,,,,Yes,,,1,,,
-IT,201555,0,INST SA Private - 100244,Private,,,,,Yes,,,1,,,
-IT,201556,0,INST SA Private - 100245,Private,,,,,Yes,,,1,,,
-IT,201557,0,INST SA Private - 100246,Private,,,,,Yes,,,1,,,
-IT,201558,0,INST SA Private - 100247,Private,,,,,Yes,,,1,,,
-IT,201559,0,INST SA Public - 100248,Public,,,,,Yes,,,1,,,
-IT,201560,0,INST SA Public - 100249,Public,,,,,Yes,,,1,,,
-IT,201561,0,INST SA Public - 100250,Public,,,,,Yes,,,1,,,
-IT,201562,0,INST SA Private - 100251,Private,,,,,Yes,,,1,,,
-IT,201563,0,INST SA Public - 100252,Public,,,,,Yes,,,1,,,
-IT,201564,0,INST SA Private - 100253,Private,,,,,Yes,,,1,,,
-IT,201565,0,INST SA Public - 100265,Public,,,,,Yes,,,1,,,
-IT,201566,0,INST SA Public - 100266,Public,,,,,Yes,,,1,,,
-IT,201567,0,INST SA Public - 100267,Public,,,,,Yes,,,1,,,
-IT,201568,0,INST SA Public - 100268,Public,,,,,Yes,,,1,,,
-IT,201569,0,INST SA Public - 100269,Public,,,,,Yes,,,1,,,
-IT,201570,0,INST SA Public - 100270,Public,,,,,Yes,,,1,,,
-IT,201571,0,INST SA Public - 100302,Public,,,,,Yes,,,1,,,
-IT,201572,0,INST SA Public - 100303,Public,,,,,Yes,,,1,,,
-IT,201573,0,INST SA Public - 100314,Public,,,,,No,,,1,,,
-IT,201574,0,INST SA Public - 100315,Public,,,,,No,,,1,,,
-IT,201575,0,INST SA Private - 100135,Private,,,,,Yes,,,1,,,
-IT,201576,0,INST SA Public - 100136,Public,,,,,Yes,,,1,,,
-IT,201577,0,INST SA Private - 100137,Private,,,,,Yes,,,1,,,
-IT,201578,0,INST SA Private - 100138,Private,,,,,Yes,,,1,,,
-IT,201579,0,INST SA Public - 100139,Public,,,,,Yes,,,1,,,
-IT,201580,0,INST SA Private - 100140,Private,,,,,Yes,,,1,,,
-IT,201581,0,INST SA Private - 100141,Private,,,,,Yes,,,1,,,
-IT,201582,0,INST SA Private - 100142,Private,,,,,Yes,,,1,,,
-IT,201583,0,INST SA Private - 100143,Private,,,,,Yes,,,1,,,
-IT,201584,0,INST SA Public - 100144,Public,,,,,Yes,,,1,,,
-IT,201585,0,INST SA Private - 100145,Private,,,,,Yes,,,1,,,
-IT,201586,0,INST SA Private - 100146,Private,,,,,Yes,,,1,,,
-IT,201587,0,INST SA Private - 100147,Private,,,,,Yes,,,1,,,
-IT,201588,0,INST SA Private - 100148,Private,,,,,Yes,,,1,,,
-IT,201589,0,INST SA Private - 100149,Private,,,,,Yes,,,1,,,
-IT,201590,0,INST SA Private - 100150,Private,,,,,Yes,,,1,,,
-IT,201591,0,INST SA Private - 100151,Private,,,,,Yes,,,1,,,
-IT,201592,0,INST SA Private - 100152,Private,,,,,Yes,,,1,,,
-IT,201593,0,INST SA Private - 100153,Private,,,,,Yes,,,1,,,
-IT,201594,0,INST SA Private - 100154,Private,,,,,Yes,,,1,,,
+IT,201477,0,INST SA Private - 100155,Public Region(s),,,,,Yes,,,1,,,0627ba65-866b-41ac-9855-5086608247be
+IT,201478,0,INST SA Private - 100156,Private Account,,,,,Yes,,,1,,,0627ba65-866b-41ac-9855-5086608247be
+IT,201479,0,INST SA Public - 100157,Public Account,,,,,Yes,,,1,,,0627ba65-866b-41ac-9855-5086608247be
+IT,201480,0,INST SA Private - 100158,Public Region(s),,,,,Yes,,,1,,,7c3cb13c-5d4a-400d-887c-a92b3a476e56
+IT,201481,0,INST SA Private - 100159,Private Account,,,,,Yes,,,1,,,7c3cb13c-5d4a-400d-887c-a92b3a476e56
+IT,201482,0,INST SA Public - 100160,Public Account,,,,,Yes,,,1,,,7c3cb13c-5d4a-400d-887c-a92b3a476e56
+IT,201483,0,INST SA Private - 100161,Private Account,,,,,Yes,,,1,,,7c3cb13c-5d4a-400d-887c-a92b3a476e56
+IT,201484,0,INST SA Public - 100162,Public Account,,,,,Yes,,,1,,,7c3cb13c-5d4a-400d-887c-a92b3a476e56
+IT,201485,0,INST SA Private - 100163,Public Region(s),,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201486,0,INST SA Private - 100164,Public Region(s),,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201487,0,INST SA Private - 100165,Private Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201488,0,INST SA Private - 100166,Private Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201489,0,INST SA Private - 100168,Private Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201490,0,INST SA Public - 100169,Public Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201491,0,INST SA Private - 100170,Private Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201492,0,INST SA Private - 100172,Private Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201493,0,INST SA Private - 100173,Private Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201494,0,INST SA Public - 100174,Public Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201495,0,INST SA Public - 100175,Public Account,,,,,Yes,,,1,,,39ee08b4-054a-4c56-b231-3d7419ae1118
+IT,201496,0,INST SA Private - 100176,Public Region(s),,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201497,0,INST SA Private - 100177,Private Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201498,0,INST SA Public - 100178,Public Region(s),,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201499,0,INST SA Private - 100179,Private Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201500,0,INST SA Private - 100180,Private Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201501,0,INST SA Public - 100181,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201502,0,INST SA Public - 100182,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201503,0,INST SA Public - 100183,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201504,0,INST SA Public - 100184,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201505,0,INST SA Public - 100185,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201506,0,INST SA Public - 100188,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201507,0,INST SA Public - 100190,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201508,0,INST SA Public - 100191,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201509,0,INST SA Public - 100192,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201510,0,INST SA Public - 100193,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201511,0,INST SA Public - 100194,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201512,0,INST SA Public - 100195,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201513,0,INST SA Public - 100196,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201514,0,INST SA Public - 100197,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201515,0,INST SA Public - 100199,Public Account,,,,,Yes,,,1,,,5f7e277a-a361-4c5e-9053-1a0713adceea
+IT,201516,0,INST SA Public - 100200,Public Region(s),,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201517,0,INST SA Public - 100201,Public Region(s),,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201518,0,INST SA Public - 100202,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201519,0,INST SA Public - 100204,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201520,0,INST SA Public - 100205,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201521,0,INST SA Public - 100206,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201522,0,INST SA Public - 100207,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201523,0,INST SA Public - 100209,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201524,0,INST SA Public - 100210,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201525,0,INST SA Private - 100211,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201526,0,INST SA Private - 100212,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201527,0,INST SA Public - 100213,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201528,0,INST SA Public - 100214,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201529,0,INST SA Public - 100215,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201530,0,INST SA Public - 100216,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201531,0,INST SA Public - 100217,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201532,0,INST SA Private - 100218,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201533,0,INST SA Public - 100219,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201534,0,INST SA Public - 100220,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201535,0,INST SA Private - 100221,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201536,0,INST SA Public - 100222,Public Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201537,0,INST SA Private - 100223,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201538,0,INST SA Private - 100224,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201539,0,INST SA Public - 100225,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201540,0,INST SA Public - 100227,Public Region(s),,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201541,0,INST SA Public - 100228,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201542,0,INST SA Public - 100229,Public Region(s),,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201543,0,INST SA Public - 100230,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201544,0,INST SA Public - 100231,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201545,0,INST SA Public - 100232,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201546,0,INST SA Private - 100233,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201547,0,INST SA Private - 100235,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201548,0,INST SA Public - 100236,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201549,0,INST SA Private - 100237,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201550,0,INST SA Public - 100238,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201551,0,INST SA Private - 100239,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201552,0,INST SA Public - 100240,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201553,0,INST SA Public - 100241,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201554,0,INST SA Private - 100242,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201555,0,INST SA Private - 100244,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201556,0,INST SA Private - 100245,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201557,0,INST SA Private - 100246,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201558,0,INST SA Private - 100247,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201559,0,INST SA Public - 100248,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201560,0,INST SA Public - 100249,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201561,0,INST SA Public - 100250,Public Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201562,0,INST SA Private - 100251,Private Account,,,,,Yes,,,1,,,9416e19d-2492-486d-b29e-b322ddb02aa7
+IT,201563,0,INST SA Public - 100252,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201564,0,INST SA Private - 100253,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201565,0,INST SA Public - 100265,Public Region(s),,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201566,0,INST SA Public - 100266,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201567,0,INST SA Public - 100267,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201568,0,INST SA Public - 100268,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201569,0,INST SA Public - 100269,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201570,0,INST SA Public - 100270,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201571,0,INST SA Public - 100302,Public Region(s),,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201572,0,INST SA Public - 100303,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201573,0,INST SA Public - 100314,Public Account,,,,,No,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201574,0,INST SA Public - 100315,Public Account,,,,,No,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201575,0,INST SA Private - 100135,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201576,0,INST SA Public - 100136,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201577,0,INST SA Private - 100137,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201578,0,INST SA Private - 100138,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201579,0,INST SA Public - 100139,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201580,0,INST SA Private - 100140,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201581,0,INST SA Private - 100141,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201582,0,INST SA Private - 100142,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201583,0,INST SA Private - 100143,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201584,0,INST SA Public - 100144,Public Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201585,0,INST SA Private - 100145,Private Account,,,,,Yes,,,1,,,ae4fe52d-6fc0-4e78-ae52-5c688329cb52
+IT,201586,0,INST SA Private - 100146,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201587,0,INST SA Private - 100147,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201588,0,INST SA Private - 100148,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201589,0,INST SA Private - 100149,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201590,0,INST SA Private - 100150,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201591,0,INST SA Private - 100151,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201592,0,INST SA Private - 100152,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201593,0,INST SA Private - 100153,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
+IT,201594,0,INST SA Private - 100154,Private Account,,,,,Yes,,,1,,,f08c57c0-d88e-4759-a442-53c8f73856a6
