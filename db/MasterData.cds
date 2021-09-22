@@ -614,4 +614,16 @@ entity ChannelProductPolicies: cuid, managed {
 entity CountryRegions: cuid {
 	CountryCode     	: String(2);
 	Name				: String;
+	Tenders				: Composition of many Tenders_in_Regions on Tenders.Region = $self;
+}
+
+entity TenderRegions {
+	key TenderID 	    : String;
+	Regions				: Composition of many Tenders_in_Regions on Regions.Tender = $self;
+}
+
+// link table to reflect many-to-many relationship between CountryRegions and TenderRegions
+entity Tenders_in_Regions {
+	 key Tender				: Association to TenderRegions;
+	 key Region				: Association to CountryRegions;
 }
