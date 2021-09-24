@@ -53,7 +53,7 @@ inner join AdminData.PT_TMUSER user
      country.CountryName,
      user.UserName,
      user.UserEmail
-};
+} where approvals.ApprovalStatus <> 'Cancelled';
 
 /* Nils: can be deleted later on... This is changed beceause when you delete an offer, the newly created offer is getting same nextofferid (only active offers are taken into account)
 entity TenderOffers as select from TransactionalData.PT_TMTEND as tender{
@@ -611,17 +611,66 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack sku
     offerProduct.SKUCountry.QTY_THRESHOLD * (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as QTY_THRESHOLD:Double
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
+entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
+inner join ApprovalRequests as approvalRequest
+    on  approvalRequest.TenderID = offer.TenderID
+	and approvalRequest.OfferId = offer.OfferID
+	and approvalRequest.CountryCode = offer.CountryCode
+    and approvalRequest.ApprovalStatus <> 'Cancelling'
+    and approvalRequest.ApprovalStatus <> 'Rejected'
+inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
+    on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
+    and offer.CountryCode = signatory.COUNTRY_CODE
+    and signatory.SIGNATORY = 1
+    and (signatory.DIVISION = offer.Division or signatory.DIVISION = 'Both')
+    and approvalRequest.ApproverName = signatory.NAME
+left outer join TransactionalData.PT_TMQUTO as quotation
+    on offer.OfferID = quotation.OfferID
+    and quotation.AS1 = signatory.AUTHORIZED_SIGNATORY
+{
+    offer.OfferID,
+    ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String
+};
+
+entity OfferSignatory2 as select from TransactionalData.PT_TMOFRS as offer
+inner join ApprovalRequests as approvalRequest
+    on  approvalRequest.TenderID = offer.TenderID
+	and approvalRequest.OfferId = offer.OfferID
+	and approvalRequest.CountryCode = offer.CountryCode
+    and approvalRequest.ApprovalStatus <> 'Cancelling'
+    and approvalRequest.ApprovalStatus <> 'Rejected'
+inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
+    on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
+    and offer.CountryCode = signatory.COUNTRY_CODE
+    and signatory.SIGNATORY = 2
+    and (signatory.DIVISION = offer.Division or signatory.DIVISION = 'Both')
+    and approvalRequest.ApproverName = signatory.NAME
+left outer join TransactionalData.PT_TMQUTO as quotation
+    on offer.OfferID = quotation.OfferID
+    and quotation.AS2 = signatory.AUTHORIZED_SIGNATORY
+{
+    offer.OfferID,
+    ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String
+};
+
+
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
-left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory1
-    on offer.SellingCompany = signatory1.LEGAL_ENTITY_CODE
-    and offer.CountryCode = signatory1.COUNTRY_CODE
-    and signatory1.SORTER = 1
-left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2
-    on offer.SellingCompany = signatory2.LEGAL_ENTITY_CODE
-    and offer.CountryCode = signatory2.COUNTRY_CODE
-    and signatory2.SORTER = 2
+left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory1Default
+    on offer.SellingCompany = signatory1Default.LEGAL_ENTITY_CODE
+    and offer.CountryCode = signatory1Default.COUNTRY_CODE
+    and signatory1Default.SORTER = 1
+left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory2Default
+    on offer.SellingCompany = signatory2Default.LEGAL_ENTITY_CODE
+    and offer.CountryCode = signatory2Default.COUNTRY_CODE
+    and signatory2Default.SORTER = 2
+left outer join OfferSignatory1 as signatory1
+    on offer.OfferID = signatory1.OfferID
+left outer join OfferSignatory2 as signatory2
+    on offer.OfferID = signatory2.OfferID
 left outer join AdminData.NextDateSettings as date_settings
     on MONTH(CURRENT_DATE) = date_settings.CurrentMonth
+left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
+    on offer.OfferID = approvalRequests.OfferId
 {	
 	'PT_TMTNOFST(TENDERID=''' || offer.TenderID || ''',OFFERID=''' || offer.OfferID || ''',Active=1)' as OFFERSTATUSPATH:String(500),
 	offer.TenderID as TENDERID,
@@ -640,8 +689,18 @@ left outer join AdminData.NextDateSettings as date_settings
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
-    ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS1:String(500),
-	ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS2:String(500),
+    ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS1:String(500),
+	ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS2:String(500),
+    case 
+        when signatory1.AUTHORIZED_SIGNATORY is null then false
+        when signatory1.AUTHORIZED_SIGNATORY = ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) then true
+        else false
+    end as E_SIGNATURE1:Boolean,
+    case 
+        when signatory2.AUTHORIZED_SIGNATORY is null then false 
+        when signatory2.AUTHORIZED_SIGNATORY = ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.AUTHORIZED_SIGNATORY) then true
+        else false
+    end as E_SIGNATURE2:Boolean,
 	offer.Currency as CURRENCY,
     min(offer.Product.Price.BudgetRate) as BUDGET_RATE,
     min(offer.Product.Price.SpotRate) as SPOT_RATE,
@@ -697,8 +756,10 @@ left outer join AdminData.NextDateSettings as date_settings
           offer.SellingCompanyDetails.BankDetails,
           offer.Quotation.AS1,
           signatory1.AUTHORIZED_SIGNATORY,
+          signatory1Default.AUTHORIZED_SIGNATORY,
           offer.Quotation.AS2,
           signatory2.AUTHORIZED_SIGNATORY,
+          signatory2Default.AUTHORIZED_SIGNATORY,
           offer.Currency,
           offer.SellingCompanyDetails.Letterhead,
           offer.SellingCompanyDetails.Remarks,

@@ -9,6 +9,8 @@ using {com.bayer.SXTENDER.TransactionalDataViews} from '../db/TransactionalDataV
 using {com.bayer.SXTENDER.IntegrationDataConversion} from '../db/IntegrationDataConversion';
 using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
+using {com.bayer.SXTENDER.BankGuaranteeData} from '../db/BankGuaranteeData';
+using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using { User, Country, managed, cuid } from '@sap/cds/common';
 
 
@@ -325,6 +327,8 @@ service CatalogService @(path : 'tender')
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
             SELLING_COMPANY_AS2   : String(300);
+            E_SIGNATURE1          : Boolean;
+            E_SIGNATURE2          : Boolean;
             CURRENCY              : String(255);
             AMOUNT_IN_NUMBERS     : Double;
             AMOUNT_IN_WORDS       : String(1024);
@@ -463,6 +467,8 @@ service CatalogService @(path : 'tender')
             REMARKS            : String(5000);
             APPROVER1          : String(5000);
             APPROVER2          : String(5000);
+            E_SIGNATURE1       : Boolean;
+            E_SIGNATURE2       : Boolean;
             SHIPMENTTERMS      : String(5000);
             PAYMENTTERMS       : String(5000);
             DELIVERYTERMS      : String(5000);
@@ -522,7 +528,8 @@ service CatalogService @(path : 'tender')
             PROFITABILITYSPOT             : String(1000);
             BUDGET_RATE                   : Double;
             SPOT_RATE                     : Double;
-            BUSINESS_CASE_PRICE           : Double;
+            BUSINESS_CASE_PRICE           : String(1000);
+            IS_LOWEST                     : Integer;
     };
 
     entity ApprovalApprovers {
@@ -554,6 +561,18 @@ service CatalogService @(path : 'tender')
         *,
         Comprador: redirected to Buyers,
         Items: redirected to Products
+    };
+
+    //BANK GUARANTEE
+    entity BankGuarantees as projection on BankGuaranteeData.BankGuarantees{
+        *,
+        Tender: redirected to PT_TMTEND
+    };
+
+     //PRICE AGREEMENT
+    entity PriceAgreements as projection on PriceAgreementData.PriceAgreements{
+        *,
+        Tender: redirected to PT_TMTEND
     };
 
     //OTHER

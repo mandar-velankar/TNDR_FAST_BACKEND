@@ -71,6 +71,9 @@
         }
     },
     "requires": {
+        "hana": {
+          "deploy-format": "hdbtable"
+        },
         "db": {
             "kind": "hana"
         },
