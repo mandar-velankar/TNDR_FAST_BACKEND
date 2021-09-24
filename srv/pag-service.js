@@ -7,7 +7,7 @@ module.exports = (srv) => {
 
     const {
 		CustomerPrices,
-        Materials
+        MaterialsView
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     
@@ -56,7 +56,7 @@ module.exports = (srv) => {
             if(!materials){
                 let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
-                materials = await tx.run(SELECT.from(Materials).where(whereCountryCode).where(whereProductPackId));
+                materials = await tx.run(SELECT.from(MaterialsView).where(whereCountryCode).where(whereProductPackId));
             }
 
 

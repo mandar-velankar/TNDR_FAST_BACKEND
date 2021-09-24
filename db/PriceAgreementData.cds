@@ -33,14 +33,11 @@ entity PriceAgreements: cuid, managed {
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
                                                      and Product.COUNTRYCODE = CountryCode
                                                      and Product.ACTIVERECORD = 'Yes';
-    Candidates: Association to many Candidates on Candidates.PriceAgreementId = ID;
-    Materials: Association to many Materials on Materials.CountryCode = CountryCode
+    Candidates: Association to many CandidatesView on Candidates.PriceAgreementId = ID;
+    Materials: Association to many MaterialsView on Materials.CountryCode = CountryCode
                                     and Materials.ProductPackId = ProductPackId;
     CustomerPrices: Association to many CustomerPrices on CustomerPrices.PriceAgreementId = ID;
 }
-
-
-
 entity CustomerPrices: cuid, managed {
     ValidFrom: DateTime;
     ValidTo: DateTime;
@@ -59,7 +56,7 @@ entity CustomerPrices: cuid, managed {
 
 // this query needs to be updated when everything is ready in the Tender app
 // list of candidate institutes that can participate in a price agreement but don't have a CustomerPrices set yet
-entity Candidates as select from PriceAgreements as pa {
+entity CandidatesView as select from PriceAgreements as pa {
     pa.ID as PriceAgreementId,
     key pa.TenderId,
     key pa.InstituteId
@@ -70,7 +67,7 @@ entity Candidates as select from PriceAgreements as pa {
  * This view tells us if a new SKU has been added from SAP to the master data automatically through interfacing.
  * Indicated with the "isNew" field
  */
-entity Materials as select from MasterData.PT_TMSKUPRDPCK sku
+entity MaterialsView as select from MasterData.PT_TMSKUPRDPCK sku
 left outer join CustomerPrices cp 
   on cp.MaterialNumber = sku.SKUCode 
   and cp.CountryCode = sku.CountryCode 
@@ -85,8 +82,8 @@ left outer join CustomerPrices cp
 
 
 entity CandidatePrices as select from PriceAgreements pa
-left outer join Candidates ca on ca.PriceAgreementId = pa.ID 
-left outer join Materials ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
+left outer join CandidatesView ca on ca.PriceAgreementId = pa.ID 
+left outer join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
 left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.MaterialNumber and cp.InstituteId = ca.InstituteId {
         key pa.ID as PriceAgreementId,
         key ca.TenderId,

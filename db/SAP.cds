@@ -105,7 +105,7 @@ entity ItalyCustomers: cuid, managed {
 
 entity ItalyDeliveries: cuid, managed {
 	VBELN				: String(10); 			// Delivery
-	POSNR				: Integer(6); 			// Delivery Item
+	POSNR				: Integer; 			// Delivery Item
 	VKBUR				: String(4); 			// Sales Office
 	BUKRS				: String(4); 			// Company Code
 	KUNNR				: String(10); 			// Ship-to party
@@ -161,7 +161,7 @@ entity SpainCustomers: cuid, managed {
 
 entity SpainDeliveries: cuid, managed {
 	VBELN				: String(10); 			// Delivery
-	POSNR				: Integer(6); 			// Delivery Item
+	POSNR				: Integer; 			// Delivery Item
 	VKBUR				: String(4); 			// Sales Office
 	BUKRS				: String(4); 			// Company Code
 	KUNNR				: String(10); 			// Ship-to party
