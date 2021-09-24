@@ -59,10 +59,16 @@ entity CustomerPrices: cuid, managed {
 
 // this query needs to be updated when everything is ready in the Tender app
 // list of candidate institutes that can participate in a price agreement but don't have a CustomerPrices set yet
-entity Candidates as select from PriceAgreements as pa {
+entity Candidates as select from PriceAgreements as pa 
+left outer join MasterData.Tenders_in_Regions tr on pa.TenderId = tr.TenderID
+inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode
+       and tr.RegionID = inst.RegionID
+       and inst.InstituteType = 'Public Account'
+{
     pa.ID as PriceAgreementId,
     key pa.TenderId,
-    key pa.InstituteId
+    key inst.InstituteID as CandidateID,
+    tr.Region.ID as RegionId
 };
 
 
@@ -85,12 +91,12 @@ left outer join CustomerPrices cp
 
 
 entity CandidatePrices as select from PriceAgreements pa
-left outer join Candidates ca on ca.PriceAgreementId = pa.ID 
-left outer join Materials ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
-left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.MaterialNumber and cp.InstituteId = ca.InstituteId {
+inner join Candidates ca on ca.PriceAgreementId = pa.ID 
+inner join Materials ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
+left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.MaterialNumber and cp.InstituteId = ca.CandidateID {
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
-        key ca.InstituteId,
+        key ca.CandidateID as InstituteId,
         pa.CountryCode,
         pa.ProductPackId, 
         key ma.MaterialNumber,

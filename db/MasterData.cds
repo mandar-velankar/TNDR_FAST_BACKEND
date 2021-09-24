@@ -624,6 +624,8 @@ entity TenderRegions {
 
 // link table to reflect many-to-many relationship between CountryRegions and TenderRegions
 entity Tenders_in_Regions {
-	 key Tender				: Association to TenderRegions;
-	 key Region				: Association to CountryRegions;
+	key TenderID        : String;
+	key RegionID        : String;
+	Tender				: Association to TenderRegions on Tender.TenderID = TenderID;
+	Region				: Association to CountryRegions on Region.ID = RegionID;
 }
