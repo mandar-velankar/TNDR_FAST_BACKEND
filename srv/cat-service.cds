@@ -53,6 +53,9 @@ service CatalogService @(path : 'tender')
     entity MasterCompetitors                 as projection on MasterData.MasterCompetitors;
     entity BrandPolicies                     as projection on MasterData.BrandPolicies;
     entity DistributorBrandPolicies          as projection on MasterData.DistributorBrandPolicies;
+    entity CountryRegions                    as projection on MasterData.CountryRegions;
+    entity TenderRegions                     as projection on MasterData.TenderRegions;
+
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
         to    : 'authenticated-user',

@@ -65,6 +65,7 @@ entity PT_TMINST{
 	INSTITUTE_HIERARCHY_ID:Integer;
 	State:String;
 	MercadoPublicoIssuer:String;
+	RegionID:String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -72,6 +73,7 @@ entity PT_TMINST{
 	Children:Association to many PT_TMINSHIER on Children.Parent = $self;
 	Terms:Association to many PT_TMINSBRTR on Terms.Institute = $self;
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
+	Region:Association to CountryRegions on Region.ID = RegionID;
 }
 
 //Institute Hierarchy Level
@@ -608,3 +610,22 @@ entity ChannelProductPolicies: cuid, managed {
 	ProductPackID		:Integer not null;
 	StandardDiscount 	: Double;	
 };
+
+entity CountryRegions: cuid {
+	CountryCode     	: String(2);
+	Name				: String;
+	Tenders				: Composition of many Tenders_in_Regions on Tenders.Region = $self;
+}
+
+entity TenderRegions {
+	key TenderID 	    : String;
+	Regions				: Composition of many Tenders_in_Regions on Regions.Tender = $self;
+}
+
+// link table to reflect many-to-many relationship between CountryRegions and TenderRegions
+entity Tenders_in_Regions {
+	key TenderID        : String;
+	key RegionID        : String;
+	Tender				: Association to TenderRegions on Tender.TenderID = TenderID;
+	Region				: Association to CountryRegions on Region.ID = RegionID;
+}
