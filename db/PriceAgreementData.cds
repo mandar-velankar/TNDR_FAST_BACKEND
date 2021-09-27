@@ -25,9 +25,9 @@ entity PriceAgreements: cuid, managed {
     CountryCode: String not null;
     InstituteId: Integer not null;
     TenderId: String not null;
-    ProductPackId: String not null;
+    ProductPackId: Integer not null;
     Synchronized: Boolean;
-    virtual hasNewMaterials: Boolean default false; // calculated from NodeJS
+    hasNewMaterials: Boolean default false; // calculated from NodeJS
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -46,7 +46,7 @@ entity CustomerPrices: cuid, managed {
     InstituteId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     CountryCode: String not null;
-    ProductPackId: String not null;
+    ProductPackId: Integer not null;
     MaterialNumber: String not null;
     Synchronized: Boolean;
     Price: Double;
