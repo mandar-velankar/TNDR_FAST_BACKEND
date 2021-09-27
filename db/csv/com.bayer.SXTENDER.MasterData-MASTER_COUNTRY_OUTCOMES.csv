@@ -86,3 +86,6 @@ COUNTRYCODE,OUTCOME,SORTER
 "SD","Cancelled",4
 "SY","Cancelled",4
 "YE","Cancelled",4
+"IT","Decision Pending",1
+"IT","Won",2
+"IT","Lost",3
