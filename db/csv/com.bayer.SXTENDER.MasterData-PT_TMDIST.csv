@@ -60,4 +60,4 @@ COUNTRYCODE,DISTRIBUTORID,DISTRIBUTORNAME,ADDRESS,CONTACTNO,FAX,CONTACTPERSON,AC
 "AR",100000003,"Drofar - Redimer","Av. Juan B. Justo 2713, CABA, Argentina","1148553564","","Juan Pablo Accoroni","Yes","juanpablo.accoroni@drofar.com.ar "
 "AR",100000004,"No Distributor","","","","","Yes",""
 "CL",100000039,"No Distributor","","","","","Yes",""
-"IT",100000040,"No Distributor","","","","","Yes",""
+"IT",100000040,"No Distributor",,,,,"Yes",
