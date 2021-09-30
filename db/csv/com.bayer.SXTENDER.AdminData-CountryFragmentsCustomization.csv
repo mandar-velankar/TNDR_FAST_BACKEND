@@ -73,5 +73,5 @@ ES,financialOfferId,financialOffer
 ES,quotationViewId,QuotationView
 ES,deliveryTrackingId,DeliveryTracking
 IT,financialOfferId,financialOffer
-IT,quotationViewId,QuotationView
+IT,quotationViewId,QuotationView_IT
 IT,deliveryTrackingId,DeliveryTracking
