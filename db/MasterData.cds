@@ -271,6 +271,8 @@ entity PT_TMCTPRDPCK{
 	VTATax:hana.REAL;
 	COMMENT:String(255);
 	GOV_CODE:String(255);
+	CODE1:String(255);
+	CODE2:String(255);
 	QTY_THRESHOLD:Integer;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;

@@ -292,6 +292,7 @@ entity PT_TMOFPR {
         DeliveryConditions       : String;
         MinInvoiceAmount         : Double;
         PricingPolicyCluster     : String;
+        OfferType                : String;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
