@@ -16,6 +16,6 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity SpainCustomers as projection on SAP.SpainCustomers;
     entity SpainDeliveries as projection on SAP.SpainDeliveries;
 
-    function createBrazilContract() returns String;
+    function createBrazilContract() returns LargeString;
 
 }
