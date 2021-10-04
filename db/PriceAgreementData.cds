@@ -66,7 +66,16 @@ inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode
     key pa.TenderId,
     key inst.InstituteID as CandidateID,
     tr.Region.ID as RegionId
-};
+}
+union
+select from PriceAgreements as pa
+inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode and pa.InstituteId = inst.InstituteID
+{
+    pa.ID as PriceAgreementId,
+    pa.TenderId,
+    inst.InstituteID as CandidateID,
+    inst.Region.ID as RegionId
+}where inst.InstituteType <> 'Region(s)';
 
 
 /**
