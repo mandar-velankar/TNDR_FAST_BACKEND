@@ -165,9 +165,25 @@ entity ExcelAttachment {
     mediaType:String @Core.IsMediaType;
 }
 
-entity WordAttachment {
-    key template : String(100);
-    key OfferId : String(50);
+// entity WordAttachment {
+//     key template : String(100);
+//     key OfferId : String(50);
+//     key CountryCode    : String(2);
+//     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+//     mediaType:String @Core.IsMediaType;
+// }
+
+entity WordTemplateCountry {
+    key countryCode    : String(2);
+    key templateId     : Integer;
+        WordTemplates      : Association to WordTemplate
+                           on WordTemplates.templateId = templateId; //This can be found in OData
+}
+
+entity WordTemplate {
+    key templateId     : Integer;
+    name:String(100);
+    filename:String(250);
     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     mediaType:String @Core.IsMediaType;
 }

@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -2328,22 +2328,22 @@ module.exports = (srv) => {
 		return excelStreamValue;
 	});
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
-	srv.on('READ', 'WordAttachment', async (req, next) => {
+	srv.on('READ', 'WordAttachments', async (req, next) => {
 		const tx = cds.transaction(req);
-		const offerId = req.data.OfferId;
-		const template = req.data.template;
+		const offerId = req.data.offerId;
+		const templateId = req.data.templateId;
 		if (!offerId) {
 			return next();
 		}
 
-		const templates = await tx.run(SELECT.from(WordAttachment).where({ template: template, OfferId: "*" }));
+		const templates = await tx.run(SELECT.from(WordTemplate).where({ templateId: templateId }));
 		if (templates.length === 0) {
-			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + template);
+			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
 		}
 		const templateContent = templates[0].content;
 		let wordData = {};
 		//Get offer data
-		if (offerId !== "*") {
+		if (offerId) {
 			try {
 				wordData = await getOfferData(tx,offerId);
 			} catch (error) {
@@ -2358,7 +2358,7 @@ module.exports = (srv) => {
 				this.push(null);
 			}
 		});
-		const filename = offerId === "*" ? template : offerId+'.docx';
+		const filename = offerId+'.docx';
 		req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 		return {
