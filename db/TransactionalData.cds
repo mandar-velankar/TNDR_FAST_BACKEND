@@ -467,6 +467,15 @@ entity PT_TMTRRES {
         Reason            : String(255);
         Comment           : String(255);
         AwardedTier       : Integer;
+        //new fields italy
+        ExtensionDate     : Date;
+        ExtensionNotes    : String;
+        AwardLetterNo     : String;
+        AwardDelibNo      : String;
+        DeliveryDate      : Date;
+        ResultDate        : Date;
+        AwardDate         : Date;
+        AwardActing       : String;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID
