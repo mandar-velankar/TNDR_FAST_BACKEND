@@ -586,7 +586,7 @@ service CatalogService @(path : 'tender')
         key OfferId : String(50);
         content   : LargeBinary @Core.MediaType : 'application/pdf';
     }
-    entity ExcelAttachment as projection on AdminData.ExcelAttachment;
+    entity ExcelAttachmentView as projection on AdminData.ExcelAttachment;
     // {
     //     key OfferId : String(50);
     //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -594,12 +594,14 @@ service CatalogService @(path : 'tender')
     // }
 
         
-    entity WordAttachment as projection on AdminData.WordAttachment;
-    // {
-    //     key OfferId : String(50);
-    //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    //     mediaType:String @Core.IsMediaType;
-    // }
+    entity WordTemplateCountry as projection on AdminData.WordTemplateCountry;
+    entity WordTemplate as projection on AdminData.WordTemplate;
+    entity WordAttachments{
+        key offerId : String(50);
+        key templateId:Integer;
+        content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        mediaType:String @Core.IsMediaType;
+    }
 
     entity DeliveryExcel {
         key OfferId : String(50);
