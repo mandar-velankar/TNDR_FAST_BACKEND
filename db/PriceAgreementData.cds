@@ -25,9 +25,9 @@ entity PriceAgreements: cuid, managed {
     CountryCode: String not null;
     InstituteId: Integer not null;
     TenderId: String not null;
-    ProductPackId: String not null;
+    ProductPackId: Integer not null;
     Synchronized: Boolean;
-    virtual hasNewMaterials: Boolean default false; // calculated from NodeJS
+    hasNewMaterials: Boolean default false; // calculated from NodeJS
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -46,7 +46,7 @@ entity CustomerPrices: cuid, managed {
     InstituteId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     CountryCode: String not null;
-    ProductPackId: String not null;
+    ProductPackId: Integer not null;
     MaterialNumber: String not null;
     Synchronized: Boolean;
     Price: Double;
@@ -56,11 +56,26 @@ entity CustomerPrices: cuid, managed {
 
 // this query needs to be updated when everything is ready in the Tender app
 // list of candidate institutes that can participate in a price agreement but don't have a CustomerPrices set yet
-entity CandidatesView as select from PriceAgreements as pa {
+entity CandidatesView as select from PriceAgreements as pa 
+left outer join MasterData.Tenders_in_Regions tr on pa.TenderId = tr.TenderID
+inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode
+       and tr.RegionID = inst.RegionID
+       and inst.InstituteType = 'Public Account'
+{
     pa.ID as PriceAgreementId,
     key pa.TenderId,
-    key pa.InstituteId
-};
+    key inst.InstituteID as CandidateID,
+    tr.Region.ID as RegionId
+}
+union
+select from PriceAgreements as pa
+inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode and pa.InstituteId = inst.InstituteID
+{
+    pa.ID as PriceAgreementId,
+    pa.TenderId,
+    inst.InstituteID as CandidateID,
+    inst.Region.ID as RegionId
+}where inst.InstituteType <> 'Region(s)';
 
 
 /**
@@ -82,12 +97,12 @@ left outer join CustomerPrices cp
 
 
 entity CandidatePrices as select from PriceAgreements pa
-left outer join CandidatesView ca on ca.PriceAgreementId = pa.ID 
-left outer join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
-left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.MaterialNumber and cp.InstituteId = ca.InstituteId {
+inner join CandidatesView ca on ca.PriceAgreementId = pa.ID 
+inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
+left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.MaterialNumber and cp.InstituteId = ca.CandidateID {
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
-        key ca.InstituteId,
+        key ca.CandidateID as InstituteId,
         pa.CountryCode,
         pa.ProductPackId, 
         key ma.MaterialNumber,

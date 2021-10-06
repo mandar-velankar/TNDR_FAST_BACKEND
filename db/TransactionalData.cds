@@ -292,6 +292,7 @@ entity PT_TMOFPR {
         DeliveryConditions       : String;
         MinInvoiceAmount         : Double;
         PricingPolicyCluster     : String;
+        OfferType                : String;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -365,7 +366,7 @@ entity PT_TMQUTO {
 }
 
 
-entity PT_TMTEND {
+entity PT_TMTEND: managed {
     key TenderID             : String(50) not null;
         CountryCode          : String(2) not null;
         ToolID               : Integer;
