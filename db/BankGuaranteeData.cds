@@ -8,6 +8,9 @@ using {
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.TransactionalData} from './TransactionalData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
+using {com.bayer.SXTENDER.PriceAgreementDataViews} from './PriceAgreementDataViews';
+
+
 
 entity BankGuarantees: cuid, managed {
     TenderID: String;
@@ -21,4 +24,5 @@ entity BankGuarantees: cuid, managed {
     Currency: String;
     Comment: String;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderID;
+    PriceAgreement: Association to PriceAgreementDataViews.PriceAgreementExpiryDate on PriceAgreement.TenderId = TenderID;
 }
