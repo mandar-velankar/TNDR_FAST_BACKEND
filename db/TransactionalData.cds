@@ -333,6 +333,28 @@ entity PT_TMOFPR {
                                        on  GroupPurchasing.OfferID     = OfferID
                                        and GroupPurchasing.ProductCode = ProductCode
                                        and GroupPurchasing.Active = Active;
+        ProductPricing           : Association to ProductPricing
+                                       on ProductPricing.OfferID = OfferID
+                                       and ProductPricing.ProductCode = ProductCode
+                                       and ProductPricing.CountryCode = CountryCode;
+}
+
+//italy
+entity ProductPricing: cuid, managed {
+    key OfferID: String;
+    key ProductCode: Integer;
+    key CountryCode: String;
+    Warranty: Double;
+    AgreementDuration: Integer;
+    MonthlyRent: Double;
+    MonthsPerInvoice: Integer;
+    ContractStartDate: Timestamp;
+    ValueOfDevices: Double;
+    StatusOfDevice: Double;
+    FreeGoodsSame: Double;
+    FreeGoodsOther: Double;
+    MinContractual: Double;
+    MinAnnPurch: Double;
 }
 
 entity PT_TMPFIOM {
