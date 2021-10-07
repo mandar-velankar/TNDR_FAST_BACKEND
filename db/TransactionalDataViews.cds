@@ -849,3 +849,8 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices o
     (consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePP: Double,
     (consumerPrices.MaxPriceNhsPU * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePU: Double,
 };
+
+entity OfferProductsItaly as select from TransactionalData.PT_TMOFPR as offerProduct{
+    *,
+    offerProduct.SKU.PRODUCTPACKNAME as ProductPackName,
+};

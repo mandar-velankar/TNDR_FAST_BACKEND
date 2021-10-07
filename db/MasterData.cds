@@ -645,6 +645,7 @@ entity ConsumerPrices: cuid, managed {
 	ConsumerPriceInclPU: Double;
 	VatPerPack: Double;
 	MandatoryDiscount: Double;
+	ExfPriceExclPP: Double;
 	ConfidentialDiscount1: Double;
 	ConfidentialDiscount2: Double;
 	TotalDiscount: Double;
