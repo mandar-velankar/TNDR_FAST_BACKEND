@@ -141,6 +141,7 @@ entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
 	ConsumerPriceInclPU,
 	VatPerPack,
 	MandatoryDiscount,
+	ExfPriceExclPP,
 	ConfidentialDiscount1,
 	ConfidentialDiscount2,
 	TotalDiscount,

@@ -352,10 +352,17 @@ entity ProductPricing: cuid, managed {
     ValueOfDevices: Double;
     StatusOfDevice: Double;
     FreeGoodsSame: Double;
-    FreeGoodsOther: Double;
+    FreeGoodsSame_ABS_PCT: String(4);
+    FreeGoodsOther: Association to FreeGoodsOther;
     MinContractual: Double;
     MinAnnPurch: Double;
     AdditionalDiscount: Double;
+}
+
+entity FreeGoodsOther: cuid, managed {
+    key ProductPackId: Integer;
+    FreeGoodsOther: Double;
+    FreeGoodsOther_ABS_PCT: String(4);
 }
 
 entity PT_TMPFIOM {
