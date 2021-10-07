@@ -27,7 +27,7 @@ inner join LatestApprovalRequests as latestApprovals
     and approvals.Active = 1
 inner join MasterData.PT_TMCTRY as country
     on country.CountryCode = approvals.CountryCode
-inner join AdminData.PT_TMUSER user
+inner join AdminData.PT_TMUSER as user
     on approvals.Submittedby = user.CWID
 {
     key approvals.TenderID,
@@ -499,30 +499,30 @@ entity OfferProductPlus as select from TransactionalData.PT_TMOFPR as offerProdu
 };
 
 entity OfferProductConsolidation as select from OfferProductPlus as offerProduct
-left outer join MasterDataViews.DirectBrand directBrand
+left outer join MasterDataViews.DirectBrand as directBrand
     on offerProduct.INSTITUTE_ID = directBrand.INSTITUTE_ID
     and offerProduct.HLEVEL4_CODE = directBrand.BRAND_ID
     and offerProduct.DISTRIBUTOR_ID = directBrand.DISTRIBUTOR_ID
-left outer join MasterDataViews.DistributorBrand distributorBrand
+left outer join MasterDataViews.DistributorBrand as distributorBrand
     on offerProduct.HLEVEL4_CODE = distributorBrand.BRAND_ID
     and offerProduct.DISTRIBUTOR_ID = distributorBrand.DISTRIBUTOR_ID
-left outer join MasterDataLatestValues.VWBUDGETEDPROFITABILITY profitability
+left outer join MasterDataLatestValues.VWBUDGETEDPROFITABILITY as profitability
     on offerProduct.HLEVEL4_CODE = profitability.HLEVEL4_CODE 
     and offerProduct.CountryCode = profitability.COUNTRYCODE
-left outer join MasterDataLatestValues.VW_MASTER_APPROVED_PRICE approved 
+left outer join MasterDataLatestValues.VW_MASTER_APPROVED_PRICE as approved 
     on offerProduct.ProductCode = approved.PRODUCT_ID
     and offerProduct.CountryCode = approved.COUNTRY_CODE
     and offerProduct.CURRENCY = approved.CURRENCY
-left outer join CountryMinPrice minPrice
+left outer join CountryMinPrice as minPrice
     on offerProduct.ProductCode = minPrice.PRODUCT_ID
     and offerProduct.CountryCode = minPrice.COUNTRY_CODE
     and offerProduct.CURRENCY = minPrice.CURRENCY
-left outer join AccountMinPrice accountPrice
+left outer join AccountMinPrice as accountPrice
     on offerProduct.ProductCode = accountPrice.PRODUCT_ID
     and offerProduct.CountryCode = accountPrice.COUNTRY_CODE
     and offerProduct.INSTITUTE_ID = accountPrice.INSTITUTE_ID
     and offerProduct.CURRENCY = accountPrice.CURRENCY
-left outer join MasterDataViews.MostRecentSkuCodeForProductPack sku 
+left outer join MasterDataViews.MostRecentSkuCodeForProductPack as sku 
     on offerProduct.ProductCode = sku.ProductPackID 
     and offerProduct.CountryCode = sku.CountryCode
 {
@@ -785,7 +785,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           date_settings.NextMonth;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
-inner join TransactionalDataViews.OfferStatus status on quotation.OfferID = status.OFFER_ID{
+inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
     key 'PT_TMQUTO(OfferID=''' || quotation.OfferID || ''',Active=1,OfferDate=' || quotation.OfferDate || ')' as QUOTATION_PATH:String(500),
     quotation.CountryCode as COUNTRY_CODE,
     quotation.TenderID as TENDER_ID,
@@ -805,4 +805,52 @@ entity PreApprovedPrices as select from PricingAppData.InstituteGroupPriceLatest
     key price.Currency,
     case when price.UoM = 'Unit' then price.MSP else price.MSP / price.ProductPack.PACKFACTOR end as PriceUnit:Double,
     case when price.UoM = 'Unit' then price.MSP * price.ProductPack.PACKFACTOR else price.MSP end as PricePack:Double
+};
+
+entity ProductPricingView as select from TransactionalData.ProductPricing as productPricing
+inner join TransactionalData.PT_TMOFRS as offer on offer.OfferID = productPricing.OfferID
+inner join TransactionalData.PT_TMOFPR as product on product.OfferID = productPricing.OfferID
+left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices on productPricing.ProductCode = consumerPrices.ProductPackId
+                                                                                and productPricing.CountryCode = consumerPrices.CountryCode {
+    productPricing.OfferID,
+    productPricing.ProductCode,
+    productPricing.CountryCode,
+    productPricing.Warranty,
+    productPricing.AgreementDuration,
+    productPricing.MonthlyRent,
+    productPricing.MonthsPerInvoice,
+    productPricing.ContractStartDate,
+    productPricing.ValueOfDevices,
+    productPricing.StatusOfDevice,
+    productPricing.FreeGoodsSame,
+    productPricing.FreeGoodsOther,
+    productPricing.MinContractual,
+    productPricing.MinAnnPurch,
+    productPricing.AdditionalDiscount,
+    offer.FOCType,
+    offer.Currency,
+    product.OfferType,
+    consumerPrices.ProductPackId,
+    consumerPrices.ValidFrom,
+	consumerPrices.ValidTo,
+	consumerPrices.ConsumerPriceExclPP,
+	consumerPrices.ConsumerPriceInclPP,
+	consumerPrices.ConsumerPriceExclPU,
+	consumerPrices.ConsumerPriceInclPU,
+	consumerPrices.VatPerPack,
+	consumerPrices.MandatoryDiscount,
+    consumerPrices.ExfPriceExclPP,
+	consumerPrices.ConfidentialDiscount1,
+	consumerPrices.ConfidentialDiscount2,
+	consumerPrices.TotalDiscount,
+	consumerPrices.MaxPriceNhsPP,
+	consumerPrices.MaxPriceNhsPU,
+    ((ConsumerPriceExclPP - MaxPriceNhsPP*(1-AdditionalDiscount))/ConsumerPriceExclPP) as FinalDiscount: Double,
+    (consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePP: Double,
+    (consumerPrices.MaxPriceNhsPU * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePU: Double,
+};
+
+entity OfferProductsItaly as select from TransactionalData.PT_TMOFPR as offerProduct{
+    *,
+    offerProduct.SKU.PRODUCTPACKNAME as ProductPackName,
 };
