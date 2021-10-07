@@ -117,9 +117,9 @@ APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE
 "Country Business","ES",1,0
 "Regional Business","ES",1,0
 "Controlling","ES",1,0
+"SM/RBM","IT",1,0
+"BU Head/PM","IT",1,0
+"Strategic Sales","IT",1,0
+"Business Integration","IT",1,0
+"Finance","IT",1,0
 "Supply Chain","IT",1,0
-"Legal","IT",1,0
-"Regulatory","IT",1,0
-"Country Business","IT",1,0
-"Regional Business","IT",1,0
-"Controlling","IT",1,0

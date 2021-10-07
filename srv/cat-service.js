@@ -661,6 +661,45 @@ module.exports = (srv) => {
 		return results;
 	}
 
+	function buildProductValidationForType9(offer, product, productInfo, aApproverTypes) {//Italy
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+		let validationType;
+
+		if (offer.OFFERTYPE === "Selling"){
+
+			if((product.ADDITIONAL_DISCOUNT) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) ){
+					validationType = 3;			
+				} else {
+					validationType = 1;
+			}
+			
+		} else {
+			validationType = 3;	
+
+		}
+
+		aApproverTypes.map(async function (oApproverType) {	
+			// for Supply Chain, optional validation type should still send a notification
+			if(oApproverType.APPROVAL_TYPE === "Supply Chain" && validationType === 1 ){
+				oApproverType.ValidationType = 2;
+			} else {
+				oApproverType.ValidationType = validationType;	
+			}
+							
+		})
+
+		
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
 	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName) {
 		let price = 0;
 		productPolicyPrices.forEach(e => {
@@ -1038,6 +1077,9 @@ module.exports = (srv) => {
 		}
 		else if (offer.APPROVAL_TYPE === 7) { //Applicable for Chile
 			productValidation = buildProductValidationForType7(offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 9) { //Applicable for Italy
+			productValidation = buildProductValidationForType9(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
