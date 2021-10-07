@@ -130,9 +130,9 @@ entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeR
 
 //italy
 entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
-	key ConsumerPrices.CountryCode,
-	key ConsumerPrices.ProductPackId: Integer,
-	key ConsumerPrices.Currency: String,
+	key CountryCode,
+	key ProductPackId,
+	key Currency,
 	ValidFrom,
 	ValidTo,
 	ConsumerPriceExclPP,
@@ -146,4 +146,4 @@ entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
 	TotalDiscount,
 	MaxPriceNhsPP,
 	MaxPriceNhsPU
-};
+}where ValidTo = '9999-12-31 00:00:00.000000000';

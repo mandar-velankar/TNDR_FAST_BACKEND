@@ -634,9 +634,9 @@ entity Tenders_in_Regions {
 
 //italy
 entity ConsumerPrices: cuid, managed {
-	key CountryCode: String;
-	key ProductPackId: String;
-	key Currency: String;
+	CountryCode: String;
+	ProductPackId: String;
+	Currency: String;
 	ValidFrom: Timestamp;
 	ValidTo: Timestamp;
 	ConsumerPriceExclPP: Double;

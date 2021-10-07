@@ -809,7 +809,9 @@ entity PreApprovedPrices as select from PricingAppData.InstituteGroupPriceLatest
 
 entity ProductPricingView as select from TransactionalData.ProductPricing as productPricing
 inner join TransactionalData.PT_TMOFRS as offer on offer.OfferID = productPricing.OfferID
-inner join TransactionalData.PT_TMOFPR as product on product.OfferID = productPricing.OfferID {
+inner join TransactionalData.PT_TMOFPR as product on product.OfferID = productPricing.OfferID
+left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices on productPricing.ProductCode = consumerPrices.ProductPackId
+                                                                                and productPricing.CountryCode = consumerPrices.CountryCode {
     productPricing.OfferID,
     productPricing.ProductCode,
     productPricing.CountryCode,
@@ -824,7 +826,26 @@ inner join TransactionalData.PT_TMOFPR as product on product.OfferID = productPr
     productPricing.FreeGoodsOther,
     productPricing.MinContractual,
     productPricing.MinAnnPurch,
+    productPricing.AdditionalDiscount,
     offer.FOCType,
     offer.Currency,
-    product.OfferType
+    product.OfferType,
+    consumerPrices.ProductPackId,
+    consumerPrices.ValidFrom,
+	consumerPrices.ValidTo,
+	consumerPrices.ConsumerPriceExclPP,
+	consumerPrices.ConsumerPriceInclPP,
+	consumerPrices.ConsumerPriceExclPU,
+	consumerPrices.ConsumerPriceInclPU,
+	consumerPrices.VatPerPack,
+	consumerPrices.MandatoryDiscount,
+	consumerPrices.ConfidentialDiscount1,
+	consumerPrices.ConfidentialDiscount2,
+	consumerPrices.TotalDiscount,
+	consumerPrices.MaxPriceNhsPP,
+	consumerPrices.MaxPriceNhsPU,
+    ((consumerPrices.ConsumerPriceInclPP - consumerPrices.ConsumerPriceExclPP) / consumerPrices.ConsumerPriceInclPP) as TotalDiscountPP: Double,
+    ((consumerPrices.ConsumerPriceInclPU - consumerPrices.ConsumerPriceExclPU) / consumerPrices.ConsumerPriceInclPP) as TotalDiscountPU: Double,
+    (consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePP: Double,
+    (consumerPrices.MaxPriceNhsPU * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePU: Double,
 };

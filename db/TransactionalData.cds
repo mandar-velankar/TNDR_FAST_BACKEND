@@ -355,6 +355,7 @@ entity ProductPricing: cuid, managed {
     FreeGoodsOther: Double;
     MinContractual: Double;
     MinAnnPurch: Double;
+    AdditionalDiscount: Double;
 }
 
 entity PT_TMPFIOM {
