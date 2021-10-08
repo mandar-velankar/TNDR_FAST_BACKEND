@@ -529,6 +529,7 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack as sku
     offerProduct.TenderID as TENDERID,
     key offerProduct.OfferID as OFFERID,
     key offerProduct.SKU.PRODUCTPACKID as PRODUCTID,
+    offerProduct.OfferType as OfferType,
     case offerProduct.AlternateOfferYN
         when 'Alternative to quoted products' then '**'
         when 'Alternative to requested products' then '*'

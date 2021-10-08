@@ -668,9 +668,9 @@ module.exports = (srv) => {
 		//3: Mandatory Approval
 		let validationType;
 
-		if (offer.OFFERTYPE === "Selling"){
+		if (product.OfferType === "Selling"){
 
-			if((product.ADDITIONAL_DISCOUNT) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) ){
+			if((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) ){
 					validationType = 3;			
 				} else {
 					validationType = 1;
@@ -683,7 +683,7 @@ module.exports = (srv) => {
 
 		aApproverTypes.map(async function (oApproverType) {	
 			// for Supply Chain, optional validation type should still send a notification
-			if(oApproverType.APPROVAL_TYPE === "Supply Chain" && validationType === 1 ){
+			if(oApproverType.ApproverType === "Supply Chain" && validationType === 1 ){
 				oApproverType.ValidationType = 2;
 			} else {
 				oApproverType.ValidationType = validationType;	
