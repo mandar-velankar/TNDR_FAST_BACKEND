@@ -59,8 +59,8 @@ service CatalogService @(path : 'tender')
     entity ConsumerPrices                    as projection on MasterData.ConsumerPrices;
     entity MostRecentConsumerPricesView      as projection on MasterDataViews.MostRecentConsumerPricesView;
     entity ProductPricing                    as projection on TransactionalData.ProductPricing;
-    entity ProductPricingView                as projection on TransactionalDataViews.ProductPricingView;
-    entity OfferProductsItaly                as projection on TransactionalDataViews.OfferProductsItaly;
+    //entity ProductPricingView                as projection on TransactionalDataViews.ProductPricingView;
+    //entity OfferProductsItaly                as projection on TransactionalDataViews.OfferProductsItalyView;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
