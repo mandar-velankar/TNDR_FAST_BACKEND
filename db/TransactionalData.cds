@@ -333,10 +333,10 @@ entity PT_TMOFPR {
                                        on  GroupPurchasing.OfferID     = OfferID
                                        and GroupPurchasing.ProductCode = ProductCode
                                        and GroupPurchasing.Active = Active;
-        /*ProductPricing           : Association to ProductPricing
+        ProductPricing           : Association to ProductPricing
                                        on ProductPricing.OfferID = OfferID
                                        and ProductPricing.ProductCode = ProductCode
-                                       and ProductPricing.CountryCode = CountryCode;*/
+                                       and ProductPricing.CountryCode = CountryCode;
 }
 
 //italy
@@ -353,10 +353,10 @@ entity ProductPricing: cuid, managed {
     StatusOfDevice: Double;
     FreeGoodsSame: Double;
     FreeGoodsSame_ABS_PCT: String(4);
-    FreeGoodsOther: Association to FreeGoodsOther;
     MinContractual: Double;
     MinAnnPurch: Double;
     AdditionalDiscount: Double;
+    FreeGoodsOther: Association to FreeGoodsOther;
 }
 
 entity FreeGoodsOther: cuid, managed {

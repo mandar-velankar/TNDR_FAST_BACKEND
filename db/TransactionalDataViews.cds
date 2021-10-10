@@ -853,5 +853,5 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices o
 
 entity OfferProductsItalyView as select from TransactionalData.PT_TMOFPR as offerProductItaly{
     *,
-    offerProductItaly.SKU.PRODUCTPACKNAME as ProductPackName,
+    offerProductItaly.SKU.PRODUCTPACKNAME as ProductPackName
 };
