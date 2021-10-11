@@ -59,6 +59,7 @@ service CatalogService @(path : 'tender')
     entity ConsumerPrices                    as projection on MasterData.ConsumerPrices;
     entity MostRecentConsumerPricesView      as projection on MasterDataViews.MostRecentConsumerPricesView;
     entity ProductPricing                    as projection on TransactionalData.ProductPricing;
+    entity FreeGoodsOther                    as projection on TransactionalData.FreeGoodsOther;
     entity ProductPricingView                as projection on TransactionalDataViews.ProductPricingView;
 
     entity PT_TMCTRY @(restrict : [{
