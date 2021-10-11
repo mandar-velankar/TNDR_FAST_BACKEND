@@ -808,14 +808,22 @@ entity PreApprovedPrices as select from PricingAppData.InstituteGroupPriceLatest
     case when price.UoM = 'Unit' then price.MSP * price.ProductPack.PACKFACTOR else price.MSP end as PricePack:Double
 };
 
-entity ProductPricingView as select from TransactionalData.ProductPricing as productPricing
-inner join TransactionalData.PT_TMOFRS as offer on offer.OfferID = productPricing.OfferID
-inner join TransactionalData.PT_TMOFPR as product on product.OfferID = productPricing.OfferID
-left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices on productPricing.ProductCode = consumerPrices.ProductPackId
-                                                                                and productPricing.CountryCode = consumerPrices.CountryCode {
-    productPricing.OfferID,
-    productPricing.ProductCode,
-    productPricing.CountryCode,
+entity ProductPricingView as select from TransactionalData.PT_TMOFRS as offer 
+inner join TransactionalData.PT_TMOFPR as product on product.OfferID = offer.OfferID
+left outer join TransactionalData.ProductPricing as productPricing 
+    on product.CountryCode = productPricing.CountryCode
+    and product.ProductCode = productPricing.ProductCode
+    and product.OfferID = productPricing.OfferID
+    and product.Active = 1
+left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices 
+    on productPricing.ProductCode = consumerPrices.ProductPackId
+    and productPricing.CountryCode = consumerPrices.CountryCode {
+    key offer.OfferID,
+    key product.ProductCode,
+    key product.CountryCode,
+    product.SKU.PRODUCTPACKNAME as ProductPackName,
+    product.RequestedVolume,
+    product.SKU.UOM,
     productPricing.Warranty,
     productPricing.AgreementDuration,
     productPricing.MonthlyRent,
@@ -846,12 +854,12 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices o
 	consumerPrices.TotalDiscount,
 	consumerPrices.MaxPriceNhsPP,
 	consumerPrices.MaxPriceNhsPU,
-    ((ConsumerPriceExclPP - MaxPriceNhsPP*(1-AdditionalDiscount))/ConsumerPriceExclPP) as FinalDiscount: Double,
+    case 
+        when consumerPrices.ConsumerPriceExclPP is not null
+            then
+                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) / consumerPrices.ConsumerPriceExclPP
+        else null
+    end as FinalDiscount: Double,
     (consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePP: Double,
-    (consumerPrices.MaxPriceNhsPU * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePU: Double,
-};
-
-entity OfferProductsItalyView as select from TransactionalData.PT_TMOFPR as offerProductItaly{
-    *,
-    offerProductItaly.SKU.PRODUCTPACKNAME as ProductPackName
-};
+    (consumerPrices.MaxPriceNhsPU * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePU: Double
+}where offer.Active = 1;
