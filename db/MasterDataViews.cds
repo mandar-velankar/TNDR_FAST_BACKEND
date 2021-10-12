@@ -132,7 +132,7 @@ entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeR
 entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
 	key CountryCode,
 	key ProductPackId,
-	key Currency,
+	Currency,
 	ValidFrom,
 	ValidTo,
 	ConsumerPriceExclPP,

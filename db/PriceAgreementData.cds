@@ -9,6 +9,8 @@ using {
 using {com.bayer.SXTENDER.TransactionalData} from './TransactionalData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
+using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
+
 
 entity PriceAgreements: cuid, managed {
     ExpiryDate:  DateTime;
@@ -28,6 +30,7 @@ entity PriceAgreements: cuid, managed {
     ProductPackId: Integer not null;
     Synchronized: Boolean;
     hasNewMaterials: Boolean default false; // calculated from NodeJS
+    hasNewPrice: Boolean default false; // calculated from NodeJS
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -37,6 +40,8 @@ entity PriceAgreements: cuid, managed {
     Materials: Association to many MaterialsView on Materials.CountryCode = CountryCode
                                     and Materials.ProductPackId = ProductPackId;
     CustomerPrices: Association to many CustomerPrices on CustomerPrices.PriceAgreementId = ID;
+    ConsumerPrice: Association to MasterDataViews.MostRecentConsumerPricesView on ConsumerPrice.CountryCode = CountryCode 
+                                                                                     and ConsumerPrice.ProductPackId = ProductPackId
 }
 entity CustomerPrices: cuid, managed {
     ValidFrom: DateTime;
