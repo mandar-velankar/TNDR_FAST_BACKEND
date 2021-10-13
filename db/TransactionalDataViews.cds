@@ -824,6 +824,7 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices
     product.SKU.PRODUCTPACKNAME as ProductPackName,
     product.RequestedVolume,
     product.SKU.UOM,
+    productPricing.ID,
     productPricing.Warranty,
     productPricing.AgreementDuration,
     productPricing.MonthlyRent,
