@@ -11,7 +11,7 @@ entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK 
 }where sku.ActiveRecord='Yes'  group by sku.ProductPackID, sku.CountryCode;
 
 entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product left outer join
-MostRecentSkuCodeForProductPack sku on Product.PRODUCTPACKID = sku.ProductPackID and Product.COUNTRYCODE = sku.CountryCode {
+MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPackID and Product.COUNTRYCODE = sku.CountryCode {
 	key Product.COUNTRYCODE as COUNTRY_CODE,
 	Product.ProductPack.Product.HLEVEL1_NAME as DIVISION,
 	Product.ProductPack.Product.HLEVEL4_CODE as BRAND_ID,
@@ -56,7 +56,7 @@ entity CountryLegalEntity as select from MasterData.PT_TMCTLE as Country{
 }where Country.LegalEntity.LegalEntityCode is not null;
 
 entity LegalEntityBrand as select from MasterData.PT_TMCTLEBR as leb
-inner join CountryBrands cb on leb.CountryCode = cb.COUNTRY_CODE and leb.HLevel4_Code = cb.BRAND_ID{
+inner join CountryBrands as cb on leb.CountryCode = cb.COUNTRY_CODE and leb.HLevel4_Code = cb.BRAND_ID{
 	key leb.CountryCode as COUNTRY_CODE,
 	key leb.HLevel4_Code as BRAND_ID,
 	key leb.Entity.LegalEntityCode as LEGAL_ENTITY_CODE,
@@ -92,7 +92,7 @@ and itr.Institute.ActiveRecord = 'Yes'
 and idst.Distributor.ActiveRecord = 'Yes';
 
 entity DistributorBrand as select from MasterData.PT_TMDISBRD as dstbr
-inner join CountryBrands cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLevel4_Code = cb.BRAND_ID{
+inner join CountryBrands as cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLevel4_Code = cb.BRAND_ID{
 	key dstbr.CountryCode as COUNTRY_CODE,
 	key dstbr.DistributorID as DISTRIBUTOR_ID,
 	dstbr.Distributor.DistributorName as DISTRIBUTOR_NAME,
@@ -127,3 +127,24 @@ entity Divisions as select from MasterData.PT_TMPRDHIER as ProductHierarchy{
 
 //DONE
 entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeRates;
+
+//italy
+entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
+	key CountryCode,
+	key ProductPackId,
+	key Currency,
+	ValidFrom,
+	ValidTo,
+	ConsumerPriceExclPP,
+	ConsumerPriceInclPP,
+	ConsumerPriceExclPU,
+	ConsumerPriceInclPU,
+	VatPerPack,
+	MandatoryDiscount,
+	ExfPriceExclPP,
+	ConfidentialDiscount1,
+	ConfidentialDiscount2,
+	TotalDiscount,
+	MaxPriceNhsPP,
+	MaxPriceNhsPU
+}where ValidTo = '9999-12-31 00:00:00.000000000';

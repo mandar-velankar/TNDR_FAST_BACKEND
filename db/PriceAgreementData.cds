@@ -54,8 +54,10 @@ entity CustomerPrices: cuid, managed {
 }
 
 
-// this query needs to be updated when everything is ready in the Tender app
-// list of candidate institutes that can participate in a price agreement but don't have a CustomerPrices set yet
+/**
+ * This view lists candidate institutes that can participate in a price agreement 
+ * but don't have a CustomerPrices set yet
+ */
 entity CandidatesView as select from PriceAgreements as pa 
 left outer join MasterData.Tenders_in_Regions tr on pa.TenderId = tr.TenderID
 inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode

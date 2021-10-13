@@ -333,6 +333,36 @@ entity PT_TMOFPR {
                                        on  GroupPurchasing.OfferID     = OfferID
                                        and GroupPurchasing.ProductCode = ProductCode
                                        and GroupPurchasing.Active = Active;
+        ProductPricing           : Association to ProductPricing
+                                       on ProductPricing.OfferID = OfferID
+                                       and ProductPricing.ProductCode = ProductCode
+                                       and ProductPricing.CountryCode = CountryCode;
+}
+
+//italy
+entity ProductPricing: cuid, managed {
+    key OfferID: String;
+    key ProductCode: Integer;
+    key CountryCode: String;
+    Warranty: Double;
+    AgreementDuration: Integer;
+    MonthlyRent: Double;
+    MonthsPerInvoice: Integer;
+    ContractStartDate: Timestamp;
+    ValueOfDevices: Double;
+    StatusOfDevice: String;
+    FreeGoodsSame: Double;
+    FreeGoodsSame_ABS_PCT: String(4);
+    MinContractual: Double;
+    MinAnnPurch: Double;
+    AdditionalDiscount: Double;
+    FreeGoodsOther: Association to FreeGoodsOther;
+}
+
+entity FreeGoodsOther: cuid, managed {
+    key ProductPackId: Integer;
+    FreeGoodsOther: Double;
+    FreeGoodsOther_ABS_PCT: String(4);
 }
 
 entity PT_TMPFIOM {
@@ -467,6 +497,15 @@ entity PT_TMTRRES {
         Reason            : String(255);
         Comment           : String(255);
         AwardedTier       : Integer;
+        //new fields italy
+        ExtensionDate     : Date;
+        ExtensionNotes    : String;
+        AwardLetterNo     : String;
+        AwardDelibNo      : String;
+        DeliveryDate      : Date;
+        ResultDate        : Date;
+        AwardDate         : Date;
+        AwardActing       : String;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID

@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -661,6 +661,45 @@ module.exports = (srv) => {
 		return results;
 	}
 
+	function buildProductValidationForType9(offer, product, productInfo, aApproverTypes) {//Italy
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+		let validationType;
+
+		if (product.OfferType === "Selling"){
+
+			if((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) ){
+					validationType = 3;			
+				} else {
+					validationType = 1;
+			}
+			
+		} else {
+			validationType = 3;	
+
+		}
+
+		aApproverTypes.map(async function (oApproverType) {	
+			// for Supply Chain, optional validation type should still send a notification
+			if(oApproverType.ApproverType === "Supply Chain" && validationType === 1 ){
+				oApproverType.ValidationType = 2;
+			} else {
+				oApproverType.ValidationType = validationType;	
+			}
+							
+		})
+
+		
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
 	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName) {
 		let price = 0;
 		productPolicyPrices.forEach(e => {
@@ -1038,6 +1077,9 @@ module.exports = (srv) => {
 		}
 		else if (offer.APPROVAL_TYPE === 7) { //Applicable for Chile
 			productValidation = buildProductValidationForType7(offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 9) { //Applicable for Italy
+			productValidation = buildProductValidationForType9(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -2328,22 +2370,22 @@ module.exports = (srv) => {
 		return excelStreamValue;
 	});
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
-	srv.on('READ', 'WordAttachment', async (req, next) => {
+	srv.on('READ', 'WordAttachments', async (req, next) => {
 		const tx = cds.transaction(req);
-		const offerId = req.data.OfferId;
-		const template = req.data.template;
+		const offerId = req.data.offerId;
+		const templateId = req.data.templateId;
 		if (!offerId) {
 			return next();
 		}
 
-		const templates = await tx.run(SELECT.from(WordAttachment).where({ template: template, OfferId: "*" }));
+		const templates = await tx.run(SELECT.from(WordTemplate).where({ templateId: templateId }));
 		if (templates.length === 0) {
-			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + template);
+			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
 		}
 		const templateContent = templates[0].content;
 		let wordData = {};
 		//Get offer data
-		if (offerId !== "*") {
+		if (offerId) {
 			try {
 				wordData = await getOfferData(tx,offerId);
 			} catch (error) {
@@ -2358,7 +2400,7 @@ module.exports = (srv) => {
 				this.push(null);
 			}
 		});
-		const filename = offerId === "*" ? template : offerId+'.docx';
+		const filename = offerId+'.docx';
 		req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 		return {
