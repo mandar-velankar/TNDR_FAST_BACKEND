@@ -631,3 +631,24 @@ entity Tenders_in_Regions {
 	Tender				: Association to TenderRegions on Tender.TenderID = TenderID;
 	Region				: Association to CountryRegions on Region.ID = RegionID;
 }
+
+//italy
+entity ConsumerPrices: cuid, managed {
+	CountryCode: String;
+	ProductPackId: String;
+	Currency: String;
+	ValidFrom: Timestamp;
+	ValidTo: Timestamp;
+	ConsumerPriceExclPP: Double;
+	ConsumerPriceInclPP: Double;
+	ConsumerPriceExclPU: Double;
+	ConsumerPriceInclPU: Double;
+	VatPerPack: Double;
+	MandatoryDiscount: Double;
+	ExfPriceExclPP: Double;
+	ConfidentialDiscount1: Double;
+	ConfidentialDiscount2: Double;
+	TotalDiscount: Double;
+	MaxPriceNhsPP: Double;
+	MaxPriceNhsPU: Double;
+}
