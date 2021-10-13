@@ -816,14 +816,15 @@ left outer join TransactionalData.ProductPricing as productPricing
     and product.OfferID = productPricing.OfferID
     and product.Active = 1
 left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices 
-    on productPricing.ProductCode = consumerPrices.ProductPackId
-    and productPricing.CountryCode = consumerPrices.CountryCode {
+    on product.ProductCode = consumerPrices.ProductPackId
+    and product.CountryCode = consumerPrices.CountryCode {
     key offer.OfferID,
     key product.ProductCode,
     key product.CountryCode,
     product.SKU.PRODUCTPACKNAME as ProductPackName,
     product.RequestedVolume,
-    product.SKU.UOM,
+    product.UnitPerPack as UOM,
+    productPricing.ID,
     productPricing.Warranty,
     productPricing.AgreementDuration,
     productPricing.MonthlyRent,

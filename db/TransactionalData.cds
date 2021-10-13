@@ -350,7 +350,7 @@ entity ProductPricing: cuid, managed {
     MonthsPerInvoice: Integer;
     ContractStartDate: Timestamp;
     ValueOfDevices: Double;
-    StatusOfDevice: Double;
+    StatusOfDevice: String;
     FreeGoodsSame: Double;
     FreeGoodsSame_ABS_PCT: String(4);
     MinContractual: Double;

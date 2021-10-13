@@ -283,6 +283,7 @@ COUNTRYCODE,APPROVERTYPE,DIVISION,APPROVERID,APPROVERNAME,APPROVEREMAILID
 "ES","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com"
 "ES","Supply Chain","Pharma","10018","Ahmed Yehya Ramadan","ahmed.yehya@bayer.com"
 "ES","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com"
+"IT","Supply Chain","Both","10018","Supply Chain responsible","jonathan.hubeau.ext@bayer.com"
 "IT","SM/RBM","Pharma","10021","Danilo Despirito","danilo.despirito@bayer.com"
 "IT","BU Head/PM","Pharma","10022","Patrizia Guarraci","patrizia.guarraci@bayer.com"
 "IT","SM/RBM","Pharma","10023","Roberto Bergonzi","roberto.bergonzi@bayer.com"
