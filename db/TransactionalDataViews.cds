@@ -823,7 +823,7 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices
     key product.CountryCode,
     product.SKU.PRODUCTPACKNAME as ProductPackName,
     product.RequestedVolume,
-    product.SKU.UOM,
+    product.UnitPerPack as UOM,
     productPricing.ID,
     productPricing.Warranty,
     productPricing.AgreementDuration,
