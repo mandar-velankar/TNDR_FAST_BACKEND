@@ -55,6 +55,12 @@ service CatalogService @(path : 'tender')
     entity DistributorBrandPolicies          as projection on MasterData.DistributorBrandPolicies;
     entity CountryRegions                    as projection on MasterData.CountryRegions;
     entity TenderRegions                     as projection on MasterData.TenderRegions;
+    //italy
+    entity ConsumerPrices                    as projection on MasterData.ConsumerPrices;
+    entity MostRecentConsumerPricesView      as projection on MasterDataViews.MostRecentConsumerPricesView;
+    entity ProductPricing                    as projection on TransactionalData.ProductPricing;
+    entity FreeGoodsOther                    as projection on TransactionalData.FreeGoodsOther;
+    entity ProductPricingView                as projection on TransactionalDataViews.ProductPricingView;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -169,11 +175,15 @@ service CatalogService @(path : 'tender')
     };
 
     entity PT_TMOFRS                         as projection on TransactionalData.PT_TMOFRS {
-        * , Tender : redirected to PT_TMTEND
+        *, 
+        Product: redirected to PT_TMOFPR,
+        Tender : redirected to PT_TMTEND
     };
 
     entity OfferView                         as projection on TransactionalData.OfferView {
-        * , Tender : redirected to PT_TMTEND
+        *, 
+        Product: redirected to PT_TMOFPR,
+        Tender : redirected to PT_TMTEND
     };
 
     entity CountrySpecificInformation as projection on TransactionalData.CountrySpecificTenderInfo {
