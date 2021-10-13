@@ -816,8 +816,8 @@ left outer join TransactionalData.ProductPricing as productPricing
     and product.OfferID = productPricing.OfferID
     and product.Active = 1
 left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices 
-    on productPricing.ProductCode = consumerPrices.ProductPackId
-    and productPricing.CountryCode = consumerPrices.CountryCode {
+    on product.ProductCode = consumerPrices.ProductPackId
+    and product.CountryCode = consumerPrices.CountryCode {
     key offer.OfferID,
     key product.ProductCode,
     key product.CountryCode,
