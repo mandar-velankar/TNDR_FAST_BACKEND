@@ -356,6 +356,7 @@ entity ProductPricing: cuid, managed {
     MinContractual: Double;
     MinAnnPurch: Double;
     AdditionalDiscount: Double;
+    FOC_ABS_PCT: String(4);
     FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
 }
 
