@@ -356,13 +356,15 @@ entity ProductPricing: cuid, managed {
     MinContractual: Double;
     MinAnnPurch: Double;
     AdditionalDiscount: Double;
-    FreeGoodsOther: Association to FreeGoodsOther;
+    FOC_ABS_PCT: String(4);
+    FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
 }
 
 entity FreeGoodsOther: cuid, managed {
-    key ProductPackId: Integer;
+    ProductPackId: Integer;
     FreeGoodsOther: Double;
     FreeGoodsOther_ABS_PCT: String(4);
+    ProductPricing: Association to ProductPricing;
 }
 
 entity PT_TMPFIOM {

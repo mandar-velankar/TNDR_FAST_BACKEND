@@ -670,7 +670,7 @@ module.exports = (srv) => {
 
 		if (product.OfferType === "Selling"){
 
-			if((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) ){
+			if(!((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) )){
 					validationType = 3;			
 				} else {
 					validationType = 1;
