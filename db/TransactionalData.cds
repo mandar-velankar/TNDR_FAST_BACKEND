@@ -357,6 +357,7 @@ entity ProductPricing: cuid, managed {
     MinAnnPurch: Double;
     AdditionalDiscount: Double;
     FreeGoodsOther: Association to FreeGoodsOther;
+    FOC_ABS_PCT: String(4);
 }
 
 entity FreeGoodsOther: cuid, managed {
