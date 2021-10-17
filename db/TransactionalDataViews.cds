@@ -837,6 +837,7 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices
     productPricing.MinContractual,
     productPricing.MinAnnPurch,
     productPricing.AdditionalDiscount,
+    productPricing.FOC_ABS_PCT,
     offer.FOCType,
     offer.Currency,
     product.OfferType,
