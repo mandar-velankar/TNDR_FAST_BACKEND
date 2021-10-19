@@ -670,7 +670,7 @@ COUNTRYCODE,TABLEID,COLUMN,BINDINGPATH,VISIBLE,REQUIRED,DESCRIPTION
 "IT","editofferProductId","Brand","Brand",0,0,"brandnme"
 "IT","editofferProductId","MoleculeName","SKU/MoleculeName",1,0,"moleculeName"
 "IT","editofferProductId","SapNo","SKU/PRODUCTPACKID",1,0,"sapNo"
-"IT","editofferProductId","CodeNational","GOV_CODE",1,0,"codeNational"
+"IT","editofferProductId","CodeNational","GOV_CODE",0,0,"codeNational"
 "IT","editofferProductId","OfferType","OfferType",1,1,"offerType"
 "IT","editofferProductId","AicCnd","CODE1",1,0,"aicCnd"
 "IT","editofferProductId","AtcRdm","CODE2",1,0,"atcRdm"
