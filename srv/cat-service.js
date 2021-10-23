@@ -2124,7 +2124,16 @@ module.exports = (srv) => {
 			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID", "or", instituteIds);
 			let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
 			let whereProduct = ServiceHelper.buildWhere(req, "PRODUCT_ID");
-			let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
+
+			//let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
+			let brandIds = ServiceHelper.getWhereValues(req, "BRAND_ID");
+			let whereBrand = [];
+			if(brandIds.length > 0){
+				for (let i = 0; i < brandIds.length; i++) {
+					brandIds[i] = "\'" + brandIds[i] + "\'";
+				  }
+			whereBrand = ServiceHelper.buildWhereExpression("BRAND_ID", "or", brandIds);
+			}
 			let whereLegalEntity = ServiceHelper.buildWhere(req, "LEGAL_ENTITY_CODE");
 			let whereOrigin = ServiceHelper.buildWhere(req, "COUNTRY_OF_ORIGIN");
 
