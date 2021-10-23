@@ -2188,7 +2188,11 @@ module.exports = (srv) => {
 			}
 		}
 		// sort by countrycode, then brand name, then product name
-		results.sort(function (x, y) { return x.COUNTRY_CODE - y.COUNTRY_CODE || x.BRAND_NAME - y.BRAND_NAME || x.PRODUCT_NAME - y.PRODUCT_NAME; });
+		results.sort((a,b)=> ( a.COUNTRY_CODE.localeCompare(b.COUNTRY_CODE) || a.BRAND_NAME.localeCompare(b.BRAND_NAME) || a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME)   ));
+
+
+
+
 		return results;
 	});
 
