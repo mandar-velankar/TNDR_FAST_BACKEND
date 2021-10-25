@@ -42,8 +42,8 @@ module.exports = (srv) => {
             hasNewPriceFilterIndex = ServiceHelper.getWhereId(req, 'hasNewPrice');
             hasNewPriceFilterValues = ServiceHelper.getWhereValues(req, 'hasNewPrice');
 
-            hasExpiringSoonFilterIndex = ServiceHelper.getWhereId(req, 'expiringSoon');
-            hasExpiringSoonFilterValues =  ServiceHelper.getWhereValues(req, 'expiringSoon');
+            hasExpiringSoonFilterIndex = ServiceHelper.getWhereId(req, 'ExpiringSoon');
+            hasExpiringSoonFilterValues =  ServiceHelper.getWhereValues(req, 'ExpiringSoon');
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
