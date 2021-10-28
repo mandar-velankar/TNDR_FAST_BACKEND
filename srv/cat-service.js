@@ -13,6 +13,7 @@ const { Readable } = require('stream');
 const path = require("path");
 const XLSXHelper = require("./utils/XLSXHelper");
 const wordTemplate = require("easy-template-x");
+const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
 
 module.exports = (srv) => {
 
@@ -2405,7 +2406,14 @@ module.exports = (srv) => {
 				return req.reject(404, 'No offer found');
 			}
 		}
-		const handler = new wordTemplate.TemplateHandler();
+		const handler = new wordTemplate.TemplateHandler({
+			scopeDataResolver: createResolver({
+				filters: {
+					upper: (input) => (input || "").toUpperCase(),
+					lower: (input) => (input || "").toLowerCase()
+				}
+			})
+		});
 		const doc = await handler.process(templateContent, wordData);
 		const readableInstanceStream = new Readable({
 			read() {
