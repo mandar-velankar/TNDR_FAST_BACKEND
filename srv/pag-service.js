@@ -32,6 +32,8 @@ module.exports = (srv) => {
         let hasNewMaterialsFilterValues = null;
         let hasNewPriceFilterIndex = null; 
         let hasNewPriceFilterValues = null;
+        let hasExpiringSoonFilterValues = null;
+
         if(req.query.SELECT.where){
 
             hasNewMaterialsFilterIndex = ServiceHelper.getWhereId(req, 'hasNewMaterials');
@@ -40,12 +42,19 @@ module.exports = (srv) => {
             hasNewPriceFilterIndex = ServiceHelper.getWhereId(req, 'hasNewPrice');
             hasNewPriceFilterValues = ServiceHelper.getWhereValues(req, 'hasNewPrice');
 
+            hasExpiringSoonFilterIndex = ServiceHelper.getWhereId(req, 'ExpiringSoon');
+            hasExpiringSoonFilterValues =  ServiceHelper.getWhereValues(req, 'ExpiringSoon');
+
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
             }
 
             if(hasNewPriceFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewPrice');
+            }
+
+            if(hasExpiringSoonFilterIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'expiringSoon');
             }
         }
 
@@ -59,6 +68,10 @@ module.exports = (srv) => {
             let customerPrices = priceAgreement.CustomerPrices;
             let materials = priceAgreement.Materials;
             let consumerPrice = priceAgreement.ConsumerPrice;
+            const todaysDate = new Date();
+
+            let calculatedFutureDate = new Date();
+            calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
 
             // Get CustomerPrices if needed
             if(!customerPrices){
@@ -106,7 +119,12 @@ module.exports = (srv) => {
                 }
 
             }
-  
+
+            if(priceAgreement.ExpiryDate){
+                let dExpiryDate = new Date(priceAgreement.ExpiryDate);
+                priceAgreement.ExpiringSoon = calculatedFutureDate >= dExpiryDate && dExpiryDate >= todaysDate ? true : false;
+            }
+
             return priceAgreement;
 
         };
@@ -124,6 +142,11 @@ module.exports = (srv) => {
 
         if(hasNewPriceFilterValues && hasNewPriceFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]);
+            result = filteredResult;
+        }
+
+        if(hasExpiringSoonFilterValues && hasExpiringSoonFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
             result = filteredResult;
         }
 
