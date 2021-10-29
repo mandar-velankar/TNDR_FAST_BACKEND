@@ -3,7 +3,7 @@ namespace com.bayer.SXTENDER.AdminData;
 using {
     User,
     Country,
-    managed, 
+    managed,
     cuid
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
@@ -128,16 +128,31 @@ entity SchedulerApiConfig: cuid {
     BasePath            : String;
     Resource            : String;
     ResourcePath        : String;
-    ApiUser             : String;
-    ApiPassword         : String;
     ProxyHost           : String;
     ProxyPort           : Integer;
     RequestDelay        : Integer;
     RequestMaxRetry     : Integer;
+    AuthType            : String;
+    User                : Association to SchedulerApiConfigUsers;
+    OAuth               : Association to SchedulerApiConfigOAuth;
+}
+
+// Scheduler basic auth configuration
+entity SchedulerApiConfigUsers : cuid {
+    ApiUser     : String;
+    ApiPassword : String;
+}
+
+// Scheduler oauth configuration
+entity SchedulerApiConfigOAuth : cuid {
+    OAuthProvider : String;
+    GrantType     : String;
+    ClientID      : String;
+    ClientSecret  : String;
 }
 
 // entity SchedulerJobs: cuid {
-//     JobName          : String; 
+//     JobName          : String;
 //     StartedAt        : Timestamp;
 //     FinishedAt       : Timestamp;
 //     Status           : String;
@@ -177,7 +192,7 @@ entity WordTemplateCountry {
     key countryCode    : String(2);
     key templateId     : Integer;
         WordTemplates      : Association to WordTemplate
-                           on WordTemplates.templateId = templateId; //This can be found in OData
+                            on WordTemplates.templateId = templateId; //This can be found in OData
 }
 
 entity WordTemplate {
