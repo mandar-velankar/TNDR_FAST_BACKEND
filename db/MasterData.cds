@@ -114,6 +114,7 @@ entity PT_TMPRDPCK{
 	PCIName:String(255);
 	MoleculeName:String(255);
 	ACTIVE_SUBSTANCE:String(50);
+	ProductType:String(50);
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
