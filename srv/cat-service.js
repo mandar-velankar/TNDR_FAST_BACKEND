@@ -451,7 +451,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = supply;
 					break;
 				default:
-					oApproverType.ValidationType = 1;
+					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
 		});
 
@@ -514,7 +514,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = supply;
 					break;
 				default:
-					oApproverType.ValidationType = 1;
+					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
 		});
 
@@ -564,7 +564,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 3;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
@@ -589,7 +589,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 3;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma') {
@@ -599,7 +599,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 2;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		} else if (product.DIVISION === 'Radiology') {
@@ -612,7 +612,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 3;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		} else {
@@ -622,7 +622,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 2;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		}
@@ -759,7 +759,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = supply;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 
@@ -827,7 +827,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = supply;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 
@@ -1025,7 +1025,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
 					break;
 				default:
-					oApproverType.ValidationType = 1;
+					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
 		});
 
