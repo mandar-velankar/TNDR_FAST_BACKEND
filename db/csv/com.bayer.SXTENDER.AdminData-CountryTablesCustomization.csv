@@ -1,4 +1,4 @@
-"COUNTRYCODE","TABLEID","COLUMN","BINDINGPATH","VISIBLE","REQUIRED","DESCRIPTION"
+COUNTRYCODE,TABLEID,COLUMN,BINDINGPATH,VISIBLE,REQUIRED,DESCRIPTION
 "MX","editofferProductId","Product","SKU/PRODUCTPACKNAME","1","1","product"
 "MX","editofferProductId","Requested","RequestedVolume","1","1","Requested"
 "MX","editofferProductId","Reference","Reference","1","0","reference"
