@@ -1509,7 +1509,8 @@ module.exports = (srv) => {
 			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
-			SPOT_RATE: spotRate
+			SPOT_RATE: spotRate,
+
 		};
 		return results;
 	}
@@ -1835,6 +1836,8 @@ module.exports = (srv) => {
 			CURRENCY: offerValidation.CURRENCY,
 			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2),
 			AMOUNT_IN_WORDS: offerValidation.AMOUNT_IN_WORDS,
+			AMOUNT_IN_NUMBERS_VAT : offerValidation.AMOUNT_IN_NUMBERS_VAT,
+            AMOUNT_IN_WORDS_VAT   : offerValidation.AMOUNT_IN_WORDS_VAT,
 			DISTRIBUTORNAME: offerValidation.DISTRIBUTORNAME,
 			DISTRIBUTORADDRESS: (!offerValidation.DISTRIBUTORADDRESS) ? "" : offerValidation.DISTRIBUTORADDRESS.replace(/<br>+/g, "</br>"),
 			DISTRIBUTORPHONE: (!offerValidation.DISTRIBUTORPHONE) ? "" : offerValidation.DISTRIBUTORPHONE,
@@ -1914,7 +1917,10 @@ module.exports = (srv) => {
 				BUDGET_RATE: d.BUDGET_RATE,
 				SPOT_RATE: d.SPOT_RATE,
 				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2),
-				IS_LOWEST: d.IS_LOWEST
+				IS_LOWEST: d.IS_LOWEST,
+				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: d.REQ_PRICE_UNIT_OFFER_CURRENCY_VAT,
+            	NET_PRICE_UNIT_OFFER_CURRENCY_VAT: d.NET_PRICE_UNIT_OFFER_CURRENCY_VAT,
+            	GROSS_SALES_OFFER_CURRENCY_VAT: d.GROSS_SALES_OFFER_CURRENCY_VAT
 			}
 		});
 	}
