@@ -32,6 +32,7 @@ entity PriceAgreements: cuid, managed {
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
     ExpiringSoon: Boolean default false; // calculated from NodeJS
+    OfferId: String;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -42,7 +43,10 @@ entity PriceAgreements: cuid, managed {
                                     and Materials.ProductPackId = ProductPackId;
     CustomerPrices: Association to many CustomerPrices on CustomerPrices.PriceAgreementId = ID;
     ConsumerPrice: Association to MasterDataViews.MostRecentConsumerPricesView on ConsumerPrice.CountryCode = CountryCode 
-                                                                                     and ConsumerPrice.ProductPackId = ProductPackId
+                                                                                     and ConsumerPrice.ProductPackId = ProductPackId;
+    OfferProduct: Association to TransactionalData.PT_TMOFPR on OfferProduct.OfferID = OfferId
+                                                             and OfferProduct.ProductCode = ProductPackId;
+    
 }
 entity CustomerPrices: cuid, managed {
     ValidFrom: DateTime;
