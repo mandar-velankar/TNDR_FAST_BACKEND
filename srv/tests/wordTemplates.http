@@ -4,14 +4,14 @@ Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "templateId":2,
-    "name":"Demo template 2",
+    "templateId":5,
+    "name":"Demo template advanced 2",
     "filename" : "word-template.docx",
     "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 }
 
 ### upload word template
-PUT http://localhost:4004/v2/tender/WordTemplate(templateId=2)/content
+PUT http://localhost:4004/v2/tender/WordTemplate(templateId=5)/content
 Authorization: Basic YXJ0aW9t
 Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
 
@@ -24,7 +24,7 @@ Content-Type: application/json
 
 {
     "countryCode":"AR",
-    "templateId":1
+    "templateId":5
 }
 ### get list of templates
 GET http://localhost:4004/v2/tender/WordTemplate
@@ -50,5 +50,5 @@ Authorization: Basic YXJ0aW9t
 DELETE http://localhost:4004/v2/tender/WordTemplateCountry(templateId=1,countryCode='IT')
 Authorization: Basic YXJ0aW9t
 ### delete template
-DELETE http://localhost:4004/v2/tender/WordTemplate(templateId=1)
+DELETE http://localhost:4004/v2/tender/WordTemplate(templateId=3)
 Authorization: Basic YXJ0aW9t

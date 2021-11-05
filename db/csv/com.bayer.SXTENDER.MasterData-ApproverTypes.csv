@@ -50,6 +50,7 @@ APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE
 "Controlling","LY",1,0
 "Country Business","MX",1,0
 "Supply Chain","MX",1,0
+"Tender Management","MX",1,3
 "Legal","OM",1,0
 "Regulatory","OM",1,0
 "Supply Chain","OM",1,0
@@ -123,3 +124,8 @@ APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE
 "Business Integration","IT",1,0
 "Finance","IT",1,0
 "Supply Chain","IT",1,0
+"Legal","IT",1,0
+"Regulatory","IT",1,0
+"Country Business","IT",1,0
+"Regional Business","IT",1,0
+"Controlling","IT",1,0

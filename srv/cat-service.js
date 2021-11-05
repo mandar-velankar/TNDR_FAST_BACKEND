@@ -13,6 +13,7 @@ const { Readable } = require('stream');
 const path = require("path");
 const XLSXHelper = require("./utils/XLSXHelper");
 const wordTemplate = require("easy-template-x");
+const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
 
 module.exports = (srv) => {
 
@@ -450,7 +451,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = supply;
 					break;
 				default:
-					oApproverType.ValidationType = 1;
+					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
 		});
 
@@ -513,7 +514,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = supply;
 					break;
 				default:
-					oApproverType.ValidationType = 1;
+					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
 		});
 
@@ -563,7 +564,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 3;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
@@ -588,7 +589,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 3;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma') {
@@ -598,7 +599,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 2;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		} else if (product.DIVISION === 'Radiology') {
@@ -611,7 +612,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 3;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		} else {
@@ -621,7 +622,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = 2;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 		}
@@ -758,7 +759,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = supply;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 
@@ -826,7 +827,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = supply;
 						break;
 					default:
-						oApproverType.ValidationType = 1;
+						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
 
@@ -1024,7 +1025,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
 					break;
 				default:
-					oApproverType.ValidationType = 1;
+					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
 		});
 
@@ -1509,7 +1510,8 @@ module.exports = (srv) => {
 			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
-			SPOT_RATE: spotRate
+			SPOT_RATE: spotRate,
+
 		};
 		return results;
 	}
@@ -1835,6 +1837,8 @@ module.exports = (srv) => {
 			CURRENCY: offerValidation.CURRENCY,
 			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2),
 			AMOUNT_IN_WORDS: offerValidation.AMOUNT_IN_WORDS,
+			AMOUNT_IN_NUMBERS_VAT : offerValidation.AMOUNT_IN_NUMBERS_VAT,
+            AMOUNT_IN_WORDS_VAT   : offerValidation.AMOUNT_IN_WORDS_VAT,
 			DISTRIBUTORNAME: offerValidation.DISTRIBUTORNAME,
 			DISTRIBUTORADDRESS: (!offerValidation.DISTRIBUTORADDRESS) ? "" : offerValidation.DISTRIBUTORADDRESS.replace(/<br>+/g, "</br>"),
 			DISTRIBUTORPHONE: (!offerValidation.DISTRIBUTORPHONE) ? "" : offerValidation.DISTRIBUTORPHONE,
@@ -1914,7 +1918,10 @@ module.exports = (srv) => {
 				BUDGET_RATE: d.BUDGET_RATE,
 				SPOT_RATE: d.SPOT_RATE,
 				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2),
-				IS_LOWEST: d.IS_LOWEST
+				IS_LOWEST: d.IS_LOWEST,
+				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: d.REQ_PRICE_UNIT_OFFER_CURRENCY_VAT,
+            	NET_PRICE_UNIT_OFFER_CURRENCY_VAT: d.NET_PRICE_UNIT_OFFER_CURRENCY_VAT,
+            	GROSS_SALES_OFFER_CURRENCY_VAT: d.GROSS_SALES_OFFER_CURRENCY_VAT
 			}
 		});
 	}
@@ -2124,7 +2131,16 @@ module.exports = (srv) => {
 			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID", "or", instituteIds);
 			let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
 			let whereProduct = ServiceHelper.buildWhere(req, "PRODUCT_ID");
-			let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
+
+			//let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
+			let brandIds = ServiceHelper.getWhereValues(req, "BRAND_ID");
+			let whereBrand = [];
+			if(brandIds.length > 0){
+				for (let i = 0; i < brandIds.length; i++) {
+					brandIds[i] = "\'" + brandIds[i] + "\'";
+				  }
+			whereBrand = ServiceHelper.buildWhereExpression("BRAND_ID", "or", brandIds);
+			}
 			let whereLegalEntity = ServiceHelper.buildWhere(req, "LEGAL_ENTITY_CODE");
 			let whereOrigin = ServiceHelper.buildWhere(req, "COUNTRY_OF_ORIGIN");
 
@@ -2188,7 +2204,11 @@ module.exports = (srv) => {
 			}
 		}
 		// sort by countrycode, then brand name, then product name
-		results.sort(function (x, y) { return x.COUNTRY_CODE - y.COUNTRY_CODE || x.BRAND_NAME - y.BRAND_NAME || x.PRODUCT_NAME - y.PRODUCT_NAME; });
+		results.sort((a,b)=> ( a.COUNTRY_CODE.localeCompare(b.COUNTRY_CODE) || a.BRAND_NAME.localeCompare(b.BRAND_NAME) || a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME)   ));
+
+
+
+
 		return results;
 	});
 
@@ -2392,7 +2412,14 @@ module.exports = (srv) => {
 				return req.reject(404, 'No offer found');
 			}
 		}
-		const handler = new wordTemplate.TemplateHandler();
+		const handler = new wordTemplate.TemplateHandler({
+			scopeDataResolver: createResolver({
+				filters: {
+					upper: (input) => (input || "").toUpperCase(),
+					lower: (input) => (input || "").toLowerCase()
+				}
+			})
+		});
 		const doc = await handler.process(templateContent, wordData);
 		const readableInstanceStream = new Readable({
 			read() {

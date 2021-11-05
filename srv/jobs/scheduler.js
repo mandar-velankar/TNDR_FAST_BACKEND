@@ -1,6 +1,7 @@
 //const CronJob = require('cron').CronJob;
 const { CronJob } = require('cron');
 const axios = require('axios');
+const qs = require("qs");
 const cds = require('@sap/cds');
 const { v4:uuidv4 } = require('uuid');
 
@@ -11,7 +12,7 @@ module.exports = async () => {
   // let db = cds.reflect(model);
 
   const db = await cds.connect.to('db'); // connect to database service
-  const { SchedulerApiConfig } = db.entities("com.bayer.SXTENDER.AdminData");
+  const { SchedulerApiConfig, SchedulerApiConfigUsers, SchedulerApiConfigOAuth } = db.entities("com.bayer.SXTENDER.AdminData");
 
   // connect to service
   const srv = await cds.connect.to('SalesOpportunityService');
@@ -23,19 +24,40 @@ module.exports = async () => {
   // get api config
   const mercadoApi = await cds.run(SELECT.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}));
 
+  const mercadoConfig = mercadoApi[0];
+  let basicAuth;
+  let oauthAuth;
+  if (mercadoConfig.AuthType === "BASIC") {
+    basicAuth = await cds.run(
+      SELECT.one.from(SchedulerApiConfigUsers, mercadoConfig.User_ID)
+    );
+  } else if (mercadoConfig.AuthType === "OAUTH") {
+    oauthAuth = await cds.run(
+      SELECT.one.from(SchedulerApiConfigOAuth, mercadoConfig.OAuth_ID)
+    );
+  }
   const classification_search_terms = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationKeywords'));
   const classification_products = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationProducts'));
 
   class MercadoPublico {
 
     constructor(){
+      this.host = mercadoConfig.Host;
+      this.serviceUrl = mercadoConfig.BasePath;
+      this.proxyHost = mercadoConfig.ProxyHost;
+      this.proxyPort = mercadoConfig.ProxyPort;
 
-      this.host = mercadoApi[0].Host;
-      this.serviceUrl = mercadoApi[0].BasePath; 
-      this.apiUser = mercadoApi[0].ApiUser;
-      this.apiPassword = mercadoApi[0].ApiPassword;
-      this.proxyHost = mercadoApi[0].ProxyHost; 
-      this.proxyPort = mercadoApi[0].ProxyPort; 
+      if (mercadoConfig.AuthType === "BASIC") {
+        this.apiUser = basicAuth.ApiUser;
+        this.apiPassword = basicAuth.ApiPassword;
+      }
+
+      if (mercadoConfig.AuthType === "OAUTH") {
+        this.oAuthProvider = oauthAuth.OAuthProvider;
+        this.grantType = oauthAuth.GrantType;
+        this.clientID = oauthAuth.ClientID;
+        this.clientSecret = oauthAuth.ClientSecret;
+      }
 
       let tendersConfig = mercadoApi.find(item => item.Resource.indexOf("Tender") > -1);
       let poConfig = mercadoApi.find(item => item.Resource.indexOf("PurchaseOrder") > -1);
@@ -212,21 +234,64 @@ module.exports = async () => {
 
     }
 
+    getBearerToken() {
+      if (mercadoConfig.AuthType === "OAUTH" && this.oAuthProvider && this.clientID && this.clientSecret) {
+        return axios({
+          method: 'post',
+          url: this.oAuthProvider,
+          headers: {
+            'Authorization': `Basic ${Buffer.from(`${this.clientID}:${this.clientSecret}`).toString('base64')}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          data: qs.stringify({
+            'grant_type': this.grantType
+          })
+        });
+      }
+      throw Error("Only use bearer token for OAUTH config");
+    }
     /**
      * Fetches data from a given entpoint. In case of failure, the request will be retried.
-     * @param {String} url 
+     * @param {String} url
      * @returns {Promise}
      */
-    fetchWithRetry(url){
+    async fetchWithRetry(url) {
 
       const REQUEST_DELAY = this.resources.tenders.requestDelay;
       const MAX_RETRY = this.resources.tenders.requestMaxRetry;
-      const API_USER = this.apiUser;
-      const API_PASSWORD = this.apiPassword;
+      // const API_USER = this.apiUser;
+      // const API_PASSWORD = this.apiPassword;
       const PROXY_HOST = this.proxyHost;
       const PROXY_PORT = this.proxyPort;
-
+      let config = {};
       const that = this;
+
+      if (mercadoConfig.AuthType === "BASIC") {
+        console.log(`Will use basic auth with user ${basicAuth.ApiUser}\n`);
+        config = {
+          auth: {
+            apiUser: basicAuth.ApiUser,
+            apiPassword: basicAuth.ApiPassword,
+          },
+        };
+      }
+
+      if (mercadoConfig.AuthType === "OAUTH") {
+        console.log(`Will use OAuth auth ${this.grantType} with clientID ${this.clientID}`);
+        try {
+          const oauthCredentials = await this.getBearerToken();
+          console.log(`OAuth auth access token ${oauthCredentials.data.access_token}\n`);
+          config = {
+            headers: {
+              'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+            }
+          };
+        } catch (error) {
+          console.log(`OAuth auth not able to fetch access token!\n`);
+          const errLog = await that.saveError(error, url);
+          throw new Error(error);
+        }
+      }
 
       let currentRetry = 0;
 
@@ -251,27 +316,28 @@ module.exports = async () => {
          
         }
       }
-      
+
       async function sendWithRetry() {
 
         await wait(REQUEST_DELAY);
-          
+
         // console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
 
-          //get using basic auth setting that configures the API header
-          return axios.get(url, {
-            auth:{
-              username: API_USER,
-              password: API_PASSWORD
-            }, // when testing locally, comment out the proxy
+        //get using basic auth setting that configures the API header
+        return axios.get(url,config
+            // {
+            // auth: {
+            //   username: API_USER,
+            //   password: API_PASSWORD,
+            // }, // when testing locally, comment out the proxy
             /*proxy: {
               host: PROXY_HOST,
               port: PROXY_PORT
             }*/
-          }).then(successHandler).catch(errorHandler);
-          
+            // }
+          ).then(successHandler).catch(errorHandler);
         // }
-        
+
       }
 
       return sendWithRetry();
@@ -282,7 +348,7 @@ module.exports = async () => {
      * @param {Array} - list of tenders  
      * @returns {Promise <Array>} - list of tenders with details
      */
-    async getTendersWithDetails(tenders){
+     async getTendersWithDetails(tenders){
       const tenderDetails = [];
       
       for(let i = 0; i < tenders.length; i++){
