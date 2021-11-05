@@ -580,7 +580,9 @@ service CatalogService @(path : 'tender')@(requires : [
 
     //PRICE AGREEMENT
     entity PriceAgreements                              as projection on PriceAgreementData.PriceAgreements {
-        * , Tender : redirected to PT_TMTEND
+        * , 
+        Tender : redirected to PT_TMTEND,
+        OfferProduct : redirected to PT_TMOFPR
     };
 
     //OTHER

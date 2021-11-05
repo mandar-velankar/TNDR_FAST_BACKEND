@@ -337,6 +337,9 @@ entity PT_TMOFPR {
                                        on ProductPricing.OfferID = OfferID
                                        and ProductPricing.ProductCode = ProductCode
                                        and ProductPricing.CountryCode = CountryCode;
+        PriceAgreement           : Association to PriceAgreementData.PriceAgreements
+                                        on PriceAgreement.OfferId = OfferID
+                                        and PriceAgreement.ProductPackId = ProductCode;
 }
 
 //italy
