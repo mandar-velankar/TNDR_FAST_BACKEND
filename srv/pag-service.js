@@ -32,6 +32,7 @@ module.exports = (srv) => {
         let hasNewMaterialsFilterValues = null;
         let hasNewPriceFilterIndex = null; 
         let hasNewPriceFilterValues = null;
+        let hasExpiringSoonFilterIndex = null;
         let hasExpiringSoonFilterValues = null;
 
         if(req.query.SELECT.where){
@@ -54,7 +55,7 @@ module.exports = (srv) => {
             }
 
             if(hasExpiringSoonFilterIndex >= 0){
-                ServiceHelper.deleteFilter(req, 'expiringSoon');
+                ServiceHelper.deleteFilter(req, 'ExpiringSoon');
             }
         }
 
