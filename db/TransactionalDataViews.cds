@@ -817,7 +817,11 @@ left outer join TransactionalData.ProductPricing as productPricing
     and product.Active = 1
 left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices 
     on product.ProductCode = consumerPrices.ProductPackId
-    and product.CountryCode = consumerPrices.CountryCode {
+    and product.CountryCode = consumerPrices.CountryCode
+left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR 
+    on product.CountryCode = PT_TMBDPR.CountryCode
+    and product.ProductCode = PT_TMBDPR.ProductCode
+    and product.OfferID = PT_TMBDPR.OfferID {
     key offer.OfferID,
     key product.ProductCode,
     key product.CountryCode,
@@ -832,12 +836,12 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices
     productPricing.ContractStartDate,
     productPricing.ValueOfDevices,
     productPricing.StatusOfDevice,
-    productPricing.FreeGoodsSame,
+    PT_TMBDPR.FOC,
     productPricing.FreeGoodsOther,
     productPricing.MinContractual,
     productPricing.MinAnnPurch,
-    productPricing.AdditionalDiscount,
-    productPricing.FOC_ABS_PCT,
+    PT_TMBDPR.AdditionalDiscount,
+    PT_TMBDPR.FOC_ABS_PCT,
     offer.FOCType,
     offer.Currency,
     product.OfferType,
@@ -859,9 +863,9 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
             then
-                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) / consumerPrices.ConsumerPriceExclPP
+                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - PT_TMBDPR.AdditionalDiscount)) / consumerPrices.ConsumerPriceExclPP
         else null
     end as FinalDiscount: Double,
-    (consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePP: Double,
-    (consumerPrices.MaxPriceNhsPU * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePU: Double
+    (consumerPrices.MaxPriceNhsPP * (1 - PT_TMBDPR.AdditionalDiscount)) as NetOfferPricePP: Double,
+    (consumerPrices.MaxPriceNhsPU * (1 - PT_TMBDPR.AdditionalDiscount)) as NetOfferPricePU: Double
 }where offer.Active = 1;
