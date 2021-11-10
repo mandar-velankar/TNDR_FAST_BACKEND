@@ -91,10 +91,10 @@ entity ItalyMaterials: cuid, managed {
 	COUNTRYOFORIG    	: String(3);			// Country of origin of the material
 	COGS    			: Double;				// Standard price
 	COGS_UOM    		: String(3);			// Base Unit of Measure
-	PRICE_UNIT    		: String(2);			// Price Unit
-	MAKTX    			: String(3);			// Material Description
-	DIVISION_DESC    	: String(1);			// Division description
-	EAN11    			: String(1); 			// EAN number
+	PRICE_UNIT    		: String(5);			// Price Unit
+	MAKTX    			: String(40);			// Material Description
+	DIVISION_DESC    	: String(20);			// Division description
+	EAN11    			: String(18); 			// EAN number
 }
 
 entity ItalyCustomers: cuid, managed {
