@@ -99,6 +99,7 @@ module.exports = (srv) => {
             // calculate hasNewMaterials
             priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
 
+
             // calculate hasNewPrice
             if(consumerPrice){
 
@@ -119,6 +120,11 @@ module.exports = (srv) => {
                         priceAgreement.hasNewPrice = true;
                 }
 
+            }
+
+            
+            if(!priceAgreement.CustomerPrices || (priceAgreement.CustomerPrices && priceAgreement.CustomerPrices.length === 0)){
+                priceAgreement.hasNewMaterials = false;
             }
 
             if(priceAgreement.ExpiryDate){
