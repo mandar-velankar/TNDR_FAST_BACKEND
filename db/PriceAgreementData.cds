@@ -49,8 +49,12 @@ entity PriceAgreements: cuid, managed {
     
 }
 entity CustomerPrices: cuid, managed {
-    ValidFrom: DateTime;
-    ValidTo: DateTime;
+    @cds.api.ignore
+    @assert.notNull: false
+    ValidFrom: Timestamp not null;
+    @cds.api.ignore
+    @assert.notNull: false
+    ValidTo: Timestamp not null;
     PriceAgreementId: String not null;
     PriceAgreement: Association to PriceAgreements;
     InstituteId: Integer;
@@ -63,6 +67,20 @@ entity CustomerPrices: cuid, managed {
     Applied: Boolean; // not needed? 
 }
 
+entity CustomerPrices_History: managed {
+    ID: UUID;
+    ValidFrom: Timestamp;
+    ValidTo: Timestamp;
+    PriceAgreementId: String not null;
+    PriceAgreement: Association to PriceAgreements;
+    InstituteId: Integer;
+    CountryCode: String not null;
+    ProductPackId: Integer not null;
+    MaterialNumber: String not null;
+    Synchronized: Boolean;
+    Price: Double;
+    Applied: Boolean; 
+}
 
 /**
  * This view lists candidate institutes that can participate in a price agreement 
