@@ -2,7 +2,7 @@ namespace com.bayer.SXTENDER.MasterData.SAP;
 
 using { User, Country, managed, cuid } from '@sap/cds/common';
 using { 
-	E1KNA1M, E1KNA11, E1KNB1M, E1MARAM, E1MARA1, E1MAKTM, E1MARCM, E1MARDM, E1MARMM,E1MBEWM, E1MVKEM, E1MLANM, E1MTXHM, E1MTXLM
+	E1KNA1M, E1KNA11, E1KNB1M, E1MARAM, E1MARA1, E1MAKTM, E1MARCM, E1MARDM, E1MARMM,E1MBEWM, E1MVKEM, E1MLANM, E1MTXHM, E1MTXLM, E1KNVVM, E1KNVKM, E1KNKKM
 } from './SAPTypes';
 
 
@@ -84,7 +84,7 @@ entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number
 	HLEVEL1_NAME    	: String(40);			// Description
 	HLEVEL4_CODE    	: String(10);			// Version Number Component
-	HLEVEL4_NAME    	: String(40);				// Description
+	HLEVEL4_NAME    	: String(40);			// Description
 	HLEVEL6_CODE   		: String(18);			// Version Number Component
 	HLEVEL6_NAME   		: String(40);			// Description            Distribution channel
 	UOM   				: String(3);			// Base Unit of Measure
@@ -101,6 +101,9 @@ entity ItalyCustomers: cuid, managed {
 	E1KNA1M				: E1KNA1M;				// Master customer master basic data (KNA1 - SAP table)
 	E1KNA11				: E1KNA11;				// Customer Master: Additional General Fields  (KNA1 - SAP table)
 	E1KNB1M				: E1KNB1M;				// Master Customer Master Company Code (KNB1- SAP table )
+	E1KNVVM				: E1KNVVM; 				// Master customer master sales data (KNVV- SAP table)
+	E1KNVKM				: E1KNVKM;				// Master customer master contact person (KNVK - SAP table)
+	E1KNKKM				: E1KNKKM;				// Master customer master credit mgmt control area data (KNKK - SAP table name)
 }
 
 entity ItalyDeliveries: cuid, managed {
