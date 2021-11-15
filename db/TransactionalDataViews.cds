@@ -828,6 +828,7 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     product.SKU.PRODUCTPACKNAME as ProductPackName,
     product.RequestedVolume,
     product.UnitPerPack as UOM,
+    product.Cogs.COGS,
     productPricing.ID,
     productPricing.Warranty,
     productPricing.AgreementDuration,
@@ -867,5 +868,34 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
         else null
     end as FinalDiscount: Double,
     (consumerPrices.MaxPriceNhsPP * (1 - PT_TMBDPR.AdditionalDiscount)) as NetOfferPricePP: Double,
-    (consumerPrices.MaxPriceNhsPU * (1 - PT_TMBDPR.AdditionalDiscount)) as NetOfferPricePU: Double
+    (consumerPrices.MaxPriceNhsPU * (1 - PT_TMBDPR.AdditionalDiscount)) as NetOfferPricePU: Double,
+    case when product.UnitPerPack = 'Unit' then $self.NetOfferPricePU else $self.NetOfferPricePP end as NetOfferPrice:Double,
+    case
+        when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+            then PT_TMBDPR.FOC * product.RequestedVolume
+        else PT_TMBDPR.FOC
+    end as focAbsolute:Double,
+    case 
+        when offer.FOCType = 'FOC 1'
+            then product.RequestedVolume - $self.focAbsolute
+        else product.RequestedVolume 
+    end as paidVolume:Double,
+    case 
+        when offer.FOCType = 'FOC 2'
+            then product.RequestedVolume + $self.focAbsolute
+        else product.RequestedVolume 
+    end as totalVolume:Double,
+    $self.NetOfferPrice * ( $self.paidVolume / $self.totalVolume ) as NetPriceFOC:Double,
+    $self.NetOfferPrice * $self.paidVolume as GrossSales:Double,
+    case   
+        when product.UnitPerPack = 'Pack'
+            then product.Cogs.COGS
+        else product.Cogs.COGS / product.SKU.PACKFACTOR
+    end as cogsUoM :Double,
+    ($self.NetOfferPrice * $self.paidVolume) - ($self.cogsUoM * $self.totalVolume) as GrossProfit:Double
+    
+
+        
+
+
 }where offer.Active = 1;
