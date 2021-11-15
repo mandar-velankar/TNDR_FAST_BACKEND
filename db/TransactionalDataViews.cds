@@ -842,6 +842,7 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     productPricing.MinAnnPurch,
     PT_TMBDPR.AdditionalDiscount,
     PT_TMBDPR.FOC_ABS_PCT,
+    PT_TMBDPR.FOCStep,
     offer.FOCType,
     offer.Currency,
     product.OfferType,

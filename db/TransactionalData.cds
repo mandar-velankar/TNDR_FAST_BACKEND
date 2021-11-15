@@ -191,6 +191,7 @@ entity PT_TMBDPR {
         VolumeTo              : Integer;
         RegPrice              : Double;
         FOC                   : Double;
+        FOCStep               : Double; 
         FOCType               : String(255);
         Discount              : Double;
         OfferPrice            : Double;
