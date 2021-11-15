@@ -688,3 +688,79 @@ type E1MTXLM {
 	TDFORMAT  			: String(2);			// Tag column
 	TDLINE				: String(132);			// Text Line
 }
+
+
+type E1KNVVM {
+	MSGFN				: String(3);			// Function
+	VKORG				: String(4);			// Sales Organization
+	VTWEG				: String(2);			// Distribution Channel
+	SPART				: String(2);			// Division
+	BEGRU				: String(4);			// Authorization Group
+	LOEVM				: String(1);			// Deletion flag for customer (sales level)
+	VERSG				: String(1);			// Customer Statistics Group
+	AUFSD				: String(2);			// Customer order block (sales area)
+	KALKS				: String(1);			// Pricing procedure assigned to this customer
+	KDGRP				: String(2);			// Customer group
+	BZIRK				: String(6);			// Sales district
+	KONDA				: String(2);			// Price group (customer)
+	PLTYP				: String(2);			// Price list type
+	AWAHR				: String(3);			// 3-Byte field
+	INCO1				: String(3);			// Incoterms (Part 1)
+	INCO2				: String(28);			// Incoterms (Part 2)
+	LIFSD				: String(2);			// Customer delivery block (sales area)
+	AUTLF				: String(1);			// Complete delivery defined for each sales order?
+	ANTLF				: String(2);			// Version Number Component
+	KZTLF				: String(1);			// Partial delivery at item level
+	KZAZU				: String(1);			// Order Combination Indicator
+	CHSPL				: String(1);			// Batch split allowed
+	LPRIO				: String(2);			// Version Number Component
+	EIKTO				: String(12);			// Shipper's (Our) Account Number at the Customer or Vendor
+	VSBED				: String(2);			// Shipping Conditions
+	FAKSD				: String(2);			// Billing block for customer (sales and distribution)
+	MRNKZ				: String(1);			// Manual invoice maintenance
+	PERFK				: String(2);			// Invoice dates (calendar identification)
+	PERRL				: String(2);			// Invoice list schedule (calendar identification)
+	WAERS				: String(5);			// R/2 table
+	KTGRD				: String(2);			// Account assignment group for this customer
+	ZTERM				: String(4);			// Terms of Payment Key
+	VWERK				: String(4);			// Delivering Plant
+	VKGRP				: String(3);			// Sales Group
+	VKBUR				: String(4);			// Sales Office
+	VSORT				: String(10);			// Item proposal
+	KVGR1				: String(3);			// Customer group 1
+	KVGR2				: String(3);			// Customer group 2
+	KVGR3				: String(3);			// Customer group 3
+	KVGR4				: String(3);			// Customer group 4
+	KVGR5				: String(3);			// Customer group 5
+	BOKRE				: String(1);			// Indicator: Customer Is Rebate-Relevant
+	KURST				: String(4);			// Exchange Rate Type
+	PRFRE				: String(1);			// Relevant for price determination ID
+	UEBTO				: String(1);			// Overdelivery tolerance limit (BTCI)
+}
+
+type E1KNVKM {
+	MSGFN				: String(3);			// Function
+	PARNR				: String(10);			// Number of contact person
+	NAMEV				: String(35);			// First name
+	NAME1				: String(35);			// Name 1
+	UEPAR				: String(12);			// Higher-level partner
+	TELF1				: String(4);			// First telephone number
+	ANRED				: String(10);			// Form of address for contact person (Mr, Mrs...etc)
+	PARLA				: String(16);			// Partner language
+	GBDAT				: String(30);			// Date of Birth
+	VRTNR				: String(2);			// Representative number
+}
+
+type E1KNKKM {
+	MSGFN				: String(3);			// Function
+	KKBER				: String(4);			// Credit control area
+	KLIMK				: String(16);			// Field of length 16
+	KNKLI				: String(10);			// Customer's account number with credit limit reference
+	DTREV				: String(8);			// Last internal review
+	NXTRV				: String(8);			// Next internal review
+	PAYDB				: String(2);			// do not use - replaced by DBPAY_CM
+	REVDB				: String(8);			// Last review (external)
+	SBDAT				: String(8);			// Reference Date
+	DBEKR				: String(17);			// Recommended credit limit
+	DBMON				: String(8);			// Date Monitoring
+}
