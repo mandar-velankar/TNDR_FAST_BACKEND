@@ -49,10 +49,10 @@ entity PriceAgreements: cuid, managed {
     
 }
 entity CustomerPrices: cuid, managed {
-    @cds.api.ignore
+    // @cds.api.ignore
     @assert.notNull: false
     ValidFrom: Timestamp not null;
-    @cds.api.ignore
+    // @cds.api.ignore
     @assert.notNull: false
     ValidTo: Timestamp not null;
     PriceAgreementId: String not null;
