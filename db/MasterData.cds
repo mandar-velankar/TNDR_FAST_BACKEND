@@ -614,6 +614,13 @@ entity ChannelProductPolicies: cuid, managed {
 	StandardDiscount 	: Double;	
 };
 
+
+entity CountryProvinces: cuid {
+	CountryCode     	: String(2);
+	RegionID            : String;
+	Name				: String;
+}
+
 entity CountryRegions: cuid {
 	CountryCode     	: String(2);
 	Name				: String;
