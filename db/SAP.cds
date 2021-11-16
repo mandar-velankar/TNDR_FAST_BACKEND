@@ -112,6 +112,7 @@ entity ItalyDeliveries: cuid, managed {
 	VKBUR				: String(4); 			// Sales Office
 	BUKRS				: String(4); 			// Company Code
 	KUNNR				: String(10); 			// Ship-to party
+	KUNAG				: String(10);			// Sold-to party
 	ERNAM				: String(12); 			// Name of Person who Created the Object
 	ERDAT				: DateTime; 			// Date on Which Record Was Created
 	XABLN				: String(10); 			// Goods Receipt/Issue Slip Number
