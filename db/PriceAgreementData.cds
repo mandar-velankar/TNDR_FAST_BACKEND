@@ -55,6 +55,8 @@ entity CustomerPrices: cuid, managed {
     // @cds.api.ignore
     @assert.notNull: false
     ValidTo: Timestamp not null;
+    EffectiveDate: DateTime;
+    ExpiryDate: DateTime;
     PriceAgreementId: String not null;
     PriceAgreement: Association to PriceAgreements;
     InstituteId: Integer;
@@ -71,6 +73,8 @@ entity CustomerPrices_History: managed {
     ID: UUID;
     ValidFrom: Timestamp;
     ValidTo: Timestamp;
+    EffectiveDate: DateTime;
+    ExpiryDate: DateTime;
     PriceAgreementId: String not null;
     PriceAgreement: Association to PriceAgreements;
     InstituteId: Integer;
@@ -142,8 +146,8 @@ left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.Material
         end as Applied:Boolean,
         ifnull(cp.Synchronized, false) as Synchronized:Boolean,
         ifnull(cp.Price, pa.Price) as Price:Double,
-        ifnull(cp.ValidFrom, pa.EffectiveDate) as ValidFrom:DateTime,
-        ifnull(cp.ValidTo, pa.ExpiryDate) as ValidTo:DateTime
+        ifnull(cp.EffectiveDate, pa.EffectiveDate) as EffectiveDate:DateTime,
+        ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime
 };
 
 
