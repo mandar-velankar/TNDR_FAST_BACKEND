@@ -735,7 +735,7 @@ type E1KNVVM {
 	BOKRE				: String(1);			// Indicator: Customer Is Rebate-Relevant
 	KURST				: String(4);			// Exchange Rate Type
 	PRFRE				: String(1);			// Relevant for price determination ID
-	UEBTO				: String(1);			// Overdelivery tolerance limit (BTCI)
+	UEBTO				: String(4);			// Overdelivery tolerance limit (BTCI)
 }
 
 type E1KNVKM {
@@ -743,12 +743,12 @@ type E1KNVKM {
 	PARNR				: String(10);			// Number of contact person
 	NAMEV				: String(35);			// First name
 	NAME1				: String(35);			// Name 1
-	UEPAR				: String(12);			// Higher-level partner
-	TELF1				: String(4);			// First telephone number
-	ANRED				: String(10);			// Form of address for contact person (Mr, Mrs...etc)
-	PARLA				: String(16);			// Partner language
-	GBDAT				: String(30);			// Date of Birth
-	VRTNR				: String(2);			// Representative number
+	UEPAR				: String(10);			// Higher-level partner
+	TELF1				: String(16);			// First telephone number
+	ANRED				: String(30);			// Form of address for contact person (Mr, Mrs...etc)
+	PARLA				: String(1);			// Partner language
+	GBDAT				: String(8);			// Date of Birth
+	VRTNR				: String(10);			// Representative number
 }
 
 type E1KNKKM {
