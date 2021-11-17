@@ -12,6 +12,30 @@ entity DeliveryForProduct as select from TransactionalData.PT_TMDLVTR delivery {
     key delivery.ProductCode as PRODUCTID,
     sum(delivery.RequestedQuantity) as RequestedQuantity:Double,
     sum(delivery.ActualDeliveryQuantity) as ActualDeliveredQuantity:Double,
+    sum(
+        case when delivery.LocalOrDirectDelivery = 'D'
+            then delivery.RequestedQuantity
+            else 0
+        end
+    ) as DirectRequestedQuantity:Double,
+    sum(
+        case when delivery.LocalOrDirectDelivery = 'L'
+            then delivery.RequestedQuantity
+            else 0
+        end
+    ) as LocalRequestedQuantity:Double,
+    sum(
+        case when delivery.LocalOrDirectDelivery = 'D'
+            then delivery.ActualDeliveryQuantity
+            else 0
+        end
+    ) as DirectDeliveredQuantity:Double,
+    sum(
+        case when delivery.LocalOrDirectDelivery = 'L'
+            then delivery.ActualDeliveryQuantity
+            else 0
+        end
+    ) as LocalDeliveredQuantity:Double
 }where delivery.Active = 1
 group by delivery.OfferID, delivery.ProductCode;
 
@@ -19,6 +43,7 @@ entity Dashboard as select from TransactionalDataViews.OfferProductPlus offerPro
 inner join MasterData.PT_TMTABRMP ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
 inner join MasterData.PT_TMRCM region on offerProduct.CountryCode = region.CountryCode
 left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.OFFERID and offerProduct.ProductCode = delivery.PRODUCTID {
+    offerProduct.OfferID || '_' || offerProduct.ProductCode as LineID:String,
     ifnull(
         year(
                 case when offerProduct.Offer.SubmissionDate = '' or offerProduct.Offer.SubmissionDate is null
@@ -81,8 +106,10 @@ left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.O
     ifnull(offerProduct.Results.Outcome, '') as Outcome:String,
     ifnull(offerProduct.Results.AwardedQty, 0) as AwardedQty:Integer,
     ifnull(offerProduct.Results.Reason, '') as Reason:String,
-    ifnull(delivery.RequestedQuantity, 0) as RequestedQuantity:Integer,
-    ifnull(delivery.ActualDeliveredQuantity, 0) as ActualDeliveredQuantity:Integer,
+    ifnull(delivery.LocalRequestedQuantity, 0) as LocalRequestedQuantity:Integer,
+    ifnull(delivery.DirectRequestedQuantity, 0) as DirectRequestedQuantity:Integer,
+    ifnull(delivery.LocalDeliveredQuantity, 0) as LocalDeliveredQuantity:Integer,
+    ifnull(delivery.DirectDeliveredQuantity, 0) as DirectDeliveredQuantity:Integer,
     case when offerProduct.Results.CompetitorResult.AWARDEDCOMPANY is null
         then ''
         else offerProduct.Results.CompetitorResult.AWARDEDCOMPANY || ' - ' || offerProduct.Results.CompetitorResult.AWARDEDPRODUCT
