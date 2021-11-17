@@ -680,14 +680,14 @@ module.exports = (srv) => {
 
 			
 			const countryPreApprovedPrice = await tx.run(SELECT.one.from(CountryPreApprovedPrices).where(whereProduct));
-			let minPreApprovedPrice = countryPreApprovedPrice && uom === "Pack" ? countryPreApprovedPrice.MIN_PACK_PRICE : countryPreApprovedPrice.MIN_UNIT_PRICE;
+			let minPreApprovedPrice = countryPreApprovedPrice && (uom === "Pack" ? countryPreApprovedPrice.MIN_PACK_PRICE : countryPreApprovedPrice.MIN_UNIT_PRICE);
 
 
 			if(!((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) )){
 
 				// if a product is offered above or equal to pre-approved price, 
 				// business approval is not mandatory even if additional discount on offer is not 0%).
-				if(netOfferPrice && netOfferPrice >= minPreApprovedPrice){
+				if(netOfferPrice && minPreApprovedPrice && netOfferPrice >= minPreApprovedPrice){
 					validationType = 1;	
 				}else{
 					validationType = 3;	
