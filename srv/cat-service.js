@@ -1238,6 +1238,19 @@ module.exports = (srv) => {
 				BUDGET_RATE: offerProduct.BUDGET_RATE,
 				SPOT_RATE: offerProduct.SPOT_RATE,
 				BUSINESS_CASE_PRICE: offerProduct.BUSINESS_CASE_PRICE,
+
+				WARRANTY: offerProduct.Warranty,
+				AGREEMENTDURATION: offerProduct.AgreementDuration,
+				MONTHLYRENT = offerProduct.MonthlyRent,
+				MONTHSPERINVOICE = offerProduct.MonthsPerInvoice,
+				CONTRACTSTARTDATE = offerProduct.ContractStartDate,
+				VALUEOFDEVICES = offerProduct.ValueOfDevices,
+				STATUSOFDEVICE = offerProduct.StatusOfDevice,
+				MINCONTRACTUAL = offerProduct.MinContractual,
+				MINANNPURCH = offerProduct.MinAnnPurch,
+				FREEGOODSOTHER = offerProduct.FreeGoodsOther.FreeGoodsOther,
+				FREEGOODSOTHERABSPCT = offerProduct.FreeGoodsOther.FreeGoodsOther_ABS_PCT,
+				FREEGOODSVAT = offerProduct.FreeGoodsOther.FreeGoodsVAT,
 			}
 		});
 		let resolvedResults = await Promise.all(results);

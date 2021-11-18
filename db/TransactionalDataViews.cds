@@ -525,6 +525,10 @@ left outer join AccountMinPrice as accountPrice
 left outer join MasterDataViews.MostRecentSkuCodeForProductPack as sku 
     on offerProduct.ProductCode = sku.ProductPackID 
     and offerProduct.CountryCode = sku.CountryCode
+left outer join TransactionalData.ProductPricing as productPricing
+    on offerProduct.OfferID = productPricing.OfferID
+    and offerProduct.ProductCode = productPricing.ProductCode
+    and offerProduct.CountryCode = productPricing.CountryCode
 {
     offerProduct.TenderID as TENDERID,
     key offerProduct.OfferID as OFFERID,
@@ -609,7 +613,19 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack as sku
     offerProduct.Price.Bundled_1_SKU.PRODUCTPACKNAME as FOC_BUNDLED_1_PRODUCT_NAME,
     offerProduct.Price.Bundled_1_SKU.PACKFACTOR as FOC_BUNDLED_1_PACKSIZE,
     offerProduct.Price.Bundled_1_Cogs.COGS * offerProduct.Price.SpotRate / (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.Price.Bundled_1_SKU.PACKFACTOR else 1 end) as FOC_BUNDLED_1_COGS,
-    offerProduct.SKUCountry.QTY_THRESHOLD * (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as QTY_THRESHOLD:Double
+    offerProduct.SKUCountry.QTY_THRESHOLD * (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as QTY_THRESHOLD:Double,
+    productPricing.Warranty,
+    productPricing.AgreementDuration,
+    productPricing.MonthlyRent,
+    productPricing.MonthsPerInvoice,
+    productPricing.ContractStartDate,
+    productPricing.ValueOfDevices,
+    productPricing.StatusOfDevice,
+    productPricing.MinContractual,
+    productPricing.MinAnnPurch,
+    productPricing.FreeGoodsOther.FreeGoodsOther,
+    productPricing.FreeGoodsOther.FreeGoodsOther_ABS_PCT,
+    productPricing.FreeGoodsOther.VAT as FreeGoodsVAT,
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
