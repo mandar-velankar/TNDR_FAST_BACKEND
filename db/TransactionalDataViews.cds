@@ -887,7 +887,7 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     case   
         when PT_TMBDPR.NetofferPrice is not null
             then 
-                PT_TMBDPR.NetofferPrice * ( $self.paidVolume / $self.totalVolume ) 
+                round(PT_TMBDPR.NetofferPrice * ( $self.paidVolume / $self.totalVolume ),2)
         else null
     end as NetPriceFOC:Double,
 
