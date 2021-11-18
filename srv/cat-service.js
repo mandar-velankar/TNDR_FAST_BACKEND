@@ -1238,6 +1238,19 @@ module.exports = (srv) => {
 				BUDGET_RATE: offerProduct.BUDGET_RATE,
 				SPOT_RATE: offerProduct.SPOT_RATE,
 				BUSINESS_CASE_PRICE: offerProduct.BUSINESS_CASE_PRICE,
+
+				WARRANTY: offerProduct.Warranty,
+				AGREEMENTDURATION: offerProduct.AgreementDuration,
+				MONTHLYRENT: offerProduct.MonthlyRent,
+				MONTHSPERINVOICE: offerProduct.MonthsPerInvoice,
+				CONTRACTSTARTDATE: offerProduct.ContractStartDate,
+				VALUEOFDEVICES: offerProduct.ValueOfDevices,
+				STATUSOFDEVICE: offerProduct.StatusOfDevice,
+				MINCONTRACTUAL: offerProduct.MinContractual,
+				MINANNPURCH: offerProduct.MinAnnPurch,
+				FREEGOODSOTHER: offerProduct.FreeGoodsOther,
+				FREEGOODSOTHERABSPCT: offerProduct.FreeGoodsOther_ABS_PCT,
+				FREEGOODSVAT: offerProduct.FreeGoodsVAT,
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1943,7 +1956,19 @@ module.exports = (srv) => {
 				IS_LOWEST: d.IS_LOWEST,
 				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: d.REQ_PRICE_UNIT_OFFER_CURRENCY_VAT,
             	NET_PRICE_UNIT_OFFER_CURRENCY_VAT: d.NET_PRICE_UNIT_OFFER_CURRENCY_VAT,
-            	GROSS_SALES_OFFER_CURRENCY_VAT: d.GROSS_SALES_OFFER_CURRENCY_VAT
+            	GROSS_SALES_OFFER_CURRENCY_VAT: d.GROSS_SALES_OFFER_CURRENCY_VAT,
+				WARRANTY: d.Warranty,
+				AGREEMENTDURATION: d.AgreementDuration,
+				MONTHLYRENT: d.MonthlyRent,
+				MONTHSPERINVOICE: d.MonthsPerInvoice,
+				CONTRACTSTARTDATE: d.ContractStartDate,
+				VALUEOFDEVICES: d.ValueOfDevices,
+				STATUSOFDEVICE: d.StatusOfDevice,
+				MINCONTRACTUAL: d.MinContractual,
+				MINANNPURCH: d.MinAnnPurch,
+				FREEGOODSOTHER: d.FreeGoodsOther,
+				FREEGOODSOTHERABSPCT: d.FreeGoodsOther_ABS_PCT,
+				FREEGOODSVAT: d.FreeGoodsVAT,
 			}
 		});
 	}
