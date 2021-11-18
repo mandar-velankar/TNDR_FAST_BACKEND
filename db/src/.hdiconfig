@@ -1,0 +1,7 @@
+{
+  "file_suffixes": {
+    "hdbsystemversioning": {
+      "plugin_name": "com.sap.hana.di.systemversioning"
+    }
+  }
+}
