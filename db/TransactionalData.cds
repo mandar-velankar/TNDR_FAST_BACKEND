@@ -191,6 +191,7 @@ entity PT_TMBDPR {
         VolumeTo              : Integer;
         RegPrice              : Double;
         FOC                   : Double;
+        FOCStep               : Double; 
         FOCType               : String(255);
         Discount              : Double;
         OfferPrice            : Double;
@@ -354,12 +355,8 @@ entity ProductPricing: cuid, managed {
     ContractStartDate: Timestamp;
     ValueOfDevices: Double;
     StatusOfDevice: String;
-    FreeGoodsSame: Double;
-    FreeGoodsSame_ABS_PCT: String(4);
     MinContractual: Double;
     MinAnnPurch: Double;
-    AdditionalDiscount: Double;
-    FOC_ABS_PCT: String(4);
     FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
 }
 

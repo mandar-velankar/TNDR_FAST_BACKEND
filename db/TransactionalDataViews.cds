@@ -525,6 +525,10 @@ left outer join AccountMinPrice as accountPrice
 left outer join MasterDataViews.MostRecentSkuCodeForProductPack as sku 
     on offerProduct.ProductCode = sku.ProductPackID 
     and offerProduct.CountryCode = sku.CountryCode
+left outer join TransactionalData.ProductPricing as productPricing
+    on offerProduct.OfferID = productPricing.OfferID
+    and offerProduct.ProductCode = productPricing.ProductCode
+    and offerProduct.CountryCode = productPricing.CountryCode
 {
     offerProduct.TenderID as TENDERID,
     key offerProduct.OfferID as OFFERID,
@@ -609,7 +613,19 @@ left outer join MasterDataViews.MostRecentSkuCodeForProductPack as sku
     offerProduct.Price.Bundled_1_SKU.PRODUCTPACKNAME as FOC_BUNDLED_1_PRODUCT_NAME,
     offerProduct.Price.Bundled_1_SKU.PACKFACTOR as FOC_BUNDLED_1_PACKSIZE,
     offerProduct.Price.Bundled_1_Cogs.COGS * offerProduct.Price.SpotRate / (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.Price.Bundled_1_SKU.PACKFACTOR else 1 end) as FOC_BUNDLED_1_COGS,
-    offerProduct.SKUCountry.QTY_THRESHOLD * (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as QTY_THRESHOLD:Double
+    offerProduct.SKUCountry.QTY_THRESHOLD * (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as QTY_THRESHOLD:Double,
+    productPricing.Warranty as Warranty,
+    productPricing.AgreementDuration as AgreementDuration,
+    productPricing.MonthlyRent as MonthlyRent,
+    productPricing.MonthsPerInvoice as MonthsPerInvoice,
+    productPricing.ContractStartDate as ContractStartDate, 
+    productPricing.ValueOfDevices as ValueOfDevices,
+    productPricing.StatusOfDevice as StatusOfDevice,
+    productPricing.MinContractual as MinContractual,
+    productPricing.MinAnnPurch as MinAnnPurch,
+    productPricing.FreeGoodsOther.FreeGoodsOther as FreeGoodsOther,
+    productPricing.FreeGoodsOther.FreeGoodsOther_ABS_PCT as FreeGoodsOther_ABS_PCT,
+    productPricing.FreeGoodsOther.VAT as FreeGoodsVAT,
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -817,13 +833,18 @@ left outer join TransactionalData.ProductPricing as productPricing
     and product.Active = 1
 left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices 
     on product.ProductCode = consumerPrices.ProductPackId
-    and product.CountryCode = consumerPrices.CountryCode {
+    and product.CountryCode = consumerPrices.CountryCode
+left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR 
+    on product.CountryCode = PT_TMBDPR.CountryCode
+    and product.ProductCode = PT_TMBDPR.ProductCode
+    and product.OfferID = PT_TMBDPR.OfferID {
     key offer.OfferID,
     key product.ProductCode,
     key product.CountryCode,
     product.SKU.PRODUCTPACKNAME as ProductPackName,
     product.RequestedVolume,
     product.UnitPerPack as UOM,
+    product.Cogs.COGS,
     productPricing.ID,
     productPricing.Warranty,
     productPricing.AgreementDuration,
@@ -832,12 +853,14 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices
     productPricing.ContractStartDate,
     productPricing.ValueOfDevices,
     productPricing.StatusOfDevice,
-    productPricing.FreeGoodsSame,
+    ifnull(PT_TMBDPR.FOC, 0) as FOC:Double,
     productPricing.FreeGoodsOther,
     productPricing.MinContractual,
     productPricing.MinAnnPurch,
-    productPricing.AdditionalDiscount,
-    productPricing.FOC_ABS_PCT,
+    PT_TMBDPR.AdditionalDiscount,
+    PT_TMBDPR.NetofferPrice,
+    ifnull(PT_TMBDPR.FOC_ABS_PCT, 'ABS') as FOC_ABS_PCT:String(4),
+    PT_TMBDPR.FOCStep,
     offer.FOCType,
     offer.Currency,
     product.OfferType,
@@ -859,9 +882,57 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
             then
-                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) / consumerPrices.ConsumerPriceExclPP
+                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - PT_TMBDPR.AdditionalDiscount)) / consumerPrices.ConsumerPriceExclPP
         else null
     end as FinalDiscount: Double,
-    (consumerPrices.MaxPriceNhsPP * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePP: Double,
-    (consumerPrices.MaxPriceNhsPU * (1 - productPricing.AdditionalDiscount)) as NetOfferPricePU: Double
+    case
+        when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+            then PT_TMBDPR.FOC
+        else PT_TMBDPR.FOC * product.RequestedVolume
+    end as focAbsolute:Double,
+    case 
+        when offer.FOCType = 'FOC 1'
+            then product.RequestedVolume - $self.focAbsolute
+        else product.RequestedVolume 
+    end as paidVolume:Double,
+    case 
+        when offer.FOCType = 'FOC 2'
+            then product.RequestedVolume + $self.focAbsolute
+        else product.RequestedVolume 
+    end as totalVolume:Double,
+    case   
+        when PT_TMBDPR.NetofferPrice is not null
+            then 
+                round(PT_TMBDPR.NetofferPrice * ( $self.paidVolume / $self.totalVolume ),2)
+        else null
+    end as NetPriceFOC:Double,
+
+    case   
+        when PT_TMBDPR.NetofferPrice is not null
+            then 
+                PT_TMBDPR.NetofferPrice * $self.paidVolume
+        else null
+    end as GrossSales:Double,
+    case   
+        when product.UnitPerPack = 'Pack'
+            then product.Cogs.COGS
+        else round(product.Cogs.COGS / product.SKU.PACKFACTOR,2)
+    end as cogsUoM :Double,
+    case   
+        when PT_TMBDPR.NetofferPrice is not null
+            then 
+                (PT_TMBDPR.NetofferPrice * $self.paidVolume) - ($self.cogsUoM * $self.totalVolume)
+        else null
+    end as GrossProfit:Double,
+    case   
+        when PT_TMBDPR.NetofferPrice is not null
+            then 
+                round(1 - (($self.cogsUoM * $self.totalVolume ) / (PT_TMBDPR.NetofferPrice * $self.paidVolume ) ),2) 
+        else null
+    end as GrossMargin:Double
+    
+
+        
+
+
 }where offer.Active = 1;

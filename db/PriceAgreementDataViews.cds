@@ -10,13 +10,18 @@ entity PriceAgreementExpiryDate as select from PriceAgreementData.PriceAgreement
 }group by PriceAgreements.TenderId, PriceAgreements.ExpiryDate;
 
 
-entity PriceAgreementFOC as select from TransactionalData.ProductPricing{
-    key OfferID,
-    key ProductCode,
-    key CountryCode,
-    ProductCode as ProductPackId:Integer,
-    FreeGoodsSame as FreeGoods:Double,
-    FOC_ABS_PCT as FreeGoods_ABS_PCT:String
+entity PriceAgreementFOC as select from TransactionalData.ProductPricing as ProductPricing
+left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR 
+    on ProductPricing.CountryCode = PT_TMBDPR.CountryCode
+    and ProductPricing.ProductCode = PT_TMBDPR.ProductCode
+    and ProductPricing.OfferID = PT_TMBDPR.OfferID 
+    {
+    key ProductPricing.OfferID,
+    key ProductPricing.ProductCode,
+    key ProductPricing.CountryCode,
+    ProductPricing.ProductCode as ProductPackId:Integer,
+    PT_TMBDPR.FOC as FreeGoods:Double,
+    PT_TMBDPR.FOC_ABS_PCT as FreeGoods_ABS_PCT:String
 }
 union
 select from TransactionalData.ProductPricing
