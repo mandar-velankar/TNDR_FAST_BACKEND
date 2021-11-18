@@ -1241,16 +1241,16 @@ module.exports = (srv) => {
 
 				WARRANTY: offerProduct.Warranty,
 				AGREEMENTDURATION: offerProduct.AgreementDuration,
-				MONTHLYRENT = offerProduct.MonthlyRent,
-				MONTHSPERINVOICE = offerProduct.MonthsPerInvoice,
-				CONTRACTSTARTDATE = offerProduct.ContractStartDate,
-				VALUEOFDEVICES = offerProduct.ValueOfDevices,
-				STATUSOFDEVICE = offerProduct.StatusOfDevice,
-				MINCONTRACTUAL = offerProduct.MinContractual,
-				MINANNPURCH = offerProduct.MinAnnPurch,
-				FREEGOODSOTHER = offerProduct.FreeGoodsOther.FreeGoodsOther,
-				FREEGOODSOTHERABSPCT = offerProduct.FreeGoodsOther.FreeGoodsOther_ABS_PCT,
-				FREEGOODSVAT = offerProduct.FreeGoodsOther.FreeGoodsVAT,
+				MONTHLYRENT: offerProduct.MonthlyRent,
+				MONTHSPERINVOICE: offerProduct.MonthsPerInvoice,
+				CONTRACTSTARTDATE: offerProduct.ContractStartDate,
+				VALUEOFDEVICES: offerProduct.ValueOfDevices,
+				STATUSOFDEVICE: offerProduct.StatusOfDevice,
+				MINCONTRACTUAL: offerProduct.MinContractual,
+				MINANNPURCH: offerProduct.MinAnnPurch,
+				FREEGOODSOTHER: offerProduct.FreeGoodsOther,
+				FREEGOODSOTHERABSPCT: offerProduct.FreeGoodsOther_ABS_PCT,
+				FREEGOODSVAT: offerProduct.FreeGoodsVAT,
 			}
 		});
 		let resolvedResults = await Promise.all(results);
