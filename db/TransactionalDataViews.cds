@@ -837,12 +837,13 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     productPricing.ContractStartDate,
     productPricing.ValueOfDevices,
     productPricing.StatusOfDevice,
-    PT_TMBDPR.FOC,
+    ifnull(PT_TMBDPR.FOC, 0) as FOC:Double,
     productPricing.FreeGoodsOther,
     productPricing.MinContractual,
     productPricing.MinAnnPurch,
     PT_TMBDPR.AdditionalDiscount,
-    PT_TMBDPR.FOC_ABS_PCT,
+    PT_TMBDPR.NetofferPrice,
+    ifnull(PT_TMBDPR.FOC_ABS_PCT, 'ABS') as FOC_ABS_PCT:String(4),
     offer.FOCType,
     offer.Currency,
     product.OfferType,
@@ -867,13 +868,10 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
                 (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - PT_TMBDPR.AdditionalDiscount)) / consumerPrices.ConsumerPriceExclPP
         else null
     end as FinalDiscount: Double,
-    (consumerPrices.MaxPriceNhsPP * (1 - PT_TMBDPR.AdditionalDiscount)) as NetOfferPricePP: Double,
-    (consumerPrices.MaxPriceNhsPU * (1 - PT_TMBDPR.AdditionalDiscount)) as NetOfferPricePU: Double,
-    case when product.UnitPerPack = 'Unit' then $self.NetOfferPricePU else $self.NetOfferPricePP end as NetOfferPrice:Double,
     case
         when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
-            then PT_TMBDPR.FOC * product.RequestedVolume
-        else PT_TMBDPR.FOC
+            then PT_TMBDPR.FOC
+        else PT_TMBDPR.FOC * product.RequestedVolume
     end as focAbsolute:Double,
     case 
         when offer.FOCType = 'FOC 1'
@@ -885,14 +883,36 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
             then product.RequestedVolume + $self.focAbsolute
         else product.RequestedVolume 
     end as totalVolume:Double,
-    $self.NetOfferPrice * ( $self.paidVolume / $self.totalVolume ) as NetPriceFOC:Double,
-    $self.NetOfferPrice * $self.paidVolume as GrossSales:Double,
+    case   
+        when PT_TMBDPR.NetofferPrice is not null
+            then 
+                PT_TMBDPR.NetofferPrice * ( $self.paidVolume / $self.totalVolume ) 
+        else null
+    end as NetPriceFOC:Double,
+
+    case   
+        when PT_TMBDPR.NetofferPrice is not null
+            then 
+                PT_TMBDPR.NetofferPrice * $self.paidVolume
+        else null
+    end as GrossSales:Double,
     case   
         when product.UnitPerPack = 'Pack'
             then product.Cogs.COGS
-        else product.Cogs.COGS / product.SKU.PACKFACTOR
+        else round(product.Cogs.COGS / product.SKU.PACKFACTOR,2)
     end as cogsUoM :Double,
-    ($self.NetOfferPrice * $self.paidVolume) - ($self.cogsUoM * $self.totalVolume) as GrossProfit:Double
+    case   
+        when PT_TMBDPR.NetofferPrice is not null
+            then 
+                (PT_TMBDPR.NetofferPrice * $self.paidVolume) - ($self.cogsUoM * $self.totalVolume)
+        else null
+    end as GrossProfit:Double,
+    case   
+        when PT_TMBDPR.NetofferPrice is not null
+            then 
+                round(1 - (($self.cogsUoM * $self.totalVolume ) / (PT_TMBDPR.NetofferPrice * $self.paidVolume ) ),2) 
+        else null
+    end as GrossMargin:Double
     
 
         
