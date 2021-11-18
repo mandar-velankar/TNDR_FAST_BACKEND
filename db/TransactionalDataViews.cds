@@ -844,6 +844,7 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     PT_TMBDPR.AdditionalDiscount,
     PT_TMBDPR.NetofferPrice,
     ifnull(PT_TMBDPR.FOC_ABS_PCT, 'ABS') as FOC_ABS_PCT:String(4),
+    PT_TMBDPR.FOCStep,
     offer.FOCType,
     offer.Currency,
     product.OfferType,
