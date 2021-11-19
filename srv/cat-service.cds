@@ -311,6 +311,18 @@ service CatalogService @(path : 'tender')@(requires : [
             BUDGET_RATE                       : Double;
             SPOT_RATE                         : Double;
             BUSINESS_CASE_PRICE               : Double;
+            WARRANTY                          : Double;
+            AGREEMENTDURATION                 : Integer;
+            MONTHLYRENT                       : Double;
+            MONTHSPERINVOICE                  : Integer;  
+            CONTRACTSTARTDATE                 : Timestamp;
+            VALUEOFDEVICES                    : Double;
+            STATUSOFDEVICE                    : String;
+            MINCONTRACTUAL                    : Double;
+            MINANNPURCH                       : Double;
+            FREEGOODSOTHER                    : Double;
+            FREEGOODSOTHERABSPCT              : String;
+            FREEGOODSVAT                      : Double;
             ApproverTypes                     : Association to many ApproverTypes
                                                     on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
     };
