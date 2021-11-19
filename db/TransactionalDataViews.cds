@@ -892,25 +892,80 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     end as focAbsolute:Double,
     case 
         when offer.FOCType = 'FOC 1'
-            then product.RequestedVolume - $self.focAbsolute
+            then product.RequestedVolume - (
+                case
+                    when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                        then PT_TMBDPR.FOC
+                    else PT_TMBDPR.FOC * product.RequestedVolume
+                end
+            ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
         else product.RequestedVolume 
     end as paidVolume:Double,
     case 
         when offer.FOCType = 'FOC 2'
-            then product.RequestedVolume + $self.focAbsolute
+            then product.RequestedVolume + (
+                case
+                    when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                        then PT_TMBDPR.FOC
+                    else PT_TMBDPR.FOC * product.RequestedVolume
+                end
+            ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
         else product.RequestedVolume 
     end as totalVolume:Double,
     case   
         when PT_TMBDPR.NetofferPrice is not null
             then 
-                round(PT_TMBDPR.NetofferPrice * ( $self.paidVolume / $self.totalVolume ),2)
+                round(PT_TMBDPR.NetofferPrice * ( 
+                    (
+                        case 
+                            when offer.FOCType = 'FOC 1'
+                                then product.RequestedVolume - (
+                                    case
+                                        when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                                            then PT_TMBDPR.FOC
+                                        else PT_TMBDPR.FOC * product.RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else product.RequestedVolume 
+                        end
+                    ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    
+                / 
+                
+                (
+                    case 
+                        when offer.FOCType = 'FOC 2'
+                            then product.RequestedVolume + (
+                                case
+                                    when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                                        then PT_TMBDPR.FOC
+                                    else PT_TMBDPR.FOC * product.RequestedVolume
+                                end
+                            ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                        else product.RequestedVolume 
+                    end
+                ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                
+                ),2)
         else null
     end as NetPriceFOC:Double,
 
     case   
         when PT_TMBDPR.NetofferPrice is not null
             then 
-                PT_TMBDPR.NetofferPrice * $self.paidVolume
+                PT_TMBDPR.NetofferPrice * (
+                    case 
+                        when offer.FOCType = 'FOC 1'
+                            then product.RequestedVolume - (
+                                case
+                                    when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                                        then PT_TMBDPR.FOC
+                                    else PT_TMBDPR.FOC * product.RequestedVolume
+                                end
+                            ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                        else product.RequestedVolume 
+                    end
+                ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
         else null
     end as GrossSales:Double,
     case   
@@ -921,13 +976,85 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     case   
         when PT_TMBDPR.NetofferPrice is not null
             then 
-                (PT_TMBDPR.NetofferPrice * $self.paidVolume) - ($self.cogsUoM * $self.totalVolume)
+                (PT_TMBDPR.NetofferPrice * 
+                    (
+                        case 
+                            when offer.FOCType = 'FOC 1'
+                                then product.RequestedVolume - (
+                                    case
+                                        when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                                            then PT_TMBDPR.FOC
+                                        else PT_TMBDPR.FOC * product.RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else product.RequestedVolume 
+                        end
+                    ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                ) - (
+                    (
+                        case   
+                            when product.UnitPerPack = 'Pack'
+                                then product.Cogs.COGS
+                            else round(product.Cogs.COGS / product.SKU.PACKFACTOR,2)
+                        end
+                    ) //=$self.cogsUoM but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future) 
+                * 
+                    (
+                        case 
+                            when offer.FOCType = 'FOC 2'
+                                then product.RequestedVolume + (
+                                    case
+                                        when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                                            then PT_TMBDPR.FOC
+                                        else PT_TMBDPR.FOC * product.RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else product.RequestedVolume 
+                        end
+                    ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                )
         else null
     end as GrossProfit:Double,
     case   
         when PT_TMBDPR.NetofferPrice is not null
             then 
-                round(1 - (($self.cogsUoM * $self.totalVolume ) / (PT_TMBDPR.NetofferPrice * $self.paidVolume ) ),2) 
+                round(1 - ((
+                    (
+                        case   
+                            when product.UnitPerPack = 'Pack'
+                                then product.Cogs.COGS
+                            else round(product.Cogs.COGS / product.SKU.PACKFACTOR,2)
+                        end
+                    ) //=$self.cogsUoM but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                * 
+                    (
+                        case 
+                            when offer.FOCType = 'FOC 2'
+                                then product.RequestedVolume + (
+                                    case
+                                        when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                                            then PT_TMBDPR.FOC
+                                        else PT_TMBDPR.FOC * product.RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else product.RequestedVolume 
+                        end
+                    ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                ) / (PT_TMBDPR.NetofferPrice * 
+                    (
+                        case 
+                            when offer.FOCType = 'FOC 1'
+                                then product.RequestedVolume - (
+                                    case
+                                        when PT_TMBDPR.FOC_ABS_PCT = 'ABS'
+                                            then PT_TMBDPR.FOC
+                                        else PT_TMBDPR.FOC * product.RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else product.RequestedVolume 
+                        end
+                    ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                ) ),2) 
         else null
     end as GrossMargin:Double
     
