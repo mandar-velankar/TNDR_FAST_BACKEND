@@ -10,6 +10,8 @@ using {com.bayer.SXTENDER.TransactionalData} from './TransactionalData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
+using {com.bayer.SXTENDER.PriceAgreementDataViews} from './PriceAgreementDataViews';
+
 
 
 entity PriceAgreements: cuid, managed {
@@ -46,6 +48,7 @@ entity PriceAgreements: cuid, managed {
                                                                                      and ConsumerPrice.ProductPackId = ProductPackId;
     OfferProduct: Association to TransactionalData.PT_TMOFPR on OfferProduct.OfferID = OfferId
                                                              and OfferProduct.ProductCode = ProductPackId;
+    Deliveries: Association to many PriceAgreementDataViews.Deliveries on Deliveries.PriceAgreementId = ID;
     
 }
 entity CustomerPrices: cuid, managed {
