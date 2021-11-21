@@ -1970,9 +1970,8 @@ module.exports = (srv) => {
 				STATUSOFDEVICE: d.StatusOfDevice,
 				MINCONTRACTUAL: d.MinContractual,
 				MINANNPURCH: d.MinAnnPurch,
-				FREEGOODSOTHER: d.FreeGoodsOther,
-				FREEGOODSOTHERABSPCT: d.FreeGoodsOther_ABS_PCT,
-				FREEGOODSVAT: d.FreeGoodsVAT,
+				FOC_STEP: d.FOC_STEP,
+				FreeGoodsOther: d.FreeGoodsOther,
 			}
 		});
 	}

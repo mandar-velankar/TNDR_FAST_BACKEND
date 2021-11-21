@@ -553,6 +553,19 @@ service CatalogService @(path : 'tender')@(requires : [
             REQ_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; 
             NET_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; 
             GROSS_SALES_OFFER_CURRENCY_VAT    : Double;
+
+            WARRANTY                          : Double;
+            AGREEMENTDURATION                 : Integer;
+            MONTHLYRENT                       : Double;
+            MONTHSPERINVOICE                  : Integer;  
+            CONTRACTSTARTDATE                 : Timestamp;
+            VALUEOFDEVICES                    : Double;
+            STATUSOFDEVICE                    : String;
+            MINCONTRACTUAL                    : Double;
+            MINANNPURCH                       : Double;
+            FOC_STEP                          : Double;
+            FreeGoodsOther                    : Association to many FreeGoodsOther
+                                                   on FreeGoodsOther.ProductPackId = $self.PRODUCTCODE;
     };
 
     entity ApprovalApprovers {
