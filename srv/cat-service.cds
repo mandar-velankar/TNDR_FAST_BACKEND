@@ -307,6 +307,7 @@ service CatalogService @(path : 'tender')@(requires : [
             //Transfer_Pricing               : Integer not null;//AR only
             //SBR                            : Integer not null;//AR only
             MOLECULE_NAME                     : String; // Chile
+            FOC_STEP                          : Double;
             OFFER_PRICE_VAT                   : Double;
             BUDGET_RATE                       : Double;
             SPOT_RATE                         : Double;
@@ -320,9 +321,8 @@ service CatalogService @(path : 'tender')@(requires : [
             STATUSOFDEVICE                    : String;
             MINCONTRACTUAL                    : Double;
             MINANNPURCH                       : Double;
-            FREEGOODSOTHER                    : Double;
-            FREEGOODSOTHERABSPCT              : String;
-            FREEGOODSVAT                      : Double;
+            FreeGoodsOther                    : Association to many FreeGoodsOther
+                                                    on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
             ApproverTypes                     : Association to many ApproverTypes
                                                     on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
     };

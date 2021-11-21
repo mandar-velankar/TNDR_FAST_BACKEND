@@ -14,6 +14,7 @@ const path = require("path");
 const XLSXHelper = require("./utils/XLSXHelper");
 const wordTemplate = require("easy-template-x");
 const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
+const { Service } = require('@sap/cds');
 
 module.exports = (srv) => {
 
@@ -28,7 +29,7 @@ module.exports = (srv) => {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -1144,6 +1145,10 @@ module.exports = (srv) => {
 			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
 			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
 
+			//let aFreeGoodsOtherTemp = [];
+			const whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", offerProduct.PRODUCTID);
+			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
+
 			return {
 				TENDER_ID: offer.TENDERID,
 				COUNTRY_CODE: offer.COUNTRYCODE,
@@ -1248,9 +1253,8 @@ module.exports = (srv) => {
 				STATUSOFDEVICE: offerProduct.StatusOfDevice,
 				MINCONTRACTUAL: offerProduct.MinContractual,
 				MINANNPURCH: offerProduct.MinAnnPurch,
-				FREEGOODSOTHER: offerProduct.FreeGoodsOther,
-				FREEGOODSOTHERABSPCT: offerProduct.FreeGoodsOther_ABS_PCT,
-				FREEGOODSVAT: offerProduct.FreeGoodsVAT,
+				FOC_STEP: offerProduct.FOC_STEP,
+				FreeGoodsOther: aFreeGoodsOtherTemp
 			}
 		});
 		let resolvedResults = await Promise.all(results);

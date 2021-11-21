@@ -588,6 +588,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Price.Discount as DISCOUNT,
     offerProduct.Price.AdditionalDiscount as ADDITIONAL_DISCOUNT,
     offerProduct.Price.StandardDiscount as STANDARD_DISCOUNT,
+    offerProduct.Price.FOCStep  as FOC_STEP,
     offerProduct.PreviousApproval.BUSINESS_APPROVED as BUSINESS_APPROVED,
     offerProduct.PreviousApproval.COUNTRY_BUSINESS_APPROVED as COUNTRY_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.LEGAL_APPROVED as LEGAL_APPROVED,
@@ -623,9 +624,6 @@ left outer join TransactionalData.ProductPricing as productPricing
     productPricing.StatusOfDevice as StatusOfDevice,
     productPricing.MinContractual as MinContractual,
     productPricing.MinAnnPurch as MinAnnPurch,
-    productPricing.FreeGoodsOther.FreeGoodsOther as FreeGoodsOther,
-    productPricing.FreeGoodsOther.FreeGoodsOther_ABS_PCT as FreeGoodsOther_ABS_PCT,
-    productPricing.FreeGoodsOther.VAT as FreeGoodsVAT,
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
