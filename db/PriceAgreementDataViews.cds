@@ -21,7 +21,8 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     key ProductPricing.CountryCode,
     ProductPricing.ProductCode as ProductPackId:Integer,
     PT_TMBDPR.FOC as FreeGoods:Double,
-    PT_TMBDPR.FOC_ABS_PCT as FreeGoods_ABS_PCT:String
+    PT_TMBDPR.FOC_ABS_PCT as FreeGoods_ABS_PCT:String,
+    PT_TMBDPR.FOCStep as FreeGoods_Step:Double,
 }
 union
 select from TransactionalData.ProductPricing
@@ -31,5 +32,6 @@ select from TransactionalData.ProductPricing
     CountryCode,
     FreeGoodsOther.ProductPackId,
     FreeGoodsOther.FreeGoodsOther as FreeGoods:Double,
+    FreeGoodsOther.FreeGoodsOther_Step as FreeGoods_Step:Double,
     FreeGoodsOther.FreeGoodsOther_ABS_PCT as FreeGoods_ABS_PCT:String
 };
