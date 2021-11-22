@@ -307,10 +307,22 @@ service CatalogService @(path : 'tender')@(requires : [
             //Transfer_Pricing               : Integer not null;//AR only
             //SBR                            : Integer not null;//AR only
             MOLECULE_NAME                     : String; // Chile
+            FOC_STEP                          : Double;
             OFFER_PRICE_VAT                   : Double;
             BUDGET_RATE                       : Double;
             SPOT_RATE                         : Double;
             BUSINESS_CASE_PRICE               : Double;
+            WARRANTY                          : Double;
+            AGREEMENTDURATION                 : Integer;
+            MONTHLYRENT                       : Double;
+            MONTHSPERINVOICE                  : Integer;  
+            CONTRACTSTARTDATE                 : Timestamp;
+            VALUEOFDEVICES                    : Double;
+            STATUSOFDEVICE                    : String;
+            MINCONTRACTUAL                    : Double;
+            MINANNPURCH                       : Double;
+            FreeGoodsOther                    : Association to many FreeGoodsOther
+                                                    on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
             ApproverTypes                     : Association to many ApproverTypes
                                                     on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
     };
@@ -541,6 +553,19 @@ service CatalogService @(path : 'tender')@(requires : [
             REQ_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; 
             NET_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; 
             GROSS_SALES_OFFER_CURRENCY_VAT    : Double;
+
+            WARRANTY                          : Double;
+            AGREEMENTDURATION                 : Integer;
+            MONTHLYRENT                       : Double;
+            MONTHSPERINVOICE                  : Integer;  
+            CONTRACTSTARTDATE                 : Timestamp;
+            VALUEOFDEVICES                    : Double;
+            STATUSOFDEVICE                    : String;
+            MINCONTRACTUAL                    : Double;
+            MINANNPURCH                       : Double;
+            FOC_STEP                          : Double;
+            FreeGoodsOther                    : Association to many FreeGoodsOther
+                                                   on FreeGoodsOther.ProductPackId = $self.PRODUCTCODE;
     };
 
     entity ApprovalApprovers {

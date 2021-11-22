@@ -14,6 +14,7 @@ const path = require("path");
 const XLSXHelper = require("./utils/XLSXHelper");
 const wordTemplate = require("easy-template-x");
 const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
+const { Service } = require('@sap/cds');
 
 module.exports = (srv) => {
 
@@ -22,13 +23,13 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -662,7 +663,7 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	function buildProductValidationForType9(offer, product, productInfo, aApproverTypes) {//Italy
+	async function buildProductValidationForType9(tx, offer, product, productInfo, aApproverTypes) {//Italy
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -671,11 +672,33 @@ module.exports = (srv) => {
 
 		if (product.OfferType === "Selling"){
 
+			const uom = product.UNIT;
+			const netOfferPrice = product.NET_OFFER_PRICE;
+			const whereProduct = {
+				COUNTRY_CODE: offer.COUNTRYCODE,
+				PRODUCT_ID: product.PRODUCTID
+			};
+
+			
+			const countryPreApprovedPrice = await tx.run(SELECT.one.from(CountryPreApprovedPrices).where(whereProduct));
+			let minPreApprovedPrice = countryPreApprovedPrice && (uom === "Pack" ? countryPreApprovedPrice.MIN_PACK_PRICE : countryPreApprovedPrice.MIN_UNIT_PRICE);
+
+
 			if(!((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) )){
-					validationType = 3;			
-				} else {
-					validationType = 1;
+
+				// if a product is offered above or equal to pre-approved price, 
+				// business approval is not mandatory even if additional discount on offer is not 0%).
+				if(netOfferPrice && minPreApprovedPrice && netOfferPrice >= minPreApprovedPrice){
+					validationType = 1;	
+				}else{
+					validationType = 3;	
+				}
+
+
+			} else {
+				validationType = 1;
 			}
+
 			
 		} else {
 			validationType = 3;	
@@ -1080,7 +1103,7 @@ module.exports = (srv) => {
 			productValidation = buildProductValidationForType7(offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else if (offer.APPROVAL_TYPE === 9) { //Applicable for Italy
-			productValidation = buildProductValidationForType9(offer, product, commnonProductInfo, aApproverTypes)
+			productValidation = await buildProductValidationForType9(tx, offer, product, commnonProductInfo, aApproverTypes)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -1121,6 +1144,10 @@ module.exports = (srv) => {
 			//Get all prices, ammounts and cogs in all units
 			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
 			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
+
+			//let aFreeGoodsOtherTemp = [];
+			const whereProductPackId = ServiceHelper.buildFullWhere("ProductPricing_ProductCode", "=", offerProduct.PRODUCTID);
+			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
 
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -1216,6 +1243,18 @@ module.exports = (srv) => {
 				BUDGET_RATE: offerProduct.BUDGET_RATE,
 				SPOT_RATE: offerProduct.SPOT_RATE,
 				BUSINESS_CASE_PRICE: offerProduct.BUSINESS_CASE_PRICE,
+
+				WARRANTY: offerProduct.Warranty,
+				AGREEMENTDURATION: offerProduct.AgreementDuration,
+				MONTHLYRENT: offerProduct.MonthlyRent,
+				MONTHSPERINVOICE: offerProduct.MonthsPerInvoice,
+				CONTRACTSTARTDATE: offerProduct.ContractStartDate,
+				VALUEOFDEVICES: offerProduct.ValueOfDevices,
+				STATUSOFDEVICE: offerProduct.StatusOfDevice,
+				MINCONTRACTUAL: offerProduct.MinContractual,
+				MINANNPURCH: offerProduct.MinAnnPurch,
+				FOC_STEP: offerProduct.FOC_STEP,
+				FreeGoodsOther: aFreeGoodsOtherTemp
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1921,7 +1960,18 @@ module.exports = (srv) => {
 				IS_LOWEST: d.IS_LOWEST,
 				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: d.REQ_PRICE_UNIT_OFFER_CURRENCY_VAT,
             	NET_PRICE_UNIT_OFFER_CURRENCY_VAT: d.NET_PRICE_UNIT_OFFER_CURRENCY_VAT,
-            	GROSS_SALES_OFFER_CURRENCY_VAT: d.GROSS_SALES_OFFER_CURRENCY_VAT
+            	GROSS_SALES_OFFER_CURRENCY_VAT: d.GROSS_SALES_OFFER_CURRENCY_VAT,
+				WARRANTY: d.Warranty,
+				AGREEMENTDURATION: d.AgreementDuration,
+				MONTHLYRENT: d.MonthlyRent,
+				MONTHSPERINVOICE: d.MonthsPerInvoice,
+				CONTRACTSTARTDATE: d.ContractStartDate,
+				VALUEOFDEVICES: d.ValueOfDevices,
+				STATUSOFDEVICE: d.StatusOfDevice,
+				MINCONTRACTUAL: d.MinContractual,
+				MINANNPURCH: d.MinAnnPurch,
+				FOC_STEP: d.FOC_STEP,
+				FreeGoodsOther: d.FreeGoodsOther,
 			}
 		});
 	}

@@ -10,6 +10,8 @@ using {com.bayer.SXTENDER.TransactionalData} from './TransactionalData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
+using {com.bayer.SXTENDER.PriceAgreementDataViews} from './PriceAgreementDataViews';
+
 
 
 entity PriceAgreements: cuid, managed {
@@ -46,11 +48,18 @@ entity PriceAgreements: cuid, managed {
                                                                                      and ConsumerPrice.ProductPackId = ProductPackId;
     OfferProduct: Association to TransactionalData.PT_TMOFPR on OfferProduct.OfferID = OfferId
                                                              and OfferProduct.ProductCode = ProductPackId;
+    Deliveries: Association to many PriceAgreementDataViews.Deliveries on Deliveries.PriceAgreementId = ID;
     
 }
 entity CustomerPrices: cuid, managed {
-    ValidFrom: DateTime;
-    ValidTo: DateTime;
+    // @cds.api.ignore
+    @assert.notNull: false
+    ValidFrom: Timestamp not null;
+    // @cds.api.ignore
+    @assert.notNull: false
+    ValidTo: Timestamp not null;
+    EffectiveDate: DateTime;
+    ExpiryDate: DateTime;
     PriceAgreementId: String not null;
     PriceAgreement: Association to PriceAgreements;
     InstituteId: Integer;
@@ -63,6 +72,22 @@ entity CustomerPrices: cuid, managed {
     Applied: Boolean; // not needed? 
 }
 
+entity CustomerPrices_History: managed {
+    ID: UUID;
+    ValidFrom: Timestamp;
+    ValidTo: Timestamp;
+    EffectiveDate: DateTime;
+    ExpiryDate: DateTime;
+    PriceAgreementId: String not null;
+    PriceAgreement: Association to PriceAgreements;
+    InstituteId: Integer;
+    CountryCode: String not null;
+    ProductPackId: Integer not null;
+    MaterialNumber: String not null;
+    Synchronized: Boolean;
+    Price: Double;
+    Applied: Boolean; 
+}
 
 /**
  * This view lists candidate institutes that can participate in a price agreement 
@@ -124,8 +149,8 @@ left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.Material
         end as Applied:Boolean,
         ifnull(cp.Synchronized, false) as Synchronized:Boolean,
         ifnull(cp.Price, pa.Price) as Price:Double,
-        ifnull(cp.ValidFrom, pa.EffectiveDate) as ValidFrom:DateTime,
-        ifnull(cp.ValidTo, pa.ExpiryDate) as ValidTo:DateTime
+        ifnull(cp.EffectiveDate, pa.EffectiveDate) as EffectiveDate:DateTime,
+        ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime
 };
 
 

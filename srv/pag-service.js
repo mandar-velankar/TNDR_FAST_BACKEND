@@ -32,6 +32,7 @@ module.exports = (srv) => {
         let hasNewMaterialsFilterValues = null;
         let hasNewPriceFilterIndex = null; 
         let hasNewPriceFilterValues = null;
+        let hasExpiringSoonFilterIndex = null;
         let hasExpiringSoonFilterValues = null;
 
         if(req.query.SELECT.where){
@@ -54,7 +55,7 @@ module.exports = (srv) => {
             }
 
             if(hasExpiringSoonFilterIndex >= 0){
-                ServiceHelper.deleteFilter(req, 'expiringSoon');
+                ServiceHelper.deleteFilter(req, 'ExpiringSoon');
             }
         }
 
@@ -98,6 +99,7 @@ module.exports = (srv) => {
             // calculate hasNewMaterials
             priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
 
+
             // calculate hasNewPrice
             if(consumerPrice){
 
@@ -118,6 +120,11 @@ module.exports = (srv) => {
                         priceAgreement.hasNewPrice = true;
                 }
 
+            }
+
+            
+            if(!priceAgreement.CustomerPrices || (priceAgreement.CustomerPrices && priceAgreement.CustomerPrices.length === 0)){
+                priceAgreement.hasNewMaterials = false;
             }
 
             if(priceAgreement.ExpiryDate){
