@@ -842,6 +842,7 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     product.SKU.PRODUCTPACKNAME as ProductPackName,
     product.RequestedVolume,
     product.UnitPerPack as UOM,
+    product.SORTER,
     product.Cogs.COGS,
     productPricing.ID,
     productPricing.Warranty,
