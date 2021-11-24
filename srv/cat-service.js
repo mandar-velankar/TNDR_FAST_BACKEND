@@ -1254,6 +1254,7 @@ module.exports = (srv) => {
 				MINCONTRACTUAL: offerProduct.MinContractual,
 				MINANNPURCH: offerProduct.MinAnnPurch,
 				FOC_STEP: offerProduct.FOC_STEP,
+				OFFER_TYPE: offerProduct.OfferType,
 				FreeGoodsOther: aFreeGoodsOtherTemp
 			}
 		});
