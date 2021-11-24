@@ -321,6 +321,7 @@ service CatalogService @(path : 'tender')@(requires : [
             STATUSOFDEVICE                    : String;
             MINCONTRACTUAL                    : Double;
             MINANNPURCH                       : Double;
+            OFFER_TYPE                        : String;
             FreeGoodsOther                    : Association to many FreeGoodsOther
                                                     on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
             ApproverTypes                     : Association to many ApproverTypes
