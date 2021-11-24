@@ -504,6 +504,9 @@ entity TransCompetitorResult {
 }
 
 entity OutgoingMails : managed, cuid {
+    CountryCode: String(2);
+    TenderID: String(50);
+    OfferID: String(30);
     Sender: LargeString;
     Recipients: LargeString;
     Subject: LargeString;
