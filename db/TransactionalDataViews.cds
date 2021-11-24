@@ -840,6 +840,7 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     key product.ProductCode,
     key product.CountryCode,
     product.SKU.PRODUCTPACKNAME as ProductPackName,
+    product.SKU.PACKFACTOR,
     product.RequestedVolume,
     product.UnitPerPack as UOM,
     product.SORTER,
