@@ -51,6 +51,9 @@ inner join SAP.ItalyDeliveries as italydeliveries on materials.MaterialNumber = 
     italydeliveries.WADAT_IST,
     italydeliveries.ANZPK,
     italydeliveries.VRKME,
+    italydeliveries.LFART,
+    italydeliveries.CHARG,
+    italydeliveries.VGBEL,
     materials.PriceAgreementId,
     materials.Institute.InstituteName
     
