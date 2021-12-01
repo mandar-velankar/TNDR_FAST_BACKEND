@@ -5,7 +5,7 @@ extends: FAST
 resources:
   - name: FAST-db-hdi-container
     parameters:
-      service: hana
+      service: hanatrial
   - name: uaa_FAST
     parameters:
       service-plan: application
