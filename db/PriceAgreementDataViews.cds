@@ -31,18 +31,15 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     ifnull(PT_TMBDPR.FOCStep,0) as FreeGoods_Step:Double
 } where PT_TMBDPR.FOC is not null and PT_TMBDPR.FOC > 0 and PT_TMBDPR.FOC  != '0'
 union
-select from TransactionalData.ProductPricing as pricing
-left outer join TransactionalData.PT_TMOFPR as product
-    on  pricing.OfferID     = product.OfferID
-    and pricing.ProductCode = product.ProductCode
+select from TransactionalData.ProductPricing 
 {
-    pricing.OfferID,
-    pricing.ProductCode,
-    pricing.CountryCode,
-    product.SKU.PRODUCTPACKNAME as ProductPackName,
-    pricing.FreeGoodsOther.ProductPackId,
-    pricing.FreeGoodsOther.FreeGoodsOther as FreeGoods:Double,
-    pricing.FreeGoodsOther.FreeGoodsOther_ABS_PCT as FreeGoods_ABS_PCT:String,
+    OfferID,
+    ProductCode,
+    CountryCode,
+    FreeGoodsOther.ProductPack.PRODUCTPACKNAME as ProductPackName,
+    FreeGoodsOther.ProductPackId,
+    FreeGoodsOther.FreeGoodsOther as FreeGoods:Double,
+    FreeGoodsOther.FreeGoodsOther_ABS_PCT as FreeGoods_ABS_PCT:String,
     ifnull(FreeGoodsOther.FreeGoodsOther_Step,0) as FreeGoods_Step:Double
 
 } where FreeGoodsOther.FreeGoodsOther is not null and FreeGoodsOther.FreeGoodsOther > 0 and FreeGoodsOther.FreeGoodsOther  != '0';
