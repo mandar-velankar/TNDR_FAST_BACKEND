@@ -47,7 +47,7 @@ select from TransactionalData.ProductPricing
 
 
 entity Deliveries as select from PriceAgreementData.CustomerPrices as materials 
-inner join SAP.ItalyDeliveries as italydeliveries on materials.MaterialNumber = italydeliveries.MATNR
+inner join SAP.ItalyDeliveries as italydeliveries on ltrim(materials.MaterialNumber,'0') = ltrim(italydeliveries.MATNR,'0')
     //and materials.InstituteId = italydeliveries.KUNNR 
 {
     key italydeliveries.ID,
