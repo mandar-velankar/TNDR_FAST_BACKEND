@@ -236,6 +236,10 @@ module.exports = async () => {
 
     getBearerToken() {
       if (mercadoConfig.AuthType === "OAUTH" && this.oAuthProvider && this.clientID && this.clientSecret) {
+        
+        const PROXY_HOST = this.proxyHost;
+        const PROXY_PORT = this.proxyPort;
+
         return axios({
           method: 'post',
           url: this.oAuthProvider,
@@ -245,7 +249,11 @@ module.exports = async () => {
           },
           data: qs.stringify({
             'grant_type': this.grantType
-          })
+          }),// when testing locally, comment out the proxy
+          proxy: {
+              host: PROXY_HOST,
+              port: PROXY_PORT
+          }
         });
       }
       throw Error("Only use bearer token for OAUTH config");

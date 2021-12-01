@@ -37,11 +37,11 @@ module.exports = (srv) => {
         auth:{
           username: API_USER,
           password: API_PASSWORD
-        } // when testing locally, comment out the proxy
-        /*proxy: {
+        }, // when testing locally, comment out the proxy
+        proxy: {
           host: PROXY_HOST,
           port: PROXY_PORT
-        }*/
+        }
       };
         
       try{
