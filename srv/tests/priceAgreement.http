@@ -9,3 +9,12 @@ Content-Type: application/json
         "f7dbd562-5c5b-4348-9d46-c15a3c14c21c"
     ]
 }
+
+
+### processMaterials 
+POST http://localhost:4004/v2/priceagreement/processMaterials
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+}

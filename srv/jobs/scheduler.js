@@ -4,6 +4,7 @@ const axios = require('axios');
 const qs = require("qs");
 const cds = require('@sap/cds');
 const { v4:uuidv4 } = require('uuid');
+const { ProcessMaterials} = require('./ItalyJobs');
 
 
 module.exports = async () => {
@@ -776,5 +777,15 @@ module.exports = async () => {
   const mercadoPublico = new MercadoPublico();
 
   return { mercadoPublico }
+
+};
+
+
+module.exports.ItalyJobs = {
+  
+  processMaterials: function(cronTime){
+    return new ProcessMaterials(cronTime);
+  },
+
 
 }

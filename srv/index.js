@@ -37,6 +37,8 @@ const jobScheduler = require("./jobs/scheduler");
   scheduler.mercadoPublico.fetchTenders('00 00 * * *').start(); // runs every day at midnight server time '0 0 0 1/1 * ? *'
   //scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
   //scheduler.mercadoPublico.fetchPurchaseOrders('00 00 * * *').start();
+  jobScheduler.ItalyJobs.processMaterials('00 00 * * *').start();
+
     
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));

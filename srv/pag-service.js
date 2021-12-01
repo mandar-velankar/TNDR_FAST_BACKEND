@@ -313,4 +313,94 @@ module.exports = async (srv) => {
 
         throw Error("Missing OAUTH config parameters");
     };
+
+
+
+    srv.on('processMaterials', async req => {
+
+        const tx = cds.transaction(req);
+    
+        try {
+
+            const { 
+                ItalyMaterials 
+            } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+
+            const { 
+                PT_TMPRDHIER
+            } = db.entities("com.bayer.SXTENDER.MasterData");
+
+
+            let existingHlevel6Code = await cds.run(SELECT.from(PT_TMPRDHIER, ['HLEVEL6_CODE']));
+            existingHlevel6Code = existingHlevel6Code.map(item => item.HLEVEL6_CODE.toString());
+    
+            const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
+            HLEVEL6_NAME not like 'zz%' and
+            HLEVEL1_NAME <> 'Animal Health' and
+            HLEVEL1_NAME <> 'Consumer Health'`;
+
+            const existingMaterials = await cds.run(SELECT.from(ItalyMaterials).where(whereExpr).where({ HLEVEL6_CODE: { in: existingHlevel6Code } }));
+
+            // 'not in' where expression was not wokring properly
+            // because of this we are using this hack
+            // TODO: find a better way to handle this
+            let {xpr} = cds.parse.expr(`HLEVEL6_CODE not in '${existingHlevel6Code}'`);
+            xpr[3].val = existingHlevel6Code;
+            const newMaterials = await cds.run(SELECT.from(ItalyMaterials).where(whereExpr).where(xpr));
+            
+            await createMaterials(newMaterials);
+            await updateMaterials(existingMaterials);
+    
+            return req.reply(result);
+
+        } catch (error) {
+            console.log(error);
+        }
+
+    });
+
+
+    async function updateMaterials(materials){
+
+        const { 
+            PT_TMPRDHIER, 
+            PT_TMPRDPCK, 
+            PT_TMCTPRDPCK,
+            PT_TMSKUPRDPCK, 
+            PT_TMCOGS 
+        } = db.entities("com.bayer.SXTENDER.MasterData");
+
+        console.log(materials);
+
+    };
+
+    async function createMaterials(materials){
+
+        const { 
+            PT_TMPRDHIER, 
+            PT_TMPRDPCK, 
+            PT_TMCTPRDPCK,
+            PT_TMSKUPRDPCK, 
+            PT_TMCOGS 
+        } = db.entities("com.bayer.SXTENDER.MasterData");
+
+        const nextProductPackID = getNextProductPackID();
+
+        await materials.map(mat => createHierarchyEntries(mat));
+
+
+        console.log(materials);
+    };
+
+    async function createHierarchyEntries(){
+
+    };
+
+    async function getNextProductPackID(){
+        const { 
+            PT_TMPRDPCK
+        } = db.entities("com.bayer.SXTENDER.MasterData");
+        const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
+        return lastProductPackID.max + 1;
+    }
 }
