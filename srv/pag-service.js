@@ -104,8 +104,13 @@ module.exports = async (srv) => {
 
             // calculate Synchronized
             priceAgreement.Synchronized = customerPrices.every(price => price.Synchronized);
+            
             // calculate hasNewMaterials
-            priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
+            if(!customerPrices || customerPrices.length === 0){
+                priceAgreement.hasNewMaterials = false;
+            }else {
+                priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
+            }
 
 
             // calculate hasNewPrice
@@ -130,10 +135,6 @@ module.exports = async (srv) => {
 
             }
 
-            
-            if(!priceAgreement.CustomerPrices || (priceAgreement.CustomerPrices && priceAgreement.CustomerPrices.length === 0)){
-                priceAgreement.hasNewMaterials = false;
-            }
 
             if(priceAgreement.ExpiryDate){
                 let dExpiryDate = new Date(priceAgreement.ExpiryDate);
