@@ -278,6 +278,10 @@ module.exports = async (srv) => {
             const url = `${priceAgreementApi.Host}${priceAgreementApi.BasePath}${priceAgreementApi.ResourcePath}`;
             const oauthCredentials = await getBearerToken();
 
+            console.log("Update Price Conditions oauthCredetials:", oauthCredentials);
+            console.log("Update Price Conditions proxyHost:", priceAgreementApi.proxyHost);
+            console.log("Update Price Conditions proxyPort:", priceAgreementApi.proxyPort);
+
             return axios({
                 method: 'post',
                 url: url,
@@ -300,6 +304,9 @@ module.exports = async (srv) => {
     async function getBearerToken() {
 
         if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
+            console.log("Bearer Token oauthCredetials:", oauthAuth);
+            console.log("Bearer Token proxyHost:", priceAgreementApi.proxyHost);
+            console.log("Bearer Token proxyPort:", priceAgreementApi.proxyPort);
             return axios({
                 method: 'post',
                 url: oauthAuth.OAuthProvider,

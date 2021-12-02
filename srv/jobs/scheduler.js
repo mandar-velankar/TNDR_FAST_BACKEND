@@ -240,6 +240,9 @@ module.exports = async () => {
         const PROXY_HOST = this.proxyHost;
         const PROXY_PORT = this.proxyPort;
 
+        console.log("Bearer Token scheduler proxyHost:", PROXY_HOST);
+        console.log("Bearer Token scheduler proxyPort:", PROXY_PORT);
+
         return axios({
           method: 'post',
           url: this.oAuthProvider,
