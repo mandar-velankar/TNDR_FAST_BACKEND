@@ -339,17 +339,18 @@ module.exports = async (srv) => {
             HLEVEL1_NAME <> 'Animal Health' and
             HLEVEL1_NAME <> 'Consumer Health'`;
 
-            const existingMaterials = await cds.run(SELECT.from(ItalyMaterials).where(whereExpr).where({ HLEVEL6_CODE: { in: existingHlevel6Code } }));
-
             // 'not in' where expression was not wokring properly
             // because of this we are using this hack
             // TODO: find a better way to handle this
             let {xpr} = cds.parse.expr(`HLEVEL6_CODE not in '${existingHlevel6Code}'`);
             xpr[3].val = existingHlevel6Code;
-            const newMaterials = await cds.run(SELECT.from(ItalyMaterials).where(whereExpr).where(xpr));
             
-            await createMaterials(newMaterials);
-            await updateMaterials(existingMaterials);
+            const newMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where(xpr));
+            const existingMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where({ HLEVEL6_CODE: { in: existingHlevel6Code } }));
+
+            if(newMaterials && newMaterials.length > 0) await createMaterials(newMaterials);
+            
+            // await updateMaterials(existingMaterials);
     
             return req.reply(result);
 
@@ -376,30 +377,83 @@ module.exports = async (srv) => {
 
     async function createMaterials(materials){
 
-        const { 
-            PT_TMPRDHIER, 
-            PT_TMPRDPCK, 
-            PT_TMCTPRDPCK,
-            PT_TMSKUPRDPCK, 
-            PT_TMCOGS 
-        } = db.entities("com.bayer.SXTENDER.MasterData");
+        if(!materials || materials.length <= 0) throw new Error('No materials provied');
 
-        const nextProductPackID = getNextProductPackID();
+        // 1. Create Hierarchy entries for new products
+        await createHierarchyEntries(materials);
+        console.log('Hierarchy entries successfully created');
 
-        await materials.map(mat => createHierarchyEntries(mat));
+        // 2. Create new products master data
+        await createProductsMasterData(materials);
+        console.log('Products master data successfully created');
 
-
-        console.log(materials);
     };
 
-    async function createHierarchyEntries(){
+    /**
+     * Create Hierarchy entries for new products
+     * @param {Object} material Material 
+     * @return {Promise} Promise
+     */
+    async function createHierarchyEntries(materials){
 
+        if(!materials || materials.length <= 0) throw new Error('No materials provied');
+
+        const { PT_TMPRDHIER } = db.entities("com.bayer.SXTENDER.MasterData");
+
+        const hierarchyEntries = materials.map(mat => {
+
+            let hlevel1_code = mat.HLEVEL1_NAME && mat.HLEVEL1_NAME.toLowerCase() === "Pharma".toLowerCase() ? 8 : mat.HLEVEL1_NAME.toLowerCase() === "Radiology".toLowerCase() ? 65 : 0; 
+
+            return {
+                HLEVEL1_NAME: mat.HLEVEL1_NAME,
+                HLEVEL1_CODE: hlevel1_code, 
+                HLEVEL2_NAME: "NEW", // TODO: this is for testing, remove in prod
+                HLEVEL2_CODE: "",
+                HLEVEL3_NAME: "",
+                HLEVEL3_CODE: "",
+                HLEVEL4_NAME: mat.HLEVEL4_NAME,
+                HLEVEL4_CODE: mat.HLEVEL4_CODE,
+                HLEVEL5_NAME: "",
+                HLEVEL5_CODE: "",
+                HLEVEL6_NAME: mat.HLEVEL6_NAME,
+                HLEVEL6_CODE: mat.HLEVEL6_CODE,
+            }
+        });
+
+        return cds.run(INSERT(hierarchyEntries).into(PT_TMPRDHIER));
+
+    };
+
+    /**
+     * Create new products master data
+     * @param {Object} material Material 
+     * @return {Promise} Promise
+     */
+    async function createProductsMasterData(materials){
+
+        // 2.a Create new product packs
+        await createProductPacks(materials);
+
+        // 2.b Create new Country Product Packs
+        // 2.c Create new SKUs
+        // 2.d Create new COGS
+    };
+
+     /**
+     * Create new product packs
+     * @param {Object} material Material 
+     * @return {Promise} Promise
+     */
+      async function createProductPacks(materials){
+
+        const { PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+
+        const nextProductPackID = await getNextProductPackID();
+            
     };
 
     async function getNextProductPackID(){
-        const { 
-            PT_TMPRDPCK
-        } = db.entities("com.bayer.SXTENDER.MasterData");
+        const { PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
         const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
         return lastProductPackID.max + 1;
     }
