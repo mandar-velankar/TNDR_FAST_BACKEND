@@ -457,4 +457,10 @@ module.exports = async (srv) => {
         const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
         return lastProductPackID.max + 1;
     }
+
+    async function getNextCountryProductPackID(){
+        const { TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+        const lastCountryProductPackID = await cds.run(SELECT.one.from(TMCTPRDPCK, ['Max(COUNTRYPRODUCTPACKID) as max']));
+        return lastCountryProductPackID.max + 1;
+    }
 }
