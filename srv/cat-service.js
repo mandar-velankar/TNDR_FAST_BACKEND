@@ -2145,7 +2145,8 @@ module.exports = (srv) => {
 				results = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), results);
 			}
 			else if (channel === "Distributor") {
-				let distributorDistributors = await tx.run(SELECT.from(DistributorBrand).where(whereCountry));
+				let whereActiveRecord = ServiceHelper.buildFullWhere("ACTIVE_RECORD", "=", "Yes");
+				let distributorDistributors = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereActiveRecord));
 				results = distributorDistributors.map(function (d) {
 					let uniqueId = d.COUNTRY_CODE.concat("_")
 						.concat(instituteId).concat("_")
