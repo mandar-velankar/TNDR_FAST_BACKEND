@@ -386,7 +386,7 @@ module.exports = (srv) => {
 		//Notification for semi-gov institute
 		let legal = 1;
 		if (product.LEGAL_APPROVED !== 1) {
-			if (offer.INSTITUTE_TYPE === "Private" || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
+			if (offer.INSTITUTE_TYPE === "Private" || offer.INSTITUTE_TYPE === "NGO-NPO" || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
 				legal = 3;
 			}
 			else if (offer.INSTITUTE_TYPE === "Semi-Governmental") {
