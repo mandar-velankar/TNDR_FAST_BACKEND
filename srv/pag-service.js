@@ -321,39 +321,8 @@ module.exports = async (srv) => {
         const tx = cds.transaction(req);
     
         try {
-
-            const { 
-                ItalyMaterials 
-            } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
-
-            const { 
-                PT_TMPRDHIER
-            } = db.entities("com.bayer.SXTENDER.MasterData");
-
-
-            let existingHlevel6Code = await cds.run(SELECT.from(PT_TMPRDHIER, ['HLEVEL6_CODE']));
-            existingHlevel6Code = existingHlevel6Code.map(item => item.HLEVEL6_CODE.toString());
-    
-            const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
-            HLEVEL6_NAME not like 'zz%' and
-            HLEVEL1_NAME <> 'Animal Health' and
-            HLEVEL1_NAME <> 'Consumer Health'`;
-
-            // 'not in' where expression was not wokring properly
-            // because of this we are using this hack
-            // TODO: find a better way to handle this
-            let {xpr} = cds.parse.expr(`HLEVEL6_CODE not in '${existingHlevel6Code}'`);
-            xpr[3].val = existingHlevel6Code;
-            
-            const newMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where(xpr));
-            const existingMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where({ HLEVEL6_CODE: { in: existingHlevel6Code } }));
-
-            if(newMaterials && newMaterials.length > 0) await createMaterials(newMaterials);
-            
-            // await updateMaterials(existingMaterials);
-    
-            return req.reply(result);
-
+            await processNewMaterials();
+            // await updateExistingMaterials(); // TODO: not implemented
         } catch (error) {
             console.log(error);
         }
@@ -361,46 +330,47 @@ module.exports = async (srv) => {
     });
 
 
-    async function updateMaterials(materials){
 
-        const { 
-            PT_TMPRDHIER, 
-            PT_TMPRDPCK, 
-            PT_TMCTPRDPCK,
-            PT_TMSKUPRDPCK, 
-            PT_TMCOGS 
-        } = db.entities("com.bayer.SXTENDER.MasterData");
-
-        console.log(materials);
-
-    };
-
-    async function createMaterials(materials){
-
-        if(!materials || materials.length <= 0) throw new Error('No materials provied');
+    async function processNewMaterials(){
 
         // 1. Create Hierarchy entries for new products
-        await createHierarchyEntries(materials);
+        await createHierarchyEntries();
         console.log('Hierarchy entries successfully created');
 
         // 2. Create new products master data
-        await createProductsMasterData(materials);
+        await createProductsMasterData();
         console.log('Products master data successfully created');
 
     };
 
     /**
      * Create Hierarchy entries for new products
-     * @param {Object} material Material 
      * @return {Promise} Promise
      */
-    async function createHierarchyEntries(materials){
+    async function createHierarchyEntries(){
 
-        if(!materials || materials.length <= 0) throw new Error('No materials provied');
-
+        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { PT_TMPRDHIER } = db.entities("com.bayer.SXTENDER.MasterData");
 
-        const hierarchyEntries = materials.map(mat => {
+        let existingHlevel6Code = await cds.run(SELECT.from(PT_TMPRDHIER, ['HLEVEL6_CODE']));
+        existingHlevel6Code = existingHlevel6Code.map(item => item.HLEVEL6_CODE.toString());
+
+        const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
+        HLEVEL6_NAME not like 'zz%' and
+        HLEVEL1_NAME <> 'Animal Health' and
+        HLEVEL1_NAME <> 'Consumer Health'`;
+
+        // 'not in' where expression was not wokring properly
+        // because of this we are using this hack
+        // TODO: find a better way to handle this
+        let {xpr} = cds.parse.expr(`HLEVEL6_CODE not in '${existingHlevel6Code}'`);
+        xpr[3].val = existingHlevel6Code;
+        
+        const newMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where(xpr));
+        
+        if( newMaterials.length <= 0 ) return {message: "No new materials found"};
+
+        const hierarchyEntries = newMaterials.map(mat => {
 
             let hlevel1_code = mat.HLEVEL1_NAME && mat.HLEVEL1_NAME.toLowerCase() === "Pharma".toLowerCase() ? 8 : mat.HLEVEL1_NAME.toLowerCase() === "Radiology".toLowerCase() ? 65 : 0; 
 
@@ -456,11 +426,17 @@ module.exports = async (srv) => {
         const { PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
         const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
         return lastProductPackID.max + 1;
-    }
+    };
 
     async function getNextCountryProductPackID(){
         const { TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
         const lastCountryProductPackID = await cds.run(SELECT.one.from(TMCTPRDPCK, ['Max(COUNTRYPRODUCTPACKID) as max']));
         return lastCountryProductPackID.max + 1;
-    }
+    };
+
+
+    
+    async function updateExistingMaterials(materials){
+        // TODO: not implemented
+    };
 }
