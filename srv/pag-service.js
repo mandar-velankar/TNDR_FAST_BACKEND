@@ -399,10 +399,10 @@ module.exports = async (srv) => {
      * @param {Object} material Material 
      * @return {Promise} Promise
      */
-    async function createProductsMasterData(materials){
+    async function createProductsMasterData(){
 
         // 2.a Create new product packs
-        await createProductPacks(materials);
+        await createProductPacks();
 
         // 2.b Create new Country Product Packs
         // 2.c Create new SKUs
@@ -414,11 +414,52 @@ module.exports = async (srv) => {
      * @param {Object} material Material 
      * @return {Promise} Promise
      */
-      async function createProductPacks(materials){
+      async function createProductPacks(){
 
-        const { PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const { PT_TMPRDPCK, PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
 
-        const nextProductPackID = await getNextProductPackID();
+        let query = cds.parse.cql (`SELECT p.ProductPackName from ${PT_TMPRDPCK.name} AS p 
+        inner join ${PT_TMCTPRDPCK.name} AS cp on p.PRODUCTPACKID = cp.PRODUCTPACKID WHERE cp.CountryCode='IT'`);
+        let ProductPackNames =  await cds.run(query);
+        ProductPackNames = ProductPackNames.map(item => item.ProductPackName);
+
+        const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
+        HLEVEL6_NAME not like 'zz%' and
+        HLEVEL1_NAME <> 'Animal Health' and
+        HLEVEL1_NAME <> 'Consumer Health'`;
+
+        // 'not in' where expression was not wokring properly
+        // because of this we are using this hack
+        // TODO: find a better way to handle this
+        let {xpr} = cds.parse.expr(`MAKTX not in '${ProductPackNames}'`);
+        xpr[3].val = ProductPackNames;
+        
+        const materials = await cds.run(SELECT.from(ItalyMaterials, ['MAKTX','HLEVEL6_CODE']).where(whereExpr).where(xpr).groupBy(`MAKTX, HLEVEL6_CODE`));
+        
+        if( materials.length <= 0 ) return {message: "No materials found to process"};
+
+        let nextProductPackID = await getNextProductPackID();
+
+        const productPackEntries = materials.map(mat => {
+
+            return {
+                PRODUCTPACKID: nextProductPackID++,
+                PRODUCTPACKNAME: mat.MAKTX,
+                PRESENTATION: "NEW", // TODO: remove this in production
+                UOM: "",
+                ACTIVERECORD: "Yes",
+                HLEVEL6_CODE: mat.HLEVEL6_CODE,
+                CONCENTRATION: 1,
+                PACKFACTOR: 1,
+                PCINAME: "",
+                MOLECULENAME: "",
+                ACTIVE_SUBSTANCE: "",
+                PRODUCTTYPE: "Drug"
+            }
+        });
+
+        return cds.run(INSERT(productPackEntries).into(PT_TMPRDPCK));
             
     };
 
