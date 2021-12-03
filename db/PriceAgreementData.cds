@@ -49,6 +49,9 @@ entity PriceAgreements: cuid, managed {
     OfferProduct: Association to TransactionalData.PT_TMOFPR on OfferProduct.OfferID = OfferId
                                                              and OfferProduct.ProductCode = ProductPackId;
     Deliveries: Association to many PriceAgreementDataViews.Deliveries on Deliveries.PriceAgreementId = ID;
+    FOC: Association to many PriceAgreementDataViews.PriceAgreementFOC on FOC.CountryCode = CountryCode
+                                                                        and FOC.OfferID = OfferId
+                                                                        and FOC.ProductCode = ProductPackId;
     
 }
 entity CustomerPrices: cuid, managed {
