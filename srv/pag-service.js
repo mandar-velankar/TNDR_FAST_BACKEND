@@ -295,8 +295,8 @@ module.exports = async (srv) => {
             const oauthCredentials = await getBearerToken();
 
             console.log("Update Price Conditions oauthCredetials:", oauthCredentials);
-            console.log("Update Price Conditions proxyHost:", priceAgreementApi.proxyHost);
-            console.log("Update Price Conditions proxyPort:", priceAgreementApi.proxyPort);
+            console.log("Update Price Conditions proxyHost:", priceAgreementApi.ProxyHost);
+            console.log("Update Price Conditions proxyPort:", priceAgreementApi.ProxyPort);
 
             return axios({
                 method: 'post',
@@ -307,8 +307,8 @@ module.exports = async (srv) => {
                 },
                 data: JSON.stringify(body),
                 proxy: {
-                    host: priceAgreementApi.proxyHost,
-                    port: priceAgreementApi.proxyPort
+                    host: priceAgreementApi.ProxyHost,
+                    port: priceAgreementApi.ProxyPort
                 }
             });
         }
@@ -321,8 +321,8 @@ module.exports = async (srv) => {
 
         if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
             console.log("Bearer Token oauthCredetials:", oauthAuth);
-            console.log("Bearer Token proxyHost:", priceAgreementApi.proxyHost);
-            console.log("Bearer Token proxyPort:", priceAgreementApi.proxyPort);
+            console.log("Bearer Token proxyHost:", priceAgreementApi.ProxyHost);
+            console.log("Bearer Token proxyPort:", priceAgreementApi.ProxyPort);
             return axios({
                 method: 'post',
                 url: oauthAuth.OAuthProvider,
@@ -334,8 +334,8 @@ module.exports = async (srv) => {
                     'grant_type': oauthAuth.GrantType
                 }),// when testing locally, comment out the proxy
                 proxy: {
-                    host: priceAgreementApi.proxyHost,
-                    port: priceAgreementApi.proxyPort
+                    host: priceAgreementApi.ProxyHost,
+                    port: priceAgreementApi.ProxyPort
                 }
             });
         }
