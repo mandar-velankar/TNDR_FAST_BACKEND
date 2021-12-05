@@ -145,6 +145,7 @@ service CatalogService @(path : 'tender')@(requires : [
             COGS              : Double;
             PACKFACTOR        : Integer;
             DIVISION          : String;
+            SKUS              : String;
     };
 
     //Transactional Data Tables

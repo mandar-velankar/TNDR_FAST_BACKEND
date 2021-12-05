@@ -23,7 +23,7 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, PT_TMSKUPRDPCK
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
@@ -151,7 +151,7 @@ module.exports = (srv) => {
 
 
 
-	function buildDirectProducts(entityBrands, directBrands, countryProducts) {
+	function buildDirectProducts(entityBrands, directBrands, countryProducts, productSKUs) {
 		let results = [];
 		entityBrands.forEach(entityBrand => {
 			directBrand = directBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
@@ -173,14 +173,15 @@ module.exports = (srv) => {
 						COMMISSION_RATE: directBrand.COMMISSION_RATE,
 						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
 						CHANNEL: 'Direct',
-						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN
+						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(",")
 					});
 				});
 			}
 		});
 		return results;
 	}
-	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds) {
+	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, productSKUs) {
 		let results = [];
 		entityBrands.forEach(entityBrand => {
 			distributorBrand = distributorBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
@@ -205,7 +206,8 @@ module.exports = (srv) => {
 							CHANNEL: 'Distributor',
 							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 							COGS: countryProduct.COGS,
-							PACKFACTOR: countryProduct.PACK_SIZE
+							PACKFACTOR: countryProduct.PACK_SIZE,
+							SKUS: productSKUs.SKUCode.join(",")
 						});
 					});
 				});
@@ -2178,6 +2180,7 @@ module.exports = (srv) => {
 			let instituteIds = ServiceHelper.getWhereValues(req, "INSTITUTE_ID");
 			//Get filters
 			let whereCountry = ServiceHelper.buildWhere(req, "COUNTRY_CODE");
+			let whereCountrySKU = ServiceHelper.buildFullWhere("CountryCode", "=", whereCountry[2].val);
 			//  let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
 			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID", "or", instituteIds);
 			let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
@@ -2244,14 +2247,19 @@ module.exports = (srv) => {
 					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
 				}
 			}
+
+			//get SKU code for products
+			//Get filters
+			let aProductSKUs = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereCountrySKU));
+
 			//Get products available to institute either Direct or through Distributor
 			if (channel === "Direct") {
 				var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
-				results = buildDirectProducts(entityBrands, directBrands, countryProducts);
+				results = buildDirectProducts(entityBrands, directBrands, countryProducts, aProductSKUs);
 			}
 			else if (channel === "Distributor") {
 				var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
-				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds);
+				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, aProductSKUs);
 			}
 		}
 		// sort by countrycode, then brand name, then product name
