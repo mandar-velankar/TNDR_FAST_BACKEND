@@ -1257,7 +1257,23 @@ module.exports = (srv) => {
 				MINANNPURCH: offerProduct.MinAnnPurch,
 				FOC_STEP: offerProduct.FOC_STEP,
 				OFFER_TYPE: offerProduct.OfferType,
-				FreeGoodsOther: aFreeGoodsOtherTemp
+				FreeGoodsOther: aFreeGoodsOtherTemp,
+
+				//missing SKU & SKUCountry fields
+				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
+				ACTIVERECORD: offerProduct.ACTIVERECORD,
+				HLEVEL6_CODE: offerProduct.HLEVEL6_CODE,
+				PCI_NAME: offerProduct.PCI_NAME,
+				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
+				PRODUCT_TYPE: offerProduct.PRODUCT_TYPE,
+
+				SKUCOUNTRY_ACTIVERECORD: offerProduct.SKUCOUNTRY_ACTIVERECORD,
+				PRESENTATION_2: offerProduct.PRESENTATION_2,
+				PRODUCT_COMMENT: offerProduct.PRODUCT_COMMENT,
+				GOV_CODE: offerProduct.GOV_CODE,
+				CODE1: offerProduct.CODE1,
+				CODE2: offerProduct.CODE2,
+				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1974,6 +1990,24 @@ module.exports = (srv) => {
 				MINCONTRACTUAL: d.MinContractual,
 				MINANNPURCH: d.MinAnnPurch,
 				FOC_STEP: d.FOC_STEP,
+				
+				//missing SKU & SKUCountry fields
+				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
+				ACTIVERECORD: offerProduct.ACTIVERECORD,
+				HLEVEL6_CODE: offerProduct.HLEVEL6_CODE,
+				PCI_NAME: offerProduct.PCI_NAME,
+				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
+				PRODUCT_TYPE: offerProduct.PRODUCT_TYPE,
+
+				SKUCOUNTRY_ACTIVERECORD: offerProduct.SKUCOUNTRY_ACTIVERECORD,
+				PRESENTATION_2: offerProduct.PRESENTATION_2,
+				PRODUCT_COMMENT: offerProduct.PRODUCT_COMMENT,
+				GOV_CODE: offerProduct.GOV_CODE,
+				CODE1: offerProduct.CODE1,
+				CODE2: offerProduct.CODE2,
+				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
+				//end of missing SKU & SKUCountry fields
+
 				FreeGoodsOther: d.FreeGoodsOther,
 			}
 		});

@@ -555,6 +555,22 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.MoleculeName as MOLECULE_NAME,
 	offerProduct.SKUCountry.VTATax as VAT,
     ifnull(offerProduct.SKUCountry.COMMENT, '') as PRODUCT_COMMENT:String(500),
+
+    /* Start of missing SKU & SKUCountry fields*/
+    offerProduct.SKU.ACTIVERECORD as ACTIVERECORD,
+    offerProduct.SKU.HLEVEL6_CODE as HLEVEL6_CODE,
+    offerProduct.SKU.PCIName as PCI_NAME,
+    offerProduct.SKU.ACTIVE_SUBSTANCE as ACTIVE_SUBSTANCE,
+    offerProduct.SKU.ProductType as PRODUCT_TYPE,
+
+    offerProduct.SKUCountry.COUNTRYPRODUCTPACKID as COUNTRYPRODUCTPACKID,
+    offerProduct.SKUCountry.ACTIVERECORD as SKUCOUNTRY_ACTIVERECORD,
+    offerProduct.SKUCountry.Presentation_2 as PRESENTATION_2,
+    offerProduct.SKUCountry.GOV_CODE as GOV_CODE,
+    offerProduct.SKUCountry.CODE1 as CODE1,
+    offerProduct.SKUCountry.CODE2 as CODE2,
+    /* End of missing SKU & SKUCountry fields*/
+
 	offerProduct.UnitPerPack as UNIT,
     offerProduct.RequestedVolume as REQUESTED_VOLUME,
 	offerProduct.SORTER as SORTER,
