@@ -323,6 +323,19 @@ service CatalogService @(path : 'tender')@(requires : [
             MINCONTRACTUAL                    : Double;
             MINANNPURCH                       : Double;
             OFFER_TYPE                        : String;
+            //missing SKU & SKUCountry fields
+            ACTIVERECORD                      : String(10);
+            HLEVEL6_CODE                      : String(50);
+            PCI_NAME                          : String(255);
+            ACTIVE_SUBSTANCE                  : String(50);
+            PRODUCT_TYPE                      : String(50);
+            SKUCOUNTRY_ACTIVERECORD           : String(10);
+            PRESENTATION_2                    : String(1000);
+            GOV_CODE                          : String(255);
+            CODE1                             : String(255);
+            CODE2                             : String(255);
+            QTY_THRESHOLD                     : Integer;
+            //end of missing SKU & SKUCountry fields
             FreeGoodsOther                    : Association to many FreeGoodsOther
                                                     on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
             ApproverTypes                     : Association to many ApproverTypes
@@ -566,6 +579,21 @@ service CatalogService @(path : 'tender')@(requires : [
             MINCONTRACTUAL                    : Double;
             MINANNPURCH                       : Double;
             FOC_STEP                          : Double;
+
+            //missing SKU & SKUCountry fields
+            ACTIVERECORD                      : String(10);
+            HLEVEL6_CODE                      : String(50);
+            PCI_NAME                          : String(255);
+            ACTIVE_SUBSTANCE                  : String(50);
+            PRODUCT_TYPE                      : String(50);
+            SKUCOUNTRY_ACTIVERECORD           : String(10);
+            PRESENTATION_2                    : String(1000);
+            GOV_CODE                          : String(255);
+            CODE1                             : String(255);
+            CODE2                             : String(255);
+            QTY_THRESHOLD                     : Integer;
+            //end of missing SKU & SKUCountry fields
+            
             FreeGoodsOther                    : Association to many FreeGoodsOther
                                                    on FreeGoodsOther.ProductPackId = $self.PRODUCTCODE;
     };
