@@ -334,8 +334,8 @@ module.exports = async (srv) => {
     async function processNewMaterials(){
 
         // 1. Create Hierarchy entries for new products
-        await createHierarchyEntries();
-        console.log('Hierarchy entries successfully created');
+        const hierarchyEntries = await createHierarchyEntries();
+        if(hierarchyEntries && hierarchyEntries.message) console.log(hierarchyEntries.message);
 
         // 2. Create new products master data
         await createProductsMasterData();
@@ -368,7 +368,7 @@ module.exports = async (srv) => {
         
         const newMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where(xpr));
         
-        if( newMaterials.length <= 0 ) return {message: "No new materials found"};
+        if( newMaterials.length <= 0 ) return {message: `No hierarchy entries were created. No new materials were found in ${ItalyMaterials.name}`};
 
         const hierarchyEntries = newMaterials.map(mat => {
 
@@ -401,20 +401,23 @@ module.exports = async (srv) => {
      */
     async function createProductsMasterData(){
 
+        let lastProductPackID = await getLastProductPackID();
+
         // 2.a Create new product packs
-        await createProductPacks();
+        const productPacks = await createProductPacks(lastProductPackID);
+        if(productPacks && productPacks.message) console.log(productPacks.message);
 
         // 2.b Create new Country Product Packs
+        const countryProductPacks = await createCountryProductPacks(lastProductPackID);
         // 2.c Create new SKUs
         // 2.d Create new COGS
     };
 
      /**
      * Create new product packs
-     * @param {Object} material Material 
      * @return {Promise} Promise
      */
-      async function createProductPacks(){
+      async function createProductPacks(lastProductPackID){
 
         const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { PT_TMPRDPCK, PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
@@ -437,14 +440,12 @@ module.exports = async (srv) => {
         
         const materials = await cds.run(SELECT.from(ItalyMaterials, ['MAKTX','HLEVEL6_CODE']).where(whereExpr).where(xpr).groupBy(`MAKTX, HLEVEL6_CODE`));
         
-        if( materials.length <= 0 ) return {message: "No materials found to process"};
-
-        let nextProductPackID = await getNextProductPackID();
+        if( materials.length <= 0 ) return {message: `Could not create product pack. /nNo new materials were found in ${ItalyMaterials.name}.`};
 
         const productPackEntries = materials.map(mat => {
 
             return {
-                PRODUCTPACKID: nextProductPackID++,
+                PRODUCTPACKID: ++lastProductPackID,
                 PRODUCTPACKNAME: mat.MAKTX,
                 PRESENTATION: "NEW", // TODO: remove this in production
                 UOM: "",
@@ -463,16 +464,79 @@ module.exports = async (srv) => {
             
     };
 
-    async function getNextProductPackID(){
-        const { PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
-        const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
-        return lastProductPackID.max + 1;
+    /**
+     * Create new country product packs
+     * @return {Promise} Promise
+     */
+     async function createCountryProductPacks(lastProductPackID){
+
+        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const { PT_TMCTPRDPCK, PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+
+        let ProductPackIDs =  await cds.run(cds.parse.cql (`SELECT ProductPackID from ${PT_TMCTPRDPCK.name} WHERE CountryCode='IT'`));
+        ProductPackIDs = ProductPackIDs.map(item => item.ProductPackID.toString());
+
+
+        let query = cds.parse.cql (`SELECT max(material.COUNTRYOFORIG), product.ProductPackID FROM ${ItalyMaterials.name} AS material 
+        inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName`);
+
+        // 'not in' where expression was not wokring properly
+        // because of this we are using this hack
+        // TODO: find a better way to handle this
+        let {xpr} = cds.parse.expr(`product.ProductPackID not in '${ProductPackIDs}' AND product.ProductPackID > ${lastProductPackID}`);
+        xpr[3].val = ProductPackIDs;
+        query.SELECT.where = xpr;
+        query.SELECT.groupBy = [
+            {
+                "ref": ['product','ProductPackID']
+            }
+        ];
+
+        const materials = await cds.run(query);
+        
+        if( materials.length <= 0 ) return {message: `Could not create product pack. /nNo new materials were found in ${ItalyMaterials.name}.`};
+
+        let nextCountryProductPackID = await getLastCountryProductPackID();
+
+        const countryProductPackEntries = materials.map(mat => {
+
+            return {
+                COUNTRYPRODUCTPACKID: ++nextCountryProductPackID,
+                COUNTRYCODE: "IT",
+                COUNTRYOFORIGIN: mat.COUNTRYOFORIGIN,
+                SHELFLIFE: 1,
+                REGISTERED: 2,
+                ACTIVERECORD: "Yes",
+                PRODUCTPACKID: mat.ProductPackID,
+                MANUFACTURER:"NEW",
+                Presentation_2: "",
+                VTATax: 10,
+                COMMENT: "",
+                GOV_CODE: "",
+                CODE1: "",
+                CODE2: "",
+                QTY_THRESHOLD: 0,
+            }
+        });
+
+        return cds.run(INSERT(countryProductPackEntries).into(PT_TMCTPRDPCK));
+            
     };
 
-    async function getNextCountryProductPackID(){
-        const { TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
-        const lastCountryProductPackID = await cds.run(SELECT.one.from(TMCTPRDPCK, ['Max(COUNTRYPRODUCTPACKID) as max']));
-        return lastCountryProductPackID.max + 1;
+    /**
+     * Get the last product pack id from PT_TMPRDPCK entity
+     * @returns {Promise} lastProductPackID 
+     */
+    async function getLastProductPackID(){
+        const { PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+        const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
+        return lastProductPackID.max;
+    };
+
+    async function getLastCountryProductPackID(){
+        const { PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+        const lastCountryProductPackID = await cds.run(SELECT.one.from(PT_TMCTPRDPCK, ['Max(PRODUCTPACKID) as max']));
+        return lastCountryProductPackID.max;
     };
 
 
