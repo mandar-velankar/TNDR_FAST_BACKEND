@@ -410,6 +410,7 @@ module.exports = async (srv) => {
         // 2.b Create new Country Product Packs
         const countryProductPacks = await createCountryProductPacks(lastProductPackID);
         // 2.c Create new SKUs
+        const skys = await createSKUs();
         // 2.d Create new COGS
     };
 
@@ -494,7 +495,7 @@ module.exports = async (srv) => {
 
         const materials = await cds.run(query);
         
-        if( materials.length <= 0 ) return {message: `Could not create product pack. /nNo new materials were found in ${ItalyMaterials.name}.`};
+        if( materials.length <= 0 ) return {message: `Could not create country product pack. /nNo new materials were found in ${ItalyMaterials.name}.`};
 
         let nextCountryProductPackID = await getLastCountryProductPackID();
 
@@ -524,6 +525,59 @@ module.exports = async (srv) => {
     };
 
     /**
+     * Create new SKUs
+     * @return {Promise} Promise
+     */
+    async function createSKUs(lastProductPackID){
+
+        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const { PT_TMSKUPRDPCK, PT_TMPRDPCK, PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+
+        let skuCodes =  await cds.run(cds.parse.cql (`SELECT DISTINCT SKUCode from ${PT_TMSKUPRDPCK.name}`));
+        skuCodes = skuCodes.map(item => addLeadingZeros(item.SKUCode, 18));
+
+
+        let query = cds.parse.cql (`SELECT product.ProductPackID, MATNR FROM ${ItalyMaterials.name} AS material 
+        inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName
+        inner join ${PT_TMCTPRDPCK.name} AS countryProduct ON product.ProductPackID = countryProduct.ProductPackID`);
+
+        // 'not in' where expression was not wokring properly
+        // because of this we are using this hack
+        // TODO: find a better way to handle this
+        let {xpr} = cds.parse.expr(`material.MATNR not in '${skuCodes}' AND countryProduct.CountryCode = 'IT'`);
+        xpr[3].val = skuCodes;
+        query.SELECT.where = xpr;
+        query.SELECT.groupBy = [
+            {
+                "ref": ['product','ProductPackID']
+            },
+            {
+                "ref": ['material','MATNR']
+            }
+        ];
+
+        const materials = await cds.run(query);
+        
+        if( materials.length <= 0 ) return {message: `Could not create SKUs`};
+
+        let nextSkuProductPackID = await getLastSkuProductPackID();
+
+        const skuProductPackEntries = materials.map(mat => {
+
+            return {
+                CountrySKUID: ++nextSkuProductPackID,
+                CountryCode: "IT",
+                ActiveRecord: "Yes",
+                ProductPackID: mat.ProductPackID,
+                SKUCode: Number(mat.MATNR),
+            }
+        });
+
+        return cds.run(INSERT(skuProductPackEntries).into(PT_TMSKUPRDPCK));
+            
+    };
+
+    /**
      * Get the last product pack id from PT_TMPRDPCK entity
      * @returns {Promise} lastProductPackID 
      */
@@ -539,8 +593,25 @@ module.exports = async (srv) => {
         return lastCountryProductPackID.max;
     };
 
+    async function getLastSkuProductPackID(){
+        const { PT_TMSKUPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+        const lastSkuProductPackID = await cds.run(SELECT.one.from(PT_TMSKUPRDPCK, ['Max(COUNTRYSKUID) as max']));
+        return lastSkuProductPackID.max;
+    };
 
-    
+
+    /**
+     * Adds leading zero's to a number
+     * @param {Integer} num Number
+     * @param {Integer} size Length of the number
+     * @returns 
+     */
+    function addLeadingZeros (num, size) {
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
+    };
+
     async function updateExistingMaterials(materials){
         // TODO: not implemented
     };
