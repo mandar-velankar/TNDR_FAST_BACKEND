@@ -412,6 +412,7 @@ module.exports = async (srv) => {
         // 2.c Create new SKUs
         const skys = await createSKUs();
         // 2.d Create new COGS
+        const cogs = await createCOGS();
     };
 
      /**
@@ -528,7 +529,7 @@ module.exports = async (srv) => {
      * Create new SKUs
      * @return {Promise} Promise
      */
-    async function createSKUs(lastProductPackID){
+    async function createSKUs(){
 
         const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { PT_TMSKUPRDPCK, PT_TMPRDPCK, PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
@@ -578,6 +579,52 @@ module.exports = async (srv) => {
     };
 
     /**
+     * Create new COGS
+     * @return {Promise} Promise
+     */
+     async function createCOGS(){
+
+        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const { PT_TMPRDPCK, PT_TMCTPRDPCK, PT_TMCOGS } = db.entities("com.bayer.SXTENDER.MasterData");
+
+        let query = cds.parse.cql (`SELECT product.ProductPackID, MAX(COGS) FROM ${ItalyMaterials.name} AS material 
+        inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName
+        inner join ${PT_TMCTPRDPCK.name} AS countryProduct ON product.ProductPackID = countryProduct.ProductPackID
+        where countryProduct.CountryCode='IT'`);
+
+        // TODO: find a better way to handle this
+        query.SELECT.groupBy = [
+            {
+                "ref": ['product','ProductPackID']
+            }
+        ];
+
+        const materials = await cds.run(query);
+        
+        if( materials.length <= 0 ) return {message: `Could not create COGS`};
+
+        let nextCogsID = await getLastCogsID();
+
+        const cogsEntries = materials.map(mat => {
+
+            return {
+                COGSID: ++nextCogsID,
+                CountryCode: "IT",
+                ProductPackID: mat.ProductPackID,
+                EffectiveDate: new Date().toISOString().slice(0, 10),
+                EndDate: "9999-12-31",
+                Currency: "EUR",
+                COGSType: "Budget",
+                COGS: mat.COGS,
+                ActiveRecord: "Yes",
+            }
+        });
+
+        return cds.run(INSERT(cogsEntries).into(PT_TMCOGS));
+            
+    };
+
+    /**
      * Get the last product pack id from PT_TMPRDPCK entity
      * @returns {Promise} lastProductPackID 
      */
@@ -597,6 +644,12 @@ module.exports = async (srv) => {
         const { PT_TMSKUPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
         const lastSkuProductPackID = await cds.run(SELECT.one.from(PT_TMSKUPRDPCK, ['Max(COUNTRYSKUID) as max']));
         return lastSkuProductPackID.max;
+    };
+
+    async function getLastCogsID(){
+        const { PT_TMCOGS } = db.entities("com.bayer.SXTENDER.MasterData");
+        const lastCogsID = await cds.run(SELECT.one.from(PT_TMCOGS, ['Max(COGSID) as max']));
+        return lastCogsID.max;
     };
 
 
