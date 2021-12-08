@@ -532,6 +532,8 @@ module.exports = async () => {
         try{
 
           const errorEntity = {
+            JobName: "MercadoPublico",
+            JobDescription: "",
             ErrorMessage: error.message,
             ResourceURL: url,
             ConsultationDate: new Date().toJSON()

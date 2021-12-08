@@ -49,6 +49,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseCron {
         } catch (error) {
             console.log('Processing of new materials has failed.');
             console.log(error);
+            return saveError(error);
         }
     };
 
@@ -450,6 +451,32 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseCron {
     async updateExistingMaterials(materials){
         // TODO: not implemented
     };
+
+    /**
+     * Saves the error in the DB.
+     * @param {Object} error 
+     * @returns {Promise}
+     */
+     async saveError(error){
+
+        if(!error && !jobDescription) throw new Error(`You must provide a job description and an error object`);
+
+        try{
+            const errorEntity = {
+              JobName: "ItalyJobs",
+              JobDescription: "ProcessMaterials",
+              ErrorMessage: error.message,
+              ResourceURL: "",
+              ConsultationDate: new Date().toJSON()
+            };
+
+            return await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
+
+          }catch(err){
+            console.log(err);
+          }
+  
+      }
 
 };
 
