@@ -37,6 +37,9 @@ const jobScheduler = require("./jobs/scheduler");
   scheduler.mercadoPublico.fetchTenders('00 00 * * *').start();
   scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
   scheduler.mercadoPublico.fetchPurchaseOrders('00 00 * * *').start();
+
+  jobScheduler.ItalyJobs.processMaterials('57 10 * * *').start();
+
   
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
