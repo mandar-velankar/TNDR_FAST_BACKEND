@@ -528,6 +528,7 @@ service CatalogService @(path : 'tender')
             SPOT_RATE                     : Double;
             BUSINESS_CASE_PRICE           : String(1000);
             IS_LOWEST                     : Integer;
+            MOLECULE_NAME                 : String(255);
     };
 
     entity ApprovalApprovers {

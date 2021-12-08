@@ -1874,7 +1874,8 @@ module.exports = (srv) => {
 				BUDGET_RATE: d.BUDGET_RATE,
 				SPOT_RATE: d.SPOT_RATE,
 				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2),
-				IS_LOWEST: d.IS_LOWEST
+				IS_LOWEST: d.IS_LOWEST,
+				MOLECULE_NAME: d.MOLECULE_NAME
 			}
 		});
 	}
