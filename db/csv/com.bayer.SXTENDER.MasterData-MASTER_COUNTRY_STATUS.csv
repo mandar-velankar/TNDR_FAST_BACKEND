@@ -288,29 +288,12 @@ COUNTRYCODE,STATUS,SORTER
 "CL","Delivery Ongoing",8
 "CL","Offer Declined",10
 "CL","All",13
-"ES","Awaiting Approval",1
-"ES","Offer Created",2
-"ES","Offer Approved",3
-"ES","Offer Rejected",4
-"ES","Quotation Submitted",5
-"ES","In FOC negotiation",6
-"ES","Results Recorded",7
-"ES","Delivery Ongoing",8
-"ES","Wholesale Offer",9
-"ES","Offer Declined",10
-"ES","Tender Closed",11
-"ES","Cancelled",12
-"ES","All",13
 "IT","Awaiting Approval",1
 "IT","Offer Created",2
 "IT","Offer Approved",3
 "IT","Offer Rejected",4
 "IT","Quotation Submitted",5
-"IT","In FOC negotiation",6
 "IT","Results Recorded",7
 "IT","Delivery Ongoing",8
-"IT","Wholesale Offer",9
 "IT","Offer Declined",10
-"IT","Tender Closed",11
-"IT","Cancelled",12
 "IT","All",13
