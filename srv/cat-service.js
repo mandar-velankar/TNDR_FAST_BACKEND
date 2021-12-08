@@ -1997,6 +1997,7 @@ module.exports = (srv) => {
 				MINCONTRACTUAL: d.MinContractual,
 				MINANNPURCH: d.MinAnnPurch,
 				FOC_STEP: d.FOC_STEP,
+				MOLECULE_NAME: d.MOLECULE_NAME,
 				
 				//missing SKU & SKUCountry fields
 				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
@@ -2015,7 +2016,8 @@ module.exports = (srv) => {
 				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
 				//end of missing SKU & SKUCountry fields
 
-				FreeGoodsOther: d.FreeGoodsOther,
+				FreeGoodsOther: d.FreeGoodsOther
+				
 			}
 		});
 	}

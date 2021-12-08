@@ -583,7 +583,7 @@ service CatalogService @(path : 'tender')@(requires : [
             MINCONTRACTUAL                    : Double;
             MINANNPURCH                       : Double;
             FOC_STEP                          : Double;
-
+            MOLECULE_NAME                     : String(255);
             //missing SKU & SKUCountry fields
             ACTIVERECORD                      : String(10);
             HLEVEL6_CODE                      : String(50);
@@ -596,8 +596,7 @@ service CatalogService @(path : 'tender')@(requires : [
             CODE1                             : String(255);
             CODE2                             : String(255);
             QTY_THRESHOLD                     : Integer;
-            //end of missing SKU & SKUCountry fields
-            
+            //end of missing SKU & SKUCountry fields  
             FreeGoodsOther                    : Association to many FreeGoodsOther
                                                    on FreeGoodsOther.ProductPackId = $self.PRODUCTCODE;
     };
