@@ -72,7 +72,5 @@ ID,COUNTRY_CODE,CLASSIFICATION
 "330b7f65-0ffc-97e8-33c0-e84a4049345e","AL","Tender"
 "f285c2b9-ca20-4a7e-8781-09dc8bb53b82","CL","Tender"
 "66315fcb-1d5c-4b20-a747-896220537fa6","CL","Contract"
-"cc449ab6-04a1-11ec-9a03-0242ac130003","ES","Tender"
-"cc449d40-04a1-11ec-9a03-0242ac130003","ES","RFQ"
 "dd6a4778-04a1-11ec-9a03-0242ac130003","IT","Tender"
-"dd6a4ab6-04a1-11ec-9a03-0242ac130003","IT","Commercial Contract"
+"dd6a4ab6-04a1-11ec-9a03-0242ac130003","IT","RFQ"

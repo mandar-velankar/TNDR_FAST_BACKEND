@@ -1,131 +1,121 @@
-APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE
-"Supply Chain","AE",1,0
-"Legal","AE",1,0
-"Regulatory","AE",1,0
-"Country Business","AE",1,0
-"Regional Business","AE",1,0
-"Controlling","AE",1,0
-"Country Business","BH",1,0
-"Supply Chain","BH",1,0
-"Legal","BH",1,0
-"Regulatory","BH",1,0
-"Regional Business","BH",1,0
-"Controlling","BH",1,0
-"Supply Chain","EG",1,0
-"Legal","EG",1,0
-"Regulatory","EG",1,0
-"Country Business","EG",1,0
-"Regional Business","EG",1,0
-"Controlling","EG",1,0
-"Controlling","GC",1,0
-"Legal","IQ",1,0
-"Regulatory","IQ",1,0
-"Supply Chain","IQ",1,0
-"Country Business","IQ",1,0
-"Regional Business","IQ",1,0
-"Controlling","IQ",1,0
-"Legal","JO",1,0
-"Regulatory","JO",1,0
-"Supply Chain","JO",1,0
-"Country Business","JO",1,0
-"Regional Business","JO",1,0
-"Controlling","JO",1,0
-"Legal","KW",1,0
-"Regulatory","KW",1,0
-"Supply Chain","KW",1,0
-"Country Business","KW",1,0
-"Regional Business","KW",1,0
-"Controlling","KW",1,0
-"Legal","LB",1,0
-"Regulatory","LB",1,0
-"Supply Chain","LB",1,0
-"Country Business","LB",1,0
-"Regional Business","LB",1,0
-"Controlling","LB",1,0
-"Legal","LY",1,0
-"Regulatory","LY",1,0
-"Supply Chain","LY",1,0
-"Country Business","LY",1,0
-"Regional Business","LY",1,0
-"Controlling","LY",1,0
-"Country Business","MX",1,0
-"Supply Chain","MX",1,0
-"Tender Management","MX",1,3
-"Legal","OM",1,0
-"Regulatory","OM",1,0
-"Supply Chain","OM",1,0
-"Country Business","OM",1,0
-"Regional Business","OM",1,0
-"Controlling","OM",1,0
-"Legal","QA",1,0
-"Regulatory","QA",1,0
-"Supply Chain","QA",1,0
-"Country Business","QA",1,0
-"Regional Business","QA",1,0
-"Controlling","QA",1,0
-"Supply Chain","SA",1,0
-"Legal","SA",1,0
-"Regulatory","SA",1,0
-"Country Business","SA",1,0
-"Regional Business","SA",1,0
-"Controlling","SA",1,0
-"Regulatory","SD",1,0
-"Supply Chain","SD",1,0
-"Country Business","SD",1,0
-"Regional Business","SD",1,0
-"Controlling","SD",1,0
-"Legal","SY",1,0
-"Regulatory","SY",1,0
-"Supply Chain","SY",1,0
-"Country Business","SY",1,0
-"Regional Business","SY",1,0
-"Controlling","SY",1,0
-"HBU","TH",1,0
-"CDH","TH",1,0
-"NSM/SM/FM","TH",1,0
-"Supply Chain","TH",1,0
-"Legal","YE",1,0
-"Regulatory","YE",1,0
-"Supply Chain","YE",1,0
-"Country Business","YE",1,0
-"Regional Business","YE",1,0
-"Controlling","YE",1,0
-"MACS","AR",1,0
-"TA","AR",1,0
-"FBP","AR",1,0
-"LPC","AR",1,0
-"COM/PGA","AR",1,0
-"Supply Chain","AR",1,0
-"International Trade","AR",1,0
-"Transfer Pricing","AR",1,0
-"CDH","AR",2,0
-"SBR","AR",3,0
-"MACS Head","CL",3,0
-"Supply Chain","CL",3,0
-"Business Service","CL",4,0
-"Law and Patents","CL",4,0
-"CDH","CL",4,0
-"SBR RA ConoSur","CL",3,0
-"CDH-Chile (signature)","CL",4,0
-"Supply Chain","GC",1,0
-"Legal","GC",1,0
-"Regulatory","GC",1,0
-"Country Business","GC",1,0
-"Regional Business","GC",1,0
-"Supply Chain","ES",1,0
-"Legal","ES",1,0
-"Regulatory","ES",1,0
-"Country Business","ES",1,0
-"Regional Business","ES",1,0
-"Controlling","ES",1,0
-"SM/RBM","IT",1,0
-"BU Head/PM","IT",1,0
-"Strategic Sales","IT",1,0
-"Business Integration","IT",1,0
-"Finance","IT",1,0
-"Supply Chain","IT",1,0
-"Legal","IT",1,0
-"Regulatory","IT",1,0
-"Country Business","IT",1,0
-"Regional Business","IT",1,0
-"Controlling","IT",1,0
+APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,ENABLED
+"Supply Chain","AE",1,0,,,,,
+"Legal","AE",1,0,,,,,
+"Regulatory","AE",1,0,,,,,
+"Country Business","AE",1,0,,,,,
+"Regional Business","AE",1,0,,,,,
+"Controlling","AE",1,0,,,,,
+"Country Business","BH",1,0,,,,,
+"Supply Chain","BH",1,0,,,,,
+"Legal","BH",1,0,,,,,
+"Regulatory","BH",1,0,,,,,
+"Regional Business","BH",1,0,,,,,
+"Controlling","BH",1,0,,,,,
+"Supply Chain","EG",1,0,,,,,
+"Legal","EG",1,0,,,,,
+"Regulatory","EG",1,0,,,,,
+"Country Business","EG",1,0,,,,,
+"Regional Business","EG",1,0,,,,,
+"Controlling","EG",1,0,,,,,
+"Controlling","GC",1,0,,,,,
+"Legal","IQ",1,0,,,,,
+"Regulatory","IQ",1,0,,,,,
+"Supply Chain","IQ",1,0,,,,,
+"Country Business","IQ",1,0,,,,,
+"Regional Business","IQ",1,0,,,,,
+"Controlling","IQ",1,0,,,,,
+"Legal","JO",1,0,,,,,
+"Regulatory","JO",1,0,,,,,
+"Supply Chain","JO",1,0,,,,,
+"Country Business","JO",1,0,,,,,
+"Regional Business","JO",1,0,,,,,
+"Controlling","JO",1,0,,,,,
+"Legal","KW",1,0,,,,,
+"Regulatory","KW",1,0,,,,,
+"Supply Chain","KW",1,0,,,,,
+"Country Business","KW",1,0,,,,,
+"Regional Business","KW",1,0,,,,,
+"Controlling","KW",1,0,,,,,
+"Legal","LB",1,0,,,,,
+"Regulatory","LB",1,0,,,,,
+"Supply Chain","LB",1,0,,,,,
+"Country Business","LB",1,0,,,,,
+"Regional Business","LB",1,0,,,,,
+"Controlling","LB",1,0,,,,,
+"Legal","LY",1,0,,,,,
+"Regulatory","LY",1,0,,,,,
+"Supply Chain","LY",1,0,,,,,
+"Country Business","LY",1,0,,,,,
+"Regional Business","LY",1,0,,,,,
+"Controlling","LY",1,0,,,,,
+"Country Business","MX",1,0,,,,,
+"Supply Chain","MX",1,0,,,,,
+"Legal","OM",1,0,,,,,
+"Regulatory","OM",1,0,,,,,
+"Supply Chain","OM",1,0,,,,,
+"Country Business","OM",1,0,,,,,
+"Regional Business","OM",1,0,,,,,
+"Controlling","OM",1,0,,,,,
+"Legal","QA",1,0,,,,,
+"Regulatory","QA",1,0,,,,,
+"Supply Chain","QA",1,0,,,,,
+"Country Business","QA",1,0,,,,,
+"Regional Business","QA",1,0,,,,,
+"Controlling","QA",1,0,,,,,
+"Supply Chain","SA",1,0,,,,,
+"Legal","SA",1,0,,,,,
+"Regulatory","SA",1,0,,,,,
+"Country Business","SA",1,0,,,,,
+"Regional Business","SA",1,0,,,,,
+"Controlling","SA",1,0,,,,,
+"Regulatory","SD",1,0,,,,,
+"Supply Chain","SD",1,0,,,,,
+"Country Business","SD",1,0,,,,,
+"Regional Business","SD",1,0,,,,,
+"Controlling","SD",1,0,,,,,
+"Legal","SY",1,0,,,,,
+"Regulatory","SY",1,0,,,,,
+"Supply Chain","SY",1,0,,,,,
+"Country Business","SY",1,0,,,,,
+"Regional Business","SY",1,0,,,,,
+"Controlling","SY",1,0,,,,,
+"HBU","TH",1,0,,,,,
+"CDH","TH",1,0,,,,,
+"NSM/SM/FM","TH",1,0,,,,,
+"Supply Chain","TH",1,0,,,,,
+"Legal","YE",1,0,,,,,
+"Regulatory","YE",1,0,,,,,
+"Supply Chain","YE",1,0,,,,,
+"Country Business","YE",1,0,,,,,
+"Regional Business","YE",1,0,,,,,
+"Controlling","YE",1,0,,,,,
+"MACS","AR",1,0,,,,,
+"TA","AR",1,0,,,,,
+"FBP","AR",1,0,,,,,
+"LPC","AR",1,0,,,,,
+"COM/PGA","AR",1,0,,,,,
+"Supply Chain","AR",1,0,,,,,
+"International Trade","AR",1,0,,,,,
+"Transfer Pricing","AR",1,0,,,,,
+"CDH","AR",2,0,,,,,
+"SBR","AR",3,0,,,,,
+"MACS Head","CL",3,0,,,,,
+"Supply Chain","CL",3,0,,,,,
+"Business Service","CL",4,0,,,,,
+"Law and Patents","CL",4,0,,,,,
+"CDH","CL",4,0,,,,,
+"SBR RA ConoSur","CL",3,0,,,,,
+"CDH-Chile (signature)","CL",4,0,,,,,
+"Supply Chain","GC",1,0,,,,,
+"Legal","GC",1,0,,,,,
+"Regulatory","GC",1,0,,,,,
+"Country Business","GC",1,0,,,,,
+"Regional Business","GC",1,0,,,,,
+"Marketing","CL",4,0,,,,,
+"SM/RBM","IT",1,0,"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP",1
+"BU Head/PM","IT",1,0,"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP",1
+"Strategic Sales","IT",1,0,"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP",1
+"Business Integration","IT",1,0,"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP",1
+"Finance","IT",1,0,"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP",1
+"Supply Chain","IT",1,0,"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP",1
+"Tender Management","MX",1,3,,,,,
