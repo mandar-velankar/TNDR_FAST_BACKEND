@@ -1535,9 +1535,9 @@ module.exports = (srv) => {
 			case "Country Business":
 			case "Regional Business":
 			case "Manager Business Operations":
+			case "Legal":
 				return "Profitability";
 			case "Regulatory":
-			case "Legal":
 			case "Supply Chain":
 				return "Quotation";
 			default:
