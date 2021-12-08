@@ -339,6 +339,8 @@ service CatalogService @(path : 'tender')@(requires : [
             INSTITUTENAME         : String(500);
             INSTITUTE_TYPE        : String(50);
             INSTITUTE_STATE       : String;
+            TAXCODE               : String(50);
+            VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
             DIVISION              : String(100);
             OFFERDATE             : Date;
@@ -472,6 +474,8 @@ service CatalogService @(path : 'tender')@(requires : [
             TENDERID              : String(50);
         key OFFERID               : String(50);
             INSTITUTENAME         : String(500);
+            TAXCODE               : String(50);
+            VATCODE               : String(50);
             CURRENCY              : String(3);
             AMOUNT_IN_NUMBERS     : String(1000);
             AMOUNT_IN_WORDS       : String(1000);

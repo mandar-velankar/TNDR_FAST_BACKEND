@@ -1497,6 +1497,8 @@ module.exports = (srv) => {
 			INSTITUTENAME: offer.INSTITUTENAME,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
 			INSTITUTE_STATE: offer.INSTITUTE_STATE,
+			VATCODE: offer.VATCODE,
+			TAXCODE: offer.TAXCODE,
 			CUSTOMER_CODE: offer.CUSTOMER_CODE,
 			DIVISION: division,//not correct, should be consolidated from product information
 			OFFERDATE: offer.OFFERDATE,
@@ -1876,6 +1878,8 @@ module.exports = (srv) => {
 			TENDERID: offerValidation.TENDER_REFERENCE, //offerValidation.TENDERID,
 			OFFERID: offerValidation.OFFERID,
 			INSTITUTENAME: offerValidation.INSTITUTENAME,
+			TAXCODE: offerValidation.TAXCODE,
+			VATCODE: offerValidation.VATCODE,
 			CURRENCY: offerValidation.CURRENCY,
 			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2),
 			AMOUNT_IN_WORDS: offerValidation.AMOUNT_IN_WORDS,
