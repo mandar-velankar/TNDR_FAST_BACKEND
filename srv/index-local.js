@@ -38,7 +38,7 @@ const jobScheduler = require("./jobs/scheduler");
   scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
   scheduler.mercadoPublico.fetchPurchaseOrders('00 00 * * *').start();
 
-  // jobScheduler.ItalyJobs.processMaterials('* * * * *').start();
+  jobScheduler.ItalyJobs.processMaterials('57 10 * * *').start();
 
   
   
