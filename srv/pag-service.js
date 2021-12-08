@@ -332,15 +332,17 @@ module.exports = async (srv) => {
 
 
     async function processNewMaterials(){
-
-        // 1. Create Hierarchy entries for new products
-        const hierarchyEntries = await createHierarchyEntries();
-        if(hierarchyEntries && hierarchyEntries.message) console.log(hierarchyEntries.message);
-
-        // 2. Create new products master data
-        await createProductsMasterData();
-        console.log('Products master data successfully created');
-
+        try {
+            // 1. Create Hierarchy entries for new products
+            await createHierarchyEntries();
+            // 2. Create new products master data
+            await createProductsMasterData();
+            // 3. Delete ItalyMaterials table
+            await clearItalyMaterialsTable();
+        } catch (error) {
+            console.log('Processing of new materials has failed.');
+            console.log(error);
+        }
     };
 
     /**
@@ -349,48 +351,59 @@ module.exports = async (srv) => {
      */
     async function createHierarchyEntries(){
 
-        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        const { PT_TMPRDHIER } = db.entities("com.bayer.SXTENDER.MasterData");
+        try {
 
-        let existingHlevel6Code = await cds.run(SELECT.from(PT_TMPRDHIER, ['HLEVEL6_CODE']));
-        existingHlevel6Code = existingHlevel6Code.map(item => item.HLEVEL6_CODE.toString());
+            const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const { PT_TMPRDHIER } = db.entities("com.bayer.SXTENDER.MasterData");
 
-        const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
-        HLEVEL6_NAME not like 'zz%' and
-        HLEVEL1_NAME <> 'Animal Health' and
-        HLEVEL1_NAME <> 'Consumer Health'`;
+            let existingHlevel6Code = await cds.run(SELECT.from(PT_TMPRDHIER, ['HLEVEL6_CODE']));
+            existingHlevel6Code = existingHlevel6Code.map(item => item.HLEVEL6_CODE.toString());
 
-        // 'not in' where expression was not wokring properly
-        // because of this we are using this hack
-        // TODO: find a better way to handle this
-        let {xpr} = cds.parse.expr(`HLEVEL6_CODE not in '${existingHlevel6Code}'`);
-        xpr[3].val = existingHlevel6Code;
-        
-        const newMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where(xpr));
-        
-        if( newMaterials.length <= 0 ) return {message: `No hierarchy entries were created. No new materials were found in ${ItalyMaterials.name}`};
+            const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
+            HLEVEL6_NAME not like 'zz%' and
+            HLEVEL1_NAME <> 'Animal Health' and
+            HLEVEL1_NAME <> 'Consumer Health'`;
 
-        const hierarchyEntries = newMaterials.map(mat => {
+            // 'not in' where expression was not wokring properly
+            // because of this we are using this hack
+            // TODO: find a better way to handle this
+            let {xpr} = cds.parse.expr(`HLEVEL6_CODE not in '${existingHlevel6Code}'`);
+            xpr[3].val = existingHlevel6Code;
+            
+            const newMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where(xpr));
+            
+            if( newMaterials.length <= 0 ) return {message: `No hierarchy entries were created. No new materials were found in ${ItalyMaterials.name}`};
 
-            let hlevel1_code = mat.HLEVEL1_NAME && mat.HLEVEL1_NAME.toLowerCase() === "Pharma".toLowerCase() ? 8 : mat.HLEVEL1_NAME.toLowerCase() === "Radiology".toLowerCase() ? 65 : 0; 
+            const hierarchyEntries = newMaterials.map(mat => {
+                let hlevel1_code = mat.HLEVEL1_NAME && mat.HLEVEL1_NAME.toLowerCase() === "Pharma".toLowerCase() ? 8 : mat.HLEVEL1_NAME.toLowerCase() === "Radiology".toLowerCase() ? 65 : 0; 
+                return {
+                    HLEVEL1_NAME: mat.HLEVEL1_NAME,
+                    HLEVEL1_CODE: hlevel1_code, 
+                    HLEVEL2_NAME: "NEW", // TODO: this is for testing, remove in prod
+                    HLEVEL2_CODE: "",
+                    HLEVEL3_NAME: "",
+                    HLEVEL3_CODE: "",
+                    HLEVEL4_NAME: mat.HLEVEL4_NAME,
+                    HLEVEL4_CODE: mat.HLEVEL4_CODE,
+                    HLEVEL5_NAME: "",
+                    HLEVEL5_CODE: "",
+                    HLEVEL6_NAME: mat.HLEVEL6_NAME,
+                    HLEVEL6_CODE: mat.HLEVEL6_CODE,
+                }
+            });
 
-            return {
-                HLEVEL1_NAME: mat.HLEVEL1_NAME,
-                HLEVEL1_CODE: hlevel1_code, 
-                HLEVEL2_NAME: "NEW", // TODO: this is for testing, remove in prod
-                HLEVEL2_CODE: "",
-                HLEVEL3_NAME: "",
-                HLEVEL3_CODE: "",
-                HLEVEL4_NAME: mat.HLEVEL4_NAME,
-                HLEVEL4_CODE: mat.HLEVEL4_CODE,
-                HLEVEL5_NAME: "",
-                HLEVEL5_CODE: "",
-                HLEVEL6_NAME: mat.HLEVEL6_NAME,
-                HLEVEL6_CODE: mat.HLEVEL6_CODE,
+            if(hierarchyEntries && hierarchyEntries.length > 0){
+                const result = await cds.run(INSERT(hierarchyEntries).into(PT_TMPRDHIER));
+                console.log(`${hierarchyEntries.length} hierarchy entries successfully created in ${PT_TMPRDHIER.name}.`);
+                return result;
             }
-        });
 
-        return cds.run(INSERT(hierarchyEntries).into(PT_TMPRDHIER));
+            return;
+
+        }catch (error) {
+            console.log('Creating hierarchy entries has failed.');
+            console.log(error);
+        }
 
     };
 
@@ -400,19 +413,21 @@ module.exports = async (srv) => {
      * @return {Promise} Promise
      */
     async function createProductsMasterData(){
-
-        let lastProductPackID = await getLastProductPackID();
-
-        // 2.a Create new product packs
-        const productPacks = await createProductPacks(lastProductPackID);
-        if(productPacks && productPacks.message) console.log(productPacks.message);
-
-        // 2.b Create new Country Product Packs
-        const countryProductPacks = await createCountryProductPacks(lastProductPackID);
-        // 2.c Create new SKUs
-        const skys = await createSKUs();
-        // 2.d Create new COGS
-        const cogs = await createCOGS();
+        try {
+            const lastProductPackID = await getLastProductPackID();
+            // 2.a Create new product packs
+            await createProductPacks(lastProductPackID);
+            // 2.b Create new Country Product Packs
+            await createCountryProductPacks(lastProductPackID);
+            // 2.c Create new SKUs
+            await createSKUs();
+            // 2.d Create new COGS
+            await createCOGS();
+            console.log('Products master data successfully created.');
+        } catch (error) {
+            console.log('Creating products master data has failed.');
+            console.log(error);
+        }
     };
 
      /**
@@ -421,49 +436,57 @@ module.exports = async (srv) => {
      */
       async function createProductPacks(lastProductPackID){
 
-        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        const { PT_TMPRDPCK, PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+        try {
+            const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const { PT_TMPRDPCK, PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
 
-        let query = cds.parse.cql (`SELECT p.ProductPackName from ${PT_TMPRDPCK.name} AS p 
-        inner join ${PT_TMCTPRDPCK.name} AS cp on p.PRODUCTPACKID = cp.PRODUCTPACKID WHERE cp.CountryCode='IT'`);
-        let ProductPackNames =  await cds.run(query);
-        ProductPackNames = ProductPackNames.map(item => item.ProductPackName);
+            let query = cds.parse.cql (`SELECT p.ProductPackName from ${PT_TMPRDPCK.name} AS p 
+            inner join ${PT_TMCTPRDPCK.name} AS cp on p.PRODUCTPACKID = cp.PRODUCTPACKID WHERE cp.CountryCode='IT'`);
+            let ProductPackNames =  await cds.run(query);
+            ProductPackNames = ProductPackNames.map(item => item.ProductPackName);
 
-        const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
-        HLEVEL6_NAME not like 'zz%' and
-        HLEVEL1_NAME <> 'Animal Health' and
-        HLEVEL1_NAME <> 'Consumer Health'`;
+            const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
+            HLEVEL6_NAME not like 'zz%' and
+            HLEVEL1_NAME <> 'Animal Health' and
+            HLEVEL1_NAME <> 'Consumer Health'`;
 
-        // 'not in' where expression was not wokring properly
-        // because of this we are using this hack
-        // TODO: find a better way to handle this
-        let {xpr} = cds.parse.expr(`MAKTX not in '${ProductPackNames}'`);
-        xpr[3].val = ProductPackNames;
-        
-        const materials = await cds.run(SELECT.from(ItalyMaterials, ['MAKTX','HLEVEL6_CODE']).where(whereExpr).where(xpr).groupBy(`MAKTX, HLEVEL6_CODE`));
-        
-        if( materials.length <= 0 ) return {message: `Could not create product pack. /nNo new materials were found in ${ItalyMaterials.name}.`};
-
-        const productPackEntries = materials.map(mat => {
-
-            return {
-                PRODUCTPACKID: ++lastProductPackID,
-                PRODUCTPACKNAME: mat.MAKTX,
-                PRESENTATION: "NEW", // TODO: remove this in production
-                UOM: "",
-                ACTIVERECORD: "Yes",
-                HLEVEL6_CODE: mat.HLEVEL6_CODE,
-                CONCENTRATION: 1,
-                PACKFACTOR: 1,
-                PCINAME: "",
-                MOLECULENAME: "",
-                ACTIVE_SUBSTANCE: "",
-                PRODUCTTYPE: "Drug"
-            }
-        });
-
-        return cds.run(INSERT(productPackEntries).into(PT_TMPRDPCK));
+            // 'not in' where expression was not wokring properly
+            // because of this we are using this hack
+            // TODO: find a better way to handle this
+            let {xpr} = cds.parse.expr(`MAKTX not in '${ProductPackNames}'`);
+            xpr[3].val = ProductPackNames;
             
+            const materials = await cds.run(SELECT.from(ItalyMaterials, ['MAKTX','HLEVEL6_CODE']).where(whereExpr).where(xpr).groupBy(`MAKTX, HLEVEL6_CODE`));
+
+            const productPackEntries = materials.map(mat => {
+                return {
+                    PRODUCTPACKID: ++lastProductPackID,
+                    PRODUCTPACKNAME: mat.MAKTX,
+                    PRESENTATION: "NEW", // TODO: remove this in production
+                    UOM: "",
+                    ACTIVERECORD: "Yes",
+                    HLEVEL6_CODE: mat.HLEVEL6_CODE,
+                    CONCENTRATION: 1,
+                    PACKFACTOR: 1,
+                    PCINAME: "",
+                    MOLECULENAME: "",
+                    ACTIVE_SUBSTANCE: "",
+                    PRODUCTTYPE: "Drug"
+                }
+            });
+
+            if(productPackEntries && productPackEntries.length > 0){
+                const result = await cds.run(INSERT(productPackEntries).into(PT_TMPRDPCK));
+                console.log(`${productPackEntries.length} product packs successfully created in ${PT_TMPRDPCK.name}.`);
+                return result;
+            }
+
+            return;
+            
+        } catch (error) {
+            console.log('Creating product packs has failed.');
+            console.log(error);
+        }
     };
 
     /**
@@ -472,57 +495,64 @@ module.exports = async (srv) => {
      */
      async function createCountryProductPacks(lastProductPackID){
 
-        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        const { PT_TMCTPRDPCK, PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+        try {
+            const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const { PT_TMCTPRDPCK, PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
 
-        let ProductPackIDs =  await cds.run(cds.parse.cql (`SELECT ProductPackID from ${PT_TMCTPRDPCK.name} WHERE CountryCode='IT'`));
-        ProductPackIDs = ProductPackIDs.map(item => item.ProductPackID.toString());
+            let ProductPackIDs =  await cds.run(cds.parse.cql (`SELECT ProductPackID from ${PT_TMCTPRDPCK.name} WHERE CountryCode='IT'`));
+            ProductPackIDs = ProductPackIDs.map(item => item.ProductPackID.toString());
 
 
-        let query = cds.parse.cql (`SELECT max(material.COUNTRYOFORIG), product.ProductPackID FROM ${ItalyMaterials.name} AS material 
-        inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName`);
+            let query = cds.parse.cql (`SELECT max(material.COUNTRYOFORIG), product.ProductPackID FROM ${ItalyMaterials.name} AS material 
+            inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName`);
 
-        // 'not in' where expression was not wokring properly
-        // because of this we are using this hack
-        // TODO: find a better way to handle this
-        let {xpr} = cds.parse.expr(`product.ProductPackID not in '${ProductPackIDs}' AND product.ProductPackID > ${lastProductPackID}`);
-        xpr[3].val = ProductPackIDs;
-        query.SELECT.where = xpr;
-        query.SELECT.groupBy = [
-            {
-                "ref": ['product','ProductPackID']
+            // 'not in' where expression was not wokring properly
+            // because of this we are using this hack
+            // TODO: find a better way to handle this
+            let {xpr} = cds.parse.expr(`product.ProductPackID not in '${ProductPackIDs}' AND product.ProductPackID > ${lastProductPackID}`);
+            xpr[3].val = ProductPackIDs;
+            query.SELECT.where = xpr;
+            query.SELECT.groupBy = [
+                {
+                    "ref": ['product','ProductPackID']
+                }
+            ];
+
+            const materials = await cds.run(query);
+            let nextCountryProductPackID = await getLastCountryProductPackID();
+
+            const countryProductPackEntries = materials.map(mat => {
+                return {
+                    COUNTRYPRODUCTPACKID: ++nextCountryProductPackID,
+                    COUNTRYCODE: "IT",
+                    COUNTRYOFORIGIN: mat.COUNTRYOFORIGIN,
+                    SHELFLIFE: 1,
+                    REGISTERED: 2,
+                    ACTIVERECORD: "Yes",
+                    PRODUCTPACKID: mat.ProductPackID,
+                    MANUFACTURER:"NEW",
+                    Presentation_2: "",
+                    VTATax: 10,
+                    COMMENT: "",
+                    GOV_CODE: "",
+                    CODE1: "",
+                    CODE2: "",
+                    QTY_THRESHOLD: 0,
+                }
+            });
+
+            if(countryProductPackEntries && countryProductPackEntries.length > 0){
+                const result = await cds.run(INSERT(countryProductPackEntries).into(PT_TMCTPRDPCK));
+                console.log(`${countryProductPackEntries.length} country product packs successfully created in ${PT_TMCTPRDPCK.name}.`);
+                return result;
             }
-        ];
 
-        const materials = await cds.run(query);
-        
-        if( materials.length <= 0 ) return {message: `Could not create country product pack. /nNo new materials were found in ${ItalyMaterials.name}.`};
+            return;
 
-        let nextCountryProductPackID = await getLastCountryProductPackID();
-
-        const countryProductPackEntries = materials.map(mat => {
-
-            return {
-                COUNTRYPRODUCTPACKID: ++nextCountryProductPackID,
-                COUNTRYCODE: "IT",
-                COUNTRYOFORIGIN: mat.COUNTRYOFORIGIN,
-                SHELFLIFE: 1,
-                REGISTERED: 2,
-                ACTIVERECORD: "Yes",
-                PRODUCTPACKID: mat.ProductPackID,
-                MANUFACTURER:"NEW",
-                Presentation_2: "",
-                VTATax: 10,
-                COMMENT: "",
-                GOV_CODE: "",
-                CODE1: "",
-                CODE2: "",
-                QTY_THRESHOLD: 0,
-            }
-        });
-
-        return cds.run(INSERT(countryProductPackEntries).into(PT_TMCTPRDPCK));
-            
+        } catch (error) {
+            console.log('Creating country product packs has failed.');
+            console.log(error);
+        }  
     };
 
     /**
@@ -531,51 +561,57 @@ module.exports = async (srv) => {
      */
     async function createSKUs(){
 
-        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        const { PT_TMSKUPRDPCK, PT_TMPRDPCK, PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+        try {
+            const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const { PT_TMSKUPRDPCK, PT_TMPRDPCK, PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
 
-        let skuCodes =  await cds.run(cds.parse.cql (`SELECT DISTINCT SKUCode from ${PT_TMSKUPRDPCK.name}`));
-        skuCodes = skuCodes.map(item => addLeadingZeros(item.SKUCode, 18));
+            let skuCodes =  await cds.run(cds.parse.cql (`SELECT DISTINCT SKUCode from ${PT_TMSKUPRDPCK.name}`));
+            skuCodes = skuCodes.map(item => addLeadingZeros(item.SKUCode, 18));
 
+            let query = cds.parse.cql (`SELECT product.ProductPackID, MATNR FROM ${ItalyMaterials.name} AS material 
+            inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName
+            inner join ${PT_TMCTPRDPCK.name} AS countryProduct ON product.ProductPackID = countryProduct.ProductPackID`);
 
-        let query = cds.parse.cql (`SELECT product.ProductPackID, MATNR FROM ${ItalyMaterials.name} AS material 
-        inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName
-        inner join ${PT_TMCTPRDPCK.name} AS countryProduct ON product.ProductPackID = countryProduct.ProductPackID`);
+            // 'not in' where expression was not wokring properly
+            // because of this we are using this hack
+            // TODO: find a better way to handle this
+            let {xpr} = cds.parse.expr(`material.MATNR not in '${skuCodes}' AND countryProduct.CountryCode = 'IT'`);
+            xpr[3].val = skuCodes;
+            query.SELECT.where = xpr;
+            query.SELECT.groupBy = [
+                {
+                    "ref": ['product','ProductPackID']
+                },
+                {
+                    "ref": ['material','MATNR']
+                }
+            ];
 
-        // 'not in' where expression was not wokring properly
-        // because of this we are using this hack
-        // TODO: find a better way to handle this
-        let {xpr} = cds.parse.expr(`material.MATNR not in '${skuCodes}' AND countryProduct.CountryCode = 'IT'`);
-        xpr[3].val = skuCodes;
-        query.SELECT.where = xpr;
-        query.SELECT.groupBy = [
-            {
-                "ref": ['product','ProductPackID']
-            },
-            {
-                "ref": ['material','MATNR']
+            const materials = await cds.run(query);
+            let nextSkuProductPackID = await getLastSkuProductPackID();
+
+            const skuProductPackEntries = materials.map(mat => {
+                return {
+                    CountrySKUID: ++nextSkuProductPackID,
+                    CountryCode: "IT",
+                    ActiveRecord: "Yes",
+                    ProductPackID: mat.ProductPackID,
+                    SKUCode: Number(mat.MATNR),
+                }
+            });
+
+            if(skuProductPackEntries && skuProductPackEntries.length > 0){
+                const result = await cds.run(INSERT(skuProductPackEntries).into(PT_TMSKUPRDPCK));
+                console.log(`${skuProductPackEntries.length} SKUs successfully created in ${PT_TMSKUPRDPCK.name}.`);
+                return result;
             }
-        ];
 
-        const materials = await cds.run(query);
-        
-        if( materials.length <= 0 ) return {message: `Could not create SKUs`};
+            return;
 
-        let nextSkuProductPackID = await getLastSkuProductPackID();
-
-        const skuProductPackEntries = materials.map(mat => {
-
-            return {
-                CountrySKUID: ++nextSkuProductPackID,
-                CountryCode: "IT",
-                ActiveRecord: "Yes",
-                ProductPackID: mat.ProductPackID,
-                SKUCode: Number(mat.MATNR),
-            }
-        });
-
-        return cds.run(INSERT(skuProductPackEntries).into(PT_TMSKUPRDPCK));
-            
+        } catch (error) {
+            console.log('Creating SKUs has failed.');
+            console.log(error);
+        }   
     };
 
     /**
@@ -584,44 +620,68 @@ module.exports = async (srv) => {
      */
      async function createCOGS(){
 
-        const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        const { PT_TMPRDPCK, PT_TMCTPRDPCK, PT_TMCOGS } = db.entities("com.bayer.SXTENDER.MasterData");
+        try {
+            const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const { PT_TMPRDPCK, PT_TMCTPRDPCK, PT_TMCOGS } = db.entities("com.bayer.SXTENDER.MasterData");
 
-        let query = cds.parse.cql (`SELECT product.ProductPackID, MAX(COGS) FROM ${ItalyMaterials.name} AS material 
-        inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName
-        inner join ${PT_TMCTPRDPCK.name} AS countryProduct ON product.ProductPackID = countryProduct.ProductPackID
-        where countryProduct.CountryCode='IT'`);
+            let query = cds.parse.cql (`SELECT product.ProductPackID, MAX(COGS) FROM ${ItalyMaterials.name} AS material 
+            inner join ${PT_TMPRDPCK.name} AS product ON material.MAKTX = product.ProductPackName
+            inner join ${PT_TMCTPRDPCK.name} AS countryProduct ON product.ProductPackID = countryProduct.ProductPackID
+            where countryProduct.CountryCode='IT'`);
 
-        // TODO: find a better way to handle this
-        query.SELECT.groupBy = [
-            {
-                "ref": ['product','ProductPackID']
+            // TODO: find a better way to handle this
+            query.SELECT.groupBy = [
+                {
+                    "ref": ['product','ProductPackID']
+                }
+            ];
+
+            const materials = await cds.run(query);
+            let nextCogsID = await getLastCogsID();
+
+            const cogsEntries = materials.map(mat => {
+                return {
+                    COGSID: ++nextCogsID,
+                    CountryCode: "IT",
+                    ProductPackID: mat.ProductPackID,
+                    EffectiveDate: new Date().toISOString().slice(0, 10),
+                    EndDate: "9999-12-31",
+                    Currency: "EUR",
+                    COGSType: "Budget",
+                    COGS: mat.COGS,
+                    ActiveRecord: "Yes",
+                }
+            });
+
+            if(cogsEntries && cogsEntries.length > 0){
+                const result = await cds.run(INSERT(cogsEntries).into(PT_TMCOGS));
+                console.log(`${cogsEntries.length} COGS successfully created in ${PT_TMCOGS.name}.`);
+                return result;
             }
-        ];
 
-        const materials = await cds.run(query);
-        
-        if( materials.length <= 0 ) return {message: `Could not create COGS`};
-
-        let nextCogsID = await getLastCogsID();
-
-        const cogsEntries = materials.map(mat => {
-
-            return {
-                COGSID: ++nextCogsID,
-                CountryCode: "IT",
-                ProductPackID: mat.ProductPackID,
-                EffectiveDate: new Date().toISOString().slice(0, 10),
-                EndDate: "9999-12-31",
-                Currency: "EUR",
-                COGSType: "Budget",
-                COGS: mat.COGS,
-                ActiveRecord: "Yes",
-            }
-        });
-
-        return cds.run(INSERT(cogsEntries).into(PT_TMCOGS));
+            return;
             
+        } catch (error) {
+            console.log('Creating COGS has failed.');
+            console.log(error);
+        }    
+    };
+
+    /**
+     * Clears the ItalyMaterials table
+     * @return {Promise} Promise
+     */
+     async function clearItalyMaterialsTable(){
+        try {
+            const { ItalyMaterials } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const result = await cds.run(DELETE.from(ItalyMaterials));
+            console.log(`${ItalyMaterials.name} table cleared successfully`);
+            return result;
+            
+        } catch (error) {
+            console.log('Clearing the Italy Materials table failed');
+            console.log(error);
+        }    
     };
 
     /**
@@ -629,27 +689,43 @@ module.exports = async (srv) => {
      * @returns {Promise} lastProductPackID 
      */
     async function getLastProductPackID(){
-        const { PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
-        const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
-        return lastProductPackID.max;
+        try {
+            const { PT_TMPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+            const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
+            return lastProductPackID.max;
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     async function getLastCountryProductPackID(){
-        const { PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
-        const lastCountryProductPackID = await cds.run(SELECT.one.from(PT_TMCTPRDPCK, ['Max(PRODUCTPACKID) as max']));
-        return lastCountryProductPackID.max;
+        try {
+            const { PT_TMCTPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+            const lastCountryProductPackID = await cds.run(SELECT.one.from(PT_TMCTPRDPCK, ['Max(PRODUCTPACKID) as max']));
+            return lastCountryProductPackID.max;
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     async function getLastSkuProductPackID(){
-        const { PT_TMSKUPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
-        const lastSkuProductPackID = await cds.run(SELECT.one.from(PT_TMSKUPRDPCK, ['Max(COUNTRYSKUID) as max']));
-        return lastSkuProductPackID.max;
+        try {
+            const { PT_TMSKUPRDPCK } = db.entities("com.bayer.SXTENDER.MasterData");
+            const lastSkuProductPackID = await cds.run(SELECT.one.from(PT_TMSKUPRDPCK, ['Max(COUNTRYSKUID) as max']));
+            return lastSkuProductPackID.max;
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     async function getLastCogsID(){
-        const { PT_TMCOGS } = db.entities("com.bayer.SXTENDER.MasterData");
-        const lastCogsID = await cds.run(SELECT.one.from(PT_TMCOGS, ['Max(COGSID) as max']));
-        return lastCogsID.max;
+        try {
+            const { PT_TMCOGS } = db.entities("com.bayer.SXTENDER.MasterData");
+            const lastCogsID = await cds.run(SELECT.one.from(PT_TMCOGS, ['Max(COGSID) as max']));
+            return lastCogsID.max;
+        } catch (error) {
+            console.log(error);
+        }
     };
 
 
