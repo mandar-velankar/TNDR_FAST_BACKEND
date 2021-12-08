@@ -14,6 +14,7 @@ const streamToBlob = require('stream-to-blob');
 const path = require("path");
 const XLSXHelper = require("./utils/XLSXHelper");
 const wordTemplate = require("easy-template-x");
+const { Service } = require('@sap/cds');
 
 module.exports = (srv) => {
 
@@ -386,7 +387,7 @@ module.exports = (srv) => {
 		//Notification for semi-gov institute
 		let legal = 1;
 		if (product.LEGAL_APPROVED !== 1) {
-			if (offer.INSTITUTE_TYPE === "Private" || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
+			if (offer.INSTITUTE_TYPE === "Private" || offer.INSTITUTE_TYPE === "NGO-NPO" || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
 				legal = 3;
 			}
 			else if (offer.INSTITUTE_TYPE === "Semi-Governmental") {
@@ -2046,7 +2047,8 @@ module.exports = (srv) => {
 				results = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), results);
 			}
 			else if (channel === "Distributor") {
-				let distributorDistributors = await tx.run(SELECT.from(DistributorBrand).where(whereCountry));
+				let whereActiveRecord = ServiceHelper.buildFullWhere("ACTIVE_RECORD", "=", "Yes");
+				let distributorDistributors = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereActiveRecord));
 				results = distributorDistributors.map(function (d) {
 					let uniqueId = d.COUNTRY_CODE.concat("_")
 						.concat(instituteId).concat("_")
