@@ -49,6 +49,9 @@ entity PriceAgreements: cuid, managed {
     OfferProduct: Association to TransactionalData.PT_TMOFPR on OfferProduct.OfferID = OfferId
                                                              and OfferProduct.ProductCode = ProductPackId;
     Deliveries: Association to many PriceAgreementDataViews.Deliveries on Deliveries.PriceAgreementId = ID;
+    FOC: Association to many PriceAgreementDataViews.PriceAgreementFOC on FOC.CountryCode = CountryCode
+                                                                        and FOC.OfferID = OfferId
+                                                                        and FOC.ProductCode = ProductPackId;
     
 }
 entity CustomerPrices: cuid, managed {
@@ -102,6 +105,7 @@ inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode
     pa.ID as PriceAgreementId,
     key pa.TenderId,
     key inst.InstituteID as CandidateID,
+    inst.InstituteName as CandidateName,
     tr.Region.ID as RegionId
 }
 union
@@ -111,6 +115,7 @@ inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode and pa
     pa.ID as PriceAgreementId,
     pa.TenderId,
     inst.InstituteID as CandidateID,
+    inst.InstituteName as CandidateName,
     inst.Region.ID as RegionId
 }where inst.InstituteType <> 'Region(s)';
 
@@ -140,6 +145,7 @@ left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.Material
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
+        ca.CandidateName as InstituteName,
         pa.CountryCode,
         pa.ProductPackId, 
         key ma.MaterialNumber,

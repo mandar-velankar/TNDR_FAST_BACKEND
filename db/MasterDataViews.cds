@@ -101,7 +101,8 @@ inner join CountryBrands as cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.
 	'Distributor' as CHANNEL:String(11),
 	dstbr.INCOTerms as INCO_TERMS,
 	dstbr.PaymentTerms as PAYMENT_TERMS,
-	dstbr.CommissionRate as COMMISSION_RATE
+	dstbr.CommissionRate as COMMISSION_RATE,
+	dstbr.ActiveRecord as ACTIVE_RECORD
 };
 
 //Distributor brand policy with aggregated data for front-end
