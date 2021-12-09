@@ -1,6 +1,6 @@
 namespace com.bayer.SXTENDER.MasterData.SAP;
 
-using { User, Country, managed, cuid } from '@sap/cds/common';
+using { Currency, User, Country, managed, cuid } from '@sap/cds/common';
 using { 
 	E1KNA1M, E1KNA11, E1KNB1M, E1MARAM, E1MARA1, E1MAKTM, E1MARCM, E1MARDM, E1MARMM,E1MBEWM, E1MVKEM, E1MLANM, E1MTXHM, E1MTXLM, E1KNVVM, E1KNVKM, E1KNKKM
 } from './SAPTypes';
@@ -79,6 +79,57 @@ entity BrazilEmpenho : cuid, managed {
 	TOTAL_UNITARIO		: Double;				// Total item value in "Nota Fiscal"
 }
 
+entity BrazilDeliveriesHeader: cuid, managed {
+	VBELN_SALES_DOC		: String(10); 			// Sales Document number
+	VTWEG				: String(2);			// Canal de distribuição
+	SPART				: String(2);			// Setor de Atividade
+	KUNNR				: String(10);			// Customer SP
+	NAME1				: String(35);			// Name SP
+	ABSTK				: String(1);			// Rejection status
+	GBSTK				: String(1);			// Status
+	ERNAM				: String(12);			// SO Created by
+	ERDAT_SO			: Date;					// Sales order Created on
+	ZTERM				: String(4);			// Terms of Payment
+	KWERT				: Double;				// Sales order header net value
+	WAERK				: String(5);				// Document Currency
+	VBELN_DELIVERY_DOC	: String(10);			// Delivery document number
+	LFDAT				: Date;					// Delivery created on
+	VDATU				: Date;					// Requested delivery date
+	WADAT_IST			: Date;					// Goods Issue Date
+	VBELN_BILL			: String(10);			// Number of invoice
+	ERDAT_BILL			: Date;					// Billing date
+	KWERT_BILL			: Double;				// Net value billing document
+	ITEMS				: Association to many BrazilDeliveriesItems on ITEMS.HEADER = $self; 
+}
+entity BrazilDeliveriesItems: cuid, managed {
+	VBELN_SALES_DOC		: String(10); 			// Sales Document number reference to header
+	POSNR				: Integer;				// Sales Document Item
+	ABGRU				: String(2);			// Reason for rejection
+	MATNR				: String(18);			// Material
+	ARKTX				: String(40);			// Description
+	PRODH				: String(18);			// Product hierarchy
+	KWMENG				: Double;				// Order Quantity
+	BMENG				: Double;				// Confirmed Quantity
+	PSTYV				: String(4);			// Item category
+	VRKME				: String(3);			// Unit of measure
+	UMVKN				: Double;				// Pricing unit
+	KWERT				: Double;				// Sales order item net price
+	KWERT_VALUE			: Double;				// Sales order item net value
+	KCMENG				: Integer;				// Delivery quantity
+	EDATU				: Date;					// Conf.Delv.Date
+	EDATU_REQ			: Date;					// Requested deliv.date (position)
+	FKIMG				: Double;				// Billed Quantity
+	HEADER				: Association to BrazilDeliveriesHeader;
+}
+
+entity BrazilExemptions: cuid, managed {
+	SHIP_TO 			: String(3);			// Ship from location (tax region) - Bayer location
+	SHIP_FROM			: String(3);			// Ship to location (tax region)
+	GROUP				: String(2);			// Table TAX Group 
+	MATNR				: String(18);			// SAP product Code
+	RATE				: String(6);			// Aliquot used for exemption process
+	BASE				: String(6);			// Base uses for exemption process
+}
 
 entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number
