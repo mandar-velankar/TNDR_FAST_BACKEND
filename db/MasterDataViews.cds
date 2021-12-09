@@ -121,11 +121,11 @@ inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode{
 	//TODO: check what we need to keep
 	dstbr.INCOTerms as INCO_TERMS,
 	dstbr.PaymentTerms as PAYMENT_TERMS,
-	dstbr.CommissionRate as COMMISSION_RATE,
-	dstbr.ActiveRecord as ACTIVE_RECORD,
-	dst.INCOTerms as INCO_TERMS,
-	dst.PaymentTerms as PAYMENT_TERMS,
-	dst.CommissionRate as COMMISSION_RATE
+	dstbr.CommissionRate as COMMISSION_RATE
+	//dstbr.ActiveRecord as ACTIVE_RECORD,
+	//dst.INCOTerms as INCO_TERMS,
+	//dst.PaymentTerms as PAYMENT_TERMS,
+	//dst.CommissionRate as COMMISSION_RATE
 	//dstbr.INCOTerms as INCO_TERMS,
 	//dstbr.PaymentTerms as PAYMENT_TERMS,
 	//dstbr.CommissionRate as COMMISSION_RATE
