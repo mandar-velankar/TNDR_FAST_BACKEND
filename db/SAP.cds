@@ -125,7 +125,7 @@ entity BrazilDeliveriesItems: cuid, managed {
 entity BrazilExemptions: cuid, managed {
 	SHIP_TO 			: String(3);			// Ship from location (tax region) - Bayer location
 	SHIP_FROM			: String(3);			// Ship to location (tax region)
-	GROUP				: String(2);			// Table TAX Group 
+	GROUPS				: String(2);			// Table TAX Group 
 	MATNR				: String(18);			// SAP product Code
 	RATE				: String(6);			// Aliquot used for exemption process
 	BASE				: String(6);			// Base uses for exemption process
