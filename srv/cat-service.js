@@ -15,6 +15,7 @@ const XLSXHelper = require("./utils/XLSXHelper");
 const wordTemplate = require("easy-template-x");
 const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
 const { Service } = require('@sap/cds');
+const NumberHelper = require("./utils/NumberHelper");
 
 module.exports = (srv) => {
 
@@ -1361,13 +1362,15 @@ module.exports = (srv) => {
 
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
-		let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
+		// let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
+		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
 
 		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
-		let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
+		// let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
+		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat)} ${offer.CURRENCY} only`;
 		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
 
 		//Division can be Pharma or Radiology, this determines division for country approvers
