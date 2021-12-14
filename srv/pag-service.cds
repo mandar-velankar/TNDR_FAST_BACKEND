@@ -21,4 +21,6 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity Deliveries as projection on PriceAgreementDataViews.Deliveries;
 
     action syncPriceAgreements(ids : array of String);
+
+    action processCustomers();
 }

@@ -343,4 +343,218 @@ module.exports = async (srv) => {
         throw Error("Missing OAUTH config parameters");
     };
 
+
+
+    srv.on('processCustomers', async req => {
+
+        try {
+            await processCustomers();
+        } catch (error) {
+            console.log(error);
+        }
+
+
+    });
+
+
+    async function processCustomers(){
+        try {
+
+            // 1. Create new Institute entries for new Customers
+            await createInstituteEntries();
+            // 2. Update Institute master data for existing Customers
+            // await updateInstituteEntries();
+            // 3. Delete ItalyCustomers table
+            // await clearItalyCustomersTable();
+
+        } catch (error) {
+            console.log('Processing of Italy customers has failed.');
+            console.log(error);
+            return saveError(error);
+        }
+    };
+
+
+    /**
+     * Create new Institute entries for new Customers
+     * @return {Promise} Promise
+     */
+    async function createInstituteEntries(){
+
+        try {
+            const { ItalyCustomers } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const { CountryProvinces, PT_TMINST } = db.entities("com.bayer.SXTENDER.MasterData");
+
+            let customerNumbers =  await cds.run(cds.parse.cql (`SELECT CustomerID from ${PT_TMINST.name} WHERE CountryCode = 'IT'`));
+            customerNumbers = customerNumbers.map(item => addLeadingZeros(item.CustomerID, 10));
+
+            let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
+            inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name`);
+
+            // 'not in' where expression was not wokring properly
+            // because of this we are using this hack
+            // TODO: find a better way to handle this
+            let {xpr} = cds.parse.expr(`customer.E1KNA1M_KUNNR not in '${customerNumbers}' AND customer.E1KNA1M_LAND1 = 'IT'`);
+            xpr[3].val = customerNumbers;
+            query.SELECT.where = xpr;
+
+            const customers = await cds.run(query);
+            let nextInstituteID = await getLastInstituteID();
+
+            const instituteEntries = customers.map(cust => {
+                return {
+                    CountryCode: cust.E1KNA1M_LAND1,
+                    InstituteID: ++nextInstituteID,
+                    CustomerID: cust.E1KNA1M_KUNNR,
+                    InstituteName: cust.E1KNA1M_NAME1,
+                    InstituteType: getInstituteType(cust.E1KNVVM_KVGR3),
+                    Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01} \ VAT: ${cust.E1KNA1M_STCEG} \ Fiscal Code: ${cust.E1KNA1M_STCD1}`,
+                    ContactNo: cust.E1KNA1M_TELF1,
+                    Fax: cust.E1KNA1M_TELFX,
+                    ContactPerson: cust.E1KNA1M_STKZN,
+                    ActiveRecord: "Yes",
+                    Comment: cust.E1KNVVM_KVGR3, // temp to keep track of code
+                    City: cust.E1KNA1M_ORT01,
+                    INSTITUTE_HIERARCHY_ID: 1,
+                    State: "",
+                    MercadoPublicoIssuer: "",
+                    RegionID: cust.RegionID
+                    // --"E1KNVVM_INCO1",--INCO1
+                    // --"E1KNVVM_INCO2",--INCO2
+                    // --"E1KNVVM_ZTERM",--PaymentTerms
+                }
+            });
+
+            if(instituteEntries && instituteEntries.length > 0){
+                const result = await cds.run(INSERT(instituteEntries).into(PT_TMINST));
+                console.log(`${instituteEntries.length} Institutes successfully created in ${PT_TMINST.name}.`);
+                return result;
+            }
+
+            return;
+
+        } catch (error) {
+            console.log('Creating Institutes has failed.');
+            console.log(error);
+        }   
+
+    };
+
+
+    /**
+     * 
+     * @param {String} id Customer group 3
+     * @returns {String} InstituteType 
+     */
+    function getInstituteType(id){
+        const KVGR3 = {
+            "I61": "PHARMAC.SUPPL. HOSP.",
+            "I69": "WHOLE. SUPPL. HOSP.",
+            "I64": "RET. SUPPL. HOSP.",
+            "I66": "VETERINARY CLINIC",
+            "I62": "PRIVATE / COMPANIES",
+            "OEM": "OEM",
+            "I53": "GLOBAL SERVICE",
+            "I43": "BAYER APPOINTED DISTRIBUTOR",
+            "I50": "CUST OWN LABEL BAYER SKU",
+            "I55": "MASS MKT",
+            "I58": "PERIMETER",
+            "BVL": "DIRECT PHARMACY",
+            "I44": "CHAIN",
+            "I54": "INDIRECT PHARMACY",
+            "L31": "PARAPHARMACY",
+            "I45": "CHAIN PARAF",
+            "I67": "WHOLESALER AND COOP",
+            "I57": "MUNICIPAL",
+            "I49": "VTO",
+            "L40": "VETERINARY WHOLESALER",
+            "I68": "WHOLESALER AH OTC",
+            "I42": "ASL / AO / IRCCS PUBLIC",
+            "I63": "REGIONAL COMPANIES",
+            "I56": "ARMY/JAIL/MINISTRY",
+            "I65": "UNIVERSITY AND CNR",
+            "I46": "CLINIC ACCREDITED BY HA",
+            "I47": "CLINIC NOT ACCREDITED BY HA",
+            "I51": "EYE DOCTOR",
+            "BVK": "LABORATORIES AND RADIOLOGIC CENTERS ",
+            "I59": "PET SHOP",
+            "I40": "AGRARIAN SHOP",
+            "I41": "AGRICULTURAL UNION",
+            "I52": "GARDEN CENTER",
+            "I60": "PET SHOP CHAIN",
+            "AUI": "BAYER AFFILIATES",
+            "I48": "COMPANY STORE"
+        }
+        return KVGR3[id];
+    };
+
+
+    /**
+     * Clears the ItalyCustomers table
+     * @return {Promise} Promise
+     */
+     async function clearItalyCustomersTable(){
+        try {
+            const { ItalyCustomers } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const result = await cds.run(DELETE.from(ItalyCustomers));
+            console.log(`${ItalyCustomers.name} table cleared successfully`);
+            return result;
+            
+        } catch (error) {
+            console.log('Clearing the Italy Customers table failed');
+            console.log(error);
+        }    
+    };
+
+
+    async function getLastInstituteID(){
+        try {
+            const { PT_TMINST } = db.entities("com.bayer.SXTENDER.MasterData");
+            const lastInstituteID = await cds.run(SELECT.one.from(PT_TMINST, ['Max(INSTITUTEID) as max']));
+            return lastInstituteID.max;
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+
+    /**
+     * Adds leading zero's to a number
+     * @param {Integer} num Number
+     * @param {Integer} size Length of the number
+     * @returns 
+     */
+     function addLeadingZeros (num, size) {
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
+    };
+
+
+    /**
+     * Saves the error in the DB.
+     * @param {Object} error 
+     * @returns {Promise}
+     */
+     async function saveError(error){
+
+        if(!error) throw new Error(`You must provide a error object`);
+
+        try{
+            const errorEntity = {
+              JobName: "ItalyJobs",
+              JobDescription: "ProcessMaterials",
+              ErrorMessage: error.message,
+              ResourceURL: "",
+              ConsultationDate: new Date().toJSON()
+            };
+
+            return await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
+
+          }catch(err){
+            console.log(err);
+          }
+  
+      }
+
 }

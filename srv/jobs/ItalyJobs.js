@@ -49,7 +49,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseCron {
         } catch (error) {
             console.log('Processing of new materials has failed.');
             console.log(error);
-            return saveError(error);
+            return this.saveError(error);
         }
     };
 
@@ -480,3 +480,78 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseCron {
 
 };
 
+
+module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
+
+    constructor(cronTime) {
+        super('ProcessCustomers', cronTime);
+    }
+
+    /**
+     * Triggered when job has started
+     */
+    //override
+    async onTick() {
+
+        console.log('Processing Italy customers started ...');
+
+        try {
+            this.db = await cds.connect.to('db'); 
+            await this.processCustomers();
+        } catch (error) {
+            console.log(error);
+        }
+
+        // when the job has finished, call the stop()
+        // this will trigger onComplete method
+        this.stop();
+    }
+
+    /**
+     * Triggered when the job has finished.
+     * You have to call the job.stop() method when the job is done.
+     */
+    //override
+    async onComplete() {
+        console.log('Processing Italy customers finished.');
+    }
+
+
+    async processCustomers(){
+        try {
+
+        } catch (error) {
+            console.log('Processing of Italy customers has failed.');
+            console.log(error);
+            return this.saveError(error);
+        }
+    };
+
+
+    /**
+     * Saves the error in the DB.
+     * @param {Object} error 
+     * @returns {Promise}
+     */
+     async saveError(error){
+
+        if(!error) throw new Error(`You must provide a error object`);
+
+        try{
+            const errorEntity = {
+              JobName: "ItalyJobs",
+              JobDescription: "ProcessMaterials",
+              ErrorMessage: error.message,
+              ResourceURL: "",
+              ConsultationDate: new Date().toJSON()
+            };
+
+            return await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
+
+          }catch(err){
+            console.log(err);
+          }
+  
+      }
+
+};

@@ -4,7 +4,7 @@ const axios = require('axios');
 const qs = require("qs");
 const cds = require('@sap/cds');
 const { v4:uuidv4 } = require('uuid');
-const { ProcessMaterials} = require('./ItalyJobs');
+const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 
 
 module.exports = async () => {
@@ -800,5 +800,9 @@ module.exports.ItalyJobs = {
     return new ProcessMaterials(cronTime);
   },
 
+  processCustomers: function(cronTime){
+    return new ProcessCustomers(cronTime);
+  },
+  
 
 }
