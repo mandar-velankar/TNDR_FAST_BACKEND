@@ -202,7 +202,11 @@ module.exports = async (srv) => {
         } catch (error) {
             console.log(`Synchronization of PricingAgreements failed\n`);
             console.log(error);
-            return req.reject(error.response.status, error.message);
+            if(error && error.response && error.response.status){
+                return req.reject(error.response.status, error.message);
+            } else {
+                return req.reject(error.message);
+            }
         }
 
     });
