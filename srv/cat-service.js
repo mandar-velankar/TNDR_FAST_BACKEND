@@ -189,6 +189,10 @@ module.exports = (srv) => {
 			if (distributorBrand && countryProductsList.length !== 0) {
 				countryProductsList.forEach((countryProduct) => {
 					instituteIds.forEach(instituteId => {
+						var aProductSKU = "";
+						if(productSKUs && productSKUs.length > 0){
+							aProductSKU = productSKUs.SKUCode.join(",");
+						}
 						results.push({
 							COUNTRY_CODE: entityBrand.COUNTRY_CODE,
 							INSTITUTE_ID: instituteId,
@@ -207,7 +211,7 @@ module.exports = (srv) => {
 							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 							COGS: countryProduct.COGS,
 							PACKFACTOR: countryProduct.PACK_SIZE,
-							SKUS: productSKUs.SKUCode.join(",")
+							SKUS: aProductSKU
 						});
 					});
 				});
