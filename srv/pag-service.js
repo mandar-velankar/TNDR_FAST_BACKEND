@@ -363,7 +363,7 @@ module.exports = async (srv) => {
             // 1. Create new Institute entries for new Customers
             await createInstituteEntries();
             // 2. Update Institute master data for existing Customers
-            // await updateInstituteEntries();
+            await updateInstituteEntries();
             // 3. Delete ItalyCustomers table
             // await clearItalyCustomersTable();
 
@@ -435,6 +435,65 @@ module.exports = async (srv) => {
 
         } catch (error) {
             console.log('Creating Institutes has failed.');
+            console.log(error);
+        }   
+
+    };
+
+
+    /**
+     * Update Institute entries for existing Customers
+     * @return {Promise} Promise
+     */
+     async function updateInstituteEntries(){
+
+        try {
+            const { ItalyCustomers } = db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const { CountryProvinces, PT_TMINST } = db.entities("com.bayer.SXTENDER.MasterData");
+
+            let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
+            inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name
+            inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
+            where customer.E1KNA1M_LAND1 = 'IT'`);
+
+            const customers = await cds.run(query);
+
+            const promises = customers.map(cust => {
+                const obj = {
+                    CountryCode: cust.E1KNA1M_LAND1,
+                    CustomerID: cust.E1KNA1M_KUNNR,
+                    InstituteName: cust.E1KNA1M_NAME1,
+                    InstituteType: getInstituteType(cust.E1KNVVM_KVGR3) || "",
+                    Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01} \ VAT: ${cust.E1KNA1M_STCEG} \ Fiscal Code: ${cust.E1KNA1M_STCD1}`,
+                    ContactNo: cust.E1KNA1M_TELF1,
+                    Fax: cust.E1KNA1M_TELFX,
+                    ContactPerson: cust.E1KNA1M_STKZN,
+                    ActiveRecord: "Yes",
+                    Comment: cust.E1KNVVM_KVGR3, // temp to keep track of code
+                    City: cust.E1KNA1M_ORT01,
+                    INSTITUTE_HIERARCHY_ID: 1,
+                    State: "",
+                    MercadoPublicoIssuer: "",
+                    RegionID: cust.RegionID
+                    // --"E1KNVVM_INCO1",--INCO1
+                    // --"E1KNVVM_INCO2",--INCO2
+                    // --"E1KNVVM_ZTERM",--PaymentTerms
+                }
+
+                return cds.run(UPDATE(PT_TMINST).with(obj).where({ InstituteID: cust.InstituteID, CountryCode: cust.CountryCode }));
+            });
+
+            if(promises && promises.length > 0){
+                console.log(`Updating ${PT_TMINST.name} ...`);
+                const result = await Promise.all(promises);
+                console.log(`${promises.length} Institutes successfully updated in ${PT_TMINST.name}.`);
+                return result;
+            }
+
+            return;
+
+        } catch (error) {
+            console.log('Updating Institutes has failed.');
             console.log(error);
         }   
 
