@@ -638,8 +638,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
                     Comment: cust.E1KNVVM_KVGR3, // temp to keep track of code
                     City: cust.E1KNA1M_ORT01,
                     INSTITUTE_HIERARCHY_ID: 1,
-                    State: "",
-                    MercadoPublicoIssuer: "",
+                    // State: "",
+                    // MercadoPublicoIssuer: "",
                     RegionID: cust.RegionID
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
@@ -739,18 +739,29 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
         try {
             const { PT_TMINST, PT_TMINSBRTR, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let lastInstituteBrandTermsID = await cds.run(SELECT.one.from(PT_TMINSBRTR, ['Max(INSTITUTEBRANDTERMSID) as max']));
-            lastInstituteBrandTermsID = lastInstituteBrandTermsID.max;
+            let instituteBrandTermsCompoundKeys =  await cds.run(cds.parse.cql (`SELECT CountryCode || InstituteID || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINSBRTR.name} WHERE CountryCode = 'IT'`));
+            instituteBrandTermsCompoundKeys = instituteBrandTermsCompoundKeys.map(item => item.CompoundKey);
 
             let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
             INNER JOIN ${PT_TMCTPRDPCK.name} AS cp ON i.CountryCode = cp.CountryCode
             INNER JOIN ${PT_TMPRDPCK.name} AS p ON cp.ProductPackId = p.ProductPackId
             INNER JOIN ${PT_TMPRDHIER.name} AS h ON p.HLevel6_Code = h.HLevel6_Code
-            WHERE i.CountryCode = 'IT'
             GROUP BY i.CountryCode,i.InstituteId,h.HLevel4_Code
             ORDER BY i.InstituteId,h.HLevel4_Code`);
 
+             // 'not in' where expression was not wokring properly
+            // because of this we are using this hack
+            // TODO: find a better way to handle this
+            let {xpr} = cds.parse.expr(`i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || h.HLEVEL4_CODE || 'Yes') not in '${instituteBrandTermsCompoundKeys}'`);
+            xpr[15].val = instituteBrandTermsCompoundKeys;
+            query.SELECT.where = xpr;
+
             const brandTerms = await cds.run(query);
+
+            if(brandTerms.length <= 0) return;
+
+            let lastInstituteBrandTermsID = await cds.run(SELECT.one.from(PT_TMINSBRTR, ['Max(INSTITUTEBRANDTERMSID) as max']));
+            lastInstituteBrandTermsID = lastInstituteBrandTermsID.max;
 
             const instituteBrandEntries = brandTerms.map(brandTerm => {
                 return {
@@ -764,12 +775,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
                 }
             });
 
-            if(instituteBrandEntries && instituteBrandEntries.length > 0){
-                const result = await cds.run(INSERT(instituteBrandEntries).into(PT_TMINSBRTR));
-                console.log(`${instituteBrandEntries.length} Institute Brand Terms successfully created in ${PT_TMINSBRTR.name}.`);
-            }
-
-            return;
+            const result = await cds.run(INSERT(instituteBrandEntries).into(PT_TMINSBRTR));
+            console.log(`${instituteBrandEntries.length} Institute Brand Terms successfully created in ${PT_TMINSBRTR.name}.`);
+            return result;
 
         } catch (error) {
             console.log('Creating Institute Brand Terms has failed.');
@@ -787,8 +795,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
         try {
             const { PT_TMINST, PT_TMDIST, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER, PT_TMINDSBR } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let lastInstituteDistBrandRelationID = await cds.run(SELECT.one.from(PT_TMINDSBR, ['Max(INSTITUTEDISTBRANDRELATIONID) as max']));
-            lastInstituteDistBrandRelationID = lastInstituteDistBrandRelationID.max;
+            let instituteDistributorBrandCompoundKeys =  await cds.run(cds.parse.cql (`SELECT CountryCode || InstituteID || DistributorId || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINDSBR.name} WHERE CountryCode = 'IT'`));
+            instituteDistributorBrandCompoundKeys = instituteDistributorBrandCompoundKeys.map(item => item.CompoundKey);
 
             let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, d.DistributorId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
             INNER JOIN ${PT_TMDIST.name} AS d ON i.CountryCode = d.CountryCode
@@ -799,7 +807,19 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
             GROUP BY i.CountryCode,i.InstituteId,h.HLevel4_Code,d.DistributorId
             ORDER BY i.InstituteId,d.DistributorId,h.HLevel4_Code`);
 
+             // 'not in' where expression was not wokring properly
+            // because of this we are using this hack
+            // TODO: find a better way to handle this
+            let {xpr} = cds.parse.expr(`i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || d.DistributorId || h.HLEVEL4_CODE || 'Yes') not in '${instituteDistributorBrandCompoundKeys}'`);
+            xpr[17].val = instituteDistributorBrandCompoundKeys;
+            query.SELECT.where = xpr;
+
             const brands = await cds.run(query);
+
+            if(brands.length <= 0) return;
+
+            let lastInstituteDistBrandRelationID = await cds.run(SELECT.one.from(PT_TMINDSBR, ['Max(INSTITUTEDISTBRANDRELATIONID) as max']));
+            lastInstituteDistBrandRelationID = lastInstituteDistBrandRelationID.max;
 
             const instituteDistributorBrandEntries = brands.map(brand => {
                 return {
@@ -813,18 +833,14 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
                 }
             });
 
-            if(instituteDistributorBrandEntries && instituteDistributorBrandEntries.length > 0){
-                const result = await cds.run(INSERT(instituteDistributorBrandEntries).into(PT_TMINDSBR));
-                console.log(`${instituteDistributorBrandEntries.length} Institute Distributor Brands successfully created in ${PT_TMINDSBR.name}.`);
-                return result;
-            }
-
-            return;
+            const result = await cds.run(INSERT(instituteDistributorBrandEntries).into(PT_TMINDSBR));
+            console.log(`${instituteDistributorBrandEntries.length} Institute Distributor Brands successfully created in ${PT_TMINDSBR.name}.`);
+            return result;
 
         } catch (error) {
             console.log('Creating Institute Distributor Brands has failed.');
             console.log(error);
-        }   
+        }     
 
     };
 
