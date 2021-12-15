@@ -364,6 +364,13 @@ module.exports = async (srv) => {
             await createInstituteEntries();
             // 2. Update Institute master data for existing Customers
             await updateInstituteEntries();
+
+            // TODO: remove this code after the merge of Mater Data app
+            // Until we have merged Master Data App branch
+            // we must further ensure that master data constraints are 
+            // correctly set so as to show all brands for each new institute.
+            await createInstituteBrands();
+
             // 3. Delete ItalyCustomers table
             // await clearItalyCustomersTable();
 
@@ -547,6 +554,120 @@ module.exports = async (srv) => {
         return KVGR3[id];
     };
 
+
+    /**
+     * Until we have merged Master Data App branch (that handles the "Few/All" for direct brands), we must 
+     * further ensure that master data constraints are correctly set so as to show all brands for each new institute.
+     * @returns {Promise}  
+     */
+    async function createInstituteBrands(){
+        try {
+            await createInstituteBrandTerms();
+            await createInstituteDistributorBrands();
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+
+    /**
+     * Create Institute Brand Terms
+     * @return {Promise} Promise
+     */
+     async function createInstituteBrandTerms(){
+
+        try {
+            const { PT_TMINST, PT_TMINSBRTR, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER } = db.entities("com.bayer.SXTENDER.MasterData");
+
+            let lastInstituteBrandTermsID = await cds.run(SELECT.one.from(PT_TMINSBRTR, ['Max(INSTITUTEBRANDTERMSID) as max']));
+            lastInstituteBrandTermsID = lastInstituteBrandTermsID.max;
+
+            let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
+            INNER JOIN ${PT_TMCTPRDPCK.name} AS cp ON i.CountryCode = cp.CountryCode
+            INNER JOIN ${PT_TMPRDPCK.name} AS p ON cp.ProductPackId = p.ProductPackId
+            INNER JOIN ${PT_TMPRDHIER.name} AS h ON p.HLevel6_Code = h.HLevel6_Code
+            WHERE i.CountryCode = 'IT'
+            GROUP BY i.CountryCode,i.InstituteId,h.HLevel4_Code
+            ORDER BY i.InstituteId,h.HLevel4_Code`);
+
+            const brandTerms = await cds.run(query);
+
+            const instituteBrandEntries = brandTerms.map(brandTerm => {
+                return {
+                    InstituteBrandTermsID: ++lastInstituteBrandTermsID,
+                    CountryCode: brandTerm.CountryCode,
+                    INCOTerms: "",
+                    PaymentTerms: "",
+                    ActiveRecord: "Yes",
+                    InstituteID: brandTerm.InstituteId,
+                    HLevel4_Code: brandTerm.HLevel4_Code
+                }
+            });
+
+            if(instituteBrandEntries && instituteBrandEntries.length > 0){
+                const result = await cds.run(INSERT(instituteBrandEntries).into(PT_TMINSBRTR));
+                console.log(`${instituteBrandEntries.length} Institute Brand Terms successfully created in ${PT_TMINSBRTR.name}.`);
+            }
+
+            return;
+
+        } catch (error) {
+            console.log('Creating Institute Brand Terms has failed.');
+            console.log(error);
+        }   
+
+    };
+
+    /**
+     * Create Institute Distributor Brands
+     * @return {Promise} Promise
+     */
+     async function createInstituteDistributorBrands(){
+
+        try {
+            const { PT_TMINST, PT_TMDIST, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER, PT_TMINDSBR } = db.entities("com.bayer.SXTENDER.MasterData");
+
+            let lastInstituteDistBrandRelationID = await cds.run(SELECT.one.from(PT_TMINDSBR, ['Max(INSTITUTEDISTBRANDRELATIONID) as max']));
+            lastInstituteDistBrandRelationID = lastInstituteDistBrandRelationID.max;
+
+            let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, d.DistributorId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
+            INNER JOIN ${PT_TMDIST.name} AS d ON i.CountryCode = d.CountryCode
+            INNER JOIN ${PT_TMCTPRDPCK.name} AS cp ON i.CountryCode = cp.CountryCode
+            INNER JOIN ${PT_TMPRDPCK.name} AS p ON cp.ProductPackId = p.ProductPackId
+            INNER JOIN ${PT_TMPRDHIER.name} AS h ON p.HLevel6_Code = h.HLevel6_Code
+            WHERE i.CountryCode = 'IT'
+            GROUP BY i.CountryCode,i.InstituteId,h.HLevel4_Code,d.DistributorId
+            ORDER BY i.InstituteId,d.DistributorId,h.HLevel4_Code`);
+
+            const brands = await cds.run(query);
+
+            const instituteDistributorBrandEntries = brands.map(brand => {
+                return {
+                    InstituteDistBrandRelationID: ++lastInstituteDistBrandRelationID,
+                    CountryCode: brand.CountryCode,
+                    Commissionrate: 0,
+                    ActiveRecord: "Yes",
+                    InstituteID: brand.InstituteId,
+                    DistributorID: brand.DistributorId,
+                    HLevel4_Code: brand.HLevel4_Code
+                }
+            });
+
+            if(instituteDistributorBrandEntries && instituteDistributorBrandEntries.length > 0){
+                const result = await cds.run(INSERT(instituteDistributorBrandEntries).into(PT_TMINDSBR));
+                console.log(`${instituteDistributorBrandEntries.length} Institute Distributor Brands successfully created in ${PT_TMINDSBR.name}.`);
+                return result;
+            }
+
+            return;
+
+        } catch (error) {
+            console.log('Creating Institute Distributor Brands has failed.');
+            console.log(error);
+        }   
+
+    };
 
     /**
      * Clears the ItalyCustomers table
