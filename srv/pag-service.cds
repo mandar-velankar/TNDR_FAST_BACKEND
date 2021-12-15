@@ -22,5 +22,4 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
 
     action syncPriceAgreements(ids : array of String);
 
-    action processCustomers();
 }
