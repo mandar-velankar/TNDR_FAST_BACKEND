@@ -44,6 +44,11 @@ select from TransactionalData.ProductPricing
 
 } where FreeGoodsOther.FreeGoodsOther is not null and FreeGoodsOther.FreeGoodsOther > 0 and FreeGoodsOther.FreeGoodsOther  != '0';
 
+entity MaterialsFOC as select from TransactionalData.ProductPricing
+ where FreeGoodsOther.FreeGoodsOther is not null and FreeGoodsOther.FreeGoodsOther > 0 and FreeGoodsOther.FreeGoodsOther  != '0';
+
+
+
 
 
 entity Deliveries as select from PriceAgreementData.CustomerPrices as materials 
