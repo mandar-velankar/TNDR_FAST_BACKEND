@@ -1535,9 +1535,9 @@ module.exports = (srv) => {
 			case "Country Business":
 			case "Regional Business":
 			case "Manager Business Operations":
+			case "Legal":
 				return "Profitability";
 			case "Regulatory":
-			case "Legal":
 			case "Supply Chain":
 				return "Quotation";
 			default:
@@ -1874,7 +1874,8 @@ module.exports = (srv) => {
 				BUDGET_RATE: d.BUDGET_RATE,
 				SPOT_RATE: d.SPOT_RATE,
 				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2),
-				IS_LOWEST: d.IS_LOWEST
+				IS_LOWEST: d.IS_LOWEST,
+				MOLECULE_NAME: d.MOLECULE_NAME
 			}
 		});
 	}
