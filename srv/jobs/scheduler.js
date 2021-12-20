@@ -4,6 +4,7 @@ const axios = require('axios');
 const qs = require("qs");
 const cds = require('@sap/cds');
 const { v4:uuidv4 } = require('uuid');
+const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 
 
 module.exports = async () => {
@@ -531,6 +532,8 @@ module.exports = async () => {
         try{
 
           const errorEntity = {
+            JobName: "MercadoPublico",
+            JobDescription: "",
             ErrorMessage: error.message,
             ResourceURL: url,
             ConsultationDate: new Date().toJSON()
@@ -787,5 +790,19 @@ module.exports = async () => {
   const mercadoPublico = new MercadoPublico();
 
   return { mercadoPublico }
+
+};
+
+
+module.exports.ItalyJobs = {
+  
+  processMaterials: function(cronTime){
+    return new ProcessMaterials(cronTime);
+  },
+
+  processCustomers: function(cronTime){
+    return new ProcessCustomers(cronTime);
+  },
+  
 
 }
