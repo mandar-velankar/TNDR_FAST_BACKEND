@@ -220,126 +220,141 @@ service CatalogService @(path : 'tender')@(requires : [
 
     //Transactional Data Services
     entity OfferProductValidation {
-            TENDER_ID                         : String(30);
-            COUNTRY_CODE                      : String(2);
-        key OFFER_ID                          : String(30) not null;
-            DIVISION                          : String(100);
-            BRANDID                           : String(50);
-            BRANDNAME                         : String(100);
-            PRODUCT_UNIT_NAME                 : String(100); //thailand
-            SKU                               : Integer;
-        key PRODUCTID                         : Integer not null;
-            CODE                              : String(255);
-            PRODUCTNAME                       : String(102);
-            PACKSIZE                          : Double not null;
-            DOSAGE                            : Double;
-            UOM                               : String(10);
-            COUNTRYOFORIGIN                   : String(120);
-            MANUFACTURER                      : String(500);
-            SHELFLIFE                         : Integer;
-            PRESENTATION                      : String(50);
-            VAT                               : Double; //percentage VAT (thailand)
-            PRODUCT_COMMENT                   : String(784);
-            UNIT                              : String(255);
-            PAID_VOLUME                       : Double;
-            SORTER                            : Integer;
-            CURRENCY                          : String(255);
-            REQUESTED_QUANTITY                : String(567);
-            SHIPMENT_TERMS                    : String(317);
-            PAYMENT_TERMS                     : String(255);
-            DELIVERY_TERMS                    : String(500);
-            SAMPLES                           : Integer;
-            SAMPLES_UNIT                      : Integer; //Thailand
-            SAMPLES_PACK                      : Integer;
-            REGISTERED_PRICE                  : Double;
-            OFFER_PRICE                       : Double;
-            FOC                               : String(25);
-            TOTAL_QUANTITY_UNITS              : Double;
-            FOC_QUANTITY_UNITS                : Double; // FOC Unit (thailand)
-            PAID_QUANTITY_UNITS               : Double;
-            REQ_PRICE_UNIT_OFFER_CURRENCY     : Double; //MSP excl VAT (thailand)
-            REQ_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; //MSP incl VAT (thailand)
-            REQ_PRICE_PACK_OFFER_CURRENCY     : Double;
-            REQ_PRICE_UNIT_EUR_BUDGET         : Double;
-            REQ_PRICE_UNIT_EUR_SPOT           : Double;
-            NET_PRICE_UNIT_OFFER_CURRENCY     : Double; //NSP excl VAT (thailand)
-            NET_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; //NSP incl VAT (thailand)
-            NET_PRICE_PACK_OFFER_CURRENCY     : Double;
-            NET_PRICE_UNIT_EUR_BUDGET         : Double;
-            NET_PRICE_UNIT_EUR_SPOT           : Double;
-            NET_OFFER_PRICE                   : Double;
-            NET_PRICE                         : Double;
-            COGS                              : Double;
-            COGS_EUR_UNIT                     : Double;
-            COGS_EUR_PACK                     : Double;
-            GROSS_SALES_OFFER_CURRENCY        : Double;
-            GROSS_SALES_OFFER_CURRENCY_VAT    : Double;
-            VAT_TOTAL                         : Double;
-            NET_SALES_OFFER_CURRENCY          : Double;
-            NET_SALES_EUR_BUDGET              : Double;
-            NET_SALES_EUR_SPOT                : Double;
-            GROSS_MARGIN_EUR_BUDGET           : Double;
-            GROSS_MARGIN_EUR_SPOT             : Double;
-            GROSS_PROFIT_EUR_BUDGET           : Double;
-            GROSS_PROFIT_EUR_SPOT             : Double;
-            //REGULATORY                     : Integer not null;//MEA only
-            //LEGAL                          : Integer not null;//MEA only
-            //CONTROLLING                    : Integer not null;//MEA only
-            //COUNTRY_BUSINESS               : Integer not null;//MEA and MX
-            //REGIONAL_BUSINESS              : Integer not null;//MEA only
-            //SUPPLY_CHAIN                   : Integer not null;//All countries
-            IS_LOWEST                         : Integer not null;
-            IS_DEFAULT_TERMS                  : Integer not null;
-            IS_REGISTERED                     : Integer not null;
-            IS_ALTERNATIVE_QUOTED             : Integer not null;
-            IS_ALTERNATIVE_REQUESTED          : Integer not null;
-            NEW_APPROVAL                      : Integer;
-            BUDGETED_PROFITABILITY            : Double;
-            //NSM_SM_FM                      : Integer not null;//TH only
-            //HBU                            : Integer not null;//TH only
-            //CDH                            : Integer not null;//TH and AR
-            IN_POLICY                         : Boolean;
-            //MACS                           : Integer not null;//AR only
-            //TA                             : Integer not null;//AR only
-            //FBP                            : Integer not null;//AR only
-            //LPC                            : Integer not null;//AR only
-            //COM_PGA                        : Integer not null;//AR only
-            //International_Trade            : Integer not null;//AR only
-            //Transfer_Pricing               : Integer not null;//AR only
-            //SBR                            : Integer not null;//AR only
-            MOLECULE_NAME                     : String; // Chile
-            FOC_STEP                          : Double;
-            OFFER_PRICE_VAT                   : Double;
-            BUDGET_RATE                       : Double;
-            SPOT_RATE                         : Double;
-            BUSINESS_CASE_PRICE               : Double;
-            WARRANTY                          : Double;
-            AGREEMENTDURATION                 : Integer;
-            MONTHLYRENT                       : Double;
-            MONTHSPERINVOICE                  : Integer;  
-            CONTRACTSTARTDATE                 : Timestamp;
-            VALUEOFDEVICES                    : Double;
-            STATUSOFDEVICE                    : String;
-            MINCONTRACTUAL                    : Double;
-            MINANNPURCH                       : Double;
-            OFFER_TYPE                        : String;
+            TENDER_ID                                   : String(30);
+            COUNTRY_CODE                                : String(2);
+        key OFFER_ID                                    : String(30) not null;
+            DIVISION                                    : String(100);
+            BRANDID                                     : String(50);
+            BRANDNAME                                   : String(100);
+            PRODUCT_UNIT_NAME                           : String(100); //thailand
+            SKU                                         : Integer;
+        key PRODUCTID                                   : Integer not null;
+            CODE                                        : String(255);
+            PRODUCTNAME                                 : String(102);
+            PACKSIZE                                    : Double not null;
+            DOSAGE                                      : Double;
+            UOM                                         : String(10);
+            COUNTRYOFORIGIN                             : String(120);
+            MANUFACTURER                                : String(500);
+            SHELFLIFE                                   : Integer;
+            PRESENTATION                                : String(50);
+            VAT                                         : Double; //percentage VAT (thailand)
+            VAT_IN_WORDS                                : String;
+            PRODUCT_COMMENT                             : String(784);
+            UNIT                                        : String(255);
+            PAID_VOLUME                                 : Double;
+            SORTER                                      : Integer;
+            CURRENCY                                    : String(255);
+            REQUESTED_QUANTITY                          : String(567);
+            SHIPMENT_TERMS                              : String(317);
+            PAYMENT_TERMS                               : String(255);
+            DELIVERY_TERMS                              : String(500);
+            SAMPLES                                     : Integer;
+            SAMPLES_UNIT                                : Integer; //Thailand
+            SAMPLES_PACK                                : Integer;
+            REGISTERED_PRICE                            : Double; // Consumer price per unit
+            REGISTERED_PRICE_IN_WORDS                   : String;
+            OFFER_PRICE                                 : Double;
+            FOC                                         : String(25);
+            TOTAL_QUANTITY_UNITS                        : Double;
+            FOC_QUANTITY_UNITS                          : Double; // FOC Unit (thailand)
+            PAID_QUANTITY_UNITS                         : Double;
+            REQ_PRICE_UNIT_OFFER_CURRENCY               : Double; //MSP excl VAT (thailand)
+            REQ_PRICE_UNIT_OFFER_CURRENCY_VAT           : Double; //MSP incl VAT (thailand)
+            REQ_PRICE_PACK_OFFER_CURRENCY               : Double;
+            REQ_PRICE_UNIT_EUR_BUDGET                   : Double;
+            REQ_PRICE_UNIT_EUR_SPOT                     : Double;
+            NET_PRICE_UNIT_OFFER_CURRENCY               : Double; //NSP excl VAT (thailand)
+            NET_PRICE_UNIT_OFFER_CURRENCY_IN_WORDS      : String;
+            NET_PRICE_UNIT_OFFER_CURRENCY_VAT           : Double; //NSP incl VAT (thailand)
+            NET_PRICE_UNIT_OFFER_CURRENCY_VAT_IN_WORDS  : String;
+            NET_PRICE_PACK_OFFER_CURRENCY               : Double;
+            NET_PRICE_PACK_OFFER_CURRENCY_IN_WORDS      : String;
+            NET_PRICE_PACK_OFFER_CURRENCY_VAT           : Double;
+            NET_PRICE_PACK_OFFER_CURRENCY_VAT_IN_WORDS  : String;
+            NET_PRICE_UNIT_EUR_BUDGET                   : Double;
+            NET_PRICE_UNIT_EUR_SPOT                     : Double;
+            NET_OFFER_PRICE                             : Double;
+            NET_PRICE                                   : Double;
+            ADDITIONAL_DISCOUNT                         : Double;
+            ADDITIONAL_DISCOUNT_IN_WORDS                : String;
+            MAX_PRICE_NHS_PP                            : Double:
+            MAX_PRICE_NHS_PP_IN_WORDS                   : String;
+            MAX_PRICE_NHS_PU                            : Double;
+            MAX_PRICE_NHS_PU_IN_WORDS   
+            COGS                                        : Double;
+            COGS_EUR_UNIT                               : Double;
+            COGS_EUR_PACK                               : Double;
+            GROSS_SALES_OFFER_CURRENCY                  : Double; // Total amount for product
+            GROSS_SALES_OFFER_CURRENCY_IN_WORDS         : String;
+            GROSS_SALES_OFFER_CURRENCY_VAT              : Double;
+            GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS     : String;
+            VAT_TOTAL                                   : Double;
+            NET_SALES_OFFER_CURRENCY                    : Double;
+            NET_SALES_EUR_BUDGET                        : Double;
+            NET_SALES_EUR_SPOT                          : Double;
+            GROSS_MARGIN_EUR_BUDGET                     : Double;
+            GROSS_MARGIN_EUR_SPOT                       : Double;
+            GROSS_PROFIT_EUR_BUDGET                     : Double;
+            GROSS_PROFIT_EUR_SPOT                       : Double;
+            //REGULATORY                                : Integer not null;//MEA only
+            //LEGAL                                     : Integer not null;//MEA only
+            //CONTROLLING                               : Integer not null;//MEA only
+            //COUNTRY_BUSINESS                          : Integer not null;//MEA and MX
+            //REGIONAL_BUSINESS                         : Integer not null;//MEA only
+            //SUPPLY_CHAIN                              : Integer not null;//All countries
+            IS_LOWEST                                   : Integer not null;
+            IS_DEFAULT_TERMS                            : Integer not null;
+            IS_REGISTERED                               : Integer not null;
+            IS_ALTERNATIVE_QUOTED                       : Integer not null;
+            IS_ALTERNATIVE_REQUESTED                    : Integer not null;
+            NEW_APPROVAL                                : Integer;
+            BUDGETED_PROFITABILITY                      : Double;
+            //NSM_SM_FM                                 : Integer not null;//TH only
+            //HBU                                       : Integer not null;//TH only
+            //CDH                                       : Integer not null;//TH and AR
+            IN_POLICY                                   : Boolean;
+            //MACS                                      : Integer not null;//AR only
+            //TA                                        : Integer not null;//AR only
+            //FBP                                       : Integer not null;//AR only
+            //LPC                                       : Integer not null;//AR only
+            //COM_PGA                                   : Integer not null;//AR only
+            //International_Trade                       : Integer not null;//AR only
+            //Transfer_Pricing                          : Integer not null;//AR only
+            //SBR                                       : Integer not null;//AR only
+            MOLECULE_NAME                               : String; // Chile
+            FOC_STEP                                    : Double;
+            OFFER_PRICE_VAT                             : Double;
+            BUDGET_RATE                                 : Double;
+            SPOT_RATE                                   : Double;
+            BUSINESS_CASE_PRICE                         : Double;
+            WARRANTY                                    : Double;
+            AGREEMENTDURATION                           : Integer;
+            MONTHLYRENT                                 : Double;
+            MONTHSPERINVOICE                            : Integer;  
+            CONTRACTSTARTDATE                           : Timestamp;
+            VALUEOFDEVICES                              : Double;
+            STATUSOFDEVICE                              : String;
+            MINCONTRACTUAL                              : Double;
+            MINANNPURCH                                 : Double;
+            OFFER_TYPE                                  : String;
             //missing SKU & SKUCountry fields
-            ACTIVERECORD                      : String(10);
-            HLEVEL6_CODE                      : String(50);
-            PCI_NAME                          : String(255);
-            ACTIVE_SUBSTANCE                  : String(50);
-            PRODUCT_TYPE                      : String(50);
-            SKUCOUNTRY_ACTIVERECORD           : String(10);
-            PRESENTATION_2                    : String(1000);
-            GOV_CODE                          : String(255);
-            CODE1                             : String(255);
-            CODE2                             : String(255);
-            QTY_THRESHOLD                     : Integer;
+            ACTIVERECORD                                : String(10);
+            HLEVEL6_CODE                                : String(50);
+            PCI_NAME                                    : String(255);
+            ACTIVE_SUBSTANCE                            : String(50);
+            PRODUCT_TYPE                                : String(50);
+            SKUCOUNTRY_ACTIVERECORD                     : String(10);
+            PRESENTATION_2                              : String(1000);
+            GOV_CODE                                    : String(255);
+            CODE1                                       : String(255);
+            CODE2                                       : String(255);
+            QTY_THRESHOLD                               : Integer;
             //end of missing SKU & SKUCountry fields
-            FreeGoodsOther                    : Association to many FreeGoodsOther
-                                                    on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
-            ApproverTypes                     : Association to many ApproverTypes
-                                                    on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
+            FreeGoodsOther                              : Association to many FreeGoodsOther
+                                                            on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
+            ApproverTypes                               : Association to many ApproverTypes
+                                                            on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
     };
 
     entity OfferValidation {

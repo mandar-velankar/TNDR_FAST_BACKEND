@@ -531,6 +531,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     and offerProduct.CountryCode = productPricing.CountryCode
 {
     offerProduct.TenderID as TENDERID,
+    offerProduct.ProductCode,
     key offerProduct.OfferID as OFFERID,
     key offerProduct.SKU.PRODUCTPACKID as PRODUCTID,
     offerProduct.OfferType as OfferType,

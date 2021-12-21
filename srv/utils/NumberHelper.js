@@ -5,7 +5,7 @@ module.exports = {
 
         // parse to fload in case value has type string to continue
         if(typeof value === 'string' || value instanceof String){
-            Value = parseFloat(Value);
+            value = parseFloat(value);
         }
         //round to two decimals
         value = Math.round((value + Number.EPSILON) * 100) / 100;
