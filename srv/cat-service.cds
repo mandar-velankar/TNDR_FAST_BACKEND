@@ -278,10 +278,10 @@ service CatalogService @(path : 'tender')@(requires : [
             NET_PRICE                                   : Double;
             ADDITIONAL_DISCOUNT                         : Double;
             ADDITIONAL_DISCOUNT_IN_WORDS                : String;
-            MAX_PRICE_NHS_PP                            : Double:
+            MAX_PRICE_NHS_PP                            : Double;
             MAX_PRICE_NHS_PP_IN_WORDS                   : String;
             MAX_PRICE_NHS_PU                            : Double;
-            MAX_PRICE_NHS_PU_IN_WORDS   
+            MAX_PRICE_NHS_PU_IN_WORDS                   : String;
             COGS                                        : Double;
             COGS_EUR_UNIT                               : Double;
             COGS_EUR_PACK                               : Double;
