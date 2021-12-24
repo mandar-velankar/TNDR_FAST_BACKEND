@@ -3,7 +3,7 @@ const { CronJob } = require('cron');
 const axios = require('axios');
 const qs = require("qs");
 const cds = require('@sap/cds');
-const { v4:uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 
 
@@ -17,47 +17,62 @@ module.exports = async () => {
 
   // connect to service
   const srv = await cds.connect.to('SalesOpportunityService');
-  const { 
-    ParticipatedPublicMarketOpportunities, 
+  const {
+    ParticipatedPublicMarketOpportunities,
     MercadoPublicoOrdenesDeCompra
-   } = srv.entities;
-
-  // get api config
-  const mercadoApi = await cds.run(SELECT.from(SchedulerApiConfig).where({Provider:'MercadoPublco'}));
-
-  const mercadoConfig = mercadoApi[0];
-  let basicAuth;
-  let oauthAuth;
-  if (mercadoConfig.AuthType === "BASIC") {
-    basicAuth = await cds.run(
-      SELECT.one.from(SchedulerApiConfigUsers, mercadoConfig.User_ID)
-    );
-  } else if (mercadoConfig.AuthType === "OAUTH") {
-    oauthAuth = await cds.run(
-      SELECT.one.from(SchedulerApiConfigOAuth, mercadoConfig.OAuth_ID)
-    );
-  }
-  const classification_search_terms = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationKeywords'));
-  const classification_products = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationProducts'));
+  } = srv.entities;
 
   class MercadoPublico {
 
-    constructor(){
-      this.host = mercadoConfig.Host;
-      this.serviceUrl = mercadoConfig.BasePath;
-      this.proxyHost = mercadoConfig.ProxyHost;
-      this.proxyPort = mercadoConfig.ProxyPort;
+    constructor() {
+      this.basicAuth = "";
+      this.oauthAuth = "";
+      this.host = "";
+      this.serviceUrl = "";
+      this.proxyHost = "";
+      this.proxyPort = "";
+      this.apiUser = "";
+      this.apiPassword = "";
+      this.oAuthProvider = "";
+      this.grantType = "";
+      this.clientID = "";
+      this.clientSecret = "";
+      this.resources = {};
+      this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
 
-      if (mercadoConfig.AuthType === "BASIC") {
-        this.apiUser = basicAuth.ApiUser;
-        this.apiPassword = basicAuth.ApiPassword;
+    }
+    async loadConfig() {
+      // get api config
+      const mercadoApi = await cds.run(SELECT.from(SchedulerApiConfig).where({ Provider: 'MercadoPublco' }));
+
+      this.mercadoConfig = mercadoApi[0];
+      if (this.mercadoConfig.AuthType === "BASIC") {
+        this.basicAuth = await cds.run(
+          SELECT.one.from(SchedulerApiConfigUsers, this.mercadoConfig.User_ID)
+        );
+      } else if (this.mercadoConfig.AuthType === "OAUTH") {
+        this.oauthAuth = await cds.run(
+          SELECT.one.from(SchedulerApiConfigOAuth, this.mercadoConfig.OAuth_ID)
+        );
+      }
+      this.classification_search_terms = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationKeywords'));
+      this.classification_products = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoClassificationProducts'));
+
+      this.host = this.mercadoConfig.Host;
+      this.serviceUrl = this.mercadoConfig.BasePath;
+      this.proxyHost = this.mercadoConfig.ProxyHost;
+      this.proxyPort = this.mercadoConfig.ProxyPort;
+
+      if (this.mercadoConfig.AuthType === "BASIC") {
+        this.apiUser = this.basicAuth.ApiUser;
+        this.apiPassword = this.basicAuth.ApiPassword;
       }
 
-      if (mercadoConfig.AuthType === "OAUTH") {
-        this.oAuthProvider = oauthAuth.OAuthProvider;
-        this.grantType = oauthAuth.GrantType;
-        this.clientID = oauthAuth.ClientID;
-        this.clientSecret = oauthAuth.ClientSecret;
+      if (this.mercadoConfig.AuthType === "OAUTH") {
+        this.oAuthProvider = this.oauthAuth.OAuthProvider;
+        this.grantType = this.oauthAuth.GrantType;
+        this.clientID = this.oauthAuth.ClientID;
+        this.clientSecret = this.oauthAuth.ClientSecret;
       }
 
       let tendersConfig = mercadoApi.find(item => item.Resource.indexOf("Tender") > -1);
@@ -76,48 +91,48 @@ module.exports = async () => {
           requestMaxRetry: poConfig.RequestMaxRetry
         }
       };
-
-      this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
-
+      return mercadoApi;
     }
-
     /**
      * Fetches Tenders and saves them to the DB
      * @returns {CronJob}
      */
-     fetchTenders(cronTime){
+    fetchTenders(cronTime) {
 
       return new CronJob(cronTime, async () => {
-
+        
+        console.log(` `);
+        console.log(`Load Config ...`);
+        await this.loadConfig();
 
         let url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?fecha=${this.consultationDate}`;
 
         const start = new Date().getTime();
         console.log(` `);
         console.log(`Job "FetchTenders" started : ${new Date()}`);
-  
+
         try {
 
           console.log(` `);
           console.log(`Fetching data from ${url} `);
-          
+
           const results = await this.fetchWithRetry(url);
           const tenders = results.data.Listado;
-          
+
           const tenderDetails = await this.getTendersWithDetails(tenders);
 
           console.log(` `);
           console.log(`${tenderDetails.length} tenders fetched`);
 
-          if(tenderDetails && tenderDetails.length > 0){
+          if (tenderDetails && tenderDetails.length > 0) {
             console.log(` `);
             console.log(`Saving data ...`);
             await this.createTenders(tenderDetails);
           }
 
-        }catch(err) {
+        } catch (err) {
           console.log(err);
-        }finally {
+        } finally {
 
           const end = new Date().getTime();
           const time = end - start;
@@ -127,8 +142,8 @@ module.exports = async () => {
           console.log(`Execution time: ${time}ms`);
 
         }
-        
-      }); 
+
+      });
 
     }
 
@@ -139,36 +154,41 @@ module.exports = async () => {
      * we need to get those results and update the opportunity in the backend.
      * @returns {CronJob}
      */
-     fetchTenderResults(cronTime){
+    fetchTenderResults(cronTime) {
 
       return new CronJob(cronTime, async () => {
+
 
         const start = new Date().getTime();
         console.log(` `);
         console.log(`Job "FetchTenderResults" started : ${new Date()}`);
 
+        console.log(` `);
+        console.log(`Load Config ...`);
+        await this.loadConfig();
+
         try {
 
-         let query = SELECT.from(ParticipatedPublicMarketOpportunities).where({CountryCode:'CL'})
-         const participatedOpportunities = await srv.run(query);
+          let query = SELECT.from(ParticipatedPublicMarketOpportunities).where({ CountryCode: 'CL' })
+          const participatedOpportunities = await srv.run(query);
 
-         console.log(` `);
-         console.log(`Fetching results ...`);
+          console.log(` `);
+          console.log(`Fetching results ...`);
 
-         const opportunitiesWithDetails = await this.getTendersWithDetails(participatedOpportunities);
+          const opportunitiesWithDetails = await this.getTendersWithDetails(participatedOpportunities);
 
-         console.log(` `);
-         console.log(`Fetching results complete.`);
+          console.log(` `);
+          console.log(`Fetching results complete.`);
 
-          if(opportunitiesWithDetails && opportunitiesWithDetails.length > 0){
+          if (opportunitiesWithDetails && opportunitiesWithDetails.length > 0) {
             console.log(` `);
             console.log(`Saving results ...`);
             await this.updateTenders(opportunitiesWithDetails);
           }
 
-        }catch(err) {
+        } catch (err) {
           console.log(err);
-        }finally {
+        } finally {
 
           const end = new Date().getTime();
           const time = end - start;
@@ -179,8 +199,8 @@ module.exports = async () => {
 
         }
 
-          
-      }); 
+
+      });
 
     }
 
@@ -188,39 +208,42 @@ module.exports = async () => {
      * Fetches Purchase orders from MercadoPublico API and saves them in the DB
      * @returns {CronJob}
      */
-     fetchPurchaseOrders(cronTime){
+    fetchPurchaseOrders(cronTime) {
 
       return new CronJob(cronTime, async () => {
 
+        console.log(` `);
+        console.log(`Load Config ...`);
+        await this.loadConfig();
 
         let url = `${this.host}${this.serviceUrl}${this.resources.purchaseOrders.path}?fecha=${this.consultationDate}`;
 
         const start = new Date().getTime();
         console.log(` `);
         console.log(`Job "FetchPurchaseOrders" started : ${new Date()}`);
-  
+
         try {
 
           console.log(` `);
           console.log(`Fetching data from ${url} `);
-          
+
           const results = await this.fetchWithRetry(url);
           const purchaseOrders = results.data.Listado;
-          
+
           const poWithDetails = await this.getPurchaseOrdersWithDetails(purchaseOrders);
 
           console.log(` `);
           console.log(`${poWithDetails.length} purchase orders fetched`);
 
-          if(poWithDetails && poWithDetails.length > 0){
+          if (poWithDetails && poWithDetails.length > 0) {
             console.log(` `);
             console.log(`Saving data ...`);
             await this.createPurchaseOrders(poWithDetails);
           }
 
-        }catch(err) {
+        } catch (err) {
           console.log(err);
-        }finally {
+        } finally {
 
           const end = new Date().getTime();
           const time = end - start;
@@ -230,14 +253,14 @@ module.exports = async () => {
           console.log(`Execution time: ${time}ms`);
 
         }
-        
-      }); 
+
+      });
 
     }
 
     getBearerToken() {
-      if (mercadoConfig.AuthType === "OAUTH" && this.oAuthProvider && this.clientID && this.clientSecret) {
-        
+      if (this.mercadoConfig.AuthType === "OAUTH" && this.oAuthProvider && this.clientID && this.clientSecret) {
+
         const PROXY_HOST = this.proxyHost;
         const PROXY_PORT = this.proxyPort;
 
@@ -255,8 +278,8 @@ module.exports = async () => {
             'grant_type': this.grantType
           }),// when testing locally, comment out the proxy
           proxy: {
-              host: PROXY_HOST,
-              port: PROXY_PORT
+            host: PROXY_HOST,
+            port: PROXY_PORT
           }
         });
       }
@@ -278,17 +301,17 @@ module.exports = async () => {
       let config = {};
       const that = this;
 
-      if (mercadoConfig.AuthType === "BASIC") {
-        console.log(`Will use basic auth with user ${basicAuth.ApiUser}\n`);
+      if (this.mercadoConfig.AuthType === "BASIC") {
+        console.log(`Will use basic auth with user ${this.basicAuth.ApiUser}\n`);
         config = {
           auth: {
-            apiUser: basicAuth.ApiUser,
-            apiPassword: basicAuth.ApiPassword,
+            apiUser: this.basicAuth.ApiUser,
+            apiPassword: this.basicAuth.ApiPassword,
           },
         };
       }
 
-      if (mercadoConfig.AuthType === "OAUTH") {
+      if (this.mercadoConfig.AuthType === "OAUTH") {
         console.log(`Will use OAuth auth ${this.grantType} with clientID ${this.clientID}`);
         try {
           const oauthCredentials = await this.getBearerToken();
@@ -307,7 +330,7 @@ module.exports = async () => {
 
       let currentRetry = 0;
 
-      function wait(ms){
+      function wait(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
 
@@ -325,7 +348,7 @@ module.exports = async () => {
           console.log(`\nRetried ${currentRetry} times but still failed to fetch from: ${url}\n`);
           const errLog = await that.saveError(error, url);
           throw new Error(error);
-         
+
         }
       }
 
@@ -336,18 +359,18 @@ module.exports = async () => {
         // console.log(`Sending basic auth request to ${url} with [${API_USER}] - [${API_PASSWORD}]`);
 
         //get using basic auth setting that configures the API header
-        return axios.get(url,config
-            // {
-            // auth: {
-            //   username: API_USER,
-            //   password: API_PASSWORD,
-            // }, // when testing locally, comment out the proxy
-            /*proxy: {
-              host: PROXY_HOST,
-              port: PROXY_PORT
-            }*/
-            // }
-          ).then(successHandler).catch(errorHandler);
+        return axios.get(url, config
+          // {
+          // auth: {
+          //   username: API_USER,
+          //   password: API_PASSWORD,
+          // }, // when testing locally, comment out the proxy
+          /*proxy: {
+            host: PROXY_HOST,
+            port: PROXY_PORT
+          }*/
+          // }
+        ).then(successHandler).catch(errorHandler);
         // }
 
       }
@@ -360,32 +383,32 @@ module.exports = async () => {
      * @param {Array} - list of tenders  
      * @returns {Promise <Array>} - list of tenders with details
      */
-     async getTendersWithDetails(tenders){
+    async getTendersWithDetails(tenders) {
       const tenderDetails = [];
-      
-      for(let i = 0; i < tenders.length; i++){
-         try {  
+
+      for (let i = 0; i < tenders.length; i++) {
+        try {
 
           let url = `${this.host}${this.serviceUrl}${this.resources.tenders.path}?codigo=${tenders[i].CodigoExterno}`;
 
-           const detail = await this.fetchWithRetry(url);
-           tenderDetails.push(detail.data.Listado[0]);
-          
-           console.log(`Tender ${detail.data.Listado[0].CodigoExterno} -> success`);
-         }catch (error) {
-           console.log(`Tender ${error.message}`);
-         }
+          const detail = await this.fetchWithRetry(url);
+          tenderDetails.push(detail.data.Listado[0]);
+
+          console.log(`Tender ${detail.data.Listado[0].CodigoExterno} -> success`);
+        } catch (error) {
+          console.log(`Tender ${error.message}`);
+        }
       }
 
       return tenderDetails;
 
     }
 
-    async createTenders(tenders){
+    async createTenders(tenders) {
 
-      if(tenders && tenders.length > 0){
+      if (tenders && tenders.length > 0) {
 
-        for(let a = 0; a < tenders.length; a++ ){
+        for (let a = 0; a < tenders.length; a++) {
 
           const mappedTenderObj = this.mapMercadoFields(tenders[a]);
           const classifiedTender = this.classifyTender(mappedTenderObj);
@@ -395,18 +418,18 @@ module.exports = async () => {
           const items = this.getEntity(classifiedTender, 'items');
 
           const insertPromises = [];
-  
+
           insertPromises.push(cds.run(INSERT.into('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione', licitacione)));
           insertPromises.push(cds.run(INSERT.into('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador', comprador)));
           insertPromises.push(cds.run(INSERT.into('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto', items)));
 
-          try{
+          try {
             await Promise.all(insertPromises);
             console.log(`Tender ${classifiedTender.CodigoExterno} success`);
-          }catch(error){
+          } catch (error) {
             console.log(`Tender ${classifiedTender.CodigoExterno} -> failed - ${error.message}`);
           }
-          
+
         }
 
       }
@@ -414,12 +437,12 @@ module.exports = async () => {
     }
 
 
-    async updateTenders(tenders){
+    async updateTenders(tenders) {
 
-      if(tenders && tenders.length > 0){
+      if (tenders && tenders.length > 0) {
 
-        for(let a = 0; a < tenders.length; a++ ){
-          try{
+        for (let a = 0; a < tenders.length; a++) {
+          try {
 
             const mappedTenderObj = this.mapMercadoFields(tenders[a]);
             const classifiedTender = this.classifyTender(mappedTenderObj);
@@ -428,8 +451,8 @@ module.exports = async () => {
             const comprador = this.getEntity(classifiedTender, 'comprador');
             const items = this.getEntity(classifiedTender, 'items');
 
-            const oldLicitacione = await cds.run(SELECT.one.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({CodigoExterno:licitacione.CodigoExterno}));
-            const oldProducts = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({Licitacione_CodigoExterno:licitacione.CodigoExterno}));
+            const oldLicitacione = await cds.run(SELECT.one.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({ CodigoExterno: licitacione.CodigoExterno }));
+            const oldProducts = await cds.run(SELECT.from('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({ Licitacione_CodigoExterno: licitacione.CodigoExterno }));
 
             // copy over the old ID's
             licitacione.Comprador_ID = oldLicitacione.Comprador_ID
@@ -437,32 +460,32 @@ module.exports = async () => {
 
 
             const updatePromises = [];
-    
+
             // Update Licitacione + Comprador
-            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({CodigoExterno:licitacione.CodigoExterno}).with(licitacione)));
-            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador').where({ID:oldLicitacione.Comprador_ID}).with(comprador)));
-           
+            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoLicitacione').where({ CodigoExterno: licitacione.CodigoExterno }).with(licitacione)));
+            updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoComprador').where({ ID: oldLicitacione.Comprador_ID }).with(comprador)));
+
 
             // Update Items
-            for(let i = 0; i < items.length; i++){
-                const oldProduct = oldProducts.find(oldP => oldP.Correlativo === items[i].Correlativo);
+            for (let i = 0; i < items.length; i++) {
+              const oldProduct = oldProducts.find(oldP => oldP.Correlativo === items[i].Correlativo);
 
-                // We need to reuse the old ID therefore we delete the new ID
-                // We also need to copy over the old values for MatchedProductName and MatchedProductKeyword
-                delete items[i]['ID']; 
-                items[i].MatchedProductName = oldProduct.MatchedProductName;
-                items[i].MatchedProductKeyword = oldProduct.MatchedProductKeyword;
+              // We need to reuse the old ID therefore we delete the new ID
+              // We also need to copy over the old values for MatchedProductName and MatchedProductKeyword
+              delete items[i]['ID'];
+              items[i].MatchedProductName = oldProduct.MatchedProductName;
+              items[i].MatchedProductKeyword = oldProduct.MatchedProductKeyword;
 
-                updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({ID:oldProduct.ID}).with(items[i])));
+              updatePromises.push(cds.run(UPDATE('com.bayer.SXTENDER.IntegrationData.MercadoPublicoProducto').where({ ID: oldProduct.ID }).with(items[i])));
             }
 
             await Promise.all(updatePromises);
             console.log(`Tender ${classifiedTender.CodigoExterno} successfully updated`);
 
-          }catch(error){
+          } catch (error) {
             console.log(`Tender ${classifiedTender.CodigoExterno} update failed - ${error.message}`);
           }
-          
+
         }
 
       }
@@ -475,21 +498,21 @@ module.exports = async () => {
    * @param {Array} - list of purchase orders  
    * @returns {Promise <Array>} - list of purchase orders with details
    */
-    async getPurchaseOrdersWithDetails(porders){
+    async getPurchaseOrdersWithDetails(porders) {
       const poWithDetails = [];
-      
-      for(let i = 0; i < porders.length; i++){
-          try {  
+
+      for (let i = 0; i < porders.length; i++) {
+        try {
 
           let url = `${this.host}${this.serviceUrl}${this.resources.purchaseOrders.path}?codigo=${porders[i].Codigo}`;
 
-            const detail = await this.fetchWithRetry(url);
-            poWithDetails.push(detail.data.Listado[0]);
-          
-            console.log(`PO ${detail.data.Listado[0].Codigo} -> success`);
-          }catch (error) {
-            console.log(`PO ${error.message}`);
-          }
+          const detail = await this.fetchWithRetry(url);
+          poWithDetails.push(detail.data.Listado[0]);
+
+          console.log(`PO ${detail.data.Listado[0].Codigo} -> success`);
+        } catch (error) {
+          console.log(`PO ${error.message}`);
+        }
       }
 
       return poWithDetails;
@@ -497,39 +520,39 @@ module.exports = async () => {
     }
 
 
-    async createPurchaseOrders(poWithDetails){
+    async createPurchaseOrders(poWithDetails) {
 
-      if(poWithDetails && poWithDetails.length > 0){
+      if (poWithDetails && poWithDetails.length > 0) {
 
-        for(let a = 0; a < poWithDetails.length; a++ ){
+        for (let a = 0; a < poWithDetails.length; a++) {
 
           const mappedPurchaseOrderObj = this.mapMercadoPurchaseOrderFields(poWithDetails[a]);
 
           let query = INSERT.into(MercadoPublicoOrdenesDeCompra, mappedPurchaseOrderObj);
 
-          try{
+          try {
             await srv.run(query);
             console.log(`PO ${mappedPurchaseOrderObj.Codigo} successfully created in the DB`);
-          }catch(error){
+          } catch (error) {
             console.log(`PO ${mappedPurchaseOrderObj.Codigo} creation failed - ${error.message}`);
           }
-          
+
         }
 
       }
 
-    }  
+    }
 
     /**
      * Saves the error in the DB.
      * @param {Object} error 
      * @returns {Promise}
      */
-    async saveError(error, url){
+    async saveError(error, url) {
 
-      if(error){
+      if (error) {
 
-        try{
+        try {
 
           const errorEntity = {
             JobName: "MercadoPublico",
@@ -547,10 +570,10 @@ module.exports = async () => {
 
           return `${msg} -> failed. See 'SchedulerErrorLog'`;
 
-        }catch(err){
+        } catch (err) {
           return err.message;
         }
-        
+
       }
 
     }
@@ -562,10 +585,10 @@ module.exports = async () => {
      * @param {String} entityType 
      * @returns {Object}
      */
-    getEntity(tender, entityType){
+    getEntity(tender, entityType) {
 
-      if(entityType === "licitacione"){
-        const obj =  {
+      if (entityType === "licitacione") {
+        const obj = {
           ...tender
         };
         delete obj['Comprador'];
@@ -573,15 +596,15 @@ module.exports = async () => {
         return obj;
       }
 
-      if(entityType === "comprador"){
-        const obj =  {
+      if (entityType === "comprador") {
+        const obj = {
           ...tender
         };
         return obj['Comprador'];
       }
 
-      if(entityType === "items"){
-        const obj =  {
+      if (entityType === "items") {
+        const obj = {
           ...tender
         };
         return obj['Items'];
@@ -594,9 +617,9 @@ module.exports = async () => {
      * @param {Object} tender 
      * @returns {Object}
      */
-    mapMercadoFields(tender){
-      if(tender){
-        const compradorUUID =  uuidv4();
+    mapMercadoFields(tender) {
+      if (tender) {
+        const compradorUUID = uuidv4();
 
         const newTender = {
           ...tender,
@@ -624,15 +647,15 @@ module.exports = async () => {
           "Comprador_ID": compradorUUID,
           "Status": "",
           "Comprador": {
-              "ID": compradorUUID,
-              ...tender.Comprador
+            "ID": compradorUUID,
+            ...tender.Comprador
           },
           "Items": tender.Items && tender.Items.Listado.map(item => {
 
             return {
               "ID": uuidv4(),
               "Licitacione_CodigoExterno": tender.CodigoExterno,
-              "Correlativo" : item.Correlativo,
+              "Correlativo": item.Correlativo,
               "CodigoProducto": item.CodigoProducto,
               "CodigoCategoria": item.CodigoCategoria,
               "Categoria": item.Categoria,
@@ -657,7 +680,7 @@ module.exports = async () => {
 
         return newTender;
 
-      }      
+      }
     }
 
     /**
@@ -665,8 +688,8 @@ module.exports = async () => {
      * @param {Object} purchase order 
      * @returns {Object}
      */
-     mapMercadoPurchaseOrderFields(purchaseOrder){
-      if(purchaseOrder){
+    mapMercadoPurchaseOrderFields(purchaseOrder) {
+      if (purchaseOrder) {
 
         const compradorUUID = uuidv4();
         const proveedorUUID = uuidv4();
@@ -680,14 +703,14 @@ module.exports = async () => {
           "FechaUltimaModificacion": purchaseOrder.Fechas.FechaUltimaModificacion,
           "Comprador_ID": compradorUUID,
           "Comprador": {
-              "ID": compradorUUID,
-              ...purchaseOrder.Comprador
+            "ID": compradorUUID,
+            ...purchaseOrder.Comprador
           },
           "Proveedor_ID": proveedorUUID,
           "Proveedor": {
             "ID": proveedorUUID,
             ...purchaseOrder.Proveedor
-        },
+          },
           "Items": purchaseOrder.Items && purchaseOrder.Items.Listado.map(item => {
 
             return {
@@ -706,7 +729,7 @@ module.exports = async () => {
 
         return newPurchaseOrder;
 
-      }      
+      }
     }
 
     /**
@@ -716,9 +739,9 @@ module.exports = async () => {
      * @param {Object} tender 
      * @returns {Object} new tender object
      */
-    classifyTender(tender){
+    classifyTender(tender) {
 
-      const { Items:products } = tender; 
+      const { Items: products } = tender;
 
       const classifiedProducts = products.map(product => this.classifyProduct(product));
 
@@ -728,8 +751,8 @@ module.exports = async () => {
 
       return {
         ...tender,
-        "Status": isTenderClassified ? "In" : "Out", 
-        "Items" : classifiedProducts
+        "Status": isTenderClassified ? "In" : "Out",
+        "Items": classifiedProducts
       };
 
     }
@@ -741,10 +764,10 @@ module.exports = async () => {
      * @param {Object} Product 
      * @returns {Object} - new Product object
      */
-    classifyProduct(product){
+    classifyProduct(product) {
 
-      const _search_keywords = classification_search_terms;
-      const _keyword_products = classification_products;
+      const _search_keywords = this.classification_search_terms;
+      const _keyword_products = this.classification_products;
       const _search_text_product = product.NombreProducto.toLowerCase();
       const _search_text_desc = product.Descripcion.toLowerCase();
 
@@ -752,23 +775,23 @@ module.exports = async () => {
       let matchedProductKeyword = "";
 
       // search the keyword in the text
-      const _keyword_found_in_product = _search_keywords.find( _term => _search_text_product.indexOf(_term.KEYWORD) > -1);
-      const _keyword_found_in_description =  _search_keywords.find( _term => _search_text_desc.indexOf(_term.KEYWORD) > -1);
+      const _keyword_found_in_product = _search_keywords.find(_term => _search_text_product.indexOf(_term.KEYWORD) > -1);
+      const _keyword_found_in_description = _search_keywords.find(_term => _search_text_desc.indexOf(_term.KEYWORD) > -1);
 
-      if(_keyword_found_in_product){
-        const prd = _keyword_products.find(prod => prod.PRODUCTID === _keyword_found_in_product.PRODUCT_PRODUCTID );
+      if (_keyword_found_in_product) {
+        const prd = _keyword_products.find(prod => prod.PRODUCTID === _keyword_found_in_product.PRODUCT_PRODUCTID);
         matchedProductName = prd.PRODUCTNAME;
         matchedProductKeyword = _keyword_found_in_product.KEYWORD;
-      }else if(_keyword_found_in_description){
-        const prd = _keyword_products.find(prod => prod.PRODUCTID === _keyword_found_in_description.PRODUCT_PRODUCTID );
+      } else if (_keyword_found_in_description) {
+        const prd = _keyword_products.find(prod => prod.PRODUCTID === _keyword_found_in_description.PRODUCT_PRODUCTID);
         matchedProductName = prd.PRODUCTNAME;
         matchedProductKeyword = _keyword_found_in_description.KEYWORD;
       }
 
       return {
         ...product,
-        "MatchedProductName" : matchedProductName,
-        "MatchedProductKeyword" : matchedProductKeyword
+        "MatchedProductName": matchedProductName,
+        "MatchedProductKeyword": matchedProductKeyword
       };
 
     }
@@ -779,10 +802,10 @@ module.exports = async () => {
      * @returns {string}
      */
     dateToDDMMYYYY(date) {
-        var d = date.getDate();
-        var m = date.getMonth() + 1;
-        var y = date.getFullYear();
-        return `${(d <= 9 ? '0' + d : d)}${(m<=9 ? '0' + m : m)}${y}`;
+      var d = date.getDate();
+      var m = date.getMonth() + 1;
+      var y = date.getFullYear();
+      return `${(d <= 9 ? '0' + d : d)}${(m <= 9 ? '0' + m : m)}${y}`;
     }
 
   }
@@ -795,14 +818,14 @@ module.exports = async () => {
 
 
 module.exports.ItalyJobs = {
-  
-  processMaterials: function(cronTime){
+
+  processMaterials: function (cronTime) {
     return new ProcessMaterials(cronTime);
   },
 
-  processCustomers: function(cronTime){
+  processCustomers: function (cronTime) {
     return new ProcessCustomers(cronTime);
   },
-  
+
 
 }
