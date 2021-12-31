@@ -24,13 +24,13 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, PT_TMSKUPRDPCK
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -686,8 +686,16 @@ module.exports = (srv) => {
 				PRODUCT_ID: product.PRODUCTID
 			};
 
+			const whereCandidatePrices = {
+				CountryCode: offer.COUNTRYCODE,
+				ProductPackId: product.PRODUCTID,
+				InstituteId: offer.InstituteID
+			};
+
 			
 			const countryPreApprovedPrice = await tx.run(SELECT.one.from(CountryPreApprovedPrices).where(whereProduct));
+			const candidatePrice = await tx.run(SELECT.one.from(CandidatePrices).where(whereCandidatePrices));
+
 			let minPreApprovedPrice = countryPreApprovedPrice && (uom === "Pack" ? countryPreApprovedPrice.MIN_PACK_PRICE : countryPreApprovedPrice.MIN_UNIT_PRICE);
 
 
@@ -698,7 +706,11 @@ module.exports = (srv) => {
 				if(netOfferPrice && minPreApprovedPrice && netOfferPrice >= minPreApprovedPrice){
 					validationType = 1;	
 				}else{
-					validationType = 3;	
+					if(netOfferPrice && minPreApprovedPrice && candidatePrice && candidatePrice.Price >= minPreApprovedPrice) {
+						validationType = 1;	
+					} else {
+						validationType = 3;	
+					}
 				}
 
 
@@ -714,7 +726,7 @@ module.exports = (srv) => {
 
 		aApproverTypes.map(async function (oApproverType) {	
 			// for Supply Chain, optional validation type should still send a notification
-			if(oApproverType.ApproverType === "Supply Chain" && validationType === 1 ){
+			if(oApproverType.ApproverType === "Contract Manager" && validationType === 1 ){
 				oApproverType.ValidationType = 2;
 			} else {
 				oApproverType.ValidationType = validationType;	
