@@ -13,6 +13,7 @@ using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews
 using {com.bayer.SXTENDER.BankGuaranteeData} from './BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from './PriceAgreementData';
 
+entity CandidatePrices as projection on PriceAgreementData.CandidatePrices;
 entity PT_TMOFRS { //Offers
         TenderID              : String(50) not null;
     key OfferID               : String(30) not null;
