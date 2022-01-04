@@ -175,7 +175,7 @@ module.exports = (srv) => {
 						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
 						CHANNEL: 'Direct',
 						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
-						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(",")
+						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
 					});
 				});
 			}
@@ -190,10 +190,6 @@ module.exports = (srv) => {
 			if (distributorBrand && countryProductsList.length !== 0) {
 				countryProductsList.forEach((countryProduct) => {
 					instituteIds.forEach(instituteId => {
-						var aProductSKU = "";
-						if(productSKUs && productSKUs.length > 0){
-							aProductSKU = productSKUs.SKUCode.join(",");
-						}
 						results.push({
 							COUNTRY_CODE: entityBrand.COUNTRY_CODE,
 							INSTITUTE_ID: instituteId,
@@ -212,7 +208,7 @@ module.exports = (srv) => {
 							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 							COGS: countryProduct.COGS,
 							PACKFACTOR: countryProduct.PACK_SIZE,
-							SKUS: aProductSKU
+							SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
 						});
 					});
 				});
