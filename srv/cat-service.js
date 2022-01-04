@@ -699,25 +699,22 @@ module.exports = (srv) => {
 
 				// if a product is offered above or equal to pre-approved price, 
 				// business approval is not mandatory even if additional discount on offer is not 0%).
-				if(netOfferPrice && minPreApprovedPrice && netOfferPrice >= minPreApprovedPrice){
-					validationType = 1;	
+				if(!minPreApprovedPrice || (minPreApprovedPrice && netOfferPrice && netOfferPrice >= minPreApprovedPrice)){
+					validationType = 1;	//if pre approved price exists, and net offer price is below the pre approved price OR the pre approved price does not exist.
+										// only contract manager notification should be sent
 				}else{
 					if(netOfferPrice && minPreApprovedPrice && candidatePrice && candidatePrice.Price >= minPreApprovedPrice) {
-						validationType = 1;	
+						validationType = 1;	//if pre-approved price exists, and a lower or an equal price has been approved for the same account (candidate): 
+											//only contract manager notification should be sent
 					} else {
-						validationType = 3;	
+						validationType = 3;	//else all approvals should be mandatory
 					}
 				}
-
-
 			} else {
-				validationType = 1;
+				validationType = 1; //no additional discount exists; only contract manager notification should be sent
 			}
-
-			
 		} else {
-			validationType = 3;	
-
+			validationType = 3;	//if the offer type differs from selling, all approvals should be mandatory
 		}
 
 		aApproverTypes.map(async function (oApproverType) {	
