@@ -72,9 +72,12 @@ entity CustomerPrices: cuid, managed {
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     CountryCode: String not null;
     ProductPackId: Integer not null;
+    FOCproductPackID: Integer;
     MaterialNumber: String not null;
+    FOCmaterialNumber: String;
     Synchronized: Boolean;
     Price: Double;
+    PriceCondition: String;
     Applied: Boolean; // not needed? 
 }
 
@@ -89,9 +92,12 @@ entity CustomerPrices_History: managed {
     InstituteId: Integer;
     CountryCode: String not null;
     ProductPackId: Integer not null;
+    FOCproductPackID: Integer;
     MaterialNumber: String not null;
+    FOCmaterialNumber: String;
     Synchronized: Boolean;
     Price: Double;
+    PriceCondition: String;
     Applied: Boolean; 
 }
 
