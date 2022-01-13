@@ -16,7 +16,8 @@ module.exports = async (srv) => {
     const {
 		CustomerPrices,
         MaterialsView,
-        PriceAgreements
+        PriceAgreements,
+        PriceAgreementFOC
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
@@ -345,5 +346,146 @@ module.exports = async (srv) => {
         }
 
         throw Error("Missing OAUTH config parameters");
+    };
+
+    srv.on('syncFocCustPrices', async req => {
+
+        const tx = cds.transaction(req);
+    
+        try {
+            const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ Id: { in: req.data.ids } })); //TODO retrieve PA data
+            //const FreeOfChargeProducts = customerPriceData.FOC ? customerPriceData.FOC : null;
+            const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice));//TODO retrieve correct data
+            const result = await Promise.all(updatePromises);
+
+            return req.reply(result);
+
+        } catch (error) {
+            console.log(`Synchronization of FOC prices failed\n`);
+            console.log(error);
+            return req.reject(error.response.status, error.message);
+        }
+
+    });
+
+    async function updateFOCcustPrices(customerPrice){
+
+
+        //const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
+        //let priceAgreement = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreementId));
+
+        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
+        const whereProductCode = ServiceHelper.buildFullWhere("ProductCode", "=", customerPrice.ProductPackId);
+        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", customerPrice.PriceAgreement.OfferId);
+
+        //let materialsFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId)); "get this from expand (customerPrice.PriceAgreement.FOC)"
+
+        const effectiveDate = new Date(customerPrice.EffectiveDate);
+        const expiryDate = new Date(customerPrice.ExpiryDate);
+
+        const body = getFOCcustPricesRequestBodyTemplate();
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(customerPrice.InstituteId);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = parseInt(customerPrice.Price);
+
+        return await sendFOCtoSAP(body);
+
+    };
+
+    async function sendFOCtoSAP(body){
+
+        if (body) {
+
+            const url = `${priceAgreementApi.Host}${priceAgreementApi.BasePath}${priceAgreementApi.ResourcePath}`;
+            const oauthCredentials = await getBearerToken();
+
+            console.log("Update Price Conditions oauthCredetials:", oauthCredentials);
+            console.log("Update Price Conditions proxyHost:", priceAgreementApi.ProxyHost);
+            console.log("Update Price Conditions proxyPort:", priceAgreementApi.ProxyPort);
+
+            return axios({
+                method: 'post',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body),
+                proxy: {
+                    host: priceAgreementApi.ProxyHost,
+                    port: priceAgreementApi.ProxyPort
+                }
+            });
+        }
+
+        throw Error("The body of the request is missing.");
+
+    };
+
+    function getFOCcustPricesRequestBodyTemplate(){
+        return {
+            "_-BAY0_-GZ_SDCOND_A04": {
+              "IDOC": {
+                "BEGIN": 1,
+                "EDI_DC40": {
+                  "SEGMENT": 1,
+                  "TABNAM": "EDI_DC40",
+                  "MANDT": 508,
+                  "DOCNUM": 34952510,
+                  "DOCREL": 740,
+                  "STATUS": 53,
+                  "DIRECT": 2,
+                  "OUTMOD": "",
+                  "IDOCTYP": "COND_A04",
+                  "CIMTYP": "/BAY0/GZ_SDCOND_A04",
+                  "MESTYP": "COND_A",
+                  "MESCOD": "EXT",
+                  "MESFCT": "ES",
+                  "SNDPOR": "D2RM508",
+                  "SNDPRT": "LS",
+                  "SNDPRN": "FAST_IT",
+                  "RCVPOR": "SAPD2R",
+                  "RCVPRT": "LS",
+                  "RCVPRN": "D2RM508",
+                  "CREDAT": 20210916,
+                  "CRETIM": 144213,
+                  "SERIAL": 20210810101046
+                },
+                "E1KOMG": {
+                  "SEGMENT": 1,
+                  "KVEWE": "N",
+                  "KOTABNR": 921,
+                  "KAPPL": "V",
+                  "KSCHL": "YA03",
+                  "VKORG": "ITHC",
+                  "VTWEG": 00,
+                  "SPART": 00,
+                  "KUNNR": 3353665,
+                  "MATNR": 85560689,
+                  "YVARIANT": 1,
+                  "DISPKNRMM": 1, //step
+                  "DISPKNRNM": 2, //qty
+                  "KNRME": "PCE", //unit
+                  "DISPKNRZM": 1,
+                  "NRPROZENT": 33.32,
+                  "KNRDD": "2",
+                  "KNRMAT": "84273139",
+                "E1KONH": {
+                    "SEGMENT": 1,
+                    "DATAB": 20201029,
+                    "DATBI": 20201231,
+                "E1KONP": {
+                      "SEGMENT": 1,
+                      "KSCHL": "YA03",
+                      "KRECH": "2",
+                      "NRPROZENT": 33.32
+                    }
+                  }
+                }
+              }
+            }
+          };
     };
 }
