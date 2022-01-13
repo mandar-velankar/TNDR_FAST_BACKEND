@@ -382,7 +382,7 @@ module.exports = async (srv) => {
         const whereProductCode = ServiceHelper.buildFullWhere("ProductCode", "=", customerPrice.ProductPackId);
         const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", priceAgreement[0].OfferId);
 
-        let materialsFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
+        let priceAgreementFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
@@ -394,6 +394,16 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = parseInt(customerPrice.Price);
 
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KSCHL = customerPrice.FOCproductPackID !== null ? customerPrice.PriceCondition : '';
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.FOCproductPackID !== null ? customerPrice.PriceCondition : '';
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.DISPKNRMM = customerPrice.FOCproductPackID !== null ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.DISPKNRNM = customerPrice.FOCproductPackID !== null ? parseInt(priceAgreementFOC.FreeGoods) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.DISPKNRZM = customerPrice.FOCproductPackID !== null ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KNRME =  customerPrice.FOCproductPackID !== null ? priceAgreementFOC.FreeGoods_ABS_PCT : '';
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.NRPROZENT = customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? parseInt(priceAgreementFOC.FreeGoods) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.NRPROZENT = customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? parseInt(priceAgreementFOC.FreeGoods) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KNRMAT = customerPrice.FOCproductPackID !== null ? customerPrice.FOCmaterialNumber : '';
+        
         return await sendFOCtoSAP(body);
 
     };
