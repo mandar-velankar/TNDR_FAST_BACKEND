@@ -16,13 +16,17 @@ module.exports = async (srv) => {
     const {
 		CustomerPrices,
         MaterialsView,
-        PriceAgreements,
-        PriceAgreementFOC
+        PriceAgreements
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
 		MostRecentConsumerPricesView
     } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
+
+    
+    const {
+		PriceAgreementFOC
+    } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
     
     srv.on('READ', 'PriceAgreements', async (req, next) => {
 
@@ -353,9 +357,9 @@ module.exports = async (srv) => {
         const tx = cds.transaction(req);
     
         try {
-            const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ Id: { in: req.data.ids } })); //TODO retrieve PA data
+            const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } })); //TODO retrieve PA data
             //const FreeOfChargeProducts = customerPriceData.FOC ? customerPriceData.FOC : null;
-            const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice));//TODO retrieve correct data
+            const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));//TODO retrieve correct data
             const result = await Promise.all(updatePromises);
 
             return req.reply(result);
@@ -368,17 +372,17 @@ module.exports = async (srv) => {
 
     });
 
-    async function updateFOCcustPrices(customerPrice){
+    async function updateFOCcustPrices(customerPrice, tx){
 
 
-        //const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
-        //let priceAgreement = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreementId));
+        const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
+        let priceAgreement = await tx.run(SELECT.from(PriceAgreements).where(wherePriceAgreementId));
 
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         const whereProductCode = ServiceHelper.buildFullWhere("ProductCode", "=", customerPrice.ProductPackId);
-        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", customerPrice.PriceAgreement.OfferId);
+        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", priceAgreement[0].OfferId);
 
-        //let materialsFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId)); "get this from expand (customerPrice.PriceAgreement.FOC)"
+        let materialsFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
