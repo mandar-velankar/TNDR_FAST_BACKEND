@@ -52,7 +52,7 @@ entity PriceAgreements: cuid, managed {
     FOC: Association to many PriceAgreementDataViews.PriceAgreementFOC on FOC.CountryCode = CountryCode
                                                                         and FOC.OfferID = OfferId
                                                                         and FOC.ProductCode = ProductPackId;
-    MaterialsFOC: Association to PriceAgreementDataViews.MaterialsFOC on MaterialsFOC.CountryCode = CountryCode
+    MaterialsFOC: Association to TransactionalData.ProductPricing on MaterialsFOC.CountryCode = CountryCode
                                                                            and MaterialsFOC.OfferID = OfferId
                                                                            and MaterialsFOC.ProductCode = ProductPackId;
     
