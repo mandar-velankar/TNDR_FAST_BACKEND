@@ -16,13 +16,17 @@ module.exports = async (srv) => {
     const {
 		CustomerPrices,
         MaterialsView,
-        PriceAgreements,
-        PriceAgreementFOC
+        PriceAgreements
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
 		MostRecentConsumerPricesView
     } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
+
+    
+    const {
+		PriceAgreementFOC
+    } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
     
     srv.on('READ', 'PriceAgreements', async (req, next) => {
 
@@ -353,9 +357,9 @@ module.exports = async (srv) => {
         const tx = cds.transaction(req);
     
         try {
-            const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ Id: { in: req.data.ids } })); //TODO retrieve PA data
+            const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } })); //TODO retrieve PA data
             //const FreeOfChargeProducts = customerPriceData.FOC ? customerPriceData.FOC : null;
-            const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice));//TODO retrieve correct data
+            const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));//TODO retrieve correct data
             const result = await Promise.all(updatePromises);
 
             return req.reply(result);
@@ -368,17 +372,17 @@ module.exports = async (srv) => {
 
     });
 
-    async function updateFOCcustPrices(customerPrice){
+    async function updateFOCcustPrices(customerPrice, tx){
 
 
-        //const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
-        //let priceAgreement = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreementId));
+        const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
+        let priceAgreement = await tx.run(SELECT.from(PriceAgreements).where(wherePriceAgreementId));
 
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         const whereProductCode = ServiceHelper.buildFullWhere("ProductCode", "=", customerPrice.ProductPackId);
-        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", customerPrice.PriceAgreement.OfferId);
+        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", priceAgreement[0].OfferId);
 
-        //let materialsFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId)); "get this from expand (customerPrice.PriceAgreement.FOC)"
+        let priceAgreementFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
@@ -390,6 +394,16 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = parseInt(customerPrice.Price);
 
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KSCHL = customerPrice.FOCproductPackID !== null ? customerPrice.PriceCondition : '';
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.FOCproductPackID !== null ? customerPrice.PriceCondition : '';
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.DISPKNRMM = customerPrice.FOCproductPackID !== null ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.DISPKNRNM = customerPrice.FOCproductPackID !== null ? parseInt(priceAgreementFOC.FreeGoods) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.DISPKNRZM = customerPrice.FOCproductPackID !== null ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KNRME =  customerPrice.FOCproductPackID !== null ? priceAgreementFOC.FreeGoods_ABS_PCT : '';
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.NRPROZENT = customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? parseInt(priceAgreementFOC.FreeGoods) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.NRPROZENT = customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? parseInt(priceAgreementFOC.FreeGoods) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KNRMAT = customerPrice.FOCproductPackID !== null ? customerPrice.FOCmaterialNumber : '';
+        
         return await sendFOCtoSAP(body);
 
     };
