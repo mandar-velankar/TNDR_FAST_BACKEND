@@ -15,6 +15,7 @@
     "axios": "^0.21.1",
     "compression": "^1.7.4",
     "cron": "^1.8.2",
+    "cron-es6": "^1.0.3",
     "dynamic-html-pdf": "^1.0.2",
     "easy-template-x": "^2.1.0",
     "express": "^4.17.1",
@@ -23,6 +24,7 @@
     "html-pdf": "^2.2.0",
     "lodash.get": "^4.4.2",
     "mysql": "^2.18.1",
+    "n2words": "^1.10.1",
     "passport": "^0.4.1",
     "qs": "^6.10.1",
     "ramda": "^0.27.0",
@@ -51,6 +53,9 @@
   },
   "private": true,
   "cds": {
+    "hana":{
+      "deploy-format":"hdbtable"
+    },
     "requires": {
       "db": {
         "kind": "hana"

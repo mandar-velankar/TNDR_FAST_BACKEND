@@ -56,6 +56,6 @@ resources:
   - name: uaa_FAST
     parameters:
       path: ./xs-security.json
-      service-plan: default
+      service-plan: application
       service: xsuaa
     type: org.cloudfoundry.managed-service
