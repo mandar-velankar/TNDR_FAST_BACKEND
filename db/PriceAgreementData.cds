@@ -54,7 +54,7 @@ entity PriceAgreements: cuid, managed {
                                                                         and FOC.ProductCode = ProductPackId;
     MaterialsFOC: Association to PriceAgreementDataViews.MaterialsFOC on MaterialsFOC.CountryCode = CountryCode
                                                                            and MaterialsFOC.OfferID = OfferId
-                                                                           and MaterialsFOC.ProductCode = ProductPackId;*/
+                                                                           and MaterialsFOC.ProductCode = ProductPackId;
     
 }
 entity CustomerPrices: cuid, managed {
