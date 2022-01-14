@@ -52,7 +52,7 @@ entity PriceAgreements: cuid, managed {
     FOC: Association to many PriceAgreementDataViews.PriceAgreementFOC on FOC.CountryCode = CountryCode
                                                                         and FOC.OfferID = OfferId
                                                                         and FOC.ProductCode = ProductPackId;
-    /*MaterialsFOC: Association to many PriceAgreementDataViews.MaterialsFOC on MaterialsFOC.CountryCode = CountryCode
+    MaterialsFOC: Association to PriceAgreementDataViews.MaterialsFOC on MaterialsFOC.CountryCode = CountryCode
                                                                            and MaterialsFOC.OfferID = OfferId
                                                                            and MaterialsFOC.ProductCode = ProductPackId;*/
     
@@ -72,9 +72,12 @@ entity CustomerPrices: cuid, managed {
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     CountryCode: String not null;
     ProductPackId: Integer not null;
+    FOCproductPackID: Integer;
     MaterialNumber: String not null;
+    FOCmaterialNumber: String;
     Synchronized: Boolean;
     Price: Double;
+    PriceCondition: String;
     Applied: Boolean; // not needed? 
 }
 
@@ -89,9 +92,12 @@ entity CustomerPrices_History: managed {
     InstituteId: Integer;
     CountryCode: String not null;
     ProductPackId: Integer not null;
+    FOCproductPackID: Integer;
     MaterialNumber: String not null;
+    FOCmaterialNumber: String;
     Synchronized: Boolean;
     Price: Double;
+    PriceCondition: String;
     Applied: Boolean; 
 }
 
