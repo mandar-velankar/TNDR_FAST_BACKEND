@@ -44,24 +44,6 @@ select from TransactionalData.ProductPricing
 
 } where FreeGoodsOther.FreeGoodsOther is not null and FreeGoodsOther.FreeGoodsOther > 0 and FreeGoodsOther.FreeGoodsOther  != '0';
 
-entity MaterialsFOC as select from TransactionalData.ProductPricing{
-
-    *,
-
-    key OfferID,
-
-    key ProductCode,
-
-    key CountryCode
-
- }
-
- where FreeGoodsOther.FreeGoodsOther is not null and FreeGoodsOther.FreeGoodsOther > 0 and FreeGoodsOther.FreeGoodsOther  != '0';
-
-
-
-
-
 entity Deliveries as select from PriceAgreementData.CustomerPrices as materials 
 inner join SAP.ItalyDeliveries as italydeliveries on ltrim(materials.MaterialNumber,'0') = ltrim(italydeliveries.MATNR,'0')
     //and materials.InstituteId = italydeliveries.KUNNR 

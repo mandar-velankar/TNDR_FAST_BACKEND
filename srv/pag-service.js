@@ -16,13 +16,24 @@ module.exports = async (srv) => {
     const {
 		CustomerPrices,
         MaterialsView,
-        PriceAgreements,
-        PriceAgreementFOC
+        PriceAgreements
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
 		MostRecentConsumerPricesView
     } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
+
+    const {
+		PT_TMINST
+    } = cds.entities("com.bayer.SXTENDER.MasterData");
+    
+    const {
+		PriceAgreementFOC
+    } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
+
+    const {
+		PT_TMOFPR
+    } = cds.entities("com.bayer.SXTENDER.TransactionalData");
     
     srv.on('READ', 'PriceAgreements', async (req, next) => {
 
@@ -217,9 +228,12 @@ module.exports = async (srv) => {
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
+        
+        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
+        let institute = await tx.run(SELECT.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 
-        const body = getPriceAgreementRequestBodyTemplate();
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(customerPrice.InstituteId);
+        const body = getPriceAgreementRequestBodyTemplate(); 
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
@@ -353,9 +367,8 @@ module.exports = async (srv) => {
         const tx = cds.transaction(req);
     
         try {
-            const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ Id: { in: req.data.ids } })); //TODO retrieve PA data
-            //const FreeOfChargeProducts = customerPriceData.FOC ? customerPriceData.FOC : null;
-            const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice));//TODO retrieve correct data
+            const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
+            const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));
             const result = await Promise.all(updatePromises);
 
             return req.reply(result);
@@ -368,28 +381,38 @@ module.exports = async (srv) => {
 
     });
 
-    async function updateFOCcustPrices(customerPrice){
+    async function updateFOCcustPrices(customerPrice, tx){
 
 
-        //const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
-        //let priceAgreement = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreementId));
+        const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
+        let priceAgreement = await tx.run(SELECT.from(PriceAgreements).where(wherePriceAgreementId));
 
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         const whereProductCode = ServiceHelper.buildFullWhere("ProductCode", "=", customerPrice.ProductPackId);
-        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", customerPrice.PriceAgreement.OfferId);
+        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", priceAgreement[0].OfferId);
+        const whereOfferID = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement[0].OfferId);
+        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
 
-        //let materialsFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId)); "get this from expand (customerPrice.PriceAgreement.FOC)"
+        let priceAgreementFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
+        let offerProduct = await tx.run(SELECT.from(PT_TMOFPR).where(whereCountry).where(whereProductCode).where(whereOfferID));
+        let institute = await tx.run(SELECT.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
 
         const body = getFOCcustPricesRequestBodyTemplate();
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(customerPrice.InstituteId);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = parseInt(customerPrice.Price);
-
+        
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSTBM = customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? (parseInt(priceAgreementFOC.FreeGoods) * offerProduct.RequestedVolume) : (customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' || priceAgreementFOC.FreeGoods_ABS_PCT === 'STP'))  ? parseInt(priceAgreementFOC.FreeGoods) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MIKBAS = customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS') ? 1 : (customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MXKBAS = customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS') ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KUNNR = parseInt(institute.CustomerID);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.MaterialNumber);
+        
         return await sendFOCtoSAP(body);
 
     };
@@ -454,35 +477,31 @@ module.exports = async (srv) => {
                   "SERIAL": 20210810101046
                 },
                 "E1KOMG": {
-                  "SEGMENT": 1,
-                  "KVEWE": "N",
-                  "KOTABNR": 921,
-                  "KAPPL": "V",
-                  "KSCHL": "YA03",
-                  "VKORG": "ITHC",
-                  "VTWEG": 00,
-                  "SPART": 00,
-                  "KUNNR": 3353665,
-                  "MATNR": 85560689,
-                  "YVARIANT": 1,
-                  "DISPKNRMM": 1, //step
-                  "DISPKNRNM": 2, //qty
-                  "KNRME": "PCE", //unit
-                  "DISPKNRZM": 1,
-                  "NRPROZENT": 33.32,
-                  "KNRDD": "2",
-                  "KNRMAT": "84273139",
-                "E1KONH": {
-                    "SEGMENT": 1,
-                    "DATAB": 20201029,
-                    "DATBI": 20201231,
-                "E1KONP": {
-                      "SEGMENT": 1,
-                      "KSCHL": "YA03",
-                      "KRECH": "2",
-                      "NRPROZENT": 33.32
+                    "KVEWE": "N",
+                    "KOTABNR": 921,
+                    "KAPPL": "V",
+                    "KSCHL": "YA03",
+                    "VKORG": "ITHC",
+                    "VTWEG": 00,
+                    "SPART": 00,
+                    "KUNNR": 3353665,
+                    "MATNR": 85560689,
+                    "PSTYP": 1,
+                    "E1KONH": {
+                        "DATAB": 20201029,
+                        "DATBI": 20201231,
+                        "E1KONP": {
+                            "KSCHL": "YA03",
+                            "KSTBM": 10,//See screenshot
+                            "KONMS": "PCE",
+                            "PRSCH":1,
+                            "MEINS": "PCE",
+                            "KUNNR": 3661906,//CustomerID (always same as above)
+                            "BOMAT": 59416824,//MaterialNumber (FOC product) - can be same as or different from above
+                            "MIKBAS": 1,//See screenshot
+                            "MXKBAS": 2//See screenshot
+                        }
                     }
-                  }
                 }
               }
             }

@@ -52,7 +52,7 @@ entity PriceAgreements: cuid, managed {
     FOC: Association to many PriceAgreementDataViews.PriceAgreementFOC on FOC.CountryCode = CountryCode
                                                                         and FOC.OfferID = OfferId
                                                                         and FOC.ProductCode = ProductPackId;
-    MaterialsFOC: Association to PriceAgreementDataViews.MaterialsFOC on MaterialsFOC.CountryCode = CountryCode
+    MaterialsFOC: Association to TransactionalData.ProductPricing on MaterialsFOC.CountryCode = CountryCode
                                                                            and MaterialsFOC.OfferID = OfferId
                                                                            and MaterialsFOC.ProductCode = ProductPackId;
     
@@ -150,7 +150,7 @@ left outer join CustomerPrices cp
 entity CandidatePrices as select from PriceAgreements pa
 inner join CandidatesView ca on ca.PriceAgreementId = pa.ID 
 inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
-left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.MaterialNumber and cp.InstituteId = ca.CandidateID {
+left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.MaterialNumber and cp.InstituteId = ca.CandidateID and cp.PriceCondition <> 'YA03' {
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
