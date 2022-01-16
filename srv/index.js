@@ -21,6 +21,7 @@ const jobScheduler = require("./jobs/scheduler");
   // OData V4
   await cds.serve("EpaService").from("./gen/").in(app);
   await cds.serve("CatalogService").from("./gen/").in(app);
+  await cds.serve("StandardAppService").from("./gen/").in(app);
   await cds.serve("PolicyService").from("./gen/").in(app);
   await cds.serve("ContractService").from("./gen/").in(app);
   await cds.serve("AccessService").from("./gen/").in(app);
