@@ -19,6 +19,7 @@ const jobScheduler = require("./jobs/scheduler");
   // OData V2
   app.use(proxy({path: "v2"}));
   // OData V4
+  await cds.serve("SchedulerService").from("./srv/").in(app);
   await cds.serve("EpaService").from("./srv/").in(app);
   await cds.serve("CatalogService").from("./srv/").in(app);
   await cds.serve("PolicyService").from("./srv/").in(app);
@@ -34,7 +35,7 @@ const jobScheduler = require("./jobs/scheduler");
 
   // Jobs Scheduler
   const scheduler = await jobScheduler();
-  scheduler.mercadoPublico.fetchTenders('00 00 * * *').start();
+  scheduler.mercadoPublico.fetchTenders();//('00 00 * * *').start();
   scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
   scheduler.mercadoPublico.fetchPurchaseOrders('00 00 * * *').start();
 

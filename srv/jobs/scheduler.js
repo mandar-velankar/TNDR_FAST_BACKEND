@@ -5,6 +5,7 @@ const qs = require("qs");
 const cds = require('@sap/cds');
 const { v4: uuidv4 } = require('uuid');
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
+var CronJobManager = require('cron-job-manager');
 
 
 module.exports = async () => {
@@ -13,7 +14,7 @@ module.exports = async () => {
   // let db = cds.reflect(model);
 
   const db = await cds.connect.to('db'); // connect to database service
-  const { SchedulerApiConfig, SchedulerApiConfigUsers, SchedulerApiConfigOAuth } = db.entities("com.bayer.SXTENDER.AdminData");
+  const { SchedulerJobConfig, SchedulerApiConfig, SchedulerApiConfigUsers, SchedulerApiConfigOAuth } = db.entities("com.bayer.SXTENDER.AdminData");
 
   // connect to service
   const srv = await cds.connect.to('SalesOpportunityService');
@@ -39,7 +40,11 @@ module.exports = async () => {
       this.clientSecret = "";
       this.resources = {};
       this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
+      this.cronManager = new CronJobManager();
 
+    }
+    getCronManager(){
+      return this.cronManager;
     }
     async loadConfig() {
       // get api config
@@ -97,9 +102,15 @@ module.exports = async () => {
      * Fetches Tenders and saves them to the DB
      * @returns {CronJob}
      */
-    fetchTenders(cronTime) {
-
-      return new CronJob(cronTime, async () => {
+    async fetchTenders() {
+      
+      const jobInfo = await cds.run(SELECT.from(SchedulerJobConfig).where({ JobName: 'MercadoPublco-Tenders' }));
+      const cronTime = '00 00 * * *';
+      if (jobInfo && jobInfo.length > 0) {
+          cronTime = jobInfo[0].JobTime;
+      }
+      // return new CronJob(cronTime, async () => {
+      this.cronManager.add("MercadoPublco-Tenders",cronTime, async () => {
         
         console.log(` `);
         console.log(`Load Config ...`);
@@ -144,7 +155,7 @@ module.exports = async () => {
         }
 
       });
-
+      this.cronManager.start("MercadoPublco-Tenders");
     }
 
 
@@ -809,10 +820,9 @@ module.exports = async () => {
     }
 
   }
+  if(!this.mercadoPublico) this.mercadoPublico = new MercadoPublico();
 
-  const mercadoPublico = new MercadoPublico();
-
-  return { mercadoPublico }
+  return { mercadoPublico:this.mercadoPublico }
 
 };
 
