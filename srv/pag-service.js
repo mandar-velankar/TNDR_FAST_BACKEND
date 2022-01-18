@@ -54,6 +54,8 @@ module.exports = async (srv) => {
         let hasNewPriceFilterValues = null;
         let hasExpiringSoonFilterIndex = null;
         let hasExpiringSoonFilterValues = null;
+        let isNewPriceAgreementFilterIndex = null;
+        let isNewPriceAgreementFilterValues = null;
 
         if(req.query.SELECT.where){
 
@@ -66,6 +68,9 @@ module.exports = async (srv) => {
             hasExpiringSoonFilterIndex = ServiceHelper.getWhereId(req, 'ExpiringSoon');
             hasExpiringSoonFilterValues =  ServiceHelper.getWhereValues(req, 'ExpiringSoon');
 
+            isNewPriceAgreementFilterIndex = ServiceHelper.getWhereId(req, 'isNewPriceAgreement');
+            isNewPriceAgreementFilterValues = ServiceHelper.getWhereValues(req, 'isNewPriceAgreement');
+
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
             }
@@ -76,6 +81,10 @@ module.exports = async (srv) => {
 
             if(hasExpiringSoonFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'ExpiringSoon');
+            }
+
+            if(isNewPriceAgreementFilterIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'isNewPriceAgreement');
             }
         }
 
@@ -116,13 +125,15 @@ module.exports = async (srv) => {
 
             // calculate Synchronized
             priceAgreement.Synchronized = customerPrices.every(price => price.Synchronized);
+
+            // calculate isNewPriceAgreement
+            priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied);
             
             // calculate hasNewMaterials
             if(!customerPrices || customerPrices.length === 0){
                 priceAgreement.hasNewMaterials = false;
             }else {
                 priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
-                
             }
 
             if(priceAgreement.CountryCode === 'IT'){
@@ -190,6 +201,11 @@ module.exports = async (srv) => {
 
         if(hasExpiringSoonFilterValues && hasExpiringSoonFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
+            result = filteredResult;
+        }
+
+        if(isNewPriceAgreementFilterValues && isNewPriceAgreementFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => !priceAgreement.isNewPriceAgreement);
             result = filteredResult;
         }
 
