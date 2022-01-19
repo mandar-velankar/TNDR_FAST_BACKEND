@@ -34,6 +34,7 @@ entity PriceAgreements: cuid, managed {
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
     ExpiringSoon: Boolean default false; // calculated from NodeJS
+    isNewPriceAgreement: Boolean default true; // calculated from NodeJS
     OfferId: String;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
@@ -78,7 +79,7 @@ entity CustomerPrices: cuid, managed {
     Synchronized: Boolean;
     Price: Double;
     PriceCondition: String;
-    Applied: Boolean; // not needed? 
+    Applied: Boolean; 
 }
 
 entity CustomerPrices_History: managed {
@@ -135,7 +136,7 @@ inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode and pa
  */
 entity MaterialsView as select from MasterData.PT_TMSKUPRDPCK sku
 left outer join CustomerPrices cp 
-  on cp.MaterialNumber = sku.SKUCode 
+  on (cp.MaterialNumber = sku.SKUCode  OR cp.FOCmaterialNumber = sku.SKUCode )
   and cp.CountryCode = sku.CountryCode 
   and cp.ProductPackId = sku.ProductPackID {
         key sku.CountryCode,
