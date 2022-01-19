@@ -15,4 +15,6 @@ service SchedulerService @(path : 'scheduler')@(requires : ['authenticated-user'
     //SchedulerJobConfig
     entity SchedulerJobConfig as projection on AdminData.SchedulerJobConfig;
     function SystemJobs() returns array of Job;
+    //voorzie start en stop van all jobs
+    //voorzie start en stop per job
 }

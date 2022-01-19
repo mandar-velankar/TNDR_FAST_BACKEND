@@ -12,7 +12,17 @@ module.exports = (srv) => {
         const cronManager = scheduler.mercadoPublico.getCronManager();
         //update job
     });
-
+    srv.before('INSERT', 'SchedulerJobConfig', async (SchedulerJobConfig, req) => {
+        //check if already job exists
+        const scheduler = await jobScheduler();
+        const cronManager = scheduler.mercadoPublico.getCronManager();
+        //update job
+    });
+    srv.after('INSERT', 'SchedulerJobConfig', async (SchedulerJobConfig, req) => {
+        const scheduler = await jobScheduler();
+        const cronManager = scheduler.mercadoPublico.getCronManager();
+        //update job
+    });
     srv.on('SystemJobs', async (req) => {
         const scheduler = await jobScheduler();
         const cronManager = scheduler.mercadoPublico.getCronManager();

@@ -5,7 +5,6 @@ const qs = require("qs");
 const cds = require('@sap/cds');
 const { v4: uuidv4 } = require('uuid');
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
-var CronJobManager = require('cron-job-manager');
 
 
 module.exports = async () => {
@@ -40,11 +39,8 @@ module.exports = async () => {
       this.clientSecret = "";
       this.resources = {};
       this.consultationDate = this.dateToDDMMYYYY(new Date()); //"20062021" example of specific day;
-      this.cronManager = new CronJobManager();
+      
 
-    }
-    getCronManager(){
-      return this.cronManager;
     }
     async loadConfig() {
       // get api config
@@ -104,13 +100,13 @@ module.exports = async () => {
      */
     async fetchTenders() {
       
-      const jobInfo = await cds.run(SELECT.from(SchedulerJobConfig).where({ JobName: 'MercadoPublco-Tenders' }));
-      const cronTime = '00 00 * * *';
-      if (jobInfo && jobInfo.length > 0) {
-          cronTime = jobInfo[0].JobTime;
-      }
+      // const jobInfo = await cds.run(SELECT.from(SchedulerJobConfig).where({ JobName: 'MercadoPublco-Tenders' }));
+      // const cronTime = '00 00 * * *';
+      // if (jobInfo && jobInfo.length > 0) {
+      //     cronTime = jobInfo[0].JobTime;
+      // }
       // return new CronJob(cronTime, async () => {
-      this.cronManager.add("MercadoPublco-Tenders",cronTime, async () => {
+      // this.cronManager.add("MercadoPublco-Tenders",cronTime, async () => {
         
         console.log(` `);
         console.log(`Load Config ...`);
@@ -154,8 +150,8 @@ module.exports = async () => {
 
         }
 
-      });
-      this.cronManager.start("MercadoPublco-Tenders");
+      // });
+      // this.cronManager.start("MercadoPublco-Tenders");
     }
 
 
@@ -820,9 +816,9 @@ module.exports = async () => {
     }
 
   }
-  if(!this.mercadoPublico) this.mercadoPublico = new MercadoPublico();
-
-  return { mercadoPublico:this.mercadoPublico }
+  // if(!this.mercadoPublico) this.mercadoPublico = new MercadoPublico();
+  const mercadoPublico = new MercadoPublico()
+  return { mercadoPublico }
 
 };
 
