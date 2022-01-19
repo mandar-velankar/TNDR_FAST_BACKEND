@@ -136,7 +136,7 @@ inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode and pa
  */
 entity MaterialsView as select from MasterData.PT_TMSKUPRDPCK sku
 left outer join CustomerPrices cp 
-  on cp.MaterialNumber = sku.SKUCode 
+  on (cp.MaterialNumber = sku.SKUCode  OR cp.FOCmaterialNumber = sku.SKUCode )
   and cp.CountryCode = sku.CountryCode 
   and cp.ProductPackId = sku.ProductPackID {
         key sku.CountryCode,
