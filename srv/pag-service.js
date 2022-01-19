@@ -279,12 +279,12 @@ module.exports = async (srv) => {
                   "MESTYP": "COND_A",
                   "MESCOD": "EXT",
                   "MESFCT": "ES",
-                  "SNDPOR": "D2RM508",
+                  "SNDPOR": "Q2RM508",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508)
                   "SNDPRT": "LS",
                   "SNDPRN": "FAST_IT",
-                  "RCVPOR": "SAPD2R",
+                  "RCVPOR": "SAPQ2R", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R)
                   "RCVPRT": "LS",
-                  "RCVPRN": "D2RM508",
+                  "RCVPRN": "Q2RM508", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508)
                   "CREDAT": 20210916,
                   "CRETIM": 144213,
                   "SERIAL": 20210810101046
@@ -482,12 +482,12 @@ module.exports = async (srv) => {
                   "MESTYP": "COND_A",
                   "MESCOD": "EXT",
                   "MESFCT": "ES",
-                  "SNDPOR": "D2RM508",
+                  "SNDPOR": "Q2RM508",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508)
                   "SNDPRT": "LS",
                   "SNDPRN": "FAST_IT",
-                  "RCVPOR": "SAPD2R",
+                  "RCVPOR": "SAPQ2R", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R)
                   "RCVPRT": "LS",
-                  "RCVPRN": "D2RM508",
+                  "RCVPRN": "Q2RM508", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508)
                   "CREDAT": 20210916,
                   "CRETIM": 144213,
                   "SERIAL": 20210810101046
