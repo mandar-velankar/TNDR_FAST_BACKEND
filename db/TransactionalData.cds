@@ -349,7 +349,7 @@ entity ProductPricing: cuid, managed {
     key OfferID: String;
     key ProductCode: Integer;
     key CountryCode: String;
-    Warranty: Double;
+    Warranty: Integer;
     AgreementDuration: Integer;
     MonthlyRent: Double;
     MonthsPerInvoice: Integer;
