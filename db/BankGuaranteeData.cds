@@ -18,6 +18,7 @@ entity BankGuarantees: cuid, managed {
     Reference: String;
     IssueDate: DateTime;
     ClosingDate: DateTime;
+    ExpectedExpiryDate: DateTime;
     Status:  String;
     Type: String;
     GuaranteedAmount: Double;
