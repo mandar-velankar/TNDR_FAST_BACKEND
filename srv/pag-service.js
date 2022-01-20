@@ -205,7 +205,7 @@ module.exports = async (srv) => {
         }
 
         if(isNewPriceAgreementFilterValues && isNewPriceAgreementFilterValues.length > 0){
-            const filteredResult = result.filter(priceAgreement => !priceAgreement.isNewPriceAgreement);
+            const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
             result = filteredResult;
         }
 
