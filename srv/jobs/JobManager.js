@@ -4,6 +4,7 @@ const cds = require('@sap/cds');
 const jobScheduler = require("./scheduler");
 
 class JobManager {
+    //this is added to support the "old" scheduler. All available jobs of the scheduler are listed here and should be the SAME as the name of the function WITHOUT fetch
     schedulerJobFunctions = ["Tenders","TenderResults","PurchaseOrders"];
     constructor() {
         this.cronManager = new CronJobManager();
@@ -16,12 +17,13 @@ class JobManager {
     }
     isJobSupported(jobConfig) {
         try {
+            //implemented check if job is supported for scheduler
             if (jobConfig.JobName.indexOf("MercadoPublco") > -1) {
                 const job = jobConfig.JobName.split("-")[1];
                 if(this.schedulerJobFunctions.findIndex(jobFunctions => jobFunctions === job)> -1) return true;
                 else return false;
             }
-
+            //if factory is not able to create an instance for this jobname, it is not supported
             JobFactory.create(jobConfig.JobName, jobConfig.JobTime);
 
             return true;
@@ -31,16 +33,18 @@ class JobManager {
     }
 
     registerJob(jobConfig) {
+        //register job if not yet exists and contains a time
         this.cronManager.exists(jobConfig.JobName) && console.log(`${jobConfig.JobName} already exists`);
         !jobConfig.JobTime && console.log(`Job time is empty: ${jobConfig.JobTime}`);
 
         if (jobConfig.JobTime && !this.cronManager.exists(jobConfig.JobName)) {
             console.log(`Adding Job : ${jobConfig.JobName} to manager`);
-            if (jobConfig.JobName.indexOf("MercadoPublco") > -1) this.addSchedulerJob(jobConfig);
-            else this.addJob(jobConfig);
+            if (jobConfig.JobName.indexOf("MercadoPublco") > -1) this.addSchedulerJob(jobConfig);//register job for old scheduler
+            else this.addJob(jobConfig);//register job using JobFactory
         }
     }
     addJob(jobConfig) {
+        //register job using JobFactory
         const job = JobFactory.create(jobConfig.JobName, jobConfig.JobTime);
         this.cronManager.add(job.getJobName(), job.getJobTime(), job.onTick.bind(job));
         this.cronManager.start(job.getJobName());
@@ -49,6 +53,7 @@ class JobManager {
         this.cronManager.exists(jobConfig.JobName) && this.cronManager.deleteJob(jobConfig.JobName);
     }
     async addSchedulerJob(jobConfig) {
+        //register job for old scheduler
         const scheduler = await jobScheduler();
         const job = jobConfig.JobName.split("-")[1];
         if(this.schedulerJobFunctions.findIndex(jobFunctions => jobFunctions === job) > -1){
@@ -59,6 +64,7 @@ class JobManager {
         this.cronManager.start(jobConfig.JobName);
     }
     stopJob(JobName) {
+        //stop job if exists, if no name is provided, stop all
         if(JobName){
             this.cronManager.exists(JobName) && this.cronManager.stop(JobName);
         }else{
@@ -66,6 +72,7 @@ class JobManager {
         }
     }
     startJob(JobName) {
+        //start job if exists, if no name is provided, start all
         if(JobName){
             this.cronManager.exists(JobName) && this.cronManager.start(JobName);
         }else{
@@ -73,6 +80,7 @@ class JobManager {
         }
     }
     updateJob(jobConfig) {
+        //update job if exists, otherwise register as new job
         if (this.cronManager.exists(jobConfig.JobName)) {
             this.cronManager.update(jobConfig.JobName, jobConfig.JobTime);
         } else {
@@ -80,6 +88,7 @@ class JobManager {
         }
     }
     async registerJobs() {
+        //register all jobs from config table in database - used during startup of the app
         const db = await cds.connect.to('db'); // connect to database service
         const { SchedulerJobConfig } = db.entities("com.bayer.SXTENDER.AdminData");
 
@@ -88,6 +97,7 @@ class JobManager {
         jobsConfig.forEach((jobConfig)=>this.registerJob(jobConfig));
     }
     getJobs() {
+        //list all jobs in the manager
         let jobs = [];
         for (let job in this.cronManager.jobs) {
             jobs.push({
