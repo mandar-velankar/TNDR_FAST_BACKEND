@@ -219,7 +219,7 @@ module.exports = async (srv) => {
     
         try {
             const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
-            const updatePromises = customerPrices.map(custPrice => updateCustomerPrice(custPrice));
+            const updatePromises = customerPrices.map(custPrice => updateCustomerPrice(custPrice, tx));
             const result = await Promise.all(updatePromises);
 
             // set customerPrices 'Synchronized' to true
@@ -240,12 +240,13 @@ module.exports = async (srv) => {
     });
 
 
-    async function updateCustomerPrice(customerPrice){
+    async function updateCustomerPrice(customerPrice, tx){
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
+        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         let institute = await tx.run(SELECT.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 
         const body = getPriceAgreementRequestBodyTemplate(); 
@@ -392,7 +393,11 @@ module.exports = async (srv) => {
         } catch (error) {
             console.log(`Synchronization of FOC prices failed\n`);
             console.log(error);
-            return req.reject(error.response.status, error.message);
+            if(error && error.response && error.response.status){
+                return req.reject(error.response.status, error.message);
+            } else {
+                return req.reject(error.message);
+            }
         }
 
     });
