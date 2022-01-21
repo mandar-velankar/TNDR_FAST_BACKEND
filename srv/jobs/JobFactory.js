@@ -7,7 +7,7 @@ module.exports = class JobFactory {
                 return new ProcessMaterials(jobName,jobTime)
                 break;
             case this.jobNames.ProcessCustomersJob:
-                return new ProcessMaterials(jobName,jobTime)
+                return new ProcessCustomers(jobName,jobTime)
                 break;
             default:
                 throw new Error('Job type not supported');
