@@ -161,9 +161,10 @@ module.exports = async () => {
      * we need to get those results and update the opportunity in the backend.
      * @returns {CronJob}
      */
-    fetchTenderResults(cronTime) {
+    // fetchTenderResults(cronTime) {
+    async fetchTenderResults() {
 
-      return new CronJob(cronTime, async () => {
+      // return new CronJob(cronTime, async () => {
 
 
         const start = new Date().getTime();
@@ -207,7 +208,7 @@ module.exports = async () => {
         }
 
 
-      });
+      // });
 
     }
 
@@ -215,9 +216,10 @@ module.exports = async () => {
      * Fetches Purchase orders from MercadoPublico API and saves them in the DB
      * @returns {CronJob}
      */
-    fetchPurchaseOrders(cronTime) {
+    // fetchPurchaseOrders(cronTime) {
+    async fetchPurchaseOrders() {
 
-      return new CronJob(cronTime, async () => {
+      // return new CronJob(cronTime, async () => {
 
         console.log(` `);
         console.log(`Load Config ...`);
@@ -261,7 +263,7 @@ module.exports = async () => {
 
         }
 
-      });
+      // });
 
     }
 

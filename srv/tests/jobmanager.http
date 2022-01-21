@@ -1,0 +1,40 @@
+POST http://localhost:4004/v2/scheduler/SchedulerJobConfig
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "JobName":"MercadoPublco-Tenders",
+    "JobTime":"00 00 * * *"
+}
+####
+PUT http://localhost:4004/v2/scheduler/SchedulerJobConfig(guid'21d809d9-d818-4034-89a9-00a773497e5f')
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "JobName":"ProcessMaterialsJob",
+    "JobTime":"01 00 * * *"
+}
+####
+GET http://localhost:4004/v2/scheduler/SchedulerJobConfig
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+####
+DELETE http://localhost:4004/v2/scheduler/SchedulerJobConfig(guid'57a5b0fd-c52b-4930-91c9-72782f3edbf0')
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+####
+GET http://localhost:4004/v2/scheduler/SystemJobs
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+####
+POST http://localhost:4004/v2/scheduler/ManageJob
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "JobName":"",
+    "Action":"START"
+}

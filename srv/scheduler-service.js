@@ -1,5 +1,5 @@
 const cds = require('@sap/cds');
-const jobScheduler = require("./jobs/scheduler");
+const JobManager = require("./jobs/JobManager");
 
 module.exports = (srv) => {
 
@@ -8,34 +8,31 @@ module.exports = (srv) => {
     } = cds.entities("com.bayer.SXTENDER.AdminData");
 
     srv.after('UPDATE', 'SchedulerJobConfig', async (SchedulerJobConfig, req) => {
-        const scheduler = await jobScheduler();
-        const cronManager = scheduler.mercadoPublico.getCronManager();
-        //update job
+        JobManager.updateJob(SchedulerJobConfig);
     });
-    srv.before('INSERT', 'SchedulerJobConfig', async (SchedulerJobConfig, req) => {
+    srv.before('INSERT', 'SchedulerJobConfig', async (req) => {
         //check if already job exists
-        const scheduler = await jobScheduler();
-        const cronManager = scheduler.mercadoPublico.getCronManager();
-        //update job
+        if(JobManager.jobExists(req.data)){
+            req.reject(404, 'Job already exists');
+        }
+        if (!JobManager.isJobSupported(req.data)){
+            req.reject(404, 'Job is not supported');
+        }
     });
-    srv.after('INSERT', 'SchedulerJobConfig', async (SchedulerJobConfig, req) => {
-        const scheduler = await jobScheduler();
-        const cronManager = scheduler.mercadoPublico.getCronManager();
-        //update job
+    srv.after('INSERT', 'SchedulerJobConfig', (SchedulerJobConfig, req) => {
+        JobManager.registerJob(SchedulerJobConfig);
+    });
+    srv.after('DELETE','SchedulerJobConfig',(SchedulerJobConfig)=>{
+        JobManager.unregisterJob(SchedulerJobConfig);
     });
     srv.on('SystemJobs', async (req) => {
-        const scheduler = await jobScheduler();
-        const cronManager = scheduler.mercadoPublico.getCronManager();
-        console.log(cronManager.listCrons())
-        let jobs = [];
-        for (let job in cronManager.jobs){
-            jobs.push({
-                Name:job,
-                JobTime:cronManager.jobs[job].cronTime.source,
-                Status:cronManager.jobs[job].running ? 'Running' : 'Not running'
-            });
-            console.log(`${job} -  ${cronManager.jobs[job].cronTime.source} - ${(cronManager.jobs[job].running ? 'Running' : 'Not running')}`);
-        } 
-        return jobs;
-    })
+        return JobManager.getJobs();
+    });
+    srv.on('ManageJob',async (req)=>{
+        const action = req.data.Action.toString().toUpperCase();
+        if(action === "START") JobManager.startJob(req.data.JobName);
+        else if(action === "STOP") JobManager.stopJob(req.data.JobName);
+        else throw new Error("Wrong action");
+        return JobManager.getJobs();
+    });
 };

@@ -1,6 +1,6 @@
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 
-class JobFactory {
+module.exports = class JobFactory {
     static create(jobName, jobTime) {
         switch (jobName) {
             case this.jobNames.ProcessMaterialsJob:
@@ -10,7 +10,7 @@ class JobFactory {
                 return new ProcessMaterials(jobName,jobTime)
                 break;
             default:
-                return new Error('Job type not supported');
+                throw new Error('Job type not supported');
                 break;
         }
     }

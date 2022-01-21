@@ -4,8 +4,8 @@ const BaseJob = require('./BaseJob');
 
 module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
-    constructor(jobName) {
-        super(jobName);
+    constructor(jobName,jobTime) {
+        super(jobName,jobTime);
     }
 
     /**
@@ -485,8 +485,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
 module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
-    constructor(jobName) {
-        super(jobName);
+    constructor(jobName,jobTime) {
+        super(jobName,jobTime);
     }
 
     /**
