@@ -127,7 +127,7 @@ module.exports = async (srv) => {
             priceAgreement.Synchronized = customerPrices.every(price => price.Synchronized);
 
             // calculate isNewPriceAgreement
-            priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied);
+            priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied || price.Applied === null) ;
             
             // calculate hasNewMaterials
             if(!customerPrices || customerPrices.length === 0){
