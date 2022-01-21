@@ -706,6 +706,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
 {	
 	'PT_TMTNOFST(TENDERID=''' || offer.TenderID || ''',OFFERID=''' || offer.OfferID || ''',Active=1)' as OFFERSTATUSPATH:String(500),
 	offer.TenderID as TENDERID,
+    offer.Tender.InstituteID as INSTITUTE_ID,
     offer.Tender.Institute.InstituteType as INSTITUTE_TYPE,
     offer.Tender.Institute.State as INSTITUTE_STATE,
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
@@ -775,6 +776,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
  group by offer.TenderID,
           offer.OfferID,
           offer.Tender.TenderChannel,
+          offer.Tender.InstituteID,
           offer.Tender.Institute.InstituteType,
           offer.Tender.Institute.State,
           offer.Tender.Classification,
