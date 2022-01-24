@@ -124,7 +124,11 @@ module.exports = async (srv) => {
             }
 
             // calculate Synchronized
-            priceAgreement.Synchronized = customerPrices.every(price => price.Synchronized);
+            priceAgreement.Synchronized = false;
+            // check needed - empty array will return true in case of every
+            if(customerPrices && customerPrices.length > 0){
+                priceAgreement.Synchronized = customerPrices.every(price => price.Synchronized);
+            }
 
             // calculate isNewPriceAgreement
             priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied || price.Applied === null) ;
