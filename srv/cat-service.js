@@ -685,7 +685,7 @@ module.exports = (srv) => {
 			const whereCandidatePrices = {
 				CountryCode: offer.COUNTRYCODE,
 				ProductPackId: product.PRODUCTID,
-				InstituteId: offer.InstituteID
+				InstituteId: offer.INSTITUTE_ID
 			};
 
 			
@@ -699,16 +699,16 @@ module.exports = (srv) => {
 
 				// if a product is offered above or equal to pre-approved price, 
 				// business approval is not mandatory even if additional discount on offer is not 0%).
-				if(!minPreApprovedPrice || (minPreApprovedPrice && netOfferPrice && netOfferPrice >= minPreApprovedPrice)){
-					validationType = 1;	//if pre approved price exists, and net offer price is below the pre approved price OR the pre approved price does not exist.
-										// only contract manager notification should be sent
-				}else{
-					if(netOfferPrice && minPreApprovedPrice && candidatePrice && candidatePrice.Price >= minPreApprovedPrice) {
+				if(!minPreApprovedPrice || (minPreApprovedPrice && netOfferPrice && netOfferPrice < minPreApprovedPrice)){
+						//if pre approved price exists, and net offer price is below the pre approved price OR the pre approved price does not exist, execute following check
+					if(netOfferPrice && minPreApprovedPrice && candidatePrice && candidatePrice.Price <= minPreApprovedPrice) {
 						validationType = 1;	//if pre-approved price exists, and a lower or an equal price has been approved for the same account (candidate): 
 											//only contract manager notification should be sent
 					} else {
 						validationType = 3;	//else all approvals should be mandatory
 					}
+				}else{
+					validationType = 1; // only contract manager notification should be sent
 				}
 			} else {
 				validationType = 1; //no additional discount exists; only contract manager notification should be sent
