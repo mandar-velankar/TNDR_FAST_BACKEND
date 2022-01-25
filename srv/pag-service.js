@@ -130,7 +130,26 @@ module.exports = async (srv) => {
             priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied || price.Applied === null) ;
             
             // calculate hasNewMaterials
-            priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
+            if(!customerPrices || customerPrices.length === 0){
+                priceAgreement.hasNewMaterials = false;
+            }else {
+                priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
+            }
+
+            if(priceAgreement.CountryCode === 'IT'){
+                // include FOC products in filter logic
+                if( priceAgreement.FOC && priceAgreement.FOC.length > 0){
+                    let productArray = [];
+                    priceAgreement.FOC.forEach(FOC => {
+                        productArray.push(FOC.ProductPackId)
+    
+                    });
+                    let whereFocProduct = ServiceHelper.buildWhereExpression("ProductPackId", "or", productArray);
+                    let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
+                    materials = await tx.run(SELECT.from(MaterialsView).where(whereCountryCode).where(whereFocProduct));
+                    priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
+                }
+            }
 
             // calculate hasNewPrice
             if(consumerPrice){
