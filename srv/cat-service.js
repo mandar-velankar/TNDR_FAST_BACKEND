@@ -1661,23 +1661,25 @@ module.exports = (srv) => {
 
 	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers) {
 
-		let aResults = [];
-		let approverName = "";
-		let approverEmailID = "";
-		let senderComment = "";
-		let approverComment = "";
-		let statusTime = null;
-		let submittedBy = null;
-		let approverDate = null;
-		let flowId = null;
-		let approverType = "";
-		let division = "";
-		let countryName = "";
-		let userName = "";
-		let userEmail = "";
-		let requiredAction = "";
 
 		approverTypes.forEach(function (type, index) {
+
+			let aResults = [];
+			let approverName = "";
+			let approverEmailID = "";
+			let senderComment = "";
+			let approverComment = "";
+			let statusTime = null;
+			let submittedBy = null;
+			let approverDate = null;
+			let flowId = null;
+			let approverType = "";
+			let division = "";
+			let countryName = "";
+			let userName = "";
+			let userEmail = "";
+			let requiredAction = "";
+			
 			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
 			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation);
 
