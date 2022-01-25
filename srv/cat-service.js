@@ -1816,9 +1816,10 @@ module.exports = (srv) => {
 
 	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers) {
 
-		let aResults = [];
+
 		approverTypes.forEach(function (type, index) {
 
+			let aResults = [];
 			let approverName = "";
 			let approverEmailID = "";
 			let senderComment = "";
