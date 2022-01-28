@@ -59,3 +59,18 @@ inner join SAP.ItalyDeliveries as italydeliveries on ltrim(materials.MaterialNum
     materials.Institute.InstituteName
     
 } ;
+
+entity PaMainFOCView as select from PriceAgreementFOC as FOC
+inner join PriceAgreementData.PriceAgreements pa on pa.CountryCode = FOC.CountryCode
+                                                                        and pa.OfferId = FOC.OfferID
+                                                                        and pa.ProductPackId = FOC.ProductCode
+
+{
+key pa.ID as PriceAgreementId:String,   
+key FOC.CountryCode,
+key FOC.OfferID,
+key FOC.ProductCode as MainProductId:String,
+key FOC.ProductPackId as FOCproductId:String
+
+    
+} group by pa.ID,FOC.CountryCode,FOC.OfferID,FOC.ProductCode,FOC.ProductPackId ;
