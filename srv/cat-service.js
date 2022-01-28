@@ -1649,7 +1649,7 @@ module.exports = (srv) => {
 
 		//For Thailand specific
 		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
-		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM');
+		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
 		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
 		if (oCDH && oNSM && oHBU) {
 			//If CDH approval is mandatory, lower levels do not need to approve
