@@ -221,25 +221,20 @@ module.exports = async (srv) => {
 
         const tx = cds.transaction(req);
     
-        try {
-            const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
-            const updatePromises = customerPrices.map(custPrice => updateCustomerPrice(custPrice, tx));
-            const result = await Promise.all(updatePromises);
+        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
 
-            // set customerPrices 'Synchronized' to true
-            await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
-
-            return req.reply(result);
-
-        } catch (error) {
-            console.log(`Synchronization of PricingAgreements failed\n`);
-            console.log(error);
-            if(error && error.response && error.response.status){
-                return req.reject(error.response.status, error.message);
-            } else {
-                return req.reject(error.message);
-            }
+        if (customerPrices && customerPrices.length <= 0) {
+            return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
+
+
+        const updatePromises = customerPrices.map(custPrice => updateCustomerPrice(custPrice, tx));
+        const result = await Promise.all(updatePromises);
+
+        // set customerPrices 'Synchronized' to true
+        await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
+
+        return req.reply(result);
 
     });
 
@@ -250,7 +245,7 @@ module.exports = async (srv) => {
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
-        let institute = await tx.run(SELECT.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 
         const body = getPriceAgreementRequestBodyTemplate(); 
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
@@ -356,6 +351,7 @@ module.exports = async (srv) => {
 
     };
 
+
     async function getBearerToken() {
 
         if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
@@ -386,22 +382,16 @@ module.exports = async (srv) => {
 
         const tx = cds.transaction(req);
     
-        try {
-            const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
-            const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));
-            const result = await Promise.all(updatePromises);
+        const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
 
-            return req.reply(result);
-
-        } catch (error) {
-            console.log(`Synchronization of FOC prices failed\n`);
-            console.log(error);
-            if(error && error.response && error.response.status){
-                return req.reject(error.response.status, error.message);
-            } else {
-                return req.reject(error.message);
-            }
+        if (customerPriceData && customerPriceData.length <= 0) {
+            return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
+
+        const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));
+        const result = await Promise.all(updatePromises);
+
+        return req.reply(result);
 
     });
 
@@ -409,17 +399,17 @@ module.exports = async (srv) => {
 
 
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
-        let priceAgreement = await tx.run(SELECT.from(PriceAgreements).where(wherePriceAgreementId));
+        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
 
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         const whereProductCode = ServiceHelper.buildFullWhere("ProductCode", "=", customerPrice.ProductPackId);
-        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", priceAgreement[0].OfferId);
-        const whereOfferID = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement[0].OfferId);
+        const whereOfferId = ServiceHelper.buildFullWhere("OfferId", "=", priceAgreement.OfferId);
+        const whereOfferID = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
 
-        let priceAgreementFOC = await tx.run(SELECT.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
-        let offerProduct = await tx.run(SELECT.from(PT_TMOFPR).where(whereCountry).where(whereProductCode).where(whereOfferID));
-        let institute = await tx.run(SELECT.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+        let priceAgreementFOC = await tx.run(SELECT.one.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
+        let offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereCountry).where(whereProductCode).where(whereOfferID));
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
@@ -437,37 +427,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.MaterialNumber);
         
-        return await sendFOCtoSAP(body);
-
-    };
-
-    async function sendFOCtoSAP(body){
-
-        if (body) {
-
-            const url = `${priceAgreementApi.Host}${priceAgreementApi.BasePath}${priceAgreementApi.ResourcePath}`;
-            const oauthCredentials = await getBearerToken();
-
-            console.log("Update Price Conditions oauthCredetials:", oauthCredentials);
-            console.log("Update Price Conditions proxyHost:", priceAgreementApi.ProxyHost);
-            console.log("Update Price Conditions proxyPort:", priceAgreementApi.ProxyPort);
-
-            return axios({
-                method: 'post',
-                url: url,
-                headers: {
-                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify(body),
-                proxy: {
-                    host: priceAgreementApi.ProxyHost,
-                    port: priceAgreementApi.ProxyPort
-                }
-            });
-        }
-
-        throw Error("The body of the request is missing.");
+        return await updatePriceConditions(body);
 
     };
 
