@@ -1511,7 +1511,7 @@ module.exports = (srv) => {
 
 		//For Thailand specific
 		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
-		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM');
+		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
 		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
 		if (oCDH && oNSM && oHBU) {
 			//If CDH approval is mandatory, lower levels do not need to approve
@@ -1662,22 +1662,23 @@ module.exports = (srv) => {
 	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers) {
 
 		let aResults = [];
-		let approverName = "";
-		let approverEmailID = "";
-		let senderComment = "";
-		let approverComment = "";
-		let statusTime = null;
-		let submittedBy = null;
-		let approverDate = null;
-		let flowId = null;
-		let approverType = "";
-		let division = "";
-		let countryName = "";
-		let userName = "";
-		let userEmail = "";
-		let requiredAction = "";
-
 		approverTypes.forEach(function (type, index) {
+
+			let approverName = "";
+			let approverEmailID = "";
+			let senderComment = "";
+			let approverComment = "";
+			let statusTime = null;
+			let submittedBy = null;
+			let approverDate = null;
+			let flowId = null;
+			let approverType = "";
+			let division = "";
+			let countryName = "";
+			let userName = "";
+			let userEmail = "";
+			let requiredAction = "";
+			
 			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
 			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation);
 
