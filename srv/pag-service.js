@@ -15,7 +15,8 @@ module.exports = async (srv) => {
 
     const {
 		CustomerPrices,
-        MaterialsView,
+        NewMaterialsView,
+        NewFOCMaterialsView,
         PriceAgreements
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
@@ -96,7 +97,8 @@ module.exports = async (srv) => {
         const calculateFields = async priceAgreement => {
 
             let customerPrices = priceAgreement.CustomerPrices;
-            let materials = priceAgreement.Materials;
+            //let newMaterials = priceAgreement.Materials;
+            
             let consumerPrice = priceAgreement.ConsumerPrice;
             const todaysDate = new Date();
 
@@ -109,12 +111,20 @@ module.exports = async (srv) => {
                 customerPrices = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreement));
             }
 
-            // Get Materials if needed
-            if(!materials){
-                let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
-                let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
-                materials = await tx.run(SELECT.from(MaterialsView).where(whereCountryCode).where(whereProductPackId));
-            }
+            // Get NewMaterials if needed
+            //if(!newMaterials){
+                //let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
+                //let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
+                let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
+                 let newMaterials = await tx.run(SELECT.from(NewMaterialsView).where(wherePriceAgreement));
+            //}
+
+            // Get NewFOCMaterials if needed
+            //if(!newMaterials){
+                //let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
+                //let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
+                let newFOCMaterials = await tx.run(SELECT.from(NewFOCMaterialsView).where(wherePriceAgreement));
+            //}
 
             // Get ConsumerPrices if needed
             if(!consumerPrice){
@@ -134,26 +144,19 @@ module.exports = async (srv) => {
             priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied || price.Applied === null) ;
             
             // calculate hasNewMaterials
+            
+           // If we don't have applied prices then hasnewmaterials is always FALSE. (so EVEN if we have new materials added)
             if(!customerPrices || customerPrices.length === 0){
                 priceAgreement.hasNewMaterials = false;
             }else {
-                priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
-            }
+                let hasNewMaterials = newMaterials.some(price => price.isNew);
+                let hasNewFOCMaterials = newFOCMaterials.some(price => price.isNew);
 
-            if(priceAgreement.CountryCode === 'IT'){
-                // include FOC products in filter logic
-                if( priceAgreement.FOC && priceAgreement.FOC.length > 0){
-                    let productArray = [];
-                    priceAgreement.FOC.forEach(FOC => {
-                        productArray.push(FOC.ProductPackId)
-    
-                    });
-                    let whereFocProduct = ServiceHelper.buildWhereExpression("ProductPackId", "or", productArray);
-                    let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
-                    materials = await tx.run(SELECT.from(MaterialsView).where(whereCountryCode).where(whereFocProduct));
-                    priceAgreement.hasNewMaterials = materials.some(price => price.isNew);
+                if(hasNewMaterials || hasNewFOCMaterials){
+                    priceAgreement.hasNewMaterials = true;
                 }
             }
+            
 
             // calculate hasNewPrice
             if(consumerPrice){
