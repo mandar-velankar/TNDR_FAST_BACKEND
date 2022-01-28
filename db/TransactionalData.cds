@@ -13,6 +13,7 @@ using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews
 using {com.bayer.SXTENDER.BankGuaranteeData} from './BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from './PriceAgreementData';
 
+entity CandidatePrices as projection on PriceAgreementData.CandidatePrices;
 entity PT_TMOFRS { //Offers
         TenderID              : String(50) not null;
     key OfferID               : String(30) not null;
@@ -348,7 +349,7 @@ entity ProductPricing: cuid, managed {
     key OfferID: String;
     key ProductCode: Integer;
     key CountryCode: String;
-    Warranty: Double;
+    Warranty: Integer;
     AgreementDuration: Integer;
     MonthlyRent: Double;
     MonthsPerInvoice: Integer;
@@ -368,6 +369,11 @@ entity FreeGoodsOther: cuid, managed {
     VAT: Double; // We store this to keep track of the VAT the moment we save FreeGoodsOther to the ProductPricing
     ProductPricing: Association to ProductPricing;
     ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+    Materials: Association to many MasterData.PT_TMSKUPRDPCK
+                                on Materials.CountryCode = 'IT'
+                                and Materials.ProductPackID = ProductPackId;
+
+
 }
 
 entity PT_TMPFIOM {

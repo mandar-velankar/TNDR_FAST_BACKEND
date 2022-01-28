@@ -531,6 +531,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     and offerProduct.CountryCode = productPricing.CountryCode
 {
     offerProduct.TenderID as TENDERID,
+    offerProduct.ProductCode,
     key offerProduct.OfferID as OFFERID,
     key offerProduct.SKU.PRODUCTPACKID as PRODUCTID,
     offerProduct.OfferType as OfferType,
@@ -555,6 +556,22 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.MoleculeName as MOLECULE_NAME,
 	offerProduct.SKUCountry.VTATax as VAT,
     ifnull(offerProduct.SKUCountry.COMMENT, '') as PRODUCT_COMMENT:String(500),
+
+    /* Start of missing SKU & SKUCountry fields*/
+    offerProduct.SKU.ACTIVERECORD as ACTIVERECORD,
+    offerProduct.SKU.HLEVEL6_CODE as HLEVEL6_CODE,
+    offerProduct.SKU.PCIName as PCI_NAME,
+    offerProduct.SKU.ACTIVE_SUBSTANCE as ACTIVE_SUBSTANCE,
+    offerProduct.SKU.ProductType as PRODUCT_TYPE,
+
+    offerProduct.SKUCountry.COUNTRYPRODUCTPACKID as COUNTRYPRODUCTPACKID,
+    offerProduct.SKUCountry.ACTIVERECORD as SKUCOUNTRY_ACTIVERECORD,
+    offerProduct.SKUCountry.Presentation_2 as PRESENTATION_2,
+    offerProduct.SKUCountry.GOV_CODE as GOV_CODE,
+    offerProduct.SKUCountry.CODE1 as CODE1,
+    offerProduct.SKUCountry.CODE2 as CODE2,
+    /* End of missing SKU & SKUCountry fields*/
+
 	offerProduct.UnitPerPack as UNIT,
     offerProduct.RequestedVolume as REQUESTED_VOLUME,
 	offerProduct.SORTER as SORTER,
@@ -689,6 +706,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
 {	
 	'PT_TMTNOFST(TENDERID=''' || offer.TenderID || ''',OFFERID=''' || offer.OfferID || ''',Active=1)' as OFFERSTATUSPATH:String(500),
 	offer.TenderID as TENDERID,
+    offer.Tender.InstituteID as INSTITUTE_ID,
     offer.Tender.Institute.InstituteType as INSTITUTE_TYPE,
     offer.Tender.Institute.State as INSTITUTE_STATE,
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
@@ -696,7 +714,9 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.Institute.InstituteName || ' - ' || offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
-    offer.Tender.Institute.InstituteName as INSTITUTENAME, 
+    offer.Tender.Institute.InstituteName as INSTITUTENAME,
+    offer.Tender.Institute.VatCode as VATCODE,
+    offer.Tender.Institute.TaxCode as TAXCODE,
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
@@ -756,11 +776,14 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
  group by offer.TenderID,
           offer.OfferID,
           offer.Tender.TenderChannel,
+          offer.Tender.InstituteID,
           offer.Tender.Institute.InstituteType,
           offer.Tender.Institute.State,
           offer.Tender.Classification,
           offer.Tender.TenderChannel,
           offer.Tender.Institute.InstituteName,
+          offer.Tender.Institute.VatCode,
+          offer.Tender.Institute.TaxCode,
           offer.Tender.TenderName,
           offer.OfferStatus.STATUS,
           offer.Tender.Country.ApprovalType,

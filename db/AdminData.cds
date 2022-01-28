@@ -159,6 +159,8 @@ entity SchedulerApiConfigOAuth : cuid {
 // }
 
 entity SchedulerErrorLog: cuid {
+    JobName          : String;
+    JobDescription   : String;
     ErrorMessage     : String;
     ResourceURL      : String;
     ConsultationDate : Timestamp;

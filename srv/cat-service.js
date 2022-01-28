@@ -15,6 +15,7 @@ const XLSXHelper = require("./utils/XLSXHelper");
 const wordTemplate = require("easy-template-x");
 const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
 const { Service } = require('@sap/cds');
+const NumberHelper = require("./utils/NumberHelper");
 
 module.exports = (srv) => {
 
@@ -23,13 +24,13 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -151,7 +152,7 @@ module.exports = (srv) => {
 
 
 
-	function buildDirectProducts(entityBrands, directBrands, countryProducts) {
+	function buildDirectProducts(entityBrands, directBrands, countryProducts, productSKUs) {
 		let results = [];
 		entityBrands.forEach(entityBrand => {
 			directBrand = directBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
@@ -173,14 +174,15 @@ module.exports = (srv) => {
 						COMMISSION_RATE: directBrand.COMMISSION_RATE,
 						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
 						CHANNEL: 'Direct',
-						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN
+						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
 					});
 				});
 			}
 		});
 		return results;
 	}
-	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds) {
+	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, productSKUs) {
 		let results = [];
 		entityBrands.forEach(entityBrand => {
 			distributorBrand = distributorBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
@@ -205,7 +207,8 @@ module.exports = (srv) => {
 							CHANNEL: 'Distributor',
 							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 							COGS: countryProduct.COGS,
-							PACKFACTOR: countryProduct.PACK_SIZE
+							PACKFACTOR: countryProduct.PACK_SIZE,
+							SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
 						});
 					});
 				});
@@ -679,8 +682,16 @@ module.exports = (srv) => {
 				PRODUCT_ID: product.PRODUCTID
 			};
 
+			const whereCandidatePrices = {
+				CountryCode: offer.COUNTRYCODE,
+				ProductPackId: product.PRODUCTID,
+				InstituteId: offer.INSTITUTE_ID
+			};
+
 			
 			const countryPreApprovedPrice = await tx.run(SELECT.one.from(CountryPreApprovedPrices).where(whereProduct));
+			const candidatePrice = await tx.run(SELECT.one.from(CandidatePrices).where(whereCandidatePrices));
+
 			let minPreApprovedPrice = countryPreApprovedPrice && (uom === "Pack" ? countryPreApprovedPrice.MIN_PACK_PRICE : countryPreApprovedPrice.MIN_UNIT_PRICE);
 
 
@@ -688,26 +699,27 @@ module.exports = (srv) => {
 
 				// if a product is offered above or equal to pre-approved price, 
 				// business approval is not mandatory even if additional discount on offer is not 0%).
-				if(netOfferPrice && minPreApprovedPrice && netOfferPrice >= minPreApprovedPrice){
-					validationType = 1;	
+				if(!minPreApprovedPrice || (minPreApprovedPrice && netOfferPrice && netOfferPrice < minPreApprovedPrice)){
+						//if pre approved price exists, and net offer price is below the pre approved price OR the pre approved price does not exist, execute following check
+					if(netOfferPrice && minPreApprovedPrice && candidatePrice && candidatePrice.Price <= netOfferPrice) {
+						validationType = 1;	//if pre-approved price exists, and a lower or an equal price has been approved for the same account (candidate): 
+											//only contract manager notification should be sent
+					} else {
+						validationType = 3;	//else all approvals should be mandatory
+					}
 				}else{
-					validationType = 3;	
+					validationType = 1; // only contract manager notification should be sent
 				}
-
-
 			} else {
-				validationType = 1;
+				validationType = 1; //no additional discount exists; only contract manager notification should be sent
 			}
-
-			
 		} else {
-			validationType = 3;	
-
+			validationType = 3;	//if the offer type differs from selling, all approvals should be mandatory
 		}
 
 		aApproverTypes.map(async function (oApproverType) {	
 			// for Supply Chain, optional validation type should still send a notification
-			if(oApproverType.ApproverType === "Supply Chain" && validationType === 1 ){
+			if(oApproverType.ApproverType === "Contract Manager" && validationType === 1 ){
 				oApproverType.ValidationType = 2;
 			} else {
 				oApproverType.ValidationType = validationType;	
@@ -1141,6 +1153,15 @@ module.exports = (srv) => {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
 			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes);
 
+			//Get corresponding ProductPricing
+			const whereProductPricing = {
+				OfferID: offer.OFFERID,
+				ProductCode: offerProduct.ProductCode,
+				CountryCode: offer.COUNTRYCODE
+			}
+
+			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
+
 			//Get all prices, ammounts and cogs in all units
 			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
 			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
@@ -1169,6 +1190,7 @@ module.exports = (srv) => {
 				SHELFLIFE: offerProduct.SHELFLIFE,
 				PRESENTATION: offerProduct.PRESENTATION,
 				VAT: offerProduct.VAT,
+				VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.VAT),
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
@@ -1182,6 +1204,7 @@ module.exports = (srv) => {
 				SAMPLES_UNIT: offerProduct.SAMPLES * toUnitFactor,
 				SAMPLES_PACK: offerProduct.SAMPLES * toPackFactor,
 				REGISTERED_PRICE: offerProduct.REGISTERED_PRICE,
+				REGISTERED_PRICE_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.REGISTERED_PRICE),
 				OFFER_PRICE: offerProduct.OFFER_PRICE,
 				FOC: productInfo.CommnonProductInfo.FocString,
 				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit, //Total Volume(units) (thailand - new column missing in the screenshot)
@@ -1193,16 +1216,28 @@ module.exports = (srv) => {
 				REQ_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.OfferPriceUnitEurBudget,
 				REQ_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.OfferPriceUnitEurSpot,
 				NET_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPriceUnit,
+				NET_PRICE_UNIT_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPriceUnit),
 				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT),   //NSP incl VAT (thailand)
+				NET_PRICE_UNIT_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT)),
 				NET_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPricePack,
+				NET_PRICE_PACK_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPricePack),
+				NET_PRICE_PACK_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPricePack * (1 + offerProduct.VAT),
+				NET_PRICE_PACK_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPricePack * (1 + offerProduct.VAT)),
 				NET_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.NetPriceUnitEurBudget,
 				NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
 				NET_OFFER_PRICE: offerProduct.NET_OFFER_PRICE,
 				NET_PRICE: offerProduct.NET_PRICE,
+				ADDITIONAL_DISCOUNT: offerProduct.ADDITIONAL_DISCOUNT,
+				ADDITIONAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.ADDITIONAL_DISCOUNT),
+				MAX_PRICE_NHS_PP: productPricing.MaxPriceNhsPP,
+				MAX_PRICE_NHS_PP_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPP),
+				MAX_PRICE_NHS_PU: productPricing.MaxPriceNhsPU,
+				MAX_PRICE_NHS_PU_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPU),
 				COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
 				COGS_EUR_UNIT: productInfo.CommnonProductInfo.CogsEurUnit,
 				COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
 				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
+				GROSS_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales),
 				NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
 				NET_SALES_EUR_BUDGET: productInfo.CommnonProductInfo.NetSalesEurBudget,
 				NET_SALES_EUR_SPOT: productInfo.CommnonProductInfo.NetSalesEurSpot,
@@ -1224,6 +1259,7 @@ module.exports = (srv) => {
 				NEW_APPROVAL: offerProduct.NEW_APPROVAL,
 				BUDGETED_PROFITABILITY: offerProduct.BUDGETED_PROFITABILITY,
 				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT),
+				GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT)),
 				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * offerProduct.VAT,
 				//NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
 				//HBU: productInfo.ProductValidation.HBU,
@@ -1255,7 +1291,23 @@ module.exports = (srv) => {
 				MINANNPURCH: offerProduct.MinAnnPurch,
 				FOC_STEP: offerProduct.FOC_STEP,
 				OFFER_TYPE: offerProduct.OfferType,
-				FreeGoodsOther: aFreeGoodsOtherTemp
+				FreeGoodsOther: aFreeGoodsOtherTemp,
+
+				//missing SKU & SKUCountry fields
+				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
+				ACTIVERECORD: offerProduct.ACTIVERECORD,
+				HLEVEL6_CODE: offerProduct.HLEVEL6_CODE,
+				PCI_NAME: offerProduct.PCI_NAME,
+				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
+				PRODUCT_TYPE: offerProduct.PRODUCT_TYPE,
+
+				SKUCOUNTRY_ACTIVERECORD: offerProduct.SKUCOUNTRY_ACTIVERECORD,
+				PRESENTATION_2: offerProduct.PRESENTATION_2,
+				PRODUCT_COMMENT: offerProduct.PRODUCT_COMMENT,
+				GOV_CODE: offerProduct.GOV_CODE,
+				CODE1: offerProduct.CODE1,
+				CODE2: offerProduct.CODE2,
+				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1343,13 +1395,15 @@ module.exports = (srv) => {
 
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
-		let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
+		// let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
+		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
 
 		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
-		let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
+		// let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
+		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat)} ${offer.CURRENCY} only`;
 		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
 
 		//Division can be Pharma or Radiology, this determines division for country approvers
@@ -1495,6 +1549,8 @@ module.exports = (srv) => {
 			INSTITUTENAME: offer.INSTITUTENAME,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
 			INSTITUTE_STATE: offer.INSTITUTE_STATE,
+			VATCODE: offer.VATCODE,
+			TAXCODE: offer.TAXCODE,
 			CUSTOMER_CODE: offer.CUSTOMER_CODE,
 			DIVISION: division,//not correct, should be consolidated from product information
 			OFFERDATE: offer.OFFERDATE,
@@ -1593,7 +1649,7 @@ module.exports = (srv) => {
 
 		//For Thailand specific
 		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
-		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM');
+		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
 		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
 		if (oCDH && oNSM && oHBU) {
 			//If CDH approval is mandatory, lower levels do not need to approve
@@ -1617,9 +1673,9 @@ module.exports = (srv) => {
 			case "Country Business":
 			case "Regional Business":
 			case "Manager Business Operations":
+			case "Legal":
 				return "Profitability";
 			case "Regulatory":
-			case "Legal":
 			case "Supply Chain":
 				return "Quotation";
 			default:
@@ -1744,22 +1800,23 @@ module.exports = (srv) => {
 	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers) {
 
 		let aResults = [];
-		let approverName = "";
-		let approverEmailID = "";
-		let senderComment = "";
-		let approverComment = "";
-		let statusTime = null;
-		let submittedBy = null;
-		let approverDate = null;
-		let flowId = null;
-		let approverType = "";
-		let division = "";
-		let countryName = "";
-		let userName = "";
-		let userEmail = "";
-		let requiredAction = "";
-
 		approverTypes.forEach(function (type, index) {
+
+			let approverName = "";
+			let approverEmailID = "";
+			let senderComment = "";
+			let approverComment = "";
+			let statusTime = null;
+			let submittedBy = null;
+			let approverDate = null;
+			let flowId = null;
+			let approverType = "";
+			let division = "";
+			let countryName = "";
+			let userName = "";
+			let userEmail = "";
+			let requiredAction = "";
+			
 			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
 			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation);
 
@@ -1874,6 +1931,8 @@ module.exports = (srv) => {
 			TENDERID: offerValidation.TENDER_REFERENCE, //offerValidation.TENDERID,
 			OFFERID: offerValidation.OFFERID,
 			INSTITUTENAME: offerValidation.INSTITUTENAME,
+			TAXCODE: offerValidation.TAXCODE,
+			VATCODE: offerValidation.VATCODE,
 			CURRENCY: offerValidation.CURRENCY,
 			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2),
 			AMOUNT_IN_WORDS: offerValidation.AMOUNT_IN_WORDS,
@@ -1972,7 +2031,27 @@ module.exports = (srv) => {
 				MINCONTRACTUAL: d.MinContractual,
 				MINANNPURCH: d.MinAnnPurch,
 				FOC_STEP: d.FOC_STEP,
-				FreeGoodsOther: d.FreeGoodsOther,
+				MOLECULE_NAME: d.MOLECULE_NAME,
+				
+				//missing SKU & SKUCountry fields
+				MOLECULE_NAME: d.MOLECULE_NAME,
+				ACTIVERECORD: d.ACTIVERECORD,
+				HLEVEL6_CODE: d.HLEVEL6_CODE,
+				PCI_NAME: d.PCI_NAME,
+				ACTIVE_SUBSTANCE: d.ACTIVE_SUBSTANCE,
+				PRODUCT_TYPE: d.PRODUCT_TYPE,
+
+				SKUCOUNTRY_ACTIVERECORD: d.SKUCOUNTRY_ACTIVERECORD,
+				PRESENTATION_2: d.PRESENTATION_2,
+				PRODUCT_COMMENT: d.PRODUCT_COMMENT,
+				GOV_CODE: d.GOV_CODE,
+				CODE1: d.CODE1,
+				CODE2: d.CODE2,
+				QTY_THRESHOLD: d.QTY_THRESHOLD,
+				//end of missing SKU & SKUCountry fields
+
+				FreeGoodsOther: d.FreeGoodsOther
+				
 			}
 		});
 	}
@@ -2145,8 +2224,7 @@ module.exports = (srv) => {
 				results = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), results);
 			}
 			else if (channel === "Distributor") {
-				let whereActiveRecord = ServiceHelper.buildFullWhere("ACTIVE_RECORD", "=", "Yes");
-				let distributorDistributors = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereActiveRecord));
+				let distributorDistributors = await tx.run(SELECT.from(DistributorBrand).where(whereCountry));
 				results = distributorDistributors.map(function (d) {
 					let uniqueId = d.COUNTRY_CODE.concat("_")
 						.concat(instituteId).concat("_")
@@ -2179,6 +2257,7 @@ module.exports = (srv) => {
 			let instituteIds = ServiceHelper.getWhereValues(req, "INSTITUTE_ID");
 			//Get filters
 			let whereCountry = ServiceHelper.buildWhere(req, "COUNTRY_CODE");
+			let whereCountrySKU = ServiceHelper.buildFullWhere("CountryCode", "=", whereCountry[2].val);
 			//  let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
 			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID", "or", instituteIds);
 			let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
@@ -2245,14 +2324,19 @@ module.exports = (srv) => {
 					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
 				}
 			}
+
+			//get SKU code for products
+			//Get filters
+			let aProductSKUs = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereCountrySKU));
+
 			//Get products available to institute either Direct or through Distributor
 			if (channel === "Direct") {
 				var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
-				results = buildDirectProducts(entityBrands, directBrands, countryProducts);
+				results = buildDirectProducts(entityBrands, directBrands, countryProducts, aProductSKUs);
 			}
 			else if (channel === "Distributor") {
 				var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
-				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds);
+				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, aProductSKUs);
 			}
 		}
 		// sort by countrycode, then brand name, then product name

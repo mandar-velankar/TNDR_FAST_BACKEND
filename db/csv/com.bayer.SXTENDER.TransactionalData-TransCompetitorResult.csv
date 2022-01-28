@@ -1,24 +1,51 @@
 OFFERID,PRODUCTCODE,OUTCOME,AWARDEDCOMPANY,AWARDEDPRODUCT,AWARDEDPRICE,CURRENCY,AWARDEDQTY,UOM,REASON,COMMENT,LASTUPDATE,UPDATEDBY,DELETED
-SA-18-208-1001-BLC-13,100029,Won,PHARMACEUTICAL INDUSTRIES CO (SAOG),OMACIP,0.088,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100029,Won,SPIMACO,CIPROMAX FC TABS 500MG 10G,0.3,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100080,Won,Jazeera Pharamceutical Industries,Zersa 600 mg Tab,120.0,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100080,Won,PFIZER INC,Zyvox 600 Mg,67.5,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-JO-18-299-1001-BME-11-A-R1,100058,Won,N.V Organon / Part of MSD,MARVELON TABS,0.672,USD,0,Pack,Not Specified,,2018-05-20,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-11,100039,Won,GE HEALTH CARE,OMNISCAN,66.0,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-11,100054,Won,GE HEALTH CARE,OMNISCAN,41.63,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-11,100085,Won,GE HEALTH CARE,OMNIPAQUE,19.13,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-11,100087,Won,GE HEALTH CARE,VISIPAQUE,73.2479,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-12,100097,Won,Gedeon Richter Secondary Packaging BY AJA PHARMA,Midiana Tablet,0.697,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100018,Won,SPIMACO,MOXIVE FC TAB 400MG 5 P,2.95,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100027,Won,PHARMACEUTICAL SOLUTIONS INDUSTRY,Cipro - Sol 100 ml,3.55,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-14,100045,Won,PFIZER SAUDI LIMITED,XYNTHA 1000 I.U. POWDER FOR SOLUTION FOR INJECTION,490.1961,SAR,0,Unit,Not Specified,,2018-08-02,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-14,100046,Won,PFIZER SAUDI LIMITED,XYNTHA 250 I.U. POWDER FOR SOLUTION FOR INJECTION,138.75,SAR,0,Unit,Not Specified,,2018-08-02,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-14,100047,Won,PFIZER SAUDI LIMITED,XYNTHA 500 I.U. POWDER FOR SOLUTION FOR INJECTION,243.5065,SAR,0,Unit,Not Specified,,2018-08-02,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-14,100087,Won,GE HEALTH CARE,VISIPAQUE,73.2479,SAR,0,Unit,Not Specified,,2018-08-02,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100030,Won,KHALID BIN SAAD INTERNATIONAL COMPANY,CIPROCIN 250MG. TAB,0.065,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100031,Won,JAMJOOM PHARMA,Ciproxen 750mg Coated Tab,0.7,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100092,Won,Tabuk Pharmaceutical Manufacturing Company,TABUREX 10 MG,3.95,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100093,Won,Tabuk Pharmaceutical Manufacturing Company,TABUREX 15 MG,3.45,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-SA-18-208-1001-BLC-13,100095,Won,Tabuk Pharmaceutical Manufacturing Company,TABUREX 20 MG,3.32,SAR,0,Unit,Not Specified,,2018-07-04,"Sidharth Dhas, Sheryl",1
-JO-18-310-1003-BME-11,100072,Won,Hikma Jordan,Aminor 5mg Tab,0.93,USD,57450,Pack,,,2018-10-08,"Sidharth Dhas, Sheryl",1
-IQ-17-100-1002-BPH-11,100047,Won,Pfizer,Xyntha,93.75,USD,0,Pack,Not Specified,$ 125 / vial + 25% FOC = $ 93.75 / IU,2018-05-20,"Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100029,"Won","PHARMACEUTICAL INDUSTRIES CO (SAOG)","OMACIP","0.088","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100029,"Won","SPIMACO","CIPROMAX FC TABS 500MG 10G","0.3","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100080,"Won","Jazeera Pharamceutical Industries","Zersa 600 mg Tab","120.0","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100080,"Won","PFIZER INC","Zyvox 600 Mg","67.5","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"JO-18-299-1001-BME-11-A-R1",100058,"Won","N.V Organon / Part of MSD","MARVELON TABS","0.672","USD",0,"Pack","Not Specified",,"2018-05-20","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-11",100039,"Won","GE HEALTH CARE","OMNISCAN","66.0","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-11",100054,"Won","GE HEALTH CARE","OMNISCAN","41.63","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-11",100085,"Won","GE HEALTH CARE","OMNIPAQUE","19.13","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-11",100087,"Won","GE HEALTH CARE","VISIPAQUE","73.2479","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-12",100097,"Won","Gedeon Richter Secondary Packaging BY AJA PHARMA","Midiana Tablet","0.697","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100018,"Won","SPIMACO","MOXIVE FC TAB 400MG 5 P","2.95","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100027,"Won","PHARMACEUTICAL SOLUTIONS INDUSTRY","Cipro - Sol 100 ml","3.55","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-14",100045,"Won","PFIZER SAUDI LIMITED","XYNTHA 1000 I.U. POWDER FOR SOLUTION FOR INJECTION","490.1961","SAR",0,"Unit","Not Specified",,"2018-08-02","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-14",100046,"Won","PFIZER SAUDI LIMITED","XYNTHA 250 I.U. POWDER FOR SOLUTION FOR INJECTION","138.75","SAR",0,"Unit","Not Specified",,"2018-08-02","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-14",100047,"Won","PFIZER SAUDI LIMITED","XYNTHA 500 I.U. POWDER FOR SOLUTION FOR INJECTION","243.5065","SAR",0,"Unit","Not Specified",,"2018-08-02","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-14",100087,"Won","GE HEALTH CARE","VISIPAQUE","73.2479","SAR",0,"Unit","Not Specified",,"2018-08-02","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100030,"Won","KHALID BIN SAAD INTERNATIONAL COMPANY","CIPROCIN 250MG. TAB","0.065","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100031,"Won","JAMJOOM PHARMA","Ciproxen 750mg Coated Tab","0.7","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100092,"Won","Tabuk Pharmaceutical Manufacturing Company","TABUREX 10 MG","3.95","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100093,"Won","Tabuk Pharmaceutical Manufacturing Company","TABUREX 15 MG","3.45","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100095,"Won","Tabuk Pharmaceutical Manufacturing Company","TABUREX 20 MG","3.32","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"JO-18-310-1003-BME-11",100072,"Won","Hikma Jordan","Aminor 5mg Tab","0.93","USD",57450,"Pack",,,"2018-10-08","Sidharth Dhas, Sheryl",1
+"IQ-17-100-1002-BPH-11",100047,"Won","Pfizer","Xyntha","93.75","USD",0,"Pack","Not Specified","$ 125 / vial + 25% FOC = $ 93.75 / IU","2018-05-20","Sidharth Dhas, Sheryl",1
+"IQ-20-1002-1-R1",100086,"Won","GE","Omnipaque","7.9","USD",164500,,"Lowest Price","Awarded Quantity is estimated. Award is valued at approx. 1.3M","2020-10-15","GCXYS",0
+"SA-20-1064-1-R1",100041,"Won","GUERBET","TELEBRIX GASTRO","86.0","SAR",0,,"Not Specified","Won against different request nos.","2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100084,"Won","GE HEALTH CARE","Omnipaque 300mg/ml 100ml","36.2","SAR",0,,"Lowest Price",,"2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100085,"Won","GE HEALTH CARE","Omnipaque 300mg/ml 50ml","18.2","SAR",0,,"Lowest Price","Split Award","2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100085,"Won","GUERBET","XENETIX 300/50","39.0","SAR",0,,"Not Specified","Split Award","2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GE HEALTH CARE","Omnipaque 350mg/ml 100ml","38.2","SAR",0,,"Lowest Price","Split Award","2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GE Health Care","Visipaque 370 / 100ml","121.8","SAR",0,,"Not Specified",,"2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GUERBET","XENETIX 350/100","79.0","SAR",0,,"Not Specified","Split Award","2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GE Health Care","Visipaque 370 / 50ml","73.0","SAR",0,,"Not Specified",,"2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GE Healthcare","OMNIPAQUE 350MG/ML 50ML","19.2","SAR",0,,"Lowest Price","Split Award","2021-02-04","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GUERBET","XENETIX 350/50","43.5","SAR",0,,"Not Specified","Split Award","2021-02-04","GCXYS",0
+"TH-21-1003-1-R1",100192,"Lost","Test competitor","Test Prod.","180.0","THB",200,,"High Price",,"2021-05-04","EUTVP",0
+"SA-20-1028-1",100011,"Won","Pfizer","OtherProduct","120.0","SAR",760,,"Not Specified","Split award","2021-05-06","EUTVP",0
+"AR-21-1039-1",200145,"Won","Company A","Product A","96.0","USD",500,"Pack","Short Lead Time",,"2021-05-06","SGQMT",0
+"CL-21-1030-1",200156,"Lost","Biogen","Occulos","500000.0","CLP",0,,"Not Specified",,"2021-06-23","EUTVP",0
+"CL-21-1033-1",200171,"Won","Biogen","OTLERAX",,,200,,"Not Specified","Split award","2021-06-23","EUTVP",0
+"CL-21-1033-1",200156,"Won","Vertex","AProduct",,,0,,"Not Specified",,"2021-06-23","EUTVP",0
+"IT-21-1027-1",200206,"Lost","Pfizer","Product","2000.0","EUR",0,,"High Price",,"2021-10-08","EUTVP",0
+"IT-21-1032-1",200205,"Lost","Biogen","EyeProd",,,0,,"Not Specified",,"2021-10-19","EUTVP",0
+"IT-21-1056-1",200205,"Lost","Test comp","Test prod","500.0","EUR",0,"Pack","High Price",,"2021-10-19","GGKKD",0
+"IT-21-1057-1",200210,"Won","test","test","70.0","EUR",0,,"Lowest Price",,"2021-10-19","GGKKD",0
+"IT-21-1058-1",200211,"Won","Pfizer","Eliquis","1.1","EUR",0,,"Price / Technical Offer",,"2021-10-19","SGQMT",0
+"IT-21-1047-1",200211,,"XXX","PRADAXA","1.3","EUR",0,,,,"2021-10-20","BIAOV",0
+"IT-21-1047-1",200211,"Won","Pfizer","Eliquis","1.1","EUR",0,,"Price / Technical Offer",,"2021-10-20","BIAOV",0
+"IT-21-1062-1",200203,,"NOVARTIS","EXTAVIA","42.0","EUR",0,,,,"2021-10-22","BIAOV",0
+"IT-21-1072-1",200203,,"NOVARTIS","EXTAVIA","27.52",,0,,,,"2021-10-22","BIAOV",0
+"IT-21-1104-1",200203,"Won","Novartis","Extavia","775.0","EUR",500,,"Lowest Price",,"2021-11-19","GBJWK",0
