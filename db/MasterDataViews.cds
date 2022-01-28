@@ -103,7 +103,7 @@ inner join CountryBrands cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLe
 	dstbr.PaymentTerms as PAYMENT_TERMS,
 	dstbr.CommissionRate as COMMISSION_RATE,
 	dstbr.ActiveRecord as ACTIVE_RECORD
-};
+} where dstbr.ActiveRecord = 'Yes' and dstbr.Distributor.ActiveRecord = 'Yes';
 
 //Distributor brand policy with aggregated data for front-end
 entity AggregatedDistributorBrandPolicies as SELECT from MasterData.PT_TMDISBRD as DistributorBrands
