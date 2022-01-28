@@ -11,7 +11,9 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity CandidatePrices as projection on PriceAgreementData.CandidatePrices;
     entity CustomerPrices as select from PriceAgreementData.CustomerPrices;
     entity ConsumerPrices as select from MasterDataViews.MostRecentConsumerPricesView;
-    entity Materials as projection on PriceAgreementData.MaterialsView;
+    //entity Materials as projection on PriceAgreementData.MaterialsView;
+    entity NewMaterialsView as projection on PriceAgreementData.NewMaterialsView;
+    entity NewFOCMaterialsView as projection on PriceAgreementData.NewFOCMaterialsView;
     entity PT_TMINST as projection on MasterData.PT_TMINST;
     entity PT_TMCTPRDPCK as projection on MasterData.PT_TMCTPRDPCK;
     entity PT_TMTEND @(cds.redirection.target:true) as projection on TransactionalData.PT_TMTEND;
@@ -22,6 +24,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity MaterialsFOC as projection on TransactionalData.ProductPricing;
     entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
     entity FreeGoodsOther as projection on TransactionalData.FreeGoodsOther;
+    entity PaMainFOCView as projection on PriceAgreementDataViews.PaMainFOCView;
 
     action syncPriceAgreements(ids : array of String);
     action syncFocCustPrices(ids : array of String);
