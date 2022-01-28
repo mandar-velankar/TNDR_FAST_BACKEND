@@ -701,7 +701,7 @@ module.exports = (srv) => {
 				// business approval is not mandatory even if additional discount on offer is not 0%).
 				if(!minPreApprovedPrice || (minPreApprovedPrice && netOfferPrice && netOfferPrice < minPreApprovedPrice)){
 						//if pre approved price exists, and net offer price is below the pre approved price OR the pre approved price does not exist, execute following check
-					if(netOfferPrice && minPreApprovedPrice && candidatePrice && candidatePrice.Price <= minPreApprovedPrice) {
+					if(netOfferPrice && minPreApprovedPrice && candidatePrice && candidatePrice.Price <= netOfferPrice) {
 						validationType = 1;	//if pre-approved price exists, and a lower or an equal price has been approved for the same account (candidate): 
 											//only contract manager notification should be sent
 					} else {
