@@ -4,7 +4,8 @@ const proxy = require("@sap/cds-odata-v2-adapter-proxy");
 const args = process.argv.slice(2);
 const host = "0.0.0.0";
 const port = process.env.PORT || 4004;
-const jobScheduler = require("./jobs/scheduler");
+// const jobScheduler = require("./jobs/scheduler");
+const jobManager = require("./jobs/JobManager");
 
 (async () => {
   const app = express();
@@ -19,6 +20,7 @@ const jobScheduler = require("./jobs/scheduler");
   // OData V2
   app.use(proxy({path: "v2"}));
   // OData V4
+  await cds.serve("SchedulerService").from("./srv/").in(app);
   await cds.serve("EpaService").from("./srv/").in(app);
   await cds.serve("CatalogService").from("./srv/").in(app);
   await cds.serve("PolicyService").from("./srv/").in(app);
@@ -33,13 +35,15 @@ const jobScheduler = require("./jobs/scheduler");
   await cds.serve("ExternalService").from("./srv/").in(app);
 
   // Jobs Scheduler
-  const scheduler = await jobScheduler();
-  scheduler.mercadoPublico.fetchTenders('00 00 * * *').start();
-  scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
-  scheduler.mercadoPublico.fetchPurchaseOrders('00 00 * * *').start();
 
-  jobScheduler.ItalyJobs.processMaterials('57 10 * * *').start();
-  jobScheduler.ItalyJobs.processCustomers('57 10 * * *').start();
+  jobManager.registerJobs();
+  // const scheduler = await jobScheduler();
+  // scheduler.mercadoPublico.fetchTenders();//('00 00 * * *').start();
+  // scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
+  // scheduler.mercadoPublico.fetchPurchaseOrders('00 00 * * *').start();
+
+  // jobScheduler.ItalyJobs.processMaterials('57 10 * * *').start();
+  // jobScheduler.ItalyJobs.processCustomers('57 10 * * *').start();
 
   
   
