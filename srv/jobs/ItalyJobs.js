@@ -1,10 +1,11 @@
 const cds = require('@sap/cds');
-const BaseCron = require('cron-es6');
+// const BaseCron = require('cron-es6');
+const BaseJob = require('./BaseJob');
 
-module.exports.ProcessMaterials = class ProcessMaterials extends BaseCron {
+module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
-    constructor(cronTime) {
-        super('ProcessMaterials', cronTime);
+    constructor(jobName,jobTime) {
+        super(jobName,jobTime);
     }
 
     /**
@@ -25,17 +26,18 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseCron {
 
         // when the job has finished, call the stop()
         // this will trigger onComplete method
-        this.stop();
+        // this.stop();
+        console.log('Processing Italy materials finished.');
     }
 
     /**
      * Triggered when the job has finished.
      * You have to call the job.stop() method when the job is done.
      */
-    //override
-    async onComplete() {
-        console.log('Processing Italy materials finished.');
-    }
+    // //override
+    // async onComplete() {
+    //     console.log('Processing Italy materials finished.');
+    // }
 
 
     async processNewMaterials(){
@@ -481,10 +483,10 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseCron {
 };
 
 
-module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
+module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
-    constructor(cronTime) {
-        super('ProcessCustomers', cronTime);
+    constructor(jobName,jobTime) {
+        super(jobName,jobTime);
     }
 
     /**
@@ -504,7 +506,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
 
         // when the job has finished, call the stop()
         // this will trigger onComplete method
-        this.stop();
+        // this.stop();
+        console.log('Processing Italy customers finished.');
     }
 
     /**
@@ -512,9 +515,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseCron {
      * You have to call the job.stop() method when the job is done.
      */
     //override
-    async onComplete() {
-        console.log('Processing Italy customers finished.');
-    }
+    // async onComplete() {
+    //     console.log('Processing Italy customers finished.');
+    // }
 
 
     async processCustomers(){

@@ -342,11 +342,11 @@ module.exports = async (srv) => {
                     'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
                     'Content-Type': 'application/json'
                 },
-                data: JSON.stringify(body),
+                data: JSON.stringify(body)/*, when testing locally or on BTP, comment out the proxy
                 proxy: {
                     host: priceAgreementApi.ProxyHost,
                     port: priceAgreementApi.ProxyPort
-                }
+                }*/
             });
         }
 
@@ -370,11 +370,11 @@ module.exports = async (srv) => {
                 },
                 data: qs.stringify({
                     'grant_type': oauthAuth.GrantType
-                }),// when testing locally, comment out the proxy
+                })/*, when testing locally, comment out the proxy
                 proxy: {
                     host: priceAgreementApi.ProxyHost,
                     port: priceAgreementApi.ProxyPort
-                }
+                }*/
             });
         }
 

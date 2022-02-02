@@ -151,6 +151,11 @@ entity SchedulerApiConfigOAuth : cuid {
     ClientSecret  : String;
 }
 
+entity SchedulerJobConfig: cuid , managed{
+    JobName : String;
+    JobTime : String;
+}
+
 // entity SchedulerJobs: cuid {
 //     JobName          : String;
 //     StartedAt        : Timestamp;
