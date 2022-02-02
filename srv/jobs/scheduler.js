@@ -285,11 +285,11 @@ module.exports = async () => {
           },
           data: qs.stringify({
             'grant_type': this.grantType
-          }),// when testing locally, comment out the proxy
+          })/*, when testing locally, comment out the proxy
           proxy: {
             host: PROXY_HOST,
             port: PROXY_PORT
-          }
+          }*/
         });
       }
       throw Error("Only use bearer token for OAUTH config");
