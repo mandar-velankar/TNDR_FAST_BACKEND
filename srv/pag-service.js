@@ -281,12 +281,12 @@ module.exports = async (srv) => {
                   "MESTYP": "COND_A",
                   "MESCOD": "EXT",
                   "MESFCT": "ES",
-                  "SNDPOR": "Q2RM508",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508)
+                  "SNDPOR": "",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
                   "SNDPRT": "LS",
                   "SNDPRN": "FAST_IT",
-                  "RCVPOR": "SAPQ2R", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R)
+                  "RCVPOR": "",  //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
                   "RCVPRT": "LS",
-                  "RCVPRN": "Q2RM508", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508)
+                  "RCVPRN": "",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | | the value is added per environment in the CPI configuration
                   "CREDAT": 20210916,
                   "CRETIM": 144213,
                   "SERIAL": 20210810101046
@@ -453,12 +453,12 @@ module.exports = async (srv) => {
                   "MESTYP": "COND_A",
                   "MESCOD": "EXT",
                   "MESFCT": "ES",
-                  "SNDPOR": "Q2RM508",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508)
+                  "SNDPOR": "",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
                   "SNDPRT": "LS",
                   "SNDPRN": "FAST_IT",
-                  "RCVPOR": "SAPQ2R", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R)
+                  "RCVPOR": "", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
                   "RCVPRT": "LS",
-                  "RCVPRN": "Q2RM508", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508)
+                  "RCVPRN": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
                   "CREDAT": 20210916,
                   "CRETIM": 144213,
                   "SERIAL": 20210810101046
