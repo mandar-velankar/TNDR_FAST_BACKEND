@@ -62,11 +62,12 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
     async createHierarchyEntries(){
 
         try {
+            const tx = cds.tx();
 
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let existingHlevel6Code = await cds.run(SELECT.from(PT_TMPRDHIER, ['HLEVEL6_CODE']));
+            let existingHlevel6Code = await tx.run(SELECT.from(PT_TMPRDHIER, ['HLEVEL6_CODE']));
             existingHlevel6Code = existingHlevel6Code.map(item => item.HLEVEL6_CODE.toString());
 
             const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
@@ -80,7 +81,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             let {xpr} = cds.parse.expr(`HLEVEL6_CODE not in '${existingHlevel6Code}'`);
             xpr[3].val = existingHlevel6Code;
             
-            const newMaterials = await cds.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where(xpr));
+            const newMaterials = await tx.run(SELECT.distinct.from(ItalyMaterials, ["HLEVEL1_NAME","HLEVEL4_NAME","HLEVEL4_CODE","HLEVEL6_NAME","HLEVEL6_CODE"]).where(whereExpr).where(xpr));
             
             if( newMaterials.length <= 0 ) return {message: `No hierarchy entries were created. No new materials were found in ${ItalyMaterials.name}`};
 
@@ -103,7 +104,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             });
 
             if(hierarchyEntries && hierarchyEntries.length > 0){
-                const result = await cds.run(INSERT(hierarchyEntries).into(PT_TMPRDHIER));
+                const result = await tx.run(INSERT(hierarchyEntries).into(PT_TMPRDHIER));
+                tx.commit(result);
                 console.log(`${hierarchyEntries.length} hierarchy entries successfully created in ${PT_TMPRDHIER.name}.`);
                 return result;
             }
@@ -111,8 +113,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             return;
 
         }catch (error) {
-            console.log('Creating hierarchy entries has failed.');
-            console.log(error);
+            console.error('Creating hierarchy entries has failed.');
+            console.error(error);
         }
 
     };
@@ -146,12 +148,14 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
       async createProductPacks(lastProductPackID){
 
         try {
+            const tx = cds.tx();
+
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMPRDPCK, PT_TMCTPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
             let query = cds.parse.cql (`SELECT p.ProductPackName from ${PT_TMPRDPCK.name} AS p 
             inner join ${PT_TMCTPRDPCK.name} AS cp on p.PRODUCTPACKID = cp.PRODUCTPACKID WHERE cp.CountryCode='IT'`);
-            let ProductPackNames =  await cds.run(query);
+            let ProductPackNames =  await tx.run(query);
             ProductPackNames = ProductPackNames.map(item => item.ProductPackName);
 
             const whereExpr = `MAKTX <> 'Customer Service Holding Material' and
@@ -165,7 +169,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             let {xpr} = cds.parse.expr(`MAKTX not in '${ProductPackNames}'`);
             xpr[3].val = ProductPackNames;
             
-            const materials = await cds.run(SELECT.from(ItalyMaterials, ['MAKTX','HLEVEL6_CODE']).where(whereExpr).where(xpr).groupBy(`MAKTX, HLEVEL6_CODE`));
+            const materials = await tx.run(SELECT.from(ItalyMaterials, ['MAKTX','HLEVEL6_CODE']).where(whereExpr).where(xpr).groupBy(`MAKTX, HLEVEL6_CODE`));
 
             const productPackEntries = materials.map(mat => {
                 return {
@@ -185,7 +189,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             });
 
             if(productPackEntries && productPackEntries.length > 0){
-                const result = await cds.run(INSERT(productPackEntries).into(PT_TMPRDPCK));
+                const result = await tx.run(INSERT(productPackEntries).into(PT_TMPRDPCK));
+                tx.commit(result);
                 console.log(`${productPackEntries.length} product packs successfully created in ${PT_TMPRDPCK.name}.`);
                 return result;
             }
@@ -193,8 +198,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             return;
             
         } catch (error) {
-            console.log('Creating product packs has failed.');
-            console.log(error);
+            console.error('Creating product packs has failed.');
+            console.error(error);
         }
     };
 
@@ -205,10 +210,12 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      async createCountryProductPacks(lastProductPackID){
 
         try {
+            const tx = cds.tx();
+
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMCTPRDPCK, PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let ProductPackIDs =  await cds.run(cds.parse.cql (`SELECT ProductPackID from ${PT_TMCTPRDPCK.name} WHERE CountryCode='IT'`));
+            let ProductPackIDs =  await tx.run(cds.parse.cql (`SELECT ProductPackID from ${PT_TMCTPRDPCK.name} WHERE CountryCode='IT'`));
             ProductPackIDs = ProductPackIDs.map(item => item.ProductPackID.toString());
 
 
@@ -227,7 +234,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
                 }
             ];
 
-            const materials = await cds.run(query);
+            const materials = await tx.run(query);
             let nextCountryProductPackID = await this.getLastCountryProductPackID();
 
             const countryProductPackEntries = materials.map(mat => {
@@ -251,7 +258,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             });
 
             if(countryProductPackEntries && countryProductPackEntries.length > 0){
-                const result = await cds.run(INSERT(countryProductPackEntries).into(PT_TMCTPRDPCK));
+                const result = await tx.run(INSERT(countryProductPackEntries).into(PT_TMCTPRDPCK));
+                tx.commit(result);
                 console.log(`${countryProductPackEntries.length} country product packs successfully created in ${PT_TMCTPRDPCK.name}.`);
                 return result;
             }
@@ -259,8 +267,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             return;
 
         } catch (error) {
-            console.log('Creating country product packs has failed.');
-            console.log(error);
+            console.error('Creating country product packs has failed.');
+            console.error(error);
         }  
     };
 
@@ -271,10 +279,12 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
     async createSKUs(){
 
         try {
+            const tx = cds.tx();
+
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMSKUPRDPCK, PT_TMPRDPCK, PT_TMCTPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let skuCodes =  await cds.run(cds.parse.cql (`SELECT DISTINCT SKUCode from ${PT_TMSKUPRDPCK.name}`));
+            let skuCodes =  await tx.run(cds.parse.cql (`SELECT DISTINCT SKUCode from ${PT_TMSKUPRDPCK.name}`));
             skuCodes = skuCodes.map(item => this.addLeadingZeros(item.SKUCode, 18));
 
             let query = cds.parse.cql (`SELECT product.ProductPackID, MATNR FROM ${ItalyMaterials.name} AS material 
@@ -296,7 +306,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
                 }
             ];
 
-            const materials = await cds.run(query);
+            const materials = await tx.run(query);
             let nextSkuProductPackID = await this.getLastSkuProductPackID();
 
             const skuProductPackEntries = materials.map(mat => {
@@ -310,7 +320,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             });
 
             if(skuProductPackEntries && skuProductPackEntries.length > 0){
-                const result = await cds.run(INSERT(skuProductPackEntries).into(PT_TMSKUPRDPCK));
+                const result = await tx.run(INSERT(skuProductPackEntries).into(PT_TMSKUPRDPCK));
+                tx.commit(result);
                 console.log(`${skuProductPackEntries.length} SKUs successfully created in ${PT_TMSKUPRDPCK.name}.`);
                 return result;
             }
@@ -318,8 +329,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             return;
 
         } catch (error) {
-            console.log('Creating SKUs has failed.');
-            console.log(error);
+            console.error('Creating SKUs has failed.');
+            console.error(error);
         }   
     };
 
@@ -330,6 +341,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      async createCOGS(){
 
         try {
+            const tx = cds.tx();
+
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMPRDPCK, PT_TMCTPRDPCK, PT_TMCOGS } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
@@ -345,7 +358,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
                 }
             ];
 
-            const materials = await cds.run(query);
+            const materials = await tx.run(query);
             let nextCogsID = await this.getLastCogsID();
 
             const cogsEntries = materials.map(mat => {
@@ -363,7 +376,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             });
 
             if(cogsEntries && cogsEntries.length > 0){
-                const result = await cds.run(INSERT(cogsEntries).into(PT_TMCOGS));
+                const result = await tx.run(INSERT(cogsEntries).into(PT_TMCOGS));
+                tx.commit(result);
                 console.log(`${cogsEntries.length} COGS successfully created in ${PT_TMCOGS.name}.`);
                 return result;
             }
@@ -371,8 +385,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             return;
             
         } catch (error) {
-            console.log('Creating COGS has failed.');
-            console.log(error);
+            console.error('Creating COGS has failed.');
+            console.error(error);
         }    
     };
 
@@ -382,14 +396,20 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      */
      async clearItalyMaterialsTable(){
         try {
+            const tx = cds.tx();
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            const result = await cds.run(DELETE.from(ItalyMaterials));
-            console.log(`${ItalyMaterials.name} table cleared successfully`);
+
+            console.log(`Clearing ${ItalyMaterials.name} table ...`);
+
+            const result = await tx.run(DELETE.from(ItalyMaterials));
+            tx.commit(result);
+
+            console.log(`${ItalyMaterials.name} table successfully cleared. ${result} records deleted.`);
             return result;
             
         } catch (error) {
-            console.log('Clearing the Italy Materials table failed');
-            console.log(error);
+            console.error('Clearing the Italy Materials table failed');
+            console.error(error);
         }    
     };
 
@@ -403,7 +423,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             const lastProductPackID = await cds.run(SELECT.one.from(PT_TMPRDPCK, ['Max(PRODUCTPACKID) as max']));
             return lastProductPackID.max;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 
@@ -413,7 +433,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             const lastCountryProductPackID = await cds.run(SELECT.one.from(PT_TMCTPRDPCK, ['Max(PRODUCTPACKID) as max']));
             return lastCountryProductPackID.max;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 
@@ -423,7 +443,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             const lastSkuProductPackID = await cds.run(SELECT.one.from(PT_TMSKUPRDPCK, ['Max(COUNTRYSKUID) as max']));
             return lastSkuProductPackID.max;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 
@@ -433,7 +453,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             const lastCogsID = await cds.run(SELECT.one.from(PT_TMCOGS, ['Max(COGSID) as max']));
             return lastCogsID.max;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 
@@ -464,6 +484,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
         if(!error && !jobDescription) throw new Error(`You must provide a job description and an error object`);
 
         try{
+            const tx = cds.tx();
+
             const errorEntity = {
               JobName: "ItalyJobs",
               JobDescription: "ProcessMaterials",
@@ -472,10 +494,13 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
               ConsultationDate: new Date().toJSON()
             };
 
-            return await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
+            const result = await tx.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
+            tx.commit(result);
+
+            return result;
 
           }catch(err){
-            console.log(err);
+            console.error(err);
           }
   
       }
