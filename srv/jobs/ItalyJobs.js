@@ -551,10 +551,13 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      async  createInstituteEntries(){
 
         try {
+
+            const tx = cds.tx();
+
             const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let customerNumbers =  await cds.run(cds.parse.cql (`SELECT CustomerID from ${PT_TMINST.name} WHERE CountryCode = 'IT'`));
+            let customerNumbers =  await tx.run(cds.parse.cql (`SELECT CustomerID from ${PT_TMINST.name} WHERE CountryCode = 'IT'`));
             customerNumbers = customerNumbers.map(item => this.addLeadingZeros(item.CustomerID, 10));
 
             let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
@@ -567,7 +570,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             xpr[3].val = customerNumbers;
             query.SELECT.where = xpr;
 
-            const customers = await cds.run(query);
+            const customers = await tx.run(query);
             let nextInstituteID = await this.getLastInstituteID();
 
             const instituteEntries = customers.map(cust => {
@@ -595,7 +598,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             });
 
             if(instituteEntries && instituteEntries.length > 0){
-                const result = await cds.run(INSERT(instituteEntries).into(PT_TMINST));
+                const result = await tx.run(INSERT(instituteEntries).into(PT_TMINST));
+                tx.commit(result);
                 console.log(`${instituteEntries.length} Institutes successfully created in ${PT_TMINST.name}.`);
                 return result;
             }
@@ -603,8 +607,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             return;
 
         } catch (error) {
-            console.log('Creating Institutes has failed.');
-            console.log(error);
+            console.error('Creating Institutes has failed.');
+            console.error(error);
         }   
 
     };
@@ -617,6 +621,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      async  updateInstituteEntries(){
 
         try {
+
+            const tx = cds.tx();
+
             const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
@@ -625,7 +632,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
             where customer.E1KNA1M_LAND1 = 'IT'`);
 
-            const customers = await cds.run(query);
+            const customers = await tx.run(query);
 
             const promises = customers.map(cust => {
                 const obj = {
@@ -649,7 +656,10 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     // --"E1KNVVM_ZTERM",--PaymentTerms
                 }
 
-                return cds.run(UPDATE(PT_TMINST).with(obj).where({ InstituteID: cust.InstituteID, CountryCode: cust.CountryCode }));
+                const result = tx.run(UPDATE(PT_TMINST).with(obj).where({ InstituteID: cust.InstituteID, CountryCode: cust.CountryCode }));
+                tx.commit(result);
+
+                return result;
             });
 
             if(promises && promises.length > 0){
@@ -740,9 +750,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      async createInstituteBrandTerms(){
 
         try {
+            const tx = cds.tx();
+
             const { PT_TMINST, PT_TMINSBRTR, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let instituteBrandTermsCompoundKeys =  await cds.run(cds.parse.cql (`SELECT CountryCode || InstituteID || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINSBRTR.name} WHERE CountryCode = 'IT'`));
+            let instituteBrandTermsCompoundKeys =  await tx.run(cds.parse.cql (`SELECT CountryCode || InstituteID || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINSBRTR.name} WHERE CountryCode = 'IT'`));
             instituteBrandTermsCompoundKeys = instituteBrandTermsCompoundKeys.map(item => item.CompoundKey);
 
             let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
@@ -759,11 +771,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             xpr[15].val = instituteBrandTermsCompoundKeys;
             query.SELECT.where = xpr;
 
-            const brandTerms = await cds.run(query);
+            const brandTerms = await tx.run(query);
 
             if(brandTerms.length <= 0) return;
 
-            let lastInstituteBrandTermsID = await cds.run(SELECT.one.from(PT_TMINSBRTR, ['Max(INSTITUTEBRANDTERMSID) as max']));
+            let lastInstituteBrandTermsID = await tx.run(SELECT.one.from(PT_TMINSBRTR, ['Max(INSTITUTEBRANDTERMSID) as max']));
             lastInstituteBrandTermsID = lastInstituteBrandTermsID.max;
 
             const instituteBrandEntries = brandTerms.map(brandTerm => {
@@ -778,13 +790,14 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                 }
             });
 
-            const result = await cds.run(INSERT(instituteBrandEntries).into(PT_TMINSBRTR));
+            const result = await tx.run(INSERT(instituteBrandEntries).into(PT_TMINSBRTR));
+            tx.commit(result);
             console.log(`${instituteBrandEntries.length} Institute Brand Terms successfully created in ${PT_TMINSBRTR.name}.`);
             return result;
 
         } catch (error) {
-            console.log('Creating Institute Brand Terms has failed.');
-            console.log(error);
+            console.error('Creating Institute Brand Terms has failed.');
+            console.error(error);
         }   
 
     };
@@ -796,9 +809,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      async createInstituteDistributorBrands(){
 
         try {
+            const tx = cds.tx();
+
             const { PT_TMINST, PT_TMDIST, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER, PT_TMINDSBR } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let instituteDistributorBrandCompoundKeys =  await cds.run(cds.parse.cql (`SELECT CountryCode || InstituteID || DistributorId || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINDSBR.name} WHERE CountryCode = 'IT'`));
+            let instituteDistributorBrandCompoundKeys =  await tx.run(cds.parse.cql (`SELECT CountryCode || InstituteID || DistributorId || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINDSBR.name} WHERE CountryCode = 'IT'`));
             instituteDistributorBrandCompoundKeys = instituteDistributorBrandCompoundKeys.map(item => item.CompoundKey);
 
             let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, d.DistributorId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
@@ -817,11 +832,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             xpr[17].val = instituteDistributorBrandCompoundKeys;
             query.SELECT.where = xpr;
 
-            const brands = await cds.run(query);
+            const brands = await tx.run(query);
 
             if(brands.length <= 0) return;
 
-            let lastInstituteDistBrandRelationID = await cds.run(SELECT.one.from(PT_TMINDSBR, ['Max(INSTITUTEDISTBRANDRELATIONID) as max']));
+            let lastInstituteDistBrandRelationID = await tx.run(SELECT.one.from(PT_TMINDSBR, ['Max(INSTITUTEDISTBRANDRELATIONID) as max']));
             lastInstituteDistBrandRelationID = lastInstituteDistBrandRelationID.max;
 
             const instituteDistributorBrandEntries = brands.map(brand => {
@@ -836,13 +851,14 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                 }
             });
 
-            const result = await cds.run(INSERT(instituteDistributorBrandEntries).into(PT_TMINDSBR));
+            const result = await tx.run(INSERT(instituteDistributorBrandEntries).into(PT_TMINDSBR));
+            tx.commit(result);
             console.log(`${instituteDistributorBrandEntries.length} Institute Distributor Brands successfully created in ${PT_TMINDSBR.name}.`);
             return result;
 
         } catch (error) {
-            console.log('Creating Institute Distributor Brands has failed.');
-            console.log(error);
+            console.error('Creating Institute Distributor Brands has failed.');
+            console.error(error);
         }     
 
     };
@@ -853,25 +869,33 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      */
      async clearItalyCustomersTable(){
         try {
+
+            const tx = cds.tx();
             const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            const result = await cds.run(DELETE.from(ItalyCustomers));
-            console.log(`${ItalyCustomers.name} table cleared successfully`);
+
+            console.log(`Clearing ${ItalyCustomers.name} table ...`);
+
+            const result = await tx.run(DELETE.from(ItalyCustomers));
+            tx.commit(result);
+
+            console.log(`${ItalyCustomers.name} table successfully cleared. ${result} records deleted.`);
             return result;
             
         } catch (error) {
-            console.log('Clearing the Italy Customers table failed');
-            console.log(error);
+            console.error('Clearing the Italy Customers table failed');
+            console.error(error);
         }    
     };
 
 
     async getLastInstituteID(){
         try {
+            const tx = cds.tx();
             const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-            const lastInstituteID = await cds.run(SELECT.one.from(PT_TMINST, ['Max(INSTITUTEID) as max']));
+            const lastInstituteID = await tx.run(SELECT.one.from(PT_TMINST, ['Max(INSTITUTEID) as max']));
             return lastInstituteID.max;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 
@@ -899,6 +923,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         if(!error) throw new Error(`You must provide a error object`);
 
         try{
+            const tx = cds.tx();
+
             const errorEntity = {
               JobName: "ItalyJobs",
               JobDescription: "ProcessMaterials",
@@ -907,10 +933,13 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
               ConsultationDate: new Date().toJSON()
             };
 
-            return await cds.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
+            const result = await tx.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
+            tx.commit(result);
+
+            return result;
 
           }catch(err){
-            console.log(err);
+            console.error(err);
           }
   
       }
