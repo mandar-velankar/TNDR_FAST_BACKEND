@@ -674,8 +674,14 @@ service CatalogService @(path : 'tender')@(requires : [
         key OfferId : String(50);
             content : LargeBinary @Core.MediaType : 'application/pdf';
     }
+    entity ExcelAttachment// as projection on AdminData.ExcelAttachment;
+    {
+        key OfferId : String(50);
+        content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        mediaType:String @Core.IsMediaType;
+    }
 
-    entity ExcelAttachmentView                          as projection on AdminData.ExcelAttachment;
+    //entity ExcelAttachmentView                          as projection on AdminData.ExcelAttachment;
     // {
     //     key OfferId : String(50);
     //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';

@@ -2526,8 +2526,8 @@ module.exports = (srv) => {
 		// const data = await next(); 
 		const tx = cds.transaction(req);
 		const offerId = req.data.OfferId;
-		const template = req.data.template;
-		if (!offerId || !template) {
+		// const template = req.data.template;
+		if (!offerId){// || !template) {
 			return next();
 		}
 		let excelData = {};
