@@ -1307,7 +1307,9 @@ module.exports = (srv) => {
 				GOV_CODE: offerProduct.GOV_CODE,
 				CODE1: offerProduct.CODE1,
 				CODE2: offerProduct.CODE2,
-				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD
+				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
+				ProductClass: offerProduct.ProductClass,
+				ProductDescription: offerProduct.ProductDescription
 			}
 		});
 		let resolvedResults = await Promise.all(results);

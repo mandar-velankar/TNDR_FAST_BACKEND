@@ -350,6 +350,8 @@ service CatalogService @(path : 'tender')@(requires : [
             CODE1                                       : String(255);
             CODE2                                       : String(255);
             QTY_THRESHOLD                               : Integer;
+            ProductClass                                : String(2);
+            ProductDescription                          : String(255);
             //end of missing SKU & SKUCountry fields
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
