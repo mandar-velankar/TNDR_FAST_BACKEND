@@ -282,6 +282,11 @@ service CatalogService @(path : 'tender')@(requires : [
             MAX_PRICE_NHS_PP_IN_WORDS                   : String;
             MAX_PRICE_NHS_PU                            : Double;
             MAX_PRICE_NHS_PU_IN_WORDS                   : String;
+            MAX_PRICE_NHS_PU_WITH_VAT                   : Double; //Italy change
+            MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS          : String; //Italy change
+            CONTRACT_START_DATE                         : String; //Italy change
+            NET_OFFER_PRICE_IN_WORDS                    : String; //Italy change
+            CUSTOMER_ID                                 : Integer; //Italy change
             COGS                                        : Double;
             COGS_EUR_UNIT                               : Double;
             COGS_EUR_PACK                               : Double;
