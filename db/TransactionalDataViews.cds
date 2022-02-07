@@ -641,6 +641,8 @@ left outer join TransactionalData.ProductPricing as productPricing
     productPricing.StatusOfDevice as StatusOfDevice,
     productPricing.MinContractual as MinContractual,
     productPricing.MinAnnPurch as MinAnnPurch,
+    offerProduct.SKU.ProductClass as ProductClass,
+    offerProduct.SKU.ProductDescription as ProductDescription,
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
