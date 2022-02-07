@@ -1141,6 +1141,10 @@ module.exports = (srv) => {
 			return results;
 		}
 
+		const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
+        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+
 		//where statement
 		let whereApproverType = {
 			CountryCode: offer.COUNTRYCODE
@@ -1233,6 +1237,11 @@ module.exports = (srv) => {
 				MAX_PRICE_NHS_PP_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPP),
 				MAX_PRICE_NHS_PU: productPricing.MaxPriceNhsPU,
 				MAX_PRICE_NHS_PU_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPU),
+				MAX_PRICE_NHS_PU_WITH_VAT: productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT),
+				MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT))),
+				CONTRACT_START_DATE: productPricing.ContractStartDate,
+				NET_OFFER_PRICE_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.NET_OFFER_PRICE),
+				CUSTOMER_ID: institute.CustomerID,
 				COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
 				COGS_EUR_UNIT: productInfo.CommnonProductInfo.CogsEurUnit,
 				COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
@@ -1307,7 +1316,9 @@ module.exports = (srv) => {
 				GOV_CODE: offerProduct.GOV_CODE,
 				CODE1: offerProduct.CODE1,
 				CODE2: offerProduct.CODE2,
-				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD
+				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
+				ProductClass: offerProduct.ProductClass,
+				ProductDescription: offerProduct.ProductDescription
 			}
 		});
 		let resolvedResults = await Promise.all(results);
