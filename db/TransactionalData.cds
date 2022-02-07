@@ -353,7 +353,7 @@ entity ProductPricing: cuid, managed {
     AgreementDuration: Integer;
     MonthlyRent: Double;
     MonthsPerInvoice: Integer;
-    ContractStartDate: Timestamp;
+    ContractStartDate: String;
     ValueOfDevices: Double;
     StatusOfDevice: String;
     MinContractual: Double;
