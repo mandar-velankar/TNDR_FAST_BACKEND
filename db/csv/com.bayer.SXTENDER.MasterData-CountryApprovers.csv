@@ -380,16 +380,16 @@ CL,CDH-Chile (signature),Radiology,1,Frank Schmitt,frank.schmitt1@bayer.com,,,,,
 CL,Supply Chain,Both,1,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,,,,,
 CL,Marketing,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com,,,,,
 IT,Supply Chain,Both,10018,(Frank)Supply Chain responsible,frank.schmitt1@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,10021,(Andre)Danilo Despirito,andre.jacobs@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,10021,(Andre)Danilo Despirito,andre.jacobs@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,BU Head/PM,Pharma,10022,(Fabian)Patrizia Guarraci,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,10024,(Fabian)Eugenia Lietta,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,10025,(Robert)Andrea Mencarelli,robert.henning@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,10024,(Fabian)Eugenia Lietta,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,10025,(Robert)Andrea Mencarelli,robert.henning@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,BU Head/PM,Pharma,10026,(Frank)Salvatore Vitale,frank.schmitt1@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,BU Head/PM,Pharma,10028,(Robert)Giuseppe Tropiano,robert.henning@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,10031,(Frank)Massimo Vergari,frank.schmitt1@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,10031,(Frank)Massimo Vergari,frank.schmitt1@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Finance,Pharma,10039,(Fabian)Melania Zappaterra,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Radiology,10033,(Andre)Paolo Radere,andre.jacobs@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Radiology,10034,(Frank)Vanda Peaquin,frank.schmitt1@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Radiology,10033,(Andre)Paolo Radere,andre.jacobs@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Radiology,10034,(Frank)Vanda Peaquin,frank.schmitt1@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Strategic Sales,Radiology,10035,(Robert)Oliveiro Parente,robert.henning@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Business Integration,Radiology,10036,(Fabian)Ornella Rizzardi,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,BU Head/PM,Radiology,10037,(Robert)Giovanni Odelli,robert.henning@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
@@ -398,43 +398,27 @@ IT,Supply Chain,Both,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:
 IT,Supply Chain,Both,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Supply Chain,Both,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Supply Chain,Both,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Pharma,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Pharma,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Pharma,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Pharma,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Pharma,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Pharma,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Pharma,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Finance,Pharma,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Finance,Pharma,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Finance,Pharma,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Finance,Pharma,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Finance,Pharma,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Radiology,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Radiology,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Radiology,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Radiology,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,SM/RBM,Radiology,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Strategic Sales,Radiology,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Strategic Sales,Radiology,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Strategic Sales,Radiology,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Strategic Sales,Radiology,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Strategic Sales,Radiology,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Business Integration,Radiology,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Business Integration,Radiology,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Business Integration,Radiology,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Business Integration,Radiology,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,Business Integration,Radiology,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Radiology,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Radiology,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Radiology,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Radiology,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-IT,BU Head/PM,Radiology,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Radiology,1000,Silvia Paesani,silvia.paesani@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Radiology,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Radiology,1000,Stefano Merlo,stefano.merlo@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Radiology,1000,Stefano Beltramolli,stefano.beltramolli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 1,Radiology,1000,Massimo Marco Bettinelli,massimo.bettinelli@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,Contract Manager,Radiology,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,ELLTZ,2021-10-13 00:00:00,ELLTZ,1
 IT,Contract Manager,Pharma,1000,Andrea Duranti,andrea.duranti@bayer.com,2021-10-13 00:00:00,ELLTZ,2021-10-13 00:00:00,ELLTZ,1
 MX,Tender Management,Both,1000,Laura,laura@bayer.com,,,,,1
 IT,Strategic Sales,Radiology,10035,Fabian,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
 IT,BU Head/PM,Radiology,10037,Fabian,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 2,Radiology,10035,Fabian,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 3,Radiology,10037,Fabian,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 2,Pharma,10035,Fabian,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+IT,Business Level 3,Pharma,10037,Fabian,fabian.deck@bayer.com,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
