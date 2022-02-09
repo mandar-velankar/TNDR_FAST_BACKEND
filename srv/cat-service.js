@@ -672,6 +672,7 @@ module.exports = (srv) => {
 		//2: Mandatory Notification
 		//3: Mandatory Approval
 		let validationType;
+		let bBlOneMandatoryAppr = false;
 
 		if (product.OfferType === "Selling"){
 
@@ -696,25 +697,27 @@ module.exports = (srv) => {
 
 
 			if(!((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) )){
-
-				// if a product is offered above or equal to pre-approved price, 
-				// business approval is not mandatory even if additional discount on offer is not 0%).
-				if(!minPreApprovedPrice || (minPreApprovedPrice && netOfferPrice && netOfferPrice < minPreApprovedPrice)){
-						//if pre approved price exists, and net offer price is below the pre approved price OR the pre approved price does not exist, execute following check
-					if(netOfferPrice && minPreApprovedPrice && candidatePrice && candidatePrice.Price <= netOfferPrice) {
-						validationType = 1;	//if pre-approved price exists, and a lower or an equal price has been approved for the same account (candidate): 
-											//only contract manager notification should be sent
+				if(minPreApprovedPrice){
+					if(netOfferPrice < minPreApprovedPrice){
+						if(candidatePrice && candidatePrice.Price <= netOfferPrice){
+							bBlOneMandatoryAppr = true;
+							validationType = 1;
+						} else {
+							validationType = 1; //no additional discount exists; only contract manager notification should be sent
+						}
 					} else {
-						validationType = 3;	//else all approvals should be mandatory
+						validationType = 1; //no additional discount exists; only contract manager notification should be sent
 					}
-				}else{
-					validationType = 1; // only contract manager notification should be sent
+				} else {
+					bBlOneMandatoryAppr = true;
+					validationType = 1;
 				}
+				
 			} else {
 				validationType = 1; //no additional discount exists; only contract manager notification should be sent
 			}
 		} else {
-			validationType = 3;	//if the offer type differs from selling, all approvals should be mandatory
+			validationType = 1;	//if the offer type differs from selling, all approvals should be optional
 		}
 
 		aApproverTypes.map(async function (oApproverType) {	
@@ -724,7 +727,10 @@ module.exports = (srv) => {
 			} else {
 				oApproverType.ValidationType = validationType;	
 			}
-							
+			
+			if(bBlOneMandatoryAppr && oApproverType.ApproverType === "Business Level 1"){
+				oApproverType.ValidationType = 3;
+			}
 		})
 
 		
