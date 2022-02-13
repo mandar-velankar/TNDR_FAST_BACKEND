@@ -50,7 +50,7 @@
     "deploy:cf": "cf deploy mta_archives/FASTCAP-Backend-CF.mtar -e cf.mtaext",
     "debug": "node --inspect node_modules/@sap/cds/bin/cds.js run",
     "start:cds": "cds run",
-    "start": "cds -v && node ./srv/index-local.js"
+    "start": "cds -v && node ./srv/index-local.js --auto-undeploy"
   },
   "private": true,
   "cds": {
