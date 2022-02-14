@@ -1199,8 +1199,8 @@ module.exports = (srv) => {
 				MANUFACTURER: offerProduct.MANUFACTURER,
 				SHELFLIFE: offerProduct.SHELFLIFE,
 				PRESENTATION: offerProduct.PRESENTATION,
-				VAT: offerProduct.VAT,
-				VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.VAT),
+				VAT: (offerProduct.VAT*100).toFixed(2),
+				VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,((offerProduct.VAT*100).toFixed(2))),
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
@@ -1324,7 +1324,9 @@ module.exports = (srv) => {
 				CODE2: offerProduct.CODE2,
 				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
 				ProductClass: offerProduct.ProductClass,
-				ProductDescription: offerProduct.ProductDescription
+				ProductDescription: offerProduct.ProductDescription,
+				FINAL_DISCOUNT: (productPricing.FinalDiscount*100).toFixed(2),
+				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.FinalDiscount*100).toFixed(2))
 			}
 		});
 		let resolvedResults = await Promise.all(results);
