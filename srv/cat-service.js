@@ -1324,7 +1324,9 @@ module.exports = (srv) => {
 				CODE2: offerProduct.CODE2,
 				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
 				ProductClass: offerProduct.ProductClass,
-				ProductDescription: offerProduct.ProductDescription
+				ProductDescription: offerProduct.ProductDescription,
+				FINAL_DISCOUNT: (productPricing.FinalDiscount*100).toFixed(2),
+				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.FinalDiscount*100).toFixed(2))
 			}
 		});
 		let resolvedResults = await Promise.all(results);
