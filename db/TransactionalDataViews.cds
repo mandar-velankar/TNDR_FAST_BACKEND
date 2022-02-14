@@ -714,7 +714,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
     //offer.Tender.Institute.CustomerID as CUSTOMERCODE,
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
-	offer.Tender.Institute.InstituteName || ' - ' || offer.Tender.TenderName as TENDER_REFERENCE:String(500),
+	offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
     offer.Tender.Institute.InstituteName as INSTITUTENAME,
     offer.Tender.Institute.VatCode as VATCODE,
