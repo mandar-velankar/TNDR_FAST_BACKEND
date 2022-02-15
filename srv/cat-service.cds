@@ -394,6 +394,10 @@ service CatalogService @(path : 'tender')@(requires : [
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
+            SELLING_COMPANY_AS1_NAMEI: String(255);
+            SELLING_COMPANY_AS1_TITLEI: String(255);
+            SELLING_COMPANY_AS2_NAMEI: String(255);
+            SELLING_COMPANY_AS2_TITLEI: String(255);
             SELLING_COMPANY_AS2   : String(300);
             E_SIGNATURE1          : Boolean;
             E_SIGNATURE2          : Boolean;
