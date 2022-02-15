@@ -1326,7 +1326,8 @@ module.exports = (srv) => {
 				ProductClass: offerProduct.ProductClass,
 				ProductDescription: offerProduct.ProductDescription,
 				FINAL_DISCOUNT: (productPricing.FinalDiscount*100).toFixed(2),
-				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.FinalDiscount*100).toFixed(2))
+				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.FinalDiscount*100).toFixed(2)),
+				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION
 			}
 		});
 		let resolvedResults = await Promise.all(results);

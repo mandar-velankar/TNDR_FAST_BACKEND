@@ -119,6 +119,7 @@ entity PT_TMPRDPCK{
 	ProductType:String(50);
 	ProductClass: String(10);
 	ProductDescription: String(255);
+	ProductFullDescription: String(255);
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
