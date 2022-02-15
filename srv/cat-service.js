@@ -1172,6 +1172,18 @@ module.exports = (srv) => {
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
 
+			//Get corresponding ProductPack
+			const whereProductPack = {
+				PRODUCTPACKID: offerProduct.ProductCode,
+			}
+			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
+
+			const whereMaterial = {
+				CountryCode: offer.COUNTRYCODE,
+				ProductPackId: offerProduct.ProductCode
+			}
+			const materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterial));
+
 			//Get all prices, ammounts and cogs in all units
 			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
 			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
@@ -1327,7 +1339,10 @@ module.exports = (srv) => {
 				ProductDescription: offerProduct.ProductDescription,
 				FINAL_DISCOUNT: (productPricing.FinalDiscount*100).toFixed(2),
 				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.FinalDiscount*100).toFixed(2)),
-				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION
+				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
+				ProductPricing: productPricing,
+				ProductPack: productPack,
+				Materials: materials
 			}
 		});
 		let resolvedResults = await Promise.all(results);
