@@ -554,6 +554,7 @@ left outer join TransactionalData.ProductPricing as productPricing
 	offerProduct.SKUCountry.SHELFLIFE as SHELFLIFE,
 	offerProduct.SKU.PRESENTATION as PRESENTATION,
     offerProduct.SKU.MoleculeName as MOLECULE_NAME,
+    offerProduct.SKU.ProductFullDescription as PRODUCT_FULL_DESCRIPTION,
 	offerProduct.SKUCountry.VTATax as VAT,
     ifnull(offerProduct.SKUCountry.COMMENT, '') as PRODUCT_COMMENT:String(500),
 
