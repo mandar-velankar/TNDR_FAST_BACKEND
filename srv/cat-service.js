@@ -1171,8 +1171,8 @@ module.exports = (srv) => {
 			}
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
-			let finalDiscount = Number(Number(productPricing.FinalDiscount*100).toFixed(2));
-			let dVat = Number(Number(offerProduct.VAT).toFixed(2));
+			let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
+			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT).toFixed(2)) : null;
 
 			//Get corresponding ProductPack
 			const whereProductPack = {
