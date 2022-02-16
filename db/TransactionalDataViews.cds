@@ -554,6 +554,7 @@ left outer join TransactionalData.ProductPricing as productPricing
 	offerProduct.SKUCountry.SHELFLIFE as SHELFLIFE,
 	offerProduct.SKU.PRESENTATION as PRESENTATION,
     offerProduct.SKU.MoleculeName as MOLECULE_NAME,
+    offerProduct.SKU.ProductFullDescription as PRODUCT_FULL_DESCRIPTION,
 	offerProduct.SKUCountry.VTATax as VAT,
     ifnull(offerProduct.SKUCountry.COMMENT, '') as PRODUCT_COMMENT:String(500),
 
@@ -714,7 +715,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
     //offer.Tender.Institute.CustomerID as CUSTOMERCODE,
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
-	offer.Tender.Institute.InstituteName || ' - ' || offer.Tender.TenderName as TENDER_REFERENCE:String(500),
+	offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
     offer.Tender.Institute.InstituteName as INSTITUTENAME,
     offer.Tender.Institute.VatCode as VATCODE,
@@ -728,6 +729,10 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
     ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS1:String(500),
 	ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS2:String(500),
+    ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.NAME) as SELLING_COMPANY_AS1_NAMEI:String(500),
+    ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.TITLE) as SELLING_COMPANY_AS1_TITLEI:String(500),
+    ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.NAME) as SELLING_COMPANY_AS2_NAMEI:String(500),
+    ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.TITLE) as SELLING_COMPANY_AS2_TITLEI:String(500),
     case 
         when signatory1.AUTHORIZED_SIGNATORY is null then false
         when signatory1.AUTHORIZED_SIGNATORY = ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) then true
@@ -797,9 +802,13 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Quotation.AS1,
           signatory1.AUTHORIZED_SIGNATORY,
           signatory1Default.AUTHORIZED_SIGNATORY,
+          signatory1Default.NAME,
+          signatory1Default.TITLE,
           offer.Quotation.AS2,
           signatory2.AUTHORIZED_SIGNATORY,
           signatory2Default.AUTHORIZED_SIGNATORY,
+          signatory2Default.NAME,
+          signatory2Default.TITLE,
           offer.Currency,
           offer.SellingCompanyDetails.Letterhead,
           offer.SellingCompanyDetails.Remarks,
