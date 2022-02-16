@@ -1171,6 +1171,20 @@ module.exports = (srv) => {
 			}
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
+			let finalDiscount = Number(Number(productPricing.FinalDiscount*100).toFixed(2));
+			let dVat = Number(Number(offerProduct.VAT).toFixed(2));
+
+			//Get corresponding ProductPack
+			const whereProductPack = {
+				PRODUCTPACKID: offerProduct.ProductCode,
+			}
+			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
+
+			const whereMaterial = {
+				CountryCode: offer.COUNTRYCODE,
+				ProductPackId: offerProduct.ProductCode
+			}
+			const materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterial));
 
 			//Get all prices, ammounts and cogs in all units
 			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
@@ -1199,8 +1213,8 @@ module.exports = (srv) => {
 				MANUFACTURER: offerProduct.MANUFACTURER,
 				SHELFLIFE: offerProduct.SHELFLIFE,
 				PRESENTATION: offerProduct.PRESENTATION,
-				VAT: (offerProduct.VAT*100).toFixed(2),
-				VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,((offerProduct.VAT*100).toFixed(2))),
+				VAT: dVat,
+				VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat),
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
@@ -1325,8 +1339,12 @@ module.exports = (srv) => {
 				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
 				ProductClass: offerProduct.ProductClass,
 				ProductDescription: offerProduct.ProductDescription,
-				FINAL_DISCOUNT: (productPricing.FinalDiscount*100).toFixed(2),
-				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.FinalDiscount*100).toFixed(2))
+				FINAL_DISCOUNT: finalDiscount,
+				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
+				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
+				ProductPricing: productPricing,
+				ProductPack: productPack,
+				Materials: materials
 			}
 		});
 		let resolvedResults = await Promise.all(results);

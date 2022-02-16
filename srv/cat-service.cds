@@ -359,9 +359,17 @@ service CatalogService @(path : 'tender')@(requires : [
             ProductDescription                          : String(255);
             FINAL_DISCOUNT                              : Double;
             FINAL_DISCOUNT_IN_WORDS                     : String(255);
+            PRODUCT_FULL_DESCRIPTION                    : String(255);
             //end of missing SKU & SKUCountry fields
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
+            ProductPricing                              : Association to many ProductPricing
+                                                            on ProductPricing.ProductCode = $self.PRODUCTID;
+            ProductPack                                 : Association to PT_TMPRDPCK 
+                                                            on ProductPack.PRODUCTPACKID = $self.PRODUCTID;
+            Materials                                   : Association to many PT_TMSKUPRDPCK
+                                                            on Materials.CountryCode = $self.COUNTRY_CODE
+                                                            and Materials.ProductPackID = $self.PRODUCTID;
             ApproverTypes                               : Association to many ApproverTypes
                                                             on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
     };

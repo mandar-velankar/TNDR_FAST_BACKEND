@@ -118,7 +118,8 @@ entity PT_TMPRDPCK{
 	ACTIVE_SUBSTANCE:String(50);
 	ProductType:String(50);
 	ProductClass: String(10);
-	ProductDescription: String(255);
+	ProductDescription: LargeString;
+	ProductFullDescription: LargeString;
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
