@@ -2587,9 +2587,24 @@ module.exports = (srv) => {
 		}
 		const handler = new wordTemplate.TemplateHandler({
 			scopeDataResolver: createResolver({
-				filters: {
+				angularFilters: {
 					upper: (input) => (input || "").toUpperCase(),
-					lower: (input) => (input || "").toLowerCase()
+					lower: (input) => (input || "").toLowerCase(),
+					numberEU2: (input) => {
+						if(typeof input === 'string'){
+						   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						} else {
+						   return input.toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						}
+				   },
+				   numberEU5: (input) => {
+					if(typeof input === 'string'){
+					   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+					} else {
+					   return input.toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+					}
+			   },
+				   dateFormatterEU: (input) => input.split("-").reverse().join("-")
 				}
 			})
 		});
