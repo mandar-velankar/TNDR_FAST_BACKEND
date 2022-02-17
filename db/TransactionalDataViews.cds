@@ -916,7 +916,7 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
             then
-                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - PT_TMBDPR.AdditionalDiscount)) / consumerPrices.ConsumerPriceExclPP
+                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - (PT_TMBDPR.AdditionalDiscount/100))) / consumerPrices.ConsumerPriceExclPP
         else null
     end as FinalDiscount: Double,
     case

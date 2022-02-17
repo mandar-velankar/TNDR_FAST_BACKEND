@@ -1171,8 +1171,8 @@ module.exports = (srv) => {
 			}
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
-			let finalDiscount = Number(Number(productPricing.FinalDiscount*100).toFixed(2));
-			let dVat = Number(Number(offerProduct.VAT).toFixed(2));
+			let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
+			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT).toFixed(2)) : null;
 
 			//Get corresponding ProductPack
 			const whereProductPack = {
@@ -1597,10 +1597,10 @@ module.exports = (srv) => {
 			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
 			SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
 			SELLING_COMPANY_AS1_NAMEI: offer.SELLING_COMPANY_AS1_NAMEI,
-			SELLING_COMPANY_AS1_TITLE: offer.SELLING_COMPANY_AS1_TITLEI,
+			SELLING_COMPANY_AS1_TITLEI: offer.SELLING_COMPANY_AS1_TITLEI,
 			SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
 			SELLING_COMPANY_AS2_NAMEI: offer.SELLING_COMPANY_AS2_NAMEI,
-			SELLING_COMPANY_AS2_TITLE: offer.SELLING_COMPANY_AS2_TITLEI,
+			SELLING_COMPANY_AS2_TITLEI: offer.SELLING_COMPANY_AS2_TITLEI,
 			E_SIGNATURE1: offer.E_SIGNATURE1,
 			E_SIGNATURE2: offer.E_SIGNATURE2,
 			CURRENCY: offer.CURRENCY,
@@ -2591,9 +2591,24 @@ module.exports = (srv) => {
 		}
 		const handler = new wordTemplate.TemplateHandler({
 			scopeDataResolver: createResolver({
-				filters: {
+				angularFilters: {
 					upper: (input) => (input || "").toUpperCase(),
-					lower: (input) => (input || "").toLowerCase()
+					lower: (input) => (input || "").toLowerCase(),
+					numberEU2: (input) => {
+						if(typeof input === 'string'){
+						   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						} else {
+						   return input.toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						}
+				   },
+				   numberEU5: (input) => {
+					if(typeof input === 'string'){
+					   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+					} else {
+					   return input.toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+					}
+			   },
+				   dateFormatterEU: (input) => input.split("-").reverse().join("-")
 				}
 			})
 		});
