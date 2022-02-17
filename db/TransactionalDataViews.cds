@@ -729,6 +729,10 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
     ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS1:String(500),
 	ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS2:String(500),
+    ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.NAME) as SELLING_COMPANY_AS1_NAMEI:String(500),
+    ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.TITLE) as SELLING_COMPANY_AS1_TITLEI:String(500),
+    ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.NAME) as SELLING_COMPANY_AS2_NAMEI:String(500),
+    ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.TITLE) as SELLING_COMPANY_AS2_TITLEI:String(500),
     case 
         when signatory1.AUTHORIZED_SIGNATORY is null then false
         when signatory1.AUTHORIZED_SIGNATORY = ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) then true
@@ -798,9 +802,13 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Quotation.AS1,
           signatory1.AUTHORIZED_SIGNATORY,
           signatory1Default.AUTHORIZED_SIGNATORY,
+          signatory1Default.NAME,
+          signatory1Default.TITLE,
           offer.Quotation.AS2,
           signatory2.AUTHORIZED_SIGNATORY,
           signatory2Default.AUTHORIZED_SIGNATORY,
+          signatory2Default.NAME,
+          signatory2Default.TITLE,
           offer.Currency,
           offer.SellingCompanyDetails.Letterhead,
           offer.SellingCompanyDetails.Remarks,
@@ -908,7 +916,7 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
             then
-                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - PT_TMBDPR.AdditionalDiscount)) / consumerPrices.ConsumerPriceExclPP
+                (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - (PT_TMBDPR.AdditionalDiscount/100))) / consumerPrices.ConsumerPriceExclPP
         else null
     end as FinalDiscount: Double,
     case
