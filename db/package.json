@@ -4,7 +4,7 @@
     "node": "^10 || ^12"
   },
   "scripts": {
-    "start": "node node_modules/@sap/hdi-deploy/deploy.js --auto-undeploy",
+    "start": "node node_modules/@sap/hdi-deploy/deploy.js",
     "start:hana": "node node_modules/@sap/hdi-deploy/deploy.js --exit --auto-undeploy"
   },
   "devDependencies": {
