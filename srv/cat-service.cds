@@ -357,9 +357,19 @@ service CatalogService @(path : 'tender')@(requires : [
             QTY_THRESHOLD                               : Integer;
             ProductClass                                : String(2);
             ProductDescription                          : String(255);
+            FINAL_DISCOUNT                              : Double;
+            FINAL_DISCOUNT_IN_WORDS                     : String(255);
+            PRODUCT_FULL_DESCRIPTION                    : String(255);
             //end of missing SKU & SKUCountry fields
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
+            ProductPricing                              : Association to many ProductPricing
+                                                            on ProductPricing.ProductCode = $self.PRODUCTID;
+            ProductPack                                 : Association to PT_TMPRDPCK 
+                                                            on ProductPack.PRODUCTPACKID = $self.PRODUCTID;
+            Materials                                   : Association to many PT_TMSKUPRDPCK
+                                                            on Materials.CountryCode = $self.COUNTRY_CODE
+                                                            and Materials.ProductPackID = $self.PRODUCTID;
             ApproverTypes                               : Association to many ApproverTypes
                                                             on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
     };
@@ -384,6 +394,10 @@ service CatalogService @(path : 'tender')@(requires : [
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
+            SELLING_COMPANY_AS1_NAMEI: String(255);
+            SELLING_COMPANY_AS1_TITLEI: String(255);
+            SELLING_COMPANY_AS2_NAMEI: String(255);
+            SELLING_COMPANY_AS2_TITLEI: String(255);
             SELLING_COMPANY_AS2   : String(300);
             E_SIGNATURE1          : Boolean;
             E_SIGNATURE2          : Boolean;
@@ -674,8 +688,14 @@ service CatalogService @(path : 'tender')@(requires : [
         key OfferId : String(50);
             content : LargeBinary @Core.MediaType : 'application/pdf';
     }
+    entity ExcelAttachment// as projection on AdminData.ExcelAttachment;
+    {
+        key OfferId : String(50);
+        content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        mediaType:String @Core.IsMediaType;
+    }
 
-    entity ExcelAttachmentView                          as projection on AdminData.ExcelAttachment;
+    //entity ExcelAttachmentView                          as projection on AdminData.ExcelAttachment;
     // {
     //     key OfferId : String(50);
     //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';

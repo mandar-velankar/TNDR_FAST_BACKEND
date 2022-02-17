@@ -3,7 +3,8 @@ const { Readable } = require('stream');
 const fs = require('fs');
 const path = require('path');
 
-exports.generateXLSX = (templateBinary, values)=>{
+exports.generateXLSX = (templatename, values)=>{
+// exports.generateXLSX = (templateBinary, values)=>{
 
     // Load an XLSX file into memory
     // const filedata = fs.readFileSync(path.join(__dirname, '../xlsx-templates', templatename));

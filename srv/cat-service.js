@@ -1171,6 +1171,20 @@ module.exports = (srv) => {
 			}
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
+			let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
+			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT).toFixed(2)) : null;
+
+			//Get corresponding ProductPack
+			const whereProductPack = {
+				PRODUCTPACKID: offerProduct.ProductCode,
+			}
+			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
+
+			const whereMaterial = {
+				CountryCode: offer.COUNTRYCODE,
+				ProductPackId: offerProduct.ProductCode
+			}
+			const materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterial));
 
 			//Get all prices, ammounts and cogs in all units
 			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
@@ -1199,8 +1213,8 @@ module.exports = (srv) => {
 				MANUFACTURER: offerProduct.MANUFACTURER,
 				SHELFLIFE: offerProduct.SHELFLIFE,
 				PRESENTATION: offerProduct.PRESENTATION,
-				VAT: offerProduct.VAT,
-				VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.VAT),
+				VAT: dVat,
+				VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat),
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
@@ -1324,7 +1338,13 @@ module.exports = (srv) => {
 				CODE2: offerProduct.CODE2,
 				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
 				ProductClass: offerProduct.ProductClass,
-				ProductDescription: offerProduct.ProductDescription
+				ProductDescription: offerProduct.ProductDescription,
+				FINAL_DISCOUNT: finalDiscount,
+				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
+				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
+				ProductPricing: productPricing,
+				ProductPack: productPack,
+				Materials: materials
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1576,7 +1596,11 @@ module.exports = (srv) => {
 			SELLINGCOMPANY: offer.SELLINGCOMPANY,
 			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
 			SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
+			SELLING_COMPANY_AS1_NAMEI: offer.SELLING_COMPANY_AS1_NAMEI,
+			SELLING_COMPANY_AS1_TITLEI: offer.SELLING_COMPANY_AS1_TITLEI,
 			SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
+			SELLING_COMPANY_AS2_NAMEI: offer.SELLING_COMPANY_AS2_NAMEI,
+			SELLING_COMPANY_AS2_TITLEI: offer.SELLING_COMPANY_AS2_TITLEI,
 			E_SIGNATURE1: offer.E_SIGNATURE1,
 			E_SIGNATURE2: offer.E_SIGNATURE2,
 			CURRENCY: offer.CURRENCY,
@@ -2526,8 +2550,8 @@ module.exports = (srv) => {
 		// const data = await next(); 
 		const tx = cds.transaction(req);
 		const offerId = req.data.OfferId;
-		const template = req.data.template;
-		if (!offerId || !template) {
+		// const template = req.data.template;
+		if (!offerId){// || !template) {
 			return next();
 		}
 		let excelData = {};
@@ -2567,9 +2591,24 @@ module.exports = (srv) => {
 		}
 		const handler = new wordTemplate.TemplateHandler({
 			scopeDataResolver: createResolver({
-				filters: {
+				angularFilters: {
 					upper: (input) => (input || "").toUpperCase(),
-					lower: (input) => (input || "").toLowerCase()
+					lower: (input) => (input || "").toLowerCase(),
+					numberEU2: (input) => {
+						if(typeof input === 'string'){
+						   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						} else {
+						   return input.toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						}
+				   },
+				   numberEU5: (input) => {
+					if(typeof input === 'string'){
+					   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+					} else {
+					   return input.toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+					}
+			   },
+				   dateFormatterEU: (input) => input.split("-").reverse().join("-")
 				}
 			})
 		});
