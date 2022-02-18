@@ -193,18 +193,37 @@ entity ItalyDeliveries: cuid, managed {
 	PLANT_ADDR			: Association to PLANT_ADDR;		// Delivery Document Address of plants
 }
 
+
+// this is the IDOC structure
+// entity SpainMaterials: cuid, managed {
+// 	E1MARAM				: E1MARAM;				// Master material general data (MARA- SAP table)
+//     E1MARA1				: E1MARA1;				// Additional Fields for E1MARAM segment  - MARA sap table additional fields
+//     E1MAKTM				: E1MAKTM;				// Master material short texts (MAKT - SAP table) : material description
+//     E1MARCM				: E1MARCM;				// Master material C segment (MARC : SAP table) :Plant Data for Material
+//     E1MARDM				: E1MARDM;				// Master material warehouse/batch segment (MARD : SAP table) -Storage Location Data for Material
+//     E1MARMM				: E1MARMM;				// Master material units of measure (MARM - SAP table ):Units of Measure for Material
+//     E1MBEWM				: E1MBEWM;				// Master material material valuation (MBEW : SAP table) :Material Valuation
+//     E1MVKEM				: E1MVKEM;				// Master material sales data (MVKE : SAP table) Sales Data for Material
+//     E1MLANM				: E1MLANM;				// Master material tax classification (MLAN : SAP table)
+//     E1MTXHM				: E1MTXHM;				// Master material long text header
+//     E1MTXLM				: E1MTXLM;				// Master material long text line item
+// }
+
 entity SpainMaterials: cuid, managed {
-	E1MARAM				: E1MARAM;				// Master material general data (MARA- SAP table)
-    E1MARA1				: E1MARA1;				// Additional Fields for E1MARAM segment  - MARA sap table additional fields
-    E1MAKTM				: E1MAKTM;				// Master material short texts (MAKT - SAP table) : material description
-    E1MARCM				: E1MARCM;				// Master material C segment (MARC : SAP table) :Plant Data for Material
-    E1MARDM				: E1MARDM;				// Master material warehouse/batch segment (MARD : SAP table) -Storage Location Data for Material
-    E1MARMM				: E1MARMM;				// Master material units of measure (MARM - SAP table ):Units of Measure for Material
-    E1MBEWM				: E1MBEWM;				// Master material material valuation (MBEW : SAP table) :Material Valuation
-    E1MVKEM				: E1MVKEM;				// Master material sales data (MVKE : SAP table) Sales Data for Material
-    E1MLANM				: E1MLANM;				// Master material tax classification (MLAN : SAP table)
-    E1MTXHM				: E1MTXHM;				// Master material long text header
-    E1MTXLM				: E1MTXLM;				// Master material long text line item
+	MATNR  				: String(18);			// Material Number
+	HLEVEL1_NAME    	: String(40);			// Description
+	HLEVEL4_CODE    	: String(10);			// Version Number Component
+	HLEVEL4_NAME    	: String(40);			// Description
+	HLEVEL6_CODE   		: String(18);			// Version Number Component
+	HLEVEL6_NAME   		: String(40);			// Description            Distribution channel
+	UOM   				: String(3);			// Base Unit of Measure
+	COUNTRYOFORIG    	: String(3);			// Country of origin of the material
+	COGS    			: Double;				// Standard price
+	COGS_UOM    		: String(3);			// Base Unit of Measure
+	PRICE_UNIT    		: String(5);			// Price Unit
+	MAKTX    			: String(40);			// Material Description
+	DIVISION_DESC    	: String(20);			// Division description
+	EAN11    			: String(18); 			// EAN number
 }
 
 entity SpainCustomers: cuid, managed {
