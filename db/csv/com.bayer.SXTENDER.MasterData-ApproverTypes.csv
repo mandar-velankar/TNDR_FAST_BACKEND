@@ -1,121 +1,129 @@
-APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,ENABLED
-Supply Chain,AE,1,0,,,,,
-Legal,AE,1,0,,,,,
-Regulatory,AE,1,0,,,,,
-Country Business,AE,1,0,,,,,
-Regional Business,AE,1,0,,,,,
-Controlling,AE,1,0,,,,,
-Country Business,BH,1,0,,,,,
-Supply Chain,BH,1,0,,,,,
-Legal,BH,1,0,,,,,
-Regulatory,BH,1,0,,,,,
-Regional Business,BH,1,0,,,,,
-Controlling,BH,1,0,,,,,
-Supply Chain,EG,1,0,,,,,
-Legal,EG,1,0,,,,,
-Regulatory,EG,1,0,,,,,
-Country Business,EG,1,0,,,,,
-Regional Business,EG,1,0,,,,,
-Controlling,EG,1,0,,,,,
-Controlling,GC,1,0,,,,,
-Legal,IQ,1,0,,,,,
-Regulatory,IQ,1,0,,,,,
-Supply Chain,IQ,1,0,,,,,
-Country Business,IQ,1,0,,,,,
-Regional Business,IQ,1,0,,,,,
-Controlling,IQ,1,0,,,,,
-Legal,JO,1,0,,,,,
-Regulatory,JO,1,0,,,,,
-Supply Chain,JO,1,0,,,,,
-Country Business,JO,1,0,,,,,
-Regional Business,JO,1,0,,,,,
-Controlling,JO,1,0,,,,,
-Legal,KW,1,0,,,,,
-Regulatory,KW,1,0,,,,,
-Supply Chain,KW,1,0,,,,,
-Country Business,KW,1,0,,,,,
-Regional Business,KW,1,0,,,,,
-Controlling,KW,1,0,,,,,
-Legal,LB,1,0,,,,,
-Regulatory,LB,1,0,,,,,
-Supply Chain,LB,1,0,,,,,
-Country Business,LB,1,0,,,,,
-Regional Business,LB,1,0,,,,,
-Controlling,LB,1,0,,,,,
-Legal,LY,1,0,,,,,
-Regulatory,LY,1,0,,,,,
-Supply Chain,LY,1,0,,,,,
-Country Business,LY,1,0,,,,,
-Regional Business,LY,1,0,,,,,
-Controlling,LY,1,0,,,,,
-Country Business,MX,1,0,,,,,
-Supply Chain,MX,1,0,,,,,
-Legal,OM,1,0,,,,,
-Regulatory,OM,1,0,,,,,
-Supply Chain,OM,1,0,,,,,
-Country Business,OM,1,0,,,,,
-Regional Business,OM,1,0,,,,,
-Controlling,OM,1,0,,,,,
-Legal,QA,1,0,,,,,
-Regulatory,QA,1,0,,,,,
-Supply Chain,QA,1,0,,,,,
-Country Business,QA,1,0,,,,,
-Regional Business,QA,1,0,,,,,
-Controlling,QA,1,0,,,,,
-Supply Chain,SA,1,0,,,,,
-Legal,SA,1,0,,,,,
-Regulatory,SA,1,0,,,,,
-Country Business,SA,1,0,,,,,
-Regional Business,SA,1,0,,,,,
-Controlling,SA,1,0,,,,,
-Regulatory,SD,1,0,,,,,
-Supply Chain,SD,1,0,,,,,
-Country Business,SD,1,0,,,,,
-Regional Business,SD,1,0,,,,,
-Controlling,SD,1,0,,,,,
-Legal,SY,1,0,,,,,
-Regulatory,SY,1,0,,,,,
-Supply Chain,SY,1,0,,,,,
-Country Business,SY,1,0,,,,,
-Regional Business,SY,1,0,,,,,
-Controlling,SY,1,0,,,,,
-HBU,TH,1,0,,,,,
-CDH,TH,1,0,,,,,
-NSM/SM/FM,TH,1,0,,,,,
-Supply Chain,TH,1,0,,,,,
-Legal,YE,1,0,,,,,
-Regulatory,YE,1,0,,,,,
-Supply Chain,YE,1,0,,,,,
-Country Business,YE,1,0,,,,,
-Regional Business,YE,1,0,,,,,
-Controlling,YE,1,0,,,,,
-MACS,AR,1,0,,,,,
-TA,AR,1,0,,,,,
-FBP,AR,1,0,,,,,
-LPC,AR,1,0,,,,,
-COM/PGA,AR,1,0,,,,,
-Supply Chain,AR,1,0,,,,,
-International Trade,AR,1,0,,,,,
-Transfer Pricing,AR,1,0,,,,,
-CDH,AR,2,0,,,,,
-SBR,AR,3,0,,,,,
-MACS Head,CL,3,0,,,,,
-Supply Chain,CL,3,0,,,,,
-Business Service,CL,4,0,,,,,
-Law and Patents,CL,4,0,,,,,
-CDH,CL,4,0,,,,,
-SBR RA ConoSur,CL,3,0,,,,,
-CDH-Chile (signature),CL,4,0,,,,,
-Supply Chain,GC,1,0,,,,,
-Legal,GC,1,0,,,,,
-Regulatory,GC,1,0,,,,,
-Country Business,GC,1,0,,,,,
-Regional Business,GC,1,0,,,,,
-Marketing,CL,4,0,,,,,
-Business Level 1,IT,1,0,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-Finance,IT,1,0,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-Supply Chain,IT,1,0,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-Contract Manager,IT,1,0,2021-10-13 00:00:00,ELLTZ,2021-10-13 00:00:00,ELLTZ,1
-Tender Management,MX,1,3,,,,,
-Business Level 2,IT,1,0,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
-Business Level 3,IT,1,0,2021-10-13 00:00:00,EUTVP,2021-10-13 00:00:00,EUTVP,1
+CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,APPROVERTYPE,COUNTRYCODE,HIERARCHY,VALIDATIONTYPE,ENABLED
+,,,,"Supply Chain","AE",1,1,"True"
+,,,,"Legal","AE",1,1,"True"
+,,,,"Regulatory","AE",1,1,"True"
+,,,,"Country Business","AE",1,1,"True"
+,,,,"Regional Business","AE",1,1,"True"
+,,,,"Controlling","AE",1,1,"True"
+,,,,"Country Business","BH",1,1,"True"
+,,,,"Supply Chain","BH",1,1,"True"
+,,,,"Legal","BH",1,1,"True"
+,,,,"Regulatory","BH",1,1,"True"
+,,,,"Regional Business","BH",1,1,"True"
+,,,,"Controlling","BH",1,1,"True"
+,,,,"Supply Chain","EG",1,1,"True"
+,,,,"Legal","EG",1,1,"True"
+,,,,"Regulatory","EG",1,1,"True"
+,,,,"Country Business","EG",1,1,"True"
+,,,,"Regional Business","EG",1,1,"True"
+,,,,"Controlling","EG",1,1,"True"
+,,,,"Controlling","GC",1,1,"True"
+,,,,"Legal","IQ",1,1,"True"
+,,,,"Regulatory","IQ",1,1,"True"
+,,,,"Supply Chain","IQ",1,1,"True"
+,,,,"Country Business","IQ",1,1,"True"
+,,,,"Regional Business","IQ",1,1,"True"
+,,,,"Controlling","IQ",1,1,"True"
+,,,,"Legal","JO",1,1,"True"
+,,,,"Regulatory","JO",1,1,"True"
+,,,,"Supply Chain","JO",1,1,"True"
+,,,,"Country Business","JO",1,1,"True"
+,,,,"Regional Business","JO",1,1,"True"
+,,,,"Controlling","JO",1,1,"True"
+,,,,"Legal","KW",1,1,"True"
+,,,,"Regulatory","KW",1,1,"True"
+,,,,"Supply Chain","KW",1,1,"True"
+,,,,"Country Business","KW",1,1,"True"
+,,,,"Regional Business","KW",1,1,"True"
+,,,,"Controlling","KW",1,1,"True"
+,,,,"Legal","LB",1,1,"True"
+,,,,"Regulatory","LB",1,1,"True"
+,,,,"Supply Chain","LB",1,1,"True"
+,,,,"Country Business","LB",1,1,"True"
+,,,,"Regional Business","LB",1,1,"True"
+,,,,"Controlling","LB",1,1,"True"
+,,,,"Legal","LY",1,1,"True"
+,,,,"Regulatory","LY",1,1,"True"
+,,,,"Supply Chain","LY",1,1,"True"
+,,,,"Country Business","LY",1,1,"True"
+,,,,"Regional Business","LY",1,1,"True"
+,,,,"Controlling","LY",1,1,"True"
+,,,,"Country Business","MX",1,1,"True"
+,,,,"Supply Chain","MX",1,1,"True"
+,,,,"Legal","OM",1,1,"True"
+,,,,"Regulatory","OM",1,1,"True"
+,,,,"Supply Chain","OM",1,1,"True"
+,,,,"Country Business","OM",1,1,"True"
+,,,,"Regional Business","OM",1,1,"True"
+,,,,"Controlling","OM",1,1,"True"
+,,,,"Legal","QA",1,1,"True"
+,,,,"Regulatory","QA",1,1,"True"
+,,,,"Supply Chain","QA",1,1,"True"
+,,,,"Country Business","QA",1,1,"True"
+,,,,"Regional Business","QA",1,1,"True"
+,,,,"Controlling","QA",1,1,"True"
+,,,,"Supply Chain","SA",1,1,"True"
+,,,,"Legal","SA",1,1,"True"
+,,,,"Regulatory","SA",1,1,"True"
+,,,,"Country Business","SA",1,1,"True"
+,,,,"Regional Business","SA",1,1,"True"
+,,,,"Controlling","SA",1,1,"True"
+,,,,"Regulatory","SD",1,1,"True"
+,,,,"Supply Chain","SD",1,1,"True"
+,,,,"Country Business","SD",1,1,"True"
+,,,,"Regional Business","SD",1,1,"True"
+,,,,"Controlling","SD",1,1,"True"
+,,,,"Legal","SY",1,1,"True"
+,,,,"Regulatory","SY",1,1,"True"
+,,,,"Supply Chain","SY",1,1,"True"
+,,,,"Country Business","SY",1,1,"True"
+,,,,"Regional Business","SY",1,1,"True"
+,,,,"Controlling","SY",1,1,"True"
+,,,,"HBU","TH",1,1,"True"
+,,,,"CDH","TH",1,1,"True"
+,,,,"NSM/SM/FM","TH",1,1,"True"
+,,,,"Supply Chain","TH",1,1,"True"
+,,,,"Legal","YE",1,1,"True"
+,,,,"Regulatory","YE",1,1,"True"
+,,,,"Supply Chain","YE",1,1,"True"
+,,,,"Country Business","YE",1,1,"True"
+,,,,"Regional Business","YE",1,1,"True"
+,,,,"Controlling","YE",1,1,"True"
+,,,,"MACS","AR",1,1,"True"
+,,,,"TA","AR",1,1,"True"
+,,,,"FBP","AR",1,1,"True"
+,,,,"LPC","AR",1,1,"True"
+,,,,"COM/PGA","AR",1,1,"True"
+,,,,"Supply Chain","AR",1,1,"True"
+,,,,"International Trade","AR",1,1,"True"
+,,,,"Transfer Pricing","AR",1,1,"True"
+,,,,"CDH","AR",2,1,"True"
+,,,,"SBR","AR",3,1,"True"
+,,,,"MACS","CL",3,2,"True"
+,,,,"Supply","CL",3,1,"True"
+,,,,"Business Service","CL",4,1,"True"
+,,,,"Law and Patents","CL",4,1,"True"
+,,,,"CDH","CL",4,1,"True"
+,,,,"SBR RA ConoSur","CL",3,1,"True"
+,,,,"CDH-Chile (signature)","CL",4,1,"True"
+,,,,"Supply Chain","GC",1,1,"True"
+,,,,"Legal","GC",1,1,"True"
+,,,,"Regulatory","GC",1,1,"True"
+,,,,"Country Business","GC",1,1,"True"
+,,,,"Regional Business","GC",1,1,"True"
+,,,,"Marketing","CL",4,1,"True"
+,,,,"Tender Management","MX",1,2,"True"
+"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP","Business Level 1","IT",1,0,"True"
+"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP","Finance","IT",1,0,"True"
+"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP","Supply Chain","IT",1,0,"True"
+"2021-10-13 00:00:00","ELLTZ","2021-10-13 00:00:00","ELLTZ","Contract Manager","IT",1,0,"True"
+"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP","Business Level 2","IT",1,0,"True"
+"2021-10-13 00:00:00","EUTVP","2021-10-13 00:00:00","EUTVP","Business Level 3","IT",1,0,"True"
+"2022-02-17 12:15:59.940000","EUTVP",,"EUTVP","BU/RAM","ES",1,1,"True"
+"2022-02-17 12:16:14.280000","EUTVP",,"EUTVP","KAMS","ES",1,1,"True"
+"2022-02-17 12:16:24.404000","EUTVP",,"EUTVP","SM","ES",1,1,"True"
+"2022-02-17 12:16:35.859000","EUTVP",,"EUTVP","Legal","ES",1,1,"True"
+"2022-02-17 12:16:47.436000","EUTVP",,"EUTVP","CDH","ES",1,1,"True"
+"2022-02-17 12:17:00.853000","EUTVP",,"EUTVP","Financial Business Partner","ES",1,1,"True"
+"2022-02-17 12:17:15.173000","EUTVP",,"EUTVP","Controlling","ES",1,1,"True"
+"2022-02-17 12:17:52.222000","EUTVP",,"EUTVP","Supply Chain","ES",1,2,"True"
