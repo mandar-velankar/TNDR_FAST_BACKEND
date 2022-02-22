@@ -173,4 +173,5 @@ COUNTRYCODE,TABID,VISIBLE
 "ES","tenderResultsId","True"
 "ES","deliveryTrackingId","False"
 "ES","financialOfferId_IT","False"
-"ES","financialOfferId","True"
+"ES","financialOfferId","False"
+"ES","financialOfferId_ES","True"
