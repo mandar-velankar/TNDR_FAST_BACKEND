@@ -67,7 +67,13 @@
     },
     "odata": {
       "version": "v4"
-    }
+    },
+    "query": {
+        "limit": {
+            "default": 2000,
+            "max"    : 2000
+        }
+      }
   },
   "files": [
     "db",
