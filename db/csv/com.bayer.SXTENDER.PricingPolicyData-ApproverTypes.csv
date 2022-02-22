@@ -1,5 +1,5 @@
 ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,APPROVERTYPE,COUNTRYCODE,MANDATORY
-"28e0dc85-d03e-4bd4-9be8-710716df9067",,,,,"Head of Business Unit","TH",1
-"6d9f914d-9982-41f0-afe7-442c4e612ae5",,,,,"Market Access Manager","TH",1
-"1d22cd42-ff4d-4d80-a2ac-9eb4e9ea8a62",,,,,"Head of Finance","TH",1
-"d7dde1bd-1cab-4a68-b55a-f7c737317870",,,,,"General Manager","TH",1
+"28e0dc85-d03e-4bd4-9be8-710716df9067",,,,,"Head of Business Unit","TH","True"
+"6d9f914d-9982-41f0-afe7-442c4e612ae5",,,,,"Market Access Manager","TH","True"
+"1d22cd42-ff4d-4d80-a2ac-9eb4e9ea8a62",,,,,"Head of Finance","TH","True"
+"d7dde1bd-1cab-4a68-b55a-f7c737317870",,,,,"General Manager","TH","True"
