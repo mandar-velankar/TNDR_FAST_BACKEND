@@ -699,3 +699,6 @@ COUNTRYCODE,TABLEID,COLUMN,BINDINGPATH,VISIBLE,REQUIRED,DESCRIPTION
 "ES","editofferProductId","PackFactor","SKU/PACKFACTOR","False","False","PackFactor"
 "ES","editofferProductId","AicCnd","CODE1","False","False","aicCnd"
 "ES","editofferProductId","AtcRdm","CODE2","False","False","atcRdm"
+"ES","editofferProductId","ActivePriceAgreement","ActivePriceAgreement","True","True","Active PriceAgreement"
+"ES","editofferProductId","AnticipatedRequestedQuantity","AnticipatedRequestedQuantity","True","False","Anticipated Requested Quantity"
+"ES","editofferProductId","DiscountCondition","DiscountCondition","True","True","Discount Condition"
