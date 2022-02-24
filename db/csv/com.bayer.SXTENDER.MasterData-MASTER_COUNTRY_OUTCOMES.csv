@@ -71,6 +71,40 @@ COUNTRYCODE,OUTCOME,SORTER
 "BR","Decision Pending",1
 "BR","Won",2
 "BR","Lost",3
-"IT","Decision Pending",1
-"IT","Won",2
-"IT","Lost",3
+"AE","Cancelled",4
+"BH","Cancelled",4
+"EG","Cancelled",4
+"GC","Cancelled",4
+"IQ","Cancelled",4
+"JO","Cancelled",4
+"KW","Cancelled",4
+"LB","Cancelled",4
+"LY","Cancelled",4
+"OM","Cancelled",4
+"QA","Cancelled",4
+"SA","Cancelled",4
+"SD","Cancelled",4
+"SY","Cancelled",4
+"YE","Cancelled",4
+"AE","Withdrawn",5
+"BH","Withdrawn",5
+"EG","Withdrawn",5
+"GC","Withdrawn",5
+"IQ","Withdrawn",5
+"JO","Withdrawn",5
+"KW","Withdrawn",5
+"LB","Withdrawn",5
+"LY","Withdrawn",5
+"OM","Withdrawn",5
+"QA","Withdrawn",5
+"SA","Withdrawn",5
+"SD","Withdrawn",5
+"SY","Withdrawn",5
+"YE","Withdrawn",5
+"IT","Won",1
+"IT","Lost",2
+"IT","Decision Pending",3
+"ES","Won",1
+"ES","Lost",2
+"ES","Decision Pending",3
+"ES","Formalization Pending",4
