@@ -297,3 +297,12 @@ COUNTRYCODE,STATUS,SORTER
 "IT","Delivery Ongoing",8
 "IT","Offer Declined",10
 "IT","All",13
+"ES","Awaiting Approval",1
+"ES","Offer Created",2
+"ES","Offer Approved",3
+"ES","Offer Rejected",4
+"ES","Quotation Submitted",5
+"ES","Results Recorded",7
+"ES","Delivery Ongoing",8
+"ES","Offer Declined",10
+"ES","All",13

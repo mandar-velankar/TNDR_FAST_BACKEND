@@ -55,15 +55,17 @@
                             ]
                         }
                     },
-                    "artiom": {
+                    "EICTW": {
                         "jwt": {
                             "userInfo": {
-                                "logonName": "ELLTZ",
+                                "logonName": "EICTW",
                                 "email": "P2001081482@example.com"
                             },
                             "scopes": [
                                 "authenticated-user",
-                                "f_tndr_cag_admin"                        ]
+                                "f_tndr_cag_admin",
+                                "f_tndr_cag_ctr_user",
+                                "f_tndr_cag_tnd_user"                        ]
                         }
                     }
                 }

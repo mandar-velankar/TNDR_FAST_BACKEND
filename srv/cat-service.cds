@@ -362,9 +362,11 @@ service CatalogService @(path : 'tender')@(requires : [
             PRODUCT_FULL_DESCRIPTION                    : String(255);
             //end of missing SKU & SKUCountry fields
             FreeGoodsOther                              : Association to many FreeGoodsOther
-                                                            on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
+                                                            on FreeGoodsOther.ProductPackId = $self.PRODUCTID
+                                                            and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
             ProductPricing                              : Association to many ProductPricing
-                                                            on ProductPricing.ProductCode = $self.PRODUCTID;
+                                                            on ProductPricing.ProductCode = $self.PRODUCTID
+                                                            and ProductPricing.OfferID = $self.OFFER_ID;
             ProductPack                                 : Association to PT_TMPRDPCK 
                                                             on ProductPack.PRODUCTPACKID = $self.PRODUCTID;
             Materials                                   : Association to many PT_TMSKUPRDPCK
