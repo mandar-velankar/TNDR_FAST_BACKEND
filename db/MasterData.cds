@@ -66,6 +66,9 @@ entity PT_TMINST{
 	State:String;
 	MercadoPublicoIssuer:String;
 	RegionID:String;
+    ProvinceID:String(20);
+    CifCode:String(50);
+    RegionalHealthSystem: String(50);
 	VatCode:String(50);
 	TaxCode:String(50);
 	//Associations
@@ -441,6 +444,14 @@ entity MASTER_COUNTRY_TENDER_ORIGIN{
 }
 
 entity MASTER_COUNTRY_TENDER_TYPE{
+	key COUNTRY_CODE:String(2) not null;
+	key TENDER_TYPE_ID:Integer not null;
+	//Associations
+	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
+	TenderType:Association to MASTER_TENDER_TYPE on TenderType.ID = TENDER_TYPE_ID;
+}
+
+entity MASTER_COUNTRY_TENDER_TYPE2{
 	key COUNTRY_CODE:String(2) not null;
 	key TENDER_TYPE_ID:Integer not null;
 	//Associations

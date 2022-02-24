@@ -443,6 +443,10 @@ entity PT_TMTEND: managed {
         TENDER_ORIGIN_ID     : Integer;
         PROCUREMENT_METHOD_ID: String;
         PROCUREMENT_REASON   : String;
+
+        CONTENT              : String(500);
+        PORTAL               : LargeString;
+        TENDER_TYPE_2_ID     : Integer;                
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID; //OK
