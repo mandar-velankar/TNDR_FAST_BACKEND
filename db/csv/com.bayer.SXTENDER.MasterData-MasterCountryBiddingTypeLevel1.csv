@@ -5,3 +5,5 @@ ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,CLASSIFICATIONID,NAME
 "dc1519f7-7b0e-4ea7-abc4-2b905cb0bc5a",,,,,"AR","4ccd60bd-011d-47fe-ab16-6d74843cd456","Adjudicación simple"
 "634921f8-c495-4dc4-831a-aa794b307a5c",,,,,"AR","4ccd60bd-011d-47fe-ab16-6d74843cd456","Proced. Por Urgencia o Emergencia"
 "66d2ca9c-534e-45e5-b120-f59477cc1283",,,,,"AR","4ccd60bd-011d-47fe-ab16-6d74843cd456","Proced. Por Seguridad o Defensa"
+"e7e4bcc6-a347-4be0-8c59-a19d8acd9fb9",,,,,"ES","19e011a2-049a-43e7-8264-33a09de1729d","Acuerdo Marco with negotiation"
+"4a1714cc-a8ae-4e79-962c-4b30301fa496",,,,,"ES","19e011a2-049a-43e7-8264-33a09de1729d","Acuerdo Marco without negotiation"
