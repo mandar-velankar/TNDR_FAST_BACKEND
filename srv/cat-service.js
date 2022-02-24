@@ -2429,9 +2429,13 @@ module.exports = (srv) => {
 		}
 		return nextValue
 	}
-	srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
-		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo")
-		return req;
+	// srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
+	srv.on('CREATE', 'PT_TMDLVTR', async (req,next) => {
+        const tx = cds.transaction(req);
+		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");
+        const delivery = await next();   
+        await tx.commit();     
+        return delivery; 
 	});
 	srv.before('CREATE', 'PT_TMUDLTRS', async (req) => {
 		req.data.SNO = await getNextValue(PT_TMUDLTRS, "SNO")
