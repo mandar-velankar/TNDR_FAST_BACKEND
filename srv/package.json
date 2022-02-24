@@ -54,6 +54,12 @@
             "passport": {
                 "strategy": "JWT"
             }
+        },
+        "query": {
+            "limit": {
+                "default": 2000,
+                "max"    : 2000
+            }
         }
     }
 }
