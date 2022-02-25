@@ -1,0 +1,11 @@
+### syncPriceAgreements  - Synchronise price agreements with SAP from
+POST http://localhost:4004/v2/priceagreement/syncPriceAgreements
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "ids": [
+        "5fd80d35-4997-4ea9-aba8-c580550fde39",
+        "f7dbd562-5c5b-4348-9d46-c15a3c14c21c"
+    ]
+}

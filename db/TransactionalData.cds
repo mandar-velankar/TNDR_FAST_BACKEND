@@ -10,7 +10,10 @@ using {com.bayer.SXTENDER.MasterData} from './MasterData';
 //using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from './MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews';
+using {com.bayer.SXTENDER.BankGuaranteeData} from './BankGuaranteeData';
+using {com.bayer.SXTENDER.PriceAgreementData} from './PriceAgreementData';
 
+entity CandidatePrices as projection on PriceAgreementData.CandidatePrices;
 entity PT_TMOFRS { //Offers
         TenderID              : String(50) not null;
     key OfferID               : String(30) not null;
@@ -189,6 +192,7 @@ entity PT_TMBDPR {
         VolumeTo              : Integer;
         RegPrice              : Double;
         FOC                   : Double;
+        FOCStep               : Double; 
         FOCType               : String(255);
         Discount              : Double;
         OfferPrice            : Double;
@@ -290,6 +294,7 @@ entity PT_TMOFPR {
         DeliveryConditions       : String;
         MinInvoiceAmount         : Double;
         PricingPolicyCluster     : String;
+        OfferType                : String;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -330,6 +335,45 @@ entity PT_TMOFPR {
                                        on  GroupPurchasing.OfferID     = OfferID
                                        and GroupPurchasing.ProductCode = ProductCode
                                        and GroupPurchasing.Active = Active;
+        ProductPricing           : Association to ProductPricing
+                                       on ProductPricing.OfferID = OfferID
+                                       and ProductPricing.ProductCode = ProductCode
+                                       and ProductPricing.CountryCode = CountryCode;
+        PriceAgreement           : Association to PriceAgreementData.PriceAgreements
+                                        on PriceAgreement.OfferId = OfferID
+                                        and PriceAgreement.ProductPackId = ProductCode;
+}
+
+//italy
+entity ProductPricing: cuid, managed {
+    key OfferID: String;
+    key ProductCode: Integer;
+    key CountryCode: String;
+    Warranty: Integer;
+    AgreementDuration: Integer;
+    MonthlyRent: Double;
+    MonthsPerInvoice: Integer;
+    ContractStartDate: String;
+    ValueOfDevices: Double;
+    StatusOfDevice: String;
+    MinContractual: Double;
+    MinAnnPurch: Double;
+    FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
+}
+
+entity FreeGoodsOther: cuid, managed {
+    ProductPackId: Integer;
+    FreeGoodsOther: Double;
+    FreeGoodsOther_Step: Double;
+    FreeGoodsOther_ABS_PCT: String(4);
+    VAT: Double; // We store this to keep track of the VAT the moment we save FreeGoodsOther to the ProductPricing
+    ProductPricing: Association to ProductPricing;
+    ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+    Materials: Association to many MasterData.PT_TMSKUPRDPCK
+                                on Materials.CountryCode = 'IT'
+                                and Materials.ProductPackID = ProductPackId;
+
+
 }
 
 entity PT_TMPFIOM {
@@ -363,7 +407,7 @@ entity PT_TMQUTO {
 }
 
 
-entity PT_TMTEND {
+entity PT_TMTEND: managed {
     key TenderID             : String(50) not null;
         CountryCode          : String(2) not null;
         ToolID               : Integer;
@@ -428,6 +472,10 @@ entity PT_TMTEND {
         CountrySpecificInformation : Association to CountrySpecificTenderInfo
                                         on CountrySpecificInformation.TenderID = TenderID
                                         and CountrySpecificInformation.CountryCode = CountryCode;
+        BankGuarantees: Association to BankGuaranteeData.BankGuarantees
+                                        on BankGuarantees.TenderID = TenderID;
+        PriceAgreements: Association to PriceAgreementData.PriceAgreements
+                                         on PriceAgreements.TenderId  = TenderID;
 }
 
 entity PT_TMTNOFST {
@@ -460,6 +508,15 @@ entity PT_TMTRRES {
         Reason            : String(255);
         Comment           : String(255);
         AwardedTier       : Integer;
+        //new fields italy
+        ExtensionDate     : Date;
+        ExtensionNotes    : String;
+        AwardLetterNo     : String;
+        AwardDelibNo      : String;
+        DeliveryDate      : Date;
+        ResultDate        : Date;
+        AwardDate         : Date;
+        AwardActing       : String;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID

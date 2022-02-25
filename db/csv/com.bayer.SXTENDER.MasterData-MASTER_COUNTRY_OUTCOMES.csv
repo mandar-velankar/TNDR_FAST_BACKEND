@@ -86,3 +86,25 @@ COUNTRYCODE,OUTCOME,SORTER
 "SD","Cancelled",4
 "SY","Cancelled",4
 "YE","Cancelled",4
+"AE","Withdrawn",5
+"BH","Withdrawn",5
+"EG","Withdrawn",5
+"GC","Withdrawn",5
+"IQ","Withdrawn",5
+"JO","Withdrawn",5
+"KW","Withdrawn",5
+"LB","Withdrawn",5
+"LY","Withdrawn",5
+"OM","Withdrawn",5
+"QA","Withdrawn",5
+"SA","Withdrawn",5
+"SD","Withdrawn",5
+"SY","Withdrawn",5
+"YE","Withdrawn",5
+"IT","Won",1
+"IT","Lost",2
+"IT","Decision Pending",3
+"ES","Won",1
+"ES","Lost",2
+"ES","Decision Pending",3
+"ES","Formalization Pending",4

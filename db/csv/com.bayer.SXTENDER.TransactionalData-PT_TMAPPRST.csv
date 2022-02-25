@@ -1,0 +1,29 @@
+TENDERID,OFFERID,COUNTRYCODE,PRODUCTCODE,APPROVALCONTENT,APPROVERTYPESECTION,APPROVALSTATUS,APPROVERNAME,APPROVEREMAILID,SENDERCOMMENT,APPROVERCOMMENT,ACTIVE,HIERARCHY,AP_ID,RESTOREKEY,STATUSTIME,SUBMITTEDBY,APPROVERDATE,APPROVERTYPE,FLOW_ID,REQUIRED_ACTION
+"IT-22-1002","IT-22-1002-1","IT",200224,"Quotation",1,"Waiting","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-11 08:13:44","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1002","IT-22-1002-1","IT",200224,"Quotation",1,"Cancelling","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-11 08:26:00","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1003","IT-22-1003-1","IT",200224,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-11 08:35:19","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1004","IT-22-1004-1","IT",200224,"Quotation",1,"Approval","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-11 10:26:58","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1004","IT-22-1004-1","IT",200224,"Quotation",1,"Approval","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-11 10:29:50","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1005","IT-22-1005-1","IT",200247,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-14 09:08:11","BIBPS",,"Contract Manager",,"Notification"
+"IT-22-1005","IT-22-1005-1","IT",200248,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-14 09:08:11","BIBPS",,"Contract Manager",,"Notification"
+,"IT-22-1010-1",,200204,,,"Notification Sent",,"andrea.duranti@bayer.com",,,1,,,,"2022-02-15 11:50:45",,,"Contract Manager",,
+"IT-22-1012","IT-22-1012-1","IT",200310,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-15 14:18:44","GBJYT",,"Contract Manager",,"Notification"
+,"AE-22-1001-1",,100119,,,"Notification Sent",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 15:19:19",,,"Controlling",,
+,"AE-22-1001-1",,100094,,,"Notification Sent",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 15:19:19",,,"Controlling",,
+,"AE-22-1001-1",,100119,,,"Approved",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 15:19:19",,,"Supply Chain",,
+,"AE-22-1001-1",,100094,,,"Approved",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 15:19:19",,,"Supply Chain",,
+,"AE-22-1001-1",,100119,,,"Approved",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 15:19:19",,,"Regional Business",,
+,"AE-22-1001-1",,100094,,,"Approved",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 15:19:19",,,"Regional Business",,
+,"AE-22-1001-1-C1",,100119,,,"Approved",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 16:32:48",,,"Supply Chain",,
+,"AE-22-1001-1-C1",,100094,,,"Approved",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 16:32:48",,,"Supply Chain",,
+,"AE-22-1001-1-C1",,100119,,,"Approved",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 16:32:48",,,"Country Business",,
+,"AE-22-1001-1-C1",,100094,,,"Approved",,"jonathan.hubeau.ext@bayer.com",,,1,,,,"2022-02-15 16:32:48",,,"Country Business",,
+,"IT-22-1010-1",,200204,,,"Approved",,"andre.jacobs@bayer.com",,,1,,,,"2022-02-15 11:50:45",,,"Business Level 1",,
+"IT-22-1013","IT-22-1013-1","IT",200399,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-16 07:41:22","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1013","IT-22-1013-1","IT",200439,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-16 07:41:22","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1013","IT-22-1013-1","IT",200404,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-16 07:41:22","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1013","IT-22-1013-1","IT",200444,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-16 07:41:22","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1013","IT-22-1013-1","IT",200402,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-16 07:41:22","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1013","IT-22-1013-1","IT",200427,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-16 07:41:22","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1016","IT-22-1016-2","IT",205279,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-16 12:51:46","GBJWK",,"Contract Manager",,"Notification"
+"IT-22-1018","IT-22-1018-1","IT",200289,"Quotation",1,"Notification Sent","Andrea Duranti","andrea.duranti@bayer.com","","",1,1,,,"2022-02-16 14:45:41","GBJWK",,"Contract Manager",,"Notification"

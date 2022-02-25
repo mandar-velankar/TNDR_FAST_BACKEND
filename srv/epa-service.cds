@@ -16,14 +16,14 @@ service EpaService @(path: 'epa') @(requires:['f_tndr_cag_admin','f_tndr_cag_epa
 	entity InstituteGroupPrice as projection on PricingAppData.InstituteGroupPrice;
 	entity InstituteGroupPriceLatest @readonly as projection on PricingAppData.InstituteGroupPriceLatest;
 	entity CountryApprovers @readonly as projection on PricingAppData.CountryApprovers;
-	entity Countries as projection on MasterData.PT_TMCTRY;
+	entity Countries @(cds.redirection.target:true) as projection on MasterData.PT_TMCTRY;
 
     entity CountryLegalentity as projection on MasterData.PT_TMCTLE;
     entity CountryProductPack as projection on MasterData.PT_TMCTPRDPCK;
     entity UserCountry as projection on AdminData.PT_TMUSERCTRY;
 	entity CountriesUser @(restrict: [
 		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
-	]) as projection on MasterData.PT_TMCTRY{
+	]) @(cds.redirection.target:false) as projection on MasterData.PT_TMCTRY{
 		*,
 		LegalEntities: redirected to CountryLegalentity,
 		CountryPacks: redirected to CountryProductPack,

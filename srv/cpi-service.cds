@@ -9,11 +9,16 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity BrazilCustomers as projection on SAP.BrazilCustomers;
     entity BrazilPrices as projection on SAP.BrazilPrices;
     entity BrazilEmpenho as projection on SAP.BrazilEmpenho;
+    entity BrazilDeliveriesHeader as projection on SAP.BrazilDeliveriesHeader;
+    entity BrazilDeliveriesItems as projection on SAP.BrazilDeliveriesItems;
+    entity BrazilExemptions as projection on SAP.BrazilExemptions;
     entity ItalyMaterials as projection on SAP.ItalyMaterials;
     entity ItalyCustomers as projection on SAP.ItalyCustomers;
     entity ItalyDeliveries as projection on SAP.ItalyDeliveries;
     entity SpainMaterials as projection on SAP.SpainMaterials;
     entity SpainCustomers as projection on SAP.SpainCustomers;
     entity SpainDeliveries as projection on SAP.SpainDeliveries;
+
+    function createBrazilContract() returns LargeString;
 
 }

@@ -65,6 +65,9 @@ entity PT_TMINST{
 	INSTITUTE_HIERARCHY_ID:Integer;
 	State:String;
 	MercadoPublicoIssuer:String;
+	RegionID:String;
+	VatCode:String(50);
+	TaxCode:String(50);
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -72,6 +75,7 @@ entity PT_TMINST{
 	Children:Association to many PT_TMINSHIER on Children.Parent = $self;
 	Terms:Association to many PT_TMINSBRTR on Terms.Institute = $self;
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
+	Region:Association to CountryRegions on Region.ID = RegionID;
 }
 
 //Institute Hierarchy Level
@@ -112,6 +116,10 @@ entity PT_TMPRDPCK{
 	PCIName:String(255);
 	MoleculeName:String(255);
 	ACTIVE_SUBSTANCE:String(50);
+	ProductType:String(50);
+	ProductClass: String(10);
+	ProductDescription: LargeString;
+	ProductFullDescription: LargeString;
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
@@ -269,6 +277,8 @@ entity PT_TMCTPRDPCK{
 	VTATax:hana.REAL;
 	COMMENT:String(255);
 	GOV_CODE:String(255);
+	CODE1:String(255);
+	CODE2:String(255);
 	QTY_THRESHOLD:Integer;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
@@ -573,6 +583,14 @@ entity AccountPreApprovedPrices: cuid, managed {
 	MIN_UNIT_NET_PRICE	: Double;
 }
 
+entity CountryPreApprovedPrices: cuid, managed {
+	COUNTRY_CODE		: String(2);
+	PRODUCT_ID			: Integer;
+	CURRENCY			: String(3);
+	MIN_PACK_PRICE		: Double;
+	MIN_UNIT_PRICE		: Double;
+}
+
 entity MasterCompetitors: cuid, managed {
 	CountryCode			: String(2); //Bayer
 	ProductCode			: Integer;  //Bayer
@@ -608,3 +626,50 @@ entity ChannelProductPolicies: cuid, managed {
 	ProductPackID		:Integer not null;
 	StandardDiscount 	: Double;	
 };
+
+
+entity CountryProvinces: cuid {
+	CountryCode     	: String(2);
+	RegionID            : String;
+	Name				: String;
+}
+
+entity CountryRegions: cuid {
+	CountryCode     	: String(2);
+	Name				: String;
+	Tenders				: Composition of many Tenders_in_Regions on Tenders.Region = $self;
+}
+
+entity TenderRegions {
+	key TenderID 	    : String;
+	Regions				: Composition of many Tenders_in_Regions on Regions.Tender = $self;
+}
+
+// link table to reflect many-to-many relationship between CountryRegions and TenderRegions
+entity Tenders_in_Regions {
+	key TenderID        : String;
+	key RegionID        : String;
+	Tender				: Association to TenderRegions on Tender.TenderID = TenderID;
+	Region				: Association to CountryRegions on Region.ID = RegionID;
+}
+
+//italy
+entity ConsumerPrices: cuid, managed {
+	CountryCode: String;
+	ProductPackId: String;
+	Currency: String;
+	ValidFrom: Timestamp;
+	ValidTo: Timestamp;
+	ConsumerPriceExclPP: Double;
+	ConsumerPriceInclPP: Double;
+	ConsumerPriceExclPU: Double;
+	ConsumerPriceInclPU: Double;
+	VatPerPack: Double;
+	MandatoryDiscount: Double;
+	ExfPriceExclPP: Double;
+	ConfidentialDiscount1: Double;
+	ConfidentialDiscount2: Double;
+	TotalDiscount: Double;
+	MaxPriceNhsPP: Double;
+	MaxPriceNhsPU: Double;
+}

@@ -75,7 +75,7 @@ service PolicyService @(path: 'ppa') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     entity Policies as projection on PricingPolicyData.ProductPolicies;
 
     //Approvals for policies
-    entity Approvals as projection on PricingPolicyData.Approvals;
+    entity Approvals @(cds.redirection.target:true) as projection on PricingPolicyData.Approvals;
 
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
