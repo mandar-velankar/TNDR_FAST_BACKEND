@@ -25,8 +25,14 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/.vscode/cds",
-      "args": [ "run", "--with-mocks", "--in-memory?" ],
-      "skipFiles": [ "<node_internals>/**" ],
+      "args": [
+        "run",
+        "--with-mocks",
+        "--in-memory?"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "console": "integratedTerminal",
       "autoAttachChildProcesses": true
     },
@@ -37,14 +43,14 @@
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
-      "run",
-      "start"
+        "run",
+        "start"
       ],
       "console": "integratedTerminal",
       "port": 9229,
       "skipFiles": [
-      "<node_internals>/**"
+        "<node_internals>/**"
       ]
-      }
+    }
   ]
 }
