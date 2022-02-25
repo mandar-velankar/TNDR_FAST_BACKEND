@@ -281,7 +281,6 @@ entity PT_TMCTPRDPCK{
 	CODE2:String(255);
 	QTY_THRESHOLD:Integer;
     BU: String(255);   
-    AnticipatedRequestedQuantity: String(25);
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
