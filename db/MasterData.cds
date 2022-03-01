@@ -79,6 +79,7 @@ entity PT_TMINST{
 	Terms:Association to many PT_TMINSBRTR on Terms.Institute = $self;
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
 	Region:Association to CountryRegions on Region.ID = RegionID;
+    Province: Association to CountryProvinces on Province.ID = ProvinceID;
 }
 
 //Institute Hierarchy Level
