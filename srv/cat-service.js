@@ -1318,6 +1318,7 @@ module.exports = (srv) => {
 				WARRANTY: offerProduct.Warranty,
 				AGREEMENTDURATION: offerProduct.AgreementDuration,
 				MONTHLYRENT: offerProduct.MonthlyRent,
+                MONTHLYRENT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.MonthlyRent),
 				MONTHSPERINVOICE: offerProduct.MonthsPerInvoice,
 				CONTRACTSTARTDATE: offerProduct.ContractStartDate,
 				VALUEOFDEVICES: offerProduct.ValueOfDevices,
