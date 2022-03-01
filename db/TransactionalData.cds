@@ -360,6 +360,9 @@ entity ProductPricing: cuid, managed {
     MinContractual: Double;
     MinAnnPurch: Double;
     FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
+    PricingCondition: Composition of many ProductPricingCondition on PricingCondition.OfferID = OfferID
+                                                                  and PricingCondition.ProductCode = ProductCode
+                                                                  and PricingCondition.CountryCode = CountryCode;
 }
 
 entity FreeGoodsOther: cuid, managed {
@@ -375,6 +378,46 @@ entity FreeGoodsOther: cuid, managed {
                                 and Materials.ProductPackID = ProductPackId;
 
 
+}
+
+
+entity ProductPricingCondition: cuid, managed {
+    OfferID         : String;
+    ProductCode     : Integer;
+    CountryCode     : String;
+    Classification  : String;
+    Division        : String;
+    isActive        : Boolean;
+    isMain          : Boolean;
+    PriceCondition  : Composition of PriceCondition;
+}
+
+entity PriceCondition: cuid, managed {
+    ConditionType                       : String;
+    PVL                                 : Decimal(15,6);
+    Discount                            : Decimal;
+    RoyalDecree                         : Boolean;
+    StandardDiscount                    : Decimal;
+    AdditionalDiscount                  : Decimal;
+    NetPriceWithoutTaxBeforeDeductionRD : Decimal;
+    NetPriceWithoutTaxAfterDeductionRD  : Decimal;
+    NetPriceWithTaxAfterDeductionRD     : Decimal;
+    NetPriceWithoutTax                  : Decimal;
+    NetPriceWithTax                     : Decimal;
+    MaximumPrice                        : Decimal;
+    Tax                                 : Decimal;
+    Liquidation                         : String;
+    RefundDate                          : Date;
+    FOCMinAmount                        : Integer;
+    FOCBonus                            : Decimal;
+    PotentialGeneratedSavings           : Decimal;
+    DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
+}
+
+entity DiscountCondition: cuid, managed {
+    Volume          : Integer;
+    Discount        : Integer;
+    PriceCondition  : Association to PriceCondition;
 }
 
 entity PT_TMPFIOM {
