@@ -360,6 +360,9 @@ entity ProductPricing: cuid, managed {
     MinContractual: Double;
     MinAnnPurch: Double;
     FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
+    PriceCondition: Composition of many PriceCondition on PriceCondition.OfferID = OfferID
+                                                                  and PriceCondition.ProductCode = ProductCode
+                                                                  and PriceCondition.CountryCode = CountryCode;
 }
 
 entity FreeGoodsOther: cuid, managed {
@@ -376,6 +379,48 @@ entity FreeGoodsOther: cuid, managed {
 
 
 }
+
+
+entity PriceCondition: cuid, managed {
+    CountryCode                         : String;
+    OfferID                             : String;
+    ProductCode                         : Integer;
+    PVL                                 : Decimal(15,6);
+    Discount                            : Decimal;
+    RoyalDecree                         : Boolean;
+    StandardDiscount                    : Decimal;
+    AdditionalDiscount                  : Decimal;
+    NetPriceWithoutTaxBeforeDeductionRD : Decimal;
+    NetPriceWithoutTaxAfterDeductionRD  : Decimal;
+    NetPriceWithTaxAfterDeductionRD     : Decimal;
+    NetPriceWithoutTax                  : Decimal;
+    NetPriceWithTax                     : Decimal;
+    MaximumPrice                        : Decimal;
+    Tax                                 : Decimal;
+    Liquidation                         : String;
+    RefundDate                          : Date;
+    FOCMinAmount                        : Integer;
+    FOCBonus                            : Decimal;
+    PotentialGeneratedSavings           : Decimal;
+    DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
+    PricingConditionClassification      : Association to PricingConditionClassification;
+}
+
+entity DiscountCondition: cuid, managed {
+    Volume          : Integer;
+    Discount        : Integer;
+    PriceCondition  : Association to PriceCondition;
+}
+
+
+entity PricingConditionClassification: cuid {
+    CountryCode     : String;
+    ConditionType   : String;
+    Classification  : String;
+    Division        : String;
+    isMain          : Boolean;
+}
+
 
 entity PT_TMPFIOM {
     key OfferID : String(255) not null;
