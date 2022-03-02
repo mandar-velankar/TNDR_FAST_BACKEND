@@ -337,6 +337,7 @@ service CatalogService @(path : 'tender')@(requires : [
             WARRANTY                                    : Double;
             AGREEMENTDURATION                           : Integer;
             MONTHLYRENT                                 : Double;
+            MONTHLYRENT_IN_WORDS                        : String;
             MONTHSPERINVOICE                            : Integer;  
             CONTRACTSTARTDATE                           : Timestamp;
             VALUEOFDEVICES                              : Double;

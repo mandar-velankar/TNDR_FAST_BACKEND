@@ -696,7 +696,7 @@ module.exports = (srv) => {
 			let minPreApprovedPrice = countryPreApprovedPrice && (uom === "Pack" ? countryPreApprovedPrice.MIN_PACK_PRICE : countryPreApprovedPrice.MIN_UNIT_PRICE);
 
 
-			if(!((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) )){
+			if(!((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleXBelowY(0, product.ADDITIONAL_DISCOUNT) )){
 				if(minPreApprovedPrice){
 					if(netOfferPrice < minPreApprovedPrice){
 						if(candidatePrice && candidatePrice.Price <= netOfferPrice){
@@ -1172,7 +1172,7 @@ module.exports = (srv) => {
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
 			let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
-			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT).toFixed(2)) : null;
+			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 
 			//Get corresponding ProductPack
 			const whereProductPack = {
@@ -1194,6 +1194,12 @@ module.exports = (srv) => {
 			const whereProductPackId = ServiceHelper.buildFullWhere("ProductPricing_ProductCode", "=", offerProduct.PRODUCTID);
 			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
 
+            // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
+            let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
+            if(Number.isInteger(dVat)){
+                vatInWords += ",00";   
+            }; 
+
 			return {
 				TENDER_ID: offer.TENDERID,
 				COUNTRY_CODE: offer.COUNTRYCODE,
@@ -1214,7 +1220,7 @@ module.exports = (srv) => {
 				SHELFLIFE: offerProduct.SHELFLIFE,
 				PRESENTATION: offerProduct.PRESENTATION,
 				VAT: dVat,
-				VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat),
+				VAT_IN_WORDS: vatInWords,
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
@@ -1312,6 +1318,7 @@ module.exports = (srv) => {
 				WARRANTY: offerProduct.Warranty,
 				AGREEMENTDURATION: offerProduct.AgreementDuration,
 				MONTHLYRENT: offerProduct.MonthlyRent,
+                MONTHLYRENT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.MonthlyRent),
 				MONTHSPERINVOICE: offerProduct.MonthsPerInvoice,
 				CONTRACTSTARTDATE: offerProduct.ContractStartDate,
 				VALUEOFDEVICES: offerProduct.ValueOfDevices,
