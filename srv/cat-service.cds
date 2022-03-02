@@ -34,6 +34,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity CountrySalesType                             as projection on MasterData.MASTER_COUNTRY_SALES_TYPE;
     entity CountryTenderOrigin                          as projection on MasterData.MASTER_COUNTRY_TENDER_ORIGIN;
     entity CountryTenderType                            as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE;
+    entity CountryTenderType2                           as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE2;
     entity MASTER_INSTITUTE_HIERARCHY                   as projection on MasterData.MASTER_INSTITUTE_HIERARCHY;
     entity SalesType                                    as projection on MasterData.MASTER_SALES_TYPE;
     entity TenderOrigin                                 as projection on MasterData.MASTER_TENDER_ORIGIN;
