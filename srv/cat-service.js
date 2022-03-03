@@ -752,7 +752,37 @@ module.exports = (srv) => {
 		return price;
 	}
 
+    async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes) {//Spain
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+		let validationType;
 
+		validationType = 1;	//if the offer type differs from selling, all approvals should be optional
+
+		aApproverTypes.map(async function (oApproverType) {	
+				oApproverType.ValidationType = validationType;	
+		})
+
+		
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
+	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName) {
+		let price = 0;
+		productPolicyPrices.forEach(e => {
+			if (e.PricingPolicyName === pricingPolicyName && e.Role === role) {
+				price = e.Price;
+			};
+		});
+		return price;
+	}
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
 		//Legend
@@ -1123,6 +1153,9 @@ module.exports = (srv) => {
 		else if (offer.APPROVAL_TYPE === 9) { //Applicable for Italy
 			productValidation = await buildProductValidationForType9(tx, offer, product, commnonProductInfo, aApproverTypes)
 		}
+        else if (offer.APPROVAL_TYPE === 10) { //Applicable for Spain
+			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes)
+        }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
 		}
