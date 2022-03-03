@@ -403,7 +403,7 @@ entity PriceCondition: cuid, managed {
     FOCBonus                            : Decimal;
     PotentialGeneratedSavings           : Decimal;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
-    PricingConditionClassification      : Association to PricingConditionClassification;
+    PriceConditionClassification      : Association to PriceConditionClassification;
 }
 
 entity DiscountCondition: cuid, managed {
@@ -413,7 +413,7 @@ entity DiscountCondition: cuid, managed {
 }
 
 
-entity PricingConditionClassification: cuid {
+entity PriceConditionClassification: cuid {
     CountryCode     : String;
     ConditionType   : String;
     Classification  : String;
