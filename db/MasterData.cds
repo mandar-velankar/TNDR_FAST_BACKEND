@@ -1,5 +1,5 @@
 namespace com.bayer.SXTENDER.MasterData;
-using { User, Country, managed, cuid } from '@sap/cds/common';
+using { User, Country, managed, cuid, temporal } from '@sap/cds/common';
 using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 using { com.bayer.SXTENDER.AdminData } from './AdminData';
@@ -71,6 +71,7 @@ entity PT_TMINST{
     RegionalHealthSystem: String(50);
 	VatCode:String(50);
 	TaxCode:String(50);
+    CustomerGroup:String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -685,4 +686,10 @@ entity ConsumerPrices: cuid, managed {
 	TotalDiscount: Double;
 	MaxPriceNhsPP: Double;
 	MaxPriceNhsPU: Double;
+}
+
+entity RoyalDecree: cuid, temporal {
+    ProductPackID       : Integer;
+    CustomerGroup       : String;
+    RoyalDecree         : Integer;
 }
