@@ -566,6 +566,8 @@ entity PT_TMTRRES {
         ResultDate        : Date;
         AwardDate         : Date;
         AwardActing       : String;
+        Appeal            : String;
+        InfoNeeded        : String;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID
