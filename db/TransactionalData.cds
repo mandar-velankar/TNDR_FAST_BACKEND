@@ -343,6 +343,10 @@ entity PT_TMOFPR {
         PriceAgreement           : Association to PriceAgreementData.PriceAgreements
                                         on PriceAgreement.OfferId = OfferID
                                         and PriceAgreement.ProductPackId = ProductCode;
+        PriceCondition: Composition of many PriceCondition 
+                                        on PriceCondition.OfferID = OfferID
+                                        and PriceCondition.ProductCode = ProductCode
+                                        and PriceCondition.CountryCode = CountryCode;
 }
 
 //italy
@@ -360,9 +364,6 @@ entity ProductPricing: cuid, managed {
     MinContractual: Double;
     MinAnnPurch: Double;
     FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
-    PriceCondition: Composition of many PriceCondition on PriceCondition.OfferID = OfferID
-                                                                  and PriceCondition.ProductCode = ProductCode
-                                                                  and PriceCondition.CountryCode = CountryCode;
 }
 
 entity FreeGoodsOther: cuid, managed {
@@ -371,17 +372,11 @@ entity FreeGoodsOther: cuid, managed {
     FreeGoodsOther_Step: Double;
     FreeGoodsOther_ABS_PCT: String(4);
     VAT: Double; // We store this to keep track of the VAT the moment we save FreeGoodsOther to the ProductPricing
-    RoyalDecree                         : Boolean;
-    FOCMinAmount                        : Integer;
-    FOCBonus                            : Decimal;
-    PotentialGeneratedSavings           : Decimal;
     ProductPricing: Association to ProductPricing;
     ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
     Materials: Association to many MasterData.PT_TMSKUPRDPCK
                                 on Materials.CountryCode = 'IT'
                                 and Materials.ProductPackID = ProductPackId;
-
-
 }
 
 
@@ -391,7 +386,7 @@ entity PriceCondition: cuid, managed {
     ProductCode                         : Integer;
     PVL                                 : Decimal(15,6);
     Discount                            : Decimal;
-    RoyalDecree                         : Boolean;
+    RoyalDecree                         : String;
     StandardDiscount                    : Decimal;
     AdditionalDiscount                  : Decimal;
     NetPriceWithoutTaxBeforeDeductionRD : Decimal;
@@ -403,8 +398,11 @@ entity PriceCondition: cuid, managed {
     Tax                                 : Decimal;
     Liquidation                         : String;
     RefundDate                          : Date;
+    FOCMinAmount                        : Integer;
+    FOCBonus                            : Decimal;
+    PotentialGeneratedSavings           : Decimal;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
-    PriceConditionClassification      : Association to PriceConditionClassification;
+    PriceConditionClassification        : Association to PriceConditionClassification;
 }
 
 entity DiscountCondition: cuid, managed {
