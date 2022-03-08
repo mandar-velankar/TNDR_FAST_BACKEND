@@ -561,7 +561,7 @@ module.exports = (srv) => {
 		//2: Mandatory Notification
 		//3: Mandatory Approval
 
-		if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
+		if (offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health') && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "Supply Chain":
@@ -571,7 +571,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
-		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
+		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health') && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "MACS Head":
@@ -596,7 +596,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
-		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma') {
+		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health')) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "Supply Chain":
