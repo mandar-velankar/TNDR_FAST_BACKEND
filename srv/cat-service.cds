@@ -64,10 +64,11 @@ service CatalogService @(path : 'tender')@(requires : [
     entity MostRecentConsumerPricesView                 as projection on MasterDataViews.MostRecentConsumerPricesView;
     entity ProductPricing                               as projection on TransactionalData.ProductPricing;
     entity PriceCondition                               as projection on TransactionalData.PriceCondition;
-    entity PriceConditionClassification               as projection on TransactionalData.PriceConditionClassification;
+    entity PriceConditionClassification                 as projection on TransactionalData.PriceConditionClassification;
     entity DiscountCondition                            as projection on TransactionalData.DiscountCondition;
     entity FreeGoodsOther                               as projection on TransactionalData.FreeGoodsOther;
     entity ProductPricingView                           as projection on TransactionalDataViews.ProductPricingView;
+    entity PriceConditionView                           as projection on TransactionalDataViews.PriceConditionView;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',

@@ -1097,3 +1097,47 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
 
 
 }where offer.Active = 1;
+
+
+entity PriceConditionView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on product.CountryCode = priceCondition.CountryCode
+    and product.ProductCode = priceCondition.ProductCode
+    and product.OfferID = priceCondition.OfferID
+    and priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID {
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    tender.CountryCode,
+    key priceConditionClassification.ConditionType,
+    priceConditionClassification.Classification,
+    priceConditionClassification.Division,
+    priceConditionClassification.isMain,
+    priceCondition.PVL,
+    priceCondition.Discount,
+    priceCondition.RoyalDecree,
+    priceCondition.StandardDiscount,
+    priceCondition.AdditionalDiscount,
+    priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
+    priceCondition.NetPriceWithoutTaxAfterDeductionRD,
+    priceCondition.NetPriceWithTaxAfterDeductionRD,
+    priceCondition.NetPriceWithoutTax,
+    priceCondition.NetPriceWithTax,
+    priceCondition.MaximumPrice,
+    priceCondition.Tax,
+    priceCondition.Liquidation,
+    priceCondition.RefundDate,
+    priceCondition.FOCMinAmount,
+    priceCondition.FOCBonus,
+    priceCondition.PotentialGeneratedSavings
+}where tender.Active = 1;
