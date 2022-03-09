@@ -365,14 +365,15 @@ service CatalogService @(path : 'tender')@(requires : [
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
-            ProductPricing                              : Association to many ProductPricing
+            ProductPricing                              : Association to ProductPricing
                                                             on ProductPricing.ProductCode = $self.PRODUCTID
                                                             and ProductPricing.OfferID = $self.OFFER_ID;
-            ProductPack                                 : Association to PT_TMPRDPCK 
+            ProductPack                                 : Association to many PT_TMPRDPCK 
                                                             on ProductPack.PRODUCTPACKID = $self.PRODUCTID;
             Materials                                   : Association to many PT_TMSKUPRDPCK
                                                             on Materials.CountryCode = $self.COUNTRY_CODE
-                                                            and Materials.ProductPackID = $self.PRODUCTID;
+                                                            and Materials.ProductPackID = $self.PRODUCTID
+                                                            and Materials.ActiveRecord = 'Yes';
             ApproverTypes                               : Association to many ApproverTypes
                                                             on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
     };
