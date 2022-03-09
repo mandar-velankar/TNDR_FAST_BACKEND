@@ -688,8 +688,10 @@ entity ConsumerPrices: cuid, managed {
 	MaxPriceNhsPU: Double;
 }
 
-entity RoyalDecree: cuid, temporal {
-    ProductPackID       : Integer;
-    CustomerGroup       : String;
-    RoyalDecree         : Integer;
+entity RoyalDecree {
+    key ProductPackID           : Integer;
+    key CustomerGroup           : String;
+        Percentage              : Integer;
+    key ValidFrom               : Date;
+        ValidTo                 : Date;
 }
