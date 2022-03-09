@@ -1116,7 +1116,6 @@ left outer join TransactionalData.PriceCondition as priceCondition
     on product.CountryCode = priceCondition.CountryCode
     and product.ProductCode = priceCondition.ProductCode
     and product.OfferID = priceCondition.OfferID
-    and priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID 
 left outer join MasterData.RoyalDecree as royalDecree
     on product.ProductCode = royalDecree.ProductPackID 
     and royalDecree.ValidTo > CURRENT_DATE {
@@ -1134,7 +1133,18 @@ left outer join MasterData.RoyalDecree as royalDecree
     priceCondition.RoyalDecree,
     royalDecree.Percentage as RoyalDecreePercentage,
     priceCondition.StandardDiscount,
-    priceCondition.AdditionalDiscount,
+    case   
+        when priceCondition.StandardDiscount is not null
+            then  
+                product.RegisteredPrice.REGISTERED_PRICE * (1 - priceCondition.StandardDiscount)
+        else null
+    end as StandardPrice:Double,
+    // case   
+    //     when PVL is not null
+    //         then  
+    //             (StandardPrice - NetPriceBefore) / StandardPrice
+    //     else null
+    // end as AdditionalDiscount:Double,
     priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
     priceCondition.NetPriceWithoutTaxAfterDeductionRD,
     priceCondition.NetPriceWithTaxAfterDeductionRD,
