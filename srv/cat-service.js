@@ -2602,21 +2602,41 @@ module.exports = (srv) => {
 				angularFilters: {
 					upper: (input) => (input || "").toUpperCase(),
 					lower: (input) => (input || "").toLowerCase(),
-					numberEU2: (input) => {
+					numberEU2: (input) => {  
+                        if(Number(input) === 0 || input === null  ){
+                            return "0,00";
+                        }          
+                        var usString;
 						if(typeof input === 'string'){
-						   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 						} else {
-						   return input.toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            usString = input.toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 						}
+                        usString = usString.replace(/\,/g,'$');
+                        usString = usString.replace(/\./g,',');  
+                        usString = usString.replace('$','.');   
+                        return  usString;                  
 				   },
 				   numberEU5: (input) => {
-					if(typeof input === 'string'){
-					   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-					} else {
-					   return input.toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-					}
+                    if(Number(input) === 0 || input === null  ){
+                        return "0,00000";
+                    } 
+                    var usString;
+                    if(typeof input === 'string'){
+                        usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+                    } else {
+                        usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+                    }
+                    usString = usString.replace(/\,/g,'$');
+                    usString = usString.replace(/\./g,',');  
+                    usString = usString.replace('$','.');   
+                    return  usString; 
 			   },
-				   dateFormatterEU: (input) => input.split("-").reverse().join("-")
+				   dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+                   extract2Decimals: (input) => Number(input).toFixed(2).split(".")[1],
+                   extract5Decimals: (input) => Number(input).toFixed(5).split(".")[1]
+
+
 				}
 			})
 		});
