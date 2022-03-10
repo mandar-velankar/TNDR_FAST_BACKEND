@@ -1,0 +1,3 @@
+ProductPackID,CustomerGroup,Percentage,ValidFrom,ValidTo
+205280,"CustGroup1",4,"2020-01-01","9999-12-31"
+205281,"CustGroup2",2,"2020-01-01","9999-12-31"

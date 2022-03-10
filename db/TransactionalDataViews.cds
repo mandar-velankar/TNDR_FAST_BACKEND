@@ -1098,7 +1098,9 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
 
 }where offer.Active = 1;
 
-
+/**
+ * This view contains calculated fields used on the Spain financial offers page
+ */
 entity PriceConditionView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1114,7 +1116,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
     on product.CountryCode = priceCondition.CountryCode
     and product.ProductCode = priceCondition.ProductCode
     and product.OfferID = priceCondition.OfferID
-    and priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID {
+left outer join MasterData.RoyalDecree as royalDecree
+    on product.ProductCode = royalDecree.ProductPackID 
+    and royalDecree.ValidTo > CURRENT_DATE {
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
@@ -1123,18 +1127,26 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceConditionClassification.Classification,
     priceConditionClassification.Division,
     priceConditionClassification.isMain,
-    priceCondition.PVL,
+    product.RegisteredPrice.REGISTERED_PRICE as PVL,
+    product.RegisteredPrice.CURRENCY as Currency,
     priceCondition.Discount,
     priceCondition.RoyalDecree,
+    royalDecree.Percentage as RoyalDecreePercentage,
     priceCondition.StandardDiscount,
-    priceCondition.AdditionalDiscount,
+    case   
+        when product.RegisteredPrice.REGISTERED_PRICE is not null
+            then  
+                product.RegisteredPrice.REGISTERED_PRICE * (1 - priceCondition.StandardDiscount)
+        else null
+    end as StandardPrice:Double,
+    priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
     priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
-    priceCondition.NetPriceWithoutTaxAfterDeductionRD,
-    priceCondition.NetPriceWithTaxAfterDeductionRD,
+    priceCondition.NetPriceWithoutTaxAfterDeductionRD, // calculated in the UI based on User Input
+    priceCondition.NetPriceWithTaxAfterDeductionRD, // calculated in the UI based on User Input
     priceCondition.NetPriceWithoutTax,
     priceCondition.NetPriceWithTax,
     priceCondition.MaximumPrice,
-    priceCondition.Tax,
+    product.SKUCountry.VTATax as Tax, 
     priceCondition.Liquidation,
     priceCondition.RefundDate,
     priceCondition.FOCMinAmount,
