@@ -66,6 +66,9 @@ entity PT_TMINST{
 	State:String;
 	MercadoPublicoIssuer:String;
 	RegionID:String;
+    ProvinceID:String(20);
+    CifCode:String(50);
+    RegionalHealthSystem: String(50);
 	VatCode:String(50);
 	TaxCode:String(50);
 	//Associations
@@ -76,6 +79,7 @@ entity PT_TMINST{
 	Terms:Association to many PT_TMINSBRTR on Terms.Institute = $self;
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
 	Region:Association to CountryRegions on Region.ID = RegionID;
+    Province: Association to CountryProvinces on Province.ID = ProvinceID;
 }
 
 //Institute Hierarchy Level
@@ -280,7 +284,8 @@ entity PT_TMCTPRDPCK{
 	CODE1:String(255);
 	CODE2:String(255);
 	QTY_THRESHOLD:Integer;
-	//Associations
+    BU: String(255);   
+ 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = PRODUCTPACKID;
@@ -441,6 +446,14 @@ entity MASTER_COUNTRY_TENDER_ORIGIN{
 }
 
 entity MASTER_COUNTRY_TENDER_TYPE{
+	key COUNTRY_CODE:String(2) not null;
+	key TENDER_TYPE_ID:Integer not null;
+	//Associations
+	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
+	TenderType:Association to MASTER_TENDER_TYPE on TenderType.ID = TENDER_TYPE_ID;
+}
+
+entity MASTER_COUNTRY_TENDER_TYPE2{
 	key COUNTRY_CODE:String(2) not null;
 	key TENDER_TYPE_ID:Integer not null;
 	//Associations

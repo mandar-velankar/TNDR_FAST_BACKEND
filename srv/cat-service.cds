@@ -34,6 +34,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity CountrySalesType                             as projection on MasterData.MASTER_COUNTRY_SALES_TYPE;
     entity CountryTenderOrigin                          as projection on MasterData.MASTER_COUNTRY_TENDER_ORIGIN;
     entity CountryTenderType                            as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE;
+    entity CountryTenderType2                           as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE2;
     entity MASTER_INSTITUTE_HIERARCHY                   as projection on MasterData.MASTER_INSTITUTE_HIERARCHY;
     entity SalesType                                    as projection on MasterData.MASTER_SALES_TYPE;
     entity TenderOrigin                                 as projection on MasterData.MASTER_TENDER_ORIGIN;
@@ -336,6 +337,7 @@ service CatalogService @(path : 'tender')@(requires : [
             WARRANTY                                    : Double;
             AGREEMENTDURATION                           : Integer;
             MONTHLYRENT                                 : Double;
+            MONTHLYRENT_IN_WORDS                        : String;
             MONTHSPERINVOICE                            : Integer;  
             CONTRACTSTARTDATE                           : Timestamp;
             VALUEOFDEVICES                              : Double;
@@ -364,14 +366,15 @@ service CatalogService @(path : 'tender')@(requires : [
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
-            ProductPricing                              : Association to many ProductPricing
+            ProductPricing                              : Association to ProductPricing
                                                             on ProductPricing.ProductCode = $self.PRODUCTID
                                                             and ProductPricing.OfferID = $self.OFFER_ID;
-            ProductPack                                 : Association to PT_TMPRDPCK 
+            ProductPack                                 : Association to many PT_TMPRDPCK 
                                                             on ProductPack.PRODUCTPACKID = $self.PRODUCTID;
             Materials                                   : Association to many PT_TMSKUPRDPCK
                                                             on Materials.CountryCode = $self.COUNTRY_CODE
-                                                            and Materials.ProductPackID = $self.PRODUCTID;
+                                                            and Materials.ProductPackID = $self.PRODUCTID
+                                                            and Materials.ActiveRecord = 'Yes';
             ApproverTypes                               : Association to many ApproverTypes
                                                             on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
     };
