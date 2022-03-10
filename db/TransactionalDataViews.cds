@@ -1134,20 +1134,15 @@ left outer join MasterData.RoyalDecree as royalDecree
     royalDecree.Percentage as RoyalDecreePercentage,
     priceCondition.StandardDiscount,
     case   
-        when priceCondition.StandardDiscount is not null
+        when product.RegisteredPrice.REGISTERED_PRICE is not null
             then  
                 product.RegisteredPrice.REGISTERED_PRICE * (1 - priceCondition.StandardDiscount)
         else null
     end as StandardPrice:Double,
-    // case   
-    //     when PVL is not null
-    //         then  
-    //             (StandardPrice - NetPriceBefore) / StandardPrice
-    //     else null
-    // end as AdditionalDiscount:Double,
+    priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
     priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
-    priceCondition.NetPriceWithoutTaxAfterDeductionRD,
-    priceCondition.NetPriceWithTaxAfterDeductionRD,
+    priceCondition.NetPriceWithoutTaxAfterDeductionRD, // calculated in the UI based on User Input
+    priceCondition.NetPriceWithTaxAfterDeductionRD, // calculated in the UI based on User Input
     priceCondition.NetPriceWithoutTax,
     priceCondition.NetPriceWithTax,
     priceCondition.MaximumPrice,
