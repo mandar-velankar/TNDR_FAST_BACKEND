@@ -246,19 +246,41 @@ module.exports = async (srv) => {
 
 
     async function updateCustomerPrice(customerPrice, tx){
-
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+        
+        const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
+        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
+        const whereOfferID = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
+        const whereProductpackID = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", customerPrice.ProductPackId);
+        let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));        
+        let packFactor;
+        if(customerPrice.ProductPackId){
+            let productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereProductpackID));
+            packFactor = productPack.PACKFACTOR;
+        } else {
+            packFactor = 1;
+        }
 
         const body = getPriceAgreementRequestBodyTemplate(); 
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = parseFloat(customerPrice.Price);
+       
+        let kbetr = parseFloat(customerPrice.Price);
+        
+        if (offer.Division === "Pharma" && priceAgreement.UoM === "Unit" ){// convert and send per pack
+            kbetr  = kbetr * packFactor;
+        }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
+            kbetr  = kbetr / packFactor;
+
+        }
+        
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
 
         return await updatePriceConditions(body);
 
@@ -402,8 +424,7 @@ module.exports = async (srv) => {
     });
 
     async function updateFOCcustPrices(customerPrice, tx){
-
-
+        
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
 
@@ -418,9 +439,10 @@ module.exports = async (srv) => {
         let offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereCountry).where(whereProductCode).where(whereOfferID));
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
         let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));
+        let packFactor;
         if(customerPrice.FOCproductPackID){
-            let productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereFOCproductpackID));
-            let packFactor = productPack.PACKFACTOR;
+            productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereFOCproductpackID));
+            const packFactor = productPack.PACKFACTOR;
         } else {
             packFactor = 1;
         }
@@ -441,13 +463,13 @@ module.exports = async (srv) => {
         let mxkbas = customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS') ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
         
         if (offer.Division === "Pharma" && priceAgreement.UoM === "Unit" ){// convert and send per pack
-            kstbm  = kstbm * packFactor;
-            mikbas = mikbas * packFactor;
-            mxkbas = mxkbas * packFactor;
-        }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
             kstbm  = kstbm / packFactor;
             mikbas = mikbas / packFactor;
             mxkbas = mxkbas / packFactor;
+        }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
+            kstbm  = kstbm * packFactor;
+            mikbas = mikbas * packFactor;
+            mxkbas = mxkbas * packFactor;
 
         }
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSTBM = kstbm;
