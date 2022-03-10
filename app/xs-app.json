@@ -11,21 +11,24 @@
       "target": "$1",
       "authenticationType": "basic",
       "destination": "srv_api",
-      "csrfProtection": false
+      "csrfProtection": false,
+      "timeout" : 120000
     },
     {
       "source": "/v2/(.*)$",
       "target": "/v2/$1",
       "authenticationType": "basic",
       "destination": "srv_api",
-      "csrfProtection": false
+      "csrfProtection": false,
+      "timeout" : 120000
     },
     {
       "source": "^/(.*)$",
       "target": "/v2/$1",
       "authenticationType": "basic",
       "destination": "srv_api",
-      "csrfProtection": true
+      "csrfProtection": true,
+      "timeout" : 120000
     }
   ]
 }
