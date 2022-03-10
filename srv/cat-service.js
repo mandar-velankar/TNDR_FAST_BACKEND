@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -696,7 +696,7 @@ module.exports = (srv) => {
 			let minPreApprovedPrice = countryPreApprovedPrice && (uom === "Pack" ? countryPreApprovedPrice.MIN_PACK_PRICE : countryPreApprovedPrice.MIN_UNIT_PRICE);
 
 
-			if(!((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleXBelowY(0, product.ADDITIONAL_DISCOUNT) )){
+			if(((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleXBelowY(0, product.ADDITIONAL_DISCOUNT) )){
 				if(minPreApprovedPrice){
 					if(netOfferPrice < minPreApprovedPrice){
 						if(candidatePrice && candidatePrice.Price <= netOfferPrice){
@@ -1171,6 +1171,7 @@ module.exports = (srv) => {
 			}
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
+			const productPricingTable = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricing));
 			let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
 			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 
@@ -1349,7 +1350,7 @@ module.exports = (srv) => {
 				FINAL_DISCOUNT: finalDiscount,
 				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
-				ProductPricing: productPricing,
+				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials
 			}
@@ -2605,21 +2606,41 @@ module.exports = (srv) => {
 				angularFilters: {
 					upper: (input) => (input || "").toUpperCase(),
 					lower: (input) => (input || "").toLowerCase(),
-					numberEU2: (input) => {
+					numberEU2: (input) => {  
+                        if(Number(input) === 0 || input === null  ){
+                            return "0,00";
+                        }          
+                        var usString;
 						if(typeof input === 'string'){
-						   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 						} else {
-						   return input.toLocaleString('it-IT',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            usString = input.toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 						}
+                        usString = usString.replace(/\,/g,'$');
+                        usString = usString.replace(/\./g,',');  
+                        usString = usString.replace('$','.');   
+                        return  usString;                  
 				   },
 				   numberEU5: (input) => {
-					if(typeof input === 'string'){
-					   return Number(input.replace(/\,/g,'')).toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-					} else {
-					   return input.toLocaleString('it-IT',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-					}
+                    if(Number(input) === 0 || input === null  ){
+                        return "0,00000";
+                    } 
+                    var usString;
+                    if(typeof input === 'string'){
+                        usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+                    } else {
+                        usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+                    }
+                    usString = usString.replace(/\,/g,'$');
+                    usString = usString.replace(/\./g,',');  
+                    usString = usString.replace('$','.');   
+                    return  usString; 
 			   },
-				   dateFormatterEU: (input) => input.split("-").reverse().join("-")
+				   dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+                   extract2Decimals: (input) => Number(input).toFixed(2).split(".")[1],
+                   extract5Decimals: (input) => Number(input).toFixed(5).split(".")[1]
+
+
 				}
 			})
 		});
