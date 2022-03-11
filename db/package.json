@@ -11,6 +11,6 @@
 
   },
   "dependencies": {
-    "@sap/hdi-deploy": "^4.2.3"
+    "@sap/hdi-deploy": "^4.0.5"
   }
 }
