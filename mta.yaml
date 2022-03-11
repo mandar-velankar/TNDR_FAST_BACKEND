@@ -44,7 +44,6 @@ modules:
           forwardAuthToken: true
           name: srv_api
           url: '~{url}'
-          timeout: 300000
       - name: uaa_FAST
 
 resources:

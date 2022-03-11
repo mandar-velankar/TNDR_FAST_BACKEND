@@ -279,8 +279,8 @@ entity PT_TMCTPRDPCK{
 	GOV_CODE:String(255);
 	CODE1:String(255);
 	CODE2:String(255);
-	QTY_THRESHOLD:Integer;
-	//Associations
+	QTY_THRESHOLD:Integer;  
+ 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = PRODUCTPACKID;
