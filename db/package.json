@@ -8,6 +8,7 @@
     "start:hana": "node node_modules/@sap/hdi-deploy/deploy.js --exit"
   },
   "devDependencies": {},
-  "dependencies": {
-    "@sap/hdi-deploy": "^4.0.5"}
+  "dependencies": {   
+      "@sap/hdi-deploy": "^4.0.5"
+    }
 }
