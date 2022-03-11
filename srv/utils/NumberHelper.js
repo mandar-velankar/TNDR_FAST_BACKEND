@@ -14,7 +14,7 @@ module.exports = {
         //only convert digits before comma
         //keep decimals as numbers
         if(language === "it" && value % 1 !== 0){
-            return `${n2words(Math.floor(value), {lang: language})} ,${value.toString().split('.')[1]}`;
+            return `${n2words(Math.floor(value), {lang: language})}`;
         }
         //set language to "en" for all other countries besides "it"
         if(language !== "it"){
