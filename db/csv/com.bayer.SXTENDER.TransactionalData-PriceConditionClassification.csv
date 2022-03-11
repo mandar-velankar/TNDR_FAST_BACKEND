@@ -11,8 +11,6 @@ ID,CountryCode,ConditionType,Classification,Division,isMain
 "5e5f5bdc-0acc-4f44-b14d-e6d11b677de0","ES","Precio Neto","Tender","Consumer Health","true"
 "a8d4afbb-e369-4633-9fec-3bfe9bcae1bf","ES","Precio Neto","Tender","Pharma","true"
 "e894d222-b0d1-4e02-b0b1-8c5a04eb02a1","ES","Precio Neto","Tender","Radiology","true"
-"05a36460-00ef-4eab-b2db-23b99d47e58c","ES","Precio Neto Inyectores","Commercial Contract","Radiology","true"
-"684283d8-8d02-4f53-9b67-9c6e7b0f6461","ES","Precio Neto Inyectores","Tender","Radiology","true"
 "a3ac4a79-49d5-4f3b-bba9-e9c27ebba6d0","ES","Descuento Comercial","Commercial Contract","Consumer Health","true"
 "34b38825-696e-4eb9-b132-65182adde948","ES","Descuento Comercial","Commercial Contract","Pharma","true"
 "555e9ff2-9573-42c8-b44c-635cc877b7b0","ES","Descuento Comercial","Commercial Contract","Radiology","true"

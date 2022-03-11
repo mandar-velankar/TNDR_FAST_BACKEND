@@ -372,11 +372,16 @@ entity FreeGoodsOther: cuid, managed {
     FreeGoodsOther_Step: Double;
     FreeGoodsOther_ABS_PCT: String(4);
     VAT: Double; // We store this to keep track of the VAT the moment we save FreeGoodsOther to the ProductPricing
-    ProductPricing: Association to ProductPricing;
-    ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
-    Materials: Association to many MasterData.PT_TMSKUPRDPCK
-                                on Materials.CountryCode = 'IT'
-                                and Materials.ProductPackID = ProductPackId;
+    FOCMinAmount                        : Integer;
+    FOCBonus                            : Decimal;
+    PotentialGeneratedSavings           : Decimal;
+    RoyalDecree                         : String;
+    ProductPricing                      : Association to ProductPricing;
+    PriceCondition                      : Association to PriceCondition;
+    ProductPack                         : Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+    Materials                           : Association to many MasterData.PT_TMSKUPRDPCK
+                                            on Materials.CountryCode = 'IT'
+                                            and Materials.ProductPackID = ProductPackId;
 }
 
 
@@ -398,17 +403,17 @@ entity PriceCondition: cuid, managed {
     Tax                                 : Decimal;
     Liquidation                         : String;
     RefundDate                          : Date;
-    FOCMinAmount                        : Integer;
-    FOCBonus                            : Decimal;
-    PotentialGeneratedSavings           : Decimal;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
+    FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
 }
 
 entity DiscountCondition: cuid, managed {
-    Volume          : Integer;
-    Discount        : Integer;
-    PriceCondition  : Association to PriceCondition;
+    Volume              : Integer;
+    Discount            : Integer;
+    NetPriceWithoutTax  : Decimal;
+    NetPriceWithTax     : Decimal;
+    PriceCondition      : Association to PriceCondition;
 }
 
 
