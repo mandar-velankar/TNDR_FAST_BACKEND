@@ -2614,7 +2614,7 @@ module.exports = (srv) => {
 						}
                         usString = usString.replace(/\,/g,'$');
                         usString = usString.replace(/\./g,',');  
-                        usString = usString.replace('$','.');   
+                        usString = usString.replace(/\$/g,'.');   
                         return  usString;                  
 				   },
 				   numberEU5: (input) => {
