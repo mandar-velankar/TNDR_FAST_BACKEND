@@ -409,9 +409,11 @@ entity PriceCondition: cuid, managed {
 }
 
 entity DiscountCondition: cuid, managed {
-    Volume          : Integer;
-    Discount        : Integer;
-    PriceCondition  : Association to PriceCondition;
+    Volume              : Integer;
+    Discount            : Integer;
+    NetPriceWithoutTax  : Decimal;
+    NetPriceWithTax     : Decimal;
+    PriceCondition      : Association to PriceCondition;
 }
 
 
