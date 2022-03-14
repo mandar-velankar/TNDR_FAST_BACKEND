@@ -2633,8 +2633,20 @@ module.exports = (srv) => {
                     return  usString; 
 			   },
 				   dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-                   extract2Decimals: (input) => Number(input).toFixed(2).split(".")[1],
-                   extract5Decimals: (input) => Number(input).toFixed(5).split(".")[1]
+                   extract2Decimals: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 2);
+                    } else {
+                        return Number(input).toFixed(2).split(".")[1];
+                    }
+                },
+                   extract5Decimals: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 5);
+                    } else {
+                        return Number(input).toFixed(5).split(".")[1];
+                    }
+                }
 
 
 				}
