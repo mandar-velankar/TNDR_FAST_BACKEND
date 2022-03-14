@@ -369,7 +369,7 @@ entity FreeGoodsOther: cuid, managed {
     FreeGoodsOther_ABS_PCT: String(4);
     VAT: Double; // We store this to keep track of the VAT the moment we save FreeGoodsOther to the ProductPricing
     ProductPricing: Association to ProductPricing;
-    ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+    ProductPack: Association to many MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
     Materials: Association to many MasterData.PT_TMSKUPRDPCK
                                 on Materials.CountryCode = 'IT'
                                 and Materials.ProductPackID = ProductPackId;
