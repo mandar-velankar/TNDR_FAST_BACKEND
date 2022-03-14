@@ -343,6 +343,10 @@ entity PT_TMOFPR {
         PriceAgreement           : Association to PriceAgreementData.PriceAgreements
                                         on PriceAgreement.OfferId = OfferID
                                         and PriceAgreement.ProductPackId = ProductCode;
+        PriceCondition: Composition of many PriceCondition 
+                                        on PriceCondition.OfferID = OfferID
+                                        and PriceCondition.ProductCode = ProductCode
+                                        and PriceCondition.CountryCode = CountryCode;
 }
 
 //italy
@@ -373,9 +377,53 @@ entity FreeGoodsOther: cuid, managed {
     Materials: Association to many MasterData.PT_TMSKUPRDPCK
                                 on Materials.CountryCode = 'IT'
                                 and Materials.ProductPackID = ProductPackId;
-
-
+    FOCMinAmount                        : Integer;
+    FOCBonus                            : Decimal;
+    PotentialGeneratedSavings           : Decimal;
+    RoyalDecree                         : String;
+    PriceCondition                      : Association to PriceCondition;
 }
+
+entity PriceCondition: cuid, managed {
+    CountryCode                         : String;
+    OfferID                             : String;
+    ProductCode                         : Integer;
+    PVL                                 : Decimal(15,6);
+    Discount                            : Decimal;
+    RoyalDecree                         : String;
+    StandardDiscount                    : Decimal;
+    AdditionalDiscount                  : Decimal;
+    NetPriceWithoutTaxBeforeDeductionRD : Decimal;
+    NetPriceWithoutTaxAfterDeductionRD  : Decimal;
+    NetPriceWithTaxAfterDeductionRD     : Decimal;
+    NetPriceWithoutTax                  : Decimal;
+    NetPriceWithTax                     : Decimal;
+    MaximumPrice                        : Decimal;
+    Tax                                 : Decimal;
+    Liquidation                         : String;
+    RefundDate                          : Date;
+    DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
+    PriceConditionClassification        : Association to PriceConditionClassification;
+    FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
+}
+
+entity DiscountCondition: cuid, managed {
+    Volume              : Integer;
+    Discount            : Integer;
+    NetPriceWithoutTax  : Decimal;
+    NetPriceWithTax     : Decimal;
+    PriceCondition      : Association to PriceCondition;
+}
+
+
+entity PriceConditionClassification: cuid {
+    CountryCode     : String;
+    ConditionType   : String;
+    Classification  : String;
+    Division        : String;
+    isMain          : Boolean;
+}
+
 
 entity PT_TMPFIOM {
     key OfferID : String(255) not null;
@@ -522,6 +570,8 @@ entity PT_TMTRRES {
         ResultDate        : Date;
         AwardDate         : Date;
         AwardActing       : String;
+        Appeal            : String;
+        InfoNeeded        : String;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID

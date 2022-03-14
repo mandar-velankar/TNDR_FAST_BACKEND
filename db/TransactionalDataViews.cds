@@ -1099,3 +1099,56 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
 
 
 }where offer.Active = 1;
+
+/**
+ * This view contains calculated fields used on the Spain financial offers page
+ */
+entity PriceConditionView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on product.CountryCode = priceCondition.CountryCode
+    and product.ProductCode = priceCondition.ProductCode
+    and product.OfferID = priceCondition.OfferID
+left outer join MasterData.RoyalDecree as royalDecree
+    on product.ProductCode = royalDecree.ProductPackID 
+    and royalDecree.ValidTo > CURRENT_DATE {
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    tender.CountryCode,
+    key priceConditionClassification.ConditionType,
+    priceConditionClassification.Classification,
+    priceConditionClassification.Division,
+    priceConditionClassification.isMain,
+    product.RegisteredPrice.REGISTERED_PRICE as PVL,
+    product.RegisteredPrice.CURRENCY as Currency,
+    priceCondition.Discount,
+    priceCondition.RoyalDecree,
+    royalDecree.Percentage as RoyalDecreePercentage,
+    priceCondition.StandardDiscount,
+    case   
+        when product.RegisteredPrice.REGISTERED_PRICE is not null
+            then  
+                product.RegisteredPrice.REGISTERED_PRICE * (1 - priceCondition.StandardDiscount)
+        else null
+    end as StandardPrice:Double,
+    priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
+    priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
+    priceCondition.NetPriceWithoutTaxAfterDeductionRD, // calculated in the UI based on User Input
+    priceCondition.NetPriceWithTaxAfterDeductionRD, // calculated in the UI based on User Input
+    priceCondition.NetPriceWithoutTax,
+    priceCondition.NetPriceWithTax,
+    priceCondition.MaximumPrice,
+    product.SKUCountry.VTATax as Tax, 
+    priceCondition.Liquidation,
+    priceCondition.RefundDate
+}where tender.Active = 1;
