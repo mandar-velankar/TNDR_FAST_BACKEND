@@ -561,7 +561,7 @@ module.exports = (srv) => {
 		//2: Mandatory Notification
 		//3: Mandatory Approval
 
-		if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
+		if (offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health') && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "Supply Chain":
@@ -571,7 +571,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
-		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
+		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health') && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "MACS Head":
@@ -596,7 +596,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
-		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma') {
+		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health')) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "Supply Chain":
@@ -752,7 +752,37 @@ module.exports = (srv) => {
 		return price;
 	}
 
+    async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes) {//Spain
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+		let validationType;
 
+		validationType = 1;	//if the offer type differs from selling, all approvals should be optional
+
+		aApproverTypes.map(async function (oApproverType) {	
+				oApproverType.ValidationType = validationType;	
+		})
+
+		
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
+	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName) {
+		let price = 0;
+		productPolicyPrices.forEach(e => {
+			if (e.PricingPolicyName === pricingPolicyName && e.Role === role) {
+				price = e.Price;
+			};
+		});
+		return price;
+	}
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
 		//Legend
@@ -1123,6 +1153,9 @@ module.exports = (srv) => {
 		else if (offer.APPROVAL_TYPE === 9) { //Applicable for Italy
 			productValidation = await buildProductValidationForType9(tx, offer, product, commnonProductInfo, aApproverTypes)
 		}
+        else if (offer.APPROVAL_TYPE === 10) { //Applicable for Spain
+			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes)
+        }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
 		}
@@ -1135,6 +1168,8 @@ module.exports = (srv) => {
 	async function buildOfferProductValidation(tx, whereOffer) {
 
 		let results = [];
+        let aFreeGoodsOther = [];
+        
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
 		if (offer.length !== 1) {
@@ -1194,6 +1229,31 @@ module.exports = (srv) => {
 			//let aFreeGoodsOtherTemp = [];
 			const whereProductPackId = ServiceHelper.buildFullWhere("ProductPricing_ProductCode", "=", offerProduct.PRODUCTID);
 			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
+
+            //loop over freegoodsother and retrieve productpricing, material and productpack data
+            aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
+                let whereMaterialFOC = {
+                    CountryCode: offer.COUNTRYCODE,
+                    ProductPackId: offerProduct.ProductCode
+                }
+                
+                tmpFreeGoodOther.Materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterialFOC));
+
+                let whereProductPricingFOC = {
+                    OfferID: offer.OFFERID,
+                    ProductCode: offerProduct.ProductCode,
+                    CountryCode: offer.COUNTRYCODE
+                }
+    
+                tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
+
+                const whereProductPackFOC = {
+                    PRODUCTPACKID: offerProduct.ProductCode,
+                }
+                tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
+
+                return tmpFreeGoodOther;
+            }));
 
             // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
             let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);

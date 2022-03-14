@@ -160,18 +160,18 @@ module.exports = (srv) => {
 		let approvalRegulatory = latestApproval.filter((d) => d.ApproverType === "Regulatory");
 		let approvalLegal = latestApproval.filter((d) => d.ApproverType === "Legal");
 		let approvalSupply = latestApproval.filter((d) => d.ApproverType === "Supply Chain");
-		let approvalCountryPharma = latestApproval.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Pharma");
+		let approvalCountryPharma = latestApproval.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && (d.Division === "Pharma" || d.Division === "Consumer Health"));
 		let approvalCountryRadiology = latestApproval.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Radiology");
-		let approvalRegionalPharma = latestApproval.filter((d) => d.ApproverType === "RegionalBusiness" && d.Division === "Pharma");
+		let approvalRegionalPharma = latestApproval.filter((d) => d.ApproverType === "RegionalBusiness" && (d.Division === "Pharma" || d.Division === "Consumer Health"));
 		let approvalRegionalRadiology = latestApproval.filter((d) => d.ApproverType === "RegionalBusiness" && d.Division === "Radiology");
 
 		//Default (first found, if exists) approvers (will be used if none saved)
 		let defaultRegulatory = countryApprovers.filter((d) => d.ApproverType === "Regulatory");
 		let defaultLegal = countryApprovers.filter((d) => d.ApproverType === "Legal");
 		let defaultSupply = countryApprovers.filter((d) => d.ApproverType === "Supply Chain");
-		let defaultCountryPharma = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Pharma");
+		let defaultCountryPharma = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && (d.Division === "Pharma" || d.Division === "Consumer Health"));
 		let defaultCountryRadiology = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Radiology");
-		let defaultRegionalPharma = countryApprovers.filter((d) => d.ApproverType === "RegionalBusiness" && d.Division === "Pharma");
+		let defaultRegionalPharma = countryApprovers.filter((d) => d.ApproverType === "RegionalBusiness" && (d.Division === "Pharma" || d.Division === "Consumer Health"));
 		let defaultRegionalRadiology = countryApprovers.filter((d) => d.ApproverType === "RegionalBusiness" && d.Division === "Radiology");
 		
         //Regulatory
@@ -195,7 +195,7 @@ module.exports = (srv) => {
 			let regionalRadiology = buildValidationEntry(approvalRegionalRadiology, defaultRegionalRadiology, countryCode, instituteGroupId, productPackId, priceApprovalValidation.REGIONAL_BUSINESS);
 			if (regionalRadiology) results.push(regionalRadiology);
 		}
-		else if (division === "Pharma"){
+		else if (division === "Pharma" || division === "Consumer Health"){
 			let countryPharma = buildValidationEntry(approvalCountryPharma, defaultCountryPharma, countryCode, instituteGroupId, productPackId, priceApprovalValidation.COUNTRY_BUSINESS);
 			if (countryPharma) results.push(countryPharma);
 			
