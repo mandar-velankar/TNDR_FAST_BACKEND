@@ -740,7 +740,7 @@ COUNTRYCODE,TABLEID,COLUMN,BINDINGPATH,VISIBLE,REQUIRED,DESCRIPTION
 "ES","editofferProductId","DeliveryConditions","DeliveryConditions","False","False","deliveryConditions"
 "ES","editofferProductId","MinInvoiceAmount","MinInvoiceAmount","False","False","minInvoiceAmount"
 "ES","editofferProductId","Brand","Brand","False","False","brandnme"
-"ES","editofferProductId","MoleculeName","SKU/MoleculeName","True","True","Active ingredient"
+"ES","editofferProductId","MoleculeName","SKU/MoleculeName","True","False","Active ingredient"
 "ES","editofferProductId","SapNo","SKU/PRODUCTPACKID","True","True","sapNo"
 "ES","editofferProductId","CodeNational","GOV_CODE","False","False","codeNational"
 "ES","editofferProductId","OfferType","OfferType","True","True","offerType"
