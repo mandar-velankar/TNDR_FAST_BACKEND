@@ -1113,9 +1113,7 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
 left outer join TransactionalData.PriceCondition as priceCondition 
-    on product.CountryCode = priceCondition.CountryCode
-    and product.ProductCode = priceCondition.ProductCode
-    and product.OfferID = priceCondition.OfferID
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
 left outer join MasterData.RoyalDecree as royalDecree
     on product.ProductCode = royalDecree.ProductPackID 
     and royalDecree.ValidTo > CURRENT_DATE {
