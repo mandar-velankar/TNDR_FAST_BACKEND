@@ -1122,6 +1122,7 @@ left outer join MasterData.RoyalDecree as royalDecree
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
+    priceCondition.ID as ExistingPriceConditionID: UUID,
     tender.CountryCode,
     key priceConditionClassification.ConditionType,
     priceConditionClassification.Classification,
