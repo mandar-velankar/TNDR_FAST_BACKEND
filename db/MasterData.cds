@@ -691,7 +691,7 @@ entity ConsumerPrices: cuid, managed {
 entity RoyalDecree {
     key ProductPackID           : Integer;
     key CustomerGroup           : String;
-        Percentage              : Integer;
+        Percentage              : Decimal;
     key ValidFrom               : Date;
         ValidTo                 : Date;
 }
