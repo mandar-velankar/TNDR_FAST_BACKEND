@@ -1,0 +1,1632 @@
+COUNTRYPRODUCTPACKID,COUNTRYCODE,COUNTRYOFORIGIN,SHELFLIFE,REGISTERED,ACTIVERECORD,PRODUCTPACKID,MANUFACTURER,PRESENTATION_2,VTATAX,COMMENT,GOV_CODE,CODE1,CODE2,QTY_THRESHOLD
+100510,"SA","Germany",36,2,"No",100043,"Bayer AG",,"0.0",,,,,
+100511,"SA","Germany",36,2,"No",100044,"Bayer AG",,"0.0",,,,,
+100512,"SA","Germany",24,2,"No",100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100261,"KW","Germany",48,2,"No",100021,"Bayer AG",,"0.0",,,,,
+100514,"SA","USA",30,2,"No",100045,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100515,"SA","USA",30,2,"No",100046,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100516,"SA","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100517,"SA","Germany",36,2,"No",100051,"Bayer AG",,"0.0",,,,,
+100518,"SA","Germany",36,2,"Yes",100050,"Bayer AG",,"0.0",,,,,
+100519,"SA","Germany",36,2,"Yes",100083,"Bayer AG & Bayer Weimar GmbH und Co. ",,"0.0",,,,,
+100520,"SA","Germany",36,2,"No",100054,"Bayer AG",,"0.0",,,,,
+100521,"SA","Germany",36,2,"No",100055,"Bayer AG",,"0.0",,,,,
+100522,"SA","Germany",36,2,"No",100057,"Bayer AG",,"0.0",,,,,
+100523,"SA","Germany",60,2,"No",100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,"0.0",,,,,
+100524,"SA","Germany",36,2,"Yes",100059,"Bayer AG & Bayer Weimar GmbH und Co. ",,"0.0",,,,,
+100525,"SA","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100526,"SA","Germany",60,2,"No",100062,"Bayer AG",,"0.0",,,,,
+100527,"SA","Germany",48,2,"Yes",100063,"Bayer AG",,"0.0",,,,,
+100528,"SA","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100529,"SA","Germany",36,2,"Yes",100065,"Bayer AG",,"0.0",,,,,
+100530,"SA","Germany",48,2,"Yes",100066,"Bayer AG",,"0.0",,,,,
+100531,"SA","Finland",36,2,"No",100067,"Bayer Oy Turku",,"0.0",,,,,
+100804,"LB","Germany",36,0,"Yes",100126,"Orion Corporation ,  Orion Pharma – Finland ",,"0.0",,,,,
+100810,"LY","USA",30,0,"Yes",100104,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100534,"SA","Germany",48,2,"No",100070,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100535,"SA","Germany",36,2,"Yes",100074,"Bayer AG",,"0.0",,,,,
+100591,"SA","Germany",24,2,"Yes",100076,"Bayer AG",,"0.0",,,,,
+100537,"SA","Germany",48,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100538,"SA","Germany",36,2,"No",100078,"Bayer AG",,"0.0",,,,,
+100539,"SA","Italy",36,2,"No",100079,"Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany",,"0.0",,,,,
+100540,"SA","Canada",36,2,"No",100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,"0.0",,,,,
+100541,"SA","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100542,"SA","Germany",48,2,"No",100082,"Bayer AG",,"0.0",,,,,
+100543,"SA","Germany",36,2,"Yes",100084,"Bayer AG",,"0.0",,,,,
+100544,"SA","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100545,"SA","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0",,,,,
+100546,"SA","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100547,"SA","Germany",0,0,"No",100088,"Bayer AG",,"0.0",,,,,
+100687,"SA","USA",30,2,"Yes",100103,"Bayer HealthCare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100549,"SA","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100550,"SA","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100551,"SA","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100552,"SA","Germany",36,2,"Yes",100094,"Bayer AG",,"0.0",,,,,
+100553,"SA","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100554,"SA","Norway",1,2,"No",100096,"Institute for Energy Technology (IFE)",,"0.0",,,,,
+100555,"SA","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100025,"AE","Germany",24,2,"No",100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0","",,,,
+100557,"SD","Germany",60,2,"Yes",100055,"Bayer AG",,"0.0",,,,,
+100558,"SD","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100559,"SD","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100560,"SY","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100561,"SY","Germany",36,2,"Yes",100028,"Bayer AG",,"0.0",,,,,
+100562,"SY","Germany",60,2,"No",100029,"Bayer AG",,"0.0",,,,,
+100563,"SY","Germany",60,2,"No",100031,"Bayer AG",,"0.0",,,,,
+100564,"SY","France",36,2,"No",100033,"Delpharm Lille SAS",,"0.0",,,,,
+100262,"KW","Italy",24,2,"No",100026,"Bayer Health Care S.R.L Italy",,"0.0",,,,,
+100566,"SY","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100305,"LB","Germany",60,2,"No",100012,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100450,"QA","Germany",24,2,"No",100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100569,"SY","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100570,"SY","Finland",36,2,"No",100067,"Bayer Oy Turku",,"0.0",,,,,
+100042,"AE","Germany",60,2,"No",100069,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100572,"SY","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100573,"SY","Spain",48,2,"Yes",100090,"BerliMed S.A.",,"0.0",,,,,
+100574,"SY","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100797,"AE","Germany",36,2,"Yes",100125,"Bayer AG",,"0.0","",,,,
+100576,"YE","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100577,"YE","Germany",36,2,"Yes",100016,"Bayer AG",,"0.0",,,,,
+100578,"YE","Germany",36,2,"Yes",100017,"Bayer AG",,"0.0",,,,,
+100579,"YE","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0",,,,,
+100580,"YE","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100581,"YE","Germany",24,2,"Yes",100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100788,"AE","Germany",30,2,"Yes",100103,"Bulk :Bayer AG",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100583,"YE","Germany",60,2,"Yes",100070,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100584,"YE","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100585,"YE","Germany",60,2,"Yes",100076,"Bayer AG",,"0.0",,,,,
+100586,"YE","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100587,"YE","Germany",60,2,"Yes",100082,"Bayer AG",,"0.0",,,,,
+100588,"YE","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0",,,,,
+100589,"YE","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100590,"YE","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100592,"LY","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100593,"LY","Germany",36,2,"Yes",100094,"Bayer AG",,"0.0",,,,,
+100594,"LY","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+200000,"MX","México",0,2,"No",200000,"",,"0.0",,,,,25000
+100686,"LY","USA",30,0,"Yes",100103,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+200001,"MX","México",0,2,"No",200001,"",,"0.0",,,,,25000
+100596,"LB","",0,2,"No",100101,"",,"0.0",,,,,
+200002,"MX","México",0,2,"No",200002,"",,"0.0",,,,,25000
+200003,"MX","México",0,2,"No",200003,"",,"0.0",,,,,25000
+200004,"MX","México",0,2,"No",200004,"",,"0.0",,,,,25000
+200005,"MX","Germany",0,2,"No",200005,"",,"0.0",,,,,200
+200006,"MX","Germany",0,2,"No",200006,"",,"0.0",,,,,450
+200007,"MX","Germany",0,2,"No",200007,"",,"0.0",,,,,450
+200008,"MX","Germany",0,2,"No",200008,"",,"0.0",,,,,3500
+200009,"MX","Germany",0,2,"No",200009,"",,"0.0",,,,,3200
+200010,"MX","México",0,2,"Yes",200010,"",,"0.0",,,,,25000
+200011,"MX","México",0,2,"Yes",200011,"",,"0.0",,,,,25000
+200012,"MX","Austria",0,2,"Yes",200012,"",,"0.0",,,,,25000
+200013,"MX","Austria",0,2,"Yes",200013,"",,"0.0",,,,,25000
+200014,"MX","Germany",0,2,"Yes",200014,"",,"0.0",,,,,8000
+200015,"MX","Germany",0,2,"Yes",200015,"",,"0.0",,,,,70000
+200016,"MX","Germany",0,2,"Yes",200016,"",,"0.0",,,,,35000
+200017,"MX","Germany",0,2,"Yes",200017,"",,"0.0",,,,,5000
+200018,"MX","Germany",0,2,"Yes",200018,"",,"0.0",,,,,25000
+200019,"MX","Germany",0,2,"Yes",200019,"",,"0.0",,,,,25000
+200020,"MX","El Salvador",0,2,"No",200020,"",,"0.0",,,,,35000
+200021,"MX","Argentina",0,2,"No",200021,"",,"0.0",,,,,35000
+200022,"MX","El Salvador",0,2,"No",200022,"",,"0.0",,,,,35000
+200023,"MX","El Salvador",0,2,"No",200023,"",,"0.0",,,,,35000
+200024,"MX","México",0,2,"Yes",200024,"",,"0.0",,,,,3500
+200025,"MX","México",0,2,"Yes",200025,"",,"0.0",,,,,3500
+200026,"MX","Germany",0,2,"Yes",200026,"",,"0.0",,,,,3500
+200027,"MX","Germany",0,2,"Yes",200027,"",,"0.0",,,,,2000
+200028,"MX","Germany",0,2,"Yes",200028,"",,"0.0",,,,,2000
+200029,"MX","Germany",0,2,"Yes",200029,"",,"0.0",,,,,2000
+200030,"MX","Italy",0,2,"Yes",200030,"",,"0.0",,,,,150000
+200031,"MX","Germany",0,2,"Yes",200031,"",,"0.0",,,,,2000
+200032,"MX","Brazil",0,2,"Yes",200032,"",,"0.0",,,,,7500
+200033,"MX","Brazil",0,2,"Yes",200033,"",,"0.0",,,,,70000
+200034,"MX","Germany",0,2,"Yes",200034,"",,"0.0",,,,,10000
+200036,"MX","United States",0,2,"Yes",200036,"",,"0.0",,,,,3500
+200037,"MX","Germany",0,2,"Yes",200037,"",,"0.0",,,,,16000
+200038,"MX","México",0,2,"No",200038,"",,"0.0",,,,,150000
+200039,"MX","Germany",0,2,"Yes",200039,"",,"0.0",,,,,1000000
+200041,"MX","Germany",0,2,"Yes",200041,"",,"0.0",,,,,80000
+200042,"MX","Finland",0,2,"Yes",200042,"",,"0.0",,,,,500
+200043,"MX","Finland",0,2,"Yes",200043,"",,"0.0",,,,,152000
+200044,"MX","Germany",0,2,"Yes",200044,"",,"0.0",,,,,2500
+200045,"MX","Germany",0,2,"Yes",200045,"",,"0.0",,,,,9500
+200046,"MX","Germany",0,2,"No",200046,"",,"0.0",,,,,7500
+200047,"MX","México",0,2,"Yes",200047,"",,"0.0",,,,,750000
+200048,"MX","Germany",0,2,"Yes",200048,"",,"0.0",,,,,2500
+200049,"MX","Germany",0,2,"Yes",200049,"",,"0.0",,,,,2500
+200050,"MX","México",0,2,"Yes",200050,"",,"0.0",,,,,56000
+200051,"MX","Germany",0,2,"Yes",200051,"",,"0.0",,,,,2500
+200052,"MX","Brazil",0,2,"No",200052,"",,"0.0",,,,,2500
+200053,"MX","Germany",0,2,"Yes",200053,"",,"0.0",,,,,5000
+200054,"MX","Germany",0,2,"No",200054,"",,"0.0",,,,,1200
+200055,"MX","Spain",0,2,"Yes",200055,"",,"0.0",,,,,700
+200056,"MX","Germany",0,2,"Yes",200056,"",,"0.0",,,,,8000
+200057,"MX","Germany",0,2,"No",200057,"",,"0.0",,,,,11000
+200058,"MX","Germany",0,2,"Yes",200058,"",,"0.0",,,,,450000
+200059,"MX","Germany",0,2,"Yes",200059,"",,"0.0",,,,,52000
+200060,"MX","Germany",0,2,"Yes",200060,"",,"0.0",,,,,185000
+200061,"MX","Germany",0,2,"Yes",200061,"",,"0.0",,,,,10000
+200062,"MX","Germany",0,2,"Yes",200062,"",,"0.0",,,,,350000
+200063,"MX","Norway",0,2,"Yes",200063,"",,"0.0",,,,,500
+200064,"MX","Germany",0,2,"Yes",200064,"",,"0.0",,,,,15000
+200067,"MX","Germany",0,2,"Yes",200067,"",,"0.0",,,,,
+200068,"MX","Germany",0,2,"Yes",200068,"",,"0.0",,,,,
+200065,"MX","Germany",0,2,"Yes",200065,"",,"0.0",,,,,15000
+100596,"GC","",0,1,"No",100006,"",,"0.0",,,,,
+100595,"GC","",0,1,"Yes",100005,"",,"0.0",,,,,
+100597,"GC","",0,0,"No",100007,"",,"0.0",,,,,
+100597,"QA","",0,0,"No",100102,"",,"0.0",,,,,
+100598,"GC","",0,0,"Yes",100008,"",,"0.0",,,,,
+100665,"GC","0",0,0,"No",100079,"0",,"0.0",,,,,
+100666,"GC","0",0,0,"No",100080,"0",,"0.0",,,,,
+100599,"GC","",0,0,"No",100009,"",,"0.0",,,,,
+100600,"GC","",0,0,"No",100010,"",,"0.0",,,,,
+100601,"GC","",0,0,"No",100011,"",,"0.0",,,,,
+100602,"GC","",0,0,"No",100013,"",,"0.0",,,,,
+100603,"GC","",0,0,"No",100014,"",,"0.0",,,,,
+100604,"GC","",0,0,"Yes",100015,"",,"0.0",,,,,
+100605,"GC","",0,0,"Yes",100016,"",,"0.0",,,,,
+100606,"GC","",0,0,"No",100017,"",,"0.0",,,,,
+100607,"GC","",0,0,"Yes",100018,"",,"0.0",,,,,
+100608,"GC","",0,0,"Yes",100019,"",,"0.0",,,,,
+100609,"GC","",0,0,"Yes",100020,"",,"0.0",,,,,
+100610,"GC","",0,0,"No",100021,"",,"0.0",,,,,
+100611,"GC","",0,0,"Yes",100022,"",,"0.0",,,,,
+100612,"GC","",0,0,"No",100023,"",,"0.0",,,,,
+100613,"GC","",0,0,"Yes",100024,"",,"0.0",,,,,
+100614,"GC","",0,0,"Yes",100026,"",,"0.0",,,,,
+100615,"GC","",0,0,"No",100027,"",,"0.0",,,,,
+100616,"GC","",0,0,"Yes",100028,"",,"0.0",,,,,
+100685,"IQ","USA",30,0,"No",100046,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100688,"SA","USA",30,0,"Yes",100104,"Bayer HealthCare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100689,"SA","USA",30,0,"Yes",100105,"Bayer HealthCare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100789,"AE","Germany",30,2,"Yes",100104,"Bulk :Bayer AG",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100548,"SA","Spain",48,2,"Yes",100090,"BerliMed S.A.",,"0.0",,,,,
+100690,"BH","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0",,,,,
+100691,"QA","USA",30,0,"No",100107,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100692,"QA","USA",30,0,"No",100108,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100617,"GC","",0,0,"Yes",100029,"",,"0.0",,,,,
+100618,"GC","",0,0,"Yes",100030,"",,"0.0",,,,,
+100695,"JO","Germany",36,2,"Yes",100040,"Bayer AG",,"0.0",,,,,
+100696,"BH","Spain",48,1,"Yes",100090,"BerliMed S.A.",,"0.0",,,,,
+100697,"BH","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0",,,,,
+100698,"BH","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0",,,,,
+100699,"BH","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0",,,,,
+100700,"BH","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0",,,,,
+100701,"BH","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0",,,,,
+100619,"GC","",0,0,"Yes",100031,"",,"0.0",,,,,
+100620,"GC","",0,0,"Yes",100033,"",,"0.0",,,,,
+100621,"GC","",0,0,"Yes",100035,"",,"0.0",,,,,
+100622,"GC","",0,0,"Yes",100036,"",,"0.0",,,,,
+100623,"GC","",0,0,"Yes",100039,"",,"0.0",,,,,
+100624,"GC","",0,0,"Yes",100040,"",,"0.0",,,,,
+100625,"GC","",0,0,"No",100041,"",,"0.0",,,,,
+100626,"GC","",0,0,"No",100043,"",,"0.0",,,,,
+100627,"GC","",0,0,"No",100044,"",,"0.0",,,,,
+100628,"GC","",0,0,"No",100037,"",,"0.0",,,,,
+100629,"GC","",0,0,"Yes",100038,"",,"0.0",,,,,
+100630,"GC","",0,0,"No",100045,"",,"0.0",,,,,
+100631,"GC","",0,0,"No",100102,"",,"0.0",,,,,
+100632,"GC","",0,0,"No",100046,"",,"0.0",,,,,
+100633,"GC","",0,0,"No",100047,"",,"0.0",,,,,
+100634,"GC","",0,0,"No",100051,"",,"0.0",,,,,
+100635,"GC","",0,0,"No",100052,"",,"0.0",,,,,
+100636,"GC","",0,0,"No",100048,"",,"0.0",,,,,
+100637,"GC","",0,0,"No",100049,"",,"0.0",,,,,
+100638,"GC","",0,0,"Yes",100050,"",,"0.0",,,,,
+100639,"GC","",0,0,"Yes",100083,"",,"0.0",,,,,
+100640,"GC","",0,0,"Yes",100054,"",,"0.0",,,,,
+100641,"GC","",0,0,"Yes",100055,"",,"0.0",,,,,
+100642,"GC","",0,0,"Yes",100056,"",,"0.0",,,,,
+100643,"GC","",0,0,"Yes",100057,"",,"0.0",,,,,
+100644,"GC","",0,0,"Yes",100058,"",,"0.0",,,,,
+100645,"GC","",0,0,"No",100059,"",,"0.0",,,,,
+100646,"GC","",0,0,"No",100060,"",,"0.0",,,,,
+100647,"GC","",0,0,"Yes",100061,"",,"0.0",,,,,
+100648,"GC","",0,0,"Yes",100062,"",,"0.0",,,,,
+100649,"GC","",0,0,"Yes",100063,"",,"0.0",,,,,
+100650,"GC","",0,0,"Yes",100064,"",,"0.0",,,,,
+100651,"GC","",0,0,"No",100065,"",,"0.0",,,,,
+100652,"GC","",0,0,"No",100066,"",,"0.0",,,,,
+100653,"GC","",0,0,"No",100067,"",,"0.0",,,,,
+100654,"GC","",0,0,"Yes",100068,"",,"0.0",,,,,
+100655,"GC","",0,0,"Yes",100075,"",,"0.0",,,,,
+100656,"GC","",0,0,"No",100069,"",,"0.0",,,,,
+100657,"GC","",0,0,"Yes",100070,"",,"0.0",,,,,
+100658,"GC","",0,0,"Yes",100071,"",,"0.0",,,,,
+100659,"GC","",0,0,"Yes",100073,"",,"0.0",,,,,
+100660,"GC","",0,0,"Yes",100074,"",,"0.0",,,,,
+100661,"GC","",0,0,"Yes",100034,"",,"0.0",,,,,
+100662,"GC","",0,0,"Yes",100076,"",,"0.0",,,,,
+100663,"GC","",0,0,"Yes",100077,"",,"0.0",,,,,
+100747,"QA","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0",,,,,
+100748,"QA","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0",,,,,
+100749,"QA","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0",,,,,
+100790,"AE","Germany",30,2,"Yes",100105,"Bulk :Bayer AG",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100800,"KW","Germany",30,1,"Yes",100104,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100760,"AE","Germany",36,2,"No",100048,"Bayer AG",,"0.0","",,,,
+100768,"AE","Germany",60,2,"Yes",100122,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100761,"AE","Germany",36,1,"No",100109,"Bayer AG",,"0.0","",,,,
+100477,"IQ","Germany",48,1,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100526,"KW","Germany",60,2,"No",100062,"Bayer AG",,"0.0",,,,,
+100526,"BH","Germany",60,2,"No",100062,"Bayer AG",,"0.0",,,,,
+100531,"QA","Finland",36,2,"No",100067,"Bayer Oy Turku",,"0.0",,,,,
+100766,"KW","Germany",36,1,"Yes",100039,"Bayer AG",,"0.0",,,,,
+100551,"IQ","Germany",36,1,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100553,"IQ","Germany",36,1,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100798,"BH","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100555,"IQ","Germany",36,1,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100260,"KW","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100080,"BH","Germany",24,2,"No",100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100001,"AE","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0","",,,,
+100263,"KW","Germany",36,2,"Yes",100028,"Bayer AG",,"0.0",,,,,
+100264,"KW","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0",,,,,
+100265,"KW","Germany",60,2,"Yes",100030,"Bayer AG",,"0.0",,,,,
+100002,"AE","Germany",48,2,"No",100003,"Bayer AG",,"0.0","",,,,
+100267,"KW","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100268,"KW","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100269,"KW","Germany",36,2,"Yes",100040,"Bayer AG",,"0.0",,,,,
+100270,"KW","Germany",24,2,"Yes",100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100271,"KW","USA",30,2,"No",100045,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100272,"KW","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100273,"KW","Germany",36,2,"No",100052,"Bayer AG",,"0.0",,,,,
+100274,"KW","Germany",36,2,"Yes",100048,"Bayer AG",,"0.0",,,,,
+100275,"KW","Germany",60,2,"Yes",100056,"Bayer AG",,"0.0",,,,,
+100276,"KW","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100277,"KW","Germany",60,2,"Yes",100063,"Bayer AG",,"0.0",,,,,
+100278,"KW","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100279,"KW","Finland",36,2,"No",100067,"Bayer Oy Turku",,"0.0",,,,,
+100280,"KW","Germany",60,2,"Yes",100075,"Bayer AG",,"0.0",,,,,
+100281,"KW","Germany",60,2,"No",100071,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100282,"KW","Germany",36,2,"Yes",100073,"Bayer AG",,"0.0",,,,,
+100283,"KW","Germany",36,2,"Yes",100074,"Bayer AG",,"0.0",,,,,
+100284,"KW","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100285,"KW","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100286,"KW","Italy",36,2,"No",100079,"Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany",,"0.0",,,,,
+100287,"KW","Canada",36,2,"No",100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,"0.0",,,,,
+100288,"KW","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100289,"KW","Germany",60,2,"Yes",100082,"Bayer AG",,"0.0",,,,,
+100290,"KW","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100291,"KW","Spain",48,2,"Yes",100090,"BerliMed S.A.",,"0.0",,,,,
+100292,"KW","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100293,"KW","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100294,"KW","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100295,"KW","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100296,"KW","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100297,"KW","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100298,"LB","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100299,"LB","Germany",48,2,"No",100003,"Bayer AG",,"0.0",,,,,
+100300,"LB","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0",,,,,
+100301,"LB","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0",,,,,
+100302,"LB","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0",,,,,
+100303,"LB","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0",,,,,
+100304,"LB","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0",,,,,
+100216,"JO","Germany",60,2,"No",100012,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100306,"LB","Germany",36,2,"Yes",100016,"Bayer AG",,"0.0",,,,,
+100307,"LB","Germany",36,2,"Yes",100017,"Bayer AG",,"0.0",,,,,
+100308,"LB","Germany",36,2,"Yes",100018,"Bayer AG",,"0.0",,,,,
+100309,"LB","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100310,"LB","Germany",36,2,"No",100027,"Bayer AG",,"0.0",,,,,
+100311,"LB","Germany",36,2,"No",100028,"Bayer AG",,"0.0",,,,,
+100312,"LB","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0",,,,,
+100313,"LB","Germany",60,2,"Yes",100031,"Bayer AG",,"0.0",,,,,
+100314,"LB","France",60,2,"No",100033,"Delpharm Lille SAS",,"0.0",,,,,
+100315,"LB","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100316,"LB","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100317,"LB","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100318,"LB","Germany",36,2,"Yes",100039,"Bayer AG",,"0.0",,,,,
+100319,"LB","Germany",36,2,"No",100043,"Bayer AG",,"0.0",,,,,
+100320,"LB","Germany",36,2,"Yes",100044,"Bayer AG",,"0.0",,,,,
+100321,"LB","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100322,"LB","Germany",36,2,"Yes",100051,"Bayer AG",,"0.0",,,,,
+100323,"LB","Germany",36,2,"Yes",100050,"Bayer AG",,"0.0",,,,,
+100324,"LB","Germany",60,2,"Yes",100057,"Bayer AG",,"0.0",,,,,
+100325,"LB","Germany",60,2,"Yes",100058,"Bayer AG",,"0.0",,,,,
+100326,"LB","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100327,"LB","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100328,"LB","Germany",48,2,"Yes",100066,"Bayer AG",,"0.0",,,,,
+100329,"LB","Germany",60,0,"Yes",100072,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100330,"LB","Germany",60,2,"Yes",100076,"Bayer AG",,"0.0",,,,,
+100331,"LB","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100332,"LB","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100333,"LB","Germany",60,2,"Yes",100082,"Bayer AG",,"0.0",,,,,
+100334,"LB","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100335,"LB","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0",,,,,
+100336,"LB","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100337,"LB","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100338,"LB","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100339,"LB","Germany",36,2,"Yes",100094,"Bayer AG",,"0.0",,,,,
+100340,"LB","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100341,"LB","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100342,"LB","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100343,"LY","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100344,"LY","Germany",48,2,"No",100003,"Bayer AG",,"0.0",,,,,
+100345,"LY","Germany",36,0,"No",100006,"Bayer AG",,"0.0",,,,,
+100346,"LY","Germany",60,2,"No",100013,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100347,"LY","Germany",36,2,"Yes",100016,"Bayer AG",,"0.0",,,,,
+100348,"LY","Germany",36,2,"Yes",100017,"Bayer AG",,"0.0",,,,,
+100349,"LY","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100350,"LY","Finland",36,2,"No",100023,"Bayer Oy Turku",,"0.0",,,,,
+100351,"LY","Germany",36,2,"Yes",100028,"Bayer AG",,"0.0",,,,,
+100352,"LY","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0",,,,,
+100353,"LY","Germany",36,2,"Yes",100030,"Bayer AG",,"0.0",,,,,
+100354,"LY","Germany",60,2,"Yes",100031,"Bayer AG",,"0.0",,,,,
+100355,"LY","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100356,"LY","Germany",36,2,"Yes",100044,"Bayer AG",,"0.0",,,,,
+100357,"LY","USA",30,2,"No",100045,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100358,"LY","USA",30,2,"No",100046,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100359,"LY","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100360,"LY","Germany",60,2,"Yes",100055,"Bayer AG",,"0.0",,,,,
+100361,"LY","Germany",60,2,"Yes",100057,"Bayer AG",,"0.0",,,,,
+100835,"BH","USA",30,2,"Yes",100103,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100363,"LY","Germany",36,2,"Yes",100060,"Bayer AG & Bayer Weimar GmbH und Co. ",,"0.0",,,,,
+100364,"LY","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100365,"LY","Germany",60,2,"Yes",100063,"Bayer AG",,"0.0",,,,,
+100366,"LY","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100367,"LY","Finland",36,2,"No",100067,"Bayer Oy Turku",,"0.0",,,,,
+100368,"LY","Germany",60,2,"Yes",100070,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100369,"LY","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100370,"LY","Germany",60,2,"Yes",100076,"Bayer AG",,"0.0",,,,,
+100371,"LY","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100372,"LY","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100373,"LY","Germany",60,2,"Yes",100082,"Bayer AG",,"0.0",,,,,
+100374,"LY","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100375,"LY","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100376,"LY","Spain",48,2,"Yes",100090,"BerliMed S.A.",,"0.0",,,,,
+100377,"LY","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100378,"LY","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100379,"OM","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100380,"OM","Germany",48,2,"No",100003,"Bayer AG",,"0.0",,,,,
+100221,"JO","France",36,2,"No",100033,"Delpharm Lille SAS",,"0.0",,,,,
+100382,"OM","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0",,,,,
+100383,"OM","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0",,,,,
+100384,"OM","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0",,,,,
+100385,"OM","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0",,,,,
+100386,"OM","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0",,,,,
+100387,"OM","Germany",60,2,"No",100013,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100388,"OM","Germany",36,2,"Yes",100016,"Bayer AG",,"0.0",,,,,
+100389,"OM","Germany",36,2,"Yes",100017,"Bayer AG",,"0.0",,,,,
+100390,"OM","Germany",36,2,"Yes",100018,"Bayer AG",,"0.0",,,,,
+100391,"OM","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100392,"OM","Finland",36,0,"No",100023,"Bayer Oy Turku",,"0.0",,,,,
+100393,"OM","Finland",36,2,"No",100024,"Bayer Oy Turku",,"0.0",,,,,
+100394,"OM","Germany",36,2,"Yes",100028,"Bayer AG",,"0.0",,,,,
+100395,"OM","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0",,,,,
+100396,"OM","Germany",60,2,"Yes",100030,"Bayer AG",,"0.0",,,,,
+100397,"OM","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100398,"OM","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100399,"OM","Germany",36,2,"Yes",100040,"Bayer AG",,"0.0",,,,,
+100400,"OM","Germany",36,2,"No",100044,"Bayer AG",,"0.0",,,,,
+100401,"OM","Germany",24,2,"Yes",100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100402,"OM","USA",30,2,"No",100045,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100403,"OM","USA",30,2,"No",100046,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100404,"OM","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100405,"OM","Germany",60,2,"Yes",100055,"Bayer AG",,"0.0",,,,,
+100406,"OM","Germany",60,2,"Yes",100057,"Bayer AG",,"0.0",,,,,
+100407,"OM","Germany",60,2,"Yes",100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,"0.0",,,,,
+100408,"OM","Germany",36,2,"No",100059,"Bayer AG & Bayer Weimar GmbH und Co. ",,"0.0",,,,,
+100409,"OM","Germany",36,2,"No",100060,"Bayer AG & Bayer Weimar GmbH und Co. ",,"0.0",,,,,
+100410,"OM","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100411,"OM","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100412,"OM","Germany",36,2,"No",100065,"Bayer AG",,"0.0",,,,,
+100413,"OM","Germany",48,2,"No",100066,"Bayer AG",,"0.0",,,,,
+100414,"OM","Germany",60,2,"Yes",100075,"Bayer AG",,"0.0",,,,,
+100415,"OM","Germany",60,2,"No",100070,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100416,"OM","Germany",36,2,"Yes",100073,"Bayer AG",,"0.0",,,,,
+100417,"OM","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100418,"OM","Germany",60,2,"Yes",100076,"Bayer AG",,"0.0",,,,,
+100419,"OM","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100420,"OM","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100421,"OM","Germany",60,2,"Yes",100082,"Bayer AG",,"0.0",,,,,
+100422,"OM","Germany",36,2,"Yes",100084,"Bayer AG",,"0.0",,,,,
+100423,"OM","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100424,"OM","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0",,,,,
+100425,"OM","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100426,"OM","Spain",48,2,"Yes",100090,"BerliMed S.A.",,"0.0",,,,,
+100427,"OM","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100428,"OM","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100429,"OM","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100430,"OM","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100431,"OM","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100432,"OM","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100433,"QA","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100434,"QA","Germany",48,2,"No",100003,"Bayer AG",,"0.0",,,,,
+100435,"QA","Germany",36,2,"No",100006,"Bayer AG",,"0.0",,,,,
+100436,"QA","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0",,,,,
+100437,"QA","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0",,,,,
+100438,"QA","Germany",36,2,"Yes",100016,"Bayer AG",,"0.0",,,,,
+100439,"QA","Germany",36,2,"Yes",100018,"Bayer AG",,"0.0",,,,,
+100440,"QA","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100441,"QA","Germany",36,2,"Yes",100028,"Bayer AG",,"0.0",,,,,
+100442,"QA","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0",,,,,
+100443,"QA","Germany",60,2,"Yes",100030,"Bayer AG",,"0.0",,,,,
+100444,"QA","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100445,"QA","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100446,"QA","Germany",36,2,"Yes",100039,"Bayer AG",,"0.0",,,,,
+100447,"QA","Germany",36,2,"Yes",100040,"Bayer AG",,"0.0",,,,,
+100448,"QA","Spain",36,2,"No",100041,"BerliMed S.A.",,"0.0",,,,,
+100449,"QA","Germany",36,2,"No",100044,"Bayer AG",,"0.0",,,,,
+100818,"JO","Germany",36,2,"No",100028,"Bayer AG",,"0.0",,,,,
+100451,"QA","Germany",24,2,"Yes",100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100452,"QA","USA",30,2,"No",100045,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100453,"QA","USA",30,2,"No",100046,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100454,"QA","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100455,"QA","Germany",36,2,"No",100052,"Bayer AG",,"0.0",,,,,
+100456,"QA","Germany",36,2,"Yes",100050,"Bayer AG",,"0.0",,,,,
+100582,"YE","Germany",60,2,"Yes",100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,"0.0",,,,,
+100458,"QA","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100459,"QA","Germany",60,2,"No",100062,"Bayer AG",,"0.0",,,,,
+100460,"QA","Germany",60,2,"Yes",100063,"Bayer AG",,"0.0",,,,,
+100461,"QA","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100462,"QA","Germany",60,2,"No",100070,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100463,"QA","Germany",60,2,"Yes",100071,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100464,"QA","Germany",36,2,"Yes",100073,"Bayer AG",,"0.0",,,,,
+100465,"QA","Germany",36,2,"Yes",100074,"Bayer AG",,"0.0",,,,,
+100466,"QA","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100467,"QA","Germany",60,2,"Yes",100076,"Bayer AG",,"0.0",,,,,
+100468,"QA","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100469,"QA","Germany",60,2,"Yes",100082,"Bayer AG",,"0.0",,,,,
+100470,"QA","Spain",48,2,"Yes",100090,"BerliMed S.A.",,"0.0",,,,,
+100471,"QA","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100472,"QA","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100473,"QA","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100474,"QA","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100475,"QA","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100476,"QA","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100477,"SA","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100478,"SA","Germany",0,0,"No",100002,"Bayer AG",,"0.0",,,,,
+100479,"SA","Germany",48,2,"No",100003,"Bayer AG",,"0.0",,,,,
+100480,"SA","Germany",0,0,"No",100004,"Bayer AG",,"0.0",,,,,
+100481,"SA","Germany",0,0,"No",100005,"Bayer AG",,"0.0",,,,,
+100482,"SA","Germany",36,2,"No",100006,"Bayer AG",,"0.0",,,,,
+100483,"SA","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0",,,,,
+100484,"SA","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0",,,,,
+100485,"SA","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0",,,,,
+100486,"SA","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0",,,,,
+100487,"SA","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0",,,,,
+100488,"SA","Germany ",48,2,"No",100013,"Bayer Weimar GmbH und Co.KG or Delpharm Lille SAS ",,"0.0",,,,,
+100819,"SY","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0",,,,,
+100490,"SA","Germany",36,0,"No",100015,"Bayer AG",,"0.0",,,,,
+100491,"SA","Germany",36,2,"Yes",100016,"Bayer AG",,"0.0",,,,,
+100492,"SA","Germany",36,2,"Yes",100017,"Bayer AG",,"0.0",,,,,
+100493,"SA","Germany",36,2,"Yes",100018,"Bayer AG",,"0.0",,,,,
+100494,"SA","Germany",0,0,"No",100019,"Bayer AG",,"0.0",,,,,
+100495,"SA","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100496,"SA","Germany",36,0,"Yes",100099,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100497,"SA","Germany",48,2,"No",100021,"Bayer AG",,"0.0",,,,,
+100498,"SA","Germany",48,2,"Yes",100022,"Bayer AG",,"0.0",,,,,
+100499,"SA","Germany",36,2,"No",100027,"Bayer AG",,"0.0",,,,,
+100500,"SA","Germany",36,2,"Yes",100028,"Bayer AG",,"0.0",,,,,
+100501,"SA","Germany",48,2,"Yes",100029,"Bayer AG , Leverkusen & Bayer HealthCare Manufacturing S.r.l. Garbagnate, Italy",,"0.0",,,,,
+100502,"SA","Germany",48,2,"Yes",100030,"Bayer AG , Leverkusen & Bayer HealthCare Manufacturing S.r.l. Garbagnate, Italy",,"0.0",,,,,
+100503,"SA","Germany",48,2,"Yes",100031,"Bayer AG , Leverkusen & Bayer HealthCare Manufacturing S.r.l. Garbagnate, Italy",,"0.0",,,,,
+100664,"GC","",0,0,"No",100078,"",,"0.0",,,,,
+100792,"QA","Germany",36,2,"Yes",100125,"Bayer AG",,"0.0",,,,,
+100793,"BH","Germany",36,2,"No",100125,"Bayer AG",,"0.0",,,,,
+100794,"LB","Germany",36,2,"Yes",100125,"Bayer AG",,"0.0",,,,,
+100795,"JO","Germany",36,2,"Yes",100125,"Bayer AG",,"0.0",,,,,
+100796,"OM","Germany",36,2,"Yes",100125,"Bayer AG",,"0.0",,,,,
+100003,"AE","Germany",36,2,"No",100006,"Bayer AG",,"0.0","",,,,
+100504,"SA","France",36,2,"Yes",100033,"Delpharm Lille SAS",,"0.0",,,,,
+100505,"SA","Germany",36,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100506,"SA","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0","Eylea goods will have no more than 50% remaining shelf life at the time of delivery",,,,
+100507,"SA","Germany",36,2,"Yes",100039,"Bayer AG",,"0.0",,,,,
+100508,"SA","Germany",36,2,"Yes",100040,"Bayer AG",,"0.0",,,,,
+100509,"SA","Spain",24,2,"Yes",100041,"BerliMed S.A.",,"0.0",,,,,
+100750,"QA","Germany",48,0,"No",100021,"Bayer AG",,"0.0",,,,,
+100751,"QA","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100752,"OM","Germany",60,0,"Yes",100063,"Bayer AG",,"0.0",,,,,
+100753,"SA","United Kingdom",24,2,"Yes",100120,"Penn Pharmaceutical Services Ltd",,"0.0",,,,,
+100754,"LY","USA",24,0,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100763,"KW","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0",,,,,
+100764,"KW","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0",,,,,
+100765,"KW","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0",,,,,
+100789,"OM","Germany",60,1,"Yes",100122,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100767,"KW","USA",30,2,"No",100046,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100769,"BH","Gemany",36,2,"No",100048,"Bayer AG",,"0.0",,,,,
+100770,"BH","Germany",36,2,"No",100049,"Bayer AG",,"0.0",,,,,
+100801,"JO","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100772,"BH","Germany",60,2,"Yes",100123,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100773,"BH","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100799,"SA","Germany",36,2,"Yes",100125,"Bayer AG",,"0.0",,,,,
+100004,"AE","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0","",,,,
+100005,"AE","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0","",,,,
+100006,"AE","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0","",,,,
+100820,"SY","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0",,,,,
+100783,"QA","Germany",36,2,"No",100049,"Bayer AG",,"0.0",,,,,
+100784,"QA","Germany",36,2,"No",100048,"Bayer AG",,"0.0",,,,,
+100785,"QA","Germany",60,2,"Yes",100123,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100836,"KW","Germany",30,2,"Yes",100103,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100787,"QA","Germany",60,2,"Yes",100031,"Bayer AG",,"0.0",,,,,
+100007,"AE","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0","",,,,
+100008,"AE","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0","",,,,
+100774,"BH","Germany",36,1,"No",100121,"Bayer AG",,"0.0",,,,,
+100009,"AE","Germany",60,2,"No",100013,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100010,"AE","Germany",36,2,"No",100016,"Bayer AG",,"0.0","",,,,
+100776,"KW","Germany",36,2,"No",100049,"Bayer AG",,"0.0",,,,,
+100777,"KW","Germany",36,2,"No",100050,"Bayer AG",,"0.0",,,,,
+100778,"KW","Germany",60,1,"Yes",100122,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100779,"KW","Germany",36,1,"Yes",100119,"Bayer AG",,"0.0",,,,,
+100780,"OM","Germany",60,2,"Yes",100123,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100786,"QA","Germany",36,1,"No",100121,"Bayer AG",,"0.0",,,,,
+100011,"AE","Germany",36,2,"No",100017,"Bayer AG",,"0.0","",,,,
+100012,"AE","Germany",36,2,"Yes",100018,"Bayer AG",,"0.0","",,,,
+100013,"AE","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0","",,,,
+100014,"AE","Germany",60,2,"No",100027,"Bayer AG",,"0.0","",,,,
+100015,"AE","Germany",36,2,"Yes",100028,"Bayer AG",,"0.0","",,,,
+100016,"AE","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0","",,,,
+100017,"AE","Germany",60,2,"Yes",100030,"Bayer AG",,"0.0","",,,,
+100018,"AE","Germany",60,2,"Yes",100031,"Bayer AG",,"0.0","",,,,
+100019,"AE","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100020,"AE","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0","",,,,
+100021,"AE","Germany",36,2,"Yes",100039,"Bayer AG",,"0.0","",,,,
+100022,"AE","Germany",36,2,"Yes",100040,"Bayer AG",,"0.0","",,,,
+100023,"AE","Germany",36,2,"Yes",100043,"Bayer AG",,"0.0","",,,,
+100024,"AE","Germany",36,2,"Yes",100044,"Bayer AG",,"0.0","",,,,
+100026,"AE","Germany",24,2,"Yes",100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0","",,,,
+100027,"AE","USA",30,2,"No",100045,"Bayer Healthcare LLC, Berkeley",,"0.0","",,,,
+100028,"AE","USA",30,2,"Yes",100046,"Bayer Healthcare LLC, Berkeley",,"0.0","",,,,
+100029,"AE","USA",30,2,"Yes",100047,"Bayer Healthcare LLC, Berkeley",,"0.0","",,,,
+100030,"AE","Germany",36,2,"No",100052,"Bayer AG",,"0.0","",,,,
+100031,"AE","Germany",36,2,"Yes",100049,"Bayer AG",,"0.0","",,,,
+100032,"AE","Germany",36,2,"Yes",100050,"Bayer AG",,"0.0","",,,,
+100033,"AE","Germany",60,2,"Yes",100055,"Bayer AG",,"0.0","",,,,
+100034,"AE","Germany",60,2,"Yes",100057,"Bayer AG",,"0.0","",,,,
+100035,"AE","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0","",,,,
+100821,"SY","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0",,,,,
+100036,"AE","Germany",60,2,"No",100062,"Bayer AG",,"0.0","",,,,
+100037,"AE","Germany",60,2,"Yes",100063,"Bayer AG",,"0.0","",,,,
+100038,"AE","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0","",,,,
+100039,"AE","Germany",48,2,"No",100066,"Bayer AG",,"0.0","",,,,
+100040,"AE","Finland",36,2,"No",100067,"Bayer Oy Turku",,"0.0","",,,,
+100041,"AE","Germany",60,2,"Yes",100075,"Bayer AG",,"0.0","",,,,
+100043,"AE","Germany",60,2,"No",100071,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100044,"AE","Germany",36,2,"Yes",100073,"Bayer AG",,"0.0","",,,,
+100045,"AE","Germany",60,2,"Yes",100074,"Bayer AG",,"0.0","",,,,
+100046,"AE","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100047,"AE","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100048,"AE","Italy",36,2,"No",100079,"Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany",,"0.0","",,,,
+100049,"AE","Canada",36,2,"No",100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,"0.0","",,,,
+100050,"AE","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0","",,,,
+100051,"AE","Germany",60,2,"Yes",100082,"Bayer AG",,"0.0","",,,,
+100052,"AE","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0","",,,,
+100822,"SY","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0",,,,,
+100053,"AE","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0","",,,,
+100054,"AE","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0","",,,,
+100055,"AE","Spain",48,2,"Yes",100090,"BerliMed S.A.",,"0.0","",,,,
+100056,"AE","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100057,"AE","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0","",,,,
+100058,"AE","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0","",,,,
+100059,"AE","Germany",36,2,"Yes",100094,"Bayer AG",,"0.0","",,,,
+100060,"AE","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0","",,,,
+100061,"AE","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0","",,,,
+100062,"AE","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0","",,,,
+100803,"AE","Germany",36,2,"Yes",100126,"Orion Corporation ,  Orion Pharma – Finland ",,"0.0","",,,,
+100762,"AE","Germany",36,1,"No",100121,"Bayer AG",,"0.0","",,,,
+100811,"AE","Germany",60,0,"No",100130,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100855,"AE","Germany",60,0,"Yes",100076,"Bayer AG",,"0.0","",,,,
+100840,"QA","USA",30,2,"Yes",100103,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100868,"BH","USA",30,2,"Yes",100104,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100878,"AE","Germany",36,2,"Yes",100119,"Bayer AG",,"0.0","",,,,
+100883,"AE","Germany",60,2,"Yes",100123,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100805,"EG","Germany",36,0,"Yes",100126,"Orion Corporation ,  Orion Pharma – Finland ",,"0.0","",,,,
+100595,"EG","Germany",48,2,"Yes",100101,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100063,"BH","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100064,"BH","Germany",48,2,"No",100003,"Bayer AG",,"0.0",,,,,
+100065,"BH","Germany",36,2,"No",100006,"Bayer AG",,"0.0",,,,,
+100066,"BH","Germany",36,2,"Yes",100016,"Bayer AG",,"0.0",,,,,
+100067,"BH","Germany",36,2,"No",100017,"Bayer AG",,"0.0",,,,,
+100068,"BH","Germany",36,2,"Yes",100018,"Bayer AG",,"0.0",,,,,
+100069,"BH","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100070,"BH","Germany",48,2,"No",100022,"Bayer AG",,"0.0",,,,,
+100071,"BH","Finland",36,2,"No",100023,"Bayer Oy Turku",,"0.0",,,,,
+100072,"BH","Germany",36,2,"No",100027,"Bayer AG",,"0.0",,,,,
+100073,"BH","Germany",36,2,"Yes",100028,"Bayer AG",,"0.0",,,,,
+100074,"BH","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0",,,,,
+100075,"BH","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100076,"BH","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100077,"BH","Germany",36,2,"Yes",100039,"Bayer AG",,"0.0",,,,,
+100078,"BH","Germany",36,2,"Yes",100040,"Bayer AG",,"0.0",,,,,
+100079,"BH","Spain",36,2,"No",100041,"BerliMed S.A.",,"0.0",,,,,
+100823,"SY","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0",,,,,
+100081,"BH","Germany",24,2,"Yes",100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100082,"BH","USA",30,2,"No",100045,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100083,"BH","USA",30,2,"No",100046,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100084,"BH","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100085,"BH","Germany",36,2,"No",100052,"Bayer AG",,"0.0",,,,,
+100086,"BH","Germany",36,2,"Yes",100050,"Bayer AG",,"0.0",,,,,
+100087,"BH","Germany",60,2,"Yes",100055,"Bayer AG",,"0.0",,,,,
+100362,"LY","Germany",60,2,"Yes",100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,"0.0",,,,,
+100089,"BH","Germany",60,2,"Yes",100063,"Bayer AG",,"0.0",,,,,
+100090,"BH","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100824,"QA","Germany",60,2,"No",100013,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100092,"BH","Germany",60,2,"No",100069,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100093,"BH","Germany",60,2,"No",100070,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100094,"BH","Germany",36,2,"Yes",100073,"Bayer AG",,"0.0",,,,,
+100095,"BH","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100096,"BH","Germany",60,2,"Yes",100076,"Bayer AG",,"0.0",,,,,
+100097,"BH","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100098,"BH","Italy",36,2,"No",100079,"Bulk Manufacturing & Primary Packaging: Patheon Italia S.p.A Ferentino Italy; Secondary Packaging & Final Release: Bayer AG Germany",,"0.0",,,,,
+100099,"BH","Canada",36,2,"No",100080,"Bulk Manufacturing & Primary Packaging: Patheon Inc, Canada Secondary Packaging & Final Release: Bayer AG Germany",,"0.0",,,,,
+100100,"BH","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100101,"BH","Germany",60,2,"No",100082,"Bayer AG",,"0.0",,,,,
+100102,"BH","Germany",36,2,"Yes",100084,"Bayer AG",,"0.0",,,,,
+100103,"BH","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100104,"BH","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100105,"BH","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100106,"BH","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100107,"BH","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100108,"BH","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100109,"BH","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100755,"EG","Germany",36,2,"Yes",100007,"Bayer AG",,"0.0","",,,,
+100756,"EG","Germany",36,2,"Yes",100008,"Bayer AG",,"0.0","",,,,
+100825,"QA","Germany",36,2,"No",100017,"Bayer AG",,"0.0",,,,,
+100757,"EG","Germany",36,2,"Yes",100009,"Bayer AG",,"0.0","",,,,
+100758,"EG","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0","",,,,
+100771,"BH","Germany",36,1,"No",100109,"Bayer AG",,"0.0",,,,,
+100775,"KW","Germany",36,1,"No",100109,"Bayer AG",,"0.0",,,,,
+100759,"EG","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0","",,,,
+100112,"EG","Germany",60,2,"No",100013,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100145,"EG","Germany ",36,2,"No",100053,"Bayer AG",,"0.0","",,,,
+100116,"EG","Finland",36,0,"No",100025,"Bayer Oy Turku",,"0.0","",,,,
+100667,"GC","",0,0,"Yes",100081,"",,"0.0",,,,,
+100111,"EG","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0","",,,,
+100113,"EG","Germany",36,2,"Yes",100017,"Bayer AG",,"0.0","",,,,
+100114,"EG","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0","",,,,
+100117,"EG","Egypt",36,2,"Yes",100029,"Hikma Pharma",,"0.0","",,,,
+100118,"EG","Egypt",36,2,"Yes",100030,"Hikma Pharma",,"0.0","",,,,
+100119,"EG","Egypt",36,2,"Yes",100031,"Hikma Pharma",,"0.0","",,,,
+100668,"GC","",0,0,"No",100082,"",,"0.0",,,,,
+100121,"EG","Germany",48,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100122,"EG","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0","",,,,
+100123,"EG","Egypt",36,2,"Yes",100044,"Hikma Pharma",,"0.0","",,,,
+100124,"EG","Germany",24,2,"No",100037,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0","",,,,
+100125,"EG","Germany",24,2,"Yes",100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0","",,,,
+100126,"EG","USA",30,2,"Yes",100046,"Bayer Healthcare LLC, Berkeley",,"0.0","",,,,
+100127,"EG","USA",30,2,"Yes",100047,"Bayer Healthcare LLC, Berkeley",,"0.0","",,,,
+100128,"EG","Germany",36,2,"Yes",100050,"Bayer AG",,"0.0","",,,,
+100129,"EG","Germany",48,2,"Yes",100055,"Bayer AG",,"0.0","",,,,
+100130,"EG","Germany",48,2,"Yes",100057,"Bayer AG",,"0.0","",,,,
+100131,"EG","Germany",48,2,"Yes",100059,"Bayer AG",,"0.0","",,,,
+100132,"EG","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0","",,,,
+100133,"EG","Germany",60,2,"Yes",100063,"Bayer AG",,"0.0","",,,,
+100134,"EG","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0","",,,,
+100135,"EG","Finland",60,2,"Yes",100067,"Bayer Oy Turku",,"0.0","",,,,
+100869,"BH","USA",30,2,"Yes",100105,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100826,"SY","Germany",36,2,"Yes",100039,"Bayer AG",,"0.0",,,,,
+100137,"EG","Germany",60,2,"Yes",100071,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100138,"EG","Germany",60,0,"No",100072,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100139,"EG","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100140,"EG","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0","",,,,
+100141,"EG","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0","",,,,
+100782,"QA","Germany",36,1,"No",100109,"Bayer AG",,"0.0",,,,,
+100190,"IQ","Germany",60,0,"No",100012,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100191,"IQ","Germany",36,0,"No",100017,"Bayer AG",,"0.0",,,,,
+100192,"IQ","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100193,"IQ","Germany",60,0,"No",100029,"Bayer AG",,"0.0",,,,,
+100194,"IQ","Germany",60,0,"No",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100195,"IQ","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100196,"IQ","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100197,"IQ","Germany",36,0,"No",100050,"Bayer AG",,"0.0",,,,,
+100198,"IQ","Germany",60,2,"Yes",100055,"Bayer AG",,"0.0",,,,,
+100199,"IQ","Germany",60,2,"Yes",100057,"Bayer AG",,"0.0",,,,,
+100200,"IQ","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100201,"IQ","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100202,"IQ","Germany",48,0,"No",100066,"Bayer AG",,"0.0",,,,,
+100142,"EG","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0","",,,,
+100204,"IQ","Germany",60,0,"No",100075,"Bayer AG",,"0.0",,,,,
+100205,"IQ","Germany",60,0,"No",100070,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100206,"IQ","Germany",60,0,"No",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100207,"IQ","Germany",60,0,"No",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100208,"IQ","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0",,,,,
+100674,"GC","",48,0,"Yes",100090,"",,"0.0",,,,,
+100210,"IQ","Germany",36,0,"No",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100802,"LY","Germany",36,0,"Yes",100040,"Bayer AG",,"0.0",,,,,
+100143,"EG","Spain",48,2,"Yes",100089,"BerliMed S.A.",,"0.0","",,,,
+100871,"QA","USA",30,2,"Yes",100104,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100827,"SY","USA",30,2,"No",100046,"Bayer Healthcare LLC",,"0.0",,,,,
+100828,"SY","USA",30,2,"No",100047,"Bayer Healthcare LLC",,"0.0",,,,,
+100829,"JO","Germany",36,2,"No",100044,"Bayer AG",,"0.0",,,,,
+100217,"JO","Germany",36,2,"Yes",100016,"Bayer AG",,"0.0",,,,,
+100218,"JO","Germany",36,2,"Yes",100017,"Bayer AG",,"0.0",,,,,
+100219,"JO","Germany",24,2,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+100220,"JO","Germany",60,2,"Yes",100029,"Bayer AG",,"0.0",,,,,
+100830,"KW","Germany",36,2,"Yes",100043,"Bayer AG",,"0.0",,,,,
+100222,"JO","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100223,"JO","USA",24,2,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+100224,"JO","Germany",36,2,"Yes",100039,"Bayer AG",,"0.0",,,,,
+100225,"JO","USA",30,2,"No",100045,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100226,"JO","USA",30,2,"No",100046,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100227,"JO","USA",30,2,"No",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+100228,"JO","Germany",36,2,"Yes",100051,"Bayer AG",,"0.0",,,,,
+100229,"JO","Germany",36,2,"Yes",100050,"Bayer AG",,"0.0",,,,,
+100230,"JO","Germany",60,2,"Yes",100055,"Bayer AG",,"0.0",,,,,
+100231,"JO","Germany",60,2,"Yes",100057,"Bayer AG",,"0.0",,,,,
+100232,"JO","Germany",60,2,"Yes",100058,"Bayer AG",,"0.0",,,,,
+100233,"JO","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100234,"JO","Germany",36,2,"Yes",100064,"Bayer AG",,"0.0",,,,,
+100831,"BH","Germany",36,2,"No",100043,"Bayer AG",,"0.0",,,,,
+100236,"JO","Finland",36,2,"Yes",100067,"Bayer Oy Turku",,"0.0",,,,,
+100237,"JO","Germany",60,2,"Yes",100075,"Bayer AG",,"0.0",,,,,
+100238,"JO","Germany",60,1,"No",100072,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100239,"JO","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100240,"JO","Germany",60,2,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100241,"JO","Germany",36,2,"Yes",100081,"Bayer AG",,"0.0",,,,,
+100242,"JO","Germany",60,2,"Yes",100082,"Bayer AG",,"0.0",,,,,
+100243,"JO","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0",,,,,
+100244,"JO","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100245,"JO","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100246,"JO","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0",,,,,
+100247,"JO","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100248,"JO","Germany",36,2,"Yes",100094,"Bayer AG",,"0.0",,,,,
+100249,"JO","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100250,"JO","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100832,"BH","Germany",36,2,"No",100044,"Bayer AG",,"0.0",,,,,
+100252,"KW","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100457,"QA","Germany",60,2,"Yes",100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,"0.0",,,,,
+100254,"KW","Germany",36,2,"Yes",100010,"Bayer AG",,"0.0",,,,,
+100255,"KW","Germany",36,2,"Yes",100011,"Bayer AG",,"0.0",,,,,
+100256,"KW","Germany",60,2,"No",100013,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100257,"KW","Germany",36,1,"No",100016,"Bayer Pharma AG",,"0.0",,,,,
+100258,"KW","Germany",36,2,"No",100017,"Bayer AG",,"0.0",,,,,
+100259,"KW","Germany",36,2,"Yes",100018,"Bayer AG",,"0.0",,,,,
+100144,"EG","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100781,"OM","Germany",36,1,"No",100121,"Bayer AG",,"0.0",,,,,
+100872,"QA","USA",30,2,"Yes",100105,"Bayer Healthcare LLC",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+100532,"SA","Finland",36,2,"Yes",100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,"0.0",,,,,
+100556,"SA","Germany",36,2,"Yes",100100,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100146,"EG","Germany",36,2,"Yes",100092,"Bayer AG",,"0.0","",,,,
+100203,"IQ","Finland",36,2,"No",100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,"0.0",,,,,
+100147,"EG","Germany",36,2,"Yes",100094,"Bayer AG",,"0.0","",,,,
+100812,"OM","Germany",60,0,"No",100130,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100813,"BH","Germany",60,0,"No",100130,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100814,"KW","Germany",60,2,"No",100130,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100815,"QA","Germany",60,0,"No",100130,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100533,"SA","Germany",48,0,"No",100069,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100816,"SA","Germany",48,2,"Yes",100123,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100847,"BH","Germany",48,0,"No",100066,"Bayer AG",,"0.0",,,,,
+100381,"OM","Germany",36,0,"No",100006,"Bayer AG",,"0.0",,,,,
+100091,"BH","Germany",36,0,"No",100065,"Bayer AG",,"0.0",,,,,
+100115,"EG","Finland",36,0,"Yes",100024,"Bayer Oy Turku",,"0.0","",,,,
+100669,"GC","",0,0,"Yes",100084,"",,"0.0",,,,,
+100670,"GC","",0,0,"Yes",100085,"",,"0.0",,,,,
+100671,"GC","",0,0,"Yes",100086,"",,"0.0",,,,,
+100672,"GC","",0,0,"Yes",100087,"",,"0.0",,,,,
+100673,"GC","",0,0,"Yes",100088,"",,"0.0",,,,,
+100209,"IQ","Spain",36,2,"Yes",100090,"BerliMed S.A.",,"0.0",,,,,
+100675,"GC","",0,0,"Yes",100091,"",,"0.0",,,,,
+100676,"GC","",0,0,"Yes",100092,"",,"0.0",,,,,
+100677,"GC","",0,0,"Yes",100093,"",,"0.0",,,,,
+100678,"GC","",0,0,"No",100094,"",,"0.0",,,,,
+100679,"GC","",0,0,"Yes",100095,"",,"0.0",,,,,
+100680,"GC","",0,0,"Yes",100096,"",,"0.0",,,,,
+100681,"GC","",0,0,"Yes",100097,"",,"0.0",,,,,
+100682,"GC","",0,0,"Yes",100098,"",,"0.0",,,,,
+100683,"GC","",0,0,"Yes",100099,"",,"0.0",,,,,
+100684,"GC","",0,0,"Yes",100100,"",,"0.0",,,,,
+100693,"JO","",0,2,"Yes",100018,"",,"0.0",,,,,
+100694,"JO","",0,2,"Yes",100109,"",,"0.0",,,,,
+100702,"AL","",0,2,"Yes",100020,"","B/15","0.0",,,,,
+100703,"AL","",0,2,"Yes",100091,"","B/2*14","0.0",,,,,
+100704,"AL","",0,2,"Yes",100065,"","B/1flacon","0.0",,,,,
+100705,"AL","",0,2,"Yes",100090,"","B/30 AMP","0.0",,,,,
+100706,"AL","",0,2,"Yes",100085,"","B/10","0.0",,,,,
+100707,"AL","",0,2,"Yes",100087,"","B/10","0.0",,,,,
+100708,"AL","",0,2,"Yes",100039,"","B/1","0.0",,,,,
+100709,"AL","",0,2,"Yes",100040,"","B/1","0.0",,,,,
+100710,"AL","",0,2,"Yes",100064,"","B/60 COMP","0.0",,,,,
+100711,"AL","",0,2,"Yes",100081,"","B/3*28","0.0",,,,,
+100712,"AL","",0,2,"Yes",100045,"","B/1","0.0",,,,,
+100713,"AL","",0,2,"Yes",100046,"","B/1","0.0",,,,,
+100714,"AL","",0,2,"Yes",100047,"","B/1","0.0",,,,,
+100715,"AL","",0,2,"Yes",100036,"","B/1","0.0",,,,,
+100716,"AL","",0,2,"Yes",100094,"","B/42","0.0",,,,,
+100717,"AL","",0,2,"Yes",100095,"","B/28","0.0",,,,,
+100718,"AL","",0,2,"Yes",100092,"","B/100","0.0",,,,,
+100719,"AL","",0,2,"Yes",100055,"","B/1","0.0",,,,,
+100720,"TN","",0,2,"Yes",100046,"","box of one pre-filled syringe and powder + one set of administration devices","0.0",,,,,
+100721,"TN","",0,2,"Yes",100047,"","box of one pre-filled syringe and powder + one set of administration devices","0.0",,,,,
+100722,"TN","",0,2,"Yes",100045,"","box of one pre-filled syringe and powder + one set of administration devices","0.0",,,,,
+100723,"MO","",0,2,"Yes",100109,"",,"0.0",,,,,
+100724,"MO","",0,2,"Yes",100110,"",,"0.0",,,,,
+100725,"MO","",0,2,"Yes",100018,"",,"0.0",,,,,
+100726,"MO","",0,2,"Yes",100045,"",,"0.0",,,,,
+100727,"MO","",0,2,"Yes",100047,"",,"0.0",,,,,
+100728,"MO","",0,2,"Yes",100046,"",,"0.0",,,,,
+100729,"MO","",0,2,"Yes",100058,"",,"0.0",,,,,
+100730,"MO","",0,2,"Yes",100111,"",,"0.0",,,,,
+100731,"MO","",0,2,"Yes",100112,"",,"0.0",,,,,
+100732,"MO","",0,2,"Yes",100113,"",,"0.0",,,,,
+100733,"MO","",0,2,"Yes",100114,"",,"0.0",,,,,
+100734,"MO","",0,2,"Yes",100115,"",,"0.0",,,,,
+100735,"MO","",0,2,"Yes",100039,"",,"0.0",,,,,
+100736,"MO","",0,2,"Yes",100020,"",,"0.0",,,,,
+100737,"MO","",0,2,"Yes",100013,"",,"0.0",,,,,
+100738,"MO","",0,2,"Yes",100064,"",,"0.0",,,,,
+100739,"MO","",0,2,"Yes",100040,"",,"0.0",,,,,
+100740,"MO","",0,2,"Yes",100041,"",,"0.0",,,,,
+100741,"MO","",0,2,"Yes",100017,"",,"0.0",,,,,
+100742,"MO","",0,2,"Yes",100092,"",,"0.0",,,,,
+100743,"MO","",0,1,"Yes",100116,"",,"0.0",,,,,
+100744,"MO","",0,2,"Yes",100095,"",,"0.0",,,,,
+100745,"MO","",0,2,"Yes",100036,"",,"0.0",,,,,
+100746,"MO","",0,2,"Yes",100119,"",,"0.0",,,,,
+100791,"SA","Germany",36,0,"Yes",100124,"Bayer AG",,"0.0",,,,,
+100110,"EG","",0,0,"Yes",100042,"",,"0.0","",,,,
+100148,"EG","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0","",,,,
+100833,"JO","Germany",36,2,"Yes",100048,"Bayer AG",,"0.0",,,,,
+100834,"KW","Germany",36,2,"No",100044,"Bayer AG",,"0.0",,,,,
+200208,"KW","Germany",30,2,"Yes",100105,"Bulk Manufacturer: Bayer Healthcare LLC; Final Release: Bayer AG",,"0.0","For shipping purposes, kindly ensure that the ordered quantities are in multiples of 20",,,,
+200210,"KW","Germany",24,0,"Yes",100127,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+100837,"SY","Germany",60,2,"Yes",100054,"Bayer AG",,"0.0",,,,,
+100838,"LB","USA",30,2,"No",100045,"Bayer Healthcare LLC",,"0.0",,,,,
+100839,"LB","USA",30,2,"No",100046,"Bayer Healthcare LLC",,"0.0",,,,,
+200211,"KW","Germany",24,0,"Yes",100128,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+100841,"SY","Germany",36,2,"No",100085,"Bayer AG",,"0.0",,,,,
+100842,"SY","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100843,"SY","Germany",36,2,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100844,"SY","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0",,,,,
+100845,"SY","Germany",36,2,"Yes",100094,"Bayer AG",,"0.0",,,,,
+100846,"SY","Germany",36,2,"Yes",100095,"Bayer AG",,"0.0",,,,,
+100120,"EG","",0,2,"Yes",100032,"",,"0.0","",,,,
+100848,"JO","Germany",60,2,"Yes",100076,"Bayer AG",,"0.0",,,,,
+100849,"LB","Germany",60,2,"Yes",100054,"Bayer AG",,"0.0",,,,,
+100850,"KW","Germany",36,2,"Yes",100084,"Bayer AG",,"0.0",,,,,
+100851,"KW","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100852,"KW","Germany",36,2,"Yes",100086,"Bayer AG",,"0.0",,,,,
+100853,"SA","Germany",36,2,"Yes",100048,"Bayer AG",,"0.0",,,,,
+100149,"EG","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0","",,,,
+100856,"LB","Germany",36,2,"Yes",100074,"Bayer AG",,"0.0",,,,,
+100857,"BH","Germany",36,2,"No",100094,"Bayer AG",,"0.0",,,,,
+100150,"EG","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0","",,,,
+100859,"LB","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100860,"OM","Germany",36,2,"No",100094,"Bayer AG",,"0.0",,,,,
+100861,"QA","Germany",36,2,"Yes",100085,"Bayer AG",,"0.0",,,,,
+100862,"QA","Germany",36,2,"Yes",100087,"Bayer AG",,"0.0",,,,,
+100863,"QA","Germany",36,2,"No",100094,"Bayer AG",,"0.0",,,,,
+100864,"SA","Germany",36,2,"No",100098,"Bulk Production: Bayer Weimar GmbH und Co KG;  Final Release: Bayer AG",,"0.0",,,,,
+100865,"SY","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG;  Final Release: Bayer AG",,"0.0",,,,,
+100866,"AE","USA",24,2,"Yes",100127,"Bayer Healthcare LLC",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+100136,"EG","Finland",36,2,"Yes",100068,"Manufacturer Bayer OY / Finland Legal Manufacturer Bayer AG, Leverkusen / Germany",,"0.0","",,,,
+100867,"AE","USA",24,2,"Yes",100128,"Bayer Healthcare LLC",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+100806,"EG","Germany",24,0,"Yes",100127,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+100870,"KW","Germany",36,2,"Yes",100125,"Bayer AG",,"0.0",,,,,
+100808,"SA","USA",24,2,"Yes",100127,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+100809,"SA","USA",24,2,"Yes",100128,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+100817,"EG","Spain",48,2,"Yes",100131,"BerliMed S.A.",,"0.0","",,,,
+100858,"EG","Germany",36,2,"Yes",100093,"Bayer AG",,"0.0","",,,,
+100807,"EG","Germany",24,0,"Yes",100128,"Bayer Health Care  LLC , Berkeley – USA / Batch releaser : Bayer AG , Leverkusen- Germany",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+100876,"JO","Germany",60,2,"Yes",100063,"Bayer AG",,"0.0",,,,,
+100877,"LB","Germany",60,2,"Yes",100063,"Bayer AG",,"0.0",,,,,
+100513,"SA","Germany",24,2,"Yes",100038,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany, Final Release Bayer AG",,"0.0",,,,,
+100565,"SY","Germany",60,2,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100567,"SY","Germany",60,2,"Yes",100058,"Bayer AG",,"0.0",,,,,
+100568,"SY","Finland",36,2,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+100571,"SY","Germany",60,2,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100575,"SY","Germany",36,2,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100266,"KW","Germany",60,2,"Yes",100031,"Bayer AG",,"0.0",,,,,
+200212,"CL","Alemania",36,2,"Yes",200204,"Bayer Pharma AG, Berlin","","0.0","","",,,0
+100489,"SA","Germany",48,2,"No",100014,"Bayer AG",,"0.0",,,,,
+100873,"EG","Germany",36,2,"Yes",100125,"Bayer AG",,"0.0","",,,,
+200213,"CL","Alemania",36,2,"Yes",200205,"Bayer Pharma AG, Berlin","","0.0","","",,,0
+100214,"JO","Germany",48,2,"Yes",100001,"Bayer AG",,"0.0",,,,,
+100215,"JO","Germany",48,2,"No",100003,"Bayer AG",,"0.0",,,,,
+100235,"JO","Germany",48,2,"Yes",100066,"Bayer AG",,"0.0",,,,,
+100251,"JO","Germany",36,2,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+100874,"EG","Germany",60,2,"Yes",100122,"Bayer Weimar GmbH und Co. KG",,"0.0","",,,,
+100879,"SA","Germany",36,0,"No",100119,"Bayer AG",,"1.0",,,,,
+100880,"JO","Germany",60,2,"Yes",100132,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100881,"LB","Germany",60,2,"Yes",100132,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100882,"OM","Germany",36,2,"Yes",100074,"Bayer AG",,"0.0",,,,,
+200214,"CL","Alemania",36,2,"Yes",200206,"Bayer Pharma AG, Berlin","","0.0","","",,,0
+100884,"YE","Germany",60,0,"Yes",100123,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100885,"JO","Germany",60,0,"Yes",100123,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+100886,"TH","DE",1460,2,"Yes",100133,"Bayer AG",,"0.07000000029802322",,,,,
+100887,"TH","DE",1460,2,"Yes",100134,"Bayer AG",,"0.07000000029802322",,,,,
+100888,"TH","DE",1460,2,"Yes",100135,"Bayer AG",,"0.07000000029802322",,,,,
+101061,"TH","Germany",60,1,"Yes",100212,"Bayer Weimar GmbH und Co. KG",,"0.07000000029802322",,,,,
+101062,"TH","Germany",36,1,"Yes",100213,"Bayer AG",,"0.07000000029802322",,,,,
+100891,"TH","FR",1095,2,"Yes",100138,"Delpharm Lille S.A.S.",,"0.07000000029802322",,,,,
+100892,"TH","DE",1095,2,"Yes",100139,"Bayer Weimar GmbH",,"0.07000000029802322",,,,,
+100893,"TH","DE",1825,2,"Yes",100140,"Bayer AG",,"0.07000000029802322",,,,,
+100894,"TH","DE",1825,2,"Yes",100141,"Bayer AG",,"0.07000000029802322",,,,,
+100895,"TH","DE",730,2,"Yes",100142,"Boehringer Ingelheim Pharma GmbH",,"0.07000000029802322",,,,,
+101063,"TH","Germany",36,1,"Yes",100214,"Bayer AG",,"0.07000000029802322",,,,,
+100897,"TH","DE",1460,2,"Yes",100144,"Bayer AG",,"0.07000000029802322",,,,,
+100898,"TH","DE",1460,2,"Yes",100145,"Bayer AG",,"0.07000000029802322",,,,,
+101064,"TH","Norway",1,1,"Yes",100215,"Institute for Energy Technology (IFE)",,"0.07000000029802322",,,,,
+100900,"TH","DE",1825,2,"Yes",100147,"Bayer AG",,"0.07000000029802322",,,,,
+100901,"TH","US",1095,2,"Yes",100148,"3 M drug delivery systems (repack by Bayer Weimar GmbH)",,"0.07000000029802322",,,,,
+101065,"TH","Germany",48,1,"Yes",100216,"Bayer AG",,"0.07000000029802322",,,,,
+100904,"TH","DE",1825,2,"Yes",100151,"Schering AG",,"0.07000000029802322",,,,,
+100907,"TH","BR",1095,2,"Yes",100154,"Schering DO Brasil Quimica E Farmaceutica Ltda.",,"0.07000000029802322",,,,,
+100908,"TH","DE",730,2,"Yes",100155,"Bayer AG",,"0.07000000029802322",,,,,
+100909,"TH","DE",1095,2,"Yes",100156,"Bayer AG",,"0.07000000029802322",,,,,
+100911,"TH","DE",1095,2,"Yes",100158,"Bayer AG",,"0.07000000029802322",,,,,
+100913,"TH","ES",1460,2,"Yes",100160,"Berlimed S.A.",,"0.07000000029802322",,,,,
+100914,"TH","FI",1825,2,"Yes",100161,"Bayer OY",,"0.07000000029802322",,,,,
+100917,"TH","DE",1095,2,"Yes",100164,"Bayer AG",,"0.07000000029802322",,,,,
+100918,"TH","FR",1095,2,"Yes",100165,"Delpharm Lille S.A.S.",,"0.07000000029802322",,,,,
+100919,"TH","FR",1095,2,"Yes",100166,"Delpharm Lille S.A.S. (repack by Bayer AG)",,"0.07000000029802322",,,,,
+100920,"TH","BR",730,2,"Yes",100167,"Schering DO Brasil Quimica E Farmaceutica Ltda.",,"0.07000000029802322",,,,,
+100921,"TH","FI",1095,2,"Yes",100168,"Bayer OY",,"0.07000000029802322",,,,,
+100923,"TH","IT",1095,2,"Yes",100170,"Patheon Italia S.p.A (Packed by Bayer Pharma AG, Berlin, Germany).",,"0.07000000029802322",,,,,
+100925,"TH","DE",0,2,"Yes",100172,"Berlimed S.A.",,"0.07000000029802322",,,,,
+100926,"TH","DE",1095,2,"Yes",100173,"Bayer AG",,"0.07000000029802322",,,,,
+100927,"TH","DE",0,2,"Yes",100174,"Berlimed S.A.",,"0.07000000029802322",,,,,
+100930,"TH","FR",730,2,"Yes",100177,"Delpharm Lille S.A.S.",,"0.07000000029802322",,,,,
+100931,"TH","FR",730,2,"Yes",100178,"Delpharm Lille S.A.S.",,"0.07000000029802322",,,,,
+100932,"TH","DE",1825,2,"Yes",100179,"Bayer AG",,"0.07000000029802322",,,,,
+100933,"TH","BR",1825,2,"Yes",100180,"Schering DO Brasil Quimica E Farmaceutica Ltda.",,"0.07000000029802322",,,,,
+100935,"TH","DE",1095,2,"Yes",100182,"Bayer AG",,"0.07000000029802322",,,,,
+100936,"TH","DE",0,2,"Yes",100183,"Berlimed S.A.",,"0.07000000029802322",,,,,
+100937,"TH","DE",1825,2,"Yes",100184,"Bayer AG",,"0.07000000029802322",,,,,
+100939,"TH","ES",730,2,"Yes",100186,"Berlimed S.A.",,"0.07000000029802322",,,,,
+100941,"TH","DE",1095,2,"Yes",100188,"Bayer Weimar GmbH",,"0.07000000029802322",,,,,
+100942,"TH","DE",1095,2,"Yes",100189,"Bayer AG",,"0.07000000029802322",,,,,
+100943,"TH","DE",1095,2,"Yes",100190,"Bayer AG",,"0.07000000029802322",,,,,
+100945,"TH","DE",1095,2,"Yes",100192,"Bayer AG",,"0.07000000029802322",,,,,
+100946,"TH","DE",1095,2,"Yes",100193,"Bayer AG",,"0.07000000029802322",,,,,
+100947,"TH","DE",1095,2,"Yes",100194,"Bayer AG",,"0.07000000029802322",,,,,
+100949,"TH","DE",1095,2,"Yes",100196,"Bayer AG",,"0.07000000029802322",,,,,
+100950,"TH","DE",1095,2,"Yes",100197,"Bayer Weimar GmbH",,"0.07000000029802322",,,,,
+100951,"TH","DE",1095,2,"Yes",100198,"Bayer AG",,"0.07000000029802322",,,,,
+100952,"TH","DE",1095,2,"Yes",100199,"Bayer AG",,"0.07000000029802322",,,,,
+100956,"TH","0",1825,2,"Yes",100203,"0",,"0.07000000029802322",,,,,
+100957,"TH","DE",1095,2,"Yes",100204,"Bayer AG",,"0.07000000029802322",,,,,
+100958,"TH","DE",1095,2,"Yes",100205,"Bayer AG",,"0.07000000029802322",,,,,
+100959,"TH","DE",1095,2,"Yes",100206,"Bayer AG",,"0.07000000029802322",,,,,
+100960,"TH","DE",1095,2,"Yes",100207,"Bayer AG",,"0.07000000029802322",,,,,
+100961,"TH","DE",1095,2,"Yes",100208,"Bayer AG",,"0.07000000029802322",,,,,
+100962,"TH","DE",1095,2,"Yes",100209,"Bayer AG",,"0.07000000029802322",,,,,
+100963,"TH","DE",1095,2,"Yes",100210,"Bayer AG",,"0.07000000029802322",,,,,
+100964,"TH","DE",1095,2,"Yes",100211,"Bayer AG",,"0.07000000029802322",,,,,
+200069,"AR","TBD",1,2,"Yes",200069,"TBD","","0.0","","",,,0
+200070,"AR","TBD",1,2,"Yes",200070,"TBD","","0.0","","",,,0
+200071,"AR","TBD",1,2,"Yes",200071,"TBD","","0.0","","",,,0
+200072,"AR","TBD",1,2,"Yes",200072,"TBD","","0.0","","",,,0
+200073,"AR","Alemania",36,2,"Yes",200073,"Leverkusen","","0.0","","",,,0
+200074,"AR","Alemania",36,2,"Yes",200074,"Leverkusen","","0.0","","",,,0
+200075,"AR","TBD",1,2,"Yes",200075,"TBD","","0.0","","",,,0
+200076,"AR","TBD",1,2,"Yes",200076,"TBD","","0.0","","",,,0
+200077,"AR","Alemania",36,2,"Yes",200077,"Leverkusen","","0.0","","",,,0
+200078,"AR","TBD",1,2,"Yes",200078,"TBD","","0.0","","",,,0
+200079,"AR","Alemania",36,2,"Yes",200079,"Leverkusen","","0.0","","",,,0
+200080,"AR","TBD",1,2,"Yes",200080,"TBD","","0.0","","",,,0
+200081,"AR","TBD",1,2,"Yes",200081,"TBD","","0.0","","",,,0
+200082,"AR","Argentina",60,2,"Yes",200082,"Argentina","","0.0","","",,,0
+200083,"AR","Argentina",24,2,"Yes",200083,"Argentina","","0.0","","",,,0
+200084,"AR","Argentina",24,2,"Yes",200084,"Argentina","","0.0","","",,,0
+200085,"AR","TBD",1,2,"Yes",200085,"TBD","","0.0","","",,,0
+200086,"AR","Argentina",24,2,"Yes",200086,"Argentina","","0.0","","",,,0
+200087,"AR","TBD",1,2,"Yes",200087,"TBD","","0.0","","",,,0
+200088,"AR","Alemania",60,2,"Yes",200088,"Leverkusen","","0.0","","",,,0
+200089,"AR","Alemania",24,2,"Yes",200089,"Berlin","","0.0","","",,,0
+200090,"AR","TBD",1,2,"Yes",200090,"TBD","","0.0","","",,,0
+200094,"AR","Brasil",60,2,"Yes",200094,"Sao Paulo","","0.0","","",,,0
+200092,"AR","TBD",1,2,"Yes",200092,"TBD","","0.0","","",,,0
+200093,"AR","TBD",1,2,"Yes",200093,"TBD","","0.0","","",,,0
+200095,"AR","Argentina",60,2,"Yes",200095,"Argentina","","0.0","","",,,0
+200096,"AR","USA",24,2,"Yes",200096,"Berlin","","0.0","","",,,0
+200101,"AR","Finlandia",36,2,"Yes",200101,"Turku","","0.0","","",,,0
+200097,"AR","TBD",1,2,"Yes",200097,"TBD","","0.0","","",,,0
+200098,"AR","TBD",1,2,"Yes",200098,"TBD","","0.0","","",,,0
+200099,"AR","TBD",1,2,"Yes",200099,"TBD","","0.0","","",,,0
+200100,"AR","TBD",1,2,"Yes",200100,"TBD","","0.0","","",,,0
+200103,"AR","USA",30,2,"Yes",200103,"Berkeley","","0.0","","",,,0
+200102,"AR","TBD",1,2,"Yes",200102,"TBD","","0.0","","",,,0
+200105,"AR","USA",30,2,"Yes",200105,"Berkeley","","0.0","","",,,0
+200104,"AR","TBD",1,2,"Yes",200104,"TBD","","0.0","","",,,0
+200106,"AR","Finlandia",36,2,"Yes",200106,"Turku","","0.0","","",,,0
+200107,"AR","Argentina",48,2,"Yes",200107,"Argentina","","0.0","","",,,0
+200108,"AR","Argentina",24,2,"Yes",200108,"Argentina","","0.0","","",,,0
+200109,"AR","Argentina",36,2,"Yes",200109,"Argentina","","0.0","","",,,0
+200110,"AR","Mexico",36,2,"Yes",200110,"Argentina","","0.0","","",,,0
+200112,"AR","Argentina",36,2,"Yes",200112,"Argentina","","0.0","","",,,0
+200113,"AR","Argentina",36,2,"Yes",200113,"Argentina","","0.0","","",,,0
+200114,"AR","Brasil",12,2,"Yes",200114,"Sao Paulo","","0.0","","",,,0
+200116,"AR","Argentina",36,2,"Yes",200116,"Argentina","","0.0","","",,,0
+200118,"AR","Finlandia",36,2,"Yes",200118,"Turku","","0.0","","",,,0
+200115,"AR","TBD",1,2,"Yes",200115,"TBD","","0.0","","",,,0
+200119,"AR","Finlandia",36,2,"Yes",200119,"Argentina","","0.0","","",,,0
+200117,"AR","TBD",1,2,"Yes",200117,"TBD","","0.0","","",,,0
+200121,"AR","Alemania",60,2,"Yes",200121,"Argentina","","0.0","","",,,0
+200123,"AR","Alemania",36,2,"Yes",200123,"Leverkusen","","0.0","","",,,0
+200120,"AR","TBD",1,2,"Yes",200120,"TBD","","0.0","","",,,0
+200126,"AR","Brasil",60,2,"Yes",200126,"Sao Paulo","","0.0","","",,,0
+200122,"AR","TBD",1,2,"Yes",200122,"TBD","","0.0","","",,,0
+200130,"AR","Brasil",24,2,"Yes",200130,"Sao Paulo","","0.0","","",,,0
+200124,"AR","TBD",1,2,"Yes",200124,"TBD","","0.0","","",,,0
+200125,"AR","TBD",1,2,"Yes",200125,"TBD","","0.0","","",,,0
+200132,"AR","Argentina",60,2,"Yes",200132,"Argentina","","0.0","","",,,0
+200127,"AR","TBD",1,2,"Yes",200127,"TBD","","0.0","","",,,0
+200128,"AR","TBD",1,2,"Yes",200128,"TBD","","0.0","","",,,0
+200129,"AR","TBD",1,2,"Yes",200129,"TBD","","0.0","","",,,0
+200133,"AR","Alemania",36,2,"Yes",200133,"Leverkusen","","0.0","","",,,0
+200131,"AR","TBD",1,2,"Yes",200131,"TBD","","0.0","","",,,0
+200134,"AR","Mexico",60,2,"Yes",200134,"Orizaba","","0.0","","",,,0
+200135,"AR","Brasil",60,2,"Yes",200135,"Sao Paulo","","0.0","","",,,0
+200137,"AR","España",48,2,"Yes",200137,"Alcalá","","0.0","","",,,0
+200138,"AR","España",60,2,"Yes",200138,"Alcalá","","0.0","","",,,0
+101013,"BR","Germany",36,0,"Yes",100126,"Orion Corporation ,  Orion Pharma – Finland ",,"0.0",,,,,
+101014,"BR","Germany",60,1,"Yes",100101,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+101015,"BR","Germany",48,1,"Yes",100001,"Bayer AG",,"0.0",,,,,
+101016,"BR","Germany",48,1,"Yes",100003,"Bayer AG",,"0.0",,,,,
+101017,"BR","Germany",36,1,"Yes",100007,"Bayer AG",,"0.0",,,,,
+101018,"BR","Germany",36,1,"Yes",100008,"Bayer AG",,"0.0",,,,,
+101019,"BR","Germany",36,1,"Yes",100009,"Bayer AG",,"0.0",,,,,
+101020,"BR","Germany",36,1,"Yes",100010,"Bayer AG",,"0.0",,,,,
+101021,"BR","Germany",36,1,"Yes",100011,"Bayer AG",,"0.0",,,,,
+101022,"BR","Germany",60,1,"Yes",100012,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+101023,"BR","Germany",36,1,"Yes",100016,"Bayer AG",,"0.0",,,,,
+101024,"BR","Germany",36,1,"Yes",100017,"Bayer AG",,"0.0",,,,,
+101025,"BR","Germany",36,1,"Yes",100018,"Bayer AG",,"0.0",,,,,
+101026,"BR","Germany",24,1,"Yes",100020,"Bulk Manufactured by: Boehringer Ingelheim Pharma GmbH and Co. KG , Germany Final release by: Bayer AG Berlin Germany",,"0.0",,,,,
+101027,"BR","Germany",36,0,"Yes",100027,"Bayer AG",,"0.0",,,,,
+101028,"BR","Germany",36,1,"Yes",100028,"Bayer AG",,"0.0",,,,,
+101029,"BR","Germany",60,1,"Yes",100029,"Bayer AG",,"0.0",,,,,
+101030,"BR","Germany",60,1,"Yes",100031,"Bayer AG",,"0.0",,,,,
+101031,"BR","France",60,1,"No",100033,"Delpharm Lille SAS",,"0.0",,,,,
+101032,"BR","Germany",60,1,"Yes",100034,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+101033,"BR","Germany",60,1,"Yes",100035,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+101034,"BR","USA",24,1,"Yes",100036,"Bulk Production: Regeneron Pharmaceuticals INC, USA, Final Release Bayer AG, Germany",,"0.0",,,,,
+101035,"BR","Germany",36,1,"Yes",100039,"Bayer AG",,"0.0",,,,,
+101036,"BR","Germany",36,1,"Yes",100043,"Bayer AG",,"0.0",,,,,
+101037,"BR","Germany",36,1,"Yes",100044,"Bayer AG",,"0.0",,,,,
+101038,"BR","USA",30,1,"Yes",100047,"Bayer Healthcare LLC, Berkeley",,"0.0",,,,,
+101039,"BR","Germany",36,1,"Yes",100051,"Bayer AG",,"0.0",,,,,
+101040,"BR","Germany",36,1,"Yes",100050,"Bayer AG",,"0.0",,,,,
+101041,"BR","Germany",60,0,"Yes",100057,"Bayer AG",,"0.0",,,,,
+101042,"BR","Germany",60,1,"Yes",100058,"Bayer AG",,"0.0",,,,,
+101043,"BR","Finland",36,1,"Yes",100061,"Bayer Oy Turku",,"0.0",,,,,
+101044,"BR","Germany",36,1,"Yes",100064,"Bayer AG",,"0.0",,,,,
+101045,"BR","Germany",48,1,"Yes",100066,"Bayer AG",,"0.0",,,,,
+101046,"BR","Germany",60,0,"Yes",100072,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+101047,"BR","Germany",60,1,"Yes",100076,"Bayer AG",,"0.0",,,,,
+101048,"BR","Germany",60,1,"Yes",100077,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+101049,"BR","Germany",36,1,"Yes",100081,"Bayer AG",,"0.0",,,,,
+101050,"BR","Germany",60,1,"Yes",100082,"Bayer AG",,"0.0",,,,,
+101051,"BR","Germany",36,1,"Yes",100085,"Bayer AG",,"0.0",,,,,
+101052,"BR","Germany",36,0,"Yes",100086,"Bayer AG",,"0.0",,,,,
+101053,"BR","Germany",36,1,"Yes",100091,"Bayer Weimar GmbH und Co. KG",,"0.0",,,,,
+101054,"BR","Germany",36,1,"Yes",100092,"Bayer AG",,"0.0",,,,,
+101055,"BR","Germany",36,1,"Yes",100093,"Bayer AG",,"0.0",,,,,
+101056,"BR","Germany",36,1,"Yes",100094,"Bayer AG",,"0.0",,,,,
+101057,"BR","Germany",36,1,"Yes",100095,"Bayer AG",,"0.0",,,,,
+101058,"BR","Germany",36,1,"Yes",100097,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+101059,"BR","Germany",36,1,"Yes",100098,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany;  Final Release: Bayer AG",,"0.0",,,,,
+101060,"BR","Germany",36,1,"Yes",100125,"Bayer AG",,"0.0",,,,,
+200136,"AR","TBD",1,2,"Yes",200136,"TBD","","0.0","","",,,0
+200140,"AR","Alemania",36,2,"Yes",200140,"Leverkusen","","0.0","","",,,0
+200142,"AR","Alemania",36,2,"Yes",200142,"Leverkusen","","0.0","","",,,0
+200139,"AR","TBD",1,2,"Yes",200139,"TBD","","0.0","","",,,0
+200143,"AR","Alemania",36,2,"Yes",200143,"Leverkusen","","0.0","","",,,0
+200141,"AR","TBD",1,2,"Yes",200141,"TBD","","0.0","","",,,0
+200145,"AR","Alemania",36,2,"Yes",200145,"Leverkusen","","0.0","","",,,0
+200146,"AR","Argentina",36,2,"Yes",200146,"Argentina","","0.0","","",,,0
+200144,"AR","TBD",1,2,"Yes",200144,"TBD","","0.0","","",,,0
+200148,"AR","Argentina",60,2,"Yes",200148,"Argentina","","0.0","","",,,0
+200150,"AR","Argentina",60,2,"Yes",200150,"Argentina","","0.0","","",,,0
+200147,"AR","TBD",1,2,"Yes",200147,"TBD","","0.0","","",,,0
+200192,"AR","Alemania",60,2,"Yes",200187,"Leverkusen","","0.0","","",,,0
+200149,"AR","TBD",1,2,"Yes",200149,"TBD","","0.0","","",,,0
+200193,"AR","Alemania",24,2,"Yes",200188,"Berlin","","0.0","","",,,0
+200151,"EG","Germany",60,1,"Yes",100016,"Bayer AG","","0.0","","",,,0
+200152,"EG","Germany",60,1,"Yes",100119,"Bayer AG","","0.0","","",,,0
+200156,"CL","Germany",24,0,"Yes",200154,"Bayer AG, Berlin","Vials","0.0","","",,,0
+200215,"CL","Alemania",36,2,"Yes",200207,"Bayer Pharma AG, Berlin","","0.0","","",,,0
+200216,"CL","Alemania",36,2,"Yes",200208,"Bayer AG, Berlin","","0.0","","",,,0
+200217,"CL","Alemania",60,2,"Yes",200209,"Bayer AG, Leverkusen","","0.0","","",,,0
+200160,"CL","Germany",60,0,"Yes",200158,"Bayer AG, Berlin","Vials","0.0","","",,,0
+200218,"CL","Brasil",36,2,"Yes",200210,"Schering do Brasil","","0.0","","",,,0
+200219,"CL","Brasil",36,2,"Yes",200211,"Schering do Brasil","","0.0","","",,,0
+200153,"CL","Alemania",36,0,"Yes",200151,"Bayer Pharma AG, Berlin","Tablets","0.0","","",,,0
+200154,"CL","Brasil",60,0,"Yes",200152,"Schering do Brasil","Tablets","0.0","","",,,0
+200155,"CL","Alemania",60,0,"Yes",200153,"Bayer AG, Leverkusen","Vials","0.0","","",,,0
+200157,"CL","Brasil",36,0,"Yes",200155,"Schering do Brasil","Sugar coated Tablets","0.0","","",,,0
+200158,"CL","Alemania",24,0,"Yes",200156,"Bayer Pharma AG, Berlin","Vials","0.0","","",,,0
+200159,"CL","Alemania",36,0,"Yes",200157,"Bayer AG, Berlin","PFS","0.0","","",,,0
+200161,"CL","Brasil",24,0,"Yes",200159,"Schering do Brasil","Sugar coated Tablets","0.0","","",,,0
+200162,"CL","Finlandia",36,0,"Yes",200160,"Bayer Oy, Turku","IUS","0.0","","",,,0
+200163,"CL","Alemania",60,0,"Yes",200161,"Bayer AG, Berlin","Vials","0.0","","",,,0
+200164,"CL","Alemania",36,0,"Yes",200162,"Bayer AG, Leverkusen","Tablets","0.0","","",,,0
+200165,"CL","Alemania",36,0,"Yes",200163,"Bayer AG, Leverkusen","Vials","0.0","","",,,0
+200166,"CL","Alemania",60,0,"Yes",200164,"Bayer AG, Berlin","Pre-Filled Syringes","0.0","","",,,0
+200167,"CL","Alemania",36,0,"Yes",200165,"Bayer AG, Leverkusen","Tablets","0.0","","",,,0
+200168,"CL","Alemania",36,0,"Yes",200166,"Bayer AG, Berlin","Bottles","0.0","","",,,0
+200169,"CL","Alemania",36,0,"Yes",200167,"Bayer AG, Berlin","Bottles","0.0","","",,,0
+200170,"CL","Alemania",36,0,"Yes",200168,"Bayer AG, Berlin","Bottles","0.0","","",,,0
+200171,"CL","Alemania",36,0,"Yes",200169,"Bayer AG, Berlin","Bottles","0.0","","",,,0
+200172,"CL","Alemania",36,0,"Yes",200170,"Bayer AG, Leverkusen","Tablets","0.0","","",,,0
+200173,"CL","Alemania",36,0,"Yes",200171,"Bayer AG, Leverkusen","Tablets","0.0","","",,,0
+200174,"CL","Alemania",36,0,"Yes",200172,"Bayer AG, Leverkusen","Tablets","0.0","","",,,0
+200175,"CL","Brasil",36,0,"Yes",200173,"Schering do Brasil","Tablets","0.0","","",,,0
+200176,"CL","Brasil",60,0,"Yes",200174,"Schering do Brasil","Tablets","0.0","","",,,0
+200177,"CL","Alemania",36,0,"Yes",200175,"Bayer AG, Berlin","Tablets","0.0","","",,,0
+200178,"CL","Alemania",36,0,"Yes",200176,"Bayer AG, Leverkusen","Tablets","0.0","","",,,0
+200187,"CL","El Salvador",60,0,"Yes",200185,"Corporación Bonima S.A. de CV - El Salvador","Tablets","0.0","","",,,0
+200179,"CL","México",48,0,"Yes",200177,"Bayer de México S.A. de CV, Veracruz, México","Pre-Filled Syringes","0.0","","",,,0
+200189,"GC","Germany",48,0,"Yes",100001,"Bayer AG","","0.0","","",,,0
+200190,"GC","Germany",48,0,"No",100003,"Bayer AG","","0.0","","",,,0
+200191,"KW","Germany",36,2,"Yes",100126,"Orion Corporation ,  Orion Pharma – Finland ","","0.0","","",,,0
+200091,"AR","Alemania",24,2,"Yes",200091,"Garbagnate","","0.0","","",,,0
+200194,"AR","Brasil",9,2,"Yes",200189,"Sao Paulo","","0.0","","",,,0
+200195,"AR","USA",30,2,"Yes",200190,"Berkeley","","0.0","","",,,0
+200196,"AR","Brasil",9,2,"Yes",200191,"Sao Paulo","","0.0","","",,,0
+200111,"AR","Mexico",36,2,"Yes",200111,"Orizaba","","0.0","","",,,0
+200197,"AR","Mexico",36,2,"Yes",200192,"Argentina","","0.0","","",,,0
+200198,"AR","Brasil",9,2,"Yes",200193,"Sao Paulo","","0.0","","",,,0
+200199,"AR","Finlandia",36,2,"Yes",200194,"Argentina","","0.0","","",,,0
+200200,"AR","Alemania",60,2,"Yes",200195,"Berlin","","0.0","","",,,0
+200201,"AR","Mexico",60,2,"Yes",200196,"Orizaba","","0.0","","",,,0
+200202,"AR","Argentina",60,2,"Yes",200197,"Argentina","","0.0","","",,,0
+200203,"AR","Mexico",60,2,"Yes",200198,"Orizaba","","0.0","","",,,0
+200204,"AR","Alemania",60,2,"Yes",200199,"Weimar","","0.0","","",,,0
+200205,"AR","Alemania",36,2,"Yes",200200,"Leverkusen","","0.0","","",,,0
+200206,"AR","Noruega",1,2,"Yes",200201,"TP INSTITUTT FOR ENE","","0.0","","",,,0
+200207,"AR","USA",30,2,"Yes",200202,"Berkeley","","0.0","","",,,0
+100875,"SA","USA",24,2,"Yes",100129,"Bayer Health Care  LLC , Berkeley – USA Batch releaser: Bayer AG, Leverkusen - Germany",,"0.0","The product will have a maximum remaining shelf life of 50% at the time of delivery",,,,
+200209,"MX","Germany",0,2,"Yes",200203,"",,"0.0",,,,,8000
+100088,"BH","Germany",60,2,"No",100058,"Bulk Production: Bayer Weimar GmbH und Co KG, Germany Final Release: Bayer AG",,"0.0",,,,,
+100253,"KW","Germany",48,2,"No",100003,"Bayer AG",,"0.0",,,,,
+200180,"CL","Brasil",24,0,"Yes",200178,"Schering do Brasil","Sugar coated Tablets","0.0","","",,,0
+200181,"CL","Finlandia",60,0,"Yes",200179,"Bayer Oy, Turku","Impl. Pouch","0.0","","",,,0
+200182,"CL","Finlandia",36,0,"Yes",200180,"Bayer Oy, Turku","IUS","0.0","","",,,0
+200183,"CL","España",24,0,"Yes",200181,"Berlimed S.A., España","Ampoule","0.0","","",,,0
+200184,"CL","España",60,0,"Yes",200182,"Berlimed S.A., España","Ampoule","0.0","","",,,0
+200185,"CL","Alemania",60,0,"Yes",200183,"Bayer AG, Leverkusen","Tablets","0.0","","",,,0
+200186,"CL","Alemania",60,0,"Yes",200184,"Bayer AG, Leverkusen","Tablets","0.0","","",,,0
+200188,"CL","Alemania",60,0,"Yes",200186,"Bayer Weimar GmbH & Co.","Tablets","0.0","","",,,0
+200220,"QA","Germany",60,0,"Yes",100122,"Bayer Weimar GmbH und Co. KG","","0.0","","",,,0
+200221,"CL","Alemania",36,2,"Yes",200212,"Bayer AG, Leverkusen","","0.0","","",,,0
+200222,"CL","Alemania",36,2,"Yes",200213,"Bayer AG, Leverkusen","","0.0","","",,,0
+200223,"CL","Alemania",36,2,"Yes",200214,"Bayer AG, Leverkusen","","0.0","","",,,0
+200224,"CL","Alemania",36,2,"Yes",200215,"Bayer AG, Leverkusen","","0.0","","",,,0
+200225,"IT","IT",0,2,"Yes",200216,"","","0.10000000149011612","","","027980022","C08CA05",0
+200226,"IT","IT",0,2,"Yes",200217,"","","0.10000000149011612","","","027980034","C08CA05",1
+200227,"IT","",0,2,"Yes",200218,"","","0.10000000149011612","","","027980010","C08CA05",2
+200229,"IT","IT",0,2,"Yes",200220,"","","0.10000000149011612","","","027980010","C08CA05",4
+200230,"IT","DE",0,2,"Yes",200221,"","","0.10000000149011612","","","023090044","G03HA01",5
+200232,"IT","DE",0,2,"Yes",200223,"","","0.10000000149011612","","","023090032","G03HA01",7
+200233,"IT","",0,2,"Yes",200224,"","","0.10000000149011612","","","023090057","G03HA01",8
+200234,"IT","",0,2,"Yes",200225,"","","0.10000000149011612","","","034921015","G03AA10",9
+200236,"IT","",0,2,"Yes",200227,"","","0.10000000149011612","","","034436016","J01MA14",11
+200237,"IT","",0,2,"Yes",200228,"","","0.10000000149011612","","","034436194","J01MA14",12
+200238,"IT","DE",0,2,"Yes",200229,"","","0.10000000149011612","","","036170013","G03FA49",13
+200239,"IT","",0,2,"Yes",200230,"","","0.10000000149011612","","","032166047/E","L03AB08",14
+200240,"IT","IT",0,2,"Yes",200231,"","","0.10000000149011612","","","024840074","B01AC06",15
+200241,"IT","DE",0,2,"Yes",200232,"","","0.10000000149011612","","","026664045","J01MA02",16
+200242,"IT","",0,2,"Yes",200233,"","","0.10000000149011612","","","026664019","J01MA02",17
+200243,"IT","",0,2,"Yes",200234,"","","0.10000000149011612","","","026664084","J01MA02",18
+200244,"IT","IT",0,2,"Yes",200235,"","","0.10000000149011612","","","026664021","J01MA02",19
+200245,"IT","",0,2,"Yes",200236,"","","0.10000000149011612","","","026664096","J01MA02",20
+200246,"IT","DE",0,2,"Yes",200237,"","","0.10000000149011612","","","026664146","J02MA02",21
+200247,"IT","",0,2,"Yes",200238,"","","0.10000000149011612","","","026664122","J01MA02",22
+200248,"IT","DE",0,2,"Yes",200239,"","","0.10000000149011612","","","030183038","G03CA03",23
+200250,"IT","FR",0,2,"Yes",200241,"","","0.10000000149011612","","","028033013","G03FB49",25
+200251,"IT","IT",0,2,"Yes",200242,"","","0.10000000149011612","","","08366015","P01BA01",26
+200252,"IT","DE",0,2,"Yes",200243,"","","0.10000000149011612","","","030183014","G03CA03",27
+200253,"IT","",0,2,"Yes",200244,"","","0.10000000149011612","","","023777030","G03HB01",28
+200254,"IT","DE",0,2,"Yes",200245,"","","0.10000000149011612","","","023647011","G03AA07",29
+200256,"IT","",0,2,"Yes",200247,"","","0.10000000149011612","","","042510014/E","S01LA05",31
+200257,"IT","",0,2,"Yes",200248,"","","0.10000000149011612","","","042510026/E","S01LA05",32
+200258,"IT","",0,2,"Yes",200249,"","","0.10000000149011612","","","029551013","G03AA10",33
+200260,"IT","IT",0,2,"Yes",200251,"","","0.10000000149011612","","","026851016","A10BF01",35
+200261,"IT","IT",0,2,"Yes",200252,"","","0.10000000149011612","","","026851028","A10BF01",36
+200262,"IT","DE",0,2,"Yes",200253,"","","0.10000000149011612","","","026435038","G03AA10",37
+200263,"IT","",0,2,"Yes",200254,"","","0.10000000149011612","","","042522019","G02BA03",38
+200264,"IT","",0,2,"Yes",200255,"","","0.10000000149011612","","","047418037","B02BD02",39
+200265,"IT","",0,2,"Yes",200256,"","","0.10000000149011612","","","047418049","B02BD02",40
+200266,"IT","",0,2,"Yes",200257,"","","0.10000000149011612","","","047418052","B02BD02",41
+200267,"IT","",0,2,"Yes",200258,"","","0.10000000149011612","","","047418025","B02BD02",42
+200268,"IT","DE",0,2,"Yes",200259,"","","0.10000000149011612","","","038900015","G03AB08",43
+200269,"IT","",0,2,"Yes",200260,"","","0.10000000149011612","","","044726065/E","B02BD02",44
+200270,"IT","",0,2,"Yes",200261,"","","0.10000000149011612","","","044726089/E","B02BD02",45
+200271,"IT","",0,2,"Yes",200262,"","","0.10000000149011612","","","044726026/E","B02BD02",46
+200272,"IT","",0,2,"Yes",200263,"","","0.10000000149011612","","","044726103/E","B02BD02",47
+200273,"IT","",0,2,"Yes",200264,"","","0.10000000149011612","","","044726040/E","B02BD02",48
+200274,"IT","",0,2,"Yes",200265,"","","0.10000000149011612","","","044756017","G02BA03",49
+200275,"IT","",0,2,"Yes",200266,"","","0.10000000149011612","","","044756029","G03BA03",50
+200276,"IT","",0,2,"Yes",200267,"","","0.10000000149011612","","","035734122/E","G04BE09",51
+200277,"IT","",0,2,"Yes",200268,"","","0.10000000149011612","","","035734161/E","G04BE09",52
+200278,"IT","DE",0,2,"Yes",200269,"","","0.10000000149011612","","","035734060/E","G04BE09",53
+200279,"IT","DE",0,2,"Yes",200270,"","","0.10000000149011612","","","035734108/E","G04BE09",54
+200280,"IT","DE",0,2,"Yes",200271,"","","0.10000000149011612","","","035734021/E","G04BE09",55
+200281,"IT","",0,2,"Yes",200272,"","","0.10000000149011612","","","038900015","G03AA07",56
+200282,"IT","",0,2,"Yes",200273,"","","0.10000000149011612","","","027358011","G03AB06",57
+200283,"IT","",0,2,"Yes",200274,"","","0.10000000149011612","","","023382029","N05CD06",58
+200284,"IT","",0,2,"Yes",200275,"","","0.10000000149011612","","","023382017","N05CD06",59
+200285,"IT","",0,2,"Yes",200276,"","","0.10000000149011612","","","023382031","N05CD06",60
+200286,"IT","",0,2,"Yes",200277,"","","0.10000000149011612","","","029326016","G02BA03",61
+200287,"IT","DE",0,2,"Yes",200278,"","","0.10000000149011612","","","033779012","G03AA07",62
+200288,"IT","FR",0,2,"Yes",200279,"","","0.1347000002861023","","","025998042","G02AD05",63
+200290,"IT","DE",0,2,"Yes",200281,"","","0.10000000149011612","","","025998030","G02AD05",65
+200291,"IT","",0,2,"Yes",200282,"","","0.10000000149011612","","","037051024","G03BA03",66
+200292,"IT","",0,2,"Yes",200283,"","","0.10000000149011612","","","037154010/E","L01EX02",67
+200293,"IT","",0,2,"Yes",200284,"","","0.10000000149011612","","","026403079","C08CA06",68
+200294,"IT","",0,2,"Yes",200285,"","","0.10000000149011612","","","026403016","C08CA06",69
+200295,"IT","",0,2,"Yes",200286,"","","0.10000000149011612","","","026403055","C08CA06",70
+200296,"IT","FI",0,2,"Yes",200287,"","","0.2199999988079071","","","N/A","N/A",71
+200298,"IT","",0,2,"Yes",200289,"","","0.10000000149011612","","","048610012/E","L02BB06",73
+200299,"IT","",0,2,"Yes",200290,"","","0.10000000149011612","","","021053018","G03DC02",74
+200301,"IT","",0,2,"Yes",200292,"","","0.10000000149011612","","","034326126/E","C09CA07",76
+200302,"IT","",0,2,"Yes",200293,"","","0.10000000149011612","","","034326025/E","C09CA07",77
+200303,"IT","",0,2,"Yes",200294,"","","0.10000000149011612","","","034326076/E","C09CA07",78
+200304,"IT","",0,2,"Yes",200295,"","","0.10000000149011612","","","035705021/E","C09DA07",79
+200305,"IT","",0,2,"Yes",200296,"","","0.10000000149011612","","","035705072/E","C09DA07",80
+200306,"IT","",0,2,"Yes",200297,"","","0.10000000149011612","","","035705122/E","C09DA07",81
+200307,"IT","",0,2,"Yes",200298,"","","0.10000000149011612","","","021226016","G03CA03",82
+200308,"IT","DE",0,2,"Yes",200299,"","","0.10000000149011612","","","005375062","G03DA03",83
+200309,"IT","",0,2,"Yes",200300,"","","0.10000000149011612","","","042925026/E","L01XE21",84
+200310,"IT","DE",0,2,"Yes",200301,"","","0.10000000149011612","","","002922060","G03BA03",85
+200311,"IT","",0,2,"Yes",200302,"","","0.10000000149011612","","","036019014/E","B01AC11",86
+200312,"IT","",0,2,"Yes",200303,"","","0.10000000149011612","","","036019091/E","B01AC11",87
+200313,"IT","",0,2,"Yes",200304,"","","0.10000000149011612","","","041407014"," G03DB08 ",88
+200314,"IT","",0,2,"Yes",200305,"","","0.10000000149011612","","","048215026","L01EX12",89
+200315,"IT","",0,2,"Yes",200306,"","","0.10000000149011612","","","048215040","L01EX12",90
+200317,"IT","",0,2,"Yes",200308,"","","0.10000000149011612","","","048215014","L01EX12",92
+200318,"IT","",0,2,"Yes",200309,"","","0.10000000149011612","","","038744064/E","B01AF01",93
+200319,"IT","",0,2,"Yes",200310,"","","0.10000000149011612","","","038744076/E","B01AF01",94
+200320,"IT","",0,2,"Yes",200311,"","","0.10000000149011612","","","038744138/E","B01AF01",95
+200321,"IT","",0,2,"Yes",200312,"","","0.10000000149011612","","","038744506/E","B01AF01",96
+200322,"IT","",0,2,"Yes",200313,"","","0.10000000149011612","","","038744518/E","B01AF01",97
+200323,"IT","IT",0,2,"Yes",200314,"","","0.10000000149011612","","","038744278/E","B01AF01",98
+200324,"IT","",0,2,"Yes",200315,"","","0.10000000149011612","","","038744189/E","B01AF01",99
+200325,"IT","",0,2,"Yes",200316,"","","0.10000000149011612","","","035023011","G03AA12",100
+200327,"IT","DE",0,2,"Yes",200318,"","","0.10000000149011612","","","037199015","G03AA12",102
+200328,"IT","DE",0,2,"Yes",200319,"","","0.10000000149011612","","","038542015","G03AA12",103
+200329,"IT","",0,2,"Yes",200320,"","","0.10000000149011612","","","018725010","P02DA01",104
+200330,"IT","FR",0,2,"Yes",200321,"","","0.10000000149011612","","","024969014","A02AD01",105
+200331,"IT","DE",0,2,"Yes",200322,"","","0.10000000149011612","","","004763330","N02BA51",106
+200332,"IT","DE",0,2,"Yes",200323,"","","0.10000000149011612","","","004763379","N02BA01",107
+200333,"IT","DE",0,2,"Yes",200324,"","","0.10000000149011612","","","026721100","N02BA01",108
+200334,"IT","",0,2,"Yes",200325,"","","0.10000000149011612","","","041962034","N02BA01",109
+200335,"IT","IT",0,2,"Yes",200326,"","","0.10000000149011612","","","004763254","N02BA01",110
+200336,"IT","DE",0,2,"Yes",200327,"","","0.10000000149011612","","","004763544","N02BA01",111
+200337,"IT","DE",0,2,"Yes",200328,"","","0.10000000149011612","","","004763405","N02BA01",112
+200338,"IT","",0,2,"Yes",200329,"","","0.10000000149011612","","","020213144","A11DB",113
+200339,"IT","",0,2,"Yes",200330,"","","0.2199999988079071","","","cosmetico","N/A",114
+200340,"IT","",0,2,"Yes",200331,"","","0.2199999988079071","","","cosmetico","N/A",115
+200341,"IT","",0,2,"Yes",200332,"","","0.2199999988079071","","","cosmetico","N/A",116
+200342,"IT","",0,2,"Yes",200333,"","","0.10000000149011612","","","integratore","N/A",117
+200343,"IT","",0,2,"Yes",200334,"","","0.10000000149011612","","","005647033","A11EA",118
+200344,"IT","",0,2,"Yes",200335,"","","0.10000000149011612","","","001328020","A11HA30",119
+200346,"IT","",0,2,"Yes",200337,"","","0.2199999988079071","","","cosmetico","N/A",121
+200347,"IT","",0,2,"Yes",200338,"","","0.2199999988079071","","","cosmetico","N/A",122
+200348,"IT","IT",0,2,"Yes",200339,"","","0.2199999988079071","","","dispositivo medico","N/A",123
+200349,"IT","",0,2,"Yes",200340,"","","0.10000000149011612","","","integratore","N/A",124
+200350,"IT","",0,2,"Yes",200341,"","","0.10000000149011612","","","022760159","D01AC01",125
+200351,"IT","IT",0,2,"Yes",200342,"","","0.10000000149011612","","","integratore","N/A",126
+200352,"IT","",0,2,"Yes",200343,"","","0.10000000149011612","","","006152021","R06AB04",127
+200353,"IT","",0,2,"Yes",200344,"","","0.10000000149011612","","","026045029","D01AC10",128
+200355,"IT","",0,2,"Yes",200346,"","","0.10000000149011612","","","025833029","G01AF02",130
+200357,"IT","",0,2,"Yes",200348,"","","0.10000000149011612","","","022760019","D01AC01",132
+200358,"IT","",0,2,"Yes",200349,"","","0.10000000149011612","","","022760108","D01AC01",133
+200359,"IT","IT",0,2,"Yes",200350,"","","0.10000000149011612","","","006006011","N/A",134
+200360,"IT","IT",0,2,"Yes",200351,"","","0.10000000149011612","","","Integratore ","N/A",135
+200361,"IT","",0,2,"Yes",200352,"","","0.10000000149011612","","","027075011","R06AX13",136
+200362,"IT","",0,2,"Yes",200353,"","","0.10000000149011612","","","027075086","R06AX13",137
+200363,"IT","IT",0,2,"Yes",200354,"","","0.2199999988079071","","","Cosmetico","N/A",138
+200364,"IT","DE",0,2,"Yes",200355,"","","0.10000000149011612","","","037072028","A11AA03",139
+200365,"IT","DE",0,2,"Yes",200356,"","","0.10000000149011612","","","037072016","A11AA03",140
+200366,"IT","IT",0,2,"Yes",200357,"","","0.10000000149011612","","","dispositivo medico","N/A",141
+200367,"IT","",0,2,"Yes",200358,"","","0.10000000149011612","","","023358068","A03FA99",142
+200368,"IT","",0,2,"Yes",200359,"","","0.10000000149011612","","","025833068","G01AF02",143
+200369,"IT","",0,2,"Yes",200360,"","","0.10000000149011612","","","042154017","M02AA13",144
+200370,"IT","",0,2,"Yes",200361,"","","0.10000000149011612","","","042154029","M02AA13",145
+200371,"IT","",0,2,"Yes",200362,"","","0.10000000149011612","","","018554081","D04AA",146
+200372,"IT","IT",0,2,"Yes",200363,"","","0.10000000149011612","","","013868031","C05AA01",147
+200373,"IT","IT",0,2,"Yes",200364,"","","0.10000000149011612","","","013868043","C05AA01",148
+200374,"IT","",0,2,"Yes",200365,"","","0.10000000149011612","","","025116029","A11GA01",149
+200375,"IT","",0,2,"Yes",200366,"","","0.10000000149011612","","","integratore","N/A",150
+200376,"IT","",0,2,"Yes",200367,"","","0.10000000149011612","","","integratore","N/A",151
+200377,"IT","",0,2,"Yes",200368,"","","0.10000000149011612","","","integratore","N/A",152
+200378,"IT","",0,2,"Yes",200369,"","","0.10000000149011612","","","integratore","N/A",153
+200379,"IT","",0,2,"Yes",200370,"","","0.10000000149011612","","","integratore","N/A",154
+200380,"IT","",0,2,"Yes",200371,"","","0.10000000149011612","","","integratore","N/A",155
+200381,"IT","",0,2,"Yes",200372,"","","0.10000000149011612","","","integratore","N/A",156
+200382,"IT","FR",0,2,"Yes",200373,"","","0.10000000149011612","","","integratore","N/A",157
+200383,"IT","",0,2,"Yes",200374,"","","0.10000000149011612","","","integratore","N/A",158
+200384,"IT","",0,2,"Yes",200375,"","","0.10000000149011612","","","integratore","N/A",159
+200385,"IT","",0,2,"Yes",200376,"","","0.10000000149011612","","","integratore","N/A",160
+200386,"IT","",0,2,"Yes",200377,"","","0.10000000149011612","","","integratore","N/A",161
+200387,"IT","",0,2,"Yes",200378,"","","0.10000000149011612","","","integratore","N/A",162
+200388,"IT","",0,2,"Yes",200379,"","","0.10000000149011612","","","integratore","N/A",163
+200389,"IT","",0,2,"Yes",200380,"","","0.10000000149011612","","","integratore","N/A",164
+200390,"IT","US",0,2,"Yes",200381,"","","0.2199999988079071","","","A02010299","1196964",165
+200391,"IT","DE",0,2,"Yes",200382,"","","0.2199999988079071","","","A02010205","1928701",166
+200393,"IT","MX",0,2,"Yes",200384,"","","0.2199999988079071","","","Z11039080","11060",168
+200394,"IT","US",0,2,"Yes",200385,"","","0.2199999988079071","","","Z11039099","1229831",169
+200395,"IT","US",0,2,"Yes",200386,"","","0.2199999988079071","","","Z11039099","1229831",170
+200397,"IT","US",0,2,"Yes",200388,"","","0.2199999988079071","","","Z11029099","1196456",172
+200398,"IT","IT",0,2,"Yes",200389,"","","0.2199999988079071","","","A02010299","1929046",173
+200399,"IT","US",0,2,"Yes",200390,"","","0.2199999988079071","","","A02010299","347652",174
+200400,"IT","US",0,2,"Yes",200391,"","","0.2199999988079071","","","A03020101","1190935",175
+200401,"IT","US",0,2,"Yes",200392,"","","0.2199999988079071","","","A0701","1190434",176
+200402,"IT","CN",0,2,"Yes",200393,"","","0.2199999988079071","","","A03020102","1345892",177
+200403,"IT","US",0,2,"Yes",200394,"","","0.2199999988079071","","","Z11029099","1748945",178
+200404,"IT","MX",0,2,"Yes",200395,"","","0.2199999988079071","","","Z11029099","1196476",179
+200405,"IT","CN",0,2,"Yes",200396,"","","0.2199999988079071","","","A03020102","1213730",180
+200406,"IT","CN",0,2,"Yes",200397,"","","0.2199999988079071","","","A03020102","1213807",181
+200407,"IT","US",0,2,"Yes",200398,"","","0.2199999988079071","","","A0701","1211019",182
+200408,"IT","US",0,2,"Yes",200399,"","","0.2199999988079071","","","A0701","1190431",183
+200409,"IT","CN",0,2,"Yes",200400,"","","0.2199999988079071","","","A03020102","1210890",184
+200410,"IT","US",0,2,"Yes",200401,"","","0.2199999988079071","","","A0701","1190456",185
+200411,"IT","CN",0,2,"Yes",200402,"","","0.2199999988079071","","","A0701","1190453",186
+200412,"IT","CN",0,2,"Yes",200403,"","","0.2199999988079071","","","A0399","1928672",187
+200413,"IT","CN",0,2,"Yes",200404,"","","0.2199999988079071","","","A03020101","1190938",188
+200414,"IT","CN",0,2,"Yes",200405,"","","0.2199999988079071","","","A03020101","1190954",189
+200415,"IT","CN",0,2,"Yes",200406,"","","0.2199999988079071","","","A0399","1340716",190
+200416,"IT","",0,2,"Yes",200407,"","","0.2199999988079071","","","","",191
+200417,"IT","",0,2,"Yes",200408,"","","0.10000000149011612","","","043849076","V08CA02",192
+200418,"IT","",0,2,"Yes",200409,"","","0.10000000149011612","","","043849013","V08CA02",193
+200419,"IT","",0,2,"Yes",200410,"","","0.10000000149011612","","","043849025","V08CA02",194
+200420,"IT","",0,2,"Yes",200411,"","","0.10000000149011612","","","043849037","V08CA02",195
+200421,"IT","DE",0,2,"Yes",200412,"","","0.10000000149011612","","","034964167","V08CA09",196
+200422,"IT","DE",0,2,"Yes",200413,"","","0.10000000149011612","","","034964155","V08CA09",197
+200423,"IT","DE",0,2,"Yes",200414,"","","0.10000000149011612","","","034964104","V08CA09",198
+200424,"IT","DE",0,2,"Yes",200415,"","","0.10000000149011612","","","034964116","V08CA09",199
+200425,"IT","",0,2,"Yes",200416,"","","0.10000000149011612","","","034964231","V08CA09",200
+200426,"IT","",0,2,"Yes",200417,"","","0.10000000149011612","","","023085020","V08AA01",201
+200427,"IT","IT",0,2,"Yes",200418,"","","0.2199999988079071","","","","",202
+200428,"IT","IT",0,2,"Yes",200419,"","","0.2199999988079071","","","","",203
+200429,"IT","",0,2,"Yes",200420,"","","0.2199999988079071","","","","",204
+200430,"IT","US",0,2,"Yes",200421,"","","0.2199999988079071","","","A02010299","1189797",205
+200431,"IT","US",0,2,"Yes",200422,"","","0.2199999988079071","","","A02010299","1190859",206
+200432,"IT","",0,2,"Yes",200423,"","","0.2199999988079071","","","A03020102","1249369",207
+200433,"IT","IT",0,2,"Yes",200424,"","","0.2199999988079071","","","","",208
+200434,"IT","DE",0,2,"Yes",200425,"","","0.10000000149011612","","","027074107","V08CA01",209
+200435,"IT","",0,2,"Yes",200426,"","","0.2199999988079071","","","","",210
+200436,"IT","US",0,2,"Yes",200427,"","","0.2199999988079071","","","A02010299","1289407",211
+200437,"IT","US",0,2,"Yes",200428,"","","0.2199999988079071","","","A02010299","1189992",212
+200438,"IT","IT",0,2,"Yes",200429,"","","0.2199999988079071","","","","",213
+200439,"IT","DE",0,2,"Yes",200430,"","","0.10000000149011612","","","037025071","V08CA10",214
+200440,"IT","US",0,2,"Yes",200431,"","","0.2199999988079071","","","A020104","1208337",215
+200441,"IT","US",0,2,"Yes",200432,"","","0.2199999988079071","","","A020104","1208328",216
+200442,"IT","CN",0,2,"Yes",200433,"","","0.2199999988079071","","","","",217
+200443,"IT","CN",0,2,"Yes",200434,"","","0.2199999988079071","","","","",218
+200444,"IT","CN",0,2,"Yes",200435,"","","0.2199999988079071","","","A03020102","1210888",219
+200445,"IT","DO",0,2,"Yes",200436,"","","0.2199999988079071","","","T030101","347575",220
+200446,"IT","DO",0,2,"Yes",200437,"","","0.2199999988079071","","","T030101","347642",221
+200447,"IT","IT",0,2,"Yes",200438,"","","0.2199999988079071","","","A0701","1211019",222
+200448,"IT","US",0,2,"Yes",200439,"","","0.2199999988079071","","","A02010299","1190818",223
+200449,"IT","US",0,2,"Yes",200440,"","","0.2199999988079071","","","A02010299","1190857",224
+200450,"IT","US",0,2,"Yes",200441,"","","0.2199999988079071","","","A02010299","1189879",225
+200451,"IT","US",0,2,"Yes",200442,"","","0.2199999988079071","","","A02010205","1340693",226
+200452,"IT","US",0,2,"Yes",200443,"","","0.2199999988079071","","","A020104","108565",227
+200453,"IT","US",0,2,"Yes",200444,"","","0.2199999988079071","","","A02010299","1189877",228
+200454,"IT","US",0,2,"Yes",200445,"","","0.2199999988079071","","","A02010299","1189881",229
+200455,"IT","US",0,2,"Yes",200446,"","","0.2199999988079071","","","A02010299","1189885",230
+200456,"IT","CN",0,2,"Yes",200447,"","","0.2199999988079071","","","A02010299","2198769",231
+200457,"IT","CN",0,2,"Yes",200448,"","","0.2199999988079071","","","A020104","593048",232
+200458,"IT","US",0,2,"Yes",200449,"","","0.2199999988079071","","","A02010299","1211283",233
+200459,"IT","",0,2,"Yes",200450,"","","0.2199999988079071","","","","",234
+200460,"IT","IT",0,2,"Yes",200451,"","","0.2199999988079071","","","","",235
+200461,"IT","DE",0,2,"Yes",200452,"","","0.10000000149011612","","","026965069","V08AB05",236
+200462,"IT","DE",0,2,"Yes",200453,"","","0.10000000149011612","","","026965044","V08AB05",237
+200463,"IT","DE",0,2,"Yes",200454,"","","0.10000000149011612","","","026965057","V08AB05",238
+200464,"IT","ES",0,2,"Yes",200455,"","","0.10000000149011612","","","026965160","V08AB05",239
+200466,"IT","DE",0,2,"Yes",200457,"","","0.10000000149011612","","","026965095","V08AB05",241
+200467,"IT","DE",0,2,"Yes",200458,"","","0.10000000149011612","","","026965107","V08AB05",242
+200468,"IT","DE",0,2,"Yes",200459,"","","0.10000000149011612","","","026965083","V08AB05",243
+200469,"IT","DE",0,2,"Yes",200460,"","","0.10000000149011612","","","026965145","V08AB05",244
+200470,"IT","DE",0,2,"Yes",200461,"","","0.10000000149011612","","","026965133","V08AB05",245
+200471,"IT","IT",0,2,"Yes",200462,"","","0.2199999988079071","","","","",246
+200472,"IT","IT",0,2,"Yes",200463,"","","0.2199999988079071","","","","",247
+200473,"IT","IT",0,2,"Yes",200464,"","","0.2199999988079071","","","","",248
+200474,"IT","0",0,2,"Yes",205065,"","","0.10000000149011612","","","043116019/E","V10XX03",0
+200475,"IT","US",0,2,"Yes",205066,"","","0.2199999988079071","","","Z11039014","1184389",1
+200476,"IT","AU",0,2,"Yes",205067,"","","0.2199999988079071","","","Z11039099","2198626",2
+200477,"IT","0",0,2,"Yes",205068,"","","0.2199999988079071","","","Z11039099","2198665",3
+200478,"IT","AU",0,2,"Yes",205069,"","","0.2199999988079071","","","Z11039099","391103",4
+200479,"IT","AU",0,2,"Yes",205070,"","","0.2199999988079071","","","Z11039099","2195962",5
+200480,"IT","0",0,2,"Yes",205071,"","","0.2199999988079071","","","A02010299","1189890",6
+200481,"IT","0",0,2,"Yes",205072,"","","0.2199999988079071","","","","",7
+200482,"IT","0",0,2,"Yes",205073,"","","0.2199999988079071","","","","",8
+200483,"IT","DE",0,2,"Yes",205074,"","","0.2199999988079071","","","","",9
+200484,"IT","DE",0,2,"Yes",205075,"","","0.2199999988079071","","","","",10
+200485,"IT","DE",0,2,"Yes",205076,"","","0.2199999988079071","","","","",11
+200486,"IT","DE",0,2,"Yes",205077,"","","0.2199999988079071","","","","",12
+200487,"IT","DE",0,2,"Yes",205078,"","","0.2199999988079071","","","","",13
+200488,"IT","DE",0,2,"Yes",205079,"","","0.2199999988079071","","","","",14
+200489,"IT","US",0,2,"Yes",205080,"","","0.2199999988079071","","","","",15
+200490,"IT","US",0,2,"Yes",205081,"","","0.2199999988079071","","","","",16
+200491,"IT","US",0,2,"Yes",205082,"","","0.2199999988079071","","","Z11039099","1288537",17
+200492,"IT","US",0,2,"Yes",205083,"","","0.2199999988079071","","","Z11059001","1196924",18
+200493,"IT","US",0,2,"Yes",205084,"","","0.2199999988079071","","","","",19
+200494,"IT","US",0,2,"Yes",205085,"","","0.2199999988079071","","","A0799","1190959",20
+200495,"IT","JP",0,2,"Yes",205086,"","","0.2199999988079071","","","","",21
+200496,"IT","US",0,2,"Yes",205087,"","","0.2199999988079071","","","","",22
+200497,"IT","US",0,2,"Yes",205088,"","","0.2199999988079071","","","","",23
+200498,"IT","US",0,2,"Yes",205089,"","","0.2199999988079071","","","","",24
+200499,"IT","US",0,2,"Yes",205090,"","","0.2199999988079071","","","","",25
+200500,"IT","US",0,2,"Yes",205091,"","","0.2199999988079071","","","","",26
+200501,"IT","US",0,2,"Yes",205092,"","","0.2199999988079071","","","","",27
+200502,"IT","US",0,2,"Yes",205093,"","","0.2199999988079071","","","","",28
+200503,"IT","US",0,2,"Yes",205094,"","","0.2199999988079071","","","","",29
+200504,"IT","US",0,2,"Yes",205095,"","","0.2199999988079071","","","","",30
+200505,"IT","US",0,2,"Yes",205096,"","","0.2199999988079071","","","","",33
+200506,"IT","US",0,2,"Yes",205097,"","","0.2199999988079071","","","","",34
+200507,"IT","US",0,2,"Yes",205098,"","","0.2199999988079071","","","","",36
+200508,"IT","US",0,2,"Yes",205099,"","","0.2199999988079071","","","","",37
+200509,"IT","0",0,2,"Yes",205100,"","","0.2199999988079071","","","","",38
+200510,"IT","US",0,2,"Yes",205101,"","","0.2199999988079071","","","R03010203","579560",39
+200511,"IT","US",0,2,"Yes",205102,"","","0.2199999988079071","","","R03010203","1235817",40
+200512,"IT","US",0,2,"Yes",205103,"","","0.2199999988079071","","","R03010203","578835",41
+200513,"IT","US",0,2,"Yes",205104,"","","0.2199999988079071","","","","",42
+200514,"IT","US",0,2,"Yes",205105,"","","0.2199999988079071","","","","",43
+200515,"IT","0",0,2,"Yes",205106,"","","0.2199999988079071","","","","",44
+200516,"IT","US",0,2,"Yes",205107,"","","0.2199999988079071","","","","",45
+200517,"IT","US",0,2,"Yes",205108,"","","0.2199999988079071","","","","",46
+200518,"IT","US",0,2,"Yes",205109,"","","0.2199999988079071","","","","",52
+200519,"IT","US",0,2,"Yes",205110,"","","0.2199999988079071","","","C900301","1187152",57
+200520,"IT","CR",0,2,"Yes",205111,"","","0.2199999988079071","","","A060399","1196362",60
+200521,"IT","US",0,2,"Yes",205112,"","","0.2199999988079071","","","","",61
+200522,"IT","CZ",0,2,"Yes",205113,"","","0.2199999988079071","","","","",62
+200523,"IT","US",0,2,"Yes",205114,"","","0.2199999988079071","","","","",63
+200524,"IT","US",0,2,"Yes",205115,"","","0.2199999988079071","","","","",64
+200525,"IT","US",0,2,"Yes",205116,"","","0.2199999988079071","","","","",65
+200526,"IT","0",0,2,"Yes",205117,"","","0.2199999988079071","","","","2185520",66
+200527,"IT","US",0,2,"Yes",205118,"","","0.2199999988079071","","","","",67
+200528,"IT","US",0,2,"Yes",205119,"","","0.2199999988079071","","","","",68
+200529,"IT","US",0,2,"Yes",205120,"","","0.2199999988079071","","","","",69
+200530,"IT","US",0,2,"Yes",205121,"","","0.2199999988079071","","","","",70
+200531,"IT","US",0,2,"Yes",205122,"","","0.2199999988079071","","","","",71
+200532,"IT","US",0,2,"Yes",205123,"","","0.2199999988079071","","","","",80
+200533,"IT","US",0,2,"Yes",205124,"","","0.2199999988079071","","","","",81
+200534,"IT","US",0,2,"Yes",205125,"","","0.2199999988079071","","","","",82
+200535,"IT","US",0,2,"Yes",205126,"","","0.2199999988079071","","","","",83
+200536,"IT","US",0,2,"Yes",205127,"","","0.2199999988079071","","","","",86
+200537,"IT","US",0,2,"Yes",205128,"","","0.2199999988079071","","","","",87
+200538,"IT","US",0,2,"Yes",205129,"","","0.2199999988079071","","","","",88
+200539,"IT","US",0,2,"Yes",205130,"","","0.2199999988079071","","","","",89
+200540,"IT","US",0,2,"Yes",205131,"","","0.2199999988079071","","","","",90
+200541,"IT","US",0,2,"Yes",205132,"","","0.2199999988079071","","","","",91
+200542,"IT","US",0,2,"Yes",205133,"","","0.2199999988079071","","","","",92
+200543,"IT","US",0,2,"Yes",205134,"","","0.2199999988079071","","","","",93
+200544,"IT","US",0,2,"Yes",205135,"","","0.2199999988079071","","","","",94
+200545,"IT","US",0,2,"Yes",205136,"","","0.2199999988079071","","","","",95
+200546,"IT","US",0,2,"Yes",205137,"","","0.2199999988079071","","","","",96
+200547,"IT","US",0,2,"Yes",205138,"","","0.2199999988079071","","","","",105
+200548,"IT","US",0,2,"Yes",205139,"","","0.2199999988079071","","","","",106
+200549,"IT","US",0,2,"Yes",205140,"","","0.2199999988079071","","","","",107
+200550,"IT","US",0,2,"Yes",205141,"","","0.2199999988079071","","","","",108
+200551,"IT","0",0,2,"Yes",205142,"","","0.2199999988079071","","","","",109
+200552,"IT","US",0,2,"Yes",205143,"","","0.2199999988079071","","","","",110
+200553,"IT","US",0,2,"Yes",205144,"","","0.2199999988079071","","","Z11039013","1198629",112
+200554,"IT","US",0,2,"Yes",205145,"","","0.2199999988079071","","","Z11039013","1198639",113
+200555,"IT","US",0,2,"Yes",205146,"","","0.2199999988079071","","","","",114
+200556,"IT","US",0,2,"Yes",205147,"","","0.2199999988079071","","","","",115
+200557,"IT","US",0,2,"Yes",205148,"","","0.2199999988079071","","","","",116
+200558,"IT","CN",0,2,"Yes",205149,"","","0.2199999988079071","","","","",117
+200559,"IT","CN",0,2,"Yes",205150,"","","0.2199999988079071","","","","",118
+200560,"IT","US",0,2,"Yes",205151,"","","0.2199999988079071","","","","",119
+200561,"IT","US",0,2,"Yes",205152,"","","0.2199999988079071","","","","",120
+200562,"IT","0",0,2,"Yes",205153,"","","0.2199999988079071","","","","",121
+200563,"IT","0",0,2,"Yes",205154,"","","0.2199999988079071","","","","",122
+200564,"IT","US",0,2,"Yes",205155,"","","0.2199999988079071","","","","",124
+200565,"IT","US",0,2,"Yes",205156,"","","0.2199999988079071","","","","",125
+200566,"IT","US",0,2,"Yes",205157,"","","0.2199999988079071","","","","",126
+200567,"IT","US",0,2,"Yes",205158,"","","0.2199999988079071","","","","",127
+200568,"IT","US",0,2,"Yes",205159,"","","0.2199999988079071","","","","",128
+200569,"IT","US",0,2,"Yes",205160,"","","0.2199999988079071","","","","",129
+200570,"IT","US",0,2,"Yes",205161,"","","0.2199999988079071","","","","",130
+200571,"IT","US",0,2,"Yes",205162,"","","0.2199999988079071","","","","",131
+200572,"IT","US",0,2,"Yes",205163,"","","0.2199999988079071","","","","",132
+200573,"IT","US",0,2,"Yes",205164,"","","0.2199999988079071","","","","",133
+200574,"IT","US",0,2,"Yes",205165,"","","0.2199999988079071","","","","",134
+200575,"IT","US",0,2,"Yes",205166,"","","0.2199999988079071","","","","",135
+200576,"IT","US",0,2,"Yes",205167,"","","0.2199999988079071","","","","",136
+200577,"IT","US",0,2,"Yes",205168,"","","0.2199999988079071","","","","",137
+200578,"IT","US",0,2,"Yes",205169,"","","0.2199999988079071","","","","",138
+200579,"IT","US",0,2,"Yes",205170,"","","0.2199999988079071","","","","",139
+200580,"IT","US",0,2,"Yes",205171,"","","0.2199999988079071","","","","",140
+200581,"IT","US",0,2,"Yes",205172,"","","0.2199999988079071","","","","",141
+200582,"IT","US",0,2,"Yes",205173,"","","0.2199999988079071","","","","",142
+200583,"IT","US",0,2,"Yes",205174,"","","0.2199999988079071","","","","",143
+200584,"IT","US",0,2,"Yes",205175,"","","0.2199999988079071","","","Z11029099","240008",144
+200585,"IT","US",0,2,"Yes",205176,"","","0.2199999988079071","","","","",145
+200586,"IT","US",0,2,"Yes",205177,"","","0.2199999988079071","","","","",146
+200587,"IT","US",0,2,"Yes",205178,"","","0.2199999988079071","","","","",147
+200588,"IT","0",0,2,"Yes",205179,"","","0.2199999988079071","","","","",148
+200589,"IT","US",0,2,"Yes",205180,"","","0.2199999988079071","","","","",149
+200590,"IT","US",0,2,"Yes",205181,"","","0.2199999988079071","","","","",150
+200591,"IT","US",0,2,"Yes",205182,"","","0.2199999988079071","","","","",151
+200592,"IT","US",0,2,"Yes",205183,"","","0.2199999988079071","","","","",152
+200593,"IT","US",0,2,"Yes",205184,"","","0.2199999988079071","","","","",153
+200594,"IT","CN",0,2,"Yes",205185,"","","0.2199999988079071","","","","",154
+200595,"IT","US",0,2,"Yes",205186,"","","0.2199999988079071","","","","",155
+200596,"IT","US",0,2,"Yes",205187,"","","0.2199999988079071","","","","",156
+200597,"IT","US",0,2,"Yes",205188,"","","0.2199999988079071","","","","",157
+200598,"IT","US",0,2,"Yes",205189,"","","0.2199999988079071","","","Z11039013","1198389",158
+200599,"IT","US",0,2,"Yes",205190,"","","0.2199999988079071","","","","",159
+200600,"IT","US",0,2,"Yes",205191,"","","0.2199999988079071","","","","",160
+200601,"IT","US",0,2,"Yes",205192,"","","0.2199999988079071","","","","",161
+200602,"IT","US",0,2,"Yes",205193,"","","0.2199999988079071","","","","",162
+200603,"IT","US",0,2,"Yes",205194,"","","0.2199999988079071","","","","",163
+200604,"IT","US",0,2,"Yes",205195,"","","0.2199999988079071","","","","",164
+200605,"IT","US",0,2,"Yes",205196,"","","0.2199999988079071","","","","",165
+200606,"IT","US",0,2,"Yes",205197,"","","0.2199999988079071","","","","",166
+200607,"IT","US",0,2,"Yes",205198,"","","0.2199999988079071","","","","",167
+200608,"IT","US",0,2,"Yes",205199,"","","0.2199999988079071","","","","",168
+200609,"IT","US",0,2,"Yes",205200,"","","0.2199999988079071","","","","",170
+200610,"IT","DE",0,2,"Yes",205201,"","","0.2199999988079071","","","","",172
+200611,"IT","US",0,2,"Yes",205202,"","","0.2199999988079071","","","","",174
+200612,"IT","MX",0,2,"Yes",205203,"","","0.2199999988079071","","","","",176
+200613,"IT","MX",0,2,"Yes",205204,"","","0.2199999988079071","","","","",177
+200614,"IT","MX",0,2,"Yes",205205,"","","0.2199999988079071","","","","",178
+200615,"IT","MX",0,2,"Yes",205206,"","","0.2199999988079071","","","","",179
+200616,"IT","MX",0,2,"Yes",205207,"","","0.2199999988079071","","","","",180
+200617,"IT","MX",0,2,"Yes",205208,"","","0.2199999988079071","","","","",181
+200618,"IT","US",0,2,"Yes",205209,"","","0.2199999988079071","","","","",183
+200619,"IT","MX",0,2,"Yes",205210,"","","0.2199999988079071","","","","",184
+200620,"IT","MX",0,2,"Yes",205211,"","","0.2199999988079071","","","","",185
+200621,"IT","US",0,2,"Yes",205212,"","","0.2199999988079071","","","","",186
+200622,"IT","US",0,2,"Yes",205213,"","","0.2199999988079071","","","","",189
+200623,"IT","US",0,2,"Yes",205214,"","","0.2199999988079071","","","","",190
+200624,"IT","US",0,2,"Yes",205215,"","","0.2199999988079071","","","Z11039013","1198629",191
+200625,"IT","US",0,2,"Yes",205216,"","","0.2199999988079071","","","","",192
+200626,"IT","0",0,2,"Yes",205217,"","","0.2199999988079071","","","","",197
+200627,"IT","US",0,2,"Yes",205218,"","","0.2199999988079071","","","Z11039099","1927842",202
+200628,"IT","0",0,2,"Yes",205219,"","","0.2199999988079071","","","Z12040182","2185537",203
+200629,"IT","0",0,2,"Yes",205220,"","","0.2199999988079071","","","Z12040182","2192391",204
+200630,"IT","0",0,2,"Yes",205221,"","","0.2199999988079071","","","Z12040182","2185501",205
+200631,"IT","MX",0,2,"Yes",205222,"","","0.2199999988079071","","","","",206
+200632,"IT","0",0,2,"Yes",205223,"","","0.2199999988079071","","","","",207
+200633,"IT","US",0,2,"Yes",205224,"","","0.2199999988079071","","","","",208
+200634,"IT","US",0,2,"Yes",205225,"","","0.2199999988079071","","","","",210
+200635,"IT","US",0,2,"Yes",205226,"","","0.2199999988079071","","","","",211
+200636,"IT","US",0,2,"Yes",205227,"","","0.2199999988079071","","","","",212
+200637,"IT","US",0,2,"Yes",205228,"","","0.2199999988079071","","","","",213
+200638,"IT","US",0,2,"Yes",205229,"","","0.2199999988079071","","","","",214
+200639,"IT","US",0,2,"Yes",205230,"","","0.2199999988079071","","","","",215
+200640,"IT","US",0,2,"Yes",205231,"","","0.2199999988079071","","","","",216
+200641,"IT","US",0,2,"Yes",205232,"","","0.2199999988079071","","","","",217
+200642,"IT","US",0,2,"Yes",205233,"","","0.2199999988079071","","","","",218
+200643,"IT","US",0,2,"Yes",205234,"","","0.2199999988079071","","","","",219
+200644,"IT","US",0,2,"Yes",205235,"","","0.2199999988079071","","","","",220
+200645,"IT","US",0,2,"Yes",205236,"","","0.2199999988079071","","","","",221
+200646,"IT","US",0,2,"Yes",205237,"","","0.2199999988079071","","","","",222
+200647,"IT","TW",0,2,"Yes",205238,"","","0.2199999988079071","","","","",223
+200648,"IT","US",0,2,"Yes",205239,"","","0.2199999988079071","","","","",224
+200649,"IT","US",0,2,"Yes",205240,"","","0.2199999988079071","","","","",225
+200650,"IT","US",0,2,"Yes",205241,"","","0.2199999988079071","","","","",226
+200651,"IT","0",0,2,"Yes",205242,"","","0.2199999988079071","","","","",227
+200652,"IT","US",0,2,"Yes",205243,"","","0.2199999988079071","","","","",228
+200653,"IT","US",0,2,"Yes",205244,"","","0.2199999988079071","","","","",229
+200654,"IT","US",0,2,"Yes",205245,"","","0.2199999988079071","","","","",230
+200655,"IT","US",0,2,"Yes",205246,"","","0.2199999988079071","","","","",231
+200656,"IT","US",0,2,"Yes",205247,"","","0.2199999988079071","","","","",232
+200657,"IT","US",0,2,"Yes",205248,"","","0.2199999988079071","","","","",233
+200658,"IT","US",0,2,"Yes",205249,"","","0.2199999988079071","","","","",234
+200659,"IT","US",0,2,"Yes",205250,"","","0.2199999988079071","","","","",235
+200660,"IT","US",0,2,"Yes",205251,"","","0.2199999988079071","","","","",236
+200661,"IT","US",0,2,"Yes",205252,"","","0.2199999988079071","","","","",237
+200662,"IT","US",0,2,"Yes",205253,"","","0.2199999988079071","","","","",238
+200663,"IT","US",0,2,"Yes",205254,"","","0.2199999988079071","","","","",239
+200664,"IT","US",0,2,"Yes",205255,"","","0.2199999988079071","","","","",240
+200665,"IT","US",0,2,"Yes",205256,"","","0.2199999988079071","","","","",241
+200666,"IT","US",0,2,"Yes",205257,"","","0.2199999988079071","","","Z11039013","1198639",243
+200667,"IT","US",0,2,"Yes",205258,"","","0.2199999988079071","","","","",244
+200668,"IT","US",0,2,"Yes",205259,"","","0.2199999988079071","","","","",245
+200669,"IT","US",0,2,"Yes",205260,"","","0.2199999988079071","","","","",246
+200670,"IT","US",0,2,"Yes",205261,"","","0.2199999988079071","","","","",247
+200671,"IT","US",0,2,"Yes",205262,"","","0.2199999988079071","","","","",248
+200672,"IT","US",0,2,"Yes",205263,"","","0.2199999988079071","","","","",248
+200673,"IT","US",0,2,"Yes",205264,"","","0.2199999988079071","","","","",248
+200674,"IT","US",0,2,"Yes",205265,"","","0.2199999988079071","","","","",248
+200675,"IT","US",0,2,"Yes",205266,"","","0.2199999988079071","","","","",248
+200676,"IT","US",0,2,"Yes",205267,"","","0.2199999988079071","","","","",248
+200677,"IT","US",0,2,"Yes",205268,"","","0.2199999988079071","","","","",248
+200678,"IT","US",0,2,"Yes",205269,"","","0.2199999988079071","","","","",248
+200679,"IT","US",0,2,"Yes",205270,"","","0.2199999988079071","","","","",248
+200680,"IT","US",0,2,"Yes",205271,"","","0.2199999988079071","","","","",248
+200681,"IT","US",0,2,"Yes",205272,"","","0.2199999988079071","","","","",248
+200682,"IT","US",0,2,"Yes",205273,"","","0.2199999988079071","","","","",248
+200683,"IT","US",0,2,"Yes",205274,"","","0.2199999988079071","","","","",248
+200684,"IT","US",0,2,"Yes",205275,"","","0.2199999988079071","","","","",248
+200685,"IT","0",0,2,"Yes",205276,"","","0.2199999988079071","","","","2185385",248
+200686,"IT","US",0,2,"Yes",205277,"","","0.2199999988079071","","","","",248
+200687,"IT","US",0,2,"Yes",205278,"","","0.2199999988079071","","","","",248
+200688,"IT","DE",0,2,"Yes",205279,"","","0.1347000002861023","","","25998042","G02AD05",0
+200689,"ES","ES",36,2,"Yes",205280,"Bayer AG","","22.0","","","","",0
+200690,"ES","ES",36,2,"Yes",205281,"Bayer AG","","22.0","","","","",0
