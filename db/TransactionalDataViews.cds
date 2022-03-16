@@ -150,7 +150,9 @@ entity TenderResults as select from TransactionalData.PT_TMTEND as tender{
         else
             case when tender.Offer.Product.Price.FOC_ABS_PCT = 'PCT'
                 then round(100 * tender.Offer.Product.Price.FOC) || '%'
-                else round(100 * tender.Offer.Product.Price.FOC) || ' ' || tender.Offer.Product.UnitPerPack || ''
+                //else round(100 * tender.Offer.Product.Price.FOC) || ' ' || tender.Offer.Product.UnitPerPack || ''
+                // ETIEF modified the else condition to fix Historic offers FOC display
+                else round(tender.Offer.Product.Price.FOC) || ' ' || tender.Offer.Product.UnitPerPack || ''
             end
             ||
             case when tender.Offer.Product.Price.FOCType = 'FOC 1'
