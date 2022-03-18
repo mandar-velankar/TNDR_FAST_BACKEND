@@ -1135,6 +1135,8 @@ module.exports = (srv) => {
 	async function buildOfferProductValidation(tx, whereOffer) {
 
 		let results = [];
+        let aFreeGoodsOther = [];
+        
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
 		if (offer.length !== 1) {
@@ -1194,6 +1196,31 @@ module.exports = (srv) => {
 			//let aFreeGoodsOtherTemp = [];
 			const whereProductPackId = ServiceHelper.buildFullWhere("ProductPricing_ProductCode", "=", offerProduct.PRODUCTID);
 			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
+
+            //loop over freegoodsother and retrieve productpricing, material and productpack data
+            aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
+                let whereMaterialFOC = {
+                    CountryCode: offer.COUNTRYCODE,
+                    ProductPackId: tmpFreeGoodOther.ProductPackID
+                }
+                
+                tmpFreeGoodOther.Materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterialFOC));
+
+                let whereProductPricingFOC = {
+                    OfferID: offer.OFFERID,
+                    ProductCode: tmpFreeGoodOther.ProductPackID,
+                    CountryCode: offer.COUNTRYCODE
+                }
+    
+                tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
+
+                const whereProductPackFOC = {
+                    PRODUCTPACKID: tmpFreeGoodOther.ProductPackID,
+                }
+                tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
+
+                return tmpFreeGoodOther;
+            }));
 
             // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
             let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
@@ -2633,8 +2660,20 @@ module.exports = (srv) => {
                     return  usString; 
 			   },
 				   dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-                   extract2Decimals: (input) => Number(input).toFixed(2).split(".")[1],
-                   extract5Decimals: (input) => Number(input).toFixed(5).split(".")[1]
+                   extract2Decimals: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 2);
+                    } else {
+                        return Number(input).toFixed(2).split(".")[1];
+                    }
+                },
+                   extract5Decimals: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 5);
+                    } else {
+                        return Number(input).toFixed(5).split(".")[1];
+                    }
+                }
 
 
 				}
