@@ -1170,7 +1170,7 @@ module.exports = (srv) => {
 		let results = [];
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
-		if (offer.length <= 0) {
+		if (offer.length !== 1) {
 			return results;
 		}
 
@@ -1395,7 +1395,7 @@ module.exports = (srv) => {
 
 		//get offer info
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
-		if (offer.length <= 0) {
+		if (offer.length !== 1) {
 			return results;
 		}
 		offer = offer[0];
