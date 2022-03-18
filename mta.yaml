@@ -8,6 +8,7 @@ build-parameters:
   before-all:
    - builder: custom
      commands:
+      - npx rimraf db/csv
       - npm install --production
       - npx -p @sap/cds-dk cds build --production
 
