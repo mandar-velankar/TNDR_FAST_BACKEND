@@ -1201,21 +1201,21 @@ module.exports = (srv) => {
             aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
                 let whereMaterialFOC = {
                     CountryCode: offer.COUNTRYCODE,
-                    ProductPackId: offerProduct.ProductCode
+                    ProductPackId: tmpFreeGoodOther.ProductPackID
                 }
                 
                 tmpFreeGoodOther.Materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterialFOC));
 
                 let whereProductPricingFOC = {
                     OfferID: offer.OFFERID,
-                    ProductCode: offerProduct.ProductCode,
+                    ProductCode: tmpFreeGoodOther.ProductPackID,
                     CountryCode: offer.COUNTRYCODE
                 }
     
                 tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
 
                 const whereProductPackFOC = {
-                    PRODUCTPACKID: offerProduct.ProductCode,
+                    PRODUCTPACKID: tmpFreeGoodOther.ProductPackID,
                 }
                 tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
 
