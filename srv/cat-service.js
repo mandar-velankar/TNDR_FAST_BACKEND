@@ -1207,7 +1207,15 @@ module.exports = (srv) => {
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
 			const productPricingTable = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricing));
-			let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
+			//let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
+                        
+            let finalDiscount;            
+            if (productPricing.UOM === "Unit") {
+                finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPU ))*100).toFixed(2));
+            } else {
+                finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPP ))*100).toFixed(2));
+            }
+            
 			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 
 			//Get corresponding ProductPack
