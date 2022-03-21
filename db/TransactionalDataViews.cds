@@ -505,6 +505,7 @@ left outer join MasterDataViews.DirectBrand as directBrand
     on offerProduct.INSTITUTE_ID = directBrand.INSTITUTE_ID
     and offerProduct.HLEVEL4_CODE = directBrand.BRAND_ID
     and offerProduct.DISTRIBUTOR_ID = directBrand.DISTRIBUTOR_ID
+    and offerProduct.CountryCode = directBrand.COUNTRY_CODE     
 left outer join MasterDataViews.DistributorBrand as distributorBrand
     on offerProduct.HLEVEL4_CODE = distributorBrand.BRAND_ID
     and offerProduct.DISTRIBUTOR_ID = distributorBrand.DISTRIBUTOR_ID

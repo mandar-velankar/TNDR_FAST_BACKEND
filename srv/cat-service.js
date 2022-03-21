@@ -1234,21 +1234,21 @@ module.exports = (srv) => {
             aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
                 let whereMaterialFOC = {
                     CountryCode: offer.COUNTRYCODE,
-                    ProductPackId: offerProduct.ProductCode
+                    ProductPackId: tmpFreeGoodOther.ProductPackID
                 }
                 
                 tmpFreeGoodOther.Materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterialFOC));
 
                 let whereProductPricingFOC = {
                     OfferID: offer.OFFERID,
-                    ProductCode: offerProduct.ProductCode,
+                    ProductCode: tmpFreeGoodOther.ProductPackID,
                     CountryCode: offer.COUNTRYCODE
                 }
     
                 tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
 
                 const whereProductPackFOC = {
-                    PRODUCTPACKID: offerProduct.ProductCode,
+                    PRODUCTPACKID: tmpFreeGoodOther.ProductPackID,
                 }
                 tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
 
@@ -2697,8 +2697,20 @@ module.exports = (srv) => {
                     return  usString; 
 			   },
 				   dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-                   extract2Decimals: (input) => Number(input).toFixed(2).split(".")[1],
-                   extract5Decimals: (input) => Number(input).toFixed(5).split(".")[1]
+                   extract2Decimals: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 2);
+                    } else {
+                        return Number(input).toFixed(2).split(".")[1];
+                    }
+                },
+                   extract5Decimals: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 5);
+                    } else {
+                        return Number(input).toFixed(5).split(".")[1];
+                    }
+                }
 
 
 				}
