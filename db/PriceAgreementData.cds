@@ -60,7 +60,10 @@ entity PriceAgreements: cuid, managed {
     MaterialsFOC: Association to TransactionalData.ProductPricing on MaterialsFOC.CountryCode = CountryCode
                                                                            and MaterialsFOC.OfferID = OfferId
                                                                            and MaterialsFOC.ProductCode = ProductPackId;
-    
+    PriceConditions: Association to many TransactionalData.PriceCondition 
+                                        on PriceConditions.OfferID = OfferId
+                                        and PriceConditions.ProductCode = ProductPackId
+                                        and PriceConditions.CountryCode = CountryCode;
 }
 entity CustomerPrices: cuid, managed {
     // @cds.api.ignore

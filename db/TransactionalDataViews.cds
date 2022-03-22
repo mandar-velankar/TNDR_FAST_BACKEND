@@ -505,6 +505,7 @@ left outer join MasterDataViews.DirectBrand as directBrand
     on offerProduct.INSTITUTE_ID = directBrand.INSTITUTE_ID
     and offerProduct.HLEVEL4_CODE = directBrand.BRAND_ID
     and offerProduct.DISTRIBUTOR_ID = directBrand.DISTRIBUTOR_ID
+    and offerProduct.CountryCode = directBrand.COUNTRY_CODE     
 left outer join MasterDataViews.DistributorBrand as distributorBrand
     on offerProduct.HLEVEL4_CODE = distributorBrand.BRAND_ID
     and offerProduct.DISTRIBUTOR_ID = distributorBrand.DISTRIBUTOR_ID
@@ -1115,8 +1116,7 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
 left outer join TransactionalData.PriceCondition as priceCondition 
-    on product.CountryCode = priceCondition.CountryCode
-    and product.ProductCode = priceCondition.ProductCode
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
 left outer join MasterData.RoyalDecree as royalDecree
     on product.ProductCode = royalDecree.ProductPackID 
@@ -1124,6 +1124,8 @@ left outer join MasterData.RoyalDecree as royalDecree
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
+    priceCondition.ID as ExistingPriceConditionID: UUID,
+    priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
     tender.CountryCode,
     key priceConditionClassification.ConditionType,
     priceConditionClassification.Classification,

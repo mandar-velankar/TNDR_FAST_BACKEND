@@ -1,0 +1,44 @@
+### syncPriceAgreements  - Synchronise price agreements with SAP from
+POST http://localhost:4004/v2/tender/PriceCondition
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "CountryCode": "ES",
+    "OfferID": "ES-22-1002-1",
+    "ProductCode": 205281,
+    "PVL": "250",
+    "Discount": null,
+    "RoyalDecree": null,
+    "StandardDiscount": null,
+    "AdditionalDiscount": null,
+    "NetPriceWithoutTaxBeforeDeductionRD": null,
+    "NetPriceWithoutTaxAfterDeductionRD": null,
+    "NetPriceWithTaxAfterDeductionRD": null,
+    "NetPriceWithoutTax": null,
+    "NetPriceWithTax": null,
+    "MaximumPrice": null,
+    "Tax": 22,
+    "Liquidation": null,
+    "RefundDate": null,
+    "DiscountCondition": [
+        {
+            "Volume": "777",
+            "Discount": "2",
+            "NetPriceWithoutTax": -245,
+            "NetPriceWithTax": -5635
+        },
+        {
+            "Volume": "888",
+            "Discount": "2",
+            "NetPriceWithoutTax": -245,
+            "NetPriceWithTax": -5635
+        }
+    ]
+}
+
+###
+DELETE http://localhost:4004/v2/tender/PriceCondition(guid'3d6b14fb-d138-4212-9a0d-13198e27ca32')
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
