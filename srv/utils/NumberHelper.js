@@ -3,6 +3,9 @@ module.exports = {
     formatNumberToText:function(countryCode,value){
         let language = countryCode.toLowerCase();//TODO:connect country with language in new entity!
 
+        if(language !== "it"){
+            return "";
+        }
         // parse to fload in case value has type string to continue
         if(typeof value === 'string' || value instanceof String){
             value = parseFloat(value);
