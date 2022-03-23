@@ -1042,7 +1042,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
 					break;
 				case "FBP":
-					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
 					break;
 				case "LPC":
 					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
@@ -1050,8 +1050,8 @@ module.exports = (srv) => {
 				case "COM/PGA":
 					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
 					break;
-				case "Supply Chain":
-					oApproverType.ValidationType = 3;
+				case "Supply Chain":  
+                    oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 2 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 2 : 3;
 					break;
 				case "International Trade":
 					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
@@ -1174,7 +1174,15 @@ module.exports = (srv) => {
 
 			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
 			const productPricingTable = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricing));
-			let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
+			//let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
+                        
+            let finalDiscount;            
+            if (productPricing.UOM === "Unit") {
+                finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPU ))*100).toFixed(2));
+            } else {
+                finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPP ))*100).toFixed(2));
+            }
+            
 			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 
 			//Get corresponding ProductPack
