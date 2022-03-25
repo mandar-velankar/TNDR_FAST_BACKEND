@@ -410,7 +410,14 @@ and year(ifnull(offerProduct.Offer.SubmissionDate, offerProduct.Offer.Tender.Pub
 and offerProduct.Offer.Tender.Country.Region = 'MEA';
 
 
-entity MasterApproverBrandMap as projection on MasterData.CountryApprovers;
+entity MasterApproverBrandMap as select from MasterData.CountryApprovers as MasterApproverBrandMap {
+    key MasterApproverBrandMap.CountryCode,
+	key MasterApproverBrandMap.ApproverType,
+    key MasterApproverBrandMap.Division,
+	MasterApproverBrandMap.ApproverName,
+	key MasterApproverBrandMap.ApproverEmailID,
+	MasterApproverBrandMap.Enabled
+};
 
 entity MasterCountries as select from MasterData.PT_TMCTRY as MasterCountries {
 	key CountryID,
