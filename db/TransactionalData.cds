@@ -405,6 +405,7 @@ entity PriceCondition: cuid, managed {
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
+    PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
 }
 
 entity DiscountCondition: cuid, managed {
