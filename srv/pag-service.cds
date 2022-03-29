@@ -14,6 +14,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity ConsumerPrices as select from MasterDataViews.MostRecentConsumerPricesView;
     entity PriceCondition as projection on TransactionalData.PriceCondition;
     entity PriceConditionClassification as projection on TransactionalData.PriceConditionClassification;
+    entity RoyalDecree as projection on MasterData.RoyalDecree;
     //entity Materials as projection on PriceAgreementData.MaterialsView;
     entity NewMaterialsView as projection on PriceAgreementData.NewMaterialsView;
     entity NewFOCMaterialsView as projection on PriceAgreementData.NewFOCMaterialsView;
