@@ -256,6 +256,7 @@ service CatalogService @(path : 'tender')@(requires : [
             REGISTERED_PRICE_IN_WORDS                   : String;
             OFFER_PRICE                                 : Double;
             FOC                                         : String(25);
+            FOC_ABS_PCT_STP                             : String;          
             TOTAL_QUANTITY_UNITS                        : Double;
             FOC_QUANTITY_UNITS                          : Double; // FOC Unit (thailand)
             PAID_QUANTITY_UNITS                         : Double;
