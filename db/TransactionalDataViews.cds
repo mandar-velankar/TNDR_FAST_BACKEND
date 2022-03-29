@@ -668,8 +668,8 @@ left outer join TransactionalData.PT_TMQUTO as quotation
 {
     offer.OfferID,
     ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
-    signatory.NAME as NAME:String,
-    signatory.TITLE as TITLE:String
+    ifnull(quotation.Signatory1.NAME, signatory.NAME) as NAME:String,
+    ifnull(quotation.Signatory1.TITLE, signatory.TITLE) as TITLE:String
 };
 
 entity OfferSignatory2 as select from TransactionalData.PT_TMOFRS as offer
@@ -691,8 +691,8 @@ left outer join TransactionalData.PT_TMQUTO as quotation
 {
     offer.OfferID,
     ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
-    signatory.NAME as NAME:String,
-    signatory.TITLE as TITLE:String
+    ifnull(quotation.Signatory2.NAME, signatory.NAME) as NAME:String,
+    ifnull(quotation.Signatory2.TITLE, signatory.TITLE) as TITLE:String
 };
 
 
