@@ -455,9 +455,9 @@ entity PT_TMQUTO {
         Offer             : Association to PT_TMOFRS
                                 on Offer.OfferID = OfferID;
         Signatory1        : Association to MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES
-                                on Signatory1.AUTHORIZED_SIGNATORY = AS1 and Signatory1.COUNTRY_CODE = CountryCode and Signatory1.LEGAL_ENTITY_CODE = Offer.SellingCompany;
+                                on Signatory1.AUTHORIZED_SIGNATORY = AS1 and Signatory1.COUNTRY_CODE = CountryCode and Signatory1.LEGAL_ENTITY_CODE = 'BIT';
         Signatory2        : Association to MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES
-                                on Signatory2.AUTHORIZED_SIGNATORY = AS2 and Signatory2.COUNTRY_CODE = CountryCode and Signatory2.LEGAL_ENTITY_CODE = Offer.SellingCompany;
+                                on Signatory2.AUTHORIZED_SIGNATORY = AS2 and Signatory2.COUNTRY_CODE = CountryCode and Signatory2.LEGAL_ENTITY_CODE = 'BIT';
 }
 
 
