@@ -3,6 +3,7 @@ using { com.bayer.SXTENDER.PriceAgreementData } from '../db/PriceAgreementData';
 using { com.bayer.SXTENDER.MasterData } from '../db/MasterData';
 using { com.bayer.SXTENDER.MasterDataViews } from '../db/MasterDataViews';
 using { com.bayer.SXTENDER.PriceAgreementDataViews } from '../db/PriceAgreementDataViews';
+using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 
 service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_admin','f_tndr_cag_priceagreements_user','f_tndr_cag_technical_user','authenticated-user']){
 
@@ -25,6 +26,18 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
     entity FreeGoodsOther as projection on TransactionalData.FreeGoodsOther;
     entity PaMainFOCView as projection on PriceAgreementDataViews.PaMainFOCView;
+
+    entity Country as projection on MasterData.PT_TMCTRY;
+    entity Users as projection on AdminData.PT_TMUSER;
+    
+    //Countries where user has accesss to
+    entity UserCountry @(restrict: [
+		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
+	])as projection on AdminData.PT_TMUSERCTRY {
+        *,
+        Country: redirected to Country,
+        User: redirected to Users,
+    };
 
     action syncPriceAgreements(ids : array of String);
     action syncFocCustPrices(ids : array of String);
