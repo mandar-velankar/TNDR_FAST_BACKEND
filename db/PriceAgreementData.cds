@@ -114,10 +114,10 @@ entity CustomerPrices_History: managed {
  * but don't have a CustomerPrices set yet
  */
 entity CandidatesView as select from PriceAgreements as pa 
-left outer join MasterData.Tenders_in_Regions tr on pa.TenderId = tr.TenderID
-inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode
+left outer join MasterData.Tenders_in_Regions AS tr on pa.TenderId = tr.TenderID
+inner join MasterData.PT_TMINST AS inst on pa.CountryCode = inst.CountryCode
        and tr.RegionID = inst.RegionID
-       and inst.InstituteType = 'Public Account'
+       and inst.InstituteType = 'Public Account' 
 {
     pa.ID as PriceAgreementId,
     key pa.TenderId,
@@ -127,14 +127,26 @@ inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode
 }
 union
 select from PriceAgreements as pa
-inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode and pa.InstituteId = inst.InstituteID
+inner join MasterData.PT_TMINST AS inst on pa.CountryCode = inst.CountryCode and pa.InstituteId = inst.InstituteID
 {
     pa.ID as PriceAgreementId,
     pa.TenderId,
     inst.InstituteID as CandidateID,
     inst.InstituteName as CandidateName,
     inst.Region.ID as RegionId
-}where inst.InstituteType <> 'Region(s)';
+}where inst.InstituteType <> 'Region(s)'
+union
+select from PriceAgreements as pa
+inner join MasterData.PT_TMINSHIER as hier on pa.InstituteId = hier.ParentInstituteID
+inner join MasterData.PT_TMINST AS inst on hier.InstituteID = inst.InstituteID
+{
+    pa.ID as PriceAgreementId,
+    pa.TenderId,
+    inst.InstituteID as CandidateID,
+    inst.InstituteName as CandidateName,
+    inst.RegionID as RegionId
+}where inst.ActiveRecord = 'Yes'
+and hier.ActiveRecord = 'Yes';
 
 
 /**
@@ -184,11 +196,11 @@ left outer join CustomerPrices as cp
 
 
 
-entity CandidatePrices as select from PriceAgreements pa
-inner join CandidatesView ca on ca.PriceAgreementId = pa.ID 
+entity CandidatePrices as select from PriceAgreements AS pa
+inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
 //inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
-inner join MasterData.PT_TMSKUPRDPCK ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
-left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.SKUCode and cp.InstituteId = ca.CandidateID and cp.PriceCondition <> 'YA03' {
+inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
+left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.SKUCode and cp.InstituteId = ca.CandidateID and cp.PriceCondition <> 'YA03' {
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
