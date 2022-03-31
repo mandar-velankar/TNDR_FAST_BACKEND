@@ -667,7 +667,9 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     and quotation.AS1 = signatory.AUTHORIZED_SIGNATORY
 {
     offer.OfferID,
-    ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String
+    ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
+    ifnull(quotation.Signatory1.NAME, signatory.NAME) as NAME:String,
+    ifnull(quotation.Signatory1.TITLE, signatory.TITLE) as TITLE:String
 };
 
 entity OfferSignatory2 as select from TransactionalData.PT_TMOFRS as offer
@@ -688,7 +690,9 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     and quotation.AS2 = signatory.AUTHORIZED_SIGNATORY
 {
     offer.OfferID,
-    ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String
+    ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
+    ifnull(quotation.Signatory2.NAME, signatory.NAME) as NAME:String,
+    ifnull(quotation.Signatory2.TITLE, signatory.TITLE) as TITLE:String
 };
 
 
@@ -732,10 +736,19 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
     ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS1:String(500),
 	ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.AUTHORIZED_SIGNATORY) as SELLING_COMPANY_AS2:String(500),
-    ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.NAME) as SELLING_COMPANY_AS1_NAMEI:String(500),
-    ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.TITLE) as SELLING_COMPANY_AS1_TITLEI:String(500),
-    ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.NAME) as SELLING_COMPANY_AS2_NAMEI:String(500),
-    ifnull(ifnull(offer.Quotation.AS2, signatory2.AUTHORIZED_SIGNATORY), signatory2Default.TITLE) as SELLING_COMPANY_AS2_TITLEI:String(500),
+
+    ifnull(ifnull(offer.Quotation.Signatory1.NAME, signatory1.NAME), signatory1Default.NAME) as SELLING_COMPANY_AS1_NAMEI:String(500),
+	ifnull(ifnull(offer.Quotation.Signatory2.NAME, signatory2.NAME), signatory2Default.NAME) as SELLING_COMPANY_AS2_NAMEI:String(500),
+
+    ifnull(ifnull(offer.Quotation.Signatory1.TITLE, signatory1.TITLE), signatory1Default.TITLE) as SELLING_COMPANY_AS1_TITLEI:String(500),
+	ifnull(ifnull(offer.Quotation.Signatory2.TITLE, signatory2.TITLE), signatory2Default.TITLE) as SELLING_COMPANY_AS2_TITLEI:String(500),
+
+
+
+    //ifnull(signatory1.NAME, signatory1Default.NAME) as SELLING_COMPANY_AS1_NAMEI:String(500),
+    //ifnull(signatory1.TITLE, signatory1Default.TITLE) as SELLING_COMPANY_AS1_TITLEI:String(500),
+    //ifnull(signatory2.NAME, signatory2Default.NAME) as SELLING_COMPANY_AS2_NAMEI:String(500),
+    //ifnull(signatory2.TITLE, signatory2Default.TITLE) as SELLING_COMPANY_AS2_TITLEI:String(500),
     case 
         when signatory1.AUTHORIZED_SIGNATORY is null then false
         when signatory1.AUTHORIZED_SIGNATORY = ifnull(ifnull(offer.Quotation.AS1, signatory1.AUTHORIZED_SIGNATORY), signatory1Default.AUTHORIZED_SIGNATORY) then true
@@ -799,16 +812,24 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Country.ApprovalType,
           offer.Quotation.OfferDate,
           offer.Quotation.OfferValidity,
+          offer.Quotation.Signatory1.NAME,
+          offer.Quotation.Signatory2.NAME,
+          offer.Quotation.Signatory1.TITLE,
+          offer.Quotation.Signatory2.TITLE,
           offer.CountryCode,
           offer.SellingCompanyDetails.LegalEntityName,
           offer.SellingCompanyDetails.BankDetails,
           offer.Quotation.AS1,
           signatory1.AUTHORIZED_SIGNATORY,
+          signatory1.NAME,
+          signatory1.TITLE,
           signatory1Default.AUTHORIZED_SIGNATORY,
           signatory1Default.NAME,
           signatory1Default.TITLE,
           offer.Quotation.AS2,
           signatory2.AUTHORIZED_SIGNATORY,
+          signatory2.NAME,
+          signatory2.TITLE,
           signatory2Default.AUTHORIZED_SIGNATORY,
           signatory2Default.NAME,
           signatory2Default.TITLE,
