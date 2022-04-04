@@ -1120,7 +1120,11 @@ left outer join TransactionalData.PriceCondition as priceCondition
     and product.OfferID = priceCondition.OfferID
 left outer join MasterData.RoyalDecree as royalDecree
     on product.ProductCode = royalDecree.ProductPackID 
-    and royalDecree.ValidTo > CURRENT_DATE {
+    and royalDecree.ValidTo > CURRENT_DATE 
+left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+    on product.ProductCode = masterPrices.ProductPackId
+    and product.CountryCode = masterPrices.CountryCode
+    {
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
@@ -1152,5 +1156,11 @@ left outer join MasterData.RoyalDecree as royalDecree
     priceCondition.MaximumPrice,
     product.SKUCountry.VTATax as Tax, 
     priceCondition.Liquidation,
-    priceCondition.RefundDate
+    priceCondition.RefundDate,
+    masterPrices.YLLP,
+    masterPrices.YLAP,
+    masterPrices.PRAF,
+    masterPrices.UoM,
+    masterPrices.Currency as masterPriceCurrency
+
 }where tender.Active = 1;
