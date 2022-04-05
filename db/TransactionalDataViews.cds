@@ -1162,5 +1162,6 @@ left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices
     masterPrices.PRAF,
     masterPrices.UoM,
     masterPrices.Currency as masterPriceCurrency
-
+    priceCondition.MonthlyRentPerUnit,
+    priceCondition.AnnualValue
 }where tender.Active = 1;

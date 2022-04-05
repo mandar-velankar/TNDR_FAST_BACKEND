@@ -115,5 +115,5 @@ LEGAL_ENTITY_CODE,COUNTRY_CODE,AUTHORIZED_SIGNATORY,NAME,TITLE,SORTER,SIGNATORY,
 "BIT","IT","Andrea Duranti nato a Durham (GBR) il 05/06/1986, C.F. DRN NDR 86H05 Z114P, in qualità di Procuratore giusta procura Repertorio 24.324 Raccolta 10.019 del 22/09/2020","Andrea Duranti","Head Of Tender Management",1,1,"Both"
 "BIT","IT","Loredana Pistorio nata a Milano il 23/02/1963, C.F. PST LDN 63B63 F205Q, in qualità di Procuratore giusta procura Repertorio 108272 Raccolta 19594 del 14.01.2010","Loredana Pistorio","Procuratore",2,2,"Both"
 "BES","ES","Signatory 1","Signatory 1","Issued By",1,1,"Both"
-"BES","ES","Signatory 2","Signatory 2","Company Stamp",1,2,"Both"
+"BES","ES","Signatory 2","Signatory 2","Company Stamp",2,2,"Both"
 "BLC","SA","Henrik Wulff\Managing Director - Bayer Middle East FZE","Henrik Wulff","Managing Director - Bayer Middle East FZE",8,1,"Pharma"
