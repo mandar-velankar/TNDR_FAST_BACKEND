@@ -305,6 +305,7 @@ COUNTRYCODE,INSTITUTEID,CUSTOMERID,INSTITUTENAME,INSTITUTETYPE,ADDRESS,CONTACTNO
 "ES","203527","0","Navarre","Region(s)",,,,,"Yes",,,"1",,,"94e8bf0d-9e92-0349-854c-67ec756f106c",,,,,
 "ES","203528","0","Cantabria","Region(s)",,,,,"Yes",,,"1",,,"087662a7-0df0-2e65-7420-bde600d14b81",,,,,
 "ES","203529","0","La Rioja","Region(s)",,,,,"Yes",,,"1",,,"10efe3c0-69ae-7210-3651-466c7f049fb4",,,,,
+"ES","203530","0","National Inst 1","National",,,,,"Yes",,,"1",,,"10efe3c0-69ae-7210-3651-466c7f049fb4",,,,,
 "JO","100089","0","Jordan University","Public",,,,,"Yes",,,"1",,,,,,,,
 "JO","100090","0","King Abdullah University Hospital","Public",,,,,"Yes",,,"1",,,,,,,,
 "JO","100091","0","King Hussein Cancer Center ","Public",,,,,"Yes",,,"1",,,,,,,,
