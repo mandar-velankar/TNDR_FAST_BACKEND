@@ -1202,7 +1202,10 @@ module.exports = (srv) => {
 			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
 
 			//let aFreeGoodsOtherTemp = [];
-			const whereProductPackId = ServiceHelper.buildFullWhere("ProductPricing_ProductCode", "=", offerProduct.PRODUCTID);
+            const whereProductPackId = {
+                ProductPricing_ProductCode: offerProduct.PRODUCTID,
+                ProductPricing_OfferID: offer.OFFERID
+            }
 			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
 
             //loop over freegoodsother and retrieve productpricing, material and productpack data
