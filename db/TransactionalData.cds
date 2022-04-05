@@ -402,6 +402,9 @@ entity PriceCondition: cuid, managed {
     Tax                                 : Decimal;
     Liquidation                         : String;
     RefundDate                          : Date;
+    PriceConditionCode                  : String;
+    MonthlyRentPerUnit                  : Double;
+    AnnualValue                         : Double;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
@@ -422,6 +425,7 @@ entity PriceConditionClassification: cuid {
     ConditionType   : String;
     Classification  : String;
     Division        : String;
+    ProductType     : String;
     isMain          : Boolean;
 }
 

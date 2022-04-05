@@ -1173,5 +1173,7 @@ left outer join MasterData.RoyalDecree as royalDecree
     priceCondition.MaximumPrice,
     product.SKUCountry.VTATax as Tax, 
     priceCondition.Liquidation,
-    priceCondition.RefundDate
+    priceCondition.RefundDate,
+    priceCondition.MonthlyRentPerUnit,
+    priceCondition.AnnualValue
 }where tender.Active = 1;
