@@ -69,6 +69,9 @@ service CatalogService @(path : 'tender')@(requires : [
     entity FreeGoodsOther                               as projection on TransactionalData.FreeGoodsOther;
     entity ProductPricingView                           as projection on TransactionalDataViews.ProductPricingView;
     entity PriceConditionView                           as projection on TransactionalDataViews.PriceConditionView;
+    //spain
+    entity MasterPrices                                 as projection on MasterData.MasterPrices;
+    entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
