@@ -20,6 +20,10 @@ entity BankGuarantees: cuid, managed {
     ClosingDate: DateTime;
     ExpectedExpiryDate: DateTime;
     Status:  String;
+    //StatusESP: String; Status field for Spain
+    BankName:String;//added this field for Spain
+    BankRequestDate:DateTime;//added this field for Spain
+    ShippingField:DateTime;//added this field for Spain
     Type: String;
     GuaranteedAmount: Double;
     Currency: String;
