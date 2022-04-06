@@ -401,11 +401,11 @@ service CatalogService @(path : 'tender')@(requires : [
             INSTITUTENAME         : String(500);
             INSTITUTE_TYPE        : String(50);
             INSTITUTE_STATE       : String;
-            REGION_NAME           : String;
-            PROVINCE_NAME         : String;
-            CIF_CODE              : String(50);
-            REGIONAL_HEALTH_SYSTEM: String(50);
-            CUSTOMER_GROUP        : String(50);
+            INSTITUTE_REGION      : String;
+            INSTITUTE_PROVINCE    : String;
+            INSTITUTE_CIFCODE     : String(50);
+            INSTITUTE_REGIONALHEALTHSYSTEM: String(50);
+            INSTITUTE_CUSTOMER_GROUP: String(50);
             TAXCODE               : String(50);
             VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
