@@ -1202,7 +1202,10 @@ module.exports = (srv) => {
 			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
 
 			//let aFreeGoodsOtherTemp = [];
-			const whereProductPackId = ServiceHelper.buildFullWhere("ProductPricing_ProductCode", "=", offerProduct.PRODUCTID);
+            const whereProductPackId = {
+                ProductPricing_ProductCode: offerProduct.PRODUCTID,
+                ProductPricing_OfferID: offer.OFFERID
+            }
 			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
 
             //loop over freegoodsother and retrieve productpricing, material and productpack data
@@ -1579,9 +1582,31 @@ module.exports = (srv) => {
 			deliveryTerms = deliveryTermsRow.join("<br>")
 		}
 
-		//Product comment shows in remarks, if any
-		let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
-
+		
+//EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
+        //Product comment shows in remarks, if any
+        //	let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
+        let producRemark = "";
+            let productRemarkDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
+                if(d && d.PRODUCT_COMMENT){
+                    return d.PRODUCT_COMMENT;
+                }else{
+                    return 'NA';
+                }	
+            }));
+            if (productRemarkDistinct.length === 1) {
+                producRemark  = productRemarkDistinct[0];
+            }
+            else {
+                let productTermsRow = [];
+                for (let i = 0; i < productRemarkDistinct.length; i++) {
+                    let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
+                    productTermsRow[i] = productTermsItems.concat(": ").concat(productRemarkDistinct[i]);
+                }
+                producRemark = productTermsRow.join("<br>")
+    
+            }
+    //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 		//Comment shows in remarks if any product is not registered in country
 		let registeredRemark = "";
 		if (isRegistered === 0) {
