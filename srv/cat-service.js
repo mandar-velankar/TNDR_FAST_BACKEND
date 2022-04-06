@@ -1227,7 +1227,7 @@ module.exports = (srv) => {
 			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
             productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
                 let whereDiscountCondition = {
-                    PriceConditionID: productCondition.ID
+                    ID: productCondition.ID
                 }
                 productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereDiscountCondition));
 
@@ -1300,7 +1300,7 @@ module.exports = (srv) => {
 
                 productFOCConditions = await Promise.all(productConditionFOCtmp.map( async (productFOCCondition) => {
                     let whereFOCDiscountCondition = {
-                        PriceConditionID: productFOCCondition.ID
+                        ID: productFOCCondition.ID
                     }
                     productFOCCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereFOCDiscountCondition));
 
