@@ -1124,6 +1124,9 @@ left outer join MasterData.RoyalDecree as royalDecree
 left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices 
     on product.ProductCode = masterPrices.ProductPackId
     and product.CountryCode = masterPrices.CountryCode
+left outer join MasterData.ChannelProductPolicies as channelproductpolicies 
+    on product.ProductCode = channelproductpolicies.ProductPackID
+    and product.CountryCode = channelproductpolicies.CountryCode
     {
     key product.TenderID,
     key offer.OfferID,
@@ -1140,11 +1143,11 @@ left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices
     priceCondition.Discount,
     priceCondition.RoyalDecree,
     royalDecree.Percentage as RoyalDecreePercentage,
-    priceCondition.StandardDiscount,
+    ifnull(channelproductpolicies.StandardDiscount,0) as StandardDiscount:Double ,
     case   
         when product.RegisteredPrice.REGISTERED_PRICE is not null
             then  
-                product.RegisteredPrice.REGISTERED_PRICE * (1 - priceCondition.StandardDiscount)
+                product.RegisteredPrice.REGISTERED_PRICE * (1 - channelproductpolicies.StandardDiscount)
         else null
     end as StandardPrice:Double,
     priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
@@ -1161,7 +1164,7 @@ left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices
     masterPrices.YLAP,
     masterPrices.PRAF,
     masterPrices.UoM,
-    masterPrices.Currency as masterPriceCurrency
+    masterPrices.Currency as masterPriceCurrency,
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue
 }where tender.Active = 1;
