@@ -382,6 +382,10 @@ service CatalogService @(path : 'tender')@(requires : [
                                                             and Materials.ActiveRecord = 'Yes';
             ApproverTypes                               : Association to many ApproverTypes
                                                             on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
+            PriceCondition                              : Composition of many PriceCondition 
+                                                                    on PriceCondition.OfferID = $self.OFFER_ID
+                                                                    and PriceCondition.ProductCode = $self.PRODUCTID
+                                                                    and PriceCondition.CountryCode = $self.COUNTRY_CODE;
     };
 
     entity OfferValidation {
@@ -394,6 +398,11 @@ service CatalogService @(path : 'tender')@(requires : [
             INSTITUTENAME         : String(500);
             INSTITUTE_TYPE        : String(50);
             INSTITUTE_STATE       : String;
+            REGION_NAME           : String;
+            PROVINCE_NAME         : String;
+            CIF_CODE              : String(50);
+            REGIONAL_HEALTH_SYSTEM: String(50);
+            CUSTOMER_GROUP        : String(50);
             TAXCODE               : String(50);
             VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
