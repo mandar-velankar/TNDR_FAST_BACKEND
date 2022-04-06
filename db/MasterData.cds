@@ -695,3 +695,16 @@ entity RoyalDecree {
     key ValidFrom               : Date;
         ValidTo                 : Date;
 }
+
+entity MasterPrices: cuid, managed {
+	CountryCode: String;
+	ProductPackId: String;
+	Currency: String;
+    UoM: String;
+    YLLP: Double;
+    YLAP: Double;
+    PRAF: Double;    
+    ValidFrom: Timestamp;
+	ValidTo: Timestamp;    
+
+}
