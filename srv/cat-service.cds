@@ -701,6 +701,8 @@ service CatalogService @(path : 'tender')@(requires : [
         OfferProduct : redirected to PT_TMOFPR
     };
 
+    entity Candidates                                   as projection on PriceAgreementData.CandidatesView;
+
     //OTHER
     entity Templates                                    as projection on AdminData.Template;
     entity MailTemplates                                as projection on AdminData.MailTemplate;
