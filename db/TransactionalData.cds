@@ -552,7 +552,7 @@ entity TransCompetitorResult {
     key PRODUCTCODE    : Integer not null;
         OUTCOME        : String(255);
     key AWARDEDCOMPANY : String(255) not null;
-    key  AWARDEDPRODUCT : String(255) not null;
+    key AWARDEDPRODUCT : String(255) not null;
         AWARDEDPRICE   : Double;
         CURRENCY       : String(3);
         AWARDEDQTY     : Integer;
