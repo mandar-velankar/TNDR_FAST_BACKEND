@@ -405,6 +405,7 @@ entity PriceCondition: cuid, managed {
     PriceConditionCode                  : String;
     MonthlyRentPerUnit                  : Double;
     AnnualValue                         : Double;
+    ReferencePriceAgreement             : UUID;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;

@@ -1197,5 +1197,6 @@ left outer join MasterData.ChannelProductPolicies as channelproductpolicies
     masterPrices.UoM,
     masterPrices.Currency as masterPriceCurrency,
     priceCondition.MonthlyRentPerUnit,
-    priceCondition.AnnualValue
+    priceCondition.AnnualValue,
+    priceCondition.ReferencePriceAgreement
 }where tender.Active = 1;
