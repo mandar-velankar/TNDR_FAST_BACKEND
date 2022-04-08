@@ -1587,11 +1587,11 @@ module.exports = (srv) => {
 		let productRemarkDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
 			if(d && d.PRODUCT_COMMENT){
 				return d.PRODUCT_COMMENT;
-			}else{
-				return ' ';
-			}	
-		}));
-		if (productRemarkDistinct.length === 1) {
+			}
+            }));
+        if (typeof (productRemarkDistinct)!=="undefined")
+        {
+       	if (productRemarkDistinct.length === 1) {
 			producRemark  = productRemarkDistinct[0];
 		}
 		else {
@@ -1603,6 +1603,7 @@ module.exports = (srv) => {
 			producRemark = productTermsRow.join("<br>")
 
 		}
+    }
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 		//Comment shows in remarks if any product is not registered in country
 		let registeredRemark = "";
