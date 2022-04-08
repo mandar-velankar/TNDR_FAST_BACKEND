@@ -71,5 +71,5 @@ COUNTRYCODE,FRAGMENTID,FRAGMENTNAME
 "CL","deliveryTrackingId","PurchaseOrder"
 "IT","quotationViewId","QuotationView_IT"
 "IT","deliveryTrackingId","DeliveryTracking"
-"ES","quotationViewId","QuotationView_IT"
+"ES","quotationViewId","QuotationView_ES"
 "ES","deliveryTrackingId","DeliveryTracking"
