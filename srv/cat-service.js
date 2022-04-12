@@ -1268,7 +1268,6 @@ module.exports = (srv) => {
 
             //loop over freegoodsother and retrieve productpricing, material and productpack data
             aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
-                const productFOCConditions = [];
 
                 let whereMaterialFOC = {
                     CountryCode: offer.COUNTRYCODE,
@@ -1298,7 +1297,7 @@ module.exports = (srv) => {
                 }
                 let productConditionFOCtmp = await tx.run(SELECT.from(PriceCondition).where(whereFocProductConditions));
 
-                productFOCConditions = await Promise.all(productConditionFOCtmp.map( async (productFOCCondition) => {
+                let productFOCConditions = await Promise.all(productConditionFOCtmp.map( async (productFOCCondition) => {
                     let whereFOCDiscountCondition = {
                         ID: productFOCCondition.ID
                     }
@@ -1307,7 +1306,7 @@ module.exports = (srv) => {
                     let whereFOCRoyalDecree = {
                         ProductPackID: PriceCondition.ProductCode
                     }
-                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereRoyalDecree));
+                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));
 
                     let wherePriceConditionClassification = {
                         ID: productFOCCondition.PricingConditionClassificationID
@@ -1317,6 +1316,8 @@ module.exports = (srv) => {
                     return productFOCCondition;
 
                 }));
+
+                tmpFreeGoodOther.priceCondition = productFOCConditions;
 
                 return tmpFreeGoodOther;
             }));
