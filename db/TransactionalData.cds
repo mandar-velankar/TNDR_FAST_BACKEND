@@ -430,6 +430,16 @@ entity PriceConditionClassification: cuid {
     isMain          : Boolean;
 }
 
+entity ProductTypeProfitability: cuid {
+    CountryCode     : String;
+    OfferId         : String;
+    ProductType     : String;
+    NPV_GrossMargin : Double;
+    NPV_NetSales    : Double;
+    NPV_Cogs        : Double;
+    Profitability   : Double;
+}
+
 
 entity PT_TMPFIOM {
     key OfferID : String(255) not null;

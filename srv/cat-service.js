@@ -757,6 +757,22 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
+
+        const whereProductTypeProfitability = {
+            CountryCode: offer.COUNTRYCODE,
+            ProductCode: product.PRODUCTID
+        };
+
+        const whereProduct = {
+            CountryCode: offer.COUNTRYCODE,
+            OfferId: offer.OFFERID
+        };
+
+			
+        const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
+        const ProductProfitabilty = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
+
+
 		let validationType;
 
 		validationType = 1;	//if the offer type differs from selling, all approvals should be optional
