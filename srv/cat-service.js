@@ -760,25 +760,25 @@ module.exports = (srv) => {
 
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
-            ProductCode: product.PRODUCTID,
+            OfferId: offer.OFFERID,
             ProductType: 'Totals'
         };
 
         const whereProduct = {
             CountryCode: offer.COUNTRYCODE,
-            OfferId: offer.OFFERID
+            ProductPackId: product.PRODUCTID
         };
 
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
-        let dFloorPrice = MasterProductPrice.PRAF;
+        let dFloorPrice = MasterProductPrice ? MasterProductPrice.PRAF : 0;
         let dRadiologyProfitability = 0;
 
-        if(offer.Division === 'Radiology'){
+        if(product.DIVISION === 'Radiology'){
             const ProductProfitabilty = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
             dRadiologyProfitability = ProductProfitability ? Number(ProductProfitabilty.Profitability) : 0;
 
-            if(product.Price.NetPrice > dFloorPrice && dRadiologyProfitability > 40){
+            if(product.NET_PRICE.NetPrice > dFloorPrice && dRadiologyProfitability > 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "Head of KAMS":
@@ -803,14 +803,14 @@ module.exports = (srv) => {
                 });
             }
         } else {
-            if(product.Price.NetPrice > dFloorPrice){
+            if(product.NET_PRICE > dFloorPrice){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "BU/RAM":
-                            oApproverType.ValidationType = offer.Division === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
                             break;
                         case "Controlling":
-                            oApproverType.ValidationType = offer.Division === 'Consumer Health' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 1 : oApproverType.ValidationType;
                             break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
@@ -820,16 +820,16 @@ module.exports = (srv) => {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "BU/RAM":
-                            oApproverType.ValidationType = offer.Division === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
                             break;
                         case "Legal":
-                            oApproverType.ValidationType = offer.Division === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
                             break;
                         case "Financial Business Partner":
-                            oApproverType.ValidationType = offer.Division === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
                             break;
                         case "Controlling":
-                            oApproverType.ValidationType = offer.Division === 'Consumer Health' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 1 : oApproverType.ValidationType;
                             break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
