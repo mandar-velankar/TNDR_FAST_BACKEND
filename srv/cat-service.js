@@ -24,13 +24,13 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing, PriceCondition, DiscountCondition, PriceConditionClassification
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing, PriceCondition, DiscountCondition, PriceConditionClassification, ProductTypeProfitability
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -757,14 +757,86 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
-		let validationType;
 
-		validationType = 1;	//if the offer type differs from selling, all approvals should be optional
+        const whereProductTypeProfitability = {
+            CountryCode: offer.COUNTRYCODE,
+            OfferId: offer.OFFERID,
+            ProductType: 'Totals'
+        };
 
-		aApproverTypes.map(async function (oApproverType) {	
-				oApproverType.ValidationType = validationType;	
-		})
+        const whereProduct = {
+            CountryCode: offer.COUNTRYCODE,
+            ProductPackId: product.PRODUCTID
+        };
 
+        const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
+        
+        let dFloorPrice = MasterProductPrice ? MasterProductPrice.PRAF : 0;
+        let dRadiologyProfitability = 0;
+
+        if(product.DIVISION === 'Radiology'){
+            const ProductProfitabilty = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
+            dRadiologyProfitability = ProductProfitability ? Number(ProductProfitabilty.Profitability)*100 : 0;
+
+            if(product.NET_PRICE.NetPrice > dFloorPrice && dRadiologyProfitability > 40){
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "Head of KAMS":
+                            oApproverType.ValidationType = 1;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            } else {
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "Head of KAMS":
+                            oApproverType.ValidationType = 1;
+                            break;
+                        case "CDH":
+                            oApproverType.ValidationType = 2;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            }
+        } else {
+            if(product.NET_PRICE > dFloorPrice){
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "BU/RAM":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            break;
+                        case "Controlling":
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 1 : oApproverType.ValidationType;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            } else {
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "BU/RAM":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            break;
+                        case "Legal":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            break;
+                        case "Financial Business Partner":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            break;
+                        case "Controlling":
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 1 : oApproverType.ValidationType;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            }
+        }
 		
 		let results = {
 			//In Policy flag

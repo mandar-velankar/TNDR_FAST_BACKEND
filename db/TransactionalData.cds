@@ -70,6 +70,8 @@ entity PT_TMOFRS { //Offers
                                     and Signatories.LEGAL_ENTITY_CODE = SellingCompany;
         Country               : Association to MasterData.PT_TMCTRY
                                     on Country.CountryCode = CountryCode;
+        ProductTypeProfitability: Association to ProductTypeProfitability
+                                    on ProductTypeProfitability.OfferId = OfferID;
 }
 
 entity OfferView as
@@ -428,6 +430,16 @@ entity PriceConditionClassification: cuid {
     Division        : String;
     ProductType     : String;
     isMain          : Boolean;
+}
+
+entity ProductTypeProfitability: cuid {
+    CountryCode     : String;
+    OfferId         : String;
+    ProductType     : String;
+    NPV_GrossMargin : Double;
+    NPV_NetSales    : Double;
+    NPV_Cogs        : Double;
+    Profitability   : Double;
 }
 
 
