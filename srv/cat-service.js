@@ -776,7 +776,7 @@ module.exports = (srv) => {
 
         if(product.DIVISION === 'Radiology'){
             const ProductProfitabilty = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
-            dRadiologyProfitability = ProductProfitability ? Number(ProductProfitabilty.Profitability) : 0;
+            dRadiologyProfitability = ProductProfitability ? Number(ProductProfitabilty.Profitability)*100 : 0;
 
             if(product.NET_PRICE.NetPrice > dFloorPrice && dRadiologyProfitability > 40){
                 aApproverTypes.map(async function (oApproverType) {
