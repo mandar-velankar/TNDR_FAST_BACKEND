@@ -70,6 +70,8 @@ entity PT_TMOFRS { //Offers
                                     and Signatories.LEGAL_ENTITY_CODE = SellingCompany;
         Country               : Association to MasterData.PT_TMCTRY
                                     on Country.CountryCode = CountryCode;
+        ProductTypeProfitability: Association to ProductTypeProfitability
+                                    on ProductTypeProfitability.OfferId = OfferID;
 }
 
 entity OfferView as
