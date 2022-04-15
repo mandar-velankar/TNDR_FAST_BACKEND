@@ -67,8 +67,12 @@ service CatalogService @(path : 'tender')@(requires : [
     entity PriceConditionClassification                 as projection on TransactionalData.PriceConditionClassification;
     entity DiscountCondition                            as projection on TransactionalData.DiscountCondition;
     entity FreeGoodsOther                               as projection on TransactionalData.FreeGoodsOther;
+    entity ProductTypeProfitability                     as projection on TransactionalData.ProductTypeProfitability;
     entity ProductPricingView                           as projection on TransactionalDataViews.ProductPricingView;
     entity PriceConditionView                           as projection on TransactionalDataViews.PriceConditionView;
+    //spain
+    entity MasterPrices                                 as projection on MasterData.MasterPrices;
+    entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -382,6 +386,10 @@ service CatalogService @(path : 'tender')@(requires : [
                                                             and Materials.ActiveRecord = 'Yes';
             ApproverTypes                               : Association to many ApproverTypes
                                                             on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
+            PriceCondition                              : Composition of many PriceCondition 
+                                                                    on PriceCondition.OfferID = $self.OFFER_ID
+                                                                    and PriceCondition.ProductCode = $self.PRODUCTID
+                                                                    and PriceCondition.CountryCode = $self.COUNTRY_CODE;
     };
 
     entity OfferValidation {
@@ -394,6 +402,11 @@ service CatalogService @(path : 'tender')@(requires : [
             INSTITUTENAME         : String(500);
             INSTITUTE_TYPE        : String(50);
             INSTITUTE_STATE       : String;
+            INSTITUTE_REGION      : String;
+            INSTITUTE_PROVINCE    : String;
+            INSTITUTE_CIFCODE     : String(50);
+            INSTITUTE_REGIONALHEALTHSYSTEM: String(50);
+            INSTITUTE_CUSTOMER_GROUP: String(50);
             TAXCODE               : String(50);
             VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
@@ -688,6 +701,8 @@ service CatalogService @(path : 'tender')@(requires : [
         Tender : redirected to PT_TMTEND,
         OfferProduct : redirected to PT_TMOFPR
     };
+
+    entity Candidates                                   as projection on PriceAgreementData.CandidatesView;
 
     //OTHER
     entity Templates                                    as projection on AdminData.Template;

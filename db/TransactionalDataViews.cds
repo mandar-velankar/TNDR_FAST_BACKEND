@@ -727,6 +727,11 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Institute.InstituteName as INSTITUTENAME,
     offer.Tender.Institute.VatCode as VATCODE,
     offer.Tender.Institute.TaxCode as TAXCODE,
+    offer.Tender.Institute.Region.Name as REGION_NAME,
+    offer.Tender.Institute.Province.Name as PROVINCE_NAME,
+    offer.Tender.Institute.CifCode as CIF_CODE,
+    offer.Tender.Institute.RegionalHealthSystem as REGIONAL_HEALTH_SYSTEM,
+    offer.Tender.Institute.CustomerGroup as CUSTOMER_GROUP,
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
@@ -807,6 +812,11 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Institute.InstituteName,
           offer.Tender.Institute.VatCode,
           offer.Tender.Institute.TaxCode,
+          offer.Tender.Institute.Region.Name,
+          offer.Tender.Institute.Province.Name,
+          offer.Tender.Institute.CifCode,
+          offer.Tender.Institute.RegionalHealthSystem,
+          offer.Tender.Institute.CustomerGroup,
           offer.Tender.TenderName,
           offer.OfferStatus.STATUS,
           offer.Tender.Country.ApprovalType,
@@ -1141,7 +1151,14 @@ left outer join TransactionalData.PriceCondition as priceCondition
     and product.OfferID = priceCondition.OfferID
 left outer join MasterData.RoyalDecree as royalDecree
     on product.ProductCode = royalDecree.ProductPackID 
-    and royalDecree.ValidTo > CURRENT_DATE {
+    and royalDecree.ValidTo > CURRENT_DATE 
+left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+    on product.ProductCode = masterPrices.ProductPackId
+    and product.CountryCode = masterPrices.CountryCode
+left outer join MasterData.ChannelProductPolicies as channelproductpolicies 
+    on product.ProductCode = channelproductpolicies.ProductPackID
+    and product.CountryCode = channelproductpolicies.CountryCode
+    {
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
@@ -1157,11 +1174,11 @@ left outer join MasterData.RoyalDecree as royalDecree
     priceCondition.Discount,
     priceCondition.RoyalDecree,
     royalDecree.Percentage as RoyalDecreePercentage,
-    priceCondition.StandardDiscount,
+    ifnull(channelproductpolicies.StandardDiscount,0) as StandardDiscount:Double ,
     case   
         when product.RegisteredPrice.REGISTERED_PRICE is not null
             then  
-                product.RegisteredPrice.REGISTERED_PRICE * (1 - priceCondition.StandardDiscount)
+                product.RegisteredPrice.REGISTERED_PRICE * (1 - channelproductpolicies.StandardDiscount)
         else null
     end as StandardPrice:Double,
     priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
@@ -1173,5 +1190,13 @@ left outer join MasterData.RoyalDecree as royalDecree
     priceCondition.MaximumPrice,
     product.SKUCountry.VTATax as Tax, 
     priceCondition.Liquidation,
-    priceCondition.RefundDate
+    priceCondition.RefundDate,
+    masterPrices.YLLP,
+    masterPrices.YLAP,
+    masterPrices.PRAF,
+    masterPrices.UoM,
+    masterPrices.Currency as masterPriceCurrency,
+    priceCondition.MonthlyRentPerUnit,
+    priceCondition.AnnualValue,
+    priceCondition.ReferencePriceAgreement
 }where tender.Active = 1;

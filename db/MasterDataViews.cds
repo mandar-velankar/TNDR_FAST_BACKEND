@@ -149,3 +149,6 @@ entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
 	MaxPriceNhsPP,
 	MaxPriceNhsPU
 }where ValidTo = '9999-12-31 00:00:00.000000000';
+
+entity MostRecentMasterPricesView as projection on MasterData.MasterPrices 
+where ValidTo = '9999-12-31 00:00:00.000000000';

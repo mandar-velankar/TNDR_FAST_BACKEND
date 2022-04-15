@@ -24,13 +24,13 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing, PriceCondition, DiscountCondition, PriceConditionClassification, ProductTypeProfitability
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -757,14 +757,86 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
-		let validationType;
 
-		validationType = 1;	//if the offer type differs from selling, all approvals should be optional
+        const whereProductTypeProfitability = {
+            CountryCode: offer.COUNTRYCODE,
+            OfferId: offer.OFFERID,
+            ProductType: 'Totals'
+        };
 
-		aApproverTypes.map(async function (oApproverType) {	
-				oApproverType.ValidationType = validationType;	
-		})
+        const whereProduct = {
+            CountryCode: offer.COUNTRYCODE,
+            ProductPackId: product.PRODUCTID
+        };
 
+        const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
+        
+        let dFloorPrice = MasterProductPrice ? MasterProductPrice.PRAF : 0;
+        let dRadiologyProfitability = 0;
+
+        if(product.DIVISION === 'Radiology'){
+            const ProductProfitabilty = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
+            dRadiologyProfitability = ProductProfitability ? Number(ProductProfitabilty.Profitability)*100 : 0;
+
+            if(product.NET_PRICE.NetPrice > dFloorPrice && dRadiologyProfitability > 40){
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "Head of KAMS":
+                            oApproverType.ValidationType = 1;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            } else {
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "Head of KAMS":
+                            oApproverType.ValidationType = 1;
+                            break;
+                        case "CDH":
+                            oApproverType.ValidationType = 2;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            }
+        } else {
+            if(product.NET_PRICE > dFloorPrice){
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "BU/RAM":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            break;
+                        case "Controlling":
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 1 : oApproverType.ValidationType;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            } else {
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "BU/RAM":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            break;
+                        case "Legal":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            break;
+                        case "Financial Business Partner":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            break;
+                        case "Controlling":
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 1 : oApproverType.ValidationType;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            }
+        }
 		
 		let results = {
 			//In Policy flag
@@ -1218,6 +1290,34 @@ module.exports = (srv) => {
             
 			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 
+            /*Get corresponding ProductConditions*/
+			const whereProductConditions = {
+				OfferID: offer.OFFERID,
+				ProductCode: offerProduct.ProductCode,
+				CountryCode: offer.COUNTRYCODE
+			}
+			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
+            productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
+                let whereDiscountCondition = {
+                    ID: productCondition.ID
+                }
+                productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereDiscountCondition));
+
+                let whereRoyalDecree = {
+                    ProductPackID: productCondition.ProductCode
+                }
+                productCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereRoyalDecree));
+
+                let wherePriceConditionClassification = {
+                    ID: productCondition.PricingConditionClassificationID
+                }
+                productCondition.PriceConditionClassification = await tx.run(SELECT.from(PriceConditionClassification).where(wherePriceConditionClassification));
+
+                return productCondition;
+
+            }));
+            /*end of ProductCondition information */
+
 			//Get corresponding ProductPack
 			const whereProductPack = {
 				PRODUCTPACKID: offerProduct.ProductCode,
@@ -1240,6 +1340,7 @@ module.exports = (srv) => {
 
             //loop over freegoodsother and retrieve productpricing, material and productpack data
             aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
+
                 let whereMaterialFOC = {
                     CountryCode: offer.COUNTRYCODE,
                     ProductPackId: tmpFreeGoodOther.ProductPackId
@@ -1259,6 +1360,36 @@ module.exports = (srv) => {
                     PRODUCTPACKID: tmpFreeGoodOther.ProductPackId,
                 }
                 tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
+
+                //Get corresponding ProductConditions
+                const whereFocProductConditions = {
+                    OfferID: offer.OFFERID,
+                    ProductCode: tmpFreeGoodOther.ProductPackId,
+                    CountryCode: offer.COUNTRYCODE
+                }
+                let productConditionFOCtmp = await tx.run(SELECT.from(PriceCondition).where(whereFocProductConditions));
+
+                let productFOCConditions = await Promise.all(productConditionFOCtmp.map( async (productFOCCondition) => {
+                    let whereFOCDiscountCondition = {
+                        ID: productFOCCondition.ID
+                    }
+                    productFOCCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereFOCDiscountCondition));
+
+                    let whereFOCRoyalDecree = {
+                        ProductPackID: PriceCondition.ProductCode
+                    }
+                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));
+
+                    let wherePriceConditionClassification = {
+                        ID: productFOCCondition.PricingConditionClassificationID
+                    }
+                    productFOCCondition.PriceConditionClassification = await tx.run(SELECT.from(PriceConditionClassification).where(wherePriceConditionClassification));
+
+                    return productFOCCondition;
+
+                }));
+
+                tmpFreeGoodOther.priceCondition = productFOCConditions;
 
                 return tmpFreeGoodOther;
             }));
@@ -1398,6 +1529,7 @@ module.exports = (srv) => {
 				FOC_STEP: offerProduct.FOC_STEP,
 				OFFER_TYPE: offerProduct.OfferType,
 				FreeGoodsOther: aFreeGoodsOtherTemp,
+                PriceCondition: productConditions,
 
 				//missing SKU & SKUCountry fields
 				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
@@ -1663,6 +1795,11 @@ module.exports = (srv) => {
 			INSTITUTENAME: offer.INSTITUTENAME,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
 			INSTITUTE_STATE: offer.INSTITUTE_STATE,
+            INSTITUTE_REGION: offer.REGION_NAME,
+            INSTITUTE_PROVINCE: offer.REGION_PROVINCE,
+            INSTITUTE_CIFCODE: offer.CIF_CODE,
+            INSTITUTE_REGIONALHEALTHSYSTEM: offer.REGIONAL_HEALTH_SYSTEM,
+            INSTITUTE_CUSTOMER_GROUP: offer.CUSTOMER_GROUP,
 			VATCODE: offer.VATCODE,
 			TAXCODE: offer.TAXCODE,
 			CUSTOMER_CODE: offer.CUSTOMER_CODE,

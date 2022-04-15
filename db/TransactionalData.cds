@@ -70,6 +70,8 @@ entity PT_TMOFRS { //Offers
                                     and Signatories.LEGAL_ENTITY_CODE = SellingCompany;
         Country               : Association to MasterData.PT_TMCTRY
                                     on Country.CountryCode = CountryCode;
+        ProductTypeProfitability: Association to ProductTypeProfitability
+                                    on ProductTypeProfitability.OfferId = OfferID;
 }
 
 entity OfferView as
@@ -389,6 +391,7 @@ entity PriceCondition: cuid, managed {
     OfferID                             : String;
     ProductCode                         : Integer;
     PVL                                 : Decimal(15,6);
+    ConfidentialPrice                   : Decimal(15,6);
     Discount                            : Decimal;
     RoyalDecree                         : String;
     StandardDiscount                    : Decimal;
@@ -402,6 +405,10 @@ entity PriceCondition: cuid, managed {
     Tax                                 : Decimal;
     Liquidation                         : String;
     RefundDate                          : Date;
+    PriceConditionCode                  : String;
+    MonthlyRentPerUnit                  : Double;
+    AnnualValue                         : Double;
+    ReferencePriceAgreement             : UUID; // reference to an existing price agreement related to a "Tender" **classification Tender** which is not expiring before tomorrow for the same product and customer
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
@@ -422,7 +429,18 @@ entity PriceConditionClassification: cuid {
     ConditionType   : String;
     Classification  : String;
     Division        : String;
+    ProductType     : String;
     isMain          : Boolean;
+}
+
+entity ProductTypeProfitability: cuid {
+    CountryCode     : String;
+    OfferId         : String;
+    ProductType     : String;
+    NPV_GrossMargin : Double;
+    NPV_NetSales    : Double;
+    NPV_Cogs        : Double;
+    Profitability   : Double;
 }
 
 
