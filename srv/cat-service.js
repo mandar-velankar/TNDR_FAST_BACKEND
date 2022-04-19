@@ -175,6 +175,7 @@ module.exports = (srv) => {
 						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
 						CHANNEL: 'Direct',
 						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+                        DIVISION: countryProduct.DIVISION,
 						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
 					});
 				});
