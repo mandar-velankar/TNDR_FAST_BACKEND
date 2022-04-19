@@ -175,6 +175,7 @@ module.exports = (srv) => {
 						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
 						CHANNEL: 'Direct',
 						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+                        DIVISION: countryProduct.DIVISION,
 						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
 					});
 				});
@@ -775,10 +776,10 @@ module.exports = (srv) => {
         let dRadiologyProfitability = 0;
 
         if(product.DIVISION === 'Radiology'){
-            const ProductProfitabilty = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
-            dRadiologyProfitability = ProductProfitability ? Number(ProductProfitabilty.Profitability)*100 : 0;
+            const ProductProfitability = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
+            dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
 
-            if(product.NET_PRICE.NetPrice > dFloorPrice && dRadiologyProfitability > 40){
+            if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability > 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "Head of KAMS":
