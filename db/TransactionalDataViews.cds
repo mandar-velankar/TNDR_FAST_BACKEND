@@ -1142,10 +1142,14 @@ inner join TransactionalData.PT_TMOFRS as offer
 inner join TransactionalData.PT_TMOFPR as product 
     on product.OfferID = offer.OfferID
     and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
 inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
     on priceConditionClassification.CountryCode = product.CountryCode
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
 inner join MasterData.PT_TMINST as institute 
     on tender.InstituteID = institute.InstituteID 
 left outer join TransactionalData.PriceCondition as priceCondition 
