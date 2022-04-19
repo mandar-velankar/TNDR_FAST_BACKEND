@@ -234,7 +234,7 @@ module.exports = async (srv) => {
         }
 
 
-        const updatePromises = customerPrices.map(custPrice => updateCustomerPrice(custPrice, tx));
+        const updatePromises = customerPrices.map(custPrice => updateCustomerPrice(custPrice, tx, req));
         const result = await Promise.all(updatePromises);
 
         // set customerPrices 'Synchronized' to true
@@ -245,18 +245,26 @@ module.exports = async (srv) => {
     });
 
 
-    async function updateCustomerPrice(customerPrice, tx){
+    async function updateCustomerPrice(customerPrice, tx, req){
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
-        
+        if (!institute) {
+            return req.reject(404, `No institute was found for InstituteID: ${customerPrice.InstituteId}`);
+        }
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
+        if (!priceAgreement) {
+            return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+        }
         const whereOfferID = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
         const whereProductpackID = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", customerPrice.ProductPackId);
-        let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));        
+        let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));     
+        if (!offer) {
+            return req.reject(404, `No offer was found for OfferID: ${priceAgreement.OfferId}`);
+        }
         let packFactor;
         if(customerPrice.ProductPackId){
             let productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereProductpackID));
@@ -349,6 +357,72 @@ module.exports = async (srv) => {
     };
 
 
+    function getES01RequestBodyTemplate(){
+        return {
+            "_BAY0-GZ_SALESAGR_ES01": {
+                "IDOC": {
+                    "EDI_DC40": {
+                        "TABNAM": "EDI_DC40",
+                        "MANDT": 508,
+                        "DOCNUM": 36256484,
+                        "DOCREL": 740,
+                        "STATUS": 53,
+                        "DIRECT": 2,
+                        "OUTMOD": "",
+                        "IDOCTYP": "/BAY0/GZ_SALESAGR_ES01",
+                        "MESTYP": "/BAY0/GZ_SALESAGR_ES",
+                        "SNDPOR": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
+                        "SNDPRT": "LS",
+                        "SNDPRN": "FAST_ES",
+                        "RCVPOR": "", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
+                        "RCVPRT": "LS",
+                        "RCVPRN": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | | the value is added per environment in the CPI configuration
+                        "CREDAT": 20220404,
+                        "CRETIM": 145201
+                    },
+                    "_BAY0-GZ_SALESAGRHEAD": {
+                        "BOART": "YAW1",
+                        "VKORG": "QFHC",
+                        "VTWEG": 0,
+                        "SPART": 0,
+                        "BONEM": 5233069,
+                        "BOTEX": "RCT COM. W. ACCRUALS",
+                        "DATAB": 20220501,
+                        "DATBI": 20220515,
+                        "CURCY": "EUR",
+                        "ZTERM": "D496",
+                        "ZLSCH": "M",
+                        "ABREX": "TEST AGMNT",
+                        "KOTABNR": 750,
+                        "KVEWE": "A",
+                        "KAPPL": "V",
+                        "_BAY0-GZ_SALESAGRITEM": [
+                            {
+                                "KUNNR": 5233069,
+                                "DATAB_GR": 20220501,
+                                "DATBI_GR": 20220515,
+                                "MATNR": 84137952,
+                                "KBETR": "75-",
+                                "KONWA": "EUR",
+                                "KPEIN": 1,
+                                "KBRUE": 75,
+                                "KSCHL": "YAW1",
+                                "E1KONW": [
+                                    {
+                                        "KSTBW": 98,
+                                        "KBETR": "46.00-"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    };
+
+
+
     async function updatePriceConditions(body){
 
         if (body) {
@@ -416,17 +490,20 @@ module.exports = async (srv) => {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
 
-        const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));
+        const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx, req));
         const result = await Promise.all(updatePromises);
 
         return req.reply(result);
 
     });
 
-    async function updateFOCcustPrices(customerPrice, tx){
+    async function updateFOCcustPrices(customerPrice, tx, req){
         
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
+        if (!priceAgreement) {
+            return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+        }
 
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         const whereProductCode = ServiceHelper.buildFullWhere("ProductCode", "=", customerPrice.ProductPackId);
@@ -439,6 +516,10 @@ module.exports = async (srv) => {
         let offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereCountry).where(whereProductCode).where(whereOfferID));
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
         let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));
+        if (!offer) {
+            return req.reject(404, `No offer was found for OfferID: ${priceAgreement.OfferId}`);
+        }
+
         let packFactor;
         if(customerPrice.FOCproductPackID){
             productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereFOCproductpackID));
