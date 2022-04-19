@@ -1142,22 +1142,30 @@ inner join TransactionalData.PT_TMOFRS as offer
 inner join TransactionalData.PT_TMOFPR as product 
     on product.OfferID = offer.OfferID
     and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
 inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
     on priceConditionClassification.CountryCode = product.CountryCode
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID 
 left outer join TransactionalData.PriceCondition as priceCondition 
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
 left outer join MasterData.RoyalDecree as royalDecree
     on product.ProductCode = royalDecree.ProductPackID 
     and royalDecree.ValidTo > CURRENT_DATE 
 left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices 
     on product.ProductCode = masterPrices.ProductPackId
     and product.CountryCode = masterPrices.CountryCode
-left outer join MasterData.ChannelProductPolicies as channelproductpolicies 
+left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelproductpolicies 
     on product.ProductCode = channelproductpolicies.ProductPackID
     and product.CountryCode = channelproductpolicies.CountryCode
+    and institute.InstituteType = channelproductpolicies.ChannelName
     {
     key product.TenderID,
     key offer.OfferID,
