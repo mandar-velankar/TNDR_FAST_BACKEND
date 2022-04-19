@@ -1,1 +1,209 @@
 OFFERID,PRODUCTCODE,OUTCOME,AWARDEDCOMPANY,AWARDEDPRODUCT,AWARDEDPRICE,CURRENCY,AWARDEDQTY,UOM,REASON,COMMENT,LASTUPDATE,UPDATEDBY,DELETED
+"SA-18-208-1001-BLC-13",100029,"Won","PHARMACEUTICAL INDUSTRIES CO (SAOG)","OMACIP","0.088","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100029,"Won","SPIMACO","CIPROMAX FC TABS 500MG 10G","0.3","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100080,"Won","Jazeera Pharamceutical Industries","Zersa 600 mg Tab","120.0","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100080,"Won","PFIZER INC","Zyvox 600 Mg","67.5","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"JO-18-299-1001-BME-11-A-R1",100058,"Won","N.V Organon / Part of MSD","MARVELON TABS","0.672","USD",0,"Pack","Not Specified",,"2018-05-20","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-11",100039,"Won","GE HEALTH CARE","OMNISCAN","66.0","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-11",100054,"Won","GE HEALTH CARE","OMNISCAN","41.63","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-11",100085,"Won","GE HEALTH CARE","OMNIPAQUE","19.13","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-11",100087,"Won","GE HEALTH CARE","VISIPAQUE","73.2479","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-12",100097,"Won","Gedeon Richter Secondary Packaging BY AJA PHARMA","Midiana Tablet","0.697","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100018,"Won","SPIMACO","MOXIVE FC TAB 400MG 5 P","2.95","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100027,"Won","PHARMACEUTICAL SOLUTIONS INDUSTRY","Cipro - Sol 100 ml","3.55","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-14",100045,"Won","PFIZER SAUDI LIMITED","XYNTHA 1000 I.U. POWDER FOR SOLUTION FOR INJECTION","490.1961","SAR",0,"Unit","Not Specified",,"2018-08-02","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-14",100046,"Won","PFIZER SAUDI LIMITED","XYNTHA 250 I.U. POWDER FOR SOLUTION FOR INJECTION","138.75","SAR",0,"Unit","Not Specified",,"2018-08-02","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-14",100047,"Won","PFIZER SAUDI LIMITED","XYNTHA 500 I.U. POWDER FOR SOLUTION FOR INJECTION","243.5065","SAR",0,"Unit","Not Specified",,"2018-08-02","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-14",100087,"Won","GE HEALTH CARE","VISIPAQUE","73.2479","SAR",0,"Unit","Not Specified",,"2018-08-02","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100030,"Won","KHALID BIN SAAD INTERNATIONAL COMPANY","CIPROCIN 250MG. TAB","0.065","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100031,"Won","JAMJOOM PHARMA","Ciproxen 750mg Coated Tab","0.7","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100092,"Won","Tabuk Pharmaceutical Manufacturing Company","TABUREX 10 MG","3.95","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100093,"Won","Tabuk Pharmaceutical Manufacturing Company","TABUREX 15 MG","3.45","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"SA-18-208-1001-BLC-13",100095,"Won","Tabuk Pharmaceutical Manufacturing Company","TABUREX 20 MG","3.32","SAR",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas, Sheryl",1
+"JO-18-310-1003-BME-11",100072,"Won","Hikma Jordan","Aminor 5mg Tab","0.93","USD",57450,"Pack",,,"2018-10-08","Sidharth Dhas, Sheryl",1
+"IQ-17-100-1002-BPH-11",100047,"Won","Pfizer","Xyntha","93.75","USD",0,"Pack","Not Specified","$ 125 / vial + 25% FOC = $ 93.75 / IU","2018-05-20","Sidharth Dhas, Sheryl",1
+"IQ-20-1002-1-R1",100086,"Won","GE","Omnipaque","7.9","USD",164500,,"Lowest Price","Awarded Quantity is estimated. Award is valued at approx. 1.3M","2020-10-15","GCXYS",0
+"SA-20-1064-1-R1",100041,"Won","GUERBET","TELEBRIX GASTRO","86.0","SAR",0,,"Not Specified","Won against different request nos.","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100084,"Won","GE HEALTH CARE","Omnipaque 300mg/ml 100ml","36.2","SAR",0,,"Lowest Price",,"2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100085,"Won","GE HEALTH CARE","Omnipaque 300mg/ml 50ml","18.2","SAR",0,,"Lowest Price","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100085,"Won","GUERBET","XENETIX 300/50","39.0","SAR",0,,"Not Specified","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GE HEALTH CARE","Omnipaque 350mg/ml 100ml","38.2","SAR",0,,"Lowest Price","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GE Health Care","Visipaque 370 / 100ml","121.8","SAR",0,,"Not Specified",,"2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GUERBET","XENETIX 350/100","79.0","SAR",0,,"Not Specified","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GE Health Care","Visipaque 370 / 50ml","73.0","SAR",0,,"Not Specified",,"2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GE Healthcare","OMNIPAQUE 350MG/ML 50ML","19.2","SAR",0,,"Lowest Price","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GUERBET","XENETIX 350/50","43.5","SAR",0,,"Not Specified","Split Award","2021-12-12","GCXYS",0
+"SA-20-1075-3-C1",100097,"Won","GEDEON RICHTER FOR AJA PHARMA","MIDIANA 3MG/ 0.3MG TABLET","0.62","SAR",0,,"Not Specified",,"2021-09-16","GCXYS",0
+"SA-20-1075-1-R1",100029,"Won","NATIONAL PHARMACEUTICAL INDUSTRIES CO","Omacip 500 mg","0.143","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100029,"Won","KUWAIT SAUDI CO.","Ciflox 500 mg tab","0.2063","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100029,"Won","SPIMACO ","CIPROMAX FC TABS 500MG 10 N","0.2893","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100092,"Won","DR. REDDY LABORATORIES","Rivaroxaban SPC 10 mg F.C. Tablets","1.7955","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100092,"Won","SPIMACO","BANORIV FC TABS 10MG 10 P","2.5","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100093,"Won","DR. REDDY LABORATORIES","Rivaroxaban SPC 15 mg F.C. Tablets","1.6748","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100093,"Won","SPIMACO","BANORIV FC TABS 15MG 28 P","1.4","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100095,"Won","DR. REDDY LABORATORIES","Rivaroxaban SPC 20 mg F.C. Tablets","1.7226","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100095,"Won","SPIMACO","BANORIV FC TABS 20MG 28 P","1.5","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100027,"Won","PHARMACEUTICAL SOLUTIONS INDUSTRY","Cipro-Sol 200 mg/ 100 ml G Bottle","3.45","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100018,"Won","SPIMACO ","Maxim","2.192","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"SA-20-1075-1-R1",100018,"Won","SPIMACO","MOXIVE FC TAB 400MG 5 N","2.28444","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
+"GC-17-100-1001-ALL-11",100018,"Won","Jamjoom Pharmaceuticals","NULL","1.01","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100027,"Won","Qatar Pharma","NULL","0.799","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100029,"Won","National Pharm. IND CO.","NULL","0.025","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100030,"Won","Kuwait Saudi Pharmaceutical Co.","NULL","0.0179","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-16-100-1001-ALL-11-A-R1",100015,"Won","Jamjoom Pharmaceuticals","","1.11","USD",0,"NULL","Not Specified","NULL","2018-06-05","Dadwal\, Gajjendar",1
+"JO-17-100-1002-BPH-11",100058,"Won","N.V Organon - Part of MSD","NULL","0.672","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100028,"Won","Qatar Pharma","NULL","2.796","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100030,"Won","NATIONAL PHARMACEUTICAL INDUSTRIES CO SAOG","NULL","0.067","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100044,"Won","RIYADH PHARMA","NULL","0.35","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100092,"Won","TABUK PHARMACEUTICAL MANUFACTURING COMPANY","NULL","5.559","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100093,"Won","TABUK PHARMACEUTICAL MANUFACTURING COMPANY","NULL","4.8856","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100095,"Won","TABUK PHARMACEUTICAL MANUFACTURING COMPANY","NULL","5.4655","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-15",100058,"Won","Lab .Leon Farma","NULL","0.14","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"GC-17-100-1001-ALL-11",100045,"Won","Wyeth Lederle S.p.A\, Catania - (Banaja) - Italy","NULL","361.0","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100046,"Won","Wyeth Lederle S.p.A\, Catania - (Banaja) - Italy","NULL","98.0","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100047,"Won","Wyeth Lederle S.p.A\, Catania - (Banaja) - Italy","NULL","190.0","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11-A-R1",100028,"Won","Pharmaceutical Solution Industry (P.S.I.) - Saudi Arabia","","0.95","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11-A-R1",100029,"Won","National Pharm. IND CO. - Oman","","0.027","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11-A-R1",100030,"Won","National Pharm. IND CO. - Oman","","0.0175","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11-A-R1",100045,"Won","Novo Nordisk A/S - Denmark","","126.98","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11-A-R1",100047,"Won","Novo Nordisk A/S - Denmark","","65.0","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11-A-R1",100085,"Won","G.E. Health Care - Ireland","","5.1","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100079,"Won","Pfizer Enterprises-SARL (Formally Pharmacia)-(Algosaibi) - Italy","NULL","66.4639","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100080,"Won","Pfizer Enterprises-SARL (Formally Pharmacia)-(Algosaibi) - Italy","NULL","70.0","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100085,"Won","G.E. Health Care","NULL","5.35","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11-A-R1",100087,"Won","G.E. Health Care - Ireland","","5.2","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100018,"Won","Jamjoom Pharmaceuticals - Saudi Arabia","NULL","0.99","USD",0,"Unit","Not Specified","NULL","2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100027,"Won","Pharmaceutical Solution Industry - KSA","NULL","0.99","USD",0,"Unit","Not Specified","NULL","2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100029,"Won","National Pharm. Ind Co - Oman","NULL","0.024","USD",0,"Unit","Not Specified","NULL","2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100030,"Won","National Pharm. Ind Co - Oman","","0.0175","USD",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100045,"Won","Baxter","","190.5","USD",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100046,"Won","Baxter","","60.06","USD",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100047,"Won","Baxter","","109.35","USD",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100079,"Won","Pfizer Enterprises SARL","","66.4639","USD",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100080,"Won","Pfizer Enterprises SARL","","70.0","USD",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-100-1001-ALL-11",100085,"Won","G.E Healthcare - Ireland","","5.2","USD",0,"Unit","Not Specified",,"2018-07-04","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11",100087,"Won","G.E. Health Care - Ireland","","5.2","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11",100028,"Won","Pharmaceutical Solution Industry (P.S.I.) - Saudi Arabia","","0.95","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11",100029,"Won","National Pharm. IND CO. - Oman","","0.027000000000000003","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11",100030,"Won","National Pharm. IND CO. - Oman","","0.0175","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11",100045,"Won","Novo Nordisk A/S - Denmark","","126.98","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11",100047,"Won","Novo Nordisk A/S - Denmark","","65.0","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11",100085,"Won","G.E. Health Care - Ireland","","5.1","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"BH-15-100-1009-BPH-11",100046,"Won","Pfizer","NULL","0.425","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"BH-15-100-1010-BPH-11",100047,"Won","Pfizer","NULL","0.425","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"BH-15-100-1014-BPH-12",100046,"Won","Pfizer","NULL","0.425","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"BH-15-100-1014-BPH-12",100045,"Won","Pfizer","NULL","0.425","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"IQ-15-100-1001-BPH-11",100047,"Won","Pfizer","NULL","124.0","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"JO-15-100-1009-BPH-11",100072,"Won","Al Hikma","NULL","0.0","EUR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"JO-15-100-1010-BPH-11",100047,"Won","Pfizer","NULL","147.68","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"JO-15-100-1010-BPH-11",100045,"Won","Pfizer","NULL","295.36","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"OM-15-100-1001-BPH-11",100028,"Won","Cipla","NULL","3.5","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"OM-15-100-1008-BPH-11",100081,"Won","UK Broker","NULL","6104.0","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"QA-15-100-1003-BPH-11",100081,"Won","UK Broker","NULL","4116.42","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"QA-15-100-1010-BPH-11",100081,"Won","UK Broker","NULL","4116.42","USD",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1003-BPH-11",100046,"Won","Pfizer","NULL","0.35","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1003-BPH-11",100047,"Won","Pfizer","NULL","0.29","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1003-BPH-11",100045,"Won","Pfizer","NULL","0.25","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1024-BPH-12",100064,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1028-BPH-11",100081,"Won","Broker","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1142-BPH-11",100047,"Won","Pfizer","NULL","0.0","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1147-BPH-11",100064,"Won","Broker & Batterjee Delay","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1241-BPH-11",100081,"Won","Broker","NULL","4410.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1243-BPH-11",100008,"Won","Broker","NULL","4410.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1243-BPH-11",100009,"Won","Broker","NULL","4410.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-15-100-1259-BPH-11",100091,"Won","Broker","NULL","5.8","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"JO-16-100-1001-BPH-11",100058,"Won","N.V. Organon (MSD)","NULL","0.7827","EUR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"JO-16-100-1007-BPH-11",100087,"Won","G.E. Health Care - Ireland","NULL","48.9","EUR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"JO-16-100-1007-BPH-11",100086,"Won","G.E. Health Care - Ireland","NULL","80.5","EUR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"LB-16-100-1001-BPH-11",100029,"Won","Ciprolon 500mg","NULL","233.54","EUR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1001-BPH-11",100081,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1004-BPH-11",100045,"Won","Pfizer","NULL","962.5","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1004-BPH-11",100046,"Won","Pfizer","NULL","333.59","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1004-BPH-11",100047,"Won","Pfizer","NULL","578.125","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1004-BPH-13",100017,"Won","Jamjoom Pharmaceuticals","NULL","4.16","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1004-BPH-18",100057,"Won","Dotarem","NULL","0.0","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1064-BPH-11",100007,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1064-BPH-11",100008,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1064-BPH-11",100009,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1064-BPH-11",100010,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1064-BPH-11",100011,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1066-BPH-11",100064,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1081-BPH-11",100064,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1086-BPH-11",100011,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1090-BPH-12",100009,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1090-BPH-12",100010,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1090-BPH-12",100011,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1173-BPH-11",100064,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-16-100-1186-BPH-11",100011,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1040-BPH-11",100009,"Won","Broker","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1040-BPH-11",100010,"Won","Broker","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1040-BPH-11",100011,"Won","Broker","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1047-BPH-11",100064,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1082-BPH-11",100008,"Won","Broker","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1082-BPH-11",100009,"Won","Broker","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1082-BPH-11",100010,"Won","Broker","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1082-BPH-11",100011,"Won","Broker","NULL","0.0","SAR",0,"Pack","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1201-BPH-11",100087,"Won","G.E. Health Care","NULL","21.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1201-BPH-11",100041,"Won","G.E. Health Care","NULL","60.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1201-BPH-11",100055,"Won","G.E. Health Care","NULL","45.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1201-BPH-11",100040,"Won","G.E. Health Care","NULL","70.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100080,"Won","Jazeera Pharamceutical Industries","NULL","130.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100079,"Won","PFIZER INC ","NULL","262.5","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100029,"Won","NATIONAL PHARMACEUTICAL INDUSTRIES CO SAOG SPIMACO","NULL","0.091","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100031,"Won","Jamjoom Pharmaceuticals","NULL","0.7","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-12",100017,"Won","SPIMACO","NULL","3.25","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-13",100045,"Won","Wyeth","NULL","678.1914","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-13",100046,"Won","Wyeth","NULL","265.3846","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1202-BPH-13",100047,"Won","Wyeth","NULL","387.5","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1251-BPH-11",100007,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1251-BPH-11",100008,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1251-BPH-11",100009,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1251-BPH-11",100010,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1251-BPH-11",100011,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1252-BPH-11",100011,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"SA-17-100-1259-BPH-11",100008,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"GC-16-100-1001-ALL-11-A-R1",100080,"Won","Pfizer Enterprises-SARL (Formally Pharmacia)-(Algosaibi) - Italy","","70.0","USD",0,"Unit","Not Specified","NULL","2018-06-05","Dadwal\, Gajjendar",1
+"GC-16-100-1001-ALL-11-A-R1",100085,"Won","G.E. Health Care - Ireland","","5.59","USD",0,"Unit","Not Specified","NULL","2018-06-05","Dadwal\, Gajjendar",1
+"GC-16-100-1001-ALL-11-A-R1",100045,"Won","Wyeth Lederle S.p.A\, Catania - (Banaja) - Italy","","361.0","USD",0,"Unit","Not Specified","NULL","2018-06-05","Dadwal\, Gajjendar",1
+"GC-16-100-1001-ALL-11-A-R1",100046,"Won","Wyeth Lederle S.p.A\, Catania - (Banaja) - Italy","","98.0","USD",0,"Unit","Not Specified","NULL","2018-06-05","Dadwal\, Gajjendar",1
+"GC-16-100-1001-ALL-11-A-R1",100047,"Won","Wyeth Lederle S.p.A\, Catania - (Banaja) - Italy","","190.0","USD",0,"Unit","Not Specified","NULL","2018-06-05","Dadwal\, Gajjendar",1
+"GC-16-100-1001-ALL-11-A-R1",100079,"Won","Pfizer Enterprises-SARL (Formally Pharmacia)-(Algosaibi) - Italy","","66.4639","USD",0,"Unit","Not Specified","NULL","2018-06-05","Dadwal\, Gajjendar",1
+"GC-15-100-1001-ALL-11-A-R1",100018,"Won","Jamjoom Pharmaceuticals","NULL","1.13","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"GC-15-100-1001-ALL-11-A-R1",100087,"Won","G.E. Health Care","NULL","6.5","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"GC-15-100-1001-ALL-11-A-R1",100085,"Won","G.E. Health Care","NULL","5.69","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"GC-15-100-1001-ALL-11-A-R1",100057,"Won","G.E. Health Care","NULL","13.0","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"GC-15-100-1001-ALL-11-A-R1",100055,"Won","Laboratoire Guerbet","NULL","6.8","USD",0,"Unit","Not Specified","NULL","2018-04-24","System",1
+"LB-18-468-1001-BME-11-A-R1",100029,"Won","Al Hikma","","0.0","EUR",0,"Pack",,"Product was awarded at half the Ciprobay quoted price.","2018-10-22","Sidharth Dhas\, Sheryl",1
+"LB-18-468-1001-BME-11-A-R1",100031,"Won","Al Hikma","","0.0","EUR",0,"Pack",,"Product was awarded at half the Ciprobay quoted price.","2018-10-22","Sidharth Dhas\, Sheryl",1
+"AE-19-575-1006-BME-11",100028,"Won","Hikma","","11.0","AED",0,"Unit",,,"2019-05-12","Sidharth Dhas\, Sheryl",1
+"AE-19-575-1008-BME-11",100028,"Won","Hikma","","11.0","AED",0,"Unit",,,"2019-05-12","Sidharth Dhas\, Sheryl",1
+"AE-19-578-1018-BME-11-A-R1",100028,"Won","Hikma","","11.0","AED",0,"Unit",,,"2019-05-12","Sidharth Dhas\, Sheryl",1
+"AE-19-578-1019-BME-11",100028,"Won","Hikma","","11.0","AED",0,"Unit",,,"2019-05-12","Sidharth Dhas\, Sheryl",1
+"GC-17-100-1001-ALL-11",100074,"Won","G.E. Health Care","NULL","12.6","USD",0,"Unit","Not Specified","NULL","2018-11-11","Sidharth Dhas\, Sheryl",1
+"GC-18-564-1001-ALL-11-A-R1",100046,"Won","Novo Nordisk A/S - Denmark","","36.5","USD",0,"Unit","Not Specified",,"2019-03-11","Sidharth Dhas\, Sheryl",1
+"SA-16-100-1084-BPH-11",100011,"Won","Broker","NULL","0.0","SAR",0,"Unit","Not Specified","NULL","2019-01-16","Sidharth Dhas\, Sheryl",1
+"JO-21-1002-1",100058,"Lost","N.V Organon / Part of MSD","Marvelon Tabs","1.477","JOD",0,,"Not Specified",,"2021-06-27","GCXYS",0
+"SA-20-1066-1-R1",100029,"Won","SPIMACO","CIPROMAX FC TABS 500MG 10 P","0.315","SAR",0,,"Not Specified",,"2021-09-05","GCXYS",0
+"SA-20-1066-1-R1",100029,"Won","JAMJOOM PHARMA","CIPROXEN 500MG 10 TABLET","0.399","SAR",0,,"Not Specified",,"2021-09-05","GCXYS",0
+"SA-20-1066-1-R1",100029,"Won","KUWAIT SAUDI CO.","Ciflox 500 mg Tablet","0.8625","SAR",0,,"Not Specified",,"2021-09-05","GCXYS",0
+"SA-20-1066-1-R1",100018,"Won","JAMJOOM PHARMA","Maxim","2.48","SAR",0,,"Not Specified",,"2021-09-05","GCXYS",0
+"SA-20-1066-1-R1",100018,"Won","SPIMACO","MOXIVE FC TAB 400MG 5 P","3.8","SAR",0,,"Not Specified",,"2021-09-05","GCXYS",0
+"SA-20-1066-1-R1",100018,"Won","Saja Pharmaceuticals","Moxican 400mg 7 Tabs","3.033","SAR",0,,"Not Specified",,"2021-09-05","GCXYS",0
+"CL-21-1003-1",200171,"Lost","Biogen","Product1",,,0,,"Incomplete Data",,"2021-10-25","EUTVP",0
+"CL-21-1005-1",200153,"Won","Company1","Product1","11000.0","CLP",200,"Pack","Not Specified",,"2021-11-08","EUTVP",0
+"AR-22-1006-1",200188,"Lost","Merck","Rebif",,,0,,"Not Specified",,"2022-02-11","GGKKD",0
+"SA-20-1075-1-R2",100016,"Won","SPIMACO KSA","Moxive tab 400mg 5 N",,"SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100029,"Won","National pharmaceuticals","Omacip 500mg","0.143","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100029,"Won","Kuwait saudi Co","Ciflox 500mg","0.2063","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100029,"Won","SPIMACO","Cipromax FC tabs 500mg","0.2893","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100092,"Won","Dr. Reddy laboratories","Rivaroxaban SPC 10mg FC Tablets","1.7955","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100092,"Won","SPIMACO","Banorvic FC tabs 10mg 10p","2.5","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100093,"Won","Dr. Reddy Laboratories","Rivaroxaban SPC 15mg FC Tablets","1.6748","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100093,"Won","SPIMACO","Banorvic FC tabs 15mg 28p","1.4","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100095,"Won","Dr. Reddy Laboratories","Rivaroxaban SPC 20mg FC Tablets","1.7226","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100095,"Won","SPIMACO","Banorvic FC Tabs 20mg 28p","1.5","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100017,"Won","SPIMACO","Maxim","2.192","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100017,"Won","SPIMACO KSA","Moxive tab 400mg 5 N","2.28444","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100028,"Won","Pharmaceutical Solutions","Cipro-Sol 200mg/100ml G Bottle","3.45","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"IT-22-1003-2",200247,"Won","Avastin","ADALAT","0.2","EUR",25,,"Not Specified",,"2022-03-18","EHMHV",0
+"ES-22-1032-1",205280,"Won","Pfizer","ghjdhg","645.0","EUR",5,,"Not Specified","Split award","2022-03-23","EUTVP",0
