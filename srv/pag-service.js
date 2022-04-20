@@ -224,24 +224,19 @@ module.exports = async (srv) => {
 	});
 
     srv.on('syncPriceAgreements', async req => {
-
         const tx = cds.transaction(req);
-    
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
-
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
-
-
-        const updatePromises = customerPrices.map(custPrice => updateCustomerPrice(custPrice, tx, req));
-        const result = await Promise.all(updatePromises);
-
-        // set customerPrices 'Synchronized' to true
+        const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP");
+        const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03");
+        const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice, tx, req));
+        const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice, tx, req));
+        const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises));
+        // set customerPrices 'Synchronized' to true after a successful synchronization with SAP backend
         await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
-
         return req.reply(result);
-
     });
 
 
@@ -273,12 +268,6 @@ module.exports = async (srv) => {
             packFactor = 1;
         }
 
-        const body = getPriceAgreementRequestBodyTemplate(); 
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-       
         let kbetr = parseFloat(customerPrice.Price);
         
         if (offer.Division === "Pharma" && priceAgreement.UoM === "Unit" ){// convert and send per pack
@@ -287,7 +276,12 @@ module.exports = async (srv) => {
             kbetr  = kbetr / packFactor;
 
         }
-        
+
+        const body = getPriceAgreementRequestBodyTemplate(); 
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
 
         return await updatePriceConditions(body);
@@ -425,32 +419,33 @@ module.exports = async (srv) => {
 
     async function updatePriceConditions(body){
 
-        if (body) {
-
-            const url = `${priceAgreementApi.Host}${priceAgreementApi.BasePath}${priceAgreementApi.ResourcePath}`;
-            const oauthCredentials = await getBearerToken();
-
-            console.log("Update Price Conditions oauthCredetials:", oauthCredentials);
-            console.log("Update Price Conditions proxyHost:", priceAgreementApi.ProxyHost);
-            console.log("Update Price Conditions proxyPort:", priceAgreementApi.ProxyPort);
-
-            return axios({
-                method: 'post',
-                url: url,
-                headers: {
-                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify(body)/*, when testing locally or on BTP, comment out the proxy
-                proxy: {
-                    host: priceAgreementApi.ProxyHost,
-                    port: priceAgreementApi.ProxyPort
-                }*/
-            });
+        if (!body) {
+            throw Error("The body of the request is missing.");
         }
 
-        throw Error("The body of the request is missing.");
+        const url = `${priceAgreementApi.Host}${priceAgreementApi.BasePath}${priceAgreementApi.ResourcePath}`;
+        const oauthCredentials = await getBearerToken();
 
+        console.log(`Synchronizing Price Conditions ...`);
+        console.log(`Calling endpoint ${url}`);
+        
+        // console.log("Update Price Conditions oauthCredetials:", oauthCredentials);
+        // console.log("Update Price Conditions proxyHost:", priceAgreementApi.ProxyHost);
+        // console.log("Update Price Conditions proxyPort:", priceAgreementApi.ProxyPort);
+
+        return axios({
+            method: 'post',
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(body)/*, when testing locally or on BTP, comment out the proxy
+            proxy: {
+                host: priceAgreementApi.ProxyHost,
+                port: priceAgreementApi.ProxyPort
+            }*/
+        });
     };
 
 
@@ -480,22 +475,22 @@ module.exports = async (srv) => {
         throw Error("Missing OAUTH config parameters");
     };
 
-    srv.on('syncFocCustPrices', async req => {
+    // srv.on('syncFocCustPrices', async req => {
 
-        const tx = cds.transaction(req);
+    //     const tx = cds.transaction(req);
     
-        const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
+    //     const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
 
-        if (customerPriceData && customerPriceData.length <= 0) {
-            return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
-        }
+    //     if (customerPriceData && customerPriceData.length <= 0) {
+    //         return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
+    //     }
 
-        const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx, req));
-        const result = await Promise.all(updatePromises);
+    //     const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx, req));
+    //     const result = await Promise.all(updatePromises);
 
-        return req.reply(result);
+    //     return req.reply(result);
 
-    });
+    // });
 
     async function updateFOCcustPrices(customerPrice, tx, req){
         
