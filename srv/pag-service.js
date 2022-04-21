@@ -33,7 +33,7 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
-		PT_TMOFPR,PT_TMOFRS
+		PT_TMOFPR,PT_TMOFRS,PriceCondition
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
 
@@ -229,11 +229,12 @@ module.exports = async (srv) => {
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
-        const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP");
-        const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03");
+        const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
+        // const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice, tx, req));
-        const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice, tx, req));
-        const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises));
+        // const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice, tx, req));
+        // const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises));
+        const result = await Promise.all(updateMainConditionPromises); // delete this line
         // set customerPrices 'Synchronized' to true after a successful synchronization with SAP backend
         await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
         return req.reply(result);
@@ -270,6 +271,20 @@ module.exports = async (srv) => {
 
         let kbetr = parseFloat(customerPrice.Price);
         
+        // Spain only
+        if(customerPrice.CountryCode === 'ES'){
+            const wherePriceAgreement_ID = ServiceHelper.buildFullWhere("PriceAgreement_ID", "=", customerPrice.PriceAgreementId);
+            const wherePriceConditionCode = ServiceHelper.buildFullWhere("PriceConditionCode", "=", customerPrice.PriceCondition);
+            let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceAgreement_ID).where(wherePriceConditionCode));     
+            if (!priceCondition) {
+                return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+            }
+            // set KBETR value
+            if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") kbetr = priceCondition.NetPriceWithoutTaxAfterDeductionRD;
+            else kbetr = priceCondition.Discount;
+        }
+
+        // KBETR per Pack or Unit
         if (offer.Division === "Pharma" && priceAgreement.UoM === "Unit" ){// convert and send per pack
             kbetr  = kbetr * packFactor;
         }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
@@ -284,7 +299,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
 
-        return await updatePriceConditions(body);
+        return await updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
     }
 
@@ -417,13 +432,15 @@ module.exports = async (srv) => {
 
 
 
-    async function updatePriceConditions(body){
+    async function updatePriceConditions(countryCode, resource, body){
 
         if (!body) {
             throw Error("The body of the request is missing.");
         }
 
-        const url = `${priceAgreementApi.Host}${priceAgreementApi.BasePath}${priceAgreementApi.ResourcePath}`;
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement', CountryCode: countryCode, Resource: resource}));
+
+        const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
         const oauthCredentials = await getBearerToken();
 
         console.log(`Synchronizing Price Conditions ...`);
@@ -558,7 +575,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.MaterialNumber);
         
-        return await updatePriceConditions(body);
+        return await updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
     };
 
