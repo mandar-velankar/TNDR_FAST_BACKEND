@@ -1592,8 +1592,9 @@ module.exports = (srv) => {
 			if(d && d.PRODUCT_COMMENT){
 				return d.PRODUCT_COMMENT;
 			}
-            }));
-        if (typeof (productRemarkDistinct)!=="undefined")
+            }));        
+        //EUTVP: fix wrong condition                            
+        if (typeof (productRemarkDistinct[0])!=="undefined")
         {
        	if (productRemarkDistinct.length === 1) {
 			producRemark  = productRemarkDistinct[0];
