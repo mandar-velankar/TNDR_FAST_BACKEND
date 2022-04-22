@@ -33,7 +33,7 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
-		PT_TMOFPR,PT_TMOFRS,PriceCondition,FreeGoodsOther
+		PT_TMOFPR,PT_TMOFRS,PriceCondition,FreeGoodsOther,DiscountCondition
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
 
@@ -235,8 +235,9 @@ module.exports = async (srv) => {
 
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice, tx, req));
         const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice, tx, req));
-        // updateRappelcustPrices
-        const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises));
+        const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice, tx, req));
+
+        const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
         // set customerPrices 'Synchronized' to true after a successful synchronization with SAP backend
         await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
         return req.reply(result);
@@ -472,7 +473,6 @@ module.exports = async (srv) => {
         let kstbm = "";
         let mikbas = "";
         let mxkbas = "";
-
         // Italy only
         if(customerPrice.CountryCode === 'IT'){
             let priceAgreementFOC = await tx.run(SELECT.one.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
@@ -480,14 +480,13 @@ module.exports = async (srv) => {
             mikbas = customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS') ? 1 : (customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
             mxkbas = customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS') ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
         }
-
         // Spain only
         if(customerPrice.CountryCode === 'ES'){
             const wherePriceAgreement_ID = ServiceHelper.buildFullWhere("PriceAgreement_ID", "=", customerPrice.PriceAgreementId);
             const wherePriceConditionCode = ServiceHelper.buildFullWhere("PriceConditionCode", "=", customerPrice.PriceCondition);
             let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceAgreement_ID).where(wherePriceConditionCode));    
             if (!priceCondition) {
-                return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+                return req.reject(404, `No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
             }
             let priceAgreementFOC = await tx.run(SELECT.one.from(FreeGoodsOther).where({PriceCondition_ID:priceCondition.ID})); 
             if (!priceAgreementFOC) {
@@ -527,6 +526,50 @@ module.exports = async (srv) => {
 
     async function updateRappelcustPrices(customerPrice, tx, req){
 
+        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ID: customerPrice.PriceAgreementId}));
+        if (!priceAgreement) {
+            return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+        }
+        let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({PriceAgreement_ID: customerPrice.PriceAgreementId}).where({PriceConditionCode: customerPrice.PriceCondition}));    
+        if (!priceCondition) {
+            return req.reject(404, `No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+        }
+
+        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
+        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+
+        const effectiveDate = new Date(customerPrice.EffectiveDate);
+        const expiryDate = new Date(customerPrice.ExpiryDate);
+
+        const body = getES01RequestBodyTemplate();
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = priceAgreement.InstituteId;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATBI_GR = body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = parseInt(institute.CustomerID);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = parseInt(customerPrice.MaterialNumber);
+
+
+        // DiscountConditions
+        let lowestDiscountCondition = null;
+        const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({PriceCondition_ID: priceCondition.ID}));
+        if(discountConditions){
+            lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Volume < current.Volume) ? prev : current);
+            discountConditions.forEach(dc => {
+                body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].E1KONW.push({
+                    "KSTBW": dc.Volume,
+                    "KBETR": dc.Discount.toFixed(2) + "-"
+                });
+            });
+        }
+
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition?.Discount.toFixed(2) + "-"; // KBETR from the minimum(KSTBW)
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = lowestDiscountCondition?.Volume + "-"; // minimum(KSTBW) value from the DiscountConditions array
+
+
+        return await updatePriceConditions(customerPrice.CountryCode, "PriceConditionRappel", body);
     };
 
 
@@ -558,10 +601,10 @@ module.exports = async (srv) => {
                         "VKORG": "QFHC",
                         "VTWEG": 0,
                         "SPART": 0,
-                        "BONEM": 5233069,
+                        "BONEM": 0,
                         "BOTEX": "RCT COM. W. ACCRUALS",
-                        "DATAB": 20220501,
-                        "DATBI": 20220515,
+                        "DATAB": 0,
+                        "DATBI": 0,
                         "CURCY": "EUR",
                         "ZTERM": "D496",
                         "ZLSCH": "M",
@@ -571,21 +614,16 @@ module.exports = async (srv) => {
                         "KAPPL": "V",
                         "_BAY0-GZ_SALESAGRITEM": [
                             {
-                                "KUNNR": 5233069,
-                                "DATAB_GR": 20220501,
-                                "DATBI_GR": 20220515,
-                                "MATNR": 84137952,
-                                "KBETR": "75-",
+                                "KUNNR": 0,
+                                "DATAB_GR": 0,
+                                "DATBI_GR": 0,
+                                "MATNR": 0,
+                                "KBETR": "0-",
                                 "KONWA": "EUR",
                                 "KPEIN": 1,
-                                "KBRUE": 75,
+                                "KBRUE": 0,
                                 "KSCHL": "YAW1",
-                                "E1KONW": [
-                                    {
-                                        "KSTBW": 98,
-                                        "KBETR": "46.00-"
-                                    }
-                                ]
+                                "E1KONW": []
                             }
                         ]
                     }
@@ -594,65 +632,4 @@ module.exports = async (srv) => {
         }
     };
 
-
-    // function getFOCcustPricesRequestBodyTemplate(){
-    //     return {
-    //         "_-BAY0_-GZ_SDCOND_A04": {
-    //           "IDOC": {
-    //             "BEGIN": 1,
-    //             "EDI_DC40": {
-    //               "SEGMENT": 1,
-    //               "TABNAM": "EDI_DC40",
-    //               "MANDT": 508,
-    //               "DOCNUM": 34952510,
-    //               "DOCREL": 740,
-    //               "STATUS": 53,
-    //               "DIRECT": 2,
-    //               "OUTMOD": "",
-    //               "IDOCTYP": "COND_A04",
-    //               "CIMTYP": "/BAY0/GZ_SDCOND_A04",
-    //               "MESTYP": "COND_A",
-    //               "MESCOD": "EXT",
-    //               "MESFCT": "ES",
-    //               "SNDPOR": "",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
-    //               "SNDPRT": "LS",
-    //               "SNDPRN": "FAST_IT",
-    //               "RCVPOR": "", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
-    //               "RCVPRT": "LS",
-    //               "RCVPRN": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
-    //               "CREDAT": 20210916,
-    //               "CRETIM": 144213,
-    //               "SERIAL": 20210810101046
-    //             },
-    //             "E1KOMG": {
-    //                 "KVEWE": "N",
-    //                 "KOTABNR": 921,
-    //                 "KAPPL": "V",
-    //                 "KSCHL": "YA03",
-    //                 "VKORG": "ITHC",
-    //                 "VTWEG": 00,
-    //                 "SPART": 00,
-    //                 "KUNNR": 3353665,
-    //                 "MATNR": 85560689,
-    //                 "PSTYP": 1,
-    //                 "E1KONH": {
-    //                     "DATAB": 20201029,
-    //                     "DATBI": 20201231,
-    //                     "E1KONP": {
-    //                         "KSCHL": "YA03",
-    //                         "KSTBM": 10,//See screenshot
-    //                         "KONMS": "PCE",
-    //                         "PRSCH":1,
-    //                         "MEINS": "PCE",
-    //                         "KUNNR": 3661906,//CustomerID (always same as above)
-    //                         "BOMAT": 59416824,//MaterialNumber (FOC product) - can be same as or different from above
-    //                         "MIKBAS": 1,//See screenshot
-    //                         "MXKBAS": 2//See screenshot
-    //                     }
-    //                 }
-    //             }
-    //           }
-    //         }
-    //       };
-    // };
 }
