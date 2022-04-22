@@ -33,7 +33,7 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
-		PT_TMOFPR,PT_TMOFRS,PriceCondition
+		PT_TMOFPR,PT_TMOFRS,PriceCondition,FreeGoodsOther
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
 
@@ -231,8 +231,11 @@ module.exports = async (srv) => {
         }
         const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
+        const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1");
+
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice, tx, req));
         const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice, tx, req));
+        // updateRappelcustPrices
         const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises));
         // set customerPrices 'Synchronized' to true after a successful synchronization with SAP backend
         await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
@@ -365,71 +368,6 @@ module.exports = async (srv) => {
     };
 
 
-    function getES01RequestBodyTemplate(){
-        return {
-            "_BAY0-GZ_SALESAGR_ES01": {
-                "IDOC": {
-                    "EDI_DC40": {
-                        "TABNAM": "EDI_DC40",
-                        "MANDT": 508,
-                        "DOCNUM": 36256484,
-                        "DOCREL": 740,
-                        "STATUS": 53,
-                        "DIRECT": 2,
-                        "OUTMOD": "",
-                        "IDOCTYP": "/BAY0/GZ_SALESAGR_ES01",
-                        "MESTYP": "/BAY0/GZ_SALESAGR_ES",
-                        "SNDPOR": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
-                        "SNDPRT": "LS",
-                        "SNDPRN": "FAST_ES",
-                        "RCVPOR": "", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
-                        "RCVPRT": "LS",
-                        "RCVPRN": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | | the value is added per environment in the CPI configuration
-                        "CREDAT": 20220404,
-                        "CRETIM": 145201
-                    },
-                    "_BAY0-GZ_SALESAGRHEAD": {
-                        "BOART": "YAW1",
-                        "VKORG": "QFHC",
-                        "VTWEG": 0,
-                        "SPART": 0,
-                        "BONEM": 5233069,
-                        "BOTEX": "RCT COM. W. ACCRUALS",
-                        "DATAB": 20220501,
-                        "DATBI": 20220515,
-                        "CURCY": "EUR",
-                        "ZTERM": "D496",
-                        "ZLSCH": "M",
-                        "ABREX": "TEST AGMNT",
-                        "KOTABNR": 750,
-                        "KVEWE": "A",
-                        "KAPPL": "V",
-                        "_BAY0-GZ_SALESAGRITEM": [
-                            {
-                                "KUNNR": 5233069,
-                                "DATAB_GR": 20220501,
-                                "DATBI_GR": 20220515,
-                                "MATNR": 84137952,
-                                "KBETR": "75-",
-                                "KONWA": "EUR",
-                                "KPEIN": 1,
-                                "KBRUE": 75,
-                                "KSCHL": "YAW1",
-                                "E1KONW": [
-                                    {
-                                        "KSTBW": 98,
-                                        "KBETR": "46.00-"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            }
-        }
-    };
-
-
 
     async function updatePriceConditions(countryCode, resource, body){
 
@@ -547,16 +485,18 @@ module.exports = async (srv) => {
         if(customerPrice.CountryCode === 'ES'){
             const wherePriceAgreement_ID = ServiceHelper.buildFullWhere("PriceAgreement_ID", "=", customerPrice.PriceAgreementId);
             const wherePriceConditionCode = ServiceHelper.buildFullWhere("PriceConditionCode", "=", customerPrice.PriceCondition);
-            let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceAgreement_ID).where(wherePriceConditionCode));     
+            let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceAgreement_ID).where(wherePriceConditionCode));    
             if (!priceCondition) {
                 return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
             }
+            let priceAgreementFOC = await tx.run(SELECT.one.from(FreeGoodsOther).where({PriceCondition_ID:priceCondition.ID})); 
+            if (!priceAgreementFOC) {
+                return req.reject(404, `No FreeGoodsOther was found for PriceConditionID: ${priceCondition.ID}`);
+            }
 
-            //TODO: the FOCs are not being saved to the FreeGoodsOther entity. Joris is looking into this
-            // set KSTBM, MIKBAS and MXKBAS values
-            // kstbm = FOCBonus
-            // mikbas = FOCMinAmount
-            // mxkbas = FOCMinAmount
+            kstbm = parseInt(priceAgreementFOC.FOCBonus);
+            mikbas = priceAgreementFOC.FOCMinAmount;
+            mxkbas = priceAgreementFOC.FOCMinAmount;
         }
 
 
@@ -583,6 +523,77 @@ module.exports = async (srv) => {
         return await updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
     };
+
+
+    async function updateRappelcustPrices(customerPrice, tx, req){
+
+    };
+
+
+    function getES01RequestBodyTemplate(){
+        return {
+            "_BAY0-GZ_SALESAGR_ES01": {
+                "IDOC": {
+                    "EDI_DC40": {
+                        "TABNAM": "EDI_DC40",
+                        "MANDT": 508,
+                        "DOCNUM": 36256484,
+                        "DOCREL": 740,
+                        "STATUS": 53,
+                        "DIRECT": 2,
+                        "OUTMOD": "",
+                        "IDOCTYP": "/BAY0/GZ_SALESAGR_ES01",
+                        "MESTYP": "/BAY0/GZ_SALESAGR_ES",
+                        "SNDPOR": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
+                        "SNDPRT": "LS",
+                        "SNDPRN": "FAST_ES",
+                        "RCVPOR": "", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
+                        "RCVPRT": "LS",
+                        "RCVPRN": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | | the value is added per environment in the CPI configuration
+                        "CREDAT": 20220404,
+                        "CRETIM": 145201
+                    },
+                    "_BAY0-GZ_SALESAGRHEAD": {
+                        "BOART": "YAW1",
+                        "VKORG": "QFHC",
+                        "VTWEG": 0,
+                        "SPART": 0,
+                        "BONEM": 5233069,
+                        "BOTEX": "RCT COM. W. ACCRUALS",
+                        "DATAB": 20220501,
+                        "DATBI": 20220515,
+                        "CURCY": "EUR",
+                        "ZTERM": "D496",
+                        "ZLSCH": "M",
+                        "ABREX": "TEST AGMNT",
+                        "KOTABNR": 750,
+                        "KVEWE": "A",
+                        "KAPPL": "V",
+                        "_BAY0-GZ_SALESAGRITEM": [
+                            {
+                                "KUNNR": 5233069,
+                                "DATAB_GR": 20220501,
+                                "DATBI_GR": 20220515,
+                                "MATNR": 84137952,
+                                "KBETR": "75-",
+                                "KONWA": "EUR",
+                                "KPEIN": 1,
+                                "KBRUE": 75,
+                                "KSCHL": "YAW1",
+                                "E1KONW": [
+                                    {
+                                        "KSTBW": 98,
+                                        "KBETR": "46.00-"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    };
+
 
     // function getFOCcustPricesRequestBodyTemplate(){
     //     return {
