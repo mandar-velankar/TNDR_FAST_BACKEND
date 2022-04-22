@@ -356,6 +356,7 @@ service CatalogService @(path : 'tender')@(requires : [
             GOV_CODE                                    : String(255);
             CODE1                                       : String(255);
             CODE2                                       : String(255);
+            CODE3                                       : String(255);
             QTY_THRESHOLD                               : Integer;
             ProductClass                                : String(2);
             ProductDescription                          : String(255);
@@ -636,6 +637,7 @@ service CatalogService @(path : 'tender')@(requires : [
             GOV_CODE                          : String(255);
             CODE1                             : String(255);
             CODE2                             : String(255);
+            CODE3                             : String(255);
             QTY_THRESHOLD                     : Integer;
             //end of missing SKU & SKUCountry fields  
             FreeGoodsOther                    : Association to many FreeGoodsOther
