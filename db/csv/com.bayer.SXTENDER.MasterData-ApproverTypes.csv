@@ -127,3 +127,6 @@ CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,APPROVERTYPE,COUNTRYCODE,HIERARCHY,VAL
 "2022-02-17 12:17:00.853000","EUTVP",,"EUTVP","Financial Business Partner","ES",1,1,"True"
 "2022-02-17 12:17:15.173000","EUTVP",,"EUTVP","Controlling","ES",1,1,"True"
 "2022-02-17 12:17:52.222000","EUTVP",,"EUTVP","Supply Chain","ES",1,2,"True"
+"2022-03-21 00:00:00","EUTVP","2022-03-21 00:00:00","EUTVP","Tender Mgr.","AR",1,2,"True"
+,,,,"TA (optional 1)","AR",1,1,"True"
+,,,,"TA (optional 2)","AR",1,1,"True"
