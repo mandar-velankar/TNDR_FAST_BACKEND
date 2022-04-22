@@ -1383,6 +1383,7 @@ module.exports = (srv) => {
 				GOV_CODE: offerProduct.GOV_CODE,
 				CODE1: offerProduct.CODE1,
 				CODE2: offerProduct.CODE2,
+                CODE3: offerProduct.CODE3,                
 				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
 				ProductClass: offerProduct.ProductClass,
 				ProductDescription: offerProduct.ProductDescription,
@@ -1591,8 +1592,9 @@ module.exports = (srv) => {
 			if(d && d.PRODUCT_COMMENT){
 				return d.PRODUCT_COMMENT;
 			}
-            }));
-        if (typeof (productRemarkDistinct)!=="undefined")
+            }));        
+        //EUTVP: fix wrong condition                            
+        if (typeof (productRemarkDistinct[0])!=="undefined")
         {
        	if (productRemarkDistinct.length === 1) {
 			producRemark  = productRemarkDistinct[0];
@@ -2158,6 +2160,7 @@ module.exports = (srv) => {
 				GOV_CODE: d.GOV_CODE,
 				CODE1: d.CODE1,
 				CODE2: d.CODE2,
+                CODE3: d.CODE3,
 				QTY_THRESHOLD: d.QTY_THRESHOLD,
 				//end of missing SKU & SKUCountry fields
 
