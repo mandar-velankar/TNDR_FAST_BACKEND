@@ -133,6 +133,7 @@ entity SchedulerApiConfig: cuid {
     RequestDelay        : Integer;
     RequestMaxRetry     : Integer;
     AuthType            : String;
+    CountryCode         : String;
     User                : Association to SchedulerApiConfigUsers;
     OAuth               : Association to SchedulerApiConfigOAuth;
 }
