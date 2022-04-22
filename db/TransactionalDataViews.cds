@@ -574,6 +574,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKUCountry.GOV_CODE as GOV_CODE,
     offerProduct.SKUCountry.CODE1 as CODE1,
     offerProduct.SKUCountry.CODE2 as CODE2,
+    offerProduct.SKUCountry.CODE3 as CODE3,
     /* End of missing SKU & SKUCountry fields*/
 
 	offerProduct.UnitPerPack as UNIT,
