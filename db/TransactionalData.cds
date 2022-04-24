@@ -526,7 +526,8 @@ entity PT_TMTEND: managed {
         TENDER_TYPE_2_ID     : Integer;                
         //Associations
         Institute           : Association to MasterData.PT_TMINST
-                                  on Institute.InstituteID = InstituteID; //OK
+                                  on Institute.InstituteID = InstituteID
+                                  and Institute.CountryCode = CountryCode; //OK
         Offer               : Association to many PT_TMOFRS
                                   on Offer.TenderID = TenderID
                                   and Offer.Active = Active;
@@ -625,13 +626,13 @@ entity PT_TMUDLTRS {
         UOM               : String(40);
     key SNO               : Integer not null;
 }
-
+//EHQUT modified the entity for extending the key field.
 entity TransCompetitorResult {
     key OFFERID        : String(30) not null;
     key PRODUCTCODE    : Integer not null;
         OUTCOME        : String(255);
     key AWARDEDCOMPANY : String(255) not null;
-        AWARDEDPRODUCT : String(255);
+    key AWARDEDPRODUCT : String(255) not null;
         AWARDEDPRICE   : Double;
         CURRENCY       : String(3);
         AWARDEDQTY     : Integer;
