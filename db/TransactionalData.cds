@@ -302,7 +302,6 @@ entity PT_TMOFPR {
         MinInvoiceAmount         : Double;
         PricingPolicyCluster     : String;
         OfferType                : String;
-        AnticipatedRequestedQuantity: String(25);
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -626,13 +625,13 @@ entity PT_TMUDLTRS {
         UOM               : String(40);
     key SNO               : Integer not null;
 }
-
+//EHQUT modified the entity for extending the key field.
 entity TransCompetitorResult {
     key OFFERID        : String(30) not null;
     key PRODUCTCODE    : Integer not null;
         OUTCOME        : String(255);
     key AWARDEDCOMPANY : String(255) not null;
-        AWARDEDPRODUCT : String(255);
+    key AWARDEDPRODUCT : String(255) not null;
         AWARDEDPRICE   : Double;
         CURRENCY       : String(3);
         AWARDEDQTY     : Integer;
