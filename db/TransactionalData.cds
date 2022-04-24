@@ -526,7 +526,8 @@ entity PT_TMTEND: managed {
         TENDER_TYPE_2_ID     : Integer;                
         //Associations
         Institute           : Association to MasterData.PT_TMINST
-                                  on Institute.InstituteID = InstituteID; //OK
+                                  on Institute.InstituteID = InstituteID
+                                  and Institute.CountryCode = CountryCode; //OK
         Offer               : Association to many PT_TMOFRS
                                   on Offer.TenderID = TenderID
                                   and Offer.Active = Active;

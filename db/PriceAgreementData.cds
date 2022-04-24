@@ -214,7 +214,12 @@ entity CandidatePrices as select from PriceAgreements AS pa
 inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
 //inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
 inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
-left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.SKUCode and cp.InstituteId = ca.CandidateID and cp.PriceCondition <> 'YA03' {
+left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId 
+    and cp.MaterialNumber = ma.SKUCode 
+    and cp.InstituteId = ca.CandidateID 
+    and cp.PriceCondition <> 'YA03' // Italy FOC
+    and cp.PriceCondition <> 'YA01' // Spain FOC
+    and cp.PriceCondition <> 'YAW1' { // Spain Rappel
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
