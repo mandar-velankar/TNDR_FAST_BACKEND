@@ -1,4 +1,4 @@
-"ID","PROVIDER","HOST","BASEPATH","RESOURCE","RESOURCEPATH","PROXYHOST","PROXYPORT","REQUESTDELAY","REQUESTMAXRETRY","AUTHTYPE","USER_ID","OAUTH_ID"
+ID,PROVIDER,HOST,BASEPATH,RESOURCE,RESOURCEPATH,PROXYHOST,PROXYPORT,REQUESTDELAY,REQUESTMAXRETRY,AUTHTYPE,USER_ID,OAUTH_ID
 "c2bbb1b7-70cb-438e-9bf1-cd48f269567c","PriceAgreementPROD","https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com","/http/BAY1_X01_FAST_IT_COND_A.COND_A04","PriceConditions","/",,,"1000","5","OAUTH",,"90d0bbfd-e1df-43d2-93fb-c7fd22525ed0"
 "858fabec-d599-11eb-b8bc-0242ac130003","MercadoPublco","https://y100134-iflmap.hcisbp.eu1.hana.ondemand.com","/http/mercado_publico","Tender","/getTenders",,,"1000","5","OAUTH",,"4d75e781-66cb-47c4-87f3-1f8f1d65a80a"
 "6b3b7736-d99e-11eb-b8bc-0242ac130003","MercadoPublcoPROD","https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com","/http/mercado_publico","Tender","/getTenders",,,"1000","5","OAUTH",,"90d0bbfd-e1df-43d2-93fb-c7fd22525ed0"
