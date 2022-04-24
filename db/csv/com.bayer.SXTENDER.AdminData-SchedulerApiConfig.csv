@@ -1,4 +1,7 @@
-ID,Provider,Host,BasePath,Resource,ResourcePath,ProxyHost,ProxyPort,RequestDelay,RequestMaxRetry,AuthType,User_ID,OAuth_ID
-"858fabec-d599-11eb-b8bc-0242ac130003","MercadoPublco","https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com","/http/mercado_publico","Tender","/getTenders","10.185.190.100","8080","1000","5","OAUTH",,"90d0bbfd-e1df-43d2-93fb-c7fd22525ed0"
-"957946ad-47f2-4990-ad11-fde1d9bf9223","MercadoPublco","https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com","/http/mercado_publico","PurchaseOrder","/getPurchaseOrders","10.185.190.100","8080","1000","5","OAUTH",,"90d0bbfd-e1df-43d2-93fb-c7fd22525ed0"
-"010d6666-70ad-4f79-b137-e4885c2e9831","PriceAgreement","https://y100134-iflmap.hcisbp.eu1.hana.ondemand.com","/http/BAY1_X01_FAST_IT_COND_A.COND_A04","PriceConditions","/","10.185.190.100","8080","1000","5","OAUTH",,"90d0bbfd-e1df-43d2-93fb-c7fd22525ed0"
+ID,PROVIDER,HOST,BASEPATH,RESOURCE,RESOURCEPATH,PROXYHOST,PROXYPORT,REQUESTDELAY,REQUESTMAXRETRY,AUTHTYPE,USER_ID,OAUTH_ID
+"c2bbb1b7-70cb-438e-9bf1-cd48f269567c","PriceAgreementPROD","https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com","/http/BAY1_X01_FAST_IT_COND_A.COND_A04","PriceConditions","/",,,"1000","5","OAUTH",,"90d0bbfd-e1df-43d2-93fb-c7fd22525ed0"
+"858fabec-d599-11eb-b8bc-0242ac130003","MercadoPublco","https://y100134-iflmap.hcisbp.eu1.hana.ondemand.com","/http/mercado_publico","Tender","/getTenders",,,"1000","5","OAUTH",,"4d75e781-66cb-47c4-87f3-1f8f1d65a80a"
+"6b3b7736-d99e-11eb-b8bc-0242ac130003","MercadoPublcoPROD","https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com","/http/mercado_publico","Tender","/getTenders",,,"1000","5","OAUTH",,"90d0bbfd-e1df-43d2-93fb-c7fd22525ed0"
+"957946ad-47f2-4990-ad11-fde1d9bf9223","MercadoPublco","https://y100134-iflmap.hcisbp.eu1.hana.ondemand.com","/http/mercado_publico","PurchaseOrder","/getPurchaseOrders",,,"1000","5","OAUTH",,"4d75e781-66cb-47c4-87f3-1f8f1d65a80a"
+"3c2450c6-e3b2-11eb-ba80-0242ac130004","MercadoPublcoPROD","https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com","/http/mercado_publico","PurchaseOrder","/getPurchaseOrders",,,"1000","5","OAUTH",,"90d0bbfd-e1df-43d2-93fb-c7fd22525ed0"
+"010d6666-70ad-4f79-b137-e4885c2e9831","PriceAgreement","https://y100134-iflmap.hcisbp.eu1.hana.ondemand.com","/http/QA/BAY1_X01_FAST_IT_COND_A.COND_A04","PriceConditions","/",,,"1000","5","OAUTH",,"4d75e781-66cb-47c4-87f3-1f8f1d65a80a"
