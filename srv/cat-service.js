@@ -762,7 +762,7 @@ module.exports = (srv) => {
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
             OfferId: offer.OFFERID,
-            ProductType: 'Totals'
+            ProductType: 'Total'
         };
 
         const whereProduct = {
@@ -782,7 +782,7 @@ module.exports = (srv) => {
             if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability > 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
-                        case "Head of KAMS":
+                        case "KAMS":
                             oApproverType.ValidationType = 1;
                             break;
                         default:
@@ -792,7 +792,7 @@ module.exports = (srv) => {
             } else {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
-                        case "Head of KAMS":
+                        case "KAMS":
                             oApproverType.ValidationType = 1;
                             break;
                         case "CDH":
