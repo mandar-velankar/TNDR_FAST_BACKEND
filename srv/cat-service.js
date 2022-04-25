@@ -762,7 +762,7 @@ module.exports = (srv) => {
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
             OfferId: offer.OFFERID,
-            ProductType: 'Totals'
+            ProductType: 'Total'
         };
 
         const whereProduct = {
