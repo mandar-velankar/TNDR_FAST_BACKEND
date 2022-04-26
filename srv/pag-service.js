@@ -564,8 +564,9 @@ module.exports = async (srv) => {
                 });
             });
         }
-
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition?.Discount.toFixed(2) + "-"; // KBETR from the minimum(KSTBW)
+        console.log("TEST NILS");
+        console.log(lowestDiscountCondition);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition?.Discount.toFixed(2).concat("-"); // KBETR from the minimum(KSTBW)
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = lowestDiscountCondition?.Volume + "-"; // minimum(KSTBW) value from the DiscountConditions array
 
 
