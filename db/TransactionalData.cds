@@ -601,6 +601,7 @@ entity PT_TMTRRES {
         AwardActing       : String;
         Appeal            : String;
         InfoNeeded        : String;
+        TotalAwardedValue : Double;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID
