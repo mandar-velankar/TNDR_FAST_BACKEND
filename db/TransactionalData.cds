@@ -643,6 +643,7 @@ entity TransCompetitorResult {
         LASTUPDATE     : Date;
         UPDATEDBY      : String(255);
         DELETED        : Integer;
+        TOTALAWARDEDVALUE: Double;
 }
 
 entity OutgoingMails : managed, cuid {
