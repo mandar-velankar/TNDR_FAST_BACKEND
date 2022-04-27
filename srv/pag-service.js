@@ -564,9 +564,16 @@ module.exports = async (srv) => {
                 });
             });
         }
+<<<<<<< HEAD
 
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(2).concat("-") || ""; // KBETR from the minimum(KSTBW)
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = lowestDiscountCondition && lowestDiscountCondition.Volume + "-" || ""; // minimum(KSTBW) value from the DiscountConditions array
+=======
+        console.log("TEST NILS");
+        console.log(lowestDiscountCondition);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition?.Discount.toFixed(2).concat("-"); // KBETR from the minimum(KSTBW)
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = lowestDiscountCondition?.Volume + "-"; // minimum(KSTBW) value from the DiscountConditions array
+>>>>>>> 7ed1bf4b43389f0957450e8b8a7ff394fd5f50c5
 
 
         return await updatePriceConditions(customerPrice.CountryCode, "PriceConditionRappel", body);
