@@ -783,7 +783,7 @@ module.exports = (srv) => {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "KAMS":
-                            oApproverType.ValidationType = 1;
+                            oApproverType.ValidationType = 3;
                             break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
@@ -793,10 +793,10 @@ module.exports = (srv) => {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "KAMS":
-                            oApproverType.ValidationType = 1;
+                            oApproverType.ValidationType = 3;
                             break;
                         case "CDH":
-                            oApproverType.ValidationType = 2;
+                            oApproverType.ValidationType = 3;
                             break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
@@ -808,10 +808,10 @@ module.exports = (srv) => {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "BU/RAM":
-                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
                             break;
                         case "Controlling":
-                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
                             break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
@@ -821,16 +821,16 @@ module.exports = (srv) => {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "BU/RAM":
-                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
                             break;
                         case "Legal":
-                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
                             break;
                         case "Financial Business Partner":
-                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
                             break;
                         case "Controlling":
-                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 1 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
                             break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
