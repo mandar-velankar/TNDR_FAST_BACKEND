@@ -501,12 +501,12 @@ module.exports = (srv) => {
 		//Optional if business approved
 		//Mandatory if volume above threshold
 		let countryBusiness = (product.BUSINESS_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
-//EHQUT SCTASK0087077 | REQ11341362 - Supply chain should be mandatory if volume above threshold
+//EHQUT SCTASK0087077|REQ11341362 - Supply chain should be mandatory if volume above threshold
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
-//EHQUT SCTASK0087077 | REQ11341362 - Supply chain should be mandatory if volume above threshold
+//EHQUT SCTASK0087077|REQ11341362 - Supply chain should be mandatory if volume above threshold
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
 		aApproverTypes.map(async function (oApproverType) {
