@@ -255,6 +255,9 @@ entity PT_TMDLVTR {
     key SNo                    : Integer not null;
         Contract               : String(10);
         PoDate                 : Date;
+        ActualDeliveredProduct :Integer;
+         ActualDeliveredProductQty : Double;
+        LocalDeliveryNoteNo :String(255);
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
