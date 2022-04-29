@@ -7,6 +7,7 @@ using {
     managed
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
+using {com.bayer.SXTENDER.AdminData} from './AdminData';
 //using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from './MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews';
@@ -523,7 +524,7 @@ entity PT_TMTEND: managed {
 
         CONTENT              : String(500);
         PORTAL               : LargeString;
-        TENDER_TYPE_2_ID     : Integer;                
+        TENDER_TYPE_2_ID     : Integer;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID
@@ -558,6 +559,8 @@ entity PT_TMTEND: managed {
                                         on BankGuarantees.TenderID = TenderID;
         PriceAgreements: Association to PriceAgreementData.PriceAgreements
                                          on PriceAgreements.TenderId  = TenderID;
+        User: Association to AdminData.PT_TMUSER
+                                         on User.UserID = SubmittedBy;
 }
 
 entity PT_TMTNOFST {
