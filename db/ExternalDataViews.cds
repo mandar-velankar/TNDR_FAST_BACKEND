@@ -1,6 +1,6 @@
 namespace com.bayer.SXTENDER.ExternalDataViews;
 
-using { User, Country, managed } from '@sap/cds/common';
+using { User, Country, managed, cuid } from '@sap/cds/common';
 using { com.bayer.SXTENDER.AdminData } from './AdminData';
 using { com.bayer.SXTENDER.MasterData } from './MasterData';
 using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
@@ -767,3 +767,33 @@ entity ProductInfo as select from MasterData.PT_TMPRDPCK as product {
     end as SKUCode:String,
     product.PACKFACTOR 
 };
+
+//Chile Massnet Tenders Data
+entity MassnetTenders: cuid, managed {
+	TenderID : String(500);
+    Line : Integer;
+    ProductCode : Integer;
+    OfferPrice : Double;
+    Product : String(5000);
+    CompetitorPrice : Double;
+    MyCompetence : String(5000);
+    TotalValue : Double;
+    AwardedQuantity : Integer;
+    RequestedQuantity : Integer;
+    UoM : String(500);
+    Status : String(500);
+    Company : String(500);
+    RequestingInstitute : String(500);
+    PurchasingInstitute : String(500);
+    ProductDescription : String(5000);
+    TenderName : String(5000);
+    OfferDescription : String(5000);
+    PublicationDate : Date;
+    ClosingDate : Date;
+    AwardDate : Date;
+    Region : String(500);
+    Currency : String(500);
+    TenderType : String(500);
+    OfferType : String(500);
+    ContractDuration : String(500);
+}

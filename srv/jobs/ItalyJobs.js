@@ -253,6 +253,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
                     GOV_CODE: "",
                     CODE1: "",
                     CODE2: "",
+                    CODE3:"",                    
                     QTY_THRESHOLD: 0,
                 }
             });
