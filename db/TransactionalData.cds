@@ -7,6 +7,7 @@ using {
     managed
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
+using {com.bayer.SXTENDER.AdminData} from './AdminData';
 //using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from './MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews';
@@ -523,10 +524,11 @@ entity PT_TMTEND: managed {
 
         CONTENT              : String(500);
         PORTAL               : LargeString;
-        TENDER_TYPE_2_ID     : Integer;                
+        TENDER_TYPE_2_ID     : Integer;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
-                                  on Institute.InstituteID = InstituteID; //OK
+                                  on Institute.InstituteID = InstituteID
+                                  and Institute.CountryCode = CountryCode; //OK
         Offer               : Association to many PT_TMOFRS
                                   on Offer.TenderID = TenderID
                                   and Offer.Active = Active;
@@ -557,6 +559,8 @@ entity PT_TMTEND: managed {
                                         on BankGuarantees.TenderID = TenderID;
         PriceAgreements: Association to PriceAgreementData.PriceAgreements
                                          on PriceAgreements.TenderId  = TenderID;
+        User: Association to AdminData.PT_TMUSER
+                                         on User.UserID = SubmittedBy;
 }
 
 entity PT_TMTNOFST {
@@ -600,6 +604,7 @@ entity PT_TMTRRES {
         AwardActing       : String;
         Appeal            : String;
         InfoNeeded        : String;
+        TotalAwardedValue : Double;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID
@@ -625,13 +630,13 @@ entity PT_TMUDLTRS {
         UOM               : String(40);
     key SNO               : Integer not null;
 }
-
+//EHQUT modified the entity for extending the key field.
 entity TransCompetitorResult {
     key OFFERID        : String(30) not null;
     key PRODUCTCODE    : Integer not null;
         OUTCOME        : String(255);
     key AWARDEDCOMPANY : String(255) not null;
-        AWARDEDPRODUCT : String(255);
+    key AWARDEDPRODUCT : String(255) not null;
         AWARDEDPRICE   : Double;
         CURRENCY       : String(3);
         AWARDEDQTY     : Integer;
@@ -641,6 +646,7 @@ entity TransCompetitorResult {
         LASTUPDATE     : Date;
         UPDATEDBY      : String(255);
         DELETED        : Integer;
+        TOTALAWARDEDVALUE: Double;
 }
 
 entity OutgoingMails : managed, cuid {

@@ -89,6 +89,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity PT_TMINSBRTR                                 as projection on MasterData.PT_TMINSBRTR;
     entity PT_TMINSHIER                                 as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINST                                    as projection on MasterData.PT_TMINST;
+    entity Province                                     as projection on MasterData.CountryProvinces;
 
     entity PT_TMLE                                      as projection on MasterData.PT_TMLE {
         * , Countries : redirected to PT_TMCTLE
@@ -205,7 +206,7 @@ service CatalogService @(path : 'tender')@(requires : [
     };
 
     entity PT_TMTEND                                    as projection on TransactionalData.PT_TMTEND {
-        * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView, CountrySpecificInformation : redirected to CountrySpecificInformation
+        * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView, CountrySpecificInformation : redirected to CountrySpecificInformation, User : redirected to PT_TMUSER,
     };
 
     entity PT_TMTNOFST                                  as projection on TransactionalData.PT_TMTNOFST;
@@ -365,6 +366,7 @@ service CatalogService @(path : 'tender')@(requires : [
             GOV_CODE                                    : String(255);
             CODE1                                       : String(255);
             CODE2                                       : String(255);
+            CODE3                                       : String(255);
             QTY_THRESHOLD                               : Integer;
             ProductClass                                : String(2);
             ProductDescription                          : String(255);
@@ -654,6 +656,7 @@ service CatalogService @(path : 'tender')@(requires : [
             GOV_CODE                          : String(255);
             CODE1                             : String(255);
             CODE2                             : String(255);
+            CODE3                             : String(255);
             QTY_THRESHOLD                     : Integer;
             //end of missing SKU & SKUCountry fields  
             FreeGoodsOther                    : Association to many FreeGoodsOther
