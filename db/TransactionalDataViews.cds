@@ -721,7 +721,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Institute.InstituteType as INSTITUTE_TYPE,
     offer.Tender.Institute.State as INSTITUTE_STATE,
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
-    //offer.Tender.Institute.CustomerID as CUSTOMERCODE,
+    offer.Tender.Institute.CustomerID as CUSTOMER_CODE,
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
@@ -818,6 +818,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Institute.CifCode,
           offer.Tender.Institute.RegionalHealthSystem,
           offer.Tender.Institute.CustomerGroup,
+          offer.Tender.Institute.CustomerID,
           offer.Tender.TenderName,
           offer.OfferStatus.STATUS,
           offer.Tender.Country.ApprovalType,
