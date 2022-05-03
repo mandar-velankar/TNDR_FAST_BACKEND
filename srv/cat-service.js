@@ -712,9 +712,9 @@ module.exports = (srv) => {
 					bBlOneMandatoryAppr = true;
 					validationType = 1;
 				}
-				
 			} else {
-				validationType = 1; //no additional discount exists; only contract manager notification should be sent
+				if(netOfferPrice < minPreApprovedPrice) bBlOneMandatoryAppr = true;
+				validationType = 1; //no additional discount exists; only contract manager notification should be sent
 			}
 		} else {
 			validationType = 1;	//if the offer type differs from selling, all approvals should be optional
