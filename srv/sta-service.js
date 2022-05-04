@@ -1,0 +1,2612 @@
+const cds = require('@sap/cds');
+const R = require('ramda');
+const ServiceHelper = require('./utils/ServiceHelper');
+const pdf = require("html-pdf");
+const fs = require("fs");
+const Handlebars = require("handlebars");
+const SapCfMailer = require("sap-cf-mailer");
+// const escape = require('escape-html');
+// const html = require('html-escaper');
+// const escapeStringRegexp = require('escape-string-regexp');
+// const resolveWhen = require('special-escape');
+const { Readable } = require('stream');
+const path = require("path");
+const XLSXHelper = require("./utils/XLSXHelper");
+const wordTemplate = require("easy-template-x");
+const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
+const { Service } = require('@sap/cds');
+
+module.exports = (srv) => {
+
+	// Use reflection to get the csn definition
+	const {
+		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
+	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
+	const {
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices
+	} = cds.entities("com.bayer.SXTENDER.MasterData");
+	const {
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests
+	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
+	const {
+		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther
+	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
+	const {
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
+	} = cds.entities("com.bayer.SXTENDER.AdminData");
+	const {
+		ProductPolicies, PolicyPrices
+	} = cds.entities("com.bayer.SXTENDER.PricingPolicyData");
+
+	const {
+		LatestApprovedBrandPolicies
+	} = cds.entities("PolicyService");
+
+
+	const arr = x => Array.from(x);
+	const num = x => Number(x) || 0;
+	const str = x => String(x);
+	const isEmpty = xs => xs.length === 0;
+	const take = n => xs => xs.slice(0, n);
+	const drop = n => xs => xs.slice(n);
+	const reverse = xs => xs.slice(0).reverse();
+	const comp = f => g => x => f(g(x));
+	const not = x => !x;
+	const chunk = n => xs =>
+		isEmpty(xs) ? [] : [take(n)(xs), ...chunk(n)(drop(n)(xs))];
+
+	/**
+	 * 
+	 * @param {Number n}
+	 * @return {String s}
+	 */
+	let inWords = (n, currency) => {
+
+		let a = [
+			'', 'One', 'Two', 'Three', 'Four',
+			'Five', 'Six', 'Seven', 'Eight', 'Nine',
+			'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen',
+			'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+		];
+
+		let b = [
+			'', '', 'Twenty', 'Thirty', 'Forty',
+			'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+		];
+
+		let g = [
+			'', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion',
+			'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion'
+		];
+
+
+		let makeGroup = ([ones, tens, huns]) => {
+			return [
+				num(huns) === 0 ? '' : a[huns] + ' Hundred ',
+				num(ones) === 0 ? b[tens] : b[tens] && b[tens] + '-' || '',
+				a[tens + ones] || a[ones]
+			].join('');
+		};
+
+		let thousand = (group, i) => group === '' ? group : `${group} ${g[i]}`;
+
+
+
+		if (typeof n === 'number')
+			return inWords(String(n), currency);
+		else if (n === '0')
+			return 'zero';
+		else {
+			// get the dot position
+			let amount, cents, numInWords = "";
+			let dotPos = n.indexOf('.');
+
+			if (dotPos > 0) {
+
+				amount = n.slice(0, dotPos);  // 1234.56 = 1234
+				cents = n.slice(dotPos + 1);  // 1234.56 = .56
+
+			} else if (dotPos == 0) {
+
+				amount = '0';
+				cents = n.slice(dotPos + 1);  // 1234.56 = .56
+
+			} else {
+
+				amount = n.slice(0);         // 1234 = 1234
+				cents = '0';
+			}
+
+
+			if (amount.length > 0) {
+				numInWords = comp(chunk(3))(reverse)(arr(amount))
+					.map(makeGroup)
+					.map(thousand)
+					.filter(comp(not)(isEmpty))
+					.reverse()
+					.join(' ');
+			}
+
+			if (Number(cents) > 0) {
+
+				if (cents.length === 1)
+					cents = cents + '0';
+
+				numInWords += 'and ';
+				numInWords += comp(chunk(3))(reverse)(arr(cents))
+					.map(makeGroup)
+					.map(thousand)
+					.filter(comp(not)(isEmpty))
+					.reverse()
+					.join(' ');
+				numInWords += 'cents ';
+			}
+
+			numInWords += currency + ' only';
+
+			return numInWords;
+		}
+
+	};
+
+
+
+	function buildDirectProducts(entityBrands, directBrands, countryProducts) {
+		let results = [];
+		entityBrands.forEach(entityBrand => {
+			directBrand = directBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			if (directBrand && countryProductsList.length !== 0) {
+				countryProductsList.forEach((countryProduct) => {
+					results.push({
+						COUNTRY_CODE: entityBrand.COUNTRY_CODE,
+						INSTITUTE_ID: directBrand.INSTITUTE_ID,
+						INSTITUTE_NAME: directBrand.INSTITUTE_NAME,
+						DISTRIBUTOR_ID: directBrand.DISTRIBUTOR_ID,
+						DISTRIBUTOR_NAME: directBrand.DISTRIBUTOR_NAME,
+						BRAND_ID: entityBrand.BRAND_ID,
+						BRAND_NAME: countryProduct.BRAND_NAME,
+						PRODUCT_ID: countryProduct.PRODUCT_ID,
+						PRODUCT_NAME: countryProduct.PRODUCT_NAME,
+						INCO_TERMS: directBrand.INCO_TERMS,
+						PAYMENT_TERMS: directBrand.PAYMENT_TERMS,
+						COMMISSION_RATE: directBrand.COMMISSION_RATE,
+						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
+						CHANNEL: 'Direct',
+						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN
+					});
+				});
+			}
+		});
+		return results;
+	}
+	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds) {
+		let results = [];
+		entityBrands.forEach(entityBrand => {
+			distributorBrand = distributorBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			if (distributorBrand && countryProductsList.length !== 0) {
+				countryProductsList.forEach((countryProduct) => {
+					instituteIds.forEach(instituteId => {
+						results.push({
+							COUNTRY_CODE: entityBrand.COUNTRY_CODE,
+							INSTITUTE_ID: instituteId,
+							INSTITUTE_NAME: 'NA',
+							DISTRIBUTOR_ID: distributorBrand.DISTRIBUTOR_ID,
+							DISTRIBUTOR_NAME: distributorBrand.DISTRIBUTOR_NAME,
+							BRAND_ID: entityBrand.BRAND_ID,
+							BRAND_NAME: countryProduct.BRAND_NAME,
+							PRODUCT_ID: countryProduct.PRODUCT_ID,
+							PRODUCT_NAME: countryProduct.PRODUCT_NAME,
+							INCO_TERMS: distributorBrand.INCO_TERMS,
+							PAYMENT_TERMS: distributorBrand.PAYMENT_TERMS,
+							COMMISSION_RATE: distributorBrand.COMMISSION_RATE,
+							LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
+							CHANNEL: 'Distributor',
+							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+							COGS: countryProduct.COGS,
+							PACKFACTOR: countryProduct.PACK_SIZE
+						});
+					});
+				});
+			}
+		});
+		return results;
+	}
+	function buildCommonProductInfo(offer, product) {
+		//Get all prices, ammounts and cogs in all units
+		let toUnitFactor = (product.UNIT === "Unit") ? 1 : product.PACKSIZE;
+		let toPackFactor = (product.UNIT === "Unit") ? 1 / product.PACKSIZE : 1;
+
+		let requestedVolume = product.REQUESTED_VOLUME;
+		//let requestedUnit = toUnitFactor * requestedVolume;
+
+		let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+		let focAmountUnit = toUnitFactor * focAmount;
+		let totalVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume : requestedVolume + focAmount;
+		let totalVolumeUnit = toUnitFactor * totalVolume;
+		let paidVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume - focAmount : requestedVolume;
+		let paidVolumeUnit = toUnitFactor * paidVolume;
+
+		//let registeredPrice = product.REGISTERED_PRICE;
+		let offerPrice = product.OFFER_PRICE;
+		let netOfferPrice = product.NET_OFFER_PRICE;
+		let netPrice = product.NET_PRICE;
+		let cogs = product.COGS;
+
+		let offerPriceUnit = offerPrice / toUnitFactor;
+		let offerPricePack = offerPrice / toPackFactor;
+		let offerPriceUnitEurSpot = offerPriceUnit / product.SPOT_RATE;
+		let offerPriceUnitEurBudget = offerPriceUnit / product.BUDGET_RATE;
+		let cogsEurUnit = cogs / product.SPOT_RATE / toUnitFactor;
+		let cogsEurPack = cogs / product.SPOT_RATE / toPackFactor;
+
+		let netPriceUnit = netPrice / toUnitFactor;
+		let netPricePack = netPrice / toPackFactor;
+		let netPriceUnitEurSpot = netPriceUnit / product.SPOT_RATE;
+		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
+
+		let grossSales = offerPrice * paidVolume;
+
+		let netSales = netPrice * totalVolume;
+		let netSalesEurSpot = netSales / product.SPOT_RATE;
+		let netSalesEurBudget = netSales / product.BUDGET_RATE;
+
+		let totalCostEur = totalVolume * cogs / product.SPOT_RATE;
+		if (product.FOC_BUNDLED_1 !== 0) {
+			if (product.FOC_BUNDLED_1_ABS_PCT === "PCT") {
+				totalCostEur = totalCostEur + Math.round(product.FOC_BUNDLED_1 * requestedVolume) * product.FOC_BUNDLED_1_COGS / product.SPOT_RATE;
+			}
+			else {
+				totalCostEur = totalCostEur + Math.round(product.FOC_BUNDLED_1) * product.FOC_BUNDLED_1_COGS / product.SPOT_RATE;
+			}
+		}
+
+		let grossProfitEurSpot = netSalesEurSpot - totalCostEur;
+		let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
+
+		let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
+		let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
+
+		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
+
+		//Product Comment: master data product comment + info on additional brand FOC, if any
+		let productComment = product.PRODUCT_COMMENT;
+		if (product.FOC_BUNDLED_1 !== 0) {
+			if (product.PRODUCT_COMMENT !== "") productComment = productComment.concat("<br>");
+			if (product.FOC_BUNDLED_1_ABS_PCT === "PCT") {
+				productComment = productComment.concat(Math.round(100 * product.FOC_BUNDLED_1).toString().concat("%"));
+			}
+			else {
+				productComment = productComment.concat(Math.round(product.FOC_BUNDLED_1).toString().concat(" ").concat(product.UNIT));
+			}
+			productComment = productComment
+				.concat(" of ")
+				.concat(product.FOC_BUNDLED_1_PRODUCT_NAME)
+				.concat(" will be provided with the ")
+				.concat(product.PRODUCTNAME)
+		}
+		//Delivery terms
+		let deliveryTerms = "";
+		if (product.NUMBER_LOTS === 0 && product.INTERVAL_SHIPMENTS === 0) {
+			deliveryTerms = "Multiple deliveries from local stocks with first ";
+			deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
+		}
+		else if (product.NUMBER_LOTS === 1 && product.INTERVAL_SHIPMENTS === 0) {
+			deliveryTerms = "Single delivery ";
+			deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
+		}
+		else {
+			deliveryTerms = product.NUMBER_LOTS.toString()
+				.concat(" lots at interval of ")
+				.concat(product.INTERVAL_SHIPMENTS.toString())
+				.concat(" months with first ")
+				.concat(product.FIRST_SHIPMENT);
+		}
+		//Requested Quantity & FOC string
+		let focString = "";
+		let requestedQuantityString = requestedVolume.toString().concat(" ").concat(product.UNIT);
+		if (product.FOC !== 0) {
+			if (product.FOC_ABS_PCT === "PCT") {
+				focString = Math.round(100 * product.FOC).toString().concat("%");
+				requestedQuantityString = requestedQuantityString.concat("<br> (FOC: ").concat(focString);
+			}
+			else {
+				focString = Math.round(product.FOC).toString();
+				requestedQuantityString = requestedQuantityString.concat("<br> (FOC: ")
+					.concat(focString)
+					.concat(" ")
+					.concat(product.UNIT);
+			}
+			requestedQuantityString = requestedQuantityString
+				.concat((product.FOC_TYPE === "FOC 1") ? " included)" : " added)");
+		}
+		//Build results object
+		let results = {
+			ProductComment: productComment,
+
+			DeliveryTerms: deliveryTerms,
+
+			FocString: focString,
+			RequestedQuantityString: requestedQuantityString,
+
+			TotalVolumeUnit: totalVolumeUnit,
+			PaidVolume: paidVolume,
+			PaidVolumeUnit: paidVolumeUnit,
+			FocAmountUnit: focAmountUnit,
+
+			OfferPriceUnit: offerPriceUnit,
+			OfferPricePack: offerPricePack,
+			OfferPriceUnitEurBudget: offerPriceUnitEurBudget,
+			OfferPriceUnitEurSpot: offerPriceUnitEurSpot,
+
+			NetPriceUnit: netPriceUnit,
+			NetPricePack: netPricePack,
+			NetPriceUnitEurBudget: netPriceUnitEurBudget,
+			NetPriceUnitEurSpot: netPriceUnitEurSpot,
+
+			CogsEurUnit: cogsEurUnit,
+			CogsEurPack: cogsEurPack,
+
+			GrossSales: grossSales,
+			NetSales: netSales,
+			NetSalesEurBudget: netSalesEurBudget,
+			NetSalesEurSpot: netSalesEurSpot,
+
+			GrossProfitEurSpot: grossProfitEurSpot,
+			GrossProfitEurBudget: grossProfitEurBudget,
+			GrossMarginEurSpot: grossMarginEurSpot,
+			GrossMarginEurBudget: grossMarginEurBudget,
+
+			IsMinPrice: isMinPrice
+		};
+		return results;
+	}
+	/*function isDoubleEqual(x, y){
+		const doubleComparisonThreshold = 0.0001;
+		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
+	}*/
+
+	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes) {//MEA (and default)
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		//Regulatory
+		//Optional if business approved (country or regional)
+		//Notification if NetOfferPrice = Registered Price (and registered price exists)
+		let regulatory = 1;
+		if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
+			regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
+		}
+
+		//Legal
+		//Optional if legal approved
+		//Approval if private institute OR negative profitability
+		//Notification for semi-gov institute
+		let legal = 1;
+		if (product.LEGAL_APPROVED !== 1) {
+			if (offer.INSTITUTE_TYPE === "Private" || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
+				legal = 3;
+			}
+			else if (offer.INSTITUTE_TYPE === "Semi-Governmental") {
+				legal = 2;
+			}
+		}
+
+		//Controlling
+		//Notification if OfferPrice below lowest price
+		let controlling = 1;
+		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+			controlling = 2;
+		}
+
+		//Country Business
+		//Optional if business approved
+		//Mandatory otherwise
+		//Note: we had logic only requiring approval if
+		//below APPROVED_PRICE (when existed) or below REGISTERED_PRICE (when existed and no APPROVED_PRICE) or when no REGISTERED_PRICE
+		//this was removed to allow applying e-signature in quotation document (compliance required business approval)
+		let countryBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : 3;
+
+		//Regional Business
+		//Optional if business approved
+		//Mandatory if OfferPrice below lowest price
+		//Mandatory if not default payment terms
+		let regionalBusiness = 1;
+		if (product.BUSINESS_APPROVED !== 1) {
+			if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+				regionalBusiness = 3;
+			}
+			else if (product.IS_DEFAULT_TERMS === 0) {
+				regionalBusiness = 3;
+			}
+		}
+
+		//Supply
+		//Optional if supply approved
+		//Mandatory otherwise
+		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
+
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch (oApproverType.ApproverType) {
+				case "Regulatory":
+					oApproverType.ValidationType = regulatory;
+					break;
+				case "Legal":
+					oApproverType.ValidationType = legal;
+					break;
+				case "Controlling":
+					oApproverType.ValidationType = controlling;
+					break;
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Regional Business":
+					oApproverType.ValidationType = regionalBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = oApproverType.ValidationType;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		/*
+		let results = {
+			REGULATORY: regulatory,
+			LEGAL: legal,
+			CONTROLLING: controlling,
+			COUNTRY_BUSINESS: countryBusiness,
+			REGIONAL_BUSINESS: regionalBusiness,
+			SUPPLY_CHAIN: supply,
+			//Other countries default values
+			NSM_SM_FM: 1,
+			HBU: 1,
+			CDH: 1,
+			MACS: 1,
+			TA: 1,
+			FBP: 1,
+			LPC: 1,
+			COM_PGA: 1,
+			International_Trade: 1,
+			Transfer_Pricing: 1,
+			SBR: 1,
+			//In Policy flag
+			IN_POLICY: true
+		};
+		*/
+		return results;
+	}
+
+	function buildProductValidationForType3(offer, product, productInfo, aApproverTypes) {//Mexico
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		//Country Business
+		//Optional if business approved
+		//Mandatory if volume above threshold
+		let countryBusiness = (product.BUSINESS_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
+
+		//Supply
+		//Optional if supply approved
+		//Mandatory otherwise
+		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
+
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch (oApproverType.ApproverType) {
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = oApproverType.ValidationType;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		/*
+		let results = {
+			REGULATORY: 1,
+			LEGAL: 1,
+			CONTROLLING: 1,
+			COUNTRY_BUSINESS: countryBusiness,
+			REGIONAL_BUSINESS: 1,
+			SUPPLY_CHAIN: supply,
+			//Other countries default values
+			NSM_SM_FM: 1,
+			HBU: 1,
+			CDH: 1,
+			MACS: 1,
+			TA: 1,
+			FBP: 1,
+			LPC: 1,
+			COM_PGA: 1,
+			International_Trade: 1,
+			Transfer_Pricing: 1,
+			SBR: 1,
+			//In Policy flag
+			IN_POLICY: true
+		};
+		*/
+
+		return results;
+	}
+
+	function buildProductValidationForType7(offer, product, productInfo, aApproverTypes) {//Chile
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "Supply Chain":
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "MACS Head":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Business Service":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Law and Patents":
+						oApproverType.ValidationType = 3;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Marketing":
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma') {
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "Supply Chain":
+						oApproverType.ValidationType = 2;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		} else if (product.DIVISION === 'Radiology') {
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "SBR RA ConoSur":
+						oApproverType.ValidationType = 3;
+						break;
+					case "CDH-Chile (signature)":
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		} else {
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "Supply Chain":
+						oApproverType.ValidationType = 2;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		}
+
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		/*aApproverTypes.map(async function (oApproverType) {
+			switch(oApproverType.ApproverType){
+				case "Regulatory": 
+					oApproverType.ValidationType = regulatory;
+					break;
+				case "Legal": 
+					oApproverType.ValidationType = legal;
+					break;
+				case "Controlling":
+					oApproverType.ValidationType = controlling;
+					break;
+				case "Country Business":
+					oApproverType.ValidationType = countryBusiness;
+					break;
+				case "Regional Business":
+					oApproverType.ValidationType = regionalBusiness;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+				default:
+					oApproverType.ValidationType = 1;	
+			}
+		});*/
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
+	async function buildProductValidationForType9(tx, offer, product, productInfo, aApproverTypes) {//Italy
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+		let validationType;
+
+		if (product.OfferType === "Selling"){
+
+			const uom = product.UNIT;
+			const netOfferPrice = product.NET_OFFER_PRICE;
+			const whereProduct = {
+				COUNTRY_CODE: offer.COUNTRYCODE,
+				PRODUCT_ID: product.PRODUCTID
+			};
+
+			
+			const countryPreApprovedPrice = await tx.run(SELECT.one.from(CountryPreApprovedPrices).where(whereProduct));
+			let minPreApprovedPrice = countryPreApprovedPrice && (uom === "Pack" ? countryPreApprovedPrice.MIN_PACK_PRICE : countryPreApprovedPrice.MIN_UNIT_PRICE);
+
+
+			if(!((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0) )){
+
+				// if a product is offered above or equal to pre-approved price, 
+				// business approval is not mandatory even if additional discount on offer is not 0%).
+				if(netOfferPrice && minPreApprovedPrice && netOfferPrice >= minPreApprovedPrice){
+					validationType = 1;	
+				}else{
+					validationType = 3;	
+				}
+
+
+			} else {
+				validationType = 1;
+			}
+
+			
+		} else {
+			validationType = 3;	
+
+		}
+
+		aApproverTypes.map(async function (oApproverType) {	
+			// for Supply Chain, optional validation type should still send a notification
+			if(oApproverType.ApproverType === "Supply Chain" && validationType === 1 ){
+				oApproverType.ValidationType = 2;
+			} else {
+				oApproverType.ValidationType = validationType;	
+			}
+							
+		})
+
+		
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
+	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName) {
+		let price = 0;
+		productPolicyPrices.forEach(e => {
+			if (e.PricingPolicyName === pricingPolicyName && e.Role === role) {
+				price = e.Price;
+			};
+		});
+		return price;
+	}
+
+
+
+	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		//Supply chain approval is alway mandatory
+		let supply = 3;
+
+		//Check on offer unit (pack or unit) and get factor to apply on policy prices
+		let uomFactor = 1;
+		if (product.UNIT === 'Unit') {
+			uomFactor = product.PACKSIZE;
+		};
+
+		//Get ChannelId
+		let whereChannel = {
+			ChannelCountry: offer.COUNTRYCODE,
+			ChannelName: offer.INSTITUTE_TYPE
+		};
+		let channel = await tx.run(SELECT.from(MASTER_COUNTRY_CHANNELS).where(whereChannel));
+
+		let whereLatestApprovedBrandPolicy = {
+			CountryCode: offer.COUNTRYCODE,
+			BrandId: product.BRANDID,
+		};
+
+		let latestApprovedBrandPolicy = await tx.run(SELECT.from(LatestApprovedBrandPolicies).where(whereLatestApprovedBrandPolicy));
+		if (latestApprovedBrandPolicy.length === 0) {//No pricing policy
+			//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+			//based upon the country the correct approverType will be handled 
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "HBU":
+						oApproverType.ValidationType = 1;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = 1;
+						break;
+					case "NSM/SM/FM":
+						oApproverType.ValidationType = 1;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+
+			return results = {
+				//In Policy flag
+				IN_POLICY: false
+			};
+
+			/*
+			return {
+				//Default values for other countries approver types
+				REGULATORY: 1,
+				LEGAL: 1,
+				CONTROLLING: 1,
+				COUNTRY_BUSINESS: 1,
+				REGIONAL_BUSINESS: 1,
+				MACS: 1,
+				TA: 1,
+				FBP: 1,
+				LPC: 1,
+				COM_PGA: 1,
+				International_Trade: 1,
+				Transfer_Pricing: 1,
+				SBR: 1,
+				//Thailand approver types
+				NSM_SM_FM: 1,
+				HBU: 1,
+				CDH: 1,
+				SUPPLY_CHAIN: supply,
+				//In Policy flag
+				IN_POLICY: false
+			};
+			*/
+		}
+
+		//Get latest approved product pricing policy for country and product
+		let wherePolicy = {
+			BrandPolicy_ID: latestApprovedBrandPolicy[0].ID,
+			ProductPackId: product.PRODUCTID
+		};
+
+		let productPolicy = await tx.run(SELECT.from(ProductPolicies).where(wherePolicy));
+		//Get linked product policy prices (MSP and NSP) for Channel
+		let wherePolicyPrices = {
+			ProductPolicy_ID: productPolicy[0].ID,
+			Channel_ID: channel[0].ID
+		};
+		let productPolicyPrices = await tx.run(SELECT.from(PolicyPrices).where(wherePolicyPrices));
+		if (productPolicyPrices.length !== 6) {//Incomplete pricing policy
+
+			//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+			//based upon the country the correct approverType will be handled 
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "HBU":
+						oApproverType.ValidationType = 1;
+						break;
+					case "CDH":
+						oApproverType.ValidationType = 1;
+						break;
+					case "NSM/SM/FM":
+						oApproverType.ValidationType = 1;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+
+			return results = {
+				//In Policy flag
+				IN_POLICY: false
+			};
+
+			/*
+			return {
+				//Default values for other countries approver types
+				REGULATORY: 1,
+				LEGAL: 1,
+				CONTROLLING: 1,
+				COUNTRY_BUSINESS: 1,
+				REGIONAL_BUSINESS: 1,
+				MACS: 1,
+				TA: 1,
+				FBP: 1,
+				LPC: 1,
+				COM_PGA: 1,
+				International_Trade: 1,
+				Transfer_Pricing: 1,
+				SBR: 1,
+				//Thailand approver types
+				NSM_SM_FM: 1,
+				HBU: 1,
+				CDH: 1,
+				SUPPLY_CHAIN: supply,
+				//In Policy flag
+				IN_POLICY: false
+			};
+			*/
+		}
+		//Set variables for policy prices thresholds
+		let nsmMSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'MSP') / uomFactor;
+		let nsmNSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'NSP') / uomFactor;
+		let hbuMSP = extractPolicyValue(productPolicyPrices, 'HBU', 'MSP') / uomFactor;
+		let hbuNSP = extractPolicyValue(productPolicyPrices, 'HBU', 'NSP') / uomFactor;
+		let cdhMSP = extractPolicyValue(productPolicyPrices, 'CDH', 'MSP') / uomFactor;
+		let cdhNSP = extractPolicyValue(productPolicyPrices, 'CDH', 'NSP') / uomFactor;
+
+		//Set initial approvals requirement to "Optional", i.e. 1
+		let nsmLevel = 1;
+		let hbuLevel = 1;
+		let cdhLevel = 1;
+		let inPolicy = true;//Boolean used to specify if product offer and net offer prices are within policy
+
+		let preApprovedAccountOfferPrice = product.ACCOUNT_OFFER_PRICE;
+		let preApprovedAccountNetOfferPrice = product.ACCOUNT_NET_OFFER_PRICE;
+
+		let requiredApprovalLevel = 0;//0: No business approval required; 1:NSM/SM/FM; 2: HBU; 3: CDH; 4: Approval not allowed
+		if (//This means it's first offer for account or offer price is new lowest for account
+			ServiceHelper.isDoubleEqual(preApprovedAccountOfferPrice, 0) ||
+			ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, preApprovedAccountOfferPrice)
+		) {
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)) {//NSM/SM/FM can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+			}
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)) {//HBU can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+			}
+			else if (ServiceHelper.isDoubleXBelowEqualY(cdhMSP, product.OFFER_PRICE)) {//CDH can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+			}
+			else {
+				requiredApprovalLevel = 4;
+			};
+		}
+		if (//This means it's first offer for account or net offer price is new lowest for account
+			ServiceHelper.isDoubleEqual(preApprovedAccountNetOfferPrice, 0) ||
+			ServiceHelper.isDoubleXBelowY(product.NET_OFFER_PRICE, preApprovedAccountNetOfferPrice)
+		) {
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_OFFER_PRICE)) {//NSM/SM/FM can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+			}
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_OFFER_PRICE)) {//HBU can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+			}
+			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_OFFER_PRICE)) {//CDH can approve
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+			}
+			else {
+				requiredApprovalLevel = 4;
+			};
+		}
+
+		switch (requiredApprovalLevel) {
+			case 4:
+				inPolicy = false;
+				break;
+			case 3:
+				cdhLevel = 3;
+				break;
+			case 2:
+				hbuLevel = 3;
+				break;
+			case 1:
+				nsmLevel = 3;
+				break;
+		}
+
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+		aApproverTypes.map(async function (oApproverType) {
+			switch (oApproverType.ApproverType) {
+				case "HBU":
+					oApproverType.ValidationType = hbuLevel;
+					break;
+				case "CDH":
+					oApproverType.ValidationType = cdhLevel;
+					break;
+				case "NSM/SM/FM":
+					oApproverType.ValidationType = nsmLevel;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = supply;
+					break;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: inPolicy
+		};
+
+		/*
+		let results = {
+			//Default values for other countries approver types
+			REGULATORY: 1,
+			LEGAL: 1,
+			CONTROLLING: 1,
+			COUNTRY_BUSINESS: 1,
+			REGIONAL_BUSINESS: 1,
+			MACS: 1,
+			TA: 1,
+			FBP: 1,
+			LPC: 1,
+			COM_PGA: 1,
+			International_Trade: 1,
+			Transfer_Pricing: 1,
+			SBR: 1,
+			//Thailand approver types
+			NSM_SM_FM: nsmLevel,
+			HBU: hbuLevel,
+			CDH: cdhLevel,
+			SUPPLY_CHAIN: supply,
+			//In Policy flag
+			IN_POLICY: inPolicy
+		};
+		*/
+
+		return results;
+	}
+
+	function buildProductValidationForType5(offer, product, productInfo, aApproverTypes) {//Argentina
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
+		//based upon the country the correct approverType will be handled 
+
+		aApproverTypes.map(async function (oApproverType) {
+			switch (oApproverType.ApproverType) {
+				case "MACS":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+					break;
+				case "TA":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+					break;
+				case "FBP":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+					break;
+				case "LPC":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+					break;
+				case "COM/PGA":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+					break;
+				case "Supply Chain":
+					oApproverType.ValidationType = 3;
+					break;
+				case "International Trade":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+					break;
+				case "Transfer Pricing":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+					break;
+				case "CDH":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 3 : 3;
+					break;
+				case "SBR":
+					oApproverType.ValidationType = ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_OFFER_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_OFFER_PRICE)) ? 1 : 3;
+					break;
+				default:
+					oApproverType.ValidationType = oApproverType.ValidationType;
+			}
+		});
+
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+		/*
+				let results = {
+					//Default values for other countries approver types
+					REGULATORY: 1,
+					LEGAL: 1,
+					CONTROLLING: 1,
+					COUNTRY_BUSINESS: 1,
+					REGIONAL_BUSINESS: 1,
+					NSM_SM_FM: 1,
+					HBU: 1,
+					//Argentina approver types
+					MACS: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+					TA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+					FBP: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
+					LPC: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+					COM_PGA: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+					International_Trade: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
+					Transfer_Pricing: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
+					SBR: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 1 : 3,
+					CDH: ServiceHelper.isDoubleEqual(product.OFFER_PRICE, product.NET_PRICE) ? 1 : (product.BUSINESS_CASE_PRICE && ServiceHelper.isDoubleXBelowEqualY(product.BUSINESS_CASE_PRICE, product.NET_PRICE)) ? 3 : 3,
+					SUPPLY_CHAIN: 3,
+					//In Policy flag
+					IN_POLICY: true
+				};
+		*/
+		return results;
+	}
+
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes) {
+		let commnonProductInfo = buildCommonProductInfo(offer, product);
+		let productValidation = {};
+		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 3) {//Applicable for Mexico
+			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 4) {//Applicable for Thailand
+			productValidation = await buildProductValidationForType4(tx, offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 5) {//Applicable for Argentina
+			productValidation = buildProductValidationForType5(offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 7) { //Applicable for Chile
+			productValidation = buildProductValidationForType7(offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else if (offer.APPROVAL_TYPE === 9) { //Applicable for Italy
+			productValidation = await buildProductValidationForType9(tx, offer, product, commnonProductInfo, aApproverTypes)
+		}
+		else {//Not implemented yet, there will be approval type values for each case where logic is different
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
+		}
+
+		return {
+			CommnonProductInfo: commnonProductInfo,
+			ProductValidation: productValidation
+		};
+	}
+	async function buildOfferProductValidation(tx, whereOffer) {
+
+		let results = [];
+		whereOffer[0].ref[0] = 'OFFERID'
+		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
+		if (offer.length !== 1) {
+			return results;
+		}
+
+		offer = offer[0];
+		let aOfferProduct = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+		if (aOfferProduct.length === 0) {
+			return results;
+		}
+
+		//where statement
+		let whereApproverType = {
+			CountryCode: offer.COUNTRYCODE
+		}
+
+		//Get corresponding approvertypes
+		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+
+		results = aOfferProduct.map(async function (offerProduct) {
+			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes);
+
+			//Get all prices, ammounts and cogs in all units
+			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
+			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
+
+			//let aFreeGoodsOtherTemp = [];
+			const whereProductPackId = ServiceHelper.buildFullWhere("ProductPricing_ProductCode", "=", offerProduct.PRODUCTID);
+			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
+
+			return {
+				TENDER_ID: offer.TENDERID,
+				COUNTRY_CODE: offer.COUNTRYCODE,
+				OFFER_ID: offer.OFFERID,
+				DIVISION: offerProduct.DIVISION,
+				BRANDID: offerProduct.BRANDID,
+				BRANDNAME: offerProduct.BRANDNAME,
+				PRODUCT_UNIT_NAME: offerProduct.PRODUCT_UNIT_NAME, //thailand
+				SKU: offerProduct.SKU, //thailand
+				PRODUCTID: offerProduct.PRODUCTID,
+				CODE: offerProduct.CODE,
+				PRODUCTNAME: offerProduct.PRODUCTNAME,
+				PACKSIZE: offerProduct.PACKSIZE,
+				DOSAGE: offerProduct.DOSAGE,
+				UOM: offerProduct.UOM,
+				COUNTRYOFORIGIN: offerProduct.COUNTRYOFORIGIN,
+				MANUFACTURER: offerProduct.MANUFACTURER,
+				SHELFLIFE: offerProduct.SHELFLIFE,
+				PRESENTATION: offerProduct.PRESENTATION,
+				VAT: offerProduct.VAT,
+				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
+				UNIT: offerProduct.UNIT,
+				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
+				SORTER: offerProduct.SORTER,
+				CURRENCY: offer.CURRENCY,
+				REQUESTED_QUANTITY: productInfo.CommnonProductInfo.RequestedQuantityString,
+				DELIVERY_TERMS: productInfo.CommnonProductInfo.DeliveryTerms,
+				PAYMENT_TERMS: offerProduct.PAYMENT_TERMS,
+				SHIPMENT_TERMS: offerProduct.INCO_TERMS,
+				SAMPLES: offerProduct.SAMPLES,
+				SAMPLES_UNIT: offerProduct.SAMPLES * toUnitFactor,
+				SAMPLES_PACK: offerProduct.SAMPLES * toPackFactor,
+				REGISTERED_PRICE: offerProduct.REGISTERED_PRICE,
+				OFFER_PRICE: offerProduct.OFFER_PRICE,
+				FOC: productInfo.CommnonProductInfo.FocString,
+				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit, //Total Volume(units) (thailand - new column missing in the screenshot)
+				FOC_QUANTITY_UNITS: productInfo.CommnonProductInfo.FocAmountUnit,
+				PAID_QUANTITY_UNITS: productInfo.CommnonProductInfo.PaidVolumeUnit,
+				REQ_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPriceUnit,
+				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + offerProduct.VAT),   //MSP incl VAT (thailand)
+				REQ_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPricePack,
+				REQ_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.OfferPriceUnitEurBudget,
+				REQ_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.OfferPriceUnitEurSpot,
+				NET_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPriceUnit,
+				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT),   //NSP incl VAT (thailand)
+				NET_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPricePack,
+				NET_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.NetPriceUnitEurBudget,
+				NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
+				NET_OFFER_PRICE: offerProduct.NET_OFFER_PRICE,
+				NET_PRICE: offerProduct.NET_PRICE,
+				COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
+				COGS_EUR_UNIT: productInfo.CommnonProductInfo.CogsEurUnit,
+				COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
+				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
+				NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
+				NET_SALES_EUR_BUDGET: productInfo.CommnonProductInfo.NetSalesEurBudget,
+				NET_SALES_EUR_SPOT: productInfo.CommnonProductInfo.NetSalesEurSpot,
+				GROSS_MARGIN_EUR_BUDGET: productInfo.CommnonProductInfo.GrossMarginEurBudget,
+				GROSS_MARGIN_EUR_SPOT: productInfo.CommnonProductInfo.GrossMarginEurSpot,
+				GROSS_PROFIT_EUR_BUDGET: productInfo.CommnonProductInfo.GrossProfitEurBudget,
+				GROSS_PROFIT_EUR_SPOT: productInfo.CommnonProductInfo.GrossProfitEurSpot,
+				//REGULATORY: productInfo.ProductValidation.REGULATORY,
+				//LEGAL: productInfo.ProductValidation.LEGAL,
+				//CONTROLLING: productInfo.ProductValidation.CONTROLLING,
+				//COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
+				//REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
+				//SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
+				IS_LOWEST: (productInfo.CommnonProductInfo.IsMinPrice) ? 1 : 0,
+				IS_DEFAULT_TERMS: offerProduct.IS_DEFAULT_TERMS,
+				IS_REGISTERED: offerProduct.IS_REGISTERED,
+				IS_ALTERNATIVE_QUOTED: offerProduct.IS_ALTERNATIVE_QUOTED,
+				IS_ALTERNATIVE_REQUESTED: offerProduct.IS_ALTERNATIVE_REQUESTED,
+				NEW_APPROVAL: offerProduct.NEW_APPROVAL,
+				BUDGETED_PROFITABILITY: offerProduct.BUDGETED_PROFITABILITY,
+				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT),
+				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * offerProduct.VAT,
+				//NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
+				//HBU: productInfo.ProductValidation.HBU,
+				//CDH: productInfo.ProductValidation.CDH,
+				IN_POLICY: productInfo.ProductValidation.IN_POLICY,
+				//MACS: productInfo.ProductValidation.MACS,
+				//TA: productInfo.ProductValidation.TA,
+				//FBP: productInfo.ProductValidation.FBP,
+				//LPC: productInfo.ProductValidation.LPC,
+				//COM_PGA: productInfo.ProductValidation.COM_PGA,
+				//International_Trade: productInfo.ProductValidation.International_Trade,
+				//Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
+				//SBR: productInfo.ProductValidation.SBR,
+				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
+				OFFER_PRICE_VAT: offerProduct.OFFER_PRICE * (1 + offerProduct.VAT),
+				ApproverTypes: aTempApproverTypes,
+				BUDGET_RATE: offerProduct.BUDGET_RATE,
+				SPOT_RATE: offerProduct.SPOT_RATE,
+				BUSINESS_CASE_PRICE: offerProduct.BUSINESS_CASE_PRICE,
+
+				WARRANTY: offerProduct.Warranty,
+				AGREEMENTDURATION: offerProduct.AgreementDuration,
+				MONTHLYRENT: offerProduct.MonthlyRent,
+				MONTHSPERINVOICE: offerProduct.MonthsPerInvoice,
+				CONTRACTSTARTDATE: offerProduct.ContractStartDate,
+				VALUEOFDEVICES: offerProduct.ValueOfDevices,
+				STATUSOFDEVICE: offerProduct.StatusOfDevice,
+				MINCONTRACTUAL: offerProduct.MinContractual,
+				MINANNPURCH: offerProduct.MinAnnPurch,
+				FOC_STEP: offerProduct.FOC_STEP,
+				FreeGoodsOther: aFreeGoodsOtherTemp
+			}
+		});
+		let resolvedResults = await Promise.all(results);
+		resolvedResults.sort((a, b) => (a.SORTER > b.SORTER) ? 1 : -1);
+		let sorter = 0;
+		for (let i = 0; i < resolvedResults.length; i++) {
+			sorter = sorter + 1;
+			resolvedResults[i].SORTER = sorter;
+		}
+
+		return resolvedResults;
+	}
+	async function buildOfferValidation(tx, whereOffer) {
+		let results = {};
+
+		//get offer info
+		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
+		if (offer.length !== 1) {
+			return results;
+		}
+		offer = offer[0];
+
+
+		//get tender info
+		const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
+		let tender = await tx.run(SELECT.from(PT_TMTEND).where(whereTender));
+		tender = tender[0];
+
+		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
+		let aApproverTypes = [];
+
+		//if we have products for the offer the offerProductValidation
+		if (offerProductValidation.length === 0) {
+			//no products
+			return results;
+		} else {
+
+			//only keep 1 approvertypes array (an array exists for each product)
+			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;
+
+			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
+			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation);
+
+		}
+
+		//convert IN_POLICY to true or false
+		let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IN_POLICY ? 1 : 0 })) === 1 ? true : false;
+
+		/*
+				//Shared
+				let supply = Math.max.apply(Math, offerProductValidation.map((d) => { return d.SUPPLY_CHAIN }));
+				//MEA
+				let regulatory = Math.max.apply(Math, offerProductValidation.map((d) => { return d.REGULATORY }));
+				let legal = Math.max.apply(Math, offerProductValidation.map((d) => { return d.LEGAL }));
+				let controlling = Math.max.apply(Math, offerProductValidation.map((d) => { return d.CONTROLLING }));
+				let countryBusiness = Math.max.apply(Math, offerProductValidation.map((d) => { return d.COUNTRY_BUSINESS }));
+				let regionalBusiness = Math.max.apply(Math, offerProductValidation.map((d) => { return d.REGIONAL_BUSINESS }));
+				countryBusiness = (regionalBusiness !== 1) ? 1 : countryBusiness;//No need for country business approval if regional business approval is required
+				//Thailand
+				let nsmLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.NSM_SM_FM }));
+				let hbuLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.HBU }));
+				let cdhLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.CDH }));
+				if (cdhLevel === 3) {//If CDH approval is mandatory, lower levels do not need to approve
+					nsmLevel = 1;
+					hbuLevel = 1;
+				}
+				else if (hbuLevel === 3) {//If HBU approval is mandatory, lower levels do not need to approve
+					nsmLevel = 1;
+				}
+				let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IN_POLICY ? 1 : 0 })) === 1 ? true : false;
+				//Argentina
+				let macsLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.MACS }));
+				let taLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.TA }));
+				let fbpLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FBP }));
+				let lpcLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.LPC }));
+				let comPgaLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.COM_PGA }));
+				let internationTradeLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.International_Trade }));
+				let transferPricingLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.Transfer_Pricing }));
+				let sbrLevel = Math.max.apply(Math, offerProductValidation.map((d) => { return d.SBR }));
+		*/
+		let isLowest = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_LOWEST }));
+		let isDefaultTerms = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_DEFAULT_TERMS }));
+		let isNewApproval = Math.max.apply(Math, offerProductValidation.map((d) => { return d.NEW_APPROVAL }));
+		let isRegistered = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_REGISTERED }));
+
+
+		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
+		let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
+
+		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
+		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
+
+		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
+		let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
+		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
+
+		//Division can be Pharma or Radiology, this determines division for country approvers
+		//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
+		let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION }));
+		let division = (divisions.length === 1) ? divisions[0] : "Both";
+
+		//In case we have any FOC (on main products) in the offer, a comment should be in remarks
+		let maxFOC = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FOC }));
+		let focRemark = "";
+		if (maxFOC !== 0) {
+			if (offer.FOC_TYPE === "FOC 1") {
+				focRemark = "Free-of-Charge goods will be included in the ordered quantity, as specified in the quantity column above."
+			}
+			else {
+				focRemark = "Free-of-Charge goods will be provided as an additional quantity to the ordered goods, as specified in the quantity column above.";
+			}
+		}
+
+		//In case we have samples, comment should be in remarks specifying item numbers for which samples are provided
+		let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
+		let samplesRemark = "";
+		if (samplesNotZero.length === offerProductValidation.length) {
+			samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
+		}
+		else if (samplesNotZero.length !== 0) {
+			let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
+			samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
+			samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
+		}
+
+		//Shipment Terms need to be specified by item number if not same for all
+		let shipmentTerms = "";
+		let shipmentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
+			if(d && d.SHIPMENT_TERMS){
+				return d.SHIPMENT_TERMS;
+			}else{
+				return 'NA';
+			}	
+		}));
+		if (shipmentTermsDistinct.length === 1) {
+			shipmentTerms = shipmentTermsDistinct[0];
+		}
+		else {
+			let shipmentTermsRow = [];
+			for (let i = 0; i < shipmentTermsDistinct.length; i++) {
+				let shipmentTermsItems = offerProductValidation.filter((d) => d.SHIPMENT_TERMS === shipmentTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+				shipmentTermsRow[i] = shipmentTermsItems.concat(": ").concat(shipmentTermsDistinct[i]);
+			}
+			shipmentTerms = shipmentTermsRow.join("<br>")
+		}
+
+		//Payment Terms need to be specified by item number if not same for all
+		let paymentTerms = "";
+		let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+			if(d && d.PAYMENT_TERMS){
+				return d.PAYMENT_TERMS;
+			}else{
+				return 'NA';
+			}		
+		}));
+		if (paymentTermsDistinct.length === 1) {
+			paymentTerms = paymentTermsDistinct[0];
+		}
+		else {
+			let paymentTermsRow = [];
+			for (let i = 0; i < paymentTermsDistinct.length; i++) {
+				let paymentTermsItems = offerProductValidation.filter((d) => d.PAYMENT_TERMS === paymentTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+				paymentTermsRow[i] = paymentTermsItems.concat(": ").concat(paymentTermsDistinct[i]);
+			}
+			paymentTerms = paymentTermsRow.join("<br>")
+		}
+
+		//Delivery Terms need to be specified by item number if not same for all
+		let deliveryTerms = "";
+		let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+			if(d && d.DELIVERY_TERMS){
+				return d.DELIVERY_TERMS;
+			}else{
+				return 'NA';
+			}	
+		}));
+		if (deliveryTermsDistinct.length === 1) {
+			deliveryTerms = deliveryTermsDistinct[0];
+		}
+		else {
+			let deliveryTermsRow = [];
+			for (let i = 0; i < deliveryTermsDistinct.length; i++) {
+				let deliveryTermsItems = offerProductValidation.filter((d) => d.DELIVERY_TERMS === deliveryTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+				deliveryTermsRow[i] = deliveryTermsItems.concat(": ").concat(deliveryTermsDistinct[i]);
+			}
+			deliveryTerms = deliveryTermsRow.join("<br>")
+		}
+
+		//Product comment shows in remarks, if any
+		let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
+
+		//Comment shows in remarks if any product is not registered in country
+		let registeredRemark = "";
+		if (isRegistered === 0) {
+			registeredRemark = "Product(s) not registered in the country. Import Permit is to be arranged by ";
+			registeredRemark = registeredRemark.concat(offer.DISTRIBUTORNAME)
+		}
+
+		//Comment if any product is alternative to quoted
+		let isAlternativeToQuoted = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_QUOTED }));
+		let alternativeQuotedRemark = (isAlternativeToQuoted !== 0)
+			? "** marked products are alternative to quoted products"
+			: "";
+
+		//Comment if any product is alternative to requested
+		let isAlternativeToRequested = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_REQUESTED }));
+		let alternativeRequestedRemark = (isAlternativeToRequested !== 0)
+			? "* marked products are alternative to requested products"
+			: "";
+
+		//In case of distributor sales, we have a specific note to distributor
+		let remarks = (offer.TENDER_CHANNEL === "Distributor")
+			? "With reference to the above tender, you must not on-sell the above mentioned products at a price higher than those listed above. However, you are always free to price lower, at your discretion.<br>"
+			: "";
+		//Building full remarks text
+		remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/\\+/g, "<br>").concat("<br>") : "");
+		remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/\\+/g, "<br>").concat("<br>") : "");
+		remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.COUNTRY_COMMENT.concat("<br>") : "");
+		remarks = remarks.concat((registeredRemark !== "") ? registeredRemark.concat("<br>") : "");
+		remarks = remarks.concat((samplesRemark !== "") ? samplesRemark.concat("<br>") : "");
+		remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
+		remarks = remarks.concat((alternativeQuotedRemark !== "") ? alternativeQuotedRemark.concat("<br>") : "");
+		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
+		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
+
+		// get SUBMITTED_BY user info 
+		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
+		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+
+		results = {
+			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
+			TENDERID: offer.TENDERID,
+			CLASSIFICATION: offer.CLASSIFICATION,//Added Classification (db#1)
+			TENDER_REFERENCE: offer.TENDER_REFERENCE,
+			PROCUREMENT_REASON: tender.PROCUREMENT_METHOD_ID,
+			OFFERID: offer.OFFERID,
+			INSTITUTENAME: offer.INSTITUTENAME,
+			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
+			INSTITUTE_STATE: offer.INSTITUTE_STATE,
+			CUSTOMER_CODE: offer.CUSTOMER_CODE,
+			DIVISION: division,//not correct, should be consolidated from product information
+			OFFERDATE: offer.OFFERDATE,
+			OFFERVALIDITY: offer.OFFERVALIDITY,
+			COUNTRYCODE: offer.COUNTRYCODE,
+			SELLINGCOMPANY: offer.SELLINGCOMPANY,
+			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
+			SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
+			SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
+			E_SIGNATURE1: offer.E_SIGNATURE1,
+			E_SIGNATURE2: offer.E_SIGNATURE2,
+			CURRENCY: offer.CURRENCY,
+			AMOUNT_IN_NUMBERS: totalAmount,
+			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
+			LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
+			//REGULATORY: regulatory,
+			//LEGAL: legal,
+			//CONTROLLING: controlling,
+			//COUNTRY_BUSINESS: countryBusiness,
+			//REGIONAL_BUSINESS: regionalBusiness,
+			//SUPPLY_CHAIN: supply,
+			DISTRIBUTORNAME: offer.DISTRIBUTORNAME,
+			DISTRIBUTORADDRESS: offer && offer.DISTRIBUTORADDRESS ? offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>") : '',
+			DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
+			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
+			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
+			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
+			REMARKS: remarks,
+			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
+			DELIVERYTERMS: deliveryTerms,
+			PAYMENTTERMS: paymentTerms,
+			SHIPMENTTERMS: shipmentTerms,
+			IS_LOWEST: isLowest,
+			IS_DEFAULT_TERMS: isDefaultTerms,
+			NEW_APPROVAL: isNewApproval,
+			AMOUNT_IN_NUMBERS_VAT: totalAmountVat,
+			AMOUNT_IN_WORDS_VAT: totalAmountVatInWords,
+			VAT_TOTAL: vatTotal,
+			//NSM_SM_FM: nsmLevel,
+			//HBU: hbuLevel,
+			//CDH: cdhLevel,
+			IN_POLICY: inPolicy,
+			//MACS: macsLevel,
+			//TA: taLevel,
+			//FBP: fbpLevel,
+			//LPC: lpcLevel,
+			//COM_PGA: comPgaLevel,
+			//International_Trade: internationTradeLevel,
+			//Transfer_Pricing: transferPricingLevel,
+			//SBR: sbrLevel,
+			PUBLICATION_DATE: offer.PUBLICATION_DATE,
+			BID_DUE_DATE: offer.BID_DUE_DATE,
+			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
+			ApproverTypes: aApproverTypes,
+			BUDGET_RATE: budgetRate,
+			SPOT_RATE: spotRate,
+
+		};
+		return results;
+	}
+
+	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
+	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation) {
+
+		//Calculate max validation type for each type in each product
+		aApproverTypes.map(async function (oApproverType) {
+
+			//convert to name of property (space = _ + all CAPITALS --> e.a Supply Chain = SUPPLY_CHAIN)
+			let sApproverType = oApproverType.ApproverType;
+			let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
+
+			//get max ValidationType
+			offerProductValidation.map((productValidation) => {
+
+				//keep current validation type
+				let iValidationType = oApproverType.ValidationType;
+
+				//check if a product is found with a higher calculated validation type for the same approverType as the current
+				if (oApproverType.ValidationType < productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType) {
+					iValidationType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType;
+				};
+
+				oApproverType.ValidationType = iValidationType;
+
+			});
+
+		});
+
+		//For MEA specific
+		//No need for country business approval if regional business approval is required
+		let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
+		let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
+		if (oCountryBusiness && oRegionalBusiness) {
+			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
+		}
+
+		//For Thailand specific
+		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
+		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM');
+		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
+		if (oCDH && oNSM && oHBU) {
+			//If CDH approval is mandatory, lower levels do not need to approve
+			if (oCDH.ValidationType === 3) {
+				oNSM.ValidationType = 1;
+				oHBU.ValidationType = 1;
+			}
+			//If HBU approval is mandatory, lower levels do not need to approve
+			else if (oHBU.ValidationType === 3) {
+				oNSM.ValidationType = 1;
+			}
+		}
+
+		//return the unique approvertypes for the offer & there re-calculated validation type
+		return aApproverTypes;
+
+	}
+
+	function getApprovalContent(ApproverType) {
+		switch (ApproverType) {
+			case "Country Business":
+			case "Regional Business":
+			case "Manager Business Operations":
+				return "Profitability";
+			case "Regulatory":
+			case "Legal":
+			case "Supply Chain":
+				return "Quotation";
+			default:
+				return "Quotation";
+		}
+	}
+	function getRequiredAction(requiredActionCode) {
+		switch (requiredActionCode) {
+			case 1:
+				return "Approval"
+			case 2:
+				return "Notification"
+			default:
+				return "Approval"
+		}
+	}
+	function buildValidationEntry(approverTypes, approvalForType, defaultForType, offerValidation, requiredActionCode) {
+		let approverName = "";
+		let approverEmailID = "";
+		let senderComment = "";
+		let approverComment = "";
+		let statusTime = null;
+		let submittedBy = null;
+		let approverDate = null;
+		let flowId = null;
+		let approverType = "";
+		let division = "";
+		let countryName = "";
+		let userName = "";
+		let userEmail = "";
+		if (approvalForType.length !== 0) {
+			approverName = approvalForType[0].ApproverName;
+			approverEmailID = approvalForType[0].ApproverEmailID;
+			statusTime = approvalForType[0].Statustime;
+			submittedBy = approvalForType[0].Submittedby;
+			approverDate = approvalForType[0].ApproverDate;
+			flowId = approvalForType[0].FLOW_ID;
+			countryName = approvalForType[0].CountryName;
+			userName = approvalForType[0].UserName;
+			userEmail = approvalForType[0].UserEmail;
+			senderComment = approvalForType[0].SenderComment;
+			approverComment = approvalForType[0].ApproverComment;
+			//			hierarchy = approvalForType[0].Hierarchy;
+		}
+		else if (defaultForType.length !== 0) {
+			approverName = defaultForType[0].ApproverName;
+			approverEmailID = defaultForType[0].ApproverEmailID;
+		}
+		else {
+			return null;
+		}
+		approverType = defaultForType[0].ApproverType;
+		division = defaultForType[0].Division;
+
+		//let aApproval = approvals.filter((a) => a.ApproverType === approverType);
+		let aApproval = approvalForType.filter((a) => a.ApproverType === approverType);
+		let aApproverType = approverTypes.filter((d) => d.ApproverType === approverType);
+		if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
+			aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
+		}
+
+		return {
+			TenderID: offerValidation.TENDERID,
+			OfferId: offerValidation.OFFERID,
+			CountryCode: offerValidation.COUNTRYCODE,
+			ApprovalContent: getApprovalContent(approverType),
+			ApproverTypeSection: (requiredActionCode === 1) ? 2 : 1,
+			REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredActionCode),
+			ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
+			ApproverName: approverName,
+			ApproverEmailID: approverEmailID,
+			SenderComment: senderComment,
+			ApproverComment: approverComment,
+			Active: 1,
+			AP_ID: null,
+			RestoreKey: null,
+			Statustime: statusTime,
+			Submittedby: submittedBy,
+			ApproverDate: approverDate,
+			ApproverType: approverType,
+			Division: division,
+			FLOW_ID: flowId,
+			ApproverList: defaultForType,
+			ApproverTypes: aApproverType,
+			CountryName: countryName,
+			UserName: userName,
+			UserEmail: userEmail
+		};
+	}
+
+	function mapDefaultCountryApprovers(countryApprovers, approverType, offerValidation) {
+		if (!offerValidation.DIVISION || offerValidation.DIVISION === "Both") {
+			//take all approver types
+			return countryApprovers.filter((d) => d.ApproverType === approverType);
+		} else {
+			//take approver types division which maches the offervalidation Division + division = both
+			return countryApprovers.filter((d) => d.ApproverType === approverType && (d.Division === offerValidation.DIVISION || d.Division === "Both"));
+		}
+	}
+
+	function mapApprovalForType(approverType, latestApproval, division) {
+		aApprovalForTypeResult = [];
+		oApprovalForType = latestApproval.filter((d => d.ApproverType === approverType));
+		if (oApprovalForType.length > 1 && approverType != 'Supply Chain' && approverType != 'Regulatory' && approverType != 'Legal' && approverType != 'Controlling') {
+			switch (division) {
+				case 'Pharma':
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					return aApprovalForTypeResult;
+				case 'Radiology':
+					aApprovalForTypeResult.push(oApprovalForType[1]);
+					return aApprovalForTypeResult;
+				case 'Both':
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					aApprovalForTypeResult.push(oApprovalForType[1]);
+					return aApprovalForTypeResult;
+			}
+		} else {
+			return oApprovalForType;
+		}
+	}
+
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers) {
+
+		let aResults = [];
+		let approverName = "";
+		let approverEmailID = "";
+		let senderComment = "";
+		let approverComment = "";
+		let statusTime = null;
+		let submittedBy = null;
+		let approverDate = null;
+		let flowId = null;
+		let approverType = "";
+		let division = "";
+		let countryName = "";
+		let userName = "";
+		let userEmail = "";
+		let requiredAction = "";
+
+		approverTypes.forEach(function (type, index) {
+			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
+			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation);
+
+			if (approvalForType.length !== 0) {
+				approverName = approvalForType[0].ApproverName;
+				approverEmailID = approvalForType[0].ApproverEmailID;
+				statusTime = approvalForType[0].Statustime;
+				submittedBy = approvalForType[0].Submittedby;
+				approverDate = approvalForType[0].ApproverDate;
+				flowId = approvalForType[0].FLOW_ID;
+				countryName = approvalForType[0].CountryName;
+				userName = approvalForType[0].UserName;
+				userEmail = approvalForType[0].UserEmail;
+				senderComment = approvalForType[0].SenderComment;
+				approverComment = approvalForType[0].ApproverComment;
+				//			hierarchy 		= approvalForType[0].Hierarchy;
+				requiredAction = type.ValidationType;
+				approverType = defaultForType.length !== 0 ? defaultForType[0].ApproverType : "";
+				division = defaultForType.length !== 0 ? defaultForType[0].Division : "";
+			}
+			else if (defaultForType.length !== 0) {
+				approverName = defaultForType[0].ApproverName;
+				approverEmailID = defaultForType[0].ApproverEmailID;
+				approverType = defaultForType[0].ApproverType;
+				division = defaultForType[0].Division;
+				requiredAction = approverTypes.filter((d) => d.ApproverType === defaultForType[0].ApproverType)[0].ValidationType
+				approverType = defaultForType[0].ApproverType;
+				division = defaultForType[0].Division;
+			}
+			else {
+				return null;
+			}
+
+			let aApproval = approvalForType.filter((a) => a.ApproverType === approverType);
+			let aApproverType = approverTypes.filter((d) => d.ApproverType === approverType);
+			if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
+				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
+			}
+
+			aResults.push({
+				TenderID: offerValidation.TENDERID,
+				OfferId: offerValidation.OFFERID,
+				CountryCode: offerValidation.COUNTRYCODE,
+				ApprovalContent: getApprovalContent(approverType),
+				ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
+				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
+				ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
+				ApproverName: approverName,
+				ApproverEmailID: approverEmailID,
+				SenderComment: senderComment,
+				ApproverComment: approverComment,
+				Active: 1,
+				AP_ID: null,
+				RestoreKey: null,
+				Statustime: statusTime,
+				Submittedby: submittedBy,
+				ApproverDate: approverDate,
+				ApproverType: approverType,
+				Division: division,
+				FLOW_ID: flowId,
+				ApproverList: defaultForType,
+				ApproverTypes: aApproverType,
+				CountryName: countryName,
+				UserName: userName,
+				UserEmail: userEmail
+			});
+
+		});
+
+		return aResults;
+	}
+
+	async function buildOfferApproval(tx, whereOffer) {
+		let results = [];
+		let approverTypes = [];
+		let latestApproval = await tx.run(SELECT.from(ApprovalRequests).where(whereOffer));
+
+		whereOffer[0].ref[0] = 'OFFERID'
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+
+		let whereCountry = whereOffer;
+		whereCountry[0].ref[0] = 'CountryCode';
+		whereCountry[2].val = offerValidation.COUNTRYCODE;
+
+		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
+
+		if (!offerValidation.COUNTRYCODE) return results;
+
+		//get ApproverTypes
+		if (offerValidation) {
+			approverTypes = offerValidation.ApproverTypes;
+		}
+
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers);
+
+	}
+
+	async function getOffersForWorkflow(tx, approvalStatus) {
+		let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", approvalStatus);
+
+		let workflowApprovals = await tx.run(SELECT.from(ApprovalRequests).where(whereStatus));
+		let workflowOffers = workflowApprovals.map((d) => d.OfferId);
+		return R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), workflowOffers);
+	}
+
+	async function buildWorkflowApprovalOffersEntry(tx, offerId, approvalStatus) {
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		return {
+			OFFERSTATUSPATH: offerValidation.OFFERSTATUSPATH,
+			COUNTRYCODE: offerValidation.COUNTRYCODE,
+			TENDERID: offerValidation.TENDER_REFERENCE, //offerValidation.TENDERID,
+			OFFERID: offerValidation.OFFERID,
+			INSTITUTENAME: offerValidation.INSTITUTENAME,
+			CURRENCY: offerValidation.CURRENCY,
+			AMOUNT_IN_NUMBERS: ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2),
+			AMOUNT_IN_WORDS: offerValidation.AMOUNT_IN_WORDS,
+			AMOUNT_IN_NUMBERS_VAT : offerValidation.AMOUNT_IN_NUMBERS_VAT,
+            AMOUNT_IN_WORDS_VAT   : offerValidation.AMOUNT_IN_WORDS_VAT,
+			DISTRIBUTORNAME: offerValidation.DISTRIBUTORNAME,
+			DISTRIBUTORADDRESS: (!offerValidation.DISTRIBUTORADDRESS) ? "" : offerValidation.DISTRIBUTORADDRESS.replace(/<br>+/g, "</br>"),
+			DISTRIBUTORPHONE: (!offerValidation.DISTRIBUTORPHONE) ? "" : offerValidation.DISTRIBUTORPHONE,
+			DISTRIBUTORFAX: (!offerValidation.DISTRIBUTORFAX) ? "" : offerValidation.DISTRIBUTORFAX,
+			DISTRIBUTORCONTACT: (!offerValidation.DISTRIBUTORCONTACT) ? "" : offerValidation.DISTRIBUTORCONTACT,
+			OFFERDATE: offerValidation.OFFERDATE,
+			OFFERVALIDITY: offerValidation.OFFERVALIDITY,
+			SELLINGCOMPANY: offerValidation.SELLINGCOMPANY,
+			SELLINGCOMPANYBANK: (!offerValidation.SELLINGCOMPANYBANK) ? "" : offerValidation.SELLINGCOMPANYBANK.replace(/<br>+/g, "</br>"),
+			REMARKS: (!offerValidation.REMARKS) ? "" : offerValidation.REMARKS.replace(/<br>+/g, "</br>").replace("NULL", ""),
+			APPROVER1: (!offerValidation.SELLING_COMPANY_AS1) ? "" : offerValidation.SELLING_COMPANY_AS1.replace(/\\+/g, "</br>"),
+			APPROVER2: (!offerValidation.SELLING_COMPANY_AS2) ? "" : offerValidation.SELLING_COMPANY_AS2.replace(/\\+/g, "</br>"),
+			E_SIGNATURE1: offerValidation.E_SIGNATURE1,
+			E_SIGNATURE2: offerValidation.E_SIGNATURE2,
+			SHIPMENTTERMS: (!offerValidation.SHIPMENTTERMS) ? "" : offerValidation.SHIPMENTTERMS.replace(/<br>+/g, "</br>"),
+			PAYMENTTERMS: (!offerValidation.PAYMENTTERMS) ? "" : offerValidation.PAYMENTTERMS.replace(/<br>+/g, "</br>"),
+			DELIVERYTERMS: (!offerValidation.DELIVERYTERMS) ? "" : offerValidation.DELIVERYTERMS.replace(/<br>+/g, "</br>"),
+			CUSTOM_REMARKS: (!offerValidation.CUSTOM_REMARKS) ? "" : offerValidation.CUSTOM_REMARKS,
+			LETTERHEAD: (!offerValidation.LETTERHEAD) ? "" : offerValidation.LETTERHEAD.replace(/<br>+/g, "</br>"),
+			CANCELLED: (approvalStatus === "Processing") ? "No" : "Yes",
+			BUDGET_RATE: offerValidation.BUDGET_RATE,
+			SPOT_RATE: offerValidation.SPOT_RATE
+		}
+	}
+
+	async function buildWorkflowApprovalProductsEntries(tx, offerId, approvalStatus) {
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
+		return offerProductValidation.map((d) => {
+			return {
+				TENDERID: d.TENDER_ID,
+				OFFERID: d.OFFER_ID,
+				COUNTRYCODE: d.COUNTRY_CODE,
+				PRODUCTCODE: d.CODE.toString(),
+				SORTER: d.SORTER,
+				BRANDNAME: d.BRANDNAME,
+				PRODUCT_UNIT_NAME: d.PRODUCT_UNIT_NAME,
+				PRODUCTNAME: d.PRODUCTNAME,
+				PACKSIZE: d.PACKSIZE,
+				DOSAGE: d.DOSAGE,
+				UOM: d.UOM,
+				COUNTRYOFORIGIN: d.COUNTRYOFORIGIN,
+				MANUFACTURER: d.MANUFACTURER,
+				SHELFLIFE: d.SHELFLIFE,
+				PRESENTATION: d.PRESENTATION,
+				VAT: d.VAT,
+				CURRENCY: d.CURRENCY,
+				NETOFFERPRICE: ServiceHelper.formatNumber(d.NETOFFERPRICE, 2, 2),
+				REQUESTEDVOLUME: d.REQUESTED_QUANTITY.replace(/<br>+/g, "</br>"),
+				PAIDVOLUME: Math.round(d.PAID_VOLUME),
+				FOC: d.FOC,
+				UNIT: d.UNIT,
+				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS, 0, 0),
+				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS, 0, 0),
+				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS, 0, 0),
+				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
+				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2),
+				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4, 4),
+				REQ_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_SPOT, 4, 4),
+				NET_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
+				NET_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_PRICE_PACK_OFFER_CURRENCY, 2, 2),
+				NET_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_EUR_BUDGET, 4, 4),
+				NET_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.NET_PRICE_UNIT_EUR_SPOT, 4, 4),
+				COGS_EUR_UNIT: ServiceHelper.formatNumber(d.COGS_EUR_UNIT, 2, 2),
+				GROSS_MARGIN_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_BUDGET, 2, 2),
+				GROSS_MARGIN_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_MARGIN_EUR_SPOT, 2, 2),
+				GROSS_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.GROSS_SALES_OFFER_CURRENCY, 2, 2),
+				NET_SALES_OFFER_CURRENCY: ServiceHelper.formatNumber(d.NET_SALES_OFFER_CURRENCY, 0, 0),
+				NET_SALES_EUR_BUDGET: ServiceHelper.formatNumber(d.NET_SALES_EUR_BUDGET, 0, 0),
+				NET_SALES_EUR_SPOT: ServiceHelper.formatNumber(d.NET_SALES_EUR_SPOT, 0, 0),
+				GROSS_PROFIT_EUR_BUDGET: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_BUDGET, 0, 0),
+				GROSS_PROFIT_EUR_SPOT: ServiceHelper.formatNumber(d.GROSS_PROFIT_EUR_SPOT, 0, 0),
+				DIVISION: d.DIVISION,
+				BUDGETEDPROFITABILITY: (d.BUDGETED_PROFITABILITY === -1) ? "NA" : ServiceHelper.formatNumber(100 * d.BUDGETED_PROFITABILITY, 2, 2).concat("%"),
+				PROFITABILITYBUDGET: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_BUDGET, 2, 2).concat("%"),
+				PROFITABILITYSPOT: ServiceHelper.formatNumber(100 * d.GROSS_MARGIN_EUR_SPOT, 2, 2).concat("%"),
+				BUDGET_RATE: d.BUDGET_RATE,
+				SPOT_RATE: d.SPOT_RATE,
+				BUSINESS_CASE_PRICE: ServiceHelper.formatNumber(d.BUSINESS_CASE_PRICE, 2, 2),
+				IS_LOWEST: d.IS_LOWEST,
+				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: d.REQ_PRICE_UNIT_OFFER_CURRENCY_VAT,
+            	NET_PRICE_UNIT_OFFER_CURRENCY_VAT: d.NET_PRICE_UNIT_OFFER_CURRENCY_VAT,
+            	GROSS_SALES_OFFER_CURRENCY_VAT: d.GROSS_SALES_OFFER_CURRENCY_VAT,
+				WARRANTY: d.Warranty,
+				AGREEMENTDURATION: d.AgreementDuration,
+				MONTHLYRENT: d.MonthlyRent,
+				MONTHSPERINVOICE: d.MonthsPerInvoice,
+				CONTRACTSTARTDATE: d.ContractStartDate,
+				VALUEOFDEVICES: d.ValueOfDevices,
+				STATUSOFDEVICE: d.StatusOfDevice,
+				MINCONTRACTUAL: d.MinContractual,
+				MINANNPURCH: d.MinAnnPurch,
+				FOC_STEP: d.FOC_STEP,
+				FreeGoodsOther: d.FreeGoodsOther,
+			}
+		});
+	}
+
+	async function buildWorkflowApprovalApprovalsEntries(tx, offerId, approvalStatus) {
+		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", offerId);
+		let offerApprovals = await buildOfferApproval(tx, whereOffer);//HERE
+
+		offerApprovals = offerApprovals.filter((d) => d.ApprovalStatus === approvalStatus);
+
+		whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
+
+		return offerApprovals.map((d) => {
+			let statusPath = offerProductValidation.map((p) => {
+				let result = "PT_TMAPPRST(OfferId='";
+				result = result.concat(d.OfferId)
+					.concat("',productcode=")
+					.concat(p.PRODUCTID).concat(",ApproverEmailID='")
+					.concat(d.ApproverEmailID).concat("',Active=1,Statustime=")
+					.concat(d.Statustime.replace(" ", "T")).concat(",ApproverType='")
+					.concat(d.ApproverType).concat("')");
+				return result;
+			});
+			statusPath = statusPath.join(";")
+			return {
+				STATUSPATH: statusPath,
+				TENDERID: d.TenderID,
+				OFFERID: d.OfferId,
+				COUNTRYCODE: d.CountryCode,
+				SUBMITTED_BY: d.Submittedby,
+				SUBMITTED_BY_NAME: d.UserName,
+				SUBMITTED_BY_EMAIL: d.UserEmail,
+				APPROVAL_TYPE: (d.ApproverTypeSection === 1) ? "Mandatory" : "Optional",
+				ApprovalContent: d.ApprovalContent,
+				ApproverName: d.ApproverName,
+				ApproverEmailID: d.ApproverEmailID,
+				SenderComment: (!d.SenderComment) ? "" : d.SenderComment,
+				ApproverType: d.ApproverType,
+				REQUIRED_ACTION: d.REQUIRED_ACTION,
+				APPROVAL_STATUS: d.ApprovalStatus,
+				FLOW_ID: (!d.FLOW_ID) ? "" : d.FLOW_ID,
+				DIVISION: d.Division,
+				COUNTRYNAME: d.CountryName,
+				HIERARCHY: d.ApproverTypes[0].Hierarchy
+			}
+		})
+	}
+
+	async function buildWorkflowApprovalOffers(tx) {
+		let results = [];
+
+		let waitingOffers = await getOffersForWorkflow(tx, "Processing");
+		let cancellingOffers = await getOffersForWorkflow(tx, "Cancelling");
+
+		for (let i = 0; i < waitingOffers.length; i++) {
+			let newEntry = await buildWorkflowApprovalOffersEntry(tx, waitingOffers[i], "Processing");
+			if (newEntry.OFFERSTATUSPATH) results.push(newEntry);
+		}
+
+		for (let i = 0; i < cancellingOffers.length; i++) {
+			let newEntry = await buildWorkflowApprovalOffersEntry(tx, cancellingOffers[i], "Cancelling");
+			if (newEntry.OFFERSTATUSPATH) results.push(newEntry);
+		}
+
+		return results;
+	}
+
+	async function buildWorkflowApprovalProducts(tx) {
+		let results = [];
+
+		let waitingOffers = await getOffersForWorkflow(tx, "Processing");
+		let cancellingOffers = await getOffersForWorkflow(tx, "Cancelling");
+
+		for (let i = 0; i < waitingOffers.length; i++) {
+			results = results.concat(await buildWorkflowApprovalProductsEntries(tx, waitingOffers[i], "Processing"));
+		}
+
+		for (let i = 0; i < cancellingOffers.length; i++) {
+			results = results.concat(await buildWorkflowApprovalProductsEntries(tx, cancellingOffers[i], "Cancelling"));
+		}
+
+		return results;
+	}
+
+	async function buildWorkflowApprovalApprovers(tx) {
+		let results = [];
+
+		let waitingOffers = await getOffersForWorkflow(tx, "Processing");
+		let cancellingOffers = await getOffersForWorkflow(tx, "Cancelling");
+
+		for (let i = 0; i < waitingOffers.length; i++) {
+			results = results.concat(await buildWorkflowApprovalApprovalsEntries(tx, waitingOffers[i], "Processing"));
+		}
+
+		for (let i = 0; i < cancellingOffers.length; i++) {
+			results = results.concat(await buildWorkflowApprovalApprovalsEntries(tx, cancellingOffers[i], "Cancelling"));
+		}
+
+		return results;
+	}
+	async function getOfferData(tx,offerId){
+		
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		if (!offerValidation) {
+			throw 'No offer found';
+		}
+
+		//Get product data
+		let productValidation = await buildOfferProductValidation(tx, whereOffer);
+
+		//format prices
+		productValidation.forEach(prd => {
+			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
+			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
+			prd.OFFER_PRICE = ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
+			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+		});
+
+		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
+		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
+		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		return {
+			offerValidation: offerValidation,
+			offerProductValidation: productValidation
+		};
+	}
+
+	srv.on('getCurrentUser', (req) => {
+		return {
+			name: req.user.id,
+			email: req.user.attr.email,
+		};
+	})
+	srv.on('READ', 'InstituteDistributor', async (req) => {
+		const tx = cds.transaction(req)
+		let results = [];
+		if (req.query.SELECT.where) {
+			//Get non-filter information
+			let channel = ServiceHelper.getWhereValue(req, "CHANNEL");
+			let legalEntityCode = ServiceHelper.getWhereValue(req, "LEGAL_ENTITY_CODE");
+			let instituteId = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
+			//Get filters
+			let whereCountry = ServiceHelper.buildWhere(req, "COUNTRY_CODE");
+			let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
+			if (channel === "Direct") {
+				let directDistributors = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute));
+				results = directDistributors.map(function (d) {
+					let uniqueId = d.COUNTRY_CODE.concat("_")
+						.concat(d.INSTITUTE_ID).concat("_")
+						.concat(d.DISTRIBUTOR_ID).concat("_")
+						.concat(legalEntityCode).concat("_Distributor");
+					return {
+						COUNTRY_INSTITUTE_DISTRIBUTOR_ID: uniqueId,
+						COUNTRY_CODE: d.COUNTRY_CODE,
+						INSTITUTE_ID: d.INSTITUTE_ID,
+						INSTITUTE_NAME: d.INSTITUTE_NAME,
+						DISTRIBUTOR_ID: d.DISTRIBUTOR_ID,
+						DISTRIBUTOR_NAME: d.DISTRIBUTOR_NAME,
+						LEGAL_ENTITY_CODE: legalEntityCode,
+						CHANNEL: d.CHANNEL
+					}
+				});
+				results = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), results);
+			}
+			else if (channel === "Distributor") {
+				let distributorDistributors = await tx.run(SELECT.from(DistributorBrand).where(whereCountry));
+				results = distributorDistributors.map(function (d) {
+					let uniqueId = d.COUNTRY_CODE.concat("_")
+						.concat(instituteId).concat("_")
+						.concat(d.DISTRIBUTOR_ID).concat("_")
+						.concat(legalEntityCode).concat("_Distributor");
+					return {
+						COUNTRY_INSTITUTE_DISTRIBUTOR_ID: uniqueId,
+						COUNTRY_CODE: d.COUNTRY_CODE,
+						INSTITUTE_ID: instituteId,
+						INSTITUTE_NAME: 'NA',
+						DISTRIBUTOR_ID: d.DISTRIBUTOR_ID,
+						DISTRIBUTOR_NAME: d.DISTRIBUTOR_NAME,
+						LEGAL_ENTITY_CODE: legalEntityCode,
+						CHANNEL: d.CHANNEL
+					}
+				});
+				results = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), results);
+			}
+		}
+		return results;
+	});
+
+	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
+		const tx = cds.transaction(req)
+		let results = [];
+		if (req.query.SELECT.where) {
+			//Get non-filter information
+			let channel = ServiceHelper.getWhereValue(req, "CHANNEL");
+			// let instituteId = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
+			let instituteIds = ServiceHelper.getWhereValues(req, "INSTITUTE_ID");
+			//Get filters
+			let whereCountry = ServiceHelper.buildWhere(req, "COUNTRY_CODE");
+			//  let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
+			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID", "or", instituteIds);
+			let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
+			let whereProduct = ServiceHelper.buildWhere(req, "PRODUCT_ID");
+
+			//let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
+			let brandIds = ServiceHelper.getWhereValues(req, "BRAND_ID");
+			let whereBrand = [];
+			if(brandIds.length > 0){
+				for (let i = 0; i < brandIds.length; i++) {
+					brandIds[i] = "\'" + brandIds[i] + "\'";
+				  }
+			whereBrand = ServiceHelper.buildWhereExpression("BRAND_ID", "or", brandIds);
+			}
+			let whereLegalEntity = ServiceHelper.buildWhere(req, "LEGAL_ENTITY_CODE");
+			let whereOrigin = ServiceHelper.buildWhere(req, "COUNTRY_OF_ORIGIN");
+
+			let sDivision = ServiceHelper.getWhereId(req, "DIVISION");
+			if (sDivision && sDivision !== ""){
+				var whereDivision = ServiceHelper.buildWhere(req, "DIVISION");
+			}
+
+			//Get available brands in legal entity
+			let entityBrands = [];
+			if (whereLegalEntity.length !== 0 && whereBrand.length !== 0) {
+				entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereLegalEntity).where(whereBrand));
+			}
+			else if (whereLegalEntity.length !== 0) {
+				entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereLegalEntity));
+			}
+			else if (whereBrand.length !== 0) {
+				entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereBrand));
+			}
+			else {
+				entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry));
+			}
+			//Get available products in country
+			let countryProducts = [];
+			if (whereProduct.length !== 0 && whereOrigin.length !== 0) {
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin));
+				}
+			}
+			else if (whereOrigin.length !== 0) {
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin));
+				}
+			}
+			else if (whereProduct.length !== 0) {
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct));
+				}
+			}
+			else {
+				if(whereDivision && whereDivision.length > 0){
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereDivision));
+				} else {
+					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
+				}
+			}
+			//Get products available to institute either Direct or through Distributor
+			if (channel === "Direct") {
+				var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
+				results = buildDirectProducts(entityBrands, directBrands, countryProducts);
+			}
+			else if (channel === "Distributor") {
+				var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
+				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds);
+			}
+		}
+		// sort by countrycode, then brand name, then product name
+		results.sort((a,b)=> ( a.COUNTRY_CODE.localeCompare(b.COUNTRY_CODE) || a.BRAND_NAME.localeCompare(b.BRAND_NAME) || a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME)   ));
+
+
+
+
+		return results;
+	});
+
+	srv.on('READ', 'OfferProductValidation', async (req) => {
+		const tx = cds.transaction(req)
+		let results = [];
+		if (req.query.SELECT.where) {
+			//Get filters
+			let whereOffer = ServiceHelper.buildWhere(req, "OFFER_ID");
+			results = await buildOfferProductValidation(tx, whereOffer);
+		}
+		return results;
+	});
+
+	srv.on('READ', 'OfferValidation', async (req) => {
+		const tx = cds.transaction(req)
+		let results = [];
+		if (req.query.SELECT.where) {
+			//Get filters
+			let whereOffer = ServiceHelper.buildWhere(req, "OFFERID");
+			results = await buildOfferValidation(tx, whereOffer);
+		}
+		return results;
+	});
+
+	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
+		const tx = cds.transaction(req)
+		let results = [];
+		if (req.query.SELECT.where) {
+			//Get filters
+			let whereOffer = ServiceHelper.buildWhere(req, "OfferId");
+			results = await buildOfferApproval(tx, whereOffer);
+		}
+		return results;
+	});
+	const getNextValue = async (table, fieldname) => {
+		let results = await cds.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
+		let nextValue = 1;
+		if (results[0].max) {
+			nextValue = results[0].max + 1
+		}
+		return nextValue
+	}
+	srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
+		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo")
+		return req;
+	});
+	srv.before('CREATE', 'PT_TMUDLTRS', async (req) => {
+		req.data.SNO = await getNextValue(PT_TMUDLTRS, "SNO")
+		return req;
+	});
+
+	srv.on('READ', 'ApprovalOffers', async (req) => {
+		const tx = cds.transaction(req);
+		let results = await buildWorkflowApprovalOffers(tx);
+		return results;
+	});
+
+	srv.on('READ', 'ApprovalProducts', async (req) => {
+		const tx = cds.transaction(req);
+		let results = await buildWorkflowApprovalProducts(tx);
+		return results;
+	});
+
+	srv.on('READ', 'ApprovalApprovers', async (req) => {
+		const tx = cds.transaction(req);
+		let results = await buildWorkflowApprovalApprovers(tx);
+		return results;
+	});
+	//http://localhost:4004/v2/tender/Attachment('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'Attachment', async (req, next) => {
+		//OfferID => get CountryCode => get Template by Country => get template
+		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
+		const tx = cds.transaction(req);
+		var offerId = req.data.OfferId;
+		if (!offerId) {
+			return next();
+		}
+
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		if (!offerValidation) {
+			return req.reject(404, 'No offer found');
+		}
+		const templatesByCountry = await tx.run(SELECT.from(TemplateCountry).where({ CountryCode: offerValidation.COUNTRYCODE, Classification: offerValidation.CLASSIFICATION }));//Added Classification (db#2)
+		if (templatesByCountry.length === 0) {
+			return req.reject(404, 'No template found for offer: ' + offerId + ' and for country: ' + offerValidation.COUNTRYCODE);
+		}
+		const templates = await tx.run(SELECT.from(Template).where({ TemplateId: templatesByCountry[0].TemplateId }));
+		if (templates.length === 0) {
+			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templatesByCountry[0].TemplateId);
+		}
+		const template = templates[0];
+
+
+		var document = {
+			type: "buffer",
+			template: template.Template,
+			context: {
+				data: {
+					offerValidation: offerValidation,
+					offerProductValidation: await buildOfferProductValidation(tx, whereOffer)
+					// institute:await tx.run(SELECT.from(Template).where({CountryCode:req.data.CountryCode}))
+				},
+				baseurl: req._.req.protocol + '://' + req._.req.get('host')
+			}
+		};
+		const htmlTemplate = Handlebars.compile((template.Template || ""));
+		const headerTemplate = Handlebars.compile((template.HeaderTemplate || ""));
+		const footerTemplate = Handlebars.compile((template.FooterTemplate || ""));
+		var options = {
+			format: template.Format,
+			orientation: template.Orientation,
+			border: template.Border,
+			header: {
+				height: template.HeaderHeight,
+				contents: headerTemplate(document.context)
+			},
+			footer: {
+				height: template.FooterHeight,
+				contents: footerTemplate(document.context)
+			}
+		};
+		// /Pictures(da07ae51-d0d3-41e7-a737-2555a213e5a9)/content
+		req._.res.setHeader('Content-disposition', 'attachment; filename=output.pdf');
+		req._.res.setHeader('Content-type', 'application/pdf');
+		return new Promise((resolve, reject) => {
+			pdf.create(htmlTemplate(document.context), options).toBuffer(function (err, buffer) {
+				const readableInstanceStream = new Readable({
+					read() {
+						this.push(buffer);
+						this.push(null);
+					}
+				});
+				resolve({
+					value: readableInstanceStream
+				});
+			});
+		});
+
+		// return pdf.create(document, options)
+		// 	.then(res => {
+		// 		// console.log(fs.createReadStream("../output.pdf"))
+		// 		const readableInstanceStream = new Readable({
+		// 			read() {
+		// 				this.push(res);
+		// 				this.push(null);
+		// 			}
+		// 		});
+
+		// 		return {
+		// 			value: readableInstanceStream//Buffer.isBuffer(res)//fs.createReadStream(res.filename)
+		// 		};
+		// 	})
+		// 	.catch(error => {
+		// 		console.error(error)
+		// 	});
+	});
+	http://localhost:4004/v2/tender/ExcelAttachment('AE-16-100-1049-BPH-11')/content
+	// srv.after('READ', 'ExcelAttachment', async function(data, req) {
+	srv.on('READ', 'ExcelAttachment', async (req, next) => {
+		// const data = await next(); 
+		const tx = cds.transaction(req);
+		const offerId = req.data.OfferId;
+		const template = req.data.template;
+		if (!offerId || !template) {
+			return next();
+		}
+		let excelData = {};
+		try {
+			excelData = await getOfferData(tx,offerId);
+		} catch (error) {
+			return req.reject(404, 'No offer found');
+		}
+		//generate XLSX
+		let excelStreamValue = XLSXHelper.generateXLSX("TH - Quotation Template.xlsx",excelData);
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+	});
+	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'WordAttachments', async (req, next) => {
+		const tx = cds.transaction(req);
+		const offerId = req.data.offerId;
+		const templateId = req.data.templateId;
+		if (!offerId) {
+			return next();
+		}
+
+		const templates = await tx.run(SELECT.from(WordTemplate).where({ templateId: templateId }));
+		if (templates.length === 0) {
+			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
+		}
+		const templateContent = templates[0].content;
+		let wordData = {};
+		//Get offer data
+		if (offerId) {
+			try {
+				wordData = await getOfferData(tx,offerId);
+			} catch (error) {
+				return req.reject(404, 'No offer found');
+			}
+		}
+		const handler = new wordTemplate.TemplateHandler({
+			scopeDataResolver: createResolver({
+				filters: {
+					upper: (input) => (input || "").toUpperCase(),
+					lower: (input) => (input || "").toLowerCase()
+				}
+			})
+		});
+		const doc = await handler.process(templateContent, wordData);
+		const readableInstanceStream = new Readable({
+			read() {
+				this.push(doc);
+				this.push(null);
+			}
+		});
+		const filename = offerId+'.docx';
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+		return {
+			value: readableInstanceStream
+		};
+	});
+	//http://localhost:4004/v2/tender/DeliveryExcel('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'DeliveryExcel', async (req, next) => {
+		const tx = cds.transaction(req);
+		var offerId = req.data.OfferId;
+		if (!offerId) {
+			return next();
+		}
+
+		//Get offer data
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		if (offerValidation) {
+			var offerDeliveries = await tx.run(SELECT.from(PT_TMDLVTR).where(whereOffer));
+			if (!offerDeliveries) {
+				return req.reject(404, 'No deliveries found');
+			}
+		} else {
+			return req.reject(404, 'No offer found');
+		}
+
+		//format prices
+		for (let i = 0; i < offerDeliveries.length; i++){
+
+		    let delivery = offerDeliveries[i];
+			let whereProduct = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", delivery.ProductCode);
+			let product = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProduct));
+
+			delivery.InstituteID = delivery.InstituteID ? delivery.InstituteID.toString() : 'NA';
+			delivery.SKUCode = delivery.SKUCode ? delivery.SKUCode.toString() : 'NA';
+			delivery.RequestedQuantity = delivery.RequestedQuantity ? ServiceHelper.formatNumber(delivery.RequestedQuantity, 2, 2) : 0;
+			delivery.ActualDeliveryQuantity = delivery.ActualDeliveryQuantity ? ServiceHelper.formatNumber(delivery.ActualDeliveryQuantity, 2, 2) : 0;
+			delivery.PenaltyValue = delivery.PenaltyValue ? ServiceHelper.formatNumber(delivery.PenaltyValue, 2, 2) : 0;
+			delivery.ProductCode = delivery.ProductCode ? delivery.InstituteID.toString() : 'NA';
+			delivery.SNo = delivery.SNo ? delivery.SNo.toString() : 'NA';
+			delivery.LocalOrDirectDelivery = delivery.LocalOrDirectDelivery === 'L' ? 'Local' : delivery.LocalOrDirectDelivery === 'D' ? 'Direct' : 'NA';
+			delivery.PlannedInAPO = delivery.PlannedInAPO ? delivery.PlannedInAPO : 'NA';
+			delivery.RequestedDeliveryDate = delivery.RequestedDeliveryDate ? delivery.RequestedDeliveryDate : '1970-01-01';
+			delivery.ActualDeliveryDate = delivery.ActualDeliveryDate ? delivery.ActualDeliveryDate : '1970-01-01';
+			delivery.PaidOrFree = delivery.PaidOrFree ? delivery.PaidOrFree : 'NA';
+			delivery.Penalty = delivery.Penalty ? delivery.Penalty : 'NA';
+			delivery.Compensated = delivery.Compensated ? delivery.Compensated : 'NA';
+			delivery.ProductName = product[0].PRODUCTPACKNAME;
+
+			offerDeliveries[i] = delivery;
+
+		};
+
+		const filedata = fs.readFileSync(path.join(__dirname, './xlsx-templates', "DeliveryTemplate.xlsx"));
+		//generate XLSX
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(filedata,
+			{
+				offerValidation: offerValidation,
+				deliveries: offerDeliveries
+			},1);
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+	});
+	//srv.on('sendMail', (req, sRecipient, sBody) => {
+	srv.on('sendMail', async (req) => {
+		let sSubject = req.data.sSubject;
+		let sRecipient = 'joris.vd.bogaert@gmail.com';
+
+		const mailer = new SapCfMailer.default("MAIL");
+		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', 'quotation_AR.html'), { encoding: 'utf-8' });
+
+		let test = await mailer.sendMailTemplate({
+			to: sRecipient,
+			subject: sSubject,
+			html: htmlMail
+		});
+
+		return true;
+	});
+
+	srv.on('getMailTemplate', async (req) => {
+		const tx = cds.transaction(req);
+		const sLanguage = req.data.language ? req.data.language : "ES";
+		const sOfferId = req.data.offerId;
+
+		//quotation data retrieval for filling template
+		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
+		let offerConsolidation = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
+		let offerProductConsolidation = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
+		if (offerConsolidation.length === 0) {
+			return req.reject(404, 'No offer found');
+		}
+
+		const templates = await tx.run(SELECT.from(MailTemplate).where({ CountryCode: req.data.countryCode, Language: sLanguage }));
+		if (templates.length === 0) {
+			return req.reject(404, 'No mail template found for country:' + req.data.countryCode + ' and Language:' + req.data.language);
+		}
+		const htmlMail = fs.readFileSync(path.join(__dirname, '.', 'mail', templates[0].TemplateId + '.html'), { encoding: 'utf-8' });
+
+		//execute required calculations for data to be displayed and add it to the product object
+		offerProductConsolidation.forEach(function (product) {
+			product.NET_PRICE_TOTAL = product.NET_OFFER_PRICE * product.REQUESTED_VOLUME;
+			product.NET_PRICE_TOTAL_VAT = product.REGISTERED_PRICE * product.REQUESTED_VOLUME * (1 + product.VAT);
+			product.PSL = ((product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE) * 100;
+		});
+
+
+		offerConsolidation = offerConsolidation[0];
+		if (offerProductValidation.length > 0) {
+			let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
+			if (divisions.length > 0) {
+				offerConsolidation.DIVISION = divisions[0];
+			}
+		}
+
+		var document = {
+			type: "buffer",
+			template: htmlMail,
+			context: {
+				data: {
+					offerConsolidation: offerConsolidation,
+					offerProductConsolidation: offerProductConsolidation
+				}
+			}
+		};
+		const htmlTemplate = Handlebars.compile((htmlMail || ""));
+
+		return htmlTemplate(document.context);
+	});
+}
