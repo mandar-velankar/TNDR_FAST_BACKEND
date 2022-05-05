@@ -713,7 +713,6 @@ module.exports = (srv) => {
 					validationType = 1;
 				}
 			} else {
-				if(netOfferPrice < minPreApprovedPrice) bBlOneMandatoryAppr = true;
 				validationType = 1; //no additional discount exists; only contract manager notification should be sent
 			}
 		} else {
