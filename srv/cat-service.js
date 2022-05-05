@@ -699,7 +699,7 @@ module.exports = (srv) => {
 			if(((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleXBelowY(0, product.ADDITIONAL_DISCOUNT) )){
 				if(minPreApprovedPrice){
 					if(netOfferPrice < minPreApprovedPrice){
-						if(!candidatePrice || (candidatePrice && candidatePrice.Price <= netOfferPrice)){
+						if(!candidatePrice || (candidatePrice && candidatePrice.Price > netOfferPrice)){
 							bBlOneMandatoryAppr = true;
 							validationType = 1;
 						} else {
