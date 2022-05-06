@@ -34,6 +34,7 @@ entity PriceAgreements: cuid, managed {
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
     ExpiringSoon: Boolean default false; // calculated from NodeJS
+    Expired: Boolean default false; //calculated from NodeJS
     isNewPriceAgreement: Boolean default true; // calculated from NodeJS
     OfferId: String;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
