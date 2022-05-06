@@ -60,6 +60,7 @@ module.exports = async (srv) => {
         let hasExpiringSoonFilterValues = null;
         let isNewPriceAgreementFilterIndex = null;
         let isNewPriceAgreementFilterValues = null;
+        let hasExpiredFilterValues = null;
 
         if(req.query.SELECT.where){
 
@@ -71,6 +72,9 @@ module.exports = async (srv) => {
 
             hasExpiringSoonFilterIndex = ServiceHelper.getWhereId(req, 'ExpiringSoon');
             hasExpiringSoonFilterValues =  ServiceHelper.getWhereValues(req, 'ExpiringSoon');
+
+            hasExpiredFilterIndex = ServiceHelper.getWhereId(req, 'Expired');
+            hasExpiredFilterValues =  ServiceHelper.getWhereValues(req, 'Expired');
 
             isNewPriceAgreementFilterIndex = ServiceHelper.getWhereId(req, 'isNewPriceAgreement');
             isNewPriceAgreementFilterValues = ServiceHelper.getWhereValues(req, 'isNewPriceAgreement');
@@ -85,6 +89,10 @@ module.exports = async (srv) => {
 
             if(hasExpiringSoonFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'ExpiringSoon');
+            }
+
+            if(hasExpiredFilterIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'Expired');
             }
 
             if(isNewPriceAgreementFilterIndex >= 0){
@@ -187,6 +195,7 @@ module.exports = async (srv) => {
             if(priceAgreement.ExpiryDate){
                 let dExpiryDate = new Date(priceAgreement.ExpiryDate);
                 priceAgreement.ExpiringSoon = calculatedFutureDate >= dExpiryDate && dExpiryDate >= todaysDate ? true : false;
+                priceAgreement.Expired = dExpiryDate < todaysDate ? true : false;
             }
 
             return priceAgreement;
@@ -211,6 +220,11 @@ module.exports = async (srv) => {
 
         if(hasExpiringSoonFilterValues && hasExpiringSoonFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
+            result = filteredResult;
+        }
+
+        if(hasExpiredFilterValues && hasExpiredFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.Expired);
             result = filteredResult;
         }
 
