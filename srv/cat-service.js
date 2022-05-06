@@ -27,7 +27,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing, PriceCondition, DiscountCondition, PriceConditionClassification, ProductTypeProfitability
@@ -1342,6 +1342,14 @@ module.exports = (srv) => {
             }
 			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
 
+            const wherePriceconditions = {
+                OfferID: offer.OFFERID,
+                ProductCode: offerProduct.PRODUCTID,
+                CountryCode: offer.COUNTRYCODE
+            }
+
+            const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
+
             //loop over freegoodsother and retrieve productpricing, material and productpack data
             aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
                 let whereMaterialFOC = {
@@ -1557,7 +1565,8 @@ module.exports = (srv) => {
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
-				Materials: materials
+				Materials: materials,
+                PriceCondition: aPriceConditions
 			}
 		});
 		let resolvedResults = await Promise.all(results);

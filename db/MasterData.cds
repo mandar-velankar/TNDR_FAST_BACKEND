@@ -52,7 +52,7 @@ entity CountryCurrency : managed {
 entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
 	key InstituteID:Integer not null;
-	CustomerID:Integer;//delete
+	CustomerID:Integer;
 	InstituteName:String(500);
 	InstituteType:String(50);
 	Address:String(500);

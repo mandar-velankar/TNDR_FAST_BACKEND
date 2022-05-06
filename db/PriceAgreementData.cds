@@ -34,6 +34,7 @@ entity PriceAgreements: cuid, managed {
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
     ExpiringSoon: Boolean default false; // calculated from NodeJS
+    Expired: Boolean default false; //calculated from NodeJS
     isNewPriceAgreement: Boolean default true; // calculated from NodeJS
     OfferId: String;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
@@ -229,7 +230,9 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         key ma.SKUCode as MaterialNumber,
         cp.ID as CustomerPriceId,
         case
-            when cp.Price is null then false else true 
+            when cp.Price is null then false 
+            when cp.Price is not null and cp.Applied is not null then cp.Applied
+            else true 
         end as Applied:Boolean,
         ifnull(cp.Synchronized, false) as Synchronized:Boolean,
         ifnull(cp.Price, pa.Price) as Price:Double,
