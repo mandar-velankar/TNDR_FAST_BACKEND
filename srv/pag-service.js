@@ -42,7 +42,8 @@ module.exports = async (srv) => {
     srv.on('READ', 'PriceAgreements', async (req, next) => {
 
         
-        const tx = cds.transaction(req);
+        // const tx = cds.transaction(req);
+		const tx = cds.tx();
 
         /**
          * As virtual/calculated elements are not persisted on the database, incoming filter requests cannot be delegated to the database to get the requested filter results. 
@@ -60,6 +61,7 @@ module.exports = async (srv) => {
         let hasExpiringSoonFilterValues = null;
         let isNewPriceAgreementFilterIndex = null;
         let isNewPriceAgreementFilterValues = null;
+        let hasExpiredFilterValues = null;
 
         if(req.query.SELECT.where){
 
@@ -71,6 +73,9 @@ module.exports = async (srv) => {
 
             hasExpiringSoonFilterIndex = ServiceHelper.getWhereId(req, 'ExpiringSoon');
             hasExpiringSoonFilterValues =  ServiceHelper.getWhereValues(req, 'ExpiringSoon');
+
+            hasExpiredFilterIndex = ServiceHelper.getWhereId(req, 'Expired');
+            hasExpiredFilterValues =  ServiceHelper.getWhereValues(req, 'Expired');
 
             isNewPriceAgreementFilterIndex = ServiceHelper.getWhereId(req, 'isNewPriceAgreement');
             isNewPriceAgreementFilterValues = ServiceHelper.getWhereValues(req, 'isNewPriceAgreement');
@@ -85,6 +90,10 @@ module.exports = async (srv) => {
 
             if(hasExpiringSoonFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'ExpiringSoon');
+            }
+
+            if(hasExpiredFilterIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'Expired');
             }
 
             if(isNewPriceAgreementFilterIndex >= 0){
@@ -187,6 +196,7 @@ module.exports = async (srv) => {
             if(priceAgreement.ExpiryDate){
                 let dExpiryDate = new Date(priceAgreement.ExpiryDate);
                 priceAgreement.ExpiringSoon = calculatedFutureDate >= dExpiryDate && dExpiryDate >= todaysDate ? true : false;
+                priceAgreement.Expired = dExpiryDate < todaysDate ? true : false;
             }
 
             return priceAgreement;
@@ -214,17 +224,23 @@ module.exports = async (srv) => {
             result = filteredResult;
         }
 
+        if(hasExpiredFilterValues && hasExpiredFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.Expired);
+            result = filteredResult;
+        }
+
         if(isNewPriceAgreementFilterValues && isNewPriceAgreementFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
             result = filteredResult;
         }
-
+        await tx.commit();
         return req.reply(result);
 
 	});
 
     srv.on('syncPriceAgreements', async req => {
-        const tx = cds.transaction(req);
+        // const tx = cds.transaction(req);
+		const tx = cds.tx();
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
@@ -239,7 +255,12 @@ module.exports = async (srv) => {
 
         const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
         // set customerPrices 'Synchronized' to true after a successful synchronization with SAP backend
-        await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
+        try {     
+            await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
+            await tx.commit();
+        } catch (error) {
+            await tx.rollback(error);
+        }
         return req.reply(result);
     });
 
