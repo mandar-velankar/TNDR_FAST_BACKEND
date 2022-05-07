@@ -298,7 +298,8 @@ module.exports = (srv) => {
 	}
 
     srv.on('READ', 'DivisionsForCountry', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx();
 		let results = [];
 		if (req.query.SELECT.where) {
             let whereCountry = ServiceHelper.buildWhere(req, "CountryCode");
@@ -309,7 +310,8 @@ module.exports = (srv) => {
     });
 
     srv.on('READ', 'ChannelsForCountry', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx();
 		let results = [];
 		if (req.query.SELECT.where) {
             let whereCountry = ServiceHelper.buildWhere(req, "CountryCode");
@@ -329,7 +331,8 @@ module.exports = (srv) => {
     });
 
     srv.on('READ', 'LatestApprovals', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx();
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -346,19 +349,25 @@ module.exports = (srv) => {
 	// TODO: insert is working, but gives an error message 
 	// error: the key 'CountryCode' does not exist in the given entity
 	srv.on('CREATE', 'LatestApprovals', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		const approvalRequests = req.query.INSERT.entries;
-		
-        const affectedRows = await tx.run(
-            INSERT.into(ApprovalStatus).entries(approvalRequests)
-		)
-		.then(rec => {
+		try{
+			const affectedRows = await tx.run( INSERT.into(ApprovalStatus).entries(approvalRequests) );
+			await tx.commit();
 			req.reply(req.data);
-		})
-		.catch(err =>{
-			if(err.code == '301')
-				req.error(409, "Unique constraint violated. Duplicate value in a restricted field.");
-		});
+		}catch(err){
+			if(err.code == '301') req.error(409, "Unique constraint violated. Duplicate value in a restricted field.");
+			await tx.rollback(err);
+		}
+
+		// .then(rec => {
+		// 	req.reply(req.data);
+		// })
+		// .catch(err =>{
+		// 	if(err.code == '301')
+		// 		req.error(409, "Unique constraint violated. Duplicate value in a restricted field.");
+		// });
 		
 		
 	});

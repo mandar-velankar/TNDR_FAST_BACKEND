@@ -42,7 +42,8 @@ module.exports = async (srv) => {
     srv.on('READ', 'PriceAgreements', async (req, next) => {
 
         
-        const tx = cds.transaction(req);
+        // const tx = cds.transaction(req);
+		const tx = cds.tx();
 
         /**
          * As virtual/calculated elements are not persisted on the database, incoming filter requests cannot be delegated to the database to get the requested filter results. 
@@ -232,13 +233,14 @@ module.exports = async (srv) => {
             const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
             result = filteredResult;
         }
-
+        await tx.commit();
         return req.reply(result);
 
 	});
 
     srv.on('syncPriceAgreements', async req => {
-        const tx = cds.transaction(req);
+        // const tx = cds.transaction(req);
+		const tx = cds.tx();
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
@@ -253,7 +255,12 @@ module.exports = async (srv) => {
 
         const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
         // set customerPrices 'Synchronized' to true after a successful synchronization with SAP backend
-        await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
+        try {     
+            await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
+            await tx.commit();
+        } catch (error) {
+            await tx.rollback(error);
+        }
         return req.reply(result);
     });
 
