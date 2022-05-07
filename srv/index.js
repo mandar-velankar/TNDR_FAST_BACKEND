@@ -34,7 +34,7 @@ const jobManager = require("./jobs/JobManager");
   await cds.serve("ExternalService").from("./gen/").in(app);
   
   // Scheduler Jobs
-  // jobManager.registerJobs();
+  jobManager.registerJobs();
   // const scheduler = await jobScheduler();
   // //TODO: only start if config is available => start via api from now on
   // scheduler.mercadoPublico.fetchTenders();//.start(); // runs every day at midnight server time '0 0 0 1/1 * ? *'
