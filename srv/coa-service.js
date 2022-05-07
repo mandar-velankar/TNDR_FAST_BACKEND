@@ -41,7 +41,8 @@ module.exports = (srv) => {
             let products = opp.Products;
 
             if(!products){
-                const tx = cds.transaction(req);
+                // const tx = cds.transaction(req);
+		        const tx = cds.tx();
                 let whereOpportunity = ServiceHelper.buildFullWhere("Opportunity_ID", "=", opp.ID);
                 products = await tx.run(SELECT.from(SalesOpportunityProducts).where(whereOpportunity));
             }
