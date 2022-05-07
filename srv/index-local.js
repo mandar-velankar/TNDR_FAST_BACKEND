@@ -36,7 +36,7 @@ const jobManager = require("./jobs/JobManager");
 
   // Jobs Scheduler
 
-  // jobManager.registerJobs();
+  jobManager.registerJobs();
   // const scheduler = await jobScheduler();
   // scheduler.mercadoPublico.fetchTenders();//('00 00 * * *').start();
   // scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
