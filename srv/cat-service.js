@@ -502,12 +502,12 @@ module.exports = (srv) => {
 		//Optional if business approved
 		//Mandatory if volume above threshold
 		let countryBusiness = (product.BUSINESS_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
-//EHQUT SCTASK0087077 | REQ11341362 - Supply chain should be mandatory if volume above threshold
+//EHQUT SCTASK0087077|REQ11341362 - Supply chain should be mandatory if volume above threshold
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
-//EHQUT SCTASK0087077 | REQ11341362 - Supply chain should be mandatory if volume above threshold
+//EHQUT SCTASK0087077|REQ11341362 - Supply chain should be mandatory if volume above threshold
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
 		aApproverTypes.map(async function (oApproverType) {
@@ -700,7 +700,7 @@ module.exports = (srv) => {
 			if(((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleXBelowY(0, product.ADDITIONAL_DISCOUNT) )){
 				if(minPreApprovedPrice){
 					if(netOfferPrice < minPreApprovedPrice){
-						if(candidatePrice && candidatePrice.Price <= netOfferPrice){
+						if(!candidatePrice || (candidatePrice && candidatePrice.Price > netOfferPrice)){
 							bBlOneMandatoryAppr = true;
 							validationType = 1;
 						} else {
@@ -713,9 +713,8 @@ module.exports = (srv) => {
 					bBlOneMandatoryAppr = true;
 					validationType = 1;
 				}
-				
 			} else {
-				validationType = 1; //no additional discount exists; only contract manager notification should be sent
+				validationType = 1; //no additional discount exists; only contract manager notification should be sent
 			}
 		} else {
 			validationType = 1;	//if the offer type differs from selling, all approvals should be optional
@@ -1760,16 +1759,19 @@ module.exports = (srv) => {
 		
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 	//Product comment shows in remarks, if any
-	//	let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
+		// let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
 	let producRemark = "";
 		let productRemarkDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
 			if(d && d.PRODUCT_COMMENT){
 				return d.PRODUCT_COMMENT;
 			}
+            else{
+           		return ' ';// EHQUT-introduce the space
+			}	
             }));        
         //EUTVP: fix wrong condition                            
-        if (typeof (productRemarkDistinct[0])!=="undefined")
-        {
+       // if (typeof (productRemarkDistinct[0])!=="undefined")
+       // {
        	if (productRemarkDistinct.length === 1) {
 			producRemark  = productRemarkDistinct[0];
 		}
@@ -1777,12 +1779,12 @@ module.exports = (srv) => {
 			let productTermsRow = [];
 			for (let i = 0; i < productRemarkDistinct.length; i++) {
 				let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				productTermsRow[i] = productTermsItems.concat(": ").concat(productRemarkDistinct[i]);
+				productTermsRow[i] = productTermsItems.concat(" ").concat(productRemarkDistinct[i]);//removed the colon
 			}
 			producRemark = productTermsRow.join("<br>")
 
 		}
-    }
+    //}
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 		//Comment shows in remarks if any product is not registered in country
 		let registeredRemark = "";

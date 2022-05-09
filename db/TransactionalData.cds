@@ -263,6 +263,11 @@ entity PT_TMDLVTR {
     key SNo                    : Integer not null;
         Contract               : String(10);
         PoDate                 : Date;
+        //EHEEX-OTT - 105262-Adding new 3 fields for delivery tracking tab
+        ActualDeliveredProduct :String(100);
+        ActualDeliveredProductQty : Double;
+        LocalDeliveryNoteNo :String(255);
+        //EHEEX-OTT - 105262-Adding new 3 fields for delivery tracking tab
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
@@ -303,7 +308,6 @@ entity PT_TMOFPR {
         MinInvoiceAmount         : Double;
         PricingPolicyCluster     : String;
         OfferType                : String;
-        AnticipatedRequestedQuantity: String(25);
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
