@@ -1,6 +1,7 @@
 const n2words = require('n2words')
 module.exports = {
     formatNumberToText:function(countryCode,value){
+      
         let language = countryCode.toLowerCase();//TODO:connect country with language in new entity!
 
         if(language !== "it"){

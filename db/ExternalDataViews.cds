@@ -7,7 +7,7 @@ using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataViews } from './TransactionalDataViews';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 
-entity DeliveryForProduct as select from TransactionalData.PT_TMDLVTR delivery {
+entity DeliveryForProduct as select from TransactionalData.PT_TMDLVTR as delivery {
     key delivery.OfferID as OFFERID,
     key delivery.ProductCode as PRODUCTID,
     sum(delivery.RequestedQuantity) as RequestedQuantity:Double,
@@ -39,10 +39,10 @@ entity DeliveryForProduct as select from TransactionalData.PT_TMDLVTR delivery {
 }where delivery.Active = 1
 group by delivery.OfferID, delivery.ProductCode;
 
-entity Dashboard as select from TransactionalDataViews.OfferProductPlus offerProduct
-inner join MasterData.PT_TMTABRMP ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
-inner join MasterData.PT_TMRCM region on offerProduct.CountryCode = region.CountryCode
-left outer join DeliveryForProduct delivery on offerProduct.OfferID = delivery.OFFERID and offerProduct.ProductCode = delivery.PRODUCTID {
+entity Dashboard as select from TransactionalDataViews.OfferProductPlus as offerProduct
+inner join MasterData.PT_TMTABRMP as ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
+inner join MasterData.PT_TMRCM as region on offerProduct.CountryCode = region.CountryCode
+left outer join DeliveryForProduct as delivery on offerProduct.OfferID = delivery.OFFERID and offerProduct.ProductCode = delivery.PRODUCTID {
     offerProduct.OfferID || '_' || offerProduct.ProductCode as LineID:String,
     ifnull(
         year(
@@ -139,12 +139,12 @@ and offerProduct.Offer.Active = 1
 and offerProduct.Active = 1 
 and offerProduct.Offer.Tender.Country.Region = 'MEA';
 
-entity TENDER_DATA as select from TransactionalDataViews.OfferProductPlus offerProduct
-inner join AdminData.PT_TMUSERCTRYN ctryCWID on offerProduct.CountryCode = ctryCWID.CountryCode
-inner join AdminData.CONDITIONAL_ACCESS access on access.Id = access.Id
-inner join MasterData.PT_TMTABRMP ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
-inner join MasterData.PT_TMRCM region on offerProduct.CountryCode = region.CountryCode
-inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = 'USD' and rates.CURRENCY_TO = 'EUR' and rates.X_TYPE = 'Budget'{
+entity TENDER_DATA as select from TransactionalDataViews.OfferProductPlus as offerProduct
+inner join AdminData.PT_TMUSERCTRYN as ctryCWID on offerProduct.CountryCode = ctryCWID.CountryCode
+inner join AdminData.CONDITIONAL_ACCESS as access on access.Id = access.Id
+inner join MasterData.PT_TMTABRMP as ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
+inner join MasterData.PT_TMRCM as region on offerProduct.CountryCode = region.CountryCode
+inner join MasterDataLatestValues.ExchangeRates as rates on rates.CURRENCY_FROM = 'USD' and rates.CURRENCY_TO = 'EUR' and rates.X_TYPE = 'Budget'{
     ifnull(offerProduct.Offer.CountryCode, '') as CountryCode:String,
     ifnull(offerProduct.Offer.Tender.Country.CountryName, '') as CountryName:String,
     ifnull(offerProduct.Offer.Tender.Country.CountryName, '') as Country:String,
@@ -253,11 +253,93 @@ inner join MasterDataLatestValues.ExchangeRates rates on rates.CURRENCY_FROM = '
     ifnull(ctryCWID.CWIDs, '') as CWIDs_Country:String
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
-and offerProduct.Active =1;
+and offerProduct.Active =1
+union
+select from MASSNET_TENDER_DATA as massnet {
+    massnet.CountryCode,
+    massnet.CountryName,
+    massnet.Country,
+    massnet.CountryID,
+    massnet.TenderID,
+    massnet.TA,
+    massnet.TenderName,
+    massnet.Tender,
+    massnet.TenderChannel,
+    massnet.InstituteID,
+    massnet.InstituteName,
+    massnet.Year,
+    massnet.PublicationDate,
+    massnet.BidDueDate,
+    key massnet.OfferID,
+    massnet.OfferNumber,
+    massnet.Offer,
+    massnet.DistributorID,
+    massnet.Currency,
+    massnet.Classification,
+    massnet.SubmissionDate,
+    massnet.InternalBidDueDate,
+    massnet.ActiveOffer,
+    massnet.RevisedOfferNo,
+    massnet.ContinuationOfferNo,
+    massnet.NewOfferDueDate,
+    massnet.SNo,
+    massnet.Brand,
+    key massnet.ProductCode,
+    massnet.ProductPackID,
+    massnet.ProductPackName,
+    massnet.Product,
+    massnet.Packfactor,
+    massnet.UoM,
+    massnet.RequestedVolume,
+    massnet.AlternateOfferYN,
+    massnet.ActiveProduct,
+    massnet.OfferPrice,
+    massnet.FOC,
+    massnet.FOCType,
+    massnet.FOC_ABS_PCT,
+    massnet.WholesalePrice,
+    massnet.OfferDate,
+    massnet.OfferValidity,
+    massnet.DelayInSubmission,
+    massnet.Outcome,
+    massnet.AwardedQty,
+    massnet.ErrorInSubmission,
+    massnet.Reason,
+    massnet.C_Outcome,
+    massnet.C_Company,
+    massnet.C_Price,
+    massnet.C_AwardedQty,
+    massnet.C_Currency,
+    massnet.C_UoM,
+    massnet.CurrentStatus,
+    massnet.FxRate_LC_EUR_Budget,
+    massnet.FxRate_USD_EUR_Budget,
+    massnet.COGS,
+    massnet.RegisteredPrice,
+    massnet.SKUCode,
+    massnet.LocalorDirectDelivery,
+    massnet.PlannedinAPO,
+    massnet.RequestedDeliveryDate,
+    massnet.RequestedQuantity,
+    massnet.ActualDeliveryDate,
+    massnet.ActualDeliveredQuantity,
+    massnet.Penalty,
+    massnet.PenaltyValue,
+    massnet.DeliveryCurrency,
+    massnet.ShipToInstituteName,
+    massnet.ShipToQty,
+    massnet.MergeKey,
+    massnet.CWIDs_COGS,
+    massnet.CWIDs_Price,
+    massnet.CWIDs_Volume,
+    massnet.CWIDs_Penalty,
+    massnet.CWIDs_MarketData,
+    massnet.CWIDs_Country    
+};
 
-entity VW_TENDER_MANAGER_DASHBOARD as select from TransactionalData.PT_TMOFPR offerProduct
-left outer join TransactionalData.PT_TMQUTO quotation on offerProduct.OfferID = quotation.OfferID
-left outer join AdminData.PT_TMUSER user on quotation.SubmittedBy = user.CWID{
+entity VW_TENDER_MANAGER_DASHBOARD as select from TransactionalData.PT_TMOFPR as offerProduct
+left outer join TransactionalData.PT_TMQUTO as quotation on offerProduct.OfferID = quotation.OfferID
+left outer join AdminData.PT_TMUSER as user on quotation.SubmittedBy = user.CWID{
     ifnull(offerProduct.Offer.Tender.CountryCode, '') as CountryCode_Tenders:String,
     ifnull(offerProduct.Offer.Tender.TenderID, '') as TenderID:String,
     ifnull(offerProduct.Offer.Tender.TenderName, '') as TenderName:String,
@@ -352,7 +434,7 @@ and offerProduct.Offer.Active = 1
 and offerProduct.Active = 1
 and offerProduct.Offer.Tender.Country.Region = 'MEA';
 
-entity TENDER_PRICING as select from TransactionalDataViews.OfferProductPlus offerProduct{
+entity TENDER_PRICING as select from TransactionalDataViews.OfferProductPlus as offerProduct{
     offerProduct.CountryCode as COUNTRY_CODE,
     offerProduct.Offer.Tender.Country.CountryName as COUNTRY_NAME,
     offerProduct.TenderID as TENDER_ID,
@@ -548,7 +630,7 @@ entity MasterInstituteDistBrandMap as select from MasterData.PT_TMINDSBR as Mast
 		   MasterInstituteDistBrandMap.Commissionrate;
 
 entity MasterInstitutes as select from MasterData.PT_TMINST as i
-left outer join MasterData.MASTER_INSTITUTE_HIERARCHY ih on i.INSTITUTE_HIERARCHY_ID = ih.ID
+left outer join MasterData.MASTER_INSTITUTE_HIERARCHY as ih on i.INSTITUTE_HIERARCHY_ID = ih.ID
 left outer join MasterData.PT_TMINSHIER as h on (i.InstituteID = h.InstituteID  or i.InstituteID =h.ParentInstituteID) and h.ActiveRecord ='Yes' 
 left outer join MasterData.PT_TMINST as i2 on h.ParentInstituteID =i2.InstituteID
 left outer join MasterData.PT_TMINDSBR as dsbr on i.InstituteID=dsbr.InstituteID
@@ -611,9 +693,9 @@ entity MasterProductPacks as select from MasterData.PT_TMCTRY as MasterProductPa
 inner join MasterData.PT_TMCTPRDPCK as CP on MasterProductPacks.CountryCode = CP.COUNTRYCODE
 inner join MasterData.PT_TMPRDPCK as P on CP.PRODUCTPACKID = P.PRODUCTPACKID 
 inner join MasterData.PT_TMPRDHIER as H on P.HLEVEL6_CODE = H.HLEVEL6_CODE
-left outer join MasterData.PT_TMSKUPRDPCK sku on CP.COUNTRYCODE = sku.CountryCode and CP.PRODUCTPACKID = sku.ProductPackID 
-left outer join MasterDataLatestValues.CountryRegisteredPrice reg on CP.COUNTRYCODE=reg.COUNTRY_CODE and CP.PRODUCTPACKID =reg.PRODUCT_ID
-left outer join MasterDataLatestValues.CountryCogs cogs on CP.COUNTRYCODE=cogs.COUNTRY_CODE and CP.PRODUCTPACKID=cogs.PRODUCT_ID {
+left outer join MasterData.PT_TMSKUPRDPCK as sku on CP.COUNTRYCODE = sku.CountryCode and CP.PRODUCTPACKID = sku.ProductPackID 
+left outer join MasterDataLatestValues.CountryRegisteredPrice as reg on CP.COUNTRYCODE=reg.COUNTRY_CODE and CP.PRODUCTPACKID =reg.PRODUCT_ID
+left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cogs.COUNTRY_CODE and CP.PRODUCTPACKID=cogs.PRODUCT_ID {
 	key P.PRODUCTPACKID,
 	key CP.COUNTRYCODE,
 	min(H.HLEVEL1_NAME) as HLEVEL1_NAME:String,
@@ -796,4 +878,97 @@ entity MassnetTenders: cuid, managed {
     TenderType : String(500);
     OfferType : String(500);
     ContractDuration : String(500);
-}
+};
+
+entity MASSNET_TENDER_DATA as select from MassnetTenders as massnet
+inner join MasterData.PT_TMCTRY  as country on country.CountryCode='CL'
+inner join AdminData.PT_TMUSERCTRYN  as ctryCWID on ctryCWID.CountryCode = 'CL'
+inner join AdminData.CONDITIONAL_ACCESS  as access on access.Id = access.Id
+inner join MasterDataLatestValues.ExchangeRates  as rates on rates.CURRENCY_FROM = 'USD' and rates.CURRENCY_TO = 'EUR' and rates.X_TYPE = 'Budget'
+inner join MasterDataLatestValues.ExchangeRates  as lcRates on lcRates.CURRENCY_FROM = 'CLP' and lcRates.CURRENCY_TO = 'EUR' and lcRates.X_TYPE = 'Budget'
+left outer join MasterProductPacks  as product on product.MaterialNumbers = massnet.ProductCode
+left outer join MasterDataLatestValues.CountryCogs  as cogs on cogs.COUNTRY_CODE = 'CL' and cogs.PRODUCT_ID = product.PRODUCTPACKID
+left outer join MasterDataLatestValues.CountryRegisteredPrice  as registeredPrice on registeredPrice.COUNTRY_CODE = 'CL' and registeredPrice.PRODUCT_ID = product.PRODUCTPACKID
+left outer join MasterData.PT_TMTABRMP as ta on product.HLEVEL4_CODE = ta.HLevel4_Code
+left outer join MasterData.PT_TMRCM as region on region.CountryCode = 'CL'
+{
+    country.CountryCode as CountryCode:String,
+    country.CountryName as CountryName:String,
+    country.CountryName as Country:String,
+    country.CountryID as CountryID:Integer,
+    massnet.TenderID as TenderID:String,
+    ifnull(ta.TA,'NA') as TA:String,
+    massnet.TenderName as TenderName:String,
+    massnet.TenderName as Tender:String,
+    'Direct' as TenderChannel:String,
+    1 as InstituteID:Integer,
+    massnet.RequestingInstitute as InstituteName:String,
+    year(massnet.PublicationDate) as Year:Integer,
+    massnet.PublicationDate as PublicationDate:DateTime,
+    massnet.ClosingDate as BidDueDate:DateTime,
+    key massnet.TenderID || massnet.Line as OfferID:String,
+    massnet.TenderID || massnet.Line as OfferNumber:String,
+    massnet.TenderID || massnet.Line as Offer:String,
+    1 as DistributorID:Integer,
+    'CLP' as Currency:String,
+    massnet.TenderType as Classification:String,
+    massnet.ClosingDate as SubmissionDate:DateTime,
+    massnet.ClosingDate as InternalBidDueDate:DateTime,
+    1 as ActiveOffer:Integer,
+    0 as RevisedOfferNo:Integer,
+    0 as ContinuationOfferNo:Integer,
+    massnet.ClosingDate as NewOfferDueDate:DateTime,
+    massnet.Line as SNo:Integer,
+    ifnull(product.HLEVEL4_NAME,'NA') as Brand:String,
+    key ifnull(product.PRODUCTPACKID,1) as ProductCode:Integer,
+    ifnull(product.PRODUCTPACKID,1) as ProductPackID:Integer,
+    ifnull(product.PRODUCTPACKNAME,massnet.Product) as ProductPackName:String,
+    ifnull(product.PRODUCTPACKNAME,massnet.Product) as Product:String,
+    ifnull(product.PACKFACTOR,1) as Packfactor:Integer,
+    case when massnet.UoM = 'CAJA' then 'Pack' else 'Unit' end as UoM:String,
+    massnet.RequestedQuantity as RequestedVolume:Integer,
+    'No' as AlternateOfferYN:String,
+    1 as ActiveProduct:Integer,
+    massnet.OfferPrice as OfferPrice:Double,
+    0 as FOC:Double,
+    'FOC 2' as FOCType:String,
+    'ABS' as FOC_ABS_PCT:String,
+    'No' as WholesalePrice:String,
+    massnet.ClosingDate as OfferDate:DateTime,
+    massnet.ClosingDate as OfferValidity:DateTime,
+    'No' as DelayInSubmission:String,
+    'Won' as Outcome:String,
+    massnet.AwardedQuantity as AwardedQty:Integer,
+    'No' as ErrorInSubmission:String,
+    'NA' as Reason:String,
+    'Won' as C_Outcome:String,
+    'Bayer' as C_Company:String,
+    massnet.OfferPrice as C_Price:Double,
+    massnet.AwardedQuantity as C_AwardedQty:Integer,
+    'CLP' as C_Currency:String,
+    case when massnet.UoM = 'CAJA' then 'Pack' else 'Unit' end as C_UoM:String,
+    'Delvery Ongoing' as CurrentStatus:String,
+    ifnull(lcRates.X_RATE, 0) as FxRate_LC_EUR_Budget:Double,
+    ifnull(rates.X_RATE, 0) as FxRate_USD_EUR_Budget:Double,
+    ifnull(cogs.COGS, 0) as COGS:Double,
+    ifnull(registeredPrice.REGISTERED_PRICE,0) as RegisteredPrice:Double,
+    ProductCode as SKUCode:Integer,
+    null as LocalorDirectDelivery:String,
+    null as PlannedinAPO:String,
+    null as RequestedDeliveryDate:DateTime,
+    null as RequestedQuantity:Integer,
+    null as ActualDeliveryDate:DateTime,
+    null as ActualDeliveredQuantity:Integer,
+    null as Penalty:String,
+    null as PenaltyValue:Double,
+    null as DeliveryCurrency:String,
+    null as ShipToInstituteName:String,
+    null as ShipToQty:Integer,
+    null as MergeKey:Double,
+    ifnull(access.CWIDs_COGS, '') as CWIDs_COGS:String,
+    ifnull(access.CWIDs_Price, '') as CWIDs_Price:String,
+    ifnull(access.CWIDs_Volume, '') as CWIDs_Volume:String,
+    ifnull(access.CWIDs_Penalty, '') as CWIDs_Penalty:String,
+    ifnull(access.CWIDs_MarketData, '') as CWIDs_MarketData:String,
+    ifnull(ctryCWID.CWIDs, '') as CWIDs_Country:String
+};
