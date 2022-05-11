@@ -574,10 +574,10 @@ module.exports = async (srv) => {
 
 
         // DiscountConditions
-        let lowestDiscountCondition = null;
+        let highestDiscountCondition = null;
         const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({PriceCondition_ID: priceCondition.ID}));
         if(discountConditions){
-            lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Volume < current.Volume) ? prev : current);
+            highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Volume > current.Volume) ? prev : current);
             discountConditions.forEach(dc => {
                 body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].E1KONW.push({
                     "KSTBW": dc.Volume,
@@ -586,8 +586,8 @@ module.exports = async (srv) => {
             });
         }
 
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(2).concat("-") || ""; // KBETR from the minimum(KSTBW)
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = lowestDiscountCondition && lowestDiscountCondition.Volume + "-" || ""; // minimum(KSTBW) value from the DiscountConditions array
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(2).concat("-") || ""; // KBETR from the minimum(KSTBW)
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = highestDiscountCondition && highestDiscountCondition.Volume + "-" || ""; // minimum(KSTBW) value from the DiscountConditions array
 
 
         return await updatePriceConditions(customerPrice.CountryCode, "PriceConditionRappel", body);
