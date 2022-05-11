@@ -47,7 +47,6 @@
                 "model": "gen/csn.json",
                 "pool":{
                   "max": 1400,
-                  "min": 100,
                   "acquireTimeoutMillis":5000
                 }
             },
