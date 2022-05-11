@@ -1198,6 +1198,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.NetPriceWithoutTax,
     priceCondition.NetPriceWithTax,
     priceCondition.MaximumPrice,
+    priceCondition.ConfidentialPrice,
     product.SKUCountry.VTATax as Tax, 
     priceCondition.Liquidation,
     priceCondition.RefundDate,
