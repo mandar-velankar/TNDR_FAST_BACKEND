@@ -40,6 +40,18 @@
                             ]
                         }
                     },
+                    "EHQUT": {
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "EHQUT",
+                                "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin"
+                            ]
+                        }
+                    },
                     "ELLUK": {
                         "password": "pwd",
                         "jwt": {

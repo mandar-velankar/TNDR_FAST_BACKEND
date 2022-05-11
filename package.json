@@ -59,7 +59,12 @@
     },
     "requires": {
       "db": {
-        "kind": "hana"
+        "kind": "hana",
+        "pool":{
+          "max": 1400,
+          "min": 100,
+          "acquireTimeoutMillis":5000
+        }
       },
       "uaa": {
         "kind": "xsuaa"

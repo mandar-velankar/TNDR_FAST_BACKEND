@@ -502,12 +502,12 @@ module.exports = (srv) => {
 		//Optional if business approved
 		//Mandatory if volume above threshold
 		let countryBusiness = (product.BUSINESS_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
-//EHQUT SCTASK0087077 | REQ11341362 - Supply chain should be mandatory if volume above threshold
+//EHQUT SCTASK0087077|REQ11341362 - Supply chain should be mandatory if volume above threshold
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1 || product.REQUESTED_VOLUME < product.QTY_THRESHOLD) ? 1 : 3;
-//EHQUT SCTASK0087077 | REQ11341362 - Supply chain should be mandatory if volume above threshold
+//EHQUT SCTASK0087077|REQ11341362 - Supply chain should be mandatory if volume above threshold
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
 		aApproverTypes.map(async function (oApproverType) {
@@ -700,7 +700,7 @@ module.exports = (srv) => {
 			if(((product.ADDITIONAL_DISCOUNT !== null) && ServiceHelper.isDoubleXBelowY(0, product.ADDITIONAL_DISCOUNT) )){
 				if(minPreApprovedPrice){
 					if(netOfferPrice < minPreApprovedPrice){
-						if(candidatePrice && candidatePrice.Price <= netOfferPrice){
+						if(!candidatePrice || (candidatePrice && candidatePrice.Price > netOfferPrice)){
 							bBlOneMandatoryAppr = true;
 							validationType = 1;
 						} else {
@@ -713,9 +713,8 @@ module.exports = (srv) => {
 					bBlOneMandatoryAppr = true;
 					validationType = 1;
 				}
-				
 			} else {
-				validationType = 1; //no additional discount exists; only contract manager notification should be sent
+				validationType = 1; //no additional discount exists; only contract manager notification should be sent
 			}
 		} else {
 			validationType = 1;	//if the offer type differs from selling, all approvals should be optional
@@ -1760,16 +1759,19 @@ module.exports = (srv) => {
 		
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 	//Product comment shows in remarks, if any
-	//	let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
+		// let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
 	let producRemark = "";
 		let productRemarkDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
 			if(d && d.PRODUCT_COMMENT){
 				return d.PRODUCT_COMMENT;
 			}
+            else{
+           		return ' ';// EHQUT-introduce the space
+			}	
             }));        
         //EUTVP: fix wrong condition                            
-        if (typeof (productRemarkDistinct[0])!=="undefined")
-        {
+       // if (typeof (productRemarkDistinct[0])!=="undefined")
+       // {
        	if (productRemarkDistinct.length === 1) {
 			producRemark  = productRemarkDistinct[0];
 		}
@@ -1777,12 +1779,12 @@ module.exports = (srv) => {
 			let productTermsRow = [];
 			for (let i = 0; i < productRemarkDistinct.length; i++) {
 				let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				productTermsRow[i] = productTermsItems.concat(": ").concat(productRemarkDistinct[i]);
+				productTermsRow[i] = productTermsItems.concat(" ").concat(productRemarkDistinct[i]);//removed the colon
 			}
 			producRemark = productTermsRow.join("<br>")
 
 		}
-    }
+    //}
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 		//Comment shows in remarks if any product is not registered in country
 		let registeredRemark = "";
@@ -2486,7 +2488,8 @@ module.exports = (srv) => {
 		};
 	})
 	srv.on('READ', 'InstituteDistributor', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx();
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get non-filter information
@@ -2541,7 +2544,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx();
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get non-filter information
@@ -2642,7 +2646,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'OfferProductValidation', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx();
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2653,7 +2658,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'OfferValidation', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx();
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2664,7 +2670,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx();
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2683,7 +2690,8 @@ module.exports = (srv) => {
 	}
 	// srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
 	srv.on('CREATE', 'PT_TMDLVTR', async (req,next) => {
-        const tx = cds.transaction(req);
+        // const tx = cds.transaction(req);
+		const tx = cds.tx();
 		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");
         const delivery = await next();   
         await tx.commit();     
@@ -2695,19 +2703,22 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'ApprovalOffers', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		let results = await buildWorkflowApprovalOffers(tx);
 		return results;
 	});
 
 	srv.on('READ', 'ApprovalProducts', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		let results = await buildWorkflowApprovalProducts(tx);
 		return results;
 	});
 
 	srv.on('READ', 'ApprovalApprovers', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
 	});
@@ -2715,7 +2726,8 @@ module.exports = (srv) => {
 	srv.on('READ', 'Attachment', async (req, next) => {
 		//OfferID => get CountryCode => get Template by Country => get template
 		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		var offerId = req.data.OfferId;
 		if (!offerId) {
 			return next();
@@ -2804,7 +2816,8 @@ module.exports = (srv) => {
 	// srv.after('READ', 'ExcelAttachment', async function(data, req) {
 	srv.on('READ', 'ExcelAttachment', async (req, next) => {
 		// const data = await next(); 
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		const offerId = req.data.OfferId;
 		// const template = req.data.template;
 		if (!offerId){// || !template) {
@@ -2824,7 +2837,8 @@ module.exports = (srv) => {
 	});
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'WordAttachments', async (req, next) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		const offerId = req.data.offerId;
 		const templateId = req.data.templateId;
 		if (!offerId) {
@@ -2916,7 +2930,8 @@ module.exports = (srv) => {
 	});
 	//http://localhost:4004/v2/tender/DeliveryExcel('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'DeliveryExcel', async (req, next) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		var offerId = req.data.OfferId;
 		if (!offerId) {
 			return next();
@@ -2990,7 +3005,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('getMailTemplate', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx();
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
 
