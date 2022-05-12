@@ -253,16 +253,37 @@ module.exports = async (srv) => {
         const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice, tx, req));
         const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice, tx, req));
 
+        // Synchronize
         const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
-        // set customerPrices 'Synchronized' to true after a successful synchronization with SAP backend
-        try {     
-            await tx.run(UPDATE(CustomerPrices).with({Synchronized: true}).where({ PriceAgreementId: { in: req.data.ids } }));
-            await tx.commit();
-        } catch (error) {
-            await tx.rollback(error);
-        }
+    
+        await updateCustomerPrices(result, mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions)); // !!the order of PriceCondition arrays is important
+
         return req.reply(result);
     });
+
+    /**
+     * This method sets the CustomerPrices 'Synchronized' to true and stores the API response (SAP backend) IDOC numbers in the corresponding CustomerPrice record.
+     * The order and number of records in the {response} and the {priceConditions} arrays are the same (Promise.all returns the same order as the input array)
+     * Since there is no correlation ID between the price conditions and the response from the API, we use Promise.all return order as correlation.
+     * @param {Array} response 
+     * @param {Array} priceConditions 
+     */
+    async function updateCustomerPrices(response, priceConditions){
+        const tx = cds.tx();
+        const refIdocIDs = response && response.map(res => res.headers.sapidocdbid) || [];
+        const customerPriceIDs = priceConditions && priceConditions.map(condition => condition.ID) || [];
+        if(refIdocIDs.length === customerPriceIDs.length){
+            try {     
+                const updatePromises = refIdocIDs.map((IdocID, index) => {
+                    return tx.run(UPDATE(CustomerPrices).with({Synchronized: true, RefIdocNumber: IdocID}).where({ ID: customerPriceIDs[index] }));
+                });
+                await Promise.all(updatePromises);
+                await tx.commit();
+            } catch (error) {
+                await tx.rollback(error);
+            }
+        }
+    };
 
 
     async function updateCustomerPrice(customerPrice, tx, req){
