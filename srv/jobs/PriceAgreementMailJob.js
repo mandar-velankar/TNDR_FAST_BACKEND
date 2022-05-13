@@ -34,7 +34,7 @@ class PriceAgreementMailJob extends BaseJob {
                 // console.dir(pas,{ depth: null });
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
-                    console.log(mails);
+                    // console.log(mails);
                     if(mails && mails.length > 0){
                         await this.addMailsToOutbox(mails, mailRun.expiryDate);
                     } else{
@@ -60,14 +60,15 @@ class PriceAgreementMailJob extends BaseJob {
             pa.Tender.User.UserName,
             pa.Tender.User.UserEmail,
             pa.Product.ProductPack.PRODUCTPACKNAME,
-            pa.Institute.InstituteName,
-            pa.PriceConditions`[PriceConditionClassification.isMain='true']`(pc=>{
-                pc.PVL
+            pa.Institute.InstituteName//,
+            //requirement changed: price not needed for now because logic is not clear 
+            // pa.PriceConditions`[PriceConditionClassification.isMain='true']`(pc=>{
+            //     pc.PVL
                 // ,
                 // pc.PriceConditionClassification(pcc=>{
                 //     pcc.isMain
                 // })
-            })
+            // })
         })
             // .columns('*',
             //     'Tender.User.UserName',

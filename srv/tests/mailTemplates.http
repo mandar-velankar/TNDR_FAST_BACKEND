@@ -83,7 +83,7 @@ Authorization: Basic YXJ0aW9t
 ### delete template
 DELETE http://localhost:4004/v2/tender/MailTemplateFiles(templateId='PriceAgreementExpiredSoonMail')
 Authorization: Basic YXJ0aW9t
-
+### delete template
 DELETE http://localhost:4004/v2/tender/MailTemplates(Language='ES',CountryCode='ES',TemplateId='PriceAgreementReminderMail')
 Authorization: Basic YXJ0aW9t
 ### delete template
