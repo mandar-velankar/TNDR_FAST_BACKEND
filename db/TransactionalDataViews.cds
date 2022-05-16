@@ -487,7 +487,9 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.Offer.InternalBidDueDate as OFFER_DATE,
     tender.Offer.Distributor.DistributorName as DISTRIBUTOR,
     tender.Offer.OfferValue.SUBMISSION_DATE as SUBMISSION_DATE,
-    tender.CountrySpecificInformation.TenderReference as TENDER_REFERENCE
+    tender.CountrySpecificInformation.TenderReference as TENDER_REFERENCE,
+    tender.ExternalID as EXTERNAL_ID,
+    tender.SAPID as SAP_ID
 }where tender.Active = 1
 and ifnull(Offer.Active, 1) = 1;
 
