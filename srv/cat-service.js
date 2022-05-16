@@ -30,7 +30,18 @@ module.exports = (srv) => {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing, PriceCondition, DiscountCondition, PriceConditionClassification, ProductTypeProfitability
+		PT_TMTEND, 
+		PT_TMDLVTR, 
+		PT_TMUDLTRS, 
+		PT_TMAPPRST, 
+		FreeGoodsOther, 
+		CandidatePrices, 
+		ProductPricing, 
+		PriceCondition, 
+		DiscountCondition, 
+		PriceConditionClassification, 
+		ProductTypeProfitability,
+		CountrySpecificTenderInfo
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -2480,6 +2491,27 @@ module.exports = (srv) => {
 			offerProductValidation: productValidation
 		};
 	}
+
+
+	srv.before('CREATE', 'PT_TMTEND', async (req) => {
+		// only runs for 'ES'
+		if(~req.data?.CountryCode?.toLowerCase().indexOf('es')){
+			await addTenderExternalIDs(req.data);
+		}
+		
+	});
+
+	async function addTenderExternalIDs(tender){
+		// Tender
+		if(~tender?.Classification?.toLowerCase().indexOf('tender')){
+			tender.SAPID = "CO-".concat(tender.TenderName.replaceAll(' ','-')); 
+			tender.ExternalID = "TE-".concat(tender.TenderID);
+		}
+		// Commercial Agreement
+		if(~tender?.Classification?.toLowerCase().indexOf('commercial agreement')){
+			tender.SAPID = "OF-".concat(tender.TenderID); 
+		}
+	};
 
 	srv.on('getCurrentUser', (req) => {
 		return {
