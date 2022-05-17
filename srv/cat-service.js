@@ -2495,7 +2495,7 @@ module.exports = (srv) => {
 
 	srv.before('CREATE', 'PT_TMTEND', async (req) => {
 		// only runs for 'ES'
-		if(~req.data?.CountryCode?.toLowerCase().indexOf('es')){
+		if(~req && ~req.data && ~req.data.CountryCode && ~req.data.CountryCode.toLowerCase().indexOf('es')){
 			await addTenderExternalIDs(req.data);
 		}
 		
@@ -2503,12 +2503,12 @@ module.exports = (srv) => {
 
 	async function addTenderExternalIDs(tender){
 		// Tender
-		if(~tender?.Classification?.toLowerCase().indexOf('tender')){
+		if(~tender && ~tender.Classification && ~tender.Classification.toLowerCase().indexOf('tender')){
 			tender.SAPID = "CO-".concat(tender.TenderName.replaceAll(' ','-')); 
 			tender.ExternalID = "TE-".concat(tender.TenderID);
 		}
 		// Commercial Agreement
-		if(~tender?.Classification?.toLowerCase().indexOf('commercial agreement')){
+		if(~tender && ~tender.Classification && ~tender.Classification.toLowerCase().indexOf('commercial agreement')){
 			tender.SAPID = "OF-".concat(tender.TenderID); 
 		}
 	};
