@@ -81,9 +81,18 @@ entity Template {
 entity MailTemplate {
     key CountryCode    : String(2);
     key Language       : String(2);
-        TemplateId     : String(100);
+    key TemplateId     : String(100);
+        MailTemplateFile      : Association to MailTemplateFile
+                            on MailTemplateFile.templateId = TemplateId; //This can be found in OData
 }
 
+entity MailTemplateFile {
+    key templateId     : String(100);
+    title:String(100);
+    filename:String(250);
+    content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    mediaType:String @Core.IsMediaType;
+}
 // entity MandatoryTableFieldsCountry {
 //     key CountryCode : String(2);
 //     key View        : String(100);

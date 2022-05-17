@@ -710,6 +710,7 @@ service CatalogService @(path : 'tender')@(requires : [
     //OTHER
     entity Templates                                    as projection on AdminData.Template;
     entity MailTemplates                                as projection on AdminData.MailTemplate;
+    entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
 
     entity Attachment {
