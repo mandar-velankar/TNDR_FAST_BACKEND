@@ -110,7 +110,7 @@ module.exports = {
      */
     formatNumberToText:function(countryCode,value){
 
-        if(language === "it"){
+        if(countryCode === "IT"){
             return this.inWordsGeneric(countryCode,value); 
         }else{
             return this.inWords(value);
