@@ -5,6 +5,7 @@ const qs = require("qs");
 const cds = require('@sap/cds');
 const { v4: uuidv4 } = require('uuid');
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
+const { ExtendPriceAgreements } = require('./PriceAgreementJobs');
 
 
 module.exports = async () => {
@@ -837,3 +838,11 @@ module.exports.ItalyJobs = {
 
 
 }
+
+/*module.exports.PriceAgreementJobs = {
+
+    ExtendPriceAgreements: function (cronTime) {
+      return new ExtendPriceAgreements(cronTime);
+    },  
+  
+  }*/
