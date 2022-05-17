@@ -530,6 +530,8 @@ entity PT_TMTEND: managed {
         CONTENT              : String(500);
         PORTAL               : LargeString;
         TENDER_TYPE_2_ID     : Integer;
+        SAPID                : String;
+        ExternalID           : String;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID
