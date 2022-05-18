@@ -2495,9 +2495,13 @@ module.exports = (srv) => {
 
 
 	srv.before('CREATE', 'PT_TMTEND', async (req) => {
-		// only runs for 'ES'
-		if(~req.data?.CountryCode?.toLowerCase().indexOf('es')){
-			await addTenderExternalIDs(req.data);
+		try {
+			// only runs for 'ES'
+			if(req && req.data && ~req.data.CountryCode.toLowerCase().indexOf('es')){
+				await addTenderExternalIDs(req.data);
+			}
+		} catch (error) {
+			return req.reject(400, error.message);
 		}
 		
 	});
@@ -2505,7 +2509,7 @@ module.exports = (srv) => {
 	async function addTenderExternalIDs(tender){
 		// Tender
 		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('tender')){
-			tender.SAPID = "CO-".concat(tender && tender.TenderName.replaceAll(' ','-')); 
+			tender.SAPID = "CO-".concat(tender && tender.TenderName && tender.TenderName.replaceAll(' ','-')); 
 			tender.ExternalID = "TE-".concat(tender.TenderID);
 		}
 		// Commercial Agreement
