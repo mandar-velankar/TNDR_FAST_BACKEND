@@ -67,11 +67,7 @@ module.exports = (srv) => {
 	const chunk = n => xs =>
 		isEmpty(xs) ? [] : [take(n)(xs), ...chunk(n)(drop(n)(xs))];
 
-	/**
-	 * 
-	 * @param {Number n}
-	 * @return {String s}
-	 */
+/* inWords has moved to NumberHelper.js
 	let inWords = (n, currency) => {
 
 		let a = [
@@ -160,7 +156,7 @@ module.exports = (srv) => {
 		}
 
 	};
-
+*/
 
 
 	function buildDirectProducts(entityBrands, directBrands, countryProducts, productSKUs) {
@@ -1416,8 +1412,9 @@ module.exports = (srv) => {
             }));
 
             // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
+			// this should only be done for Italy & only for vatInWords
             let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
-            if(Number.isInteger(dVat)){
+            if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
                 vatInWords += ",00";   
             }; 
 
@@ -1912,7 +1909,8 @@ module.exports = (srv) => {
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
-
+			EXTERNAL_ID: tender.ExternalID,
+			SAP_ID: tender.SAPID
 		};
 		return results;
 	}
