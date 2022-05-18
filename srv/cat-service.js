@@ -2508,7 +2508,7 @@ module.exports = (srv) => {
 	async function addTenderExternalIDs(tender){
 		// Tender
 		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('tender')){
-			tender.SAPID = "CO-".concat(tender && tender.TenderName && tender.TenderName.replaceAll(' ','-')); 
+			tender.SAPID = "CO-".concat(tender && tender.TenderName && tender.TenderName.replace(/ /g,'-')); 
 			tender.ExternalID = "TE-".concat(tender.TenderID);
 		}
 		// Commercial Agreement
