@@ -2503,12 +2503,21 @@ module.exports = (srv) => {
 
 	async function addTenderExternalIDs(tender){
 		// Tender
+<<<<<<< HEAD
 		if(~tender?.Classification?.toLowerCase().indexOf('tender')){
 			tender.SAPID = "CO-".concat(tender.TenderName.replaceAll(' ','-')); 
 			tender.ExternalID = "TE-".concat(tender.TenderID);
 		}
 		// Commercial Agreement
 		if(~tender?.Classification?.toLowerCase().indexOf('commercial agreement')){
+=======
+		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('tender')){
+			tender.SAPID = "CO-".concat(tender && tender.TenderName.replaceAll(' ','-')); 
+			tender.ExternalID = "TE-".concat(tender.TenderID);
+		}
+		// Commercial Agreement
+		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('commercial agreement')){
+>>>>>>> 80bb344... Merge conflict Bugfix 11e4dcc
 			tender.SAPID = "OF-".concat(tender.TenderID); 
 		}
 	};
