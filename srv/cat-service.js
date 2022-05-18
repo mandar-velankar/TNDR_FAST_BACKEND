@@ -1909,7 +1909,8 @@ module.exports = (srv) => {
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
-
+			EXTERNAL_ID: tender.ExternalID,
+			SAP_ID: tender.SAPID
 		};
 		return results;
 	}
@@ -2491,30 +2492,25 @@ module.exports = (srv) => {
 
 
 	srv.before('CREATE', 'PT_TMTEND', async (req) => {
-		// only runs for 'ES'
-		if(~req.data?.CountryCode?.toLowerCase().indexOf('es')){
-			await addTenderExternalIDs(req.data);
+		try {
+			// only runs for 'ES'
+			if(req && req.data && ~req.data.CountryCode.toLowerCase().indexOf('es')){
+				await addTenderExternalIDs(req.data);
+			}
+		} catch (error) {
+			return req.reject(400, error.message);
 		}
 		
 	});
 
 	async function addTenderExternalIDs(tender){
 		// Tender
-<<<<<<< HEAD
-		if(~tender?.Classification?.toLowerCase().indexOf('tender')){
-			tender.SAPID = "CO-".concat(tender.TenderName.replaceAll(' ','-')); 
-			tender.ExternalID = "TE-".concat(tender.TenderID);
-		}
-		// Commercial Agreement
-		if(~tender?.Classification?.toLowerCase().indexOf('commercial agreement')){
-=======
 		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('tender')){
-			tender.SAPID = "CO-".concat(tender && tender.TenderName.replaceAll(' ','-')); 
+			tender.SAPID = "CO-".concat(tender && tender.TenderName && tender.TenderName.replace(/ /g,'-')); 
 			tender.ExternalID = "TE-".concat(tender.TenderID);
 		}
 		// Commercial Agreement
 		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('commercial agreement')){
->>>>>>> 80bb344... Merge conflict Bugfix 11e4dcc
 			tender.SAPID = "OF-".concat(tender.TenderID); 
 		}
 	};
