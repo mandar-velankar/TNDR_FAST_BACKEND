@@ -56,11 +56,7 @@ module.exports = (srv) => {
 	const chunk = n => xs =>
 		isEmpty(xs) ? [] : [take(n)(xs), ...chunk(n)(drop(n)(xs))];
 
-	/**
-	 * 
-	 * @param {Number n}
-	 * @return {String s}
-	 */
+/* inWords has moved to NumberHelper.js
 	let inWords = (n, currency) => {
 
 		let a = [
@@ -149,7 +145,7 @@ module.exports = (srv) => {
 		}
 
 	};
-
+*/
 
 
 	function buildDirectProducts(entityBrands, directBrands, countryProducts, productSKUs) {
@@ -1233,8 +1229,9 @@ module.exports = (srv) => {
             }));
 
             // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
+			// this should only be done for Italy & only for vatInWords
             let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
-            if(Number.isInteger(dVat)){
+            if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
                 vatInWords += ",00";   
             }; 
 
@@ -1480,14 +1477,14 @@ module.exports = (srv) => {
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
 		// let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
-		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
+		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount,offer.CURRENCY)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
 
 		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
 		// let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
-		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat)} ${offer.CURRENCY} only`;
+		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat,offer.CURRENCY)} ${offer.CURRENCY} only`;
 		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
 
 		//Division can be Pharma or Radiology, this determines division for country approvers
