@@ -1912,7 +1912,8 @@ module.exports = (srv) => {
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
-
+			EXTERNAL_ID: tender.ExternalID,
+			SAP_ID: tender.SAPID
 		};
 		return results;
 	}
