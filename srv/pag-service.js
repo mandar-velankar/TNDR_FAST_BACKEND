@@ -33,7 +33,7 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
-		PT_TMOFPR,PT_TMOFRS,PriceCondition,FreeGoodsOther,DiscountCondition
+		PT_TMTEND,PT_TMOFPR,PT_TMOFRS,PriceCondition,FreeGoodsOther,DiscountCondition
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
 
@@ -306,6 +306,9 @@ module.exports = async (srv) => {
         if (!offer) {
             return req.reject(404, `No offer was found for OfferID: ${priceAgreement.OfferId}`);
         }
+
+        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: priceAgreement.TenderId}));
+
         let packFactor;
         if(customerPrice.ProductPackId){
             let productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereProductpackID));
@@ -343,6 +346,8 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
+
+        tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
         return await updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
@@ -389,7 +394,7 @@ module.exports = async (srv) => {
                   "SPART": 0,
                   "KUNNR": 0,
                   "MATNR": 0,
-                  "_BAY0-GZ_SDREFINFO01": {
+                  "_-BAY0_-GZ_SDREFINFO01": {
                     "SEGMENT": 1,
                     "EDIQUAL": "CIG",
                     "REFVAL": "Z18178A124"
@@ -495,6 +500,8 @@ module.exports = async (srv) => {
             return req.reject(404, `No offer was found for OfferID: ${priceAgreement.OfferId}`);
         }
 
+        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: priceAgreement.TenderId}));
+
         // TODO: Isma will check with Jonathan if this is correct
         let packFactor = 1;
         if(customerPrice.FOCproductPackID){
@@ -511,6 +518,8 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
+
+        tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
         let kstbm = "";
         let mikbas = "";
