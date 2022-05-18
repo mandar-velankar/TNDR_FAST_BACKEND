@@ -347,7 +347,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
 
-        tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_BAY0-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
+        tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
         return await updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
@@ -394,7 +394,7 @@ module.exports = async (srv) => {
                   "SPART": 0,
                   "KUNNR": 0,
                   "MATNR": 0,
-                  "_BAY0-GZ_SDREFINFO01": {
+                  "_-BAY0_-GZ_SDREFINFO01": {
                     "SEGMENT": 1,
                     "EDIQUAL": "CIG",
                     "REFVAL": "Z18178A124"
@@ -519,7 +519,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
 
-        tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_BAY0-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
+        tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
         let kstbm = "";
         let mikbas = "";
