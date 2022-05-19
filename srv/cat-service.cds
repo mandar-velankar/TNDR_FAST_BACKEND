@@ -470,6 +470,8 @@ service CatalogService @(path : 'tender')@(requires : [
             //SBR                            : Integer not null;//AR only
             BUDGET_RATE           : Double;
             SPOT_RATE             : Double;
+            EXTERNAL_ID           : String;
+			SAP_ID                : String;
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -710,6 +712,7 @@ service CatalogService @(path : 'tender')@(requires : [
     //OTHER
     entity Templates                                    as projection on AdminData.Template;
     entity MailTemplates                                as projection on AdminData.MailTemplate;
+    entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
 
     entity Attachment {
