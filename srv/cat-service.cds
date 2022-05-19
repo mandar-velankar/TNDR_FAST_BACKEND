@@ -470,6 +470,8 @@ service CatalogService @(path : 'tender')@(requires : [
             //SBR                            : Integer not null;//AR only
             BUDGET_RATE           : Double;
             SPOT_RATE             : Double;
+            EXTERNAL_ID           : String;
+			SAP_ID                : String;
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
