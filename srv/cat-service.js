@@ -30,7 +30,18 @@ module.exports = (srv) => {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing, PriceCondition, DiscountCondition, PriceConditionClassification, ProductTypeProfitability
+		PT_TMTEND, 
+		PT_TMDLVTR, 
+		PT_TMUDLTRS, 
+		PT_TMAPPRST, 
+		FreeGoodsOther, 
+		CandidatePrices, 
+		ProductPricing, 
+		PriceCondition, 
+		DiscountCondition, 
+		PriceConditionClassification, 
+		ProductTypeProfitability,
+		CountrySpecificTenderInfo
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -56,11 +67,7 @@ module.exports = (srv) => {
 	const chunk = n => xs =>
 		isEmpty(xs) ? [] : [take(n)(xs), ...chunk(n)(drop(n)(xs))];
 
-	/**
-	 * 
-	 * @param {Number n}
-	 * @return {String s}
-	 */
+/* inWords has moved to NumberHelper.js
 	let inWords = (n, currency) => {
 
 		let a = [
@@ -149,7 +156,7 @@ module.exports = (srv) => {
 		}
 
 	};
-
+*/
 
 
 	function buildDirectProducts(entityBrands, directBrands, countryProducts, productSKUs) {
@@ -1405,8 +1412,9 @@ module.exports = (srv) => {
             }));
 
             // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
+			// this should only be done for Italy & only for vatInWords
             let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
-            if(Number.isInteger(dVat)){
+            if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
                 vatInWords += ",00";   
             }; 
 
@@ -1901,7 +1909,8 @@ module.exports = (srv) => {
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
-
+			EXTERNAL_ID: tender.ExternalID,
+			SAP_ID: tender.SAPID
 		};
 		return results;
 	}
@@ -2480,6 +2489,31 @@ module.exports = (srv) => {
 			offerProductValidation: productValidation
 		};
 	}
+
+
+	srv.before('CREATE', 'PT_TMTEND', async (req) => {
+		try {
+			// only runs for 'ES'
+			if(req && req.data && ~req.data.CountryCode.toLowerCase().indexOf('es')){
+				await addTenderExternalIDs(req.data);
+			}
+		} catch (error) {
+			return req.reject(400, error.message);
+		}
+		
+	});
+
+	async function addTenderExternalIDs(tender){
+		// Tender
+		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('tender')){
+			tender.SAPID = "CO-".concat(tender && tender.TenderName && tender.TenderName.replace(/ /g,'-')); 
+			tender.ExternalID = "TE-".concat(tender.TenderID);
+		}
+		// Commercial Agreement
+		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('commercial agreement')){
+			tender.SAPID = "OF-".concat(tender.TenderID); 
+		}
+	};
 
 	srv.on('getCurrentUser', (req) => {
 		return {
