@@ -21,17 +21,15 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             this.db = await cds.connect.to('db');
 
             // get mail Template
-            const mailTemplate = await this.getMailTemplate('PriceAgreementPriceConditionNotificationMail');
+            const templateName = 'PriceAgreementPriceConditionNotificationMail';
+            const mailTemplate = await this.getMailTemplate(templateName);
 
             //get customer prices
-            const synchronizedCustomerPrices = await this.getSynchronizedCustomerPrices(today);
-            const priceAgreementIDs = Array.isArray(synchronizedCustomerPrices) && synchronizedCustomerPrices.map(cp => cp.PriceAgreementId);
-            const priceAgreements = Array.isArray(priceAgreementIDs) && await this.getPriceAgreements(priceAgreementIDs);
-            
+            const synchronizedAggregatedData = await this.getSynchronizedCustomerPricesAggregatedData(today);
 
             // console.dir(pas,{ depth: null });
-            if (synchronizedCustomerPrices && synchronizedCustomerPrices.length > 0) {
-                let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
+            if (synchronizedAggregatedData && synchronizedAggregatedData.length > 0) {
+                let mails = this.mapDataToMails(mailTemplate,templateName)(synchronizedAggregatedData);
                 // console.log(mails);
                 if(mails && mails.length > 0){
                     await this.addMailsToOutbox(mails, mailRun.expiryDate);
@@ -49,44 +47,45 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
     }
 
     /**
-     * Fetch Customer Prices which are synchronized but not yet notified
-     * @param {*} date 
-     * @returns 
+     * Fetch Customer Prices which are synchronized but not yet notified.
+     * Price Agreement and Tender data is aggregated.
+     * @param {Date} date 
+     * @returns {Array<Objects>}  A list of aggregated data
      */
-    async getSynchronizedCustomerPrices(date) {
+    async getSynchronizedCustomerPricesAggregatedData(date) {
         console.log(`Fetching Customer Prices synchronized on: ${date}`);
-        const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
+        const { CustomerPrices, PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const tx = this.db.tx();
-        let syncedCustomerPrices = await tx.run(
-            SELECT.from(CustomerPrices)
+        return await tx.run(
+            SELECT.from(`${CustomerPrices.name} as CP`)
+            .join(`${PriceAgreements.name} as PA`)
+            .on({ 
+                'CP.PriceAgreementId': { '=': 'PA.ID' } 
+            })
+            .join(`${PT_TMTEND.name} as TND`)
+            .on({ 
+                'PA.TenderId': { '=': 'TND.TenderID' } 
+            })
             .where({ 
-                    CountryCode: 'ES', 
-                    Synchronized: true, 
-                    Notified: false,
-                    modifiedAt: { '>': `${date.toJSON().substr(0,10)} 00:00:00.000000000` } // only records synced on the specified date (= when this jobs runs)
+                    'CP.CountryCode': 'ES', 
+                    'CP.Synchronized': true, 
+                    'CP.Notified': false,
+                    'CP.modifiedAt': { '>=': `${date.toJSON().substr(0,10)} 00:00:00.000000000` }, // only records synced on the specified date (= when this jobs runs)
+                    'TND.Classification': 'Commercial Agreement'
             })
         ); 
-        
-        return syncedCustomerPrices;
     }
 
-    async getPriceAgreements(priceAgreementIDs) {
-        console.log(`Fetching Price Agreements ... `);
-        const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
-        const tx = this.db.tx();
-        return await tx.run(SELECT.from(PriceAgreements).where({ID: { in: priceAgreementIDs }})); 
-    }
-
-    mapPriceAgreementsToMails = (templates,mail) => pas => pas
+    mapDataToMails = (template,mail) => pas => pas
         .map(pa => ({
             CountryCode: pa.CountryCode,
             TenderID: pa.TenderId,
             OfferID: pa.OfferId,
             Sender: 'FAST-Admin@bayer.com',
             Recipients: pa.UserEmail,
-            Subject: this.findTemplate(templates,mail,pa).title,
-            MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), pa),
+            Subject: this.findTemplate(template,mail,pa).title,
+            MailBody: this.generateMailBody(this.findTemplate(template,mail,pa), pa),
             Sent: false
         }))
         .filter(pa =>{
