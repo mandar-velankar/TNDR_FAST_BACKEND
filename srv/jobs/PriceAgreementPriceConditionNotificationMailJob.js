@@ -19,11 +19,16 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
 
         try {
             this.db = await cds.connect.to('db');
-            //get all mail templates for price agreements
+
+            // get mail Template
             const mailTemplate = await this.getMailTemplate('PriceAgreementPriceConditionNotificationMail');
 
             //get customer prices
-            let synchronizedCustomerPrices = await this.getSynchronizedCustomerPrices(today);
+            const synchronizedCustomerPrices = await this.getSynchronizedCustomerPrices(today);
+            const priceAgreementIDs = Array.isArray(synchronizedCustomerPrices) && synchronizedCustomerPrices.map(cp => cp.PriceAgreementId);
+            const priceAgreements = Array.isArray(priceAgreementIDs) && await this.getPriceAgreements(priceAgreementIDs);
+            
+
             // console.dir(pas,{ depth: null });
             if (synchronizedCustomerPrices && synchronizedCustomerPrices.length > 0) {
                 let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
@@ -58,10 +63,19 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             .where({ 
                     CountryCode: 'ES', 
                     Synchronized: true, 
-                    Notified: false 
+                    Notified: false,
+                    modifiedAt: { '>': `${date.toJSON().substr(0,10)} 00:00:00.000000000` } // only records synced on the specified date (= when this jobs runs)
             })
-        ); // todo: add modifiedAt: today as filter
+        ); 
+        
         return syncedCustomerPrices;
+    }
+
+    async getPriceAgreements(priceAgreementIDs) {
+        console.log(`Fetching Price Agreements ... `);
+        const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
+        const tx = this.db.tx();
+        return await tx.run(SELECT.from(PriceAgreements).where({ID: { in: priceAgreementIDs }})); 
     }
 
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
