@@ -95,13 +95,11 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
     }
 
     mapDataToMail = (template,mail,syncDate) => data => {
-
         // change some fields in data
         data.forEach(d => {
             d.EffectiveDate = new Date(d.EffectiveDate).toJSON().substring(0,10),
             d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10)
         })
-
         const outbox = {
             CountryCode: data[0].CountryCode,
             TenderID: data[0].TenderId,
@@ -117,16 +115,12 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             }),
             Sent: false
         }
-
         if(!outbox.MailBody || outbox.MailBody === 'undefined') {
             console.log(`No template found for Customer Price of tender ${outbox.TenderID} with countrycode ${outbox.CountryCode}`);
             return;
         }
-
         return outbox;
-
-    };
-
+    }
 
     async addMailsToOutbox(mail, syncDate) {
         console.log(`Adding notification mail for Price Conditions synchronised with SAP on: ${syncDate.toDateString()}`);
@@ -142,10 +136,11 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             throw error;
         }
     }
+
     generateMailBody(mail, data) {
-        //CountryCode: language, Language: language, 
         return Handlebars.compile("" + mail.content)(data);
     }
+    
     getMailTemplate(templateId) {
         console.log('Get mail templates for price agreements');
         console.table(templateId);
@@ -155,20 +150,4 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
             .where({ TemplateId: templateId }));
     }
-    // getReminderDate() {
-    //     let date = new Date();
-    //     date.setDate(date.getDate() + 5);
-    //     return this.formatDate(date);
-    // }
-    // getExpiringSoonDate() {
-    //     let date = new Date();
-    //     date.setDate(date.getDate() + 45);//+45
-    //     return this.formatDate(date);
-    // }
-    // formatDate(date) {
-    //     let month = '' + (date.getMonth() + 1);
-    //     month = month.length < 2 ? `0${month}` : month;
-    //     return `${date.getFullYear()}-${month}-${date.getDate()} 00:00:00`;
-    // }
-
 };
