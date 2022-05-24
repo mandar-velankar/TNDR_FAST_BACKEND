@@ -1,6 +1,7 @@
 const cds = require('@sap/cds');
 const BaseJob = require('./BaseJob');
 const Handlebars = require("handlebars");
+const cfenv = require("cfenv")
 
 module.exports = class PriceAgreementPriceConditionNotificationMailJob extends BaseJob {
 
@@ -95,10 +96,12 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
     }
 
     mapDataToMail = (template,mail,syncDate) => data => {
-        // change some fields in data
+        const appEnv = cfenv.getAppEnv();
+        // add/change some fields in the data array
         data.forEach(d => {
             d.EffectiveDate = new Date(d.EffectiveDate).toJSON().substring(0,10),
-            d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10)
+            d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10),
+            d.URL = `${appEnv.url}/index.html#/PriceAgreements/${d.PriceAgreementId}`
         })
         const outbox = {
             CountryCode: data[0].CountryCode,
