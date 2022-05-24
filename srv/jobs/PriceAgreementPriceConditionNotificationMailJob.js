@@ -14,8 +14,8 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
     //override
     async onTick() {
 
-        const today = new Date();
-        console.log(`Processing email consolidation for all commercial agreements synchronised with SAP on ${today} ... `);
+        const syncDate = new Date();
+        console.log(`Processing notification mail for Price Conditions synchronised with SAP on ${syncDate.toDateString()} ... `);
 
         try {
             this.db = await cds.connect.to('db');
@@ -25,25 +25,25 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             const mailTemplate = await this.getMailTemplate(templateName);
 
             //get customer prices
-            const synchronizedAggregatedData = await this.getSynchronizedCustomerPricesAggregatedData(today);
+            const synchronizedAggregatedData = await this.getSynchronizedCustomerPricesAggregatedData(syncDate);
 
             // console.dir(pas,{ depth: null });
             if (synchronizedAggregatedData && synchronizedAggregatedData.length > 0) {
-                let mails = this.mapDataToMails(mailTemplate,templateName)(synchronizedAggregatedData);
+                let mail = this.mapDataToMail(mailTemplate,templateName, syncDate)(synchronizedAggregatedData);
                 // console.log(mails);
-                if(mails && mails.length > 0){
-                    await this.addMailsToOutbox(mails, mailRun.expiryDate);
+                if(mail){
+                    await this.addMailsToOutbox(mail, syncDate);
                 } else{
-                    console.log(`No mails to add to outbox for template ${mailRun.template}`);
+                    console.log(`No mail to add to outbox for template ${templateName}`);
                 }
              } else {
-                 console.log(`No reminder mails to be send for expiry date: ${mailRun.expiryDate}`);
+                 console.log(`No notification mail to be send on ${syncDate}`);
              }
         } catch (error) {
             console.error(error);
         }
 
-        console.log('Processing reminder mails for Price Agreements finished.');
+        console.log(`Processing notification mail for Price Conditions synchronised with SAP on ${syncDate.toDateString()} finished`);
     }
 
     /**
@@ -77,35 +77,41 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
         ); 
     }
 
-    mapDataToMails = (template,mail) => pas => pas
-        .map(pa => ({
-            CountryCode: pa.CountryCode,
-            TenderID: pa.TenderId,
-            OfferID: pa.OfferId,
+    mapDataToMail = (template,mail,syncDate) => data => {
+
+        const outbox = {
+            CountryCode: data[0].CountryCode,
+            TenderID: data[0].TenderId,
+            OfferID: data[0].OfferId,
             Sender: 'FAST-Admin@bayer.com',
-            Recipients: pa.UserEmail,
-            Subject: this.findTemplate(template,mail,pa).title,
-            MailBody: this.generateMailBody(this.findTemplate(template,mail,pa), pa),
+            Recipients: undefined,
+            Subject: template.title,
+            MailBody: this.generateMailBody(template, { 
+                data: { 
+                    SyncDate: syncDate.toDateString(), 
+                    CustomerPrices: data 
+                }
+            }),
             Sent: false
-        }))
-        .filter(pa =>{
-            // console.log(pa);
-            if(!pa.MailBody || pa.MailBody === 'undefined')console.log(`No template found for Price Agreement of tender ${pa.TenderID} with countrycode ${pa.CountryCode}`)
-            return !!pa.MailBody && pa.MailBody !== 'undefined';
-        });
+        }
 
-    findTemplate = (templates,templateid,pa) => templates.find(template => 
-        template.CountryCode === pa.CountryCode && 
-        template.Language === pa.CountryCode && 
-        template.TemplateId === templateid);
+        if(!outbox.MailBody || outbox.MailBody === 'undefined') {
+            console.log(`No template found for Customer Price of tender ${outbox.TenderID} with countrycode ${outbox.CountryCode}`);
+            return;
+        }
 
-    async addMailsToOutbox(mails, expiryDate) {
-        console.log(`Adding reminder mails for Price Agreements to outbox for expiry date: ${expiryDate}`);
-        console.table(mails,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
+        return outbox;
+
+    };
+
+
+    async addMailsToOutbox(mail, syncDate) {
+        console.log(`Adding notification mail for Price Conditions synchronised with SAP on: ${syncDate.toDateString()}`);
+        console.table(mail,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const tx = this.db.tx();
         try {
-            const mailsResult = await tx.run(INSERT(mails).into(OutgoingMails));
+            const mailsResult = await tx.run(INSERT(mail).into(OutgoingMails));
             await tx.commit();
             return mailsResult;
         } catch (error) {
@@ -127,20 +133,20 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
             .where({ TemplateId: templateId }));
     }
-    getReminderDate() {
-        let date = new Date();
-        date.setDate(date.getDate() + 5);
-        return this.formatDate(date);
-    }
-    getExpiringSoonDate() {
-        let date = new Date();
-        date.setDate(date.getDate() + 45);//+45
-        return this.formatDate(date);
-    }
-    formatDate(date) {
-        let month = '' + (date.getMonth() + 1);
-        month = month.length < 2 ? `0${month}` : month;
-        return `${date.getFullYear()}-${month}-${date.getDate()} 00:00:00`;
-    }
+    // getReminderDate() {
+    //     let date = new Date();
+    //     date.setDate(date.getDate() + 5);
+    //     return this.formatDate(date);
+    // }
+    // getExpiringSoonDate() {
+    //     let date = new Date();
+    //     date.setDate(date.getDate() + 45);//+45
+    //     return this.formatDate(date);
+    // }
+    // formatDate(date) {
+    //     let month = '' + (date.getMonth() + 1);
+    //     month = month.length < 2 ? `0${month}` : month;
+    //     return `${date.getFullYear()}-${month}-${date.getDate()} 00:00:00`;
+    // }
 
 };
