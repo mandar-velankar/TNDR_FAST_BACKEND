@@ -15,7 +15,7 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
     async onTick() {
 
         const syncDate = new Date();
-        console.log(`Processing notification mail for Price Conditions synchronised with SAP on ${syncDate.toDateString()} ... `);
+        console.log(`Processing notification mail for Price Conditions synchronised with SAP on ${syncDate.toDateString()} STARTED ... `);
 
         try {
             this.db = await cds.connect.to('db');
@@ -37,13 +37,13 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
                     console.log(`No mail to add to outbox for template ${templateName}`);
                 }
              } else {
-                 console.log(`No notification mail to be send on ${syncDate}`);
+                 console.log(`No notification mail to be send on ${syncDate.toDateString()}`);
              }
         } catch (error) {
             console.error(error);
         }
 
-        console.log(`Processing notification mail for Price Conditions synchronised with SAP on ${syncDate.toDateString()} finished`);
+        console.log(`Processing notification mail for Price Conditions synchronised with SAP on ${syncDate.toDateString()} FINISHED`);
     }
 
     /**
@@ -53,8 +53,9 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
      * @returns {Array<Objects>}  A list of aggregated data
      */
     async getSynchronizedCustomerPricesAggregatedData(date) {
-        console.log(`Fetching Customer Prices synchronized on: ${date}`);
+        console.log(`Fetching Customer Prices synchronized on ${date.toDateString()}`);
         const { CustomerPrices, PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        const { PT_TMINST, PT_TMPRDPCK, PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const tx = this.db.tx();
         return await tx.run(
@@ -67,17 +68,39 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             .on({ 
                 'PA.TenderId': { '=': 'TND.TenderID' } 
             })
+            .leftJoin(`${PT_TMINST.name} as INST`)
+            .on({ 
+                'CP.InstituteId': { '=': 'INST.InstituteID' },
+                'CP.CountryCode': { '=': 'INST.CountryCode' },
+            })
+            .leftJoin(`${PT_TMSKUPRDPCK.name} as PRDPCK`)
+            .on({ 
+                'CP.MaterialNumber': { '=': 'PRDPCK.SKUCode' },
+                'CP.CountryCode': { '=': 'PRDPCK.CountryCode' },
+                'PRDPCK.ActiveRecord': 'Yes',
+            })
+            .leftJoin(`${PT_TMPRDPCK.name} as PRD`)
+            .on({ 
+                'PRDPCK.ProductPackID': { '=': 'PRD.PRODUCTPACKID' },
+                'PRD.ACTIVERECORD': 'Yes',
+            })
             .where({ 
                     'CP.CountryCode': 'ES', 
                     'CP.Synchronized': true, 
                     'CP.Notified': false,
-                    'CP.modifiedAt': { '>=': `${date.toJSON().substr(0,10)} 00:00:00.000000000` }, // only records synced on the specified date (= when this jobs runs)
+                    'CP.modifiedAt': { '>=': `${date.toJSON().substring(0,10)} 00:00:00.000000000` }, // only records synced on the specified date (= when this jobs runs)
                     'TND.Classification': 'Commercial Agreement'
             })
         ); 
     }
 
     mapDataToMail = (template,mail,syncDate) => data => {
+
+        // change some fields in data
+        data.forEach(d => {
+            d.EffectiveDate = new Date(d.EffectiveDate).toJSON().substring(0,10),
+            d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10)
+        })
 
         const outbox = {
             CountryCode: data[0].CountryCode,
@@ -107,7 +130,6 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
 
     async addMailsToOutbox(mail, syncDate) {
         console.log(`Adding notification mail for Price Conditions synchronised with SAP on: ${syncDate.toDateString()}`);
-        console.table(mail,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const tx = this.db.tx();
         try {
