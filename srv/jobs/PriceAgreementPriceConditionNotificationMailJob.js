@@ -88,7 +88,7 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
                     'CP.CountryCode': 'ES', 
                     'CP.Synchronized': true, 
                     'CP.Notified': false,
-                    'CP.modifiedAt': { '>=': `${date.toJSON().substring(0,10)} 00:00:00.000000000` }, // only records synced on the specified date (= when this jobs runs)
+                    'CP.modifiedAt': { '>=': `${date.toJSON().substring(0,10)} 00:00:00.000000000` }, // only consider records synced on the day this job runs
                     'TND.Classification': 'Commercial Agreement'
             })
         ); 
@@ -140,7 +140,7 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
     generateMailBody(mail, data) {
         return Handlebars.compile("" + mail.content)(data);
     }
-    
+
     getMailTemplate(templateId) {
         console.log('Get mail templates for price agreements');
         console.table(templateId);
