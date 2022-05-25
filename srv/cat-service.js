@@ -3082,7 +3082,7 @@ module.exports = (srv) => {
 
         //add url to offerConsolidation
         
-        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/ES/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
+        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/${offerConsolidation.COUNTRYCODE}/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
 
 		var document = {
 			type: "buffer",
