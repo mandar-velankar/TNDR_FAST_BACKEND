@@ -1212,5 +1212,6 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     masterPrices.Currency as masterPriceCurrency,
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
-    priceCondition.ReferencePriceAgreement
+    priceCondition.ReferencePriceAgreement,
+    priceCondition.Settlement.ID as Settlement_ID
 }where tender.Active = 1;

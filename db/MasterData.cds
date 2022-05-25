@@ -709,3 +709,8 @@ entity MasterPrices: cuid, managed {
 	ValidTo: Timestamp;    
 
 }
+
+entity Settlements {
+	key ID: String(10);
+	Description: localized String(50);
+}
