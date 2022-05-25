@@ -1315,10 +1315,10 @@ module.exports = (srv) => {
                 }
                 productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereDiscountCondition));
 
-                let whereRoyalDecree = {
+                /*let whereRoyalDecree = {
                     ProductPackID: productCondition.ProductCode
                 }
-                productCondition.RoyalDecree = (await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree))).Percentage;
+                productCondition.RoyalDecree = (await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree))).Percentage;*/
 
                 let wherePriceConditionClassification = {
                     ID: productCondition.PriceConditionClassification_ID
@@ -1397,15 +1397,15 @@ module.exports = (srv) => {
                     }
                     productFOCCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereFOCDiscountCondition));
 
-                    let whereFOCRoyalDecree = {
+                    /*let whereFOCRoyalDecree = {
                         ProductPackID: PriceCondition.ProductCode
                     }
-                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));
+                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));*/
 
                     let wherePriceConditionClassification = {
-                        ID: productFOCCondition.PricingConditionClassificationID
+                        ID: productFOCCondition.PriceConditionClassification_ID
                     }
-                    productFOCCondition.PriceConditionClassification = await tx.run(SELECT.from(PriceConditionClassification).where(wherePriceConditionClassification));
+                    productFOCCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where(wherePriceConditionClassification));
 
                     return productFOCCondition;
 
