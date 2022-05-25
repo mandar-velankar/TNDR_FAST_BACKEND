@@ -1309,7 +1309,7 @@ module.exports = (srv) => {
 				CountryCode: offer.COUNTRYCODE
 			}
 			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
-            productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
+            const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
                 let whereDiscountCondition = {
                     ID: productCondition.ID
                 }
