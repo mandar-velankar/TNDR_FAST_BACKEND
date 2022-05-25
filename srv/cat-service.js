@@ -1358,7 +1358,7 @@ module.exports = (srv) => {
                 CountryCode: offer.COUNTRYCODE
             }
 
-            const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
+            //const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
 
             //loop over freegoodsother and retrieve productpricing, material and productpack data
             aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
@@ -1576,7 +1576,7 @@ module.exports = (srv) => {
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials,
-                PriceCondition: aPriceConditions
+                //PriceCondition: aPriceConditions
 			}
 		});
 		let resolvedResults = await Promise.all(results);
