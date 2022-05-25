@@ -16,6 +16,7 @@ const wordTemplate = require("easy-template-x");
 const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
 const { Service } = require('@sap/cds');
 const NumberHelper = require("./utils/NumberHelper");
+const cfenv = require("cfenv");
 
 module.exports = (srv) => {
 
@@ -3077,6 +3078,10 @@ module.exports = (srv) => {
 				offerConsolidation.DIVISION = divisions[0];
 			}
 		}
+
+        //add url to offerConsolidation
+        
+        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/ES/${offerConsolidation.TenderID}/${offerConsolidation.OfferID}/__component0---tenderManagementDetailId--offerProductsId//TwoColumnsMidExpanded`
 
 		var document = {
 			type: "buffer",
