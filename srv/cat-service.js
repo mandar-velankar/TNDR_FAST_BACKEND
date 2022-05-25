@@ -3047,6 +3047,7 @@ module.exports = (srv) => {
 		const tx = cds.tx();
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
+        const appEnv = cfenv.getAppEnv();
 
 		//quotation data retrieval for filling template
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
@@ -3081,7 +3082,7 @@ module.exports = (srv) => {
 
         //add url to offerConsolidation
         
-        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/ES/${offerConsolidation.TenderID}/${offerConsolidation.OfferID}/__component0---tenderManagementDetailId--offerProductsId//TwoColumnsMidExpanded`
+        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/ES/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
 
 		var document = {
 			type: "buffer",
