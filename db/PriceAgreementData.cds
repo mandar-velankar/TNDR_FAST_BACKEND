@@ -37,6 +37,8 @@ entity PriceAgreements: cuid, managed {
     Expired: Boolean default false; //calculated from NodeJS
     isNewPriceAgreement: Boolean default true; // calculated from NodeJS
     OfferId: String;
+    ExtendPriceAgreement: Boolean default false;
+    ExpiryExtensionPeriod: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -89,6 +91,7 @@ entity CustomerPrices: cuid, managed {
     PriceCondition: String;
     Applied: Boolean; 
     RefIdocNumber: String;
+    Notified: Boolean default false;
 }
 
 entity CustomerPrices_History: managed {
@@ -110,6 +113,7 @@ entity CustomerPrices_History: managed {
     PriceCondition: String;
     Applied: Boolean; 
     RefIdocNumber: String;
+    Notified: Boolean default false;
 }
 
 /**
