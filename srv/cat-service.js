@@ -1321,7 +1321,7 @@ module.exports = (srv) => {
                 productCondition.RoyalDecree = (await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree))).Percentage;
 
                 let wherePriceConditionClassification = {
-                    ID: productCondition.PricingConditionClassificationID
+                    ID: productCondition.PriceConditionClassification_ID
                 }
                 productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where(wherePriceConditionClassification));
 
