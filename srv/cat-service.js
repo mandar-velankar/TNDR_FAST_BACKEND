@@ -16,6 +16,7 @@ const wordTemplate = require("easy-template-x");
 const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
 const { Service } = require('@sap/cds');
 const NumberHelper = require("./utils/NumberHelper");
+const cfenv = require("cfenv");
 
 module.exports = (srv) => {
 
@@ -3046,6 +3047,7 @@ module.exports = (srv) => {
 		const tx = cds.tx();
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
+        const appEnv = cfenv.getAppEnv();
 
 		//quotation data retrieval for filling template
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
@@ -3077,6 +3079,10 @@ module.exports = (srv) => {
 				offerConsolidation.DIVISION = divisions[0];
 			}
 		}
+
+        //add url to offerConsolidation
+        
+        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/${offerConsolidation.COUNTRYCODE}/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
 
 		var document = {
 			type: "buffer",
