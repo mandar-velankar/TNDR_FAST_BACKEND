@@ -1310,23 +1310,10 @@ module.exports = (srv) => {
 			}
 			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
             const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
-                let whereDiscountCondition = {
-                    ID: productCondition.ID
-                }
-                productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereDiscountCondition));
-
-                /*let whereRoyalDecree = {
-                    ProductPackID: productCondition.ProductCode
-                }
-                productCondition.RoyalDecree = (await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree))).Percentage;*/
-
-                let wherePriceConditionClassification = {
-                    ID: productCondition.PriceConditionClassification_ID
-                }
-                productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where(wherePriceConditionClassification));
-
+                productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
+				productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
+                productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
                 return productCondition;
-
             }));
             /*end of ProductCondition information */
 
