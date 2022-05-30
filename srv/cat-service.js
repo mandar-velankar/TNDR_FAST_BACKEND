@@ -16,6 +16,7 @@ const wordTemplate = require("easy-template-x");
 const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
 const { Service } = require('@sap/cds');
 const NumberHelper = require("./utils/NumberHelper");
+const cfenv = require("cfenv");
 
 module.exports = (srv) => {
 
@@ -1304,24 +1305,14 @@ module.exports = (srv) => {
 				CountryCode: offer.COUNTRYCODE
 			}
 			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
-            productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
-                let whereDiscountCondition = {
-                    ID: productCondition.ID
-                }
-                productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereDiscountCondition));
-
-                let whereRoyalDecree = {
-                    ProductPackID: productCondition.ProductCode
-                }
-                productCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereRoyalDecree));
-
-                let wherePriceConditionClassification = {
-                    ID: productCondition.PricingConditionClassificationID
-                }
-                productCondition.PriceConditionClassification = await tx.run(SELECT.from(PriceConditionClassification).where(wherePriceConditionClassification));
-
+            const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
+                productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
+				productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
+				productCondition.FreeGoodsOther.forEach(async foc => {
+					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
+				});
+                productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
                 return productCondition;
-
             }));
             /*end of ProductCondition information */
 
@@ -1354,7 +1345,7 @@ module.exports = (srv) => {
                 CountryCode: offer.COUNTRYCODE
             }
 
-            const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
+            //const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
 
             //loop over freegoodsother and retrieve productpricing, material and productpack data
             aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
@@ -1392,15 +1383,15 @@ module.exports = (srv) => {
                     }
                     productFOCCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereFOCDiscountCondition));
 
-                    let whereFOCRoyalDecree = {
+                    /*let whereFOCRoyalDecree = {
                         ProductPackID: PriceCondition.ProductCode
                     }
-                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));
+                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));*/
 
                     let wherePriceConditionClassification = {
-                        ID: productFOCCondition.PricingConditionClassificationID
+                        ID: productFOCCondition.PriceConditionClassification_ID
                     }
-                    productFOCCondition.PriceConditionClassification = await tx.run(SELECT.from(PriceConditionClassification).where(wherePriceConditionClassification));
+                    productFOCCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where(wherePriceConditionClassification));
 
                     return productFOCCondition;
 
@@ -1573,7 +1564,7 @@ module.exports = (srv) => {
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials,
-                PriceCondition: aPriceConditions
+                //PriceCondition: aPriceConditions
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -3043,6 +3034,7 @@ module.exports = (srv) => {
 		const tx = cds.tx();
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
+        const appEnv = cfenv.getAppEnv();
 
 		//quotation data retrieval for filling template
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
@@ -3074,6 +3066,10 @@ module.exports = (srv) => {
 				offerConsolidation.DIVISION = divisions[0];
 			}
 		}
+
+        //add url to offerConsolidation
+        
+        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/${offerConsolidation.COUNTRYCODE}/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
 
 		var document = {
 			type: "buffer",

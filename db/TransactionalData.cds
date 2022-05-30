@@ -424,6 +424,7 @@ entity PriceCondition: cuid, managed {
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
+    Settlement                          : Association to MasterData.Settlements;
 }
 
 entity DiscountCondition: cuid, managed {

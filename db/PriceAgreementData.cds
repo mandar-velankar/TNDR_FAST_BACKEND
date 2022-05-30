@@ -91,6 +91,7 @@ entity CustomerPrices: cuid, managed {
     PriceCondition: String;
     Applied: Boolean; 
     RefIdocNumber: String;
+    Notified: Boolean default false;
 }
 
 entity CustomerPrices_History: managed {
@@ -112,6 +113,7 @@ entity CustomerPrices_History: managed {
     PriceCondition: String;
     Applied: Boolean; 
     RefIdocNumber: String;
+    Notified: Boolean default false;
 }
 
 /**
