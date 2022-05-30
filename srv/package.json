@@ -11,6 +11,7 @@
         "@sap/xssec": "^3.0.10",
         "angular-expressions": "^1.1.4",
         "axios": "^0.21.1",
+        "cfenv": "^1.2.4",
         "compression": "^1.7.4",
         "cron": "^1.8.2",
         "cron-es6": "^1.0.3",
