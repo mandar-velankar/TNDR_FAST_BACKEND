@@ -376,10 +376,11 @@ module.exports = (srv) => {
 		//Optional if business approved (country or regional)
 		//Notification if NetOfferPrice = Registered Price (and registered price exists)
 		let regulatory = 1;
-		if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
-			regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
-		}
-
+        //EHQUT-INC0170965/INC15506460-Mandatory Notification not sent for Regulatory
+		// if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
+		// 	regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
+		// }
+        //EHQUT-INC0170965/INC15506460-Mandatory Notification not sent for Regulatory
 		//Legal
 		//Optional if legal approved
 		//Approval if private institute OR negative profitability
