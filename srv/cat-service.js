@@ -376,11 +376,10 @@ module.exports = (srv) => {
 		//Optional if business approved (country or regional)
 		//Notification if NetOfferPrice = Registered Price (and registered price exists)
 		let regulatory = 1;
-        //EHQUT-INC0170965/INC15506460-Mandatory Notification not sent for Regulatory
-		// if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
-		// 	regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
-		// }
-        //EHQUT-INC0170965/INC15506460-Mandatory Notification not sent for Regulatory
+		if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
+			regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
+		}
+
 		//Legal
 		//Optional if legal approved
 		//Approval if private institute OR negative profitability
@@ -1506,16 +1505,45 @@ module.exports = (srv) => {
 		}
 
 		//In case we have samples, comment should be in remarks specifying item numbers for which samples are provided
-		let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
-		let samplesRemark = "";
-		if (samplesNotZero.length === offerProductValidation.length) {
-			samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
-		}
-		else if (samplesNotZero.length !== 0) {
-			let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
-			samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
-			samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
-		}
+		
+		// if (samplesNotZero.length === offerProductValidation.length) {
+		// 	samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
+		// }
+		// else if (samplesNotZero.length !== 0) {
+		// 	let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
+		// 	samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
+		// 	samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
+		// }
+        //EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
+        let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
+        let samplesRemark = "";
+        let samplesItemsToUnique = samplesNotZero.map((d) => { return d.SAMPLES });
+        let uniqueSample = Array.from(new Set(samplesItemsToUnique));
+
+        if (samplesNotZero.length === offerProductValidation.length && uniqueSample.length == 1) {
+
+            samplesRemark = uniqueSample[0].toString().concat(" samples will be delivered for all products as per the tender terms and conditions.");
+        }
+        else if (uniqueSample.length >= 1) {
+
+            for (i = 0; i < uniqueSample.length; i++) {
+
+                let samplesItems = Array.from(samplesNotZero.filter((sample) => sample.SAMPLES === uniqueSample[i]).map((sample) => { return sample.SORTER })).join(", ");
+
+                if (samplesItems.length !== 1) {
+                    samplesItems = samplesItems.substring(0, samplesItems.length - 3).concat(" and ").concat(samplesItems[samplesItems.length - 1]);
+                }
+
+                samplesRemark = samplesRemark.concat(uniqueSample[i].toString().concat(" samples will be delivered for Items ").concat(samplesItems));
+                if (i !== uniqueSample.length - 1) {
+                    samplesRemark = samplesRemark.concat("; ");
+                }
+            }
+
+            samplesRemark = samplesRemark.concat(" as per the tender terms and conditions.");
+
+        }
+//EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
 
 		//Shipment Terms need to be specified by item number if not same for all
 		let shipmentTerms = "";
