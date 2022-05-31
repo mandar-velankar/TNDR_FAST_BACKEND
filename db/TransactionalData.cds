@@ -309,6 +309,7 @@ entity PT_TMOFPR {
         PricingPolicyCluster     : String;
         OfferType                : String;
         AnticipatedRequestedQuantity: String(25);
+        MaxPrice                 : Double;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
