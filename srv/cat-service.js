@@ -1419,6 +1419,11 @@ module.exports = (srv) => {
 
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		let aApproverTypes = [];
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
+        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
 		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
@@ -1644,6 +1649,9 @@ module.exports = (srv) => {
 			registeredRemark = "Product(s) not registered in the country. Import Permit is to be arranged by ";
 			registeredRemark = registeredRemark.concat(offer.DISTRIBUTORNAME)
 		}
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+        let InstituteRemark = institute.Comment;
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
 		//Comment if any product is alternative to quoted
 		let isAlternativeToQuoted = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_QUOTED }));
@@ -1670,6 +1678,7 @@ module.exports = (srv) => {
 		remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
 		remarks = remarks.concat((alternativeQuotedRemark !== "") ? alternativeQuotedRemark.concat("<br>") : "");
 		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
+        remarks=remarks.concat((InstituteRemark !== "") ? InstituteRemark.concat("<br>") : "");
 		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
 
 		// get SUBMITTED_BY user info 
