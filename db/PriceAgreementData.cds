@@ -67,6 +67,7 @@ entity PriceAgreements: cuid, managed {
                                         on PriceConditions.OfferID = OfferId
                                         and PriceConditions.ProductCode = ProductPackId
                                         and PriceConditions.CountryCode = CountryCode;
+    SettlementDates: Composition of many SettlementDates on SettlementDates.PriceAgreementId = ID;
 }
 entity CustomerPrices: cuid, managed {
     // @cds.api.ignore
@@ -94,6 +95,11 @@ entity CustomerPrices: cuid, managed {
     Notified: Boolean default false;
 }
 
+entity SettlementDates: managed {
+    key PriceAgreementId: String not null;
+    key FromDate: Date;
+    ToDate: Date;
+}
 entity CustomerPrices_History: managed {
     ID: UUID;
     ValidFrom: Timestamp;
