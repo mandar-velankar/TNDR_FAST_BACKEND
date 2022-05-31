@@ -4,18 +4,18 @@ Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "templateId":"PriceAgreementExpiredSoonMail",
-    "title":"Price Agreement/s Expiring Soon!!",
-    "filename" : "PriceAgreementExpiredSoonMail.html",
+    "templateId":"PriceAgreementPriceConditionNotificationMail",
+    "title":"Notification email when synching Price Agreement for a Commercial Agreement with SAP",
+    "filename" : "PriceAgreementPriceConditionNotificationMail.html",
     "mediaType": "text/html"
 }
 
 ### upload word template
-PUT http://localhost:4004/v2/tender/MailTemplateFiles(templateId='PriceAgreementExpiredSoonMail')/content
+PUT http://localhost:4004/v2/tender/MailTemplateFiles(templateId='PriceAgreementPriceConditionNotificationMail')/content
 Authorization: Basic YXJ0aW9t
 Content-Type: text/html
 
-< ../mail/PriceAgreementExpiredSoonMail.html
+< ../mail/PriceAgreementPriceConditionNotificationMail.html
 
 ### create mapping between countrycode and template (for reusability)
 POST http://localhost:4004/v2/tender/MailTemplates
@@ -25,7 +25,7 @@ Content-Type: application/json
 {
     "CountryCode":"ES",
     "Language":"ES",
-    "TemplateId":"PriceAgreementExpiredSoonMail"
+    "TemplateId":"PriceAgreementPriceConditionNotificationMail"
 }
 
 ### upload word template
