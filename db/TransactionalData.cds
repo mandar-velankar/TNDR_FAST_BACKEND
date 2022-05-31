@@ -309,6 +309,7 @@ entity PT_TMOFPR {
         PricingPolicyCluster     : String;
         OfferType                : String;
         AnticipatedRequestedQuantity: String(25);
+        MaxPrice                 : Double;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -424,6 +425,7 @@ entity PriceCondition: cuid, managed {
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
+    Settlement                          : Association to MasterData.Settlements;
 }
 
 entity DiscountCondition: cuid, managed {

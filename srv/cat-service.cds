@@ -73,6 +73,7 @@ service CatalogService @(path : 'tender')@(requires : [
     //spain
     entity MasterPrices                                 as projection on MasterData.MasterPrices;
     entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
+    entity Settlements                                  as projection on MasterData.Settlements;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
