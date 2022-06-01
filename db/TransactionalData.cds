@@ -402,8 +402,8 @@ entity PriceCondition: cuid, managed {
     CountryCode                         : String;
     OfferID                             : String;
     ProductCode                         : Integer;
-    PVL                                 : Decimal(15,6);
-    ConfidentialPrice                   : Decimal(15,6);
+    PVL                                 : Decimal;
+    ConfidentialPrice                   : Decimal;
     Discount                            : Decimal;
     RoyalDecree                         : String;
     StandardDiscount                    : Decimal;
