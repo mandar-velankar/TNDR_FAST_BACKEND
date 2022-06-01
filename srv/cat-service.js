@@ -1419,6 +1419,11 @@ module.exports = (srv) => {
 
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		let aApproverTypes = [];
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
+        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
 		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
@@ -1505,16 +1510,45 @@ module.exports = (srv) => {
 		}
 
 		//In case we have samples, comment should be in remarks specifying item numbers for which samples are provided
-		let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
-		let samplesRemark = "";
-		if (samplesNotZero.length === offerProductValidation.length) {
-			samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
-		}
-		else if (samplesNotZero.length !== 0) {
-			let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
-			samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
-			samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
-		}
+		
+		// if (samplesNotZero.length === offerProductValidation.length) {
+		// 	samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
+		// }
+		// else if (samplesNotZero.length !== 0) {
+		// 	let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
+		// 	samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
+		// 	samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
+		// }
+        //EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
+        let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
+        let samplesRemark = "";
+        let samplesItemsToUnique = samplesNotZero.map((d) => { return d.SAMPLES });
+        let uniqueSample = Array.from(new Set(samplesItemsToUnique));
+
+        if (samplesNotZero.length === offerProductValidation.length && uniqueSample.length == 1) {
+
+            samplesRemark = uniqueSample[0].toString().concat(" samples will be delivered for all products as per the tender terms and conditions.");
+        }
+        else if (uniqueSample.length >= 1) {
+
+            for (i = 0; i < uniqueSample.length; i++) {
+
+                let samplesItems = Array.from(samplesNotZero.filter((sample) => sample.SAMPLES === uniqueSample[i]).map((sample) => { return sample.SORTER })).join(", ");
+
+                if (samplesItems.length !== 1) {
+                    samplesItems = samplesItems.substring(0, samplesItems.length - 3).concat(" and ").concat(samplesItems[samplesItems.length - 1]);
+                }
+
+                samplesRemark = samplesRemark.concat(uniqueSample[i].toString().concat(" samples will be delivered for Items ").concat(samplesItems));
+                if (i !== uniqueSample.length - 1) {
+                    samplesRemark = samplesRemark.concat("; ");
+                }
+            }
+
+            samplesRemark = samplesRemark.concat(" as per the tender terms and conditions.");
+
+        }
+//EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
 
 		//Shipment Terms need to be specified by item number if not same for all
 		let shipmentTerms = "";
@@ -1615,6 +1649,9 @@ module.exports = (srv) => {
 			registeredRemark = "Product(s) not registered in the country. Import Permit is to be arranged by ";
 			registeredRemark = registeredRemark.concat(offer.DISTRIBUTORNAME)
 		}
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+        let InstituteRemark = institute.Comment;
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
 		//Comment if any product is alternative to quoted
 		let isAlternativeToQuoted = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_QUOTED }));
@@ -1641,6 +1678,7 @@ module.exports = (srv) => {
 		remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
 		remarks = remarks.concat((alternativeQuotedRemark !== "") ? alternativeQuotedRemark.concat("<br>") : "");
 		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
+        remarks=remarks.concat((InstituteRemark !== "") ? InstituteRemark.concat("<br>") : "");
 		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
 
 		// get SUBMITTED_BY user info 
