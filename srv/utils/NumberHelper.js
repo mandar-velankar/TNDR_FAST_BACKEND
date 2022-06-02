@@ -101,22 +101,22 @@ let inWords = (n) => {
                 .reverse()
                 .join(' ');
         }
-
+        //EHQUT-INC0162365 | INC15186896 - Total Amount in Words
         if (Number(cents) > 0) {
 
             if (cents.length === 1)
                 cents = cents + '0';
-
-            numInWords += 'and ';
+            
+            numInWords += ' Point ';
             numInWords += comp(chunk(3))(reverse)(arr(cents))
                 .map(makeGroup)
                 .map(thousand)
                 .filter(comp(not)(isEmpty))
                 .reverse()
                 .join(' ');
-            numInWords += 'cents ';
+            //numInWords += 'cents ';
         }
-
+        //EHQUT-INC0162365 | INC15186896 - Total Amount in Words
         //currency only addition is now done after method
         //numInWords += currency + ' only';
 
