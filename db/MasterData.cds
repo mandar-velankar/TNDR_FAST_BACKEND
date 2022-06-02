@@ -66,7 +66,7 @@ entity PT_TMINST{
 	State:String;
 	MercadoPublicoIssuer:String;
 	RegionID:String;
-    ProvinceID:String(20);
+    ProvinceID:String;
     CifCode:String(50);
     RegionalHealthSystem: String(50);
 	VatCode:String(50);
