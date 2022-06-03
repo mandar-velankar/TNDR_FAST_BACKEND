@@ -439,7 +439,7 @@ module.exports = async (srv) => {
         let packFactor;
         if(customerPrice.FOCproductPackID){
             productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereFOCproductpackID));
-            const packFactor = productPack.PACKFACTOR;
+            packFactor = productPack.PACKFACTOR;
         } else {
             packFactor = 1;
         }
