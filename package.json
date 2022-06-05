@@ -62,9 +62,9 @@
       "db": {
         "kind": "hana",
         "pool": {
-          "max": 1400,
+          "max": 2000,
           "min": 100,
-          "acquireTimeoutMillis": 5000
+          "acquireTimeoutMillis": 10000
         }
       },
       "uaa": {

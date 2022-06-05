@@ -1,7 +1,8 @@
 const cds = require('@sap/cds');
 const BaseJob = require('./BaseJob');
 const Handlebars = require("handlebars");
-const cfenv = require("cfenv")
+const cfenv = require("cfenv");
+const { tryCatch } = require('ramda');
 
 module.exports = class PriceAgreementPriceConditionNotificationMailJob extends BaseJob {
 
@@ -144,13 +145,24 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
         return Handlebars.compile("" + mail.content)(data);
     }
 
-    getMailTemplate(templateId) {
+    async getMailTemplate(templateId) {
         console.log('Get mail templates for price agreements');
         console.table(templateId);
         const tx = cds.tx();
         const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
-        return tx.run(SELECT.one.from(MailTemplate)
+        try{
+            const result = await tx.run(SELECT.one.from(MailTemplate)
             .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
             .where({ TemplateId: templateId }));
+            await tx.commit();
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            await tx.rollback();
+            return [];
+        }
+        // return tx.run(SELECT.one.from(MailTemplate)
+        //     .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+        //     .where({ TemplateId: templateId }));
     }
 };
