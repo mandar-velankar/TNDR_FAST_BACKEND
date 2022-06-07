@@ -839,10 +839,10 @@ module.exports.ItalyJobs = {
 
 }
 
-/*module.exports.PriceAgreementJobs = {
+module.exports.PriceAgreementJobs = {
 
     ExtendPriceAgreements: function (cronTime) {
       return new ExtendPriceAgreements(cronTime);
     },  
   
-  }*/
+}
