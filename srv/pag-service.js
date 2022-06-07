@@ -43,7 +43,7 @@ module.exports = async (srv) => {
 
         
         // const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 
         /**
          * As virtual/calculated elements are not persisted on the database, incoming filter requests cannot be delegated to the database to get the requested filter results. 
@@ -240,7 +240,7 @@ module.exports = async (srv) => {
 
     srv.on('syncPriceAgreements', async req => {
         // const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);

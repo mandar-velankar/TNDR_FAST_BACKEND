@@ -2514,7 +2514,7 @@ module.exports = (srv) => {
 	})
 	srv.on('READ', 'InstituteDistributor', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get non-filter information
@@ -2570,7 +2570,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get non-filter information
@@ -2672,7 +2672,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'OfferProductValidation', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2684,7 +2684,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'OfferValidation', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2696,7 +2696,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2716,7 +2716,7 @@ module.exports = (srv) => {
 	// srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
 	srv.on('CREATE', 'PT_TMDLVTR', async (req,next) => {
         // const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");
         const delivery = await next();   
         await tx.commit();     
@@ -2729,21 +2729,21 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'ApprovalOffers', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalOffers(tx);
 		return results;
 	});
 
 	srv.on('READ', 'ApprovalProducts', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalProducts(tx);
 		return results;
 	});
 
 	srv.on('READ', 'ApprovalApprovers', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
 	});
@@ -2752,7 +2752,7 @@ module.exports = (srv) => {
 		//OfferID => get CountryCode => get Template by Country => get template
 		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		var offerId = req.data.OfferId;
 		if (!offerId) {
 			return next();
@@ -2842,7 +2842,7 @@ module.exports = (srv) => {
 	srv.on('READ', 'ExcelAttachment', async (req, next) => {
 		// const data = await next(); 
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		const offerId = req.data.OfferId;
 		// const template = req.data.template;
 		if (!offerId){// || !template) {
@@ -2863,7 +2863,7 @@ module.exports = (srv) => {
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'WordAttachments', async (req, next) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		const offerId = req.data.offerId;
 		const templateId = req.data.templateId;
 		if (!offerId) {
@@ -2956,7 +2956,7 @@ module.exports = (srv) => {
 	//http://localhost:4004/v2/tender/DeliveryExcel('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'DeliveryExcel', async (req, next) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		var offerId = req.data.OfferId;
 		if (!offerId) {
 			return next();
@@ -3031,7 +3031,7 @@ module.exports = (srv) => {
 
 	srv.on('getMailTemplate', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
         const appEnv = cfenv.getAppEnv();
