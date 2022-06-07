@@ -93,8 +93,6 @@ entity CustomerPrices: cuid, managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
-    SettlementFrom: DateTime;
-    SettlementTo: DateTime;
 }
 
 entity SettlementDates: managed {
@@ -122,8 +120,6 @@ entity CustomerPrices_History: managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
-    SettlementFrom: DateTime;
-    SettlementTo: DateTime;
 }
 
 /**
