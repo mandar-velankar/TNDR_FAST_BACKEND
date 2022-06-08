@@ -1534,11 +1534,15 @@ module.exports = (srv) => {
             for (i = 0; i < uniqueSample.length; i++) {
 
                 let samplesItems = Array.from(samplesNotZero.filter((sample) => sample.SAMPLES === uniqueSample[i]).map((sample) => { return sample.SORTER })).join(", ");
-
+               //EHQUT--INC0170966/INC15506491-Number of Samples not reflected in the Quotation(correction)
                 if (samplesItems.length !== 1) {
-                    samplesItems = samplesItems.substring(0, samplesItems.length - 3).concat(" and ").concat(samplesItems[samplesItems.length - 1]);
-                }
 
+                    let lastValue= samplesItems.split(",").pop();
+                    let lastComma=samplesItems.lastIndexOf(",");
+                    samplesItems = samplesItems.substring(0, lastComma).concat(" and ").concat(lastValue);
+                     // samplesItems = samplesItems.substring(0, samplesItems.length - 3).concat(" and ").concat(samplesItems[samplesItems.length - 1]);
+                }
+                //EHQUT--INC0170966/INC15506491-Number of Samples not reflected in the Quotation(correction)
                 samplesRemark = samplesRemark.concat(uniqueSample[i].toString().concat(" samples will be delivered for Items ").concat(samplesItems));
                 if (i !== uniqueSample.length - 1) {
                     samplesRemark = samplesRemark.concat("; ");
