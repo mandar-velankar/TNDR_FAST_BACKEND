@@ -47,9 +47,9 @@
                 "kind": "hana",
                 "model": "gen/csn.json",
                 "pool":{
-                    "max": 2000,
+                    "max": 1400,
                     "min": 100,
-                    "acquireTimeoutMillis": 10000
+                    "acquireTimeoutMillis": 5000
                 }
             },
             "uaa": {

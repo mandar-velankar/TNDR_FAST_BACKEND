@@ -254,9 +254,9 @@ module.exports = async (srv) => {
         const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice, tx, req));
 
         // Synchronize
-        const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
-    
-        await updateCustomerPrices(result, mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions)); // !!the order of PriceCondition arrays is important
+        const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises)); 
+        // Set 'Synchronized' to true and add IDOC number from the response
+        result.length > 0 && await updateCustomerPrices(result, mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions)); // !!the order of PriceCondition arrays is important
 
         return req.reply(result);
     });
@@ -287,6 +287,7 @@ module.exports = async (srv) => {
 
 
     async function updateCustomerPrice(customerPrice, tx, req){
+        const body = getPriceAgreementRequestBodyTemplate(); 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
@@ -330,6 +331,11 @@ module.exports = async (srv) => {
             // set KBETR value
             if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") kbetr = priceCondition.NetPriceWithoutTaxAfterDeductionRD;
             else kbetr = priceCondition.Discount;
+
+            // set partner and sales organisation
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.EDI_DC40.SNDPRN = "FAST_ES";
+
         }
 
         // KBETR per Pack or Unit
@@ -339,8 +345,7 @@ module.exports = async (srv) => {
             kbetr  = kbetr / packFactor;
 
         }
-
-        const body = getPriceAgreementRequestBodyTemplate(); 
+ 
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
@@ -547,6 +552,10 @@ module.exports = async (srv) => {
             kstbm = parseInt(priceAgreementFOC.FOCBonus);
             mikbas = priceAgreementFOC.FOCMinAmount;
             mxkbas = priceAgreementFOC.FOCMinAmount;
+
+            // set partner and sales organisation
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.EDI_DC40.SNDPRN = "FAST_ES";
         }
 
 
