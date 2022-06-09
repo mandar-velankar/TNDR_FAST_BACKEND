@@ -241,7 +241,7 @@ module.exports = async (srv) => {
     srv.on('syncPriceAgreements', async req => {
         // const tx = cds.transaction(req);
 		const tx = cds.tx(req);
-        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
+        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids }, PriceCondition: {'!=': 'YA03'} }));
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
@@ -427,7 +427,7 @@ module.exports = async (srv) => {
         if (!body) {
             throw Error("The body of the request is missing.");
         }
-
+        
         const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement', CountryCode: countryCode, Resource: resource}));
 
         const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
@@ -435,10 +435,7 @@ module.exports = async (srv) => {
 
         console.log(`Synchronizing Price Conditions ...`);
         console.log(`Calling endpoint ${url}`);
-        
-        // console.log("Update Price Conditions oauthCredetials:", oauthCredentials);
-        // console.log("Update Price Conditions proxyHost:", priceAgreementApi.ProxyHost);
-        // console.log("Update Price Conditions proxyPort:", priceAgreementApi.ProxyPort);
+
 
         return axios({
             method: 'post',
@@ -447,21 +444,16 @@ module.exports = async (srv) => {
                 'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
                 'Content-Type': 'application/json'
             },
-            data: JSON.stringify(body)/*, when testing locally or on BTP, comment out the proxy
-            proxy: {
-                host: priceAgreementApi.ProxyHost,
-                port: priceAgreementApi.ProxyPort
-            }*/
+            data: JSON.stringify(body)
         });
+        
     };
 
 
     async function getBearerToken() {
 
         if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
-            console.log("Bearer Token oauthCredetials:", oauthAuth);
-            console.log("Bearer Token proxyHost:", priceAgreementApi.ProxyHost);
-            console.log("Bearer Token proxyPort:", priceAgreementApi.ProxyPort);
+            console.log(`Calling ${oauthAuth.OAuthProvider}`);
             return axios({
                 method: 'post',
                 url: oauthAuth.OAuthProvider,
@@ -482,6 +474,23 @@ module.exports = async (srv) => {
         throw Error("Missing OAUTH config parameters");
     };
 
+    srv.on('syncFocCustPrices', async req => {
+
+        const tx = cds.transaction(req);
+    
+        const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids }, PriceCondition: 'YA03' }));
+
+        if (customerPriceData && customerPriceData.length <= 0) {
+            return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
+        }
+
+        console.log("Updating Price Conditions ...");
+        const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));
+        const result = await Promise.all(updatePromises);
+
+        return req.reply(result);
+
+    });
 
     async function updateFOCcustPrices(customerPrice, tx, req){
         
@@ -498,6 +507,7 @@ module.exports = async (srv) => {
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereFOCproductpackID = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", customerPrice.FOCproductPackID);
 
+        let priceAgreementFOC = await tx.run(SELECT.one.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId).where(whereFOCproductpackID));
         let offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereCountry).where(whereProductCode).where(whereOfferID));
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
         let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));
@@ -510,7 +520,7 @@ module.exports = async (srv) => {
         // TODO: Isma will check with Jonathan if this is correct
         let packFactor = 1;
         if(customerPrice.FOCproductPackID){
-            productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereFOCproductpackID));
+            let productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereFOCproductpackID));
             if(productPack) packFactor = productPack.PACKFACTOR;
         }
 
@@ -523,6 +533,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KSCHL = customerPrice.PriceCondition;
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
@@ -532,9 +543,10 @@ module.exports = async (srv) => {
         // Italy only
         if(customerPrice.CountryCode === 'IT'){
             let priceAgreementFOC = await tx.run(SELECT.one.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId));
-            kstbm =  customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? (parseInt(priceAgreementFOC.FreeGoods) * offerProduct.RequestedVolume) : (customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' || priceAgreementFOC.FreeGoods_ABS_PCT === 'STP'))  ? parseInt(priceAgreementFOC.FreeGoods) : 0;
-            mikbas = customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS') ? 1 : (customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
-            mxkbas = customerPrice.FOCproductPackID !== null && (priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS') ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID !== null && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? parseInt(priceAgreementFOC.FreeGoods_Step) : 0;
+            kstbm =  priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ?  priceAgreementFOC.FreeGoods * offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && (priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' || priceAgreementFOC.FreeGoods_ABS_PCT === 'STP'))  ? priceAgreementFOC.FreeGoods : 0;
+            mikbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? 1 : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
+            mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
+            
         }
         // Spain only
         if(customerPrice.CountryCode === 'ES'){
@@ -571,8 +583,8 @@ module.exports = async (srv) => {
             kstbm  = kstbm * packFactor;
             mikbas = mikbas * packFactor;
             mxkbas = mxkbas * packFactor;
-
         }
+        
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSTBM = kstbm;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MIKBAS = mikbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MXKBAS = mxkbas;
