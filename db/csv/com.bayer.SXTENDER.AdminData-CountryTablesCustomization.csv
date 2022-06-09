@@ -51,7 +51,6 @@ COUNTRYCODE,TABLEID,COLUMN,BINDINGPATH,VISIBLE,REQUIRED,DESCRIPTION
 "TH","editofferProductId","SapNo","SKU/PRODUCTPACKID","False","False","sapNo"
 "SA","editofferProductId","Product","SKU/PRODUCTPACKNAME","True","False","product"
 "SA","editofferProductId","ProductType","SKU/ProductType","False","False","ProductType"
-"SA","editofferProductId","ProductType","SKU/ProductType","False","False","ProductType"
 "SA","editofferProductId","Requested","RequestedVolume","True","True","Volume"
 "SA","editofferProductId","Reference","Reference","True","False","reference"
 "SA","editofferProductId","MaxPrice","MaxPrice","False","False","maxprice"
