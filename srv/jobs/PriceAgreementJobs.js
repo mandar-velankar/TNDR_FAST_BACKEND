@@ -9,9 +9,9 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
     }
 
     async updatePriceAgreementExpiration(){
+        const tx = cds.tx();
         try {
 
-            const tx = cds.tx();
             const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementsData");
 
             let query = cds.parse.cql (`SELECT * FROM ${PriceAgreements.name} as PriceAgreements where PriceAgreements.ExtendPriceAgreement = 'true'`);
@@ -27,7 +27,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
                 }
 
                 const result = tx.run(UPDATE(PriceAgreements).with(obj).where({ ID: priceAgreements.ID }));
-                tx.commit(result);
+                // tx.commit(result);
 
                 return result;
             });
@@ -35,15 +35,17 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             if(promises && promises.length > 0){
                 console.log(`Updating ${PriceAgreements.name} ...`);
                 const result = await Promise.all(promises);
+                await tx.commit();
                 console.log(`${promises.length} Expiry dates successfully updated in ${PriceAgreements.name}.`);
                 return result;
             }
-
+            await tx.commit();
             return;
 
         } catch (error) {
             console.log('Updating expiry dates has failed.');
             console.log(error);
+            await tx.rollback(error);
         }   
     };
 };

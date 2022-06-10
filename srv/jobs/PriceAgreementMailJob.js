@@ -125,16 +125,27 @@ class PriceAgreementMailJob extends BaseJob {
         //CountryCode: language, Language: language, 
         return Handlebars.compile("" + mail.content)(data);
     }
-    getMailTemplates(templateIds) {
+    async getMailTemplates(templateIds) {
         console.log('Get mail templates for price agreements');
         console.table(templateIds);
         const tx = cds.tx();
         // const language = "ES";
 
         const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
-        return tx.run(SELECT.from(MailTemplate)
-            .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
-            .where({ TemplateId: { in: templateIds } }));
+        try{
+            const result = await tx.run(SELECT.from(MailTemplate)
+                .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+                .where({ TemplateId: { in: templateIds } }));
+            await tx.commit();
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            await tx.rollback();
+            return [];
+        }
+            // return tx.run(SELECT.from(MailTemplate)
+            //     .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+            //     .where({ TemplateId: { in: templateIds } }));
     }
     getReminderDate() {
         let date = new Date();

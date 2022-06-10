@@ -1,7 +1,8 @@
 const cds = require('@sap/cds');
 const BaseJob = require('./BaseJob');
 const Handlebars = require("handlebars");
-const cfenv = require("cfenv")
+const cfenv = require("cfenv");
+const { tryCatch } = require('ramda');
 
 module.exports = class PriceAgreementPriceConditionNotificationMailJob extends BaseJob {
 
@@ -97,11 +98,12 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
 
     mapDataToMail = (template,mail,syncDate) => data => {
         const appEnv = cfenv.getAppEnv();
+        const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         // add/change some fields in the data array
         data.forEach(d => {
             d.EffectiveDate = new Date(d.EffectiveDate).toJSON().substring(0,10),
             d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10),
-            d.URL = `${appEnv.url}/index.html#/PriceAgreements/${d.PriceAgreementId}`
+            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.PriceAgreementId}`
         })
         const outbox = {
             CountryCode: data[0].CountryCode,
@@ -144,13 +146,24 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
         return Handlebars.compile("" + mail.content)(data);
     }
 
-    getMailTemplate(templateId) {
+    async getMailTemplate(templateId) {
         console.log('Get mail templates for price agreements');
         console.table(templateId);
         const tx = cds.tx();
         const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
-        return tx.run(SELECT.one.from(MailTemplate)
+        try{
+            const result = await tx.run(SELECT.one.from(MailTemplate)
             .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
             .where({ TemplateId: templateId }));
+            await tx.commit();
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            await tx.rollback();
+            return [];
+        }
+        // return tx.run(SELECT.one.from(MailTemplate)
+        //     .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+        //     .where({ TemplateId: templateId }));
     }
 };

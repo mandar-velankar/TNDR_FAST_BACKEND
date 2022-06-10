@@ -25,6 +25,18 @@ let inWords = (n) => {
         return "";
     }
 
+    // parse to fload in case value has type string to continue (need to round)
+    if(typeof n === 'string' || n instanceof String){
+        n = parseFloat(n);
+    }
+
+    //round to two decimals
+    n = Math.round((n + Number.EPSILON) * 100) / 100;
+
+    //convert to string (method needs a string to continue)
+    n = String(n);
+    
+    
     let a = [
         '', 'One', 'Two', 'Three', 'Four',
         'Five', 'Six', 'Seven', 'Eight', 'Nine',
@@ -59,7 +71,7 @@ let inWords = (n) => {
         return inWords(String(n));
     else if (n === '0')
         return 'zero';
-    else {
+    else {      
         // get the dot position
         let amount, cents, numInWords = "";
         let dotPos = n.indexOf('.');
@@ -89,22 +101,22 @@ let inWords = (n) => {
                 .reverse()
                 .join(' ');
         }
-
+        //EHQUT-INC0162365 | INC15186896 - Total Amount in Words
         if (Number(cents) > 0) {
 
             if (cents.length === 1)
                 cents = cents + '0';
-
-            numInWords += 'and ';
+            
+            numInWords += ' Point ';
             numInWords += comp(chunk(3))(reverse)(arr(cents))
                 .map(makeGroup)
                 .map(thousand)
                 .filter(comp(not)(isEmpty))
                 .reverse()
                 .join(' ');
-            numInWords += 'cents ';
+            //numInWords += 'cents ';
         }
-
+        //EHQUT-INC0162365 | INC15186896 - Total Amount in Words
         //currency only addition is now done after method
         //numInWords += currency + ' only';
 
@@ -125,8 +137,11 @@ module.exports = {
     formatNumberToText:function(countryCode,value){
 
         if(countryCode === "IT"){
+            //this is a generic method that can be used for all languages 
+            //in the future we want to align more between countries and always use this method           
             return this.inWordsGeneric(countryCode,value); 
         }else{
+            //this is our original more specific method created for ES in Thailand & MEA (beceause they had special requirements)
             return inWords(value);
         }
 

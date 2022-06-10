@@ -43,7 +43,7 @@ module.exports = (srv) => {
     srv.after('READ', 'Brands', async (brands, req) => { 
         
         // const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
         let approvals = await tx.run(SELECT.from(OverallApprovalStatus));
 
         //replace status with overall status
@@ -69,7 +69,7 @@ module.exports = (srv) => {
     srv.on('READ', 'OverallApprovalStatus', async (req) => { 
         
         // const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
         let Approvals = await tx.run(req.query);
     
         const distinctApprovals = [];

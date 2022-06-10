@@ -107,7 +107,7 @@ module.exports = (srv) => {
      */
     srv.after('READ', 'Contracts', (contracts, req) => {
         // const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
         // const queryOptions = req._.odataReq.getQueryOptions();
 
         contracts.map(async contract => {

@@ -299,7 +299,7 @@ module.exports = (srv) => {
 
     srv.on('READ', 'DivisionsForCountry', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
             let whereCountry = ServiceHelper.buildWhere(req, "CountryCode");
@@ -311,7 +311,7 @@ module.exports = (srv) => {
 
     srv.on('READ', 'ChannelsForCountry', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
             let whereCountry = ServiceHelper.buildWhere(req, "CountryCode");
@@ -332,7 +332,7 @@ module.exports = (srv) => {
 
     srv.on('READ', 'LatestApprovals', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -350,7 +350,7 @@ module.exports = (srv) => {
 	// error: the key 'CountryCode' does not exist in the given entity
 	srv.on('CREATE', 'LatestApprovals', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		const approvalRequests = req.query.INSERT.entries;
 		try{
 			const affectedRows = await tx.run( INSERT.into(ApprovalStatus).entries(approvalRequests) );
