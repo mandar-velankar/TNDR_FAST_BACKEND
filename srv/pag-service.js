@@ -241,7 +241,7 @@ module.exports = async (srv) => {
     srv.on('syncPriceAgreements', async req => {
         // const tx = cds.transaction(req);
 		const tx = cds.tx(req);
-        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids }, PriceCondition: {'!=': 'YA03'} }));
+        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
@@ -351,6 +351,8 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KSCHL = customerPrice.PriceCondition;
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
@@ -474,23 +476,23 @@ module.exports = async (srv) => {
         throw Error("Missing OAUTH config parameters");
     };
 
-    srv.on('syncFocCustPrices', async req => {
+    // srv.on('syncFocCustPrices', async req => {
 
-        const tx = cds.transaction(req);
+    //     const tx = cds.transaction(req);
     
-        const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids }, PriceCondition: 'YA03' }));
+    //     const customerPriceData = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids }, PriceCondition: 'YA03' }));
 
-        if (customerPriceData && customerPriceData.length <= 0) {
-            return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
-        }
+    //     if (customerPriceData && customerPriceData.length <= 0) {
+    //         return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
+    //     }
 
-        console.log("Updating Price Conditions ...");
-        const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));
-        const result = await Promise.all(updatePromises);
+    //     console.log("Updating Price Conditions ...");
+    //     const updatePromises = customerPriceData.map(customerPrice => updateFOCcustPrices(customerPrice, tx));
+    //     const result = await Promise.all(updatePromises);
 
-        return req.reply(result);
+    //     return req.reply(result);
 
-    });
+    // });
 
     async function updateFOCcustPrices(customerPrice, tx, req){
         
