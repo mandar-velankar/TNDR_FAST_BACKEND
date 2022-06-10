@@ -1595,6 +1595,11 @@ module.exports = (srv) => {
 
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		let aApproverTypes = [];
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
+        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
 		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
@@ -1681,16 +1686,49 @@ module.exports = (srv) => {
 		}
 
 		//In case we have samples, comment should be in remarks specifying item numbers for which samples are provided
-		let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
-		let samplesRemark = "";
-		if (samplesNotZero.length === offerProductValidation.length) {
-			samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
-		}
-		else if (samplesNotZero.length !== 0) {
-			let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
-			samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
-			samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
-		}
+		
+		// if (samplesNotZero.length === offerProductValidation.length) {
+		// 	samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
+		// }
+		// else if (samplesNotZero.length !== 0) {
+		// 	let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
+		// 	samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
+		// 	samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
+		// }
+        //EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
+        let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
+        let samplesRemark = "";
+        let samplesItemsToUnique = samplesNotZero.map((d) => { return d.SAMPLES });
+        let uniqueSample = Array.from(new Set(samplesItemsToUnique));
+
+        if (samplesNotZero.length === offerProductValidation.length && uniqueSample.length == 1) {
+
+            samplesRemark = uniqueSample[0].toString().concat(" samples will be delivered for all products as per the tender terms and conditions.");
+        }
+        else if (uniqueSample.length >= 1) {
+
+            for (i = 0; i < uniqueSample.length; i++) {
+
+                let samplesItems = Array.from(samplesNotZero.filter((sample) => sample.SAMPLES === uniqueSample[i]).map((sample) => { return sample.SORTER })).join(", ");
+               //EHQUT--INC0170966/INC15506491-Number of Samples not reflected in the Quotation(correction)
+                if (samplesItems.length !== 1) {
+
+                    let lastValue= samplesItems.split(",").pop();
+                    let lastComma=samplesItems.lastIndexOf(",");
+                    samplesItems = samplesItems.substring(0, lastComma).concat(" and ").concat(lastValue);
+                     // samplesItems = samplesItems.substring(0, samplesItems.length - 3).concat(" and ").concat(samplesItems[samplesItems.length - 1]);
+                }
+                //EHQUT--INC0170966/INC15506491-Number of Samples not reflected in the Quotation(correction)
+                samplesRemark = samplesRemark.concat(uniqueSample[i].toString().concat(" samples will be delivered for Items ").concat(samplesItems));
+                if (i !== uniqueSample.length - 1) {
+                    samplesRemark = samplesRemark.concat("; ");
+                }
+            }
+
+            samplesRemark = samplesRemark.concat(" as per the tender terms and conditions.");
+
+        }
+//EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
 
 		//Shipment Terms need to be specified by item number if not same for all
 		let shipmentTerms = "";
@@ -1791,6 +1829,9 @@ module.exports = (srv) => {
 			registeredRemark = "Product(s) not registered in the country. Import Permit is to be arranged by ";
 			registeredRemark = registeredRemark.concat(offer.DISTRIBUTORNAME)
 		}
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+        let InstituteRemark = institute.Comment;
+        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
 		//Comment if any product is alternative to quoted
 		let isAlternativeToQuoted = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_QUOTED }));
@@ -1817,6 +1858,7 @@ module.exports = (srv) => {
 		remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
 		remarks = remarks.concat((alternativeQuotedRemark !== "") ? alternativeQuotedRemark.concat("<br>") : "");
 		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
+        remarks=remarks.concat((InstituteRemark !== "") ? InstituteRemark.concat("<br>") : "");
 		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
 
 		// get SUBMITTED_BY user info 
@@ -2514,7 +2556,7 @@ module.exports = (srv) => {
 	})
 	srv.on('READ', 'InstituteDistributor', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get non-filter information
@@ -2570,7 +2612,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get non-filter information
@@ -2672,7 +2714,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'OfferProductValidation', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2684,7 +2726,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'OfferValidation', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2696,7 +2738,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
 		// const tx = cds.transaction(req)
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2716,7 +2758,7 @@ module.exports = (srv) => {
 	// srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
 	srv.on('CREATE', 'PT_TMDLVTR', async (req,next) => {
         // const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");
         const delivery = await next();   
         await tx.commit();     
@@ -2729,21 +2771,21 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'ApprovalOffers', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalOffers(tx);
 		return results;
 	});
 
 	srv.on('READ', 'ApprovalProducts', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalProducts(tx);
 		return results;
 	});
 
 	srv.on('READ', 'ApprovalApprovers', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
 	});
@@ -2752,7 +2794,7 @@ module.exports = (srv) => {
 		//OfferID => get CountryCode => get Template by Country => get template
 		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		var offerId = req.data.OfferId;
 		if (!offerId) {
 			return next();
@@ -2842,7 +2884,7 @@ module.exports = (srv) => {
 	srv.on('READ', 'ExcelAttachment', async (req, next) => {
 		// const data = await next(); 
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		const offerId = req.data.OfferId;
 		// const template = req.data.template;
 		if (!offerId){// || !template) {
@@ -2863,7 +2905,7 @@ module.exports = (srv) => {
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'WordAttachments', async (req, next) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		const offerId = req.data.offerId;
 		const templateId = req.data.templateId;
 		if (!offerId) {
@@ -2956,7 +2998,7 @@ module.exports = (srv) => {
 	//http://localhost:4004/v2/tender/DeliveryExcel('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'DeliveryExcel', async (req, next) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		var offerId = req.data.OfferId;
 		if (!offerId) {
 			return next();
@@ -3031,7 +3073,7 @@ module.exports = (srv) => {
 
 	srv.on('getMailTemplate', async (req) => {
 		// const tx = cds.transaction(req);
-		const tx = cds.tx();
+		const tx = cds.tx(req);
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
         const appEnv = cfenv.getAppEnv();
