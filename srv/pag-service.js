@@ -62,6 +62,8 @@ module.exports = async (srv) => {
         let isNewPriceAgreementFilterIndex = null;
         let isNewPriceAgreementFilterValues = null;
         let hasExpiredFilterValues = null;
+        let isSynchronizedFilterIndex = null;
+        let isSynchronizedFilterValues = null;
 
         if(req.query.SELECT.where){
 
@@ -79,6 +81,9 @@ module.exports = async (srv) => {
 
             isNewPriceAgreementFilterIndex = ServiceHelper.getWhereId(req, 'isNewPriceAgreement');
             isNewPriceAgreementFilterValues = ServiceHelper.getWhereValues(req, 'isNewPriceAgreement');
+            
+            isSynchronizedFilterIndex = ServiceHelper.getWhereId(req, 'Synchronized');
+            isSynchronizedFilterValues = ServiceHelper.getWhereValues(req, 'Synchronized');
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
@@ -98,6 +103,10 @@ module.exports = async (srv) => {
 
             if(isNewPriceAgreementFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'isNewPriceAgreement');
+            }
+
+            if(isSynchronizedFilterIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'Synchronized');
             }
         }
 
@@ -231,6 +240,11 @@ module.exports = async (srv) => {
 
         if(isNewPriceAgreementFilterValues && isNewPriceAgreementFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
+            result = filteredResult;
+        }
+
+        if(isSynchronizedFilterValues && isSynchronizedFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
             result = filteredResult;
         }
         await tx.commit();
