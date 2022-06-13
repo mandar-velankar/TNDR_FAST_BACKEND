@@ -234,7 +234,7 @@ module.exports = async (srv) => {
         }
 
         if(hasExpiredFilterValues && hasExpiredFilterValues.length > 0){
-            const filteredResult = result.filter(priceAgreement => priceAgreement.Expired);
+            const filteredResult = result.filter(priceAgreement => priceAgreement.Expired === hasExpiredFilterValues[0]);
             result = filteredResult;
         }
 
