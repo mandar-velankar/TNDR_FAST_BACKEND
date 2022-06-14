@@ -84,6 +84,14 @@ entity MailTemplate {
         TemplateId     : String(100);
 }
 
+entity AppConfig: cuid {
+    CountryCode         : String(2);
+    Environment         : String(10);
+    ApplicationName     : String(40);
+    Control             : String(100);
+    URL                 : String;
+}
+
 // entity MandatoryTableFieldsCountry {
 //     key CountryCode : String(2);
 //     key View        : String(100);
