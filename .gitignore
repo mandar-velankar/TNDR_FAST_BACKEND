@@ -25,10 +25,12 @@ webapp_bck*/
 
 # Ignore database setting (different on UI/MASTER then on DB)
 default-env.json
+default-env-dev.json
 db/default-env.json
 srv/default-env.json
 #default-env.json
 .*/default-env.json
+.*/default-env-dev.json
 
 # Web IDE, App Studio
 .gen/

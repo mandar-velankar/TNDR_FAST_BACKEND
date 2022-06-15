@@ -4,18 +4,18 @@ Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "templateId":5,
-    "name":"Demo template advanced 2",
-    "filename" : "word-template.docx",
+    "templateId":1,
+    "name":"SpainTemplate",
+    "filename" : "Spain_Template_revised.docx",
     "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 }
 
 ### upload word template
-PUT http://localhost:4004/v2/tender/WordTemplate(templateId=5)/content
+PUT http://localhost:4004/v2/tender/WordTemplate(templateId=6)/content
 Authorization: Basic YXJ0aW9t
 Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
 
-< ./word-template.docx
+< ./Spain_Template_revised.docx
 
 ### create mapping between countrycode and template (for reusability)
 POST http://localhost:4004/v2/tender/WordTemplateCountry
@@ -23,8 +23,8 @@ Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "countryCode":"AR",
-    "templateId":5
+    "countryCode":"ES",
+    "templateId":1
 }
 ### get list of templates
 GET http://localhost:4004/v2/tender/WordTemplate
