@@ -518,6 +518,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity CountryTablesCustomization @readonly         as projection on AdminData.CountryTablesCustomization;
     entity CountryTabsCustomization @readonly           as projection on AdminData.CountryTabsCustomization;
     entity CountryFragmentsCustomization @readonly      as projection on AdminData.CountryFragmentsCustomization;
+    entity AppConfig @readonly                          as projection on AdminData.AppConfig;
     function getCurrentUser() returns User;
     //Office365 PowerAutomate Approval Workflow Views
     entity QuotationUpdates @readonly                   as projection on TransactionalDataViews.QuotationUpdates;
