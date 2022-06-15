@@ -36,6 +36,7 @@ entity PriceAgreements: cuid, managed {
     ExpiringSoon: Boolean default false; // calculated from NodeJS
     Expired: Boolean default false; //calculated from NodeJS
     isNewPriceAgreement: Boolean default true; // calculated from NodeJS
+    AppliedCount: Integer default 0; // calculated from NodeJS
     OfferId: String;
     ExtendPriceAgreement: Boolean default false;
     ExpiryExtensionPeriod: Integer;
