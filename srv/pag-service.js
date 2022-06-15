@@ -64,6 +64,8 @@ module.exports = async (srv) => {
         let hasExpiredFilterValues = null;
         let isSynchronizedFilterIndex = null;
         let isSynchronizedFilterValues = null;
+        let appliedCountFilterIndex = null;
+        let appliedCountFilterValues = null;
 
         if(req.query.SELECT.where){
 
@@ -84,6 +86,9 @@ module.exports = async (srv) => {
             
             isSynchronizedFilterIndex = ServiceHelper.getWhereId(req, 'Synchronized');
             isSynchronizedFilterValues = ServiceHelper.getWhereValues(req, 'Synchronized');
+
+            appliedCountFilterIndex = ServiceHelper.getWhereId(req, 'AppliedCount');
+            appliedCountFilterValues = ServiceHelper.getWhereValues(req, 'AppliedCount');
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
@@ -107,6 +112,10 @@ module.exports = async (srv) => {
 
             if(isSynchronizedFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'Synchronized');
+            }
+
+            if(appliedCountFilterValues >= 0){
+                ServiceHelper.deleteFilter(req, 'AppliedCount');
             }
         }
 
@@ -160,7 +169,7 @@ module.exports = async (srv) => {
             if(customerPrices && customerPrices.length > 0){
                 priceAgreement.Synchronized = customerPrices.every(price => price.Synchronized);
             }
-
+            priceAgreement.AppliedCount = customerPrices.reduce((acc, cp) => (cp.Applied && ++acc) || acc, 0) || 0;
             // calculate isNewPriceAgreement
             priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied || price.Applied === null) ;
             
@@ -245,6 +254,11 @@ module.exports = async (srv) => {
 
         if(isSynchronizedFilterValues && isSynchronizedFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
+            result = filteredResult;
+        }
+
+        if(appliedCountFilterValues && isSynchronizedFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
             result = filteredResult;
         }
         await tx.commit();
