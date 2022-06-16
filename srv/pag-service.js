@@ -29,7 +29,8 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.MasterData");
     
     const {
-		PriceAgreementFOC
+		PriceAgreementFOC,
+        Deliveries
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
@@ -251,6 +252,24 @@ module.exports = async (srv) => {
         return req.reply(result);
 
 	});
+
+    srv.after('READ', 'PriceAgreements', async (data) => {
+        const tx = db.tx();
+        // Calculate DeliveredVolume 
+        for (let each of data) await calculateDeliveredVolume(each);
+        async function calculateDeliveredVolume(pag){
+            let deliveries = pag.Deliveries;
+            if(!deliveries){
+                try {
+                    deliveries = await tx.run(SELECT.from(Deliveries).where({ PriceAgreementId: pag.ID }));
+                    await tx.commit();
+                } catch(e) {
+                    await tx.rollback(e)
+                }
+            }
+            pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.ANZPK, 0);
+        }
+    } );
 
     srv.on('syncPriceAgreements', async req => {
         // const tx = cds.transaction(req);
