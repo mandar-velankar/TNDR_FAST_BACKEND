@@ -93,6 +93,8 @@ entity MailTemplateFile {
     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     mediaType:String @Core.IsMediaType;
 }
+
+
 // entity MandatoryTableFieldsCountry {
 //     key CountryCode : String(2);
 //     key View        : String(100);
@@ -129,6 +131,14 @@ entity CountryFragmentsCustomization {
     key FragmentName  : String(100);
 }
 
+//config for application urls
+entity AppConfig: cuid {
+    CountryCode         : String(2);
+    Environment         : String(10);
+    ApplicationName     : String(40);
+    Control             : String(100);
+    URL                 : String;
+}
 
 // Scheduler configuration
 entity SchedulerApiConfig: cuid {
