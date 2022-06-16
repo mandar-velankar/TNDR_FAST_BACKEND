@@ -358,7 +358,7 @@ module.exports = async (srv) => {
             }
             // set KBETR value
             if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") kbetr = priceCondition.NetPriceWithoutTaxAfterDeductionRD;
-            else kbetr = priceCondition.Discount;
+            else kbetr = priceCondition.Discount * 100;
 
             // set partner and sales organisation
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
