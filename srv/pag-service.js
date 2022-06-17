@@ -257,7 +257,7 @@ module.exports = async (srv) => {
             result = filteredResult;
         }
 
-        if(appliedCountFilterValues && isSynchronizedFilterValues.length > 0){
+        if(appliedCountFilterValues && appliedCountFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
             result = filteredResult;
         }
