@@ -1,6 +1,7 @@
 const cds = require('@sap/cds');
 // const BaseCron = require('cron-es6');
 const BaseJob = require('./BaseJob');
+const paFactory = require("./factories/PriceAgreement");
 
 module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJob {
 
@@ -14,6 +15,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
 
             const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementsData");
 
+            //get all price agreements which have to be extended
             let query = cds.parse.cql (`SELECT * FROM ${PriceAgreements.name} as PriceAgreements where PriceAgreements.ExtendPriceAgreement = 'true'`);
 
             const priceAgreements = await tx.run(query);
@@ -26,12 +28,13 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
                     ExpiryDate: newDate
                 }
 
+                //update the actual price agreement withh the new price agreement date
                 const result = tx.run(UPDATE(PriceAgreements).with(obj).where({ ID: priceAgreements.ID }));
-                // tx.commit(result);
 
                 return result;
             });
 
+            //execute the promises and log the output
             if(promises && promises.length > 0){
                 console.log(`Updating ${PriceAgreements.name} ...`);
                 const result = await Promise.all(promises);
@@ -39,6 +42,10 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
                 console.log(`${promises.length} Expiry dates successfully updated in ${PriceAgreements.name}.`);
                 return result;
             }
+
+            //resync all updated price agreements
+            const resultSync = await paFactory.syncPriceAgreements(tx, req, priceAgreements);
+
             await tx.commit();
             return;
 
