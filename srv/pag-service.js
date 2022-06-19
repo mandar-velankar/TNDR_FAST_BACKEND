@@ -3,6 +3,7 @@ const R = require('ramda');
 const ServiceHelper = require('./utils/ServiceHelper');
 const axios = require('axios');
 const qs = require("qs");
+const paFactory = require("./factories/PriceAgreement");
 
 module.exports = async (srv) => {
 
@@ -267,6 +268,7 @@ module.exports = async (srv) => {
 	});
 
     srv.on('syncPriceAgreements', async req => {
+
         // const tx = cds.transaction(req);
 		const tx = cds.tx(req);
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
