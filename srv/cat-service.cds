@@ -416,6 +416,8 @@ service CatalogService @(path : 'tender')@(requires : [
             DIVISION              : String(100);
             OFFERDATE             : Date;
             OFFERVALIDITY         : Date not null;
+            EffectiveDate         : Date;
+            ExpiryDate            : Date;
             COUNTRYCODE           : String(2) not null;
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);

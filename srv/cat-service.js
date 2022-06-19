@@ -1886,6 +1886,8 @@ module.exports = (srv) => {
 			DIVISION: division,//not correct, should be consolidated from product information
 			OFFERDATE: offer.OFFERDATE,
 			OFFERVALIDITY: offer.OFFERVALIDITY,
+			EffectiveDate: offer.EffectiveDate,
+			ExpiryDate: offer.ExpiryDate,
 			COUNTRYCODE: offer.COUNTRYCODE,
 			SELLINGCOMPANY: offer.SELLINGCOMPANY,
 			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
