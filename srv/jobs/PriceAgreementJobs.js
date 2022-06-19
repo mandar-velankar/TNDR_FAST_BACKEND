@@ -2,6 +2,7 @@ const cds = require('@sap/cds');
 // const BaseCron = require('cron-es6');
 const BaseJob = require('./BaseJob');
 const paFactory = require("./factories/PriceAgreement");
+const core = require('@sap-cloud-sdk/core');
 
 module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJob {
 
@@ -19,10 +20,12 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             let query = cds.parse.cql (`SELECT * FROM ${PriceAgreements.name} as PriceAgreements where PriceAgreements.ExtendPriceAgreement = 'true'`);
 
             const priceAgreements = await tx.run(query);
+            let aPriceAgreementIds = {};
 
             const promises = priceAgreements.map(agreement => {
                 let newDate = new Date(agreement.ExpiryDate);
                 newDate.setMonth(newDate.getMonth()+agreement.ExpiryExtensionPeriod);
+                aPriceAgreementIds.push(priceAgreements.ID); //prepare agreements to be synchronised
 
                 const obj = {
                     ExpiryDate: newDate
@@ -44,7 +47,14 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             }
 
             //resync all updated price agreements
-            const resultSync = await paFactory.syncPriceAgreements(tx, req, priceAgreements);
+            //const resultSync = await paFactory.syncPriceAgreements(tx, req, priceAgreements);
+            const sDestinationName = 'API-Fast';
+
+            let response = await core.executeHttpRequest({ destinationName: sDestinationName}, {
+                method: 'POST',
+                url: "/v2/priceagreement/syncPriceAgreements",
+                data: aPriceAgreementIds //gather all priceagreement IDs
+            });
 
             await tx.commit();
             return;
