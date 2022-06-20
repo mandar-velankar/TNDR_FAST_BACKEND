@@ -3,7 +3,6 @@ const R = require('ramda');
 const ServiceHelper = require('./utils/ServiceHelper');
 const axios = require('axios');
 const qs = require("qs");
-const paFactory = require("./factories/PriceAgreement");
 
 module.exports = async (srv) => {
 

@@ -1,7 +1,6 @@
 const cds = require('@sap/cds');
 // const BaseCron = require('cron-es6');
 const BaseJob = require('./BaseJob');
-const paFactory = require("./factories/PriceAgreement");
 const core = require('@sap-cloud-sdk/core');
 
 module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJob {
