@@ -258,7 +258,7 @@ module.exports = async (srv) => {
             result = filteredResult;
         }
 
-        if(appliedCountFilterValues && isSynchronizedFilterValues.length > 0){
+        if(appliedCountFilterValues && appliedCountFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
             result = filteredResult;
         }
@@ -286,6 +286,7 @@ module.exports = async (srv) => {
     } );
 
     srv.on('syncPriceAgreements', async req => {
+
         // const tx = cds.transaction(req);
 		const tx = cds.tx(req);
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
