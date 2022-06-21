@@ -168,7 +168,8 @@ module.exports = async (srv) => {
             priceAgreement.Synchronized = false;
             // check needed - empty array will return true in case of every
             if(customerPrices && customerPrices.length > 0){
-                priceAgreement.Synchronized = customerPrices.every(price => price.Synchronized);
+                // we are filtering out the PVL conditions first as we don't sync PVL with SAP
+                priceAgreement.Synchronized = customerPrices.filter(price => price.PriceCondition).every(price => price.Synchronized); 
             }
             priceAgreement.AppliedCount = customerPrices.reduce((acc, cp) => (cp.Applied && ++acc) || acc, 0) || 0;
             // calculate isNewPriceAgreement
