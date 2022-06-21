@@ -376,14 +376,17 @@ module.exports = async (srv) => {
             if (!priceCondition) {
                 return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
             }
-            // set KBETR value
-            if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") kbetr = priceCondition.NetPriceWithoutTaxAfterDeductionRD;
-            else kbetr = priceCondition.Discount * 100;
+            // set KBETR and KPEIN (unit for price) for Precio Neto
+            if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") {
+                kbetr = priceCondition.NetPriceWithoutTaxAfterDeductionRD;
+                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KPEIN = 10000;
+            }else {
+                kbetr = priceCondition.Discount * 100;
+            }
 
             // set partner and sales organisation
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.EDI_DC40.SNDPRN = "FAST_ES";
-
         }
 
         // KBETR per Pack or Unit
