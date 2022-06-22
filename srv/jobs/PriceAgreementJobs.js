@@ -2,6 +2,8 @@ const cds = require('@sap/cds');
 // const BaseCron = require('cron-es6');
 const BaseJob = require('./BaseJob');
 const core = require('@sap-cloud-sdk/core');
+const ServiceHelper = require('../utils/ServiceHelper');
+const axios = require('axios');
 
 module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJob {
 
@@ -9,24 +11,56 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         super(jobName,jobTime);
     }
 
+     /**
+     * Triggered when job has started
+     */
+    //override
+    async onTick() {
+
+        console.log('Update expiry date started ...');
+
+        try {
+            this.db = await cds.connect.to('db'); 
+            let aUpdatedPriceAgreements = await this.updatePriceAgreementExpiration();
+            await this.syncPriceAgreements(aUpdatedPriceAgreements);
+        } catch (error) {
+            console.log(error);
+        }
+
+        // when the job has finished, call the stop()
+        // this will trigger onComplete method
+        // this.stop();
+        console.log('Processing Italy materials finished.');
+    }
+
+    //this code is copied from pag-service file - make sure that these ones are in sync -- add comment to pag-service.js so we don't forget to do this in both places
     async syncPriceAgreements(ids){
+        const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+
+        if(ids.length === 0){
+            throw `No price agreements found for synchronization`;
+        }
+
         const tx = cds.tx();
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
         if (customerPrices && customerPrices.length <= 0) {
-            return req.reject(404, `No customer prices were found for the following PriceAgreement: ${ids}`);
+            throw `No customer prices were found for the following PriceAgreement: ${ids}`;
         }
         const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice, tx, req));
+        const updateMainConditionPromises = mainPriceConditions.map(custPrice => this.updateCustomerPrice(custPrice, tx));
 
         // Synchronize
-        const result = await Promise.all(updateMainConditionPromises); 
+        let result = await Promise.all(updateMainConditionPromises); 
         // Set 'Synchronized' to true and add IDOC number from the response
-        result.length > 0 && await updateCustomerPrices(result, mainPriceConditions); // !!the order of PriceCondition arrays is important
+        result = result.filter(res => res);
+        result.length > 0 && await this.updateCustomerPrices(result, mainPriceConditions); // !!the order of PriceCondition arrays is important
 
-        return req.reply(result);
+        return result;
     };
 
     async updateCustomerPrices(response, priceConditions){
+        const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+
         const tx = cds.tx();
         const refIdocIDs = response && response.map(res => res.headers.sapidocdbid) || [];
         const customerPriceIDs = priceConditions && priceConditions.map(condition => condition.ID) || [];
@@ -43,26 +77,35 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         }
     };
 
-    async updateCustomerPrice(customerPrice, tx, req){
-        const body = getPriceAgreementRequestBodyTemplate(); 
+    async updateCustomerPrice(customerPrice, tx){
+        
+        const { PT_TMINST, PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+        const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+
+        const body = this.getPriceAgreementRequestBodyTemplate(); 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
+
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
         if (!institute) {
-            return req.reject(404, `No institute was found for InstituteID: ${customerPrice.InstituteId}`);
+            console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
+            return;
         }
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
         if (!priceAgreement) {
-            return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+            console.error(`No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+            return;
         }
         const whereOfferID = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
         const whereProductpackID = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", customerPrice.ProductPackId);
         let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));     
         if (!offer) {
-            return req.reject(404, `No offer was found for OfferID: ${priceAgreement.OfferId}`);
+            console.error(`No offer was found for OfferID: ${priceAgreement.OfferId}`);
+            return;
         }
 
         const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: priceAgreement.TenderId}));
@@ -83,7 +126,8 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             const wherePriceConditionCode = ServiceHelper.buildFullWhere("PriceConditionCode", "=", customerPrice.PriceCondition);
             let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceAgreement_ID).where(wherePriceConditionCode));     
             if (!priceCondition) {
-                return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+                console.error(`No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+                return;
             }
             // set KBETR value
             if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") kbetr = priceCondition.NetPriceWithoutTaxAfterDeductionRD;
@@ -113,7 +157,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
-        return await updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
+        return await this.updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
     }
 
@@ -180,6 +224,8 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
 
     async updatePriceConditions(countryCode, resource, body){
 
+        const { SchedulerApiConfig } = this.db.entities("com.bayer.SXTENDER.AdminData");
+
         if (!body) {
             throw Error("The body of the request is missing.");
         }
@@ -187,7 +233,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement', CountryCode: countryCode, Resource: resource}));
 
         const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
-        const oauthCredentials = await getBearerToken();
+        const oauthCredentials = await this.getBearerToken();
 
         console.log(`Synchronizing Price Conditions ...`);
         console.log(`Calling endpoint ${url}`);
@@ -207,7 +253,12 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
 
 
     async getBearerToken() {
+        const { SchedulerApiConfig, SchedulerApiConfigOAuth } = db.entities("com.bayer.SXTENDER.AdminData");
 
+        // get api config
+        const priceAgreementApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement'}));
+        const oauthAuth  = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, priceAgreementApi.OAuth_ID));
+        
         if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
             console.log(`Calling ${oauthAuth.OAuthProvider}`);
             return axios({
@@ -219,11 +270,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
                 },
                 data: qs.stringify({
                     'grant_type': oauthAuth.GrantType
-                })/*, when testing locally, comment out the proxy
-                proxy: {
-                    host: priceAgreementApi.ProxyHost,
-                    port: priceAgreementApi.ProxyPort
-                }*/
+                })
             });
         }
 
@@ -234,50 +281,29 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         const tx = cds.tx();
         try {
 
-            const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementsData");
+            const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
             //get all price agreements which have to be extended
-            let query = cds.parse.cql (`SELECT * FROM ${PriceAgreements.name} as PriceAgreements where PriceAgreements.ExtendPriceAgreement = 'true'`);
+            const whereExpr = `ExtendPriceAgreement = true and synchronized = false`
+            const priceAgreements = await tx.run(SELECT.from(PriceAgreements).where(whereExpr));
 
-            const priceAgreements = await tx.run(query);
-            let aPriceAgreementIds = {};
-
+            let aPriceAgreementsUpdated = [];
             const promises = priceAgreements.map(agreement => {
                 let newDate = new Date(agreement.ExpiryDate);
                 newDate.setMonth(newDate.getMonth()+agreement.ExpiryExtensionPeriod);
-                aPriceAgreementIds.push(priceAgreements.ID); //prepare agreements to be synchronised
-
-                const obj = {
-                    ExpiryDate: newDate
-                }
+                newDate = newDate.toISOString().replace('T', ' ').replace('Z', '');
+                aPriceAgreementsUpdated.push(agreement.ID);
 
                 //update the actual price agreement withh the new price agreement date
-                const result = tx.run(UPDATE(PriceAgreements).with(obj).where({ ID: priceAgreements.ID }));
-
-                return result;
+                return tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate}).where({ ID: agreement.ID }));;
             });
 
             //execute the promises and log the output
-            if(promises && promises.length > 0){
-                console.log(`Updating ${PriceAgreements.name} ...`);
-                const result = await Promise.all(promises);
-                await tx.commit();
-                console.log(`${promises.length} Expiry dates successfully updated in ${PriceAgreements.name}.`);
-                return result;
-            }
-
-            //resync all updated price agreements
-            //const resultSync = await paFactory.syncPriceAgreements(tx, req, priceAgreements);
-            const sDestinationName = 'API-Fast';
-
-            let response = await core.executeHttpRequest({ destinationName: sDestinationName}, {
-                method: 'POST',
-                url: "/v2/priceagreement/syncPriceAgreements",
-                data: aPriceAgreementIds //gather all priceagreement IDs
-            });
-
+            console.log(`Updating ${PriceAgreements.name} ...`);
+            await Promise.all(promises);
             await tx.commit();
-            return;
+            console.log(`${promises.length} Expiry dates successfully updated in ${PriceAgreements.name}.`);
+            return aPriceAgreementsUpdated;
 
         } catch (error) {
             console.log('Updating expiry dates has failed.');
