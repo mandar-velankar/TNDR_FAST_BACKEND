@@ -30,7 +30,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         // when the job has finished, call the stop()
         // this will trigger onComplete method
         // this.stop();
-        console.log('Processing Italy materials finished.');
+        console.log('Updating expiry dates finished.');
     }
 
     //this code is copied from pag-service file - make sure that these ones are in sync -- add comment to pag-service.js so we don't forget to do this in both places
@@ -302,7 +302,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             console.log(`Updating ${PriceAgreements.name} ...`);
             await Promise.all(promises);
             await tx.commit();
-            console.log(`${promises.length} Expiry dates successfully updated in ${PriceAgreements.name}.`);
+            console.log(`${promises.length} Expiry date(s) successfully updated in ${PriceAgreements.name}.`);
             return aPriceAgreementsUpdated;
 
         } catch (error) {
