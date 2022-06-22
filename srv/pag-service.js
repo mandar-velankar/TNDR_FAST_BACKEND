@@ -379,7 +379,7 @@ module.exports = async (srv) => {
             }
             // set KBETR and KPEIN (unit for price) for Precio Neto
             if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") {
-                kbetr = Number(priceCondition.NetPriceWithoutTaxAfterDeductionRD * 1000).toFixed(2);
+                kbetr = Number(priceCondition.NetPriceWithoutTaxAfterDeductionRD * 10000).toFixed(2);
                 body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KPEIN = 10000;
             }else {
                 kbetr = priceCondition.Discount * 100;

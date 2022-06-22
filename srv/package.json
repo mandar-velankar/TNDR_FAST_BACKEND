@@ -47,7 +47,7 @@
             "db": {
                 "kind": "hana",
                 "model": "gen/csn.json",
-                "pool":{
+                "pool": {
                     "max": 1400,
                     "min": 100,
                     "acquireTimeoutMillis": 5000
