@@ -416,6 +416,8 @@ service CatalogService @(path : 'tender')@(requires : [
             DIVISION              : String(100);
             OFFERDATE             : Date;
             OFFERVALIDITY         : Date not null;
+            EffectiveDate         : Date;
+            ExpiryDate            : Date;
             COUNTRYCODE           : String(2) not null;
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);
@@ -540,6 +542,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity CountryTablesCustomization @readonly         as projection on AdminData.CountryTablesCustomization;
     entity CountryTabsCustomization @readonly           as projection on AdminData.CountryTabsCustomization;
     entity CountryFragmentsCustomization @readonly      as projection on AdminData.CountryFragmentsCustomization;
+    entity AppConfig @readonly                          as projection on AdminData.AppConfig;
     function getCurrentUser() returns User;
     //Office365 PowerAutomate Approval Workflow Views
     entity QuotationUpdates @readonly                   as projection on TransactionalDataViews.QuotationUpdates;

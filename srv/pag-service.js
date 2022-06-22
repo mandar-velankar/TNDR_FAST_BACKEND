@@ -29,7 +29,8 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.MasterData");
     
     const {
-		PriceAgreementFOC
+		PriceAgreementFOC,
+        Deliveries
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
@@ -62,6 +63,10 @@ module.exports = async (srv) => {
         let isNewPriceAgreementFilterIndex = null;
         let isNewPriceAgreementFilterValues = null;
         let hasExpiredFilterValues = null;
+        let isSynchronizedFilterIndex = null;
+        let isSynchronizedFilterValues = null;
+        let appliedCountFilterIndex = null;
+        let appliedCountFilterValues = null;
 
         if(req.query.SELECT.where){
 
@@ -79,6 +84,12 @@ module.exports = async (srv) => {
 
             isNewPriceAgreementFilterIndex = ServiceHelper.getWhereId(req, 'isNewPriceAgreement');
             isNewPriceAgreementFilterValues = ServiceHelper.getWhereValues(req, 'isNewPriceAgreement');
+            
+            isSynchronizedFilterIndex = ServiceHelper.getWhereId(req, 'Synchronized');
+            isSynchronizedFilterValues = ServiceHelper.getWhereValues(req, 'Synchronized');
+
+            appliedCountFilterIndex = ServiceHelper.getWhereId(req, 'AppliedCount');
+            appliedCountFilterValues = ServiceHelper.getWhereValues(req, 'AppliedCount');
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
@@ -98,6 +109,14 @@ module.exports = async (srv) => {
 
             if(isNewPriceAgreementFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'isNewPriceAgreement');
+            }
+
+            if(isSynchronizedFilterIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'Synchronized');
+            }
+
+            if(appliedCountFilterValues >= 0){
+                ServiceHelper.deleteFilter(req, 'AppliedCount');
             }
         }
 
@@ -149,9 +168,10 @@ module.exports = async (srv) => {
             priceAgreement.Synchronized = false;
             // check needed - empty array will return true in case of every
             if(customerPrices && customerPrices.length > 0){
-                priceAgreement.Synchronized = customerPrices.every(price => price.Synchronized);
+                // we are filtering out the PVL conditions first as we don't sync PVL with SAP
+                priceAgreement.Synchronized = customerPrices.filter(price => price.PriceCondition).every(price => price.Synchronized); 
             }
-
+            priceAgreement.AppliedCount = customerPrices.reduce((acc, cp) => (cp.Applied && ++acc) || acc, 0) || 0;
             // calculate isNewPriceAgreement
             priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied || price.Applied === null) ;
             
@@ -225,7 +245,7 @@ module.exports = async (srv) => {
         }
 
         if(hasExpiredFilterValues && hasExpiredFilterValues.length > 0){
-            const filteredResult = result.filter(priceAgreement => priceAgreement.Expired);
+            const filteredResult = result.filter(priceAgreement => priceAgreement.Expired === hasExpiredFilterValues[0]);
             result = filteredResult;
         }
 
@@ -233,12 +253,41 @@ module.exports = async (srv) => {
             const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
             result = filteredResult;
         }
+
+        if(isSynchronizedFilterValues && isSynchronizedFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
+            result = filteredResult;
+        }
+
+        if(appliedCountFilterValues && appliedCountFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
+            result = filteredResult;
+        }
         await tx.commit();
         return req.reply(result);
 
 	});
 
+    srv.after('READ', 'PriceAgreements', async (data) => {
+        const tx = db.tx();
+        // Calculate DeliveredVolume 
+        for (let each of data) await calculateDeliveredVolume(each);
+        async function calculateDeliveredVolume(pag){
+            let deliveries = pag.Deliveries;
+            if(!deliveries){
+                try {
+                    deliveries = await tx.run(SELECT.from(Deliveries).where({ PriceAgreementId: pag.ID }));
+                    await tx.commit();
+                } catch(e) {
+                    await tx.rollback(e)
+                }
+            }
+            pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.ANZPK, 0);
+        }
+    } );
+
     srv.on('syncPriceAgreements', async req => {
+
         // const tx = cds.transaction(req);
 		const tx = cds.tx(req);
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
@@ -328,14 +377,17 @@ module.exports = async (srv) => {
             if (!priceCondition) {
                 return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
             }
-            // set KBETR value
-            if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") kbetr = priceCondition.NetPriceWithoutTaxAfterDeductionRD;
-            else kbetr = priceCondition.Discount;
+            // set KBETR and KPEIN (unit for price) for Precio Neto
+            if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") {
+                kbetr = Number(priceCondition.NetPriceWithoutTaxAfterDeductionRD * 10000).toFixed(2);
+                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KPEIN = 10000;
+            }else {
+                kbetr = priceCondition.Discount * 100;
+            }
 
             // set partner and sales organisation
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.EDI_DC40.SNDPRN = "FAST_ES";
-
         }
 
         // KBETR per Pack or Unit

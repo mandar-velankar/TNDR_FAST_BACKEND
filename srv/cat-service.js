@@ -1886,6 +1886,8 @@ module.exports = (srv) => {
 			DIVISION: division,//not correct, should be consolidated from product information
 			OFFERDATE: offer.OFFERDATE,
 			OFFERVALIDITY: offer.OFFERVALIDITY,
+			EffectiveDate: offer.EffectiveDate,
+			ExpiryDate: offer.ExpiryDate,
 			COUNTRYCODE: offer.COUNTRYCODE,
 			SELLINGCOMPANY: offer.SELLINGCOMPANY,
 			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
@@ -2517,9 +2519,29 @@ module.exports = (srv) => {
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
+		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
+			const { ConditionType } = product.PriceConditionClassification;
+			const foundGroup = groups.find(group=>group[ConditionType.replace(/\s/g, '')]);
+			if(!foundGroup){
+			  let test = {};
+			  test[ConditionType.replace(/\s/g, '')]=[{items:[product]}];
+			  groups.push(test);
+			}else{
+			  foundGroup[ConditionType.replace(/\s/g, '')][0].items.push(product);
+			}
+			return groups;
+		  }, []);
 		return {
 			offerValidation: offerValidation,
-			offerProductValidation: productValidation
+			offerProductValidation: productValidation,
+			groupedOfferProductValidation: groupedOfferProductValidation
+			// flatOfferProductValidation.reduce((group, product) => {
+			// 	const { PriceConditionClassification } = product;
+			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
+			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')].items.push(product);
+			// 	return group;
+			//   }, {})
 		};
 	}
 
