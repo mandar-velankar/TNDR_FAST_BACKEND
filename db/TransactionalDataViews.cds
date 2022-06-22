@@ -763,7 +763,9 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
 	offer.Currency as CURRENCY,
     min(offer.Product.Price.BudgetRate) as BUDGET_RATE,
     min(offer.Product.Price.SpotRate) as SPOT_RATE,
-    ifnull(offer.SellingCompanyDetails.Letterhead, '') as LETTERHEAD:String(500),
+    //EITOG-SCTASK0100482/REQ11565210-Increase the size of Letterhead
+    ifnull(offer.SellingCompanyDetails.Letterhead, '') as LETTERHEAD:String(700),
+     //EITOG-SCTASK0100482/REQ11565210-Increase the size of Letterhead
     ifnull(offer.SellingCompanyDetails.Remarks, '') as SELLING_COMPANY_REMARKS:String(500),
     ifnull(offer.SellingCompanyDetails.FooterComment, '') as SELLING_COMPANY_FOOTER:String(500),
 	case offer.Tender.TenderChannel
