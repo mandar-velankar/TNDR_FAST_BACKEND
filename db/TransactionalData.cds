@@ -482,6 +482,8 @@ entity PT_TMQUTO {
         I_Q_3             : String(255);
         Comment           : String(500);
         UPDATED           : Integer;
+        EffectiveDate     : Date;
+        ExpiryDate        : Date;
         //Associations
         Offer             : Association to PT_TMOFRS
                                 on Offer.OfferID = OfferID;
