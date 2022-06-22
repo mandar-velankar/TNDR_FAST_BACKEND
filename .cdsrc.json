@@ -28,6 +28,18 @@
                             ]
                         }
                     },
+                    "EGSZO": {
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "EGSZO",
+                                "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin"
+                            ]
+                        }
+                    },
                     "ELLUI": {
                         "jwt": {
                             "userInfo": {
