@@ -36,6 +36,7 @@ entity PriceAgreements: cuid, managed {
     ExpiringSoon: Boolean default false; // calculated from NodeJS
     Expired: Boolean default false; //calculated from NodeJS
     isNewPriceAgreement: Boolean default true; // calculated from NodeJS
+    AppliedCount: Integer default 0; // calculated from NodeJS
     OfferId: String;
     ExtendPriceAgreement: Boolean default false;
     ExpiryExtensionPeriod: Integer;
@@ -227,6 +228,7 @@ entity CandidatePrices as select from PriceAgreements AS pa
 inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
 //inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
 inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
+inner join MasterData.PT_TMINST AS ins on pa.CountryCode = ins.CountryCode and ca.CandidateID = ins.InstituteID
 left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId 
     and cp.MaterialNumber = ma.SKUCode 
     and cp.InstituteId = ca.CandidateID 
@@ -249,7 +251,9 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ifnull(cp.Synchronized, false) as Synchronized:Boolean,
         ifnull(cp.Price, pa.Price) as Price:Double,
         ifnull(cp.EffectiveDate, pa.EffectiveDate) as EffectiveDate:DateTime,
-        ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime
+        ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime,
+        ins.CustomerID //by candidate
+        // pa.Institute.CustomerID //by price agreement
 };
 
 
