@@ -629,10 +629,6 @@ module.exports = async (srv) => {
 
 
         if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" ){// convert and send per pack
-            kstbm  = kstbm * packFactor;
-            mikbas = mikbas * packFactor;
-            mxkbas = mxkbas * packFactor;
-        }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
             kstbm  = kstbm / packFactor;
             mikbas = mikbas / packFactor;
             mxkbas = mxkbas / packFactor;
