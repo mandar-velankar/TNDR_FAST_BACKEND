@@ -16,6 +16,7 @@ const wordTemplate = require("easy-template-x");
 const createResolver = require("./libs/easy-template-x-angular-expression").createResolver;
 const { Service } = require('@sap/cds');
 const NumberHelper = require("./utils/NumberHelper");
+const cfenv = require("cfenv");
 
 module.exports = (srv) => {
 
@@ -24,13 +25,24 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
-		PT_TMTEND, PT_TMDLVTR, PT_TMUDLTRS, PT_TMAPPRST, FreeGoodsOther, CandidatePrices, ProductPricing
+		PT_TMTEND, 
+		PT_TMDLVTR, 
+		PT_TMUDLTRS, 
+		PT_TMAPPRST, 
+		FreeGoodsOther, 
+		CandidatePrices, 
+		ProductPricing, 
+		PriceCondition, 
+		DiscountCondition, 
+		PriceConditionClassification, 
+		ProductTypeProfitability,
+		CountrySpecificTenderInfo
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
@@ -171,6 +183,7 @@ module.exports = (srv) => {
 						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
 						CHANNEL: 'Direct',
 						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+                        DIVISION: countryProduct.DIVISION,
 						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
 					});
 				});
@@ -557,7 +570,7 @@ module.exports = (srv) => {
 		//2: Mandatory Notification
 		//3: Mandatory Approval
 
-		if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
+		if (offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health') && ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "Supply Chain":
@@ -567,7 +580,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
-		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma' && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
+		} else if (offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health') && !ServiceHelper.isDoubleEqual(product.ADDITIONAL_DISCOUNT, 0)) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "MACS Head":
@@ -592,7 +605,7 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
-		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && product.DIVISION === 'Pharma') {
+		} else if (!offer.INSTITUTE_TYPE === 'Cenabast' && (product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health')) {
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "Supply Chain":
@@ -747,7 +760,109 @@ module.exports = (srv) => {
 		return price;
 	}
 
+    async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes) {//Spain
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
 
+        const whereProductTypeProfitability = {
+            CountryCode: offer.COUNTRYCODE,
+            OfferId: offer.OFFERID,
+            ProductType: 'Total'
+        };
+
+        const whereProduct = {
+            CountryCode: offer.COUNTRYCODE,
+            ProductPackId: product.PRODUCTID
+        };
+
+        const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
+        
+        let dFloorPrice = MasterProductPrice ? MasterProductPrice.PRAF : 0;
+        let dRadiologyProfitability = 0;
+
+        if(product.DIVISION === 'Radiology'){
+            const ProductProfitability = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
+            dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
+
+            if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability > 40){
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "KAMS":
+                            oApproverType.ValidationType = 3;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            } else {
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "KAMS":
+                            oApproverType.ValidationType = 3;
+                            break;
+                        case "CDH":
+                            oApproverType.ValidationType = 3;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            }
+        } else {
+            if(product.NET_PRICE > dFloorPrice){
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "BU/RAM":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                            break;
+                        case "Controlling":
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            } else {
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "BU/RAM":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                            break;
+                        case "Legal":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                            break;
+                        case "Financial Business Partner":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                            break;
+                        case "Controlling":
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
+                            break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            }
+        }
+		
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
+	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName) {
+		let price = 0;
+		productPolicyPrices.forEach(e => {
+			if (e.PricingPolicyName === pricingPolicyName && e.Role === role) {
+				price = e.Price;
+			};
+		});
+		return price;
+	}
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
 		//Legend
@@ -1118,6 +1233,9 @@ module.exports = (srv) => {
 		else if (offer.APPROVAL_TYPE === 9) { //Applicable for Italy
 			productValidation = await buildProductValidationForType9(tx, offer, product, commnonProductInfo, aApproverTypes)
 		}
+        else if (offer.APPROVAL_TYPE === 10) { //Applicable for Spain
+			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes)
+        }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
 		}
@@ -1180,6 +1298,24 @@ module.exports = (srv) => {
             
 			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 
+            /*Get corresponding ProductConditions*/
+			const whereProductConditions = {
+				OfferID: offer.OFFERID,
+				ProductCode: offerProduct.ProductCode,
+				CountryCode: offer.COUNTRYCODE
+			}
+			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
+            const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
+                productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
+				productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
+				productCondition.FreeGoodsOther.forEach(async foc => {
+					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
+				});
+                productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
+                return productCondition;
+            }));
+            /*end of ProductCondition information */
+
 			//Get corresponding ProductPack
 			const whereProductPack = {
 				PRODUCTPACKID: offerProduct.ProductCode,
@@ -1203,6 +1339,14 @@ module.exports = (srv) => {
             }
 			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
 
+            const wherePriceconditions = {
+                OfferID: offer.OFFERID,
+                ProductCode: offerProduct.PRODUCTID,
+                CountryCode: offer.COUNTRYCODE
+            }
+
+            //const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
+
             //loop over freegoodsother and retrieve productpricing, material and productpack data
             aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
                 let whereMaterialFOC = {
@@ -1224,6 +1368,36 @@ module.exports = (srv) => {
                     PRODUCTPACKID: tmpFreeGoodOther.ProductPackId,
                 }
                 tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
+
+                //Get corresponding ProductConditions
+                const whereFocProductConditions = {
+                    OfferID: offer.OFFERID,
+                    ProductCode: tmpFreeGoodOther.ProductPackId,
+                    CountryCode: offer.COUNTRYCODE
+                }
+                let productConditionFOCtmp = await tx.run(SELECT.from(PriceCondition).where(whereFocProductConditions));
+
+                let productFOCConditions = await Promise.all(productConditionFOCtmp.map( async (productFOCCondition) => {
+                    let whereFOCDiscountCondition = {
+                        ID: productFOCCondition.ID
+                    }
+                    productFOCCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereFOCDiscountCondition));
+
+                    /*let whereFOCRoyalDecree = {
+                        ProductPackID: PriceCondition.ProductCode
+                    }
+                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));*/
+
+                    let wherePriceConditionClassification = {
+                        ID: productFOCCondition.PriceConditionClassification_ID
+                    }
+                    productFOCCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where(wherePriceConditionClassification));
+
+                    return productFOCCondition;
+
+                }));
+
+                tmpFreeGoodOther.priceCondition = productFOCConditions;
 
                 return tmpFreeGoodOther;
             }));
@@ -1364,6 +1538,7 @@ module.exports = (srv) => {
 				FOC_STEP: offerProduct.FOC_STEP,
 				OFFER_TYPE: offerProduct.OfferType,
 				FreeGoodsOther: aFreeGoodsOtherTemp,
+                PriceCondition: productConditions,
 
 				//missing SKU & SKUCountry fields
 				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
@@ -1388,7 +1563,8 @@ module.exports = (srv) => {
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
-				Materials: materials
+				Materials: materials,
+                //PriceCondition: aPriceConditions
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1482,14 +1658,14 @@ module.exports = (srv) => {
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
 		// let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
-		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount,offer.CURRENCY)} ${offer.CURRENCY} only`;
+		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
 
 		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
 		// let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
-		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat,offer.CURRENCY)} ${offer.CURRENCY} only`;
+		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat)} ${offer.CURRENCY} only`;
 		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
 
 		//Division can be Pharma or Radiology, this determines division for country approvers
@@ -1699,12 +1875,19 @@ module.exports = (srv) => {
 			INSTITUTENAME: offer.INSTITUTENAME,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
 			INSTITUTE_STATE: offer.INSTITUTE_STATE,
+            INSTITUTE_REGION: offer.REGION_NAME,
+            INSTITUTE_PROVINCE: offer.REGION_PROVINCE,
+            INSTITUTE_CIFCODE: offer.CIF_CODE,
+            INSTITUTE_REGIONALHEALTHSYSTEM: offer.REGIONAL_HEALTH_SYSTEM,
+            INSTITUTE_CUSTOMER_GROUP: offer.CUSTOMER_GROUP,
 			VATCODE: offer.VATCODE,
 			TAXCODE: offer.TAXCODE,
 			CUSTOMER_CODE: offer.CUSTOMER_CODE,
 			DIVISION: division,//not correct, should be consolidated from product information
 			OFFERDATE: offer.OFFERDATE,
 			OFFERVALIDITY: offer.OFFERVALIDITY,
+			EffectiveDate: offer.EffectiveDate,
+			ExpiryDate: offer.ExpiryDate,
 			COUNTRYCODE: offer.COUNTRYCODE,
 			SELLINGCOMPANY: offer.SELLINGCOMPANY,
 			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
@@ -1761,7 +1944,8 @@ module.exports = (srv) => {
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
-
+			EXTERNAL_ID: tender.ExternalID,
+			SAP_ID: tender.SAPID
 		};
 		return results;
 	}
@@ -2335,11 +2519,56 @@ module.exports = (srv) => {
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
+		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
+			const { ConditionType } = product.PriceConditionClassification;
+			const foundGroup = groups.find(group=>group[ConditionType.replace(/\s/g, '')]);
+			if(!foundGroup){
+			  let test = {};
+			  test[ConditionType.replace(/\s/g, '')]=[{items:[product]}];
+			  groups.push(test);
+			}else{
+			  foundGroup[ConditionType.replace(/\s/g, '')][0].items.push(product);
+			}
+			return groups;
+		  }, []);
 		return {
 			offerValidation: offerValidation,
-			offerProductValidation: productValidation
+			offerProductValidation: productValidation,
+			groupedOfferProductValidation: groupedOfferProductValidation
+			// flatOfferProductValidation.reduce((group, product) => {
+			// 	const { PriceConditionClassification } = product;
+			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
+			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')].items.push(product);
+			// 	return group;
+			//   }, {})
 		};
 	}
+
+
+	srv.before('CREATE', 'PT_TMTEND', async (req) => {
+		try {
+			// only runs for 'ES'
+			if(req && req.data && ~req.data.CountryCode.toLowerCase().indexOf('es')){
+				await addTenderExternalIDs(req.data);
+			}
+		} catch (error) {
+			return req.reject(400, error.message);
+		}
+		
+	});
+
+	async function addTenderExternalIDs(tender){
+		// Tender
+		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('tender')){
+			tender.SAPID = "CO-".concat(tender && tender.TenderName && tender.TenderName.replace(/ /g,'-')); 
+			tender.ExternalID = "TE-".concat(tender.TenderID);
+		}
+		// Commercial Agreement
+		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('commercial agreement')){
+			tender.SAPID = "OF-".concat(tender.TenderID); 
+		}
+	};
 
 	srv.on('getCurrentUser', (req) => {
 		return {
@@ -2348,7 +2577,8 @@ module.exports = (srv) => {
 		};
 	})
 	srv.on('READ', 'InstituteDistributor', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get non-filter information
@@ -2403,7 +2633,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get non-filter information
@@ -2504,7 +2735,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'OfferProductValidation', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2515,7 +2747,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'OfferValidation', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2526,7 +2759,8 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -2543,9 +2777,14 @@ module.exports = (srv) => {
 		}
 		return nextValue
 	}
-	srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
-		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo")
-		return req;
+	// srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
+	srv.on('CREATE', 'PT_TMDLVTR', async (req,next) => {
+        // const tx = cds.transaction(req);
+		const tx = cds.tx(req);
+		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");
+        const delivery = await next();   
+        await tx.commit();     
+        return delivery; 
 	});
 	srv.before('CREATE', 'PT_TMUDLTRS', async (req) => {
 		req.data.SNO = await getNextValue(PT_TMUDLTRS, "SNO")
@@ -2553,19 +2792,22 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'ApprovalOffers', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalOffers(tx);
 		return results;
 	});
 
 	srv.on('READ', 'ApprovalProducts', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalProducts(tx);
 		return results;
 	});
 
 	srv.on('READ', 'ApprovalApprovers', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
 	});
@@ -2573,7 +2815,8 @@ module.exports = (srv) => {
 	srv.on('READ', 'Attachment', async (req, next) => {
 		//OfferID => get CountryCode => get Template by Country => get template
 		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		var offerId = req.data.OfferId;
 		if (!offerId) {
 			return next();
@@ -2662,7 +2905,8 @@ module.exports = (srv) => {
 	// srv.after('READ', 'ExcelAttachment', async function(data, req) {
 	srv.on('READ', 'ExcelAttachment', async (req, next) => {
 		// const data = await next(); 
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		const offerId = req.data.OfferId;
 		// const template = req.data.template;
 		if (!offerId){// || !template) {
@@ -2682,7 +2926,8 @@ module.exports = (srv) => {
 	});
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'WordAttachments', async (req, next) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		const offerId = req.data.offerId;
 		const templateId = req.data.templateId;
 		if (!offerId) {
@@ -2774,7 +3019,8 @@ module.exports = (srv) => {
 	});
 	//http://localhost:4004/v2/tender/DeliveryExcel('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'DeliveryExcel', async (req, next) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		var offerId = req.data.OfferId;
 		if (!offerId) {
 			return next();
@@ -2848,9 +3094,11 @@ module.exports = (srv) => {
 	});
 
 	srv.on('getMailTemplate', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
+        const appEnv = cfenv.getAppEnv();
 
 		//quotation data retrieval for filling template
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
@@ -2882,6 +3130,10 @@ module.exports = (srv) => {
 				offerConsolidation.DIVISION = divisions[0];
 			}
 		}
+
+        //add url to offerConsolidation
+        
+        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/${offerConsolidation.COUNTRYCODE}/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
 
 		var document = {
 			type: "buffer",

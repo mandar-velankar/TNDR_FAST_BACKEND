@@ -1,4 +1,5 @@
 const cds = require('@sap/cds');
+const { T } = require('ramda');
 // const BaseCron = require('cron-es6');
 const BaseJob = require('./BaseJob');
 
@@ -60,9 +61,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      * @return {Promise} Promise
      */
     async createHierarchyEntries(){
-
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
 
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -105,7 +105,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
             if(hierarchyEntries && hierarchyEntries.length > 0){
                 const result = await tx.run(INSERT(hierarchyEntries).into(PT_TMPRDHIER));
-                tx.commit(result);
+                await tx.commit(result);
                 console.log(`${hierarchyEntries.length} hierarchy entries successfully created in ${PT_TMPRDHIER.name}.`);
                 return result;
             }
@@ -115,6 +115,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
         }catch (error) {
             console.error('Creating hierarchy entries has failed.');
             console.error(error);
+            await tx.rollback(error);
         }
 
     };
@@ -147,8 +148,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      */
       async createProductPacks(lastProductPackID){
 
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
 
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMPRDPCK, PT_TMCTPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -190,16 +191,17 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
             if(productPackEntries && productPackEntries.length > 0){
                 const result = await tx.run(INSERT(productPackEntries).into(PT_TMPRDPCK));
-                tx.commit(result);
+                await tx.commit(result);
                 console.log(`${productPackEntries.length} product packs successfully created in ${PT_TMPRDPCK.name}.`);
                 return result;
             }
-
+            await tx.commit()
             return;
             
         } catch (error) {
             console.error('Creating product packs has failed.');
             console.error(error);
+            await tx.rollback(error);
         }
     };
 
@@ -209,8 +211,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      */
      async createCountryProductPacks(lastProductPackID){
 
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
 
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMCTPRDPCK, PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -260,16 +262,17 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
             if(countryProductPackEntries && countryProductPackEntries.length > 0){
                 const result = await tx.run(INSERT(countryProductPackEntries).into(PT_TMCTPRDPCK));
-                tx.commit(result);
+                await tx.commit(result);
                 console.log(`${countryProductPackEntries.length} country product packs successfully created in ${PT_TMCTPRDPCK.name}.`);
                 return result;
             }
-
+            await tx.commit();
             return;
 
         } catch (error) {
             console.error('Creating country product packs has failed.');
             console.error(error);
+            await tx.rollback(error);
         }  
     };
 
@@ -279,8 +282,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      */
     async createSKUs(){
 
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
 
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMSKUPRDPCK, PT_TMPRDPCK, PT_TMCTPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -322,16 +325,17 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
             if(skuProductPackEntries && skuProductPackEntries.length > 0){
                 const result = await tx.run(INSERT(skuProductPackEntries).into(PT_TMSKUPRDPCK));
-                tx.commit(result);
+                await tx.commit(result);
                 console.log(`${skuProductPackEntries.length} SKUs successfully created in ${PT_TMSKUPRDPCK.name}.`);
                 return result;
             }
-
+            await tx.commit();
             return;
 
         } catch (error) {
             console.error('Creating SKUs has failed.');
             console.error(error);
+            await tx.rollback(error);
         }   
     };
 
@@ -341,8 +345,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      */
      async createCOGS(){
 
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
 
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { PT_TMPRDPCK, PT_TMCTPRDPCK, PT_TMCOGS } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -378,16 +382,17 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
             if(cogsEntries && cogsEntries.length > 0){
                 const result = await tx.run(INSERT(cogsEntries).into(PT_TMCOGS));
-                tx.commit(result);
+                await tx.commit(result);
                 console.log(`${cogsEntries.length} COGS successfully created in ${PT_TMCOGS.name}.`);
                 return result;
             }
-
+            await tx.commit();
             return;
             
         } catch (error) {
             console.error('Creating COGS has failed.');
             console.error(error);
+            await tx.rollback(error);
         }    
     };
 
@@ -396,14 +401,14 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
      * @return {Promise} Promise
      */
      async clearItalyMaterialsTable(){
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
             const { ItalyMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
 
             console.log(`Clearing ${ItalyMaterials.name} table ...`);
 
             const result = await tx.run(DELETE.from(ItalyMaterials));
-            tx.commit(result);
+            await tx.commit(result);
 
             console.log(`${ItalyMaterials.name} table successfully cleared. ${result} records deleted.`);
             return result;
@@ -411,6 +416,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
         } catch (error) {
             console.error('Clearing the Italy Materials table failed');
             console.error(error);
+            await tx.rollback(error);
         }    
     };
 
@@ -484,8 +490,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
 
         if(!error && !jobDescription) throw new Error(`You must provide a job description and an error object`);
 
+        const tx = cds.tx();
         try{
-            const tx = cds.tx();
 
             const errorEntity = {
               JobName: "ItalyJobs",
@@ -496,12 +502,13 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
             };
 
             const result = await tx.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
-            tx.commit(result);
+            await tx.commit(result);
 
             return result;
 
           }catch(err){
             console.error(err);
+            await tx.rollback(err);
           }
   
       }
@@ -576,9 +583,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      */
      async  createInstituteEntries(){
 
+        const tx = cds.tx();
         try {
 
-            const tx = cds.tx();
 
             const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -625,16 +632,17 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
             if(instituteEntries && instituteEntries.length > 0){
                 const result = await tx.run(INSERT(instituteEntries).into(PT_TMINST));
-                tx.commit(result);
+                await tx.commit(result);
                 console.log(`${instituteEntries.length} Institutes successfully created in ${PT_TMINST.name}.`);
                 return result;
             }
-
+            await tx.commit();
             return;
 
         } catch (error) {
             console.error('Creating Institutes has failed.');
             console.error(error);
+            await tx.rollback(error);
         }   
 
     };
@@ -646,9 +654,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      */
      async  updateInstituteEntries(){
 
+        const tx = cds.tx();
         try {
 
-            const tx = cds.tx();
 
             const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -683,7 +691,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                 }
 
                 const result = tx.run(UPDATE(PT_TMINST).with(obj).where({ InstituteID: cust.InstituteID, CountryCode: cust.CountryCode }));
-                tx.commit(result);
+                // tx.commit(result);
 
                 return result;
             });
@@ -691,15 +699,17 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             if(promises && promises.length > 0){
                 console.log(`Updating ${PT_TMINST.name} ...`);
                 const result = await Promise.all(promises);
+                await tx.commit();
                 console.log(`${promises.length} Institutes successfully updated in ${PT_TMINST.name}.`);
                 return result;
             }
-
+            await tx.commit();
             return;
 
         } catch (error) {
             console.log('Updating Institutes has failed.');
             console.log(error);
+            await tx.rollback(error);
         }   
 
     };
@@ -775,8 +785,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      */
      async createInstituteBrandTerms(){
 
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
 
             const { PT_TMINST, PT_TMINSBRTR, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
@@ -817,13 +827,14 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             });
 
             const result = await tx.run(INSERT(instituteBrandEntries).into(PT_TMINSBRTR));
-            tx.commit(result);
+            await tx.commit(result);
             console.log(`${instituteBrandEntries.length} Institute Brand Terms successfully created in ${PT_TMINSBRTR.name}.`);
             return result;
 
         } catch (error) {
             console.error('Creating Institute Brand Terms has failed.');
             console.error(error);
+            await tx.rollback(error);
         }   
 
     };
@@ -834,8 +845,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      */
      async createInstituteDistributorBrands(){
 
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
 
             const { PT_TMINST, PT_TMDIST, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER, PT_TMINDSBR } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
@@ -878,13 +889,14 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             });
 
             const result = await tx.run(INSERT(instituteDistributorBrandEntries).into(PT_TMINDSBR));
-            tx.commit(result);
+            await tx.commit(result);
             console.log(`${instituteDistributorBrandEntries.length} Institute Distributor Brands successfully created in ${PT_TMINDSBR.name}.`);
             return result;
 
         } catch (error) {
             console.error('Creating Institute Distributor Brands has failed.');
             console.error(error);
+            await tx.rollback(error);
         }     
 
     };
@@ -894,15 +906,15 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
      * @return {Promise} Promise
      */
      async clearItalyCustomersTable(){
+        const tx = cds.tx();
         try {
 
-            const tx = cds.tx();
             const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
 
             console.log(`Clearing ${ItalyCustomers.name} table ...`);
 
             const result = await tx.run(DELETE.from(ItalyCustomers));
-            tx.commit(result);
+            await tx.commit(result);
 
             console.log(`${ItalyCustomers.name} table successfully cleared. ${result} records deleted.`);
             return result;
@@ -910,18 +922,21 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         } catch (error) {
             console.error('Clearing the Italy Customers table failed');
             console.error(error);
+            await tx.rollback(error);
         }    
     };
 
 
     async getLastInstituteID(){
+        const tx = cds.tx();
         try {
-            const tx = cds.tx();
             const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
             const lastInstituteID = await tx.run(SELECT.one.from(PT_TMINST, ['Max(INSTITUTEID) as max']));
+            await tx.commit();
             return lastInstituteID.max;
         } catch (error) {
             console.error(error);
+            await tx.rollback(error);
         }
     };
 
@@ -948,8 +963,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
         if(!error) throw new Error(`You must provide a error object`);
 
+        const tx = cds.tx();
         try{
-            const tx = cds.tx();
 
             const errorEntity = {
               JobName: "ItalyJobs",
@@ -960,12 +975,13 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             };
 
             const result = await tx.run(INSERT.into('com.bayer.SXTENDER.AdminData.SchedulerErrorLog', errorEntity));
-            tx.commit(result);
+            await tx.commit(result);
 
             return result;
 
           }catch(err){
             console.error(err);
+            await tx.rollback(error);
           }
   
       }

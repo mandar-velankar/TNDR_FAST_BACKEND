@@ -7,6 +7,7 @@ using {
     managed
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
+using {com.bayer.SXTENDER.AdminData} from './AdminData';
 //using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from './MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews';
@@ -42,6 +43,11 @@ entity PT_TMOFRS { //Offers
         FOCType               : String(255);
         DEFAULT_FOC_ABS_PCT   : String(4);
         Division              : String;
+        ProfitabilityStartMnth: Integer;
+        ProfitabilityAgrDur   : Integer;
+        ProfitabilityYrlyMntCost: Double;
+        ProfitabilityDiscRate : Double;
+        ProfitabilityGrowthRate: Double;
         //Associations
         Tender                : Association to PT_TMTEND
                                     on Tender.TenderID = TenderID;
@@ -70,6 +76,8 @@ entity PT_TMOFRS { //Offers
                                     and Signatories.LEGAL_ENTITY_CODE = SellingCompany;
         Country               : Association to MasterData.PT_TMCTRY
                                     on Country.CountryCode = CountryCode;
+        ProductTypeProfitability: Association to ProductTypeProfitability
+                                    on ProductTypeProfitability.OfferId = OfferID;
 }
 
 entity OfferView as
@@ -300,6 +308,8 @@ entity PT_TMOFPR {
         MinInvoiceAmount         : Double;
         PricingPolicyCluster     : String;
         OfferType                : String;
+        AnticipatedRequestedQuantity: String(25);
+        MaxPrice                 : Double;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -347,6 +357,10 @@ entity PT_TMOFPR {
         PriceAgreement           : Association to PriceAgreementData.PriceAgreements
                                         on PriceAgreement.OfferId = OfferID
                                         and PriceAgreement.ProductPackId = ProductCode;
+        PriceCondition: Composition of many PriceCondition 
+                                        on PriceCondition.OfferID = OfferID
+                                        and PriceCondition.ProductCode = ProductCode
+                                        and PriceCondition.CountryCode = CountryCode;
 }
 
 //italy
@@ -377,9 +391,71 @@ entity FreeGoodsOther: cuid, managed {
     Materials: Association to many MasterData.PT_TMSKUPRDPCK
                                 on Materials.CountryCode = 'IT'
                                 and Materials.ProductPackID = ProductPackId;
-
-
+    FOCMinAmount                        : Integer;
+    FOCBonus                            : Decimal;
+    PotentialGeneratedSavings           : Decimal;
+    RoyalDecree                         : String;
+    PriceCondition                      : Association to PriceCondition;
 }
+
+entity PriceCondition: cuid, managed {
+    CountryCode                         : String;
+    OfferID                             : String;
+    ProductCode                         : Integer;
+    PVL                                 : Decimal;
+    ConfidentialPrice                   : Decimal;
+    Discount                            : Decimal;
+    RoyalDecree                         : String;
+    StandardDiscount                    : Decimal;
+    AdditionalDiscount                  : Decimal;
+    NetPriceWithoutTaxBeforeDeductionRD : Decimal;
+    NetPriceWithoutTaxAfterDeductionRD  : Decimal;
+    NetPriceWithTaxAfterDeductionRD     : Decimal;
+    NetPriceWithoutTax                  : Decimal;
+    NetPriceWithTax                     : Decimal;
+    MaximumPrice                        : Decimal;
+    Tax                                 : Decimal;
+    Liquidation                         : String;
+    RefundDate                          : Date;
+    PriceConditionCode                  : String;
+    MonthlyRentPerUnit                  : Double;
+    AnnualValue                         : Double;
+    ReferencePriceAgreement             : UUID; // reference to an existing price agreement related to a "Tender" **classification Tender** which is not expiring before tomorrow for the same product and customer
+    DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
+    PriceConditionClassification        : Association to PriceConditionClassification;
+    FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
+    PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
+    Settlement                          : Association to MasterData.Settlements;
+}
+
+entity DiscountCondition: cuid, managed {
+    Volume              : Integer;
+    Discount            : Integer;
+    NetPriceWithoutTax  : Decimal;
+    NetPriceWithTax     : Decimal;
+    PriceCondition      : Association to PriceCondition;
+}
+
+
+entity PriceConditionClassification: cuid {
+    CountryCode     : String;
+    ConditionType   : String;
+    Classification  : String;
+    Division        : String;
+    ProductType     : String;
+    isMain          : Boolean;
+}
+
+entity ProductTypeProfitability: cuid {
+    CountryCode     : String;
+    OfferId         : String;
+    ProductType     : String;
+    NPV_GrossMargin : Double;
+    NPV_NetSales    : Double;
+    NPV_Cogs        : Double;
+    Profitability   : Double;
+}
+
 
 entity PT_TMPFIOM {
     key OfferID : String(255) not null;
@@ -406,6 +482,8 @@ entity PT_TMQUTO {
         I_Q_3             : String(255);
         Comment           : String(500);
         UPDATED           : Integer;
+        EffectiveDate     : Date;
+        ExpiryDate        : Date;
         //Associations
         Offer             : Association to PT_TMOFRS
                                 on Offer.OfferID = OfferID;
@@ -452,9 +530,16 @@ entity PT_TMTEND: managed {
         TENDER_ORIGIN_ID     : Integer;
         PROCUREMENT_METHOD_ID: String;
         PROCUREMENT_REASON   : String;
+
+        CONTENT              : String(500);
+        PORTAL               : LargeString;
+        TENDER_TYPE_2_ID     : Integer;
+        SAPID                : String;
+        ExternalID           : String;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
-                                  on Institute.InstituteID = InstituteID; //OK
+                                  on Institute.InstituteID = InstituteID
+                                  and Institute.CountryCode = CountryCode; //OK
         Offer               : Association to many PT_TMOFRS
                                   on Offer.TenderID = TenderID
                                   and Offer.Active = Active;
@@ -485,6 +570,8 @@ entity PT_TMTEND: managed {
                                         on BankGuarantees.TenderID = TenderID;
         PriceAgreements: Association to PriceAgreementData.PriceAgreements
                                          on PriceAgreements.TenderId  = TenderID;
+        User: Association to AdminData.PT_TMUSER
+                                         on User.UserID = SubmittedBy;
 }
 
 entity PT_TMTNOFST {
@@ -526,6 +613,9 @@ entity PT_TMTRRES {
         ResultDate        : Date;
         AwardDate         : Date;
         AwardActing       : String;
+        Appeal            : String;
+        InfoNeeded        : String;
+        TotalAwardedValue : Double;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID
@@ -567,6 +657,7 @@ entity TransCompetitorResult {
         LASTUPDATE     : Date;
         UPDATEDBY      : String(255);
         DELETED        : Integer;
+        TOTALAWARDEDVALUE: Double;
 }
 
 entity OutgoingMails : managed, cuid {

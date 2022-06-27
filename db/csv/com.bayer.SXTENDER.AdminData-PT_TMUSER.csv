@@ -1,6 +1,7 @@
 TOOLIDENTITY,TOOLID,USERID,USERNAME,LOGINTIME,CWID,USEREMAIL
 "FAST",1000,"EUTVP","Jonathan Hubeau",,"EUTVP","jonathan.hubeau.ext@bayer.com"
 "FAST",1000,"ELLUI","Nils Vanderheyden",,"ELLUI","nils.vanderheyden.ext@bayer.com"
+"FAST",1000,"EGSZO","Mandar Velankar",,"EGSZO","mandar.velankar.ext@bayer.com"
 "FAST",1000,"ELLUK","Wouter Lemaire",,"ELLUK","wouter.lemaire.ext@bayer.com"
 "FAST",1000,"ELLTZ","Joris Bogaert",,"ELLTZ","joris.bogaert.ext@bayer.com"
 "FAST",1000,"EICTW","Artiom Sargesjan",,"EICTW","artiom.sargesjan.ext@bayer.com"
@@ -78,7 +79,3 @@ TOOLIDENTITY,TOOLID,USERID,USERNAME,LOGINTIME,CWID,USEREMAIL
 "FAST",1004,"EHTNQ","Arun Kumar Jayakumar",,"EHTNQ","arunkumar.jayakumar.ext@bayer.com"
 "FAST",1005,"EHMHV","Vasudevan Mariyappan",,"EHMHV","vasudevan.mariyappan.ext@bayer.com"
 "FAST",1005,"EHMHQ","Ashish Jain",,"EHMHQ","ashish.jain2.ext@bayer.com"
-"FAST",1000,"EIOGT","Shailendra Dadhiya",,"EIOGT","shailendra.dadhiya.ext@bayer.com"
-"FAST",1000,"ELOJU","Anthony Clintan",,"ELOJU","anthony.clintan.ext@bayer.com"
-"FAST",1000,"EHXIE","Rabin Singh",,"EHXIE","shailendra.dadhiya.ext@bayer.com"
-"FAST",1000,"ETMYT","Laxman Negi",,"ETMYT","laxman.negi.ext@bayer.com"

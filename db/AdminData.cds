@@ -81,16 +81,19 @@ entity Template {
 entity MailTemplate {
     key CountryCode    : String(2);
     key Language       : String(2);
-        TemplateId     : String(100);
+    key TemplateId     : String(100);
+        MailTemplateFile      : Association to MailTemplateFile
+                            on MailTemplateFile.templateId = TemplateId; //This can be found in OData
 }
 
-entity AppConfig: cuid {
-    CountryCode         : String(2);
-    Environment         : String(10);
-    ApplicationName     : String(40);
-    Control             : String(100);
-    URL                 : String;
+entity MailTemplateFile {
+    key templateId     : String(100);
+    title:String(100);
+    filename:String(250);
+    content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    mediaType:String @Core.IsMediaType;
 }
+
 
 // entity MandatoryTableFieldsCountry {
 //     key CountryCode : String(2);
@@ -128,6 +131,14 @@ entity CountryFragmentsCustomization {
     key FragmentName  : String(100);
 }
 
+//config for application urls
+entity AppConfig: cuid {
+    CountryCode         : String(2);
+    Environment         : String(10);
+    ApplicationName     : String(40);
+    Control             : String(100);
+    URL                 : String;
+}
 
 // Scheduler configuration
 entity SchedulerApiConfig: cuid {
@@ -141,6 +152,7 @@ entity SchedulerApiConfig: cuid {
     RequestDelay        : Integer;
     RequestMaxRetry     : Integer;
     AuthType            : String;
+    CountryCode         : String;
     User                : Association to SchedulerApiConfigUsers;
     OAuth               : Association to SchedulerApiConfigOAuth;
 }

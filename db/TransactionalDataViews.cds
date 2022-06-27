@@ -487,7 +487,10 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.Offer.InternalBidDueDate as OFFER_DATE,
     tender.Offer.Distributor.DistributorName as DISTRIBUTOR,
     tender.Offer.OfferValue.SUBMISSION_DATE as SUBMISSION_DATE,
-    tender.CountrySpecificInformation.TenderReference as TENDER_REFERENCE
+    tender.CountrySpecificInformation.TenderReference as TENDER_REFERENCE,
+    tender.ExternalID as EXTERNAL_ID,
+    tender.SAPID as SAP_ID,
+    tender.User.UserName
 }where tender.Active = 1
 and ifnull(Offer.Active, 1) = 1;
 
@@ -721,17 +724,24 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Institute.InstituteType as INSTITUTE_TYPE,
     offer.Tender.Institute.State as INSTITUTE_STATE,
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
-    //offer.Tender.Institute.CustomerID as CUSTOMERCODE,
+    offer.Tender.Institute.CustomerID as CUSTOMER_CODE,
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
     offer.Tender.Institute.InstituteName as INSTITUTENAME,
     offer.Tender.Institute.VatCode as VATCODE,
     offer.Tender.Institute.TaxCode as TAXCODE,
+    offer.Tender.Institute.Region.Name as REGION_NAME,
+    offer.Tender.Institute.Province.Name as PROVINCE_NAME,
+    offer.Tender.Institute.CifCode as CIF_CODE,
+    offer.Tender.Institute.RegionalHealthSystem as REGIONAL_HEALTH_SYSTEM,
+    offer.Tender.Institute.CustomerGroup as CUSTOMER_GROUP,
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
 	ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay))) as OFFERVALIDITY,
+	ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate,
+	ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate,
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
@@ -810,11 +820,19 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Institute.InstituteName,
           offer.Tender.Institute.VatCode,
           offer.Tender.Institute.TaxCode,
+          offer.Tender.Institute.Region.Name,
+          offer.Tender.Institute.Province.Name,
+          offer.Tender.Institute.CifCode,
+          offer.Tender.Institute.RegionalHealthSystem,
+          offer.Tender.Institute.CustomerGroup,
+          offer.Tender.Institute.CustomerID,
           offer.Tender.TenderName,
           offer.OfferStatus.STATUS,
           offer.Tender.Country.ApprovalType,
           offer.Quotation.OfferDate,
           offer.Quotation.OfferValidity,
+          offer.Quotation.EffectiveDate,
+          offer.Quotation.ExpiryDate,
           offer.Quotation.Signatory1.NAME,
           offer.Quotation.Signatory2.NAME,
           offer.Quotation.Signatory1.TITLE,
@@ -1124,3 +1142,82 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
 
 
 }where offer.Active = 1;
+
+/**
+ * This view contains calculated fields used on the Spain financial offers page
+ */
+entity PriceConditionView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
+left outer join MasterData.RoyalDecree as royalDecree
+    on product.ProductCode = royalDecree.ProductPackID 
+    and royalDecree.ValidTo > CURRENT_DATE 
+left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+    on product.ProductCode = masterPrices.ProductPackId
+    and product.CountryCode = masterPrices.CountryCode
+left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelproductpolicies 
+    on product.ProductCode = channelproductpolicies.ProductPackID
+    and product.CountryCode = channelproductpolicies.CountryCode
+    and institute.InstituteType = channelproductpolicies.ChannelName
+    {
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    priceCondition.ID as ExistingPriceConditionID: UUID,
+    priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
+    tender.CountryCode,
+    key priceConditionClassification.ConditionType,
+    priceConditionClassification.Classification,
+    priceConditionClassification.Division,
+    priceConditionClassification.isMain,
+    //product.RegisteredPrice.REGISTERED_PRICE as PVL,
+    product.RegisteredPrice.CURRENCY as Currency,
+    priceCondition.Discount,
+    priceCondition.RoyalDecree,
+    royalDecree.Percentage as RoyalDecreePercentage,
+    ifnull(channelproductpolicies.StandardDiscount,0) as StandardDiscount:Double ,
+    case   
+        when product.RegisteredPrice.REGISTERED_PRICE is not null
+            then  
+                product.RegisteredPrice.REGISTERED_PRICE * (1 - channelproductpolicies.StandardDiscount)
+        else null
+    end as StandardPrice:Double,
+    priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
+    priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
+    priceCondition.NetPriceWithoutTaxAfterDeductionRD, // calculated in the UI based on User Input
+    priceCondition.NetPriceWithTaxAfterDeductionRD, // calculated in the UI based on User Input
+    priceCondition.NetPriceWithoutTax,
+    priceCondition.NetPriceWithTax,
+    priceCondition.MaximumPrice,
+    priceCondition.ConfidentialPrice,
+    product.SKUCountry.VTATax as Tax, 
+    priceCondition.Liquidation,
+    priceCondition.RefundDate,
+    masterPrices.YLLP as PVL,
+    masterPrices.YLAP,
+    masterPrices.PRAF,
+    masterPrices.UoM,
+    masterPrices.Currency as masterPriceCurrency,
+    priceCondition.MonthlyRentPerUnit,
+    priceCondition.AnnualValue,
+    priceCondition.ReferencePriceAgreement,
+    priceCondition.Settlement.ID as Settlement_ID
+}where tender.Active = 1;

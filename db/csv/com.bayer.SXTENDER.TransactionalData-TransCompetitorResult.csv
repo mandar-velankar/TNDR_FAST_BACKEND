@@ -23,16 +23,16 @@ OFFERID,PRODUCTCODE,OUTCOME,AWARDEDCOMPANY,AWARDEDPRODUCT,AWARDEDPRICE,CURRENCY,
 "JO-18-310-1003-BME-11",100072,"Won","Hikma Jordan","Aminor 5mg Tab","0.93","USD",57450,"Pack",,,"2018-10-08","Sidharth Dhas, Sheryl",1
 "IQ-17-100-1002-BPH-11",100047,"Won","Pfizer","Xyntha","93.75","USD",0,"Pack","Not Specified","$ 125 / vial + 25% FOC = $ 93.75 / IU","2018-05-20","Sidharth Dhas, Sheryl",1
 "IQ-20-1002-1-R1",100086,"Won","GE","Omnipaque","7.9","USD",164500,,"Lowest Price","Awarded Quantity is estimated. Award is valued at approx. 1.3M","2020-10-15","GCXYS",0
-"SA-20-1064-1-R1",100041,"Won","GUERBET","TELEBRIX GASTRO","86.0","SAR",0,,"Not Specified","Won against different request nos.","2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100084,"Won","GE HEALTH CARE","Omnipaque 300mg/ml 100ml","36.2","SAR",0,,"Lowest Price",,"2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100085,"Won","GE HEALTH CARE","Omnipaque 300mg/ml 50ml","18.2","SAR",0,,"Lowest Price","Split Award","2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100085,"Won","GUERBET","XENETIX 300/50","39.0","SAR",0,,"Not Specified","Split Award","2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100086,"Won","GE HEALTH CARE","Omnipaque 350mg/ml 100ml","38.2","SAR",0,,"Lowest Price","Split Award","2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100086,"Won","GE Health Care","Visipaque 370 / 100ml","121.8","SAR",0,,"Not Specified",,"2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100086,"Won","GUERBET","XENETIX 350/100","79.0","SAR",0,,"Not Specified","Split Award","2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100087,"Won","GE Health Care","Visipaque 370 / 50ml","73.0","SAR",0,,"Not Specified",,"2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100087,"Won","GE Healthcare","OMNIPAQUE 350MG/ML 50ML","19.2","SAR",0,,"Lowest Price","Split Award","2022-04-15","GCXYS",0
-"SA-20-1064-1-R1",100087,"Won","GUERBET","XENETIX 350/50","43.5","SAR",0,,"Not Specified","Split Award","2022-04-15","GCXYS",0
+"SA-20-1064-1-R1",100041,"Won","GUERBET","TELEBRIX GASTRO","86.0","SAR",0,,"Not Specified","Won against different request nos.","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100084,"Won","GE HEALTH CARE","Omnipaque 300mg/ml 100ml","36.2","SAR",0,,"Lowest Price",,"2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100085,"Won","GE HEALTH CARE","Omnipaque 300mg/ml 50ml","18.2","SAR",0,,"Lowest Price","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100085,"Won","GUERBET","XENETIX 300/50","39.0","SAR",0,,"Not Specified","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GE HEALTH CARE","Omnipaque 350mg/ml 100ml","38.2","SAR",0,,"Lowest Price","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GE Health Care","Visipaque 370 / 100ml","121.8","SAR",0,,"Not Specified",,"2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100086,"Won","GUERBET","XENETIX 350/100","79.0","SAR",0,,"Not Specified","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GE Health Care","Visipaque 370 / 50ml","73.0","SAR",0,,"Not Specified",,"2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GE Healthcare","OMNIPAQUE 350MG/ML 50ML","19.2","SAR",0,,"Lowest Price","Split Award","2021-12-12","GCXYS",0
+"SA-20-1064-1-R1",100087,"Won","GUERBET","XENETIX 350/50","43.5","SAR",0,,"Not Specified","Split Award","2021-12-12","GCXYS",0
 "SA-20-1075-3-C1",100097,"Won","GEDEON RICHTER FOR AJA PHARMA","MIDIANA 3MG/ 0.3MG TABLET","0.62","SAR",0,,"Not Specified",,"2021-09-16","GCXYS",0
 "SA-20-1075-1-R1",100029,"Won","NATIONAL PHARMACEUTICAL INDUSTRIES CO","Omacip 500 mg","0.143","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
 "SA-20-1075-1-R1",100029,"Won","KUWAIT SAUDI CO.","Ciflox 500 mg tab","0.2063","SAR",0,,"Not Specified",,"2022-02-21","GCXYS",0
@@ -192,45 +192,18 @@ OFFERID,PRODUCTCODE,OUTCOME,AWARDEDCOMPANY,AWARDEDPRODUCT,AWARDEDPRICE,CURRENCY,
 "CL-21-1003-1",200171,"Lost","Biogen","Product1",,,0,,"Incomplete Data",,"2021-10-25","EUTVP",0
 "CL-21-1005-1",200153,"Won","Company1","Product1","11000.0","CLP",200,"Pack","Not Specified",,"2021-11-08","EUTVP",0
 "AR-22-1006-1",200188,"Lost","Merck","Rebif",,,0,,"Not Specified",,"2022-02-11","GGKKD",0
-"IT-22-1023-3",200277,"Won","GEDEON","BENILEXA","68.98","EUR",105,,"Lowest Price",,"2022-04-07","BIAVJ",0
-"IT-22-1023-3",200260,"Won","TAKEDA","ADVATE","525.9","EUR",92,,"Lowest Price",,"2022-04-07","BIAVJ",0
-"IT-22-1023-5",200260,"Won","TAKEDA","ADVATE","525.9","EUR",476,,"Lowest Price",,"2022-03-16","BIAOV",0
-"IT-22-1023-1",200277,"Won","GEDEON","BENILEXA","68.98","EUR",900,,"Lowest Price",,"2022-04-06","BIAVJ",0
-"IT-22-1023-1",200260,"Won","KEDRION","NUWIQ","0.5259","EUR",3000000,,"Only Participant","L2615 - ESCLUSIVO","2022-04-06","BIAVJ",0
-"IT-22-1023-1",200260,"Won","TAKEDA_ADY","ADYNOVI","0.5488","EUR",3325400,,"Only Participant","L2616 - ESCLUSIVO","2022-04-06","BIAVJ",0
-"IT-22-1023-1",200260,"Won","NOVO NORDISK_ESP","ESPEROCT","0.468","EUR",3575000,,"Only Participant","L2619 - ESCLUSIVO","2022-04-06","BIAVJ",0
-"IT-22-1023-1",200260,"Won","NOVO NORDISK","NOVO EIGHT","0.5","EUR",3025000,,"Only Participant","L2610 - ESCLUSIVO","2022-04-06","BIAVJ",0
-"IT-22-1048-1",200308,"Won","Rozlytrek ","Rozlytrek (Entrectinib)","54.0","EUR",21330,,"Only Participant","Offerto prezzo superiore al base d'asta - Offerta ammessa perchè unico e prezzo offerto corrisponde al prezzo di cessione al SSN","2022-04-04","BIAOV",0
-"IT-22-1175-1",200277,"Won","GEDEON","BENILEXA","68.49","EUR",3968,,"Lowest Price",,"2022-03-28","BIAOV",0
-"SA-20-1075-1-R2",100029,"Won","National pharmaceuticals","Omacip 500mg","0.143","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100029,"Won","Kuwait saudi Co","Ciflox 500mg","0.2063","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100029,"Won","SPIMACO","Cipromax FC tabs 500mg","0.2893","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"IT-22-1023-2",200247,"Won","NOVARTIS","LUCENTIS","390.0","EUR",4500,,"Lowest Price",,"2022-03-16","BIAOV",0
-"IT-22-1023-4",200247,"Won","NOVARTIS","LUCENTIS","390.0","EUR",600,,"Lowest Price",,"2022-03-16","BIAOV",0
-"IT-22-1023-6",200247,"Won","NOVARTIS","LUCENTIS","390.0","EUR",3630,,"Lowest Price",,"2022-03-16","BIAOV",0
-"SA-20-1075-1-R2",100092,"Won","Dr. Reddy laboratories","Rivaroxaban SPC 10mg FC Tablets","1.7955","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100092,"Won","SPIMACO","Banorvic FC tabs 10mg 10p","2.5","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100093,"Won","Dr. Reddy Laboratories","Rivaroxaban SPC 15mg FC Tablets","1.6748","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100093,"Won","SPIMACO","Banorvic FC tabs 15mg 28p","1.4","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100095,"Won","Dr. Reddy Laboratories","Rivaroxaban SPC 20mg FC Tablets","1.7226","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100095,"Won","SPIMACO","Banorvic FC Tabs 20mg 28p","1.5","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100017,"Won","SPIMACO","Maxim","2.192","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100017,"Won","SPIMACO KSA","Moxive tab 400mg 5 N","2.28444","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"IT-22-1023-1",200260,"Won","PFIZER","REFACTO","0.528","EUR",3760800,,"Only Participant","L2612 - ESCLUSIVO","2022-04-06","BIAVJ",0
-"IT-22-1023-1",200260,"Won","CSL BEHRING","AFSTYLA","0.528","EUR",3000000,,"Only Participant","L2614 - ESCLUSIVO","2022-04-06","BIAVJ",0
-"IT-22-1023-1",200260,"Won","TAKEDA","ADVATE","525.9","EUR",5996,,"Lowest Price",,"2022-04-06","BIAVJ",0
-"IT-22-1134-2",200309,"Won","NOVARTIS","BEOVU ","365.0","EUR",4000,,"Not Specified",,"2022-03-21","BIAOV",0
-"IT-22-1134-2",200309,"Won","JANSSEN ","ERLEADA ","15.9242","EUR",26208,,"Not Specified",,"2022-03-21","BIAOV",0
-"IT-22-1134-2",200309,"Won","DAIICHI SANKYO ","LIXIANA ","2.51148","EUR",5039760,,"Not Specified",,"2022-03-21","BIAOV",0
-"IT-22-1175-2",200408,"Won","GUERBET S.P.A.","DOTAREM (acido gadoterico)","0.599","EUR",1540,"Pack","Lowest Price","Lotto a ml","2022-03-25","BIAOV",0
-"IT-22-1175-2",200409,"Won","GUERBET S.P.A.","DOTAREM (acido gadoterico)","6.13","EUR",27036,,"Lowest Price",,"2022-03-25","BIAOV",0
-"IT-22-1175-2",200410,"Won","GUERBET S.P.A.","DOTAREM (acido gadoterico)","9.135","EUR",26644,"Pack","Lowest Price",,"2022-03-25","BIAOV",0
-"IT-22-1175-2",200411,"Won","GUERBET S.P.A.","DOTAREM (acido gadoterico)","11.98","EUR",53176,"Pack","Lowest Price",,"2022-03-25","BIAOV",0
-"SA-20-1075-1-R2",100016,"Won","SPIMACO KSA","Moxive tab 400mg 5 N",,"SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"SA-20-1075-1-R2",100028,"Won","Pharmaceutical Solutions","Cipro-Sol 200mg/100ml G Bottle","3.45","SAR",0,,"Not Specified",,"2022-03-29","GCXYS",0
-"IT-22-1192-2",200409,"Won","GUERBET","DOTAREM","6.8","EUR",0,,"Lowest Price",,"2022-03-30","BIAOV",0
-"IT-22-1192-2",200410,"Won","GUERBET","DOTAREM","10.2","EUR",0,,"Lowest Price",,"2022-03-30","BIAOV",0
-"IT-22-1192-2",200411,"Won","GUERBET","DOTAREM","13.6","EUR",0,,"Lowest Price",,"2022-03-30","BIAOV",0
-"IT-22-1192-1",200230,"Lost","NOVARTIS","EXTAVIS","25.0","EUR",0,,"High Price",,"2022-03-30","BIAOV",0
-"IT-22-1048-1",200308,"Won","IPSEN S.p.A","CABOMETYX","154.0","EUR",37296,,"Not Specified","Competitor di STVARGA","2022-04-04","BIAOV",0
-"IT-22-1179-1",200259,,"","",,"",0,,,,"2022-04-04","BIAVJ",0
+"SA-20-1075-1-R2",100016,"Won","SPIMACO KSA","Moxive tab 400mg 5 N",,"SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100029,"Won","National pharmaceuticals","Omacip 500mg","0.143","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100029,"Won","Kuwait saudi Co","Ciflox 500mg","0.2063","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100029,"Won","SPIMACO","Cipromax FC tabs 500mg","0.2893","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100092,"Won","Dr. Reddy laboratories","Rivaroxaban SPC 10mg FC Tablets","1.7955","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100092,"Won","SPIMACO","Banorvic FC tabs 10mg 10p","2.5","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100093,"Won","Dr. Reddy Laboratories","Rivaroxaban SPC 15mg FC Tablets","1.6748","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100093,"Won","SPIMACO","Banorvic FC tabs 15mg 28p","1.4","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100095,"Won","Dr. Reddy Laboratories","Rivaroxaban SPC 20mg FC Tablets","1.7226","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100095,"Won","SPIMACO","Banorvic FC Tabs 20mg 28p","1.5","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100017,"Won","SPIMACO","Maxim","2.192","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100017,"Won","SPIMACO KSA","Moxive tab 400mg 5 N","2.28444","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"SA-20-1075-1-R2",100028,"Won","Pharmaceutical Solutions","Cipro-Sol 200mg/100ml G Bottle","3.45","SAR",0,,"Not Specified",,"2022-03-09","EITOG",0
+"IT-22-1003-2",200247,"Won","Avastin","ADALAT","0.2","EUR",25,,"Not Specified",,"2022-03-18","EHMHV",0
+"ES-22-1032-1",205280,"Won","Pfizer","ghjdhg","645.0","EUR",5,,"Not Specified","Split award","2022-03-23","EUTVP",0
