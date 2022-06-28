@@ -305,7 +305,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
                     aPriceAgreementsUpdated.push(agreement.ID);
 
                     //update the actual price agreement withh the new price agreement date
-                    return tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate, extendPriceAgreement: false}).where({ ID: agreement.ID }));
+                    return tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate}).where({ ID: agreement.ID }));
                 }
 
                 return null;
