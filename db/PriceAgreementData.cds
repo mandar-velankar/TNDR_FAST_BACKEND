@@ -34,8 +34,13 @@ entity PriceAgreements: cuid, managed {
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
     ExpiringSoon: Boolean default false; // calculated from NodeJS
+    Expired: Boolean default false; //calculated from NodeJS
     isNewPriceAgreement: Boolean default true; // calculated from NodeJS
+    AppliedCount: Integer default 0; // calculated from NodeJS
     OfferId: String;
+    ExtendPriceAgreement: Boolean default false;
+    ExpiryExtensionPeriod: Integer;
+    Status: String;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -60,7 +65,11 @@ entity PriceAgreements: cuid, managed {
     MaterialsFOC: Association to TransactionalData.ProductPricing on MaterialsFOC.CountryCode = CountryCode
                                                                            and MaterialsFOC.OfferID = OfferId
                                                                            and MaterialsFOC.ProductCode = ProductPackId;
-    
+    PriceConditions: Association to many TransactionalData.PriceCondition 
+                                        on PriceConditions.OfferID = OfferId
+                                        and PriceConditions.ProductCode = ProductPackId
+                                        and PriceConditions.CountryCode = CountryCode;
+    SettlementDates: Composition of many SettlementDates on SettlementDates.PriceAgreementId = ID;
 }
 entity CustomerPrices: cuid, managed {
     // @cds.api.ignore
@@ -84,8 +93,15 @@ entity CustomerPrices: cuid, managed {
     Price: Double;
     PriceCondition: String;
     Applied: Boolean; 
+    RefIdocNumber: String;
+    Notified: Boolean default false;
 }
 
+entity SettlementDates: managed {
+    key PriceAgreementId: String not null;
+    key FromDate: Date;
+    ToDate: Date;
+}
 entity CustomerPrices_History: managed {
     ID: UUID;
     ValidFrom: Timestamp;
@@ -104,6 +120,8 @@ entity CustomerPrices_History: managed {
     Price: Double;
     PriceCondition: String;
     Applied: Boolean; 
+    RefIdocNumber: String;
+    Notified: Boolean default false;
 }
 
 /**
@@ -111,10 +129,10 @@ entity CustomerPrices_History: managed {
  * but don't have a CustomerPrices set yet
  */
 entity CandidatesView as select from PriceAgreements as pa 
-left outer join MasterData.Tenders_in_Regions tr on pa.TenderId = tr.TenderID
-inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode
+left outer join MasterData.Tenders_in_Regions AS tr on pa.TenderId = tr.TenderID
+inner join MasterData.PT_TMINST AS inst on pa.CountryCode = inst.CountryCode
        and tr.RegionID = inst.RegionID
-       and inst.InstituteType = 'Public Account'
+       and inst.InstituteType = 'Public Account' 
 {
     pa.ID as PriceAgreementId,
     key pa.TenderId,
@@ -124,14 +142,40 @@ inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode
 }
 union
 select from PriceAgreements as pa
-inner join MasterData.PT_TMINST inst on pa.CountryCode = inst.CountryCode and pa.InstituteId = inst.InstituteID
+inner join MasterData.PT_TMINST AS inst on pa.CountryCode = inst.CountryCode and pa.InstituteId = inst.InstituteID
 {
     pa.ID as PriceAgreementId,
     pa.TenderId,
     inst.InstituteID as CandidateID,
     inst.InstituteName as CandidateName,
     inst.Region.ID as RegionId
-}where inst.InstituteType <> 'Region(s)';
+}where inst.InstituteType <> 'Region(s)'
+// Add children institutes as price agreement candidates
+union
+select from PriceAgreements as pa
+inner join MasterData.PT_TMINSHIER as hier on pa.InstituteId = hier.ParentInstituteID
+inner join MasterData.PT_TMINST AS inst on hier.InstituteID = inst.InstituteID
+{
+    pa.ID as PriceAgreementId,
+    pa.TenderId,
+    inst.InstituteID as CandidateID,
+    inst.InstituteName as CandidateName,
+    inst.RegionID as RegionId
+}where inst.ActiveRecord = 'Yes'
+and hier.ActiveRecord = 'Yes'
+// Add all public institutes in Spain as candidates for price agreement when tender institute is of type "National"
+union
+select from PriceAgreements as pa
+inner join MasterData.PT_TMINST AS inst on pa.InstituteId = inst.InstituteID 
+inner join MasterData.PT_TMINST AS inst2 on (inst2.InstituteType = 'Public Account' or inst2.InstituteType = 'Governmental Account') and pa.CountryCode = inst2.CountryCode
+{
+    pa.ID as PriceAgreementId,
+    pa.TenderId,
+    inst2.InstituteID as CandidateID,
+    inst2.InstituteName as CandidateName,
+    inst2.RegionID as RegionId
+}where inst.InstituteType = 'National'
+and inst.ActiveRecord = 'Yes';
 
 
 /**
@@ -181,11 +225,17 @@ left outer join CustomerPrices as cp
 
 
 
-entity CandidatePrices as select from PriceAgreements pa
-inner join CandidatesView ca on ca.PriceAgreementId = pa.ID 
+entity CandidatePrices as select from PriceAgreements AS pa
+inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
 //inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
-inner join MasterData.PT_TMSKUPRDPCK ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
-left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.MaterialNumber = ma.SKUCode and cp.InstituteId = ca.CandidateID and cp.PriceCondition <> 'YA03' {
+inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
+inner join MasterData.PT_TMINST AS ins on pa.CountryCode = ins.CountryCode and ca.CandidateID = ins.InstituteID
+left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId 
+    and cp.MaterialNumber = ma.SKUCode 
+    and cp.InstituteId = ca.CandidateID 
+    and cp.PriceCondition <> 'YA03' // Italy FOC
+    and cp.PriceCondition <> 'YA01' // Spain FOC
+    and cp.PriceCondition <> 'YAW1' { // Spain Rappel
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
@@ -195,12 +245,16 @@ left outer join CustomerPrices cp on pa.ID = cp.PriceAgreementId and cp.Material
         key ma.SKUCode as MaterialNumber,
         cp.ID as CustomerPriceId,
         case
-            when cp.Price is null then false else true 
+            when cp.Price is null then false 
+            when cp.Price is not null and cp.Applied is not null then cp.Applied
+            else true 
         end as Applied:Boolean,
         ifnull(cp.Synchronized, false) as Synchronized:Boolean,
         ifnull(cp.Price, pa.Price) as Price:Double,
         ifnull(cp.EffectiveDate, pa.EffectiveDate) as EffectiveDate:DateTime,
-        ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime
+        ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime,
+        ins.CustomerID //by candidate
+        // pa.Institute.CustomerID //by price agreement
 };
 
 

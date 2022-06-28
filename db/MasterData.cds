@@ -1,5 +1,5 @@
 namespace com.bayer.SXTENDER.MasterData;
-using { User, Country, managed, cuid } from '@sap/cds/common';
+using { User, Country, managed, cuid, temporal } from '@sap/cds/common';
 using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 using { com.bayer.SXTENDER.AdminData } from './AdminData';
@@ -52,7 +52,7 @@ entity CountryCurrency : managed {
 entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
 	key InstituteID:Integer not null;
-	CustomerID:Integer;//delete
+	CustomerID:Integer;
 	InstituteName:String(500);
 	InstituteType:String(50);
 	Address:String(500);
@@ -66,8 +66,12 @@ entity PT_TMINST{
 	State:String;
 	MercadoPublicoIssuer:String;
 	RegionID:String;
+    ProvinceID:String;
+    CifCode:String(50);
+    RegionalHealthSystem: String(50);
 	VatCode:String(50);
 	TaxCode:String(50);
+    CustomerGroup:String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -76,6 +80,7 @@ entity PT_TMINST{
 	Terms:Association to many PT_TMINSBRTR on Terms.Institute = $self;
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
 	Region:Association to CountryRegions on Region.ID = RegionID;
+    Province: Association to CountryProvinces on Province.ID = ProvinceID;
 }
 
 //Institute Hierarchy Level
@@ -281,7 +286,8 @@ entity PT_TMCTPRDPCK{
 	CODE1:String(255);
 	CODE2:String(255);
     CODE3:String(255);    
-	QTY_THRESHOLD:Integer;  
+	QTY_THRESHOLD:Integer; 
+	BU: String(255);   
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
@@ -443,6 +449,14 @@ entity MASTER_COUNTRY_TENDER_ORIGIN{
 }
 
 entity MASTER_COUNTRY_TENDER_TYPE{
+	key COUNTRY_CODE:String(2) not null;
+	key TENDER_TYPE_ID:Integer not null;
+	//Associations
+	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
+	TenderType:Association to MASTER_TENDER_TYPE on TenderType.ID = TENDER_TYPE_ID;
+}
+
+entity MASTER_COUNTRY_TENDER_TYPE2{
 	key COUNTRY_CODE:String(2) not null;
 	key TENDER_TYPE_ID:Integer not null;
 	//Associations
@@ -674,4 +688,30 @@ entity ConsumerPrices: cuid, managed {
 	TotalDiscount: Double;
 	MaxPriceNhsPP: Double;
 	MaxPriceNhsPU: Double;
+}
+
+entity RoyalDecree {
+    key ProductPackID           : Integer;
+    key CustomerGroup           : String;
+        Percentage              : Decimal;
+    key ValidFrom               : Date;
+        ValidTo                 : Date;
+}
+
+entity MasterPrices: cuid, managed {
+	CountryCode: String;
+	ProductPackId: String;
+	Currency: String;
+    UoM: String;
+    YLLP: Double;
+    YLAP: Double;
+    PRAF: Double;    
+    ValidFrom: Timestamp;
+	ValidTo: Timestamp;    
+
+}
+
+entity Settlements {
+	key ID: String(10);
+	Description: localized String(50);
 }

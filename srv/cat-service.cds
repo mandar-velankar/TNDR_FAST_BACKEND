@@ -34,6 +34,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity CountrySalesType                             as projection on MasterData.MASTER_COUNTRY_SALES_TYPE;
     entity CountryTenderOrigin                          as projection on MasterData.MASTER_COUNTRY_TENDER_ORIGIN;
     entity CountryTenderType                            as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE;
+    entity CountryTenderType2                           as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE2;
     entity MASTER_INSTITUTE_HIERARCHY                   as projection on MasterData.MASTER_INSTITUTE_HIERARCHY;
     entity SalesType                                    as projection on MasterData.MASTER_SALES_TYPE;
     entity TenderOrigin                                 as projection on MasterData.MASTER_TENDER_ORIGIN;
@@ -62,8 +63,17 @@ service CatalogService @(path : 'tender')@(requires : [
     entity ConsumerPrices                               as projection on MasterData.ConsumerPrices;
     entity MostRecentConsumerPricesView                 as projection on MasterDataViews.MostRecentConsumerPricesView;
     entity ProductPricing                               as projection on TransactionalData.ProductPricing;
+    entity PriceCondition                               as projection on TransactionalData.PriceCondition;
+    entity PriceConditionClassification                 as projection on TransactionalData.PriceConditionClassification;
+    entity DiscountCondition                            as projection on TransactionalData.DiscountCondition;
     entity FreeGoodsOther                               as projection on TransactionalData.FreeGoodsOther;
+    entity ProductTypeProfitability                     as projection on TransactionalData.ProductTypeProfitability;
     entity ProductPricingView                           as projection on TransactionalDataViews.ProductPricingView;
+    entity PriceConditionView                           as projection on TransactionalDataViews.PriceConditionView;
+    //spain
+    entity MasterPrices                                 as projection on MasterData.MasterPrices;
+    entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
+    entity Settlements                                  as projection on MasterData.Settlements;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -80,6 +90,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity PT_TMINSBRTR                                 as projection on MasterData.PT_TMINSBRTR;
     entity PT_TMINSHIER                                 as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINST                                    as projection on MasterData.PT_TMINST;
+    entity Province                                     as projection on MasterData.CountryProvinces;
 
     entity PT_TMLE                                      as projection on MasterData.PT_TMLE {
         * , Countries : redirected to PT_TMCTLE
@@ -196,7 +207,7 @@ service CatalogService @(path : 'tender')@(requires : [
     };
 
     entity PT_TMTEND                                    as projection on TransactionalData.PT_TMTEND {
-        * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView, CountrySpecificInformation : redirected to CountrySpecificInformation
+        * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView, CountrySpecificInformation : redirected to CountrySpecificInformation, User : redirected to PT_TMUSER,
     };
 
     entity PT_TMTNOFST                                  as projection on TransactionalData.PT_TMTNOFST;
@@ -378,6 +389,10 @@ service CatalogService @(path : 'tender')@(requires : [
                                                             and Materials.ActiveRecord = 'Yes';
             ApproverTypes                               : Association to many ApproverTypes
                                                             on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
+            PriceCondition                              : Composition of many PriceCondition 
+                                                                    on PriceCondition.OfferID = $self.OFFER_ID
+                                                                    and PriceCondition.ProductCode = $self.PRODUCTID
+                                                                    and PriceCondition.CountryCode = $self.COUNTRY_CODE;
     };
 
     entity OfferValidation {
@@ -390,12 +405,19 @@ service CatalogService @(path : 'tender')@(requires : [
             INSTITUTENAME         : String(500);
             INSTITUTE_TYPE        : String(50);
             INSTITUTE_STATE       : String;
+            INSTITUTE_REGION      : String;
+            INSTITUTE_PROVINCE    : String;
+            INSTITUTE_CIFCODE     : String(50);
+            INSTITUTE_REGIONALHEALTHSYSTEM: String(50);
+            INSTITUTE_CUSTOMER_GROUP: String(50);
             TAXCODE               : String(50);
             VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
             DIVISION              : String(100);
             OFFERDATE             : Date;
             OFFERVALIDITY         : Date not null;
+            EffectiveDate         : Date;
+            ExpiryDate            : Date;
             COUNTRYCODE           : String(2) not null;
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);
@@ -451,6 +473,8 @@ service CatalogService @(path : 'tender')@(requires : [
             //SBR                            : Integer not null;//AR only
             BUDGET_RATE           : Double;
             SPOT_RATE             : Double;
+            EXTERNAL_ID           : String;
+			SAP_ID                : String;
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -687,9 +711,12 @@ service CatalogService @(path : 'tender')@(requires : [
         OfferProduct : redirected to PT_TMOFPR
     };
 
+    entity Candidates                                   as projection on PriceAgreementData.CandidatesView;
+
     //OTHER
     entity Templates                                    as projection on AdminData.Template;
     entity MailTemplates                                as projection on AdminData.MailTemplate;
+    entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
 
     entity Attachment {

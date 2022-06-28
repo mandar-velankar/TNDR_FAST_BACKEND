@@ -160,18 +160,18 @@ module.exports = (srv) => {
 		let approvalRegulatory = latestApproval.filter((d) => d.ApproverType === "Regulatory");
 		let approvalLegal = latestApproval.filter((d) => d.ApproverType === "Legal");
 		let approvalSupply = latestApproval.filter((d) => d.ApproverType === "Supply Chain");
-		let approvalCountryPharma = latestApproval.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Pharma");
+		let approvalCountryPharma = latestApproval.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && (d.Division === "Pharma" || d.Division === "Consumer Health"));
 		let approvalCountryRadiology = latestApproval.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Radiology");
-		let approvalRegionalPharma = latestApproval.filter((d) => d.ApproverType === "RegionalBusiness" && d.Division === "Pharma");
+		let approvalRegionalPharma = latestApproval.filter((d) => d.ApproverType === "RegionalBusiness" && (d.Division === "Pharma" || d.Division === "Consumer Health"));
 		let approvalRegionalRadiology = latestApproval.filter((d) => d.ApproverType === "RegionalBusiness" && d.Division === "Radiology");
 
 		//Default (first found, if exists) approvers (will be used if none saved)
 		let defaultRegulatory = countryApprovers.filter((d) => d.ApproverType === "Regulatory");
 		let defaultLegal = countryApprovers.filter((d) => d.ApproverType === "Legal");
 		let defaultSupply = countryApprovers.filter((d) => d.ApproverType === "Supply Chain");
-		let defaultCountryPharma = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Pharma");
+		let defaultCountryPharma = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && (d.Division === "Pharma" || d.Division === "Consumer Health"));
 		let defaultCountryRadiology = countryApprovers.filter((d) => (d.ApproverType === "Country Business" || d.ApproverType === "Manager Business Operations") && d.Division === "Radiology");
-		let defaultRegionalPharma = countryApprovers.filter((d) => d.ApproverType === "RegionalBusiness" && d.Division === "Pharma");
+		let defaultRegionalPharma = countryApprovers.filter((d) => d.ApproverType === "RegionalBusiness" && (d.Division === "Pharma" || d.Division === "Consumer Health"));
 		let defaultRegionalRadiology = countryApprovers.filter((d) => d.ApproverType === "RegionalBusiness" && d.Division === "Radiology");
 		
         //Regulatory
@@ -195,7 +195,7 @@ module.exports = (srv) => {
 			let regionalRadiology = buildValidationEntry(approvalRegionalRadiology, defaultRegionalRadiology, countryCode, instituteGroupId, productPackId, priceApprovalValidation.REGIONAL_BUSINESS);
 			if (regionalRadiology) results.push(regionalRadiology);
 		}
-		else if (division === "Pharma"){
+		else if (division === "Pharma" || division === "Consumer Health"){
 			let countryPharma = buildValidationEntry(approvalCountryPharma, defaultCountryPharma, countryCode, instituteGroupId, productPackId, priceApprovalValidation.COUNTRY_BUSINESS);
 			if (countryPharma) results.push(countryPharma);
 			
@@ -298,7 +298,8 @@ module.exports = (srv) => {
 	}
 
     srv.on('READ', 'DivisionsForCountry', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
             let whereCountry = ServiceHelper.buildWhere(req, "CountryCode");
@@ -309,7 +310,8 @@ module.exports = (srv) => {
     });
 
     srv.on('READ', 'ChannelsForCountry', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
             let whereCountry = ServiceHelper.buildWhere(req, "CountryCode");
@@ -329,7 +331,8 @@ module.exports = (srv) => {
     });
 
     srv.on('READ', 'LatestApprovals', async (req) => {
-		const tx = cds.transaction(req)
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
 		let results = [];
 		if (req.query.SELECT.where) {
 			//Get filters
@@ -346,19 +349,25 @@ module.exports = (srv) => {
 	// TODO: insert is working, but gives an error message 
 	// error: the key 'CountryCode' does not exist in the given entity
 	srv.on('CREATE', 'LatestApprovals', async (req) => {
-		const tx = cds.transaction(req);
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
 		const approvalRequests = req.query.INSERT.entries;
-		
-        const affectedRows = await tx.run(
-            INSERT.into(ApprovalStatus).entries(approvalRequests)
-		)
-		.then(rec => {
+		try{
+			const affectedRows = await tx.run( INSERT.into(ApprovalStatus).entries(approvalRequests) );
+			await tx.commit();
 			req.reply(req.data);
-		})
-		.catch(err =>{
-			if(err.code == '301')
-				req.error(409, "Unique constraint violated. Duplicate value in a restricted field.");
-		});
+		}catch(err){
+			if(err.code == '301') req.error(409, "Unique constraint violated. Duplicate value in a restricted field.");
+			await tx.rollback(err);
+		}
+
+		// .then(rec => {
+		// 	req.reply(req.data);
+		// })
+		// .catch(err =>{
+		// 	if(err.code == '301')
+		// 		req.error(409, "Unique constraint violated. Duplicate value in a restricted field.");
+		// });
 		
 		
 	});
