@@ -4,6 +4,7 @@ const BaseJob = require('./BaseJob');
 const core = require('@sap-cloud-sdk/core');
 const ServiceHelper = require('../utils/ServiceHelper');
 const axios = require('axios');
+const qs = require("qs");
 
 module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJob {
 
@@ -84,7 +85,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
-        const body = this.getPriceAgreementRequestBodyTemplate(); 
+        const body = await this.getPriceAgreementRequestBodyTemplate(); 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
@@ -254,7 +255,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
 
 
     async getBearerToken() {
-        const { SchedulerApiConfig, SchedulerApiConfigOAuth } = db.entities("com.bayer.SXTENDER.AdminData");
+        const { SchedulerApiConfig, SchedulerApiConfigOAuth } = this.db.entities("com.bayer.SXTENDER.AdminData");
 
         // get api config
         const priceAgreementApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement'}));
@@ -324,10 +325,4 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             await tx.rollback(error);
         }   
     };
-
-    formatDate(date) {
-        let month = '' + (date.getMonth() + 1);
-        month = month.length < 2 ? `0${month}` : month;
-        return `${date.getFullYear()}-${month}-${date.getDate()} 00:00:00`;
-    }
 };
