@@ -47,8 +47,9 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             throw `No customer prices were found for the following PriceAgreement: ${ids}`;
         }
         const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        const updateMainConditionPromises = mainPriceConditions.map(custPrice => this.updateCustomerPrice(custPrice, tx));
-
+        const updateMainConditionPromises = mainPriceConditions.map(custPrice => {
+            return this.updateCustomerPrice(custPrice, tx);
+        });
         // Synchronize
         let result = await Promise.all(updateMainConditionPromises); 
         // Set 'Synchronized' to true and add IDOC number from the response
@@ -284,18 +285,30 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
             //get all price agreements which have to be extended
-            const whereExpr = `ExtendPriceAgreement = true and synchronized = false`
+            //first, calculate todays date - 1 day, as such that we can use this as a filter in our select
+
+
+            const whereExpr = `ExtendPriceAgreement = true` //and expiry date is today - 1 
             const priceAgreements = await tx.run(SELECT.from(PriceAgreements).where(whereExpr));
 
             let aPriceAgreementsUpdated = [];
             const promises = priceAgreements.map(agreement => {
-                let newDate = new Date(agreement.ExpiryDate);
-                newDate.setMonth(newDate.getMonth()+agreement.ExpiryExtensionPeriod);
-                newDate = newDate.toISOString().replace('T', ' ').replace('Z', '');
-                aPriceAgreementsUpdated.push(agreement.ID);
+                let todayMinus1 = new Date();
+                todayMinus1 = new Date(todayMinus1.setDate(todayMinus1.getDate()-1));
+                todayMinus1 = todayMinus1.toISOString().substr(0, agreement.ExpiryDate.lastIndexOf("T"));
+                let agreementExpiryDate = agreement.ExpiryDate.substr(0, agreement.ExpiryDate.lastIndexOf("T"));
 
-                //update the actual price agreement withh the new price agreement date
-                return tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate}).where({ ID: agreement.ID }));;
+                if(agreementExpiryDate === todayMinus1){
+                    let newDate = new Date(agreement.ExpiryDate);
+                    newDate.setMonth(newDate.getMonth()+agreement.ExpiryExtensionPeriod);
+                    newDate = newDate.toISOString().replace('T', ' ').replace('Z', '');
+                    aPriceAgreementsUpdated.push(agreement.ID);
+
+                    //update the actual price agreement withh the new price agreement date
+                    return tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate, extendPriceAgreement: false}).where({ ID: agreement.ID }));
+                }
+
+                return null;
             });
 
             //execute the promises and log the output
@@ -311,4 +324,10 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             await tx.rollback(error);
         }   
     };
+
+    formatDate(date) {
+        let month = '' + (date.getMonth() + 1);
+        month = month.length < 2 ? `0${month}` : month;
+        return `${date.getFullYear()}-${month}-${date.getDate()} 00:00:00`;
+    }
 };
