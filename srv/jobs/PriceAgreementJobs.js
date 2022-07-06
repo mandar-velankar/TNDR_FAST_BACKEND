@@ -6,7 +6,7 @@ const ServiceHelper = require('../utils/ServiceHelper');
 const axios = require('axios');
 const qs = require("qs");
 
-module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJob {
+module.exports = class ExtendPriceAgreements extends BaseJob {
 
     constructor(jobName,jobTime) {
         super(jobName,jobTime);
