@@ -1,7 +1,7 @@
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 const PriceAgreementMailJob = require("./PriceAgreementMailJob");
 const PriceAgreementPriceConditionNotificationMailJob = require("./PriceAgreementPriceConditionNotificationMailJob");
-const {ExtendPriceAgreements} = require("./PriceAgreementJobs");
+const ExtendPriceAgreements = require("./PriceAgreementJobs");
 
 module.exports = class JobFactory {
     static create(jobName, jobTime) {
