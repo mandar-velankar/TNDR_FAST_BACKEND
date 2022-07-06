@@ -406,6 +406,7 @@ entity PriceCondition: cuid, managed {
     ConfidentialPrice                   : Decimal;
     Discount                            : Decimal;
     RoyalDecree                         : String;
+    RoyalDecreeValue                    : Decimal;
     StandardDiscount                    : Decimal;
     AdditionalDiscount                  : Decimal;
     NetPriceWithoutTaxBeforeDeductionRD : Decimal;
