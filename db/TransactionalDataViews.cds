@@ -1210,6 +1210,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.Liquidation,
     priceCondition.RefundDate,
     priceCondition.RoyalDecreeValue, //calculated in UI based on User Input
+    priceCondition.RoyalDecreeIncl,
     masterPrices.YLLP as PVL,
     masterPrices.YLAP,
     masterPrices.PRAF,
