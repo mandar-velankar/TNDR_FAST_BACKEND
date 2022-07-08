@@ -24,14 +24,4 @@ service BankGuaranteeService @(path: 'bankguarantee') @(requires:['f_tndr_cag_ad
         User: redirected to Users,
     };
 
-
-    //Countries where user has accesss to
-    entity UserCountry @(restrict: [
-		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
-	])as projection on AdminData.PT_TMUSERCTRY {
-        *,
-        Country: redirected to Country,
-        User: redirected to Users,
-    };
-
 }
