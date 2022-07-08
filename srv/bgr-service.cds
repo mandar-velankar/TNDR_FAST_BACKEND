@@ -24,8 +24,6 @@ service BankGuaranteeService @(path: 'bankguarantee') @(requires:['f_tndr_cag_ad
         User: redirected to Users,
     };
 
-    entity Country as projection on MasterData.PT_TMCTRY;
-    entity Users as projection on AdminData.PT_TMUSER;
 
     //Countries where user has accesss to
     entity UserCountry @(restrict: [
