@@ -2,6 +2,9 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
     
     type Access {
         tender : Boolean;
+        tenderAccess:{
+            COGS:Boolean;
+        };
         ppa:Boolean;
         contract:Boolean;
         epa:Boolean;
