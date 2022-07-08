@@ -1212,6 +1212,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     masterPrices.YLLP as PVL,
     masterPrices.YLAP,
     masterPrices.PRAF,
+    masterPrices.RentalPrice,
     masterPrices.UoM,
     masterPrices.Currency as masterPriceCurrency,
     priceCondition.MonthlyRentPerUnit,

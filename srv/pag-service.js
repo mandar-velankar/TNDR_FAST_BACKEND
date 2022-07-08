@@ -82,6 +82,9 @@ module.exports = async (srv) => {
             hasExpiredFilterIndex = ServiceHelper.getWhereId(req, 'Expired');
             hasExpiredFilterValues =  ServiceHelper.getWhereValues(req, 'Expired');
 
+            isCancelledFilterIndex = ServiceHelper.getWhereId(req, 'isCancelled');
+            isCancelledFilterValues =  ServiceHelper.getWhereValues(req, 'isCancelled');
+
             isNewPriceAgreementFilterIndex = ServiceHelper.getWhereId(req, 'isNewPriceAgreement');
             isNewPriceAgreementFilterValues = ServiceHelper.getWhereValues(req, 'isNewPriceAgreement');
             
@@ -105,6 +108,10 @@ module.exports = async (srv) => {
 
             if(hasExpiredFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'Expired');
+            }
+
+            if(isCancelledFilterIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'isCancelled');
             }
 
             if(isNewPriceAgreementFilterIndex >= 0){
@@ -216,8 +223,10 @@ module.exports = async (srv) => {
             if(priceAgreement.ExpiryDate){
                 let dExpiryDate = new Date(priceAgreement.ExpiryDate);
                 priceAgreement.ExpiringSoon = calculatedFutureDate >= dExpiryDate && dExpiryDate >= todaysDate ? true : false;
-                priceAgreement.Expired = dExpiryDate < todaysDate ? true : false;
+                priceAgreement.Expired = dExpiryDate < todaysDate && priceAgreement.Status !== 'Cancelled' ? true : false;
             }
+
+            priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
 
             return priceAgreement;
 
@@ -251,6 +260,11 @@ module.exports = async (srv) => {
 
         if(isNewPriceAgreementFilterValues && isNewPriceAgreementFilterValues.length > 0){
             const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
+            result = filteredResult;
+        }
+
+        if(isCancelledFilterValues && isCancelledFilterValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.isCancelled === isCancelledFilterValues[0]);
             result = filteredResult;
         }
 
@@ -402,7 +416,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr+"-";
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KSCHL = customerPrice.PriceCondition;
 
