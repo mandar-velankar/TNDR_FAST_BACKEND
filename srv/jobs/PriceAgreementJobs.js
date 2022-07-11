@@ -296,6 +296,10 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             const promises = priceAgreements.map(agreement => {
                 let todayMinus1 = new Date();
                 todayMinus1 = new Date(todayMinus1.setDate(todayMinus1.getDate()-1));
+                if(!agreement.ExpiryDate || agreement.ExpiryDate.indexOf("T") === -1){
+                    console.log(`AgreementID ${agreement.ID}:Expiry date ${agreement.ExpiryDate} is not valid, will not be processed...`);
+                    return null;
+                }
                 todayMinus1 = todayMinus1.toISOString().substr(0, agreement.ExpiryDate.lastIndexOf("T"));
                 let agreementExpiryDate = agreement.ExpiryDate.substr(0, agreement.ExpiryDate.lastIndexOf("T"));
 
