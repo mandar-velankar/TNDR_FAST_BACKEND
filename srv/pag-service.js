@@ -391,12 +391,18 @@ module.exports = async (srv) => {
             if (!priceCondition) {
                 return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
             }
-            // set KBETR and KPEIN (unit for price) for Precio Neto
+            // set KRECH, KBETR and KPEIN (unit for price) for Precio Neto
             if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") {
                 kbetr = Number(priceCondition.NetPriceWithoutTaxAfterDeductionRD * 10000).toFixed(2);
                 body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KPEIN = 10000;
+                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "C";
             }else {
                 kbetr = priceCondition.Discount * 100;
+            }
+
+            // set KRECH for Descuento Comercial and Descuento Comercial 
+            if(customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
+                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "A";
             }
 
             // set partner and sales organisation
@@ -681,7 +687,7 @@ module.exports = async (srv) => {
         const expiryDate = new Date(customerPrice.ExpiryDate);
 
         const body = getES01RequestBodyTemplate();
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = priceAgreement.InstituteId;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = parseInt(institute.CustomerID);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB;
@@ -737,8 +743,8 @@ module.exports = async (srv) => {
                     "_BAY0-GZ_SALESAGRHEAD": {
                         "BOART": "YAW1",
                         "VKORG": "QFHC",
-                        "VTWEG": 0,
-                        "SPART": 0,
+                        "VTWEG": "00",
+                        "SPART": "00",
                         "BONEM": 0,
                         "BOTEX": "RCT COM. W. ACCRUALS",
                         "DATAB": 0,
@@ -757,7 +763,7 @@ module.exports = async (srv) => {
                                 "DATBI_GR": 0,
                                 "MATNR": 0,
                                 "KBETR": "0-",
-                                "KONWA": "EUR",
+                                "KONWA": "%",
                                 "KPEIN": 1,
                                 "KBRUE": 0,
                                 "KSCHL": "YAW1",
