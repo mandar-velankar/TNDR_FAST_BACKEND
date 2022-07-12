@@ -479,7 +479,8 @@ module.exports = async (srv) => {
                     "E1KONP": {
                       "SEGMENT": 1,
                       "KSCHL": "YLTP",
-                      "KBETR": 0
+                      "KBETR": 0,
+                      "KRECH": "A"
                     }
                   }
                 }
