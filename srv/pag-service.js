@@ -682,7 +682,7 @@ module.exports = async (srv) => {
         const expiryDate = new Date(customerPrice.ExpiryDate);
 
         const body = getES01RequestBodyTemplate();
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = priceAgreement.InstituteId;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = parseInt(institute.CustomerID);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB;
@@ -738,8 +738,8 @@ module.exports = async (srv) => {
                     "_BAY0-GZ_SALESAGRHEAD": {
                         "BOART": "YAW1",
                         "VKORG": "QFHC",
-                        "VTWEG": 0,
-                        "SPART": 0,
+                        "VTWEG": "00",
+                        "SPART": "00",
                         "BONEM": 0,
                         "BOTEX": "RCT COM. W. ACCRUALS",
                         "DATAB": 0,
@@ -758,7 +758,7 @@ module.exports = async (srv) => {
                                 "DATBI_GR": 0,
                                 "MATNR": 0,
                                 "KBETR": "0-",
-                                "KONWA": "EUR",
+                                "KONWA": "%",
                                 "KPEIN": 1,
                                 "KBRUE": 0,
                                 "KSCHL": "YAW1",
