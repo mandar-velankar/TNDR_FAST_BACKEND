@@ -391,12 +391,18 @@ module.exports = async (srv) => {
             if (!priceCondition) {
                 return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
             }
-            // set KBETR and KPEIN (unit for price) for Precio Neto
+            // set KRECH, KBETR and KPEIN (unit for price) for Precio Neto
             if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") {
                 kbetr = Number(priceCondition.NetPriceWithoutTaxAfterDeductionRD * 10000).toFixed(2);
                 body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KPEIN = 10000;
+                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "C";
             }else {
                 kbetr = priceCondition.Discount * 100;
+            }
+
+            // set KRECH for Descuento Comercial and Descuento Comercial 
+            if(customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
+                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "A";
             }
 
             // set partner and sales organisation
@@ -479,8 +485,7 @@ module.exports = async (srv) => {
                     "E1KONP": {
                       "SEGMENT": 1,
                       "KSCHL": "YLTP",
-                      "KBETR": 0,
-                      "KRECH": "A"
+                      "KBETR": 0
                     }
                   }
                 }
