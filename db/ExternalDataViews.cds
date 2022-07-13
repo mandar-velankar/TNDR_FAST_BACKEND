@@ -136,8 +136,7 @@ left outer join DeliveryForProduct as delivery on offerProduct.OfferID = deliver
     ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Integer
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
-and offerProduct.Active = 1 
-and offerProduct.Offer.Tender.Country.Region = 'MEA';
+and offerProduct.Active = 1;
 
 entity TENDER_DATA as select from TransactionalDataViews.OfferProductPlus as offerProduct
 inner join AdminData.PT_TMUSERCTRYN as ctryCWID on offerProduct.CountryCode = ctryCWID.CountryCode
