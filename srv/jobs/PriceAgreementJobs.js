@@ -283,7 +283,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const tx = cds.tx();
         try {
 
-            const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+            const { PriceAgreements, CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
             //get all price agreements which have to be extended
             //first, calculate todays date - 1 day, as such that we can use this as a filter in our select
@@ -310,7 +310,10 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                     aPriceAgreementsUpdated.push(agreement.ID);
 
                     //update the actual price agreement withh the new price agreement date
-                    return tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate}).where({ ID: agreement.ID }));
+                    return Promise.all([
+                        tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate}).where({ ID: agreement.ID })),
+                        tx.run(UPDATE(CustomerPrices).with({ExpiryDate: newDate}).where({ PriceAgreementId: agreement.ID }))
+                    ]);
                 }
 
                 return null;
