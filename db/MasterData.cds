@@ -134,12 +134,13 @@ entity PT_TMPRDPCK{
 }
 
 //Legal Entities (Selling Company)
+ //EITOG-SCTASK0100482/REQ11565210-Increase the size of Letterhead
 entity PT_TMLE{
 	LegalEntityID:Integer; //TODO: to be discussed if still needed -> still used for association
 	key LegalEntityCode:String(3) not null;
 	LegalEntityName:String(300);
 	BankDetails:String(300);
-	Letterhead:String(500);
+	Letterhead:String(700);
 	Remarks:String(300);
 	AuthorizedSignatory1:String(300);//delete
 	AuthorizedSignatory2:String(300);//delete
