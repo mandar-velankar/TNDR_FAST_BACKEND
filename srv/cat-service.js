@@ -3099,6 +3099,7 @@ module.exports = (srv) => {
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
         const appEnv = cfenv.getAppEnv();
+		const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
 
 		//quotation data retrieval for filling template
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
@@ -3133,7 +3134,7 @@ module.exports = (srv) => {
 
         //add url to offerConsolidation
         
-        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/${offerConsolidation.COUNTRYCODE}/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
+        offerConsolidation.URL = `${fastUIAppHost}/index.html#/tender&/t/detail/${offerConsolidation.COUNTRYCODE}/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
 
 		var document = {
 			type: "buffer",
