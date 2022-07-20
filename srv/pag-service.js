@@ -602,6 +602,7 @@ module.exports = async (srv) => {
             mikbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? 1 : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
             mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.FOCmaterialNumber);
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 921;
         }
         // Spain only
         if(customerPrice.CountryCode === 'ES'){
@@ -623,6 +624,8 @@ module.exports = async (srv) => {
             // set partner and sales organisation
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.EDI_DC40.SNDPRN = "FAST_ES";
+
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 902;
 
             const focMaterial = await tx.run(SELECT.one.from(PT_TMSKUPRDPCK).where(whereFOCproductpackID).where({CountryCode: priceAgreement.CountryCode, ActiveRecord: 'Yes'})); 
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(focMaterial.SKUCode);
