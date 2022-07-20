@@ -167,7 +167,7 @@ and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1
 and tender.Offer.Product.ActiveProduct = 1
 and (tender.Offer.OfferStatusTable.STATUS = 'Quotation Submitted' or tender.Offer.OfferStatusTable.STATUS = 'Results Recorded' or tender.Offer.OfferStatusTable.STATUS = 'Delivery Ongoing');
-
+//EHQUT-Restrict the Zero Min Price for sending Notification to Controlling
 entity CountryMinPrice as select from TenderResults as results{
     key results.COUNTRY_CODE,
     results.BRAND_ID,
@@ -177,13 +177,14 @@ entity CountryMinPrice as select from TenderResults as results{
     key results.CURRENCY,
     min(results.PACK_PRICE) as MIN_PACK_PRICE:Double,
     min(results.UNIT_PRICE) as MIN_UNIT_PRICE:Double
-}group by results.COUNTRY_CODE,
+}where UNIT_PRICE>0 and PACK_PRICE>0
+group by results.COUNTRY_CODE,
     results.BRAND_ID,
     results.BRAND_NAME,
     results.PRODUCT_ID,
     results.PRODUCT_NAME,
     results.CURRENCY;
-
+//EHQUT-Restrict the Zero Min Price for sending Notification to Controlling
 entity AccountMinPrice as select from MasterData.AccountPreApprovedPrices as a full outer join
 TenderResults as results on results.COUNTRY_CODE = a.COUNTRY_CODE and results.INSTITUTE_ID = a.INSTITUTE_ID and results.PRODUCT_ID = a.PRODUCT_ID and results.CURRENCY = a.CURRENCY {
     key ifnull(results.COUNTRY_CODE, a.COUNTRY_CODE) as COUNTRY_CODE:String,
