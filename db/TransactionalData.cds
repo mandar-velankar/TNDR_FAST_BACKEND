@@ -429,7 +429,7 @@ entity PriceCondition: cuid, managed {
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
-                                                                                and RoyalDecreePercentage.ValidTo > CURRENT_DATE ;
+                                                                                and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000' ;
 }
 
 entity DiscountCondition: cuid, managed {
