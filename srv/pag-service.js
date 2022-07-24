@@ -387,6 +387,17 @@ module.exports = async (srv) => {
             const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
             result = filteredResult;
         }
+
+        if(hasNewYLLPValues && hasNewYLLPValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
+            result = filteredResult;
+        }
+
+        if(hasNewYLAPValues && hasNewYLAPValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+            result = filteredResult;
+        }
+
         await tx.commit();
         return req.reply(result);
 
