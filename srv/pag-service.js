@@ -186,7 +186,7 @@ module.exports = async (srv) => {
             if(!mostRecentMasterPrice){
                 let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
-                mostRecentMasterPrice = await tx.run(SELECT.from(MostRecentMasterPricesView).where(whereCountryCode).where(whereProductPackId));
+                mostRecentMasterPrice = await tx.run(SELECT.one.from(MostRecentMasterPricesView).where(whereCountryCode).where(whereProductPackId));
             }
 
             // Get NewMaterials if needed
@@ -275,8 +275,9 @@ module.exports = async (srv) => {
 
                 /*if check on price condition*/
                 let mainCondition = priceConditions.find(condition => condition.isMain === true);
-                let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel');
-                let focConditions = priceConditions.find(condition => condition.ConditionType === 'FOC');
+                var rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel');
+                var focConditions = priceConditions.find(condition => condition.ConditionType === 'FOC');
+
                 if(mainCondition){
                     if(mainCondition.ConditionType === 'PVL' || mainCondition.ConditionType === 'Descuento Especial'){
                         priceAgreement.hasNewYLLP = mostRecentMasterPrice.YLLP != mainCondition.PVL ? 2 : 0;
@@ -335,7 +336,8 @@ module.exports = async (srv) => {
                 } else priceAgreement.hasNewYLAP = 0;
             }
             if(focConditions){
-                
+                priceAgreement.hasNewYLLP = mostRecentMasterPrice.YLLP != focConditions.PVL ? 2 : 0;
+                priceAgreement.hasNewYLAP = mostRecentMasterPrice.YLAP != focConditions.ConfidentialPrice ? 2 : 0;
             }
 
             return priceAgreement;
