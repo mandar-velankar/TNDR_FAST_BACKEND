@@ -275,8 +275,8 @@ module.exports = async (srv) => {
 
                 /*if check on price update*/
                 if((hasNewYLLPValues.length > 0 && hasNewYLLPValues[0] === 1) || (hasNewYLAPValues.length > 0 && hasNewYLAPValues[0] === 1)){
-                    priceAgreement.hasNewYLLP = (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') && mostRecentMasterPrice.YLAP != mainCondition.ConfidentialPrice ? 2 : 0;
-                    priceAgreement.hasNewYLAP = (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') && mostRecentMasterPrice.YLLP != mainCondition.PVL ? 2 : 0;
+                    priceAgreement.hasNewYLLP = (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster')  && mostRecentMasterPrice.YLLP != mainCondition.PVL ? 2 : 0;
+                    priceAgreement.hasNewYLAP = (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') && mostRecentMasterPrice.YLAP != mainCondition.ConfidentialPrice ? 2 : 0;
                 }
                 /*if check on price condition*/
                 else if((hasNewYLLPValues.length > 0 && (hasNewYLLPValues[0] === 4 || hasNewYLLPValues[0] === 3)) || (hasNewYLAPValues.length > 0 && (hasNewYLAPValues[0] === 4 || hasNewYLAPValues[0] === 3))){
