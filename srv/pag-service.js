@@ -21,7 +21,7 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
-		MostRecentConsumerPricesView
+		MostRecentConsumerPricesView, MostRecentMasterPricesView
     } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 
     const {
@@ -36,6 +36,10 @@ module.exports = async (srv) => {
     const {
 		PT_TMTEND,PT_TMOFPR,PT_TMOFRS,PriceCondition,FreeGoodsOther,DiscountCondition
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+
+    const {
+		PriceConditionView
+    } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 
 
 
@@ -61,12 +65,16 @@ module.exports = async (srv) => {
         let hasExpiringSoonFilterIndex = null;
         let hasExpiringSoonFilterValues = null;
         let isNewPriceAgreementFilterIndex = null;
+        let hasNewYLLPIndex = null;
+        let hasNewYLAPIndex = null;
         let isNewPriceAgreementFilterValues = null;
         let hasExpiredFilterValues = null;
         let isSynchronizedFilterIndex = null;
         let isSynchronizedFilterValues = null;
         let appliedCountFilterIndex = null;
         let appliedCountFilterValues = null;
+        let hasNewYLLPValues = null;
+        let hasNewYLAPValues = null;
 
         if(req.query.SELECT.where){
 
@@ -93,6 +101,12 @@ module.exports = async (srv) => {
 
             appliedCountFilterIndex = ServiceHelper.getWhereId(req, 'AppliedCount');
             appliedCountFilterValues = ServiceHelper.getWhereValues(req, 'AppliedCount');
+
+            hasNewYLLPIndex = ServiceHelper.getWhereId(req, 'hasNewYLLP');
+            hasNewYLLPValues = ServiceHelper.getWhereValues(req, 'hasNewYLLP');
+
+            hasNewYLAPIndex = ServiceHelper.getWhereId(req, 'hasNewYLAP');
+            hasNewYLAPValues = ServiceHelper.getWhereValues(req, 'hasNewYLAP');
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
@@ -125,6 +139,14 @@ module.exports = async (srv) => {
             if(appliedCountFilterValues >= 0){
                 ServiceHelper.deleteFilter(req, 'AppliedCount');
             }
+
+            if(hasNewYLLPIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'hasNewYLLP');
+            }
+
+            if(hasNewYLAPIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'hasNewYLAP');
+            }
         }
 
 
@@ -135,6 +157,7 @@ module.exports = async (srv) => {
         const calculateFields = async priceAgreement => {
 
             let customerPrices = priceAgreement.CustomerPrices;
+            let mostRecentMasterPrice;
             //let newMaterials = priceAgreement.Materials;
             
             let consumerPrice = priceAgreement.ConsumerPrice;
@@ -143,10 +166,27 @@ module.exports = async (srv) => {
             let calculatedFutureDate = new Date();
             calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
 
+            let priceConditions = priceAgreement.PriceConditions;
+            let institute = priceAgreement.Institute;
+
             // Get CustomerPrices if needed
             if(!customerPrices){
                 let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
                 customerPrices = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreement));
+            }
+
+            if(!priceConditions){
+                let wherePriceAgreement = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
+                let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
+                let whereProductPackId = ServiceHelper.buildFullWhere("ProductCode", "=", priceAgreement.ProductPackId);
+                let whereExistingPriceCondition = ServiceHelper.buildFullWhere("ExistingPriceConditionID", "!=", null);
+                priceConditions = await tx.run(SELECT.from(PriceConditionView).where(whereCountryCode).where(whereProductPackId).where(wherePriceAgreement).where(whereExistingPriceCondition));
+            }
+
+            if(!mostRecentMasterPrice){
+                let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
+                let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
+                mostRecentMasterPrice = await tx.run(SELECT.one.from(MostRecentMasterPricesView).where(whereCountryCode).where(whereProductPackId));
             }
 
             // Get NewMaterials if needed
@@ -228,6 +268,104 @@ module.exports = async (srv) => {
 
             priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
 
+            if(priceConditions && institute && (hasNewYLLPValues.length > 0 || hasNewYLAPValues.length > 0)){
+                let mainCondition = priceConditions.find(condition => condition.isMain === true);
+                let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel');
+                let focConditions = priceConditions.find(condition => condition.ConditionType === 'FOC' && condition.ProductCode === mainCondition.ProductCode);
+
+                /*if check on price update*/
+                if((hasNewYLLPValues.length > 0 && hasNewYLLPValues[0] === 1) || (hasNewYLAPValues.length > 0 && hasNewYLAPValues[0] === 1)){
+                    priceAgreement.hasNewYLLP = (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster')  && mostRecentMasterPrice.YLLP != mainCondition.PVL ? 2 : 0;
+                    priceAgreement.hasNewYLAP = (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') && mostRecentMasterPrice.YLAP != mainCondition.ConfidentialPrice ? 2 : 0;
+                }
+                /*if check on price condition*/
+                else if((hasNewYLLPValues.length > 0 && (hasNewYLLPValues[0] === 4 || hasNewYLLPValues[0] === 3)) || (hasNewYLAPValues.length > 0 && (hasNewYLAPValues[0] === 4 || hasNewYLAPValues[0] === 3))){
+
+                    if(mainCondition){
+                        if(mainCondition.ConditionType === 'PVL' || mainCondition.ConditionType === 'Descuento Especial'){
+                            priceAgreement.hasNewYLLP = (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') && mostRecentMasterPrice.YLLP != mainCondition.PVL ? 2 : 0;
+                            priceAgreement.hasNewYLAP = (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') && mostRecentMasterPrice.YLAP != mainCondition.ConfidentialPrice ? 2 : 0;
+                        } else if(mainCondition.ConditionType === 'Precio Neto'){
+                            if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                                if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
+                                    if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
+                                        priceAgreement.hasNewYLLP = 3;
+                                    } else {
+                                        priceAgreement.hasNewYLLP = 2;
+                                    }
+                                } else priceAgreement.hasNewYLLP = 0;
+                            }
+
+                            if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
+                                if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
+                                    if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLAP, mainCondition.NetPriceWithoutTaxAfterDeductionR)){
+                                        priceAgreement.hasNewYLAP = 3;
+                                    } else {
+                                        priceAgreement.hasNewYLAP = 2;
+                                    }
+                                } else priceAgreement.hasNewYLAP = 0;
+                            }
+                        } else if(mainCondition.ConditionType === 'Descuento Commercial'){
+                            if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                                if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
+                                    if(mostRecentMasterPrice.YLLP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                        priceAgreement.hasNewYLLP = 4;
+                                    } else {
+                                        priceAgreement.hasNewYLLP = 1;
+                                    }
+                                } else priceAgreement.hasNewYLLP = 0;
+                            }
+
+                            if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
+                                if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
+                                    if(mostRecentMasterPrice.YLAP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                        priceAgreement.hasNewYLAP = 4;
+                                    } else {
+                                        priceAgreement.hasNewYLAP = 1;
+                                    }
+                                } else priceAgreement.hasNewYLAP = 0;
+                            }
+                        }
+                    }
+
+                    if(rappelCondition){
+                        if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,rappelCondition.PVL)){
+                                if(mostRecentMasterPrice.YLLP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                    priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP && priceAgreement.hasNewYLLP < 4 ? priceAgreement.hasNewYLLP : 4;
+                                } else {
+                                    priceAgreement.hasNewYLLP = 1;
+                                }
+                            }  priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 0 ? 0 : priceAgreement.hasNewYLLP;
+                        }
+        
+                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){  
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,rappelCondition.ConfidentialPrice)){
+                                if(mostRecentMasterPrice.YLAP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                    priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP && priceAgreement.hasNewYLAP < 4 ? priceAgreement.hasNewYLLP : 4;
+                                } else {
+                                    priceAgreement.hasNewYLAP = 1;
+                                }
+                            } else priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 0 ? 0 : priceAgreement.hasNewYLAP;
+                        }
+                    }
+                    
+                    if(focConditions){
+                        if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
+                                priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP && priceAgreement.hasNewYLLP < 2 ? priceAgreement.hasNewYLLP : 2;
+                            } else priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 0 ? 0 : priceAgreement.hasNewYLLP;
+                        }
+                        
+                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
+                                priceAgreement.hasNewYLAP && priceAgreement.hasNewYLAP < 2 ? priceAgreement.hasNewYLAP : 2;
+                            } else priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 0 ? 0 : priceAgreement.hasNewYLAP;
+                        }
+                    }
+                }
+            }
+
             return priceAgreement;
 
         };
@@ -277,6 +415,17 @@ module.exports = async (srv) => {
             const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
             result = filteredResult;
         }
+
+        if(hasNewYLLPValues && hasNewYLLPValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
+            result = filteredResult;
+        }
+
+        if(hasNewYLAPValues && hasNewYLAPValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+            result = filteredResult;
+        }
+
         await tx.commit();
         return req.reply(result);
 
