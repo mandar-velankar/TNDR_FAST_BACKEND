@@ -416,13 +416,15 @@ module.exports = async (srv) => {
             result = filteredResult;
         }
 
-        if(hasNewYLLPValues && hasNewYLLPValues.length > 0){
-            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
-            result = filteredResult;
-        }
-
-        if(hasNewYLAPValues && hasNewYLAPValues.length > 0){
-            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+        if(hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0){
+            let filteredResult;
+            if(hasNewYLLPValues && hasNewYLLPValues.length > 0 && hasNewYLAPValues && hasNewYLAPValues.length > 0){
+                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+            } else if(!hasNewYLLPValues || (hasNewYLLPValues && hasNewYLLPValues.length === 0)){
+                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+            } else if(!hasNewYLAPValues || (hasNewYLAPValues && hasNewYLAPValues.length === 0)){
+                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
+            }
             result = filteredResult;
         }
 
