@@ -298,7 +298,7 @@ module.exports = async (srv) => {
 
                             if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
                                 if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
-                                    if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLAP, mainCondition.NetPriceWithoutTaxAfterDeductionR)){
+                                    if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
                                         priceAgreement.hasNewYLAP = 3;
                                     } else {
                                         priceAgreement.hasNewYLAP = 2;
