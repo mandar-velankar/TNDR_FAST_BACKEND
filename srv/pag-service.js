@@ -268,13 +268,13 @@ module.exports = async (srv) => {
 
             priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
 
-            if(priceConditions && institute && ((hasNewYLLPValues && hasNewYLLPValues.length > 0) || (hasNewYLAPValues && hasNewYLAPValues.length > 0))){
-                let mainCondition = priceConditions.find(condition => condition.isMain === true);
-                let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel');
+            if(priceConditions && institute){
+                let mainCondition = priceConditions.find(condition => condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true));
+                let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel'));
                 let focConditions = priceConditions.find(condition => condition.ConditionType === 'FOC' && condition.ProductCode === mainCondition.ProductCode);
 
                 if(mainCondition){
-                    if(mainCondition.ConditionType === 'Precio Neto'){
+                    if(mainCondition.ConditionType === 'Precio Neto' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Precio Neto')){
                         if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
                             if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
                                 if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
@@ -294,7 +294,7 @@ module.exports = async (srv) => {
                                 }
                             } else priceAgreement.hasNewYLAP = 0;
                         }
-                    } else if(mainCondition.ConditionType === 'Descuento Commercial'){
+                    } else if(mainCondition.ConditionType === 'Descuento Commercial' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Descuento Commercial')){
                         if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
                             if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
                                 if(mostRecentMasterPrice.YLLP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){
