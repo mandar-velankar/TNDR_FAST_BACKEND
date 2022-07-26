@@ -268,7 +268,7 @@ module.exports = async (srv) => {
 
             priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
 
-            if(priceConditions && institute && (hasNewYLLPValues.length > 0 || hasNewYLAPValues.length > 0)){
+            if(priceConditions && institute && ((hasNewYLLPValues && hasNewYLLPValues.length > 0) || (hasNewYLAPValues && hasNewYLAPValues.length > 0))){
                 let mainCondition = priceConditions.find(condition => condition.isMain === true);
                 let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel');
                 let focConditions = priceConditions.find(condition => condition.ConditionType === 'FOC' && condition.ProductCode === mainCondition.ProductCode);
