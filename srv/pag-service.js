@@ -268,7 +268,7 @@ module.exports = async (srv) => {
 
             priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
 
-            if(priceConditions && institute){
+            if(priceConditions && institute && !priceAgreement.IgnoreConfPriceChange && !priceAgreement.IgnoreConfPVLPriceChange){
                 let mainCondition = priceConditions.find(condition => condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true));
                 let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel'));
                 let focConditions = priceConditions.find(condition => condition.ConditionType === 'FOC' && condition.ProductCode === mainCondition.ProductCode);
@@ -338,6 +338,10 @@ module.exports = async (srv) => {
                         }
                     }
                 }
+            } else if(priceAgreement.IgnoreConfPVLPriceChange){
+                priceAgreement.hasNewYLLP = 2;
+            } else if(priceAgreement.IgnoreConfPriceChange){
+                priceAgreement.hasNewYLAP = 2;
             }
 
             return priceAgreement;
