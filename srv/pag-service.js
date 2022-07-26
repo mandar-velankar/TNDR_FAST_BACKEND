@@ -273,94 +273,68 @@ module.exports = async (srv) => {
                 let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel');
                 let focConditions = priceConditions.find(condition => condition.ConditionType === 'FOC' && condition.ProductCode === mainCondition.ProductCode);
 
-                /*if check on price update*/
-                if((hasNewYLLPValues.length > 0 && hasNewYLLPValues[0] === 1) || (hasNewYLAPValues.length > 0 && hasNewYLAPValues[0] === 1)){
-                    priceAgreement.hasNewYLLP = (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster')  && mostRecentMasterPrice.YLLP != mainCondition.PVL ? 2 : 0;
-                    priceAgreement.hasNewYLAP = (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') && mostRecentMasterPrice.YLAP != mainCondition.ConfidentialPrice ? 2 : 0;
-                }
-                /*if check on price condition*/
-                else if((hasNewYLLPValues.length > 0 && (hasNewYLLPValues[0] === 4 || hasNewYLLPValues[0] === 3)) || (hasNewYLAPValues.length > 0 && (hasNewYLAPValues[0] === 4 || hasNewYLAPValues[0] === 3))){
-
-                    if(mainCondition){
-                        if(mainCondition.ConditionType === 'PVL' || mainCondition.ConditionType === 'Descuento Especial'){
-                            priceAgreement.hasNewYLLP = (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') && mostRecentMasterPrice.YLLP != mainCondition.PVL ? 2 : 0;
-                            priceAgreement.hasNewYLAP = (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') && mostRecentMasterPrice.YLAP != mainCondition.ConfidentialPrice ? 2 : 0;
-                        } else if(mainCondition.ConditionType === 'Precio Neto'){
-                            if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
-                                if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
-                                    if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
-                                        priceAgreement.hasNewYLLP = 3;
-                                    } else {
-                                        priceAgreement.hasNewYLLP = 2;
-                                    }
-                                } else priceAgreement.hasNewYLLP = 0;
-                            }
-
-                            if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
-                                if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
-                                    if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
-                                        priceAgreement.hasNewYLAP = 3;
-                                    } else {
-                                        priceAgreement.hasNewYLAP = 2;
-                                    }
-                                } else priceAgreement.hasNewYLAP = 0;
-                            }
-                        } else if(mainCondition.ConditionType === 'Descuento Commercial'){
-                            if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
-                                if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
-                                    if(mostRecentMasterPrice.YLLP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){
-                                        priceAgreement.hasNewYLLP = 4;
-                                    } else {
-                                        priceAgreement.hasNewYLLP = 1;
-                                    }
-                                } else priceAgreement.hasNewYLLP = 0;
-                            }
-
-                            if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
-                                if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
-                                    if(mostRecentMasterPrice.YLAP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){
-                                        priceAgreement.hasNewYLAP = 4;
-                                    } else {
-                                        priceAgreement.hasNewYLAP = 1;
-                                    }
-                                } else priceAgreement.hasNewYLAP = 0;
-                            }
-                        }
-                    }
-
-                    if(rappelCondition){
+                if(mainCondition){
+                    if(mainCondition.ConditionType === 'Precio Neto'){
                         if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
-                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,rappelCondition.PVL)){
-                                if(mostRecentMasterPrice.YLLP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
-                                    priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP && priceAgreement.hasNewYLLP < 4 ? priceAgreement.hasNewYLLP : 4;
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
+                                if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
+                                    priceAgreement.hasNewYLLP = 3;
+                                } else {
+                                    priceAgreement.hasNewYLLP = 2;
+                                }
+                            } else priceAgreement.hasNewYLLP = 0;
+                        }
+
+                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
+                                if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
+                                    priceAgreement.hasNewYLAP = 3;
+                                } else {
+                                    priceAgreement.hasNewYLAP = 2;
+                                }
+                            } else priceAgreement.hasNewYLAP = 0;
+                        }
+                    } else if(mainCondition.ConditionType === 'Descuento Commercial'){
+                        if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
+                                if(mostRecentMasterPrice.YLLP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                    priceAgreement.hasNewYLLP = 4;
                                 } else {
                                     priceAgreement.hasNewYLLP = 1;
                                 }
-                            }  priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 0 ? 0 : priceAgreement.hasNewYLLP;
+                            } else priceAgreement.hasNewYLLP = 0;
                         }
-        
-                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){  
-                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,rappelCondition.ConfidentialPrice)){
-                                if(mostRecentMasterPrice.YLAP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
-                                    priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP && priceAgreement.hasNewYLAP < 4 ? priceAgreement.hasNewYLLP : 4;
+
+                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
+                                if(mostRecentMasterPrice.YLAP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){ //add royal decree to this calculation (new card)
+                                    priceAgreement.hasNewYLAP = 4;
                                 } else {
                                     priceAgreement.hasNewYLAP = 1;
                                 }
-                            } else priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 0 ? 0 : priceAgreement.hasNewYLAP;
+                            } else priceAgreement.hasNewYLAP = 0;
                         }
                     }
-                    
-                    if(focConditions){
-                        if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
-                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
-                                priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP && priceAgreement.hasNewYLLP < 2 ? priceAgreement.hasNewYLLP : 2;
-                            } else priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 0 ? 0 : priceAgreement.hasNewYLLP;
+                }
+
+                if(rappelCondition){
+                    if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                        if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,rappelCondition.PVL)){
+                            if(mostRecentMasterPrice.YLLP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
+                            } else {
+                                priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
+                            }
                         }
-                        
-                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
-                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
-                                priceAgreement.hasNewYLAP && priceAgreement.hasNewYLAP < 2 ? priceAgreement.hasNewYLAP : 2;
-                            } else priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 0 ? 0 : priceAgreement.hasNewYLAP;
+                    }
+    
+                    if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){  
+                        if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,rappelCondition.ConfidentialPrice)){
+                            if(mostRecentMasterPrice.YLAP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){ //add royal decree to this calculation (new card)
+                                priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 3 ? priceAgreement.hasNewYLAP : 4;
+                            } else {
+                                priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
+                            }
                         }
                     }
                 }
