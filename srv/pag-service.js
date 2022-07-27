@@ -598,8 +598,8 @@ module.exports = async (srv) => {
                   "KAPPL": "V",
                   "KSCHL": "YLTP",
                   "VKORG": "ITHC",
-                  "VTWEG": 00,
-                  "SPART": 00,
+                  "VTWEG": "00",
+                  "SPART": "00",
                   "KUNNR": 0,
                   "MATNR": 0,
                   "_-BAY0_-GZ_SDREFINFO01": {
@@ -755,6 +755,8 @@ module.exports = async (srv) => {
             mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.FOCmaterialNumber);
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 921;
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1;
+            delete body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"];
         }
         // Spain only
         if(customerPrice.CountryCode === 'ES'){
