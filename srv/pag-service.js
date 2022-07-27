@@ -294,7 +294,7 @@ module.exports = async (srv) => {
                                 }
                             } else priceAgreement.hasNewYLAP = 0;
                         }
-                    } else if(mainCondition.ConditionType === 'Descuento Commercial' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Descuento Commercial')){
+                    } else if(mainCondition.ConditionType === 'Descuento Comercial' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Descuento Comercial')){
                         if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
                             if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
                                 if(mostRecentMasterPrice.YLLP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){
