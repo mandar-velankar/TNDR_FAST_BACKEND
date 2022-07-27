@@ -336,16 +336,16 @@ module.exports = async (srv) => {
                        therefore, we're retrieving the condition again from the pricecondition table, based on the existingpriceconditionID */
                     let priceConditionRappel = null;
                     if(priceAgreement.PriceConditions && priceAgreement.PriceConditions.length > 0){
-                        priceConditionRappel = rappelCondititon;
+                        priceConditionRappel = rappelCondition;
                     } else {
                         let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", rappelCondition.ExistingPriceConditionID);
-                        priceConditionRappel = await tx.run(SELECT.from(PriceCondition).where(wherePriceCondition));
+                        priceConditionRappel = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
                     }
 
                     if(priceConditionRappel){
                         if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
                             if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,priceConditionRappel.PVL)){
-                                if(mostRecentMasterPrice.YLLP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                if(mostRecentMasterPrice.YLLP * (1 - rappelConditionn.Discount) < mostRecentMasterPrice.PRAF){ //Discount is a separate entity and should thus be handled as taking the max(DiscountCondition) value as a discount
                                     priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
                                 } else {
                                     priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
