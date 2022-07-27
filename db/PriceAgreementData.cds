@@ -33,6 +33,10 @@ entity PriceAgreements: cuid, managed {
     Synchronized: Boolean;
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
+    hasNewYLLP: Integer default 0;
+    hasNewYLAP: Integer default 0;
+    IgnorePVLPriceChange: Boolean default false;
+    IgnoreConfPriceChange: Boolean default false;
     ExpiringSoon: Boolean default false; // calculated from NodeJS
     Expired: Boolean default false; //calculated from NodeJS
     isNewPriceAgreement: Boolean default true; // calculated from NodeJS

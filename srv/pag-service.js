@@ -21,7 +21,7 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
-		MostRecentConsumerPricesView
+		MostRecentConsumerPricesView, MostRecentMasterPricesView
     } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 
     const {
@@ -36,6 +36,10 @@ module.exports = async (srv) => {
     const {
 		PT_TMTEND,PT_TMOFPR,PT_TMOFRS,PriceCondition,FreeGoodsOther,DiscountCondition
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+
+    const {
+		PriceConditionView
+    } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 
 
 
@@ -61,12 +65,16 @@ module.exports = async (srv) => {
         let hasExpiringSoonFilterIndex = null;
         let hasExpiringSoonFilterValues = null;
         let isNewPriceAgreementFilterIndex = null;
+        let hasNewYLLPIndex = null;
+        let hasNewYLAPIndex = null;
         let isNewPriceAgreementFilterValues = null;
         let hasExpiredFilterValues = null;
         let isSynchronizedFilterIndex = null;
         let isSynchronizedFilterValues = null;
         let appliedCountFilterIndex = null;
         let appliedCountFilterValues = null;
+        let hasNewYLLPValues = null;
+        let hasNewYLAPValues = null;
 
         if(req.query.SELECT.where){
 
@@ -93,6 +101,12 @@ module.exports = async (srv) => {
 
             appliedCountFilterIndex = ServiceHelper.getWhereId(req, 'AppliedCount');
             appliedCountFilterValues = ServiceHelper.getWhereValues(req, 'AppliedCount');
+
+            hasNewYLLPIndex = ServiceHelper.getWhereId(req, 'hasNewYLLP');
+            hasNewYLLPValues = ServiceHelper.getWhereValues(req, 'hasNewYLLP');
+
+            hasNewYLAPIndex = ServiceHelper.getWhereId(req, 'hasNewYLAP');
+            hasNewYLAPValues = ServiceHelper.getWhereValues(req, 'hasNewYLAP');
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
@@ -125,6 +139,14 @@ module.exports = async (srv) => {
             if(appliedCountFilterValues >= 0){
                 ServiceHelper.deleteFilter(req, 'AppliedCount');
             }
+
+            if(hasNewYLLPIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'hasNewYLLP');
+            }
+
+            if(hasNewYLAPIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'hasNewYLAP');
+            }
         }
 
 
@@ -135,6 +157,7 @@ module.exports = async (srv) => {
         const calculateFields = async priceAgreement => {
 
             let customerPrices = priceAgreement.CustomerPrices;
+            let mostRecentMasterPrice;
             //let newMaterials = priceAgreement.Materials;
             
             let consumerPrice = priceAgreement.ConsumerPrice;
@@ -143,10 +166,27 @@ module.exports = async (srv) => {
             let calculatedFutureDate = new Date();
             calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
 
+            let priceConditions = priceAgreement.PriceConditions;
+            let institute = priceAgreement.Institute;
+
             // Get CustomerPrices if needed
             if(!customerPrices){
                 let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
                 customerPrices = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreement));
+            }
+
+            if(!priceConditions){
+                let wherePriceAgreement = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
+                let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
+                let whereProductPackId = ServiceHelper.buildFullWhere("ProductCode", "=", priceAgreement.ProductPackId);
+                let whereExistingPriceCondition = ServiceHelper.buildFullWhere("ExistingPriceConditionID", "!=", null);
+                priceConditions = await tx.run(SELECT.from(PriceConditionView).where(whereCountryCode).where(whereProductPackId).where(wherePriceAgreement).where(whereExistingPriceCondition));
+            }
+
+            if(!mostRecentMasterPrice){
+                let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
+                let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
+                mostRecentMasterPrice = await tx.run(SELECT.one.from(MostRecentMasterPricesView).where(whereCountryCode).where(whereProductPackId));
             }
 
             // Get NewMaterials if needed
@@ -228,6 +268,82 @@ module.exports = async (srv) => {
 
             priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
 
+            if(priceConditions && institute && !priceAgreement.IgnoreConfPriceChange && !priceAgreement.IgnoreConfPVLPriceChange){
+                let mainCondition = priceConditions.find(condition => condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true));
+                let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel'));
+                let focConditions = priceConditions.find(condition => condition.ConditionType === 'FOC' && condition.ProductCode === mainCondition.ProductCode);
+
+                if(mainCondition){
+                    if(mainCondition.ConditionType === 'Precio Neto' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Precio Neto')){
+                        if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
+                                if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
+                                    priceAgreement.hasNewYLLP = 3;
+                                } else {
+                                    priceAgreement.hasNewYLLP = 2;
+                                }
+                            } else priceAgreement.hasNewYLLP = 0;
+                        }
+
+                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
+                                if(ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)){
+                                    priceAgreement.hasNewYLAP = 3;
+                                } else {
+                                    priceAgreement.hasNewYLAP = 2;
+                                }
+                            } else priceAgreement.hasNewYLAP = 0;
+                        }
+                    } else if(mainCondition.ConditionType === 'Descuento Commercial' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Descuento Commercial')){
+                        if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,mainCondition.PVL)){
+                                if(mostRecentMasterPrice.YLLP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                    priceAgreement.hasNewYLLP = 4;
+                                } else {
+                                    priceAgreement.hasNewYLLP = 1;
+                                }
+                            } else priceAgreement.hasNewYLLP = 0;
+                        }
+
+                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,mainCondition.ConfidentialPrice)){
+                                if(mostRecentMasterPrice.YLAP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF){ //add royal decree to this calculation (new card)
+                                    priceAgreement.hasNewYLAP = 4;
+                                } else {
+                                    priceAgreement.hasNewYLAP = 1;
+                                }
+                            } else priceAgreement.hasNewYLAP = 0;
+                        }
+                    }
+                }
+
+                if(rappelCondition){
+                    if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                        if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,rappelCondition.PVL)){
+                            if(mostRecentMasterPrice.YLLP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
+                            } else {
+                                priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
+                            }
+                        }
+                    }
+    
+                    if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){  
+                        if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,rappelCondition.ConfidentialPrice)){
+                            if(mostRecentMasterPrice.YLAP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){ //add royal decree to this calculation (new card)
+                                priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 3 ? priceAgreement.hasNewYLAP : 4;
+                            } else {
+                                priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
+                            }
+                        }
+                    }
+                }
+            } else if(priceAgreement.IgnoreConfPVLPriceChange){
+                priceAgreement.hasNewYLLP = 2;
+            } else if(priceAgreement.IgnoreConfPriceChange){
+                priceAgreement.hasNewYLAP = 2;
+            }
+
             return priceAgreement;
 
         };
@@ -277,6 +393,19 @@ module.exports = async (srv) => {
             const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
             result = filteredResult;
         }
+
+        if(hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0){
+            let filteredResult;
+            if(hasNewYLLPValues && hasNewYLLPValues.length > 0 && hasNewYLAPValues && hasNewYLAPValues.length > 0){
+                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+            } else if(!hasNewYLLPValues || (hasNewYLLPValues && hasNewYLLPValues.length === 0)){
+                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+            } else if(!hasNewYLAPValues || (hasNewYLAPValues && hasNewYLAPValues.length === 0)){
+                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
+            }
+            result = filteredResult;
+        }
+
         await tx.commit();
         return req.reply(result);
 
@@ -469,8 +598,8 @@ module.exports = async (srv) => {
                   "KAPPL": "V",
                   "KSCHL": "YLTP",
                   "VKORG": "ITHC",
-                  "VTWEG": 0,
-                  "SPART": 0,
+                  "VTWEG": "00",
+                  "SPART": "00",
                   "KUNNR": 0,
                   "MATNR": 0,
                   "_-BAY0_-GZ_SDREFINFO01": {
@@ -609,6 +738,9 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KSCHL = customerPrice.PriceCondition;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KVEWE = 'N';
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KONMS = "PCE";
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MEINS = "PCE";
+        
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
@@ -622,6 +754,9 @@ module.exports = async (srv) => {
             mikbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? 1 : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
             mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.FOCmaterialNumber);
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 921;
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1;
+            delete body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"];
         }
         // Spain only
         if(customerPrice.CountryCode === 'ES'){
@@ -643,6 +778,8 @@ module.exports = async (srv) => {
             // set partner and sales organisation
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.EDI_DC40.SNDPRN = "FAST_ES";
+
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 902;
 
             const focMaterial = await tx.run(SELECT.one.from(PT_TMSKUPRDPCK).where(whereFOCproductpackID).where({CountryCode: priceAgreement.CountryCode, ActiveRecord: 'Yes'})); 
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(focMaterial.SKUCode);
