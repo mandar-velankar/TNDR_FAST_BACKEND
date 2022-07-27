@@ -336,28 +336,30 @@ module.exports = async (srv) => {
                        therefore, we're retrieving the condition again from the pricecondition table, based on the existingpriceconditionID */
                     let priceConditionRappel = null;
                     if(priceAgreement.PriceConditions && priceAgreement.PriceConditions.length > 0){
-                        priceCondition = rappelCondititon;
+                        priceConditionRappel = rappelCondititon;
                     } else {
                         let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", rappelCondition.ExistingPriceConditionID);
                         priceConditionRappel = await tx.run(SELECT.from(PriceCondition).where(wherePriceCondition));
                     }
 
-                    if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
-                        if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,priceConditionRappel.PVL)){
-                            if(mostRecentMasterPrice.YLLP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
-                                priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
-                            } else {
-                                priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
+                    if(priceConditionRappel){
+                        if(institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster'){
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP,priceConditionRappel.PVL)){
+                                if(mostRecentMasterPrice.YLLP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){
+                                    priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
+                                } else {
+                                    priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
+                                }
                             }
                         }
-                    }
-    
-                    if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){  
-                        if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,priceConditionRappel.ConfidentialPrice)){
-                            if(mostRecentMasterPrice.YLAP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){ //add royal decree to this calculation (new card)
-                                priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 3 ? priceAgreement.hasNewYLAP : 4;
-                            } else {
-                                priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
+        
+                        if(institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)'){  
+                            if(!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP,priceConditionRappel.ConfidentialPrice)){
+                                if(mostRecentMasterPrice.YLAP * (1 - rappelCondition.Discount) < mostRecentMasterPrice.PRAF){ //add royal decree to this calculation (new card)
+                                    priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 3 ? priceAgreement.hasNewYLAP : 4;
+                                } else {
+                                    priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
+                                }
                             }
                         }
                     }
