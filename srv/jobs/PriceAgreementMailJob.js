@@ -81,6 +81,7 @@ class PriceAgreementMailJob extends BaseJob {
             if(pa.PriceConditions && pa.PriceConditions.length > 0){
                 pa.Price = pa.PriceConditions[0].PVL
             }
+            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
             return pa;
         })
     }
@@ -162,7 +163,12 @@ class PriceAgreementMailJob extends BaseJob {
         month = month.length < 2 ? `0${month}` : month;
         return `${date.getFullYear()}-${month}-${date.getDate()} 00:00:00`;
     }
-
+    dateToDDMMYYYY(dateStr) {
+        var d = dateStr.substr(0,4);
+        var m = dateStr.substr(5,2);
+        var y = dateStr.substr(8,2);
+        return `${d}-${m}-${y}`;
+      }
 };
 
 module.exports = PriceAgreementMailJob;
