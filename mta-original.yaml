@@ -8,9 +8,11 @@ build-parameters:
   before-all:
    - builder: custom
      commands:
+    #  will remove csv files when deploying to production landscape to not delete the existing data
       - npx rimraf db/csv
       - npm install --production
-      - npx -p @sap/cds-dk cds build --production
+      - npx -p @sap/cds-dk cds -v
+      - npx -p @sap/cds-dk@4.9.7 cds build --production
 
 modules:
   - name: FAST-db
@@ -25,8 +27,8 @@ modules:
     type: nodejs
     path: srv
     parameters:
-      memory: 1024M
-      disk-quota: 1024M
+      memory: 4096M
+      disk-quota: 4096M
     provides:
       - name: srv_api
         public: true

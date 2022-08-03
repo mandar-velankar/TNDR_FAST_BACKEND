@@ -8,8 +8,10 @@ build-parameters:
   before-all:
    - builder: custom
      commands:
+      # - npx rimraf db/csv - Remove CSV files for production landscape, will not do this when deploying to trial account
       - npm install --production
-      - npx -p @sap/cds-dk cds build --production
+      - npx -p @sap/cds-dk cds -v
+      - npx -p @sap/cds-dk@4.9.7 cds build --production
 
 modules:
   - name: FAST-db
