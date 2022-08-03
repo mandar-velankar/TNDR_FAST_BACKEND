@@ -472,6 +472,7 @@ and tender.Offer.Product.Active = 1;
 entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRY,
     key tender.TenderID as TENDER_ID,
+    tender.Classification as CLASSIFICATION,
     tender.TenderName as TENDER_NAME,
     tender.Institute.InstituteName as INSTITUTE,
     tender.Brands as BRAND,
