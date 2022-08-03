@@ -82,17 +82,29 @@
                         <p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">
 							Dear {{UserName}},
 							<br><br>
-							This is to inform you that the below Price agreements are getting expired on {{FormatedExpiryDate}}<br>
-							Tender Id:{{TenderId}}<br>
-							Institute: {{InstituteName}}<br>
-							Product: {{PRODUCTPACKNAME}}<br>
+							This is to inform you that the below Price agreements are getting expired on {{FormatedExpiryDate}}<br><ul>
+								<li>Tender Id:{{TenderId}}</li>
+								<li>Institute: {{InstituteName}}</li>
+								<li>Product: {{PRODUCTPACKNAME}}</li>
+								<li>GIC: External tender reference: {{ExternalID}}</li>
+								<li>
+									Info on automatic extension settings:
+									<ul>
+										<li>Automatically extended: {{FormattedExtendPriceAgreement}}</li>
+										{{#if ShowExpiryExtensionPeriod}}
+										<li>Expiry extension period: {{ExpiryExtensionPeriod}}</li>
+										{{/if}}
+									</ul>
+								</li>
+							</ul>
+							<a href="{{URL}}">Click here to view the details of the Price Agreement</a>							
+							<br><br>
+								Please do not reply to this email.
 							<br><br>
 							Best regards,
 							<br><br>
 							FAST Admin
 						</span></p>
-                        <ul>
-						</ul>
                         </div>
                         </td>
                         </tr>
