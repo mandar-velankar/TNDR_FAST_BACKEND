@@ -1,6 +1,7 @@
 const cds = require('@sap/cds');
 const BaseJob = require('./BaseJob');
 const Handlebars = require("handlebars");
+const cfenv = require("cfenv");
 
 class PriceAgreementMailJob extends BaseJob {
 
@@ -53,10 +54,13 @@ class PriceAgreementMailJob extends BaseJob {
     async getPriceAgreementsExpiring(expiryDate) {
         console.log(`Fetching Price Agreements with expiry date: ${expiryDate}`);
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        const appEnv = cfenv.getAppEnv();
+        const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
         let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-            pa.CountryCode,pa.TenderId, pa.OfferId,pa.ExpiryDate,
+            pa.ID,pa.CountryCode,pa.TenderId, pa.OfferId,pa.ExpiryDate,pa.ExpiryExtensionPeriod,pa.ExtendPriceAgreement,
+            pa.Tender.ExternalID,
             pa.Tender.User.UserName,
             pa.Tender.User.UserEmail,
             pa.Product.ProductPack.PRODUCTPACKNAME,
@@ -81,6 +85,13 @@ class PriceAgreementMailJob extends BaseJob {
             if(pa.PriceConditions && pa.PriceConditions.length > 0){
                 pa.Price = pa.PriceConditions[0].PVL
             }
+            pa.FormattedExtendPriceAgreement = pa.ExtendPriceAgreement?'Yes':'No';
+            pa.ShowExpiryExtensionPeriod = false;
+            if(pa.ExpiryExtensionPeriod && pa.ExpiryExtensionPeriod > 0){
+                pa.ShowExpiryExtensionPeriod = true;
+            }
+            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+            pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
         })
     }
@@ -159,10 +170,17 @@ class PriceAgreementMailJob extends BaseJob {
     }
     formatDate(date) {
         let month = '' + (date.getMonth() + 1);
+        let day = date.getDate();
         month = month.length < 2 ? `0${month}` : month;
-        return `${date.getFullYear()}-${month}-${date.getDate()} 00:00:00`;
+        day = day.length < 2 ? `0${day}` : day;
+        return `${date.getFullYear()}-${month}-${day} 00:00:00`;
     }
-
+    dateToDDMMYYYY(dateStr) {
+        var d = dateStr.substr(0,4);
+        var m = dateStr.substr(5,2);
+        var y = dateStr.substr(8,2);
+        return `${d}-${m}-${y}`;
+      }
 };
 
 module.exports = PriceAgreementMailJob;
