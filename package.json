@@ -76,10 +76,11 @@
     "odata": {
       "version": "v4"
     },
+   
     "query": {
       "limit": {
-        "default": 2000,
-        "max": 2000
+        "default": 5000,
+        "max": 5000
       }
     }
   },
