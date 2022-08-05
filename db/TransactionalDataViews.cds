@@ -1137,7 +1137,8 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
                     ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                 ) ),2) 
         else null
-    end as GrossMargin:Double
+    end as GrossMargin:Double,
+    product.ActiveProduct
     
 
         
