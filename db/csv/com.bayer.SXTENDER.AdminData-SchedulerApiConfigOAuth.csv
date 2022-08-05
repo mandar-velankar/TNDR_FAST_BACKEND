@@ -1,3 +1,3 @@
-ID,OAuthProvider,GrantType,ClientID,ClientSecret
-90d0bbfd-e1df-43d2-93fb-c7fd22525ed0,https://oauthasservices-a5124e685.hana.ondemand.com/oauth2/api/v1/token,client_credentials,fast_test_client,L/EQA4:?7fk{-
-4d75e781-66cb-47c4-87f3-1f8f1d65a80a,https://oauthasservices-a5124e685.hana.ondemand.com/oauth2/api/v1/token,client_credentials,fast_test_client,L/EQA4:?7fk{-
+version https://git-lfs.github.com/spec/v1
+oid sha256:3b7338c371d30ec5171d33cfffbda257ba9503c21c98b325672c95b418f69928
+size 368
