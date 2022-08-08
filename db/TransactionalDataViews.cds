@@ -1208,12 +1208,22 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.NetPriceWithoutTax,
     priceCondition.NetPriceWithTax,
     priceCondition.MaximumPrice,
-    priceCondition.ConfidentialPrice,
+    case
+        when priceCondition.ConfidentialPrice is null
+            then masterPrices.YLAP
+        else priceCondition.ConfidentialPrice
+    end as ConfidentialPrice:Decimal,        
     product.SKUCountry.VTATax as Tax, 
     priceCondition.Liquidation,
     priceCondition.RefundDate,
     priceCondition.RoyalDecreeValue, //calculated in UI based on User Input
     priceCondition.RoyalDecreeIncl,
+    case 
+        when priceCondition.PVL is null
+            then masterPrices.YLLP
+        else 
+            priceCondition.PVL        
+    end as PriceConditionPVL:Decimal,
     masterPrices.YLLP as PVL,
     masterPrices.YLAP,
     masterPrices.PRAF,
