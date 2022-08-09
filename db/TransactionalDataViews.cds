@@ -469,11 +469,13 @@ where tender.Active = 1
 and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1;
 
+ //EHQUT-OTT-123341-Italy Customer Code in Tender Page
 entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRY,
     key tender.TenderID as TENDER_ID,
     tender.TenderName as TENDER_NAME,
     tender.Institute.InstituteName as INSTITUTE,
+    tender.Institute.CustomerID as CustomerID,
     tender.Brands as BRAND,
     key ifnull(tender.Offer.OfferID, '') as OFFER_ID:String(30),
     tender.Offer.OfferValue.VALUE as VALUE:Double,
