@@ -1,6 +1,3 @@
-COUNTRY_CODE,TENDER_TYPE_ID,COUNTRY_OF_ORIGIN
-"MX",3,"México"
-"MX",4,"México"
-"MX",3,"El Salvador"
-"MX",3,"Argentina"
-"MX",3,"Brazil"
+version https://git-lfs.github.com/spec/v1
+oid sha256:ae41bd957afdd983fff1934ade216c1f003dbc487e27d2e862ff36476aff725e
+size 142
