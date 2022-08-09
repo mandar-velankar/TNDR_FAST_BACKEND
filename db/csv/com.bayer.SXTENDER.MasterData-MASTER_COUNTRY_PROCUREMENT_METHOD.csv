@@ -1,3 +1,28 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:653d5e1fb7ad3aae1995bbdfe2763b1526804bef54524380a0c8fe60bb66f491
-size 735
+COUNTRY_CODE,PROCUREMENT_METHOD_ID,SORTER
+"TN","Not Specified",1
+"MO","Not Specified",1
+"AL","Not Specified",1
+"AE","Not Specified",1
+"BH","Not Specified",1
+"EG","Not Specified",1
+"GC","Not Specified",1
+"IQ","Not Specified",1
+"JO","Not Specified",1
+"KW","Not Specified",1
+"LB","Not Specified",1
+"LY","Not Specified",1
+"OM","Not Specified",1
+"QA","Not Specified",1
+"SA","Not Specified",1
+"SD","Not Specified",1
+"SY","Not Specified",1
+"YE","Not Specified",1
+"MX","Not Specified",1
+"TH","E-bidding",1
+"TH","Price comparison",2
+"TH","Selection method",3
+"TH","Specific method",4
+"TH","Other",5
+"AR","Not Specified",1
+"BR","Not Specified",1
+"CL","Not Specified",1
