@@ -1,3 +1,23 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:e390ba99043542852f1fb802be98af751092ea854ca680ab5104f93472e49fc2
-size 207
+COUNTRY_CODE,CONTRACT_TYPE_ID
+"TN",1
+"MO",1
+"AL",1
+"AE",1
+"BH",1
+"EG",1
+"GC",1
+"IQ",1
+"JO",1
+"KW",1
+"LB",1
+"LY",1
+"OM",1
+"QA",1
+"SA",1
+"SD",1
+"SY",1
+"YE",1
+"MX",2
+"MX",3
+"IT",1
+"ES",1

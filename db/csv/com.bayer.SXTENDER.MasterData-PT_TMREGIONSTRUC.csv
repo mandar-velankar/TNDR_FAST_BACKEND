@@ -1,3 +1,21 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:7450f67a527ecef0d9269d083fbab190f09dffd695bef821df406f71b82db627
-size 592
+REGION,REGIONCODE,COUNTRY,COUNTRYCODE
+"GCC","GC","UAE","AE"
+"GCC","GC","Bahrain","BH"
+"GCC","GC","Kuwait","KW"
+"GCC","GC","Oman","OM"
+"GCC","GC","Qatar","QA"
+"GCC","GC","Saudi Arabia","SA"
+"Saudi Arabia","SA","Saudi Arabia","SA"
+"UAE","AE","UAE","AE"
+"Bahrain","BH","Bahrain","BH"
+"Egypt","EG","Egypt","EG"
+"Iraq","IQ","Iraq","IQ"
+"Jordan","JO","Jordan","JO"
+"Kuwait","KW","Kuwait","KW"
+"Lebanon","LB","Lebanon","LB"
+"Libya","LY","Libya","LY"
+"Oman","OM","Oman","OM"
+"Qatar","QA","Qatar","QA"
+"Sudan","SD","Sudan","SD"
+"Syria","SY","Syria","SY"
+"Yemen","YE","Yemen","YE"
