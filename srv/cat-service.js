@@ -674,7 +674,7 @@ module.exports = (srv) => {
 
 		return results;
 	}
-
+//EHQUT-OTT-138291-Business approval condition for Radiology
 	async function buildProductValidationForType9(tx, offer, product, productInfo, aApproverTypes) {//Italy
 		//Legend
 		//1: Optional
@@ -721,8 +721,12 @@ module.exports = (srv) => {
 					bBlOneMandatoryAppr = true;
 					validationType = 1;
 				}
-			} else {
-				validationType = 1; //no additional discount exists; only contract manager notification should be sent
+			   } else if(product.DIVISION === "Radiology" && netOfferPrice < minPreApprovedPrice){
+                bBlOneMandatoryAppr = true;
+                validationType = 1; 
+            }
+            else {
+                validationType = 1; //no additional discount exists; only contract manager notification should be sent
 			}
 		} else {
 			validationType = 1;	//if the offer type differs from selling, all approvals should be optional
@@ -749,7 +753,7 @@ module.exports = (srv) => {
 
 		return results;
 	}
-
+//EHQUT-OTT-138291-Business approval condition for Radiology
 	function extractPolicyValue(productPolicyPrices, role, pricingPolicyName) {
 		let price = 0;
 		productPolicyPrices.forEach(e => {

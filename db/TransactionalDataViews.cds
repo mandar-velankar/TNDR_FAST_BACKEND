@@ -469,6 +469,7 @@ where tender.Active = 1
 and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1;
 
+
 entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRY,
     key tender.TenderID as TENDER_ID,
