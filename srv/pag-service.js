@@ -635,18 +635,18 @@ module.exports = async (srv) => {
             const focMaterial = await tx.run(SELECT.one.from(PT_TMSKUPRDPCK).where(whereFOCproductpackID).where({CountryCode: priceAgreement.CountryCode, ActiveRecord: 'Yes'})); 
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(focMaterial.SKUCode);
         }
+        //EHQUT-OTT-138426-Italy - different offer values on SAP
 
-
-        if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" ){// convert and send per pack
-            kstbm  = kstbm / packFactor;
-            mikbas = mikbas / packFactor;
-            mxkbas = mxkbas / packFactor;
-        }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
-            kstbm  = kstbm * packFactor;
-            mikbas = mikbas * packFactor;
-            mxkbas = mxkbas * packFactor;
-        }
-        
+        // if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" ){// convert and send per pack
+        //     kstbm  = kstbm / packFactor;
+        //    mikbas = mikbas / packFactor;
+        //     mxkbas = mxkbas / packFactor;
+        // }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
+        //     kstbm  = kstbm * packFactor;
+        //    mikbas = mikbas * packFactor;
+        //    mxkbas = mxkbas * packFactor;
+        // }
+        //EHQUT-OTT-138426-Italy - different offer values on SAP
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSTBM = kstbm;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MIKBAS = mikbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MXKBAS = mxkbas;
