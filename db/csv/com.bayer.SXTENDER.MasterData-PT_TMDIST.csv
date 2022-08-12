@@ -1,4 +1,4 @@
-"COUNTRYCODE","DISTRIBUTORID","DISTRIBUTORNAME","ADDRESS","CONTACTNO","FAX","CONTACTPERSON","ACTIVERECORD","CONTACT_EMAIL","COMMISSIONRATE","INCOTERMS","PAYMENTTERMS","FORALLBRANDS"
+COUNTRYCODE,DISTRIBUTORID,DISTRIBUTORNAME,ADDRESS,CONTACTNO,FAX,CONTACTPERSON,ACTIVERECORD,CONTACT_EMAIL,COMMISSIONRATE,INCOTERMS,PAYMENTTERMS,FORALLBRANDS
 "SA","3147458","Alkamal Import Office Co. Ltd.","Beside United Doctors Hospital, P.O.BOX 405, jeddah 21411","+966 12 288 9445","+966 12 651 3759","Mr. Mohammed AbdulJawad Sulaiman","Yes","abduljawad.mohamad@alkamal-sa.com","0.075","CIF Jeddah","365 days after receipt of goods","false"
 "SA","8039883","Saudi International Trading Company Limited","P.O. Box 5132, Riyadh 11422","+966 1 4757500","+966 1 4730525","Mr. Maher Adwan","Yes","maher@sitcopharma.com","0.05","CIF Jeddah by Sea; CIP Jeddah / Riyadh by Air","360 days from invoice date","false"
 "SA","2024839","Batterjee National Pharmaceuticals","Batterjee Building, Palestine Street, Post Box 2,  Jeddah 21411","+966 12 660 2933 ","+966 12 668 7165","Mr. Moustafa Shaltout","No",,"0.075","CIF Jeddah by Sea","180 days after receipt of goods","false"
