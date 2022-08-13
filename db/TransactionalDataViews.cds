@@ -167,7 +167,7 @@ and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1
 and tender.Offer.Product.ActiveProduct = 1
 and (tender.Offer.OfferStatusTable.STATUS = 'Quotation Submitted' or tender.Offer.OfferStatusTable.STATUS = 'Results Recorded' or tender.Offer.OfferStatusTable.STATUS = 'Delivery Ongoing');
-
+//EHQUT-Restrict the Zero Min Price for sending Notification to Controlling
 entity CountryMinPrice as select from TenderResults as results{
     key results.COUNTRY_CODE,
     results.BRAND_ID,
@@ -177,13 +177,14 @@ entity CountryMinPrice as select from TenderResults as results{
     key results.CURRENCY,
     min(results.PACK_PRICE) as MIN_PACK_PRICE:Double,
     min(results.UNIT_PRICE) as MIN_UNIT_PRICE:Double
-}group by results.COUNTRY_CODE,
+}where UNIT_PRICE>0 and PACK_PRICE>0
+group by results.COUNTRY_CODE,
     results.BRAND_ID,
     results.BRAND_NAME,
     results.PRODUCT_ID,
     results.PRODUCT_NAME,
     results.CURRENCY;
-
+//EHQUT-Restrict the Zero Min Price for sending Notification to Controlling
 entity AccountMinPrice as select from MasterData.AccountPreApprovedPrices as a full outer join
 TenderResults as results on results.COUNTRY_CODE = a.COUNTRY_CODE and results.INSTITUTE_ID = a.INSTITUTE_ID and results.PRODUCT_ID = a.PRODUCT_ID and results.CURRENCY = a.CURRENCY {
     key ifnull(results.COUNTRY_CODE, a.COUNTRY_CODE) as COUNTRY_CODE:String,
@@ -468,9 +469,11 @@ where tender.Active = 1
 and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1;
 
+
 entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRY,
     key tender.TenderID as TENDER_ID,
+    tender.Classification as CLASSIFICATION,
     tender.TenderName as TENDER_NAME,
     tender.Institute.InstituteName as INSTITUTE,
     tender.Brands as BRAND,
@@ -1135,7 +1138,8 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
                     ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                 ) ),2) 
         else null
-    end as GrossMargin:Double
+    end as GrossMargin:Double,
+    product.ActiveProduct
     
 
         
@@ -1207,12 +1211,22 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.NetPriceWithoutTax,
     priceCondition.NetPriceWithTax,
     priceCondition.MaximumPrice,
-    priceCondition.ConfidentialPrice,
+    case
+        when priceCondition.ConfidentialPrice is null
+            then masterPrices.YLAP
+        else priceCondition.ConfidentialPrice
+    end as ConfidentialPrice:Decimal,        
     product.SKUCountry.VTATax as Tax, 
     priceCondition.Liquidation,
     priceCondition.RefundDate,
     priceCondition.RoyalDecreeValue, //calculated in UI based on User Input
     priceCondition.RoyalDecreeIncl,
+    case 
+        when priceCondition.PVL is null
+            then masterPrices.YLLP
+        else 
+            priceCondition.PVL        
+    end as PriceConditionPVL:Decimal,
     masterPrices.YLLP as PVL,
     masterPrices.YLAP,
     masterPrices.PRAF,

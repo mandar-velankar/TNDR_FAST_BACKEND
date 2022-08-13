@@ -31,6 +31,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity PaMainFOCView as projection on PriceAgreementDataViews.PaMainFOCView;
     entity Settlements as projection on MasterData.Settlements;
     entity SettlementDates as projection on PriceAgreementData.SettlementDates;
+    entity MasterPrices as projection on MasterDataViews.MostRecentMasterPricesView;
 
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;

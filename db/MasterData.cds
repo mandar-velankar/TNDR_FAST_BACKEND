@@ -109,6 +109,7 @@ entity PT_TMDIST{
 }
 
 //Product Pack
+//EITOG-119446-Adding new Field Nucleus
 entity PT_TMPRDPCK{
 	key PRODUCTPACKID:Integer not null;
 	PRODUCTPACKNAME:String(100);
@@ -125,6 +126,7 @@ entity PT_TMPRDPCK{
 	ProductClass: String(10);
 	ProductDescription: LargeString;
 	ProductFullDescription: LargeString;
+    Nucleus: String(100);
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
@@ -132,7 +134,7 @@ entity PT_TMPRDPCK{
 	RegisteredPrices:Association to many PT_TMREGPR on RegisteredPrices.ProductPack = $self;
 	ProductPackSKUs:Association to many PT_TMSKUPRDPCK on ProductPackSKUs.ProductPack = $self;
 }
-
+//EITOG-119446-Adding new Field Nucleus
 //Legal Entities (Selling Company)
  //EITOG-SCTASK0100482/REQ11565210-Increase the size of Letterhead
 entity PT_TMLE{
