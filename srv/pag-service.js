@@ -523,7 +523,7 @@ module.exports = async (srv) => {
      */
     async function updateCustomerPrices(response, priceConditions){
         const tx = cds.tx();
-        const refIdocIDs = response && response.map(res => res.headers.sapidocdbid) || [];
+        const refIdocIDs = response && response.map(res => res.headers && res.headers.sapidocdbid) || [];
         const customerPriceIDs = priceConditions && priceConditions.map(condition => condition.ID) || [];
         if(refIdocIDs.length === customerPriceIDs.length){
             try {     
