@@ -49,6 +49,7 @@
     "build:xs-security": "cds compile srv/ --to xsuaa  > xs-security.json",
     "build:xsa": "mbt build -p=xsa --mtar=FASTCAP-Backend.mtar",
     "build:cf": "mbt build -p=cf --mtar=FASTCAP-Backend-CF.mtar",
+    "build:trial": "cp mta-trial.yaml mta.yaml && npm run build:cf && cp mta-original.yaml mta.yaml",
     "deploy:cf": "cf deploy mta_archives/FASTCAP-Backend-CF.mtar -e cf.mtaext",
     "debug": "node --inspect node_modules/@sap/cds/bin/cds.js run",
     "start:cds": "cds run",
@@ -75,10 +76,11 @@
     "odata": {
       "version": "v4"
     },
+   
     "query": {
       "limit": {
-        "default": 2000,
-        "max": 2000
+        "default": 5000,
+        "max": 5000
       }
     }
   },

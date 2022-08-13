@@ -76,6 +76,8 @@ entity PriceAgreements: cuid, managed {
                                         and PriceConditions.ProductCode = ProductPackId
                                         and PriceConditions.CountryCode = CountryCode;
     SettlementDates: Composition of many SettlementDates on SettlementDates.PriceAgreementId = ID;
+    MasterPrices: Association to MasterDataViews.MostRecentMasterPricesView on MasterPrices.ProductPackId = ProductPackId
+                                                                            and MasterPrices.CountryCode = CountryCode  ;
 }
 entity CustomerPrices: cuid, managed {
     // @cds.api.ignore
