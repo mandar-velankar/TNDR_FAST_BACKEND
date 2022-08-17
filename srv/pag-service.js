@@ -69,6 +69,8 @@ module.exports = async (srv) => {
         let hasNewYLAPIndex = null;
         let isNewPriceAgreementFilterValues = null;
         let hasExpiredFilterValues = null;
+        let isCancelledFilterIndex = null;
+        let isCancelledFilterValues = null;
         let isSynchronizedFilterIndex = null;
         let isSynchronizedFilterValues = null;
         let appliedCountFilterIndex = null;
@@ -500,21 +502,21 @@ module.exports = async (srv) => {
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
         // await this.syncPriceAgreements(customerPrices);
-        syncPriceAgreements(req.data.ids,customerPrices);//run without waiting
+        syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
         return req.reply();
     });
-    async function syncPriceAgreements(pas,customerPrices) {
+    async function syncPriceAgreements(pas, customerPrices) {
         console.log(`Start synchronisation of PriceAgreements`);
-        
+
         console.log(`Prepare categories of customer prices`);
         const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1");
         const allCustomerPrices = mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions);
-        
+
         (!allCustomerPrices || allCustomerPrices.length === 0) && console.log("Nothing to process");
-        await setStatusPriceAgreement(allCustomerPrices.map(cp => cp.PriceAgreementId),'RUNNING');
+        await setStatusPriceAgreement(allCustomerPrices.map(cp => cp.PriceAgreementId), 'RUNNING');
 
         console.log(`Prepare requests of customer prices`);
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice));
@@ -525,32 +527,35 @@ module.exports = async (srv) => {
         console.log(`Process requests of customer prices`);
         const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
         console.log(`Process responses of customer prices`);
-        const mappedCustomerPrices = result.map((res,idx) => res?.headers?.sapidocdbid?allCustomerPrices[index]:res);//get customerprice for related response
+        const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
         const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrice.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
-        const paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status).map(req => req.customerPrice.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
-        await setStatusPriceAgreement(paWithErrorsIds,'ERROR');
+        let paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status); //in case one of the promises returns false -> it means there was an error
+        paWithoutErrorsIds = paWithoutErrorsIds.filter(paWE => paWithErrorsIds.findIndex(paE => paE === paWE.customerPrice.PriceAgreementId) === -1);//do not keep the ones that are already in error
+        await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
         // Set 'Synchronized' to true and add IDOC number from the response
         try {
             console.log(`Process customer prices in DB`);
-            if(result.length > 0){
-                await updateCustomerPrices(result, allCustomerPrices); // !!the order of PriceCondition arrays is important
-                await setStatusPriceAgreement(paWithoutErrorsIds,'DONE');
+            if (paWithoutErrorsIds.length > 0) {
+                console.log(`Process customer prices count: ${paWithoutErrorsIds.length}`);
+                await updateCustomerPrices(paWithoutErrorsIds); // !!the order of PriceCondition arrays is important
+                await setStatusPriceAgreement(paWithoutErrorsIds.map(req => req.customerPrice.PriceAgreementId), 'DONE');
             }else{
-                await setStatusPriceAgreement(allCustomerPrices.map(cp => cp.PriceAgreementId),'DONE');   
+                console.log(`Nothing to update in DB`);
             }
             console.log(`Finished synchronisation of PriceAgreements`);
         } catch (error) {
-            await setStatusPriceAgreement(allCustomerPrices.map(cp => cp.PriceAgreementId),'ERROR');//error for all
+            await setStatusPriceAgreement(allCustomerPrices.map(cp => cp.PriceAgreementId), 'ERROR');//error for all
         }
     };
-    async function setStatusPriceAgreement(pas,status){
-        if(!pas || pas?.length === 0){
+    async function setStatusPriceAgreement(pas, status) {
+        if (!pas || pas?.length === 0) {
             return false;
         }
+        pas = [...new Set(pas)];
         const tx = cds.tx();
         try {
             console.log(`Update SynchronizationStatus to ${status} for ${pas.join("||")}`)
-            await tx.run(UPDATE(PriceAgreements).with({ SynchronizationStatus: status }).where({ ID: { in: pas} }));
+            await tx.run(UPDATE(PriceAgreements).with({ SynchronizationStatus: status }).where({ ID: { in: pas } }));
             await tx.commit();
         } catch (error) {
             await tx.rollback(error);
@@ -566,30 +571,31 @@ module.exports = async (srv) => {
      * @param {Array} response 
      * @param {Array} priceConditions 
      */
-    async function updateCustomerPrices(response, priceConditions) {
+    async function updateCustomerPrices(responses) {
         const tx = cds.tx();
-        const refIdocIDs = response && response.map(res => res.headers.sapidocdbid) || [];
-        const customerPriceIDs = priceConditions && priceConditions.map(condition => condition.ID) || [];
-        if (refIdocIDs.length === customerPriceIDs.length) {
-            try {
-                console.log(`Start updating customer prices in HANA DB`)
-                const updatePromises = refIdocIDs.map((IdocID, index) => {
-                    return tx.run(UPDATE(CustomerPrices).with({ Synchronized: true, RefIdocNumber: IdocID }).where({ ID: customerPriceIDs[index] }));
-                });
-                await Promise.all(updatePromises);
-                await tx.commit();
-            } catch (error) {
-                await tx.rollback(error);
-                console.error(`ERROR when updating customer prices in HANA DB`)
-                console.error(error);
-                throw error;
-            }
+        // const refIdocIDs = response && response.map(res => res.headers.sapidocdbid) || [];
+        // const customerPriceIDs = priceConditions && priceConditions.map(condition => condition.ID) || [];
+        // if (refIdocIDs.length === customerPriceIDs.length) {
+        try {
+            console.log(`Start updating customer prices in HANA DB`)
+            const updatePromises = responses.map(response =>
+                tx.run(UPDATE(CustomerPrices)
+                    .with({ Synchronized: true, RefIdocNumber: response.result.headers.sapidocdbid })
+                    .where({ ID: response.customerPrice.ID })));
+            await Promise.all(updatePromises);
+            await tx.commit();
+        } catch (error) {
+            await tx.rollback(error);
+            console.error(`ERROR when updating customer prices in HANA DB`)
+            console.error(error);
+            throw error;
         }
+        // }
     };
 
 
     async function updateCustomerPrice(customerPrice) {
-        console.log(`Prepare sending update customer prices for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+        console.log(`Prepare sending update customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
         const body = getPriceAgreementRequestBodyTemplate();
         const effectiveDate = new Date(customerPrice.EffectiveDate);
@@ -598,24 +604,27 @@ module.exports = async (srv) => {
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
         if (!institute) {
+            console.error(`Error customer price: ${customerPrice.ID}`);
             console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
-            return { status: false,customerPrice:customerPrice};
+            return { status: false, customerPrice: customerPrice };
             // return req.reject(404, `No institute was found for InstituteID: ${customerPrice.InstituteId}`);
         }
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
         if (!priceAgreement) {
             // return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+            console.error(`Error customer price: ${customerPrice.ID}`);
             console.error(`No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
-            return { status: false,customerPrice:customerPrice};
+            return { status: false, customerPrice: customerPrice };
         }
         const whereOfferID = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
         const whereProductpackID = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", customerPrice.ProductPackId);
         let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));
         if (!offer) {
             // return req.reject(404, `No offer was found for OfferID: ${priceAgreement.OfferId}`);
+            console.error(`Error customer price: ${customerPrice.ID}`);
             console.error(`No offer was found for OfferID: ${priceAgreement.OfferId}`);
-            return { status: false,customerPrice:customerPrice};
+            return { status: false, customerPrice: customerPrice };
         }
 
         const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
@@ -681,11 +690,12 @@ module.exports = async (srv) => {
         try {
             const result = await updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
             console.log(`Finished sending update customer prices for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
-            return result;
+            return { status: true, result: result, customerPrice: customerPrice };
         } catch (error) {
+            console.error(`Error customer price: ${customerPrice.ID}`);
             console.error(`ERROR: sending update customer prices for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
-            console.error(error);
-            return { status: false,customerPrice:customerPrice};
+            logRequestError(error);
+            return { status: false, customerPrice: customerPrice };
             // throw error;//do not throw error to continue with other requests
         }
     }
@@ -831,8 +841,9 @@ module.exports = async (srv) => {
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
         if (!priceAgreement) {
+            console.error(`Error FOC customer price: ${customerPrice.ID}`);
             console.error(`No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
-            return { status: false,customerPrice:customerPrice};
+            return { status: false, customerPrice: customerPrice };
             // return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
         }
 
@@ -849,8 +860,9 @@ module.exports = async (srv) => {
         let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));
         if (!offer) {
             // return req.reject(404, `No offer was found for OfferID: ${priceAgreement.OfferId}`);{
+            console.error(`Error FOC customer price: ${customerPrice.ID}`);
             console.error(`No offer was found for OfferID: ${priceAgreement.OfferId}`);
-            return { status: false,customerPrice:customerPrice};
+            return { status: false, customerPrice: customerPrice };
         }
 
         const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
@@ -900,14 +912,16 @@ module.exports = async (srv) => {
             let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceAgreement_ID).where(wherePriceConditionCode));
             if (!priceCondition) {
                 // return req.reject(404, `No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+                console.error(`Error FOC customer price: ${customerPrice.ID}`);
                 console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
-                return { status: false,customerPrice:customerPrice};
+                return { status: false, customerPrice: customerPrice };
             }
             let priceAgreementFOC = await tx.run(SELECT.one.from(FreeGoodsOther).where({ PriceCondition_ID: priceCondition.ID }).where(whereFOCproductpackID));
             if (!priceAgreementFOC) {
                 // return req.reject(404, `No FreeGoodsOther was found for PriceConditionID: ${priceCondition.ID}`);
+                console.error(`Error FOC customer price: ${customerPrice.ID}`);
                 console.error(`No FreeGoodsOther was found for PriceConditionID: ${priceCondition.ID}`);
-                return { status: false,customerPrice:customerPrice};
+                return { status: false, customerPrice: customerPrice };
             }
 
             kstbm = parseInt(priceAgreementFOC.FOCBonus);
@@ -945,12 +959,12 @@ module.exports = async (srv) => {
         try {
             const result = await updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
             console.log(`Finished sending update FOC customer price: ${customerPrice.ID}`);
-            return result;
+            return { status: true, result: result, customerPrice: customerPrice };
         } catch (error) {
             console.error(`ERROR: sending update FOC customer price: price: ${customerPrice.ID}`);
-            console.error(error);
+            logRequestError(error);
             // throw error;//do not throw error to continue with other requests
-            return { status: false,customerPrice:customerPrice};
+            return { status: false, customerPrice: customerPrice };
         }
     };
 
@@ -961,14 +975,16 @@ module.exports = async (srv) => {
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: customerPrice.PriceAgreementId }));
         if (!priceAgreement) {
             // return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+            console.error(`Error Rappel customer price: ${customerPrice.ID}`);
             console.error(`No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
-            return { status: false,customerPrice:customerPrice};
+            return { status: false, customerPrice: customerPrice };
         }
         let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({ PriceAgreement_ID: customerPrice.PriceAgreementId }).where({ PriceConditionCode: customerPrice.PriceCondition }));
         if (!priceCondition) {
             // return req.reject(404, `No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+            console.error(`Error Rappel customer price: ${customerPrice.ID}`);
             console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
-            return { status: false,customerPrice:customerPrice};
+            return { status: false, customerPrice: customerPrice };
         }
 
         const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
@@ -995,7 +1011,7 @@ module.exports = async (srv) => {
         let highestDiscountCondition = null;
         let lowestDiscountCondition = null;
         const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: priceCondition.ID }));
-        if (discountConditions) {
+        if (discountConditions?.length > 0) {
             highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount > current.Discount) ? prev : current);
             lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount < current.Discount) ? prev : current);
             discountConditions.forEach(dc => {
@@ -1015,16 +1031,29 @@ module.exports = async (srv) => {
         try {
             const result = await updatePriceConditions(customerPrice.CountryCode, "PriceConditionRappel", body);
             console.log(`Finished sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
-            return result;
+            return { status: true, result: result, customerPrice: customerPrice };
         } catch (error) {
             console.error(`ERROR: sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
-            console.error(error);
-            return { status: false,customerPrice:customerPrice};
+            logRequestError(error);
+            return { status: false, customerPrice: customerPrice };
             // throw error;//do not throw error to continue with other requests
         }
     };
 
-
+    function logRequestError(error) {
+        if (error.response) {
+            // Request made and server responded
+            console.log(`Response data: ${error.response.data}`);
+            console.log(`Response status: ${error.response.status}`);
+            console.log(`Response headers: ${error.response.headers}`);
+        } else if (error.request) {
+            // The request was made but no response was received
+            console.log(`Request: ${error.request}`);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+    }
     function getES01RequestBodyTemplate() {
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
