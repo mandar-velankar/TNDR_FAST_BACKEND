@@ -248,6 +248,7 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
         ca.CandidateName as InstituteName,
+        ins.InstituteType as InstituteType,
         pa.CountryCode,
         pa.ProductPackId, 
         key ma.SKUCode as MaterialNumber,
