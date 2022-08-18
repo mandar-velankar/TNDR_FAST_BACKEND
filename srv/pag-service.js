@@ -108,6 +108,13 @@ module.exports = async (srv) => {
             hasNewYLAPIndex = ServiceHelper.getWhereId(req, 'hasNewYLAP');
             hasNewYLAPValues = ServiceHelper.getWhereValues(req, 'hasNewYLAP');
 
+            hasProductPackIdIndex = ServiceHelper.getWhereId(req, 'ProductPackId');
+            hasProductPackIdValues = ServiceHelper.getWhereValues(req, 'ProductPackId');
+
+            if(hasProductPackIdIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'ProductPackId');
+            }
+
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
             }
@@ -466,6 +473,12 @@ module.exports = async (srv) => {
             }
             result = filteredResult;
         }
+
+        if(hasProductPackIdIndex && hasProductPackIdValues.length > 0){
+            const filteredResult = result.filter(priceAgreement => priceAgreement.ProductPackId === hasProductPackIdValues[0]);
+            result = filteredResult;
+        }
+        
 
         await tx.commit();
         return req.reply(result);
