@@ -262,7 +262,8 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ifnull(cp.Price, pa.Price) as Price:Double,
         ifnull(cp.EffectiveDate, pa.EffectiveDate) as EffectiveDate:DateTime,
         ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime,
-        ins.CustomerID //by candidate
+        ins.CustomerID, //by candidate
+        cp.PriceCondition
         // pa.Institute.CustomerID //by price agreement
 };
 
