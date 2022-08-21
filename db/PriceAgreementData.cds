@@ -35,6 +35,7 @@ entity PriceAgreements: cuid, managed {
     hasNewPrice: Boolean default false; // calculated from NodeJS
     hasNewYLLP: Integer default 0;
     hasNewYLAP: Integer default 0;
+    hasProductPackId: Integer;
     IgnorePVLPriceChange: Boolean default false;
     IgnoreConfPriceChange: Boolean default false;
     ExpiringSoon: Boolean default false; // calculated from NodeJS
