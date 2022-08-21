@@ -108,12 +108,12 @@ module.exports = async (srv) => {
             hasNewYLAPIndex = ServiceHelper.getWhereId(req, 'hasNewYLAP');
             hasNewYLAPValues = ServiceHelper.getWhereValues(req, 'hasNewYLAP');
 
-            hasProductPackIdIndex = ServiceHelper.getWhereId(req, 'ProductPackId');
-            hasProductPackIdValues = ServiceHelper.getWhereValues(req, 'ProductPackId');
+            hasProductPackIdIndex = ServiceHelper.getWhereId(req, 'hasProductPackId');
+            hasProductPackIdValues = ServiceHelper.getWhereValues(req, 'hasProductPackId');
 
-            /*if(hasProductPackIdIndex >= 0){
-                ServiceHelper.deleteFilter(req, 'ProductPackId');
-            }*/
+            if(hasProductPackIdIndex >= 0){
+                ServiceHelper.deleteFilter(req, 'hasProductPackId');
+            }
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
