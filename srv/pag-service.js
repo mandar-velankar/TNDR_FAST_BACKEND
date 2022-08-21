@@ -111,9 +111,9 @@ module.exports = async (srv) => {
             hasProductPackIdIndex = ServiceHelper.getWhereId(req, 'ProductPackId');
             hasProductPackIdValues = ServiceHelper.getWhereValues(req, 'ProductPackId');
 
-            if(hasProductPackIdIndex >= 0){
+            /*if(hasProductPackIdIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'ProductPackId');
-            }
+            }*/
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
