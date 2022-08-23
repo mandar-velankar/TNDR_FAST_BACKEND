@@ -520,7 +520,9 @@ module.exports = async (srv) => {
         const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice, tx, req));
 
         // Synchronize
-        const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises)); 
+        let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises)); 
+        result = result.filter(res => res !== undefined);
+
         // Set 'Synchronized' to true and add IDOC number from the response
         result.length > 0 && await updateCustomerPrices(result, mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions)); // !!the order of PriceCondition arrays is important
 
@@ -562,6 +564,9 @@ module.exports = async (srv) => {
         if (!institute) {
             return req.reject(404, `No institute was found for InstituteID: ${customerPrice.InstituteId}`);
         }
+
+        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
+
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
         if (!priceAgreement) {
@@ -791,6 +796,8 @@ module.exports = async (srv) => {
         if (!offer) {
             return req.reject(404, `No offer was found for OfferID: ${priceAgreement.OfferId}`);
         }
+
+        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
 
         const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: priceAgreement.TenderId}));
 
