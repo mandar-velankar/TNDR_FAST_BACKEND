@@ -54,7 +54,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         // Synchronize
         let result = await Promise.all(updateMainConditionPromises); 
         // Set 'Synchronized' to true and add IDOC number from the response
-        result = result.filter(res => res);
+        result = result.filter(res => res !== undefined);
         result.length > 0 && await this.updateCustomerPrices(result, mainPriceConditions); // !!the order of PriceCondition arrays is important
 
         return result;
@@ -97,7 +97,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             return;
         }
 
-        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return; //Customer prices should not be synchronized for ship to parties
+        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve(); //Customer prices should not be synchronized for ship to parties
 
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
