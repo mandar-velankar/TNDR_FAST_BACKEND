@@ -1233,6 +1233,8 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     masterPrices.RentalPrice,
     masterPrices.UoM,
     masterPrices.Currency as masterPriceCurrency,
+    masterPrices.TaxES,
+    masterPrices.TaxE1,
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
     priceCondition.ReferencePriceAgreement,
