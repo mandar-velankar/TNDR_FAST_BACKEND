@@ -31,6 +31,7 @@ entity PriceAgreements: cuid, managed {
     TenderId: String not null;
     ProductPackId: Integer not null;
     Synchronized: Boolean;
+    SynchronizationStatus: String;//RUNNING/FAILED/DONE
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
     hasNewYLLP: Integer default 0;
