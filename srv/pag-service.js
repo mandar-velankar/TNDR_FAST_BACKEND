@@ -526,12 +526,16 @@ module.exports = async (srv) => {
         // Synchronize
         console.log(`Process requests of customer prices`);
         const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
+
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
+        
         const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrice.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
+        await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
+
         let paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status); //in case one of the promises returns false -> it means there was an error
         paWithoutErrorsIds = paWithoutErrorsIds.filter(paWE => paWithErrorsIds.findIndex(paE => paE === paWE.customerPrice.PriceAgreementId) === -1);//do not keep the ones that are already in error
-        await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
+        
         // Set 'Synchronized' to true and add IDOC number from the response
         try {
             console.log(`Process customer prices in DB`);
@@ -771,9 +775,12 @@ module.exports = async (srv) => {
             return false;
         }
 
+        console.log(`Get api config ...`);
         const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'PriceAgreement', CountryCode: countryCode, Resource: resource }));
-
+        console.log(`API config:`);
+        console.log(apiConfig);
         const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+        console.log(`Get bearer token ...`);
         const oauthCredentials = await getBearerToken();
 
         console.log(`Synchronizing Price Conditions ...`);
