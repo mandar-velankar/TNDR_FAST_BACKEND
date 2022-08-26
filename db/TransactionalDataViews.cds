@@ -1236,7 +1236,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
         when tender.CountryCode = 'ES'
             then
                 case
-                    when ApplicableTaxRate = 'E1'
+                    when institute.ApplicableTaxRate = 'E1'
                         then masterPrices.TaxE1
                     else 
                         masterPrices.TaxES
