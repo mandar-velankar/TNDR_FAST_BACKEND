@@ -1,4 +1,5 @@
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
+const { ProcessMaterialsBrazil, ProcessCustomersBrazil } = require('./BrazilJobs');
 const PriceAgreementMailJob = require("./PriceAgreementMailJob");
 const PriceAgreementPriceConditionNotificationMailJob = require("./PriceAgreementPriceConditionNotificationMailJob");
 const ExtendPriceAgreements = require("./PriceAgreementJobs");
@@ -11,6 +12,12 @@ module.exports = class JobFactory {
                 break;
             case this.jobNames.ProcessCustomersJob:
                 return new ProcessCustomers(jobName,jobTime)
+                break;
+            case this.jobNames.ProcessMaterialsBrazilJob:
+                return new ProcessMaterialsBrazil(jobName,jobTime)
+                break;
+            case this.jobNames.ProcessCustomersBrazilJob:
+                return new ProcessCustomersBrazil(jobName,jobTime)
                 break;
             case this.jobNames.PriceAgreementMailJob:
                 return new PriceAgreementMailJob(jobName,jobTime)
@@ -30,6 +37,8 @@ module.exports = class JobFactory {
         return {
             ProcessMaterialsJob: "ProcessMaterialsJob",
             ProcessCustomersJob: "ProcessCustomersJob",
+            ProcessMaterialsBrazilJob: "ProcessMaterialsBrazilJob",
+            ProcessCustomersBrazilJob: "ProcessCustomersBrazilJob",
             PriceAgreementMailJob: "PriceAgreementMailJob",
             PriceAgreementPriceConditionNotificationMailJob: "PriceAgreementPriceConditionNotificationMailJob",
             ExtendPriceAgreements: "ExtendPriceAgreements"
