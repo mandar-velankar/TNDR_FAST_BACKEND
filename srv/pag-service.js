@@ -538,7 +538,7 @@ module.exports = async (srv) => {
 
         // Synchronize
         console.log(`Process requests of customer prices`);
-        const result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
+        let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
         result = result.filter(res => res !== undefined);
 
         console.log(`Process responses of customer prices`);
