@@ -29,7 +29,7 @@ entity BrazilCustomers: managed {
 	REPRES				: String(3);			// Flag if the customer is a sales representative - 'M34' - Distributor
 	ORG_VENDAS			: String(4);			// Sales organization
     CANAL_DISTR			: String(2);			// Distribution channel
-	SECTOR_ATIV			: String(2);			// Division
+	key SECTOR_ATIV	    : String(2);		    // Division
 	RAZAO				: String;			    // Customer real name  (spec mis match, it was 35 long)
 	FANTASIA			: String(10);			// Customer nickname
 	ENDERECO			: String(35);			// Address
@@ -40,9 +40,9 @@ entity BrazilCustomers: managed {
 	FAX					: String(31);			// Fax
 	CNPJ				: String(16);			// Customer fiscal ID 1
 	IE					: String(18);			// Customer fiscal ID 1
-	EMAIL				: String(3);			// E-mail
+	EMAIL				: String;			    // E-mail (Spec different? this was specified as 3 long??)
 	REGIAO				: String(3);			// Customer federation state
-	UF					: String(1);			// Customer federation state
+	UF					: String(3);			// Customer federation state
 	BLOQ				: String(1);			// Flag if customer is blocked
 	GRP_CLIENTE			: String(3);			// Customer group 4
 	LISTA_PRC			: String(2);			// Customer price list
