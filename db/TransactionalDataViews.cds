@@ -1215,8 +1215,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
         when priceCondition.ConfidentialPrice is null
             then masterPrices.YLAP
         else priceCondition.ConfidentialPrice
-    end as ConfidentialPrice:Decimal,        
-    product.SKUCountry.VTATax as Tax, 
+    end as ConfidentialPrice:Decimal,
     priceCondition.Liquidation,
     priceCondition.RefundDate,
     priceCondition.RoyalDecreeValue, //calculated in UI based on User Input
@@ -1233,6 +1232,18 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     masterPrices.RentalPrice,
     masterPrices.UoM,
     masterPrices.Currency as masterPriceCurrency,
+    case
+        when tender.CountryCode = 'ES'
+            then
+                case
+                    when ApplicableTaxRate = 'E1'
+                        then masterPrices.TaxE1
+                    else 
+                        masterPrices.TaxES
+                end
+        else
+            product.SKUCountry.VTATax
+    end as Tax:Double,
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
     priceCondition.ReferencePriceAgreement,
