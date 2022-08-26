@@ -31,10 +31,12 @@ entity PriceAgreements: cuid, managed {
     TenderId: String not null;
     ProductPackId: Integer not null;
     Synchronized: Boolean;
+    SynchronizationStatus: String;//RUNNING/FAILED/DONE
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
     hasNewYLLP: Integer default 0;
     hasNewYLAP: Integer default 0;
+    hasProductPackId: Integer;
     IgnorePVLPriceChange: Boolean default false;
     IgnoreConfPriceChange: Boolean default false;
     ExpiringSoon: Boolean default false; // calculated from NodeJS
@@ -271,5 +273,6 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
 //Distinct list of Products
 entity PriceAgreementProductNames as select from PriceAgreements {
 	key ProductPackId,
+    CountryCode,
     Product.ProductPack.PRODUCTPACKNAME as ProductName
-} group by ProductPackId, Product.ProductPack.PRODUCTPACKNAME;
+} group by ProductPackId, CountryCode, Product.ProductPack.PRODUCTPACKNAME;
