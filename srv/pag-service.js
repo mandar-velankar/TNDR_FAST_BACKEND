@@ -962,6 +962,8 @@ module.exports = async (srv) => {
 
             const focMaterial = await tx.run(SELECT.one.from(PT_TMSKUPRDPCK).where(whereFOCproductpackID).where({ CountryCode: priceAgreement.CountryCode, ActiveRecord: 'Yes' }));
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(focMaterial.SKUCode);
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.PRSCH = 2;
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KZNEP = "E";
         }
         //EHQUT-OTT-138426-Italy - different offer values on SAP
 
