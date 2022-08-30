@@ -1243,7 +1243,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
                 end
         else
             product.SKUCountry.VTATax
-    end as Tax:Double,
+    end as Tax:hana.REAL,
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
     priceCondition.ReferencePriceAgreement,
