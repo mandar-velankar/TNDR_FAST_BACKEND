@@ -31,10 +31,12 @@ entity PriceAgreements: cuid, managed {
     TenderId: String not null;
     ProductPackId: Integer not null;
     Synchronized: Boolean;
+    SynchronizationStatus: String;//RUNNING/FAILED/DONE
     hasNewMaterials: Boolean default false; // calculated from NodeJS
     hasNewPrice: Boolean default false; // calculated from NodeJS
     hasNewYLLP: Integer default 0;
     hasNewYLAP: Integer default 0;
+    hasProductPackId: Integer;
     IgnorePVLPriceChange: Boolean default false;
     IgnoreConfPriceChange: Boolean default false;
     ExpiringSoon: Boolean default false; // calculated from NodeJS
@@ -248,6 +250,7 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
         ca.CandidateName as InstituteName,
+        ins.InstituteType as InstituteType,
         pa.CountryCode,
         pa.ProductPackId, 
         key ma.SKUCode as MaterialNumber,
@@ -261,7 +264,8 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ifnull(cp.Price, pa.Price) as Price:Double,
         ifnull(cp.EffectiveDate, pa.EffectiveDate) as EffectiveDate:DateTime,
         ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime,
-        ins.CustomerID //by candidate
+        ins.CustomerID, //by candidate
+        cp.PriceCondition
         // pa.Institute.CustomerID //by price agreement
 };
 
@@ -269,5 +273,6 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
 //Distinct list of Products
 entity PriceAgreementProductNames as select from PriceAgreements {
 	key ProductPackId,
+    CountryCode,
     Product.ProductPack.PRODUCTPACKNAME as ProductName
-} group by ProductPackId, Product.ProductPack.PRODUCTPACKNAME;
+} group by ProductPackId, CountryCode, Product.ProductPack.PRODUCTPACKNAME;

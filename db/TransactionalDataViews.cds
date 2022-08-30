@@ -1215,8 +1215,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
         when priceCondition.ConfidentialPrice is null
             then masterPrices.YLAP
         else priceCondition.ConfidentialPrice
-    end as ConfidentialPrice:Decimal,        
-    product.SKUCountry.VTATax as Tax, 
+    end as ConfidentialPrice:Decimal,
     priceCondition.Liquidation,
     priceCondition.RefundDate,
     priceCondition.RoyalDecreeValue, //calculated in UI based on User Input
@@ -1233,8 +1232,114 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     masterPrices.RentalPrice,
     masterPrices.UoM,
     masterPrices.Currency as masterPriceCurrency,
+    case
+        when tender.CountryCode = 'ES'
+            then
+                case
+                    when institute.ApplicableTaxRate = 'E1'
+                        then masterPrices.TaxE1
+                    else 
+                        masterPrices.TaxES
+                end
+        else
+            product.SKUCountry.VTATax
+    end as Tax:Double,
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
     priceCondition.ReferencePriceAgreement,
     priceCondition.Settlement.ID as Settlement_ID
 }where tender.Active = 1;
+
+/**
+ * This view contains Tender History fields used on the Spain financial offers page
+ */
+entity TenderHistorySpain as select from TransactionalData.PT_TMTEND as tender
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID 
+left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+    on product.ProductCode = masterPrices.ProductPackId
+    and product.CountryCode = masterPrices.CountryCode    
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode 
+left outer join TransactionalData.FreeGoodsOther as freegoods 
+    on product.ProductCode = freegoods.ProductPackId
+	and freegoods.PriceCondition.ID is not NULL
+	{
+key product.TenderID,
+key offer.OfferID,
+key product.ProductCode,
+tender.TenderName as TENDER_NAME,
+offer.SubmittedOn as OFFER_DATE,
+key institute.InstituteID as INSTITUTE_ID,
+institute.InstituteName as INSTITUTE_NAME,
+key product.SKU.PRODUCTPACKID as PRODUCT_ID,
+product.SKU.PRODUCTPACKNAME as PRODUCT_NAME,
+product.Price.OfferPrice *
+    case when product.UnitPerPack = 'Unit'
+        then product.SKU.PACKFACTOR
+        else 1
+    end as PACK_PRICE:Double,
+product.Price.OfferPrice *
+    case when product.UnitPerPack = 'Unit'
+        then 1
+        else 1 / product.SKU.PACKFACTOR
+    end as UNIT_PRICE:Double,
+masterPrices.YLLP as PVL,
+masterPrices.YLAP as CONFIDENTIAL_PRICE,
+priceConditionClassification.ConditionType as PRICE_CONDITION,
+priceCondition.RoyalDecree as ROYALDECREE,
+priceCondition.Discount as DISCOUNT,
+case when priceCondition.Liquidation is not null
+	then 'Yes'
+	else 'No'
+end as RAPPEL:String(10),
+case when freegoods.FOCBonus is not null and freegoods.FOCMinAmount is not null
+    then 'Yes'
+    else 'No'
+end as FOC:String(10),
+freegoods.FOCBonus as FOC_BONUS,
+freegoods.FOCMinAmount as FOCMIN_AMOUNT,
+ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
+}
+where offer.Active = 1
+and product.Active = 1
+and product.ActiveProduct = 1 
+and priceConditionClassification.isMain = 'true' 
+and (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+group by product.TenderID,
+    offer.OfferID,
+    product.ProductCode,
+    tender.TenderName,
+    offer.SubmittedOn,
+    institute.InstituteID,
+    institute.InstituteName,
+    product.SKU.PRODUCTPACKID,
+    product.SKU.PRODUCTPACKNAME,
+    product.Price.OfferPrice,
+    product.SKU.PACKFACTOR,
+    product.UnitPerPack,
+    masterPrices.YLLP,
+    masterPrices.YLAP,
+    priceConditionClassification.ConditionType,
+    priceCondition.RoyalDecree,
+    priceCondition.Discount,
+    priceCondition.Liquidation,
+    freegoods.FOCBonus,
+    freegoods.FOCMinAmount,
+    product.Results.Outcome;
