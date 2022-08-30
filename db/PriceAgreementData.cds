@@ -47,7 +47,7 @@ entity PriceAgreements: cuid, managed {
     OfferId: String;
     ExtendPriceAgreement: Boolean default false;
     ExpiryExtensionPeriod: Integer;
-    ExpiryExtensionAcknowledged: Boolean;
+    ExpiryExtensionAcknowledged: Boolean default false;
     Status: String;
     CancellationComment: String;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
