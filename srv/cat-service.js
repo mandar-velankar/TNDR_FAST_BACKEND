@@ -1835,7 +1835,7 @@ module.exports = (srv) => {
 			registeredRemark = registeredRemark.concat(offer.DISTRIBUTORNAME)
 		}
         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
-        let InstituteRemark = institute.Comment;
+        let InstituteRemark = institute.Comment ? institute.Comment : ""; //solution for TCS (otherwise line concat will not work if its null)
         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
 		//Comment if any product is alternative to quoted
