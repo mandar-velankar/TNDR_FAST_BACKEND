@@ -17,7 +17,8 @@ module.exports = async (srv) => {
         CustomerPrices,
         NewMaterialsView,
         NewFOCMaterialsView,
-        PriceAgreements
+        PriceAgreements,
+        PriceAgreementAcknowledgementHistory
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
@@ -485,6 +486,51 @@ module.exports = async (srv) => {
         await tx.commit();
         return req.reply(result);
 
+    });
+
+    srv.on(['CREATE','UPDATE'], 'PriceAgreements', async (req, next) => {
+        const tx = cds.tx(req);
+        const result = await next();
+        let acknowledgementHistory = "";
+        // when creating/updating a price agreement, we also want to automatically create 
+        // a history of the expiry extension acknowledged associated with the price agreement
+        try {
+            acknowledgementHistory = await tx.run(SELECT.from(PriceAgreementAcknowledgementHistory).where({PriceAgreementID: result.ID}));
+            if(!acknowledgementHistory && result.ExpiryExtensionAcknowledged){
+                acknowledgementHistory = [
+                    { 
+                        PriceAgreementID: result.ID,
+                        ExpiryDate: result.ExpiryDate,
+                        ExpiryExtensionPeriod: result.ExpiryExtensionPeriod,
+                        Acknowledged: result.ExpiryExtensionAcknowledged,
+                    }
+                ];
+                await tx.run(INSERT(acknowledgementHistory).into(PriceAgreementAcknowledgementHistory));    
+            }else if(acknowledgementHistory && acknowledgementHistory.Acknowledged !== result.ExpiryExtensionAcknowledged){
+                acknowledgementHistory.Acknowledged = result.ExpiryExtensionAcknowledged;
+                await tx.run(UPDATE(PriceAgreementAcknowledgementHistory, {ID:acknowledgementHistory.ID}).with(PriceAgreementAcknowledgementHistory));
+            }
+            await tx.commit();
+        } catch (e) {
+            await tx.rollback(e)
+        }
+        return req.reply(result);
+    });
+
+    srv.on('DELETE', 'PriceAgreements', async (req, next) => {
+        const tx = cds.tx(req);
+        const result = await next();
+        // when we delete a price agreement, we also need to delete the expiry extension 
+        // acknowledged history associated with the price agreement.
+        if(result){
+            try {
+                await tx.run(DELETE.from(PriceAgreementAcknowledgementHistory).where({ PriceAgreementID: result.ID }));
+                await tx.commit();
+            } catch (e) {
+                await tx.rollback(e)
+            }
+        }
+        return req.reply(result);
     });
 
     srv.after('READ', 'PriceAgreements', async (data) => {
