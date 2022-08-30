@@ -1152,7 +1152,6 @@ module.exports = async (srv) => {
                         "KOTABNR": 750,
                         "KVEWE": "A",
                         "KAPPL": "V",
-                        "KNUMA_BO": "",
                         "_BAY0-GZ_SALESAGRITEM": [
                             {
                                 "KUNNR": 0,
