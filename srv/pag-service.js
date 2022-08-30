@@ -17,7 +17,8 @@ module.exports = async (srv) => {
         CustomerPrices,
         NewMaterialsView,
         NewFOCMaterialsView,
-        PriceAgreements
+        PriceAgreements,
+        PriceAgreementAcknowledgementHistory
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
@@ -77,6 +78,8 @@ module.exports = async (srv) => {
         let appliedCountFilterValues = null;
         let hasNewYLLPValues = null;
         let hasNewYLAPValues = null;
+        let hasProductPackIdIndex = null;
+        let hasProductPackIdValues = null; 
 
         if (req.query.SELECT.where) {
 
@@ -485,6 +488,34 @@ module.exports = async (srv) => {
         await tx.commit();
         return req.reply(result);
 
+    });
+
+    srv.on(['CREATE','UPDATE'], 'PriceAgreements', async (req, next) => {
+        const tx = cds.tx(req);
+        const result = await next();
+        let acknowledgementHistory = "";
+        // when creating/updating a price agreement, we also want to automatically create 
+        // a history of the expiry extension acknowledged associated with the price agreement
+        if(result){
+            try {
+                acknowledgementHistory = await tx.run(SELECT.one.from(PriceAgreementAcknowledgementHistory).where({PriceAgreementID: result.ID, ExpiryDate: result.ExpiryDate, ExpiryExtensionPeriod: result.ExpiryExtensionPeriod}));
+                if((!acknowledgementHistory && result.ExpiryExtensionAcknowledged) || acknowledgementHistory){
+                    acknowledgementHistory = [
+                        { 
+                            PriceAgreementID: result.ID,
+                            ExpiryDate: result.ExpiryDate,
+                            ExpiryExtensionPeriod: result.ExpiryExtensionPeriod,
+                            Acknowledged: result.ExpiryExtensionAcknowledged,
+                        }
+                    ];    
+                    await tx.run(INSERT(acknowledgementHistory).into(PriceAgreementAcknowledgementHistory));
+                }
+                await tx.commit();
+            } catch (e) {
+                await tx.rollback(e)
+            }
+        }
+        return req.reply(result);
     });
 
     srv.after('READ', 'PriceAgreements', async (data) => {

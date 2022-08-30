@@ -47,6 +47,7 @@ entity PriceAgreements: cuid, managed {
     OfferId: String;
     ExtendPriceAgreement: Boolean default false;
     ExpiryExtensionPeriod: Integer;
+    ExpiryExtensionAcknowledged: Boolean default false;
     Status: String;
     CancellationComment: String;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
@@ -81,6 +82,14 @@ entity PriceAgreements: cuid, managed {
     MasterPrices: Association to MasterDataViews.MostRecentMasterPricesView on MasterPrices.ProductPackId = ProductPackId
                                                                             and MasterPrices.CountryCode = CountryCode  ;
 }
+
+entity PriceAgreementAcknowledgementHistory: cuid, managed {
+    PriceAgreementID: UUID;
+    ExpiryDate:  DateTime;
+    ExpiryExtensionPeriod: Integer;
+    Acknowledged: Boolean;
+}
+
 entity CustomerPrices: cuid, managed {
     // @cds.api.ignore
     @assert.notNull: false
