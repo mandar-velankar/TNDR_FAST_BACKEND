@@ -296,12 +296,14 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             const priceAgreements = await tx.run(SELECT.from(PriceAgreements).where(whereExpr));
 
             let aPriceAgreementsUpdated = [];
-            const promises = priceAgreements.map(agreement => {
+            const promises = [];
+            
+            priceAgreements.forEach(agreement => {
                 let todayMinus1 = new Date();
                 todayMinus1 = new Date(todayMinus1.setDate(todayMinus1.getDate()-1));
                 if(!agreement.ExpiryDate || agreement.ExpiryDate.indexOf("T") === -1){
                     console.log(`AgreementID ${agreement.ID}:Expiry date ${agreement.ExpiryDate} is not valid, will not be processed...`);
-                    return null;
+                    return;
                 }
                 todayMinus1 = todayMinus1.toISOString().substr(0, agreement.ExpiryDate.lastIndexOf("T"));
                 let agreementExpiryDate = agreement.ExpiryDate.substr(0, agreement.ExpiryDate.lastIndexOf("T"));
@@ -313,20 +315,21 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                     aPriceAgreementsUpdated.push(agreement.ID);
 
                     //update the actual price agreement withh the new price agreement date
-                    return Promise.all([
-                        tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate}).where({ ID: agreement.ID })),
+                    promises.push(Promise.all([
+                        tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate, ExpiryExtensionAcknowledged: false}).where({ ID: agreement.ID })),
                         tx.run(UPDATE(CustomerPrices).with({ExpiryDate: newDate}).where({ PriceAgreementId: agreement.ID }))
-                    ]);
+                    ]));
                 }
-
-                return null;
             });
 
             //execute the promises and log the output
-            console.log(`Updating ${PriceAgreements.name} ...`);
-            await Promise.all(promises);
-            await tx.commit();
-            console.log(`${promises.length} Expiry date(s) successfully updated in ${PriceAgreements.name}.`);
+            if(promises.length > 0){
+                console.log(`Updating ${PriceAgreements.name} ...`);
+                await Promise.all(promises);
+                await tx.commit();
+                console.log(`${promises.length} Expiry date(s) successfully updated in ${PriceAgreements.name}.`);
+            }
+            
             return aPriceAgreementsUpdated;
 
         } catch (error) {
