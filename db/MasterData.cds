@@ -110,6 +110,7 @@ entity PT_TMDIST{
 
 //Product Pack
 //EITOG-119446-Adding new Field Nucleus
+//EITOG-167492-Adding new Field Product Generic Name
 entity PT_TMPRDPCK{
 	key PRODUCTPACKID:Integer not null;
 	PRODUCTPACKNAME:String(100);
@@ -127,6 +128,7 @@ entity PT_TMPRDPCK{
 	ProductDescription: LargeString;
 	ProductFullDescription: LargeString;
     Nucleus: String(100);
+    ProductGenericName: String(500);
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
