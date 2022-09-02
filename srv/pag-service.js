@@ -3,6 +3,7 @@ const R = require('ramda');
 const ServiceHelper = require('./utils/ServiceHelper');
 const axios = require('axios');
 const qs = require("qs");
+const { findIndex } = require('lodash');
 
 module.exports = async (srv) => {
 
@@ -46,6 +47,21 @@ module.exports = async (srv) => {
 
     srv.on('READ', 'PriceAgreements', async (req, next) => {
 
+        let start;
+        let end;
+        let totalTime = 0;
+        const startTrace = (entity) => {
+            start = new Date();
+            console.log(`Start fetching all ${entity} at ${start}`);
+        };
+        const stopTrace = (entity) => {
+            if(!start)return; //not started
+            end = new Date();
+            console.log(`Finished fetching all ${entity} at ${end}`);
+            let duration = (end - start)/1000;
+            totalTime += duration;
+            console.log(`Fetching ${entity} took: ${duration} seconds`);
+        };
 
         // const tx = cds.transaction(req);
         const tx = cds.tx(req);
@@ -157,12 +173,20 @@ module.exports = async (srv) => {
                 ServiceHelper.deleteFilter(req, 'hasNewYLAP');
             }
         }
-        //store limit to apply at the end
-        const limit = req.query.SELECT.limit;
         //delete limit from request to SELECT all data from table
-        delete req.query.SELECT.limit
+        // delete req.query.SELECT.limit
         //run default query on db
-        const data = await next();
+        // const data = await next();// do not use because it does not behaves as expected in case of count
+        let data = [];
+        startTrace("PriceAgreements");
+        if(req.query.SELECT.columns[0]?.func === "count"){
+            data = await tx.run(SELECT.from(PriceAgreements).where(req.query.SELECT.where));
+        }else{
+            data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
+        }
+        stopTrace("PriceAgreements");
+        
+
         // const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
         let ids = [];
         //use only one loop instead of multiple map functionslet ids = [];
@@ -172,77 +196,72 @@ module.exports = async (srv) => {
         // let existingPriceConditionIDs = [];
         //use only one loop instead of multiple map functions
         for(const pa of data){
-            ids.push(pa.ID);
-            offers.push(pa.OfferId);
-            countrycodes.push(pa.CountryCode);
-            productpacks.push(pa.ProductPackId);
+            if(ids.findIndex(id => id === pa.ID) === -1)ids.push(pa.ID);
+            if(offers.findIndex(off => off === pa.OfferId) === -1)offers.push(pa.OfferId);
+            if(countrycodes.findIndex(cc => cc === pa.CountryCode) === -1)countrycodes.push(pa.CountryCode);
+            if(productpacks.findIndex(ppid => ppid === pa.ProductPackId) === -1)productpacks.push(pa.ProductPackId);
             // existingPriceConditionIDs.push(pa.ExistingPriceConditionID);
         }
-        let start = new Date();
-        console.log(`Start fetching all CustomerPrices at ${start}`);
-        const customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
-        let end = new Date();
-        console.log(`Finished fetching all CustomerPrices at ${end}`);
-        console.log(`Fetching CustomerPrices took: ${(end - start)/1000} seconds`);
+        let customerPricesAll = [];
+        let priceConditionsAll = [];
+        let mostRecentMasterPricesAll = [];
+        let consumerPricesAll = [];
+        let newMaterialsAll = [];
+        let newFOCMaterialsAll = [];
+
+        if(ids && ids.length > 0){
+            startTrace("CustomerPrices");
+            customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+            stopTrace("CustomerPrices");
+
+            startTrace("NewMaterialsView");
+            newMaterialsAll = await tx.run(SELECT.from(NewMaterialsView).where({ PriceAgreementId: { in: ids } }));
+            stopTrace("NewMaterialsView");
+    
+            startTrace("NewFOCMaterialsView");
+            newFOCMaterialsAll = await tx.run(SELECT.from(NewFOCMaterialsView).where({ PriceAgreementId: { in: ids } }));
+            stopTrace("NewFOCMaterialsView");
+        }
         
-        start = new Date();
-        console.log(`Start fetching all PriceConditionView at ${start}`);
-        const priceConditionsAll = await tx.run(SELECT.from(PriceConditionView)
-            .where({CountryCode:{in:countrycodes},
-                and:{
-                    ProductCode:{in:productpacks},
-                    and:{
-                        OfferID:{in:offers},
+        if(countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0){
+            if(offers && offers.length > 0){
+                startTrace("PriceConditionView");
+                priceConditionsAll = await tx.run(SELECT.from(PriceConditionView)
+                    .where({CountryCode:{in:countrycodes},
                         and:{
-                            ExistingPriceConditionID:{'!=':null}
+                            ProductCode:{in:productpacks},
+                            and:{
+                                OfferID:{in:offers},
+                                and:{
+                                    ExistingPriceConditionID:{'!=':null}
+                                }
+                            }
                         }
+                    })
+                );
+                stopTrace("PriceConditionView");
+            }
+            startTrace("MostRecentMasterPricesView");
+            mostRecentMasterPricesAll = await tx.run(SELECT.from(MostRecentMasterPricesView)
+                .where({CountryCode:{in:countrycodes},
+                    and:{
+                        ProductPackId:{in:productpacks}
                     }
-                }
-            })
-        );
-        end = new Date();
-        console.log(`Finished fetching all PriceConditionView at ${end}`);
-        console.log(`Fetching PriceConditionView took: ${(end - start)/1000} seconds`);
+                })
+            );
+            stopTrace("MostRecentMasterPricesView");
+            
+            startTrace("MostRecentConsumerPricesView");
+            consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
+                .where({CountryCode:{in:countrycodes},
+                    and:{
+                        ProductPackId:{in:productpacks}
+                    }
+                })
+            );
+            stopTrace("MostRecentConsumerPricesView");
+        }
 
-        start = new Date();
-        console.log(`Start fetching all MostRecentMasterPricesView at ${start}`);
-        const mostRecentMasterPricesAll = await tx.run(SELECT.from(MostRecentMasterPricesView)
-            .where({CountryCode:{in:countrycodes},
-                and:{
-                    ProductPackId:{in:productpacks}
-                }
-            })
-        );
-        end = new Date();
-        console.log(`Finished fetching all MostRecentMasterPricesView at ${end}`);
-        console.log(`Fetching MostRecentMasterPricesView took: ${(end - start)/1000} seconds`);
-
-        start = new Date();
-        console.log(`Start fetching all NewMaterialsView at ${start}`);
-        const newMaterialsAll = await tx.run(SELECT.from(NewMaterialsView).where({ PriceAgreementId: { in: ids } }));
-        end = new Date();
-        console.log(`Finished fetching all NewMaterialsView at ${end}`);
-        console.log(`Fetching NewMaterialsView took: ${(end - start)/1000} seconds`);
-        start = new Date();
-        console.log(`Start fetching all NewFOCMaterialsView at ${start}`);
-        const newFOCMaterialsAll = await tx.run(SELECT.from(NewFOCMaterialsView).where({ PriceAgreementId: { in: ids } }));
-        end = new Date();
-        console.log(`Finished fetching all NewFOCMaterialsView at ${end}`);
-        console.log(`Fetching NewFOCMaterialsView took: ${(end - start)/1000} seconds`);
-
-        
-        start = new Date();
-        console.log(`Start fetching all MostRecentConsumerPricesView at ${start}`);
-        const consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
-            .where({CountryCode:{in:countrycodes},
-                and:{
-                    ProductPackId:{in:productpacks}
-                }
-            })
-        );
-        end = new Date();
-        console.log(`Finished fetching all MostRecentConsumerPricesView at ${end}`);
-        console.log(`Fetching MostRecentConsumerPricesView took: ${(end - start)/1000} seconds`);
 
         let mainConditionIDs = [];
         let rappelConditionIDs = [];
@@ -254,41 +273,40 @@ module.exports = async (srv) => {
             if(condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')){
                 rappelConditionIDs.push(condition.ExistingPriceConditionID);
             }
-            if((condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode){
+            if(condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')){
                 focConditionIDs.push(condition.ExistingPriceConditionID);
             }
         }
-        
-        start = new Date();
-        console.log(`Start fetching all PriceCondition at ${start}`);
-        const priceConditionAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: mainConditionIDs } }));
-        end = new Date();
-        console.log(`Finished fetching all PriceCondition at ${end}`);
-        console.log(`Fetching PriceCondition took: ${(end - start)/1000} seconds`);
+        let priceConditionAll = [];
+        let priceConditionRappelAll = [];
+        let discountConditionsAll = [];
+        let priceConditionFOCAll = [];
+        if(mainConditionIDs && mainConditionIDs.length > 0){
+            startTrace("PriceCondition");
+            priceConditionAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: mainConditionIDs } }));
+            stopTrace("PriceCondition");
+        }
 
-        start = new Date();
-        console.log(`Start fetching all PriceCondition at ${start}`);
-        const priceConditionRappelAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: rappelConditionIDs } }));
-        end = new Date();
-        console.log(`Finished fetching all PriceCondition at ${end}`);
-        console.log(`Fetching PriceCondition took: ${(end - start)/1000} seconds`);
-        
-        start = new Date();
-        console.log(`Start fetching all DiscountCondition at ${start}`);
-        const discountConditionsAll = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: { in: rappelConditionIDs } }));
-        end = new Date();
-        console.log(`Finished fetching all DiscountCondition at ${end}`);
-        console.log(`Fetching DiscountCondition took: ${(end - start)/1000} seconds`);
-        
-        start = new Date();
-        console.log(`Start fetching all PriceCondition at ${start}`);
-        const priceConditionFOCAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: focConditionIDs } }));
-        end = new Date();
-        console.log(`Finished fetching all PriceCondition at ${end}`);
-        console.log(`Fetching PriceCondition took: ${(end - start)/1000} seconds`);
+        if(rappelConditionIDs && rappelConditionIDs.length > 0){
+            startTrace("RappelPriceCondition");
+            priceConditionRappelAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: rappelConditionIDs } }));
+            stopTrace("RappelPriceCondition");
+        }
 
+        if(rappelConditionIDs && rappelConditionIDs.length > 0){
+            startTrace("DiscountCondition");
+            discountConditionsAll = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: { in: rappelConditionIDs } }));
+            stopTrace("DiscountCondition");
+        }
+
+        if(focConditionIDs && focConditionIDs.length > 0){
+            startTrace("FOCPriceCondition");
+            priceConditionFOCAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: focConditionIDs } }));
+            stopTrace("FOCPriceCondition");
+        }
+// use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
         // 2. calculate the fields
-        const calculateFields = async priceAgreement => {
+        const calculateFields = priceAgreement => {
 
             let customerPrices = priceAgreement.CustomerPrices;
             let mostRecentMasterPrice;
@@ -307,7 +325,7 @@ module.exports = async (srv) => {
             if (!customerPrices) {
                 // let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
                 // customerPrices = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreement));
-                customerPrices = customerPricesAll.filter(cp => cp.PriceAgreementId === priceAgreement.ID );
+                customerPrices = customerPricesAll.filter(cp => cp.PriceAgreementId == priceAgreement.ID );
             }
 
             if (!priceConditions) {
@@ -316,14 +334,14 @@ module.exports = async (srv) => {
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductCode", "=", priceAgreement.ProductPackId);
                 // let whereExistingPriceCondition = ServiceHelper.buildFullWhere("ExistingPriceConditionID", "!=", null);
                 // priceConditions = await tx.run(SELECT.from(PriceConditionView).where(whereCountryCode).where(whereProductPackId).where(wherePriceAgreement).where(whereExistingPriceCondition));
-                priceConditions = priceConditionsAll.filter(pc => pc.OfferID === priceAgreement.OfferId && pc.CountryCode === priceAgreement.CountryCode && pc.ProductCode === priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null);
+                priceConditions = priceConditionsAll.filter(pc => pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null);
             }
 
             if (!mostRecentMasterPrice) {
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
                 // mostRecentMasterPrice = await tx.run(SELECT.one.from(MostRecentMasterPricesView).where(whereCountryCode).where(whereProductPackId));
-                mostRecentMasterPrice = mostRecentMasterPricesAll.find(mp => mp.CountryCode === priceAgreement.CountryCode && mp.ProductPackId === priceAgreement.ProductPackId ); 
+                mostRecentMasterPrice = mostRecentMasterPricesAll.find(mp => mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId ); // use == instead of === because type of productpackid is different between two tables
             }
 
             // Get NewMaterials if needed
@@ -332,7 +350,7 @@ module.exports = async (srv) => {
             //let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
             // let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
             // let newMaterials = await tx.run(SELECT.from(NewMaterialsView).where(wherePriceAgreement));
-            let newMaterials = newMaterialsAll.filter(material => material.PriceAgreementId === priceAgreement.ID);
+            let newMaterials = newMaterialsAll.filter(material => material.PriceAgreementId == priceAgreement.ID);
             //}
 
             // Get NewFOCMaterials if needed
@@ -340,7 +358,7 @@ module.exports = async (srv) => {
             //let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
             //let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
             // let newFOCMaterials = await tx.run(SELECT.from(NewFOCMaterialsView).where(wherePriceAgreement));
-            let newFOCMaterials = newFOCMaterialsAll.filter(FOCmaterial => FOCmaterial.PriceAgreementId === priceAgreement.ID);
+            let newFOCMaterials = newFOCMaterialsAll.filter(FOCmaterial => FOCmaterial.PriceAgreementId == priceAgreement.ID);
             //}
 
             // Get ConsumerPrices if needed
@@ -348,7 +366,7 @@ module.exports = async (srv) => {
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
                 // consumerPrice = await tx.run(SELECT.one.from(MostRecentConsumerPricesView).where(whereCountryCode).where(whereProductPackId));
-                consumerPrice = consumerPricesAll.find(cp => cp.CountryCode === priceAgreement.CountryCode && cp.ProductPackId === priceAgreement.ProductPackId );
+                consumerPrice = consumerPricesAll.find(cp => cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId );
             }
 
             // calculate Synchronized
@@ -423,7 +441,7 @@ module.exports = async (srv) => {
                     } else {
                         // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", mainCondition.ExistingPriceConditionID);
                         // priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                        priceCondition = priceConditionAll.find(pc => pc.ID === mainCondition.ExistingPriceConditionID);
+                        priceCondition = priceConditionAll.find(pc => pc.ID == mainCondition.ExistingPriceConditionID);
                     }
 
                     if (priceCondition) {
@@ -481,12 +499,12 @@ module.exports = async (srv) => {
                     } else {
                         // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", rappelCondition.ExistingPriceConditionID);
                         // priceConditionRappel = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                        priceConditionRappel = priceConditionRappelAll.find(pcr => pcr.ID === rappelCondition.ExistingPriceConditionID);
+                        priceConditionRappel = priceConditionRappelAll.find(pcr => pcr.ID == rappelCondition.ExistingPriceConditionID);
 
                         //we'll need the discount conditions also, as these will not be filled based on this select
                         // let whereDiscountConditionRef = ServiceHelper.buildFullWhere("PriceCondition_ID", "=", rappelCondition.ExistingPriceConditionID);
                         // let discountConditions = await tx.run(SELECT.from(DiscountCondition).where(whereDiscountConditionRef));
-                        let discountConditions = discountConditionsAll.find(dc => dc.PriceCondition_ID === rappelCondition.ExistingPriceConditionID);
+                        let discountConditions = discountConditionsAll.find(dc => dc.PriceCondition_ID == rappelCondition.ExistingPriceConditionID);
                         if (discountConditions) {
                             priceConditionRappel.DiscountCondition = discountConditions;
                         }
@@ -522,7 +540,7 @@ module.exports = async (srv) => {
                     } else {
                         // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", focCondition.ExistingPriceConditionID);
                         // priceConditionFOC = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                        priceConditionFOC = priceConditionFOCAll.find(pcf => pcf.ID === focCondition.ExistingPriceConditionID);
+                        priceConditionFOC = priceConditionFOCAll.find(pcf => pcf.ID == focCondition.ExistingPriceConditionID);
                     }
 
                     if (priceConditionFOC) {
@@ -554,11 +572,14 @@ module.exports = async (srv) => {
         };
 
         // calculate the 'Synchronized' field based on CustomerPrices 
-        const result = Array.isArray(data) ? data.map(calculateFields) : [calculateFields(data)];
+        startTrace("CalculateFields");
+        let result = Array.isArray(data) ? data.map(calculateFields) : [calculateFields(data)];
+        stopTrace("CalculateFields");
         // const promises = Array.isArray(data) ? data.map(calculateFields) : [calculateFields(data)];
 
         // let result = await Promise.all(promises);
 
+        startTrace("apply filters");
         //3. return the filtered results if calculated filter is used
         if (hasNewMaterialsFilterValues && hasNewMaterialsFilterValues.length > 0) {
             const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]);
@@ -617,8 +638,27 @@ module.exports = async (srv) => {
             result = filteredResult;
         }
         
-
+        stopTrace("apply filters");
+        console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
         await tx.commit();
+        if (req.query.SELECT.columns[0].func === 'count') {
+            return [{ counted: result.length }];
+        }
+        const limit = req.query.SELECT.limit;
+        let startFrom = 0;
+        let endAt = 0;
+        if(limit?.offset?.val){
+            startFrom = limit?.offset?.val;
+        }
+        if(limit?.rows?.val){
+            endAt = startFrom + limit.rows.val;
+        }
+        if(endAt > 0){
+            result = result.slice(startFrom,endAt);
+        }else if(startFrom > 0){
+            result = result.slice(startFrom);
+        }
+        //otherwise keep as is
         return req.reply(result);
 
     });
