@@ -2714,11 +2714,11 @@ module.exports = (srv) => {
 					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
 				}
 			}
-
+             //EHQUT-SCTASK13413732-Filter Active SKU Code
 			//get SKU code for products
 			//Get filters
-			let aProductSKUs = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereCountrySKU));
-
+			let aProductSKUs = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereCountrySKU).where({ActiveRecord : 'Yes'}));
+             //EHQUT-SCTASK13413732-Filter Active SKU Code
 			//Get products available to institute either Direct or through Distributor
 			if (channel === "Direct") {
 				var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
