@@ -411,7 +411,7 @@ module.exports = async (srv) => {
                         }
                     }
                 }
-            } else if (priceAgreement.IgnoreConfPVLPriceChange) {
+            } else if (priceAgreement.IgnorePVLPriceChange) {
                 priceAgreement.hasNewYLLP = 2;
             } else if (priceAgreement.IgnoreConfPriceChange) {
                 priceAgreement.hasNewYLAP = 2;
