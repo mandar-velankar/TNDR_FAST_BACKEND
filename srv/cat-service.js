@@ -3001,7 +3001,17 @@ module.exports = (srv) => {
                     } else {
                         return Number(input).toFixed(5).split(".")[1];
                     }
+                },
+                //EHQUT-167492-Quotation Adjustment in word file
+                Decimals2Unit: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 2);
+                    } else {
+                        return Number(input).toFixed(2);
+                    }
+                    
                 }
+                //EHQUT-167492-Quotation Adjustment in word file
 
 
 				}
