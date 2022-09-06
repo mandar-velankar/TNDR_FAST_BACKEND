@@ -280,7 +280,7 @@ module.exports = async (srv) => {
 
             priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
 
-            if (priceConditions && institute && !priceAgreement.IgnoreConfPriceChange && !priceAgreement.IgnoreConfPVLPriceChange) {
+            if (priceConditions && institute && !priceAgreement.IgnoreConfPriceChange && !priceAgreement.IgnorePVLPriceChange) {
                 let mainCondition = priceConditions.find(condition => condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true));
                 let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel'));
                 let focCondition = priceConditions.find(condition => (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode);
@@ -364,7 +364,7 @@ module.exports = async (srv) => {
                     if (priceConditionRappel) {
                         if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
                             if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP, priceConditionRappel.PVL)) {
-                                if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentMasterPrice.YLLP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => discountCondition.Discount))) < mostRecentMasterPrice.PRAF)) { //Discount is a separate entity and should thus be handled as taking the max(DiscountCondition) value as a discount
+                                if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentMasterPrice.YLLP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount/100)))) < mostRecentMasterPrice.PRAF)) { //Discount is a separate entity and should thus be handled as taking the max(DiscountCondition) value as a discount
                                     priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
                                 } else {
                                     priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
@@ -374,7 +374,7 @@ module.exports = async (srv) => {
 
                         if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
                             if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP, priceConditionRappel.ConfidentialPrice)) {
-                                if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentMasterPrice.YLAP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => discountCondition.Discount))) < mostRecentMasterPrice.PRAF)) { //add royal decree to this calculation (new card)
+                                if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentMasterPrice.YLAP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount/100)))) < mostRecentMasterPrice.PRAF)) { //add royal decree to this calculation (new card)
                                     priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 3 ? priceAgreement.hasNewYLAP : 4;
                                 } else {
                                     priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
@@ -411,7 +411,7 @@ module.exports = async (srv) => {
                         }
                     }
                 }
-            } else if (priceAgreement.IgnoreConfPVLPriceChange) {
+            } else if (priceAgreement.IgnorePVLPriceChange) {
                 priceAgreement.hasNewYLLP = 2;
             } else if (priceAgreement.IgnoreConfPriceChange) {
                 priceAgreement.hasNewYLAP = 2;
