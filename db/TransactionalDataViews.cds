@@ -1250,6 +1250,80 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.Settlement.ID as Settlement_ID
 }where tender.Active = 1;
 
+entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1
+    and product.ActiveProduct = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+left outer join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)    
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
+{
+key tender.TenderID,
+key offer.OfferID,
+key product.ProductCode,
+key institute.InstituteID as INSTITUTE_ID,
+case 
+    when priceCondition.PriceConditionCode = 'YAW1'
+        then 'Yes'
+        else 'No'        
+end as RAPPEL:String(10)
+} where priceConditionClassification.ConditionType = 'Rappel' and (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+group by tender.TenderID, 
+        offer.OfferID, 
+        product.ProductCode, 
+        institute.InstituteID, 
+        priceCondition.PriceConditionCode; 
+
+entity TenderFOCView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1
+    and product.ActiveProduct = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+left outer join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
+{
+key tender.TenderID,
+key offer.OfferID,
+key product.ProductCode,
+key institute.InstituteID as INSTITUTE_ID,
+case  
+    when priceCondition.PriceConditionCode = 'YA01'
+            then 'Yes'
+            else 'No'
+end as FOC:String(10)
+} where priceConditionClassification.ConditionType = 'FOC' and (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+group by tender.TenderID, offer.OfferID, product.ProductCode,institute.InstituteID, priceCondition.PriceConditionCode; 
+
 /**
  * This view contains Tender History fields used on the Spain financial offers page
  */
@@ -1259,36 +1333,44 @@ inner join TransactionalData.PT_TMOFRS as offer
     and offer.Active = 1
 inner join TransactionalData.PT_TMOFPR as product 
     on product.OfferID = offer.OfferID
-    and product.Active = 1 
+    and product.Active = 1
+    and product.ActiveProduct = 1 
 inner join MasterData.PT_TMPRDPCK as productPacks
     on productPacks.PRODUCTPACKID = product.ProductCode
     and productPacks.ACTIVERECORD = 'Yes' 
 inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
     on priceConditionClassification.CountryCode = product.CountryCode
     and priceConditionClassification.Classification = tender.Classification
-    and priceConditionClassification.Division = offer.Division 
+    and priceConditionClassification.Division = offer.Division
+    and priceConditionClassification.isMain = 'true' 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
 inner join MasterData.PT_TMINST as institute 
     on tender.InstituteID = institute.InstituteID 
-left outer join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
     on product.ProductCode = masterPrices.ProductPackId
     and product.CountryCode = masterPrices.CountryCode    
-left outer join TransactionalData.PriceCondition as priceCondition 
+inner join TransactionalData.PriceCondition as priceCondition 
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
-    and product.ProductCode = priceCondition.ProductCode 
-left outer join TransactionalData.FreeGoodsOther as freegoods 
-    on product.ProductCode = freegoods.ProductPackId
-	and freegoods.PriceCondition.ID is not NULL
-	{
-key product.TenderID,
+    and product.ProductCode = priceCondition.ProductCode
+left outer join TransactionalDataViews.TenderFOCView as tenderFOC
+    on tender.TenderID = tenderFOC.TenderID
+    and offer.OfferID = tenderFOC.OfferID
+    and product.ProductCode = tenderFOC.ProductCode
+    and institute.InstituteID = tenderFOC.INSTITUTE_ID
+left outer join TransactionalDataViews.TenderRappelView as tenderRappel
+    on tender.TenderID = tenderRappel.TenderID
+    and offer.OfferID = tenderRappel.OfferID
+    and product.ProductCode = tenderRappel.ProductCode
+    and institute.InstituteID = tenderRappel.INSTITUTE_ID
+{
+key tender.TenderID,
 key offer.OfferID,
 key product.ProductCode,
 tender.TenderName as TENDER_NAME,
 offer.SubmittedOn as OFFER_DATE,
 key institute.InstituteID as INSTITUTE_ID,
 institute.InstituteName as INSTITUTE_NAME,
-key product.SKU.PRODUCTPACKID as PRODUCT_ID,
 product.SKU.PRODUCTPACKNAME as PRODUCT_NAME,
 product.Price.OfferPrice *
     case when product.UnitPerPack = 'Unit'
@@ -1301,45 +1383,33 @@ product.Price.OfferPrice *
         else 1 / product.SKU.PACKFACTOR
     end as UNIT_PRICE:Double,
 masterPrices.YLLP as PVL,
+ifnull(tenderFOC.FOC, 'No') as FOC:String(10),
+ifnull(tenderRappel.RAPPEL, 'No') as RAPPEL:String(10),
 masterPrices.YLAP as CONFIDENTIAL_PRICE,
+priceCondition.PriceConditionCode as PriceConditionCode,
 priceConditionClassification.ConditionType as PRICE_CONDITION,
 priceCondition.RoyalDecree as ROYALDECREE,
 priceCondition.Discount as DISCOUNT,
-case when priceCondition.Liquidation is not null
-	then 'Yes'
-	else 'No'
-end as RAPPEL:String(10),
-case when freegoods.FOCBonus is not null and freegoods.FOCMinAmount is not null
-    then 'Yes'
-    else 'No'
-end as FOC:String(10),
-freegoods.FOCBonus as FOC_BONUS,
-freegoods.FOCMinAmount as FOCMIN_AMOUNT,
 ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
 }
-where offer.Active = 1
-and product.Active = 1
-and product.ActiveProduct = 1 
-and priceConditionClassification.isMain = 'true' 
-and (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
-group by product.TenderID,
+where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+group by tender.TenderID,
     offer.OfferID,
     product.ProductCode,
     tender.TenderName,
     offer.SubmittedOn,
     institute.InstituteID,
     institute.InstituteName,
-    product.SKU.PRODUCTPACKID,
     product.SKU.PRODUCTPACKNAME,
     product.Price.OfferPrice,
     product.SKU.PACKFACTOR,
     product.UnitPerPack,
     masterPrices.YLLP,
+    tenderFOC.FOC,
+    tenderRappel.RAPPEL,
     masterPrices.YLAP,
     priceConditionClassification.ConditionType,
     priceCondition.RoyalDecree,
-    priceCondition.Discount,
-    priceCondition.Liquidation,
-    freegoods.FOCBonus,
-    freegoods.FOCMinAmount,
+    priceCondition.PriceConditionCode,
+    priceCondition.Discount,    
     product.Results.Outcome;
