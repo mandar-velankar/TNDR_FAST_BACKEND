@@ -196,22 +196,20 @@ module.exports = async (srv) => {
         //run default query on db
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
-        startTrace("PriceAgreements");
-        if(req.query.SELECT.columns[0]?.func === "count"){
-            console.log("Count Priceagreements");
-            data = await tx.run(SELECT.from(PriceAgreements).where(req.query.SELECT.where));
-        }else{
-            let paQuery = SELECT.from(req.query.SELECT.from);
-            if(!hasFilter){
-                console.log("Fetch using limit Priceagreements");
-                req.query.SELECT.limit && (paQuery = paQuery.limit(req.query.SELECT.limit));
-                // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
-            }
-            paQuery = paQuery.columns(req.query.SELECT.columns);
-            req.query.SELECT.where && (paQuery = paQuery.where(req.query.SELECT.where));
-            req.query.SELECT.orderBy && (paQuery = paQuery.orderBy(req.query.SELECT.orderBy));
-            data = await tx.run(paQuery);
+        let paQuery = SELECT.from(req.query.SELECT.from);
+        if(req.query.SELECT.columns[0]?.func !== "count"){
+            paQuery.columns(req.query.SELECT.columns);
         }
+        if(!hasFilter){
+            console.log("Fetch using limit Priceagreements - no filters");
+            req.query.SELECT.limit && (paQuery.limit(req.query.SELECT.limit));
+            // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
+        }
+        req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
+        req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
+        
+        startTrace("PriceAgreements");
+        data = await tx.run(paQuery);        
         stopTrace("PriceAgreements");
         
 
