@@ -98,6 +98,8 @@ module.exports = async (srv) => {
         let hasNewYLLPValues = null;
         let hasNewYLAPValues = null;
         let hasFilter = false;
+        let hasProductPackIdIndex = null;
+        let hasProductPackIdValues = null;
 
         if (req.query.SELECT.where) {
 
@@ -199,14 +201,16 @@ module.exports = async (srv) => {
             console.log("Count Priceagreements");
             data = await tx.run(SELECT.from(PriceAgreements).where(req.query.SELECT.where));
         }else{
-            if(hasFilter){
-                console.log("Fetch all Priceagreements");
-                data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
-            }else{
+            let paQuery = SELECT.from(req.query.SELECT.from);
+            if(!hasFilter){
                 console.log("Fetch using limit Priceagreements");
-                data = await tx.run(SELECT.from(PriceAgreements).limit(req.query.SELECT.limit).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
+                req.query.SELECT.limit && (paQuery = paQuery.limit(req.query.SELECT.limit));
+                // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
             }
-            
+            paQuery = paQuery.columns(req.query.SELECT.columns);
+            req.query.SELECT.where && (paQuery = paQuery.where(req.query.SELECT.where));
+            req.query.SELECT.orderBy && (paQuery = paQuery.orderBy(req.query.SELECT.orderBy));
+            data = await tx.run(paQuery);
         }
         stopTrace("PriceAgreements");
         
