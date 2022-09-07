@@ -50,17 +50,21 @@ module.exports = async (srv) => {
         let start;
         let end;
         let totalTime = 0;
+        let type = "";
+        if(req.query.SELECT.columns[0]?.func === "count"){
+            type = "COUNT";
+        }
         const startTrace = (entity) => {
             start = new Date();
-            console.log(`Start fetching all ${entity} at ${start}`);
+            console.log(`${type}Start fetching all ${entity} at ${start}`);
         };
         const stopTrace = (entity) => {
             if(!start)return; //not started
             end = new Date();
-            console.log(`Finished fetching all ${entity} at ${end}`);
+            console.log(`${type}Finished fetching all ${entity} at ${end}`);
             let duration = (end - start)/1000;
             totalTime += duration;
-            console.log(`Fetching ${entity} took: ${duration} seconds`);
+            console.log(`${type}Fetching ${entity} took: ${duration} seconds`);
         };
 
         // const tx = cds.transaction(req);
@@ -93,6 +97,9 @@ module.exports = async (srv) => {
         let appliedCountFilterValues = null;
         let hasNewYLLPValues = null;
         let hasNewYLAPValues = null;
+        let hasFilter = false;
+        let hasProductPackIdIndex = null;
+        let hasProductPackIdValues = null;
 
         if (req.query.SELECT.where) {
 
@@ -131,46 +138,57 @@ module.exports = async (srv) => {
 
             if(hasProductPackIdIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasProductPackId');
+                hasFilter = true;
             }
 
             if(hasNewMaterialsFilterIndex >= 0){
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
+                hasFilter = true;
             }
 
             if (hasNewPriceFilterIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'hasNewPrice');
+                hasFilter = true;
             }
 
             if (hasExpiringSoonFilterIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'ExpiringSoon');
+                hasFilter = true;
             }
 
             if (hasExpiredFilterIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'Expired');
+                hasFilter = true;
             }
 
             if (isCancelledFilterIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'isCancelled');
+                hasFilter = true;
             }
 
             if (isNewPriceAgreementFilterIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'isNewPriceAgreement');
+                hasFilter = true;
             }
 
             if (isSynchronizedFilterIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'Synchronized');
+                hasFilter = true;
             }
 
-            if (appliedCountFilterValues >= 0) {
+            if (appliedCountFilterIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'AppliedCount');
+                hasFilter = true;
             }
 
             if (hasNewYLLPIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'hasNewYLLP');
+                hasFilter = true;
             }
 
             if (hasNewYLAPIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'hasNewYLAP');
+                hasFilter = true;
             }
         }
         //delete limit from request to SELECT all data from table
@@ -180,9 +198,19 @@ module.exports = async (srv) => {
         let data = [];
         startTrace("PriceAgreements");
         if(req.query.SELECT.columns[0]?.func === "count"){
+            console.log("Count Priceagreements");
             data = await tx.run(SELECT.from(PriceAgreements).where(req.query.SELECT.where));
         }else{
-            data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
+            let paQuery = SELECT.from(req.query.SELECT.from);
+            if(!hasFilter){
+                console.log("Fetch using limit Priceagreements");
+                req.query.SELECT.limit && (paQuery = paQuery.limit(req.query.SELECT.limit));
+                // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
+            }
+            paQuery = paQuery.columns(req.query.SELECT.columns);
+            req.query.SELECT.where && (paQuery = paQuery.where(req.query.SELECT.where));
+            req.query.SELECT.orderBy && (paQuery = paQuery.orderBy(req.query.SELECT.orderBy));
+            data = await tx.run(paQuery);
         }
         stopTrace("PriceAgreements");
         
@@ -639,25 +667,32 @@ module.exports = async (srv) => {
         }
         
         stopTrace("apply filters");
-        console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
+        startTrace("Commit");
         await tx.commit();
+        stopTrace("Commit");
         if (req.query.SELECT.columns[0].func === 'count') {
+            console.log(`COUNT: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: result.length }];
         }
-        const limit = req.query.SELECT.limit;
-        let startFrom = 0;
-        let endAt = 0;
-        if(limit?.offset?.val){
-            startFrom = limit?.offset?.val;
+        if(hasFilter){
+            startTrace("SkipTop");
+            const limit = req.query.SELECT.limit;
+            let startFrom = 0;
+            let endAt = 0;
+            if(limit?.offset?.val){
+                startFrom = limit?.offset?.val;
+            }
+            if(limit?.rows?.val){
+                endAt = startFrom + limit.rows.val;
+            }
+            if(endAt > 0){
+                result = result.slice(startFrom,endAt);
+            }else if(startFrom > 0){
+                result = result.slice(startFrom);
+            }
+            stopTrace("SkipTop");
         }
-        if(limit?.rows?.val){
-            endAt = startFrom + limit.rows.val;
-        }
-        if(endAt > 0){
-            result = result.slice(startFrom,endAt);
-        }else if(startFrom > 0){
-            result = result.slice(startFrom);
-        }
+        console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
         //otherwise keep as is
         return req.reply(result);
 
