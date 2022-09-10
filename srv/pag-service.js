@@ -471,7 +471,8 @@ module.exports = async (srv) => {
                 let focCondition = priceConditions.find(condition => (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode);
                 let offerProduct = OfferProductsAll.find(product => product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode);
                 let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
-                let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR)
+                let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
+                let mostRecentPRAF = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.PRAF : (mostRecentMasterPrice.PRAF / priceAgreement.Product.ProductPack.PACKFACTOR); 
 
                 if (mainCondition) {
                     /* we are using the maincondition which is coming from the PriceConditionView
@@ -500,7 +501,7 @@ module.exports = async (srv) => {
 
                             if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
                                 if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceCondition.ConfidentialPrice)) {
-                                    if (ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
+                                    if (ServiceHelper.isDoubleXBelowY(mostRecentYLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
                                         priceAgreement.hasNewYLAP = 3;
                                     } else {
                                         priceAgreement.hasNewYLAP = 2;
@@ -510,7 +511,7 @@ module.exports = async (srv) => {
                         } else if (mainCondition.ConditionType === 'Descuento Comercial' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Descuento Comercial')) {
                             if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
                                 if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceCondition.PVL)) {
-                                    if (mostRecentMasterPrice.YLLP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF) {
+                                    if (mostRecentYLLP * (1 - mainCondition.Discount) < mostRecentPRAF) {
                                         priceAgreement.hasNewYLLP = 4;
                                     } else {
                                         priceAgreement.hasNewYLLP = 1;
@@ -520,7 +521,7 @@ module.exports = async (srv) => {
 
                             if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
                                 if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceCondition.ConfidentialPrice)) {
-                                    if (mostRecentMasterPrice.YLAP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF) { //add royal decree to this calculation (new card)
+                                    if (mostRecentYLAP * (1 - mainCondition.Discount) < mostRecentPRAF) { //add royal decree to this calculation (new card)
                                         priceAgreement.hasNewYLAP = 4;
                                     } else {
                                         priceAgreement.hasNewYLAP = 1;
