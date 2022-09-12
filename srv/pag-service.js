@@ -266,6 +266,19 @@ module.exports = async (srv) => {
                     })
                 );
                 stopTrace("PriceConditionView");
+
+                startTrace("OfferProducts");
+                OfferProductsAll = await tx.run(SELECT.from(PT_TMOFPR)
+                    .where({CountryCode:{in:countrycodes},
+                        and:{
+                            ProductCode:{in:productpacks},
+                            and:{
+                                OfferID:{in:offers}
+                            }
+                        }
+                    })
+                );
+                stopTrace("OfferProducts");
             }
             startTrace("MostRecentMasterPricesView");
             mostRecentMasterPricesAll = await tx.run(SELECT.from(MostRecentMasterPricesView)
@@ -456,6 +469,10 @@ module.exports = async (srv) => {
                 let mainCondition = priceConditions.find(condition => condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true));
                 let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel'));
                 let focCondition = priceConditions.find(condition => (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode);
+                let offerProduct = OfferProductsAll.find(product => product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode);
+                let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
+                let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
+                let mostRecentPRAF = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.PRAF : (mostRecentMasterPrice.PRAF / priceAgreement.Product.ProductPack.PACKFACTOR); 
 
                 if (mainCondition) {
                     /* we are using the maincondition which is coming from the PriceConditionView
@@ -473,7 +490,7 @@ module.exports = async (srv) => {
                     if (priceCondition) {
                         if (mainCondition.ConditionType === 'Precio Neto' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Precio Neto')) {
                             if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
-                                if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP, priceCondition.PVL)) {
+                                if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceCondition.PVL)) {
                                     if (ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
                                         priceAgreement.hasNewYLLP = 3;
                                     } else {
@@ -483,8 +500,8 @@ module.exports = async (srv) => {
                             }
 
                             if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
-                                if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP, priceCondition.ConfidentialPrice)) {
-                                    if (ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
+                                if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceCondition.ConfidentialPrice)) {
+                                    if (ServiceHelper.isDoubleXBelowY(mostRecentYLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
                                         priceAgreement.hasNewYLAP = 3;
                                     } else {
                                         priceAgreement.hasNewYLAP = 2;
@@ -493,8 +510,8 @@ module.exports = async (srv) => {
                             }
                         } else if (mainCondition.ConditionType === 'Descuento Comercial' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Descuento Comercial')) {
                             if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
-                                if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP, priceCondition.PVL)) {
-                                    if (mostRecentMasterPrice.YLLP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF) {
+                                if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceCondition.PVL)) {
+                                    if (mostRecentYLLP * (1 - mainCondition.Discount) < mostRecentPRAF) {
                                         priceAgreement.hasNewYLLP = 4;
                                     } else {
                                         priceAgreement.hasNewYLLP = 1;
@@ -503,8 +520,8 @@ module.exports = async (srv) => {
                             }
 
                             if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
-                                if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP, priceCondition.ConfidentialPrice)) {
-                                    if (mostRecentMasterPrice.YLAP * (1 - mainCondition.Discount) < mostRecentMasterPrice.PRAF) { //add royal decree to this calculation (new card)
+                                if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceCondition.ConfidentialPrice)) {
+                                    if (mostRecentYLAP * (1 - mainCondition.Discount) < mostRecentPRAF) { //add royal decree to this calculation (new card)
                                         priceAgreement.hasNewYLAP = 4;
                                     } else {
                                         priceAgreement.hasNewYLAP = 1;
