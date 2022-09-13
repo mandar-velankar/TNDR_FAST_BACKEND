@@ -873,10 +873,10 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
-
+         //EHQUT-167489-Supply Chain as optional
 		//Supply chain approval is alway mandatory
-		let supply = 3;
-
+		let supply = 1;
+        //EHQUT-167489-Supply Chain as optional
 		//Check on offer unit (pack or unit) and get factor to apply on policy prices
 		let uomFactor = 1;
 		if (product.UNIT === 'Unit') {
