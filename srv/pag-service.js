@@ -491,7 +491,7 @@ module.exports = async (srv) => {
                         if (mainCondition.ConditionType === 'Precio Neto' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Precio Neto')) {
                             if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
                                 if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceCondition.PVL)) {
-                                    if (ServiceHelper.isDoubleXBelowY(mostRecentMasterPrice.YLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
+                                    if (ServiceHelper.isDoubleXBelowY(mostRecentYLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
                                         priceAgreement.hasNewYLLP = 3;
                                     } else {
                                         priceAgreement.hasNewYLLP = 2;
@@ -555,8 +555,8 @@ module.exports = async (srv) => {
 
                     if (priceConditionRappel) {
                         if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
-                            if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP, priceConditionRappel.PVL)) {
-                                if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentMasterPrice.YLLP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount/100)))) < mostRecentMasterPrice.PRAF)) { //Discount is a separate entity and should thus be handled as taking the max(DiscountCondition) value as a discount
+                            if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceConditionRappel.PVL)) {
+                                if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentYLLP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount/100)))) <mostRecentPRAF)) { //Discount is a separate entity and should thus be handled as taking the max(DiscountCondition) value as a discount
                                     priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
                                 } else {
                                     priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
@@ -565,8 +565,8 @@ module.exports = async (srv) => {
                         }
 
                         if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
-                            if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP, priceConditionRappel.ConfidentialPrice)) {
-                                if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentMasterPrice.YLAP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount/100)))) < mostRecentMasterPrice.PRAF)) { //add royal decree to this calculation (new card)
+                            if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceConditionRappel.ConfidentialPrice)) {
+                                if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentYLAP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount/100)))) < mostRecentPRAF)) { //add royal decree to this calculation (new card)
                                     priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 3 ? priceAgreement.hasNewYLAP : 4;
                                 } else {
                                     priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
@@ -588,7 +588,7 @@ module.exports = async (srv) => {
 
                     if (priceConditionFOC) {
                         if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
-                            if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLLP, priceConditionFOC.PVL)) {
+                            if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceConditionFOC.PVL)) {
                                 priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
                             } else {
                                 priceAgreement.hasNewYLLP = priceAgreement.hasNewYLAP !== 0 && priceAgreement.hasNewYLAP !== 2 ? priceAgreement.hasNewYLAP : 0;
@@ -596,7 +596,7 @@ module.exports = async (srv) => {
                         }
 
                         if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
-                            if (!ServiceHelper.isDoubleEqual(mostRecentMasterPrice.YLAP, priceConditionFOC.ConfidentialPrice)) {
+                            if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceConditionFOC.ConfidentialPrice)) {
                                 priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
                             } else {
                                 priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP !== 0 && priceAgreement.hasNewYLAP !== 2 ? priceAgreement.hasNewYLAP : 0;
