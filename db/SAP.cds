@@ -6,8 +6,8 @@ using {
 } from './SAPTypes';
 
 
-entity BrazilMaterials: managed {
-	key COD				: String(18);			// SAP product code
+entity BrazilMaterials: cuid, managed {
+	COD					: String(18);			// SAP product code - key
 	NOME				: String(40);			// Product description
 	CENTRO				: String(4);			// Material plant code
 	APRES				: String;				// Sales text
