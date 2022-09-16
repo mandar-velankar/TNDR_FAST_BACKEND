@@ -24,12 +24,12 @@ entity BrazilMaterials: managed {
     BRAND               : String;               // not in spec? String ok?
 }
 
-entity BrazilCustomers: managed {
-	key CODIGO			: String(10);			// Customer code in SAP
+entity BrazilCustomers: cuid, managed {
+	CODIGO			    : String(10);			// Customer code in SAP - key
 	REPRES				: String(3);			// Flag if the customer is a sales representative - 'M34' - Distributor
 	ORG_VENDAS			: String(4);			// Sales organization
     CANAL_DISTR			: String(2);			// Distribution channel
-	key SECTOR_ATIV	    : String(2);		    // Division
+	SECTOR_ATIV	        : String(2);		    // Division - key
 	RAZAO				: String;			    // Customer real name  (spec mis match, it was 35 long)
 	FANTASIA			: String(10);			// Customer nickname
 	ENDERECO			: String(35);			// Address
