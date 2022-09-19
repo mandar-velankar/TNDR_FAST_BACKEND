@@ -13,7 +13,7 @@ entity BrazilMaterials: cuid, managed {
 	APRES				: String;				// Sales text
 	ORG_VENDAS			: String(4);			// Sales Org
 	CANAL_DISTR			: String(2);			// Distribution channel
-	SECTOR_ATIV			: String(2);			// Division
+	SETOR_ATIV			: String(2);			// Division
 	NREG				: String(13);			// Register Number
 	CBAR				: String(18);			// Barcode (EAN)
 	GRUPO_MAT3		    : String(3);			// Material group 3 code
