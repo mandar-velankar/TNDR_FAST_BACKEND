@@ -82,6 +82,15 @@ entity BrazilEmpenho : cuid, managed {
 	TOTAL_UNITARIO		: Double;				// Total item value in "Nota Fiscal"
 }
 
+entity BrazilTaxes: cuid, managed {
+	SHIPFROM			: String;
+	SHIPTO				: String;
+	TAX_GROUP			: String;
+	MATERIAL			: String;
+	RATE				: String;
+	BASE				: String;
+}
+
 entity BrazilDeliveriesHeader: cuid, managed {
 	VBELN_SALES_DOC		: String(10); 			// Sales Document number
 	VTWEG				: String(2);			// Canal de distribuição
