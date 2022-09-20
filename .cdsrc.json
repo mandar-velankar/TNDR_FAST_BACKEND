@@ -89,7 +89,8 @@
                                 "authenticated-user",
                                 "f_tndr_cag_admin",
                                 "f_tndr_cag_ctr_user",
-                                "f_tndr_cag_tnd_user"
+                                "f_tndr_cag_tnd_user",
+                                "f_tndr_cag_cogs_user"
                             ]
                         }
                     }

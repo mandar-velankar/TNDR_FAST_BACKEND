@@ -72,6 +72,7 @@ entity PT_TMINST{
 	VatCode:String(50);
 	TaxCode:String(50);
     CustomerGroup:String;
+    ApplicableTaxRate:String(2);
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -709,9 +710,12 @@ entity MasterPrices: cuid, managed {
     UoM: String;
     YLLP: Double;
     YLAP: Double;
-    PRAF: Double;    
+    PRAF: Double; 
+    RentalPrice: Double;   
     ValidFrom: Timestamp;
-	ValidTo: Timestamp;    
+	ValidTo: Timestamp;  
+    TaxES: Double;
+    TaxE1: Double;
 
 }
 

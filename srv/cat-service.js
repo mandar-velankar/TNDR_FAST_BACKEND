@@ -28,7 +28,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -184,7 +184,8 @@ module.exports = (srv) => {
 						CHANNEL: 'Direct',
 						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
                         DIVISION: countryProduct.DIVISION,
-						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
+                        PACKFACTOR: countryProduct.PACK_SIZE,                        
+						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
 					});
 				});
 			}
@@ -217,7 +218,7 @@ module.exports = (srv) => {
 							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 							COGS: countryProduct.COGS,
 							PACKFACTOR: countryProduct.PACK_SIZE,
-							SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID).map((product) => { return product.SKUCode})).join(", ")
+							SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
 						});
 					});
 				});
@@ -1834,7 +1835,7 @@ module.exports = (srv) => {
 			registeredRemark = registeredRemark.concat(offer.DISTRIBUTORNAME)
 		}
         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
-        let InstituteRemark = institute.Comment;
+        let InstituteRemark = institute.Comment ? institute.Comment : ""; //solution for TCS (otherwise line concat will not work if its null)
         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
 		//Comment if any product is alternative to quoted
@@ -3113,6 +3114,7 @@ module.exports = (srv) => {
 		const sLanguage = req.data.language ? req.data.language : "ES";
 		const sOfferId = req.data.offerId;
         const appEnv = cfenv.getAppEnv();
+		const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
 
 		//quotation data retrieval for filling template
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", sOfferId);
@@ -3147,7 +3149,7 @@ module.exports = (srv) => {
 
         //add url to offerConsolidation
         
-        offerConsolidation.URL = `${appEnv.url}/index.html#/tender&/t/detail/${offerConsolidation.COUNTRYCODE}/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
+        offerConsolidation.URL = `${fastUIAppHost}/index.html#/tender&/t/detail/${offerConsolidation.COUNTRYCODE}/${offerConsolidation.TENDERID}/${offerConsolidation.OFFERID}/__component0---tenderManagementDetailId--basicInformationId//TwoColumnsMidExpanded`
 
 		var document = {
 			type: "buffer",
