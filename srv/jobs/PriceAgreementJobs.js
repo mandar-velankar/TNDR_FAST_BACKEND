@@ -4,8 +4,9 @@ const BaseJob = require('./BaseJob');
 const core = require('@sap-cloud-sdk/core');
 const ServiceHelper = require('../utils/ServiceHelper');
 const axios = require('axios');
+const qs = require("qs");
 
-module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJob {
+module.exports = class ExtendPriceAgreements extends BaseJob {
 
     constructor(jobName,jobTime) {
         super(jobName,jobTime);
@@ -47,12 +48,13 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             throw `No customer prices were found for the following PriceAgreement: ${ids}`;
         }
         const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        const updateMainConditionPromises = mainPriceConditions.map(custPrice => this.updateCustomerPrice(custPrice, tx));
-
+        const updateMainConditionPromises = mainPriceConditions.map(custPrice => {
+            return this.updateCustomerPrice(custPrice, tx);
+        });
         // Synchronize
         let result = await Promise.all(updateMainConditionPromises); 
         // Set 'Synchronized' to true and add IDOC number from the response
-        result = result.filter(res => res);
+        result = result.filter(res => res !== undefined);
         result.length > 0 && await this.updateCustomerPrices(result, mainPriceConditions); // !!the order of PriceCondition arrays is important
 
         return result;
@@ -83,7 +85,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
-        const body = this.getPriceAgreementRequestBodyTemplate(); 
+        const body = await this.getPriceAgreementRequestBodyTemplate(); 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
@@ -94,6 +96,9 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
             console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
             return;
         }
+
+        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve(); //Customer prices should not be synchronized for ship to parties
+
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
         if (!priceAgreement) {
@@ -151,7 +156,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
+        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr+"-";
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KSCHL = customerPrice.PriceCondition;
 
@@ -253,7 +258,7 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
 
 
     async getBearerToken() {
-        const { SchedulerApiConfig, SchedulerApiConfigOAuth } = db.entities("com.bayer.SXTENDER.AdminData");
+        const { SchedulerApiConfig, SchedulerApiConfigOAuth } = this.db.entities("com.bayer.SXTENDER.AdminData");
 
         // get api config
         const priceAgreementApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement'}));
@@ -281,28 +286,50 @@ module.exports.ExtendPriceAgreements = class ExtendPriceAgreements extends BaseJ
         const tx = cds.tx();
         try {
 
-            const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+            const { PriceAgreements, CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
             //get all price agreements which have to be extended
-            const whereExpr = `ExtendPriceAgreement = true and synchronized = false`
+            //first, calculate todays date - 1 day, as such that we can use this as a filter in our select
+
+
+            const whereExpr = `ExtendPriceAgreement = true` //and expiry date is today - 1 
             const priceAgreements = await tx.run(SELECT.from(PriceAgreements).where(whereExpr));
 
             let aPriceAgreementsUpdated = [];
-            const promises = priceAgreements.map(agreement => {
-                let newDate = new Date(agreement.ExpiryDate);
-                newDate.setMonth(newDate.getMonth()+agreement.ExpiryExtensionPeriod);
-                newDate = newDate.toISOString().replace('T', ' ').replace('Z', '');
-                aPriceAgreementsUpdated.push(agreement.ID);
+            const promises = [];
+            
+            priceAgreements.forEach(agreement => {
+                let todayMinus1 = new Date();
+                todayMinus1 = new Date(todayMinus1.setDate(todayMinus1.getDate()-1));
+                if(!agreement.ExpiryDate || agreement.ExpiryDate.indexOf("T") === -1){
+                    console.log(`AgreementID ${agreement.ID}:Expiry date ${agreement.ExpiryDate} is not valid, will not be processed...`);
+                    return;
+                }
+                todayMinus1 = todayMinus1.toISOString().substr(0, agreement.ExpiryDate.lastIndexOf("T"));
+                let agreementExpiryDate = agreement.ExpiryDate.substr(0, agreement.ExpiryDate.lastIndexOf("T"));
 
-                //update the actual price agreement withh the new price agreement date
-                return tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate}).where({ ID: agreement.ID }));;
+                if(agreementExpiryDate === todayMinus1){
+                    let newDate = new Date(agreement.ExpiryDate);
+                    newDate.setMonth(newDate.getMonth()+agreement.ExpiryExtensionPeriod);
+                    newDate = newDate.toISOString().replace('T', ' ').replace('Z', '');
+                    aPriceAgreementsUpdated.push(agreement.ID);
+
+                    //update the actual price agreement withh the new price agreement date
+                    promises.push(Promise.all([
+                        tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate, ExpiryExtensionAcknowledged: false}).where({ ID: agreement.ID })),
+                        tx.run(UPDATE(CustomerPrices).with({ExpiryDate: newDate}).where({ PriceAgreementId: agreement.ID }))
+                    ]));
+                }
             });
 
             //execute the promises and log the output
-            console.log(`Updating ${PriceAgreements.name} ...`);
-            await Promise.all(promises);
-            await tx.commit();
-            console.log(`${promises.length} Expiry date(s) successfully updated in ${PriceAgreements.name}.`);
+            if(promises.length > 0){
+                console.log(`Updating ${PriceAgreements.name} ...`);
+                await Promise.all(promises);
+                await tx.commit();
+                console.log(`${promises.length} Expiry date(s) successfully updated in ${PriceAgreements.name}.`);
+            }
+            
             return aPriceAgreementsUpdated;
 
         } catch (error) {

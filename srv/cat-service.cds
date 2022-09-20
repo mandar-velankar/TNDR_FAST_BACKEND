@@ -74,6 +74,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity MasterPrices                                 as projection on MasterData.MasterPrices;
     entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
     entity Settlements                                  as projection on MasterData.Settlements;
+    entity RoyalDecreePercentage                        as projection on MasterData.RoyalDecree;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -228,6 +229,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity BrandsInTender @readonly                     as projection on TransactionalDataViews.BrandsInTender;
     entity CountryMinPrice @readonly                    as projection on TransactionalDataViews.CountryMinPrice;
     entity PreApprovedPrices @readonly                  as projection on TransactionalDataViews.PreApprovedPrices;
+    entity TenderHistorySpain @readonly                 as projection on TransactionalDataViews.TenderHistorySpain;
 
     //Transactional Data Services
     entity OfferProductValidation {

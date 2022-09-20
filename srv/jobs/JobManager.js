@@ -28,6 +28,7 @@ class JobManager {
 
             return true;
         } catch (error) {
+            console.error(error);
             return false;
         }
     }
