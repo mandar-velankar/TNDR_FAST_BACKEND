@@ -470,6 +470,10 @@ module.exports = async (srv) => {
                     let mainCondition = priceConditions.find(condition => condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true));
                     let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel'));
                     let focCondition = priceConditions.find(condition => (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode);
+                    // If no mainCondition was found, we don't evaluate further
+                    if (!mainCondition){
+                        return priceAgreement;
+                    }
                     let offerProduct = OfferProductsAll.find(product => product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode);
                     let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
                     let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
