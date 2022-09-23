@@ -50,8 +50,8 @@ entity BrazilCustomers: cuid, managed {
 	STATUS				: String(1); 			// Customer status - A = Insert / Change, D = Deletion
 }
 
-entity BrazilPrices : managed {
-	key CODIGO			: String(18);			// Material code
+entity BrazilPrices : cuid, managed {
+	CODIGO			    : String(18);			// Material code - key
 	NOME				: String(40);			// Material description
 	ORG_VENDAS			: String(4);			// Sales organization
 	SETOR_ATV			: String(2);			// Division
