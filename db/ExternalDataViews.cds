@@ -688,6 +688,7 @@ entity MasterLegalEntities as select from MasterData.PT_TMLE as MasterLegalEntit
 	MasterLegalEntities.Countries.CountryCode
 } order by MasterLegalEntities.LegalEntityName;
 
+//EHQUT-119446-Adding Nucleus field in Template
 entity MasterProductPacks as select from MasterData.PT_TMCTRY as MasterProductPacks
 inner join MasterData.PT_TMCTPRDPCK as CP on MasterProductPacks.CountryCode = CP.COUNTRYCODE
 inner join MasterData.PT_TMPRDPCK as P on CP.PRODUCTPACKID = P.PRODUCTPACKID 
@@ -708,6 +709,7 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	P.CONCENTRATION,
 	P.PACKFACTOR,
 	P.PCIName,
+    P.Nucleus,
 	CP.COUNTRYOFORIGIN,
 	CP.SHELFLIFE,
 	case CP.REGISTERED 
@@ -737,7 +739,7 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	P.UOM,
 	P.CONCENTRATION,
 	P.PACKFACTOR,
-	CP.COUNTRYOFORIGIN,
+   	CP.COUNTRYOFORIGIN,
 	CP.SHELFLIFE,
 	CP.MANUFACTURER,
 	reg.CURRENCY,
@@ -745,6 +747,7 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	P.ACTIVERECORD,
 	CP.ACTIVERECORD,
 	P.PCIName,
+    P.Nucleus,
 	CP.REGISTERED,
 	CP.COMMENT,
 	reg.UOM,
