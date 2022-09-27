@@ -29,7 +29,7 @@ entity BrazilCustomers: cuid, managed {
 	REPRES				: String(3);			// Flag if the customer is a sales representative - 'M34' - Distributor
 	ORG_VENDAS			: String(4);			// Sales organization
     CANAL_DISTR			: String(2);			// Distribution channel
-	SECTOR_ATIV	        : String(2);		    // Division - key
+	SETOR_ATIV	        : String(2);		    // Division - key
 	RAZAO				: String;			    // Customer real name  (spec mis match, it was 35 long)
 	FANTASIA			: String(10);			// Customer nickname
 	ENDERECO			: String(35);			// Address
