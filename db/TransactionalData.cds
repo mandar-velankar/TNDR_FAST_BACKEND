@@ -370,7 +370,7 @@ entity PT_TMOFPR {
 }
 
 //brazil
-entity LotProduct: managed {
+entity LotProduct: managed { 
     key LotID: Integer;
     key OfferID: String;
     key ProductCode: Integer;

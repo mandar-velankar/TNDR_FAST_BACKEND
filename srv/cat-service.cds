@@ -75,6 +75,8 @@ service CatalogService @(path : 'tender')@(requires : [
     entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
     entity Settlements                                  as projection on MasterData.Settlements;
     entity RoyalDecreePercentage                        as projection on MasterData.RoyalDecree;
+    //Brazil
+    entity LotProducts                                  as projection on TransactionalData.LotProduct;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
