@@ -310,6 +310,7 @@ entity PT_TMOFPR {
         OfferType                : String;
         AnticipatedRequestedQuantity: String(25);
         MaxPrice                 : Double;
+    key LotID                    : Integer default 1;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -357,10 +358,22 @@ entity PT_TMOFPR {
         PriceAgreement           : Association to PriceAgreementData.PriceAgreements
                                         on PriceAgreement.OfferId = OfferID
                                         and PriceAgreement.ProductPackId = ProductCode;
-        PriceCondition: Composition of many PriceCondition 
+        PriceCondition           : Composition of many PriceCondition 
                                         on PriceCondition.OfferID = OfferID
                                         and PriceCondition.ProductCode = ProductCode
                                         and PriceCondition.CountryCode = CountryCode;
+        //Brazil
+        LotProduct               : Association to LotProduct
+                                        on LotProduct.OfferID = OfferID
+                                        and LotProduct.ProductCode = ProductCode
+                                        and LotProduct.LotID = LotID;
+}
+
+//brazil
+entity LotProduct: managed {
+    key LotID: Integer;
+    key OfferID: String;
+    key ProductCode: Integer;
 }
 
 //italy
