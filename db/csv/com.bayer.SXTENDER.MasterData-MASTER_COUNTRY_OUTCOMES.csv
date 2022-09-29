@@ -108,3 +108,8 @@ COUNTRYCODE,OUTCOME,SORTER
 "ES","Lost",2
 "ES","Decision Pending",3
 "ES","Formalization Pending",4
+"BR","Cancelled",4
+"BR","Withdrawn",5
+"BR","Process Failed",6
+"BR","Disabled",7
+"BR","Disqualified",8
