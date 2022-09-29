@@ -39,6 +39,7 @@ entity DeliveryForProduct as select from TransactionalData.PT_TMDLVTR as deliver
 }where delivery.Active = 1
 group by delivery.OfferID, delivery.ProductCode;
 
+//EHQUT-195987-Adding NetOffer Price to MEA Tender data extract.
 entity Dashboard as select from TransactionalDataViews.OfferProductPlus as offerProduct
 inner join MasterData.PT_TMTABRMP as ta on offerProduct.HLEVEL4_CODE = ta.HLevel4_Code
 inner join MasterData.PT_TMRCM as region on offerProduct.CountryCode = region.CountryCode
@@ -133,7 +134,8 @@ left outer join DeliveryForProduct as delivery on offerProduct.OfferID = deliver
     ifnull(offerProduct.Price.RegPrice, 0) as RegisteredPrice:Double,
     ifnull(offerProduct.Price.Discount, 0) as Discount:Double,
     ifnull(offerProduct.Offer.Currency, '') as RegisteredPriceCurrency:String,
-    ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Integer
+    ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Integer,
+    ifnull(offerProduct.Price.NetPrice, 0) as NetPrice:Double
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
 and offerProduct.Active = 1;
@@ -688,6 +690,7 @@ entity MasterLegalEntities as select from MasterData.PT_TMLE as MasterLegalEntit
 	MasterLegalEntities.Countries.CountryCode
 } order by MasterLegalEntities.LegalEntityName;
 
+//EHQUT-119446-Adding Nucleus field in Template
 entity MasterProductPacks as select from MasterData.PT_TMCTRY as MasterProductPacks
 inner join MasterData.PT_TMCTPRDPCK as CP on MasterProductPacks.CountryCode = CP.COUNTRYCODE
 inner join MasterData.PT_TMPRDPCK as P on CP.PRODUCTPACKID = P.PRODUCTPACKID 
@@ -708,6 +711,7 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	P.CONCENTRATION,
 	P.PACKFACTOR,
 	P.PCIName,
+    P.Nucleus,
 	CP.COUNTRYOFORIGIN,
 	CP.SHELFLIFE,
 	case CP.REGISTERED 
@@ -737,7 +741,7 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	P.UOM,
 	P.CONCENTRATION,
 	P.PACKFACTOR,
-	CP.COUNTRYOFORIGIN,
+   	CP.COUNTRYOFORIGIN,
 	CP.SHELFLIFE,
 	CP.MANUFACTURER,
 	reg.CURRENCY,
@@ -745,6 +749,7 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	P.ACTIVERECORD,
 	CP.ACTIVERECORD,
 	P.PCIName,
+    P.Nucleus,
 	CP.REGISTERED,
 	CP.COMMENT,
 	reg.UOM,
