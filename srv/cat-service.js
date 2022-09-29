@@ -2636,6 +2636,24 @@ module.exports = (srv) => {
 		}
 		return results;
 	});
+    //EHQUT-167489-Auto Approval in Thailand
+    srv.on('READ', 'AccountPreApprovedPrices', async (req) => {
+        
+        const tx = cds.tx(req);
+      var instituteIds = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
+      var whereCountry = ServiceHelper.getWhereValue(req, "COUNTRY_CODE");
+            
+        const wherePrices = {
+            INSTITUTE_ID: instituteIds,
+            COUNTRY_CODE: whereCountry 
+           
+        };
+        let results = await tx.run(SELECT.from(AccountPreApprovedPrices).where(wherePrices));
+         
+        
+       
+        return results;
+    });
 
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
 		// const tx = cds.transaction(req)
