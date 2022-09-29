@@ -160,11 +160,13 @@ entity PT_TMAPPRST {
     key ApproverType        : String(30) not null;
         FLOW_ID             : String(255);
         REQUIRED_ACTION     : String(12);
+    key LotID               : Integer default 1;
         //Associations
         OfferProduct        : Association to PT_TMOFPR
                                   on  OfferProduct.OfferID     = OfferId
                                   and OfferProduct.ProductCode = productcode
                                   and OfferProduct.Active = Active
+                                  and OfferProduct.LotID = LotID
 }
 
 entity PT_TMAWRDCR {
@@ -222,10 +224,12 @@ entity PT_TMBDPR {
         NetPrice              : Double;
         NetPrice_OfPaid       : Double;
         PRICE_UPDATE          : Integer;
+    key LotID                 : Integer default 1;
         //Associations
         Product               : Association to PT_TMOFPR
                                     on  Product.OfferID     = OfferID
-                                    and Product.ProductCode = ProductCode;
+                                    and Product.ProductCode = ProductCode
+                                    and Product.LotID       = LotID;
         Bundled_1_Cogs        : Association to MasterDataLatestValues.CountryCogs
                                     on  Bundled_1_Cogs.COUNTRY_CODE = CountryCode
                                     and Bundled_1_Cogs.PRODUCT_ID   = FOCProduct_Bundled_1;
@@ -633,10 +637,12 @@ entity PT_TMTRRES {
         Appeal            : String;
         InfoNeeded        : String;
         TotalAwardedValue : Double;
+    key LotID             : Integer default 1;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID
-                                and CompetitorResult.PRODUCTCODE = ProductCode;
+                                and CompetitorResult.PRODUCTCODE = ProductCode
+                                and CompetitorResult.LOTID       = LotID;
 }
 
 entity PT_TMUDLTRS {
@@ -662,6 +668,7 @@ entity PT_TMUDLTRS {
 entity TransCompetitorResult {
     key OFFERID        : String(30) not null;
     key PRODUCTCODE    : Integer not null;
+    key LOTID          : Integer default 1;
         OUTCOME        : String(255);
     key AWARDEDCOMPANY : String(255) not null;
     key AWARDEDPRODUCT : String(255) not null;
