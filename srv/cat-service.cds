@@ -42,6 +42,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity MASTER_COUNTRY_STATUS                        as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity MASTER_COUNTRY_OUTCOMES                      as projection on MasterData.MASTER_COUNTRY_OUTCOMES;
     entity CountryApprovers                             as projection on MasterData.CountryApprovers;
+    entity AccountPreApprovedPrices                     as projection on MasterData.AccountPreApprovedPrices;
     entity ApproverTypes                                as projection on MasterData.ApproverTypes;
     entity PT_TMCOGS                                    as projection on MasterData.PT_TMCOGS;
     entity PT_TMCTLE                                    as projection on MasterData.PT_TMCTLE;
