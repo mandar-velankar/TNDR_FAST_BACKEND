@@ -272,6 +272,7 @@ entity PT_TMDLVTR {
         ActualDeliveredProductQty : Double;
         LocalDeliveryNoteNo :String(255);
         //EHEEX-OTT - 105262-Adding new 3 fields for delivery tracking tab
+    key LotID                  : Integer default 1;
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
@@ -344,10 +345,12 @@ entity PT_TMOFPR {
                                        and PreviousApproval.PRODUCT_ID = ProductCode;
         Deliveries               : Association to many PT_TMDLVTR
                                        on  Deliveries.OfferID     = OfferID
-                                       and Deliveries.ProductCode = ProductCode;
+                                       and Deliveries.ProductCode = ProductCode
+                                       and Deliveries.LotID       = LotID;
         Letters                  : Association to many PT_TMUDLTRS
                                        on  Letters.OFFERID = OfferID
-                                       and Letters.SKUCODE = ProductCode;
+                                       and Letters.SKUCODE = ProductCode
+                                       and Letters.LOTID   = LotID;
         Scenario                 : Association to many PT_SCENARIOPLAN
                                        on  Scenario.OfferID     = OfferID
                                        and Scenario.ProductCode = ProductCode;
@@ -358,14 +361,17 @@ entity PT_TMOFPR {
         ProductPricing           : Association to ProductPricing
                                        on ProductPricing.OfferID = OfferID
                                        and ProductPricing.ProductCode = ProductCode
-                                       and ProductPricing.CountryCode = CountryCode;
+                                       and ProductPricing.CountryCode = CountryCode
+                                       and ProductPricing.LotID = LotID;
         PriceAgreement           : Association to PriceAgreementData.PriceAgreements
                                         on PriceAgreement.OfferId = OfferID
-                                        and PriceAgreement.ProductPackId = ProductCode;
+                                        and PriceAgreement.ProductPackId = ProductCode
+                                        and PriceAgreement.LotID = LotID;
         PriceCondition           : Composition of many PriceCondition 
                                         on PriceCondition.OfferID = OfferID
                                         and PriceCondition.ProductCode = ProductCode
-                                        and PriceCondition.CountryCode = CountryCode;
+                                        and PriceCondition.CountryCode = CountryCode
+                                        and PriceCondition.LotID = LotID;
         //Brazil
         LotProduct               : Association to LotProduct
                                         on LotProduct.OfferID = OfferID
@@ -394,6 +400,7 @@ entity ProductPricing: cuid, managed {
     StatusOfDevice: String;
     MinContractual: Double;
     MinAnnPurch: Double;
+    key LotID : Integer default 1;
     FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
 }
 
@@ -440,6 +447,7 @@ entity PriceCondition: cuid, managed {
     MonthlyRentPerUnit                  : Double;
     AnnualValue                         : Double;
     ReferencePriceAgreement             : UUID; // reference to an existing price agreement related to a "Tender" **classification Tender** which is not expiring before tomorrow for the same product and customer
+    LotID                               : Integer default 1;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
@@ -663,6 +671,7 @@ entity PT_TMUDLTRS {
         RETURNEDQTY       : Integer;
         UOM               : String(40);
     key SNO               : Integer not null;
+    key LOTID             : Integer default 1;
 }
 //EHQUT modified the entity for extending the key field.
 entity TransCompetitorResult {
