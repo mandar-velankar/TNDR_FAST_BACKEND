@@ -543,6 +543,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.ProductCode,
     key offerProduct.OfferID as OFFERID,
     key offerProduct.SKU.PRODUCTPACKID as PRODUCTID,
+    key offerProduct.LotID as LOTID,
     offerProduct.OfferType as OfferType,
     case offerProduct.AlternateOfferYN
         when 'Alternative to quoted products' then '**'
