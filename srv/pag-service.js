@@ -900,15 +900,11 @@ module.exports = async (srv) => {
                 // return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
             }
             // set KRECH, KBETR and KPEIN (unit for price) for Precio Neto
-            if (customerPrice.PriceCondition === "YLTF") {
-                kbetr = Number(priceCondition.NetPriceWithoutTaxAfterDeductionRD * 10000).toFixed(2);
-                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KPEIN = 10000;
-                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "C";
-            } else if(customerPrice.PriceCondition === "YLTP") {
+            if (customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP") {
                 kbetr = Number(priceCondition.NetPriceWithoutTaxBeforeDeductionRD * 10000).toFixed(2);
                 body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KPEIN = 10000;
                 body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "C";
-            }else {
+            } else {
                 kbetr = priceCondition.Discount * 100;
             }
 
@@ -924,13 +920,13 @@ module.exports = async (srv) => {
         }
 
         // KBETR per Pack or Unit
-        if(customerPrice.CountryCode === 'IT'){
-            if (offer.Division === "Pharma" && priceAgreement.UoM === "Unit") {// convert and send per pack
-                kbetr = kbetr * packFactor;
-            } else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack") { // => radiology so per unit
-                kbetr = kbetr / packFactor;
+        //if(customerPrice.CountryCode === 'IT'){
+            if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" ){// convert and send per pack
+                kbetr  = kbetr * packFactor;
+            }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
+                kbetr  = kbetr / packFactor;
             }
-        }
+        //}
 
         //we should add "-" only in case of Price Condition "YL60" and "YDC0"
         if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0"){
