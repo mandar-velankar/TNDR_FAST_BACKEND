@@ -3183,4 +3183,10 @@ module.exports = (srv) => {
 
 		return htmlTemplate(document.context);
 	});
+
+    srv.on('READ', 'PT_TMINST', async (req,next) => {
+        delete req.query.SELECT.limit;
+        const data = await next(); 
+        return data;
+    });
 }
