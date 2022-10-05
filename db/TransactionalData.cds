@@ -310,6 +310,7 @@ entity PT_TMOFPR {
         OfferType                : String;
         AnticipatedRequestedQuantity: String(25);
         MaxPrice                 : Double;
+        Channel                  : String;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
