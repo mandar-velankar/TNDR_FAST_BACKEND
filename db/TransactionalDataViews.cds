@@ -543,6 +543,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.ProductCode,
     key offerProduct.OfferID as OFFERID,
     key offerProduct.SKU.PRODUCTPACKID as PRODUCTID,
+    key offerProduct.LotID as LOTID,
     offerProduct.OfferType as OfferType,
     case offerProduct.AlternateOfferYN
         when 'Alternative to quoted products' then '**'
@@ -911,16 +912,19 @@ left outer join TransactionalData.ProductPricing as productPricing
     and product.ProductCode = productPricing.ProductCode
     and product.OfferID = productPricing.OfferID
     and product.Active = 1
+    and product.LotID = productPricing.LotID
 left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices 
     on product.ProductCode = consumerPrices.ProductPackId
     and product.CountryCode = consumerPrices.CountryCode
 left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR 
     on product.CountryCode = PT_TMBDPR.CountryCode
     and product.ProductCode = PT_TMBDPR.ProductCode
-    and product.OfferID = PT_TMBDPR.OfferID {
+    and product.OfferID = PT_TMBDPR.OfferID
+    and product.LotID = PT_TMBDPR.LotID {
     key offer.OfferID,
     key product.ProductCode,
     key product.CountryCode,
+    key product.LotID,
     product.SKU.PRODUCTPACKNAME as ProductPackName,
     product.SKU.PACKFACTOR,
     product.RequestedVolume,
