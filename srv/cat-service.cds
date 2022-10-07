@@ -75,6 +75,8 @@ service CatalogService @(path : 'tender')@(requires : [
     entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
     entity Settlements                                  as projection on MasterData.Settlements;
     entity RoyalDecreePercentage                        as projection on MasterData.RoyalDecree;
+    //Brazil
+    entity LotProducts                                  as projection on TransactionalData.LotProduct;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -377,6 +379,7 @@ service CatalogService @(path : 'tender')@(requires : [
             FINAL_DISCOUNT_IN_WORDS                     : String(255);
             PRODUCT_FULL_DESCRIPTION                    : String(255);
             //end of missing SKU & SKUCountry fields
+        key LOTID                                       : Integer default 1;
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;

@@ -1566,6 +1566,7 @@ module.exports = (srv) => {
 				FINAL_DISCOUNT: finalDiscount,
 				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
+                LOTID: offerProduct.LOTID,
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials,

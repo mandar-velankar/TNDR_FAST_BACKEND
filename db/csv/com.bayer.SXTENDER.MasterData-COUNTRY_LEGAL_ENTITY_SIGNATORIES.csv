@@ -117,3 +117,5 @@ LEGAL_ENTITY_CODE,COUNTRY_CODE,AUTHORIZED_SIGNATORY,NAME,TITLE,SORTER,SIGNATORY,
 "BES","ES","Signatory 1","Signatory 1","Issued By",1,1,"Both"
 "BES","ES","Signatory 2","Signatory 2","Company Stamp",2,2,"Both"
 "BLC","SA","Henrik Wulff\Managing Director - Bayer Middle East FZE","Henrik Wulff","Managing Director - Bayer Middle East FZE",8,1,"Pharma"
+"BBR","BR","Signatory 1","Signatory 1","Issued By",1,1,"Both"
+"BBR","BR","Signatory 2","Signatory 2","Company Stamp",2,2,"Both"
