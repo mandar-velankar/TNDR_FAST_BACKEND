@@ -51,7 +51,7 @@ module.exports = async (srv) => {
         let end;
         let totalTime = 0;
         let type = "";
-        if(req.query.SELECT.columns[0]?.func === "count"){
+        if (req.query.SELECT.columns[0]?.func === "count") {
             type = "COUNT";
         }
         const startTrace = (entity) => {
@@ -59,10 +59,10 @@ module.exports = async (srv) => {
             console.log(`${type}Start fetching all ${entity} at ${start}`);
         };
         const stopTrace = (entity) => {
-            if(!start)return; //not started
+            if (!start) return; //not started
             end = new Date();
             console.log(`${type}Finished fetching all ${entity} at ${end}`);
-            let duration = (end - start)/1000;
+            let duration = (end - start) / 1000;
             totalTime += duration;
             console.log(`${type}Fetching ${entity} took: ${duration} seconds`);
         };
@@ -136,12 +136,12 @@ module.exports = async (srv) => {
             hasProductPackIdIndex = ServiceHelper.getWhereId(req, 'hasProductPackId');
             hasProductPackIdValues = ServiceHelper.getWhereValues(req, 'hasProductPackId');
 
-            if(hasProductPackIdIndex >= 0){
+            if (hasProductPackIdIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'hasProductPackId');
                 hasFilter = true;
             }
 
-            if(hasNewMaterialsFilterIndex >= 0){
+            if (hasNewMaterialsFilterIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'hasNewMaterials');
                 hasFilter = true;
             }
@@ -197,22 +197,30 @@ module.exports = async (srv) => {
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
         let paQuery = SELECT.from(req.query.SELECT.from);
-        if(req.query.SELECT.columns[0]?.func !== "count"){
+        if (req.query.SELECT.columns[0]?.func !== "count") {
             paQuery.columns(req.query.SELECT.columns);
         }
-        if(!hasFilter){
+        if (!hasFilter) {
             console.log("Fetch using limit Priceagreements - no filters");
             req.query.SELECT.limit && (paQuery.limit(req.query.SELECT.limit));
             // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
         }
         req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
         req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
-        
-        startTrace("PriceAgreements");
-        data = await tx.run(paQuery);        
-        stopTrace("PriceAgreements");
-        
 
+        startTrace("PriceAgreements");
+        data = await tx.run(paQuery);
+        stopTrace("PriceAgreements");
+
+        //return directly without filters
+        if (req.query.SELECT.columns[0].func === 'count' && !hasFilter) {
+            console.log(`COUNT: Total time trace fetching Price Agreements: ${totalTime}`);
+            return [{ counted: data.length }];
+        }
+        //return directly without filters and not for only one (selection by keys)
+        if (!req.query.SELECT.one && !hasFilter) {
+            return data;
+        }
         // const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
         let ids = [];
         //use only one loop instead of multiple map functionslet ids = [];
@@ -221,59 +229,73 @@ module.exports = async (srv) => {
         let productpacks = [];
         // let existingPriceConditionIDs = [];
         //use only one loop instead of multiple map functions
-        for(const pa of data){
-            if(ids.findIndex(id => id === pa.ID) === -1)ids.push(pa.ID);
-            if(offers.findIndex(off => off === pa.OfferId) === -1)offers.push(pa.OfferId);
-            if(countrycodes.findIndex(cc => cc === pa.CountryCode) === -1)countrycodes.push(pa.CountryCode);
-            if(productpacks.findIndex(ppid => ppid === pa.ProductPackId) === -1)productpacks.push(pa.ProductPackId);
+        startTrace("PrepareKeysForOtherQueries");
+        for (const pa of data) {
+            if (ids.findIndex(id => id === pa.ID) === -1) ids.push(pa.ID);
+            if (offers.findIndex(off => off === pa.OfferId) === -1) offers.push(pa.OfferId);
+            if (countrycodes.findIndex(cc => cc === pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
+            if (productpacks.findIndex(ppid => ppid === pa.ProductPackId) === -1) productpacks.push(pa.ProductPackId);
             // existingPriceConditionIDs.push(pa.ExistingPriceConditionID);
         }
+        stopTrace("PrepareKeysForOtherQueries");
         let customerPricesAll = [];
+        let customerPricesInPA = true;
         let priceConditionsAll = [];
+        let priceConditionsInPa = true;
         let mostRecentMasterPricesAll = [];
         let consumerPricesAll = [];
+        let consumerPricesInPA = true;
         let newMaterialsAll = [];
         let newFOCMaterialsAll = [];
 
-        if(ids && ids.length > 0){
+        if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
-            customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+            if (req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
+                customerPricesInPA = false;
+                customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+            }
             stopTrace("CustomerPrices");
+            if (req.query.SELECT.one || hasNewMaterialsFilterIndex >= 0) {
+                startTrace("NewMaterialsView");
+                newMaterialsAll = await tx.run(SELECT.from(NewMaterialsView).where({ PriceAgreementId: { in: ids } }));
+                stopTrace("NewMaterialsView");
 
-            startTrace("NewMaterialsView");
-            newMaterialsAll = await tx.run(SELECT.from(NewMaterialsView).where({ PriceAgreementId: { in: ids } }));
-            stopTrace("NewMaterialsView");
-    
-            startTrace("NewFOCMaterialsView");
-            newFOCMaterialsAll = await tx.run(SELECT.from(NewFOCMaterialsView).where({ PriceAgreementId: { in: ids } }));
-            stopTrace("NewFOCMaterialsView");
+                startTrace("NewFOCMaterialsView");
+                newFOCMaterialsAll = await tx.run(SELECT.from(NewFOCMaterialsView).where({ PriceAgreementId: { in: ids } }));
+                stopTrace("NewFOCMaterialsView");
+            }
         }
-        
-        if(countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0){
-            if(offers && offers.length > 0){
+
+        if (countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0) {
+            if (offers && offers.length > 0) {
                 startTrace("PriceConditionView");
-                priceConditionsAll = await tx.run(SELECT.from(PriceConditionView)
-                    .where({CountryCode:{in:countrycodes},
-                        and:{
-                            ProductCode:{in:productpacks},
-                            and:{
-                                OfferID:{in:offers},
-                                and:{
-                                    ExistingPriceConditionID:{'!=':null}
+                if (req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'priceConditions') === -1) {
+                    priceConditionsInPa = false;
+                    priceConditionsAll = await tx.run(SELECT.from(PriceConditionView)
+                        .where({
+                            CountryCode: { in: countrycodes },
+                            and: {
+                                ProductCode: { in: productpacks },
+                                and: {
+                                    OfferID: { in: offers },
+                                    and: {
+                                        ExistingPriceConditionID: { '!=': null }
+                                    }
                                 }
                             }
-                        }
-                    })
-                );
+                        })
+                    );
+                }
                 stopTrace("PriceConditionView");
 
                 startTrace("OfferProducts");
                 OfferProductsAll = await tx.run(SELECT.from(PT_TMOFPR)
-                    .where({CountryCode:{in:countrycodes},
-                        and:{
-                            ProductCode:{in:productpacks},
-                            and:{
-                                OfferID:{in:offers}
+                    .where({
+                        CountryCode: { in: countrycodes },
+                        and: {
+                            ProductCode: { in: productpacks },
+                            and: {
+                                OfferID: { in: offers }
                             }
                         }
                     })
@@ -282,22 +304,27 @@ module.exports = async (srv) => {
             }
             startTrace("MostRecentMasterPricesView");
             mostRecentMasterPricesAll = await tx.run(SELECT.from(MostRecentMasterPricesView)
-                .where({CountryCode:{in:countrycodes},
-                    and:{
-                        ProductPackId:{in:productpacks}
+                .where({
+                    CountryCode: { in: countrycodes },
+                    and: {
+                        ProductPackId: { in: productpacks }
                     }
                 })
             );
             stopTrace("MostRecentMasterPricesView");
-            
+
             startTrace("MostRecentConsumerPricesView");
-            consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
-                .where({CountryCode:{in:countrycodes},
-                    and:{
-                        ProductPackId:{in:productpacks}
-                    }
-                })
-            );
+            if (req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
+                consumerPricesInPA = false;
+                consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
+                    .where({
+                        CountryCode: { in: countrycodes },
+                        and: {
+                            ProductPackId: { in: productpacks }
+                        }
+                    })
+                );
+            }
             stopTrace("MostRecentConsumerPricesView");
         }
 
@@ -305,69 +332,75 @@ module.exports = async (srv) => {
         let mainConditionIDs = [];
         let rappelConditionIDs = [];
         let focConditionIDs = [];
-        for(const condition of priceConditionsAll){
-            if(condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)){
-                mainConditionIDs.push(condition.ExistingPriceConditionID);
-            }
-            if(condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')){
-                rappelConditionIDs.push(condition.ExistingPriceConditionID);
-            }
-            if(condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')){
-                focConditionIDs.push(condition.ExistingPriceConditionID);
-            }
-        }
         let priceConditionAll = [];
         let priceConditionRappelAll = [];
         let discountConditionsAll = [];
         let priceConditionFOCAll = [];
-        if(mainConditionIDs && mainConditionIDs.length > 0){
-            startTrace("PriceCondition");
-            priceConditionAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: mainConditionIDs } }));
-            stopTrace("PriceCondition");
-        }
+        if (req.query.SELECT.one || ( countrycodes[0].CountryCode === 'ES' && ( hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0))) {
+            for (const condition of priceConditionsAll) {
+                if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
+                    mainConditionIDs.push(condition.ExistingPriceConditionID);
+                }
+                if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
+                    rappelConditionIDs.push(condition.ExistingPriceConditionID);
+                }
+                if (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) {
+                    focConditionIDs.push(condition.ExistingPriceConditionID);
+                }
+            }
+            if (mainConditionIDs && mainConditionIDs.length > 0) {
+                startTrace("PriceCondition");
+                priceConditionAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: mainConditionIDs } }));
+                stopTrace("PriceCondition");
+            }
 
-        if(rappelConditionIDs && rappelConditionIDs.length > 0){
-            startTrace("RappelPriceCondition");
-            priceConditionRappelAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: rappelConditionIDs } }));
-            stopTrace("RappelPriceCondition");
-        }
+            if (rappelConditionIDs && rappelConditionIDs.length > 0) {
+                startTrace("RappelPriceCondition");
+                priceConditionRappelAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: rappelConditionIDs } }));
+                stopTrace("RappelPriceCondition");
+            }
 
-        if(rappelConditionIDs && rappelConditionIDs.length > 0){
-            startTrace("DiscountCondition");
-            discountConditionsAll = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: { in: rappelConditionIDs } }));
-            stopTrace("DiscountCondition");
-        }
+            if (rappelConditionIDs && rappelConditionIDs.length > 0) {
+                startTrace("DiscountCondition");
+                discountConditionsAll = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: { in: rappelConditionIDs } }));
+                stopTrace("DiscountCondition");
+            }
 
-        if(focConditionIDs && focConditionIDs.length > 0){
-            startTrace("FOCPriceCondition");
-            priceConditionFOCAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: focConditionIDs } }));
-            stopTrace("FOCPriceCondition");
+            if (focConditionIDs && focConditionIDs.length > 0) {
+                startTrace("FOCPriceCondition");
+                priceConditionFOCAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: focConditionIDs } }));
+                stopTrace("FOCPriceCondition");
+            }
         }
-// use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
+        // use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
         // 2. calculate the fields
+        const todaysDate = new Date();
+
+        let calculatedFutureDate = new Date();
+        calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
+
         const calculateFields = priceAgreement => {
 
-            let customerPrices = priceAgreement.CustomerPrices;
+            let customerPrices = priceAgreement.CustomerPrices || [];
             let mostRecentMasterPrice;
             //let newMaterials = priceAgreement.Materials;
 
             let consumerPrice = priceAgreement.ConsumerPrice;
-            const todaysDate = new Date();
 
-            let calculatedFutureDate = new Date();
-            calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
 
-            let priceConditions = priceAgreement.PriceConditions;
+            let priceConditions = priceAgreement.PriceConditions || [];
             let institute = priceAgreement.Institute;
 
             // Get CustomerPrices if needed
-            if (!customerPrices) {
-                // let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
-                // customerPrices = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreement));
-                customerPrices = customerPricesAll.filter(cp => cp.PriceAgreementId == priceAgreement.ID );
+            // if (!customerPrices) {
+            // let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
+            // customerPrices = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreement));
+            if (!customerPricesInPA) {
+                customerPrices = customerPricesAll.filter(cp => cp.PriceAgreementId == priceAgreement.ID);
             }
+            // }
 
-            if (!priceConditions) {
+            if (!priceConditionsInPa) {
                 // let wherePriceAgreement = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductCode", "=", priceAgreement.ProductPackId);
@@ -380,7 +413,7 @@ module.exports = async (srv) => {
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
                 // mostRecentMasterPrice = await tx.run(SELECT.one.from(MostRecentMasterPricesView).where(whereCountryCode).where(whereProductPackId));
-                mostRecentMasterPrice = mostRecentMasterPricesAll.find(mp => mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId ); // use == instead of === because type of productpackid is different between two tables
+                mostRecentMasterPrice = mostRecentMasterPricesAll.find(mp => mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId); // use == instead of === because type of productpackid is different between two tables
             }
 
             // Get NewMaterials if needed
@@ -401,38 +434,54 @@ module.exports = async (srv) => {
             //}
 
             // Get ConsumerPrices if needed
-            if (!consumerPrice) {
+            // if (!consumerPrice) {
+            if (!consumerPricesInPA) {
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
                 // consumerPrice = await tx.run(SELECT.one.from(MostRecentConsumerPricesView).where(whereCountryCode).where(whereProductPackId));
-                consumerPrice = consumerPricesAll.find(cp => cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId );
+                consumerPrice = consumerPricesAll.find(cp => cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId);
             }
 
             // calculate Synchronized
             priceAgreement.Synchronized = false;
             // check needed - empty array will return true in case of every
-            if (customerPrices && customerPrices.length > 0) {
-                // we are filtering out the PVL conditions first as we don't sync PVL with SAP
-                priceAgreement.Synchronized = customerPrices.filter(price => price.PriceCondition).every(price => price.Synchronized);
-            }
-            priceAgreement.AppliedCount = customerPrices.reduce((acc, cp) => (cp.Applied && ++acc) || acc, 0) || 0;
-            // calculate isNewPriceAgreement
-            priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied || price.Applied === null);
-
-            // calculate hasNewMaterials
-
-            // If we don't have applied prices then hasnewmaterials is always FALSE. (so EVEN if we have new materials added)
-            if (!customerPrices || customerPrices.length === 0) {
-                priceAgreement.hasNewMaterials = false;
-            } else {
-                let hasNewMaterials = newMaterials.some(price => price.isNew);
-                let hasNewFOCMaterials = newFOCMaterials.some(price => price.isNew);
-
-                if (hasNewMaterials || hasNewFOCMaterials) {
-                    priceAgreement.hasNewMaterials = true;
+            // if (customerPrices && customerPrices.length > 0) {
+            // we are filtering out the PVL conditions first as we don't sync PVL with SAP
+            // priceAgreement.Synchronized = customerPrices.filter(price => price.PriceCondition).every(price => price.Synchronized);
+            //only one loop instead of two (filter + every)
+            priceAgreement.Synchronized = true;
+            priceAgreement.isNewPriceAgreement = true;
+            priceAgreement.AppliedCount = 0;
+            for (let price of customerPrices) {
+                if (price.PriceCondition && !price.Synchronized) {
+                    priceAgreement.Synchronized = false;
+                }
+                if (price.Applied || price.Applied === null) {
+                    priceAgreement.isNewPriceAgreement = false;
+                    priceAgreement.AppliedCount++;
                 }
             }
+            // }
+            //added to the for above
+            // priceAgreement.AppliedCount = customerPrices.reduce((acc, cp) => (cp.Applied && ++acc) || acc, 0) || 0;
+            // calculate isNewPriceAgreement
+            //added to the for above
+            // priceAgreement.isNewPriceAgreement = !customerPrices.some(price => price.Applied || price.Applied === null);
 
+            // calculate hasNewMaterials
+            if (req.query.SELECT.one || hasNewMaterialsFilterIndex >= 0) {
+                // If we don't have applied prices then hasnewmaterials is always FALSE. (so EVEN if we have new materials added)
+                if (!customerPrices || customerPrices.length === 0) {
+                    priceAgreement.hasNewMaterials = false;
+                } else {
+                    let hasNewMaterials = newMaterials.some(price => price.isNew);
+                    let hasNewFOCMaterials = newFOCMaterials.some(price => price.isNew);
+
+                    if (hasNewMaterials || hasNewFOCMaterials) {
+                        priceAgreement.hasNewMaterials = true;
+                    }
+                }
+            }
 
             // calculate hasNewPrice
             if (consumerPrice) {
@@ -465,19 +514,37 @@ module.exports = async (srv) => {
 
             priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
 
-            if(priceAgreement.CountryCode === 'ES'){
+            if (req.query.SELECT.one || (priceAgreement.CountryCode === 'ES' && ( hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0 ))) {
                 if (priceConditions && institute && !priceAgreement.IgnoreConfPriceChange && !priceAgreement.IgnorePVLPriceChange) {
-                    let mainCondition = priceConditions.find(condition => condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true));
-                    let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel'));
-                    let focCondition = priceConditions.find(condition => (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode);
+                    // let mainCondition = priceConditions.find(condition => condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true));
+                    // let rappelCondition = priceConditions.find(condition => condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel'));
+                    // let focCondition = priceConditions.find(condition => (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode);
+
+                    let mainCondition = undefined;
+                    let rappelCondition = undefined;
+                    let focCondition = undefined;
+                    for (let condition of priceConditions) {
+                        if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
+                            mainCondition = condition;
+                        }
+                        if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
+                            rappelCondition = condition;
+                        }
+                        if ((condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode) {
+                            focCondition = condition;
+                        }
+                        if (mainCondition && rappelCondition && focCondition) {
+                            break;
+                        }
+                    }
                     // If no mainCondition was found, we don't evaluate further
-                    if (!mainCondition){
+                    if (!mainCondition) {
                         return priceAgreement;
                     }
                     let offerProduct = OfferProductsAll.find(product => product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode);
                     let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
                     let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
-                    let mostRecentPRAF = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.PRAF : (mostRecentMasterPrice.PRAF / priceAgreement.Product.ProductPack.PACKFACTOR); 
+                    let mostRecentPRAF = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.PRAF : (mostRecentMasterPrice.PRAF / priceAgreement.Product.ProductPack.PACKFACTOR);
 
                     if (mainCondition) {
                         /* we are using the maincondition which is coming from the PriceConditionView
@@ -561,7 +628,7 @@ module.exports = async (srv) => {
                         if (priceConditionRappel) {
                             if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
                                 if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceConditionRappel.PVL)) {
-                                    if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentYLLP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount/100)))) <mostRecentPRAF)) { //Discount is a separate entity and should thus be handled as taking the max(DiscountCondition) value as a discount
+                                    if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentYLLP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount / 100)))) < mostRecentPRAF)) { //Discount is a separate entity and should thus be handled as taking the max(DiscountCondition) value as a discount
                                         priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
                                     } else {
                                         priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
@@ -571,7 +638,7 @@ module.exports = async (srv) => {
 
                             if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
                                 if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceConditionRappel.ConfidentialPrice)) {
-                                    if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentYLAP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount/100)))) < mostRecentPRAF)) { //add royal decree to this calculation (new card)
+                                    if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentYLAP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount / 100)))) < mostRecentPRAF)) { //add royal decree to this calculation (new card)
                                         priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 3 ? priceAgreement.hasNewYLAP : 4;
                                     } else {
                                         priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
@@ -681,33 +748,33 @@ module.exports = async (srv) => {
             result = filteredResult;
         }
 
-        if(hasProductPackIdIndex && hasProductPackIdValues.length > 0){
+        if (hasProductPackIdIndex && hasProductPackIdValues.length > 0) {
             const filteredResult = result.filter(priceAgreement => priceAgreement.ProductPackId === hasProductPackIdValues[0]);
             result = filteredResult;
         }
-        
+
         stopTrace("apply filters");
         startTrace("Commit");
         await tx.commit();
         stopTrace("Commit");
         if (req.query.SELECT.columns[0].func === 'count') {
-            console.log(`COUNT: Total time trace fetching Price Agreements: ${totalTime}`);
+            console.log(`COUNT WITH FILTER: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: result.length }];
         }
-        if(hasFilter){
+        if (hasFilter) {
             startTrace("SkipTop");
             const limit = req.query.SELECT.limit;
             let startFrom = 0;
             let endAt = 0;
-            if(limit?.offset?.val){
+            if (limit?.offset?.val) {
                 startFrom = limit?.offset?.val;
             }
-            if(limit?.rows?.val){
+            if (limit?.rows?.val) {
                 endAt = startFrom + limit.rows.val;
             }
-            if(endAt > 0){
-                result = result.slice(startFrom,endAt);
-            }else if(startFrom > 0){
+            if (endAt > 0) {
+                result = result.slice(startFrom, endAt);
+            } else if (startFrom > 0) {
                 result = result.slice(startFrom);
             }
             stopTrace("SkipTop");
@@ -774,13 +841,13 @@ module.exports = async (srv) => {
 
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
-        
+
         const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrice.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
         await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
 
         let paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status); //in case one of the promises returns false -> it means there was an error
         paWithoutErrorsIds = paWithoutErrorsIds.filter(paWE => paWithErrorsIds.findIndex(paE => paE === paWE.customerPrice.PriceAgreementId) === -1);//do not keep the ones that are already in error
-        
+
         // Set 'Synchronized' to true and add IDOC number from the response
         try {
             console.log(`Process customer prices in DB`);
@@ -788,7 +855,7 @@ module.exports = async (srv) => {
                 console.log(`Process customer prices count: ${paWithoutErrorsIds.length}`);
                 await updateCustomerPrices(paWithoutErrorsIds); // !!the order of PriceCondition arrays is important
                 await setStatusPriceAgreement(paWithoutErrorsIds.map(req => req.customerPrice.PriceAgreementId), 'DONE');
-            }else{
+            } else {
                 console.log(`Nothing to update in DB`);
             }
             console.log(`Finished synchronisation of PriceAgreements`);
@@ -859,7 +926,7 @@ module.exports = async (srv) => {
             // return req.reject(404, `No institute was found for InstituteID: ${customerPrice.InstituteId}`);
         }
 
-        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
+        if (customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
 
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
@@ -911,7 +978,7 @@ module.exports = async (srv) => {
             // set KRECH for Descuento Comercial and Descuento Comercial 
             if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
                 body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "A";
-                
+
             }
 
             // set partner and sales organisation
@@ -921,18 +988,18 @@ module.exports = async (srv) => {
 
         // KBETR per Pack or Unit
         //if(customerPrice.CountryCode === 'IT'){
-            if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" ){// convert and send per pack
-                kbetr  = kbetr * packFactor;
-            }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
-                kbetr  = kbetr / packFactor;
-            }
+        if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit") {// convert and send per pack
+            kbetr = kbetr * packFactor;
+        } else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack") { // => radiology so per unit
+            kbetr = kbetr / packFactor;
+        }
         //}
 
         //we should add "-" only in case of Price Condition "YL60" and "YDC0"
-        if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0"){
-             kbetr = kbetr + "-";
+        if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
+            kbetr = kbetr + "-";
         }
-                
+
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
@@ -1127,9 +1194,9 @@ module.exports = async (srv) => {
             return { status: false, customerPrice: customerPrice };
         }
 
-        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
+        if (customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
 
-        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: priceAgreement.TenderId}));
+        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
 
         // TODO: Isma will check with Jonathan if this is correct
         let packFactor = 1;
