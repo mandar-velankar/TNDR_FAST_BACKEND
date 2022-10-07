@@ -386,6 +386,9 @@ entity PT_TMOFPR {
 entity Lots: managed {
     key LotID: Integer;
     key OfferID: String;
+    LotProducts: Association to many LotProduct
+                    on LotProducts.LotID = LotID
+                    and LotProducts.OfferID = OfferID
 }
 
 entity LotProduct: managed { 
