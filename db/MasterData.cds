@@ -723,3 +723,9 @@ entity Settlements {
 	key ID: String(10);
 	Description: localized String(50);
 }
+
+entity BrazilCap: cuid, managed {
+    CAP: Decimal;
+    ValidFrom: Timestamp;
+	ValidTo: Timestamp;
+}
