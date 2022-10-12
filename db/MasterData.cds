@@ -103,7 +103,6 @@ entity PT_TMDIST{
 	ContactPerson:String(500);
 	ActiveRecord:String(10);
 	CONTACT_EMAIL:String(100);
-	DistributorCode: Integer;
 	City: String;
 	State: String;
 	TaxCode: String;
@@ -114,6 +113,7 @@ entity PT_TMDIST{
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Distributor = $self;
+	DistributorDivision: Association to many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID;
 }
 
 //Product Pack
@@ -748,3 +748,11 @@ entity BrazilMasterPrices: cuid, managed {
 	UOM			: String;
 }
 
+entity BrazilDistributorDivision: managed {
+	key DistributorID: Integer; 
+	key DivisionCode: String(50);
+	DivisionName: String(50);
+	CustomerGroup: String(3);
+	PriceList: String(2);
+	DistributorType: String(50);
+}

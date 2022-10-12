@@ -79,6 +79,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity LotProducts                                  as projection on TransactionalData.LotProduct;
     entity BrazilCap                                    as projection on MasterData.BrazilCap;
     entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
+    entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
 
 
     entity PT_TMCTRY @(restrict : [{
