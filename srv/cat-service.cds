@@ -77,6 +77,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity RoyalDecreePercentage                        as projection on MasterData.RoyalDecree;
     //Brazil
     entity LotProducts                                  as projection on TransactionalData.LotProduct;
+    entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',

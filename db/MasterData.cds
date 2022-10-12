@@ -723,3 +723,15 @@ entity Settlements {
 	key ID: String(10);
 	Description: localized String(50);
 }
+
+entity BrazilMasterPrices: cuid, managed {
+	CustomerID	: Integer;
+	ProductID 	: Integer;
+	ValidFrom   : Date;
+    ValidTo     : Date;
+	Type		: String(6) enum {ZWP0; ZWD4; IBRX};
+	Value		: Double;
+	Currency	: String(3);
+	UOM			: String;
+}
+
