@@ -693,7 +693,7 @@ COUNTRYCODE,TABLEID,COLUMN,BINDINGPATH,VISIBLE,REQUIRED,DESCRIPTION
 "AR","editofferProductId","CodeNational","SKUCountry/GOV_CODE","False","False","codeNational"
 "AR","editofferProductId","OfferType","OfferType","False","False","offerType"
 "BR","editofferProductId","CodeNational","SKUCountry/GOV_CODE","False","False","codeNational"
-"BR","editofferProductId","OfferType","OfferType","False","False","offerType"
+"BR","editofferProductId","OfferType","OfferType","True","True","offerType"
 "CL","editofferProductId","CodeNational","SKUCountry/GOV_CODE","False","False","codeNational"
 "CL","editofferProductId","OfferType","OfferType","False","False","offerType"
 "MX","editofferProductId","PackFactor","SKU/PACKFACTOR","False","False","PackFactor"
