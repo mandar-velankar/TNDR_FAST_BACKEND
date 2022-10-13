@@ -82,6 +82,7 @@ entity PT_TMINST{
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
 	Region:Association to CountryRegions on Region.ID = RegionID;
     Province: Association to CountryProvinces on Province.ID = ProvinceID;
+	InstituteDivision: Association to many BrazilInstituteDivision on InstituteDivision.InstituteID = InstituteID;
 }
 
 //Institute Hierarchy Level
@@ -755,4 +756,12 @@ entity BrazilDistributorDivision: managed {
 	CustomerGroup: String(3);
 	PriceList: String(2);
 	DistributorType: String(50);
+}
+
+entity BrazilInstituteDivision: managed {
+	key InstituteID: Integer; 
+	key DivisionCode: String(50);
+	DivisionName: String(50);
+	CustomerGroup: String(3);
+	PriceList: String(2);
 }
