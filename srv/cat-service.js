@@ -830,17 +830,18 @@ module.exports = (srv) => {
                     }
                 });
             } else {
+                //EHQUT-197936-Spain Approval flow change for quotations with prices below floor price
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "BU/RAM":
                             oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
                             break;
-                        case "Legal":
-                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
-                            break;
-                        case "Financial Business Partner":
-                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
-                            break;
+                        // case "Legal":
+                        //     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                        //     break;
+                        // case "Financial Business Partner":
+                        //     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                        //     break;
                         case "Controlling":
                             oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
                             break;
@@ -850,7 +851,7 @@ module.exports = (srv) => {
                 });
             }
         }
-		
+		//EHQUT-197936-Spain Approval flow change for quotations with prices below floor price
 		let results = {
 			//In Policy flag
 			IN_POLICY: true
