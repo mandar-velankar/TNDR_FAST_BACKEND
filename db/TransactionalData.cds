@@ -78,6 +78,8 @@ entity PT_TMOFRS { //Offers
                                     on Country.CountryCode = CountryCode;
         ProductTypeProfitability: Association to ProductTypeProfitability
                                     on ProductTypeProfitability.OfferId = OfferID;
+        Lots                  : Association to many Lots
+                                    on Lots.OfferID = OfferID;
 }
 
 entity OfferView as
@@ -381,6 +383,15 @@ entity PT_TMOFPR {
 }
 
 //brazil
+
+entity Lots: managed {
+    key LotID: Integer;
+    key OfferID: String;
+    LotProducts: Association to many LotProduct
+                    on LotProducts.LotID = LotID
+                    and LotProducts.OfferID = OfferID
+}
+
 entity LotProduct: managed { 
     key LotID: Integer;
     key OfferID: String;
