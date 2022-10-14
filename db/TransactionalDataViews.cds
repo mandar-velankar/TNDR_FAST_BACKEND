@@ -1417,3 +1417,68 @@ group by tender.TenderID,
     priceCondition.PriceConditionCode,
     priceCondition.Discount,    
     product.Results.Outcome;
+
+    /**
+ * This view contains calculated fields used on the Brazil financial offers page
+ */
+entity PriceConditionBrazilView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
+left outer join MasterDataViews.MostRecentBrazilMasterPricesView as brazilmasterPrices 
+    on product.ProductCode = brazilmasterPrices.ProductID
+    and institute.CustomerID = brazilmasterPrices.CustomerID
+    {
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    priceCondition.ID as ExistingPriceConditionID: UUID,
+    priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
+    tender.CountryCode,
+    key priceConditionClassification.ConditionType,
+    priceConditionClassification.Classification,
+    priceConditionClassification.Division,
+    priceConditionClassification.isMain,
+    //product.RegisteredPrice.REGISTERED_PRICE as PVL,
+    product.RegisteredPrice.CURRENCY as Currency,
+    priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
+    case 
+        when priceCondition.PriceList is null and brazilmasterPrices.Type = 'ZWP0'
+            then brazilmasterPrices.Value
+        else 
+            priceCondition.PriceList
+    end as BrazilPriceList: Decimal,
+    case 
+        when priceCondition.BrazilStandardDiscount is null and brazilmasterPrices.Type = 'ZWD4'
+            then brazilmasterPrices.Value
+        else 
+            priceCondition.BrazilStandardDiscount
+    end as BrazilStandardDiscount: Decimal,
+    priceCondition.TaxExemption,
+    priceCondition.PriceAfterTaxExemtion, //calculated in UI based on User Input
+    priceCondition.CAP,
+    priceCondition.PriceAfterCap, //calculated in UI based on User Input
+    priceCondition.CommercialProposal,  //User Input field for Commercial Proposal PriceCondition, calculated field in UI for Discount PriceCondition
+    brazilmasterPrices.Type,
+    brazilmasterPrices.Value,
+    brazilmasterPrices.Currency as brazilMasterPriceCurrency,
+    brazilmasterPrices.UOM as brazilUoM,
+    priceCondition.ReferencePriceAgreement,
+}where tender.Active = 1;
