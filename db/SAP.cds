@@ -26,7 +26,7 @@ entity BrazilMaterials: cuid, managed {
 
 entity BrazilCustomers: cuid, managed {
 	CODIGO			    : String(10);			// Customer code in SAP - key
-	REPRES				: String(3);			// Flag if the customer is a sales representative - 'M34' - Distributor
+	REPRES				: String(3);			// Flag if the customer is a Distributor or Institute ( X = Distributor)
 	ORG_VENDAS			: String(4);			// Sales organization
     CANAL_DISTR			: String(2);			// Distribution channel
 	SETOR_ATIV	        : String(2);		    // Division - key
