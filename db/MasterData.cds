@@ -77,6 +77,9 @@ entity PT_TMINST{
 	PaymentTerms:String(500);
 	ForAllBrands:Boolean;
 	DirectTender:Boolean;
+	ContactEmail: String;
+	CNPJ: String(16);
+	ShortName: String(10);
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
