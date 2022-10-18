@@ -50,7 +50,7 @@ entity PriceAgreements: cuid, managed {
     ExpiryExtensionAcknowledged: Boolean default false;
     Status: String;
     CancellationComment: String;
-    LotID: Integer;
+    LotID: Integer default 1;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
