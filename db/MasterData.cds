@@ -52,7 +52,7 @@ entity CountryCurrency : managed {
 entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
 	key InstituteID:Integer not null;
-	CustomerID:Integer;
+	CustomerID:Integer; // Codigo
 	InstituteName:String(500);
 	InstituteType:String(50);
 	Address:String(500);
@@ -112,6 +112,7 @@ entity PT_TMDIST{
 	State: String;
 	TaxCode: String;
 	CNPJ: String;
+	CustomerID: Integer; // Codigo
 	Shortname: String;
 	CommissionRate:Double;
 	INCOTerms:String(500);
@@ -121,7 +122,7 @@ entity PT_TMDIST{
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Distributor = $self;
-	DistributorDivision: Association to many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID;
+	DistributorDivision: Composition of many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID;
 }
 
 //Product Pack
@@ -768,7 +769,7 @@ entity BrazilMasterPrices: cuid, managed {
 
 entity BrazilDistributorDivision: managed {
 	key DistributorID: Integer; 
-	key DivisionCode: String(50);
+	key DivisionCode: String(50); // setor_ativ
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);
@@ -777,7 +778,7 @@ entity BrazilDistributorDivision: managed {
 
 entity BrazilInstituteDivision: managed {
 	key InstituteID: Integer; 
-	key DivisionCode: String(50);
+	key DivisionCode: String(50); // setor_ativ
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);

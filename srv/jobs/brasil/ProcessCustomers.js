@@ -11,65 +11,114 @@ module.exports = class ProcessCustomers extends BaseJob {
     */
     //override
     async onTick() {
-        console.log('Processing Brazil Customers ...');
-        this.db = await cds.connect.to('db');
+        console.log('Processing Brazil customers ...');
         try {
+            this.db = await cds.connect.to('db');
+
+            // Fetch data
             const allSAPCustomers = await this.getSAPCustomers();
-            const distrubutors = allSAPCustomers.filter(cust => cust.REPRES === 'X');
+            const distributors = allSAPCustomers.filter(cust => cust.REPRES === 'X');
             const institutes = allSAPCustomers.filter(cust => cust.REPRES !== 'X');
 
-            await this.mapSAPDistributorsToFAST(distrubutors);
-            // this.processInstitutes();
-            // const prices = this.mapSAPPricesToFAST((await this.getSAPCustomers()));
-            // this.updateFASTPrices(prices);
-            debugger;
+            // Process data
+            await this.processDistributors(distributors);
+
         } catch (error) {
+            console.error(`ERROR: Processing of Brazil customers failed`);
             console.error(error);
+            throw error;
         }
-        console.log('Finished processing Brazil Customers ...');
+        console.log('Processing of Brazil customers successfully completed.');
     }
 
 
+    /**
+     * This method fetches all the customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS
+     * @returns - A list of Customers
+     */
     async getSAPCustomers() {
         const tx = this.db.tx();
-        console.log(`Start fetching BrazilCustomers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS`);
-        const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        const result = await tx.run(SELECT.from(BrazilCustomers));
-        await tx.commit();
-        console.log(`End fetching BrazilCustomers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS`);
-        return result;
+        try {
+            console.log(`Fetching Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS ...`);
+            const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            const result = await tx.run(SELECT.from(BrazilCustomers));
+            await tx.commit();
+            console.log(`Fetching of Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS successfully completed`);
+            return result;
+        }catch (error) {
+            console.error(`ERROR: Fetching of Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS failed`);
+            console.error(error);
+            await tx.rollback();
+            throw error;
+        }
     }
 
-    mapSAPDistributorsToFAST(distributors) {
+    /**
+     * This method will process a list of Distributors by Creating/Updating PT_TMDIST and BrazilDistributorDivision entities
+     * from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS. 
+     * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS records will be deleted.
+     * @param {*} distributors 
+     * @returns 
+     */
+    async processDistributors(distributors) {
         console.log(`Start processing BrazilDistrubutors`);
-        distributors = distributors.reduce((prevValue, currentValue, idx, distributors) => {
-            // let priceZWP0 = {
-            //     CustomerID: parseInt(price.CLIENTE),
-            //     ProductID: parseInt(price.CODIGO),
-            //     ValidFrom: price.DATA_INI, //Q: Need example on how date looks when coming from SAP - seem format in CDS but will it one to one?
-            //     ValidTo: price.DATA_FIM //Q: Need example on how date looks when coming from SAP - seem format in CDS but will it one to one?
-            // };
-            // let priceZWD4 = { ...priceZWP0 };
-            // let priceIBRX = { ...priceZWP0 };
-            // if (price.PRC_PADRAO) {
-            //     priceZWP0.Type = "ZWP0";
-            //     priceZWP0.Value = price.PRC_PADRAO;
-            //     prev.push(priceZWP0);f
-            // }
-            // if (price.DESC_PADRAO) {    //Q: would this be enough to know if we need to create it in our db?
-            //     priceZWD4.Type = "ZWD4";
-            //     priceZWD4.Value = price.DESC_PADRAO;
-            //     prev.push(priceZWD4);
-            //     priceIBRX.Type = "IBRX";
-            //     priceIBRX.Value = price.DESC_PADRAO;
-            //     prev.push(priceIBRX);
-            // }
-            prevValue.push(currentValue);
-            return prevValue;
-        }, []);
+        const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+
+        const nextDistributorID = await this.getNextValue(PT_TMDIST, "DistributorID");
+        // Distributor - PT_TMDIST
+        // 1. map fields from SAP to FAST
+        const mappedDistributors = this.mapSAPDistributorsToFAST(distributors);
+        // 2. Identify if Distributor already exists in PT_TMDIST -> Condigo
+        // 3a. If yes, update PT_TMDIST record with info from SAP Brazil
+        // 3b. If no, create new record in PT_TMDIST with info from SAP Brazil -> generate new DistributorID
+        
+
+        // DistributorDivision - BrazilDistributorDivision
+        // 1. Identify if Distributor already exists in BrazilDistributorDivision -> Condigo
+        // 2a. If yes, update BrazilDistributorDivision record with info from SAP Brazil
+        // 2b. If no, create new record in BrazilDistributorDivision with info from SAP Brazil
+        // 3. map fields from SAP to FAST
+
+
         console.log(`End processing BrazilDistrubutors`);
         return distributors;
     }
+
+    mapSAPDistributorsToFAST(distributors) {
+        console.log(`Start mapping of Brazil distributors`);
+        distributors = distributors.reduce((prev, curr, idx, distributors) => {
+            const numberOfDivisions = (distributors.filter(distr => distr.CODIGO ===  curr.CODIGO)).length;
+
+            let fastDistributor = {
+                CountryCode: "BR",
+                DistributorID: "",
+                DistributorName: curr.RAZAO,
+                Address: `${curr.ENDERECO} ${curr.BAIRRO} ${curr.CEP} ${curr.CIDADE}`,
+                ContactNo: curr.TELEFONE,
+                Fax: curr.FAX,
+                ContactPerson:"",
+                ActiveRecord: (!curr.BLOQ && curr.STATUS === 'A') ? 'Yes' : 'No',
+                CONTACT_EMAIL: curr.EMAIL,
+                City: curr.CIDADE,
+                State: curr.REGIAO,
+                TaxCode: curr.IE,
+                CNPJ: curr.CNPJ,
+                CustomerID: curr.CODIGO,
+                Shortname: curr.FANTASIA,
+                CommissionRate:"",
+                INCOTerms:"",
+                PaymentTerms:"",
+                ForAllBrands: (numberOfDivisions > 2),
+            };
+
+            prev.push(fastDistributor);
+            return prev;
+        }, []);
+        console.log(`End mapping of Brazil distributors`);
+        return distributors;
+    }
+
+
     async updateFASTPrices(prices) {
         const FASTPrices = await this.getFASTPrices(prices);
         //Q: keys of BrazilMasterPrices? 
@@ -109,6 +158,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             throw error;
         }
     }
+
     async getFASTPrices(prices) {
         if(!prices || prices.length === 0){
             console.log(`No SAP Prices to be updated -> No FAST Prices to be fetched`);
@@ -129,4 +179,38 @@ module.exports = class ProcessCustomers extends BaseJob {
         console.log(`End fetching BrazilPrices from FAST table`);
         return result;
     }
+    
+    /**
+     * Gets the next highest value for a given field from table
+     * @param {*} table 
+     * @param {*} fieldname 
+     * @returns - next highest value
+     */
+    async getNextValue (table, fieldname){
+        const tx = this.db.tx();
+        console.log(`Start fetching next value of ${fieldname} from FAST ${table.name}`);
+		let results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
+		let nextValue = 1;
+		if (results[0].max) {
+			nextValue = results[0].max + 1
+		}
+        await tx.commit();
+        console.log(`End fetching next value of ${fieldname}  from FAST ${table}`);
+		return nextValue;
+	}
+
+    /**
+     * Returns the DivisionName for a given DivisionCode
+     * @param {String} divisionCode 
+     * @returns {String} - DivisionName
+     */
+    getDivisionName(divisionCode){
+        const divisions = {
+            '08':'Pharma',
+		    '65':'Radiology',
+		    '16':'Consumer Health'
+        }
+        return divisions[divisionCode] || '00';
+    }
+    
 };
