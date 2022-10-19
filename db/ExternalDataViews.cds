@@ -547,7 +547,7 @@ entity MasterCountryLegalEntityMap as select from MasterData.PT_TMCTLE as Master
 	key MasterCountryLegalEntityMap.LegalEntityID,
 	key MasterCountryLegalEntityMap.CountryCode,
 	MasterCountryLegalEntityMap.LegalEntity.LegalEntityName,
-	MasterCountryLegalEntityMap.Brand
+	MasterCountryLegalEntityMap.ForAllBrands
 } order by MasterCountryLegalEntityMap.CountryCode,
 		   MasterCountryLegalEntityMap.LegalEntity.LegalEntityName;
 
@@ -808,7 +808,7 @@ entity Offers as select from TransactionalData.PT_TMOFRS as offer {
 };
 
 entity OfferInfo as select from Offers as o1 
-left outer join Offers o2 on o1.RootId = o2.RootId and o2.ActiveOffer = 1
+left outer join Offers as o2 on o1.RootId = o2.RootId and o2.ActiveOffer = 1
 {
     key o1.OfferID,
     o1.PFINo,
