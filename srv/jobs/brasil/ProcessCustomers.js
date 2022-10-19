@@ -61,31 +61,34 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @returns 
      */
     async processDistributors(distributors) {
-        console.log(`Start processing BrazilDistrubutors`);
-        const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-
-        const nextDistributorID = await this.getNextValue(PT_TMDIST, "DistributorID");
-        // Distributor - PT_TMDIST
-        // 1. map fields from SAP to FAST
+        console.log(`Processing Brazil distrubutors ...`);
+        // Map the fields from SAP to FAST
         const mappedDistributors = this.mapSAPDistributorsToFAST(distributors);
-        // 2. Identify if Distributor already exists in PT_TMDIST -> Condigo
-        // 3a. If yes, update PT_TMDIST record with info from SAP Brazil
-        // 3b. If no, create new record in PT_TMDIST with info from SAP Brazil -> generate new DistributorID
+        try {
+            // 1. PT_TMDIST
+            await this.upsertFASTDistributors(mappedDistributors);
+            // 2. BrazilDistributorDivision
+            // 3. delete records from SAP table
+        }catch (error) {
+            console.error(`ERROR: Processing of Brazil distrubutors failed.`);
+            console.error(error);
+            throw error;
+        }
         
-
-        // DistributorDivision - BrazilDistributorDivision
+    
+        // 2. BrazilDistributorDivision
         // 1. Identify if Distributor already exists in BrazilDistributorDivision -> Condigo
         // 2a. If yes, update BrazilDistributorDivision record with info from SAP Brazil
         // 2b. If no, create new record in BrazilDistributorDivision with info from SAP Brazil
         // 3. map fields from SAP to FAST
 
 
-        console.log(`End processing BrazilDistrubutors`);
-        return distributors;
+        console.log(`Processing of Brazil distrubutors successfully completed.`);
+        return mappedDistributors;
     }
 
     mapSAPDistributorsToFAST(distributors) {
-        console.log(`Start mapping of Brazil distributors`);
+        console.log(`Mapping of Brazil distributors ...`);
         distributors = distributors.reduce((prev, curr, idx, distributors) => {
             const numberOfDivisions = (distributors.filter(distr => distr.CODIGO ===  curr.CODIGO)).length;
 
@@ -105,7 +108,7 @@ module.exports = class ProcessCustomers extends BaseJob {
                 CNPJ: curr.CNPJ,
                 CustomerID: curr.CODIGO,
                 Shortname: curr.FANTASIA,
-                CommissionRate:"",
+                CommissionRate: 0.0,
                 INCOTerms:"",
                 PaymentTerms:"",
                 ForAllBrands: (numberOfDivisions > 2),
@@ -114,69 +117,82 @@ module.exports = class ProcessCustomers extends BaseJob {
             prev.push(fastDistributor);
             return prev;
         }, []);
-        console.log(`End mapping of Brazil distributors`);
+        console.log(`Mapping of Brazil distributors finished.`);
         return distributors;
     }
 
 
-    async updateFASTPrices(prices) {
-        const FASTPrices = await this.getFASTPrices(prices);
-        //Q: keys of BrazilMasterPrices? 
-        const FASTNewPrices = [];
-        const FASTChangedPrices = [];
-        console.log(`Prepare update BrazilPrices in FAST table`);
-        for (const price of prices) {
-            let FASTPriceIdx = FASTPrices.findIndex(FASTPrice =>
-                FASTPrice.CustomerID === price.CustomerID &&
-                FASTPrice.ProductID === price.ProductID &&
-                FASTPrice.ValidFrom === price.ValidFrom &&
-                FASTPrice.ValidTo === price.ValidTo &&
-                FASTPrice.Type === price.Type);
-            if (FASTPriceIdx > -1) {
-                FASTChangedPrices.push(price);
+    /**
+     * Creates or Updates distributors in FAST
+     * @param {*} distributors 
+     * @returns 
+     */
+    async upsertFASTDistributors(distributors) {
+        const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        let nextDistributorID = await this.getNextValue(PT_TMDIST, "DistributorID");
+
+        // 1. get a list of existing Distributors from FAST
+        const distributorsExistingInFAST = await this.getFASTDistributors(distributors);
+        // 2. devide mappedDistributors into New or Changed distributors
+        const FASTNewDistributors = [];
+        const FASTChangedDistributors = [];
+        for (const distributor of distributors) {
+            let FASTDistributorIdx = distributorsExistingInFAST.findIndex(FASTDistributor => Number(FASTDistributor.CustomerID) === Number(distributor.CustomerID));
+            if (FASTDistributorIdx > -1) {
+                // copy over the DistributorID from existing distributor
+                distributor.DistributorID = distributorsExistingInFAST[FASTDistributorIdx].DistributorID;
+                FASTChangedDistributors.push(distributor);
             } else {
-                FASTNewPrices.push(price);
+                // generate new DistributorID
+                distributor.DistributorID = nextDistributorID++;
+                FASTNewDistributors.push(distributor);
             }
         }
+        // 3. Upsert records into PT_TMDIST
         //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
-
-        console.log(`Start update BrazilPrices in FAST table`);
-        const { BrazilMasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        console.log(`Upserting Brazil customers into FAST table ...`);
         const tx = this.db.tx();
         try {
-            for (const FASTPrice of FASTChangedPrices) {
-                await tx.run(UPDATE(BrazilMasterPrices).with(FASTPrice));
+            for (const FASTDistributor of FASTChangedDistributors) {
+                await tx.run(UPDATE(PT_TMDIST).with(FASTDistributor));
             }
-            FASTNewPrices && FASTNewPrices.length > 0 && await tx.run(INSERT(FASTNewPrices).into(BrazilMasterPrices));
+            FASTNewDistributors && FASTNewDistributors.length > 0 && await tx.run(INSERT(FASTNewDistributors).into(PT_TMDIST));
             await tx.commit();
-            console.log(`End update BrazilPrices in FAST table`);
+            console.log(`Upserting of Brazil customers into FAST table successfully completed.`);
             return true;
         } catch (error) {
-            console.error(`ERROR: during update BrazilPrices in FAST table`);
+            console.error(`ERROR: Upserting of Brazil customers into FAST table failed`);
             console.error(error);
             await tx.rollback();
             throw error;
         }
     }
 
-    async getFASTPrices(prices) {
-        if(!prices || prices.length === 0){
-            console.log(`No SAP Prices to be updated -> No FAST Prices to be fetched`);
+    /**
+     * Gets a list of existing Distributors from FAST where CustomerIDs (CODIGO) are equal.
+     * @param {Array} distributors 
+     * @returns {Array<PT_TMDIST>} a list of existing distributors
+     */
+    async getFASTDistributors(distributors) {
+        if(!distributors || distributors.length === 0){
+            console.log(`No Distributors were found in FAST`);
             return [];
         }
         const tx = this.db.tx();
-        console.log(`Prepare fetching BrazilPrices from FAST table`);
-        let custIDs = [];
-        let productIDs = [];
-        for (const price of prices) {
-            custIDs.push(price.CustomerID);
-            productIDs.push(price.ProductID);
+        console.log(`Prepare fetching Brazil customers from FAST table`);
+
+        // get all the CustomerIDs from distributors
+        let customerIDs = [];
+        for (const distributor of distributors) {
+            customerIDs.push(distributor.CustomerID);
         }
-        console.log(`Start fetching BrazilPrices from FAST table`);
-        const { BrazilMasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const result = await tx.run(SELECT.from(BrazilMasterPrices).where({ CustomerID: { in: custIDs}, ProductID: { in: productIDs } } )); //Q: Select everything or specific product? Delete when processing sucessful?
+        console.log(`Start fetching Brazil customers from FAST table`);
+
+        // get a list of distributors entities for given list of CustomerIDs
+        const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const result = await tx.run(SELECT.from(PT_TMDIST).where({ CustomerID: { in: customerIDs}, CountryCode: 'BR' } ));
         await tx.commit();
-        console.log(`End fetching BrazilPrices from FAST table`);
+        console.log(`End fetching Brazil customers from FAST table`);
         return result;
     }
     
@@ -188,15 +204,19 @@ module.exports = class ProcessCustomers extends BaseJob {
      */
     async getNextValue (table, fieldname){
         const tx = this.db.tx();
-        console.log(`Start fetching next value of ${fieldname} from FAST ${table.name}`);
-		let results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
-		let nextValue = 1;
-		if (results[0].max) {
-			nextValue = results[0].max + 1
-		}
-        await tx.commit();
-        console.log(`End fetching next value of ${fieldname}  from FAST ${table}`);
-		return nextValue;
+        let nextValue = 1;
+        try {
+            let results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
+            if (results[0].max) {
+                nextValue = results[0].max + 1
+            }
+            await tx.commit();
+            return nextValue;
+        }catch (error) {
+            console.error(`ERROR: Fetching next highest value for ${fieldname} from ${table.name} failed`);
+            console.error(error);
+            throw error;
+        }
 	}
 
     /**

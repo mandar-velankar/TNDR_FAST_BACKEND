@@ -52,7 +52,7 @@ entity CountryCurrency : managed {
 entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
 	key InstituteID:Integer not null;
-	CustomerID:Integer; // Codigo
+	CustomerID:String; // Codigo
 	InstituteName:String(500);
 	InstituteType:String(50);
 	Address:String(500);
@@ -112,7 +112,7 @@ entity PT_TMDIST{
 	State: String;
 	TaxCode: String;
 	CNPJ: String;
-	CustomerID: Integer; // Codigo
+	CustomerID: String; // Codigo
 	Shortname: String;
 	CommissionRate:Double;
 	INCOTerms:String(500);
@@ -757,7 +757,7 @@ entity BrazilCap: cuid, managed {
 }
 
 entity BrazilMasterPrices: cuid, managed {
-	CustomerID	: Integer;
+	CustomerID	: String;
 	ProductID 	: Integer;
 	ValidFrom   : Date;
     ValidTo     : Date;
