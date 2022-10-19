@@ -736,24 +736,24 @@ module.exports = async (srv) => {
         }
     });
 
-    //EHQUT-Italy - Synchronize button becomes available again when user changes expiry date
-    srv.after('READ', 'CustomerPrices', async (req) => {
+  //EHQUT-Italy - Synchronize button becomes available again when user changes expiry date
+//     srv.after('READ', 'CustomerPrices', async (req) => {
          
-        const tx = cds.tx(req);
-       if(req && req.length > 0){
+//         const tx = cds.tx(req);
+//        if(req && req.length > 0){
         
-        let whereCountry =req[0].ID ;
-        if(whereCountry){
-            const customerPrices = await tx.run(UPDATE(CustomerPrices).with({ Synchronized:false }).where({ ID: whereCountry }));
-            await tx.commit();
-            return customerPrices;
-        }else{
-            return "";
-        }
-    }
+//         let whereCountry =req[0].ID ;
+//         if(whereCountry){
+//             const customerPrices = await tx.run(UPDATE(CustomerPrices).with({ Synchronized:false }).where({ ID: whereCountry }));
+//             await tx.commit();
+//             return customerPrices;
+//         }else{
+//             return "";
+//         }
+//     }
         
-    });
-   //EHQUT- Italy - Synchronize button becomes available again when user changes expiry date
+//     });
+ //EHQUT- Italy - Synchronize button becomes available again when user changes expiry date
     srv.on('syncPriceAgreements', async req => {
         // const tx = cds.transaction(req);
         const tx = cds.tx(req);
