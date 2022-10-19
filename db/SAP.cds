@@ -66,6 +66,7 @@ entity BrazilPrices : cuid, managed {
 	GRP_CLIENTE			: String(3);			// Customer group 4
 	REG_ORIGEM			: String(3);			// Plant federation state
 	REG_DESTINO			: String(3);			// Customer federation state
+    TYPE                : String(4);            // Price List Type
 }
 
 entity BrazilEmpenho : cuid, managed {
