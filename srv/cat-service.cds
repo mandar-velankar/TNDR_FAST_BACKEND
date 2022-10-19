@@ -82,6 +82,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
     entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
     entity BrazilInstituteDivision                      as projection on MasterData.BrazilInstituteDivision;
+    entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
 
 
     entity PT_TMCTRY @(restrict : [{
