@@ -188,9 +188,6 @@ module.exports = class ProcessMasterDataPrices extends BaseJob {
         }
         console.log(`Start fetching BrazilPrices from FAST table`);
         const { BrazilMasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        // let {xpr}=cds.parse.expr(where);
-        // xpr[3].val = custIDs;
-        // xpr[13].val = productIDs;
         const result = await tx.run(SELECT.from(BrazilMasterPrices).where(where));
         await tx.commit();
         console.log(`End fetching BrazilPrices from FAST table`);
