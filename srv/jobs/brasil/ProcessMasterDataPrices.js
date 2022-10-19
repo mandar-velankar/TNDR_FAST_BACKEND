@@ -107,7 +107,7 @@ module.exports = class ProcessMasterDataPrices extends BaseJob {
             console.log(`Updated ${FASTChangedPrices.length} and inserted ${FASTNewPrices.length} rows`);
             console.log(`End update BrazilMasterPrices in FAST table`);
             console.log(`Delete from BrazilPrices in FAST table`);
-            // await tx.run(DELETE.from(BrazilPrices));
+            await tx.run(DELETE.from(BrazilPrices));
             console.log(`Commit all!`);
             await tx.commit();
             return true;
