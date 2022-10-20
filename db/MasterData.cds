@@ -77,6 +77,9 @@ entity PT_TMINST{
 	PaymentTerms:String(500);
 	ForAllBrands:Boolean;
 	DirectTender:Boolean;
+	ContactEmail:String(100);
+	CNPJ:String;
+	Shortname:String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -785,4 +788,5 @@ entity BrazilInstituteDivision: managed {
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);
+	InstituteType: String(50);
 }

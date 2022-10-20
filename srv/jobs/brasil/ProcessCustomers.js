@@ -21,7 +21,8 @@ module.exports = class ProcessCustomers extends BaseJob {
             const institutes = allSAPCustomers.filter(cust => cust.REPRES !== 'X');
 
             // Process data
-            await this.processDistributors(distributors);
+            // await this.processDistributors(distributors);
+            await this.processInstitutes(institutes);
 
             console.log('JOB: Processing of Brazil customers successfully completed.');
 
@@ -86,6 +87,38 @@ module.exports = class ProcessCustomers extends BaseJob {
         }
     }
 
+     /**
+     * This method will process a list of Institutes by Creating/Updating PT_TMINST and BrazilInstituteDivision entities
+     * from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS. 
+     * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS records will be deleted.
+     * @param {*} institutes 
+     * @returns 
+     */
+      async processInstitutes(institutes) {
+        console.log(`Processing Brazil institutes ...`);
+        try {
+            // 1. Institutes - PT_TMINST
+            // Institutes list now contains the same institute per division, we must not process the same institute more than ones
+            const uniqueInstitutes = Array.from(new Set(institutes.map(d => d.CODIGO)))
+                                    .map(codigo => {
+                                        return institutes.find(d => d.CODIGO === codigo)
+                                    });
+            const mappedInstitutes = this.mapSAPInstitutesToFAST(uniqueInstitutes);
+            // await this.upsertFASTInstitutes(mappedInstitutes);
+
+            // 2. Divisions - BrazilInstituteDivision
+            // const mappedDivisions = this.mapSAPDivisionsToFAST(institutes);
+            // await this.upsertFASTDistributorDivision(mappedDivisions);
+
+            console.log(`Processing of Brazil institutes successfully completed.`);
+
+        }catch (error) {
+            console.error(`ERROR: Processing of Brazil institutes failed.`);
+            console.error(error);
+            throw error;
+        }
+    }
+
     /**
      * Maps Customer fields from SAP to FAST Distributors
      * @param {*} distributors 
@@ -123,6 +156,56 @@ module.exports = class ProcessCustomers extends BaseJob {
         }, []);
         console.log(`Mapping of Brazil distributors finished.`);
         return distributors;
+    }
+
+    /**
+     * Maps Customer fields from SAP to FAST Institutes
+     * @param {*} institutes 
+     * @returns 
+     */
+     mapSAPInstitutesToFAST(institutes) {
+        console.log(`Mapping of Brazil institutes ...`);
+        institutes = institutes.reduce((prev, curr, idx, institutes) => {
+            const numberOfDivisions = (institutes.filter(distr => distr.CODIGO ===  curr.CODIGO)).length;
+
+            let fastInstitute = {
+                CountryCode: "BR",
+                InstituteID: "",
+                CustomerID: curr.CODIGO,
+                InstituteName: curr.RAZAO,
+                InstituteType: "Public Institute",
+                Address: `${curr.ENDERECO} ${curr.BAIRRO} ${curr.CEP} ${curr.CIDADE}`,
+                ContactNo: curr.TELEFONE,
+                Fax: curr.FAX,
+                ContactPerson: null,
+                ActiveRecord: (!curr.BLOQ && curr.STATUS === 'A') ? 'Yes' : 'No',
+                Comment: null,
+                City: curr.CIDADE,
+                INSTITUTE_HIERARCHY_ID: 1,
+                State: curr.REGIAO,
+                MercadoPublicoIssuer: null,
+                RegionID: null,
+                ProvinceID: null,
+                CifCode: null,
+                RegionalHealthSystem: null,
+                VatCode: null,
+                TaxCode: "IE",
+                CustomerGroup: null,
+                ApplicableTaxRate: null,
+                INCOTerms: null,
+                PaymentTerms: null,
+                ForAllBrands: (numberOfDivisions > 2),
+                DirectTender: "",
+                ContactEmail: curr.EMAIL,
+                CNPJ: curr.CNPJ,
+                Shortname: curr.FANTASIA,
+            };
+
+            prev.push(fastInstitute);
+            return prev;
+        }, []);
+        console.log(`Mapping of Brazil institutes finished.`);
+        return institutes;
     }
 
     /**
