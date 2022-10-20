@@ -199,6 +199,7 @@ module.exports = class ProcessCustomers extends BaseJob {
     
     /**
      * Creates or Updates divisions in FAST
+     * After successful processing, the processed customers will be removed from BrazilCustomers
      * @param {*} divisions 
      * @returns 
      */
@@ -232,8 +233,11 @@ module.exports = class ProcessCustomers extends BaseJob {
                 await tx.run(UPDATE(BrazilDistributorDivision, {DistributorID:FASTDivision.DistributorID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
             }
             FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(BrazilDistributorDivision));
-            await tx.commit();
             console.log(`Upserting of Brazil divisions into FAST table successfully completed.`);
+            console.log(`Deleting processed Customers from BrazilCustomers table`);
+            const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            await tx.run(DELETE.from(BrazilCustomers).where ({REPRES: 'X'}));
+            await tx.commit();
             return true;
         } catch (error) {
             console.error(`ERROR: Upserting of Brazil division into FAST table failed`);
