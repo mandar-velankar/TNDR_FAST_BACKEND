@@ -94,12 +94,12 @@ module.exports = class ProcessCustomers extends BaseJob {
 
             let fastDistributor = {
                 CountryCode: "BR",
-                DistributorID: "",
+                DistributorID: null,
                 DistributorName: curr.RAZAO,
                 Address: `${curr.ENDERECO} ${curr.BAIRRO} ${curr.CEP} ${curr.CIDADE}`,
                 ContactNo: curr.TELEFONE,
                 Fax: curr.FAX,
-                ContactPerson:"",
+                ContactPerson: null,
                 ActiveRecord: (!curr.BLOQ && curr.STATUS === 'A') ? 'Yes' : 'No',
                 CONTACT_EMAIL: curr.EMAIL,
                 City: curr.CIDADE,
@@ -109,8 +109,8 @@ module.exports = class ProcessCustomers extends BaseJob {
                 CustomerID: curr.CODIGO,
                 Shortname: curr.FANTASIA,
                 CommissionRate: 0.0,
-                INCOTerms:"",
-                PaymentTerms:"",
+                INCOTerms: null,
+                PaymentTerms: null,
                 ForAllBrands: (numberOfDivisions > 2),
             };
 
@@ -154,7 +154,7 @@ module.exports = class ProcessCustomers extends BaseJob {
         const tx = this.db.tx();
         try {
             for (const FASTDistributor of FASTChangedDistributors) {
-                await tx.run(UPDATE(PT_TMDIST).with(FASTDistributor));
+                await tx.run(UPDATE(PT_TMDIST, {CountryCode:FASTDistributor.CountryCode, DistributorID:FASTDistributor.DistributorID}).with(FASTDistributor));
             }
             FASTNewDistributors && FASTNewDistributors.length > 0 && await tx.run(INSERT(FASTNewDistributors).into(PT_TMDIST));
             await tx.commit();
