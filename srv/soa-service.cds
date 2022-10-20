@@ -165,7 +165,7 @@ service SalesOpportunityService @(path: 'salesopportunity') @(requires:['f_tndr_
     };
 
 
-    entity ParticipatedPublicMarketOpportunities as select from CountrySpecificInformation countryInfo
+    entity ParticipatedPublicMarketOpportunities as select from CountrySpecificInformation as countryInfo
     left outer join PT_TMTEND as tndr 
         on countryInfo.TenderID = tndr.TenderID 
     left outer join PT_TMTNOFST as status 
