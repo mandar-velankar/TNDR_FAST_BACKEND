@@ -11,7 +11,7 @@ module.exports = class ProcessCustomers extends BaseJob {
     */
     //override
     async onTick() {
-        console.log('Processing Brazil customers ...');
+        console.log('JOB: Processing Brazil customers ...');
         try {
             this.db = await cds.connect.to('db');
 
@@ -23,12 +23,13 @@ module.exports = class ProcessCustomers extends BaseJob {
             // Process data
             await this.processDistributors(distributors);
 
+            console.log('JOB: Processing of Brazil customers successfully completed.');
+
         } catch (error) {
-            console.error(`ERROR: Processing of Brazil customers failed`);
+            console.error(`JOB ERROR: Processing of Brazil customers failed`);
             console.error(error);
             throw error;
         }
-        console.log('Processing of Brazil customers successfully completed.');
     }
 
 
@@ -62,31 +63,34 @@ module.exports = class ProcessCustomers extends BaseJob {
      */
     async processDistributors(distributors) {
         console.log(`Processing Brazil distrubutors ...`);
-        // Map the fields from SAP to FAST
-        const mappedDistributors = this.mapSAPDistributorsToFAST(distributors);
         try {
-            // 1. PT_TMDIST
+            // 1. Distributors - PT_TMDIST
+            // distributors list now contains the same distributor per division, we must not process the same distributor more than ones
+            const uniqueDistributors = Array.from(new Set(distributors.map(d => d.CODIGO)))
+                                    .map(codigo => {
+                                        return distributors.find(d => d.CODIGO === codigo)
+                                    });
+            const mappedDistributors = this.mapSAPDistributorsToFAST(uniqueDistributors);
             await this.upsertFASTDistributors(mappedDistributors);
-            // 2. BrazilDistributorDivision
-            // 3. delete records from SAP table
+
+            // 2. Divisions - BrazilDistributorDivision
+            const mappedDivisions = this.mapSAPDivisionsToFAST(distributors);
+            await this.upsertFASTDistributorDivision(mappedDivisions);
+
+            console.log(`Processing of Brazil distrubutors successfully completed.`);
+
         }catch (error) {
             console.error(`ERROR: Processing of Brazil distrubutors failed.`);
             console.error(error);
             throw error;
         }
-        
-    
-        // 2. BrazilDistributorDivision
-        // 1. Identify if Distributor already exists in BrazilDistributorDivision -> Condigo
-        // 2a. If yes, update BrazilDistributorDivision record with info from SAP Brazil
-        // 2b. If no, create new record in BrazilDistributorDivision with info from SAP Brazil
-        // 3. map fields from SAP to FAST
-
-
-        console.log(`Processing of Brazil distrubutors successfully completed.`);
-        return mappedDistributors;
     }
 
+    /**
+     * Maps Customer fields from SAP to FAST Distributors
+     * @param {*} distributors 
+     * @returns 
+     */
     mapSAPDistributorsToFAST(distributors) {
         console.log(`Mapping of Brazil distributors ...`);
         distributors = distributors.reduce((prev, curr, idx, distributors) => {
@@ -118,6 +122,30 @@ module.exports = class ProcessCustomers extends BaseJob {
             return prev;
         }, []);
         console.log(`Mapping of Brazil distributors finished.`);
+        return distributors;
+    }
+
+    /**
+     * Maps Customer fields from SAP to FAST BrazilDistributorDivision
+     * @param {*} distributors 
+     * @returns 
+     */
+     mapSAPDivisionsToFAST(distributors) {
+        console.log(`Mapping of Brazil divisions ...`);
+        distributors = distributors.reduce((prev, curr, idx, distributors) => {
+            let fastDivision = {
+                DistributorID: "",
+                DivisionCode: curr.SETOR_ATIV,
+                CustomerID: curr.CODIGO,
+                DivisionName: this.getDivisionName(curr.SETOR_ATIV),
+                CustomerGroup: curr.GRP_CLIENTE,
+                PriceList: curr.LISTA_PRC,
+                DistributorType: "Distributor",
+            };
+            prev.push(fastDivision);
+            return prev;
+        }, []);
+        console.log(`Mapping of Brazil divisions finished.`);
         return distributors;
     }
 
@@ -168,6 +196,53 @@ module.exports = class ProcessCustomers extends BaseJob {
         }
     }
 
+    
+    /**
+     * Creates or Updates divisions in FAST
+     * @param {*} divisions 
+     * @returns 
+     */
+     async upsertFASTDistributorDivision(divisions) {
+        const { BrazilDistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
+
+        // 1. get a list of existing Distributors from FAST
+        const distributorsExistingInFAST = await this.getFASTDistributors(divisions);
+        const divisionsExistingInFAST = await this.getFASTDivisions(divisions);
+
+        // 2. devide mapped Divisions into New or Changed divisions
+        const FASTNewDivisions = [];
+        const FASTChangedDivisions = [];
+        for (const division of divisions) {
+            let FASTDistributor = distributorsExistingInFAST.find(FASTDistributor => Number(FASTDistributor.CustomerID) === Number(division.CustomerID));
+            // copy over the DistributorID from existing distributor
+            division.DistributorID = FASTDistributor.DistributorID;
+            let FASTDivisionIdx = divisionsExistingInFAST.findIndex(FASTDivision => Number(FASTDivision.CustomerID) === Number(division.CustomerID));
+            if (FASTDivisionIdx > -1) {
+                FASTChangedDivisions.push(division);
+            } else {
+                FASTNewDivisions.push(division);
+            }
+        }
+
+        // 3. Upsert records into BrazilDistributorDivision
+        console.log(`Upserting Brazil divisions into FAST table ...`);
+        const tx = this.db.tx();
+        try {
+            for (const FASTDivision of FASTChangedDivisions) {
+                await tx.run(UPDATE(BrazilDistributorDivision, {DistributorID:FASTDivision.DistributorID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
+            }
+            FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(BrazilDistributorDivision));
+            await tx.commit();
+            console.log(`Upserting of Brazil divisions into FAST table successfully completed.`);
+            return true;
+        } catch (error) {
+            console.error(`ERROR: Upserting of Brazil division into FAST table failed`);
+            console.error(error);
+            await tx.rollback();
+            throw error;
+        }
+    }
+
     /**
      * Gets a list of existing Distributors from FAST where CustomerIDs (CODIGO) are equal.
      * @param {Array} distributors 
@@ -193,6 +268,36 @@ module.exports = class ProcessCustomers extends BaseJob {
         const result = await tx.run(SELECT.from(PT_TMDIST).where({ CustomerID: { in: customerIDs}, CountryCode: 'BR' } ));
         await tx.commit();
         console.log(`End fetching Brazil customers from FAST table`);
+        return result;
+    }
+
+    /**
+     * Gets a list of existing Divisions from FAST where CustomerIDs (CODIGO) are equal.
+     * @param {Array} divisions 
+     * @returns {Array<BrazilDistributorDivision>} a list of existing divisions
+     */
+     async getFASTDivisions(divisions) {
+        if(!divisions || divisions.length === 0){
+            console.log(`No Divisions were found in FAST`);
+            return [];
+        }
+        const tx = this.db.tx();
+        console.log(`Prepare fetching Brazil divisions from FAST table`);
+
+        // get all the CustomerIDs from divisions
+        let customerIDs = [];
+        let divisionCodes = [];
+        for (const division of divisions) {
+            customerIDs.push(division.CustomerID);
+            divisionCodes.push(division.DivisionCode);
+        }
+        console.log(`Start fetching Brazil divisions from FAST table`);
+
+        // get a list of divisions entities for given list of CustomerIDs
+        const { BrazilDistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const result = await tx.run(SELECT.from(BrazilDistributorDivision).where({ CustomerID: { in: customerIDs}, DivisionCode: { in: divisionCodes} } ));
+        await tx.commit();
+        console.log(`End fetching Brazil divisions from FAST table`);
         return result;
     }
     
