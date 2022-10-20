@@ -11,6 +11,7 @@ using {com.bayer.SXTENDER.AdminData} from './AdminData';
 //using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from './MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews';
+using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
 using {com.bayer.SXTENDER.BankGuaranteeData} from './BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from './PriceAgreementData';
 
@@ -473,7 +474,8 @@ entity PriceCondition: cuid, managed {
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
-                                                                                and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000' ;
+                                                                                and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
+    CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
 }
 
 entity DiscountCondition: cuid, managed {
