@@ -104,7 +104,7 @@ module.exports = class ProcessCustomers extends BaseJob {
                                         return institutes.find(d => d.CODIGO === codigo)
                                     });
             const mappedInstitutes = this.mapSAPInstitutesToFAST(uniqueInstitutes);
-            // await this.upsertFASTInstitutes(mappedInstitutes);
+            await this.upsertFASTInstitutes(mappedInstitutes);
 
             // 2. Divisions - BrazilInstituteDivision
             // const mappedDivisions = this.mapSAPDivisionsToFAST(institutes);
@@ -279,6 +279,51 @@ module.exports = class ProcessCustomers extends BaseJob {
         }
     }
 
+    /**
+     * Creates or Updates Institutes in FAST
+     * @param {*} institutes 
+     * @returns 
+     */
+     async upsertFASTInstitutes(institutes) {
+        const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        let nextInsituteID = await this.getNextValue(PT_TMINST, "InstituteID");
+
+        // 1. get a list of existing Institutes from FAST
+        const insitutesExistingInFAST = await this.getFASTInstitutes(institutes);
+        // 2. devide mappedDistributors into New or Changed institutes
+        const FASTNewInstitutes = [];
+        const FASTChangedInstitutes = [];
+        for (const institute of institutes) {
+            let FASTInstituteIdx = insitutesExistingInFAST.findIndex(FASTInstitute => Number(FASTInstitute.CustomerID) === Number(institute.CustomerID));
+            if (FASTInstituteIdx > -1) {
+                // copy over the DistributorID from existing distributor
+                institute.InstituteID = insitutesExistingInFAST[FASTInstituteIdx].InstituteID;
+                FASTChangedInstitutes.push(institute);
+            } else {
+                // generate new DistributorID
+                institute.InstituteID = nextInsituteID++;
+                FASTNewInstitutes.push(institute);
+            }
+        }
+        // 3. Upsert records into PT_TMDIST
+        console.log(`Upserting Brazil Institutes into FAST table ...`);
+        const tx = this.db.tx();
+        try {
+            for (const FASTInstitute of FASTChangedInstitutes) {
+                await tx.run(UPDATE(PT_TMINST, {CountryCode:FASTInstitute.CountryCode, InstituteID:FASTInstitute.InstituteID}).with(FASTInstitute));
+            }
+            FASTNewInstitutes && FASTNewInstitutes.length > 0 && await tx.run(INSERT(FASTNewInstitutes).into(PT_TMINST));
+            await tx.commit();
+            console.log(`Upserting of Brazil Institutes into FAST table successfully completed.`);
+            return true;
+        } catch (error) {
+            console.error(`ERROR: Upserting of Brazil Institutes into FAST table failed`);
+            console.error(error);
+            await tx.rollback();
+            throw error;
+        }
+    }
+
     
     /**
      * Creates or Updates divisions in FAST
@@ -355,6 +400,34 @@ module.exports = class ProcessCustomers extends BaseJob {
         const result = await tx.run(SELECT.from(PT_TMDIST).where({ CustomerID: { in: customerIDs}, CountryCode: 'BR' } ));
         await tx.commit();
         console.log(`End fetching Brazil customers from FAST table`);
+        return result;
+    }
+
+    /**
+     * Gets a list of existing Institutes from FAST where CustomerIDs (CODIGO) are equal.
+     * @param {Array} institutes 
+     * @returns {Array<PT_TMINST>} a list of existing institutes
+     */
+     async getFASTInstitutes(institutes) {
+        if(!institutes || institutes.length === 0){
+            console.log(`No Institutes were found in FAST`);
+            return [];
+        }
+        const tx = this.db.tx();
+        console.log(`Prepare fetching Brazil institutes from FAST table`);
+
+        // get all the CustomerIDs from distributors
+        let customerIDs = [];
+        for (const institute of institutes) {
+            customerIDs.push(institute.CustomerID);
+        }
+        console.log(`Start fetching Brazil institutes from FAST table`);
+
+        // get a list of distributors entities for given list of CustomerIDs
+        const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const result = await tx.run(SELECT.from(PT_TMINST).where({ CustomerID: { in: customerIDs}, CountryCode: 'BR' } ));
+        await tx.commit();
+        console.log(`End fetching Brazil institutes from FAST table`);
         return result;
     }
 
