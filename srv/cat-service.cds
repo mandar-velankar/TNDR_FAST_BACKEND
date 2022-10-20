@@ -42,6 +42,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity MASTER_COUNTRY_STATUS                        as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity MASTER_COUNTRY_OUTCOMES                      as projection on MasterData.MASTER_COUNTRY_OUTCOMES;
     entity CountryApprovers                             as projection on MasterData.CountryApprovers;
+    entity AccountPreApprovedPrices                     as projection on MasterData.AccountPreApprovedPrices;
     entity ApproverTypes                                as projection on MasterData.ApproverTypes;
     entity PT_TMCOGS                                    as projection on MasterData.PT_TMCOGS;
     entity PT_TMCTLE                                    as projection on MasterData.PT_TMCTLE;
@@ -75,6 +76,15 @@ service CatalogService @(path : 'tender')@(requires : [
     entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
     entity Settlements                                  as projection on MasterData.Settlements;
     entity RoyalDecreePercentage                        as projection on MasterData.RoyalDecree;
+    //Brazil
+    entity Lots                                         as projection on TransactionalData.Lots;
+    entity LotProducts                                  as projection on TransactionalData.LotProduct;
+    entity BrazilCap                                    as projection on MasterData.BrazilCap;
+    entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
+    entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
+    entity BrazilInstituteDivision                      as projection on MasterData.BrazilInstituteDivision;
+    entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
+
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -377,6 +387,7 @@ service CatalogService @(path : 'tender')@(requires : [
             FINAL_DISCOUNT_IN_WORDS                     : String(255);
             PRODUCT_FULL_DESCRIPTION                    : String(255);
             //end of missing SKU & SKUCountry fields
+        key LOTID                                       : Integer default 1;
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;

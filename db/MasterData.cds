@@ -82,6 +82,7 @@ entity PT_TMINST{
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
 	Region:Association to CountryRegions on Region.ID = RegionID;
     Province: Association to CountryProvinces on Province.ID = ProvinceID;
+	InstituteDivision: Association to many BrazilInstituteDivision on InstituteDivision.InstituteID = InstituteID;
 }
 
 //Institute Hierarchy Level
@@ -103,10 +104,17 @@ entity PT_TMDIST{
 	ContactPerson:String(500);
 	ActiveRecord:String(10);
 	CONTACT_EMAIL:String(100);
+	City: String;
+	State: String;
+	TaxCode: String;
+	CNPJ: String;
+	Shortname: String;
+	ForallBrands: String;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Distributor = $self;
+	DistributorDivision: Association to many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID;
 }
 
 //Product Pack
@@ -722,4 +730,38 @@ entity MasterPrices: cuid, managed {
 entity Settlements {
 	key ID: String(10);
 	Description: localized String(50);
+}
+
+entity BrazilCap: cuid, managed {
+    CAP: Decimal;
+    ValidFrom: Timestamp;
+	ValidTo: Timestamp;
+}
+
+entity BrazilMasterPrices: cuid, managed {
+	CustomerID	: Integer;
+	ProductID 	: Integer;
+	ValidFrom   : Date;
+    ValidTo     : Date;
+	Type		: String(6) enum {ZWP0; ZWD4; IBRX};
+	Value		: Double;
+	Currency	: String(3);
+	UOM			: String;
+}
+
+entity BrazilDistributorDivision: managed {
+	key DistributorID: Integer; 
+	key DivisionCode: String(50);
+	DivisionName: String(50);
+	CustomerGroup: String(3);
+	PriceList: String(2);
+	DistributorType: String(50);
+}
+
+entity BrazilInstituteDivision: managed {
+	key InstituteID: Integer; 
+	key DivisionCode: String(50);
+	DivisionName: String(50);
+	CustomerGroup: String(3);
+	PriceList: String(2);
 }

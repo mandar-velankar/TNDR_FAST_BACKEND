@@ -20,7 +20,8 @@ service ContractService @(path: 'ctr') @(requires:['f_tndr_cag_admin','f_tndr_ca
     };
     entity PenaltyReasons as projection on MasterData.PT_TMPNLTYRS;
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
-
+    //EHQUT-192851-Add OTC customer group for "Contract Management" app
+    entity CountryChannels as projection on MasterData.MASTER_COUNTRY_CHANNELS ;
     entity Products as select from ContractsAppData.Products {
         *,
         /*sum(

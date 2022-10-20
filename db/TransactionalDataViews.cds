@@ -469,7 +469,7 @@ where tender.Active = 1
 and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1;
 
-
+//EHQUT-189207-Creation Date instead of BidDueDate on main page
 entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRY,
     key tender.TenderID as TENDER_ID,
@@ -482,6 +482,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.Offer.Currency as CURRENCY,
     ifnull(tender.Offer.OfferStatus.STATUS, 'Offer Created') as STATUS:String(255),
     tender.PublicationDate as PUBLICATION_DATE,
+    tender.SubmittedOn as CREATION_DATE, 
     tender.Offer.InternalBidDueDate as INTERNAL_BID_DUE_DATE,
     case when tender.Offer.RevisedOfferNo = 0 and tender.Offer.ContinuationOfferNo = 0 then tender.BidDueDate else tender.Offer.NewOfferDueDate end as CLOSING_DATE:Date,
     ifnull(tender.Offer.ActiveOffer, 1) as ACTIVE_OFFER:Integer,
@@ -543,6 +544,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.ProductCode,
     key offerProduct.OfferID as OFFERID,
     key offerProduct.SKU.PRODUCTPACKID as PRODUCTID,
+    key offerProduct.LotID as LOTID,
     offerProduct.OfferType as OfferType,
     case offerProduct.AlternateOfferYN
         when 'Alternative to quoted products' then '**'
@@ -911,16 +913,19 @@ left outer join TransactionalData.ProductPricing as productPricing
     and product.ProductCode = productPricing.ProductCode
     and product.OfferID = productPricing.OfferID
     and product.Active = 1
+    and product.LotID = productPricing.LotID
 left outer join MasterDataViews.MostRecentConsumerPricesView as consumerPrices 
     on product.ProductCode = consumerPrices.ProductPackId
     and product.CountryCode = consumerPrices.CountryCode
 left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR 
     on product.CountryCode = PT_TMBDPR.CountryCode
     and product.ProductCode = PT_TMBDPR.ProductCode
-    and product.OfferID = PT_TMBDPR.OfferID {
+    and product.OfferID = PT_TMBDPR.OfferID
+    and product.LotID = PT_TMBDPR.LotID {
     key offer.OfferID,
     key product.ProductCode,
     key product.CountryCode,
+    key product.LotID,
     product.SKU.PRODUCTPACKNAME as ProductPackName,
     product.SKU.PACKFACTOR,
     product.RequestedVolume,
@@ -1413,3 +1418,211 @@ group by tender.TenderID,
     priceCondition.PriceConditionCode,
     priceCondition.Discount,    
     product.Results.Outcome;
+
+    /**
+ * This view contains Brazil PriceCondition ZWP0 price fields used in the PriceConditionBrazilView
+ */
+entity PriceConditionPriceListView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID
+left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices 
+    on product.ProductCode = masterPrices.ProductID
+    and institute.CustomerID = masterPrices.CustomerID
+    and masterPrices.Type = 'ZWP0'
+    {
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    key institute.InstituteID,
+    key institute.CustomerID,
+    masterPrices.Value as masterPriceList,
+    masterPrices.Currency as masterPriceCurrency,
+    masterPrices.UOM as UoM,
+    }where tender.Active = 1 and tender.CountryCode = 'BR'
+    group by product.TenderID,
+    offer.OfferID,
+    product.ProductCode,
+    institute.InstituteID,
+    institute.CustomerID,
+    masterPrices.Value,
+    masterPrices.Currency,
+    masterPrices.UOM;
+
+    /**
+ * This view contains Brazil PriceCondition ZWD4 price fields used in the PriceConditionBrazilView
+ */
+entity PriceConditionStandardDiscountView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID
+left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices 
+    on product.ProductCode = masterPrices.ProductID
+    and institute.CustomerID = masterPrices.CustomerID
+    and masterPrices.Type = 'ZWD4'
+    {
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    key institute.InstituteID,
+    key institute.CustomerID,
+    masterPrices.Value as masterStandardDiscount
+    }where tender.Active = 1 and tender.CountryCode = 'BR'
+    group by product.TenderID,
+    offer.OfferID,
+    product.ProductCode,
+    institute.InstituteID,
+    institute.CustomerID,
+    masterPrices.Value;
+
+
+    /**
+ * This view contains Brazil PriceCondition IBRX price fields used in the PriceConditionBrazilView
+ */
+entity PriceConditionICMSTaxesView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID
+left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices 
+    on product.ProductCode = masterPrices.ProductID
+    and institute.CustomerID = masterPrices.CustomerID
+    and masterPrices.Type = 'IBRX'
+    {
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    key institute.InstituteID,
+    key institute.CustomerID,
+    masterPrices.Value as masterICMSTaxes
+    }where tender.Active = 1 and tender.CountryCode = 'BR'
+    group by product.TenderID,
+    offer.OfferID,
+    product.ProductCode,
+    institute.InstituteID,
+    institute.CustomerID,
+    masterPrices.Value;
+
+
+    /**
+ * This view contains calculated fields used on the Brazil financial offers page
+ */
+entity PriceConditionBrazilView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID 
+inner join TransactionalDataViews.PriceConditionPriceListView as masterPriceListPriceCondition
+    on masterPriceListPriceCondition.TenderID = product.TenderID
+    and masterPriceListPriceCondition.OfferID = product.OfferID
+    and masterPriceListPriceCondition.ProductCode = product.ProductCode 
+    and masterPriceListPriceCondition.InstituteID = tender.InstituteID
+    and masterPriceListPriceCondition.CustomerID = institute.CustomerID
+inner join TransactionalDataViews.PriceConditionStandardDiscountView as masterStandardDiscountPriceCondition
+    on masterStandardDiscountPriceCondition.TenderID = product.TenderID
+    and masterStandardDiscountPriceCondition.OfferID = product.OfferID
+    and masterStandardDiscountPriceCondition.ProductCode = product.ProductCode 
+    and masterStandardDiscountPriceCondition.InstituteID = tender.InstituteID
+    and masterStandardDiscountPriceCondition.CustomerID = institute.CustomerID
+inner join TransactionalDataViews.PriceConditionICMSTaxesView as masterICMSTaxesPriceCondition
+    on masterICMSTaxesPriceCondition.TenderID = product.TenderID
+    and masterICMSTaxesPriceCondition.OfferID = product.OfferID
+    and masterICMSTaxesPriceCondition.ProductCode = product.ProductCode 
+    and masterICMSTaxesPriceCondition.InstituteID = tender.InstituteID
+    and masterICMSTaxesPriceCondition.CustomerID = institute.CustomerID    
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
+    {
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    priceCondition.ID as ExistingPriceConditionID: UUID,
+    priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
+    tender.CountryCode,
+    key priceConditionClassification.ConditionType,
+    priceConditionClassification.Classification,
+    priceConditionClassification.Division,
+    priceConditionClassification.isMain,
+    priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
+    masterPriceListPriceCondition.masterPriceList,
+    masterStandardDiscountPriceCondition.masterStandardDiscount,
+    masterICMSTaxesPriceCondition.masterICMSTaxes,
+    masterPriceListPriceCondition.masterPriceCurrency,
+    masterPriceListPriceCondition.UoM,
+    case 
+        when priceCondition.PriceList is null
+            then masterPriceListPriceCondition.masterPriceList
+        else
+            priceCondition.PriceList
+    end as PriceList:Decimal,
+    case 
+        when priceCondition.StandardDiscount is null
+            then masterStandardDiscountPriceCondition.masterStandardDiscount
+        else
+            priceCondition.StandardDiscount
+    end as StandardDiscount:Decimal,
+    case 
+        when priceCondition.ICMSTax is null
+            then masterICMSTaxesPriceCondition.masterICMSTaxes
+        else
+            priceCondition.ICMSTax
+    end as ICMSTax:Decimal,
+    priceCondition.TaxExemption,
+    priceCondition.PriceAfterTaxExemtion, //calculated in UI based on User Input
+    priceCondition.CAP,
+    priceCondition.PriceAfterCap, //calculated in UI based on User Input
+    priceCondition.CommercialProposal,  //User Input field for Commercial Proposal PriceCondition, calculated field in UI for Discount PriceCondition
+    priceCondition.ReferencePriceAgreement,
+    }where tender.Active = 1 and tender.CountryCode = 'BR';

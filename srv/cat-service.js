@@ -28,7 +28,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -1566,6 +1566,7 @@ module.exports = (srv) => {
 				FINAL_DISCOUNT: finalDiscount,
 				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
+                LOTID: offerProduct.LOTID,
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials,
@@ -2636,6 +2637,24 @@ module.exports = (srv) => {
 		}
 		return results;
 	});
+    //EHQUT-167489-Auto Approval in Thailand
+    srv.on('READ', 'AccountPreApprovedPrices', async (req) => {
+        
+        const tx = cds.tx(req);
+      var instituteIds = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
+      var whereCountry = ServiceHelper.getWhereValue(req, "COUNTRY_CODE");
+            
+        const wherePrices = {
+            INSTITUTE_ID: instituteIds,
+            COUNTRY_CODE: whereCountry 
+           
+        };
+        let results = await tx.run(SELECT.from(AccountPreApprovedPrices).where(wherePrices));
+         
+        
+       
+        return results;
+    });
 
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
 		// const tx = cds.transaction(req)
