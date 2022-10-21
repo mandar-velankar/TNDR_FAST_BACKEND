@@ -5,30 +5,41 @@ module.exports = class ProcessCustomers extends BaseJob {
 
     constructor(jobName, jobTime) {
         super(jobName, jobTime);
+        this.jobName = jobName.toUpperCase();
     }
+
     /**
     * Triggered when job has started
     */
     //override
     async onTick() {
-        console.log('JOB: Processing Brazil customers ...');
+        console.log(`JOB (${this.jobName }): Processing Brazil customers ...`);
+        const start = new Date().getTime();
         try {
             this.db = await cds.connect.to('db');
+            const tx = this.db.tx();
 
             // Fetch data
-            const allSAPCustomers = await this.getSAPCustomers();
+            const allSAPCustomers = await this.getSAPCustomers(tx);
             const distributors = allSAPCustomers.filter(cust => cust.REPRES === 'X');
             const institutes = allSAPCustomers.filter(cust => cust.REPRES !== 'X');
 
             // Process data
-            await this.processDistributors(distributors);
-            await this.processInstitutes(institutes);
+            await this.processDistributors(distributors, tx);
+            await this.processInstitutes(institutes, tx);
 
-            console.log('JOB: Processing of Brazil customers successfully completed.');
+            // Commit All
+            await tx.commit();
+            console.log(`JOB (${this.jobName }): Processing of Brazil customers successfully completed.`);
+            const end = new Date().getTime();
+            const time = end - start;
+            console.log(`JOB (${this.jobName }): SUCCESS --> Execution time: ${time}ms`);
 
         } catch (error) {
-            console.error(`JOB ERROR: Processing of Brazil customers failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Processing of Brazil customers failed.`);
             console.error(error);
+            // Rollback All
+            await tx.rollback();
             throw error;
         }
     }
@@ -38,19 +49,16 @@ module.exports = class ProcessCustomers extends BaseJob {
      * This method fetches all the customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS
      * @returns - A list of Customers
      */
-    async getSAPCustomers() {
-        const tx = this.db.tx();
+    async getSAPCustomers(tx) {
         try {
-            console.log(`Fetching Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS ...`);
+            console.log(`JOB (${this.jobName }): Fetching Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS ...`);
             const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const result = await tx.run(SELECT.from(BrazilCustomers));
-            await tx.commit();
-            console.log(`Fetching of Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS successfully completed`);
+            console.log(`JOB (${this.jobName }): Fetching of Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS successfully completed`);
             return result;
         }catch (error) {
-            console.error(`ERROR: Fetching of Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of Brazil customers from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS failed`);
             console.error(error);
-            await tx.rollback();
             throw error;
         }
     }
@@ -62,8 +70,8 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {*} distributors 
      * @returns 
      */
-    async processDistributors(distributors) {
-        console.log(`Processing Brazil distrubutors ...`);
+    async processDistributors(distributors, tx) {
+        console.log(`JOB (${this.jobName }): Processing Brazil distrubutors ...`);
         try {
             // 1. Distributors - PT_TMDIST
             // distributors list now contains the same distributor per division, we must not process the same distributor more than ones
@@ -72,16 +80,16 @@ module.exports = class ProcessCustomers extends BaseJob {
                                         return distributors.find(d => d.CODIGO === codigo)
                                     });
             const mappedDistributors = this.mapSAPDistributorsToFAST(uniqueDistributors);
-            await this.upsertFASTDistributors(mappedDistributors);
+            await this.upsertFASTDistributors(mappedDistributors, tx);
 
             // 2. Divisions - BrazilDistributorDivision
             const mappedDivisions = this.mapSAPDivisionsToFAST(distributors, "distributor");
-            await this.upsertFASTDistributorDivision(mappedDivisions);
+            await this.upsertFASTDistributorDivision(mappedDivisions, tx);
 
-            console.log(`Processing of Brazil distrubutors successfully completed.`);
+            console.log(`JOB (${this.jobName }): Processing of Brazil distrubutors successfully completed.`);
 
         }catch (error) {
-            console.error(`ERROR: Processing of Brazil distrubutors failed.`);
+            console.error(`JOB (${this.jobName }): ERROR - Processing of Brazil distrubutors failed.`);
             console.error(error);
             throw error;
         }
@@ -94,8 +102,8 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {*} institutes 
      * @returns 
      */
-      async processInstitutes(institutes) {
-        console.log(`Processing Brazil institutes ...`);
+      async processInstitutes(institutes, tx) {
+        console.log(`JOB (${this.jobName }): Processing Brazil institutes ...`);
         try {
             // 1. Institutes - PT_TMINST
             // Institutes list now contains the same institute per division, we must not process the same institute more than ones
@@ -104,16 +112,16 @@ module.exports = class ProcessCustomers extends BaseJob {
                                         return institutes.find(d => d.CODIGO === codigo)
                                     });
             const mappedInstitutes = this.mapSAPInstitutesToFAST(uniqueInstitutes);
-            await this.upsertFASTInstitutes(mappedInstitutes);
+            await this.upsertFASTInstitutes(mappedInstitutes, tx);
 
             // 2. Divisions - BrazilInstituteDivision
             const mappedDivisions = this.mapSAPDivisionsToFAST(institutes, "institute");
-            await this.upsertFASTInstituteDivision(mappedDivisions);
+            await this.upsertFASTInstituteDivision(mappedDivisions, tx);
 
-            console.log(`Processing of Brazil institutes successfully completed.`);
+            console.log(`JOB (${this.jobName }): Processing of Brazil institutes successfully completed.`);
 
         }catch (error) {
-            console.error(`ERROR: Processing of Brazil institutes failed.`);
+            console.error(`JOB (${this.jobName }): ERROR - Processing of Brazil institutes failed.`);
             console.error(error);
             throw error;
         }
@@ -125,7 +133,7 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @returns 
      */
     mapSAPDistributorsToFAST(distributors) {
-        console.log(`Mapping of Brazil distributors ...`);
+        console.log(`JOB (${this.jobName }): Mapping of Brazil distributors ...`);
         distributors = distributors.reduce((prev, curr, idx, distributors) => {
             const numberOfDivisions = (distributors.filter(distr => distr.CODIGO ===  curr.CODIGO)).length;
 
@@ -154,7 +162,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             prev.push(fastDistributor);
             return prev;
         }, []);
-        console.log(`Mapping of Brazil distributors finished.`);
+        console.log(`JOB (${this.jobName }): Mapping of Brazil distributors finished.`);
         return distributors;
     }
 
@@ -164,7 +172,7 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @returns 
      */
      mapSAPInstitutesToFAST(institutes) {
-        console.log(`Mapping of Brazil institutes ...`);
+        console.log(`JOB (${this.jobName }): Mapping of Brazil institutes ...`);
         institutes = institutes.reduce((prev, curr, idx, institutes) => {
             const numberOfDivisions = (institutes.filter(distr => distr.CODIGO ===  curr.CODIGO)).length;
 
@@ -204,7 +212,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             prev.push(fastInstitute);
             return prev;
         }, []);
-        console.log(`Mapping of Brazil institutes finished.`);
+        console.log(`JOB (${this.jobName }): Mapping of Brazil institutes finished.`);
         return institutes;
     }
 
@@ -216,7 +224,7 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @returns {array}
      */
      mapSAPDivisionsToFAST(divisions, type) {
-        console.log(`Mapping of Brazil divisions ...`);
+        console.log(`JOB (${this.jobName }): Mapping of Brazil divisions ...`);
         divisions = divisions.reduce((prev, curr, idx, divisions) => {
             let fastDivision = {
                 DivisionCode: curr.SETOR_ATIV,
@@ -235,7 +243,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             prev.push(fastDivision);
             return prev;
         }, []);
-        console.log(`Mapping of Brazil divisions finished.`);
+        console.log(`JOB (${this.jobName }): Mapping of Brazil divisions finished.`);
         return divisions;
     }
 
@@ -245,12 +253,12 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {*} distributors 
      * @returns 
      */
-    async upsertFASTDistributors(distributors) {
+    async upsertFASTDistributors(distributors, tx) {
         const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        let nextDistributorID = await this.getNextValue(PT_TMDIST, "DistributorID");
+        let nextDistributorID = await this.getNextValue(PT_TMDIST, "DistributorID", tx);
 
         // 1. get a list of existing Distributors from FAST
-        const distributorsExistingInFAST = await this.getFASTDistributors(distributors);
+        const distributorsExistingInFAST = await this.getFASTDistributors(distributors, tx);
         // 2. devide mappedDistributors into New or Changed distributors
         const FASTNewDistributors = [];
         const FASTChangedDistributors = [];
@@ -268,20 +276,17 @@ module.exports = class ProcessCustomers extends BaseJob {
         }
         // 3. Upsert records into PT_TMDIST
         //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
-        console.log(`Upserting Brazil customers into FAST table ...`);
-        const tx = this.db.tx();
+        console.log(`JOB (${this.jobName }): Upserting Brazil customers into FAST table ...`);
         try {
             for (const FASTDistributor of FASTChangedDistributors) {
                 await tx.run(UPDATE(PT_TMDIST, {CountryCode:FASTDistributor.CountryCode, DistributorID:FASTDistributor.DistributorID}).with(FASTDistributor));
             }
             FASTNewDistributors && FASTNewDistributors.length > 0 && await tx.run(INSERT(FASTNewDistributors).into(PT_TMDIST));
-            await tx.commit();
-            console.log(`Upserting of Brazil customers into FAST table successfully completed.`);
+            console.log(`JOB (${this.jobName }): Upserting of Brazil customers into FAST table successfully completed.`);
             return true;
         } catch (error) {
-            console.error(`ERROR: Upserting of Brazil customers into FAST table failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Upserting of Brazil customers into FAST table failed`);
             console.error(error);
-            await tx.rollback();
             throw error;
         }
     }
@@ -291,12 +296,12 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {*} institutes 
      * @returns 
      */
-     async upsertFASTInstitutes(institutes) {
+     async upsertFASTInstitutes(institutes, tx) {
         const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        let nextInsituteID = await this.getNextValue(PT_TMINST, "InstituteID");
+        let nextInsituteID = await this.getNextValue(PT_TMINST, "InstituteID", tx);
 
         // 1. get a list of existing Institutes from FAST
-        const insitutesExistingInFAST = await this.getFASTInstitutes(institutes);
+        const insitutesExistingInFAST = await this.getFASTInstitutes(institutes, tx);
         // 2. devide mappedDistributors into New or Changed institutes
         const FASTNewInstitutes = [];
         const FASTChangedInstitutes = [];
@@ -313,20 +318,17 @@ module.exports = class ProcessCustomers extends BaseJob {
             }
         }
         // 3. Upsert records into PT_TMDIST
-        console.log(`Upserting Brazil Institutes into FAST table ...`);
-        const tx = this.db.tx();
+        console.log(`JOB (${this.jobName }): Upserting Brazil Institutes into FAST table ...`);
         try {
             for (const FASTInstitute of FASTChangedInstitutes) {
                 await tx.run(UPDATE(PT_TMINST, {CountryCode:FASTInstitute.CountryCode, InstituteID:FASTInstitute.InstituteID}).with(FASTInstitute));
             }
             FASTNewInstitutes && FASTNewInstitutes.length > 0 && await tx.run(INSERT(FASTNewInstitutes).into(PT_TMINST));
-            await tx.commit();
-            console.log(`Upserting of Brazil Institutes into FAST table successfully completed.`);
+            console.log(`JOB (${this.jobName }): Upserting of Brazil Institutes into FAST table successfully completed.`);
             return true;
         } catch (error) {
-            console.error(`ERROR: Upserting of Brazil Institutes into FAST table failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Upserting of Brazil Institutes into FAST table failed`);
             console.error(error);
-            await tx.rollback();
             throw error;
         }
     }
@@ -338,12 +340,12 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {*} divisions 
      * @returns 
      */
-     async upsertFASTDistributorDivision(divisions) {
+     async upsertFASTDistributorDivision(divisions, tx) {
         const { BrazilDistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
         // 1. get a list of existing Distributors from FAST
-        const distributorsExistingInFAST = await this.getFASTDistributors(divisions);
-        const divisionsExistingInFAST = await this.getFASTDivisions(divisions, "distributor");
+        const distributorsExistingInFAST = await this.getFASTDistributors(divisions, tx);
+        const divisionsExistingInFAST = await this.getFASTDivisions(divisions, "distributor", tx);
 
         // 2. devide mapped Divisions into New or Changed divisions
         const FASTNewDivisions = [];
@@ -361,23 +363,20 @@ module.exports = class ProcessCustomers extends BaseJob {
         }
 
         // 3. Upsert records into BrazilDistributorDivision
-        console.log(`Upserting BrazilDistributorDivisions into FAST table ...`);
-        const tx = this.db.tx();
+        console.log(`JOB (${this.jobName }): Upserting BrazilDistributorDivisions into FAST table ...`);
         try {
             for (const FASTDivision of FASTChangedDivisions) {
                 await tx.run(UPDATE(BrazilDistributorDivision, {DistributorID:FASTDivision.DistributorID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
             }
             FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(BrazilDistributorDivision));
-            console.log(`Upserting of BrazilDistributorDivisions into FAST table successfully completed.`);
-            console.log(`Deleting processed Customers from BrazilCustomers table`);
+            console.log(`JOB (${this.jobName }): Upserting of BrazilDistributorDivisions into FAST table successfully completed.`);
+            console.log(`JOB (${this.jobName }): Deleting processed Customers from BrazilCustomers table`);
             const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             await tx.run(DELETE.from(BrazilCustomers).where ({REPRES: 'X'}));
-            await tx.commit();
             return true;
         } catch (error) {
-            console.error(`ERROR: Upserting of BrazilDistributorDivisions into FAST table failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Upserting of BrazilDistributorDivisions into FAST table failed`);
             console.error(error);
-            await tx.rollback();
             throw error;
         }
     }
@@ -389,12 +388,12 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {*} divisions 
      * @returns 
      */
-     async upsertFASTInstituteDivision(divisions) {
+     async upsertFASTInstituteDivision(divisions, tx) {
         const { BrazilInstituteDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
         // 1. get a list of existing Institutes from FAST
-        const institutesExistingInFAST = await this.getFASTInstitutes(divisions);
-        const divisionsExistingInFAST = await this.getFASTDivisions(divisions, "insitute");
+        const institutesExistingInFAST = await this.getFASTInstitutes(divisions, tx);
+        const divisionsExistingInFAST = await this.getFASTDivisions(divisions, "insitute", tx);
 
         // 2. devide mapped Divisions into New or Changed divisions
         const FASTNewDivisions = [];
@@ -412,23 +411,20 @@ module.exports = class ProcessCustomers extends BaseJob {
         }
 
         // 3. Upsert records into BrazilInstituteDivision
-        console.log(`Upserting BrazilInstituteDivisions into FAST table ...`);
-        const tx = this.db.tx();
+        console.log(`JOB (${this.jobName }): Upserting BrazilInstituteDivisions into FAST table ...`);
         try {
             for (const FASTDivision of FASTChangedDivisions) {
                 await tx.run(UPDATE(BrazilInstituteDivision, {InstituteID:FASTDivision.InstituteID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
             }
             FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(BrazilInstituteDivision));
-            console.log(`Upserting of BrazilInstituteDivisions into FAST table successfully completed.`);
-            console.log(`Deleting processed Customers from BrazilCustomers table`);
+            console.log(`JOB (${this.jobName }): Upserting of BrazilInstituteDivisions into FAST table successfully completed.`);
+            console.log(`JOB (${this.jobName }): Deleting processed Customers from BrazilCustomers table`);
             const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             await tx.run(DELETE.from(BrazilCustomers).where ({REPRES: null}));
-            await tx.commit();
             return true;
         } catch (error) {
-            console.error(`ERROR: Upserting of BrazilInstituteDivisions into FAST table failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Upserting of BrazilInstituteDivisions into FAST table failed`);
             console.error(error);
-            await tx.rollback();
             throw error;
         }
     }
@@ -438,26 +434,24 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {Array} distributors 
      * @returns {Array<PT_TMDIST>} a list of existing distributors
      */
-    async getFASTDistributors(distributors) {
+    async getFASTDistributors(distributors, tx) {
         if(!distributors || distributors.length === 0){
-            console.log(`No Distributors were found in FAST`);
+            console.log(`JOB (${this.jobName }): No Distributors were found in FAST`);
             return [];
         }
-        const tx = this.db.tx();
-        console.log(`Prepare fetching Brazil customers from FAST table`);
+        console.log(`JOB (${this.jobName }): Prepare fetching Brazil customers from FAST table`);
 
         // get all the CustomerIDs from distributors
         let customerIDs = [];
         for (const distributor of distributors) {
             customerIDs.push(distributor.CustomerID);
         }
-        console.log(`Start fetching Brazil customers from FAST table`);
+        console.log(`JOB (${this.jobName }): Start fetching Brazil customers from FAST table`);
 
         // get a list of distributors entities for given list of CustomerIDs
         const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const result = await tx.run(SELECT.from(PT_TMDIST).where({ CustomerID: { in: customerIDs}, CountryCode: 'BR' } ));
-        await tx.commit();
-        console.log(`End fetching Brazil customers from FAST table`);
+        console.log(`JOB (${this.jobName }): End fetching Brazil customers from FAST table`);
         return result;
     }
 
@@ -466,26 +460,24 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {Array} institutes 
      * @returns {Array<PT_TMINST>} a list of existing institutes
      */
-     async getFASTInstitutes(institutes) {
+     async getFASTInstitutes(institutes, tx) {
         if(!institutes || institutes.length === 0){
-            console.log(`No Institutes were found in FAST`);
+            console.log(`JOB (${this.jobName }): No Institutes were found in FAST`);
             return [];
         }
-        const tx = this.db.tx();
-        console.log(`Prepare fetching Brazil institutes from FAST table`);
+        console.log(`JOB (${this.jobName }): Prepare fetching Brazil institutes from FAST table`);
 
         // get all the CustomerIDs from distributors
         let customerIDs = [];
         for (const institute of institutes) {
             customerIDs.push(institute.CustomerID);
         }
-        console.log(`Start fetching Brazil institutes from FAST table`);
+        console.log(`JOB (${this.jobName }): Start fetching Brazil institutes from FAST table`);
 
         // get a list of distributors entities for given list of CustomerIDs
         const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const result = await tx.run(SELECT.from(PT_TMINST).where({ CustomerID: { in: customerIDs}, CountryCode: 'BR' } ));
-        await tx.commit();
-        console.log(`End fetching Brazil institutes from FAST table`);
+        console.log(`JOB (${this.jobName }): End fetching Brazil institutes from FAST table`);
         return result;
     }
 
@@ -494,14 +486,13 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {array} divisions 
      * @returns {array} a list of existing divisions
      */
-     async getFASTDivisions(divisions, type) {
+     async getFASTDivisions(divisions, type, tx) {
         if(!divisions || divisions.length === 0){
-            console.log(`No Divisions were found in FAST`);
+            console.log(`JOB (${this.jobName }): No Divisions were found in FAST`);
             return [];
         }
 
-        const tx = this.db.tx();
-        console.log(`Prepare fetching Brazil divisions from FAST table`);
+        console.log(`JOB (${this.jobName }): Prepare fetching Brazil divisions from FAST table`);
 
         // get all the CustomerIDs from divisions
         let customerIDs = [];
@@ -510,7 +501,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             customerIDs.push(division.CustomerID);
             divisionCodes.push(division.DivisionCode);
         }
-        console.log(`Start fetching Brazil divisions from FAST table`);
+        console.log(`JOB (${this.jobName }): Start fetching Brazil divisions from FAST table`);
 
         // get a list of divisions entities for given list of CustomerIDs
         let result = "";
@@ -520,8 +511,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             result = await this.getFASTInsituteDivisions(customerIDs, divisionCodes, tx);
         }
 
-        await tx.commit();
-        console.log(`End fetching Brazil divisions from FAST table`);
+        console.log(`JOB (${this.jobName }): End fetching Brazil divisions from FAST table`);
         return result;
     }
 
@@ -541,18 +531,16 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @param {*} fieldname 
      * @returns - next highest value
      */
-    async getNextValue (table, fieldname){
-        const tx = this.db.tx();
+    async getNextValue (table, fieldname, tx){
         let nextValue = 1;
         try {
             let results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
             if (results[0].max) {
                 nextValue = results[0].max + 1
             }
-            await tx.commit();
             return nextValue;
         }catch (error) {
-            console.error(`ERROR: Fetching next highest value for ${fieldname} from ${table.name} failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching next highest value for ${fieldname} from ${table.name} failed`);
             console.error(error);
             throw error;
         }
