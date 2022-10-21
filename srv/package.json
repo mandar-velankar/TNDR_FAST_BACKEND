@@ -38,7 +38,7 @@
         "node": "^14"
     },
     "scripts": {
-        "start": "node ./index.js",
+        "start": "cds -v && node ./index.js",
         "watch": "nodemon -w . -i node_modules/**,.git/** -e cds -x npm run build"
     },
     "private": true,
