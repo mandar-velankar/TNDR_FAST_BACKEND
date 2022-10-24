@@ -4,6 +4,7 @@ const PriceAgreementMailJob = require("./PriceAgreementMailJob");
 const PriceAgreementPriceConditionNotificationMailJob = require("./PriceAgreementPriceConditionNotificationMailJob");
 const ExtendPriceAgreements = require("./PriceAgreementJobs");
 const ProcessMasterDataPrices = require("./brasil/ProcessMasterDataPrices");
+const ProcessBrazilCustomers = require("./brasil/ProcessCustomers");
 
 module.exports = class JobFactory {
     static create(jobName, jobTime) {
@@ -32,6 +33,9 @@ module.exports = class JobFactory {
             case this.jobNames.ProcessMasterDataPrices:
                 return new ProcessMasterDataPrices(jobName,jobTime)
                 break;
+            case this.jobNames.ProcessBrazilCustomers:
+                return new ProcessBrazilCustomers(jobName,jobTime);
+                break;
             default:
                 throw new Error('Job type not supported');
                 break;
@@ -41,12 +45,13 @@ module.exports = class JobFactory {
         return {
             ProcessMaterialsJob: "ProcessMaterialsJob",
             ProcessCustomersJob: "ProcessCustomersJob",
-            ProcessMaterialsBrazilJob: "ProcessMaterialsBrazilJob",
-            ProcessCustomersBrazilJob: "ProcessCustomersBrazilJob",
+            ProcessMaterialsBrazilJob: "ProcessMaterialsBrazilJob", // TODO: are these old jobs? if yes, remove them
+            ProcessCustomersBrazilJob: "ProcessCustomersBrazilJob", // TODO: are these old jobs? if yes, remove them
             PriceAgreementMailJob: "PriceAgreementMailJob",
             PriceAgreementPriceConditionNotificationMailJob: "PriceAgreementPriceConditionNotificationMailJob",
             ExtendPriceAgreements: "ExtendPriceAgreements",
-            ProcessMasterDataPrices:"ProcessMasterDataPrices"
+            ProcessMasterDataPrices:"ProcessMasterDataPrices",
+            ProcessBrazilCustomers:"ProcessBrazilCustomers"
         };
     }
 }
