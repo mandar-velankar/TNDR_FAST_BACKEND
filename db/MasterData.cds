@@ -759,7 +759,7 @@ entity BrazilCap: cuid, managed {
 }
 
 entity BrazilMasterPrices: cuid, managed {
-	CustomerID	: Integer;
+	CustomerID	: String;
 	ProductID 	: Integer;
 	ValidFrom   : Date;
     ValidTo     : Date;

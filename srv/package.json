@@ -4,12 +4,12 @@
     "version": "1.0.0",
     "dependencies": {
         "@sap-cloud-sdk/core": "^1.54.2",
-        "@sap/cds": "5.9.6",
-        "@sap/cds-odata-v2-adapter-proxy": "1.8.19",
-        "@sap/hana-client": "2.12.25",
-        "@sap/logging": "^6.1.1",
-        "@sap/xsenv": "^3.2.2",
-        "@sap/xssec": "^3.2.13",
+        "@sap/cds": "4.6.5",
+        "@sap/cds-odata-v2-adapter-proxy": "1.5.10",
+        "@sap/hana-client": "2.7.21",
+        "@sap/logging": "^6.0.2",
+        "@sap/xsenv": "^3.1.0",
+        "@sap/xssec": "^3.0.10",
         "angular-expressions": "^1.1.4",
         "axios": "^0.21.1",
         "cfenv": "^1.2.4",
@@ -38,7 +38,7 @@
         "node": "^14"
     },
     "scripts": {
-        "start": "node ./index.js",
+        "start": "cds -v && node ./index.js",
         "watch": "nodemon -w . -i node_modules/**,.git/** -e cds -x npm run build"
     },
     "private": true,
