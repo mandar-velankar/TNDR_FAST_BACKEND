@@ -52,7 +52,7 @@ entity CountryCurrency : managed {
 entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
 	key InstituteID:Integer not null;
-	CustomerID:Integer;
+	CustomerID:String; // Codigo
 	InstituteName:String(500);
 	InstituteType:String(50);
 	Address:String(500);
@@ -77,9 +77,9 @@ entity PT_TMINST{
 	PaymentTerms:String(500);
 	ForAllBrands:Boolean;
 	DirectTender:Boolean;
-	ContactEmail: String;
-	CNPJ: String(16);
-	ShortName: String(10);
+	ContactEmail:String(100);
+	CNPJ:String;
+	Shortname:String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -115,6 +115,7 @@ entity PT_TMDIST{
 	State: String;
 	TaxCode: String;
 	CNPJ: String;
+	CustomerID: String; // Codigo
 	Shortname: String;
 	CommissionRate:Double;
 	INCOTerms:String(500);
@@ -124,7 +125,8 @@ entity PT_TMDIST{
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Distributor = $self;
-	DistributorDivision: Association to many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID;
+	DistributorDivision: Composition of many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID 
+																	   and DistributorDivision.CustomerID = CustomerID;
 }
 
 //Product Pack
@@ -771,7 +773,8 @@ entity BrazilMasterPrices: cuid, managed {
 
 entity BrazilDistributorDivision: managed {
 	key DistributorID: Integer; 
-	key DivisionCode: String(50);
+	key DivisionCode: String(50); // setor_ativ
+	CustomerID: String; // Codigo
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);
@@ -780,8 +783,10 @@ entity BrazilDistributorDivision: managed {
 
 entity BrazilInstituteDivision: managed {
 	key InstituteID: Integer; 
-	key DivisionCode: String(50);
+	key DivisionCode: String(50); // setor_ativ
+	CustomerID: String; // Codigo
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);
+	InstituteType: String(50);
 }
