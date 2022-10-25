@@ -101,14 +101,14 @@ module.exports = class ProcessMaterials extends BaseJob {
                 {
                     HLEVEL1_NAME: this.getDivisionName(curr.SETOR_ATIV),
                     HLEVEL1_CODE: curr.SETOR_ATIV,
-                    HLEVEL2_NAME: "",
-                    HLEVEL2_CODE: "",
-                    HLEVEL3_NAME: "",
-                    HLEVEL3_CODE: "",
+                    HLEVEL2_NAME: null,
+                    HLEVEL2_CODE: null,
+                    HLEVEL3_NAME: null,
+                    HLEVEL3_CODE: null,
                     HLEVEL4_NAME: this.extractBrandNameFrom(curr.NOME),
                     HLEVEL4_CODE: this.extractBrandNameFrom(curr.NOME),
-                    HLEVEL5_NAME: "",
-                    HLEVEL5_CODE: "",
+                    HLEVEL5_NAME: null,
+                    HLEVEL5_CODE: null,
                     HLEVEL6_NAME: curr.NOME,
                     HLEVEL6_CODE: curr.COD
                 }
