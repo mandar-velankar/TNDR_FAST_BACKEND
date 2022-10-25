@@ -72,9 +72,9 @@ module.exports = class ProcessMaterials extends BaseJob {
         console.log(`JOB (${this.jobName }): Processing Brazil materials ...`);
         try {
 
-            // 1. Create new/update hierarchy entries in PT_TMPRDHIER
+            // 1. Create/update hierarchy entries in PT_TMPRDHIER
             const mappedHierarchy = this.mapSAPMaterialsToFASTHierarchy(materials);
-            await this.upsertFASTDistributors(mappedDistributors, tx);
+            await this.upsertFASTHierarchy(mappedHierarchy, tx);
 
             // 2. Divisions - BrazilDistributorDivision
             // const mappedDivisions = this.mapSAPDivisionsToFAST(materials, "material");
@@ -202,43 +202,39 @@ module.exports = class ProcessMaterials extends BaseJob {
 
 
     /**
-     * Creates or Updates distributors in FAST
-     * @param {*} distributors 
+     * Creates or Updates Hierarchies in FAST
+     * @param {Array.Object} Mapped Hierarchies 
      * @returns 
      */
-    async upsertFASTDistributors(distributors, tx) {
-        const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        let nextDistributorID = await this.getNextValue(PT_TMDIST, "DistributorID", tx);
+    async upsertFASTHierarchy(mappedHierarchies, tx) {
+        const { PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-        // 1. get a list of existing Distributors from FAST
-        const distributorsExistingInFAST = await this.getFASTDistributors(distributors, tx);
+        // 1. get a list of existing Hierarchies from FAST
+        const hierarchiesExistingInFAST = await this.getFASTHierarchies(mappedHierarchies, tx);
         // 2. devide mappedDistributors into New or Changed distributors
-        const FASTNewDistributors = [];
-        const FASTChangedDistributors = [];
-        for (const distributor of distributors) {
-            let FASTDistributorIdx = distributorsExistingInFAST.findIndex(FASTDistributor => Number(FASTDistributor.CustomerID) === Number(distributor.CustomerID));
-            if (FASTDistributorIdx > -1) {
-                // copy over the DistributorID from existing distributor
-                distributor.DistributorID = distributorsExistingInFAST[FASTDistributorIdx].DistributorID;
-                FASTChangedDistributors.push(distributor);
+        const FASTNewHierarchies = [];
+        const FASTChangedHierarchies = [];
+        for (const hierarchy of mappedHierarchies) {
+            let FASTHierarchyIdx = hierarchiesExistingInFAST.findIndex(FASTHierarchy => Number(FASTHierarchy.HLEVEL6_CODE) === Number(hierarchy.HLEVEL6_CODE));
+            if (FASTHierarchyIdx > -1) {
+                FASTChangedHierarchies.push(hierarchy);
             } else {
-                // generate new DistributorID
-                distributor.DistributorID = nextDistributorID++;
-                FASTNewDistributors.push(distributor);
+                FASTNewHierarchies.push(hierarchy);
             }
         }
         // 3. Upsert records into PT_TMDIST
         //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
-        console.log(`JOB (${this.jobName }): Upserting Brazil customers into FAST table ...`);
+        console.log(`JOB (${this.jobName }): Upserting Brazil Hierarchies into FAST table (PT_TMPRDHIER) ...`);
         try {
-            for (const FASTDistributor of FASTChangedDistributors) {
-                await tx.run(UPDATE(PT_TMDIST, {CountryCode:FASTDistributor.CountryCode, DistributorID:FASTDistributor.DistributorID}).with(FASTDistributor));
+            for (const FASTHierarchy of FASTChangedHierarchies) {
+                await tx.run(UPDATE(PT_TMPRDHIER, {HLEVEL6_CODE:FASTHierarchy.HLEVEL6_CODE}).with(FASTHierarchy));
             }
-            FASTNewDistributors && FASTNewDistributors.length > 0 && await tx.run(INSERT(FASTNewDistributors).into(PT_TMDIST));
-            console.log(`JOB (${this.jobName }): Upserting of Brazil customers into FAST table successfully completed.`);
+            FASTNewHierarchies && FASTNewHierarchies.length > 0 && await tx.run(INSERT(FASTNewHierarchies).into(PT_TMPRDHIER));
+            console.log(`JOB (${this.jobName }): Upserting of Brazil Hierarchies into FAST table (PT_TMPRDHIER) successfully completed.`);
+            console.log(`JOB (${this.jobName }): PT_TMPRDHIER -> created: ${FASTNewHierarchies.length}, updated: ${FASTChangedHierarchies.length}`);
             return true;
         } catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Upserting of Brazil customers into FAST table failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Upserting of Brazil Hierarchies into FAST table (PT_TMPRDHIER) failed`);
             console.error(error);
             throw error;
         }
@@ -383,28 +379,28 @@ module.exports = class ProcessMaterials extends BaseJob {
     }
 
     /**
-     * Gets a list of existing Distributors from FAST where CustomerIDs (CODIGO) are equal.
-     * @param {Array} distributors 
-     * @returns {Array<PT_TMDIST>} a list of existing distributors
+     * Gets a list of existing Hierarchies from FAST.
+     * @param {Array} Hierarchies 
+     * @returns {Array<PT_TMPRDHIER>} a list of existing Hierarchies
      */
-    async getFASTDistributors(distributors, tx) {
-        if(!distributors || distributors.length === 0){
-            console.log(`JOB (${this.jobName }): No Distributors were found in FAST`);
+    async getFASTHierarchies(mappedHierarchies, tx) {
+        if(!mappedHierarchies || mappedHierarchies.length === 0){
+            console.log(`JOB (${this.jobName }): No hierarchies were found in FAST (PT_TMPRDHIER)`);
             return [];
         }
-        console.log(`JOB (${this.jobName }): Prepare fetching Brazil customers from FAST table`);
+        console.log(`JOB (${this.jobName }): Prepare fetching Brazil hierarchies from PT_TMPRDHIER`);
 
-        // get all the CustomerIDs from distributors
-        let customerIDs = [];
-        for (const distributor of distributors) {
-            customerIDs.push(distributor.CustomerID);
+        // get all the HLEVEL6_NAMEs from mappedHierarchies
+        let aHLEVEL6_CODEs = [];
+        for (const hierarchy of mappedHierarchies) {
+            aHLEVEL6_CODEs.push(hierarchy.aHLEVEL6_CODE);
         }
-        console.log(`JOB (${this.jobName }): Start fetching Brazil customers from FAST table`);
+        console.log(`JOB (${this.jobName }): Start fetching Brazil hierarchies from PT_TMPRDHIER`);
 
         // get a list of distributors entities for given list of CustomerIDs
-        const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const result = await tx.run(SELECT.from(PT_TMDIST).where({ CustomerID: { in: customerIDs}, CountryCode: 'BR' } ));
-        console.log(`JOB (${this.jobName }): End fetching Brazil customers from FAST table`);
+        const { PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const result = await tx.run(SELECT.from(PT_TMPRDHIER).where({ HLEVEL6_CODE: { in: aHLEVEL6_CODEs } } ));
+        console.log(`JOB (${this.jobName }): End fetching Brazil hierarchies from PT_TMPRDHIER`);
         return result;
     }
 
