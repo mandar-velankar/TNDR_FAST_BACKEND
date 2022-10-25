@@ -393,7 +393,7 @@ module.exports = class ProcessMaterials extends BaseJob {
         // get all the HLEVEL6_NAMEs from mappedHierarchies
         let aHLEVEL6_CODEs = [];
         for (const hierarchy of mappedHierarchies) {
-            aHLEVEL6_CODEs.push(hierarchy.aHLEVEL6_CODE);
+            aHLEVEL6_CODEs.push(hierarchy.HLEVEL6_CODE);
         }
         console.log(`JOB (${this.jobName }): Start fetching Brazil hierarchies from PT_TMPRDHIER`);
 
