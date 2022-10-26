@@ -468,6 +468,10 @@ entity PriceCondition: cuid, managed {
     CAP                                 : String;
     PriceAfterCap                       : Decimal;
     CommercialProposal                  : Decimal;
+    TaxEqualization                     : Decimal; //will come from SAP simulation
+    Invoive                             : Decimal; //will come from SAP simulation
+    ICMS                                : Decimal; //will come from SAP simulation
+    NetPrice                            : Decimal; //will come from SAP simulation
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
