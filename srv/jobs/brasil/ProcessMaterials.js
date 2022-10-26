@@ -76,9 +76,11 @@ module.exports = class ProcessMaterials extends BaseJob {
             const mappedHierarchy = this.mapSAPMaterialsToFASTHierarchy(materials);
             await this.upsertFASTHierarchy(mappedHierarchy, tx);
 
-            // 2. Divisions - BrazilDistributorDivision
-            // const mappedDivisions = this.mapSAPDivisionsToFAST(materials, "material");
-            // await this.upsertFASTDistributorDivision(mappedDivisions, tx);
+            // 2. Create/update Product entries in PT_TMPRDPCK, PT_TMCTPRDPCK and PT_TMSKUPRDPCK
+            const mappedProductPacks = this.mapSAPMaterialsToFASTProductPack(materials);
+            const mappedCountryProductPacks = this.mapSAPMaterialsToFASTCountryProductPack(materials);
+            const mappedProductPackSKUs = this.mapSAPMaterialsToFASTProductPackSKU(materials);
+            await this.upsertFASTProducts(mappedProductPacks, mappedCountryProductPacks, mappedProductPackSKUs, tx);
 
             console.log(`JOB (${this.jobName }): Processing of Brazil materials successfully completed.`);
 
@@ -105,8 +107,8 @@ module.exports = class ProcessMaterials extends BaseJob {
                     HLEVEL2_CODE: null,
                     HLEVEL3_NAME: null,
                     HLEVEL3_CODE: null,
-                    HLEVEL4_NAME: this.extractBrandNameFrom(curr.NOME),
-                    HLEVEL4_CODE: this.extractBrandNameFrom(curr.NOME),
+                    HLEVEL4_NAME: curr.BRAND, // this.extractBrandNameFrom(curr.NOME),
+                    HLEVEL4_CODE: curr.BRAND, // this.extractBrandNameFrom(curr.NOME),
                     HLEVEL5_NAME: null,
                     HLEVEL5_CODE: null,
                     HLEVEL6_NAME: curr.NOME,
@@ -120,84 +122,97 @@ module.exports = class ProcessMaterials extends BaseJob {
     }
 
     /**
-     * Maps Customer fields from SAP to FAST Institutes
-     * @param {*} institutes 
-     * @returns 
+     * Maps Material fields from SAP (BRAZILMATERIALS) to FAST ProductPack (PT_TMPRDPCK)
+     * @param {*} materials 
+     * @returns {[Objects]} PT_TMPRDPCK objects
      */
-     mapSAPInstitutesToFAST(institutes) {
-        console.log(`JOB (${this.jobName }): Mapping of Brazil institutes ...`);
-        institutes = institutes.reduce((prev, curr, idx, institutes) => {
-            const numberOfDivisions = (institutes.filter(distr => distr.CODIGO ===  curr.CODIGO)).length;
-
-            let fastInstitute = {
-                CountryCode: "BR",
-                InstituteID: "",
-                CustomerID: curr.CODIGO,
-                InstituteName: curr.RAZAO,
-                InstituteType: "Public Institute",
-                Address: `${curr.ENDERECO} ${curr.BAIRRO} ${curr.CEP} ${curr.CIDADE}`,
-                ContactNo: curr.TELEFONE,
-                Fax: curr.FAX,
-                ContactPerson: null,
-                ActiveRecord: (!curr.BLOQ && curr.STATUS === 'A') ? 'Yes' : 'No',
-                Comment: null,
-                City: curr.CIDADE,
-                INSTITUTE_HIERARCHY_ID: 1,
-                State: curr.REGIAO,
-                MercadoPublicoIssuer: null,
-                RegionID: null,
-                ProvinceID: null,
-                CifCode: null,
-                RegionalHealthSystem: null,
-                VatCode: null,
-                TaxCode: "IE",
-                CustomerGroup: null,
-                ApplicableTaxRate: null,
-                INCOTerms: null,
-                PaymentTerms: null,
-                ForAllBrands: (numberOfDivisions > 2),
-                DirectTender: "",
-                ContactEmail: curr.EMAIL,
-                CNPJ: curr.CNPJ,
-                Shortname: curr.FANTASIA,
-            };
-
-            prev.push(fastInstitute);
+     mapSAPMaterialsToFASTProductPack(materials) {
+        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMPRDPCK ...`);
+        materials = materials.reduce((prev, curr, idx, materials) => {
+            prev.push(
+                {
+                    PRODUCTPACKID: "",
+                    PRODUCTPACKNAME: curr.NOME,
+                    PRESENTATION: "NA",
+                    UOM: "NA",
+                    ACTIVERECORD: "Yes",
+                    HLEVEL6_CODE: curr.NOME,
+                    CONCENTRATION: 1,
+                    PACKFACTOR: 1,
+                    PCIName: curr.APRES,
+                    MoleculeName: "NA",
+                    ACTIVE_SUBSTANCE: "NA",
+                    ProductType: "NA",
+                    ProductClass: "NA",
+                    ProductDescription: "NA",
+                    ProductFullDescription: "NA",
+                    Nucleus: "NA",
+                    ProductGenericName: "NA",
+                }
+            );
             return prev;
         }, []);
-        console.log(`JOB (${this.jobName }): Mapping of Brazil institutes finished.`);
-        return institutes;
+        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMPRDPCK finished.`);
+        return materials;
     }
 
     /**
-     * Maps Customer fields from SAP to FAST BrazilDistributorDivision or BrazilInstituteDivision 
-     * based on type.
-     * @param {array} divisions
-     * @param {string} type - 'distributor' or 'institue'
-     * @returns {array}
+     * Maps Material fields from SAP (BRAZILMATERIALS) to FAST CountryProductPack (PT_TMCTPRDPCK)
+     * @param {*} materials 
+     * @returns {[Objects]} PT_TMCTPRDPCK objects
      */
-     mapSAPDivisionsToFAST(divisions, type) {
-        console.log(`JOB (${this.jobName }): Mapping of Brazil divisions ...`);
-        divisions = divisions.reduce((prev, curr, idx, divisions) => {
-            let fastDivision = {
-                DivisionCode: curr.SETOR_ATIV,
-                CustomerID: curr.CODIGO,
-                DivisionName: this.getDivisionName(curr.SETOR_ATIV),
-                CustomerGroup: curr.GRP_CLIENTE,
-                PriceList: curr.LISTA_PRC,
-            };
-            if(type === "distributor"){
-                fastDivision.DistributorID = "";
-                fastDivision.DistributorType = "Distributor";
-            }else if(type === "institute"){
-                fastDivision.InstituteID = "";
-                fastDivision.InstituteType = "Public Institute";
-            }
-            prev.push(fastDivision);
+     mapSAPMaterialsToFASTCountryProductPack(materials) {
+        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMCTPRDPCK ...`);
+        materials = materials.reduce((prev, curr, idx, materials) => {
+            prev.push(
+                {
+                    COUNTRYPRODUCTPACKID: "",
+                    COUNTRYCODE: "BR",
+                    COUNTRYOFORIGIN: curr.PROCEDENCIA,
+                    SHELFLIFE: 1,
+                    REGISTERED: 2,
+                    ACTIVERECORD: "Yes",
+                    PRODUCTPACKID: "", // use ProductPackID from PT_TMPRDPCK for new entries
+                    MANUFACTURER: "NA",
+                    Presentation_2: "NA",
+                    VTATax: 0,
+                    COMMENT: "",
+                    GOV_CODE: curr.NREG,
+                    CODE1: curr.CBAR,
+                    CODE2: curr.GRUPO_MAT3,
+                    CODE3: "",
+                    QTY_THRESHOLD: 0,
+                    BU: this.getDivisionName(curr.SETOR_ATIV),
+                }
+            );
             return prev;
         }, []);
-        console.log(`JOB (${this.jobName }): Mapping of Brazil divisions finished.`);
-        return divisions;
+        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMCTPRDPCK finished.`);
+        return materials;
+    }
+
+
+    /**
+     * Maps Material fields from SAP (BRAZILMATERIALS) to FAST ProductPackSKU (PT_TMSKUPRDPCK)
+     * @param {*} materials 
+     * @returns {[Objects]} PT_TMSKUPRDPCK objects
+     */
+     mapSAPMaterialsToFASTProductPackSKU(materials) {
+        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMSKUPRDPCK ...`);
+        materials = materials.reduce((prev, curr, idx, materials) => {
+            prev.push(
+                {
+                    CountrySKUID: "",
+                    CountryCode: "BR",
+                    ActiveRecord: "Yes",
+                    ProductPackID: "", // --link from TMPRDPCK,
+                    SKUCode: curr.COD,
+                }
+            );
+            return prev;
+        }, []);
+        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMSKUPRDPCK finished.`);
+        return materials;
     }
 
 
@@ -241,16 +256,20 @@ module.exports = class ProcessMaterials extends BaseJob {
     }
 
     /**
-     * Creates or Updates Institutes in FAST
-     * @param {*} institutes 
+     * Creates or Updates Products in FAST
+     * @param {Array<PT_TMPRDPCK>} mappedProductPacks
+     * @param {Array<PT_TMCTPRDPCK>} mappedCountryProductPacks
+     * @param {Array<PT_TMSKUPRDPCK>} mappedProductPackSKUs
      * @returns 
      */
-     async upsertFASTInstitutes(institutes, tx) {
-        const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        let nextInsituteID = await this.getNextValue(PT_TMINST, "InstituteID", tx);
-
-        // 1. get a list of existing Institutes from FAST
-        const insitutesExistingInFAST = await this.getFASTInstitutes(institutes, tx);
+     async upsertFASTProducts(mappedProductPacks, mappedCountryProductPacks, mappedProductPackSKUs, tx) {
+        const { PT_TMPRDPCK, PT_TMCTPRDPCK, PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        let nextProductPackID = await this.getNextValue(PT_TMPRDPCK, "PRODUCTPACKID", tx);
+        let nextCountryProductPackID = await this.getNextValue(PT_TMCTPRDPCK, "COUNTRYPRODUCTPACKID", tx);
+        let nextCountrySKUID = await this.getNextValue(PT_TMSKUPRDPCK, "CountrySKUID", tx);
+        
+        // 1. get a list of existing ProductPacks from FAST
+        const productPacksExistingInFAST = await this.getFASTProductPacks(mappedProductPacks, tx);
         // 2. devide mappedDistributors into New or Changed institutes
         const FASTNewInstitutes = [];
         const FASTChangedInstitutes = [];
@@ -283,100 +302,6 @@ module.exports = class ProcessMaterials extends BaseJob {
     }
 
     
-    /**
-     * Creates or Updates divisions in FAST
-     * After successful processing, the processed customers will be removed from BrazilCustomers
-     * @param {*} divisions 
-     * @returns 
-     */
-     async upsertFASTDistributorDivision(divisions, tx) {
-        const { BrazilDistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
-
-        // 1. get a list of existing Distributors from FAST
-        const distributorsExistingInFAST = await this.getFASTDistributors(divisions, tx);
-        const divisionsExistingInFAST = await this.getFASTDivisions(divisions, "distributor", tx);
-
-        // 2. devide mapped Divisions into New or Changed divisions
-        const FASTNewDivisions = [];
-        const FASTChangedDivisions = [];
-        for (const division of divisions) {
-            let FASTDistributor = distributorsExistingInFAST.find(FASTDistributor => Number(FASTDistributor.CustomerID) === Number(division.CustomerID));
-            // copy over the DistributorID from existing distributor
-            division.DistributorID = FASTDistributor.DistributorID;
-            let FASTDivisionIdx = divisionsExistingInFAST.findIndex(FASTDivision => Number(FASTDivision.CustomerID) === Number(division.CustomerID));
-            if (FASTDivisionIdx > -1) {
-                FASTChangedDivisions.push(division);
-            } else {
-                FASTNewDivisions.push(division);
-            }
-        }
-
-        // 3. Upsert records into BrazilDistributorDivision
-        console.log(`JOB (${this.jobName }): Upserting BrazilDistributorDivisions into FAST table ...`);
-        try {
-            for (const FASTDivision of FASTChangedDivisions) {
-                await tx.run(UPDATE(BrazilDistributorDivision, {DistributorID:FASTDivision.DistributorID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
-            }
-            FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(BrazilDistributorDivision));
-            console.log(`JOB (${this.jobName }): Upserting of BrazilDistributorDivisions into FAST table successfully completed.`);
-            console.log(`JOB (${this.jobName }): Deleting processed Customers from BrazilCustomers table`);
-            const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            await tx.run(DELETE.from(BrazilCustomers).where ({REPRES: 'X'}));
-            return true;
-        } catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Upserting of BrazilDistributorDivisions into FAST table failed`);
-            console.error(error);
-            throw error;
-        }
-    }
-
-    
-    /**
-     * Creates or Updates divisions in FAST
-     * After successful processing, the processed customers will be removed from BrazilCustomers
-     * @param {*} divisions 
-     * @returns 
-     */
-     async upsertFASTInstituteDivision(divisions, tx) {
-        const { BrazilInstituteDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
-
-        // 1. get a list of existing Institutes from FAST
-        const institutesExistingInFAST = await this.getFASTInstitutes(divisions, tx);
-        const divisionsExistingInFAST = await this.getFASTDivisions(divisions, "insitute", tx);
-
-        // 2. devide mapped Divisions into New or Changed divisions
-        const FASTNewDivisions = [];
-        const FASTChangedDivisions = [];
-        for (const division of divisions) {
-            let FASTInstitute = institutesExistingInFAST.find(FASTInstitute => Number(FASTInstitute.CustomerID) === Number(division.CustomerID));
-            // copy over the InstituteID from existing distributor
-            division.InstituteID = FASTInstitute.InstituteID;
-            let FASTDivisionIdx = divisionsExistingInFAST.findIndex(FASTDivision => Number(FASTDivision.CustomerID) === Number(division.CustomerID));
-            if (FASTDivisionIdx > -1) {
-                FASTChangedDivisions.push(division);
-            } else {
-                FASTNewDivisions.push(division);
-            }
-        }
-
-        // 3. Upsert records into BrazilInstituteDivision
-        console.log(`JOB (${this.jobName }): Upserting BrazilInstituteDivisions into FAST table ...`);
-        try {
-            for (const FASTDivision of FASTChangedDivisions) {
-                await tx.run(UPDATE(BrazilInstituteDivision, {InstituteID:FASTDivision.InstituteID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
-            }
-            FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(BrazilInstituteDivision));
-            console.log(`JOB (${this.jobName }): Upserting of BrazilInstituteDivisions into FAST table successfully completed.`);
-            console.log(`JOB (${this.jobName }): Deleting processed Customers from BrazilCustomers table`);
-            const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            await tx.run(DELETE.from(BrazilCustomers).where ({REPRES: null}));
-            return true;
-        } catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Upserting of BrazilInstituteDivisions into FAST table failed`);
-            console.error(error);
-            throw error;
-        }
-    }
 
     /**
      * Gets a list of existing Hierarchies from FAST.
@@ -405,74 +330,31 @@ module.exports = class ProcessMaterials extends BaseJob {
     }
 
     /**
-     * Gets a list of existing Institutes from FAST where CustomerIDs (CODIGO) are equal.
-     * @param {Array} institutes 
-     * @returns {Array<PT_TMINST>} a list of existing institutes
+     * Gets a list of existing ProductPacks from FAST.
+     * @param {Array<PT_TMPRDPCK>} ProductPacks 
+     * @returns {Array<PT_TMPRDPCK>} a list of existing ProductPacks
      */
-     async getFASTInstitutes(institutes, tx) {
-        if(!institutes || institutes.length === 0){
-            console.log(`JOB (${this.jobName }): No Institutes were found in FAST`);
+     async getFASTProductPacks(mappedProductPacks, tx) {
+        if(!mappedProductPacks || mappedProductPacks.length === 0){
+            console.log(`JOB (${this.jobName }): No ProductPacks were found in FAST (PT_TMPRDPCK)`);
             return [];
         }
-        console.log(`JOB (${this.jobName }): Prepare fetching Brazil institutes from FAST table`);
+        console.log(`JOB (${this.jobName }): Prepare fetching Brazil ProductPacks from PT_TMPRDPCK`);
 
-        // get all the CustomerIDs from distributors
-        let customerIDs = [];
-        for (const institute of institutes) {
-            customerIDs.push(institute.CustomerID);
+        // get all the ProductPackNames from mappedProductPacks
+        let aProductPackName = [];
+        for (const productPack of mappedProductPacks) {
+            aProductPackName.push(productPack.PRODUCTPACKNAME);
         }
-        console.log(`JOB (${this.jobName }): Start fetching Brazil institutes from FAST table`);
+        console.log(`JOB (${this.jobName }): Start fetching Brazil ProductPacks from PT_TMPRDPCK`);
 
-        // get a list of distributors entities for given list of CustomerIDs
-        const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const result = await tx.run(SELECT.from(PT_TMINST).where({ CustomerID: { in: customerIDs}, CountryCode: 'BR' } ));
-        console.log(`JOB (${this.jobName }): End fetching Brazil institutes from FAST table`);
+        // get a list of ProductPack entities for given list of ProductPackNames
+        const { PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const result = await tx.run(SELECT.from(PT_TMPRDPCK).where({ HLEVEL6_CODE: { in: aHLEVEL6_CODEs } } ));
+        console.log(`JOB (${this.jobName }): End fetching Brazil ProductPacks from PT_TMPRDPCK`);
         return result;
     }
 
-    /**
-     * Gets a list of existing Divisions from FAST where CustomerIDs (CODIGO) are equal.
-     * @param {array} divisions 
-     * @returns {array} a list of existing divisions
-     */
-     async getFASTDivisions(divisions, type, tx) {
-        if(!divisions || divisions.length === 0){
-            console.log(`JOB (${this.jobName }): No Divisions were found in FAST`);
-            return [];
-        }
-
-        console.log(`JOB (${this.jobName }): Prepare fetching Brazil divisions from FAST table`);
-
-        // get all the CustomerIDs from divisions
-        let customerIDs = [];
-        let divisionCodes = [];
-        for (const division of divisions) {
-            customerIDs.push(division.CustomerID);
-            divisionCodes.push(division.DivisionCode);
-        }
-        console.log(`JOB (${this.jobName }): Start fetching Brazil divisions from FAST table`);
-
-        // get a list of divisions entities for given list of CustomerIDs
-        let result = "";
-        if(type === 'distributor'){
-            result = await this.getFASTDistributorDivisions(customerIDs, divisionCodes, tx);
-        }else if(type === 'insitute'){
-            result = await this.getFASTInsituteDivisions(customerIDs, divisionCodes, tx);
-        }
-
-        console.log(`JOB (${this.jobName }): End fetching Brazil divisions from FAST table`);
-        return result;
-    }
-
-    async getFASTDistributorDivisions(customerIDs, divisionCodes, tx){
-        const { BrazilDistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        return tx.run(SELECT.from(BrazilDistributorDivision).where({ CustomerID: { in: customerIDs}, DivisionCode: { in: divisionCodes} } ));
-    }
-
-    async getFASTInsituteDivisions(customerIDs, divisionCodes, tx){
-        const { BrazilInstituteDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        return tx.run(SELECT.from(BrazilInstituteDivision).where({ CustomerID: { in: customerIDs}, DivisionCode: { in: divisionCodes} } ));
-    }
     
     /**
      * Gets the next highest value for a given field from table
