@@ -1624,5 +1624,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.PriceAfterCap, //calculated in UI based on User Input
     priceCondition.CommercialProposal,  //User Input field for Commercial Proposal PriceCondition, calculated field in UI for Discount PriceCondition
     priceCondition.ReferencePriceAgreement,
+    priceCondition.TaxEqualization,
+    priceCondition.Invoive,
+    priceCondition.ICMS,
+    priceCondition.NetPrice,
     priceCondition.CapBrazil.CAP as CapValue,
     }where tender.Active = 1 and tender.CountryCode = 'BR';
