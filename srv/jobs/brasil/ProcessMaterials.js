@@ -23,7 +23,7 @@ module.exports = class ProcessMaterials extends BaseJob {
             const allSAPMaterials = await this.getSAPMaterials(tx);
 
             // Process data
-            await this.processMaterials(allSAPMaterials, tx);
+            await this.processMaterials(tx, allSAPMaterials);
 
             // Commit All
             await tx.commit();
@@ -68,19 +68,19 @@ module.exports = class ProcessMaterials extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILMATERIALS records will be deleted.
      * @param {[Object]} materials 
      */
-    async processMaterials(materials, tx) {
+    async processMaterials(tx, materials) {
         console.log(`JOB (${this.jobName }): Processing Brazil materials ...`);
         try {
 
             // 1. Create/update hierarchy entries in PT_TMPRDHIER
             const mappedHierarchy = this.mapSAPMaterialsToFASTHierarchy(materials);
-            await this.upsertFASTHierarchy(mappedHierarchy, tx);
+            await this.upsertFASTHierarchy(tx, mappedHierarchy);
 
             // 2. Create/update Product entries in PT_TMPRDPCK, PT_TMCTPRDPCK and PT_TMSKUPRDPCK
             const mappedProductPacks = this.mapSAPMaterialsToFASTProductPack(materials);
             const mappedCountryProductPacks = this.mapSAPMaterialsToFASTCountryProductPack(materials);
             const mappedProductPackSKUs = this.mapSAPMaterialsToFASTProductPackSKU(materials);
-            await this.upsertFASTProducts(mappedProductPacks, mappedCountryProductPacks, mappedProductPackSKUs, tx);
+            await this.upsertFASTProducts(tx, mappedProductPacks, mappedCountryProductPacks, mappedProductPackSKUs);
 
             console.log(`JOB (${this.jobName }): Processing of Brazil materials successfully completed.`);
 
@@ -221,11 +221,11 @@ module.exports = class ProcessMaterials extends BaseJob {
      * @param {Array.Object} Mapped Hierarchies 
      * @returns 
      */
-    async upsertFASTHierarchy(mappedHierarchies, tx) {
+    async upsertFASTHierarchy(tx, mappedHierarchies) {
         const { PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
         // 1. get a list of existing Hierarchies from FAST
-        const hierarchiesExistingInFAST = await this.getFASTHierarchies(mappedHierarchies, tx);
+        const hierarchiesExistingInFAST = await this.getFASTHierarchies(tx, mappedHierarchies);
         // 2. devide mappedDistributors into New or Changed distributors
         const FASTNewHierarchies = [];
         const FASTChangedHierarchies = [];
@@ -262,27 +262,27 @@ module.exports = class ProcessMaterials extends BaseJob {
      * @param {Array<PT_TMSKUPRDPCK>} mappedProductPackSKUs
      * @returns 
      */
-     async upsertFASTProducts(mappedProductPacks, mappedCountryProductPacks, mappedProductPackSKUs, tx) {
+     async upsertFASTProducts(tx, mappedProductPacks, mappedCountryProductPacks, mappedProductPackSKUs) {
         const { PT_TMPRDPCK, PT_TMCTPRDPCK, PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        let nextProductPackID = await this.getNextValue(PT_TMPRDPCK, "PRODUCTPACKID", tx);
-        let nextCountryProductPackID = await this.getNextValue(PT_TMCTPRDPCK, "COUNTRYPRODUCTPACKID", tx);
-        let nextCountrySKUID = await this.getNextValue(PT_TMSKUPRDPCK, "CountrySKUID", tx);
+        let nextProductPackID = await this.getNextValue(tx, PT_TMPRDPCK, "PRODUCTPACKID");
+        let nextCountryProductPackID = await this.getNextValue(tx, PT_TMCTPRDPCK, "COUNTRYPRODUCTPACKID");
+        let nextCountrySKUID = await this.getNextValue(tx, PT_TMSKUPRDPCK, "CountrySKUID");
         
         // 1. get a list of existing ProductPacks from FAST
-        const productPacksExistingInFAST = await this.getFASTProductPacks(mappedProductPacks, tx);
-        // 2. devide mappedDistributors into New or Changed institutes
-        const FASTNewInstitutes = [];
-        const FASTChangedInstitutes = [];
-        for (const institute of institutes) {
-            let FASTInstituteIdx = insitutesExistingInFAST.findIndex(FASTInstitute => Number(FASTInstitute.CustomerID) === Number(institute.CustomerID));
-            if (FASTInstituteIdx > -1) {
-                // copy over the DistributorID from existing distributor
-                institute.InstituteID = insitutesExistingInFAST[FASTInstituteIdx].InstituteID;
-                FASTChangedInstitutes.push(institute);
+        const productPacksExistingInFAST = await this.getFASTProductPacks(tx, mappedProductPacks);
+        // 2. devide mappedProductPacks into New or Changed ProductPacks
+        const FASTNewProductPacks = [];
+        const FASTChangedProductPacks = [];
+        for (const productPack of mappedProductPacks) {
+            let FASTProductPackdx = productPacksExistingInFAST.findIndex(FASTProductPack => FASTProductPack.PRODUCTPACKNAME === productPack.PRODUCTPACKNAME);
+            if (FASTProductPackdx > -1) {
+                // copy over the ProductPackID from existing ProductPack
+                productPack.PRODUCTPACKID = productPacksExistingInFAST[FASTProductPackdx].PRODUCTPACKID;
+                FASTChangedProductPacks.push(productPack);
             } else {
                 // generate new DistributorID
-                institute.InstituteID = nextInsituteID++;
-                FASTNewInstitutes.push(institute);
+                productPack.PRODUCTPACKID = nextProductPackID++;
+                FASTNewProductPacks.push(productPack);
             }
         }
         // 3. Upsert records into PT_TMDIST
@@ -308,7 +308,7 @@ module.exports = class ProcessMaterials extends BaseJob {
      * @param {Array} Hierarchies 
      * @returns {Array<PT_TMPRDHIER>} a list of existing Hierarchies
      */
-    async getFASTHierarchies(mappedHierarchies, tx) {
+    async getFASTHierarchies(tx, mappedHierarchies) {
         if(!mappedHierarchies || mappedHierarchies.length === 0){
             console.log(`JOB (${this.jobName }): No hierarchies were found in FAST (PT_TMPRDHIER)`);
             return [];
@@ -334,7 +334,7 @@ module.exports = class ProcessMaterials extends BaseJob {
      * @param {Array<PT_TMPRDPCK>} ProductPacks 
      * @returns {Array<PT_TMPRDPCK>} a list of existing ProductPacks
      */
-     async getFASTProductPacks(mappedProductPacks, tx) {
+     async getFASTProductPacks(tx, mappedProductPacks) {
         if(!mappedProductPacks || mappedProductPacks.length === 0){
             console.log(`JOB (${this.jobName }): No ProductPacks were found in FAST (PT_TMPRDPCK)`);
             return [];
@@ -342,15 +342,15 @@ module.exports = class ProcessMaterials extends BaseJob {
         console.log(`JOB (${this.jobName }): Prepare fetching Brazil ProductPacks from PT_TMPRDPCK`);
 
         // get all the ProductPackNames from mappedProductPacks
-        let aProductPackName = [];
+        let productPackNames = [];
         for (const productPack of mappedProductPacks) {
-            aProductPackName.push(productPack.PRODUCTPACKNAME);
+            productPackNames.push(productPack.PRODUCTPACKNAME);
         }
         console.log(`JOB (${this.jobName }): Start fetching Brazil ProductPacks from PT_TMPRDPCK`);
 
         // get a list of ProductPack entities for given list of ProductPackNames
         const { PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const result = await tx.run(SELECT.from(PT_TMPRDPCK).where({ HLEVEL6_CODE: { in: aHLEVEL6_CODEs } } ));
+        const result = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKNAME: { in: productPackNames } } ));
         console.log(`JOB (${this.jobName }): End fetching Brazil ProductPacks from PT_TMPRDPCK`);
         return result;
     }
@@ -362,7 +362,7 @@ module.exports = class ProcessMaterials extends BaseJob {
      * @param {*} fieldname 
      * @returns - next highest value
      */
-    async getNextValue (table, fieldname, tx){
+    async getNextValue (tx, table, fieldname){
         let nextValue = 1;
         try {
             let results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
