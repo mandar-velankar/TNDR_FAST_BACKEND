@@ -1,0 +1,48 @@
+{
+  "VCAP_SERVICES": {
+    "xsuaa": [
+      {
+        "name": "xsuaa-service",
+        "label": "xsuaa",
+        "tags": ["xsuaa"],
+        "credentials": {
+          "tenantmode": "dedicated",
+          "sburl": "https://internal-xsuaa.authentication.eu20.hana.ondemand.com",
+          "subaccountid": "f18bc1b5-6440-484b-a922-376a22142ee5",
+          "credential-type": "instance-secret",
+          "clientid": "sb-FAST!t6094",
+          "xsappname": "FAST!t6094",
+          "clientsecret": "uJSI9Gi5PzR3YrxEuQKLcHGx8WQ=",
+          "url": "https://bayer-fast-dev.authentication.eu20.hana.ondemand.com",
+          "uaadomain": "authentication.eu20.hana.ondemand.com",
+          "verificationkey": "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqiRtR90YKtC+fyINAxE/dM5THSMREccjAloOHNM7AYaEyNmNqnEN2Gqh6g0gi32eSMQFD4FiT37EFtBUDyuBQZYRbcuZYD0p12SBTjJUex9z95pyUwH2bt5e7FXcbB771/10dJfpDHIy7/2P3S/5y6fT35vFsllqsr3gkF51K5fMG+Tw0KZGefKoS+pH1Ddr2RFI+AC89RjU2DgQWMF3gCrX6VQqnxeR5bQrZNhhdQq44zae/Kc7ISxN4tOunIg1ZgWBKCxXejjkR07dPwfuMTNX+jOVl6HNWvNpgUCCg2KxXf8dZec4hh6I5qKAX0KwwmTYqaUl5j3r1TSY0/mgcQIDAQAB-----END PUBLIC KEY-----",
+          "apiurl": "https://api.authentication.eu20.hana.ondemand.com",
+          "identityzone": "bayer-fast-dev",
+          "identityzoneid": "f18bc1b5-6440-484b-a922-376a22142ee5",
+          "tenantid": "f18bc1b5-6440-484b-a922-376a22142ee5",
+          "zoneid": "f18bc1b5-6440-484b-a922-376a22142ee5"
+        }
+      }
+    ],
+    "hana": [
+      {
+        "name": "hana-service",
+        "label": "hana",
+        "tags": ["hana"],
+        "credentials": {
+          "database_id": "7d5dac01-18e4-4cf3-bccf-db394fb46beb",
+          "host": "7d5dac01-18e4-4cf3-bccf-db394fb46beb.hana.prod-eu20.hanacloud.ondemand.com",
+          "port": "443",
+          "driver": "com.sap.db.jdbc.Driver",
+          "url": "jdbc:sap://7d5dac01-18e4-4cf3-bccf-db394fb46beb.hana.prod-eu20.hanacloud.ondemand.com:443?encrypt=true&validateCertificate=true&currentschema=0C43074C633A44BE9B335F030AD11110",
+          "schema": "0C43074C633A44BE9B335F030AD11110",
+          "hdi_user": "0C43074C633A44BE9B335F030AD11110_ECRR27IKXCAX8PDY2AMOTF4XT_DT",
+          "hdi_password": "Xf1rsjRHSctCzddwqAVWo.cAKb.7YsmlGwNCB7GbuzP7Pn_00_-ba6iNHGH9ajeqcb8gwYd2u3kKjnBEB54Gx1fYzO3HZtiHZHynEsGgEgL18TBct2JUse2VbKuXW9At",
+          "user": "0C43074C633A44BE9B335F030AD11110_ECRR27IKXCAX8PDY2AMOTF4XT_RT",
+          "password": "Vf1-ijuKGvu83tRXZlnYEuBTOWctHFO88gk9NFj.WO4Cc00BsY.l98Tz-K3IXQF0h7fGyq0oO3PHl1Mo-sZbBeLgERPBnNztcgw331xfTWZuRyjQ8sxKw0KlV8hARkVJ",
+          "certificate": "-----BEGIN CERTIFICATE-----\nMIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\nMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\nd3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBD\nQTAeFw0wNjExMTAwMDAwMDBaFw0zMTExMTAwMDAwMDBaMGExCzAJBgNVBAYTAlVT\nMRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j\nb20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IENBMIIBIjANBgkqhkiG\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4jvhEXLeqKTTo1eqUKKPC3eQyaKl7hLOllsB\nCSDMAZOnTjC3U/dDxGkAV53ijSLdhwZAAIEJzs4bg7/fzTtxRuLWZscFs3YnFo97\nnh6Vfe63SKMI2tavegw5BmV/Sl0fvBf4q77uKNd0f3p4mVmFaG5cIzJLv07A6Fpt\n43C/dxC//AH2hdmoRBBYMql1GNXRor5H4idq9Joz+EkIYIvUX7Q6hL+hqkpMfT7P\nT19sdl6gSzeRntwi5m3OFBqOasv+zbMUZBfHWymeMr/y7vrTC0LUq7dBMtoM1O/4\ngdW7jVg/tRvoSSiicNoxBN33shbyTApOB6jtSj1etX+jkMOvJwIDAQABo2MwYTAO\nBgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUA95QNVbR\nTLtm8KPiGxvDl7I90VUwHwYDVR0jBBgwFoAUA95QNVbRTLtm8KPiGxvDl7I90VUw\nDQYJKoZIhvcNAQEFBQADggEBAMucN6pIExIK+t1EnE9SsPTfrgT1eXkIoyQY/Esr\nhMAtudXH/vTBH1jLuG2cenTnmCmrEbXjcKChzUyImZOMkXDiqw8cvpOp/2PV5Adg\n06O/nVsJ8dWO41P0jmP6P6fbtGbfYmbW0W5BjfIttep3Sp+dWOIrWcBAI+0tKIJF\nPnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls\nYSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\nCAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\n-----END CERTIFICATE-----"
+        }
+      }
+    ]
+  }
+}
