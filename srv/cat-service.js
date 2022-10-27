@@ -2135,6 +2135,9 @@ module.exports = (srv) => {
 					aApprovalForTypeResult.push(oApprovalForType[0]);
 					aApprovalForTypeResult.push(oApprovalForType[1]);
 					return aApprovalForTypeResult;
+				case 'Consumer Health':
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					return aApprovalForTypeResult;
 			}
 		} else {
 			return oApprovalForType;
