@@ -497,7 +497,7 @@ module.exports = async (srv) => {
                     consumerRetailPrice = consumerPrice.MaxPriceNhsPU;
                 }
 
-                if(!isDoubleEqual(priceAgreement.ListPrice, consumerListPrice) || !isDoubleEqual(priceAgreement.RetailPrice, consumerRetailPrice)) {
+                if(!ServiceHelper.isDoubleEqual(priceAgreement.ListPrice, consumerListPrice) || !ServiceHelper.isDoubleEqual(priceAgreement.RetailPrice, consumerRetailPrice)) {
                     priceAgreement.hasNewPrice = true;
                 }
 
