@@ -50,7 +50,6 @@ module.exports = class ProcessMaterials extends BaseJob {
             console.log(`JOB (${this.jobName }): Fetching Brazil materials from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILMATERIALS ...`);
             const { BrazilMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const result = await tx.run(SELECT.from(BrazilMaterials));
-            console.log(`JOB (${this.jobName }): Fetching of Brazil materials from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILMATERIALS successfully completed`);
             return result;
         }catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Fetching of Brazil materials from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILMATERIALS failed`);
@@ -88,6 +87,11 @@ module.exports = class ProcessMaterials extends BaseJob {
             await this.upsertFASTCountryProductPacks(tx, mappedCountryProductPacks, processedProductPacks);
 
             // 4. Create/update ProductPackSKUs entries in PT_TMSKUPRDPCK
+            await this.upsertFASTProductPackSKUs(tx, mappedProductPackSKUs, processedProductPacks);
+
+            // 5. Delete all records from BrazilMaterials after successful processing.
+            const { BrazilMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+            // await tx.run(DELETE.from(BrazilMaterials));
 
             console.log(`JOB (${this.jobName }): Processing of Brazil materials successfully completed.`);
 
@@ -110,7 +114,7 @@ module.exports = class ProcessMaterials extends BaseJob {
                 {
                     HLEVEL1_NAME: this.getDivisionName(curr.SETOR_ATIV),
                     HLEVEL1_CODE: curr.SETOR_ATIV,
-                    HLEVEL2_NAME: 'Job',
+                    HLEVEL2_NAME: 'Job2',
                     HLEVEL2_CODE: null,
                     HLEVEL3_NAME: null,
                     HLEVEL3_CODE: null,
@@ -124,7 +128,6 @@ module.exports = class ProcessMaterials extends BaseJob {
             );
             return prev;
         }, []);
-        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMPRDHIER finished.`);
         return materials;
     }
 
@@ -142,7 +145,7 @@ module.exports = class ProcessMaterials extends BaseJob {
                     PRODUCTPACKNAME: curr.NOME,
                     PRESENTATION: "NA",
                     UOM: "NA",
-                    ACTIVERECORD: "Job",
+                    ACTIVERECORD: "Job2",
                     HLEVEL6_CODE: curr.NOME,
                     CONCENTRATION: 1,
                     PACKFACTOR: 1,
@@ -159,7 +162,6 @@ module.exports = class ProcessMaterials extends BaseJob {
             );
             return prev;
         }, []);
-        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMPRDPCK finished.`);
         return materials;
     }
 
@@ -178,7 +180,7 @@ module.exports = class ProcessMaterials extends BaseJob {
                     COUNTRYOFORIGIN: curr.PROCEDENCIA,
                     SHELFLIFE: 1,
                     REGISTERED: 2,
-                    ACTIVERECORD: "Job",
+                    ACTIVERECORD: "Job2",
                     PRODUCTPACKID: "",
                     MANUFACTURER: "NA",
                     Presentation_2: "NA",
@@ -194,7 +196,6 @@ module.exports = class ProcessMaterials extends BaseJob {
             );
             return prev;
         }, []);
-        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMCTPRDPCK finished.`);
         return materials;
     }
 
@@ -211,14 +212,13 @@ module.exports = class ProcessMaterials extends BaseJob {
                 {
                     CountrySKUID: "",
                     CountryCode: "BR",
-                    ActiveRecord: "Job",
+                    ActiveRecord: "Job2",
                     ProductPackID: "", // --link from TMPRDPCK,
-                    SKUCode: curr.COD,
+                    SKUCode: Number(curr.COD),
                 }
             );
             return prev;
         }, []);
-        console.log(`JOB (${this.jobName }): Mapping BRAZILMATERIALS to PT_TMSKUPRDPCK finished.`);
         return materials;
     }
 
@@ -287,13 +287,15 @@ module.exports = class ProcessMaterials extends BaseJob {
                 // copy over the ProductPackID from existing ProductPack
                 const existingProductPackID = productPacksExistingInFAST[FASTProductPackdx].PRODUCTPACKID;
                 productPack.PRODUCTPACKID = existingProductPackID;
+                mappedCountryProductPacks[index].PRODUCTPACKID = existingProductPackID;
+                mappedProductPackSKUs[index].ProductPackID = existingProductPackID;
                 FASTChangedProductPacks.push(productPack);
             } else {
                 // generate new ProductPackID and link it to CountryProductPacks and ProductPackSKUs
                 const nextID = nextProductPackID++;
                 productPack.PRODUCTPACKID = nextID;
                 mappedCountryProductPacks[index].PRODUCTPACKID = nextID;
-                mappedProductPackSKUs[index].PRODUCTPACKID = nextID;
+                mappedProductPackSKUs[index].ProductPackID = nextID;
                 FASTNewProductPacks.push(productPack);
             }
         }
@@ -351,7 +353,7 @@ module.exports = class ProcessMaterials extends BaseJob {
         console.log(`JOB (${this.jobName }): Upserting Brazil CountryProductPacks into FAST table PT_TMCTPRDPCK ...`);
         try {
             for (const FASTCountryProductPack of FASTChangedCountryProductPacks) {
-                await tx.run(UPDATE(PT_TMCTPRDPCK, {PRODUCTPACKID:FASTCountryProductPack.PRODUCTPACKID}).with(FASTCountryProductPack));
+                await tx.run(UPDATE(PT_TMCTPRDPCK, {PRODUCTPACKID:FASTCountryProductPack.PRODUCTPACKID, COUNTRYCODE: 'BR'}).with(FASTCountryProductPack));
             }
             FASTNewCountryProductPacks && FASTNewCountryProductPacks.length > 0 && await tx.run(INSERT(FASTNewCountryProductPacks).into(PT_TMCTPRDPCK));
             console.log(`JOB (${this.jobName }): Upserting of Brazil CountryProductPacks into FAST table PT_TMCTPRDPCK successfully completed.`);
@@ -364,6 +366,50 @@ module.exports = class ProcessMaterials extends BaseJob {
         }
     }
 
+    /**
+     * Creates or Updates ProductPackSKUs in FAST
+     * @param {Array<PT_TMSKUPRDPCK>} mappedProductPackSKUs
+     * @param {Object<Array>} processedProductPacks
+     * @returns 
+     */
+     async upsertFASTProductPackSKUs(tx, mappedProductPackSKUs, processedProductPacks) {
+        const { PT_TMSKUPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
+        let nextCountrySKUID = await this.getNextValue(tx, PT_TMSKUPRDPCK, "CountrySKUID");
+        
+        // 1. get a list of existing ProductPackSKUs from FAST
+        const productPackSKUsExistingInFAST = await this.getFASTProductPackSKUs(tx, mappedProductPackSKUs, processedProductPacks);
+        // 2. devide mapped ProductPackSKUs into New or Changed ProductPackSKUs
+        const FASTNewProductPackSKUs = [];
+        const FASTChangedProductPackSKU = [];
+        for (const productPackSKU of mappedProductPackSKUs) {
+            let FASTProductPackSKUidx = productPackSKUsExistingInFAST.findIndex(FASTProductPackSKU => FASTProductPackSKU.PRODUCTPACKNAME === productPackSKU.PRODUCTPACKNAME);
+            if (FASTProductPackSKUidx > -1) {
+                // copy over the ProductPackSKUs
+                const existingCountrySKUID = productPackSKUsExistingInFAST[FASTCountryProductPackdx].CountrySKUID;
+                productPackSKU.CountrySKUID = existingCountrySKUID;
+                FASTChangedProductPackSKU.push(productPackSKU);
+            } else {
+                // generate new nextCountrySKUID
+                productPackSKU.CountrySKUID = nextCountrySKUID++;
+                FASTNewProductPackSKUs.push(productPackSKU);
+            }
+        }
+        // 3. Upsert records into PT_TMSKUPRDPCK 
+        console.log(`JOB (${this.jobName }): Upserting Brazil ProductPackSKUs into FAST table PT_TMSKUPRDPCK ...`);
+        try {
+            for (const FASTCountryProductPack of FASTChangedProductPackSKU) {
+                await tx.run(UPDATE(PT_TMSKUPRDPCK, {PRODUCTPACKID:FASTCountryProductPack.PRODUCTPACKID}).with(FASTCountryProductPack));
+            }
+            FASTNewProductPackSKUs && FASTNewProductPackSKUs.length > 0 && await tx.run(INSERT(FASTNewProductPackSKUs).into(PT_TMSKUPRDPCK));
+            console.log(`JOB (${this.jobName }): Upserting of Brazil ProductPackSKUs into FAST table PT_TMSKUPRDPCK successfully completed.`);
+            console.log(`JOB (${this.jobName }): PT_TMSKUPRDPCK -> created: ${FASTNewProductPackSKUs.length}, updated: ${FASTChangedProductPackSKU.length}`);
+            return true;
+        } catch (error) {
+            console.error(`JOB (${this.jobName }): ERROR - Upserting of Brazil ProductPackSKUs into FAST table PT_TMSKUPRDPCK failed`);
+            console.error(error);
+            throw error;
+        }
+    }
     
 
     /**
@@ -383,12 +429,11 @@ module.exports = class ProcessMaterials extends BaseJob {
         for (const hierarchy of mappedHierarchies) {
             aHLEVEL6_CODEs.push(hierarchy.HLEVEL6_CODE);
         }
-        console.log(`JOB (${this.jobName }): Start fetching Brazil hierarchies from PT_TMPRDHIER`);
+        console.log(`JOB (${this.jobName }): Fetching Brazil hierarchies from PT_TMPRDHIER ...`);
 
         // get a list of distributors entities for given list of CustomerIDs
         const { PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const result = await tx.run(SELECT.from(PT_TMPRDHIER).where({ HLEVEL6_CODE: { in: aHLEVEL6_CODEs } } ));
-        console.log(`JOB (${this.jobName }): End fetching Brazil hierarchies from PT_TMPRDHIER`);
         return result;
     }
 
@@ -409,7 +454,7 @@ module.exports = class ProcessMaterials extends BaseJob {
         for (const productPack of mappedProductPacks) {
             productPackNames.push(productPack.PRODUCTPACKNAME);
         }
-        console.log(`JOB (${this.jobName }): Start fetching Brazil ProductPacks from PT_TMPRDPCK`);
+        console.log(`JOB (${this.jobName }): Fetching Brazil ProductPacks from PT_TMPRDPCK ...`);
 
         // get a list of ProductPack entities for given list of ProductPackNames
         const { PT_TMPRDPCK, PT_TMCTPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -420,7 +465,6 @@ module.exports = class ProcessMaterials extends BaseJob {
             .where({'cp.COUNTRYCODE': {'=': 'BR'}})
             .where({ PRODUCTPACKNAME: { in: productPackNames } } )
         );
-        console.log(`JOB (${this.jobName }): End fetching Brazil ProductPacks from PT_TMPRDPCK`);
         return result;
     }
 
@@ -442,15 +486,41 @@ module.exports = class ProcessMaterials extends BaseJob {
         for (const productPack of processedProductPacks) {
             productPackIDs.push(productPack.PRODUCTPACKID);
         }
-        console.log(`JOB (${this.jobName }): Start fetching Brazil CountryProductPacks from PT_TMCTPRDPCK`);
+        console.log(`JOB (${this.jobName }): Fetching Brazil CountryProductPacks from PT_TMCTPRDPCK ...`);
 
         // get a list of ProductPack entities for given list of ProductPackNames
         const {PT_TMCTPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const result = await tx.run(SELECT.from(PT_TMCTPRDPCK).where({ PRODUCTPACKID: { in: productPackIDs}, COUNTRYCODE: 'BR' } ));
-        console.log(`JOB (${this.jobName }): End fetching Brazil CountryProductPacks from PT_TMCTPRDPCK`);
         return result;
     }
 
+    /**
+     * Gets a list of existing ProductPackSKUs from FAST.
+     * @param {Array<PT_TMSKUPRDPCK>} ProductPackSKUs 
+     * @returns {Array<PT_TMSKUPRDPCK>} a list of existing ProductPackSKUs
+     */
+     async getFASTProductPackSKUs(tx, mappedProductPackSKUs, processedProductPacks) {
+        if(!mappedProductPackSKUs || mappedProductPackSKUs.length === 0){
+            console.log(`JOB (${this.jobName }): No ProductPackSKUs were found in FAST (PT_TMSKUPRDPCK)`);
+            return [];
+        }
+        console.log(`JOB (${this.jobName }): Prepare fetching Brazil ProductPackSKUs from PT_TMSKUPRDPCK`);
+
+        // get all the productPackIDs and CODs from mappedProductPackSKUs
+        // processedProductPacks = processedProductPacks.FASTChangedProductPacks.concat(processedProductPacks.FASTNewProductPacks);
+        let productPackIDs = [];
+        let SKUCodes = [];
+        for (const productPack of mappedProductPackSKUs) {
+            productPackIDs.push(productPack.PRODUCTPACKID);
+            SKUCodes.push(productPack.SKUCode);
+        }
+        console.log(`JOB (${this.jobName }): Fetching Brazil ProductPackSKUs from PT_TMSKUPRDPCK ...`);
+
+        // get a list of ProductPack entities for given list of ProductPackNames
+        const {PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ PRODUCTPACKID: { in: productPackIDs},SKUCODE: { in: SKUCodes}, COUNTRYCODE: 'BR' } ));
+        return result;
+    }
     
     /**
      * Gets the next highest value for a given field from table
