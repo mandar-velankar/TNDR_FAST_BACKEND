@@ -219,7 +219,8 @@ left outer join CustomerPrices as cp
             when  min(cp.Price) is null then true else false 
         end as isNew: Boolean,
         pa.ID as PriceAgreementId:String
-} group by sku.CountryCode, sku.ProductPackID, sku.SKUCode,pa.ID;
+} where sku.ActiveRecord = 'Yes' 
+group by sku.CountryCode, sku.ProductPackID, sku.SKUCode,pa.ID;
 
 /**
  * This view tells us if a new SKU has been added from SAP to the master data automatically through interfacing.
