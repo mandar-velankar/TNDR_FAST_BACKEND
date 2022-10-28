@@ -225,6 +225,7 @@ module.exports = async (srv) => {
         let ids = [];
         //use only one loop instead of multiple map functionslet ids = [];
         let offers = [];
+        let institutes = [];
         let countrycodes = [];
         let productpacks = [];
         // let existingPriceConditionIDs = [];
@@ -232,6 +233,7 @@ module.exports = async (srv) => {
         startTrace("PrepareKeysForOtherQueries");
         for (const pa of data) {
             if (ids.findIndex(id => id === pa.ID) === -1) ids.push(pa.ID);
+            if (institutes.findIndex(instituteId => instituteId === pa.InstituteId) === -1) institutes.push(pa.InstituteId);
             if (offers.findIndex(off => off === pa.OfferId) === -1) offers.push(pa.OfferId);
             if (countrycodes.findIndex(cc => cc === pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
             if (productpacks.findIndex(ppid => ppid === pa.ProductPackId) === -1) productpacks.push(pa.ProductPackId);
@@ -250,7 +252,7 @@ module.exports = async (srv) => {
 
         if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
-            if (req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
+            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
                 customerPricesInPA = false;
                 customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
             }
@@ -266,10 +268,16 @@ module.exports = async (srv) => {
             }
         }
 
+        if(institutes && institutes.length > 0) {
+            startTrace("Institutes");
+            institutesAll = await tx.run(SELECT.from(PT_TMINST).where({ InstituteId: { in: institutes } }));
+            stopTrace("Institutes");
+        }
+
         if (countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0) {
             if (offers && offers.length > 0) {
                 startTrace("PriceConditionView");
-                if (req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'priceConditions') === -1) {
+                if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'priceConditions') === -1) {
                     priceConditionsInPa = false;
                     priceConditionsAll = await tx.run(SELECT.from(PriceConditionView)
                         .where({
@@ -314,7 +322,7 @@ module.exports = async (srv) => {
             stopTrace("MostRecentMasterPricesView");
 
             startTrace("MostRecentConsumerPricesView");
-            if (req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
+            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
                 consumerPricesInPA = false;
                 consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
                     .where({
@@ -390,6 +398,9 @@ module.exports = async (srv) => {
 
             let priceConditions = priceAgreement.PriceConditions || [];
             let institute = priceAgreement.Institute;
+            if(!institute){
+                institute = institutesAll.find(inst => inst.InstituteID === priceAgreement.InstituteId)
+            }
 
             // Get CustomerPrices if needed
             // if (!customerPrices) {
