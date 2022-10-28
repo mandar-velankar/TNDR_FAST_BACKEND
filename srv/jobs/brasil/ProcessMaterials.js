@@ -392,7 +392,6 @@ module.exports = class ProcessMaterials extends BaseJob {
         const productPackSKUsExistingInFAST = await this.getFASTProductPackSKUs(tx, mappedProductPackSKUs);
         // 2. devide mapped ProductPackSKUs into New or Changed ProductPackSKUs
         const FASTNewProductPackSKUs = [];
-        const FASTChangedProductPackSKU = [];
         for (const productPackSKU of mappedProductPackSKUs) {
             let FASTProductPackSKUidx = productPackSKUsExistingInFAST.findIndex(FASTProductPackSKU => FASTProductPackSKU.PRODUCTPACKNAME === productPackSKU.PRODUCTPACKNAME);
             if (FASTProductPackSKUidx === -1) {
@@ -406,7 +405,7 @@ module.exports = class ProcessMaterials extends BaseJob {
         try {
             FASTNewProductPackSKUs && FASTNewProductPackSKUs.length > 0 && await tx.run(INSERT(FASTNewProductPackSKUs).into(PT_TMSKUPRDPCK));
             console.log(`JOB (${this.jobName }): Upserting of Brazil ProductPackSKUs into FAST table PT_TMSKUPRDPCK successfully completed.`);
-            console.log(`JOB (${this.jobName }): PT_TMSKUPRDPCK -> created: ${FASTNewProductPackSKUs.length}, updated: ${FASTChangedProductPackSKU.length}`);
+            console.log(`JOB (${this.jobName }): PT_TMSKUPRDPCK -> created: ${FASTNewProductPackSKUs.length}`);
             return true;
         } catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Upserting of Brazil ProductPackSKUs into FAST table PT_TMSKUPRDPCK failed`);
