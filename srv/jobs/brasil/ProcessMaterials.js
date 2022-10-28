@@ -81,17 +81,17 @@ module.exports = class ProcessMaterials extends BaseJob {
             await this.upsertFASTHierarchy(tx, mappedHierarchy);
 
             // 2. Create/update ProductPacks entries in PT_TMPRDPCK
-            const processedProductPacks = await this.upsertFASTProductPacks(tx, mappedProductPacks, mappedCountryProductPacks, mappedProductPackSKUs);
+            await this.upsertFASTProductPacks(tx, mappedProductPacks, mappedCountryProductPacks, mappedProductPackSKUs);
 
             // 3. Create/update CountryProductPacks entries in PT_TMCTPRDPCK
-            await this.upsertFASTCountryProductPacks(tx, mappedCountryProductPacks, processedProductPacks);
+            await this.upsertFASTCountryProductPacks(tx, mappedCountryProductPacks);
 
-            // 4. Create/update ProductPackSKUs entries in PT_TMSKUPRDPCK
-            await this.upsertFASTProductPackSKUs(tx, mappedProductPackSKUs, processedProductPacks);
+            // 4. Create ProductPackSKUs entries in PT_TMSKUPRDPCK
+            await this.upsertFASTProductPackSKUs(tx, mappedProductPackSKUs);
 
             // 5. Delete all records from BrazilMaterials after successful processing.
             const { BrazilMaterials } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            // await tx.run(DELETE.from(BrazilMaterials));
+            await tx.run(DELETE.from(BrazilMaterials));
 
             console.log(`JOB (${this.jobName }): Processing of Brazil materials successfully completed.`);
 
@@ -114,7 +114,7 @@ module.exports = class ProcessMaterials extends BaseJob {
                 {
                     HLEVEL1_NAME: this.getDivisionName(curr.SETOR_ATIV),
                     HLEVEL1_CODE: curr.SETOR_ATIV,
-                    HLEVEL2_NAME: 'Job2',
+                    HLEVEL2_NAME: null,
                     HLEVEL2_CODE: null,
                     HLEVEL3_NAME: null,
                     HLEVEL3_CODE: null,
@@ -145,7 +145,7 @@ module.exports = class ProcessMaterials extends BaseJob {
                     PRODUCTPACKNAME: curr.NOME,
                     PRESENTATION: "NA",
                     UOM: "NA",
-                    ACTIVERECORD: "Job2",
+                    ACTIVERECORD: "Yes",
                     HLEVEL6_CODE: curr.NOME,
                     CONCENTRATION: 1,
                     PACKFACTOR: 1,
@@ -180,7 +180,7 @@ module.exports = class ProcessMaterials extends BaseJob {
                     COUNTRYOFORIGIN: curr.PROCEDENCIA,
                     SHELFLIFE: 1,
                     REGISTERED: 2,
-                    ACTIVERECORD: "Job2",
+                    ACTIVERECORD: "Yes",
                     PRODUCTPACKID: "",
                     MANUFACTURER: "NA",
                     Presentation_2: "NA",
@@ -212,7 +212,7 @@ module.exports = class ProcessMaterials extends BaseJob {
                 {
                     CountrySKUID: "",
                     CountryCode: "BR",
-                    ActiveRecord: "Job2",
+                    ActiveRecord: "Yes",
                     ProductPackID: "", // --link from TMPRDPCK,
                     SKUCode: Number(curr.COD),
                 }
@@ -276,12 +276,17 @@ module.exports = class ProcessMaterials extends BaseJob {
         const { PT_TMPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
         let nextProductPackID = await this.getNextValue(tx, PT_TMPRDPCK, "PRODUCTPACKID");
         
+        // 0. SAP material may contain the same ProductPack per SKU, we must not process the same ProductPack more than ones
+        const uniqueMappedProductPacks = Array.from(new Set(mappedProductPacks.map(d => d.PRODUCTPACKNAME)))
+                                        .map(name => {
+                                            return mappedProductPacks.find(d => d.PRODUCTPACKNAME === name)
+                                        });
         // 1. get a list of existing ProductPacks from FAST
-        const productPacksExistingInFAST = await this.getFASTProductPacks(tx, mappedProductPacks);
+        const productPacksExistingInFAST = await this.getFASTProductPacks(tx, uniqueMappedProductPacks);
         // 2. devide mapped ProductPacks into New or Changed ProductPacks
         const FASTNewProductPacks = [];
         const FASTChangedProductPacks = [];
-        for (const [index, productPack] of mappedProductPacks.entries()) {
+        for (const [index, productPack] of uniqueMappedProductPacks.entries()) {
             let FASTProductPackdx = productPacksExistingInFAST.findIndex(FASTProductPack => FASTProductPack.PRODUCTPACKNAME === productPack.PRODUCTPACKNAME);
             if (FASTProductPackdx > -1) {
                 // copy over the ProductPackID from existing ProductPack
@@ -299,7 +304,14 @@ module.exports = class ProcessMaterials extends BaseJob {
                 FASTNewProductPacks.push(productPack);
             }
         }
-        // 3. Upsert records into PT_TMPRDPCK 
+
+        // 3. some SKUs belong to the same ProductPack. These SKUs could't be mapped to a ProductPackID and therefore we need to handle them here
+        const productPackSKUidxWithouPackID = mappedProductPackSKUs.reduce((prev, curr, idx) => { !curr.ProductPackID && prev.push(idx); return prev;}, []);
+        productPackSKUidxWithouPackID.forEach(idx => {
+            mappedProductPackSKUs[idx].ProductPackID = mappedProductPacks[idx].PRODUCTPACKID;
+        });
+
+        // 4. Upsert records into PT_TMPRDPCK 
         console.log(`JOB (${this.jobName }): Upserting Brazil ProductPacks into FAST table PT_TMPRDPCK ...`);
         try {
             for (const FASTProductPack of FASTChangedProductPacks) {
@@ -308,10 +320,7 @@ module.exports = class ProcessMaterials extends BaseJob {
             FASTNewProductPacks && FASTNewProductPacks.length > 0 && await tx.run(INSERT(FASTNewProductPacks).into(PT_TMPRDPCK));
             console.log(`JOB (${this.jobName }): Upserting of Brazil ProductPacks into FAST table PT_TMPRDPCK successfully completed.`);
             console.log(`JOB (${this.jobName }): PT_TMPRDPCK -> created: ${FASTNewProductPacks.length}, updated: ${FASTChangedProductPacks.length}`);
-            return {
-                FASTNewProductPacks,
-                FASTChangedProductPacks
-            };
+            return true;
         } catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Upserting of Brazil ProductPacks into FAST table PT_TMPRDPCK failed`);
             console.error(error);
@@ -322,19 +331,22 @@ module.exports = class ProcessMaterials extends BaseJob {
     /**
      * Creates or Updates CountryProductPacks in FAST
      * @param {Array<PT_TMCTPRDPCK>} mappedCountryProductPacks
-     * @param {Object<Array>} processedProductPacks
      * @returns 
      */
-     async upsertFASTCountryProductPacks(tx, mappedCountryProductPacks, processedProductPacks) {
+     async upsertFASTCountryProductPacks(tx, mappedCountryProductPacks) {
         const { PT_TMCTPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
         let nextCountryProductPackID = await this.getNextValue(tx, PT_TMCTPRDPCK, "COUNTRYPRODUCTPACKID");
+
+        // 0. SAP material may contain the same ProductPack per SKU, we must not process the same ProductPack more than ones
+        // in this case we are filtering out the records that don't have a ProductPackId mapped from the previous steps
+        const uniqueMappedCountryProductPacks = mappedCountryProductPacks.filter(c => c.PRODUCTPACKID);
         
         // 1. get a list of existing CountryProductPacks from FAST
-        const countryProductPacksExistingInFAST = await this.getFASTCountryProductPacks(tx, mappedCountryProductPacks, processedProductPacks);
+        const countryProductPacksExistingInFAST = await this.getFASTCountryProductPacks(tx, uniqueMappedCountryProductPacks);
         // 2. devide mapped CountryProductPacks into New or Changed CountryProductPacks
         const FASTNewCountryProductPacks = [];
         const FASTChangedCountryProductPacks = [];
-        for (const countryProductPack of mappedCountryProductPacks) {
+        for (const countryProductPack of uniqueMappedCountryProductPacks) {
             let FASTCountryProductPackdx = countryProductPacksExistingInFAST.findIndex(FASTCountryProductPack => FASTCountryProductPack.PRODUCTPACKNAME === countryProductPack.PRODUCTPACKNAME);
             if (FASTCountryProductPackdx > -1) {
                 // copy over the ProductPackID and CountryProductPackID from existing ProductPack
@@ -367,39 +379,31 @@ module.exports = class ProcessMaterials extends BaseJob {
     }
 
     /**
-     * Creates or Updates ProductPackSKUs in FAST
+     * Creates ProductPackSKUs in FAST
+     * No update needed as all fields are keys
      * @param {Array<PT_TMSKUPRDPCK>} mappedProductPackSKUs
-     * @param {Object<Array>} processedProductPacks
      * @returns 
      */
-     async upsertFASTProductPackSKUs(tx, mappedProductPackSKUs, processedProductPacks) {
+     async upsertFASTProductPackSKUs(tx, mappedProductPackSKUs) {
         const { PT_TMSKUPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
         let nextCountrySKUID = await this.getNextValue(tx, PT_TMSKUPRDPCK, "CountrySKUID");
         
         // 1. get a list of existing ProductPackSKUs from FAST
-        const productPackSKUsExistingInFAST = await this.getFASTProductPackSKUs(tx, mappedProductPackSKUs, processedProductPacks);
+        const productPackSKUsExistingInFAST = await this.getFASTProductPackSKUs(tx, mappedProductPackSKUs);
         // 2. devide mapped ProductPackSKUs into New or Changed ProductPackSKUs
         const FASTNewProductPackSKUs = [];
         const FASTChangedProductPackSKU = [];
         for (const productPackSKU of mappedProductPackSKUs) {
             let FASTProductPackSKUidx = productPackSKUsExistingInFAST.findIndex(FASTProductPackSKU => FASTProductPackSKU.PRODUCTPACKNAME === productPackSKU.PRODUCTPACKNAME);
-            if (FASTProductPackSKUidx > -1) {
-                // copy over the ProductPackSKUs
-                const existingCountrySKUID = productPackSKUsExistingInFAST[FASTCountryProductPackdx].CountrySKUID;
-                productPackSKU.CountrySKUID = existingCountrySKUID;
-                FASTChangedProductPackSKU.push(productPackSKU);
-            } else {
+            if (FASTProductPackSKUidx === -1) {
                 // generate new nextCountrySKUID
                 productPackSKU.CountrySKUID = nextCountrySKUID++;
                 FASTNewProductPackSKUs.push(productPackSKU);
             }
         }
-        // 3. Upsert records into PT_TMSKUPRDPCK 
+        // 3. Create records in PT_TMSKUPRDPCK 
         console.log(`JOB (${this.jobName }): Upserting Brazil ProductPackSKUs into FAST table PT_TMSKUPRDPCK ...`);
         try {
-            for (const FASTCountryProductPack of FASTChangedProductPackSKU) {
-                await tx.run(UPDATE(PT_TMSKUPRDPCK, {PRODUCTPACKID:FASTCountryProductPack.PRODUCTPACKID}).with(FASTCountryProductPack));
-            }
             FASTNewProductPackSKUs && FASTNewProductPackSKUs.length > 0 && await tx.run(INSERT(FASTNewProductPackSKUs).into(PT_TMSKUPRDPCK));
             console.log(`JOB (${this.jobName }): Upserting of Brazil ProductPackSKUs into FAST table PT_TMSKUPRDPCK successfully completed.`);
             console.log(`JOB (${this.jobName }): PT_TMSKUPRDPCK -> created: ${FASTNewProductPackSKUs.length}, updated: ${FASTChangedProductPackSKU.length}`);
@@ -473,7 +477,7 @@ module.exports = class ProcessMaterials extends BaseJob {
      * @param {Array<PT_TMCTPRDPCK>} CountryProductPacks 
      * @returns {Array<PT_TMCTPRDPCK>} a list of existing CountryProductPacks
      */
-      async getFASTCountryProductPacks(tx, mappedCountryProductPacks, processedProductPacks) {
+      async getFASTCountryProductPacks(tx, mappedCountryProductPacks) {
         if(!mappedCountryProductPacks || mappedCountryProductPacks.length === 0){
             console.log(`JOB (${this.jobName }): No CountryProductPacks were found in FAST (PT_TMCTPRDPCK)`);
             return [];
@@ -481,9 +485,8 @@ module.exports = class ProcessMaterials extends BaseJob {
         console.log(`JOB (${this.jobName }): Prepare fetching Brazil CountryProductPacks from PT_TMCTPRDPCK`);
 
         // get all the productPackIDs from mappedCountryProductPacks
-        processedProductPacks = processedProductPacks.FASTChangedProductPacks.concat(processedProductPacks.FASTNewProductPacks);
         let productPackIDs = [];
-        for (const productPack of processedProductPacks) {
+        for (const productPack of mappedCountryProductPacks) {
             productPackIDs.push(productPack.PRODUCTPACKID);
         }
         console.log(`JOB (${this.jobName }): Fetching Brazil CountryProductPacks from PT_TMCTPRDPCK ...`);
@@ -499,7 +502,7 @@ module.exports = class ProcessMaterials extends BaseJob {
      * @param {Array<PT_TMSKUPRDPCK>} ProductPackSKUs 
      * @returns {Array<PT_TMSKUPRDPCK>} a list of existing ProductPackSKUs
      */
-     async getFASTProductPackSKUs(tx, mappedProductPackSKUs, processedProductPacks) {
+     async getFASTProductPackSKUs(tx, mappedProductPackSKUs) {
         if(!mappedProductPackSKUs || mappedProductPackSKUs.length === 0){
             console.log(`JOB (${this.jobName }): No ProductPackSKUs were found in FAST (PT_TMSKUPRDPCK)`);
             return [];
@@ -507,18 +510,17 @@ module.exports = class ProcessMaterials extends BaseJob {
         console.log(`JOB (${this.jobName }): Prepare fetching Brazil ProductPackSKUs from PT_TMSKUPRDPCK`);
 
         // get all the productPackIDs and CODs from mappedProductPackSKUs
-        // processedProductPacks = processedProductPacks.FASTChangedProductPacks.concat(processedProductPacks.FASTNewProductPacks);
         let productPackIDs = [];
         let SKUCodes = [];
         for (const productPack of mappedProductPackSKUs) {
-            productPackIDs.push(productPack.PRODUCTPACKID);
+            productPackIDs.push(productPack.ProductPackID);
             SKUCodes.push(productPack.SKUCode);
         }
         console.log(`JOB (${this.jobName }): Fetching Brazil ProductPackSKUs from PT_TMSKUPRDPCK ...`);
 
         // get a list of ProductPack entities for given list of ProductPackNames
         const {PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ PRODUCTPACKID: { in: productPackIDs},SKUCODE: { in: SKUCodes}, COUNTRYCODE: 'BR' } ));
+        const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ ProductPackID: { in: productPackIDs},SKUCode: { in: SKUCodes}, CountryCode: 'BR' } ));
         return result;
     }
     
