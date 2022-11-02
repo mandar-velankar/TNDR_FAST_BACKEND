@@ -298,7 +298,7 @@ entity PT_TMCTPRDPCK{
     LAP_CURRENCY : String(5);
     LAP : Double;
     LAP_UNIT : String(15);
-    PRAD_ID: String(50);
+    PRAF_ID: String(50);
     PRAF_COMMENTS : String(255);
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
