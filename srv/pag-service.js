@@ -250,6 +250,7 @@ module.exports = async (srv) => {
         let newMaterialsAll = [];
         let newFOCMaterialsAll = [];
         let OfferProductsAll = [];
+        let institutesAll = [];
 
         if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
@@ -400,7 +401,14 @@ module.exports = async (srv) => {
             let priceConditions = priceAgreement.PriceConditions || [];
             let institute = priceAgreement.Institute;
             if(!institute){
-                institute = institutesAll.find(inst => inst.InstituteID === priceAgreement.InstituteId)
+                // before performance
+                // institute = institutesAll.find(inst => inst.InstituteID === priceAgreement.InstituteId)
+                // after performance
+                for(const inst of institutesAll){
+                    if(inst.InstituteID === priceAgreement.InstituteId){
+                        institute = inst;
+                    }
+                }
             }
 
             // Get CustomerPrices if needed
@@ -408,7 +416,14 @@ module.exports = async (srv) => {
             // let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
             // customerPrices = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreement));
             if (!customerPricesInPA) {
-                customerPrices = customerPricesAll.filter(cp => cp.PriceAgreementId == priceAgreement.ID);
+                // before performance
+                // customerPrices = customerPricesAll.filter(cp => cp.PriceAgreementId == priceAgreement.ID);
+                 // after performance
+                 for(const cp of customerPricesAll){
+                    if(cp.PriceAgreementId == priceAgreement.ID){
+                        customerPrices.push(cp);
+                    }
+                }
             }
             // }
 
@@ -418,7 +433,14 @@ module.exports = async (srv) => {
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductCode", "=", priceAgreement.ProductPackId);
                 // let whereExistingPriceCondition = ServiceHelper.buildFullWhere("ExistingPriceConditionID", "!=", null);
                 // priceConditions = await tx.run(SELECT.from(PriceConditionView).where(whereCountryCode).where(whereProductPackId).where(wherePriceAgreement).where(whereExistingPriceCondition));
-                priceConditions = priceConditionsAll.filter(pc => pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null);
+                // before performance
+                // priceConditions = priceConditionsAll.filter(pc => pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null);
+                // after performance
+                for(const pc of priceConditionsAll){
+                    if(pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null){
+                        priceConditions.push(pc);
+                    }
+                }
             }
 
             if (!mostRecentMasterPrice) {
@@ -441,7 +463,15 @@ module.exports = async (srv) => {
             //let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
             // let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
             // let newMaterials = await tx.run(SELECT.from(NewMaterialsView).where(wherePriceAgreement));
-            let newMaterials = newMaterialsAll.filter(material => material.PriceAgreementId == priceAgreement.ID);
+            // before performance
+            // let newMaterials = newMaterialsAll.filter(material => material.PriceAgreementId == priceAgreement.ID);
+            // after performance
+            let newMaterials = [];
+            for(const material of newMaterialsAll){
+                if(material.PriceAgreementId == priceAgreement.ID){
+                    newMaterials.push(material);
+                }
+            }
             //}
 
             // Get NewFOCMaterials if needed
@@ -449,7 +479,15 @@ module.exports = async (srv) => {
             //let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
             //let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
             // let newFOCMaterials = await tx.run(SELECT.from(NewFOCMaterialsView).where(wherePriceAgreement));
-            let newFOCMaterials = newFOCMaterialsAll.filter(FOCmaterial => FOCmaterial.PriceAgreementId == priceAgreement.ID);
+            // before performance
+            // let newFOCMaterials = newFOCMaterialsAll.filter(FOCmaterial => FOCmaterial.PriceAgreementId == priceAgreement.ID);
+            // after performance
+            let newFOCMaterials = [];
+            for(const FOCmaterial of newFOCMaterialsAll){
+                if(FOCmaterial.PriceAgreementId == priceAgreement.ID){
+                    newFOCMaterials.push(FOCmaterial);
+                }
+            }
             //}
 
             // Get ConsumerPrices if needed
@@ -758,59 +796,147 @@ module.exports = async (srv) => {
         startTrace("apply filters");
         //3. return the filtered results if calculated filter is used
         if (hasNewMaterialsFilterValues && hasNewMaterialsFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]);
+            // before performance
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (hasNewPriceFilterValues && hasNewPriceFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (hasExpiringSoonFilterValues && hasExpiringSoonFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.ExpiringSoon){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (hasExpiredFilterValues && hasExpiredFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.Expired === hasExpiredFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.Expired === hasExpiredFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.Expired === hasExpiredFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (isNewPriceAgreementFilterValues && isNewPriceAgreementFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (isCancelledFilterValues && isCancelledFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.isCancelled === isCancelledFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.isCancelled === isCancelledFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.isCancelled === isCancelledFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (isSynchronizedFilterValues && isSynchronizedFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.Synchronized === isSynchronizedFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (appliedCountFilterValues && appliedCountFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.AppliedCount >= appliedCountFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0) {
             let filteredResult;
             if (hasNewYLLPValues && hasNewYLLPValues.length > 0 && hasNewYLAPValues && hasNewYLAPValues.length > 0) {
-                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+                // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+                // after performance
+                let filteredResult2 = [];
+                for(const priceAgreement of result){
+                    if(priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]){
+                        filteredResult2.push(priceAgreement);
+                    }
+                }
+                filteredResult = filteredResult2;
             } else if (!hasNewYLLPValues || (hasNewYLLPValues && hasNewYLLPValues.length === 0)) {
-                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+                // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+                // after performance
+                let filteredResult2 = [];
+                for(const priceAgreement of result){
+                    if(priceAgreement.hasNewYLAP === hasNewYLAPValues[0]){
+                        filteredResult2.push(priceAgreement);
+                    }
+                }
+                filteredResult = filteredResult2;
             } else if (!hasNewYLAPValues || (hasNewYLAPValues && hasNewYLAPValues.length === 0)) {
-                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
+                // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
+                // after performance
+                let filteredResult2 = [];
+                for(const priceAgreement of result){
+                    if(priceAgreement.hasNewYLLP === hasNewYLLPValues[0]){
+                        filteredResult2.push(priceAgreement);
+                    }
+                }
+                filteredResult = filteredResult2;
             }
             result = filteredResult;
         }
 
         if (hasProductPackIdIndex && hasProductPackIdValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.ProductPackId === hasProductPackIdValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.ProductPackId === hasProductPackIdValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.ProductPackId === hasProductPackIdValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
