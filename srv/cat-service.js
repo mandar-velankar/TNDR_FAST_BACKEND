@@ -2309,7 +2309,7 @@ module.exports = (srv) => {
 			SPOT_RATE: offerValidation.SPOT_RATE
 		}
 	}
-
+//EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.
 	async function buildWorkflowApprovalProductsEntries(tx, offerId, approvalStatus) {
 		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
@@ -2340,7 +2340,7 @@ module.exports = (srv) => {
 				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS, 0, 0),
 				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS, 0, 0),
 				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS, 0, 0),
-				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
+				REQ_PRICE_UNIT_OFFER_CURRENCY: (d.COUNTRY_CODE === "IT") ? ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 5, 5) : ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
 				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2),
 				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4, 4),
 				REQ_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_SPOT, 4, 4),
@@ -2403,7 +2403,7 @@ module.exports = (srv) => {
 			}
 		});
 	}
-
+//EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.
 	async function buildWorkflowApprovalApprovalsEntries(tx, offerId, approvalStatus) {
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", offerId);
 		let offerApprovals = await buildOfferApproval(tx, whereOffer);//HERE
