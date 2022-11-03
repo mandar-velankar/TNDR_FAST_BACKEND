@@ -249,6 +249,7 @@ module.exports = async (srv) => {
         let consumerPricesInPA = true;
         let newMaterialsAll = [];
         let newFOCMaterialsAll = [];
+        let OfferProductsAll = [];
 
         if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
@@ -424,7 +425,14 @@ module.exports = async (srv) => {
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
                 // mostRecentMasterPrice = await tx.run(SELECT.one.from(MostRecentMasterPricesView).where(whereCountryCode).where(whereProductPackId));
-                mostRecentMasterPrice = mostRecentMasterPricesAll.find(mp => mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId); // use == instead of === because type of productpackid is different between two tables
+                // before performance
+                // mostRecentMasterPrice = mostRecentMasterPricesAll.find(mp => mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId); // use == instead of === because type of productpackid is different between two tables
+                // after performance
+                for(const mp of mostRecentMasterPricesAll){
+                    if(mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId){
+                        mostRecentMasterPrice = mp;
+                    }
+                }
             }
 
             // Get NewMaterials if needed
@@ -450,7 +458,14 @@ module.exports = async (srv) => {
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
                 // consumerPrice = await tx.run(SELECT.one.from(MostRecentConsumerPricesView).where(whereCountryCode).where(whereProductPackId));
-                consumerPrice = consumerPricesAll.find(cp => cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId);
+                // before performance
+                // consumerPrice = consumerPricesAll.find(cp => cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId);
+                // after performance
+                for(const cp of consumerPricesAll){
+                    if(cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId){
+                        consumerPrice = cp;
+                    }
+                }
             }
 
             // calculate Synchronized
@@ -539,7 +554,7 @@ module.exports = async (srv) => {
                         if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
                             rappelCondition = condition;
                         }
-                        if ((condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode) {
+                        if ((condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && (mainCondition && condition.ProductCode === mainCondition.ProductCode)) {
                             focCondition = condition;
                         }
                         if (mainCondition && rappelCondition && focCondition) {
@@ -550,7 +565,15 @@ module.exports = async (srv) => {
                     if (!mainCondition) {
                         return priceAgreement;
                     }
-                    let offerProduct = OfferProductsAll.find(product => product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode);
+                    // before performance
+                    // let offerProduct = OfferProductsAll.find(product => product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode);
+                    // after performance
+                    let offerProduct;
+                    for(const product of OfferProductsAll){
+                        if(product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode){
+                            offerProduct = product;
+                        }
+                    }
                     let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
                     let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
                     let mostRecentPRAF = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.PRAF : (mostRecentMasterPrice.PRAF / priceAgreement.Product.ProductPack.PACKFACTOR);
@@ -565,7 +588,14 @@ module.exports = async (srv) => {
                         } else {
                             // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", mainCondition.ExistingPriceConditionID);
                             // priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                            priceCondition = priceConditionAll.find(pc => pc.ID == mainCondition.ExistingPriceConditionID);
+                            // before performance
+                            // priceCondition = priceConditionAll.find(pc => pc.ID == mainCondition.ExistingPriceConditionID);
+                            // after performance
+                            for(const pc of priceConditionAll){
+                                if(pc.ID == mainCondition.ExistingPriceConditionID){
+                                    priceCondition = pc;
+                                }
+                            }
                         }
 
                         if (priceCondition) {
@@ -623,12 +653,27 @@ module.exports = async (srv) => {
                         } else {
                             // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", rappelCondition.ExistingPriceConditionID);
                             // priceConditionRappel = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                            priceConditionRappel = priceConditionRappelAll.find(pcr => pcr.ID == rappelCondition.ExistingPriceConditionID);
+                            // before perfomance
+                            // priceConditionRappel = priceConditionRappelAll.find(pcr => pcr.ID == rappelCondition.ExistingPriceConditionID);
+                            // after performance
+                            for(const pcr of priceConditionRappelAll){
+                                if(pcr.ID == rappelCondition.ExistingPriceConditionID){
+                                    priceConditionRappel = pcr;
+                                }
+                            }
 
                             //we'll need the discount conditions also, as these will not be filled based on this select
                             // let whereDiscountConditionRef = ServiceHelper.buildFullWhere("PriceCondition_ID", "=", rappelCondition.ExistingPriceConditionID);
                             // let discountConditions = await tx.run(SELECT.from(DiscountCondition).where(whereDiscountConditionRef));
-                            let discountConditions = discountConditionsAll.find(dc => dc.PriceCondition_ID == rappelCondition.ExistingPriceConditionID);
+                            // before performance
+                            // let discountConditions = discountConditionsAll.find(dc => dc.PriceCondition_ID == rappelCondition.ExistingPriceConditionID);
+                            // after performance
+                            let discountConditions;
+                            for(const dc of discountConditionsAll){
+                                if(dc.PriceCondition_ID == rappelCondition.ExistingPriceConditionID){
+                                    discountConditions = dc;
+                                }
+                            }
                             if (discountConditions) {
                                 priceConditionRappel.DiscountCondition = discountConditions;
                             }
@@ -664,7 +709,14 @@ module.exports = async (srv) => {
                         } else {
                             // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", focCondition.ExistingPriceConditionID);
                             // priceConditionFOC = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                            priceConditionFOC = priceConditionFOCAll.find(pcf => pcf.ID == focCondition.ExistingPriceConditionID);
+                            // before performance
+                            // priceConditionFOC = priceConditionFOCAll.find(pcf => pcf.ID == focCondition.ExistingPriceConditionID);
+                            // after performance
+                            for(const pcf of priceConditionFOCAll){
+                                if(pcf.ID == focCondition.ExistingPriceConditionID){
+                                    priceConditionFOC = pcf;
+                                }
+                            }
                         }
 
                         if (priceConditionFOC) {
