@@ -3,6 +3,8 @@ const R = require('ramda');
 const ServiceHelper = require('./utils/ServiceHelper');
 const axios = require('axios');
 const qs = require("qs");
+const path = require('path');
+const Piscina = require('piscina')
 //const { findIndex } = require('lodash'); This will cause a deploy issue and is automatically added by auto complete beceause of the use of FindIndex (new javascript not needed with lodash)
 
 module.exports = async (srv) => {
@@ -222,24 +224,35 @@ module.exports = async (srv) => {
             return data;
         }
         // const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+        // let ids = [];
+        // //use only one loop instead of multiple map functionslet ids = [];
+        //use only one loop instead of multiple map functions
+        startTrace("PrepareKeysForOtherQueries");
+        // Divide the data into chunks
+        const chunks = splitToChunks(data, 1000);
+        // Create a new thread pool
+        const pkPool = new Piscina({ 
+            filename: path.resolve(__dirname, 'workers/PrepareKeysWorker') 
+        });
+        // Run operation on the chunks parallely
+        const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
+        const pkWorkerResults = await Promise.all(pkWorkerPromises);
+
         let ids = [];
-        //use only one loop instead of multiple map functionslet ids = [];
         let offers = [];
         let institutes = [];
         let countrycodes = [];
         let productpacks = [];
-        // let existingPriceConditionIDs = [];
-        //use only one loop instead of multiple map functions
-        startTrace("PrepareKeysForOtherQueries");
-        for (const pa of data) {
-            if (ids.findIndex(id => id === pa.ID) === -1) ids.push(pa.ID);
-            if (institutes.findIndex(instituteId => instituteId === pa.InstituteId) === -1) institutes.push(pa.InstituteId);
-            if (offers.findIndex(off => off === pa.OfferId) === -1) offers.push(pa.OfferId);
-            if (countrycodes.findIndex(cc => cc === pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
-            if (productpacks.findIndex(ppid => ppid === pa.ProductPackId) === -1) productpacks.push(pa.ProductPackId);
-            // existingPriceConditionIDs.push(pa.ExistingPriceConditionID);
+
+        for(const workerResult of pkWorkerResults){
+            ids = ids.concat(workerResult.ids);
+            offers = offers.concat(workerResult.offers);
+            institutes = institutes.concat(workerResult.institutes);
+            countrycodes = countrycodes.concat(workerResult.countrycodes);
+            productpacks = productpacks.concat(workerResult.productpacks);
         }
         stopTrace("PrepareKeysForOtherQueries");
+        
         let customerPricesAll = [];
         let customerPricesInPA = true;
         let priceConditionsAll = [];
@@ -1647,6 +1660,21 @@ module.exports = async (srv) => {
                 }
             }
         }
+    };
+
+
+    /**
+     * Splits a given array into chunks
+     * @param {Array} array 
+     * @param {Array} chunkSize 
+     * @returns 
+     */
+    function splitToChunks(array, chunkSize){
+        const chunks = [];
+        for (let i = 0; i < array.length; i += chunkSize) {
+            chunks.push(array.slice(i, i + chunkSize));
+        }
+        return chunks;
     };
 
 }
