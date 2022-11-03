@@ -539,7 +539,7 @@ module.exports = async (srv) => {
                         if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
                             rappelCondition = condition;
                         }
-                        if ((condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && condition.ProductCode === mainCondition.ProductCode) {
+                        if ((condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && (mainCondition && condition.ProductCode === mainCondition.ProductCode)) {
                             focCondition = condition;
                         }
                         if (mainCondition && rappelCondition && focCondition) {
