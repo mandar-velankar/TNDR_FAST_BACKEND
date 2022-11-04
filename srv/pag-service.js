@@ -90,6 +90,7 @@ module.exports = async (srv) => {
         let hasNewYLLPIndex = null;
         let hasNewYLAPIndex = null;
         let isNewPriceAgreementFilterValues = null;
+        let hasExpiredFilterIndex = null;
         let hasExpiredFilterValues = null;
         let isCancelledFilterIndex = null;
         let isCancelledFilterValues = null;
