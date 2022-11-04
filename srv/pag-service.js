@@ -3,6 +3,8 @@ const R = require('ramda');
 const ServiceHelper = require('./utils/ServiceHelper');
 const axios = require('axios');
 const qs = require("qs");
+const path = require('path');
+const Piscina = require('piscina')
 //const { findIndex } = require('lodash'); This will cause a deploy issue and is automatically added by auto complete beceause of the use of FindIndex (new javascript not needed with lodash)
 
 module.exports = async (srv) => {
@@ -222,24 +224,35 @@ module.exports = async (srv) => {
             return data;
         }
         // const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+        // let ids = [];
+        // //use only one loop instead of multiple map functionslet ids = [];
+        //use only one loop instead of multiple map functions
+        startTrace("PrepareKeysForOtherQueries");
+        // Divide the data into chunks
+        const chunks = splitToChunks(data, 1000);
+        // Create a new thread pool
+        const pkPool = new Piscina({ 
+            filename: path.resolve(__dirname, 'workers/PrepareKeysWorker') 
+        });
+        // Run operation on the chunks parallely
+        const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
+        const pkWorkerResults = await Promise.all(pkWorkerPromises);
+
         let ids = [];
-        //use only one loop instead of multiple map functionslet ids = [];
         let offers = [];
         let institutes = [];
         let countrycodes = [];
         let productpacks = [];
-        // let existingPriceConditionIDs = [];
-        //use only one loop instead of multiple map functions
-        startTrace("PrepareKeysForOtherQueries");
-        for (const pa of data) {
-            if (ids.findIndex(id => id === pa.ID) === -1) ids.push(pa.ID);
-            if (institutes.findIndex(instituteId => instituteId === pa.InstituteId) === -1) institutes.push(pa.InstituteId);
-            if (offers.findIndex(off => off === pa.OfferId) === -1) offers.push(pa.OfferId);
-            if (countrycodes.findIndex(cc => cc === pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
-            if (productpacks.findIndex(ppid => ppid === pa.ProductPackId) === -1) productpacks.push(pa.ProductPackId);
-            // existingPriceConditionIDs.push(pa.ExistingPriceConditionID);
+
+        for(const workerResult of pkWorkerResults){
+            ids = ids.concat(workerResult.ids);
+            offers = offers.concat(workerResult.offers);
+            institutes = institutes.concat(workerResult.institutes);
+            countrycodes = countrycodes.concat(workerResult.countrycodes);
+            productpacks = productpacks.concat(workerResult.productpacks);
         }
         stopTrace("PrepareKeysForOtherQueries");
+        
         let customerPricesAll = [];
         let customerPricesInPA = true;
         let priceConditionsAll = [];
@@ -249,6 +262,8 @@ module.exports = async (srv) => {
         let consumerPricesInPA = true;
         let newMaterialsAll = [];
         let newFOCMaterialsAll = [];
+        let OfferProductsAll = [];
+        let institutesAll = [];
 
         if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
@@ -399,7 +414,14 @@ module.exports = async (srv) => {
             let priceConditions = priceAgreement.PriceConditions || [];
             let institute = priceAgreement.Institute;
             if(!institute){
-                institute = institutesAll.find(inst => inst.InstituteID === priceAgreement.InstituteId)
+                // before performance
+                // institute = institutesAll.find(inst => inst.InstituteID === priceAgreement.InstituteId)
+                // after performance
+                for(const inst of institutesAll){
+                    if(inst.InstituteID === priceAgreement.InstituteId){
+                        institute = inst;
+                    }
+                }
             }
 
             // Get CustomerPrices if needed
@@ -407,7 +429,14 @@ module.exports = async (srv) => {
             // let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
             // customerPrices = await tx.run(SELECT.from(CustomerPrices).where(wherePriceAgreement));
             if (!customerPricesInPA) {
-                customerPrices = customerPricesAll.filter(cp => cp.PriceAgreementId == priceAgreement.ID);
+                // before performance
+                // customerPrices = customerPricesAll.filter(cp => cp.PriceAgreementId == priceAgreement.ID);
+                 // after performance
+                 for(const cp of customerPricesAll){
+                    if(cp.PriceAgreementId == priceAgreement.ID){
+                        customerPrices.push(cp);
+                    }
+                }
             }
             // }
 
@@ -417,14 +446,28 @@ module.exports = async (srv) => {
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductCode", "=", priceAgreement.ProductPackId);
                 // let whereExistingPriceCondition = ServiceHelper.buildFullWhere("ExistingPriceConditionID", "!=", null);
                 // priceConditions = await tx.run(SELECT.from(PriceConditionView).where(whereCountryCode).where(whereProductPackId).where(wherePriceAgreement).where(whereExistingPriceCondition));
-                priceConditions = priceConditionsAll.filter(pc => pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null);
+                // before performance
+                // priceConditions = priceConditionsAll.filter(pc => pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null);
+                // after performance
+                for(const pc of priceConditionsAll){
+                    if(pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null){
+                        priceConditions.push(pc);
+                    }
+                }
             }
 
             if (!mostRecentMasterPrice) {
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
                 // mostRecentMasterPrice = await tx.run(SELECT.one.from(MostRecentMasterPricesView).where(whereCountryCode).where(whereProductPackId));
-                mostRecentMasterPrice = mostRecentMasterPricesAll.find(mp => mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId); // use == instead of === because type of productpackid is different between two tables
+                // before performance
+                // mostRecentMasterPrice = mostRecentMasterPricesAll.find(mp => mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId); // use == instead of === because type of productpackid is different between two tables
+                // after performance
+                for(const mp of mostRecentMasterPricesAll){
+                    if(mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId){
+                        mostRecentMasterPrice = mp;
+                    }
+                }
             }
 
             // Get NewMaterials if needed
@@ -433,7 +476,15 @@ module.exports = async (srv) => {
             //let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
             // let wherePriceAgreement = ServiceHelper.buildFullWhere("PriceAgreementId", "=", priceAgreement.ID);
             // let newMaterials = await tx.run(SELECT.from(NewMaterialsView).where(wherePriceAgreement));
-            let newMaterials = newMaterialsAll.filter(material => material.PriceAgreementId == priceAgreement.ID);
+            // before performance
+            // let newMaterials = newMaterialsAll.filter(material => material.PriceAgreementId == priceAgreement.ID);
+            // after performance
+            let newMaterials = [];
+            for(const material of newMaterialsAll){
+                if(material.PriceAgreementId == priceAgreement.ID){
+                    newMaterials.push(material);
+                }
+            }
             //}
 
             // Get NewFOCMaterials if needed
@@ -441,7 +492,15 @@ module.exports = async (srv) => {
             //let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
             //let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
             // let newFOCMaterials = await tx.run(SELECT.from(NewFOCMaterialsView).where(wherePriceAgreement));
-            let newFOCMaterials = newFOCMaterialsAll.filter(FOCmaterial => FOCmaterial.PriceAgreementId == priceAgreement.ID);
+            // before performance
+            // let newFOCMaterials = newFOCMaterialsAll.filter(FOCmaterial => FOCmaterial.PriceAgreementId == priceAgreement.ID);
+            // after performance
+            let newFOCMaterials = [];
+            for(const FOCmaterial of newFOCMaterialsAll){
+                if(FOCmaterial.PriceAgreementId == priceAgreement.ID){
+                    newFOCMaterials.push(FOCmaterial);
+                }
+            }
             //}
 
             // Get ConsumerPrices if needed
@@ -450,11 +509,18 @@ module.exports = async (srv) => {
                 // let whereCountryCode = ServiceHelper.buildFullWhere("CountryCode", "=", priceAgreement.CountryCode);
                 // let whereProductPackId = ServiceHelper.buildFullWhere("ProductPackId", "=", priceAgreement.ProductPackId);
                 // consumerPrice = await tx.run(SELECT.one.from(MostRecentConsumerPricesView).where(whereCountryCode).where(whereProductPackId));
-                consumerPrice = consumerPricesAll.find(cp => cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId);
+                // before performance
+                // consumerPrice = consumerPricesAll.find(cp => cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId);
+                // after performance
+                for(const cp of consumerPricesAll){
+                    if(cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId){
+                        consumerPrice = cp;
+                    }
+                }
             }
 
             // calculate Synchronized
-            priceAgreement.Synchronized = false;
+            // priceAgreement.Synchronized = false;
             // check needed - empty array will return true in case of every
             // if (customerPrices && customerPrices.length > 0) {
             // we are filtering out the PVL conditions first as we don't sync PVL with SAP
@@ -550,7 +616,15 @@ module.exports = async (srv) => {
                     if (!mainCondition) {
                         return priceAgreement;
                     }
-                    let offerProduct = OfferProductsAll.find(product => product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode);
+                    // before performance
+                    // let offerProduct = OfferProductsAll.find(product => product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode);
+                    // after performance
+                    let offerProduct;
+                    for(const product of OfferProductsAll){
+                        if(product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode){
+                            offerProduct = product;
+                        }
+                    }
                     let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
                     let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
                     let mostRecentPRAF = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.PRAF : (mostRecentMasterPrice.PRAF / priceAgreement.Product.ProductPack.PACKFACTOR);
@@ -565,7 +639,14 @@ module.exports = async (srv) => {
                         } else {
                             // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", mainCondition.ExistingPriceConditionID);
                             // priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                            priceCondition = priceConditionAll.find(pc => pc.ID == mainCondition.ExistingPriceConditionID);
+                            // before performance
+                            // priceCondition = priceConditionAll.find(pc => pc.ID == mainCondition.ExistingPriceConditionID);
+                            // after performance
+                            for(const pc of priceConditionAll){
+                                if(pc.ID == mainCondition.ExistingPriceConditionID){
+                                    priceCondition = pc;
+                                }
+                            }
                         }
 
                         if (priceCondition) {
@@ -623,12 +704,27 @@ module.exports = async (srv) => {
                         } else {
                             // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", rappelCondition.ExistingPriceConditionID);
                             // priceConditionRappel = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                            priceConditionRappel = priceConditionRappelAll.find(pcr => pcr.ID == rappelCondition.ExistingPriceConditionID);
+                            // before perfomance
+                            // priceConditionRappel = priceConditionRappelAll.find(pcr => pcr.ID == rappelCondition.ExistingPriceConditionID);
+                            // after performance
+                            for(const pcr of priceConditionRappelAll){
+                                if(pcr.ID == rappelCondition.ExistingPriceConditionID){
+                                    priceConditionRappel = pcr;
+                                }
+                            }
 
                             //we'll need the discount conditions also, as these will not be filled based on this select
                             // let whereDiscountConditionRef = ServiceHelper.buildFullWhere("PriceCondition_ID", "=", rappelCondition.ExistingPriceConditionID);
                             // let discountConditions = await tx.run(SELECT.from(DiscountCondition).where(whereDiscountConditionRef));
-                            let discountConditions = discountConditionsAll.find(dc => dc.PriceCondition_ID == rappelCondition.ExistingPriceConditionID);
+                            // before performance
+                            // let discountConditions = discountConditionsAll.find(dc => dc.PriceCondition_ID == rappelCondition.ExistingPriceConditionID);
+                            // after performance
+                            let discountConditions;
+                            for(const dc of discountConditionsAll){
+                                if(dc.PriceCondition_ID == rappelCondition.ExistingPriceConditionID){
+                                    discountConditions = dc;
+                                }
+                            }
                             if (discountConditions) {
                                 priceConditionRappel.DiscountCondition = discountConditions;
                             }
@@ -664,7 +760,14 @@ module.exports = async (srv) => {
                         } else {
                             // let wherePriceCondition = ServiceHelper.buildFullWhere("ID", "=", focCondition.ExistingPriceConditionID);
                             // priceConditionFOC = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceCondition));
-                            priceConditionFOC = priceConditionFOCAll.find(pcf => pcf.ID == focCondition.ExistingPriceConditionID);
+                            // before performance
+                            // priceConditionFOC = priceConditionFOCAll.find(pcf => pcf.ID == focCondition.ExistingPriceConditionID);
+                            // after performance
+                            for(const pcf of priceConditionFOCAll){
+                                if(pcf.ID == focCondition.ExistingPriceConditionID){
+                                    priceConditionFOC = pcf;
+                                }
+                            }
                         }
 
                         if (priceConditionFOC) {
@@ -706,59 +809,147 @@ module.exports = async (srv) => {
         startTrace("apply filters");
         //3. return the filtered results if calculated filter is used
         if (hasNewMaterialsFilterValues && hasNewMaterialsFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]);
+            // before performance
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (hasNewPriceFilterValues && hasNewPriceFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (hasExpiringSoonFilterValues && hasExpiringSoonFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.ExpiringSoon){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (hasExpiredFilterValues && hasExpiredFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.Expired === hasExpiredFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.Expired === hasExpiredFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.Expired === hasExpiredFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (isNewPriceAgreementFilterValues && isNewPriceAgreementFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (isCancelledFilterValues && isCancelledFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.isCancelled === isCancelledFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.isCancelled === isCancelledFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.isCancelled === isCancelledFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (isSynchronizedFilterValues && isSynchronizedFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.Synchronized === isSynchronizedFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (appliedCountFilterValues && appliedCountFilterValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.AppliedCount >= appliedCountFilterValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
         if (hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0) {
             let filteredResult;
             if (hasNewYLLPValues && hasNewYLLPValues.length > 0 && hasNewYLAPValues && hasNewYLAPValues.length > 0) {
-                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+                // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+                // after performance
+                let filteredResult2 = [];
+                for(const priceAgreement of result){
+                    if(priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]){
+                        filteredResult2.push(priceAgreement);
+                    }
+                }
+                filteredResult = filteredResult2;
             } else if (!hasNewYLLPValues || (hasNewYLLPValues && hasNewYLLPValues.length === 0)) {
-                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+                // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
+                // after performance
+                let filteredResult2 = [];
+                for(const priceAgreement of result){
+                    if(priceAgreement.hasNewYLAP === hasNewYLAPValues[0]){
+                        filteredResult2.push(priceAgreement);
+                    }
+                }
+                filteredResult = filteredResult2;
             } else if (!hasNewYLAPValues || (hasNewYLAPValues && hasNewYLAPValues.length === 0)) {
-                filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
+                // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
+                // after performance
+                let filteredResult2 = [];
+                for(const priceAgreement of result){
+                    if(priceAgreement.hasNewYLLP === hasNewYLLPValues[0]){
+                        filteredResult2.push(priceAgreement);
+                    }
+                }
+                filteredResult = filteredResult2;
             }
             result = filteredResult;
         }
 
         if (hasProductPackIdIndex && hasProductPackIdValues.length > 0) {
-            const filteredResult = result.filter(priceAgreement => priceAgreement.ProductPackId === hasProductPackIdValues[0]);
+            // const filteredResult = result.filter(priceAgreement => priceAgreement.ProductPackId === hasProductPackIdValues[0]);
+            // after performance
+            let filteredResult = [];
+            for(const priceAgreement of result){
+                if(priceAgreement.ProductPackId === hasProductPackIdValues[0]){
+                    filteredResult.push(priceAgreement);
+                }
+            }
             result = filteredResult;
         }
 
@@ -1469,6 +1660,21 @@ module.exports = async (srv) => {
                 }
             }
         }
+    };
+
+
+    /**
+     * Splits a given array into chunks
+     * @param {Array} array 
+     * @param {Array} chunkSize 
+     * @returns 
+     */
+    function splitToChunks(array, chunkSize){
+        const chunks = [];
+        for (let i = 0; i < array.length; i += chunkSize) {
+            chunks.push(array.slice(i, i + chunkSize));
+        }
+        return chunks;
     };
 
 }
