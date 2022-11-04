@@ -520,7 +520,7 @@ module.exports = async (srv) => {
             }
 
             // calculate Synchronized
-            priceAgreement.Synchronized = false;
+            // priceAgreement.Synchronized = false;
             // check needed - empty array will return true in case of every
             // if (customerPrices && customerPrices.length > 0) {
             // we are filtering out the PVL conditions first as we don't sync PVL with SAP
