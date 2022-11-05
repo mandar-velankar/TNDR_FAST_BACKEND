@@ -235,7 +235,9 @@ module.exports = async (srv) => {
         //use only one loop instead of multiple map functions
         startTrace("PrepareKeysForOtherQueries");
         // Divide the data into chunks
-        const chunks = splitToChunks(data, 1000);
+        const NUMBER_OF_THREADS = 4;
+        const chunkSize = Math.round(data.length / NUMBER_OF_THREADS);
+        const chunks = splitToChunks(data, chunkSize);
         // Create a new thread pool
         const pkPool = new Piscina({ 
             filename: path.resolve(__dirname, 'workers/PrepareKeysWorker') 
