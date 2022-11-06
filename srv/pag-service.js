@@ -49,6 +49,11 @@ module.exports = async (srv) => {
 
     srv.on('READ', 'PriceAgreements', async (req, next) => {
 
+
+        // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
+        //     return [{ counted: 5555 }]; 
+        // } 
+
         let start;
         let end;
         let totalTime = 0;
@@ -235,16 +240,24 @@ module.exports = async (srv) => {
         //use only one loop instead of multiple map functions
         startTrace("PrepareKeysForOtherQueries");
         // Divide the data into chunks
-        const NUMBER_OF_THREADS = 4;
-        const chunkSize = Math.round(data.length / NUMBER_OF_THREADS);
-        const chunks = splitToChunks(data, chunkSize);
-        // Create a new thread pool
-        const pkPool = new Piscina({ 
-            filename: path.resolve(__dirname, 'workers/PrepareKeysWorker') 
-        });
+        const chunks = splitToChunks(data, 1000);
+        
         // Run operation on the chunks parallely
-        const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
-        const pkWorkerResults = await Promise.all(pkWorkerPromises);
+        let pkWorkerResults = [];
+        try{
+            // Create a new thread pool
+            const pkPool = new Piscina({ 
+                filename: path.resolve(__dirname, 'workers/PrepareKeysWorker'),
+                maxThreads: 5,
+                idleTimeout: 2000
+            });
+            const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
+            pkWorkerResults = await Promise.all(pkWorkerPromises);
+        }catch(err){
+            console.error("PrepareKeysWorker stopped");
+            console.error(err);
+            throw err;
+        }
 
         let ids = [];
         let offers = [];
@@ -422,12 +435,15 @@ module.exports = async (srv) => {
             req_query_SELECT_one: req.query.SELECT.one || false,
             hasNewYLLPValues,
             hasNewYLAPValues,
-            priceConditionsAll
+            priceConditionsAll,
+            OfferProductsAll
         };
 
         // Create a new thread pool
         const cfPool = new Piscina({ 
-            filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker') 
+            filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker'),
+            maxThreads: 5,
+            idleTimeout: 2000
         });
         // Run operation on the chunks parallely
         const cfWorkerPromises = chunks.map(chunk => cfPool.run({chunk, requiredParameters}));
@@ -618,6 +634,9 @@ module.exports = async (srv) => {
         }
         console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
         //otherwise keep as is
+        req.query.count = true;
+        req.query.cqn.count = true;
+        result.$count = result.length;
         return req.reply(result);
 
     });

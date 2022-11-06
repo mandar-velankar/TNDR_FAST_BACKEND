@@ -20,7 +20,8 @@ function calculateFields(priceAgreement, requiredParameters){
         req_query_SELECT_one,
         hasNewYLLPValues,
         hasNewYLAPValues,
-        priceConditionsAll
+        priceConditionsAll,
+        OfferProductsAll
     } = requiredParameters;
 
     const todaysDate = new Date();
