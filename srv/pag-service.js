@@ -242,6 +242,7 @@ module.exports = async (srv) => {
         // Divide the data into chunks
         const chunks = splitToChunks(data, 1000);
         const MAX_THREADS = 4;
+        const MAX_OLD_GENERATION_SIZE_MB = 1024;
         // Run operation on the chunks parallely
         let pkWorkerResults = [];
         try{
@@ -250,7 +251,7 @@ module.exports = async (srv) => {
                 filename: path.resolve(__dirname, 'workers/PrepareKeysWorker'),
                 maxThreads: MAX_THREADS,
                 idleTimeout: 2000,
-                resourceLimits: { maxOldGenerationSizeMb: 200 }
+                resourceLimits: { maxOldGenerationSizeMb: MAX_OLD_GENERATION_SIZE_MB }
             });
             const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
             pkWorkerResults = await Promise.all(pkWorkerPromises);
@@ -445,7 +446,7 @@ module.exports = async (srv) => {
             filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker'),
             maxThreads: MAX_THREADS,
             idleTimeout: 2000,
-            resourceLimits: { maxOldGenerationSizeMb: 200 }
+            resourceLimits: { maxOldGenerationSizeMb: MAX_OLD_GENERATION_SIZE_MB }
         });
         // Run operation on the chunks parallely
         const cfWorkerPromises = chunks.map(chunk => cfPool.run({chunk, requiredParameters}));
