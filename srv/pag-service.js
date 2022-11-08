@@ -241,15 +241,16 @@ module.exports = async (srv) => {
         startTrace("PrepareKeysForOtherQueries");
         // Divide the data into chunks
         const chunks = splitToChunks(data, 1000);
-        
+        const MAX_THREADS = 4;
         // Run operation on the chunks parallely
         let pkWorkerResults = [];
         try{
             // Create a new thread pool
             const pkPool = new Piscina({ 
                 filename: path.resolve(__dirname, 'workers/PrepareKeysWorker'),
-                maxThreads: 5,
-                idleTimeout: 2000
+                maxThreads: MAX_THREADS,
+                idleTimeout: 2000,
+                resourceLimits: { maxOldGenerationSizeMb: 200 }
             });
             const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
             pkWorkerResults = await Promise.all(pkWorkerPromises);
@@ -442,8 +443,9 @@ module.exports = async (srv) => {
         // Create a new thread pool
         const cfPool = new Piscina({ 
             filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker'),
-            maxThreads: 5,
-            idleTimeout: 2000
+            maxThreads: MAX_THREADS,
+            idleTimeout: 2000,
+            resourceLimits: { maxOldGenerationSizeMb: 200 }
         });
         // Run operation on the chunks parallely
         const cfWorkerPromises = chunks.map(chunk => cfPool.run({chunk, requiredParameters}));
