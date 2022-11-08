@@ -241,7 +241,8 @@ module.exports = async (srv) => {
         startTrace("PrepareKeysForOtherQueries");
         // Divide the data into chunks
         const chunks = splitToChunks(data, 1000);
-        const MAX_THREADS = 4;
+        const MAX_THREADS = 6;
+        const MIN_THREADS = 4;
         const MAX_OLD_GENERATION_SIZE_MB = 8192;
         // Run operation on the chunks parallely
         let pkWorkerResults = [];
@@ -253,7 +254,9 @@ module.exports = async (srv) => {
             const pkPool = new Piscina({ 
                 filename: path.resolve(__dirname, 'workers/PrepareKeysWorker'),
                 maxThreads: MAX_THREADS,
+                minThreads: MIN_THREADS,
                 idleTimeout: 2000,
+                maxQueue: MAX_THREADS * MAX_THREADS,
                 resourceLimits: { maxOldGenerationSizeMb: MAX_OLD_GENERATION_SIZE_MB }
             });
             const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
@@ -448,7 +451,9 @@ module.exports = async (srv) => {
         const cfPool = new Piscina({ 
             filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker'),
             maxThreads: MAX_THREADS,
+            minThreads: MIN_THREADS,
             idleTimeout: 2000,
+            maxQueue: MAX_THREADS * MAX_THREADS,
             resourceLimits: { maxOldGenerationSizeMb: MAX_OLD_GENERATION_SIZE_MB }
         });
         // Run operation on the chunks parallely
