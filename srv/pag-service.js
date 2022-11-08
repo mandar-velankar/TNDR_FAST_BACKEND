@@ -242,7 +242,7 @@ module.exports = async (srv) => {
         // Divide the data into chunks
         const chunks = splitToChunks(data, 1000);
         const MAX_THREADS = 4;
-        const MAX_OLD_GENERATION_SIZE_MB = 1024;
+        const MAX_OLD_GENERATION_SIZE_MB = 3072;
         // Run operation on the chunks parallely
         let pkWorkerResults = [];
         try{
