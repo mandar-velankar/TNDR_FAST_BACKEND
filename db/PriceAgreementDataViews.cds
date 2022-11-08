@@ -44,22 +44,41 @@ select from TransactionalData.ProductPricing
 
 } where FreeGoodsOther.FreeGoodsOther is not null and FreeGoodsOther.FreeGoodsOther > 0 and FreeGoodsOther.FreeGoodsOther  != '0';
 
-entity Deliveries as select from PriceAgreementData.CustomerPrices as materials 
-inner join SAP.ItalyDeliveries as italydeliveries on ltrim(materials.MaterialNumber,'0') = ltrim(italydeliveries.MATNR,'0')
-    //and materials.InstituteId = italydeliveries.KUNNR 
-{
-    key italydeliveries.ID,
-    italydeliveries.WADAT_IST,
-    italydeliveries.ANZPK,
-    italydeliveries.VRKME,
-    italydeliveries.LFART,
-    italydeliveries.CHARG,
-    italydeliveries.VGBEL,
-    materials.PriceAgreementId,
-    materials.Institute.InstituteName
+// entity Deliveries as select from PriceAgreementData.CustomerPrices as materials 
+// inner join SAP.ItalyDeliveries as italydeliveries on ltrim(materials.MaterialNumber,'0') = ltrim(italydeliveries.MATNR,'0')
+//     //and materials.InstituteId = italydeliveries.KUNNR 
+// {
+//     key italydeliveries.ID,
+//     italydeliveries.WADAT_IST,
+//     italydeliveries.ANZPK,
+//     italydeliveries.VRKME,
+//     italydeliveries.LFART,
+//     italydeliveries.CHARG,
+//     italydeliveries.VGBEL,
+//     materials.PriceAgreementId,
+//     materials.Institute.InstituteName
     
-} ;
+// } ;
+//EHQUT-202495-Italy - fix for mapping of SAP Italy deliveries
+entity Deliveries as select from PriceAgreementData.CustomerPrices as materials
+inner join MasterData.PT_TMINST as institutes
+  on materials.InstituteId=institutes.InstituteID
+inner join SAP.ItalyDeliveries as italydeliveries
+  on ltrim(materials.MaterialNumber,'0') = ltrim(italydeliveries.MATNR,'0')
+  and institutes.CustomerID = ltrim(italydeliveries.KUNAG,'0')
+{
+    key italydeliveries.ID,//unique identifier for SAP delivery entry
+    italydeliveries.WADAT_IST,//actual delivery date
+    italydeliveries.LFIMG,//delivery quantity
+    italydeliveries.VRKME,//meant to be sales unit
+    italydeliveries.LFART,//delivery type
+    italydeliveries.CHARG,//batch number
+    italydeliveries.VGBEL,//document reference number
+    materials.PriceAgreementId,//link to price agreement in FAST
+    institutes.InstituteName//name of institute
 
+} ;
+//EHQUT-202495-Italy - fix for mapping of SAP Italy deliveries
 entity PaMainFOCView as select from PriceAgreementFOC as FOC
 inner join PriceAgreementData.PriceAgreements pa on pa.CountryCode = FOC.CountryCode
                                                                         and pa.OfferId = FOC.OfferID
