@@ -242,11 +242,14 @@ module.exports = async (srv) => {
         // Divide the data into chunks
         const chunks = splitToChunks(data, 1000);
         const MAX_THREADS = 4;
-        const MAX_OLD_GENERATION_SIZE_MB = 1024;
+        const MAX_OLD_GENERATION_SIZE_MB = 3072;
         // Run operation on the chunks parallely
         let pkWorkerResults = [];
         try{
             // Create a new thread pool
+            // resourceLimits.maxOldGenerationSizeMb This is a very important parameter and this defines the max memory used by the worker thread. 
+            // By default, it depends on the system how much max memory a worker thread can use but it is always good to set the max limit otherwise 
+            // the worker thread will get terminated on reaching the limit
             const pkPool = new Piscina({ 
                 filename: path.resolve(__dirname, 'workers/PrepareKeysWorker'),
                 maxThreads: MAX_THREADS,
