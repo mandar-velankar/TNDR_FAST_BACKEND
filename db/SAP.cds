@@ -144,6 +144,31 @@ entity BrazilExemptions: cuid, managed {
 	BASE				: String(6);			// Base uses for exemption process
 }
 
+entity IbizResultados: cuid, managed {
+	ID_CC_QP 					: Integer; 		// ID QP Item
+	ID_QP 						: Integer; 		// ID QP (workflow)
+	ID_LIC 						: Integer; 		// ID Lic (BID)
+	NU_SENT_EXT_LINK 			: Integer; 		// Determine if result has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	NU_GANHEI 					: Integer; 		// Determine if item was won by distributor (-3 = Did not participate; -2 = No result registered; -1 = Result not published by institute; 0 = Lost; 1 = Won; 2 = There are no winners; 3 = Homologated but without a winner)
+	CREATED_AT 					: String; 		// Result's date of creation
+	NM_SITUACAO 				: String; 		// Result's situation
+	NM_MOTIVO_RESULTADO 		: String; 		// Result's reason
+	NM_DESC_MOTIVO_RESULTADO 	: String; 		// Result's reason description
+	DT_HOMOLOGACAO 				: String; 		// Result's date of homologation
+	POSICOES_RESULTADOS			: Composition of many IbizResultadosItems;
+}
+
+entity IbizResultadosItems: cuid, managed {
+	NU_POSICAO					: Integer;		// Position
+	NM_PARTICIPANTE				: String;		// Position's participant
+	COD_PARTICIPANTE			: String;		// Position's participant CNPJ
+	NM_PRODUTO					: String;		// Position's product
+	NM_FABRICANTE				: String;		// Position's product manufacturer
+	NU_QTDE						: Integer;		// Position's unit quantity
+	VLR_UNITARIO				: Double;		// Position's unit price
+	VLR_TOTAL					: Double;		// Position's total price
+}
+
 entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number
 	HLEVEL1_NAME    	: String(40);			// Description
