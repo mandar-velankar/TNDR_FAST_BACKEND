@@ -90,6 +90,8 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
                     'CP.CountryCode': 'ES', 
                     'CP.Synchronized': true, 
                     'CP.Notified': false,
+                    'CP.RefIdocNumber': { '!=': null }, 
+                     and: { 'CP.RefIdocNumber': {'!=': '' } },
                     'CP.modifiedAt': { '>=': `${date.toJSON().substring(0,10)} 00:00:00.000000000` }, // only consider records synced on the day this job runs
                     'TND.Classification': 'Commercial Agreement'
             })
