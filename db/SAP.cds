@@ -271,6 +271,40 @@ entity IbizContratosDocs: cuid {
 	DOCS						: IBIZDOCS;		
 }
 
+entity IbizEmpenhos: cuid, managed {
+	ID_EMPENHO 		 : Integer;             //ID Commitment
+	ID_CONTRATO 	 : Integer;           	//ID Contract
+	ID_LIC_ATRIBUIDA : Integer; 			//ID BID by distributor or direct participation
+	ID_LIC 			 : Integer; 			//ID BID
+	NU_SENT_EXT_LINK : Integer; 			//Determine if opportunity has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	NM_COMPRADOR 	 : String; 				//Buyer's name
+	COD_COMPRADOR 	 : String; 				//Buyer's CNPJ
+	NM_VENDEDOR 	 : String; 				//Seller's name
+	COD_VENDEDOR 	 : String; 				//Seller's CNPJ
+	NM_PROCESSO 	 : String; 				//Process number
+	NU_EMPENHO 	 	 : String; 				//Commitment number
+	DT_EMPENHO 		 : String; 				//Commitment date
+	DT_ENTREGA 		 : String; 				//Commitment delivery date
+	CREATED_AT 		 : String; 				//Commitment creation date
+	CCS_EMPENHOS	 : Composition of many IbizCcsEmpenhosItems;  //List of commiments items
+	DOCS			 : Composition of many IbizEmpenhosDocs; //List of commiments docuemnts
+}
+
+entity IbizCcsEmpenhosItems: cuid {
+	ID_CC_EMPENHO 		: Integer; 				//ID Commitment Item
+	ID_CC_CONTRATO 		: Integer; 				//ID Contract Item
+	ID_EMPENHO 			: Integer; 				//ID Commitment
+	NU_SENT_EXT_LINK  	: Integer; 				//Determine if contract has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	COD_REFERENCIA 		: String; 				//SAP code
+	NU_QTDE_UNITARIA 	: Integer; 				//Unit quantity
+	NU_QTDE_EMBALAGEM 	: Integer; 				//Package quantity
+	VLR_UNITARIO 		: Double; 				//Unit price for distributor -> institute sale (with taxes and without discounts)
+	VLR_EMBALAGEM 		: Double; 				//Package price for distributor -> institute sale (with taxes and without discounts)
+}
+
+entity IbizEmpenhosDocs: cuid {
+	DOCS 				: IBIZDOCS;				//List of documents
+}
 
 entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number
