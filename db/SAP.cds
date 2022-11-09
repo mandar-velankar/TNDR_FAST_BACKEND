@@ -155,10 +155,10 @@ entity IbizResultados: cuid, managed {
 	NM_MOTIVO_RESULTADO 		: String; 		// Result's reason
 	NM_DESC_MOTIVO_RESULTADO 	: String; 		// Result's reason description
 	DT_HOMOLOGACAO 				: String; 		// Result's date of homologation
-	POSICOES_RESULTADOS			: Composition of many IbizResultadosItems;
+	POSICOES_RESULTADOS			: Composition of many IbizResultadosItems; // List of result items
 }
 
-entity IbizResultadosItems: cuid, managed {
+entity IbizResultadosItems: cuid {
 	NU_POSICAO					: Integer;		// Position
 	NM_PARTICIPANTE				: String;		// Position's participant
 	COD_PARTICIPANTE			: String;		// Position's participant CNPJ
@@ -168,6 +168,47 @@ entity IbizResultadosItems: cuid, managed {
 	VLR_UNITARIO				: Double;		// Position's unit price
 	VLR_TOTAL					: Double;		// Position's total price
 }
+
+entity IbizContratos: cuid, managed {
+	ID_CONTRATO					: Integer;		// ID Contract
+	ID_LIC_ATRIBUIDA			: Integer;		// ID BID by distributor or direct participation
+	ID_LIC						: Integer;		// ID BID
+	NU_SENT_EXT_LINK			: Integer;		// Determine if contract has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	NM_COMPRADOR				: String;		// Buyer's name
+	COD_COMPRADOR				: String;		// Buyer's CNPJ
+	NM_VENDEDOR					: String;		// Seller's name
+	COD_VENDEDOR				: String;		// Seller's CNPJ
+	NM_PROCESSO					: String;		// Process number
+	NU_CONTRATO					: String;		// Contract number
+	DT_ASSINATURA				: String;		// Contract's date of signature
+	DT_INI_VIGENCIA				: String;		// Contract's date of start
+	DT_FIM_VIGENCIA				: String;		// Contract's date of end
+	NM_TIPO_CONTRATO			: String;		// Contract's type (ATA/Contrato; Adesao; ATA/Contrato Filho; Aditivo)
+	NM_OBS						: String;		// Contract's observation
+	CCS_CONTRATOS				: Composition of many IbizContratosItems;		// List of contract items
+	DOCS						: Composition of many IbizContratosDocs;		// List of contracts documents
+}
+
+entity IbizContratosItems: cuid {
+	ID_CC_CONTRATO				: Integer; 		// ID Contract Item
+	ID_CC_QP					: Integer; 		// ID QP Item
+	ID_CONTRATO					: Integer; 		// ID Contract
+	NU_SENT_EXT_LINK			: Integer; 		// Determine if contract item has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	ID_CONTEUDO_CATALOGO		: Integer; 		// ID product
+	COD_REFERENCIA				: String; 		// SAP code
+	NU_TIPO						: Integer; 		// Item type (0=direct sales; 1=sample FOC; 2=lending; 3=consigned; 4=location; 5=service; 6=testing; 7=bonus FOC)
+	NU_LOTE						: Integer; 		// Batch number
+	NU_ITEM						: Integer; 		// Item number
+	NU_QTDE_UNITARIA			: Integer; 		// Unit quantity
+	NU_QTDE_EMBALAGEM			: Integer; 		// Package quantity
+	VLR_UNITARIO				: Double; 		// Unit price for distributor -> institute sale (with taxes and without discounts)
+	VLR_EMBALAGEM				: Double; 		// Package price for distributor -> institute sale (with taxes and without discounts)
+}
+
+entity IbizContratosDocs: cuid {
+	DOCS						: IBIZDOCS;		
+}
+
 
 entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number

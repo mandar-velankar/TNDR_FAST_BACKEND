@@ -14,6 +14,7 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity BrazilDeliveriesItems as projection on SAP.BrazilDeliveriesItems;
     entity BrazilExemptions as projection on SAP.BrazilExemptions;
     entity IbizResultados as projection on SAP.IbizResultados;
+    entity IbizContratos as projection on SAP.IbizContratos;
     entity ItalyMaterials as projection on SAP.ItalyMaterials;
     entity ItalyCustomers as projection on SAP.ItalyCustomers;
     entity ItalyDeliveries as projection on SAP.ItalyDeliveries;
