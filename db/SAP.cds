@@ -2,7 +2,7 @@ namespace com.bayer.SXTENDER.MasterData.SAP;
 
 using { Currency, User, Country, managed, cuid } from '@sap/cds/common';
 using { 
-	E1KNA1M, E1KNA11, E1KNB1M, E1MARAM, E1MARA1, E1MAKTM, E1MARCM, E1MARDM, E1MARMM,E1MBEWM, E1MVKEM, E1MLANM, E1MTXHM, E1MTXLM, E1KNVVM, E1KNVKM, E1KNKKM
+	E1KNA1M, E1KNA11, E1KNB1M, E1MARAM, E1MARA1, E1MAKTM, E1MARCM, E1MARDM, E1MARMM,E1MBEWM, E1MVKEM, E1MLANM, E1MTXHM, E1MTXLM, E1KNVVM, E1KNVKM, E1KNKKM, IBIZDOCS
 } from './SAPTypes';
 
 
@@ -143,6 +143,68 @@ entity BrazilExemptions: cuid, managed {
 	RATE				: String(6);			// Aliquot used for exemption process
 	BASE				: String(6);			// Base uses for exemption process
 }
+
+entity IbizQps: cuid, managed {
+	ID_QP 								: Integer; 		//ID QP (workflow)
+	ID_PRE_QP 							: Integer; 		//ID Pre QP (pre-workflow)
+	ID_LIC_ATRIBUIDA 					: Integer; 		//ID BID by distributor or direct participation
+	ID_LIC 								: Integer; 		//ID BID
+	NU_SENT_EXT_LINK 					: Integer; 		//Determine if opportunity has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	NU_DIRETO_INDIRETO 					: Integer; 		//Determine if opportunity is direct or indirect (0 = direct; 1 = indirect)
+	ID_ALTERNATIVO 						: String; 		//ID Alternative (used for linking legacy bids)
+	ID_LICITACAO_IBIZ_LICITA  			: Integer; 		//ID IBIZ Licita (service of IBIZ that capture bids)
+	NM_BU_ABREV 						: String; 		//Business Unit
+	DT_CAPTURA 							: String; 		//BID's date of capture
+	DT_ABERTURA 						: String; 		//Opening date
+	DT_FIM_ACOLHIMENTO 					: String; 		//Closing date
+	NM_MODALIDADE 						: String; 		//BID's modality
+	NU_LICITACAO_EDITAL 				: String; 		//BID's document number
+	NM_PROCESSO 						: String; 		//Process number
+	COD_LICITADOR 						: String; 		//Main Institute's CNPJ
+	NM_LICITADOR 						: String; 		//Main Institute's name
+	NM_FANTASIA 						: String; 		//Main Institute's secondary name
+	NM_MUNICIPIO 						: String; 		//Main Institute's city
+	NM_UF_ABREV 						: String; 		//Main Institute's state
+	NM_PAIS 							: String; 		//Main Institute's country
+	NM_DONO_QP 							: String; 		//Distributor's name (for direct it will be Bayer's name)
+	COD_DONO_QP 						: String; 		//Distributor's CNPJ (for direct it will be Bayer's CNPJ)
+	NM_FINALIDADE_LIC 					: String; 		//Item's purpose
+	NM_LIC_TIPO_PARTICIPACAO 			: String; 		//Participation's type
+	NM_CARD_ATUAL 						: String; 		//Current workflow step
+	NU_2D_NOTIF_APPLIED_NO_DN_RESPONDED : Integer; 		//Determine if the opportunity wasn't interesting for any DN and was switched automaticly to direct 2 days before the opening date (0 = no; 1 = yes)
+	DT_FINALIZADO 						: String; 		//Determine if a workflow was ended by setting a date its end (if it is null, than the workflow is still on going)
+	NM_MOTIVO_FINALIZADO 				: String; 		//Determine the motive for ending a workflow
+	CCS_QPS								: Composition of many IbizCcsQps;  	//List of batch and items by products
+	DOCS								: Composition of many IbizQpsDocs;	//List of opportunities documents
+}
+
+entity IbizCcsQps: cuid {
+	ID_CC_QP  						: Integer; 		//ID QP item
+	ID_QP 							: Integer; 		//ID QP (workflow)
+	NU_LOTE 						: Integer; 		//Batch number
+	NU_ITEM 						: Integer; 		//Item number
+	ID_CONTEUDO_CATALOGO 			: Integer; 		//ID product
+	COD_REFERENCIA 					: String; 		//SAP code
+	NU_QTDE_UNITARIA 				: Integer;  	//Unit quantity
+	NU_QTDE_EMBALAGEM 				: Integer;  	//Package quantity
+	VLR_BASE_CALCULO_UNITARIO 		: Double;  		//Unit price for distributor -> institute sale (with taxes and without discounts)
+	VLR_BASE_CALCULO 				: Double; 		//Package price for distributor -> institute sale (with taxes and without discounts)
+	VLR_UNITARIO 					: Double;  		//Unit price for bayer -> distributor sale (with taxes and with discounts)
+	VLR_EMBALAGEM 					: Double; 		//Package price for bayer -> distributor sale (with taxes and with discounts)
+	NU_TIPO 						: Integer; 		//Item type (0=direct sales; 1=sample FOC; 2=lending; 3=consigned; 4=location; 5=service; 6=testing; 7=bonus FOC)
+	NU_UF_ICMS 						: String; 		//State
+	NU_PORCENTAGEM_ICMS 			: Double; 		//ICMS Tax
+	NU_CAP 							: Integer; 		//Determines if CAP is applied (0=no; 1=yes)
+	NU_PORCENTAGEM_CAP 				: Double; 		//CAP discount
+	NU_PORCENTAGEM_DESCONTO 		: Double; 		//Total discount
+	NU_PORCENTAGEM_DESCONTO_INICIAL : Double; 		//Initial discount
+	NU_PORCENTAGEM_DESCONTO_ADD 	: Double; 		//Additional discount
+}
+
+entity IbizQpsDocs: cuid {
+	DOCS 				: IBIZDOCS;				//List of documents
+}
+
 
 entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number
