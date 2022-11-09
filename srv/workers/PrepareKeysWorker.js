@@ -5,6 +5,7 @@ module.exports = async (data) => {
     let institutes = [];
     let countrycodes = [];
     let productpacks = [];
+    let productpacksstr = [];
 
     for (const pa of data) {
         if (ids.findIndex(id => id === pa.ID) === -1) ids.push(pa.ID);
@@ -12,6 +13,7 @@ module.exports = async (data) => {
         if (offers.findIndex(off => off === pa.OfferId) === -1) offers.push(pa.OfferId);
         if (countrycodes.findIndex(cc => cc === pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
         if (productpacks.findIndex(ppid => ppid === pa.ProductPackId) === -1) productpacks.push(pa.ProductPackId);
+        if (productpacksstr.findIndex(ppid => ppid === pa.ProductPackId) === -1) productpacksstr.push(pa.ProductPackId.toString());
     }
 
     return {
@@ -19,6 +21,7 @@ module.exports = async (data) => {
         offers,
         institutes,
         countrycodes,
-        productpacks
+        productpacks,
+        productpacksstr
     }
 }

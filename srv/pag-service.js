@@ -265,6 +265,7 @@ module.exports = async (srv) => {
         let institutes = [];
         let countrycodes = [];
         let productpacks = [];
+        let productpacksstr = [];
 
         for(const workerResult of pkWorkerResults){
             ids = ids.concat(workerResult.ids);
@@ -272,6 +273,7 @@ module.exports = async (srv) => {
             institutes = institutes.concat(workerResult.institutes);
             countrycodes = countrycodes.concat(workerResult.countrycodes);
             productpacks = productpacks.concat(workerResult.productpacks);
+            productpacksstr = productpacksstr.concat(workerResult.productpacksstr);
         }
         stopTrace("PrepareKeysForOtherQueries");
         
@@ -352,7 +354,7 @@ module.exports = async (srv) => {
                 .where({
                     CountryCode: { in: countrycodes },
                     and: {
-                        ProductPackId: { in: productpacks }
+                        ProductPackId: { in: productpacksstr }
                     }
                 })
             );
@@ -365,7 +367,7 @@ module.exports = async (srv) => {
                     .where({
                         CountryCode: { in: countrycodes },
                         and: {
-                            ProductPackId: { in: productpacks }
+                            ProductPackId: { in: productpacksstr }
                         }
                     })
                 );
