@@ -217,7 +217,7 @@ entity IbizResultados: cuid, managed {
 	NM_MOTIVO_RESULTADO 		: String; 		// Result's reason
 	NM_DESC_MOTIVO_RESULTADO 	: String; 		// Result's reason description
 	DT_HOMOLOGACAO 				: String; 		// Result's date of homologation
-	POSICOES_RESULTADOS			: Composition of many IbizResultadosItems; // List of result items
+	POSICOES_RESULTADOS			: Composition of many IbizResultadosItems on POSICOES_RESULTADOS.parent = $self; // List of result items
 }
 
 entity IbizResultadosItems: cuid {
@@ -229,6 +229,7 @@ entity IbizResultadosItems: cuid {
 	NU_QTDE						: Integer;		// Position's unit quantity
 	VLR_UNITARIO				: Double;		// Position's unit price
 	VLR_TOTAL					: Double;		// Position's total price
+	parent						: Association to IbizResultados;
 }
 
 entity IbizContratos: cuid, managed {
@@ -247,8 +248,8 @@ entity IbizContratos: cuid, managed {
 	DT_FIM_VIGENCIA				: String;		// Contract's date of end
 	NM_TIPO_CONTRATO			: String;		// Contract's type (ATA/Contrato; Adesao; ATA/Contrato Filho; Aditivo)
 	NM_OBS						: String;		// Contract's observation
-	CCS_CONTRATOS				: Composition of many IbizContratosItems;		// List of contract items
-	DOCS						: Composition of many IbizContratosDocs;		// List of contracts documents
+	CCS_CONTRATOS				: Composition of many IbizContratosItems on CCS_CONTRATOS.parent = $self;		// List of contract items
+	DOCS						: Composition of many IbizContratosDocs on DOCS.parent = $self;		// List of contracts documents
 }
 
 entity IbizContratosItems: cuid {
@@ -265,10 +266,12 @@ entity IbizContratosItems: cuid {
 	NU_QTDE_EMBALAGEM			: Integer; 		// Package quantity
 	VLR_UNITARIO				: Double; 		// Unit price for distributor -> institute sale (with taxes and without discounts)
 	VLR_EMBALAGEM				: Double; 		// Package price for distributor -> institute sale (with taxes and without discounts)
+	parent						: Association to IbizContratos;
 }
 
 entity IbizContratosDocs: cuid {
-	DOCS						: IBIZDOCS;		
+	DOCS						: IBIZDOCS;
+	parent						: Association to IbizContratos;		
 }
 
 entity IbizEmpenhos: cuid, managed {
