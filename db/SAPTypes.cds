@@ -764,3 +764,11 @@ type E1KNKKM {
 	DBEKR				: String(17);			// Recommended credit limit
 	DBMON				: String(8);			// Date Monitoring
 }
+
+type IBIZDOCS {
+	ID_DOC 				: Integer; 				//ID Document
+	CREATED_AT 			: String;  				//Doc's criation date
+	NM_TAG 				: String; 				//Doc's label
+	NM_DOC 				: String; 				//File name
+	FILE_URL 			: String;  				//Signed file url to be requested as GET (expires in 5 minutes)
+}
