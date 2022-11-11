@@ -233,6 +233,8 @@ entity IbizResultadosItems: cuid {
 }
 
 entity IbizContratos: cuid, managed {
+	ID_QP						: Integer;		// 
+	ID_QP_CONTRATO				: String;		// 
 	ID_CONTRATO					: Integer;		// ID Contract
 	ID_LIC_ATRIBUIDA			: Integer;		// ID BID by distributor or direct participation
 	ID_LIC						: Integer;		// ID BID
