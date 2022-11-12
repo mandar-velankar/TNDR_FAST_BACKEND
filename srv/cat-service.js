@@ -776,7 +776,7 @@ module.exports = (srv) => {
 		return price;
 	}
 
-    async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes) {//Spain
+    async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -795,7 +795,8 @@ module.exports = (srv) => {
 
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
-        let dFloorPrice = MasterProductPrice ? MasterProductPrice.PRAF : 0;
+        let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
+						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
         let dRadiologyProfitability = 0;
 
         if(product.DIVISION === 'Radiology'){
@@ -1229,7 +1230,7 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
@@ -1251,7 +1252,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType9(tx, offer, product, commnonProductInfo, aApproverTypes)
 		}
         else if (offer.APPROVAL_TYPE === 10) { //Applicable for Spain
-			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes)
+			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes, institute)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -1293,7 +1294,7 @@ module.exports = (srv) => {
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute);
 
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
