@@ -316,7 +316,7 @@ module.exports = async (srv) => {
         if (countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0) {
             if (offers && offers.length > 0) {
                 startTrace("PriceConditionView");
-                if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'priceConditions') === -1) {
+                //if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'priceConditions') === -1) {
                     priceConditionsInPa = false;
                     priceConditionsAll = await tx.run(SELECT.from(PriceConditionView)
                         .where({
@@ -332,7 +332,7 @@ module.exports = async (srv) => {
                             }
                         })
                     );
-                }
+                //}
                 stopTrace("PriceConditionView");
 
                 startTrace("OfferProducts");
@@ -439,7 +439,10 @@ module.exports = async (srv) => {
             hasNewYLLPValues,
             hasNewYLAPValues,
             priceConditionsAll,
-            OfferProductsAll
+            OfferProductsAll,
+            priceConditionRappelAll,
+            discountConditionsAll,
+            priceConditionFOCAll
         };
 
         // Create a new thread pool
