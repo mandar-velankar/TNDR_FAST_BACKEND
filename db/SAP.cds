@@ -175,7 +175,7 @@ entity IbizQps: cuid, managed {
 	NU_2D_NOTIF_APPLIED_NO_DN_RESPONDED : Integer; 		//Determine if the opportunity wasn't interesting for any DN and was switched automaticly to direct 2 days before the opening date (0 = no; 1 = yes)
 	DT_FINALIZADO 						: String; 		//Determine if a workflow was ended by setting a date its end (if it is null, than the workflow is still on going)
 	NM_MOTIVO_FINALIZADO 				: String; 		//Determine the motive for ending a workflow
-	CCS_QPS								: Composition of many IbizCcsQpsItems;  	//List of batch and items by products
+	CCS_QPS								: Composition of many IbizCcsQpsItems on CCS_QPS.parent = $self;	//List of batch and items by products
 	DOCS								: Composition of many IbizDocs on DOCS.Qps = $self;	//List of opportunities documents
 }
 
@@ -200,6 +200,7 @@ entity IbizCcsQpsItems: cuid {
 	NU_PORCENTAGEM_DESCONTO 		: Double; 		//Total discount
 	NU_PORCENTAGEM_DESCONTO_INICIAL : Double; 		//Initial discount
 	NU_PORCENTAGEM_DESCONTO_ADD 	: Double; 		//Additional discount
+	parent							: Association to IbizQps;
 }
 
 entity IbizDocs {
@@ -294,7 +295,7 @@ entity IbizEmpenhos: cuid, managed {
 	DT_EMPENHO 		 : String; 				//Commitment date
 	DT_ENTREGA 		 : String; 				//Commitment delivery date
 	CREATED_AT 		 : String; 				//Commitment creation date
-	CCS_EMPENHOS	 : Composition of many IbizCcsEmpenhosItems;  //List of commiments items
+	CCS_EMPENHOS	 : Composition of many IbizCcsEmpenhosItems on CCS_EMPENHOS.parent = $self;  //List of commiments items
 	DOCS			 : Composition of many IbizDocs on DOCS.Empenhos = $self; //List of commiments docuemnts
 }
 
@@ -308,6 +309,7 @@ entity IbizCcsEmpenhosItems: cuid {
 	NU_QTDE_EMBALAGEM 	: Integer; 				//Package quantity
 	VLR_UNITARIO 		: Double; 				//Unit price for distributor -> institute sale (with taxes and without discounts)
 	VLR_EMBALAGEM 		: Double; 				//Package price for distributor -> institute sale (with taxes and without discounts)
+	parent 				: Association to IbizEmpenhos;
 }
 
 
