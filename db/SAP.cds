@@ -176,7 +176,7 @@ entity IbizQps: cuid, managed {
 	DT_FINALIZADO 						: String; 		//Determine if a workflow was ended by setting a date its end (if it is null, than the workflow is still on going)
 	NM_MOTIVO_FINALIZADO 				: String; 		//Determine the motive for ending a workflow
 	CCS_QPS								: Composition of many IbizCcsQpsItems;  	//List of batch and items by products
-	DOCS								: Composition of many IbizQpsDocs;	//List of opportunities documents
+	DOCS								: Composition of many IbizDocs on DOCS.Qps = $self;	//List of opportunities documents
 }
 
 entity IbizCcsQpsItems: cuid {
@@ -202,8 +202,15 @@ entity IbizCcsQpsItems: cuid {
 	NU_PORCENTAGEM_DESCONTO_ADD 	: Double; 		//Additional discount
 }
 
-entity IbizQpsDocs: cuid {
-	DOCS 				: IBIZDOCS;				//List of documents
+entity IbizDocs {
+	ID_DOC 				: Integer; 				//ID Document
+	CREATED_AT 			: String;  				//Doc's criation date
+	NM_TAG 				: String; 				//Doc's label
+	NM_DOC 				: String; 				//File name
+	FILE_URL 			: String;  				//Signed file url to be requested as GET (expires in 5 minutes)
+	Contratos			: Association to IbizContratos;	
+	Qps					: Association to IbizQps;	
+	Empenhos			: Association to IbizEmpenhos;	
 }
 
 entity IbizResultados: cuid, managed {
@@ -251,7 +258,7 @@ entity IbizContratos: cuid, managed {
 	NM_TIPO_CONTRATO			: String;		// Contract's type (ATA/Contrato; Adesao; ATA/Contrato Filho; Aditivo)
 	NM_OBS						: String;		// Contract's observation
 	CCS_CONTRATOS				: Composition of many IbizContratosItems on CCS_CONTRATOS.parent = $self;		// List of contract items
-	DOCS						: Composition of many IbizContratosDocs on DOCS.parent = $self;		// List of contracts documents
+	DOCS						: Composition of many IbizDocs on DOCS.Contratos = $self;		// List of contracts documents
 }
 
 entity IbizContratosItems: cuid {
@@ -271,10 +278,6 @@ entity IbizContratosItems: cuid {
 	parent						: Association to IbizContratos;
 }
 
-entity IbizContratosDocs: cuid {
-	DOCS						: IBIZDOCS;
-	parent						: Association to IbizContratos;		
-}
 
 entity IbizEmpenhos: cuid, managed {
 	ID_EMPENHO 		 : Integer;             //ID Commitment
@@ -292,7 +295,7 @@ entity IbizEmpenhos: cuid, managed {
 	DT_ENTREGA 		 : String; 				//Commitment delivery date
 	CREATED_AT 		 : String; 				//Commitment creation date
 	CCS_EMPENHOS	 : Composition of many IbizCcsEmpenhosItems;  //List of commiments items
-	DOCS			 : Composition of many IbizEmpenhosDocs; //List of commiments docuemnts
+	DOCS			 : Composition of many IbizDocs on DOCS.Empenhos = $self; //List of commiments docuemnts
 }
 
 entity IbizCcsEmpenhosItems: cuid {
@@ -307,9 +310,6 @@ entity IbizCcsEmpenhosItems: cuid {
 	VLR_EMBALAGEM 		: Double; 				//Package price for distributor -> institute sale (with taxes and without discounts)
 }
 
-entity IbizEmpenhosDocs: cuid {
-	DOCS 				: IBIZDOCS;				//List of documents
-}
 
 entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number
