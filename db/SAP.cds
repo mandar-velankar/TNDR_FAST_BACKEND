@@ -203,7 +203,7 @@ entity IbizCcsQpsItems: cuid {
 	parent							: Association to IbizQps;
 }
 
-entity IbizDocs {
+entity IbizDocs: cuid {
 	ID_DOC 				: Integer; 				//ID Document
 	CREATED_AT 			: String;  				//Doc's criation date
 	NM_TAG 				: String; 				//Doc's label

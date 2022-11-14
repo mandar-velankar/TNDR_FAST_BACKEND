@@ -49,6 +49,13 @@ entity PT_TMOFRS { //Offers
         ProfitabilityYrlyMntCost: Double;
         ProfitabilityDiscRate : Double;
         ProfitabilityGrowthRate: Double;
+        IbizWorkflowID         : Integer;
+        PreviousIbizWorkflowID : Integer;
+        TenderDistributorID    : Integer;
+        BusinessUnit           : String;
+        Responded              : Integer;
+        DistributorDeadline    : Date;
+        DistributorComments    : String;
         //Associations
         Tender                : Association to PT_TMTEND
                                     on Tender.TenderID = TenderID;
@@ -320,6 +327,8 @@ entity PT_TMOFPR {
         MaxPrice                 : Double;
         Channel                  : String;
     key LotID                    : Integer default 1;
+        WorkflowProductID        : Integer;
+        IbizWorkflowID           : Integer;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -590,6 +599,12 @@ entity PT_TMTEND: managed {
         TENDER_TYPE_2_ID     : Integer;
         SAPID                : String;
         ExternalID           : String;
+        AlternativeID        : Integer;
+        IbizLicitaID         : Integer;
+        Liciedital           : String;
+        Purpose              : String;
+        ParticiationType     : String;
+        ParticipationIntention : String;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID
