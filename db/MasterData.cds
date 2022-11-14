@@ -302,6 +302,7 @@ entity PT_TMCTLEBR{
 }
 
 //Country Product Pack
+//EHQUT-198144-MEA - Master data template file to be updated 
 entity PT_TMCTPRDPCK{
 	COUNTRYPRODUCTPACKID:Integer;//TODO: discuss with Jonathan
 	key COUNTRYCODE:String(2) not null;
@@ -320,6 +321,12 @@ entity PT_TMCTPRDPCK{
     CODE3:String(255);    
 	QTY_THRESHOLD:Integer; 
 	BU: String(255);   
+    GPP_GOVERNED : String(10);
+    LAP_CURRENCY : String(5);
+    LAP : Double;
+    LAP_UNIT : String(15);
+    PRAF_ID: String(50);
+    PRAF_COMMENTS : String(255);
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;

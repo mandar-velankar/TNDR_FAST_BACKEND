@@ -260,7 +260,10 @@ module.exports = (srv) => {
 		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
 
 		let grossSales = offerPrice * paidVolume;
-
+        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
+        let grossSalesEurSpot=grossSales / product.SPOT_RATE;
+        let grossSalesEurBudget = grossSales / product.BUDGET_RATE;
+        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
 		let netSales = netPrice * totalVolume;
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
@@ -277,10 +280,18 @@ module.exports = (srv) => {
 
 		let grossProfitEurSpot = netSalesEurSpot - totalCostEur;
 		let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
-
-		let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
-		let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
-
+        
+        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
+        let grossMarginEurSpot,grossMarginEurBudget;
+		if(offer.APPROVAL_TYPE===1 || offer.APPROVAL_TYPE===2){
+            grossMarginEurSpot = grossProfitEurSpot / grossSalesEurSpot;
+            grossMarginEurBudget = grossProfitEurBudget / grossSalesEurBudget;
+            }else{
+            grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
+            grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
+    
+         }
+        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
 		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
 
 		//Product Comment: master data product comment + info on additional brand FOC, if any
@@ -830,6 +841,7 @@ module.exports = (srv) => {
                     }
                 });
             } else {
+                
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "BU/RAM":
@@ -2135,6 +2147,9 @@ module.exports = (srv) => {
 					aApprovalForTypeResult.push(oApprovalForType[0]);
 					aApprovalForTypeResult.push(oApprovalForType[1]);
 					return aApprovalForTypeResult;
+				case 'Consumer Health':
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					return aApprovalForTypeResult;
 			}
 		} else {
 			return oApprovalForType;
@@ -2306,7 +2321,7 @@ module.exports = (srv) => {
 			SPOT_RATE: offerValidation.SPOT_RATE
 		}
 	}
-
+//EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.
 	async function buildWorkflowApprovalProductsEntries(tx, offerId, approvalStatus) {
 		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
@@ -2337,7 +2352,7 @@ module.exports = (srv) => {
 				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS, 0, 0),
 				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS, 0, 0),
 				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS, 0, 0),
-				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
+				REQ_PRICE_UNIT_OFFER_CURRENCY: (d.COUNTRY_CODE === "IT") ? ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 5, 5) : ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
 				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2),
 				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4, 4),
 				REQ_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_SPOT, 4, 4),
@@ -2400,7 +2415,7 @@ module.exports = (srv) => {
 			}
 		});
 	}
-
+//EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.
 	async function buildWorkflowApprovalApprovalsEntries(tx, offerId, approvalStatus) {
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", offerId);
 		let offerApprovals = await buildOfferApproval(tx, whereOffer);//HERE
