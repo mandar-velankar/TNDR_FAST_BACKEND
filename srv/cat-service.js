@@ -17,6 +17,8 @@ const createResolver = require("./libs/easy-template-x-angular-expression").crea
 const { Service } = require('@sap/cds');
 const NumberHelper = require("./utils/NumberHelper");
 const cfenv = require("cfenv");
+const axios = require('axios');
+const qs = require("qs");
 
 module.exports = (srv) => {
 
@@ -45,7 +47,7 @@ module.exports = (srv) => {
 		CountrySpecificTenderInfo
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate,SchedulerApiConfig,SchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -3190,4 +3192,86 @@ module.exports = (srv) => {
         const data = await next(); 
         return data;
     });
+
+
+
+	srv.on('notifyIbiz', async (req) => {
+
+		const id_qp = req.data.ibizWorkflowID;
+		const nu_direto_indireto = req.data.directIndirect; //  (0 = direct; 1 = indirect)
+		const ccs_qps = req.data.lineNumbers; 
+
+		if(typeof nu_direto_indireto != "number" || typeof id_qp != "number"|| (!ccs_qps && !Array.isArray(ccs_qps))) return req.reject(400, "Invalid request: missing/invalid parameters.");
+
+		const body = {
+			"nu_direto_indireto": nu_direto_indireto,
+			"ccs_qps": ccs_qps
+		};
+
+		try {
+            const result = await notifyIbiz(id_qp, body);
+			const msg = `Ibiz channel switch notification successful. WorkflowID: ${id_qp}`;
+            console.log(msg);
+            return msg;
+        } catch (error) {
+            console.error(`ERROR: Ibiz channel switch notification failed. WorkflowID: ${id_qp}`);
+        }
+
+	});
+
+
+	async function notifyIbiz(id_qp, body) {
+
+		if (!id_qp) {
+            console.error("The Ibiz workflow ID is missing.");
+            return false;
+        }
+
+        if (!body) {
+            console.error("The body of the request is missing.");
+            return false;
+        }
+
+        console.log(`Get api config ...`);
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "OfferProductChannel" }));
+        const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+        console.log(`Get bearer token ...`);
+		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+        const oauthCredentials = await getBearerToken(oauthAuth);
+
+        console.log(`Calling endpoint ${url}`);
+
+
+        return axios({
+            method: 'post',
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(body)
+        });
+
+    };
+
+
+	async function getBearerToken(oauthAuth) {
+
+        if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
+            console.log(`Calling ${oauthAuth.OAuthProvider}`);
+            return axios({
+                method: 'post',
+                url: oauthAuth.OAuthProvider,
+                headers: {
+                    'Authorization': `Basic ${Buffer.from(`${oauthAuth.ClientID}:${oauthAuth.ClientSecret}`).toString('base64')}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                data: qs.stringify({
+                    'grant_type': oauthAuth.GrantType
+                })
+            });
+        }
+
+        throw Error("Missing OAUTH config parameters");
+    };
 }
