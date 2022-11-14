@@ -3214,7 +3214,12 @@ module.exports = (srv) => {
             console.log(msg);
             return msg;
         } catch (error) {
-            console.error(`ERROR: Ibiz channel switch notification failed. WorkflowID: ${id_qp}`);
+			if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+			console.error(`ERROR: Ibiz channel switch notification failed. WorkflowID: ${id_qp}`);
+			return req.reject(500, error.message);
         }
 
 	});
@@ -3234,10 +3239,16 @@ module.exports = (srv) => {
 
         console.log(`Get api config ...`);
         const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "OfferProductChannel" }));
-        const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+        
         console.log(`Get bearer token ...`);
 		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
         const oauthCredentials = await getBearerToken(oauthAuth);
+
+		const queryString = qs.stringify({
+			'id_qp': id_qp
+		});
+
+		const url = `${apiConfig.Host}${apiConfig.BasePath}?${queryString}`;
 
         console.log(`Calling endpoint ${url}`);
 
