@@ -2,7 +2,7 @@ namespace com.bayer.SXTENDER.MasterData.SAP;
 
 using { Currency, User, Country, managed, cuid } from '@sap/cds/common';
 using { 
-	E1KNA1M, E1KNA11, E1KNB1M, E1MARAM, E1MARA1, E1MAKTM, E1MARCM, E1MARDM, E1MARMM,E1MBEWM, E1MVKEM, E1MLANM, E1MTXHM, E1MTXLM, E1KNVVM, E1KNVKM, E1KNKKM, IBIZDOCS
+	E1KNA1M, E1KNA11, E1KNB1M, E1MARAM, E1MARA1, E1MAKTM, E1MARCM, E1MARDM, E1MARMM,E1MBEWM, E1MVKEM, E1MLANM, E1MTXHM, E1MTXLM, E1KNVVM, E1KNVKM, E1KNKKM
 } from './SAPTypes';
 
 
@@ -175,8 +175,8 @@ entity IbizQps: cuid, managed {
 	NU_2D_NOTIF_APPLIED_NO_DN_RESPONDED : Integer; 		//Determine if the opportunity wasn't interesting for any DN and was switched automaticly to direct 2 days before the opening date (0 = no; 1 = yes)
 	DT_FINALIZADO 						: String; 		//Determine if a workflow was ended by setting a date its end (if it is null, than the workflow is still on going)
 	NM_MOTIVO_FINALIZADO 				: String; 		//Determine the motive for ending a workflow
-	CCS_QPS								: Composition of many IbizCcsQpsItems;  	//List of batch and items by products
-	DOCS								: Composition of many IbizQpsDocs;	//List of opportunities documents
+	CCS_QPS								: Composition of many IbizCcsQpsItems on CCS_QPS.parent = $self;	//List of batch and items by products
+	DOCS								: Composition of many IbizDocs on DOCS.Qps = $self;	//List of opportunities documents
 }
 
 entity IbizCcsQpsItems: cuid {
@@ -200,10 +200,18 @@ entity IbizCcsQpsItems: cuid {
 	NU_PORCENTAGEM_DESCONTO 		: Double; 		//Total discount
 	NU_PORCENTAGEM_DESCONTO_INICIAL : Double; 		//Initial discount
 	NU_PORCENTAGEM_DESCONTO_ADD 	: Double; 		//Additional discount
+	parent							: Association to IbizQps;
 }
 
-entity IbizQpsDocs: cuid {
-	DOCS 				: IBIZDOCS;				//List of documents
+entity IbizDocs {
+	ID_DOC 				: Integer; 				//ID Document
+	CREATED_AT 			: String;  				//Doc's criation date
+	NM_TAG 				: String; 				//Doc's label
+	NM_DOC 				: String; 				//File name
+	FILE_URL 			: String;  				//Signed file url to be requested as GET (expires in 5 minutes)
+	Contratos			: Association to IbizContratos;	
+	Qps					: Association to IbizQps;	
+	Empenhos			: Association to IbizEmpenhos;	
 }
 
 entity IbizResultados: cuid, managed {
@@ -233,6 +241,8 @@ entity IbizResultadosItems: cuid {
 }
 
 entity IbizContratos: cuid, managed {
+	ID_QP						: Integer;		// 
+	ID_QP_CONTRATO				: String;		// 
 	ID_CONTRATO					: Integer;		// ID Contract
 	ID_LIC_ATRIBUIDA			: Integer;		// ID BID by distributor or direct participation
 	ID_LIC						: Integer;		// ID BID
@@ -249,7 +259,7 @@ entity IbizContratos: cuid, managed {
 	NM_TIPO_CONTRATO			: String;		// Contract's type (ATA/Contrato; Adesao; ATA/Contrato Filho; Aditivo)
 	NM_OBS						: String;		// Contract's observation
 	CCS_CONTRATOS				: Composition of many IbizContratosItems on CCS_CONTRATOS.parent = $self;		// List of contract items
-	DOCS						: Composition of many IbizContratosDocs on DOCS.parent = $self;		// List of contracts documents
+	DOCS						: Composition of many IbizDocs on DOCS.Contratos = $self;		// List of contracts documents
 }
 
 entity IbizContratosItems: cuid {
@@ -269,10 +279,6 @@ entity IbizContratosItems: cuid {
 	parent						: Association to IbizContratos;
 }
 
-entity IbizContratosDocs: cuid {
-	DOCS						: IBIZDOCS;
-	parent						: Association to IbizContratos;		
-}
 
 entity IbizEmpenhos: cuid, managed {
 	ID_EMPENHO 		 : Integer;             //ID Commitment
@@ -289,8 +295,8 @@ entity IbizEmpenhos: cuid, managed {
 	DT_EMPENHO 		 : String; 				//Commitment date
 	DT_ENTREGA 		 : String; 				//Commitment delivery date
 	CREATED_AT 		 : String; 				//Commitment creation date
-	CCS_EMPENHOS	 : Composition of many IbizCcsEmpenhosItems;  //List of commiments items
-	DOCS			 : Composition of many IbizEmpenhosDocs; //List of commiments docuemnts
+	CCS_EMPENHOS	 : Composition of many IbizCcsEmpenhosItems on CCS_EMPENHOS.parent = $self;  //List of commiments items
+	DOCS			 : Composition of many IbizDocs on DOCS.Empenhos = $self; //List of commiments docuemnts
 }
 
 entity IbizCcsEmpenhosItems: cuid {
@@ -303,11 +309,9 @@ entity IbizCcsEmpenhosItems: cuid {
 	NU_QTDE_EMBALAGEM 	: Integer; 				//Package quantity
 	VLR_UNITARIO 		: Double; 				//Unit price for distributor -> institute sale (with taxes and without discounts)
 	VLR_EMBALAGEM 		: Double; 				//Package price for distributor -> institute sale (with taxes and without discounts)
+	parent 				: Association to IbizEmpenhos;
 }
 
-entity IbizEmpenhosDocs: cuid {
-	DOCS 				: IBIZDOCS;				//List of documents
-}
 
 entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number
