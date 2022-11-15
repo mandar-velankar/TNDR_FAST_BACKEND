@@ -21,7 +21,10 @@ function calculateFields(priceAgreement, requiredParameters){
         hasNewYLLPValues,
         hasNewYLAPValues,
         priceConditionsAll,
-        OfferProductsAll
+        OfferProductsAll,
+        priceConditionRappelAll,
+        discountConditionsAll,
+        priceConditionFOCAll
     } = requiredParameters;
 
     const todaysDate = new Date();
