@@ -209,8 +209,8 @@ function calculateFields(priceAgreement, requiredParameters){
                 if (priceAgreement.PriceConditions && priceAgreement.PriceConditions.length > 0) {
                     priceCondition = mainCondition;
                 } else {
-                    for(const pc of priceConditionAll){
-                        if(pc.ID == mainCondition.ExistingPriceConditionID){
+                    for(const pc of priceConditionsAll){
+                        if(pc.ExistingPriceConditionID == mainCondition.ExistingPriceConditionID){
                             priceCondition = pc;
                         }
                     }
@@ -270,7 +270,7 @@ function calculateFields(priceAgreement, requiredParameters){
                     priceConditionRappel = rappelCondition;
                 } else {
                     for(const pcr of priceConditionRappelAll){
-                        if(pcr.ID == rappelCondition.ExistingPriceConditionID){
+                        if(pcr.ExistingPriceConditionID == rappelCondition.ExistingPriceConditionID){
                             priceConditionRappel = pcr;
                         }
                     }
@@ -316,7 +316,7 @@ function calculateFields(priceAgreement, requiredParameters){
                     priceConditionFOC = focCondition;
                 } else {
                     for(const pcf of priceConditionFOCAll){
-                        if(pcf.ID == focCondition.ExistingPriceConditionID){
+                        if(pcf.ExistingPriceConditionID == focCondition.ExistingPriceConditionID){
                             priceConditionFOC = pcf;
                         }
                     }
