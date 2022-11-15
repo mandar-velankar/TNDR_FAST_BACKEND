@@ -21,12 +21,15 @@ module.exports = class processOpportunities extends BaseJob {
 
             // Fetch data
             const opportunities = await this.getOpportunities(tx);
-            const opportunitiesItems = await this.getOpportunitiesItems(tx);
             const opportunitiesDocs = await this.getOpportunitiesDocs(tx);
+
             const directIbizOpportunities = opportunities.filter(direct => direct.NU_DIRETO_INDIRETO === 0);
-            const directIbizOpportunityItems = opportunitiesItems.filter(parent => parent.parent_ID === directIbizOpportunities.ID);
+            const directIbizOpportunityParentIDs = directIbizOpportunities.map(dop => dop.ID);
+            const directIbizOpportunityItems = await this.getOpportunitiesItems(tx, directIbizOpportunityParentIDs);
+
             const indirectIbizOpportunities = opportunities.filter(indirect => indirect.NU_DIRETO_INDIRETO === 1);
-            const indirectIbizOpportunityItems = opportunitiesItems.filter(parent => parent.parent_ID === indirectIbizOpportunities.ID);
+            const indirectIbizOpportunityParentIDs = indirectIbizOpportunities.map(dop => dop.ID);
+            const indirectIbizOpportunityItems = await this.getOpportunitiesItems(tx, indirectIbizOpportunityParentIDs);
 
             // Process data
             await this.processDirectIbizOpportunities(directIbizOpportunities,directIbizOpportunityItems,tx);
@@ -68,11 +71,11 @@ module.exports = class processOpportunities extends BaseJob {
      * This method fetches all the Ibiz opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS
      * @returns - A list of Ibiz opportunity items
      */
-     async getOpportunitiesItems(tx) {
+     async getOpportunitiesItems(tx, parentIDs) {
         try {
             console.log(`JOB (${this.jobName }): Fetching Ibiz Opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS ...`);
             const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            const result = await tx.run(SELECT.from(IbizCcsQpsItems));
+            const result = await tx.run(SELECT.from(IbizCcsQpsItems).where({'parent_ID': { in: parentIDs }}));
             return result;
         }catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Fetching of Ibiz Opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS failed`);
