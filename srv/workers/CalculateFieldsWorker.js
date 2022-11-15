@@ -21,7 +21,10 @@ function calculateFields(priceAgreement, requiredParameters){
         hasNewYLLPValues,
         hasNewYLAPValues,
         priceConditionsAll,
-        OfferProductsAll
+        OfferProductsAll,
+        priceConditionRappelAll,
+        discountConditionsAll,
+        priceConditionFOCAll
     } = requiredParameters;
 
     const todaysDate = new Date();
@@ -209,7 +212,7 @@ function calculateFields(priceAgreement, requiredParameters){
                 if (priceAgreement.PriceConditions && priceAgreement.PriceConditions.length > 0) {
                     priceCondition = mainCondition;
                 } else {
-                    for(const pc of priceConditionAll){
+                    for(const pc of priceConditionsAll){
                         if(pc.ID == mainCondition.ExistingPriceConditionID){
                             priceCondition = pc;
                         }
