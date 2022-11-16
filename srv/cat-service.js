@@ -261,8 +261,8 @@ module.exports = (srv) => {
 
 		let grossSales = offerPrice * paidVolume;
         //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
-        let grossSalesEurSpot=grossSales / product.SPOT_RATE;
-        let grossSalesEurBudget = grossSales / product.BUDGET_RATE;
+        //let grossSalesEurSpot=grossSales / product.SPOT_RATE;
+        //let grossSalesEurBudget = grossSales / product.BUDGET_RATE;
         //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
 		let netSales = netPrice * totalVolume;
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
@@ -282,15 +282,15 @@ module.exports = (srv) => {
 		let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
         
         //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
-        let grossMarginEurSpot,grossMarginEurBudget;
-		if(offer.APPROVAL_TYPE===1 || offer.APPROVAL_TYPE===2){
-            grossMarginEurSpot = grossProfitEurSpot / grossSalesEurSpot;
-            grossMarginEurBudget = grossProfitEurBudget / grossSalesEurBudget;
-            }else{
-            grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
-            grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
+        // let grossMarginEurSpot,grossMarginEurBudget;
+		// if(offer.APPROVAL_TYPE===1 || offer.APPROVAL_TYPE===2){
+        //     grossMarginEurSpot = grossProfitEurSpot / grossSalesEurSpot;
+        //     grossMarginEurBudget = grossProfitEurBudget / grossSalesEurBudget;
+        //     }else{
+           let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
+           let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
     
-         }
+       //  }
         //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
 		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
 
