@@ -39,7 +39,7 @@ module.exports = class processOpportunities extends BaseJob {
 
             // Process data
             await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
-            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
+            // await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
 
             // Commit All
             await tx.commit();
@@ -191,11 +191,14 @@ module.exports = class processOpportunities extends BaseJob {
         await this.upsertFASTOffers(tx, mappedOffers, mappedTenders);
 
         // 3. Create/update entries in PT_TMOFPR
-        await this.upsertFASTOfferProducts(tx, mappedProducts);
+        await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
 
-        // 4. Delete all records from IbizQPS after successful processing.
+        // 4. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
         const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        await tx.run(DELETE.from(IbizQps));
+        await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 0}));
+        const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const parentIDs = mappedProducts.map(pr => pr.parent_ID);
+        await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
 
         console.log(`JOB (${this.jobName }): Processing of Direct ibiz opportunities successfully completed.`);
 
@@ -271,15 +274,64 @@ module.exports = class processOpportunities extends BaseJob {
         offer.TenderOfferNo =  (nextOfferNumber && nextOfferNumber.NEXTOFFERID++) || 1;
         offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
     }
+
+    // delete IBIZ_TECHNICAL_ID before saving to DB
+    const offersWithoutID = mappedOffers.map(ofr => { 
+        const copy = {...ofr}; 
+        delete copy.IBIZ_TECHNICAL_ID; 
+        delete copy.NU_DIRETO_INDIRETO;
+        return copy;
+    });  
+
     // 3. Upsert records into PT_TMOFRS
     console.log(`JOB (${this.jobName }): Upserting IBIZ Offers into FAST table (PT_TMOFRS) ...`);
     try {
-        mappedOffers && mappedOffers.length > 0 && await tx.run(INSERT(mappedOffers).into(PT_TMOFRS));
+        offersWithoutID && offersWithoutID.length > 0 && await tx.run(INSERT(offersWithoutID).into(PT_TMOFRS));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
-        console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${mappedOffers.length}`);
+        console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Tenders into FAST table (PT_TMOFRS) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Offers into FAST table (PT_TMOFRS) failed`);
+        console.error(error);
+        throw error;
+    }
+}
+
+
+/**
+ * Creates Product in FAST
+ * @returns 
+ */
+ async upsertFASTOfferProducts(tx, mappedProducts, mappedOffers) {
+    const { PT_TMOFPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+
+    // 1. link existing Tenders and Offer with Products
+    for (const product of mappedProducts) {
+        let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === product.parent_ID);
+        product.TenderID = parentOffer.TenderID;
+        product.OfferID = parentOffer.OfferID;
+        // add distributor id
+        product.DistributorID = parentOffer.DistributorID;
+        // add channel
+        product.Channel = (parentOffer.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor';
+    }
+
+    // delete IBIZ_TECHNICAL_ID before saving to DB
+    const productsWithoutID = mappedProducts.map(ofpr => { 
+        const copy = {...ofpr}; 
+        delete copy.parent_ID; 
+        return copy;
+    });  
+
+    // 3. Upsert records into PT_TMOFPR
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Products into FAST table (PT_TMOFPR) ...`);
+    try {
+        productsWithoutID && productsWithoutID.length > 0 && await tx.run(INSERT(productsWithoutID).into(PT_TMOFPR));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Products into FAST table (PT_TMOFPR) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMOFPR -> created: ${productsWithoutID.length}`);
+        return true;
+    } catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products into FAST table (PT_TMOFPR) failed`);
         console.error(error);
         throw error;
     }
@@ -335,7 +387,7 @@ module.exports = class processOpportunities extends BaseJob {
     console.log(`JOB (${this.jobName }): Start fetching Brazil SKUs from FAST table`);
     // get a list of distributors entities for given list of CustomerIDs
     const { PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-    const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'BR' } ));
+    const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'BR', ActiveRecord: 'Yes' } ));
     console.log(`JOB (${this.jobName }): End fetching Brazil SKUs from FAST table`);
     return result;
 }
@@ -456,11 +508,13 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
         const distributorID = distributor && distributor.DistributorID || null;
         prev.push(
             {
+                IBIZ_TECHNICAL_ID     : curr.ID, // this ID will be used to create relationship with the items and will be deleted afterwards
+                NU_DIRETO_INDIRETO    : curr.NU_DIRETO_INDIRETO,
                 TenderID              : "", 
                 OfferID               : "", 
                 CountryCode           : "BR",
                 TenderOfferNo         : null,
-                RevisedOfferNo        : "",
+                RevisedOfferNo        : null,
                 ActiveOffer           : 1, 
                 CloneOfferID          : null,
                 CreationDate          : new Date().toISOString(),
@@ -512,13 +566,11 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFPR ...`);
     directIbizOpportunityItems = directIbizOpportunityItems.reduce((prev, curr, idx, directIbizOpportunityItems) => {
-        const cnpj = curr.COD_DONO_QP.replace(/\D/g,'');
-        const distributor = existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
-        const distributorID = distributor && distributor.DistributorID || null;
-        const sku = existingSKUFAST.find(sku => sku.SKUCode === curr.COD_REFERENCIA);
+        const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
         const productPackID = sku && sku.ProductPackID || null;
         prev.push(
             {
+                parent_ID                : curr.parent_ID,
                 TenderID                 : "",
                 OfferID                  : "",
                 CountryCode              : "BR",
@@ -539,12 +591,12 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 NoOfTier                 : 0,
                 DiscOrOffer              : null,
                 PaymentTerms             : null,
-                DistributorID            : distributorID,
+                DistributorID            : null,
                 SNo                      : null,
-                ActiveProduct            : "",
+                ActiveProduct            : 1,
                 Comment                  : null,
                 INCOTerms                : null,
-                SORTER                   : "",
+                SORTER                   : null,
                 DEFAULT_COMMISSION_RATE  : 0,
                 SUPPLY_UPDATE            : null,
                 PAYMENT_UPDATE           : null,
@@ -555,7 +607,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 OfferType                : "Selling",
                 AnticipatedRequestedQuantity: null,
                 MaxPrice                 : null,
-                Channel                  : (curr.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor',
+                Channel                  : null,
                 LotID                    : curr.NU_LOTE,
                 WorkflowProductID        : curr.ID_CC_QP,
                 IbizWorkflowID           : curr.ID_QP
