@@ -15,10 +15,10 @@ module.exports = class ProcessCustomers extends BaseJob {
     async onTick() {
         console.log(`JOB (${this.jobName }): Processing Brazil customers ...`);
         const start = new Date().getTime();
-        try {
-            this.db = await cds.connect.to('db');
-            const tx = this.db.tx();
+        this.db = await cds.connect.to('db');
+        const tx = this.db.tx();
 
+        try {
             // Fetch data
             const allSAPCustomers = await this.getSAPCustomers(tx);
             const distributors = allSAPCustomers.filter(cust => cust.REPRES === 'X');

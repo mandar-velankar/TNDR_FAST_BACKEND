@@ -15,12 +15,17 @@ module.exports = class processOpportunities extends BaseJob {
     async onTick() {
         console.log(`JOB (${this.jobName }): Processing Ibiz Opportunities ...`);
         const start = new Date().getTime();
-        try {
-            this.db = await cds.connect.to('db');
-            const tx = this.db.tx();
+        
+        this.db = await cds.connect.to('db');
+        const tx = this.db.tx();
 
+        try {
             // Fetch data
             const opportunities = await this.getOpportunities(tx);
+            const existingInstitutesInFAST = await this.getInstitutes(tx);
+            const existingTenderTypesFAST = await this.getTenderTypes(tx);
+            const existingDistributorsFAST = await this.getFASTDistributors(tx);
+            const existingSKUFAST = await this.getFASTSKUs(tx);
 
             const directIbizOpportunities = opportunities.filter(direct => direct.NU_DIRETO_INDIRETO === 0);
             const directIbizOpportunityParentIDs = directIbizOpportunities.map(dop => dop.ID);
@@ -33,8 +38,8 @@ module.exports = class processOpportunities extends BaseJob {
             const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); //to-be implemented later
 
             // Process data
-            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems);
-            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems);
+            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
+            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
 
             // Commit All
             await tx.commit();
@@ -93,10 +98,70 @@ module.exports = class processOpportunities extends BaseJob {
         try {
             console.log(`JOB (${this.jobName }): Fetching Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IbizDocs ...`);
             const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            const result = await tx.run(SELECT.from(IbizDocs).where({'Qps_ID':{"!=": null}, 'parent_ID': { in: parentIDs }}));
+            const result = await tx.run(SELECT.from(IbizDocs).where({'Qps_ID': { in: parentIDs } }));
             return result;
         }catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Fetching of Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IbizDocs failed`);
+            console.error(error);
+            throw error;
+        }
+    }
+
+    /**
+     * This method fetches all the Institutes from COM_BAYER_SXTENDER_MASTERDATA_PT_TMINST where CNPJ is not null
+     * @returns - 
+     */
+     async getInstitutes(tx) {
+        try {
+            console.log(`JOB (${this.jobName }): Fetching Institutes from COM_BAYER_SXTENDER_MASTERDATA_PT_TMINST ...`);
+            const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const result = await tx.run(SELECT.from(PT_TMINST).where({'CNPJ': {"!=": null}, CountryCode: 'BR' }));
+            return result;
+        }catch (error) {
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of Institutes from COM_BAYER_SXTENDER_MASTERDATA_PT_TMINST failed`);
+            console.error(error);
+            throw error;
+        }
+    }
+
+    /**
+     * This method fetches all the TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE
+     * @returns - 
+     */
+     async getTenderTypes(tx) {
+        try {
+            console.log(`JOB (${this.jobName }): Fetching TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE ...`);
+            const { MASTER_TENDER_TYPE } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const result = await tx.run(SELECT.from(MASTER_TENDER_TYPE));
+            return result;
+        }catch (error) {
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE failed`);
+            console.error(error);
+            throw error;
+        }
+    }
+
+     async getNextOfferIDs(tx, tenderIDs) {
+        try {
+            console.log(`JOB (${this.jobName }): Fetching NextOfferID from com.bayer.SXTENDER.TransactionalDataViews.TenderOffers ...`);
+            const { TenderOffers } = this.db.entities("com.bayer.SXTENDER.TransactionalDataViews");
+            const result = await tx.run(SELECT.from(TenderOffers).where({TENDERID: {in: tenderIDs }}));
+            return result;
+        }catch (error) {
+            console.error(`JOB (${this.jobName }): ERROR - Fetching NextOfferID from com.bayer.SXTENDER.TransactionalDataViews.TenderOffers failed`);
+            console.error(error);
+            throw error;
+        }
+    }
+
+    async getNextTenderID(tx) {
+        try {
+            console.log(`JOB (${this.jobName }): Fetching NextTenderID from com.bayer.SXTENDER.TransactionalDataViews.CountryTenderNo ...`);
+            const { CountryTenderNo } = this.db.entities("com.bayer.SXTENDER.TransactionalDataViews");
+            const result = await tx.run(SELECT.one.from(CountryTenderNo).where({COUNTRY_CODE: 'BR'}));
+            return result.NEXT_TENDER_NO;
+        }catch (error) {
+            console.error(`JOB (${this.jobName }): ERROR - Fetching NextTenderID from com.bayer.SXTENDER.TransactionalDataViews.CountryTenderNo failed`);
             console.error(error);
             throw error;
         }
@@ -110,16 +175,25 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems) {
+ async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST) {
     console.log(`JOB (${this.jobName }): Processing Direct Ibiz Opportunities ...`);
     try {
 
-        // Process data to FAST
-        const mappedTenders = this.mapIbizOpportunitiestoFASTTender(directIbizOpportunities);
-        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(directIbizOpportunities);
-        const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems);
+        // 0. Mapping - Map IBIZ Opportunities to FAST
+        const mappedTenders = this.mapIbizOpportunitiestoFASTTender(directIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
+        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(directIbizOpportunities, existingDistributorsFAST);
+        const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
 
-        // 5. Delete all records from IbizQPS after successful processing.
+        // 1. Create/update entries in PT_TMTEND
+        await this.upsertFASTTenders(tx, mappedTenders);
+
+        // 2. Create/update entries in PT_TMOFRS
+        await this.upsertFASTOffers(tx, mappedOffers, mappedTenders);
+
+        // 3. Create/update entries in PT_TMOFPR
+        await this.upsertFASTOfferProducts(tx, mappedProducts);
+
+        // 4. Delete all records from IbizQPS after successful processing.
         const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         await tx.run(DELETE.from(IbizQps));
 
@@ -133,6 +207,140 @@ module.exports = class processOpportunities extends BaseJob {
 }
 
 /**
+ * Creates or Updates Tenders in FAST
+ * @param {Array.Object} Mapped Tenders 
+ * @returns 
+ */
+ async upsertFASTTenders(tx, mappedTenders) {
+    const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    let nextTenderID = await this.getNextTenderID(tx);
+
+    // 1. get a list of existing Tenders with an ExternalID from FAST
+    const tendersExistingInFAST = await this.getFASTTenders(tx, mappedTenders);
+    // 2. devide mappedTenders into New or Changed tenders
+    const FASTNewTenders = [];
+    const FASTChangedTenders = [];
+    for (const tender of mappedTenders) {
+        let FASTTenderIdx = tendersExistingInFAST.findIndex(FASTTender => FASTTender.ExternalID === tender.ExternalID);
+        if (FASTTenderIdx > -1) {
+            // copy over the TenderID from existing Tender
+            tender.TenderID = tendersExistingInFAST[FASTTenderIdx].TenderID;
+            FASTChangedTenders.push(tender);
+        } else {
+            // generate new TenderID
+            tender.TenderNo = nextTenderID++;
+            const sYear = (new Date().getFullYear()+'').slice(-2);
+            let sNewTenderID = "BR-" + sYear + "-" + tender.TenderNo;
+            tender.TenderID = sNewTenderID;
+            FASTNewTenders.push(tender);
+        }
+    }
+    // 3. Upsert records into PT_TMTEND
+    //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
+    try {
+        // for (const FASTHierarchy of FASTChangedTenders) {
+        //     await tx.run(UPDATE(PT_TMPRDHIER, {HLEVEL6_CODE:FASTHierarchy.HLEVEL6_CODE}).with(FASTHierarchy));
+        // }
+        FASTNewTenders && FASTNewTenders.length > 0 && await tx.run(INSERT(FASTNewTenders).into(PT_TMTEND));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Tenders into FAST table (PT_TMTEND) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMTEND -> created: ${FASTNewTenders.length}, updated: ${FASTChangedTenders.length}`);
+        return true;
+    } catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Tenders into FAST table (PT_TMTEND) failed`);
+        console.error(error);
+        throw error;
+    }
+}
+
+
+/**
+ * Creates or Updates Offers in FAST
+ * @param {Array.Object} Mapped Offers 
+ * @returns 
+ */
+ async upsertFASTOffers(tx, mappedOffers, mappedTenders) {
+    const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const tenderIDs = mappedTenders.map(tender => tender.TenderID);
+    let nextOfferIDs = await this.getNextOfferIDs(tx, tenderIDs);
+
+    // 1. link existing Tenders with Offers
+    for (const [index, offer] of mappedOffers.entries()) {
+        offer.TenderID = mappedTenders[index].TenderID;
+        let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
+        offer.TenderOfferNo =  (nextOfferNumber && nextOfferNumber.NEXTOFFERID++) || 1;
+        offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
+    }
+    // 3. Upsert records into PT_TMOFRS
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Offers into FAST table (PT_TMOFRS) ...`);
+    try {
+        mappedOffers && mappedOffers.length > 0 && await tx.run(INSERT(mappedOffers).into(PT_TMOFRS));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${mappedOffers.length}`);
+        return true;
+    } catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Tenders into FAST table (PT_TMOFRS) failed`);
+        console.error(error);
+        throw error;
+    }
+}
+
+
+/**
+ * Gets a list of existing Tenders from FAST with an ExternalID
+ * @param {Array} tenders 
+ * @returns {Array<PT_TMTEND>} a list of existing tenders
+ */
+ async getFASTTenders(tx, tenders) {
+    if(!tenders || tenders.length === 0){
+        console.log(`JOB (${this.jobName }): No Tenders were found in FAST`);
+        return [];
+    }
+    console.log(`JOB (${this.jobName }): Prepare fetching IBIZ Opportunity Tenders from FAST table`);
+
+    // get all the ExternalIDs from tenders
+    let externalIDs = [];
+    for (const tender of tenders) {
+        externalIDs.push(tender.ExternalID);
+    }
+    console.log(`JOB (${this.jobName }): Start fetching IBIZ Opportunity Tenders from FAST table`);
+
+    // get a list of tenders for given list of ExternalIDs
+    const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const result = await tx.run(SELECT.from(PT_TMTEND).where({ ExternalID: { in: externalIDs}, CountryCode: 'BR' } ));
+    console.log(`JOB (${this.jobName }): End fetching IBIZ Opportunity Tenders from FAST table`);
+    return result;
+}
+
+/**
+ * Gets a list of existing Distributors from FAST
+ * @param {Array} distributors 
+ * @returns {Array<PT_TMDIST>} a list of existing distributors
+ */
+ async getFASTDistributors(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil Distributors from FAST table`);
+    // get a list of distributors entities for given list of CustomerIDs
+    const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+    const result = await tx.run(SELECT.from(PT_TMDIST).where({ CountryCode: 'BR' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil Distributors from FAST table`);
+    return result;
+}
+
+/**
+ * Gets a list of existing SKUs from FAST
+ * @param {Array} SKUs 
+ * @returns {Array<PT_TMSKUPRDPCK>} a list of existing SKU
+ */
+ async getFASTSKUs(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil SKUs from FAST table`);
+    // get a list of distributors entities for given list of CustomerIDs
+    const { PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
+    const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'BR' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil SKUs from FAST table`);
+    return result;
+}
+
+/**
      * This method will process a list of Ibiz Opportunities by Creating/Updating the following entities
      *  - PT_TMTEND
      *  - PT_TMOFRS
@@ -142,12 +350,12 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems) {
+ async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST) {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
         //Process data to FAST
-        const mappedTenders = this.mapIbizOpportunitiestoFASTTender(indirectIbizOpportunities);
+        const mappedTenders = this.mapIbizOpportunitiestoFASTTender(indirectIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
         const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities);
         const mappedProduct = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems);
         const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems);
@@ -171,18 +379,22 @@ module.exports = class processOpportunities extends BaseJob {
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} tenders
      */
-mapIbizOpportunitiestoFASTTender(directIbizOpportunities) {
+mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, existingTenderTypesFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMTEND ...`);
-    directIbizOpportunities = directIbizOpportunities.reduce((prev, curr, idx, directIbizOpportunities) => {
+    ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
+        const institute = (existingInstitutesInFAST.find(inst => inst.CNPJ === curr.COD_LICITADOR.replace(/\D/g,'')));
+        const instituteID = institute && institute.InstituteID || null;
+        const tenderType = (existingTenderTypesFAST.find(tt => tt.NAME === curr.NM_MODALIDADE));
+        const tenderTypeID = tenderType && tenderType.ID || null;
         prev.push(
             {
-                TenderID             : "", //need to check with Artiom for logic
+                TenderID             : "",
                 CountryCode          : "BR",
                 ToolID               : null,
-                TenderNo             : "", //need to check with Artiom for logic
+                TenderNo             : null,
                 CloneTenderID        : null,
-                SubmittedOn          : Date.now(), //need to check with Artiom for logic
+                SubmittedOn          : new Date().toISOString(), 
                 SubmittedBy          : "anonymous",
                 Active               : 1,
                 Classification       : "Tender",
@@ -194,7 +406,7 @@ mapIbizOpportunitiestoFASTTender(directIbizOpportunities) {
                 IbizID               : curr.ID_LIC,
                 PublicNotice         : null,
                 TenderName           : curr.NU_LICITACAO_EDITAL,
-                InstituteID          : curr.COD_LICITADOR,
+                InstituteID          : instituteID,
                 TenderChannel        : null,
                 GroupPurchasing      : null,
                 PublicationDate      : curr.DT_ABERTURA,
@@ -206,7 +418,7 @@ mapIbizOpportunitiestoFASTTender(directIbizOpportunities) {
                 TenderStatus         : "Open",
                 ManualSaveStatus     : null,
                 FoldersCreated       : 0,
-                TENDER_TYPE_ID       : curr.NM_MODALIDADE,
+                TENDER_TYPE_ID       : tenderTypeID,
                 CONTRACT_TYPE_ID     : 1,
                 SALES_TYPE_ID        : 1,
                 TENDER_ORIGIN_ID     : 1,
@@ -227,7 +439,7 @@ mapIbizOpportunitiestoFASTTender(directIbizOpportunities) {
         );
         return prev;
     }, []);
-    return directIbizOpportunities;
+    return ibizOpportunities;
 }
 
 /**
@@ -235,25 +447,28 @@ mapIbizOpportunitiestoFASTTender(directIbizOpportunities) {
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} offers
      */
-mapIbizOpportunitiestoFASTOffer(directIbizOpportunities) {
+mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFRS ...`);
-    directIbizOpportunities = directIbizOpportunities.reduce((prev, curr, idx, directIbizOpportunities) => {
+    ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
+        const cnpj = curr.COD_DONO_QP && curr.COD_DONO_QP.replace(/\D/g,'');
+        const distributor = existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
+        const distributorID = distributor && distributor.DistributorID || null;
         prev.push(
             {
-                TenderID              : "", //need to check with Artiom for logic
-                OfferID               : "", //need to check with Artiom for logic
+                TenderID              : "", 
+                OfferID               : "", 
                 CountryCode           : "BR",
-                TenderOfferNo         : "", //need to check with Artiom for logic
-                RevisedOfferNo        : "", //need to check with Artiom for logic
+                TenderOfferNo         : null,
+                RevisedOfferNo        : "",
                 ActiveOffer           : 1, 
                 CloneOfferID          : null,
-                CreationDate          : Date.now(),
-                SubmissionDate        : Date.now(),
-                SubmittedOn           : Date.now(),
+                CreationDate          : new Date().toISOString(),
+                SubmissionDate        : new Date().toISOString(),
+                SubmittedOn           : new Date().toISOString(),
                 SubmittedBy           : "anonymous",
                 Active                : 1,
-                DistributorID         : "", //need to check with Artiom for logic
+                DistributorID         : distributorID,
                 InternalBidDueDate    : curr.DT_FIM_ACOLHIMENTO,
                 SellingCompany        : "BBR",
                 ProductCount          : 0,
@@ -284,7 +499,7 @@ mapIbizOpportunitiestoFASTOffer(directIbizOpportunities) {
         );
         return prev;
     }, []);
-    return directIbizOpportunities;
+    return ibizOpportunities;
 
 }
 
@@ -293,19 +508,24 @@ mapIbizOpportunitiestoFASTOffer(directIbizOpportunities) {
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} products
      */
-mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems) {
+mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFPR ...`);
     directIbizOpportunityItems = directIbizOpportunityItems.reduce((prev, curr, idx, directIbizOpportunityItems) => {
+        const cnpj = curr.COD_DONO_QP.replace(/\D/g,'');
+        const distributor = existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
+        const distributorID = distributor && distributor.DistributorID || null;
+        const sku = existingSKUFAST.find(sku => sku.SKUCode === curr.COD_REFERENCIA);
+        const productPackID = sku && sku.ProductPackID || null;
         prev.push(
             {
-                TenderID                 : "", //need to check with Artiom for logic
-                OfferID                  : "", //need to check with Artiom for logic
+                TenderID                 : "",
+                OfferID                  : "",
                 CountryCode              : "BR",
-                SubmittedOn              : Date.now(), //need to check with Artiom for logic
+                SubmittedOn              : new Date().toISOString(),
                 SubmittedBy              : "anonymous",
                 Active                   : 1,
-                ProductCode              : curr.COD_REFERENCIA,
+                ProductCode              : productPackID,
                 Reference                : null,
                 AlternateOfferYN         : null,
                 RequestedVolume          : curr.NU_QTDE_UNITARIA,
@@ -319,12 +539,12 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 NoOfTier                 : 0,
                 DiscOrOffer              : null,
                 PaymentTerms             : null,
-                DistributorID            : "", //need to check with Artiom for logic for how to get data from directIbizOpportunities
+                DistributorID            : distributorID,
                 SNo                      : null,
-                ActiveProduct            : "", //need to check with Artiom for logic
+                ActiveProduct            : "",
                 Comment                  : null,
                 INCOTerms                : null,
-                SORTER                   : "", //need to check with Artiom for logic
+                SORTER                   : "",
                 DEFAULT_COMMISSION_RATE  : 0,
                 SUPPLY_UPDATE            : null,
                 PAYMENT_UPDATE           : null,
@@ -335,7 +555,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 OfferType                : "Selling",
                 AnticipatedRequestedQuantity: null,
                 MaxPrice                 : null,
-                Channel                  : (curr.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor', //need to check with Artiom for logic to get data from directIbizOpportunities
+                Channel                  : (curr.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor',
                 LotID                    : curr.NU_LOTE,
                 WorkflowProductID        : curr.ID_CC_QP,
                 IbizWorkflowID           : curr.ID_QP
@@ -358,16 +578,16 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
     indirectIbizOpportunityItems = indirectIbizOpportunityItems.reduce((prev, curr, idx, indirectIbizOpportunityItems) => {
         prev.push(
             {
-                TenderID              : "", //need to check with Artiom for logic
-                OfferID               : "", //need to check with Artiom for logic
+                TenderID              : "",
+                OfferID               : "",
                 CountryCode           : "BR",
                 ProductCode           : curr.COD_REFERENCIA,
-                SubmittedOn           : Date.now(),
+                SubmittedOn           : new Date().toISOString(),
                 SubmittedBy           : "anonymous",
                 Active                : 1,
                 Tier                  : 1,
                 VolumeFrom            : 0,
-                VolumeTo              : ,
+                VolumeTo              : 0,
                 RegPrice              : curr.VLR_BASE_CALCULO_UNITARIO,
                 FOC                   : null,
                 FOCStep               : null, 
@@ -380,7 +600,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 NetofferPrice         : null,
                 BusinessCasePrice     : null,
                 WholesalePrice        : null,
-                COGS                  : "", //need to check logic with Artiom
+                COGS                  : "",
                 SpotRate              : 1,
                 BudgetRate            : 1,
                 Scenario              : 0,
@@ -391,7 +611,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 ActiveTier            : 0,
                 NetPrice              : null,
                 NetPrice_OfPaid       : 0,
-                PRICE_UPDATE          : "", //Please check the existing logic with Artiom
+                PRICE_UPDATE          : "",
                 LotID                 : curr.NU_LOTE
             }
         );
@@ -413,7 +633,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
         prev.push(
             {
                 CountryCode                         : "BR",
-                OfferID                             : "", //Please check the existing logic with Artiom
+                OfferID                             : "",
                 ProductCode                         : curr.COD_REFERENCIA,
                 PVL                                 : null,
                 ConfidentialPrice                   : null,
@@ -454,6 +674,33 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
     }, []);
     return indirectIbizOpportunityItems;
 
+}
+
+
+/**
+ * Gets the next highest value for a given field from table
+ * @param {*} table 
+ * @param {*} fieldname 
+ * @returns - next highest value
+ */
+ async getNextValue (tx, table, fieldname, countryCode,){
+    let nextValue = 1;
+    try {
+        let results = [];
+        if(countryCode){
+            results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']).where({CountryCode: countryCode}));
+        }else{
+            results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
+        }
+        if (results[0].max) {
+            nextValue = results[0].max + 1
+        }
+        return nextValue;
+    }catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Fetching next highest value for ${fieldname} from ${table.name} failed`);
+        console.error(error);
+        throw error;
+    }
 }
 
 };
