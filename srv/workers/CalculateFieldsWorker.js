@@ -7,7 +7,7 @@ module.exports = async ({ chunk, requiredParameters}) => {
 function calculateFields(priceAgreement, requiredParameters){
 
     const {
-        priceConditionsInPa,
+        //priceConditionsInPa,
         institutesAll,
         customerPricesInPA,
         customerPricesAll,
@@ -54,13 +54,13 @@ function calculateFields(priceAgreement, requiredParameters){
     }
     // }
 
-    if (!priceConditionsInPa) {
+    /*if (!priceConditionsInPa) {
         for(const pc of priceConditionsAll){
             if(pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null){
                 priceConditions.push(pc);
             }
         }
-    }
+    }*/
 
     if (!mostRecentMasterPrice) {
         for(const mp of mostRecentMasterPricesAll){
