@@ -39,7 +39,7 @@ module.exports = class processOpportunities extends BaseJob {
 
             // Process data
             await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
-            // await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
+            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
 
             // Commit All
             await tx.commit();
@@ -198,7 +198,7 @@ module.exports = class processOpportunities extends BaseJob {
         await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 0}));
         const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const parentIDs = mappedProducts.map(pr => pr.parent_ID);
-        await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
+        Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
 
         console.log(`JOB (${this.jobName }): Processing of Direct ibiz opportunities successfully completed.`);
 
@@ -406,16 +406,28 @@ module.exports = class processOpportunities extends BaseJob {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
-        //Process data to FAST
+        // 0 Mapping
         const mappedTenders = this.mapIbizOpportunitiestoFASTTender(indirectIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
-        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities);
-        const mappedProduct = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems);
-        const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems);
-        const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems);
+        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST);
+        const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
+        const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST);
+        const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST);
 
-        // 5. Delete all records from BrazilMaterials after successful processing.
-        const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        await tx.run(DELETE.from(IbizQps));
+         // 1. Create/update entries in PT_TMTEND
+         await this.upsertFASTTenders(tx, mappedTenders);
+
+         // 2. Create/update entries in PT_TMOFRS
+         await this.upsertFASTOffers(tx, mappedOffers, mappedTenders);
+ 
+         // 3. Create/update entries in PT_TMOFPR
+         await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
+ 
+         // 4. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
+         const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+         await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 0}));
+         const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+         const parentIDs = mappedProducts.map(pr => pr.parent_ID);
+         Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
 
         console.log(`JOB (${this.jobName }): Processing of Indirect ibiz opportunities successfully completed.`);
 
@@ -624,16 +636,18 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} prices
      */
- mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems) {
+ mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMBDPR ...`);
     indirectIbizOpportunityItems = indirectIbizOpportunityItems.reduce((prev, curr, idx, indirectIbizOpportunityItems) => {
+        const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
+        const productPackID = sku && sku.ProductPackID || null;
         prev.push(
             {
                 TenderID              : "",
                 OfferID               : "",
                 CountryCode           : "BR",
-                ProductCode           : curr.COD_REFERENCIA,
+                ProductCode           : productPackID,
                 SubmittedOn           : new Date().toISOString(),
                 SubmittedBy           : "anonymous",
                 Active                : 1,
@@ -652,7 +666,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 NetofferPrice         : null,
                 BusinessCasePrice     : null,
                 WholesalePrice        : null,
-                COGS                  : "",
+                COGS                  : null,
                 SpotRate              : 1,
                 BudgetRate            : 1,
                 Scenario              : 0,
@@ -663,7 +677,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 ActiveTier            : 0,
                 NetPrice              : null,
                 NetPrice_OfPaid       : 0,
-                PRICE_UPDATE          : "",
+                PRICE_UPDATE          : null,
                 LotID                 : curr.NU_LOTE
             }
         );
@@ -678,15 +692,17 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} priceCondition
      */
- mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems) {
+ mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PriceCondition ...`);
     indirectIbizOpportunityItems = indirectIbizOpportunityItems.reduce((prev, curr, idx, indirectIbizOpportunityItems) => {
+        const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
+        const productPackID = sku && sku.ProductPackID || null;
         prev.push(
             {
                 CountryCode                         : "BR",
                 OfferID                             : "",
-                ProductCode                         : curr.COD_REFERENCIA,
+                ProductCode                         : productPackID,
                 PVL                                 : null,
                 ConfidentialPrice                   : null,
                 Discount                            : curr.NU_PORCENTAGEM_DESCONTO,
@@ -713,8 +729,8 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 ICMSTax                             : curr.NU_PORCENTAGEM_ICMS,
                 TaxExemption                        : (!curr.NU_PORCENTAGEM_ICMS) ? 'No' : 'Yes',
                 PriceAfterTaxExemtion               : (!curr.NU_PORCENTAGEM_ICMS) ? null : (curr.VLR_BASE_CALCULO_UNITARIO * (1 - curr.NU_PORCENTAGEM_ICMS)),
-                CAP                                 : (curr.NU_CAP === 0) ? false : true,
-                PriceAfterCap                       : (curr.NU_CAP === 1) ? ((1 - curr.NU_PORCENTAGEM_CAP) * (1 - curr.NU_PORCENTAGEM_ICMS) * VLR_BASE_CALCULO_UNITARIO) : (1 * (1 - curr.NU_PORCENTAGEM_ICMS) * VLR_BASE_CALCULO_UNITARIO) ,
+                CAP                                 : (curr.NU_CAP === 0) ? 'No' : 'Yes',
+                PriceAfterCap                       : (curr.NU_CAP === 1) ? ((1 - curr.NU_PORCENTAGEM_CAP) * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) : (1 * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) ,
                 CommercialProposal                  : curr.VLR_UNITARIO,
                 TaxEqualization                     : null, 
                 Invoive                             : null, 
