@@ -47,7 +47,8 @@ const jobManager = require("./jobs/JobManager");
   // jobScheduler.ItalyJobs.processMaterials('57 10 * * *').start();
   // jobScheduler.ItalyJobs.processCustomers('57 10 * * *').start();
 
-  
+  // const ProcessOpportunities = require("./jobs/brasil/ProcessOpportunities");
+  // new ProcessOpportunities("test","*").onTick();
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));
