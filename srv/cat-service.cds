@@ -770,4 +770,6 @@ service CatalogService @(path : 'tender')@(requires : [
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail(sRecipient : String, sSubject : String, sTemplate : String) returns Boolean;
     function getMailTemplate(countryCode : String, language : String, offerId : String) returns LargeString;
+
+    action notifyIbiz(ibizWorkflowID: Integer, directIndirect: Integer, lineNumbers: array of Integer) returns String; //  (0 = direct; 1 = indirect)
 }

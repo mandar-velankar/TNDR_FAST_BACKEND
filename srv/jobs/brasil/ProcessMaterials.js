@@ -15,10 +15,9 @@ module.exports = class ProcessMaterials extends BaseJob {
     async onTick() {
         console.log(`JOB (${this.jobName }): Processing Brazil materials ...`);
         const start = new Date().getTime();
+        this.db = await cds.connect.to('db');
+        const tx = this.db.tx();
         try {
-            this.db = await cds.connect.to('db');
-            const tx = this.db.tx();
-
             // Fetch data
             const allSAPMaterials = await this.getSAPMaterials(tx);
 
