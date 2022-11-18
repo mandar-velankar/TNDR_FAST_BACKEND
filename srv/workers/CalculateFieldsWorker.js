@@ -176,7 +176,7 @@ function calculateFields(priceAgreement, requiredParameters){
                 }
             }
             // If no mainCondition was found, we don't evaluate further
-            if (!mainCondition) {
+            if (!mainCondition || !mostRecentMasterPrice) {
                 return priceAgreement;
             }
 
@@ -188,7 +188,18 @@ function calculateFields(priceAgreement, requiredParameters){
             }
             let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
             let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
-            let mostRecentPRAF = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.PRAF : (mostRecentMasterPrice.PRAF / priceAgreement.Product.ProductPack.PACKFACTOR);
+
+            //calculate mostRecentPraf
+            let mostRecentPRAF = 0;
+            if(offerProduct.UnitPerPack === 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
+                mostRecentPRAF = mostRecentMasterPrice.PRAF_Private; 
+            } else if(offerProduct.UnitPerPack === 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
+                mostRecentPRAF = (mostRecentMasterPrice.PRAF_Private / priceAgreement.Product.ProductPack.PACKFACTOR);
+            } else if(offerProduct.UnitPerPack === 'Pack' && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ){
+                mostRecentPRAF = mostRecentMasterPrice.PRAF_Public; 
+            } else if(offerProduct.UnitPerPack !== 'Pack' && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ){
+                mostRecentPRAF = (mostRecentMasterPrice.PRAF_Public / priceAgreement.Product.ProductPack.PACKFACTOR);
+            }
 
             if (mainCondition) {
                 /* we are using the maincondition which is coming from the PriceConditionView
