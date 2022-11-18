@@ -605,7 +605,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
                 OfferID               : "", 
                 CountryCode           : "BR",
                 TenderOfferNo         : null,
-                RevisedOfferNo        : null,
+                RevisedOfferNo        : 0,
                 ActiveOffer           : 1, 
                 CloneOfferID          : null,
                 CreationDate          : new Date().toISOString(),
