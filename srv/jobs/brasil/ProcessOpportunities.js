@@ -263,9 +263,12 @@ module.exports = class processOpportunities extends BaseJob {
  * @returns 
  */
  async upsertFASTOffers(tx, mappedOffers, mappedTenders) {
-    const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const { PT_TMOFRS, PT_TMTNOFST } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     const tenderIDs = mappedTenders.map(tender => tender.TenderID);
     let nextOfferIDs = await this.getNextOfferIDs(tx, tenderIDs);
+
+
+    const offerStatusses = [];
 
     // 1. link existing Tenders with Offers
     for (const [index, offer] of mappedOffers.entries()) {
@@ -273,6 +276,16 @@ module.exports = class processOpportunities extends BaseJob {
         let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
         offer.TenderOfferNo =  (nextOfferNumber && nextOfferNumber.NEXTOFFERID++) || 1;
         offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
+
+        //add status
+        offerStatusses.push({
+            TenderID    : offer.TenderID,
+            OfferID     : offer.OfferID,
+            CountryCode : "BR",
+            Active      : 1,
+            STATUS      : "Offer Created",
+            Date        : new Date().toISOString().slice(0,10)
+        });
     }
 
     // delete IBIZ_TECHNICAL_ID before saving to DB
@@ -287,11 +300,14 @@ module.exports = class processOpportunities extends BaseJob {
     console.log(`JOB (${this.jobName }): Upserting IBIZ Offers into FAST table (PT_TMOFRS) ...`);
     try {
         offersWithoutID && offersWithoutID.length > 0 && await tx.run(INSERT(offersWithoutID).into(PT_TMOFRS));
+        offerStatusses && offerStatusses.length > 0 && await tx.run(INSERT(offerStatusses).into(PT_TMTNOFST));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length}`);
+        console.log(`JOB (${this.jobName }): Upserting of Offer statuses into FAST table (PT_TMTNOFST) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${PT_TMTNOFST.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Offers into FAST table (PT_TMOFRS) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Offers or OfferStatuses into FAST table (PT_TMOFRS, PT_TMTNOFST) failed`);
         console.error(error);
         throw error;
     }
@@ -824,6 +840,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
     return indirectIbizOpportunityItems;
 
 }
+
 
 
 /**
