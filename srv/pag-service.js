@@ -280,7 +280,7 @@ module.exports = async (srv) => {
         let customerPricesAll = [];
         let customerPricesInPA = true;
         let priceConditionsAll = [];
-        let priceConditionsInPa = true;
+        //let priceConditionsInPa = true;
         let mostRecentMasterPricesAll = [];
         let consumerPricesAll = [];
         let consumerPricesInPA = true;
@@ -291,7 +291,7 @@ module.exports = async (srv) => {
 
         if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
-            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
+            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
                 customerPricesInPA = false;
                 customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
             }
@@ -315,35 +315,15 @@ module.exports = async (srv) => {
 
         if (countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0) {
             if (offers && offers.length > 0) {
-                startTrace("PriceConditionView");
-                //if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'priceConditions') === -1) {
-                    priceConditionsInPa = false;
-                    priceConditionsAll = await tx.run(SELECT.from(PriceConditionView)
-                        .where({
-                            CountryCode: { in: countrycodes },
-                            and: {
-                                ProductCode: { in: productpacks },
-                                and: {
-                                    OfferID: { in: offers },
-                                    and: {
-                                        ExistingPriceConditionID: { '!=': null }
-                                    }
-                                }
-                            }
-                        })
-                    );
-                //}
-                stopTrace("PriceConditionView");
-
                 startTrace("OfferProducts");
                 OfferProductsAll = await tx.run(SELECT.from(PT_TMOFPR)
                     .where({
                         CountryCode: { in: countrycodes },
                         and: {
-                            ProductCode: { in: productpacks },
-                            and: {
+                            ProductCode: { in: productpacks }
+                        /*  and: {
                                 OfferID: { in: offers }
-                            }
+                            }*/
                         }
                     })
                 );
@@ -361,7 +341,7 @@ module.exports = async (srv) => {
             stopTrace("MostRecentMasterPricesView");
 
             startTrace("MostRecentConsumerPricesView");
-            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
+            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
                 consumerPricesInPA = false;
                 consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
                     .where({
@@ -425,7 +405,7 @@ module.exports = async (srv) => {
         startTrace("CalculateFields");
 
         const requiredParameters = {
-            priceConditionsInPa,
+            //priceConditionsInPa,
             institutesAll,
             customerPricesInPA,
             customerPricesAll,
