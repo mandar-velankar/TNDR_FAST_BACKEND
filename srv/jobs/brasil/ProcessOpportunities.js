@@ -314,7 +314,7 @@ module.exports = class processOpportunities extends BaseJob {
         offerStatusses && offerStatusses.length > 0 && await tx.run(INSERT(offerStatusses).into(PT_TMTNOFST));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length}`);
-        console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${PT_TMTNOFST.length}`);
+        console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${offerStatusses.length}`);
         return true;
     } catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Offers or OfferStatuses into FAST table (PT_TMOFRS, PT_TMTNOFST) failed`);
@@ -637,7 +637,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFRS ...`);
     ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
         const cnpj = curr.COD_DONO_QP && curr.COD_DONO_QP.replace(/\D/g,'');
-        const distributor = existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
+        const distributor = (curr.NU_DIRETO_INDIRETO === 0) ? existingDistributorsFAST.find(dist => dist.DistributorName === "Bayer Brazil") : existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
         const distributorID = distributor && distributor.DistributorID || null;
         prev.push(
             {
