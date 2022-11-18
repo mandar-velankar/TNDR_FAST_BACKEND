@@ -303,7 +303,6 @@ module.exports = class processOpportunities extends BaseJob {
         offerStatusses && offerStatusses.length > 0 && await tx.run(INSERT(offerStatusses).into(PT_TMTNOFST));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length}`);
-        console.log(`JOB (${this.jobName }): Upserting of Offer statuses into FAST table (PT_TMTNOFST) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${PT_TMTNOFST.length}`);
         return true;
     } catch (error) {
@@ -319,7 +318,9 @@ module.exports = class processOpportunities extends BaseJob {
  * @returns 
  */
  async upsertFASTOfferProducts(tx, mappedProducts, mappedOffers) {
-    const { PT_TMOFPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const { PT_TMOFPR, Lots, LotProduct } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+
+    const lots = [];
 
     // 1. link existing Tenders and Offer with Products
     for (const product of mappedProducts) {
@@ -330,6 +331,15 @@ module.exports = class processOpportunities extends BaseJob {
         product.DistributorID = parentOffer.DistributorID;
         // add channel
         product.Channel = (parentOffer.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor';
+
+         //add status
+         lots.push({
+            LotID    : product.LotID,
+            OfferID  : product.OfferID,
+            createdBy: "IBIZ",
+            modifiedBy: "IBIZ"
+        });
+
     }
 
     // delete IBIZ_TECHNICAL_ID before saving to DB
@@ -343,8 +353,10 @@ module.exports = class processOpportunities extends BaseJob {
     console.log(`JOB (${this.jobName }): Upserting IBIZ Products into FAST table (PT_TMOFPR) ...`);
     try {
         productsWithoutID && productsWithoutID.length > 0 && await tx.run(INSERT(productsWithoutID).into(PT_TMOFPR));
+        lots && lots.length > 0 && await tx.run(INSERT(lots).into(Lots));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Products into FAST table (PT_TMOFPR) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFPR -> created: ${productsWithoutID.length}`);
+        console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
         return true;
     } catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products into FAST table (PT_TMOFPR) failed`);
