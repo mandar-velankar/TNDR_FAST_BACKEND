@@ -566,7 +566,7 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
                 TenderNo             : null,
                 CloneTenderID        : null,
                 SubmittedOn          : new Date().toISOString(), 
-                SubmittedBy          : "anonymous",
+                SubmittedBy          : "IBIZ",
                 Active               : 1,
                 Classification       : "Tender",
                 BiddingTypeLevel1    : null,
@@ -605,7 +605,9 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
                 Liciedital           : curr.NU_LICITACAO_EDITAL,
                 Purpose              : curr.NM_FINALIDADE_LIC,
                 ParticiationType     : curr.NM_LIC_TIPO_PARTICIPACAO,
-                ParticipationIntention : curr.NM_CARD_ATUAL
+                ParticipationIntention : curr.NM_CARD_ATUAL,
+                createdBy: "IBIZ",
+                modifiedBy: "IBIZ"
             }
         );
         return prev;
