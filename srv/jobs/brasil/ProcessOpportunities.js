@@ -263,9 +263,12 @@ module.exports = class processOpportunities extends BaseJob {
  * @returns 
  */
  async upsertFASTOffers(tx, mappedOffers, mappedTenders) {
-    const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const { PT_TMOFRS, PT_TMTNOFST } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     const tenderIDs = mappedTenders.map(tender => tender.TenderID);
     let nextOfferIDs = await this.getNextOfferIDs(tx, tenderIDs);
+
+
+    const offerStatusses = [];
 
     // 1. link existing Tenders with Offers
     for (const [index, offer] of mappedOffers.entries()) {
@@ -273,6 +276,16 @@ module.exports = class processOpportunities extends BaseJob {
         let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
         offer.TenderOfferNo =  (nextOfferNumber && nextOfferNumber.NEXTOFFERID++) || 1;
         offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
+
+        //add status
+        offerStatusses.push({
+            TenderID    : offer.TenderID,
+            OfferID     : offer.OfferID,
+            CountryCode : "BR",
+            Active      : 1,
+            STATUS      : "Offer Created",
+            Date        : new Date().toISOString().slice(0,10)
+        });
     }
 
     // delete IBIZ_TECHNICAL_ID before saving to DB
@@ -287,11 +300,13 @@ module.exports = class processOpportunities extends BaseJob {
     console.log(`JOB (${this.jobName }): Upserting IBIZ Offers into FAST table (PT_TMOFRS) ...`);
     try {
         offersWithoutID && offersWithoutID.length > 0 && await tx.run(INSERT(offersWithoutID).into(PT_TMOFRS));
+        offerStatusses && offerStatusses.length > 0 && await tx.run(INSERT(offerStatusses).into(PT_TMTNOFST));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length}`);
+        console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${PT_TMTNOFST.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Offers into FAST table (PT_TMOFRS) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Offers or OfferStatuses into FAST table (PT_TMOFRS, PT_TMTNOFST) failed`);
         console.error(error);
         throw error;
     }
@@ -303,7 +318,9 @@ module.exports = class processOpportunities extends BaseJob {
  * @returns 
  */
  async upsertFASTOfferProducts(tx, mappedProducts, mappedOffers) {
-    const { PT_TMOFPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const { PT_TMOFPR, Lots, LotProduct } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+
+    const lots = [];
 
     // 1. link existing Tenders and Offer with Products
     for (const product of mappedProducts) {
@@ -314,6 +331,15 @@ module.exports = class processOpportunities extends BaseJob {
         product.DistributorID = parentOffer.DistributorID;
         // add channel
         product.Channel = (parentOffer.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor';
+
+         //add status
+         lots.push({
+            LotID    : product.LotID,
+            OfferID  : product.OfferID,
+            createdBy: "IBIZ",
+            modifiedBy: "IBIZ"
+        });
+
     }
 
     // delete IBIZ_TECHNICAL_ID before saving to DB
@@ -327,8 +353,10 @@ module.exports = class processOpportunities extends BaseJob {
     console.log(`JOB (${this.jobName }): Upserting IBIZ Products into FAST table (PT_TMOFPR) ...`);
     try {
         productsWithoutID && productsWithoutID.length > 0 && await tx.run(INSERT(productsWithoutID).into(PT_TMOFPR));
+        lots && lots.length > 0 && await tx.run(INSERT(lots).into(Lots));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Products into FAST table (PT_TMOFPR) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFPR -> created: ${productsWithoutID.length}`);
+        console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
         return true;
     } catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products into FAST table (PT_TMOFPR) failed`);
@@ -538,7 +566,7 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
                 TenderNo             : null,
                 CloneTenderID        : null,
                 SubmittedOn          : new Date().toISOString(), 
-                SubmittedBy          : "anonymous",
+                SubmittedBy          : "IBIZ",
                 Active               : 1,
                 Classification       : "Tender",
                 BiddingTypeLevel1    : null,
@@ -550,7 +578,7 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
                 PublicNotice         : null,
                 TenderName           : curr.NU_LICITACAO_EDITAL,
                 InstituteID          : instituteID,
-                TenderChannel        : null,
+                TenderChannel        : "Distributor",
                 GroupPurchasing      : null,
                 PublicationDate      : curr.DT_ABERTURA,
                 BidDueDate           : curr.DT_FIM_ACOLHIMENTO,
@@ -577,7 +605,9 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
                 Liciedital           : curr.NU_LICITACAO_EDITAL,
                 Purpose              : curr.NM_FINALIDADE_LIC,
                 ParticiationType     : curr.NM_LIC_TIPO_PARTICIPACAO,
-                ParticipationIntention : curr.NM_CARD_ATUAL
+                ParticipationIntention : curr.NM_CARD_ATUAL,
+                createdBy: "IBIZ",
+                modifiedBy: "IBIZ"
             }
         );
         return prev;
@@ -605,7 +635,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
                 OfferID               : "", 
                 CountryCode           : "BR",
                 TenderOfferNo         : null,
-                RevisedOfferNo        : null,
+                RevisedOfferNo        : 0,
                 ActiveOffer           : 1, 
                 CloneOfferID          : null,
                 CreationDate          : new Date().toISOString(),
@@ -824,6 +854,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
     return indirectIbizOpportunityItems;
 
 }
+
 
 
 /**
