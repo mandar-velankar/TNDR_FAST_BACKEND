@@ -78,6 +78,10 @@ module.exports = class processOpportunities extends BaseJob {
      * @returns - A list of Ibiz opportunity items
      */
      async getOpportunitiesItems(tx, parentIDs) {
+        if(!parentIDs || parentIDs.length <= 0) {
+            console.log("No Parent Itmes found");
+            return [];
+        }
         try {
             console.log(`JOB (${this.jobName }): Fetching Ibiz Opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS ...`);
             const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -95,6 +99,10 @@ module.exports = class processOpportunities extends BaseJob {
      * @returns - A list of Ibiz Documents
      */
       async getOpportunitiesDocs(tx, parentIDs) {
+        if(!parentIDs || parentIDs.length <= 0) {
+            console.log("No Parent Itmes found");
+            return [];
+        }
         try {
             console.log(`JOB (${this.jobName }): Fetching Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IbizDocs ...`);
             const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -142,6 +150,9 @@ module.exports = class processOpportunities extends BaseJob {
     }
 
      async getNextOfferIDs(tx, tenderIDs) {
+        if(!tenderIDs || tenderIDs.length <= 0) {
+            return [];
+        }
         try {
             console.log(`JOB (${this.jobName }): Fetching NextOfferID from com.bayer.SXTENDER.TransactionalDataViews.TenderOffers ...`);
             const { TenderOffers } = this.db.entities("com.bayer.SXTENDER.TransactionalDataViews");
@@ -460,7 +471,8 @@ module.exports = class processOpportunities extends BaseJob {
 
     // get a list of tenders for given list of ExternalIDs
     const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    const result = await tx.run(SELECT.from(PT_TMTEND).where({ ExternalID: { in: externalIDs}, CountryCode: 'BR' } ));
+    let result = [];
+    Array.isArray(externalIDs) && externalIDs.length > 0 && (result = await tx.run(SELECT.from(PT_TMTEND).where({ ExternalID: { in: externalIDs}, CountryCode: 'BR' } )));
     console.log(`JOB (${this.jobName }): End fetching IBIZ Opportunity Tenders from FAST table`);
     return result;
 }
