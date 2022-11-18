@@ -176,7 +176,7 @@ function calculateFields(priceAgreement, requiredParameters){
                 }
             }
             // If no mainCondition was found, we don't evaluate further
-            if (!mainCondition) {
+            if (!mainCondition || !mostRecentMasterPrice) {
                 return priceAgreement;
             }
 
