@@ -550,7 +550,7 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
                 PublicNotice         : null,
                 TenderName           : curr.NU_LICITACAO_EDITAL,
                 InstituteID          : instituteID,
-                TenderChannel        : null,
+                TenderChannel        : "Distributor",
                 GroupPurchasing      : null,
                 PublicationDate      : curr.DT_ABERTURA,
                 BidDueDate           : curr.DT_FIM_ACOLHIMENTO,
