@@ -231,10 +231,17 @@ module.exports = class processOpportunities extends BaseJob {
 
     // 1. get a list of existing Tenders with an ExternalID from FAST
     const tendersExistingInFAST = await this.getFASTTenders(tx, mappedTenders);
+
+    // 1.1 SAP material may contain the same ProductPack per SKU, we must not process the same ProductPack more than ones
+    const uniqueMappedTenders = Array.from(new Set(mappedTenders.map(t => t.IbizID)))
+            .map(id => {
+                return mappedTenders.find(d => d.IbizID === id)
+            });
+
     // 2. devide mappedTenders into New or Changed tenders
     const FASTNewTenders = [];
     const FASTChangedTenders = [];
-    for (const tender of mappedTenders) {
+    for (const tender of uniqueMappedTenders) {
         let FASTTenderIdx = tendersExistingInFAST.findIndex(FASTTender => FASTTender.ExternalID === tender.ExternalID);
         if (FASTTenderIdx > -1) {
             // copy over the TenderID from existing Tender
@@ -275,17 +282,28 @@ module.exports = class processOpportunities extends BaseJob {
  */
  async upsertFASTOffers(tx, mappedOffers, mappedTenders) {
     const { PT_TMOFRS, PT_TMTNOFST } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    const tenderIDs = mappedTenders.map(tender => tender.TenderID);
+    const uniqueMappedTenders = mappedTenders.filter(t => t.TenderID);
+    const tenderIDs = uniqueMappedTenders.map(tender => tender.TenderID);
     let nextOfferIDs = await this.getNextOfferIDs(tx, tenderIDs);
-
-
     const offerStatusses = [];
 
     // 1. link existing Tenders with Offers
     for (const [index, offer] of mappedOffers.entries()) {
-        offer.TenderID = mappedTenders[index].TenderID;
+        let nextOfferID = 1;
+        const ibizID = mappedTenders[index].IbizID;
+        const parentTender = uniqueMappedTenders.find(ut => ut.IbizID == ibizID);
+        offer.TenderID = parentTender && parentTender.TenderID;
         let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
-        offer.TenderOfferNo =  (nextOfferNumber && nextOfferNumber.NEXTOFFERID++) || 1;
+        if(nextOfferNumber && nextOfferNumber.NEXTOFFERID) {
+            offer.TenderOfferNo = ++nextOfferNumber.NEXTOFFERID;
+        }else{
+            offer.TenderOfferNo = nextOfferID++;
+            nextOfferIDs.push({
+                TenderID: offer.TenderID,
+                NEXTOFFERID: offer.TenderOfferNo
+            }); 
+        }
+        
         offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
 
         //add status
@@ -314,7 +332,7 @@ module.exports = class processOpportunities extends BaseJob {
         offerStatusses && offerStatusses.length > 0 && await tx.run(INSERT(offerStatusses).into(PT_TMTNOFST));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length}`);
-        console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${PT_TMTNOFST.length}`);
+        console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${offerStatusses.length}`);
         return true;
     } catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Offers or OfferStatuses into FAST table (PT_TMOFRS, PT_TMTNOFST) failed`);
@@ -612,8 +630,8 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
                 TENDER_TYPE_2_ID     : null,
                 SAPID                : null,
                 ExternalID           : curr.ID_LIC,
-                AlternativeID        : curr.ID_ALTERNATIVO,
-                IbizLicitaID         : curr.ID_LICITACAO_IBIZ_LICITA,
+                AlternativeID        : curr.ID_ALTERNATIVO || 0,
+                IbizLicitaID         : curr.ID_LICITACAO_IBIZ_LICITA || 0,
                 Liciedital           : curr.NU_LICITACAO_EDITAL,
                 Purpose              : curr.NM_FINALIDADE_LIC,
                 ParticiationType     : curr.NM_LIC_TIPO_PARTICIPACAO,
@@ -637,7 +655,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFRS ...`);
     ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
         const cnpj = curr.COD_DONO_QP && curr.COD_DONO_QP.replace(/\D/g,'');
-        const distributor = existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
+        const distributor = (curr.NU_DIRETO_INDIRETO === 0) ? existingDistributorsFAST.find(dist => dist.DistributorName === "Bayer Brazil") : existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
         const distributorID = distributor && distributor.DistributorID || null;
         prev.push(
             {
