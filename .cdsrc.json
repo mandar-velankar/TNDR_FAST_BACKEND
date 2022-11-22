@@ -36,7 +36,8 @@
                             },
                             "scopes": [
                                 "authenticated-user",
-                                "f_tndr_cag_admin"
+                                "f_tndr_cag_admin",
+                                "f_tndr_cag_cogs_user"
                             ]
                         }
                     },
@@ -44,6 +45,28 @@
                         "jwt": {
                             "userInfo": {
                                 "logonName": "ELLUI",
+                                "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin"
+                            ]
+                        }
+                    },"EHMHV": {
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "EHMHV",
+                                "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin"
+                            ]
+                        }
+                    },"EUTVP": {
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "EHMHV",
                                 "email": "P2001081482@example.com"
                             },
                             "scopes": [

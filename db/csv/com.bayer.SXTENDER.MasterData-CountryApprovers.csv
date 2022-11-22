@@ -199,8 +199,8 @@ CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,APPROVERTYPE,DIVISION,APPR
 ,,,,"SD","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
 ,,,,"SY","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
 ,,,,"YE","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-"2022-01-21 00:00:00","EUTVP","2022-01-21 00:00:00","EUTVP","TH","HBU","Pharma","1000","Chanya Leawrungruang","chanya.leawrungruang@bayer.com","True"
-"2022-01-21 00:00:00","EUTVP","2022-01-21 00:00:00","EUTVP","TH","NSM/SM/FM","Pharma","1000","Chanya Leawrungruang","chanya.leawrungruang@bayer.com","True"
+"2022-01-21 00:00:00.000000000","EUTVP","2022-01-21 00:00:00.000000000","EUTVP","TH","HBU","Pharma","1000","Chanya Leawrungruang","chanya.leawrungruang@bayer.com","true"
+"2022-01-21 00:00:00.000000000","EUTVP","2022-01-21 00:00:00.000000000","EUTVP","TH","NSM/SM/FM","Pharma","1000","Chanya Leawrungruang","chanya.leawrungruang@bayer.com","true"
 ,,,,"TH","HBU","Pharma","1023","Sunee Kamalanon","sunee.kamalanon@bayer.com",
 ,,,,"TH","NSM/SM/FM","Radiology","1024","Panyamon Passakornpinit","panyamon.passakornpinit@bayer.com",
 ,,,,"TH","CDH","Pharma","1025","JinA Lee","jina.lee@bayer.com",
@@ -214,8 +214,8 @@ CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,APPROVERTYPE,DIVISION,APPR
 ,,,,"TH","Supply Chain","Both","1000","Prateep Thumpong","prateep.thumpong@bayer.com",
 ,,,,"TH","NSM/SM/FM","Pharma","2004","Pakornwut Suntornkaew","pakornwut.suntornkaew@bayer.com",
 ,,,,"TH","NSM/SM/FM","Pharma","2005","Kesuma Sinthusarn","kesuma.sinthusarn@bayer.com",
-"2022-01-21 00:00:00","EUTVP","2022-01-21 00:00:00","EUTVP","TH","NSM/SM/FM","Pharma","1000","Peyanun Ngamtaweekij","peyanun.ngamtaweekij@bayer.com","True"
-"2022-01-21 00:00:00","EUTVP","2022-01-21 00:00:00","EUTVP","TH","HBU","Pharma","1000","Peyanun Ngamtaweekij","peyanun.ngamtaweekij@bayer.com","True"
+"2022-01-21 00:00:00.000000000","EUTVP","2022-01-21 00:00:00.000000000","EUTVP","TH","NSM/SM/FM","Pharma","1000","Peyanun Ngamtaweekij","peyanun.ngamtaweekij@bayer.com","true"
+"2022-01-21 00:00:00.000000000","EUTVP","2022-01-21 00:00:00.000000000","EUTVP","TH","HBU","Pharma","1000","Peyanun Ngamtaweekij","peyanun.ngamtaweekij@bayer.com","true"
 ,,,,"TH","NSM/SM/FM","Pharma","2008","Kodchaporn Buasiri","kodchaporn.buasiri@bayer.com",
 ,,,,"TH","NSM/SM/FM","Pharma","1023","Sunee Kamalanon","sunee.kamalanon@bayer.com",
 ,,,,"MX","Tender Management","Both","2001","Laura Luz Tecillo López","laura.tecillo@bayer.com",

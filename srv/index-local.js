@@ -37,6 +37,8 @@ const jobManager = require("./jobs/JobManager");
   // Jobs Scheduler
 
   jobManager.registerJobs();
+  // const ProcessMasterDataPrices = require("./jobs/brasil/ProcessMasterDataPrices");
+  // new ProcessMasterDataPrices("test","*").onTick();
   // const scheduler = await jobScheduler();
   // scheduler.mercadoPublico.fetchTenders();//('00 00 * * *').start();
   // scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
@@ -45,7 +47,8 @@ const jobManager = require("./jobs/JobManager");
   // jobScheduler.ItalyJobs.processMaterials('57 10 * * *').start();
   // jobScheduler.ItalyJobs.processCustomers('57 10 * * *').start();
 
-  
+  // const ProcessOpportunities = require("./jobs/brasil/ProcessOpportunities");
+  // new ProcessOpportunities("test","*").onTick();
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));

@@ -35,6 +35,8 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     //Brazil
     entity LotProducts as projection on TransactionalData.LotProduct;
 
+    entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
+    entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
     

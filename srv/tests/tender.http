@@ -64,3 +64,19 @@ Content-Type: application/json
     "BU": "ff",
     "AnticipatedRequestedQuantity": "aa"
 }
+
+
+### notifyIbiz  - Notify IBIZ channel switch
+POST http://localhost:4004/v2/tender/notifyIbiz
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "ibizWorkflowID": 10021,
+    "directIndirect": 0,
+    "lineNumbers": [
+        123,
+        321,
+        7892
+    ]
+}

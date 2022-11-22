@@ -1,0 +1,4 @@
+ID,OAuthProvider,GrantType,ClientID,ClientSecret
+90d0bbfd-e1df-43d2-93fb-c7fd22525ed0,https://oauthasservices-a5124e685.hana.ondemand.com/oauth2/api/v1/token,client_credentials,fast_test_client,L/EQA4:?7fk{-
+4d75e781-66cb-47c4-87f3-1f8f1d65a80a,https://oauthasservices-a5124e685.hana.ondemand.com/oauth2/api/v1/token,client_credentials,fast_test_client,L/EQA4:?7fk{-
+d583415f-8262-476a-a436-c740a8b798d8,https://auth.dev.erp-int.bayer.com/oauth/token,client_credentials,sb-d11c9a0a-fa23-42db-857c-ba99ff7e3852!b5631|it-rt-bayerglobalcpi-dev!b259,c9644f27-7496-4543-94d8-0fe5fa91fd2f$CqJaQufe7l_F77cTGmEZPZ8HuXz_XpIAgArfcSfDofY=

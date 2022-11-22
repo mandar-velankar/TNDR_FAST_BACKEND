@@ -1,7 +1,12 @@
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
+const { ProcessMaterialsBrazil, ProcessCustomersBrazil } = require('./BrazilJobs');
 const PriceAgreementMailJob = require("./PriceAgreementMailJob");
 const PriceAgreementPriceConditionNotificationMailJob = require("./PriceAgreementPriceConditionNotificationMailJob");
 const ExtendPriceAgreements = require("./PriceAgreementJobs");
+const ProcessMasterDataPrices = require("./brasil/ProcessMasterDataPrices");
+const ProcessBrazilCustomers = require("./brasil/ProcessCustomers");
+const ProcessBrazilMaterials = require("./brasil/ProcessMaterials");
+const ProcessBrazilOpportunities = require("./brasil/ProcessOpportunities.js");
 
 module.exports = class JobFactory {
     static create(jobName, jobTime) {
@@ -12,6 +17,12 @@ module.exports = class JobFactory {
             case this.jobNames.ProcessCustomersJob:
                 return new ProcessCustomers(jobName,jobTime)
                 break;
+            case this.jobNames.ProcessMaterialsBrazilJob:
+                return new ProcessMaterialsBrazil(jobName,jobTime)
+                break;
+            case this.jobNames.ProcessCustomersBrazilJob:
+                return new ProcessCustomersBrazil(jobName,jobTime)
+                break;
             case this.jobNames.PriceAgreementMailJob:
                 return new PriceAgreementMailJob(jobName,jobTime)
                 break;
@@ -20,6 +31,18 @@ module.exports = class JobFactory {
                 break;
             case this.jobNames.ExtendPriceAgreements:
                 return new ExtendPriceAgreements(jobName,jobTime)
+                break;
+            case this.jobNames.ProcessMasterDataPrices:
+                return new ProcessMasterDataPrices(jobName,jobTime)
+                break;
+            case this.jobNames.ProcessBrazilCustomers:
+                return new ProcessBrazilCustomers(jobName,jobTime);
+                break;
+            case this.jobNames.ProcessBrazilMaterials:
+                return new ProcessBrazilMaterials(jobName,jobTime);
+                break;
+            case this.jobNames.ProcessBrazilOpportunities:
+                return new ProcessBrazilOpportunities(jobName,jobTime);
                 break;
             default:
                 throw new Error('Job type not supported');
@@ -30,9 +53,15 @@ module.exports = class JobFactory {
         return {
             ProcessMaterialsJob: "ProcessMaterialsJob",
             ProcessCustomersJob: "ProcessCustomersJob",
+            ProcessMaterialsBrazilJob: "ProcessMaterialsBrazilJob", // TODO: are these old jobs? if yes, remove them
+            ProcessCustomersBrazilJob: "ProcessCustomersBrazilJob", // TODO: are these old jobs? if yes, remove them
             PriceAgreementMailJob: "PriceAgreementMailJob",
             PriceAgreementPriceConditionNotificationMailJob: "PriceAgreementPriceConditionNotificationMailJob",
-            ExtendPriceAgreements: "ExtendPriceAgreements"
+            ExtendPriceAgreements: "ExtendPriceAgreements",
+            ProcessMasterDataPrices:"ProcessMasterDataPrices",
+            ProcessBrazilCustomers:"ProcessBrazilCustomers",
+            ProcessBrazilMaterials:"ProcessBrazilMaterials",
+            ProcessBrazilOpportunities:"ProcessBrazilOpportunities"
         };
     }
 }
