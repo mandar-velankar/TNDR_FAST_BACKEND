@@ -212,6 +212,7 @@ entity IbizDocs: cuid {
 	Contratos			: Association to IbizContratos;	
 	Qps					: Association to IbizQps;	
 	Empenhos			: Association to IbizEmpenhos;	
+	Resultados			: Association to IbizResultados;	
 }
 
 entity IbizResultados: cuid, managed {
@@ -226,6 +227,7 @@ entity IbizResultados: cuid, managed {
 	NM_DESC_MOTIVO_RESULTADO 	: String; 		// Result's reason description
 	DT_HOMOLOGACAO 				: String; 		// Result's date of homologation
 	POSICOES_RESULTADOS			: Composition of many IbizResultadosItems on POSICOES_RESULTADOS.parent = $self; // List of result items
+	DOCS						: Composition of many IbizDocs on DOCS.Resultados = $self;	//List of opportunities documents
 }
 
 entity IbizResultadosItems: cuid {
