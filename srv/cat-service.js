@@ -17,6 +17,8 @@ const createResolver = require("./libs/easy-template-x-angular-expression").crea
 const { Service } = require('@sap/cds');
 const NumberHelper = require("./utils/NumberHelper");
 const cfenv = require("cfenv");
+const axios = require('axios');
+const qs = require("qs");
 
 module.exports = (srv) => {
 
@@ -45,7 +47,7 @@ module.exports = (srv) => {
 		CountrySpecificTenderInfo
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate,SchedulerApiConfig,SchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -260,7 +262,10 @@ module.exports = (srv) => {
 		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
 
 		let grossSales = offerPrice * paidVolume;
-
+        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
+        let grossSalesEurSpot=grossSales / product.SPOT_RATE;
+        let grossSalesEurBudget = grossSales / product.BUDGET_RATE;
+        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
 		let netSales = netPrice * totalVolume;
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
@@ -277,10 +282,18 @@ module.exports = (srv) => {
 
 		let grossProfitEurSpot = netSalesEurSpot - totalCostEur;
 		let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
-
-		let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
-		let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
-
+        
+        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
+        let grossMarginEurSpot,grossMarginEurBudget;
+		if(offer.APPROVAL_TYPE===1 || offer.APPROVAL_TYPE===2){
+            grossMarginEurSpot = grossProfitEurSpot / grossSalesEurSpot;
+            grossMarginEurBudget = grossProfitEurBudget / grossSalesEurBudget;
+            }else{
+            grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
+            grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
+    
+         }
+        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
 		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
 
 		//Product Comment: master data product comment + info on additional brand FOC, if any
@@ -830,6 +843,7 @@ module.exports = (srv) => {
                     }
                 });
             } else {
+                
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "BU/RAM":
@@ -2135,6 +2149,9 @@ module.exports = (srv) => {
 					aApprovalForTypeResult.push(oApprovalForType[0]);
 					aApprovalForTypeResult.push(oApprovalForType[1]);
 					return aApprovalForTypeResult;
+				case 'Consumer Health':
+					aApprovalForTypeResult.push(oApprovalForType[0]);
+					return aApprovalForTypeResult;
 			}
 		} else {
 			return oApprovalForType;
@@ -2306,7 +2323,7 @@ module.exports = (srv) => {
 			SPOT_RATE: offerValidation.SPOT_RATE
 		}
 	}
-
+//EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.
 	async function buildWorkflowApprovalProductsEntries(tx, offerId, approvalStatus) {
 		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
@@ -2337,7 +2354,7 @@ module.exports = (srv) => {
 				TOTAL_QUANTITY_UNITS: ServiceHelper.formatNumber(d.TOTAL_QUANTITY_UNITS, 0, 0),
 				FOC_QUANTITY_UNITS: ServiceHelper.formatNumber(d.FOC_QUANTITY_UNITS, 0, 0),
 				PAID_QUANTITY_UNITS: ServiceHelper.formatNumber(d.PAID_QUANTITY_UNITS, 0, 0),
-				REQ_PRICE_UNIT_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
+				REQ_PRICE_UNIT_OFFER_CURRENCY: (d.COUNTRY_CODE === "IT") ? ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 5, 5) : ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_OFFER_CURRENCY, 4, 4),
 				REQ_PRICE_PACK_OFFER_CURRENCY: ServiceHelper.formatNumber(d.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2),
 				REQ_PRICE_UNIT_EUR_BUDGET: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_BUDGET, 4, 4),
 				REQ_PRICE_UNIT_EUR_SPOT: ServiceHelper.formatNumber(d.REQ_PRICE_UNIT_EUR_SPOT, 4, 4),
@@ -2400,7 +2417,7 @@ module.exports = (srv) => {
 			}
 		});
 	}
-
+//EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.
 	async function buildWorkflowApprovalApprovalsEntries(tx, offerId, approvalStatus) {
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", offerId);
 		let offerApprovals = await buildOfferApproval(tx, whereOffer);//HERE
@@ -3190,4 +3207,97 @@ module.exports = (srv) => {
         const data = await next(); 
         return data;
     });
+
+
+
+	srv.on('notifyIbiz', async (req) => {
+
+		const id_qp = req.data.ibizWorkflowID;
+		const nu_direto_indireto = req.data.directIndirect; //  (0 = direct; 1 = indirect)
+		const ccs_qps = req.data.lineNumbers; 
+
+		if(typeof nu_direto_indireto != "number" || typeof id_qp != "number"|| (!ccs_qps && !Array.isArray(ccs_qps))) return req.reject(400, "Invalid request: missing/invalid parameters.");
+
+		const body = {
+			"nu_direto_indireto": nu_direto_indireto,
+			"ccs_qps": ccs_qps
+		};
+
+		try {
+            const result = await notifyIbiz(id_qp, body);
+			const msg = `Ibiz channel switch notification successful. WorkflowID: ${id_qp}`;
+            console.log(msg);
+            return msg;
+        } catch (error) {
+			if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+			console.error(`ERROR: Ibiz channel switch notification failed. WorkflowID: ${id_qp}`);
+			return req.reject(500, error.message);
+        }
+
+	});
+
+
+	async function notifyIbiz(id_qp, body) {
+
+		if (!id_qp) {
+            console.error("The Ibiz workflow ID is missing.");
+            return false;
+        }
+
+        if (!body) {
+            console.error("The body of the request is missing.");
+            return false;
+        }
+
+        console.log(`Get api config ...`);
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "OfferProductChannel" }));
+        
+        console.log(`Get bearer token ...`);
+		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+        const oauthCredentials = await getBearerToken(oauthAuth);
+
+		const queryString = qs.stringify({
+			'id_qp': id_qp
+		});
+
+		const url = `${apiConfig.Host}${apiConfig.BasePath}?${queryString}`;
+
+        console.log(`Calling endpoint ${url}`);
+
+
+        return axios({
+            method: 'post',
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(body)
+        });
+
+    };
+
+
+	async function getBearerToken(oauthAuth) {
+
+        if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
+            console.log(`Calling ${oauthAuth.OAuthProvider}`);
+            return axios({
+                method: 'post',
+                url: oauthAuth.OAuthProvider,
+                headers: {
+                    'Authorization': `Basic ${Buffer.from(`${oauthAuth.ClientID}:${oauthAuth.ClientSecret}`).toString('base64')}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                data: qs.stringify({
+                    'grant_type': oauthAuth.GrantType
+                })
+            });
+        }
+
+        throw Error("Missing OAUTH config parameters");
+    };
 }

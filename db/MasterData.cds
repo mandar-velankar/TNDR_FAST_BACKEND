@@ -52,7 +52,7 @@ entity CountryCurrency : managed {
 entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
 	key InstituteID:Integer not null;
-	CustomerID:Integer;
+	CustomerID:String; // Codigo
 	InstituteName:String(500);
 	InstituteType:String(50);
 	Address:String(500);
@@ -73,6 +73,13 @@ entity PT_TMINST{
 	TaxCode:String(50);
     CustomerGroup:String;
     ApplicableTaxRate:String(2);
+	INCOTerms:String(500);
+	PaymentTerms:String(500);
+	ForAllBrands:Boolean;
+	DirectTender:Boolean;
+	ContactEmail:String(100);
+	CNPJ:String;
+	Shortname:String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -108,13 +115,18 @@ entity PT_TMDIST{
 	State: String;
 	TaxCode: String;
 	CNPJ: String;
+	CustomerID: String; // Codigo
 	Shortname: String;
-	ForallBrands: String;
+	CommissionRate:Double;
+	INCOTerms:String(500);
+	PaymentTerms:String(500);
+	ForAllBrands:Boolean;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Distributor = $self;
-	DistributorDivision: Association to many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID;
+	DistributorDivision: Composition of many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID 
+																	   and DistributorDivision.CustomerID = CustomerID;
 }
 
 //Product Pack
@@ -125,9 +137,10 @@ entity PT_TMPRDPCK{
 	PRODUCTPACKNAME:String(100);
 	PRESENTATION:String(50);
 	UOM:String(10);
-	key ACTIVERECORD:String(10);
+	ACTIVERECORD:String(10);
 	HLEVEL6_CODE:String(50);
 	CONCENTRATION:hana.REAL;
+	
 	PACKFACTOR:hana.REAL;
 	PCIName:String(255);
 	MoleculeName:String(255);
@@ -161,10 +174,11 @@ entity PT_TMLE{
 	AuthorizedSignatory4:String(300);//delete
 	AuthorizedSignatory5:String(300);//delete
 	FooterComment:String(300);
+	Enabled                 : Boolean not null;
 	//Associations
-	EntityBrands:Association to many PT_TMCTLEBR on EntityBrands.Entity = $self;
-	Signatories:Association to many COUNTRY_LEGAL_ENTITY_SIGNATORIES on Signatories.LEGAL_ENTITY_CODE = LegalEntityCode;
-	Countries:Association to many PT_TMCTLE on Countries.LegalEntity = $self;
+	//EntityBrands:Association to many PT_TMCTLEBR on EntityBrands.Entity = $self;
+	Signatories:Association to many COUNTRY_LEGAL_ENTITY_SIGNATORIES on Signatories.LEGAL_ENTITY_CODE = LegalEntityCode;//check if used, otherwise remove
+	Countries:Association to many PT_TMCTLE on Countries.LegalEntity = $self;//keep
 }
 
 //Legal Entity Signatories
@@ -264,11 +278,15 @@ entity ApproverTypes: managed {
 entity PT_TMCTLE{
 	CountryLegalEntityID:Integer;//TODO: discuss with Jonathan
 	key CountryCode:String(2)  not null;
-	Brand:String(50);
+	ForAllBrands:Boolean;
 	key LegalEntityID:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	LegalEntity: Association to PT_TMLE on LegalEntity.LegalEntityID = LegalEntityID;
+	EntityBrands:Association to many PT_TMCTLEBR on EntityBrands.LegalEntityID = LegalEntityID and EntityBrands.CountryCode = CountryCode ;
+	// link to signatories
+
+
 }
 //Country Legal Entity Brand
 entity PT_TMCTLEBR{
@@ -276,6 +294,7 @@ entity PT_TMCTLEBR{
 	key CountryCode:String(2) not null;
 	key LegalEntityID:Integer not null;
 	key HLevel4_Code:String(50) not null;
+	ActiveRecord:String(10);
 	//Associations
 	Country: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	Entity: Association to PT_TMLE on Entity.LegalEntityID = LegalEntityID;
@@ -283,13 +302,14 @@ entity PT_TMCTLEBR{
 }
 
 //Country Product Pack
+//EHQUT-198144-MEA - Master data template file to be updated 
 entity PT_TMCTPRDPCK{
 	COUNTRYPRODUCTPACKID:Integer;//TODO: discuss with Jonathan
 	key COUNTRYCODE:String(2) not null;
 	COUNTRYOFORIGIN:String(120);
 	SHELFLIFE:Integer;
 	REGISTERED:Integer;//rename
-	key ACTIVERECORD:String(10);
+	ACTIVERECORD:String(10);
 	key PRODUCTPACKID:Integer;
 	MANUFACTURER:String(500);
 	Presentation_2:String(1000);
@@ -301,11 +321,18 @@ entity PT_TMCTPRDPCK{
     CODE3:String(255);    
 	QTY_THRESHOLD:Integer; 
 	BU: String(255);   
+    GPP_GOVERNED : String(10);
+    LAP_CURRENCY : String(5);
+    LAP : Double;
+    LAP_UNIT : String(15);
+    PRAF_ID: String(50);
+    PRAF_COMMENTS : String(255);
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = PRODUCTPACKID;
 	COGS:Association to MasterDataLatestValues.CountryCogs on COGS.PRODUCT_ID = PRODUCTPACKID and COGS.COUNTRY_CODE = COUNTRYCODE;
+	ProductPackSKU:Association to many PT_TMSKUPRDPCK on ProductPackSKU.CountryProductPack = $self;
 }
 //Brand
 entity PT_TMPRDHIER{
@@ -337,7 +364,7 @@ entity PT_TMDISBRD{
 	CommissionRate:Double;
 	INCOTerms:String(500);
 	PaymentTerms:String(500);
-	key ActiveRecord:String(10);
+	ActiveRecord:String(10);
 	key DistributorID:Integer not null;
 	key HLevel4_Code:String(50) not null;
 	//Associations
@@ -380,7 +407,7 @@ entity PT_TMINSBRTR{
 //Institute Hierarchy
 entity PT_TMINSHIER{
 	InstituteRelationID:Integer;//TODO: Check if needed?
-	key ActiveRecord:String(10) not null;
+	ActiveRecord:String(10) not null;
     key ParentInstituteID:Integer not null;
     key InstituteID:Integer not null;
 	//Associations
@@ -398,6 +425,8 @@ entity PT_TMSKUPRDPCK{
 	//Associations
     Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackID;
+	CountryProductPack: Association to PT_TMCTPRDPCK on CountryProductPack.COUNTRYCODE = CountryCode 
+										and CountryProductPack.PRODUCTPACKID = ProductPackID;
 }
 
 //Approved prices
@@ -739,7 +768,7 @@ entity BrazilCap: cuid, managed {
 }
 
 entity BrazilMasterPrices: cuid, managed {
-	CustomerID	: Integer;
+	CustomerID	: String;
 	ProductID 	: Integer;
 	ValidFrom   : Date;
     ValidTo     : Date;
@@ -751,7 +780,8 @@ entity BrazilMasterPrices: cuid, managed {
 
 entity BrazilDistributorDivision: managed {
 	key DistributorID: Integer; 
-	key DivisionCode: String(50);
+	key DivisionCode: String(50); // setor_ativ
+	CustomerID: String; // Codigo
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);
@@ -760,8 +790,10 @@ entity BrazilDistributorDivision: managed {
 
 entity BrazilInstituteDivision: managed {
 	key InstituteID: Integer; 
-	key DivisionCode: String(50);
+	key DivisionCode: String(50); // setor_ativ
+	CustomerID: String; // Codigo
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);
+	InstituteType: String(50);
 }

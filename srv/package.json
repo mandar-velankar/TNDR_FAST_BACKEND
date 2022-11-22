@@ -27,6 +27,7 @@
         "mysql": "^2.18.1",
         "n2words": "^1.10.1",
         "passport": "^0.4.1",
+        "piscina": "^3.2.0",
         "qs": "^6.10.1",
         "ramda": "^0.27.0",
         "sap-cf-mailer": "0.0.3",
@@ -38,7 +39,7 @@
         "node": "^14"
     },
     "scripts": {
-        "start": "node ./index.js",
+        "start": "cds -v && node ./index.js",
         "watch": "nodemon -w . -i node_modules/**,.git/** -e cds -x npm run build"
     },
     "private": true,

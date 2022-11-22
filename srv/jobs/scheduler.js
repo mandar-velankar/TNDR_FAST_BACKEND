@@ -5,6 +5,7 @@ const qs = require("qs");
 const cds = require('@sap/cds');
 const { v4: uuidv4 } = require('uuid');
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
+const { ProcessMaterialsBrazil, ProcessCustomersBrazil } = require('./BrazilJobs');
 const { ExtendPriceAgreements } = require('./PriceAgreementJobs');
 
 
@@ -837,6 +838,16 @@ module.exports.ItalyJobs = {
   },
 
 
+}
+
+module.exports.BrazilJobs = {
+    processMaterialsBrazil: function (cronTime) {
+      return new ProcessMaterialsBrazil(cronTime);
+    },
+  
+    processCustomersBrazil: function (cronTime) {
+      return new ProcessCustomersBrazil(cronTime);
+    },
 }
 
 module.exports.PriceAgreementJobs = {

@@ -547,7 +547,7 @@ entity MasterCountryLegalEntityMap as select from MasterData.PT_TMCTLE as Master
 	key MasterCountryLegalEntityMap.LegalEntityID,
 	key MasterCountryLegalEntityMap.CountryCode,
 	MasterCountryLegalEntityMap.LegalEntity.LegalEntityName,
-	MasterCountryLegalEntityMap.Brand
+	MasterCountryLegalEntityMap.ForAllBrands
 } order by MasterCountryLegalEntityMap.CountryCode,
 		   MasterCountryLegalEntityMap.LegalEntity.LegalEntityName;
 
@@ -691,6 +691,7 @@ entity MasterLegalEntities as select from MasterData.PT_TMLE as MasterLegalEntit
 } order by MasterLegalEntities.LegalEntityName;
 
 //EHQUT-119446-Adding Nucleus field in Template
+//EHQUT-198144-MEA - Master data template file to be updated 
 entity MasterProductPacks as select from MasterData.PT_TMCTRY as MasterProductPacks
 inner join MasterData.PT_TMCTPRDPCK as CP on MasterProductPacks.CountryCode = CP.COUNTRYCODE
 inner join MasterData.PT_TMPRDPCK as P on CP.PRODUCTPACKID = P.PRODUCTPACKID 
@@ -711,6 +712,12 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	P.CONCENTRATION,
 	P.PACKFACTOR,
 	P.PCIName,
+    CP.GPP_GOVERNED,
+    CP.LAP_CURRENCY,
+    CP.LAP,
+    CP.LAP_UNIT,
+    CP.PRAF_ID,
+    CP.PRAF_COMMENTS,
     P.Nucleus,
 	CP.COUNTRYOFORIGIN,
 	CP.SHELFLIFE,
@@ -749,6 +756,12 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	P.ACTIVERECORD,
 	CP.ACTIVERECORD,
 	P.PCIName,
+    CP.GPP_GOVERNED,
+    CP.LAP_CURRENCY,
+    CP.LAP,
+    CP.LAP_UNIT,
+    CP.PRAF_ID,
+    CP.PRAF_COMMENTS,
     P.Nucleus,
 	CP.REGISTERED,
 	CP.COMMENT,
@@ -808,7 +821,7 @@ entity Offers as select from TransactionalData.PT_TMOFRS as offer {
 };
 
 entity OfferInfo as select from Offers as o1 
-left outer join Offers o2 on o1.RootId = o2.RootId and o2.ActiveOffer = 1
+left outer join Offers as o2 on o1.RootId = o2.RootId and o2.ActiveOffer = 1
 {
     key o1.OfferID,
     o1.PFINo,
