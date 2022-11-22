@@ -196,7 +196,7 @@ function calculateFields(priceAgreement, requiredParameters){
             let mostRecentPRAF = 0;
             if(offerProduct.UnitPerPack === 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
                 mostRecentPRAF = mostRecentMasterPrice.PRAF_Private; 
-            } else if(offerProduct.UnitPerPack === 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
+            } else if(offerProduct.UnitPerPack !== 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
                 mostRecentPRAF = (mostRecentMasterPrice.PRAF_Private / priceAgreement.Product.ProductPack.PACKFACTOR);
             } else if(offerProduct.UnitPerPack === 'Pack' && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ){
                 mostRecentPRAF = mostRecentMasterPrice.PRAF_Public; 
