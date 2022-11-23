@@ -717,7 +717,9 @@ entity MasterPrices: cuid, managed {
     UoM: String;
     YLLP: Double;
     YLAP: Double;
-    PRAF: Double; 
+    //PRAF: Double; 
+	PRAF_Public: Double;
+	PRAF_Private: Double;
     RentalPrice: Double;   
     ValidFrom: Timestamp;
 	ValidTo: Timestamp;  
