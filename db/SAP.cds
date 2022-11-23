@@ -218,6 +218,8 @@ entity IbizDocs: cuid {
 entity IbizResultados: cuid, managed {
 	ID_CC_QP 					: Integer; 		// ID QP Item
 	ID_QP 						: Integer; 		// ID QP (workflow)
+	ID_RESULTADO				: Integer;
+	ID_LIC_ATRIBUIDA			: Integer;
 	ID_LIC 						: Integer; 		// ID Lic (BID)
 	NU_SENT_EXT_LINK 			: Integer; 		// Determine if result has already been sent (-1 = changed; 0 = never approved; 1 = yes)
 	NU_GANHEI 					: Integer; 		// Determine if item was won by distributor (-3 = Did not participate; -2 = No result registered; -1 = Result not published by institute; 0 = Lost; 1 = Won; 2 = There are no winners; 3 = Homologated but without a winner)
