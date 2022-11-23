@@ -7,7 +7,7 @@ module.exports = async ({ chunk, requiredParameters}) => {
 function calculateFields(priceAgreement, requiredParameters){
 
     const {
-        priceConditionsInPa,
+        //priceConditionsInPa,
         institutesAll,
         customerPricesInPA,
         customerPricesAll,
@@ -21,7 +21,10 @@ function calculateFields(priceAgreement, requiredParameters){
         hasNewYLLPValues,
         hasNewYLAPValues,
         priceConditionsAll,
-        OfferProductsAll
+        OfferProductsAll,
+        priceConditionRappelAll,
+        discountConditionsAll,
+        priceConditionFOCAll
     } = requiredParameters;
 
     const todaysDate = new Date();
@@ -54,13 +57,13 @@ function calculateFields(priceAgreement, requiredParameters){
     }
     // }
 
-    if (!priceConditionsInPa) {
+    /*if (!priceConditionsInPa) {
         for(const pc of priceConditionsAll){
             if(pc.OfferID == priceAgreement.OfferId && pc.CountryCode == priceAgreement.CountryCode && pc.ProductCode == priceAgreement.ProductPackId && pc.ExistingPriceConditionID !== null){
                 priceConditions.push(pc);
             }
         }
-    }
+    }*/
 
     if (!mostRecentMasterPrice) {
         for(const mp of mostRecentMasterPricesAll){
@@ -176,7 +179,7 @@ function calculateFields(priceAgreement, requiredParameters){
                 }
             }
             // If no mainCondition was found, we don't evaluate further
-            if (!mainCondition) {
+            if (!mainCondition || !mostRecentMasterPrice) {
                 return priceAgreement;
             }
 
@@ -188,7 +191,18 @@ function calculateFields(priceAgreement, requiredParameters){
             }
             let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
             let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
-            let mostRecentPRAF = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.PRAF : (mostRecentMasterPrice.PRAF / priceAgreement.Product.ProductPack.PACKFACTOR);
+
+            //calculate mostRecentPraf
+            let mostRecentPRAF = 0;
+            if(offerProduct.UnitPerPack === 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
+                mostRecentPRAF = mostRecentMasterPrice.PRAF_Private; 
+            } else if(offerProduct.UnitPerPack !== 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
+                mostRecentPRAF = (mostRecentMasterPrice.PRAF_Private / priceAgreement.Product.ProductPack.PACKFACTOR);
+            } else if(offerProduct.UnitPerPack === 'Pack' && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ){
+                mostRecentPRAF = mostRecentMasterPrice.PRAF_Public; 
+            } else if(offerProduct.UnitPerPack !== 'Pack' && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ){
+                mostRecentPRAF = (mostRecentMasterPrice.PRAF_Public / priceAgreement.Product.ProductPack.PACKFACTOR);
+            }
 
             if (mainCondition) {
                 /* we are using the maincondition which is coming from the PriceConditionView
@@ -198,8 +212,8 @@ function calculateFields(priceAgreement, requiredParameters){
                 if (priceAgreement.PriceConditions && priceAgreement.PriceConditions.length > 0) {
                     priceCondition = mainCondition;
                 } else {
-                    for(const pc of priceConditionAll){
-                        if(pc.ID == mainCondition.ExistingPriceConditionID){
+                    for(const pc of priceConditionsAll){
+                        if(pc.ExistingPriceConditionID == mainCondition.ExistingPriceConditionID){
                             priceCondition = pc;
                         }
                     }
@@ -259,7 +273,7 @@ function calculateFields(priceAgreement, requiredParameters){
                     priceConditionRappel = rappelCondition;
                 } else {
                     for(const pcr of priceConditionRappelAll){
-                        if(pcr.ID == rappelCondition.ExistingPriceConditionID){
+                        if(pcr.ExistingPriceConditionID == rappelCondition.ExistingPriceConditionID){
                             priceConditionRappel = pcr;
                         }
                     }
@@ -305,7 +319,7 @@ function calculateFields(priceAgreement, requiredParameters){
                     priceConditionFOC = focCondition;
                 } else {
                     for(const pcf of priceConditionFOCAll){
-                        if(pcf.ID == focCondition.ExistingPriceConditionID){
+                        if(pcf.ExistingPriceConditionID == focCondition.ExistingPriceConditionID){
                             priceConditionFOC = pcf;
                         }
                     }
