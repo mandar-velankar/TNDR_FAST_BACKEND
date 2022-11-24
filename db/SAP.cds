@@ -285,8 +285,10 @@ entity IbizContratosItems: cuid {
 
 
 entity IbizEmpenhos: cuid, managed {
+	ID_QP_EMPENHO	 : String;				//ID Opportunity and Commitment	
 	ID_EMPENHO 		 : Integer;             //ID Commitment
 	ID_CONTRATO 	 : Integer;           	//ID Contract
+	ID_QP			 : Integer;				//ID Opportunity
 	ID_LIC_ATRIBUIDA : Integer; 			//ID BID by distributor or direct participation
 	ID_LIC 			 : Integer; 			//ID BID
 	NU_SENT_EXT_LINK : Integer; 			//Determine if opportunity has already been sent (-1 = changed; 0 = never approved; 1 = yes)
@@ -304,6 +306,7 @@ entity IbizEmpenhos: cuid, managed {
 }
 
 entity IbizCcsEmpenhosItems: cuid {
+	ID_CC_QP			: Integer;				//ID QP Item
 	ID_CC_EMPENHO 		: Integer; 				//ID Commitment Item
 	ID_CC_CONTRATO 		: Integer; 				//ID Contract Item
 	ID_EMPENHO 			: Integer; 				//ID Commitment
