@@ -198,7 +198,7 @@ entity Specifications : cuid, managed {
         Name		: String(50);
         Tender      : Association to PT_TMTEND on Tender.TenderID = TenderID;
 }
-
+//EHQUT-196575- Thailand - Change Request - INC16653808 
 entity PT_TMBDPR {
         TenderID              : String(50) not null;
     key OfferID               : String(30) not null;
@@ -235,6 +235,7 @@ entity PT_TMBDPR {
         NetPrice_OfPaid       : Double;
         PRICE_UPDATE          : Integer;
     key LotID                 : Integer default 1;
+        Deductions_ABS_PCT     : String(4);
         //Associations
         Product               : Association to PT_TMOFPR
                                     on  Product.OfferID     = OfferID
