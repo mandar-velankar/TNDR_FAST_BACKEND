@@ -3284,6 +3284,77 @@ module.exports = (srv) => {
     };
 
 
+	srv.on('sendApprovalToIbiz', async (req) => {
+
+		const id_qp = req.data.ibizWorkflowID;
+		const is_ok = req.data.offerStatus; //  (0 = not approved; 1 = approved)
+		const nm_motivo = req.data.comment; 
+
+		if(typeof is_ok != "number" || typeof id_qp != "number" || typeof nm_motivo != "string" ) return req.reject(400, "Invalid request: missing/invalid parameters.");
+
+		const body = {
+			"is_ok": is_ok,
+			"nm_motivo": nm_motivo
+		};
+
+		try {
+            const result = await sendOfferApproval(id_qp, body);
+			const msg = `Ibiz Offer approval successful. WorkflowID: ${id_qp}`;
+            console.log(msg);
+            return msg;
+        } catch (error) {
+			if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+			console.error(`ERROR: Ibiz Offer approval failed. WorkflowID: ${id_qp}`);
+			return req.reject(500, error.message);
+        }
+
+	});
+
+
+	async function sendOfferApproval(id_qp, body) {
+
+		if (!id_qp) {
+            console.error("The Ibiz workflow ID is missing.");
+            return false;
+        }
+
+        if (!body) {
+            console.error("The body of the request is missing.");
+            return false;
+        }
+
+        console.log(`Get api config ...`);
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "OfferApproval" }));
+        
+        console.log(`Get bearer token ...`);
+		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+        const oauthCredentials = await getBearerToken(oauthAuth);
+
+		const queryString = qs.stringify({
+			'id_qp': id_qp
+		});
+
+		const url = `${apiConfig.Host}${apiConfig.BasePath}?${queryString}`;
+
+        console.log(`Calling endpoint ${url}`);
+
+
+        return axios({
+            method: 'post',
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(body)
+        });
+
+    };
+
+
 	async function getBearerToken(oauthAuth) {
 
         if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
