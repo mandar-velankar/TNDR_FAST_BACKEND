@@ -155,6 +155,7 @@ entity IbizQps: cuid, managed {
 	ID_ALTERNATIVO 						: String; 		//ID Alternative (used for linking legacy bids)
 	ID_LICITACAO_IBIZ_LICITA  			: Integer; 		//ID IBIZ Licita (service of IBIZ that capture bids)
 	NM_BU_ABREV 						: String; 		//Business Unit
+	DT_PUBLICACAO						: String;		//Publication Date
 	DT_CAPTURA 							: String; 		//BID's date of capture
 	DT_ABERTURA 						: String; 		//Opening date
 	DT_FIM_ACOLHIMENTO 					: String; 		//Closing date
