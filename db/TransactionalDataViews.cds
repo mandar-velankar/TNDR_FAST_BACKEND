@@ -506,7 +506,7 @@ entity OfferProductPlus as select from TransactionalData.PT_TMOFPR as offerProdu
     offerProduct.Offer.DistributorID as DISTRIBUTOR_ID,
     offerProduct.Offer.Tender.InstituteID as INSTITUTE_ID
 };
-
+//EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity OfferProductConsolidation as select from OfferProductPlus as offerProduct
 left outer join MasterDataViews.DirectBrand as directBrand
     on offerProduct.INSTITUTE_ID = directBrand.INSTITUTE_ID
@@ -519,6 +519,7 @@ left outer join MasterDataViews.DistributorBrand as distributorBrand
 left outer join MasterDataLatestValues.VWBUDGETEDPROFITABILITY as profitability
     on offerProduct.HLEVEL4_CODE = profitability.HLEVEL4_CODE 
     and offerProduct.CountryCode = profitability.COUNTRYCODE
+    and offerProduct.ProductCode =profitability.PRODUCTPACKID
 left outer join MasterDataLatestValues.VW_MASTER_APPROVED_PRICE as approved 
     on offerProduct.ProductCode = approved.PRODUCT_ID
     and offerProduct.CountryCode = approved.COUNTRY_CODE
