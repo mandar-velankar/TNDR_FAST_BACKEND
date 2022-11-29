@@ -740,7 +740,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 RequestedVolume          : curr.NU_QTDE_UNITARIA,
                 UnitPerPack              : "Unit",
                 SampleYN                 : null,
-                SampleQuantity           : null,
+                SampleQuantity           : 0,
                 DocumentsRequired        : null,
                 FirstShipment            : null,
                 NoofLots                 : 0,
