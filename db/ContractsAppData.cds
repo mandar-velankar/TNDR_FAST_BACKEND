@@ -34,11 +34,11 @@ entity TenderContracts as select from TransactionalDataConversion.PT_TMOFRS offe
 entity Channels : cuid {
     ChannelName                 : String(50);
 }
-
+//EHQUT-215577-Thailand - I can't create a new record in "Contract Management" application
 entity Contracts : managed, cuid {
         CountryCode             : String(2) not null;
-        ContractName            : String(50);
-        ContractNumber          : String(50);
+        ContractName            : String(1000);
+        ContractNumber          : String(1000);
         ChannelId               : UUID;
         ContractDate            : Date;
         ContractValidUntil      : Date;

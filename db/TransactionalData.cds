@@ -232,6 +232,7 @@ entity PT_TMBDPR {
                                     and Bundled_1_Cogs.PRODUCT_ID   = FOCProduct_Bundled_1;
         Bundled_1_SKU         : Association to MasterData.PT_TMPRDPCK
                                     on Bundled_1_SKU.PRODUCTPACKID = FOCProduct_Bundled_1;
+        Profitability         :  Association to MasterDataLatestValues.VWBUDGETEDPROFITABILITY on Profitability.PRODUCTPACKID = ProductCode   and Profitability.COUNTRYCODE =CountryCode;
 }
 
 
@@ -429,6 +430,7 @@ entity PriceCondition: cuid, managed {
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
+    IsPricingUnlocked                   : Boolean default false;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000' ;
 }

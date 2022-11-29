@@ -1960,8 +1960,12 @@ module.exports = (srv) => {
 	}
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
+	//EHQUT-197468-MEA – Nucleus heads notifications flow
 	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation) {
+		let tenderid = offerProductValidation[0].TENDER_ID;
 
+		tenderid = tenderid.split("-")[1].substring(0, 2);
+		
 		//Calculate max validation type for each type in each product
 		aApproverTypes.map(async function (oApproverType) {
 
@@ -1993,7 +1997,9 @@ module.exports = (srv) => {
 		if (oCountryBusiness && oRegionalBusiness) {
 			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
 		}
-
+		if(tenderid > '22'){
+			aApproverTypes.splice(oCountryBusiness,1);
+		}
 		//For Thailand specific
 		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
 		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
@@ -2014,7 +2020,7 @@ module.exports = (srv) => {
 		return aApproverTypes;
 
 	}
-
+    //EHQUT-197468-MEA – Nucleus heads notifications flow
 	function getApprovalContent(ApproverType) {
 		switch (ApproverType) {
 			case "Country Business":
