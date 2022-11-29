@@ -754,3 +754,16 @@ entity CountrySpecificTenderInfo: managed {
         ClosingDate          : Date;
         MercadoPublicoIssuer : Integer;
 }
+
+entity DocumentsDownload: cuid, managed {
+    DocID 				: Integer; // id_doc
+    DocCreatedAt        : String;  // created_at
+    NameTag             : String;  // nm_tag
+    CountryCode         : String(2);
+    TenderID            : String(50) not null;
+    OfferID             : String(30) not null;
+    IbizAPIName         : String; // to store from which API the DOC are receiving, like from CONTRATOS,RESULTADOS or from QPS
+    URL                 : String; // file_url
+    Name                : String; // nm_doc
+    Downloaded          : Boolean default false;
+}
