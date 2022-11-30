@@ -1250,8 +1250,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
     priceCondition.ReferencePriceAgreement,
-    priceCondition.Settlement.ID as Settlement_ID,
-    priceCondition.IsPricingUnlocked
+    priceCondition.Settlement.ID as Settlement_ID
 }where tender.Active = 1;
 
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
