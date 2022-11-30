@@ -793,10 +793,14 @@ order by MasterTABrandMap.TA,
 entity MasterBudgetedProfitability as select from MasterDataLatestValues.VWBUDGETEDPROFITABILITY as MasterBudgetedProfitability
 inner join MasterData.PT_TMPRDHIER as h on MasterBudgetedProfitability.HLEVEL4_CODE = h.HLEVEL4_CODE {
 	key MasterBudgetedProfitability.HLEVEL4_CODE,
+    key MasterBudgetedProfitability.PRODUCTPACKID,
+    MasterBudgetedProfitability.PRODUCTPACKNAME,
 	key MasterBudgetedProfitability.COUNTRYCODE,
 	min(h.HLEVEL4_NAME) as BRAND:String,
 	MasterBudgetedProfitability.PROFITABILITY
 } group by MasterBudgetedProfitability.HLEVEL4_CODE,
+            MasterBudgetedProfitability.PRODUCTPACKID,
+           MasterBudgetedProfitability.PRODUCTPACKNAME,
 		   MasterBudgetedProfitability.COUNTRYCODE,
 		   MasterBudgetedProfitability.PROFITABILITY
   order by MasterBudgetedProfitability.COUNTRYCODE,
