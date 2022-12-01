@@ -10,9 +10,9 @@ const jobManager = require("./jobs/JobManager");
   console.log("begin start app gen");
   console.error("begin start app gen");
   const app = express();
-  console.log("begin connect app gen");
-  console.error("begin connect app gen");
-  await cds.connect("db");
+  // console.log("begin connect app gen");
+  // console.error("begin connect app gen");
+  // await cds.connect("db");
   let srv;
   try {
     console.log("load gen")
@@ -31,6 +31,9 @@ const jobManager = require("./jobs/JobManager");
   } catch (ex) {
     console.log(ex);
   }
+  console.log("begin connect app gen");
+  console.error("begin connect app gen");
+  await cds.connect("db");
   // OData V2
   app.use(proxy({
     path: "v2",
