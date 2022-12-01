@@ -17,7 +17,11 @@ const jobManager = require("./jobs/JobManager");
     console.log(ex);
   }
   // OData V2
-  app.use(proxy({path: "v2"}));
+  app.use(proxy({
+    path: "v2",
+    returnPrimitiveNested:false,
+    returnComplexNested:false
+  }));
   // OData V4
   await cds.serve("SchedulerService").from("./gen/").in(app);
   await cds.serve("EpaService").from("./gen/").in(app);

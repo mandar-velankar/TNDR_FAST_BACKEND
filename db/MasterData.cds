@@ -5,6 +5,7 @@ using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValu
 using { com.bayer.SXTENDER.AdminData } from './AdminData';
 
 //Country
+//EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity PT_TMCTRY{
 	key CountryCode:String(2) not null;
 	CountryName:String(50);
@@ -37,6 +38,7 @@ entity PT_TMCTRY{
 	RegionStructure:Association to many PT_TMREGIONSTRUC on RegionStructure.CountryLink = $self;
 	Distributors:Association to many PT_TMDIST on Distributors.Country = $self;
 	User:Association to AdminData.PT_TMUSERCTRY on User.CountryCode = CountryCode and User.ActiveRecord = 'Yes';
+	PROFITABILITY : Association to BUDGETEDPROFITABILITY on PROFITABILITY.COUNTRYCODE = CountryCode;
 }
 
 //Country Currency
@@ -132,6 +134,7 @@ entity PT_TMDIST{
 //Product Pack
 //EITOG-119446-Adding new Field Nucleus
 //EITOG-167492-Adding new Field Product Generic Name
+//EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity PT_TMPRDPCK{
 	key PRODUCTPACKID:Integer not null;
 	PRODUCTPACKNAME:String(100);
@@ -157,6 +160,7 @@ entity PT_TMPRDPCK{
 	Product: Association to PT_TMPRDHIER on Product.HLEVEL6_CODE = HLEVEL6_CODE;
 	RegisteredPrices:Association to many PT_TMREGPR on RegisteredPrices.ProductPack = $self;
 	ProductPackSKUs:Association to many PT_TMSKUPRDPCK on ProductPackSKUs.ProductPack = $self;
+	PROFITABILITY : Association to BUDGETEDPROFITABILITY on PROFITABILITY.PRODUCTPACKID = PRODUCTPACKID;
 }
 //EITOG-119446-Adding new Field Nucleus
 //Legal Entities (Selling Company)
@@ -577,13 +581,17 @@ entity PT_TMTABRMP{
 	//Associations
 	Product:Association to many PT_TMPRDHIER on Product.HLEVEL4_CODE = HLevel4_Code;
 }
-
+//EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity BUDGETEDPROFITABILITY{
 	key COUNTRYCODE:String(2);
 	key HLEVEL4_CODE:String(255);
+	key PRODUCTPACKID: Integer;
+	PRODUCTPACKNAME : String(100);
 	key EFFECTIVEDATE:Date;
 	ENDDATE:Date;
 	PROFITABILITY:Double;
+	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
+	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = PRODUCTPACKID;
 }
 
 entity MASTER_COUNTRY_CLASSIFICATION : cuid {

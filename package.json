@@ -6,12 +6,12 @@
   "license": "ISC",
   "dependencies": {
     "@sap-cloud-sdk/core": "^1.54.2",
-    "@sap/cds": "4.6.5",
-    "@sap/cds-odata-v2-adapter-proxy": "1.5.10",
-    "@sap/hana-client": "2.7.21",
-    "@sap/logging": "^6.0.2",
-    "@sap/xsenv": "^3.1.0",
-    "@sap/xssec": "^3.0.10",
+    "@sap/cds": "6.3.0",
+    "@sap/cds-odata-v2-adapter-proxy": "1.9.13",
+    "@sap/hana-client": "2.14.22",
+    "@sap/logging": "^6.1.1",
+    "@sap/xsenv": "^3.4.0",
+    "@sap/xssec": "^3.2.14",
     "angular-expressions": "^1.1.4",
     "axios": "^0.21.1",
     "cfenv": "^1.2.4",
@@ -89,7 +89,7 @@
     "srv"
   ],
   "devDependencies": {
-    "@sap/cds-dk": "~4.9.7",
+    "@sap/cds-dk": "~6.3.0",
     "mbt": "~1.1.1"
   }
 }

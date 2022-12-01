@@ -1186,7 +1186,7 @@ module.exports = async (srv) => {
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
 
-        const body = getES01RequestBodyTemplate();
+        const body = getES01RequestBodyTemplate(institute);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = parseInt(institute.CustomerID);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
@@ -1244,7 +1244,7 @@ module.exports = async (srv) => {
             console.log('Error', error.message);
         }
     }
-    function getES01RequestBodyTemplate() {
+    function getES01RequestBodyTemplate(institute) {
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
                 "IDOC": {
@@ -1280,7 +1280,7 @@ module.exports = async (srv) => {
                         "ZTERM": "D496",
                         "ZLSCH": "M",
                         "ABREX": "TEST AGMNT",
-                        "KOTABNR": 750,
+                        "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 750,
                         "KVEWE": "A",
                         "KAPPL": "V",
                         "_BAY0-GZ_SALESAGRITEM": [
