@@ -8,25 +8,16 @@ const jobManager = require("./jobs/JobManager");
 
 (async () => {
   console.log("begin start app gen");
-  console.error("begin start app gen");
   const app = express();
   console.log("begin connect app gen");
-  console.error("begin connect app gen");
   await cds.connect.to("db");
   let srv;
-  try {
+
     console.log("load gen")
-    srv = await cds.load("./gen/");
-  } catch (error) {
-    console.log("error failed loading from gen")
-  }
+    srv = await cds.load("./gen/srv/");
+
   try {
-    console.log("load srv")
-    srv = await cds.load("./srv/");
-  } catch (error) {
-    console.log("error failed loading from srv")
-  }
-  try {
+    console.log("deploy")
     await cds.deploy(srv);
   } catch (ex) {
     console.log(ex);
@@ -38,42 +29,19 @@ const jobManager = require("./jobs/JobManager");
     returnComplexNested: false
   }));
   // OData V4
-  try {
-    console.log("load gen")
-    await cds.serve("SchedulerService").from("./gen/").in(app);
-    await cds.serve("EpaService").from("./gen/").in(app);
-    await cds.serve("CatalogService").from("./gen/").in(app);
-    await cds.serve("PolicyService").from("./gen/").in(app);
-    await cds.serve("ContractService").from("./gen/").in(app);
-    await cds.serve("AccessService").from("./gen/").in(app);
-    await cds.serve("MasterDataManagementService").from("./gen/").in(app);
-    await cds.serve("SalesOpportunityService").from("./gen/").in(app);
-    await cds.serve("CreateOpportunityService").from("./gen/").in(app);
-    await cds.serve("BankGuaranteeService").from("./gen/").in(app);
-    await cds.serve("PriceAgreementService").from("./gen/").in(app);
-    await cds.serve("CpiService").from("./gen/").in(app);
-    await cds.serve("ExternalService").from("./gen/").in(app);
-  } catch (error) {
-    console.log("error failed loading from gen")
-  }
-  try {
-    console.log("load srv")
-    await cds.serve("SchedulerService").from("./srv/").in(app);
-    await cds.serve("EpaService").from("./srv/").in(app);
-    await cds.serve("CatalogService").from("./srv/").in(app);
-    await cds.serve("PolicyService").from("./srv/").in(app);
-    await cds.serve("ContractService").from("./srv/").in(app);
-    await cds.serve("AccessService").from("./srv/").in(app);
-    await cds.serve("MasterDataManagementService").from("./srv/").in(app);
-    await cds.serve("SalesOpportunityService").from("./srv/").in(app);
-    await cds.serve("CreateOpportunityService").from("./srv/").in(app);
-    await cds.serve("BankGuaranteeService").from("./srv/").in(app);
-    await cds.serve("PriceAgreementService").from("./srv/").in(app);
-    await cds.serve("CpiService").from("./srv/").in(app);
-    await cds.serve("ExternalService").from("./srv/").in(app);
-  } catch (error) {
-    console.log("error failed loading from srv")
-  }
+    await cds.serve("SchedulerService").from("./gen/srv/").in(app);
+    await cds.serve("EpaService").from("./gen/srv/").in(app);
+    await cds.serve("CatalogService").from("./gen/srv/").in(app);
+    await cds.serve("PolicyService").from("./gen/srv/").in(app);
+    await cds.serve("ContractService").from("./gen/srv/").in(app);
+    await cds.serve("AccessService").from("./gen/srv/").in(app);
+    await cds.serve("MasterDataManagementService").from("./gen/srv/").in(app);
+    await cds.serve("SalesOpportunityService").from("./gen/srv/").in(app);
+    await cds.serve("CreateOpportunityService").from("./gen/srv/").in(app);
+    await cds.serve("BankGuaranteeService").from("./gen/srv/").in(app);
+    await cds.serve("PriceAgreementService").from("./gen/srv/").in(app);
+    await cds.serve("CpiService").from("./gen/srv/").in(app);
+    await cds.serve("ExternalService").from("./gen/srv/").in(app);
 
   console.log("register jobs")
   // Scheduler Jobs
