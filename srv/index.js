@@ -7,7 +7,11 @@ const port = process.env.PORT || 4004;
 const jobManager = require("./jobs/JobManager");
 
 (async () => {
+  console.log("begin start app gen");
+  console.error("begin start app gen");
   const app = express();
+  console.log("begin connect app gen");
+  console.error("begin connect app gen");
   await cds.connect("db");
   let srv;
   try {
