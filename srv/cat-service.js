@@ -262,10 +262,7 @@ module.exports = (srv) => {
 		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
 
 		let grossSales = offerPrice * paidVolume;
-        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
-        let grossSalesEurSpot=grossSales / product.SPOT_RATE;
-        let grossSalesEurBudget = grossSales / product.BUDGET_RATE;
-        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
+       
 		let netSales = netPrice * totalVolume;
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
@@ -284,15 +281,9 @@ module.exports = (srv) => {
 		let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
         
         //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
-        let grossMarginEurSpot,grossMarginEurBudget;
-		if(offer.APPROVAL_TYPE===1 || offer.APPROVAL_TYPE===2){
-            grossMarginEurSpot = grossProfitEurSpot / grossSalesEurSpot;
-            grossMarginEurBudget = grossProfitEurBudget / grossSalesEurBudget;
-            }else{
-            grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
-            grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
+           let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
+           let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
     
-         }
         //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
 		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
 
@@ -778,7 +769,7 @@ module.exports = (srv) => {
 		return price;
 	}
 
-    async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes) {//Spain
+    async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -797,7 +788,8 @@ module.exports = (srv) => {
 
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
-        let dFloorPrice = MasterProductPrice ? MasterProductPrice.PRAF : 0;
+        let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
+						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
         let dRadiologyProfitability = 0;
 
         if(product.DIVISION === 'Radiology'){
@@ -1231,7 +1223,7 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
@@ -1253,7 +1245,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType9(tx, offer, product, commnonProductInfo, aApproverTypes)
 		}
         else if (offer.APPROVAL_TYPE === 10) { //Applicable for Spain
-			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes)
+			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes, institute)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -1295,7 +1287,7 @@ module.exports = (srv) => {
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute);
 
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
@@ -2435,7 +2427,10 @@ module.exports = (srv) => {
 					.concat(p.PRODUCTID).concat(",ApproverEmailID='")
 					.concat(d.ApproverEmailID).concat("',Active=1,Statustime=")
 					.concat(d.Statustime.replace(" ", "T")).concat(",ApproverType='")
-					.concat(d.ApproverType).concat("')");
+					.concat(d.ApproverType).concat("')")
+					.concat("',LotID=")
+					.concat(p.LOTID)
+					.concat(")");
 				return result;
 			});
 			statusPath = statusPath.join(";")
@@ -3254,6 +3249,77 @@ module.exports = (srv) => {
 
         console.log(`Get api config ...`);
         const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "OfferProductChannel" }));
+        
+        console.log(`Get bearer token ...`);
+		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+        const oauthCredentials = await getBearerToken(oauthAuth);
+
+		const queryString = qs.stringify({
+			'id_qp': id_qp
+		});
+
+		const url = `${apiConfig.Host}${apiConfig.BasePath}?${queryString}`;
+
+        console.log(`Calling endpoint ${url}`);
+
+
+        return axios({
+            method: 'post',
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(body)
+        });
+
+    };
+
+
+	srv.on('sendApprovalToIbiz', async (req) => {
+
+		const id_qp = req.data.ibizWorkflowID;
+		const is_ok = req.data.offerStatus; //  (0 = not approved; 1 = approved)
+		const nm_motivo = req.data.comment; 
+
+		if(typeof is_ok != "number" || typeof id_qp != "number" || typeof nm_motivo != "string" ) return req.reject(400, "Invalid request: missing/invalid parameters.");
+
+		const body = {
+			"is_ok": is_ok,
+			"nm_motivo": nm_motivo
+		};
+
+		try {
+            const result = await sendOfferApproval(id_qp, body);
+			const msg = `Ibiz Offer approval successful. WorkflowID: ${id_qp}`;
+            console.log(msg);
+            return msg;
+        } catch (error) {
+			if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+			console.error(`ERROR: Ibiz Offer approval failed. WorkflowID: ${id_qp}`);
+			return req.reject(500, error.message);
+        }
+
+	});
+
+
+	async function sendOfferApproval(id_qp, body) {
+
+		if (!id_qp) {
+            console.error("The Ibiz workflow ID is missing.");
+            return false;
+        }
+
+        if (!body) {
+            console.error("The body of the request is missing.");
+            return false;
+        }
+
+        console.log(`Get api config ...`);
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "OfferApproval" }));
         
         console.log(`Get bearer token ...`);
 		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));

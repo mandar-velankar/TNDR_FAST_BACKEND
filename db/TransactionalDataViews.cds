@@ -921,7 +921,13 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     on product.CountryCode = PT_TMBDPR.CountryCode
     and product.ProductCode = PT_TMBDPR.ProductCode
     and product.OfferID = PT_TMBDPR.OfferID
-    and product.LotID = PT_TMBDPR.LotID {
+    and product.LotID = PT_TMBDPR.LotID 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on product.CountryCode = priceCondition.CountryCode
+    and product.ProductCode = priceCondition.ProductCode
+    and product.OfferID = priceCondition.OfferID
+    and product.Active = 1
+    and product.LotID = priceCondition.LotID {
     key offer.OfferID,
     key product.ProductCode,
     key product.CountryCode,
@@ -1144,12 +1150,8 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
                 ) ),2) 
         else null
     end as GrossMargin:Double,
-    product.ActiveProduct
-    
-
-        
-
-
+    product.ActiveProduct,
+    priceCondition.CommercialProposal
 }where offer.Active = 1;
 
 /**
@@ -1233,7 +1235,8 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     end as PriceConditionPVL:Decimal,
     masterPrices.YLLP as PVL,
     masterPrices.YLAP,
-    masterPrices.PRAF,
+    masterPrices.PRAF_Private,
+    masterPrices.PRAF_Public,
     masterPrices.RentalPrice,
     masterPrices.UoM,
     masterPrices.Currency as masterPriceCurrency,

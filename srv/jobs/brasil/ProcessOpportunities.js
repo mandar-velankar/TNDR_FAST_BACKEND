@@ -361,13 +361,16 @@ module.exports = class processOpportunities extends BaseJob {
         // add channel
         product.Channel = (parentOffer.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor';
 
-         //add status
-         lots.push({
-            LotID    : product.LotID,
-            OfferID  : product.OfferID,
-            createdBy: "IBIZ",
-            modifiedBy: "IBIZ"
-        });
+         //add lots
+         const hasLot = lots.find(l => l.LotID === product.LotID && l.OfferID === product.OfferID);
+         if(!hasLot){
+            lots.push({
+                LotID    : product.LotID,
+                OfferID  : product.OfferID,
+                createdBy: "IBIZ",
+                modifiedBy: "IBIZ"
+            });
+         }
 
     }
 
@@ -378,17 +381,20 @@ module.exports = class processOpportunities extends BaseJob {
         return copy;
     });  
 
-    // 3. Upsert records into PT_TMOFPR
+    // 3. Upsert records into PT_TMOFPR and Lots
     console.log(`JOB (${this.jobName }): Upserting IBIZ Products into FAST table (PT_TMOFPR) ...`);
     try {
+        // PT_TMOFPR
         productsWithoutID && productsWithoutID.length > 0 && await tx.run(INSERT(productsWithoutID).into(PT_TMOFPR));
-        lots && lots.length > 0 && await tx.run(INSERT(lots).into(Lots));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Products into FAST table (PT_TMOFPR) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFPR -> created: ${productsWithoutID.length}`);
+        // Lots
+        lots && lots.length > 0 && await tx.run(INSERT(lots).into(Lots));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Product Lots into FAST table (Lots) successfully completed.`);
         console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products into FAST table (PT_TMOFPR) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products into FAST tables failed`);
         console.error(error);
         throw error;
     }
@@ -585,7 +591,7 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMTEND ...`);
     ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
         const institute = (existingInstitutesInFAST.find(inst => inst.CNPJ === curr.COD_LICITADOR.replace(/\D/g,'')));
-        const instituteID = institute && institute.InstituteID || null;
+        const instituteID = institute && institute.InstituteID || 0;
         const tenderType = (existingTenderTypesFAST.find(tt => tt.NAME === curr.NM_MODALIDADE));
         const tenderTypeID = tenderType && tenderType.ID || null;
         prev.push(
@@ -610,8 +616,8 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
                 InstituteID          : instituteID,
                 TenderChannel        : "Distributor",
                 GroupPurchasing      : null,
-                PublicationDate      : curr.DT_ABERTURA,
-                BidDueDate           : curr.DT_FIM_ACOLHIMENTO,
+                PublicationDate      : curr.DT_PUBLICACAO,
+                BidDueDate           : curr.DT_ABERTURA,
                 AwardDate            : null,
                 NextPublicationDye   : null,
                 ContractLength       : null,
@@ -674,7 +680,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
                 SubmittedBy           : "anonymous",
                 Active                : 1,
                 DistributorID         : distributorID,
-                InternalBidDueDate    : curr.DT_FIM_ACOLHIMENTO,
+                InternalBidDueDate    : curr.DT_ABERTURA,
                 SellingCompany        : "BBR",
                 ProductCount          : 0,
                 Currency              : "BRL",
@@ -718,7 +724,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFPR ...`);
     directIbizOpportunityItems = directIbizOpportunityItems.reduce((prev, curr, idx, directIbizOpportunityItems) => {
         const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
-        const productPackID = sku && sku.ProductPackID || null;
+        const productPackID = sku && sku.ProductPackID || 0;
         prev.push(
             {
                 parent_ID                : curr.parent_ID,
@@ -734,7 +740,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
                 RequestedVolume          : curr.NU_QTDE_UNITARIA,
                 UnitPerPack              : "Unit",
                 SampleYN                 : null,
-                SampleQuantity           : null,
+                SampleQuantity           : 0,
                 DocumentsRequired        : null,
                 FirstShipment            : null,
                 NoofLots                 : 0,

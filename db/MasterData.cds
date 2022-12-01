@@ -52,7 +52,7 @@ entity CountryCurrency : managed {
 entity PT_TMINST{
 	key CountryCode:String(2) not null;//remove from key
 	key InstituteID:Integer not null;
-	CustomerID:String; // Codigo
+	CustomerID:Integer; // Codigo
 	InstituteName:String(500);
 	InstituteType:String(50);
 	Address:String(500);
@@ -115,7 +115,7 @@ entity PT_TMDIST{
 	State: String;
 	TaxCode: String;
 	CNPJ: String;
-	CustomerID: String; // Codigo
+	CustomerID: Integer; // Codigo
 	Shortname: String;
 	CommissionRate:Double;
 	INCOTerms:String(500);
@@ -747,7 +747,9 @@ entity MasterPrices: cuid, managed {
     UoM: String;
     YLLP: Double;
     YLAP: Double;
-    PRAF: Double; 
+    //PRAF: Double; 
+	PRAF_Public: Double;
+	PRAF_Private: Double;
     RentalPrice: Double;   
     ValidFrom: Timestamp;
 	ValidTo: Timestamp;  
@@ -781,7 +783,7 @@ entity BrazilMasterPrices: cuid, managed {
 entity BrazilDistributorDivision: managed {
 	key DistributorID: Integer; 
 	key DivisionCode: String(50); // setor_ativ
-	CustomerID: String; // Codigo
+	CustomerID: Integer; // Codigo
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);
@@ -791,7 +793,7 @@ entity BrazilDistributorDivision: managed {
 entity BrazilInstituteDivision: managed {
 	key InstituteID: Integer; 
 	key DivisionCode: String(50); // setor_ativ
-	CustomerID: String; // Codigo
+	CustomerID: Integer; // Codigo
 	DivisionName: String(50);
 	CustomerGroup: String(3);
 	PriceList: String(2);

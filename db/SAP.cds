@@ -155,6 +155,7 @@ entity IbizQps: cuid, managed {
 	ID_ALTERNATIVO 						: String; 		//ID Alternative (used for linking legacy bids)
 	ID_LICITACAO_IBIZ_LICITA  			: Integer; 		//ID IBIZ Licita (service of IBIZ that capture bids)
 	NM_BU_ABREV 						: String; 		//Business Unit
+	DT_PUBLICACAO						: String;		//Publication Date
 	DT_CAPTURA 							: String; 		//BID's date of capture
 	DT_ABERTURA 						: String; 		//Opening date
 	DT_FIM_ACOLHIMENTO 					: String; 		//Closing date
@@ -218,6 +219,8 @@ entity IbizDocs: cuid {
 entity IbizResultados: cuid, managed {
 	ID_CC_QP 					: Integer; 		// ID QP Item
 	ID_QP 						: Integer; 		// ID QP (workflow)
+	ID_RESULTADO				: Integer;
+	ID_LIC_ATRIBUIDA			: Integer;
 	ID_LIC 						: Integer; 		// ID Lic (BID)
 	NU_SENT_EXT_LINK 			: Integer; 		// Determine if result has already been sent (-1 = changed; 0 = never approved; 1 = yes)
 	NU_GANHEI 					: Integer; 		// Determine if item was won by distributor (-3 = Did not participate; -2 = No result registered; -1 = Result not published by institute; 0 = Lost; 1 = Won; 2 = There are no winners; 3 = Homologated but without a winner)
@@ -283,8 +286,10 @@ entity IbizContratosItems: cuid {
 
 
 entity IbizEmpenhos: cuid, managed {
+	ID_QP_EMPENHO	 : String;				//ID Opportunity and Commitment	
 	ID_EMPENHO 		 : Integer;             //ID Commitment
 	ID_CONTRATO 	 : Integer;           	//ID Contract
+	ID_QP			 : Integer;				//ID Opportunity
 	ID_LIC_ATRIBUIDA : Integer; 			//ID BID by distributor or direct participation
 	ID_LIC 			 : Integer; 			//ID BID
 	NU_SENT_EXT_LINK : Integer; 			//Determine if opportunity has already been sent (-1 = changed; 0 = never approved; 1 = yes)
@@ -302,6 +307,7 @@ entity IbizEmpenhos: cuid, managed {
 }
 
 entity IbizCcsEmpenhosItems: cuid {
+	ID_CC_QP			: Integer;				//ID QP Item
 	ID_CC_EMPENHO 		: Integer; 				//ID Commitment Item
 	ID_CC_CONTRATO 		: Integer; 				//ID Contract Item
 	ID_EMPENHO 			: Integer; 				//ID Commitment
