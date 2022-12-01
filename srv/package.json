@@ -47,7 +47,7 @@
         "requires": {
             "db": {
                 "kind": "hana",
-                "model": "gen/csn.json",
+                "model": "gen/srv/csn.json",
                 "pool": {
                     "max": 1400,
                     "min": 100,
