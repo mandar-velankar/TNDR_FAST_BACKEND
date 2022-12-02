@@ -1,11 +1,13 @@
 const cds = require('@sap/cds');
 
+//EITOG-217330-Only to view commercial offers, NOT to modify
 module.exports = (srv) => {
 	srv.on('getAccess', (req) => {
 		return {
 			tender: req.user.is('f_tndr_cag_tnd_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			tenderAccess:{
-				COGS:req.user.is('f_tndr_cag_cogs_user')
+				COGS:req.user.is('f_tndr_cag_cogs_user'),
+				SPAINTENDERVIEW:req.user.is('f_tndr_cag_spaintenderview_user')
 			},
 			ppa: req.user.is('f_tndr_cag_ppa_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			contract: req.user.is('f_tndr_cag_ctr_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
