@@ -30,16 +30,16 @@ module.exports = class processOpportunities extends BaseJob {
             const directIbizOpportunities = opportunities.filter(direct => direct.NU_DIRETO_INDIRETO === 0);
             const directIbizOpportunityParentIDs = directIbizOpportunities.map(dop => dop.ID);
             const directIbizOpportunityItems = await this.getOpportunitiesItems(tx, directIbizOpportunityParentIDs);
-            const directIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, directIbizOpportunityParentIDs); //to-be implemented later
+            const directIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, directIbizOpportunityParentIDs); 
 
             const indirectIbizOpportunities = opportunities.filter(indirect => indirect.NU_DIRETO_INDIRETO === 1);
             const indirectIbizOpportunityParentIDs = indirectIbizOpportunities.map(dop => dop.ID);
             const indirectIbizOpportunityItems = await this.getOpportunitiesItems(tx, indirectIbizOpportunityParentIDs);
-            const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); //to-be implemented later
+            const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); 
 
             // Process data
-            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
-            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST);
+            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs);
+            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs);
 
             // Commit All
             await tx.commit();
@@ -186,7 +186,7 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST) {
+ async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs) {
     console.log(`JOB (${this.jobName }): Processing Direct Ibiz Opportunities ...`);
     try {
 
@@ -194,6 +194,7 @@ module.exports = class processOpportunities extends BaseJob {
         const mappedTenders = this.mapIbizOpportunitiestoFASTTender(directIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
         const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(directIbizOpportunities, existingDistributorsFAST);
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
+        const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(directIbizOpportunityDocs);
 
         // 1. Create/update entries in PT_TMTEND
         await this.upsertFASTTenders(tx, mappedTenders);
@@ -204,12 +205,18 @@ module.exports = class processOpportunities extends BaseJob {
         // 3. Create/update entries in PT_TMOFPR
         await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
 
-        // 4. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
+        // 4. Create/update entries in DocumentsDownload
+        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers);  
+
+        // 5. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
         const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 0}));
         const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const parentIDs = mappedProducts.map(pr => pr.parent_ID);
         Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
+        const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
+        Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}}));
 
         console.log(`JOB (${this.jobName }): Processing of Direct ibiz opportunities successfully completed.`);
 
@@ -374,9 +381,9 @@ module.exports = class processOpportunities extends BaseJob {
 
     }
 
-    // delete IBIZ_TECHNICAL_ID before saving to DB
-    const productsWithoutID = mappedProducts.map(ofpr => { 
-        const copy = {...ofpr}; 
+    // 2. delete parent id before saving to DB
+    const productsWithoutID = mappedProducts.map(prd => { 
+        const copy = {...prd}; 
         delete copy.parent_ID; 
         return copy;
     });  
@@ -416,9 +423,9 @@ module.exports = class processOpportunities extends BaseJob {
         price.OfferID = parentOffer.OfferID;
     }
 
-    // delete IBIZ_TECHNICAL_ID before saving to DB
-    const pricesWithoutID = mappedPrice.map(ofpr => { 
-        const copy = {...ofpr}; 
+    // 2. delete parent_ID before saving to DB
+    const pricesWithoutID = mappedPrice.map(prc => { 
+        const copy = {...prc}; 
         delete copy.parent_ID; 
         return copy;
     });  
@@ -452,9 +459,9 @@ module.exports = class processOpportunities extends BaseJob {
         pc.OfferID = parentOffer.OfferID;
     }
 
-    // delete IBIZ_TECHNICAL_ID before saving to DB
-    const priceConditionsWithoutID = mappedPriceCondition.map(ofpr => { 
-        const copy = {...ofpr}; 
+    // delete parent_ID before saving to DB
+    const priceConditionsWithoutID = mappedPriceCondition.map(prccnd => { 
+        const copy = {...prccnd}; 
         delete copy.parent_ID; 
         return copy;
     });  
@@ -473,6 +480,41 @@ module.exports = class processOpportunities extends BaseJob {
     }
 }
 
+/**
+ * Creates Opportunity Documents in FAST
+ * DocumentsDownload
+ * @returns 
+ */
+ async upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers) {
+    const { DocumentsDownload } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+
+    // 1. link existing Tenders and Offer with Documents
+    for (const docs of mappedDocs) {
+        let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === docs.parent_ID);
+        docs.TenderID = parentOffer.TenderID;
+        docs.OfferID = parentOffer.OfferID;
+    }
+
+    // 2. delete QPS ParentId before saving to DB
+    const docsWithoutID = mappedDocs.map(doc => { 
+        const copy = {...doc}; 
+        delete copy.parent_ID; 
+        return copy;
+    });  
+
+    // 3. Upsert records into DocumentsDownload
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Opportunity Documents into FAST table (DocumentsDownload) ...`);
+    try {
+        docsWithoutID && docsWithoutID.length > 0 && await tx.run(INSERT(docsWithoutID).into(DocumentsDownload));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Opportunity Documents into FAST table (DocumentsDownload) successfully completed.`);
+        console.log(`JOB (${this.jobName }): DocumentsDownload -> created: ${docsWithoutID.length}`);
+        return true;
+    } catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Opportunity Documents into FAST table (DocumentsDownload) failed`);
+        console.error(error);
+        throw error;
+    }
+}
 
 /**
  * Gets a list of existing Tenders from FAST with an ExternalID
@@ -539,7 +581,7 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST) {
+ async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs) {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
@@ -549,6 +591,7 @@ module.exports = class processOpportunities extends BaseJob {
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
         const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST);
         const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST);
+        const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(indirectIbizOpportunityDocs);
 
          // 1. Create/update entries in PT_TMTEND
          await this.upsertFASTTenders(tx, mappedTenders);
@@ -564,13 +607,19 @@ module.exports = class processOpportunities extends BaseJob {
 
          // 5. Create/update entries in PRICECONDITION
          await this.upsertFASTPriceConditions(tx, mappedPriceCondition, mappedOffers);
+
+         // 6. Create/update entries in DocumentsDownload
+        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers);
  
-         // 6. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
+         // 7. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
          const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
          await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 1}));
          const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
          const parentIDs = mappedProducts.map(pr => pr.parent_ID);
          Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
+         const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+         const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
+         Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}}));
 
         console.log(`JOB (${this.jobName }): Processing of Indirect ibiz opportunities successfully completed.`);
 
@@ -719,10 +768,10 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} products
      */
-mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST) {
+mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems, existingDistributorsFAST, existingSKUFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFPR ...`);
-    directIbizOpportunityItems = directIbizOpportunityItems.reduce((prev, curr, idx, directIbizOpportunityItems) => {
+    ibizOpportunityItems = ibizOpportunityItems.reduce((prev, curr, idx, ibizOpportunityItems) => {
         const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
         const productPackID = sku && sku.ProductPackID || 0;
         prev.push(
@@ -772,7 +821,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
         );
         return prev;
     }, []);
-    return directIbizOpportunityItems;
+    return ibizOpportunityItems;
 
 }
 
@@ -891,6 +940,34 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunity
 
 }
 
+/**
+ * Maps Ibiz Opportunities Documents from Ibiz Opportunities to FAST DocumentsDownload
+ * @param {*} directIbizOpportunityDocs 
+ * @returns {[Objects]} documentsDownload
+ */
+mapIbizOpportunitiesDocstoFASTDocumentsDownload(ibizOpportunityDocs){
+
+    console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities Docs to DocumentsDownload ...`);
+    ibizOpportunityDocs = ibizOpportunityDocs.reduce((prev, curr, idx, ibizOpportunityDocs) => {
+        prev.push(
+            {
+                parent_ID             : curr.Qps_ID,
+                DocID                 : curr.ID_DOC,
+                DocCreatedAt          : curr.CREATED_AT,
+                NameTag               : curr.NM_TAG,
+                CountryCode           : "BR",
+                TenderID              : "",
+                OfferID               : "",
+                IbizAPIName           : "Tender",
+                URL                   : curr.FILE_URL,
+                Name                  : curr.NM_DOC,
+                Downloaded            : false
+            }
+        );
+        return prev;
+    }, []);
+    return ibizOpportunityDocs;
+}
 
 
 /**
