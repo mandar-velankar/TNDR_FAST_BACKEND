@@ -506,7 +506,7 @@ entity OfferProductPlus as select from TransactionalData.PT_TMOFPR as offerProdu
     offerProduct.Offer.DistributorID as DISTRIBUTOR_ID,
     offerProduct.Offer.Tender.InstituteID as INSTITUTE_ID
 };
-
+//EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity OfferProductConsolidation as select from OfferProductPlus as offerProduct
 left outer join MasterDataViews.DirectBrand as directBrand
     on offerProduct.INSTITUTE_ID = directBrand.INSTITUTE_ID
@@ -519,6 +519,7 @@ left outer join MasterDataViews.DistributorBrand as distributorBrand
 left outer join MasterDataLatestValues.VWBUDGETEDPROFITABILITY as profitability
     on offerProduct.HLEVEL4_CODE = profitability.HLEVEL4_CODE 
     and offerProduct.CountryCode = profitability.COUNTRYCODE
+    and offerProduct.ProductCode =profitability.PRODUCTPACKID
 left outer join MasterDataLatestValues.VW_MASTER_APPROVED_PRICE as approved 
     on offerProduct.ProductCode = approved.PRODUCT_ID
     and offerProduct.CountryCode = approved.COUNTRY_CODE
@@ -921,7 +922,13 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
     on product.CountryCode = PT_TMBDPR.CountryCode
     and product.ProductCode = PT_TMBDPR.ProductCode
     and product.OfferID = PT_TMBDPR.OfferID
-    and product.LotID = PT_TMBDPR.LotID {
+    and product.LotID = PT_TMBDPR.LotID 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on product.CountryCode = priceCondition.CountryCode
+    and product.ProductCode = priceCondition.ProductCode
+    and product.OfferID = priceCondition.OfferID
+    and product.Active = 1
+    and product.LotID = priceCondition.LotID {
     key offer.OfferID,
     key product.ProductCode,
     key product.CountryCode,
@@ -1144,12 +1151,8 @@ left outer join  TransactionalData.PT_TMBDPR as PT_TMBDPR
                 ) ),2) 
         else null
     end as GrossMargin:Double,
-    product.ActiveProduct
-    
-
-        
-
-
+    product.ActiveProduct,
+    priceCondition.CommercialProposal
 }where offer.Active = 1;
 
 /**
@@ -1233,7 +1236,8 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     end as PriceConditionPVL:Decimal,
     masterPrices.YLLP as PVL,
     masterPrices.YLAP,
-    masterPrices.PRAF,
+    masterPrices.PRAF_Private,
+    masterPrices.PRAF_Public,
     masterPrices.RentalPrice,
     masterPrices.UoM,
     masterPrices.Currency as masterPriceCurrency,

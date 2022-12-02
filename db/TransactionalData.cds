@@ -198,7 +198,8 @@ entity Specifications : cuid, managed {
         Name		: String(50);
         Tender      : Association to PT_TMTEND on Tender.TenderID = TenderID;
 }
-
+//EHQUT-196575- Thailand - Change Request - INC16653808 
+//EHQUT-197393-MEA – change display in Offer Summary in Financial Offer tab
 entity PT_TMBDPR {
         TenderID              : String(50) not null;
     key OfferID               : String(30) not null;
@@ -235,6 +236,7 @@ entity PT_TMBDPR {
         NetPrice_OfPaid       : Double;
         PRICE_UPDATE          : Integer;
     key LotID                 : Integer default 1;
+        Deductions_ABS_PCT     : String(4);
         //Associations
         Product               : Association to PT_TMOFPR
                                     on  Product.OfferID     = OfferID
@@ -245,6 +247,7 @@ entity PT_TMBDPR {
                                     and Bundled_1_Cogs.PRODUCT_ID   = FOCProduct_Bundled_1;
         Bundled_1_SKU         : Association to MasterData.PT_TMPRDPCK
                                     on Bundled_1_SKU.PRODUCTPACKID = FOCProduct_Bundled_1;
+        Profitability         :  Association to MasterDataLatestValues.VWBUDGETEDPROFITABILITY on Profitability.PRODUCTPACKID = ProductCode   and Profitability.COUNTRYCODE =CountryCode;
 }
 
 
@@ -752,4 +755,17 @@ entity CountrySpecificTenderInfo: managed {
         PublicationDate      : Date;
         ClosingDate          : Date;
         MercadoPublicoIssuer : Integer;
+}
+
+entity DocumentsDownload: cuid, managed {
+    DocID 				: Integer; // id_doc
+    DocCreatedAt        : String;  // created_at
+    NameTag             : String;  // nm_tag
+    CountryCode         : String(2);
+    TenderID            : String(50) not null;
+    OfferID             : String(30) not null;
+    IbizAPIName         : String; // to store from which API the DOC are receiving, like from CONTRATOS,RESULTADOS or from QPS
+    URL                 : String; // file_url
+    Name                : String; // nm_doc
+    Downloaded          : Boolean default false;
 }

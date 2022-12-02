@@ -280,7 +280,7 @@ module.exports = async (srv) => {
         let customerPricesAll = [];
         let customerPricesInPA = true;
         let priceConditionsAll = [];
-        let priceConditionsInPa = true;
+        //let priceConditionsInPa = true;
         let mostRecentMasterPricesAll = [];
         let consumerPricesAll = [];
         let consumerPricesInPA = true;
@@ -291,7 +291,7 @@ module.exports = async (srv) => {
 
         if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
-            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
+            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
                 customerPricesInPA = false;
                 customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
             }
@@ -315,35 +315,15 @@ module.exports = async (srv) => {
 
         if (countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0) {
             if (offers && offers.length > 0) {
-                startTrace("PriceConditionView");
-                if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'priceConditions') === -1) {
-                    priceConditionsInPa = false;
-                    priceConditionsAll = await tx.run(SELECT.from(PriceConditionView)
-                        .where({
-                            CountryCode: { in: countrycodes },
-                            and: {
-                                ProductCode: { in: productpacks },
-                                and: {
-                                    OfferID: { in: offers },
-                                    and: {
-                                        ExistingPriceConditionID: { '!=': null }
-                                    }
-                                }
-                            }
-                        })
-                    );
-                }
-                stopTrace("PriceConditionView");
-
                 startTrace("OfferProducts");
                 OfferProductsAll = await tx.run(SELECT.from(PT_TMOFPR)
                     .where({
                         CountryCode: { in: countrycodes },
                         and: {
-                            ProductCode: { in: productpacks },
-                            and: {
+                            ProductCode: { in: productpacks }
+                        /*  and: {
                                 OfferID: { in: offers }
-                            }
+                            }*/
                         }
                     })
                 );
@@ -361,7 +341,7 @@ module.exports = async (srv) => {
             stopTrace("MostRecentMasterPricesView");
 
             startTrace("MostRecentConsumerPricesView");
-            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.find(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
+            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
                 consumerPricesInPA = false;
                 consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
                     .where({
@@ -425,7 +405,7 @@ module.exports = async (srv) => {
         startTrace("CalculateFields");
 
         const requiredParameters = {
-            priceConditionsInPa,
+            //priceConditionsInPa,
             institutesAll,
             customerPricesInPA,
             customerPricesAll,
@@ -439,7 +419,10 @@ module.exports = async (srv) => {
             hasNewYLLPValues,
             hasNewYLAPValues,
             priceConditionsAll,
-            OfferProductsAll
+            OfferProductsAll,
+            priceConditionRappelAll,
+            discountConditionsAll,
+            priceConditionFOCAll
         };
 
         // Create a new thread pool
@@ -1203,7 +1186,7 @@ module.exports = async (srv) => {
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
 
-        const body = getES01RequestBodyTemplate();
+        const body = getES01RequestBodyTemplate(institute);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = parseInt(institute.CustomerID);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
@@ -1261,7 +1244,7 @@ module.exports = async (srv) => {
             console.log('Error', error.message);
         }
     }
-    function getES01RequestBodyTemplate() {
+    function getES01RequestBodyTemplate(institute) {
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
                 "IDOC": {
@@ -1297,7 +1280,7 @@ module.exports = async (srv) => {
                         "ZTERM": "D496",
                         "ZLSCH": "M",
                         "ABREX": "TEST AGMNT",
-                        "KOTABNR": 750,
+                        "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 750,
                         "KVEWE": "A",
                         "KAPPL": "V",
                         "_BAY0-GZ_SALESAGRITEM": [

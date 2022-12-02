@@ -80,3 +80,15 @@ Content-Type: application/json
         7892
     ]
 }
+
+
+### sendApprovalToIbiz  - Sent Approval to IBIZ
+POST http://localhost:4004/v2/tender/sendApprovalToIbiz
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "ibizWorkflowID": 10021,
+    "offerStatus": 1,
+    "comment": "Test"
+}

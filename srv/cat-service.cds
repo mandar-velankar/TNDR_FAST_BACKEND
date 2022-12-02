@@ -84,6 +84,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
     entity BrazilInstituteDivision                      as projection on MasterData.BrazilInstituteDivision;
     entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
+    entity DocumentsDownload                            as projection on TransactionalData.DocumentsDownload;
 
 
     entity PT_TMCTRY @(restrict : [{
@@ -772,4 +773,5 @@ service CatalogService @(path : 'tender')@(requires : [
     function getMailTemplate(countryCode : String, language : String, offerId : String) returns LargeString;
 
     action notifyIbiz(ibizWorkflowID: Integer, directIndirect: Integer, lineNumbers: array of Integer) returns String; //  (0 = direct; 1 = indirect)
+    action sendApprovalToIbiz(ibizWorkflowID: Integer, offerStatus: Integer, comment: String) returns String;
 }
