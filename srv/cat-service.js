@@ -383,7 +383,6 @@ module.exports = (srv) => {
 	}*/
 
 	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes) {//MEA (and default)
-		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -392,11 +391,10 @@ module.exports = (srv) => {
 		//Regulatory
 		//Optional if business approved (country or regional)
 		//Notification if NetOfferPrice = Registered Price (and registered price exists)
-		//Regulatory-Always Optional-EHQUT
 		let regulatory = 1;
-		// if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
-		// 	regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
-		// }
+		if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
+			regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
+		}
 
 		//Legal
 		//Optional if legal approved
@@ -431,17 +429,16 @@ module.exports = (srv) => {
 		//Optional if business approved
 		//Mandatory if OfferPrice below lowest price
 		//Mandatory if not default payment terms
-		//let regionalBusiness = 1;
-		// if (product.BUSINESS_APPROVED !== 1) {
-		// 	if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
-		// 		regionalBusiness = 3;
-		// 	}
-		// 	else if (product.IS_DEFAULT_TERMS === 0) {
-		// 		regionalBusiness = 3;
-		// 	}
-		// }
-		//Regional Business is optional only if it already approved else Mandatory-EHQUT
-		let regionalBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : 3;
+		let regionalBusiness = 1;
+		if (product.BUSINESS_APPROVED !== 1) {
+			if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+				regionalBusiness = 3;
+			}
+			else if (product.IS_DEFAULT_TERMS === 0) {
+				regionalBusiness = 3;
+			}
+		}
+
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
