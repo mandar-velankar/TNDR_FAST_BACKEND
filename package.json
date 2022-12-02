@@ -38,7 +38,7 @@
     "xlsx-template": "^1.3.0"
   },
   "engines": {
-    "node": "^14"
+    "node": "^14.18"
   },
   "scripts": {
     "setup": "npm install && npm run setup:ui",
@@ -46,6 +46,7 @@
     "deploy": "cds deploy db --to sqlite:db/sxtender.db",
     "deploy:hana": "cds deploy --to hana --vcap-file ./default-env.json",
     "build": "cds build/all --clean",
+    "build:prd": "cds -v && cds build --production",
     "build:local": "rm -rf ./srv/node_modules && cds build/all --clean ",
     "build:xs-security": "cds compile srv/ --to xsuaa  > xs-security.json",
     "build:xsa": "mbt build -p=xsa --mtar=FASTCAP-Backend.mtar",

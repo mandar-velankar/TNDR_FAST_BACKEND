@@ -7,36 +7,43 @@ const port = process.env.PORT || 4004;
 const jobManager = require("./jobs/JobManager");
 
 (async () => {
+  console.log("begin start app gen");
   const app = express();
-  await cds.connect("db");
+  console.log("begin connect app gen");
+  await cds.connect.to("db");
+  let srv;
 
-  const srv = await cds.load("./gen/");
-  try{
+    console.log("load gen")
+    srv = await cds.load("./gen/srv/");
+
+  try {
+    console.log("deploy")
     await cds.deploy(srv);
-  }catch(ex){
+  } catch (ex) {
     console.log(ex);
   }
   // OData V2
   app.use(proxy({
     path: "v2",
-    returnPrimitiveNested:false,
-    returnComplexNested:false
+    returnPrimitiveNested: false,
+    returnComplexNested: false
   }));
   // OData V4
-  await cds.serve("SchedulerService").from("./gen/").in(app);
-  await cds.serve("EpaService").from("./gen/").in(app);
-  await cds.serve("CatalogService").from("./gen/").in(app);
-  await cds.serve("PolicyService").from("./gen/").in(app);
-  await cds.serve("ContractService").from("./gen/").in(app);
-  await cds.serve("AccessService").from("./gen/").in(app);
-  await cds.serve("MasterDataManagementService").from("./gen/").in(app);
-  await cds.serve("SalesOpportunityService").from("./gen/").in(app);
-  await cds.serve("CreateOpportunityService").from("./gen/").in(app);
-  await cds.serve("BankGuaranteeService").from("./gen/").in(app);
-  await cds.serve("PriceAgreementService").from("./gen/").in(app);
-  await cds.serve("CpiService").from("./gen/").in(app);
-  await cds.serve("ExternalService").from("./gen/").in(app);
-  
+    await cds.serve("SchedulerService").from("./gen/srv/").in(app);
+    await cds.serve("EpaService").from("./gen/srv/").in(app);
+    await cds.serve("CatalogService").from("./gen/srv/").in(app);
+    await cds.serve("PolicyService").from("./gen/srv/").in(app);
+    await cds.serve("ContractService").from("./gen/srv/").in(app);
+    await cds.serve("AccessService").from("./gen/srv/").in(app);
+    await cds.serve("MasterDataManagementService").from("./gen/srv/").in(app);
+    await cds.serve("SalesOpportunityService").from("./gen/srv/").in(app);
+    await cds.serve("CreateOpportunityService").from("./gen/srv/").in(app);
+    await cds.serve("BankGuaranteeService").from("./gen/srv/").in(app);
+    await cds.serve("PriceAgreementService").from("./gen/srv/").in(app);
+    await cds.serve("CpiService").from("./gen/srv/").in(app);
+    await cds.serve("ExternalService").from("./gen/srv/").in(app);
+
+  console.log("register jobs")
   // Scheduler Jobs
   jobManager.registerJobs();
   // const scheduler = await jobScheduler();
@@ -47,7 +54,8 @@ const jobManager = require("./jobs/JobManager");
   // jobScheduler.ItalyJobs.processMaterials('00 00 * * *').start(); // TODO: check if this settings is correct
   // jobScheduler.ItalyJobs.processCustomers('00 00 * * *').start(); // TODO: check if this settings is correct
 
-    
+  console.log("start")
+
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));
 })();
