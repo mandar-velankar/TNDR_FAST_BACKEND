@@ -2433,7 +2433,7 @@ module.exports = (srv) => {
 					.concat(p.PRODUCTID).concat(",ApproverEmailID='")
 					.concat(d.ApproverEmailID).concat("',Active=1,Statustime=")
 					.concat(d.Statustime.replace(" ", "T")).concat(",ApproverType='")
-					.concat(d.ApproverType).concat("')")
+					.concat(d.ApproverType)
 					.concat("',LotID=")
 					.concat(p.LOTID)
 					.concat(")");
