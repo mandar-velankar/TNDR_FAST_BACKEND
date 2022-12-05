@@ -2330,7 +2330,7 @@ module.exports = (srv) => {
 				TENDERID: d.TENDER_ID,
 				OFFERID: d.OFFER_ID,
 				COUNTRYCODE: d.COUNTRY_CODE,
-				PRODUCTCODE: d.CODE.toString(),
+				PRODUCTCODE: d.CODE && d.CODE.toString() || "",
 				SORTER: d.SORTER,
 				BRANDNAME: d.BRANDNAME,
 				PRODUCT_UNIT_NAME: d.PRODUCT_UNIT_NAME,
