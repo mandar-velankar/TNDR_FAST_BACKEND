@@ -81,9 +81,8 @@ entity MostRecentBudgetedProfitability as SELECT from MasterData.BUDGETEDPROFITA
     key BudgetedProfitability.COUNTRYCODE,
     key BudgetedProfitability.HLEVEL4_CODE,
      key BudgetedProfitability.PRODUCTPACKID,
-    BudgetedProfitability.PRODUCTPACKNAME,
     max(BudgetedProfitability.EFFECTIVEDATE) as MaxEffectiveDate:Date
-}group by BudgetedProfitability.COUNTRYCODE, BudgetedProfitability.HLEVEL4_CODE,BudgetedProfitability.PRODUCTPACKID,BudgetedProfitability.PRODUCTPACKNAME;
+}group by BudgetedProfitability.COUNTRYCODE, BudgetedProfitability.HLEVEL4_CODE,BudgetedProfitability.PRODUCTPACKID;
 
 //EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity VWBUDGETEDPROFITABILITY AS SELECT from MasterData.BUDGETEDPROFITABILITY as BudgetedProfitability
@@ -92,7 +91,6 @@ INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRY
     key BudgetedProfitability.COUNTRYCODE,
     key BudgetedProfitability.HLEVEL4_CODE,
     key BudgetedProfitability.PRODUCTPACKID,
-    BudgetedProfitability.PRODUCTPACKNAME,
     BudgetedProfitability.PROFITABILITY
 };
 

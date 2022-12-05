@@ -233,7 +233,7 @@ entity PT_TMBDPR {
                                     and Bundled_1_Cogs.PRODUCT_ID   = FOCProduct_Bundled_1;
         Bundled_1_SKU         : Association to MasterData.PT_TMPRDPCK
                                     on Bundled_1_SKU.PRODUCTPACKID = FOCProduct_Bundled_1;
-        Profitability         :  Association to MasterDataLatestValues.VWBUDGETEDPROFITABILITY on Profitability.PRODUCTPACKID = ProductCode   and Profitability.COUNTRYCODE =CountryCode;
+        Profitability         :  Association to MasterData.BUDGETEDPROFITABILITY on Profitability.PRODUCTPACKID = ProductCode  and Profitability.COUNTRYCODE =CountryCode and SubmittedOn >= Profitability.EFFECTIVEDATE and SubmittedOn <= Profitability.ENDDATE;
 }
 
 
