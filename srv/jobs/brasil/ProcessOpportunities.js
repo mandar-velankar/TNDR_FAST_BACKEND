@@ -294,25 +294,42 @@ module.exports = class processOpportunities extends BaseJob {
     let nextOfferIDs = await this.getNextOfferIDs(tx, tenderIDs);
     const offerStatusses = [];
 
-    // 1. link existing Tenders with Offers
+    // 1. get a list of existing Offers with an IBIZWORKFLOWID from FAST
+    const parentOffersExistingInFAST = await this.getFASTOffersWithIbizWorkflowID(tx);
+    
+    // 2. link existing Tenders with Offers
+    // IMPORTANT: the indexes of mappedOffers and mappedTenders are pointing to the same IBIZ object
+    // The index is used to map parent tenders to offers. Do
     for (const [index, offer] of mappedOffers.entries()) {
-        let nextOfferID = 1;
+
+        // link parent TenderID
         const ibizID = mappedTenders[index].IbizID;
         const parentTender = uniqueMappedTenders.find(ut => ut.IbizID == ibizID);
         offer.TenderID = parentTender && parentTender.TenderID;
-        let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
-        if(nextOfferNumber && nextOfferNumber.NEXTOFFERID) {
-            offer.TenderOfferNo = ++nextOfferNumber.NEXTOFFERID;
-        }else{
-            offer.TenderOfferNo = nextOfferID++;
-            nextOfferIDs.push({
-                TenderID: offer.TenderID,
-                NEXTOFFERID: offer.TenderOfferNo
-            }); 
+
+        const isRevisedOffer = !!offer.PreviousIbizWorkflowID;
+        let parentFASTOffer = parentOffersExistingInFAST.find(FASTOffer => FASTOffer.IbizWorkflowID == offer.PreviousIbizWorkflowID);
+        // if we can't find an existing parent offer in FAST, a.k.a cannot map to any qp_id, we consider it as a new offer.
+        if(isRevisedOffer && parentFASTOffer){ // revised offer
+            parentFASTOffer.ActiveOffer = 0;
+            offer.RevisedOfferNo = parentFASTOffer.RevisedOfferNo + 1;
+            offer.TenderID = parentFASTOffer.TenderID;
+            offer.OfferID = parentFASTOffer.TenderID + '-' + parentFASTOffer.TenderOfferNo + '-R' + offer.RevisedOfferNo;
+        }else{ // new offer
+            let nextOfferID = 1;
+            let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
+            if(nextOfferNumber && nextOfferNumber.NEXTOFFERID) {
+                offer.TenderOfferNo = ++nextOfferNumber.NEXTOFFERID;
+            }else{
+                offer.TenderOfferNo = nextOfferID++;
+                nextOfferIDs.push({
+                    TenderID: offer.TenderID,
+                    NEXTOFFERID: offer.TenderOfferNo
+                }); 
+            }
+            offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
         }
         
-        offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
-
         //add status
         offerStatusses.push({
             TenderID    : offer.TenderID,
@@ -337,8 +354,12 @@ module.exports = class processOpportunities extends BaseJob {
     try {
         offersWithoutID && offersWithoutID.length > 0 && await tx.run(INSERT(offersWithoutID).into(PT_TMOFRS));
         offerStatusses && offerStatusses.length > 0 && await tx.run(INSERT(offerStatusses).into(PT_TMTNOFST));
+        //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
+        for (const parrentOffer of parentOffersExistingInFAST) {
+            await tx.run(UPDATE(PT_TMOFRS, {OfferID:parrentOffer.OfferID}).with(parrentOffer));
+        }
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
-        console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length}`);
+        console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length} updated: ${parentOffersExistingInFAST.length}`);
         console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${offerStatusses.length}`);
         return true;
     } catch (error) {
@@ -401,7 +422,7 @@ module.exports = class processOpportunities extends BaseJob {
         console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products into FAST tables failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products/Lots into FAST tables failed`);
         console.error(error);
         throw error;
     }
@@ -541,6 +562,28 @@ module.exports = class processOpportunities extends BaseJob {
     Array.isArray(externalIDs) && externalIDs.length > 0 && (result = await tx.run(SELECT.from(PT_TMTEND).where({ ExternalID: { in: externalIDs}, CountryCode: 'BR' } )));
     console.log(`JOB (${this.jobName }): End fetching IBIZ Opportunity Tenders from FAST table`);
     return result;
+}
+
+/**
+ * Gets a list of existing Offers from FAST with an IbizWorkflowID set
+ * @returns {Array<PT_TMOFRS>} a list of existing offers
+ */
+ async getFASTOffersWithIbizWorkflowID(tx) {
+    try {
+        console.log(`JOB (${this.jobName }): Start fetching Offers with IbizWorkflowID from FAST table`);
+        const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+        let result = await tx.run(SELECT.from(PT_TMOFRS).where(
+            { 
+                    IbizWorkflowID: {'!=': null}, 
+                    CountryCode: 'BR' 
+            } 
+        ));
+        console.log(`JOB (${this.jobName }): End fetching Offers with IbizWorkflowID from FAST table`);
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw(error);
+    }
 }
 
 /**
