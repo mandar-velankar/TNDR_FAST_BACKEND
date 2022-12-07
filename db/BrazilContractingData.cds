@@ -15,7 +15,7 @@ entity Contracts : managed, cuid {
         LIC_ATRI_ID             : String(100);
         ContractNumber          : String(20);
         ProcessNumber           : String(20);
-        Type                    : String(20);
+        ContractType            : String(20);
         OBS                     : String(20);
         DistCNPJ                : String(20);
         CNPJ                    : String(20);
