@@ -58,6 +58,7 @@
       "name": "$XSAPPNAME.f_tndr_cag_cogs_user",
       "description": "f_tndr_cag_cogs_user"
     }
+    
   ],
   "attributes": [],
   "role-templates": [
@@ -173,5 +174,6 @@
       ],
       "attribute-references": []
     }
+    
   ]
 }

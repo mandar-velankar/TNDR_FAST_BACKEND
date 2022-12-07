@@ -6,6 +6,7 @@ module.exports = (srv) => {
 			tender: req.user.is('f_tndr_cag_tnd_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			tenderAccess:{
 				COGS:req.user.is('f_tndr_cag_cogs_user')
+				
 			},
 			ppa: req.user.is('f_tndr_cag_ppa_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			contract: req.user.is('f_tndr_cag_ctr_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
