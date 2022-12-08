@@ -9,16 +9,13 @@ using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/Transactiona
 entity Contracts : managed, cuid {
         TenderID                : String(50);
         OfferID                 : String(50);
-        BidID                   : String(20);
         InstituteID             : String(20);
         DistributorID           : String(20);
-        LIC_ATRI_ID             : String(100);
+        LicAtriID               : String(100);
         ContractNumber          : String(20);
         ProcessNumber           : String(20);
         ContractType            : String(20);
         OBS                     : String(20);
-        DistCNPJ                : String(20);
-        CNPJ                    : String(20);
         StartDate               : DateTime;
         EndDate                 : DateTime;
         StatusID                : String(20);
@@ -28,14 +25,11 @@ entity Contracts : managed, cuid {
         OfferProducts           : Association to many TransactionalData.PT_TMOFPR
                                     on OfferProducts.OfferID = OfferID;
         Tender                  : Association to TransactionalData.PT_TMTEND
-                                    on Tender.TenderID = TenderID 
-                                    and Tender.IbizID  = BidID;
+                                    on Tender.TenderID = TenderID;
         Institute               : Association to MasterData.PT_TMINST
-                                    on Institute.InstituteID = InstituteID
-                                    and Institute.CNPJ = CNPJ;
+                                    on Institute.InstituteID = InstituteID;
         Distributor             : Association to MasterData.PT_TMDIST
-                                    on Distributor.DistributorID = DistributorID
-                                    and Distributor.CNPJ = DistCNPJ;
+                                    on Distributor.DistributorID = DistributorID;
         Status                  : Association to AdminData.ContractStatus
                                     on Status.ID = StatusID;
         ContractProducts        : Association to many ContractProducts;
@@ -45,27 +39,22 @@ entity Contracts : managed, cuid {
 entity ContractProducts: managed, cuid {
     ProductPackID               : String(100);
     OfferID                     : String(50);
-    WorkflowProductID           : String(50);
     ContractVolume              : Double;
     //Associations
-    Product                     : Association to TransactionalData.PT_TMOFPR
-                                    on Product.ProductCode = ProductPackID
-                                    and Product.OfferID = OfferID
-                                    and Product.WorkflowProductID = WorkflowProductID;
+    OfferProduct                : Association to TransactionalData.PT_TMOFPR
+                                    on OfferProduct.ProductCode = ProductPackID
+                                    and OfferProduct.OfferID = OfferID;
     Contract                    : Association to Contracts
                                     on Contract.ContractProducts = $self;
 }
 
 entity SalesOrders: managed, cuid {
     TenderID                : String(50);
-    BidID                   : String(20);
     InstituteID             : String(20);
     DistributorID           : String(20);
-    LIC_ATRI_ID             : String(100);
+    LicAtriID               : String(100);
     SalesOrderNumber        : String(20);
     ProcessNumber           : String(20);
-    DistCNPJ                : String(20);
-    CNPJ                    : String(20);
     CommitmentDate          : DateTime;
     CommitmentDeliveryDate  : DateTime;
     CommitmentCreationDate  : DateTime;
@@ -74,11 +63,9 @@ entity SalesOrders: managed, cuid {
     Contract                : Association to Contracts 
                                 on Contract.SalesOrders = $self;
     Institute               : Association to MasterData.PT_TMINST
-                                on Institute.InstituteID = InstituteID
-                                and Institute.CNPJ = CNPJ;
+                                on Institute.InstituteID = InstituteID;
     Distributor             : Association to MasterData.PT_TMDIST
-                                on Distributor.DistributorID = DistributorID
-                                and Distributor.CNPJ = DistCNPJ;
+                                on Distributor.DistributorID = DistributorID;
     Status                  : Association to AdminData.SalesOrderStatus
                                 on Status.ID = StatusID;
     SalesOrderProducts      : Association to many SalesOrderProducts;
@@ -86,8 +73,12 @@ entity SalesOrders: managed, cuid {
 
 entity SalesOrderProducts: managed, cuid {
     ProductPackID           : String(100);
-    Quantity                : Double;
+    RequestedQty            : Double;
+    DeliveredQty            : Double;
     Price                   : Double;
+    RequestedDeliveryDate   : DateTime;
+    ActualDeliveryDate      : DateTime;
+    UoM                     : String(10);
     //Associations
     SalesOrder              : Association to SalesOrders
                                 on SalesOrder.SalesOrderProducts = $self;
