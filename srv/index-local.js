@@ -36,6 +36,7 @@ const jobManager = require("./jobs/JobManager");
   await cds.serve("BankGuaranteeService").from("./srv").in(app);
   await cds.serve("PriceAgreementService").from("./srv").in(app);
   await cds.serve("CpiService").from("./srv/").in(app);
+  await cds.serve("BrazilContractingService").from("./srv/").in(app);
   await cds.serve("ExternalService").from("./srv/").in(app);
 
   // Jobs Scheduler
