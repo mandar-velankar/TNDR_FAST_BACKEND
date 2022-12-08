@@ -11,23 +11,22 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
     inner join AdminData.ContractStatus as ContractStatus 
         on ContractStatus.ID = Contracts.StatusID
     inner join MasterData.PT_TMINST as Institute 
-        on Institute.InstituteID = Contracts.InstituteID 
-        and Institute.CNPJ = Contracts.CNPJ
+        on Institute.InstituteID = Contracts.InstituteID
     inner join MasterData.PT_TMDIST as Distributor
         on Distributor.DistributorID = Contracts.DistributorID
-        and Distributor.CNPJ = Contracts.DistCNPJ {
+    inner join TransactionalData.PT_TMTEND as Tender
+        on  Tender.TenderID = Contracts.TenderID 
+    inner join TransactionalData.PT_TMOFRS as Offer
+        on Offer.OfferID = Contracts.OfferID {
         Contracts.TenderID,
         Contracts.OfferID,
-        Contracts.BidID,
         Contracts.InstituteID,
         Contracts.DistributorID,
-        Contracts.LIC_ATRI_ID,
+        Contracts.LicAtriID,
         Contracts.ContractNumber,
         Contracts.ProcessNumber,
         Contracts.ContractType,
         Contracts.OBS,
-        Contracts.DistCNPJ,
-        Contracts.CNPJ,
         Contracts.StartDate,
         Contracts.EndDate,
         ContractStatus.Status as ContractStatus,
