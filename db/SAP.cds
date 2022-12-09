@@ -296,7 +296,7 @@ entity PLANT_ADDR : cuid{
 entity SpainRappel : cuid {
 	KNUMA 				: String;	
 	BONEM 				: Integer;	
-	DATAB 				: Integer;				// Effective date
+	DATAB 				: String;				// Effective date
 	DATBI 				: String;				// Expiry date
 	KNUMH 				: Integer;				// Customer ID
 	SOLD_TO 			: String;	

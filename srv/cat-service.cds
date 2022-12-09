@@ -216,6 +216,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity PT_TMTRRES                                   as projection on TransactionalData.PT_TMTRRES;
     entity PT_TMUDLTRS                                  as projection on TransactionalData.PT_TMUDLTRS;
     entity TransCompetitorResult                        as projection on TransactionalData.TransCompetitorResult;
+    entity SpainRappelData                              as projection on TransactionalData.SpainRappelData;
     //Transactional Data Views
     entity TenderOffers @readonly                       as projection on TransactionalDataViews.TenderOffers;
     entity OfferRevisions @readonly                     as projection on TransactionalDataViews.OfferRevisions;
