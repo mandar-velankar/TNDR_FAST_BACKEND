@@ -41,6 +41,7 @@ const jobManager = require("./jobs/JobManager");
     await cds.serve("BankGuaranteeService").from("./gen/srv/").in(app);
     await cds.serve("PriceAgreementService").from("./gen/srv/").in(app);
     await cds.serve("CpiService").from("./gen/srv/").in(app);
+    await cds.serve("BrazilContractingService").from("./gen/srv/").in(app);
     await cds.serve("ExternalService").from("./gen/srv/").in(app);
 
   console.log("register jobs")

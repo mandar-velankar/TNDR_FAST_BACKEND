@@ -482,3 +482,13 @@ entity PLANT_ADDR : cuid{
 	LAND1				: String(3);			// Country Key
 	REGIO				: String(3);			// Region (State, Province, County)
 }
+
+entity SpainRappel : cuid {
+	KNUMA 				: String;	
+	BONEM 				: Integer;	
+	DATAB 				: String;				// Effective date
+	DATBI 				: String;				// Expiry date
+	KNUMH 				: Integer;				// Customer ID
+	SOLD_TO 			: String;	
+	MATNR 				: String(18);			// Material number
+}
