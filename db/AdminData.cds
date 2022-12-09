@@ -8,6 +8,7 @@ using {
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
+using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 
 //Autorization tables
 //-------------------
@@ -228,4 +229,12 @@ entity WordTemplate {
     filename:String(250);
     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     mediaType:String @Core.IsMediaType;
+}
+
+entity ContractStatus: cuid {
+    Status: String(200);
+}
+
+entity SalesOrderStatus: cuid {
+    Status: String(200);
 }
