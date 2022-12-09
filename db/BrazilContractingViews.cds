@@ -8,6 +8,7 @@ using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/Transactiona
 using { com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 
 entity ContractsView as select from BrazilContractingData.Contracts as Contracts{
+        Contracts.ID,
         Contracts.TenderID,
         Contracts.OfferID,
         Contracts.InstituteID,
@@ -24,7 +25,10 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.Status.Status,
         sum(Contracts.ContractProducts.OfferProduct.PriceCondition.CommercialProposal) as TotalValue:Double,
         Contracts.modifiedBy,
-        Contracts.modifiedAt
+        Contracts.modifiedAt,
+        Contracts.ContractProducts,
+        ContractProductsView  : Association to ContractProductsView
+                                    on ContractProductsView.Contract_ID = ID
 }group by Contracts.TenderID,
         Contracts.OfferID,
         Contracts.InstituteID,
@@ -43,6 +47,7 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.modifiedAt;
 
 entity ContractProductsView as select from BrazilContractingData.ContractProducts as ContractProducts {
+        ContractProducts.Contract.ID as Contract_ID,
         ContractProducts.ProductPackID,                                          
         ContractProducts.OfferID,                                      
         ContractProducts.RequestedVolume,             
