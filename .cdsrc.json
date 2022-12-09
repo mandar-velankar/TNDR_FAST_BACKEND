@@ -42,6 +42,7 @@
                         }
                     },
                     "ELLUI": {
+                        "password": "ELLUI",
                         "jwt": {
                             "userInfo": {
                                 "logonName": "ELLUI",

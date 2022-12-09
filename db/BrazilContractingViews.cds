@@ -8,6 +8,7 @@ using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/Transactiona
 using { com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 
 entity ContractsView as select from BrazilContractingData.Contracts as Contracts{
+    key Contracts.ID,
         Contracts.TenderID,
         Contracts.OfferID,
         Contracts.InstituteID,
@@ -25,7 +26,8 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         sum(Contracts.ContractProducts.OfferProduct.PriceCondition.CommercialProposal) as TotalValue:Double,
         Contracts.modifiedBy,
         Contracts.modifiedAt
-}group by Contracts.TenderID,
+}group by Contracts.ID,
+        Contracts.TenderID,
         Contracts.OfferID,
         Contracts.InstituteID,
         Contracts.Institute.InstituteName,
@@ -43,6 +45,8 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.modifiedAt;
 
 entity ContractProductsView as select from BrazilContractingData.ContractProducts as ContractProducts {
+    key ContractProducts.ID,
+        ContractProducts.Contract.ID as Contract_ID,
         ContractProducts.ProductPackID,                                          
         ContractProducts.OfferID,                                      
         ContractProducts.RequestedVolume,             
@@ -51,7 +55,9 @@ entity ContractProductsView as select from BrazilContractingData.ContractProduct
         ContractProducts.OfferProduct.SKU.PRODUCTPACKNAME as ProductPackName,
         ContractProducts.OfferProduct.PriceCondition.CommercialProposal as CommercialPrice
 };    
-entity SalesOrderView as select from BrazilContractingData.SalesOrders as SalesOrders {
+entity SalesOrdersView as select from BrazilContractingData.SalesOrders as SalesOrders {
+    key SalesOrders.ID,
+        SalesOrders.Contract.ID as Contract_ID,
         SalesOrders.TenderID,      
         SalesOrders.InstituteID,                                       
         SalesOrders.DistributorID,                                        
@@ -65,6 +71,8 @@ entity SalesOrderView as select from BrazilContractingData.SalesOrders as SalesO
 };
 
 entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderProducts as SalesOrderProducts {
+    key SalesOrderProducts.ID,
+        SalesOrderProducts.SalesOrder.ID as SalesOrder_ID,
         SalesOrderProducts.ProductPackID,           
         SalesOrderProducts.OfferID,                
         SalesOrderProducts.RequestedQty,           
