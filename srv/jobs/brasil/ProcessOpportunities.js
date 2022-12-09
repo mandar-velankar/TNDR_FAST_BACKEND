@@ -248,13 +248,13 @@ module.exports = class processOpportunities extends BaseJob {
 
     // 2. devide mappedTenders into New or Changed tenders
     const FASTNewTenders = [];
-    const FASTChangedTenders = [];
+    const FASTChangedTenders = []; //TO-DO CHECK IF WE NEED THIS 
     for (const tender of uniqueMappedTenders) {
         let FASTTenderIdx = tendersExistingInFAST.findIndex(FASTTender => FASTTender.ExternalID === tender.ExternalID);
         if (FASTTenderIdx > -1) {
             // copy over the TenderID from existing Tender
             tender.TenderID = tendersExistingInFAST[FASTTenderIdx].TenderID;
-            FASTChangedTenders.push(tender);
+            FASTChangedTenders.push(tender); 
         } else {
             // generate new TenderID
             tender.TenderNo = nextTenderID++;
@@ -268,9 +268,6 @@ module.exports = class processOpportunities extends BaseJob {
     //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
     console.log(`JOB (${this.jobName }): Upserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
     try {
-        // for (const FASTHierarchy of FASTChangedTenders) {
-        //     await tx.run(UPDATE(PT_TMPRDHIER, {HLEVEL6_CODE:FASTHierarchy.HLEVEL6_CODE}).with(FASTHierarchy));
-        // }
         FASTNewTenders && FASTNewTenders.length > 0 && await tx.run(INSERT(FASTNewTenders).into(PT_TMTEND));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Tenders into FAST table (PT_TMTEND) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMTEND -> created: ${FASTNewTenders.length}, updated: ${FASTChangedTenders.length}`);
@@ -555,7 +552,7 @@ module.exports = class processOpportunities extends BaseJob {
     // get all the ExternalIDs from tenders
     let externalIDs = [];
     for (const tender of tenders) {
-        externalIDs.push(tender.ExternalID.toString());
+        externalIDs.push(tender.ExternalID);
     }
     console.log(`JOB (${this.jobName }): Start fetching IBIZ Opportunity Tenders from FAST table`);
 
