@@ -75,6 +75,7 @@ entity SalesOrders: managed, cuid {
 
 entity SalesOrderProducts: managed, cuid {
         ProductPackID           : Integer not null;
+        OfferID                 : String(30) not null; 
         RequestedQty            : Double;
         //DeliveredQty            : Double;
         //Price                   : Double;
@@ -83,5 +84,8 @@ entity SalesOrderProducts: managed, cuid {
         //UoM                     : String(10);   
         //Associations
         SalesOrder              : Association to SalesOrders
-                                on SalesOrder.SalesOrderProducts = $self;
+                                     on SalesOrder.SalesOrderProducts = $self;
+        OfferProduct            : Association to TransactionalData.PT_TMOFPR
+                                     on OfferProduct.ProductCode = ProductPackID
+                                     and OfferProduct.OfferID = OfferID;
 }
