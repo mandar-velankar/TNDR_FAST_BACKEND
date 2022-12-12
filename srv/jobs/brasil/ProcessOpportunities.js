@@ -26,6 +26,7 @@ module.exports = class processOpportunities extends BaseJob {
             const existingTenderTypesFAST = await this.getTenderTypes(tx);
             const existingDistributorsFAST = await this.getFASTDistributors(tx);
             const existingSKUFAST = await this.getFASTSKUs(tx);
+            const priceConditionClassificationFAST = await this.getPriceConditionClassification(tx);
 
             const directIbizOpportunities = opportunities.filter(direct => direct.NU_DIRETO_INDIRETO === 0);
             const directIbizOpportunityParentIDs = directIbizOpportunities.map(dop => dop.ID);
@@ -38,8 +39,8 @@ module.exports = class processOpportunities extends BaseJob {
             const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); 
 
             // Process data
-            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs);
-            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs);
+            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
+            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST);
 
             // Commit All
             await tx.commit();
@@ -186,13 +187,13 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs) {
+ async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST) {
     console.log(`JOB (${this.jobName }): Processing Direct Ibiz Opportunities ...`);
     try {
 
         // 0. Mapping - Map IBIZ Opportunities to FAST
         const mappedTenders = this.mapIbizOpportunitiestoFASTTender(directIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
-        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(directIbizOpportunities, existingDistributorsFAST);
+        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(directIbizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST);
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
         const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(directIbizOpportunityDocs);
 
@@ -247,13 +248,13 @@ module.exports = class processOpportunities extends BaseJob {
 
     // 2. devide mappedTenders into New or Changed tenders
     const FASTNewTenders = [];
-    const FASTChangedTenders = [];
+    const FASTChangedTenders = []; //TO-DO CHECK IF WE NEED THIS 
     for (const tender of uniqueMappedTenders) {
         let FASTTenderIdx = tendersExistingInFAST.findIndex(FASTTender => FASTTender.ExternalID === tender.ExternalID);
         if (FASTTenderIdx > -1) {
             // copy over the TenderID from existing Tender
             tender.TenderID = tendersExistingInFAST[FASTTenderIdx].TenderID;
-            FASTChangedTenders.push(tender);
+            FASTChangedTenders.push(tender); 
         } else {
             // generate new TenderID
             tender.TenderNo = nextTenderID++;
@@ -267,9 +268,6 @@ module.exports = class processOpportunities extends BaseJob {
     //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
     console.log(`JOB (${this.jobName }): Upserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
     try {
-        // for (const FASTHierarchy of FASTChangedTenders) {
-        //     await tx.run(UPDATE(PT_TMPRDHIER, {HLEVEL6_CODE:FASTHierarchy.HLEVEL6_CODE}).with(FASTHierarchy));
-        // }
         FASTNewTenders && FASTNewTenders.length > 0 && await tx.run(INSERT(FASTNewTenders).into(PT_TMTEND));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Tenders into FAST table (PT_TMTEND) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMTEND -> created: ${FASTNewTenders.length}, updated: ${FASTChangedTenders.length}`);
@@ -341,11 +339,12 @@ module.exports = class processOpportunities extends BaseJob {
         });
     }
 
-    // delete IBIZ_TECHNICAL_ID before saving to DB
+    // delete technical ids which are not needed in offers before saving to DB
     const offersWithoutID = mappedOffers.map(ofr => { 
         const copy = {...ofr}; 
         delete copy.IBIZ_TECHNICAL_ID; 
         delete copy.NU_DIRETO_INDIRETO;
+        delete copy.PriceConditionClassificationID;
         return copy;
     });  
 
@@ -478,6 +477,7 @@ module.exports = class processOpportunities extends BaseJob {
     for (const pc of mappedPriceCondition) {
         let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === pc.parent_ID);
         pc.OfferID = parentOffer.OfferID;
+        pc.PriceConditionClassification_ID = parentOffer.PriceConditionClassificationID;
     }
 
     // delete parent_ID before saving to DB
@@ -615,6 +615,20 @@ module.exports = class processOpportunities extends BaseJob {
 }
 
 /**
+ * Gets a list of PriceConditionClassification from FAST
+ * @param {Array} priceConditionClassifications 
+ * @returns {Array<PriceConditionClassification>} a list of existing SKU
+ */
+ async getPriceConditionClassification(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil PriceConditionClassification from FAST table`);
+    // get a list of PriceConditionClassifications
+    const { PriceConditionClassification } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const result = await tx.run(SELECT.from(PriceConditionClassification).where({ CountryCode: 'BR', Classification: 'Tender', ProductType: 'All', ConditionType: 'Discount' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil PriceConditionClassification from FAST table`);
+    return result;
+}
+
+/**
      * This method will process a list of Ibiz Opportunities by Creating/Updating the following entities
      *  - PT_TMTEND
      *  - PT_TMOFRS
@@ -624,13 +638,13 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs) {
+ async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST) {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
         // 0 Mapping
         const mappedTenders = this.mapIbizOpportunitiestoFASTTender(indirectIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
-        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST);
+        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST);
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
         const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST);
         const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST);
@@ -748,16 +762,19 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} offers
      */
-mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
+mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFRS ...`);
     ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
         const cnpj = curr.COD_DONO_QP && curr.COD_DONO_QP.replace(/\D/g,'');
         const distributor = (curr.NU_DIRETO_INDIRETO === 0) ? existingDistributorsFAST.find(dist => dist.DistributorName === "Bayer Brazil") : existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
         const distributorID = distributor && distributor.DistributorID || null;
+        const priceConditionClassification = priceConditionClassificationFAST.find(p => p.Division === curr.NM_BU_ABREV);
+        const priceConditionClassificationId = priceConditionClassification && priceConditionClassification.ID || null;
         prev.push(
             {
                 IBIZ_TECHNICAL_ID     : curr.ID, // this ID will be used to create relationship with the items and will be deleted afterwards
+                PriceConditionClassificationID : priceConditionClassificationId, //this ID will be used to create relationship with the PriceCondition items and will be deleted afterwards
                 NU_DIRETO_INDIRETO    : curr.NU_DIRETO_INDIRETO,
                 TenderID              : "", 
                 OfferID               : "", 
@@ -974,7 +991,8 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 TaxEqualization                     : null, 
                 Invoive                             : null, 
                 ICMS                                : null, 
-                NetPrice                            : null 
+                NetPrice                            : null,
+                PriceConditionClassification_ID     : null
             }
         );
         return prev;
