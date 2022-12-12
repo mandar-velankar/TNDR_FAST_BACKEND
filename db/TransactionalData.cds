@@ -771,10 +771,10 @@ entity DocumentsDownload: cuid, managed {
 }
 
 entity SpainRappelData: cuid, managed {
-    KNUMA       : Integer;
-    BONEM       : Integer;
+    KNUMA       : String;
+    BONEM       : String;
     DATAB       : Date;
     DATBI       : Date;
-    KUNNR       : Integer;
-    MATNR       : Integer;
+    KUNNR       : String;
+    MATNR       : String;
 }

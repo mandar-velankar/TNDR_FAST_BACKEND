@@ -485,10 +485,10 @@ entity PLANT_ADDR : cuid{
 
 entity SpainRappel : cuid {
 	KNUMA 				: String;	
-	BONEM 				: Integer;	
+	BONEM 				: String;	
 	DATAB 				: String;				// Effective date
 	DATBI 				: String;				// Expiry date
-	KNUMH 				: Integer;				// Customer ID
+	KNUMH 				: String;				// Customer ID
 	SOLD_TO 			: String;	
 	MATNR 				: String(18);			// Material number
 }
