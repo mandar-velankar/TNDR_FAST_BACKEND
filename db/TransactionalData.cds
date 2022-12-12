@@ -694,7 +694,6 @@ entity SpainRappelData: cuid, managed {
     BONEM       : Integer;
     DATAB       : Date;
     DATBI       : Date;
-    KNUMH       : Integer;
-    SOLD_TO     : Integer;
+    KUNNR       : Integer;
     MATNR       : Integer;
 }
