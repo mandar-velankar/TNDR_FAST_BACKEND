@@ -769,3 +769,12 @@ entity DocumentsDownload: cuid, managed {
     Name                : String; // nm_doc
     Downloaded          : Boolean default false;
 }
+
+entity SpainRappelData: cuid, managed {
+    KNUMA       : String;
+    BONEM       : String;
+    DATAB       : Date;
+    DATBI       : Date;
+    KUNNR       : String;
+    MATNR       : String;
+}
