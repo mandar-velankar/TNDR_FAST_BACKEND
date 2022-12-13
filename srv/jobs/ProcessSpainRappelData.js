@@ -173,7 +173,7 @@ module.exports = class processSpainRappelData extends BaseJob {
     }
     console.log(`JOB (${this.jobName }): Fetching RappelData from SpainRappelData ...`);
 
-    // get a list of distributors entities for given list of CustomerIDs
+    // get a list of rappel data entities for given list of KNUMAs
     const { SpainRappelData } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     const result = await tx.run(SELECT.from(SpainRappelData).where({ KNUMA: { in: aKNUMAs } } ));
     return result;
