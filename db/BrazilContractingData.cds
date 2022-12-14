@@ -32,8 +32,8 @@ entity Contracts : managed, cuid {
                                     on Distributor.DistributorID = DistributorID;
         Status                  : Association to AdminData.ContractStatus            
                                     on Status.ID = StatusID;
-        ContractProducts        : Association to many ContractProducts;
-        SalesOrders             : Association to many SalesOrders;
+        ContractProducts        : Association to many ContractProducts on ContractProducts.Contract = $self;
+        SalesOrders             : Association to many SalesOrders on SalesOrders.Contract = $self;
 }
 
 entity ContractProducts: managed, cuid {
@@ -44,8 +44,7 @@ entity ContractProducts: managed, cuid {
         OfferProduct                : Association to TransactionalData.PT_TMOFPR
                                         on OfferProduct.ProductCode = ProductPackID
                                         and OfferProduct.OfferID = OfferID;
-        Contract                    : Association to Contracts
-                                        on Contract.ContractProducts = $self;
+        Contract                    : Association to Contracts;                        
 }
 
 entity SalesOrders: managed, cuid {
@@ -60,8 +59,7 @@ entity SalesOrders: managed, cuid {
         CommitmentCreationDate  : Date;
         StatusID                : UUID;                                             
         //Associations
-        Contract                : Association to Contracts 
-                                    on Contract.SalesOrders = $self;
+        Contract                : Association to Contracts;
         Institute               : Association to MasterData.PT_TMINST
                                     on Institute.InstituteID = InstituteID;
         Distributor             : Association to MasterData.PT_TMDIST
