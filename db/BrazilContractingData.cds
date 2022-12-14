@@ -68,7 +68,7 @@ entity SalesOrders: managed, cuid {
                                     on Status.ID = StatusID;
         Tender                  : Association to TransactionalData.PT_TMTEND
                                     on Tender.TenderID = TenderID;
-        SalesOrderProducts      : Association to many SalesOrderProducts;
+        SalesOrderProducts      : Association to many SalesOrderProducts on SalesOrderProducts.SalesOrder = $self;
 }
 
 entity SalesOrderProducts: managed, cuid {
@@ -81,8 +81,7 @@ entity SalesOrderProducts: managed, cuid {
         //ActualDeliveryDate      : Date;
         //UoM                     : String(10);   
         //Associations
-        SalesOrder              : Association to SalesOrders
-                                     on SalesOrder.SalesOrderProducts = $self;
+        SalesOrder              : Association to SalesOrders;
         OfferProduct            : Association to TransactionalData.PT_TMOFPR
                                      on OfferProduct.ProductCode = ProductPackID
                                      and OfferProduct.OfferID = OfferID;
