@@ -833,7 +833,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFPR ...`);
     ibizOpportunityItems = ibizOpportunityItems.reduce((prev, curr, idx, ibizOpportunityItems) => {
         const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
-        const productPackID = sku && sku.ProductPackID || 0;
+        const productPackID = sku && sku.ProductPackID || null;
         prev.push(
             {
                 parent_ID                : curr.parent_ID,
@@ -985,8 +985,8 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 ICMSTax                             : curr.NU_PORCENTAGEM_ICMS,
                 TaxExemption                        : (!curr.NU_PORCENTAGEM_ICMS) ? 'No' : 'Yes',
                 PriceAfterTaxExemtion               : (!curr.NU_PORCENTAGEM_ICMS) ? null : (curr.VLR_BASE_CALCULO_UNITARIO * (1 - curr.NU_PORCENTAGEM_ICMS)),
-                CAP                                 : (curr.NU_CAP === 0) ? 'No' : 'Yes',
-                PriceAfterCap                       : (curr.NU_CAP === 1) ? ((1 - curr.NU_PORCENTAGEM_CAP) * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) : (1 * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) ,
+                CAP                                 : (!curr.NU_CAP || curr.NU_CAP === 0) ? 'No' : 'Yes',
+                PriceAfterCap                       : (!curr.NU_CAP || curr.NU_CAP === 0) ? (1 * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) : ((1 - curr.NU_PORCENTAGEM_CAP) * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO),
                 CommercialProposal                  : curr.VLR_UNITARIO,
                 TaxEqualization                     : null, 
                 Invoive                             : null, 
