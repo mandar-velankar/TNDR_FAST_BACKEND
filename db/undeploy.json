@@ -1,6 +1,4 @@
 [
-    "src/gen/com.bayer.SXTENDER.BrazilContractingData.ContractProducts.hdbtable",
-    "src/gen/com.bayer.SXTENDER.BrazilContractingData.Contracts.hdbtable",
-    "src/gen/com.bayer.SXTENDER.BrazilContractingData.SalesOrderProducts.hdbtable",
-    "src/gen/com.bayer.SXTENDER.BrazilContractingData.SalesOrders.hdbtable"
+    "src/gen/localized.BrazilContractingService.ContractsView.hdbview",
+    "src/gen/localized.com.bayer.SXTENDER.BrazilContractingViews.ContractsView.hdbview"
 ]
