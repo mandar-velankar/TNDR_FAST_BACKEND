@@ -6,5 +6,8 @@
     "src/gen/com.bayer.SXTENDER.BrazilContractingViews.ContractProductsView.hdbview",
     "src/gen/com.bayer.SXTENDER.BrazilContractingViews.ContractsView.hdbview",
     "src/gen/com.bayer.SXTENDER.BrazilContractingViews.SalesOrderProductsView.hdbview",
-    "src/gen/com.bayer.SXTENDER.BrazilContractingViews.SalesOrdersView.hdbview"
+    "src/gen/com.bayer.SXTENDER.BrazilContractingViews.SalesOrdersView.hdbview",
+    "src/gen/localized.com.bayer.SXTENDER.BrazilContractingViews.ContractsView.hdbview",
+    "src/gen/localized.BrazilContractingService.Contracts.hdbview",
+    "src/gen/localized.BrazilContractingService.ContractProducts.hdbview"
 ]
