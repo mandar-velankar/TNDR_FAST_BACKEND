@@ -1,3 +1,4 @@
 [
-    "src/gen/localized.BrazilContractingService.Contracts.hdbview"
+    "src/gen/localized.BrazilContractingService.Contracts.hdbview",
+    "src/gen/localized.com.bayer.SXTENDER.BrazilContractingViews.ContractsView.hdbview"
 ]
