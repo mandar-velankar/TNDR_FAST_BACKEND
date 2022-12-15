@@ -15,6 +15,10 @@
       "description": "f_tndr_cag_technical_user"
     },
     {
+      "name": "$XSAPPNAME.f_tndr_cag_brcontracting_user",
+      "description": "f_tndr_cag_brcontracting_user"
+    },
+    {
       "name": "$XSAPPNAME.f_tndr_cag_tnd_user",
       "description": "f_tndr_cag_tnd_user"
     },
@@ -53,14 +57,6 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_cpi_user",
       "description": "f_tndr_cag_cpi_user"
-    },
-    {
-      "name": "$XSAPPNAME.f_tndr_cag_cogs_user",
-      "description": "f_tndr_cag_cogs_user"
-    },
-    {
-      "name": "$XSAPPNAME.f_tndr_cag_brcontracting_user",
-      "description": "f_tndr_cag_brcontracting_user"
     }
   ],
   "attributes": [],
@@ -86,6 +82,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_technical_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_brcontracting_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_brcontracting_user"
       ],
       "attribute-references": []
     },
@@ -146,14 +150,6 @@
       "attribute-references": []
     },
     {
-      "name": "f_tndr_cag_brcontracting_user",
-      "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_brcontracting_user"
-      ],
-      "attribute-references": []
-    },
-    {
       "name": "f_tndr_cag_salesopportunity_user",
       "description": "generated",
       "scope-references": [
@@ -174,14 +170,6 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_cpi_user"
-      ],
-      "attribute-references": []
-    },
-    {
-      "name": "f_tndr_cag_cogs_user",
-      "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_cogs_user"
       ],
       "attribute-references": []
     }

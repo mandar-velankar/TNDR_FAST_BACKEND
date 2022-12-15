@@ -67,7 +67,8 @@ entity SalesOrdersView as select from BrazilContractingData.SalesOrders as Sales
         SalesOrders.CommitmentDate,         
         SalesOrders.CommitmentDeliveryDate, 
         SalesOrders.CommitmentCreationDate,
-        SalesOrders.Status.Status 
+        SalesOrders.Status.Status,
+        SalesOrders.SalesOrderProducts.RequestedDeliveryDate 
 };
 
 entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderProducts as SalesOrderProducts {
