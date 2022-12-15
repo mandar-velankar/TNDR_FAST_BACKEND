@@ -167,7 +167,7 @@ entity PT_TMAPPRST {
     key Statustime          : DateTime not null;
         Submittedby         : String(100);
         ApproverDate        : Date;
-    key ApproverType        : String(30) not null;
+    key ApproverType        : String(200) not null;
         FLOW_ID             : String(255);
         REQUIRED_ACTION     : String(12);
     key LotID               : Integer default 1;
