@@ -130,7 +130,7 @@ COUNTRYCODE,TABID,VISIBLE
 "BR","financialOfferId","False"
 "BR","quotationId","True"
 "BR","tenderResultsId","True"
-"BR","deliveryTrackingId","True"
+"BR","deliveryTrackingId","False"
 "BR","financialOfferId_BR","True"
 "CL","basicInformationId","True"
 "CL","offerProductsId","True"
