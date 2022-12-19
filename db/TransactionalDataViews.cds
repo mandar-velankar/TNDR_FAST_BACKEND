@@ -704,7 +704,7 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     ifnull(quotation.Signatory2.TITLE, signatory.TITLE) as TITLE:String
 };
 
-
+//EHQUT-RITM12706398-OfferValidity for SEWA
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
 left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory1Default
     on offer.SellingCompany = signatory1Default.LEGAL_ENTITY_CODE
@@ -744,7 +744,10 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
-	ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay))) as OFFERVALIDITY,
+	 case offer.Tender.Institute.Region.Name
+        when 'SEWA' then ADD_DAYS(CURRENT_DATE, 60)
+        else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
+    end as OFFERVALIDITY,
 	ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate,
 	ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate,
 	offer.CountryCode as COUNTRYCODE,
