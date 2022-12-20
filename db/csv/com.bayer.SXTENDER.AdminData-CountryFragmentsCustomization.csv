@@ -23,7 +23,7 @@ COUNTRYCODE,FRAGMENTID,FRAGMENTNAME
 "YE","financialOfferId","financialOffer"
 "AR","financialOfferId","financialOffer"
 "CL","financialOfferId","financialOffer"
-"BR","quotationViewId","QuotationView"
+"BR","quotationViewId","QuotationView_BR"
 "MX","quotationViewId","QuotationView_MX"
 "TH","quotationViewId","QuotationView_TH"
 "SA","quotationViewId","QuotationView"
