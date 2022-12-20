@@ -580,6 +580,14 @@ entity PT_TMTEND: managed {
                                          on PriceAgreements.TenderId  = TenderID;
         User: Association to AdminData.PT_TMUSER
                                          on User.UserID = SubmittedBy;
+        TenderType1: Association to MasterData.MASTER_TENDER_TYPE
+                                on TenderType1.ID = TENDER_TYPE_ID;
+        TenderType2: Association to MasterData.MASTER_TENDER_TYPE
+                                on TenderType2.ID = TENDER_TYPE_2_ID;
+        ContractType: Association to MasterData.MASTER_CONTRACT_TYPE
+                                on ContractType.ID = CONTRACT_TYPE_ID;
+        SalesType: Association to MasterData.MASTER_SALES_TYPE
+                                on SalesType.ID = SALES_TYPE_ID;
 }
 
 entity PT_TMTNOFST {
