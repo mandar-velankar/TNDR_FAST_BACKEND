@@ -11,11 +11,13 @@ entity Contracts : managed, cuid {
         OfferID                 : String(30) not null;     
         InstituteID             : Integer not null;         
         DistributorID           : Integer not null;         
-        LicAtriID               : Integer;
-        ContractNumber          : String(5000);
-        ProcessNumber           : String(5000);
-        ContractType            : String(5000);
-        OBS                     : String(5000);
+        ContractNumber          : String;
+        IbizProcessNumber       : String;
+        ContractType            : String;
+        OBS                     : String;
+        IbizContractID          : Integer;
+        IbizContractNumber      : String;
+        IbizContractSignDate    : Date;
         StartDate               : Date;
         EndDate                 : Date;
         StatusID                : UUID;                                       
@@ -32,14 +34,19 @@ entity Contracts : managed, cuid {
                                     on Distributor.DistributorID = DistributorID;
         Status                  : Association to AdminData.ContractStatus            
                                     on Status.ID = StatusID;
-        ContractProducts        : Association to many ContractProducts on ContractProducts.Contract = $self;
-        SalesOrders             : Association to many SalesOrders on SalesOrders.Contract = $self;
+        ContractProducts        : Association to many ContractProducts 
+                                    on ContractProducts.Contract = $self;
+        SalesOrders             : Association to many SalesOrders 
+                                    on SalesOrders.Contract = $self;
 }
 
 entity ContractProducts: managed, cuid {
         ProductPackID               : Integer not null;                             
         OfferID                     : String(30) not null;                          
         RequestedVolume             : Integer;
+        IbizItemType                : String;
+        LotID                       : Integer default 1;
+        ContractPrice               : Decimal;
         //Associations
         OfferProduct                : Association to TransactionalData.PT_TMOFPR
                                         on OfferProduct.ProductCode = ProductPackID
