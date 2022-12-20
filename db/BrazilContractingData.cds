@@ -55,12 +55,12 @@ entity ContractProducts: managed, cuid {
 }
 
 entity SalesOrders: managed, cuid {
-        TenderID                : String(50) not null;
+        EmpenhoID               : Integer;
         InstituteID             : Integer not null;                                 
         DistributorID           : Integer not null;                                 
-        LicAtriID               : Integer;
+        EmpenhoNumber           : String;
         SalesOrderNumber        : String(20);
-        ProcessNumber           : String(5000);
+        IbizProcessNumber       : String(5000);
         CommitmentDate          : Date;
         CommitmentDeliveryDate  : Date;
         CommitmentCreationDate  : Date;
@@ -73,8 +73,6 @@ entity SalesOrders: managed, cuid {
                                     on Distributor.DistributorID = DistributorID;
         Status                  : Association to AdminData.SalesOrderStatus         
                                     on Status.ID = StatusID;
-        Tender                  : Association to TransactionalData.PT_TMTEND
-                                    on Tender.TenderID = TenderID;
         SalesOrderProducts      : Association to many SalesOrderProducts on SalesOrderProducts.SalesOrder = $self;
 }
 
@@ -82,11 +80,10 @@ entity SalesOrderProducts: managed, cuid {
         ProductPackID           : Integer not null;
         OfferID                 : String(30) not null; 
         RequestedQty            : Double;
-        //DeliveredQty            : Double;
-        //Price                   : Double;
         RequestedDeliveryDate   : Date;
-        //ActualDeliveryDate      : Date;
-        //UoM                     : String(10);   
+        IbizEmpenhoProductID    : Integer;
+        IbizContractProductID   : Integer;
+        SalesOrderPrice         : Double;
         //Associations
         SalesOrder              : Association to SalesOrders;
         OfferProduct            : Association to TransactionalData.PT_TMOFPR
