@@ -24,6 +24,12 @@ service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     @cov2ap.isoTimestamp:true
     @cov2ap.isoDateTimeOffset:true
     entity TENDER_PRICING @readonly as projection on ExternalDataViews.TENDER_PRICING;
+    entity FastReportingData as projection on ExternalDataViews.FastReportingData;
+    @cov2ap.isoTime:true
+    @cov2ap.isoDate:true
+    @cov2ap.isoDateTime:true
+    @cov2ap.isoTimestamp:true
+    @cov2ap.isoDateTimeOffset:true
 
     //Master Data Views addendum
     entity MasterApproverBrandMap @readonly as projection on ExternalDataViews.MasterApproverBrandMap;

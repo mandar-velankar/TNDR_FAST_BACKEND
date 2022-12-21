@@ -279,10 +279,18 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         // pa.Institute.CustomerID //by price agreement
 };
 
-
+//EHQUT-199066-Italy – Brand filter in Price Agreements
 //Distinct list of Products
-entity PriceAgreementProductNames as select from PriceAgreements {
-	key ProductPackId,
-    CountryCode,
-    Product.ProductPack.PRODUCTPACKNAME as ProductName
-} group by ProductPackId, CountryCode, Product.ProductPack.PRODUCTPACKNAME;
+// entity PriceAgreementProductNames as select from PriceAgreements {
+// 	key ProductPackId,
+//     CountryCode,
+//     Product.ProductPack.PRODUCTPACKNAME as ProductName
+// } group by ProductPackId, CountryCode, Product.ProductPack.PRODUCTPACKNAME;
+entity PriceAgreementProductNames as select from PriceAgreements as pa
+inner join MasterDataViews.CountryBrandProducts as ca on pa.ProductPackId= ca.PRODUCT_ID{
+	key pa.ProductPackId,
+    pa.CountryCode,
+    Product.ProductPack.PRODUCTPACKNAME as ProductName,
+    ca.BRAND_ID,
+    ca.BRAND_NAME
+} group by pa.ProductPackId, pa.CountryCode, Product.ProductPack.PRODUCTPACKNAME,ca.BRAND_ID,ca.BRAND_NAME;
