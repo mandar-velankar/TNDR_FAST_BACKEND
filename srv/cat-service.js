@@ -303,6 +303,10 @@ module.exports = (srv) => {
 		}
 		//Delivery terms
 		let deliveryTerms = "";
+		//EHQUT-RITM12706398-SEWA Change Request
+		if(offer.REGION_NAME === "SEWA"){
+			deliveryTerms = product.FIRST_SHIPMENT;
+		}else{
 		if (product.NUMBER_LOTS === 0 && product.INTERVAL_SHIPMENTS === 0) {
 			deliveryTerms = "Multiple deliveries from local stocks with first ";
 			deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
@@ -316,8 +320,11 @@ module.exports = (srv) => {
 				.concat(" lots at interval of ")
 				.concat(product.INTERVAL_SHIPMENTS.toString())
 				.concat(" months with first ")
+			
 				.concat(product.FIRST_SHIPMENT);
 		}
+	}
+	
 		//Requested Quantity & FOC string
 		let focString = "";
 		let requestedQuantityString = requestedVolume.toString().concat(" ").concat(product.UNIT);
