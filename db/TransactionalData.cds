@@ -247,7 +247,7 @@ entity PT_TMBDPR {
                                     and Bundled_1_Cogs.PRODUCT_ID   = FOCProduct_Bundled_1;
         Bundled_1_SKU         : Association to MasterData.PT_TMPRDPCK
                                     on Bundled_1_SKU.PRODUCTPACKID = FOCProduct_Bundled_1;
-        Profitability         :  Association to MasterDataLatestValues.VWBUDGETEDPROFITABILITY on Profitability.PRODUCTPACKID = ProductCode   and Profitability.COUNTRYCODE =CountryCode;
+        Profitability         :  Association to MasterData.BUDGETEDPROFITABILITY on Profitability.PRODUCTPACKID = ProductCode  and Profitability.COUNTRYCODE =CountryCode and SubmittedOn >= Profitability.EFFECTIVEDATE and SubmittedOn <= Profitability.ENDDATE;
 }
 
 
@@ -717,6 +717,7 @@ entity PT_TMUDLTRS {
     key LOTID             : Integer default 1;
 }
 //EHQUT modified the entity for extending the key field.
+//EHQUT-218727-Requested Volume Field for competitor result
 entity TransCompetitorResult {
     key OFFERID        : String(30) not null;
     key PRODUCTCODE    : Integer not null;
@@ -724,6 +725,7 @@ entity TransCompetitorResult {
         OUTCOME        : String(255);
     key AWARDEDCOMPANY : String(255) not null;
     key AWARDEDPRODUCT : String(255) not null;
+        REQUESTEDVOLUME: Integer;
         AWARDEDPRICE   : Double;
         CURRENCY       : String(3);
         AWARDEDQTY     : Integer;

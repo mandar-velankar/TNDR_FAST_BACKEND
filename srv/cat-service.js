@@ -385,6 +385,7 @@ module.exports = (srv) => {
 	}*/
 
 	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes) {//MEA (and default)
+		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -440,7 +441,7 @@ module.exports = (srv) => {
 				regionalBusiness = 3;
 			}
 		}
-
+		//let regionalBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : 3;
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
