@@ -749,6 +749,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
                 ProfitabilityDiscRate : null,
                 ProfitabilityGrowthRate: null,
                 IbizWorkflowID         : curr.ID_QP,
+                isDirectIbizOpportunity: curr.NU_DIRETO_INDIRETO == 0 ? true : false,
                 PreviousIbizWorkflowID : curr.ID_PRE_QP,
                 TenderDistributorID    : curr.ID_LIC_ATRIBUIDA,
                 BusinessUnit           : curr.NM_BU_ABREV,

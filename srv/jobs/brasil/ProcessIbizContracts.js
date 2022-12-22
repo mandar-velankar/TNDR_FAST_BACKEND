@@ -105,9 +105,9 @@ module.exports = class processIbizContracts extends BaseJob {
      * @returns - 
      */
      async getContractStatuses(tx) {
+         const { ContractStatus } = this.db.entities("com.bayer.SXTENDER.AdminData");
+         console.log(`JOB (${this.jobName }): Fetching data from ${ContractStatus.name} ...`);
         try {
-            const { ContractStatus } = this.db.entities("com.bayer.SXTENDER.AdminData");ß
-            console.log(`JOB (${this.jobName }): Fetching data from ${ContractStatus.name} ...`);
             return await tx.run(SELECT.from(ContractStatus));
         }catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${ContractStatus.name} failed`);
@@ -115,23 +115,6 @@ module.exports = class processIbizContracts extends BaseJob {
             throw error;
         }
     }
-
-    /**
-     * This method fetches all the TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE
-     * @returns - 
-     */
-    //  async getTenderTypes(tx) {
-    //     try {
-    //         console.log(`JOB (${this.jobName }): Fetching TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE ...`);
-    //         const { MASTER_TENDER_TYPE } = this.db.entities("com.bayer.SXTENDER.MasterData");
-    //         const result = await tx.run(SELECT.from(MASTER_TENDER_TYPE));
-    //         return result;
-    //     }catch (error) {
-    //         console.error(`JOB (${this.jobName }): ERROR - Fetching of TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE failed`);
-    //         console.error(error);
-    //         throw error;
-    //     }
-    // }
 
      async getNextOfferIDs(tx, tenderIDs) {
         if(!tenderIDs || tenderIDs.length <= 0) {
@@ -164,35 +147,39 @@ module.exports = class processIbizContracts extends BaseJob {
 
 /**
      * This method will process a list of Ibiz Contracts by Creating/Updating the following entities
-     *  - PT_TMTEND
-     *  - PT_TMOFRS
-     *  - PT_TMOFPR
+     *  - Contracts
+     *  - ContractProducts
+     *  - DocumentsDownload
      * After successful processing, all the Ibiz records will be deleted.
      */
  async processContracts(tx, ibizContracts, ibizContractProducts, ibizContractDocs) {
-    console.log(`JOB (${this.jobName }): Processing Ibiz Contracts ...`);
-    try {
+     try {
+        console.log(`JOB (${this.jobName }): Processing Ibiz Contracts ...`);
 
-        const contractStatuses = await this.getContractStatuses();
+        // 0. Fetch existing data from FAST
+        const contractStatuses = await this.getContractStatuses(tx);
+        const existingInstitutesInFAST = await this.getFASTInstitutes(tx);
+        const existingDistributorsInFAST = await this.getFASTDistributors(tx);
+        const existingOfferFAST = await this.getFASTOffers(tx);
 
-        // 0. Mapping - Map IBIZ Contracts to FAST
-        const mappedContracts = this.mapIbizContractsToFASTContracts(ibizContracts,contractStatuses);
+        // 1. Mapping - Map IBIZ Contracts to FAST
+        const mappedContracts = this.mapIbizContractsToFASTContracts(ibizContracts,contractStatuses,existingInstitutesInFAST,existingDistributorsInFAST,existingOfferFAST);
         const mappedContractProducts = this.mapIbizContractProductsToFASTContractProducts(ibizContractProducts);
         const mappedDocs = this.mapIbizContractDocsToFASTDocumentsDownload(ibizContractDocs);
 
-        // 1. Create/update entries in PT_TMTEND
+        // 2. Create/update entries in PT_TMTEND
         await this.upsertFASTTenders(tx, mappedTenders);
 
-        // 2. Create/update entries in PT_TMOFRS
+        // 3. Create/update entries in PT_TMOFRS
         await this.upsertFASTOffers(tx, mappedOffers, mappedTenders);
 
-        // 3. Create/update entries in PT_TMOFPR
+        // 4. Create/update entries in PT_TMOFPR
         await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
 
-        // 4. Create/update entries in DocumentsDownload
+        // 5. Create/update entries in DocumentsDownload
         await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers);  
 
-        // 5. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
+        // 6. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
         const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 0}));
         const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -527,33 +514,55 @@ module.exports = class processIbizContracts extends BaseJob {
     return result;
 }
 
+ /**
+ * This method fetches all the Institutes from COM_BAYER_SXTENDER_MASTERDATA_PT_TMINST where CNPJ is not null
+ * @returns - 
+ */
+ async getFASTInstitutes(tx) {
+    const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+    console.log(`JOB (${this.jobName }): Fetching data from ${PT_TMINST.name} ...`);
+    try {
+        return await tx.run(SELECT.from(PT_TMINST).where({'CNPJ': {"!=": null}, CountryCode: 'BR' }));
+    }catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${PT_TMINST.name} failed`);
+        console.error(error);
+        throw error;
+    }
+}
+
+
 /**
  * Gets a list of existing Distributors from FAST
  * @param {Array} distributors 
  * @returns {Array<PT_TMDIST>} a list of existing distributors
  */
-//  async getFASTDistributors(tx) {
-//     console.log(`JOB (${this.jobName }): Start fetching Brazil Distributors from FAST table`);
-//     // get a list of distributors entities for given list of CustomerIDs
-//     const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-//     const result = await tx.run(SELECT.from(PT_TMDIST).where({ CountryCode: 'BR' } ));
-//     console.log(`JOB (${this.jobName }): End fetching Brazil Distributors from FAST table`);
-//     return result;
-// }
+ async getFASTDistributors(tx) {
+    const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+    console.log(`JOB (${this.jobName }): Fetching data from ${PT_TMDIST.name} ...`);
+    try {
+        return await tx.run(SELECT.from(PT_TMDIST).where({ CountryCode: 'BR' } ));
+    }catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${PT_TMDIST.name} failed`);
+        console.error(error);
+        throw error;
+    }
+}
 
-/**
- * Gets a list of existing SKUs from FAST
- * @param {Array} SKUs 
- * @returns {Array<PT_TMSKUPRDPCK>} a list of existing SKU
+ /**
+ * This method fetches all the OfferProducts from COM_BAYER_SXTENDER_TRANSACTIONALDATA_PT_TMOFPR where WorkflowProductID is not null
+ * @returns - 
  */
-//  async getFASTSKUs(tx) {
-//     console.log(`JOB (${this.jobName }): Start fetching Brazil SKUs from FAST table`);
-//     // get a list of distributors entities for given list of CustomerIDs
-//     const { PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-//     const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'BR', ActiveRecord: 'Yes' } ));
-//     console.log(`JOB (${this.jobName }): End fetching Brazil SKUs from FAST table`);
-//     return result;
-// }
+ async getFASTOffers(tx) {
+    const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    console.log(`JOB (${this.jobName }): Fetching data from ${PT_TMOFRS.name} ...`);
+    try {
+        return await tx.run(SELECT.from(PT_TMOFRS).where({'IbizWorkflowID': {"!=": null}, CountryCode: 'BR' }));
+    }catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${PT_TMOFRS.name} failed`);
+        console.error(error);
+        throw error;
+    }
+}
 
 
 
@@ -562,20 +571,22 @@ module.exports = class processIbizContracts extends BaseJob {
  * @param {[Objects]} ibizContracts 
  * @returns {[Objects]} contracts
  */
-mapIbizContractsToFASTContracts(ibizContracts,contractStatuses) {
+mapIbizContractsToFASTContracts(ibizContracts,contractStatuses, existingInstitutesInFAST, existingDistributorsFAST, existingOfferFAST) {
     console.log(`JOB (${this.jobName }): Mapping IBIZ Contracts to FAST ...`);
     const contractStatus = contractStatuses.find(cs => cs.Status.toLowerCase() === "new ibiz");
     ibizContracts = ibizContracts.reduce((prev, curr, idx, ibizContracts) => {
-        // const institute = (existingInstitutesInFAST.find(inst => inst.CNPJ === curr.COD_LICITADOR.replace(/\D/g,'')));
-        // const instituteID = institute && institute.InstituteID || 0;
-        // const tenderType = (existingTenderTypesFAST.find(tt => tt.NAME === curr.NM_MODALIDADE));
-        // const tenderTypeID = tenderType && tenderType.ID || null;
+        const offer = existingOfferFAST.find(ofr => ofr.IbizWorkflowID === curr.ID_QP);
+        const institute = existingInstitutesInFAST.find(inst => inst.CNPJ === curr.COD_COMPRADOR.replace(/\D/g,''));
+        const instituteID = institute && institute.InstituteID || 0;
+        const cnpj = curr.COD_VENDEDOR && curr.COD_VENDEDOR.replace(/\D/g,'');
+        const distributor = offer && offer.isDirectIbizOpportunity ? existingDistributorsFAST.find(dist => dist.DistributorName === "Bayer Brazil") : existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
+        const distributorID = distributor && distributor.DistributorID || 0;
         prev.push(
             {
-                TenderID             : "", // TODO: find PT_TMOFPR with same id_qp and get offer id en tenderid 
-                OfferID              : "",
-                InstituteID          : curr.NM_COMPRADOR, // Get the corresponding Institute id from the id_qp
-                DistributorID        : curr.NM_VENDEDOR, // Get the corresponding Institute id from the id_qp
+                TenderID             : offer && offer.TenderID, 
+                OfferID              : offer && offer.OfferID,
+                InstituteID          : instituteID,
+                DistributorID        : distributorID,
                 ContractNumber       : null,
                 IbizProcessNumber    : curr.NM_PROCESSO,
                 ContractType         : this.getContractType(curr.NM_TIPO_CONTRATO),

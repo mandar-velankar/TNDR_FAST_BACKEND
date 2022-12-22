@@ -50,6 +50,7 @@ entity PT_TMOFRS { //Offers
         ProfitabilityDiscRate : Double;
         ProfitabilityGrowthRate: Double;
         IbizWorkflowID         : Integer;
+        isDirectIbizOpportunity: Boolean;
         PreviousIbizWorkflowID : Integer;
         TenderDistributorID    : Integer;
         BusinessUnit           : String;
