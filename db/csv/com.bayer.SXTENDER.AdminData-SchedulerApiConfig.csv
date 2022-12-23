@@ -11,3 +11,5 @@ c42e968a-c7b3-11ec-9d64-0242ac120002,PriceAgreementPROD,https://y100135-iflmap.h
 c42e9950-c7b3-11ec-9d64-0242ac120002,PriceAgreementPROD,https://y100135-iflmap.hcisbp.eu1.hana.ondemand.com,/http/BAY1_X01_FAST_ES_COND_A.SALESAGR_ES01,PriceConditionRappel,/,,,1000,5,OAUTH,ES,,90d0bbfd-e1df-43d2-93fb-c7fd22525ed0
 a0cda419-04bf-4fca-8002-888aeb7504cb,IBIZ,https://dev.erp-int.bayer.com,/http/channel_switch,OfferProductChannel,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8
 25112c94-a3f9-42f8-9254-324bfdab98e6,IBIZ,https://dev.erp-int.bayer.com,/http/offer_approval,OfferApproval,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8
+4fc4aa36-0b83-4c66-acdf-79aa00d8c510,Contract, https://dev.erp-int.bayer.com,/http/BAY3_X01_8B_SD_RFC_TBN_CONTRACTFT,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8
+8b372f12-2356-47f5-a54c-88706abf92c4,Contract, https://dev.erp-int.bayer.com,/http/BAY3_X01_8B_SD_RFC_TBN_SALESORD,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8
