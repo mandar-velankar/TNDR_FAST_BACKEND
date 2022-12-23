@@ -54,6 +54,9 @@ const jobManager = require("./jobs/JobManager");
 
   // const ProcessOpportunities = require("./jobs/brasil/ProcessOpportunities");
   // new ProcessOpportunities("test","*").onTick();
+
+  // const ProcessEmpenho = require("./jobs/brasil/ProcessEmpenho");
+  // new ProcessEmpenho("test","*").onTick();
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));
