@@ -27,5 +27,5 @@ service BrazilContractingService @(path: 'brazilcontracting') @(requires:['f_tnd
     entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
     entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
 
-    action createSalesOrder(salesOrderID: String);
+    action createSalesOrder(salesOrderID: String) returns String;
 }
