@@ -46,7 +46,7 @@ entity ContractProducts: managed, cuid {
         OfferID                     : String(30) not null;                          
         RequestedVolume             : Integer;
         IbizItemType                : String;
-        LotID                       : Integer default 1;
+        LotID                       : Integer;
         ContractPrice               : Decimal;
         //Associations
         OfferProduct                : Association to TransactionalData.PT_TMOFPR

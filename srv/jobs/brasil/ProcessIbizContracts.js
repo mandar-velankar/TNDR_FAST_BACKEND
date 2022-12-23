@@ -157,8 +157,6 @@ module.exports = class processIbizContracts extends BaseJob {
         // const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
         // Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}}));
 
-        console.log(`JOB (${this.jobName }): Processing of Ibiz Contracts successfully completed.`);
-
     }catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Processing of Ibiz Contracts failed.`);
         console.error(error);
@@ -176,7 +174,7 @@ module.exports = class processIbizContracts extends BaseJob {
     console.log(`JOB (${this.jobName }): Creating records in ${Contracts.name} ...`);
     try {
         mappedContracts && mappedContracts.length > 0 && await tx.run(INSERT(mappedContracts).into(Contracts));
-        console.log(`JOB (${this.jobName }): ${mappedContracts.length} records successfully created in ${Contracts.name}`);
+        console.log(`JOB (${this.jobName }): ${mappedContracts.length} record(s) successfully created in ${Contracts.name}`);
         return true;
     } catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Creating records in ${Contracts.name} failed`);
@@ -196,7 +194,7 @@ async insertFASTContractProducts(tx, mappedContractProducts) {
     console.log(`JOB (${this.jobName }): Creating records in ${ContractProducts.name} ...`);
     try {
         mappedContractProducts && mappedContractProducts.length > 0 && await tx.run(INSERT(mappedContractProducts).into(ContractProducts));
-        console.log(`JOB (${this.jobName }): ${mappedContractProducts.length} records successfully created in ${ContractProducts.name}`);
+        console.log(`JOB (${this.jobName }): ${mappedContractProducts.length} record(s) successfully created in ${ContractProducts.name}`);
         return true;
     } catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Creating records in ${ContractProducts.name} failed`);
@@ -342,7 +340,10 @@ mapIbizContractsToFASTContracts(ibizContracts,contractStatuses, existingInstitut
                 IbizContractSignDate : curr.DT_ASSINATURA,
                 StartDate            : curr.DT_INI_VIGENCIA,
                 EndDate              : curr.DT_FIM_VIGENCIA,
-                StatusID             : contractStatus.ID
+                StatusID             : contractStatus.ID,
+                modifiedBy           : "IBIZ",
+                createdBy            : "IBIZ"
+
             }
         );
         return prev;
@@ -386,14 +387,16 @@ mapIbizContractProductsToFASTContractProducts(ibizContractProducts,existingOffer
         const parentContract = mappedContracts.find(cr => cr.ID == curr.parent_ID);
         prev.push(
             {
-                ProductPackID           : offerProduct && offerProduct.ProductCode,
-                OfferID                 : parentContract && parentContract.OfferID,
+                ProductPackID           : offerProduct && offerProduct.ProductCode || 0, // TODO: should the job fail in case no ProductPackID was found?
+                OfferID                 : parentContract && parentContract.OfferID || "", // TODO: should the job fail in case no OfferID was found?
                 IbizContractProductID   : curr.ID_CC_CONTRATO,
                 RequestedVolume         : curr.NU_QTDE_UNITARIA,
                 IbizItemType            : this.getIbizItemType(curr.NU_TIPO),
                 LotID                   : curr.NU_LOTE,
                 ContractPrice           : curr.VLR_UNITARIO,
-                Contract_ID             : parentContract.ID
+                Contract_ID             : parentContract.ID,
+                modifiedBy              : "IBIZ",
+                createdBy               : "IBIZ"
             }
         );
         return prev;
@@ -431,31 +434,5 @@ mapIbizOpportunitiesDocstoFASTDocumentsDownload(ibizOpportunityDocs){
     return ibizOpportunityDocs;
 }
 
-
-/**
- * Gets the next highest value for a given field from table
- * @param {*} table 
- * @param {*} fieldname 
- * @returns - next highest value
- */
-//  async getNextValue (tx, table, fieldname, countryCode,){
-//     let nextValue = 1;
-//     try {
-//         let results = [];
-//         if(countryCode){
-//             results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']).where({CountryCode: countryCode}));
-//         }else{
-//             results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
-//         }
-//         if (results[0].max) {
-//             nextValue = results[0].max + 1
-//         }
-//         return nextValue;
-//     }catch (error) {
-//         console.error(`JOB (${this.jobName }): ERROR - Fetching next highest value for ${fieldname} from ${table.name} failed`);
-//         console.error(error);
-//         throw error;
-//     }
-// }
 
 };
