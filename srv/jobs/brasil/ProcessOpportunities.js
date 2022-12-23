@@ -26,6 +26,7 @@ module.exports = class processOpportunities extends BaseJob {
             const existingTenderTypesFAST = await this.getTenderTypes(tx);
             const existingDistributorsFAST = await this.getFASTDistributors(tx);
             const existingSKUFAST = await this.getFASTSKUs(tx);
+            const priceConditionClassificationFAST = await this.getPriceConditionClassification(tx);
 
             const directIbizOpportunities = opportunities.filter(direct => direct.NU_DIRETO_INDIRETO === 0);
             const directIbizOpportunityParentIDs = directIbizOpportunities.map(dop => dop.ID);
@@ -38,8 +39,8 @@ module.exports = class processOpportunities extends BaseJob {
             const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); 
 
             // Process data
-            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs);
-            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs);
+            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
+            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST);
 
             // Commit All
             await tx.commit();
@@ -186,13 +187,13 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs) {
+ async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST) {
     console.log(`JOB (${this.jobName }): Processing Direct Ibiz Opportunities ...`);
     try {
 
         // 0. Mapping - Map IBIZ Opportunities to FAST
         const mappedTenders = this.mapIbizOpportunitiestoFASTTender(directIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
-        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(directIbizOpportunities, existingDistributorsFAST);
+        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(directIbizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST);
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
         const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(directIbizOpportunityDocs);
 
@@ -247,13 +248,13 @@ module.exports = class processOpportunities extends BaseJob {
 
     // 2. devide mappedTenders into New or Changed tenders
     const FASTNewTenders = [];
-    const FASTChangedTenders = [];
+    const FASTChangedTenders = []; //TO-DO CHECK IF WE NEED THIS 
     for (const tender of uniqueMappedTenders) {
         let FASTTenderIdx = tendersExistingInFAST.findIndex(FASTTender => FASTTender.ExternalID === tender.ExternalID);
         if (FASTTenderIdx > -1) {
             // copy over the TenderID from existing Tender
             tender.TenderID = tendersExistingInFAST[FASTTenderIdx].TenderID;
-            FASTChangedTenders.push(tender);
+            FASTChangedTenders.push(tender); 
         } else {
             // generate new TenderID
             tender.TenderNo = nextTenderID++;
@@ -267,9 +268,6 @@ module.exports = class processOpportunities extends BaseJob {
     //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
     console.log(`JOB (${this.jobName }): Upserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
     try {
-        // for (const FASTHierarchy of FASTChangedTenders) {
-        //     await tx.run(UPDATE(PT_TMPRDHIER, {HLEVEL6_CODE:FASTHierarchy.HLEVEL6_CODE}).with(FASTHierarchy));
-        // }
         FASTNewTenders && FASTNewTenders.length > 0 && await tx.run(INSERT(FASTNewTenders).into(PT_TMTEND));
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Tenders into FAST table (PT_TMTEND) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMTEND -> created: ${FASTNewTenders.length}, updated: ${FASTChangedTenders.length}`);
@@ -294,25 +292,42 @@ module.exports = class processOpportunities extends BaseJob {
     let nextOfferIDs = await this.getNextOfferIDs(tx, tenderIDs);
     const offerStatusses = [];
 
-    // 1. link existing Tenders with Offers
+    // 1. get a list of existing Offers with an IBIZWORKFLOWID from FAST
+    const parentOffersExistingInFAST = await this.getFASTOffersWithIbizWorkflowID(tx);
+    
+    // 2. link existing Tenders with Offers
+    // IMPORTANT: the indexes of mappedOffers and mappedTenders are pointing to the same IBIZ object
+    // The index is used to map parent tenders to offers. Do
     for (const [index, offer] of mappedOffers.entries()) {
-        let nextOfferID = 1;
+
+        // link parent TenderID
         const ibizID = mappedTenders[index].IbizID;
         const parentTender = uniqueMappedTenders.find(ut => ut.IbizID == ibizID);
         offer.TenderID = parentTender && parentTender.TenderID;
-        let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
-        if(nextOfferNumber && nextOfferNumber.NEXTOFFERID) {
-            offer.TenderOfferNo = ++nextOfferNumber.NEXTOFFERID;
-        }else{
-            offer.TenderOfferNo = nextOfferID++;
-            nextOfferIDs.push({
-                TenderID: offer.TenderID,
-                NEXTOFFERID: offer.TenderOfferNo
-            }); 
+
+        const isRevisedOffer = !!offer.PreviousIbizWorkflowID;
+        let parentFASTOffer = parentOffersExistingInFAST.find(FASTOffer => FASTOffer.IbizWorkflowID == offer.PreviousIbizWorkflowID);
+        // if we can't find an existing parent offer in FAST, a.k.a cannot map to any qp_id, we consider it as a new offer.
+        if(isRevisedOffer && parentFASTOffer){ // revised offer
+            parentFASTOffer.ActiveOffer = 0;
+            offer.RevisedOfferNo = parentFASTOffer.RevisedOfferNo + 1;
+            offer.TenderID = parentFASTOffer.TenderID;
+            offer.OfferID = parentFASTOffer.TenderID + '-' + parentFASTOffer.TenderOfferNo + '-R' + offer.RevisedOfferNo;
+        }else{ // new offer
+            let nextOfferID = 1;
+            let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
+            if(nextOfferNumber && nextOfferNumber.NEXTOFFERID) {
+                offer.TenderOfferNo = ++nextOfferNumber.NEXTOFFERID;
+            }else{
+                offer.TenderOfferNo = nextOfferID++;
+                nextOfferIDs.push({
+                    TenderID: offer.TenderID,
+                    NEXTOFFERID: offer.TenderOfferNo
+                }); 
+            }
+            offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
         }
         
-        offer.OfferID = offer.TenderID + '-' + offer.TenderOfferNo;
-
         //add status
         offerStatusses.push({
             TenderID    : offer.TenderID,
@@ -324,11 +339,12 @@ module.exports = class processOpportunities extends BaseJob {
         });
     }
 
-    // delete IBIZ_TECHNICAL_ID before saving to DB
+    // delete technical ids which are not needed in offers before saving to DB
     const offersWithoutID = mappedOffers.map(ofr => { 
         const copy = {...ofr}; 
         delete copy.IBIZ_TECHNICAL_ID; 
         delete copy.NU_DIRETO_INDIRETO;
+        delete copy.PriceConditionClassificationID;
         return copy;
     });  
 
@@ -337,8 +353,12 @@ module.exports = class processOpportunities extends BaseJob {
     try {
         offersWithoutID && offersWithoutID.length > 0 && await tx.run(INSERT(offersWithoutID).into(PT_TMOFRS));
         offerStatusses && offerStatusses.length > 0 && await tx.run(INSERT(offerStatusses).into(PT_TMTNOFST));
+        //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
+        for (const parrentOffer of parentOffersExistingInFAST) {
+            await tx.run(UPDATE(PT_TMOFRS, {OfferID:parrentOffer.OfferID}).with(parrentOffer));
+        }
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
-        console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length}`);
+        console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length} updated: ${parentOffersExistingInFAST.length}`);
         console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${offerStatusses.length}`);
         return true;
     } catch (error) {
@@ -401,7 +421,7 @@ module.exports = class processOpportunities extends BaseJob {
         console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products into FAST tables failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products/Lots into FAST tables failed`);
         console.error(error);
         throw error;
     }
@@ -457,6 +477,7 @@ module.exports = class processOpportunities extends BaseJob {
     for (const pc of mappedPriceCondition) {
         let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === pc.parent_ID);
         pc.OfferID = parentOffer.OfferID;
+        pc.PriceConditionClassification_ID = parentOffer.PriceConditionClassificationID;
     }
 
     // delete parent_ID before saving to DB
@@ -544,6 +565,28 @@ module.exports = class processOpportunities extends BaseJob {
 }
 
 /**
+ * Gets a list of existing Offers from FAST with an IbizWorkflowID set
+ * @returns {Array<PT_TMOFRS>} a list of existing offers
+ */
+ async getFASTOffersWithIbizWorkflowID(tx) {
+    try {
+        console.log(`JOB (${this.jobName }): Start fetching Offers with IbizWorkflowID from FAST table`);
+        const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+        let result = await tx.run(SELECT.from(PT_TMOFRS).where(
+            { 
+                    IbizWorkflowID: {'!=': null}, 
+                    CountryCode: 'BR' 
+            } 
+        ));
+        console.log(`JOB (${this.jobName }): End fetching Offers with IbizWorkflowID from FAST table`);
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw(error);
+    }
+}
+
+/**
  * Gets a list of existing Distributors from FAST
  * @param {Array} distributors 
  * @returns {Array<PT_TMDIST>} a list of existing distributors
@@ -572,6 +615,20 @@ module.exports = class processOpportunities extends BaseJob {
 }
 
 /**
+ * Gets a list of PriceConditionClassification from FAST
+ * @param {Array} priceConditionClassifications 
+ * @returns {Array<PriceConditionClassification>} a list of existing SKU
+ */
+ async getPriceConditionClassification(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil PriceConditionClassification from FAST table`);
+    // get a list of PriceConditionClassifications
+    const { PriceConditionClassification } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const result = await tx.run(SELECT.from(PriceConditionClassification).where({ CountryCode: 'BR', Classification: 'Tender', ProductType: 'All', ConditionType: 'Discount' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil PriceConditionClassification from FAST table`);
+    return result;
+}
+
+/**
      * This method will process a list of Ibiz Opportunities by Creating/Updating the following entities
      *  - PT_TMTEND
      *  - PT_TMOFRS
@@ -581,13 +638,13 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs) {
+ async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST) {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
         // 0 Mapping
         const mappedTenders = this.mapIbizOpportunitiestoFASTTender(indirectIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
-        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST);
+        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST);
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
         const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST);
         const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST);
@@ -705,16 +762,19 @@ mapIbizOpportunitiestoFASTTender(ibizOpportunities,existingInstitutesInFAST, exi
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} offers
      */
-mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
+mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFRS ...`);
     ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
         const cnpj = curr.COD_DONO_QP && curr.COD_DONO_QP.replace(/\D/g,'');
         const distributor = (curr.NU_DIRETO_INDIRETO === 0) ? existingDistributorsFAST.find(dist => dist.DistributorName === "Bayer Brazil") : existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
         const distributorID = distributor && distributor.DistributorID || null;
+        const priceConditionClassification = priceConditionClassificationFAST.find(p => p.Division === curr.NM_BU_ABREV);
+        const priceConditionClassificationId = priceConditionClassification && priceConditionClassification.ID || null;
         prev.push(
             {
                 IBIZ_TECHNICAL_ID     : curr.ID, // this ID will be used to create relationship with the items and will be deleted afterwards
+                PriceConditionClassificationID : priceConditionClassificationId, //this ID will be used to create relationship with the PriceCondition items and will be deleted afterwards
                 NU_DIRETO_INDIRETO    : curr.NU_DIRETO_INDIRETO,
                 TenderID              : "", 
                 OfferID               : "", 
@@ -749,6 +809,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST) {
                 ProfitabilityDiscRate : null,
                 ProfitabilityGrowthRate: null,
                 IbizWorkflowID         : curr.ID_QP,
+                isDirectIbizOpportunity: curr.NU_DIRETO_INDIRETO == 0 ? true : false,
                 PreviousIbizWorkflowID : curr.ID_PRE_QP,
                 TenderDistributorID    : curr.ID_LIC_ATRIBUIDA,
                 BusinessUnit           : curr.NM_BU_ABREV,
@@ -773,7 +834,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFPR ...`);
     ibizOpportunityItems = ibizOpportunityItems.reduce((prev, curr, idx, ibizOpportunityItems) => {
         const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
-        const productPackID = sku && sku.ProductPackID || 0;
+        const productPackID = sku && sku.ProductPackID || null;
         prev.push(
             {
                 parent_ID                : curr.parent_ID,
@@ -925,13 +986,14 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 ICMSTax                             : curr.NU_PORCENTAGEM_ICMS,
                 TaxExemption                        : (!curr.NU_PORCENTAGEM_ICMS) ? 'No' : 'Yes',
                 PriceAfterTaxExemtion               : (!curr.NU_PORCENTAGEM_ICMS) ? null : (curr.VLR_BASE_CALCULO_UNITARIO * (1 - curr.NU_PORCENTAGEM_ICMS)),
-                CAP                                 : (curr.NU_CAP === 0) ? 'No' : 'Yes',
-                PriceAfterCap                       : (curr.NU_CAP === 1) ? ((1 - curr.NU_PORCENTAGEM_CAP) * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) : (1 * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) ,
+                CAP                                 : (!curr.NU_CAP || curr.NU_CAP === 0) ? 'No' : 'Yes',
+                PriceAfterCap                       : (!curr.NU_CAP || curr.NU_CAP === 0) ? (1 * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) : ((1 - curr.NU_PORCENTAGEM_CAP) * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO),
                 CommercialProposal                  : curr.VLR_UNITARIO,
                 TaxEqualization                     : null, 
                 Invoive                             : null, 
                 ICMS                                : null, 
-                NetPrice                            : null 
+                NetPrice                            : null,
+                PriceConditionClassification_ID     : null
             }
         );
         return prev;
