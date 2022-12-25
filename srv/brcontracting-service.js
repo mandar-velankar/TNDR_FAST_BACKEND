@@ -174,7 +174,7 @@ module.exports = (srv) => {
                 return req.reject(404, "Division is not found");
             }
             const salesOrderBody = createSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
-            await sendCreatedSalesOrder("BR", "", salesOrderBody);// check Provider and resource
+            await sendCreatedSalesOrderToSAP("BR", "", salesOrderBody);// check resource
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             await tx.commit();
         } catch (error) {
@@ -205,7 +205,7 @@ module.exports = (srv) => {
         return body;
     };
 
-    async function sendCreatedSalesOrder (countryCode, resource, body) {
+    async function sendCreatedSalesOrderToSAP (countryCode, resource, body) {
 
         if (!body) {
             return false;
