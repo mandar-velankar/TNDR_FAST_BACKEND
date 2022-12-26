@@ -1,6 +1,8 @@
 const cds = require('@sap/cds');
 const R = require('ramda');
 const ServiceHelper = require('./utils/ServiceHelper');
+const axios = require('axios');
+const qs = require("qs");
 
 module.exports = (srv) => {
     srv.on('syncContract', async req => {
@@ -65,7 +67,7 @@ module.exports = (srv) => {
 
     };
 
-    async function getBearerToken() {
+    async function getBearerToken(oauthAuth) {
 
         if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
             console.log(`Calling ${oauthAuth.OAuthProvider}`);
@@ -173,48 +175,61 @@ module.exports = (srv) => {
             if (!divisionCode) {
                 return req.reject(404, "Division is not found");
             }
-            const salesOrderBody = createSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
-            await sendCreatedSalesOrderToSAP("BR", "", salesOrderBody);// check resource
+
+            // Update all fields in sales order body template  
+            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
+            // Send request to SAP
+            const resFromSAP = await sendCreatedSalesOrderToSAP("BR", "SalesOrder", updateSalesOrderBody);
+            // Update SalesOrder Status
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             await tx.commit();
+            return req.reply("Sales order is created");
         } catch (error) {
             await tx.rollback();
         }
-
-        return req.reply("Sales order is created");
     });
 
-    function createSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode) {
+    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode) {
         const body = getSalesOrderRequestBodyTemplate();
         if (!body) {
             return false;
         }
-        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = contract.ContractNumber;
-        if (Number(divisionCode.HLEVEL1_CODE) < 10) {
+        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = addLeadingZeros(contract.ContractNumber, 10);
+        if (Number(divisionCode.HLEVEL1_CODE) == 8) {
             body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = "0" + divisionCode.HLEVEL1_CODE;
         }
         let items = salesOrderProducts.map((el,index) => {
             return {
-                ITEM: `${offerProducts[index].ProductCode}`,
-                MATERIAL: `${offerProducts[index].SORTER}`,
+                ITEM: addLeadingZeros(offerProducts[index].SORTER, 6),
+                MATERIAL: addLeadingZeros(offerProducts[index].ProductCode, 18),
                 ITEM_QTD: `${el.RequestedQty}`,
-                IV_TEXT: "Brazil Workshop Test"
+                IV_TEXT: ""
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["TT_ITEMS"].item = items;
         return body;
     };
 
+    function addLeadingZeros (num, size) {
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
+    };
+
     async function sendCreatedSalesOrderToSAP (countryCode, resource, body) {
+        const {
+            SchedulerApiConfig,
+            SchedulerApiConfigOAuth
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
 
         if (!body) {
             return false;
         }
-        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'Contract', CountryCode: countryCode, Resource: resource })); // check Provider and resource
-  
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'Contract', CountryCode: countryCode, Resource: resource })); 
+		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
         const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
 
-        const oauthCredentials = await getBearerToken();
+        const oauthCredentials = await getBearerToken(oauthAuth);
 
         return axios({
             method: 'post',
@@ -252,5 +267,5 @@ module.exports = (srv) => {
               }
             }
         }
-    }
+    };
 }
