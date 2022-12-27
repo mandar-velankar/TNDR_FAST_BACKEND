@@ -18,7 +18,8 @@ module.exports = (srv) => {
         const {
             PT_TMOFRS,
             PT_TMOFPR,
-            PT_TMTEND
+            PT_TMTEND,
+            PriceConditions
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
         try {
@@ -32,6 +33,7 @@ module.exports = (srv) => {
             const offerDistributor = await tx.run(SELECT.one.from(PT_TMDIST).where({ DistributorID: offer.DistributorID }));
             const institute = await tx.run(SELECT.one.from(PT_TMINST).where({ InstituteID: contract.InstituteID }));
             const distributor = await tx.run(SELECT.one.from(PT_TMDIST).where({ DistributorID: contract.DistributorID }));
+            const priceconditions = await tx.run(SELECT.from(PriceCondition).where({ OfferID: contract.OfferID }));
 
             if (!contract) {
                 return req.reject(404, "Contract is not found");
@@ -53,7 +55,7 @@ module.exports = (srv) => {
             }
 
             // Update all fields in sales order body template  
-            const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender);
+            const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions);
             // Send request to SAP
             const resFromSAP = await sendCreatedContractToSAP("BR", "Contract", updateContractBody);
             // Update SalesOrder Status
@@ -65,7 +67,7 @@ module.exports = (srv) => {
         }
     });
 
-    function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender) {
+    function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions) {
         const body = getContractRequestBodyTemplate();
         if (!body) {
             return false;
@@ -79,12 +81,15 @@ module.exports = (srv) => {
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PO_DATE"]      = tender.PublicationDate;
 
         let items = contractProducts.map((el,index) => {
+            let productPriceCondition = priceconditions.filter(cond => cond.ProductCode === el.ProductPackID)[0];
             return {
                 ITEM: addLeadingZeros(offerProducts[index].SORTER, 6),
                 MATERIAL: addLeadingZeros(offerProducts[index].ProductCode, 18),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
-                ITEM_QTD: offerProducts.filter(product => product.ProductCode === el.ProductPackID)?.RequestedQty
+                ITEM_QTD: offerProducts.filter(product => product.ProductCode === el.ProductPackID)[0]?.RequestedQty,
+                MANUAL_D: productPriceCondition?.StandardDiscount + productPriceCondition?.AdditionalDiscount,
+                CAP: productPriceCondition?.PriceAfterCAP
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;
