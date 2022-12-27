@@ -20,7 +20,7 @@ entity Contracts : managed, cuid {
         IbizContractSignDate    : Date;
         StartDate               : Date;
         EndDate                 : Date;
-        StatusID                : UUID;                                       
+        StatusID                : UUID;                              
         //Associations
         Offer                   : Association to TransactionalData.PT_TMOFRS
                                     on Offer.OfferID = OfferID;
