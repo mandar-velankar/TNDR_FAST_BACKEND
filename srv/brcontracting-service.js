@@ -22,8 +22,8 @@ module.exports = (srv) => {
             PriceConditions
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
+        const tx = cds.tx(req);
         try {
-            const tx = cds.tx(req);
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: req.data.contractID }));
             const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: contract.TenderID }));
             const contractProducts = await tx.run(SELECT.from(ContractProducts).where({ Contract_ID: req.data.contractID, OfferID: contract.OfferID }));
