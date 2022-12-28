@@ -41,11 +41,12 @@ entity Contracts : managed, cuid {
 }
 
 entity ContractProducts: managed, cuid {
-        ProductPackID               : Integer not null;                             
+        ProductPackID               : Integer not null;   
+        IbizContractProductID       : Integer;                          
         OfferID                     : String(30) not null;                          
         RequestedVolume             : Integer;
         IbizItemType                : String;
-        LotID                       : Integer default 1;
+        LotID                       : Integer;
         ContractPrice               : Decimal;
         //Associations
         OfferProduct                : Association to TransactionalData.PT_TMOFPR

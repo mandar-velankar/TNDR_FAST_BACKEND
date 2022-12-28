@@ -202,9 +202,9 @@ module.exports = (srv) => {
             PT_TMOFRS,
             PT_TMOFPR
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+        const tx = cds.tx(req);
 
         try {
-            const tx = cds.tx(req);
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
@@ -212,24 +212,8 @@ module.exports = (srv) => {
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
             const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
 
-            
-            if (!salesOrder) {
-                return req.reject(404, "Sales order is not found");
-            }
-            if (!contract) {
-                return req.reject(404, "Contract is not found");
-            }
-            if (!salesOrderProducts.length) {
-                return req.reject(404, "Sales order Products are not found");
-            }
-            if (!offerProducts.length) {
-                return req.reject(404, "Offer products are not found");
-            }
-            if (!offer) {
-                return req.reject(404, "Offer is not found");
-            }
-            if (!divisionCode) {
-                return req.reject(404, "Division is not found");
+            if (offerProducts.length !== salesOrderProducts.length) {
+                return req.reject(404, "Sales order products or Offer products not found");
             }
 
             // Update all fields in sales order body template  
@@ -239,9 +223,9 @@ module.exports = (srv) => {
             // Update SalesOrder Status
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             await tx.commit();
-            return req.reply("Sales order is created");
+            return req.reply("Sales order is successfully created");
         } catch (error) {
-            await tx.rollback();
+            await tx.rollback(error);
         }
     });
 
