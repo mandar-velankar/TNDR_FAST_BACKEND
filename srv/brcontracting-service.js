@@ -189,6 +189,24 @@ module.exports = (srv) => {
         }
     }
 
+    srv.before("CREATE", "SalesOrders", async (req) => {
+        const {
+            SalesOrderStatus
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
+
+        const tx = cds.tx(req);
+
+        try {
+            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "New FAST"}));
+            await tx.commit();
+            req.data.StatusID = salesOrderStatus.ID;
+        } catch (error) {
+            await tx.rollback(error);
+        }
+        
+    })
+
+
     srv.on("createSalesOrder", async (req) => {
         const {
             Contracts,
@@ -205,14 +223,21 @@ module.exports = (srv) => {
         const tx = cds.tx(req);
 
         try {
+            if (!req.data.salesOrderID) {
+                return req.reject(404, "Sales order ID not found");
+            }
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
+
+            if (!offer) {
+                return req.reject(404, "Offer not found");
+            }
             const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
 
-            if (offerProducts.length !== salesOrderProducts.length) {
+            if ((offerProducts.length !== salesOrderProducts.length) || (!offerProducts.length || !salesOrderProducts.length)) {
                 return req.reject(404, "Sales order products or Offer products not found");
             }
 
@@ -223,9 +248,10 @@ module.exports = (srv) => {
             // Update SalesOrder Status
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             await tx.commit();
-            return req.reply("Sales order is successfully created");
+            return req.reply("Sales order is successfully synchronized with SAP");
         } catch (error) {
             await tx.rollback(error);
+            return req.reject(400, error);
         }
     });
 
