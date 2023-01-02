@@ -81,8 +81,8 @@ module.exports = class processIbizContracts extends BaseJob {
     }
 
      /**
-     * This method fetches all the Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZDOCS
-     * @returns {Array} - A list of Ibiz Documents
+     * This method fetches all the Ibiz Contract Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZDOCS
+     * @returns {Array} - A list of Ibiz Contract Documents
      */
       async getContractDocs(tx, parentIDs) {
         if(!parentIDs || parentIDs.length <= 0) {
@@ -92,7 +92,7 @@ module.exports = class processIbizContracts extends BaseJob {
         const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         console.log(`JOB (${this.jobName }): Fetching data from ${IbizDocs.name} ...`);
         try {
-            return await tx.run(SELECT.from(IbizDocs).where({'Qps_ID': { in: parentIDs } }));
+            return await tx.run(SELECT.from(IbizDocs).where({'Contratos_ID': { in: parentIDs } }));
         }catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${IbizDocs.name} failed`);
             console.error(error);
@@ -138,7 +138,7 @@ module.exports = class processIbizContracts extends BaseJob {
         // 1. Mapping - Map IBIZ Contracts to FAST
         const mappedContracts = this.mapIbizContractsToFASTContracts(ibizContracts,contractStatuses,existingInstitutesInFAST,existingDistributorsInFAST,existingOfferFAST);
         const mappedContractProducts = this.mapIbizContractProductsToFASTContractProducts(ibizContractProducts,existingOfferProductsInFAST,mappedContracts);
-        // const mappedDocs = this.mapIbizContractDocsToFASTDocumentsDownload(ibizContractDocs);
+        const mappedDocs = this.mapIbizContractDocsToFASTDocumentsDownload(ibizContractDocs);
 
         // 2. Create Contracts
         await this.insertFASTContracts(tx, mappedContracts);
@@ -146,16 +146,16 @@ module.exports = class processIbizContracts extends BaseJob {
         // 3. Create ContractProducts
         await this.insertFASTContractProducts(tx, mappedContractProducts);
 
-        // 4. Create/update entries in DocumentsDownload
-        // await this.upsertFASTDocumentsDownload(tx, mappedDocs);  
+        // 4. Create entries in DocumentsDownload
+        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedContracts);  
 
-        // 5. Delete all records from IbizContratos and IbizContratosItems after successful processing.
+        // 5. Delete all records from IbizContratos, IbizContratosItems and IbizDocs after successful processing.
         const { IbizContratos, IbizContratosItems,IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         await tx.run(DELETE.from(IbizContratos));
         await tx.run(DELETE.from(IbizContratosItems));
 
-        // const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
-        // Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}}));
+        const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
+        Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Contratos_ID: {in: docParentIDs}}));
 
     }catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Processing of Ibiz Contracts failed.`);
@@ -206,36 +206,35 @@ async insertFASTContractProducts(tx, mappedContractProducts) {
 
 
 /**
- * Creates Opportunity Documents in FAST
+ * Creates Contract Documents in FAST
  * DocumentsDownload
  * @returns 
  */
- async upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers) {
+ async upsertFASTDocumentsDownload(tx, mappedDocs, mappedContracts) {
     const { DocumentsDownload } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
 
     // 1. link existing Tenders and Offer with Documents
     for (const docs of mappedDocs) {
-        let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === docs.parent_ID);
-        docs.TenderID = parentOffer.TenderID;
-        docs.OfferID = parentOffer.OfferID;
-    }
+        let parentContract = mappedContracts.find(ctr => ctr.ID === docs.parent_ID);
+        docs.TenderID = parentContract.TenderID;
+        docs.OfferID = parentContract.OfferID;
+    } 
 
-    // 2. delete QPS ParentId before saving to DB
+    // 2. delete Contract ParentId before saving to DB
     const docsWithoutID = mappedDocs.map(doc => { 
         const copy = {...doc}; 
         delete copy.parent_ID; 
         return copy;
-    });  
+    }); 
 
-    // 3. Upsert records into DocumentsDownload
-    console.log(`JOB (${this.jobName }): Upserting IBIZ Opportunity Documents into FAST table (DocumentsDownload) ...`);
+    // 3. Insert records into DocumentsDownload
+    console.log(`JOB (${this.jobName }): Creating records in ${DocumentsDownload.name} ...`);
     try {
         docsWithoutID && docsWithoutID.length > 0 && await tx.run(INSERT(docsWithoutID).into(DocumentsDownload));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ Opportunity Documents into FAST table (DocumentsDownload) successfully completed.`);
-        console.log(`JOB (${this.jobName }): DocumentsDownload -> created: ${docsWithoutID.length}`);
+        console.log(`JOB (${this.jobName }): ${docsWithoutID.length} record(s) successfully created in ${DocumentsDownload.name}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Opportunity Documents into FAST table (DocumentsDownload) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Creating records in ${DocumentsDownload.name} failed`);
         console.error(error);
         throw error;
     }
@@ -406,24 +405,24 @@ mapIbizContractProductsToFASTContractProducts(ibizContractProducts,existingOffer
 }
 
 /**
- * Maps Ibiz Opportunities Documents from Ibiz Opportunities to FAST DocumentsDownload
- * @param {*} directIbizOpportunityDocs 
+ * Maps Ibiz Contract Documents from IbizDocs to FAST DocumentsDownload
+ * @param {*} ibizContractDocs 
  * @returns {[Objects]} documentsDownload
  */
-mapIbizOpportunitiesDocstoFASTDocumentsDownload(ibizOpportunityDocs){
+mapIbizContractDocsToFASTDocumentsDownload(ibizContractDocs){
 
-    console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities Docs to DocumentsDownload ...`);
-    ibizOpportunityDocs = ibizOpportunityDocs.reduce((prev, curr, idx, ibizOpportunityDocs) => {
+    console.log(`JOB (${this.jobName }): Mapping IBIZ Contract documents to DocumentsDownload ...`);
+    ibizContractDocs = ibizContractDocs.reduce((prev, curr, idx, ibizContractDocs) => {
         prev.push(
             {
-                parent_ID             : curr.Qps_ID,
+                parent_ID             : curr.Contratos_ID,
                 DocID                 : curr.ID_DOC,
                 DocCreatedAt          : curr.CREATED_AT,
                 NameTag               : curr.NM_TAG,
                 CountryCode           : "BR",
                 TenderID              : "",
                 OfferID               : "",
-                IbizAPIName           : "Tender",
+                IbizAPIName           : "Contracts",
                 URL                   : curr.FILE_URL,
                 Name                  : curr.NM_DOC,
                 Downloaded            : false
@@ -431,7 +430,7 @@ mapIbizOpportunitiesDocstoFASTDocumentsDownload(ibizOpportunityDocs){
         );
         return prev;
     }, []);
-    return ibizOpportunityDocs;
+    return ibizContractDocs;
 }
 
 
