@@ -19,7 +19,7 @@ module.exports = (srv) => {
             PT_TMOFRS,
             PT_TMOFPR,
             PT_TMTEND,
-            PriceConditions
+            PriceCondition
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
         const tx = cds.tx(req);
@@ -63,7 +63,7 @@ module.exports = (srv) => {
             await tx.commit();
             return req.reply("Contract is created");
         } catch (error) {
-            await tx.rollback();
+            await tx.rollback(error);
         }
     });
 
@@ -88,7 +88,7 @@ module.exports = (srv) => {
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
                 ITEM_QTD: offerProducts.filter(product => product.ProductCode === el.ProductPackID)[0]?.RequestedQty,
-                MANUAL_D: productPriceCondition?.StandardDiscount + productPriceCondition?.AdditionalDiscount,
+                MANUAL_D: Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount),
                 CAP: productPriceCondition?.PriceAfterCAP
             }
         })
