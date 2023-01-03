@@ -175,10 +175,10 @@ module.exports = class processEmpenho extends BaseJob {
     console.log(`JOB (${this.jobName }): Processing Ibiz Empenhos ...`);
     try {
 
-        // 0. Mapping - Map IBIZ Opportunities to FAST
+        // 0. Mapping - Map IBIZ Empehnos to FAST
         const mappedSalesOrders = this.mapIbizEmpenhostoFASTSalesOrders(empenhos, existingContractsInFAST, salesOrderStatuses);
         const mappedSalesOrderProducts = this.mapIbizEmpenhostoFASTSalesOrderProducts(empenhoItems);
-        // const mappedDocs = this.mapIbizEmpenhoDocstoFASTDocumentsDownload(empenhoDocs);
+        const mappedDocs = this.mapIbizEmpenhoDocstoFASTDocumentsDownload(empenhoDocs);
 
         // 1. Create/update entries in SalesOrders
         await this.upsertFASTSalesOrders(tx, mappedSalesOrders);
@@ -187,7 +187,7 @@ module.exports = class processEmpenho extends BaseJob {
         await this.upsertFASTSalesOrderProducts(tx, mappedSalesOrders, mappedSalesOrderProducts);
 
         // 3. Create/update entries in DocumentsDownload
-        // await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedSalesOrders);  
+        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedSalesOrders);  
 
         // 4. Delete all records from IbizEmpenhos, IbizCcsEmpenhosItems and IbizDocs after successful processing.
         const { IbizEmpenhos } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -195,9 +195,9 @@ module.exports = class processEmpenho extends BaseJob {
         const { IbizCcsEmpenhosItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const parentIDs = mappedSalesOrderProducts.map(pr => pr.parent_ID);
         Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsEmpenhosItems).where({parent_ID: {in: parentIDs}}));
-        // const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-        // const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
-        // Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Empenhos_ID: {in: docParentIDs}}));
+        const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
+        Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Empenhos_ID: {in: docParentIDs}}));
 
         console.log(`JOB (${this.jobName }): Processing of Ibiz Empenhos successfully completed.`);
 
@@ -279,7 +279,34 @@ module.exports = class processEmpenho extends BaseJob {
 
 }
 
+/**
+ * Maps Ibiz Empenhos Documents from Ibiz Empenhos to FAST DocumentsDownload
+ * @param {*} IbizEmpenhoDocuments 
+ * @returns {[Objects]} documentsDownload
+ */
+ mapIbizEmpenhoDocstoFASTDocumentsDownload(empenhoDocs){
 
+    console.log(`JOB (${this.jobName }): Mapping IBIZ Empenhos Documents to DocumentsDownload ...`);
+    empenhoDocs = empenhoDocs.reduce((prev, curr, idx, empenhoDocs) => {
+        prev.push(
+            {
+                parent_ID             : curr.Empenhos_ID,
+                DocID                 : curr.ID_DOC,
+                DocCreatedAt          : curr.CREATED_AT,
+                NameTag               : curr.NM_TAG,
+                CountryCode           : "BR",
+                TenderID              : "",
+                OfferID               : "",
+                IbizAPIName           : "Sales Order",
+                URL                   : curr.FILE_URL,
+                Name                  : curr.NM_DOC,
+                Downloaded            : false
+            }
+        );
+        return prev;
+    }, []);
+    return empenhoDocs;
+}
 
 /**
  * Creates or Updates SalesOrders in FAST
@@ -351,6 +378,40 @@ module.exports = class processEmpenho extends BaseJob {
     }
 }
 
+/**
+ * Creates Opportunity Documents in FAST
+ * DocumentsDownload
+ * @returns 
+ */
+ async upsertFASTDocumentsDownload(tx, mappedDocs, mappedSalesOrders) {
+    const { DocumentsDownload } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
 
+    // 1. link existing Tenders and Offer with Documents
+    for (const docs of mappedDocs) {
+        let parentSalesOrder = mappedSalesOrders.find(ofr => ofr.ID === docs.parent_ID);
+        docs.TenderID = parentSalesOrder.TenderID;
+        docs.OfferID = parentSalesOrder.OfferID;
+    }
+
+    // 2. delete Empenho ParentId before saving to DB
+    const docsWithoutID = mappedDocs.map(doc => { 
+        const copy = {...doc}; 
+        delete copy.parent_ID; 
+        return copy;
+    });  
+
+    // 3. Upsert records into DocumentsDownload
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Empenho Documents into FAST table (DocumentsDownload) ...`);
+    try {
+        docsWithoutID && docsWithoutID.length > 0 && await tx.run(INSERT(docsWithoutID).into(DocumentsDownload));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Empenho Documents into FAST table (DocumentsDownload) successfully completed.`);
+        console.log(`JOB (${this.jobName }): DocumentsDownload -> created: ${docsWithoutID.length}`);
+        return true;
+    } catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Empenho Documents into FAST table (DocumentsDownload) failed`);
+        console.error(error);
+        throw error;
+    }
+}
 
 };
