@@ -25,7 +25,7 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.StartDate,
         Contracts.EndDate,
         Contracts.Status.Status,
-        sum(Contracts.ContractProducts.OfferProduct.PriceCondition.CommercialProposal) as TotalValue:Double,
+        sum(Contracts.ContractProducts.OfferProduct.PriceCondition.CommercialProposal) as TotalValue:Decimal,
         Contracts.modifiedBy,
         Contracts.modifiedAt
 }group by Contracts.ID,
