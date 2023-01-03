@@ -229,22 +229,22 @@ module.exports = (srv) => {
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
-            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID }));
+            const salesOrderProductsProductPackIDs = salesOrderProducts.map(el => el.ProductPackID);
+            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
 
             if (!offer) {
                 return req.reject(404, "Offer not found");
             }
-            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
-
-            if ((offerProducts.length !== salesOrderProducts.length) || (!offerProducts.length || !salesOrderProducts.length)) {
-                return req.reject(404, "Sales order products or Offer products not found");
+            if (!offerProducts || offerProducts.length <= 0) {
+                return req.reject(404, `No offer products were found for the following sales order product: ${salesOrderProductsProductPackIDs}`);
             }
+            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
 
             // Update all fields in sales order body template  
             const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
             // Send request to SAP
-            const resFromSAP = await sendCreatedSalesOrderToSAP("BR", "SalesOrder", updateSalesOrderBody);
+            await sendCreatedSalesOrderToSAP("BR", "SalesOrder", updateSalesOrderBody);
             // Update SalesOrder Status
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             await tx.commit();
