@@ -2005,10 +2005,32 @@ module.exports = (srv) => {
 		if (oCountryBusiness && oRegionalBusiness) {
 			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
 		}
-		if(tenderid > '22'){
-			aApproverTypes.splice(oCountryBusiness,1);
+		// if(tenderid > '22'){
+		// 	aApproverTypes.splice(oCountryBusiness,1);
+		// }
+		
+		let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
+		if(tenderid > '22' && CountryBusinessindex !== -1){
+			aApproverTypes.splice(CountryBusinessindex,1);
+			
 		}
+		
 		//For Thailand specific
+		//EHQUT-197882-Thailand - Additional approver for Nalador
+		let index = aApproverTypes.findIndex(x => x.ApproverType === 'Additional CDH' );
+		let total=offerProductValidation.length;
+		let BrandName=[];
+
+		for(var i=0;i<total;i++){
+			BrandName.push(offerProductValidation[i].BRANDNAME);	
+			}
+
+			if(!(BrandName.includes('Nalador')) && index !== -1){
+				aApproverTypes.splice(index,1);
+				
+			}
+
+		//EHQUT-197882-Thailand - Additional approver for Nalador
 		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
 		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
 		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
