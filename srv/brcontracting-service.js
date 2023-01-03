@@ -264,12 +264,15 @@ module.exports = (srv) => {
         if (Number(divisionCode.HLEVEL1_CODE) == 8) {
             body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = "0" + divisionCode.HLEVEL1_CODE;
         }
-        let items = salesOrderProducts.map((el,index) => {
-            return {
-                ITEM: addLeadingZeros(offerProducts[index].SORTER, 6),
-                MATERIAL: addLeadingZeros(offerProducts[index].ProductCode, 18),
-                ITEM_QTD: `${el.RequestedQty}`,
-                IV_TEXT: ""
+        let items = salesOrderProducts.map(el => {
+            const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
+            if (offerProduct) {
+                return {
+                    ITEM: addLeadingZeros(offerProduct.SORTER, 6),
+                    MATERIAL: addLeadingZeros(offerProduct.ProductCode, 18),
+                    ITEM_QTD: `${el.RequestedQty}`,
+                    IV_TEXT: ""
+                }
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["TT_ITEMS"].item = items;
