@@ -198,8 +198,9 @@ module.exports = (srv) => {
 
         try {
             const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "New FAST"}));
-            await tx.commit();
+            if (!salesOrderStatus) req.reject(404, "New FAST status not found")
             req.data.StatusID = salesOrderStatus.ID;
+            await tx.commit(); 
         } catch (error) {
             await tx.rollback(error);
         }
