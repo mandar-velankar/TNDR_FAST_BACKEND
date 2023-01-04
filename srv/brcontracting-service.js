@@ -204,7 +204,6 @@ module.exports = (srv) => {
         } catch (error) {
             await tx.rollback(error);
         }
-        
     })
 
 
@@ -338,4 +337,15 @@ module.exports = (srv) => {
             }
         }
     };
+
+    // srv.on("approveRejectContract", async (req) => {
+        
+    // });
+
+    srv.after("READ", "ContractStatus", async (req) => {
+        // Add an empty line 
+        if (req && Array.isArray(req) && req.length > 0) {
+            req.unshift({ID: "99999999-9999-9999-9999-999999999999", Status: ""});
+        }
+    })
 }
