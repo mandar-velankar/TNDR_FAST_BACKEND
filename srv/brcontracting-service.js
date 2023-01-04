@@ -19,7 +19,7 @@ module.exports = (srv) => {
             PT_TMOFRS,
             PT_TMOFPR,
             PT_TMTEND,
-            PriceConditions
+            PriceCondition
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
         const tx = cds.tx(req);
@@ -63,7 +63,7 @@ module.exports = (srv) => {
             await tx.commit();
             return req.reply("Contract is created");
         } catch (error) {
-            await tx.rollback();
+            await tx.rollback(error);
         }
     });
 
@@ -88,7 +88,7 @@ module.exports = (srv) => {
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
                 ITEM_QTD: offerProducts.filter(product => product.ProductCode === el.ProductPackID)[0]?.RequestedQty,
-                MANUAL_D: productPriceCondition?.StandardDiscount + productPriceCondition?.AdditionalDiscount,
+                MANUAL_D: Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount),
                 CAP: productPriceCondition?.PriceAfterCAP
             }
         })
@@ -189,6 +189,24 @@ module.exports = (srv) => {
         }
     }
 
+    srv.before("CREATE", "SalesOrders", async (req) => {
+        const {
+            SalesOrderStatus
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
+
+        const tx = cds.tx(req);
+
+        try {
+            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "New FAST"}));
+            if (!salesOrderStatus) req.reject(404, "New FAST status not found")
+            req.data.StatusID = salesOrderStatus.ID;
+            await tx.commit(); 
+        } catch (error) {
+            await tx.rollback(error);
+        }
+    })
+
+
     srv.on("createSalesOrder", async (req) => {
         const {
             Contracts,
@@ -205,27 +223,35 @@ module.exports = (srv) => {
         const tx = cds.tx(req);
 
         try {
+            if (!req.data.salesOrderID) {
+                return req.reject(404, "Sales order ID not found");
+            }
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
-            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID }));
+            const salesOrderProductsProductPackIDs = salesOrderProducts.map(el => el.ProductPackID);
+            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
-            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
 
-            if (offerProducts.length !== salesOrderProducts.length) {
-                return req.reject(404, "Sales order products or Offer products not found");
+            if (!offer) {
+                return req.reject(404, "Offer not found");
             }
+            if (!offerProducts || offerProducts.length <= 0) {
+                return req.reject(404, `No offer products were found for the following sales order product: ${salesOrderProductsProductPackIDs}`);
+            }
+            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
 
             // Update all fields in sales order body template  
             const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
             // Send request to SAP
-            const resFromSAP = await sendCreatedSalesOrderToSAP("BR", "SalesOrder", updateSalesOrderBody);
+            await sendCreatedSalesOrderToSAP("BR", "SalesOrder", updateSalesOrderBody);
             // Update SalesOrder Status
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             await tx.commit();
-            return req.reply("Sales order is successfully created");
+            return req.reply("Sales order is successfully synchronized with SAP");
         } catch (error) {
             await tx.rollback(error);
+            return req.reject(400, error);
         }
     });
 
@@ -238,12 +264,15 @@ module.exports = (srv) => {
         if (Number(divisionCode.HLEVEL1_CODE) == 8) {
             body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = "0" + divisionCode.HLEVEL1_CODE;
         }
-        let items = salesOrderProducts.map((el,index) => {
-            return {
-                ITEM: addLeadingZeros(offerProducts[index].SORTER, 6),
-                MATERIAL: addLeadingZeros(offerProducts[index].ProductCode, 18),
-                ITEM_QTD: `${el.RequestedQty}`,
-                IV_TEXT: ""
+        let items = salesOrderProducts.map(el => {
+            const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
+            if (offerProduct) {
+                return {
+                    ITEM: addLeadingZeros(offerProduct.SORTER, 6),
+                    MATERIAL: addLeadingZeros(offerProduct.ProductCode, 18),
+                    ITEM_QTD: `${el.RequestedQty}`,
+                    IV_TEXT: ""
+                }
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["TT_ITEMS"].item = items;
@@ -308,4 +337,15 @@ module.exports = (srv) => {
             }
         }
     };
+
+    // srv.on("approveRejectContract", async (req) => {
+        
+    // });
+
+    srv.after("READ", "ContractStatus", async (req) => {
+        // Add an empty line 
+        if (req && Array.isArray(req) && req.length > 0) {
+            req.unshift({ID: "99999999-9999-9999-9999-999999999999", Status: ""});
+        }
+    })
 }
