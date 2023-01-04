@@ -337,9 +337,9 @@ module.exports = (srv) => {
         }
     };
 
-    srv.on("approveRejectContract", async (req) => {
+    // srv.on("approveRejectContract", async (req) => {
         
-    });
+    // });
 
     srv.after("READ", "ContractStatus", async (req) => {
         // Add an empty line 
