@@ -622,7 +622,9 @@ module.exports = async (srv) => {
         console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
         //otherwise keep as is
         req.query.count = true;
-        req.query.cqn.count = true;
+        if(req.query.cqn){
+            req.query.cqn.count = true;
+        }
         result.$count = result.length;
         return req.reply(result);
 
