@@ -58,7 +58,9 @@ module.exports = async (srv) => {
         let end;
         let totalTime = 0;
         let type = "";
-        if (req.query.SELECT.columns[0]?.func === "count") {
+        console.log("Start price agreements");
+        if (req?.query?.SELECT?.columns?.length > 0 && req?.query?.SELECT?.columns[0]?.func === "count") {
+            console.log("Running price agreements for count");
             type = "COUNT";
         }
         const startTrace = (entity) => {
