@@ -29,6 +29,11 @@ module.exports = (srv) => {
             const contractProducts = await tx.run(SELECT.from(ContractProducts).where({ Contract_ID: req.data.contractID, OfferID: contract.OfferID }));
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
+
+            if (!offer) {
+                return req.reject(404, "Offer is not found");
+            }
+            
             const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
             const offerDistributor = await tx.run(SELECT.one.from(PT_TMDIST).where({ DistributorID: offer.DistributorID }));
             const institute = await tx.run(SELECT.one.from(PT_TMINST).where({ InstituteID: contract.InstituteID }));
@@ -44,9 +49,7 @@ module.exports = (srv) => {
             if (!offerProducts.length) {
                 return req.reject(404, "Offer products are not found");
             }
-            if (!offer) {
-                return req.reject(404, "Offer is not found");
-            }
+            
             if (!divisionCode) {
                 return req.reject(404, "Division is not found");
             }
@@ -57,13 +60,22 @@ module.exports = (srv) => {
             // Update all fields in sales order body template  
             const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions);
             // Send request to SAP
-            const resFromSAP = await sendCreatedContractToSAP("BR", "Contract", updateContractBody);
+            await sendCreatedContractToSAP("BR", "Contract", updateContractBody);
             // Update SalesOrder Status
             await tx.run(UPDATE(Contracts).with({StatusID: "51a102b8-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.contractID}));
             await tx.commit();
-            return req.reply("Contract is created");
+            return req.reply("Contract is created successfully");
         } catch (error) {
-            await tx.rollback(error);
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            await tx.rollback(req);
+			return req.reject(500, error.message);
         }
     });
 
@@ -243,7 +255,7 @@ module.exports = (srv) => {
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
             const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
-            
+
             if (!offer) {
                 return req.reject(404, "Offer not found");
             }
