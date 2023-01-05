@@ -229,20 +229,30 @@ module.exports = (srv) => {
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
+
             if (!salesOrderProducts || salesOrderProducts.length <= 0) {
                 return req.reject(404, `No sales order products were found for the following sales order: ${salesOrder.EmpenhoNumber}`);
             }
+
             const salesOrderProductsProductPackIDs = salesOrderProducts.map(el => el.ProductPackID);
+
+            if (salesOrderProductsProductPackIDs.length <= 0) {
+                return req.reject(404, `No sales order product ProductPackIDs were found`);
+            }
+
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
-
+            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+            
             if (!offer) {
                 return req.reject(404, "Offer not found");
             }
             if (!offerProducts || offerProducts.length <= 0) {
                 return req.reject(404, `No offer products were found for the following sales order product: ${salesOrderProductsProductPackIDs}`);
             }
-            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+            if (!divisionCode) {
+                return req.reject(404, "divisionCode not found");
+            }
 
             // Update all fields in sales order body template  
             const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
