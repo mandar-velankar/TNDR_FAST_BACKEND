@@ -33,7 +33,7 @@ module.exports = (srv) => {
             if (!offer) {
                 return req.reject(404, "Offer is not found");
             }
-            
+
             const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
             const offerDistributor = await tx.run(SELECT.one.from(PT_TMDIST).where({ DistributorID: offer.DistributorID }));
             const institute = await tx.run(SELECT.one.from(PT_TMINST).where({ InstituteID: contract.InstituteID }));
@@ -60,7 +60,7 @@ module.exports = (srv) => {
             // Update all fields in sales order body template  
             const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions);
             // Send request to SAP
-            await sendCreatedContractToSAP("BR", "Contract", updateContractBody);
+            await sendCreatedContractToSAP(tx, "BR", "Contract", updateContractBody);
             // Update SalesOrder Status
             await tx.run(UPDATE(Contracts).with({StatusID: "51a102b8-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.contractID}));
             await tx.commit();
@@ -108,30 +108,35 @@ module.exports = (srv) => {
         return body;
     };
 
-    async function sendCreatedContractToSAP (countryCode, resource, body) {
+    async function sendCreatedContractToSAP (tx, countryCode, resource, body) {
         const {
             SchedulerApiConfig,
             SchedulerApiConfigOAuth
         } = cds.entities("com.bayer.SXTENDER.AdminData");
 
         if (!body) {
-            return false;
+            throw new Error("ERR_MISSING_PARAMETER:body");
         }
-        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'Contract', CountryCode: countryCode, Resource: resource })); 
-		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
-        const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+        try {
+            const apiConfig = await tx.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'Contract', CountryCode: countryCode, Resource: resource })); 
+            const oauthAuth = await tx.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+            const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
 
-        const oauthCredentials = await getBearerToken(oauthAuth);
+            const oauthCredentials = await getBearerToken(oauthAuth);
 
-        return axios({
-            method: 'post',
-            url: url,
-            headers: {
-                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify(body)
-        });
+            return axios({
+                method: 'post',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body)
+            });
+        } catch (error) {
+            throw error
+        }
+        
 
     };
 
@@ -210,7 +215,7 @@ module.exports = (srv) => {
 
         try {
             const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "New FAST"}));
-            if (!salesOrderStatus) req.reject(404, "New FAST status not found")
+            if (!salesOrderStatus) req.reject(404, "New FAST status not found");
             req.data.StatusID = salesOrderStatus.ID;
             // await tx.commit(); 
         } catch (error) {
@@ -269,7 +274,7 @@ module.exports = (srv) => {
             // Update all fields in sales order body template  
             const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
             // Send request to SAP
-            await sendCreatedSalesOrderToSAP("BR", "SalesOrder", updateSalesOrderBody);
+            await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
             // Update SalesOrder Status
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             await tx.commit();
@@ -318,31 +323,33 @@ module.exports = (srv) => {
         return num;
     };
 
-    async function sendCreatedSalesOrderToSAP (countryCode, resource, body) {
+    async function sendCreatedSalesOrderToSAP (tx, countryCode, resource, body) {
         const {
             SchedulerApiConfig,
             SchedulerApiConfigOAuth
         } = cds.entities("com.bayer.SXTENDER.AdminData");
-
         if (!body) {
-            return false;
+            throw new Error("ERR_MISSING_PARAMETER:body");
         }
-        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'Contract', CountryCode: countryCode, Resource: resource })); 
-		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
-        const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+        try {
+            const apiConfig = await tx.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'Contract', CountryCode: countryCode, Resource: resource })); 
+            const oauthAuth = await tx.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+            const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
 
-        const oauthCredentials = await getBearerToken(oauthAuth);
+            const oauthCredentials = await getBearerToken(oauthAuth);
 
-        return axios({
-            method: 'post',
-            url: url,
-            headers: {
-                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify(body)
-        });
-
+            return axios({
+                method: 'post',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body)
+            });
+        } catch (error) {
+            throw error;
+        }
     };
     
     function getSalesOrderRequestBodyTemplate () {
