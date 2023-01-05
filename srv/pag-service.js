@@ -635,9 +635,10 @@ module.exports = async (srv) => {
             if (!deliveries) {
                 try {
                     deliveries = await tx.run(SELECT.from(Deliveries).where({ PriceAgreementId: pag.ID }));
-                    await tx.commit();
+                    // await tx.commit();
                 } catch (e) {
-                    await tx.rollback(e)
+                    // await tx.rollback(e)
+                    console.log(e);
                 }
             }
             pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.ANZPK, 0);
