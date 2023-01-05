@@ -274,12 +274,14 @@ module.exports = (srv) => {
             // Update all fields in sales order body template  
             const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
             // Send request to SAP
-            await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
+            const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
+            console.log("create sales order result" + createSalesOrderResult);
             // Update SalesOrder Status
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             await tx.commit();
             return req.reply("Sales order is successfully synchronized with SAP");
         } catch (error) {
+            console.log(error);
             if(error.response && error.response.data){
 				console.error(error.response.data);
 				return req.reject(error.response.status, JSON.stringify(error.response.data));
@@ -337,7 +339,7 @@ module.exports = (srv) => {
             const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
 
             const oauthCredentials = await getBearerToken(oauthAuth);
-
+            console.log("Sending data to CPI");
             return axios({
                 method: 'post',
                 url: url,
@@ -348,6 +350,7 @@ module.exports = (srv) => {
                 data: JSON.stringify(body)
             });
         } catch (error) {
+            console.log(error);
             throw error;
         }
     };
