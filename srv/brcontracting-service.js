@@ -229,6 +229,9 @@ module.exports = (srv) => {
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
+            if (!salesOrderProducts || salesOrderProducts.length <= 0) {
+                return req.reject(404, `No sales order products were found for the following sales order: ${salesOrder.EmpenhoNumber}`);
+            }
             const salesOrderProductsProductPackIDs = salesOrderProducts.map(el => el.ProductPackID);
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
@@ -250,8 +253,16 @@ module.exports = (srv) => {
             await tx.commit();
             return req.reply("Sales order is successfully synchronized with SAP");
         } catch (error) {
-            await tx.rollback(error);
-            return req.reject(400, error);
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            await tx.rollback(req);
+			return req.reject(500, error.message);
         }
     });
 
