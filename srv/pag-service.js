@@ -594,9 +594,9 @@ module.exports = async (srv) => {
         }
 
         stopTrace("apply filters");
-        startTrace("Commit");
-        await tx.commit();
-        stopTrace("Commit");
+        //startTrace("Commit");
+        //await tx.commit();
+        //stopTrace("Commit");
         if (req.query.SELECT.columns[0].func === 'count') {
             console.log(`COUNT WITH FILTER: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: result.length }];
