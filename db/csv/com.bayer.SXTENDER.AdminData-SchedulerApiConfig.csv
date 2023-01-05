@@ -13,3 +13,5 @@ a0cda419-04bf-4fca-8002-888aeb7504cb,IBIZ,https://dev.erp-int.bayer.com,/http/ch
 25112c94-a3f9-42f8-9254-324bfdab98e6,IBIZ,https://dev.erp-int.bayer.com,/http/offer_approval,OfferApproval,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8
 4fc4aa36-0b83-4c66-acdf-79aa00d8c510,Contract,https://dev.erp-int.bayer.com,/http/BAY3_X01_8B_SD_RFC_TBN_CONTRACTFT,Contract,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8
 8b372f12-2356-47f5-a54c-88706abf92c4,Contract,https://dev.erp-int.bayer.com,/http/BAY3_X01_8B_SD_RFC_TBN_SALESORD,SalesOrder,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8
+017ae9a2-916d-4f75-a36a-9fa2d7ed559c,IBIZ,https://dev.erp-int.bayer.com,/http/contract_approval,Contract,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8
+9c1d55e3-a5ae-4122-b144-33646d966967,IBIZ,https://dev.erp-int.bayer.com,/http/empenho_approval,SalesOrder,/,,,1000,5,OAUTH,BR,,d583415f-8262-476a-a436-c740a8b798d8

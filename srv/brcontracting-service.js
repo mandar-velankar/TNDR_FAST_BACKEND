@@ -229,17 +229,30 @@ module.exports = (srv) => {
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
+
+            if (!salesOrderProducts || salesOrderProducts.length <= 0) {
+                return req.reject(404, `No sales order products were found for the following sales order: ${salesOrder.EmpenhoNumber}`);
+            }
+
             const salesOrderProductsProductPackIDs = salesOrderProducts.map(el => el.ProductPackID);
+
+            if (salesOrderProductsProductPackIDs.length <= 0) {
+                return req.reject(404, `No sales order product ProductPackIDs were found`);
+            }
+
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
-
+            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+            
             if (!offer) {
                 return req.reject(404, "Offer not found");
             }
             if (!offerProducts || offerProducts.length <= 0) {
                 return req.reject(404, `No offer products were found for the following sales order product: ${salesOrderProductsProductPackIDs}`);
             }
-            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+            if (!divisionCode) {
+                return req.reject(404, "divisionCode not found");
+            }
 
             // Update all fields in sales order body template  
             const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
@@ -250,8 +263,16 @@ module.exports = (srv) => {
             await tx.commit();
             return req.reply("Sales order is successfully synchronized with SAP");
         } catch (error) {
-            await tx.rollback(error);
-            return req.reject(400, error);
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            await tx.rollback(req);
+			return req.reject(500, error.message);
         }
     });
 
@@ -338,10 +359,92 @@ module.exports = (srv) => {
         }
     };
 
-    // srv.on("approveRejectContract", async (req) => {
-        
-    // });
+    srv.on("approveRejectContract", async (req) => {
+        const {
+            Contracts
+        } = cds.entities("com.bayer.SXTENDER.BrazilContractingData");
+        const {
+            ContractStatus
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
+        const {
+            PT_TMOFPR
+        } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+        const tx = cds.tx(req);
 
+        try {
+            const contract = await tx.run(SELECT.one.from(Contracts).where({ID: req.data.contractID}));
+            const contractStatus = await tx.run(SELECT.one.from(ContractStatus).where({Status: req.data.sContractStatus}));
+            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({TenderID: contract.TenderID, OfferID: contract.OfferID}));
+
+            if (!offerProducts || offerProducts.length <= 0) {
+                return req.reject(404, `No offer products were found for the following contract: ${contract.ID}`);
+            }
+            const body = updateContractApprovalTemplate(contractStatus);
+            await shareContractApprovalToIBIZ(req, body, contract, offerProducts[0]);
+            await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.Status}).where({ID: req.data.contractID}));
+            await tx.commit();
+            return req.reply("Correct")
+        } catch (error) {
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            await tx.rollback(req);
+			return req.reject(500, error.message); 
+        }
+    });
+
+    function updateContractApprovalTemplate (contractStatus) {
+        let body = getContractApprovalTemplate();
+        if (!body) return false;
+
+        body["is_ok"] = contractStatus.Status === "Approved" ? 1 : -1;
+        body["nm_motivo"] = contractStatus.Status === "Approved" ? "Contract Approved" : "Contract Rejected";
+        return body;
+    };
+
+    async function shareContractApprovalToIBIZ (req, body, contract, offerProduct) {
+        const {
+            SchedulerApiConfig,
+            SchedulerApiConfigOAuth
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
+
+        if (!offerProduct.IbizWorkflowID) {
+            return req.reject(404, `No IbizWorkflowID found for: ${offerProduct.OfferID} - ${offerProduct.ProductCode} in COM_BAYER_SXTENDER_TRANSACTIONALDATA_PT_TMOFPR`);
+        }
+        if (!contract.IbizContractID) {
+            return req.reject(404, `No IbizContractID found for: ${contract.ID} in COM_BAYER_SXTENDER_BRAZILCONTRACTINGDATA_CONTRACTS`);
+        }
+        
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "Contract" })); 
+		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+        const url = `${apiConfig.Host}${apiConfig.BasePath}?id_qp=${offerProduct.IbizWorkflowID}&id_contrato=${contract.IbizContractID}`;
+
+        const oauthCredentials = await getBearerToken(oauthAuth);
+
+        return axios({
+            method: 'post',
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(body)
+        });
+
+    };
+
+    function getContractApprovalTemplate () {
+        return {
+            "is_ok": 0,
+            "nm_motivo": "Item 123 it is not good for contract"
+        };
+    };
+    
     srv.after("READ", "ContractStatus", async (req) => {
         // Add an empty line 
         if (req && Array.isArray(req) && req.length > 0) {

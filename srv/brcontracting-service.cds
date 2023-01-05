@@ -29,4 +29,5 @@ service BrazilContractingService @(path: 'brazilcontracting') @(requires:['f_tnd
 
     action createSalesOrder(salesOrderID: String) returns String;
     action createContract(contractID: String);
+    action approveRejectContract(sContractStatus: String, contractID: String) returns String;
 }
