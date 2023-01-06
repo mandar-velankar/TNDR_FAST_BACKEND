@@ -21,4 +21,13 @@ service BrazilContractingService @(path: 'brazilcontracting') @(requires:['f_tnd
     entity SalesOrderProductsView as projection on BrazilContractingViews.SalesOrderProductsView;
     entity ContractStatus as projection on AdminData.ContractStatus;
     entity SalesOrderStatus as projection on AdminData.SalesOrderStatus;
+    entity AppConfig @readonly as projection on AdminData.AppConfig;
+    entity PriceCondition as projection on TransactionalData.PriceCondition;
+
+    entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
+    entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
+
+    action createSalesOrder(salesOrderID: String) returns String;
+    action createContract(contractID: String) returns String;
+    action approveRejectContract(sContractStatus: String, contractID: String) returns String;
 }

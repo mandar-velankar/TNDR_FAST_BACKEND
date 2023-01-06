@@ -4,6 +4,8 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         tender : Boolean;
         tenderAccess:{
             COGS:Boolean;
+            SPAINTENDERVIEW:Boolean;
+           
         };
         ppa:Boolean;
         contract:Boolean;

@@ -57,7 +57,16 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_cpi_user",
       "description": "f_tndr_cag_cpi_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_cogs_user",
+      "description": "f_tndr_cag_cogs_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_spaintenderview_user",
+      "description": "f_tndr_cag_spaintenderview_user"
     }
+    
   ],
   "attributes": [],
   "role-templates": [
@@ -172,6 +181,23 @@
         "$XSAPPNAME.f_tndr_cag_cpi_user"
       ],
       "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_cogs_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_cogs_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_spaintenderview_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
+      ],
+      "attribute-references": []
     }
+    
   ]
 }

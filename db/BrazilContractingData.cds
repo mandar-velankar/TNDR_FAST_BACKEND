@@ -11,14 +11,16 @@ entity Contracts : managed, cuid {
         OfferID                 : String(30) not null;     
         InstituteID             : Integer not null;         
         DistributorID           : Integer not null;         
-        LicAtriID               : Integer;
-        ContractNumber          : String(5000);
-        ProcessNumber           : String(5000);
-        ContractType            : String(5000);
-        OBS                     : String(5000);
+        ContractNumber          : String;
+        IbizProcessNumber       : String;
+        ContractType            : String;
+        OBS                     : String;
+        IbizContractID          : Integer;
+        IbizContractNumber      : String;
+        IbizContractSignDate    : Date;
         StartDate               : Date;
         EndDate                 : Date;
-        StatusID                : UUID;                                       
+        StatusID                : UUID;                              
         //Associations
         Offer                   : Association to TransactionalData.PT_TMOFRS
                                     on Offer.OfferID = OfferID;
@@ -32,14 +34,20 @@ entity Contracts : managed, cuid {
                                     on Distributor.DistributorID = DistributorID;
         Status                  : Association to AdminData.ContractStatus            
                                     on Status.ID = StatusID;
-        ContractProducts        : Association to many ContractProducts on ContractProducts.Contract = $self;
-        SalesOrders             : Association to many SalesOrders on SalesOrders.Contract = $self;
+        ContractProducts        : Association to many ContractProducts 
+                                    on ContractProducts.Contract = $self;
+        SalesOrders             : Association to many SalesOrders 
+                                    on SalesOrders.Contract = $self;
 }
 
 entity ContractProducts: managed, cuid {
-        ProductPackID               : Integer not null;                             
+        ProductPackID               : Integer not null;   
+        IbizContractProductID       : Integer;                          
         OfferID                     : String(30) not null;                          
         RequestedVolume             : Integer;
+        IbizItemType                : String;
+        LotID                       : Integer;
+        ContractPrice               : Decimal;
         //Associations
         OfferProduct                : Association to TransactionalData.PT_TMOFPR
                                         on OfferProduct.ProductCode = ProductPackID
@@ -48,12 +56,12 @@ entity ContractProducts: managed, cuid {
 }
 
 entity SalesOrders: managed, cuid {
-        TenderID                : String(50) not null;
+        EmpenhoID               : Integer;
         InstituteID             : Integer not null;                                 
         DistributorID           : Integer not null;                                 
-        LicAtriID               : Integer;
+        EmpenhoNumber           : String;
         SalesOrderNumber        : String(20);
-        ProcessNumber           : String(5000);
+        IbizProcessNumber       : String(5000);
         CommitmentDate          : Date;
         CommitmentDeliveryDate  : Date;
         CommitmentCreationDate  : Date;
@@ -66,8 +74,6 @@ entity SalesOrders: managed, cuid {
                                     on Distributor.DistributorID = DistributorID;
         Status                  : Association to AdminData.SalesOrderStatus         
                                     on Status.ID = StatusID;
-        Tender                  : Association to TransactionalData.PT_TMTEND
-                                    on Tender.TenderID = TenderID;
         SalesOrderProducts      : Association to many SalesOrderProducts on SalesOrderProducts.SalesOrder = $self;
 }
 
@@ -75,11 +81,10 @@ entity SalesOrderProducts: managed, cuid {
         ProductPackID           : Integer not null;
         OfferID                 : String(30) not null; 
         RequestedQty            : Double;
-        //DeliveredQty            : Double;
-        //Price                   : Double;
         RequestedDeliveryDate   : Date;
-        //ActualDeliveryDate      : Date;
-        //UoM                     : String(10);   
+        IbizEmpenhoProductID    : Integer;
+        IbizContractProductID   : Integer;
+        SalesOrderPrice         : Double;
         //Associations
         SalesOrder              : Association to SalesOrders;
         OfferProduct            : Association to TransactionalData.PT_TMOFPR
