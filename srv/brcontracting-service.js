@@ -63,7 +63,7 @@ module.exports = (srv) => {
             await sendCreatedContractToSAP(tx, "BR", "Contract", updateContractBody);
             // Update SalesOrder Status
             await tx.run(UPDATE(Contracts).with({StatusID: "51a102b8-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.contractID}));
-            await tx.commit();
+            // await tx.commit();
             return req.reply("Contract is created successfully");
         } catch (error) {
             if(error.response && error.response.data){
@@ -281,7 +281,7 @@ module.exports = (srv) => {
             // await tx.commit();
             return req.reply("Sales order is successfully synchronized with SAP");
         } catch (error) {
-            console.log(error);
+            console.log("ERROR:SalesOrder" + error);
             if(error.response && error.response.data){
 				console.error(error.response.data);
 				return req.reject(error.response.status, JSON.stringify(error.response.data));
@@ -404,7 +404,7 @@ module.exports = (srv) => {
             const body = updateContractApprovalTemplate(contractStatus);
             await shareContractApprovalToIBIZ(req, body, contract, offerProducts[0]);
             await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.Status}).where({ID: req.data.contractID}));
-            await tx.commit();
+            // await tx.commit();
             return req.reply("Correct")
         } catch (error) {
             if(error.response && error.response.data){
