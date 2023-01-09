@@ -100,7 +100,7 @@ module.exports = (srv) => {
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
                 ITEM_QTD: offerProducts.filter(product => product.ProductCode === el.ProductPackID)[0]?.RequestedQty,
-                MANUAL_D: Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount),
+                MANUAL_D: (Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
                 CAP: productPriceCondition?.PriceAfterCAP
             }
         })
