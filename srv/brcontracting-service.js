@@ -74,7 +74,7 @@ module.exports = (srv) => {
 				console.error(error.message);
 				return req.reject(error.code, error.message);
 			}
-            await tx.rollback(req);
+            // await tx.rollback(req);
 			return req.reject(500, error.message);
         }
     });
@@ -290,7 +290,7 @@ module.exports = (srv) => {
 				console.error(error.message);
 				return req.reject(error.code, error.message);
 			}
-            await tx.rollback(req);
+            // await tx.rollback(req);
 			return req.reject(500, error.message);
         }
     });
@@ -415,7 +415,7 @@ module.exports = (srv) => {
 				console.error(error.message);
 				return req.reject(error.code, error.message);
 			}
-            await tx.rollback(req);
+            // await tx.rollback(req);
 			return req.reject(500, error.message); 
         }
     });
@@ -442,21 +442,26 @@ module.exports = (srv) => {
             return req.reject(404, `No IbizContractID found for: ${contract.ID} in COM_BAYER_SXTENDER_BRAZILCONTRACTINGDATA_CONTRACTS`);
         }
         
-        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "Contract" })); 
-		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
-        const url = `${apiConfig.Host}${apiConfig.BasePath}?id_qp=${offerProduct.IbizWorkflowID}&id_contrato=${contract.IbizContractID}`;
+        try {
+            const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "Contract" })); 
+		    const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+            const url = `${apiConfig.Host}${apiConfig.BasePath}?id_qp=${offerProduct.IbizWorkflowID}&id_contrato=${contract.IbizContractID}`;
 
-        const oauthCredentials = await getBearerToken(oauthAuth);
+            const oauthCredentials = await getBearerToken(oauthAuth);
 
-        return axios({
-            method: 'post',
-            url: url,
-            headers: {
-                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify(body)
-        });
+            return axios({
+                method: 'post',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body)
+            });
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
 
     };
 
