@@ -275,7 +275,6 @@ module.exports = (srv) => {
             const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode);
             // Send request to SAP
             const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
-            console.log("create sales order result" + JSON.stringify(createSalesOrderResult));
             // Update SalesOrder Status
             await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
             // await tx.commit();
@@ -472,6 +471,109 @@ module.exports = (srv) => {
         };
     };
     
+    // Approve or reject Sales order
+    srv.on("approveRejectSalesOrder", async (req) => {
+        const {
+            Contracts,
+            SalesOrders
+        } = cds.entities("com.bayer.SXTENDER.BrazilContractingData");
+        const {
+            SalesOrderStatus
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
+        const {
+            PT_TMOFPR
+        } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+        const tx = cds.tx(req);
+
+        try {
+            const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ID: req.data.salesOrderID}));
+            const contract = await tx.run(SELECT.one.from(Contracts).where({ID: salesOrder.Contract_ID}));
+            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: req.data.sSalesOrderStatus}));
+            if (!contract) {
+                return req.reject(404, `Contract not found`);
+            }
+            if (!salesOrder) {
+                return req.reject(404, `No Sales order found for Sales order with this ID: ${salesOrder.ID} in COM_BAYER_SXTENDER_ADMINDATA_SALESORDERSTATUS table`);
+            }
+            if (!salesOrderStatus) {
+                return req.reject(404, `No Sales order status found for the following contract: ${contract.ID}`);
+            }
+            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({TenderID: contract.TenderID, OfferID: contract.OfferID}));
+
+            if (!offerProducts || offerProducts.length <= 0) {
+                return req.reject(404, `No offer products were found for the following contract: ${contract.ID}`);
+            }
+            const body = updateSalesOrderApprovalTemplate(salesOrderStatus);
+            await shareSalesOrderApprovalToIBIZ(req, body, salesOrder, offerProducts[0]);
+            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.Status}).where({ID: req.data.salesOrderID}));
+            // await tx.commit();
+            return req.reply("Correct")
+        } catch (error) {
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            // await tx.rollback(req);
+			return req.reject(500, error.message); 
+        }
+    });
+
+    function updateSalesOrderApprovalTemplate (salesOrderStatus) {
+        let body = getSalesOrderApprovalTemplate();
+        if (!body) return false;
+
+        body["is_ok"] = salesOrderStatus.Status === "Approved" ? 1 : -1;
+        body["nm_motivo"] = salesOrderStatus.Status === "Approved" ? "Empenho Approved" : "Empenho Rejected";
+        return body;
+    };
+
+    async function shareSalesOrderApprovalToIBIZ (req, body, salesOrder, offerProduct) {
+        const {
+            SchedulerApiConfig,
+            SchedulerApiConfigOAuth
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
+
+        if (!offerProduct.IbizWorkflowID) {
+            return req.reject(404, `No IbizWorkflowID found for: ${offerProduct.OfferID} - ${offerProduct.ProductCode} in COM_BAYER_SXTENDER_TRANSACTIONALDATA_PT_TMOFPR`);
+        }
+        if (!salesOrder.EmpenhoID) {
+            return req.reject(404, `No IbizContractID found for: ${salesOrder.ID} in COM_BAYER_SXTENDER_BRAZILCONTRACTINGDATA_CONTRACTS`);
+        }
+        
+        try {
+            const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "SalesOrder" })); 
+		    const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+            const url = `${apiConfig.Host}${apiConfig.BasePath}?id_qp=${offerProduct.IbizWorkflowID}&id_empenho=${salesOrder.EmpenhoID}`;
+
+            const oauthCredentials = await getBearerToken(oauthAuth);
+
+            return axios({
+                method: 'post',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body)
+            });
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+
+    };
+
+    function getSalesOrderApprovalTemplate () {
+        return {
+            "is_ok": 0,
+            "nm_motivo": "Item 123 it is not good for contract"
+        };
+    };
+
     srv.after("READ", "ContractStatus", async (req) => {
         // Add an empty line 
         if (req && Array.isArray(req) && req.length > 0) {
