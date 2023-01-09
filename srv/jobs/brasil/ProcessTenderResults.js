@@ -27,9 +27,12 @@ module.exports = class processTenderResults extends BaseJob {
             const tenderResultParentIDs = tenderResults.map(trs => trs.ID);
             const tenderResultItems = await this.getTenderResultItems(tx, tenderResultParentIDs);
             const tenderResultDocs = await this.getTenderResultDocs(tx, tenderResultParentIDs); 
+            const existingProductsFAST = await this.getFASTProducts(tx);
+            const existingTendersFAST = await this.getFASTTenders(tx);
+            const existingDistributorsFAST = await this.getFASTDistributors(tx);
 
             // Process data
-            await this.processTenderResults(tx, tenderResults, tenderResultItems, tenderResultDocs);
+            await this.processTenderResults(tx, tenderResults, tenderResultItems, tenderResultDocs, existingProductsFAST, existingTendersFAST, existingDistributorsFAST);
 
             // Commit All
             await tx.commit();
@@ -106,6 +109,47 @@ module.exports = class processTenderResults extends BaseJob {
 }
 
 /**
+ * Gets a list of existing Products from FAST
+ * @param {Array} products 
+ * @returns {Array<PT_TMOFPR>} a list of existing Products
+ */
+ async getFASTProducts(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil Products from FAST table`);
+    const { PT_TMOFPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const result = await tx.run(SELECT.from(PT_TMOFPR).where({ CountryCode: 'BR' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil Products from FAST table`);
+    return result;
+}
+
+
+/**
+ * Gets a list of existing Tenders from FAST
+ * @param {Array} tenders 
+ * @returns {Array<PT_TMTEND>} a list of existing Tenders
+ */
+ async getFASTTenders(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil Tenders from FAST table`);
+    const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const result = await tx.run(SELECT.from(PT_TMTEND).where({ CountryCode: 'BR' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil Tenders from FAST table`);
+    return result;
+}
+
+/**
+ * Gets a list of existing Distributors from FAST
+ * @param {Array} distributors 
+ * @returns {Array<PT_TMDIST>} a list of existing distributors
+ */
+ async getFASTDistributors(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil Distributors from FAST table`);
+    const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+    const result = await tx.run(SELECT.from(PT_TMDIST).where({ CountryCode: 'BR' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil Distributors from FAST table`);
+    return result;
+}
+
+
+/**
      * This method will process a list of Ibiz TenderResult by Creating/Updating the following entities
      *  - PT_TMTRRES
      * After successful processing, the records will be deleted from the following buffer tables
@@ -114,17 +158,16 @@ module.exports = class processTenderResults extends BaseJob {
      *  - COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZDOCS
      * @param {[Object]} tenderResults
      */
- async  processTenderResults(tx, tenderResults, tenderResultItems, tenderResultDocs) {
+ async  processTenderResults(tx, tenderResults, tenderResultItems, tenderResultDocs, existingProductsFAST, existingTendersFAST, existingDistributorsFAST) {
     console.log(`JOB (${this.jobName }): Processing Ibiz TenderResult ...`);
     try {
 
         // 0 Mapping
-        const mappedTenderResults = this.mapIbizTenderResultstoFASTResults(tenderResults);
-        const mappedTenderResultItems = this.mapIbizTenderResultItems(tenderResultItems);
+        const mappedTenderResults = this.mapIbizTenderResultstoFASTResults(tenderResults, tenderResultItems, existingProductsFAST, existingTendersFAST, existingDistributorsFAST);
         const mappedDocs = this.mapIbizTenderResultDocstoFASTDocumentsDownload(tenderResultDocs);
 
          // 1. Create/update entries in PT_TMTEND
-         await this.upsertFASTResults(tx, mappedTenderResults, mappedTenderResultItems);
+         await this.upsertFASTResults(tx, mappedTenderResults);
 
          // 2. Create/update entries in DocumentsDownload
         await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedTenderResults);
@@ -153,33 +196,35 @@ module.exports = class processTenderResults extends BaseJob {
      * @param {[Objects]} tenderResults 
      * @returns {[Objects]} tenderResults
      */
- mapIbizTenderResultstoFASTResults(tenderResults) {
+ mapIbizTenderResultstoFASTResults(tenderResults, tenderResultItems, existingProductsFAST, existingTendersFAST, existingDistributorsFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ TenderResults to PT_TMTRRES ...`);
     tenderResults = tenderResults.reduce((prev, curr, idx, tenderResults) => {
-        const institute = (existingInstitutesInFAST.find(inst => inst.CNPJ === curr.COD_LICITADOR.replace(/\D/g,'')));
+        const products = existingProductsFAST.find(prd => prd.IbizWorkflowID === curr.ID_QP);
+        const institute = existingTendersFAST.find(inst => inst.TenderID === products.TenderID);
+        const resultsItem = (tenderResultItems.find(inst => inst.parent_ID === curr.ID));
         const instituteID = institute && institute.InstituteID || 0;
-        const tenderType = (existingTenderTypesFAST.find(tt => tt.NAME === curr.NM_MODALIDADE));
-        const tenderTypeID = tenderType && tenderType.ID || null;
+        const distributor = existingDistributorsFAST.find(dst => dst.DistributorID === products.DistributorID);
+        const cnpj = resultsItem.COD_PARTICIPANTE && resultsItem.COD_PARTICIPANTE.replace(/\D/g,'');
         prev.push(
             {
                 IBIZ_TECHNICAL_ID : curr.ID,
-                TenderID          : "",
-                OfferID           : "",
+                TenderID          : products.TenderID,
+                OfferID           : products.OfferID,
                 CountryCode       : "BR",
-                InstituteID       : "",
-                ProductCode       : "",
+                InstituteID       : instituteID,
+                ProductCode       : products.ProductCode,
                 ContractNo        : "",
                 SubmittedOn       : new Date().toISOString(),
                 SubmittedBy       : "IBIZ",
                 Active            : 1,
                 ErrorInSubmission : "No",
                 Outcome           : "",
-                AwardedCompany    : "Bayer",
-                AwardedProduct    : "",
-                AwardedPrice      : "",
+                AwardedCompany    : resultsItem.NM_FABRICANTE ? resultsItem.NM_FABRICANTE : "Bayer",
+                AwardedProduct    : resultsItem.NM_PRODUTO,
+                AwardedPrice      : resultsItem.VLR_UNITARIO,
                 Currency          : "BRL",
-                AwardedQty        : "",
+                AwardedQty        : resultsItem.NU_QTDE,
                 UoM               : "Unit",
                 Reason            : "Not Specified",
                 Comment           : curr.NM_DESC_MOTIVO_RESULTADO,
@@ -194,43 +239,15 @@ module.exports = class processTenderResults extends BaseJob {
                 AwardActing       : null,
                 Appeal            : "No",
                 InfoNeeded        : "No",
-                TotalAwardedValue : "",
-                LotID             : "",
-                createdBy: "IBIZ",
-                modifiedBy: "IBIZ"
+                TotalAwardedValue : resultsItem.VLR_TOTAL,
+                LotID             : products.LotID,
+                createdBy         : "IBIZ",
+                modifiedBy        : "IBIZ"
             }
         );
         return prev;
     }, []);
     return tenderResults;
-}
-
-/**
-     * Maps Ibiz TenderResult Items to make relationship with the Tender Result data
-     * @param {[Objects]} tenderResultItems 
-     * @returns {[Objects]} tenderResultItems
-     */
-mapIbizTenderResultItems(tenderResultItems) {
-
-    console.log(`JOB (${this.jobName }): Mapping IBIZ TenderResult Items ...`);
-    tenderResultItems = tenderResultItems.reduce((prev, curr, idx, tenderResultItems) => {
-        prev.push(
-            {
-                parent_ID             : curr.parent_ID, 
-                NU_POSICAO            : curr.NU_POSICAO, 
-                NM_PARTICIPANTE       : curr.NU_DIRETO_INDIRETO,
-                COD_PARTICIPANTE      : curr.NM_PARTICIPANTE, 
-                NM_PRODUTO            : curr.NM_PRODUTO,
-                NM_FABRICANTE         : curr.NM_FABRICANTE,
-                NU_QTDE               : curr.NU_QTDE,
-                VLR_UNITARIO          : curr.VLR_UNITARIO,
-                VLR_TOTAL             : curr.VLR_TOTAL
-            }
-        );
-        return prev;
-    }, []);
-    return tenderResultItems;
-
 }
 
 };
