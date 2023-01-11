@@ -56,12 +56,12 @@ module.exports = class processTenderResults extends BaseJob {
      */
      async getTenderResults(tx) {
         try {
-            console.log(`JOB (${this.jobName }): Fetching Ibiz empenhos from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZRESULTADOS ...`);
+            console.log(`JOB (${this.jobName }): Fetching Ibiz TenderResults from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZRESULTADOS ...`);
             const { IbizResultados } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             const result = await tx.run(SELECT.from(IbizResultados));
             return result;
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching of Ibiz empenhos from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZRESULTADOS failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of Ibiz TenderResults from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZRESULTADOS failed`);
             console.error(error);
             throw error;
         }
@@ -189,11 +189,11 @@ getOutcome(code){
         const mappedTenderResults = this.mapIbizTenderResultstoFASTResults(tenderResults, tenderResultItems, existingProductsFAST, existingTendersFAST, existingDistributorsFAST);
         const mappedDocs = this.mapIbizTenderResultDocstoFASTDocumentsDownload(tenderResultDocs);
 
-         // 1. Create/update entries in PT_TMTRRES
-         await this.upsertFASTResults(tx, mappedTenderResults);
+         // 1. Create entries in PT_TMTRRES
+         await this.insertFASTResults(tx, mappedTenderResults);
 
-         // 2. Create/update entries in DocumentsDownload
-        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedTenderResults);
+         // 2. Create entries in DocumentsDownload
+        await this.insertFASTDocumentsDownload(tx, mappedDocs, mappedTenderResults);
  
          // 3. Delete all records from IbizResultados, IbizResultadosItems and IbizDocs after successful processing.
          const { IbizResultados } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -223,6 +223,7 @@ getOutcome(code){
     console.log(`JOB (${this.jobName }): Mapping IBIZ TenderResults to PT_TMTRRES ...`);
     tenderResults = tenderResults.reduce((prev, curr, idx, tenderResults) => {
         const product = existingProductsFAST.find(prd => prd.IbizWorkflowID === curr.ID_QP);
+        if(!product){return prev;}
         const institute = existingTendersFAST.find(inst => inst.TenderID === product.TenderID);
         const resultItem = tenderResultItems.find(inst => inst.parent_ID === curr.ID);
         const instituteID = institute && institute.InstituteID || 0;
@@ -236,7 +237,7 @@ getOutcome(code){
                 CountryCode       : "BR",
                 InstituteID       : instituteID,
                 ProductCode       : product.ProductCode,
-                ContractNo        : "",
+                ContractNo        : null,
                 SubmittedOn       : new Date().toISOString(),
                 SubmittedBy       : "IBIZ",
                 Active            : 1,
@@ -262,9 +263,7 @@ getOutcome(code){
                 Appeal            : "No",
                 InfoNeeded        : "No",
                 TotalAwardedValue : distributor.CNPJ == cnpj ? resultItem.VLR_TOTAL : null,
-                LotID             : product.LotID,
-                createdBy         : "IBIZ",
-                modifiedBy        : "IBIZ"
+                LotID             : product.LotID
             }
         );
         return prev;
@@ -302,21 +301,23 @@ getOutcome(code){
 }
 
 /**
- * Creates or Updates Tender Results in FAST
+ * Creates Tender Results in FAST
  * @param {Array.Object} mappedTenderResults 
  * @returns 
  */
- async upsertFASTResults(tx, mappedTenderResults) {
+ async insertFASTResults(tx, mappedTenderResults) {
     const { PT_TMTRRES } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    
+    const uniqueMappedTenderResults = [...new Map(mappedTenderResults.map(item => [item['OfferID'], item])).values()];
 
     // 1. delete Ids before saving to DB
-    const tenderResultsWithoutID = mappedTenderResults.map(so => { 
+    const tenderResultsWithoutID = uniqueMappedTenderResults.map(so => { 
         const copy = {...so}; 
         delete copy.IBIZ_TECHNICAL_ID;
         return copy;
     }); 
 
-    // 2. Upsert records into PT_TMTRRES
+    // 2. Insert records into PT_TMTRRES
     console.log(`JOB (${this.jobName }): Upserting IBIZ Tender Result into FAST table (PT_TMTRRES) ...`);
     try {
         tenderResultsWithoutID && tenderResultsWithoutID.length > 0 && await tx.run(INSERT(tenderResultsWithoutID).into(PT_TMTRRES));
@@ -335,14 +336,15 @@ getOutcome(code){
  * DocumentsDownload
  * @returns 
  */
- async upsertFASTDocumentsDownload(tx, mappedDocs, mappedTenderResults) {
+ async insertFASTDocumentsDownload(tx, mappedDocs, mappedTenderResults) {
     const { DocumentsDownload } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-
+    
     // 1. link existing Tenders and Offer with Documents
     for (const docs of mappedDocs) {
         let parentTenderResult = mappedTenderResults.find(tres => tres.IBIZ_TECHNICAL_ID === docs.parent_ID);
-        docs.TenderID = parentTenderResult.TenderID;
-        docs.OfferID = parentTenderResult.OfferID;
+        if(!parentTenderResult){return;}
+        docs.TenderID = parentTenderResult && parentTenderResult.TenderID;
+        docs.OfferID = parentTenderResult && parentTenderResult.OfferID;
     }
 
     // 2. delete TenderResult ParentId before saving to DB
@@ -352,7 +354,7 @@ getOutcome(code){
         return copy;
     });  
 
-    // 3. Upsert records into DocumentsDownload
+    // 3. Insert records into DocumentsDownload
     console.log(`JOB (${this.jobName }): Upserting IBIZ TenderResult Documents into FAST table (DocumentsDownload) ...`);
     try {
         docsWithoutID && docsWithoutID.length > 0 && await tx.run(INSERT(docsWithoutID).into(DocumentsDownload));
