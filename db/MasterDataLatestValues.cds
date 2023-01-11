@@ -81,16 +81,18 @@ entity MostRecentBudgetedProfitability as SELECT from MasterData.BUDGETEDPROFITA
     key BudgetedProfitability.COUNTRYCODE,
     key BudgetedProfitability.HLEVEL4_CODE,
      key BudgetedProfitability.PRODUCTPACKID,
+     BudgetedProfitability.PRODUCTPACKNAME,
     max(BudgetedProfitability.EFFECTIVEDATE) as MaxEffectiveDate:Date
-}group by BudgetedProfitability.COUNTRYCODE, BudgetedProfitability.HLEVEL4_CODE,BudgetedProfitability.PRODUCTPACKID;
+}group by BudgetedProfitability.COUNTRYCODE, BudgetedProfitability.HLEVEL4_CODE,BudgetedProfitability.PRODUCTPACKID,BudgetedProfitability.PRODUCTPACKNAME;
 
 //EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity VWBUDGETEDPROFITABILITY AS SELECT from MasterData.BUDGETEDPROFITABILITY as BudgetedProfitability
-INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRYCODE = l.COUNTRYCODE and BudgetedProfitability.HLEVEL4_CODE = l.HLEVEL4_CODE and BudgetedProfitability.EFFECTIVEDATE = l.MaxEffectiveDate  and BudgetedProfitability.PRODUCTPACKID= l.PRODUCTPACKID
+INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRYCODE = l.COUNTRYCODE and BudgetedProfitability.HLEVEL4_CODE = l.HLEVEL4_CODE and BudgetedProfitability.EFFECTIVEDATE = l.MaxEffectiveDate  and BudgetedProfitability.PRODUCTPACKID= l.PRODUCTPACKID and BudgetedProfitability.PRODUCTPACKNAME= l.PRODUCTPACKNAME
 {
     key BudgetedProfitability.COUNTRYCODE,
     key BudgetedProfitability.HLEVEL4_CODE,
     key BudgetedProfitability.PRODUCTPACKID,
+    BudgetedProfitability.PRODUCTPACKNAME,
     BudgetedProfitability.PROFITABILITY
 };
 
