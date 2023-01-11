@@ -697,3 +697,12 @@ entity CountrySpecificTenderInfo: managed {
         ClosingDate          : Date;
         MercadoPublicoIssuer : Integer;
 }
+
+entity SpainRappelData: cuid, managed {
+    KNUMA       : String;
+    BONEM       : String;
+    DATAB       : Date;
+    DATBI       : Date;
+    KUNNR       : String;
+    MATNR       : String;
+}
