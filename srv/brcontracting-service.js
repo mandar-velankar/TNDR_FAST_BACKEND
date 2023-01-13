@@ -100,8 +100,8 @@ module.exports = (srv) => {
         let items = contractProducts.map((el,index) => {
             let productPriceCondition = priceconditions.filter(cond => cond.ProductCode === el.ProductPackID)[0];
             return {
-                ITEM: addLeadingZeros(offerProducts[index].SORTER, 6),
-                MATERIAL: addLeadingZeros(offerProducts[index].ProductCode, 18),
+                ITEM: addLeadingZeros(offerProducts[index].SORTER, 6, "Sorter"),
+                MATERIAL: addLeadingZeros(offerProducts[index].ProductCode, 18, "ProductCode"),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
                 ITEM_QTD: offerProducts.filter(product => product.ProductCode === el.ProductPackID)[0]?.RequestedQty,
@@ -264,11 +264,12 @@ module.exports = (srv) => {
 
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
-            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
 
             if (!offer) {
                 return req.reject(404, "Offer not found");
             }
+            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+            
             if (!offerProducts || offerProducts.length <= 0) {
                 return req.reject(404, `No offer products were found for the following sales order product: ${salesOrderProductsProductPackIDs}`);
             }
@@ -299,6 +300,9 @@ module.exports = (srv) => {
 				console.error(error.message);
 				return req.reject(error.code, error.message);
 			}
+            if (error.message) {
+                return req.reject(400, error.message);
+            }
             // await tx.rollback(req);
 			return req.reject(500, error.message);
         }
@@ -309,7 +313,7 @@ module.exports = (srv) => {
         if (!body) {
             return false;
         }
-        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = addLeadingZeros(contract.ContractNumber, 10);
+        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = addLeadingZeros(contract.ContractNumber, 10, "ContractNumber");
         if (Number(divisionCode.HLEVEL1_CODE) == 8) {
             body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = "0" + divisionCode.HLEVEL1_CODE;
         }
@@ -317,8 +321,8 @@ module.exports = (srv) => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             if (offerProduct) {
                 return {
-                    ITEM: addLeadingZeros(offerProduct.SORTER, 6),
-                    MATERIAL: addLeadingZeros(offerProduct.ProductCode, 18),
+                    ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
+                    MATERIAL: addLeadingZeros(offerProduct.ProductCode, 18, "ProductCode"),
                     ITEM_QTD: `${el.RequestedQty}`,
                     IV_TEXT: ""
                 }
@@ -328,7 +332,10 @@ module.exports = (srv) => {
         return body;
     };
 
-    function addLeadingZeros (num, size) {
+    function addLeadingZeros (num, size, text) {
+        if (num === null) {
+            throw new Error(`${text} doesn't exist`);
+        }
         num = num.toString();
         while (num.length < size) num = "0" + num;
         return num;
