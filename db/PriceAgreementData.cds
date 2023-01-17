@@ -8,6 +8,7 @@ using {
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.TransactionalData} from './TransactionalData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
+using {com.bayer.SXTENDER.AdminData} from './AdminData';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
 using {com.bayer.SXTENDER.PriceAgreementDataViews} from './PriceAgreementDataViews';
@@ -81,6 +82,7 @@ entity PriceAgreements: cuid, managed {
     SettlementDates: Composition of many SettlementDates on SettlementDates.PriceAgreementId = ID;
     MasterPrices: Association to MasterDataViews.MostRecentMasterPricesView on MasterPrices.ProductPackId = ProductPackId
                                                                             and MasterPrices.CountryCode = CountryCode  ;
+    User: Association to AdminData.PT_TMUSER on User.CWID = createdBy;
 }
 
 entity PriceAgreementAcknowledgementHistory: cuid, managed {

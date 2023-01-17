@@ -63,6 +63,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
             pa.PriceConditions,
             pa.SettlementDates,
             pa.MasterPrices,
+            pa.User,
             list.MaterialsList
     };
     entity Candidates as projection on PriceAgreementData.CandidatesView;
@@ -94,6 +95,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
     entity MaterialsConcatList as projection on PriceAgreementDataViews.MaterialsConcatList;
+    entity User @(cds.redirection.target:true) as projection on AdminData.PT_TMUSER;
     
     //Countries where user has accesss to
     entity UserCountry @(restrict: [
