@@ -307,8 +307,22 @@ getOutcome(code){
  */
  async insertFASTResults(tx, mappedTenderResults) {
     const { PT_TMTRRES } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const { PT_TMTNOFST } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const offerStatusses = [];
     
     const uniqueMappedTenderResults = [...new Map(mappedTenderResults.map(item => [item['OfferID'], item])).values()];
+
+    for (const ofsts of uniqueMappedTenderResults){
+        //add status
+        offerStatusses.push({
+            TenderID    : ofsts.TenderID,
+            OfferID     : ofsts.OfferID,
+            CountryCode : "BR",
+            Active      : 1,
+            STATUS      : "Results Recorded",
+            Date        : new Date().toISOString().slice(0,10)
+        });
+    }
 
     // 1. delete Ids before saving to DB
     const tenderResultsWithoutID = uniqueMappedTenderResults.map(so => { 
@@ -317,15 +331,20 @@ getOutcome(code){
         return copy;
     }); 
 
-    // 2. Insert records into PT_TMTRRES
-    console.log(`JOB (${this.jobName }): Upserting IBIZ Tender Result into FAST table (PT_TMTRRES) ...`);
+    // 2. Insert records into PT_TMTRRES and Update records into PT_TMTNOFST
+    console.log(`JOB (${this.jobName }): Inserting IBIZ Tender Result into FAST table (PT_TMTRRES) ...`);
     try {
         tenderResultsWithoutID && tenderResultsWithoutID.length > 0 && await tx.run(INSERT(tenderResultsWithoutID).into(PT_TMTRRES));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ Tender Result into FAST table (PT_TMTRRES) successfully completed.`);
+        console.log(`JOB (${this.jobName }): Inserting of IBIZ Tender Result into FAST table (PT_TMTRRES) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMTRRES -> created: ${tenderResultsWithoutID.length}`);
+        for (const FASTOfferStatus of offerStatusses) {
+            await tx.run(UPDATE(PT_TMTNOFST, {TenderID:FASTOfferStatus.TenderID, OfferID:FASTOfferStatus.OfferID, CountryCode:'BR'}).with(FASTOfferStatus));
+        }
+        console.log(`JOB (${this.jobName }): Updating of Offer Statuses into FAST table (PT_TMTNOFST) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMTNOFST -> updated: ${offerStatusses.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Tender Result into FAST table (PT_TMTRRES) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting of IBIZ Tender Result into FAST table (PT_TMTRRES) failed`);
         console.error(error);
         throw error;
     }
@@ -355,14 +374,14 @@ getOutcome(code){
     });  
 
     // 3. Insert records into DocumentsDownload
-    console.log(`JOB (${this.jobName }): Upserting IBIZ TenderResult Documents into FAST table (DocumentsDownload) ...`);
+    console.log(`JOB (${this.jobName }): Inserting IBIZ TenderResult Documents into FAST table (DocumentsDownload) ...`);
     try {
         docsWithoutID && docsWithoutID.length > 0 && await tx.run(INSERT(docsWithoutID).into(DocumentsDownload));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ TenderResult Documents into FAST table (DocumentsDownload) successfully completed.`);
+        console.log(`JOB (${this.jobName }): Inserting of IBIZ TenderResult Documents into FAST table (DocumentsDownload) successfully completed.`);
         console.log(`JOB (${this.jobName }): DocumentsDownload -> created: ${docsWithoutID.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ TenderResult Documents into FAST table (DocumentsDownload) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting of IBIZ TenderResult Documents into FAST table (DocumentsDownload) failed`);
         console.error(error);
         throw error;
     }
