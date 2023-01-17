@@ -247,6 +247,9 @@ module.exports = (srv) => {
             PT_TMOFRS,
             PT_TMOFPR
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+        const {
+            SalesOrderStatus
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
         const tx = cds.tx(req);
 
         try {
@@ -256,6 +259,8 @@ module.exports = (srv) => {
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
+            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "Synchronized"}));
+            if (!salesOrderStatus) req.reject(404, "Status Synchronized not found");
 
             if (!salesOrderProducts || salesOrderProducts.length <= 0) {
                 return req.reject(404, `No sales order products were found for the following sales order: ${salesOrder.EmpenhoNumber}`);
@@ -292,7 +297,7 @@ module.exports = (srv) => {
                 return req.reject(404, errorMsg);
             }
             // Update SalesOrder Status
-            await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
+            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.ID, SalesOrderNumber: EV_ORDER_NUMBER}).where({ID: req.data.salesOrderID}));
             // await tx.commit();
             return req.reply("Sales order is successfully synchronized with SAP");
         } catch (error) {
