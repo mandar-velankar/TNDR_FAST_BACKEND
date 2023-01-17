@@ -87,7 +87,7 @@ entity MostRecentBudgetedProfitability as SELECT from MasterData.BUDGETEDPROFITA
 
 //EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity VWBUDGETEDPROFITABILITY AS SELECT from MasterData.BUDGETEDPROFITABILITY as BudgetedProfitability
-INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRYCODE = l.COUNTRYCODE and BudgetedProfitability.HLEVEL4_CODE = l.HLEVEL4_CODE and BudgetedProfitability.EFFECTIVEDATE = l.MaxEffectiveDate  and BudgetedProfitability.PRODUCTPACKID= l.PRODUCTPACKID and BudgetedProfitability.PRODUCTPACKNAME= l.PRODUCTPACKNAME
+INNER JOIN MostRecentBudgetedProfitability as l on BudgetedProfitability.COUNTRYCODE = l.COUNTRYCODE and BudgetedProfitability.HLEVEL4_CODE = l.HLEVEL4_CODE and BudgetedProfitability.EFFECTIVEDATE = l.MaxEffectiveDate  and BudgetedProfitability.PRODUCTPACKID= l.PRODUCTPACKID
 {
     key BudgetedProfitability.COUNTRYCODE,
     key BudgetedProfitability.HLEVEL4_CODE,
