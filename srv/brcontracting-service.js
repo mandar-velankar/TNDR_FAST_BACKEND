@@ -21,6 +21,9 @@ module.exports = (srv) => {
             PT_TMTEND,
             PriceCondition
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+        const {
+            ContractStatus
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
 
         const tx = cds.tx(req);
         try {
@@ -29,6 +32,8 @@ module.exports = (srv) => {
             const contractProducts = await tx.run(SELECT.from(ContractProducts).where({ Contract_ID: req.data.contractID, OfferID: contract.OfferID }));
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
+            const contractStatus = await tx.run(SELECT.one.from(ContractStatus).where({Status: "Synchronized"}));
+            if (!contractStatus) req.reject(404, "Status Synchronized not found");
 
             if (!offer) {
                 return req.reject(404, "Offer is not found");
@@ -56,7 +61,7 @@ module.exports = (srv) => {
             if (!offerDistributor) {
                 return req.reject(404, "Offer distributor is not found");
             }
-
+            
             // Update all fields in sales order body template  
             const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions);
             // Send request to SAP
@@ -66,8 +71,8 @@ module.exports = (srv) => {
                 const errorMsg = createdContractResult["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_RETURN"]["item"]["LINE"];
                 return req.reject(404, errorMsg);
             }
-            // Update SalesOrder Status
-            await tx.run(UPDATE(Contracts).with({StatusID: "51a102b8-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.contractID}));
+            // Update Contract Status and add Contract Number in DB if EV_CONTRACT_NUMBER exists in response from SAP
+            await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.ID, ContractNumber: EV_CONTRACT_NUMBER}).where({ID: req.data.contractID}));
             // await tx.commit();
             return req.reply("Contract is synchronized successfully");
         } catch (error) {
