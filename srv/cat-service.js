@@ -1861,9 +1861,9 @@ module.exports = (srv) => {
 		let alternativeRequestedRemark = (isAlternativeToRequested !== 0)
 			? "* marked products are alternative to requested products"
 			: "";
-
+			//EHQUT-INC17933752-FAST SEWA - Workflow issue
 		//In case of distributor sales, we have a specific note to distributor
-		let remarks = (offer.TENDER_CHANNEL === "Distributor")
+		let remarks = (offer.TENDER_CHANNEL === "Distributor" && offer.REGION_NAME !== "SEWA")
 			? "With reference to the above tender, you must not on-sell the above mentioned products at a price higher than those listed above. However, you are always free to price lower, at your discretion.<br>"
 			: "";
 		//Building full remarks text
