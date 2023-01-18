@@ -2,6 +2,7 @@ const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 const PriceAgreementMailJob = require("./PriceAgreementMailJob");
 const PriceAgreementPriceConditionNotificationMailJob = require("./PriceAgreementPriceConditionNotificationMailJob");
 const ExtendPriceAgreements = require("./PriceAgreementJobs");
+const ProcessSpainRappelData = require("./ProcessSpainRappelData");
 
 module.exports = class JobFactory {
     static create(jobName, jobTime) {
@@ -21,6 +22,9 @@ module.exports = class JobFactory {
             case this.jobNames.ExtendPriceAgreements:
                 return new ExtendPriceAgreements(jobName,jobTime)
                 break;
+            case this.jobNames.ProcessSpainRappelData:
+                return new ProcessSpainRappelData(jobName,jobTime)
+                break;
             default:
                 throw new Error('Job type not supported');
                 break;
@@ -32,7 +36,8 @@ module.exports = class JobFactory {
             ProcessCustomersJob: "ProcessCustomersJob",
             PriceAgreementMailJob: "PriceAgreementMailJob",
             PriceAgreementPriceConditionNotificationMailJob: "PriceAgreementPriceConditionNotificationMailJob",
-            ExtendPriceAgreements: "ExtendPriceAgreements"
+            ExtendPriceAgreements: "ExtendPriceAgreements",
+            ProcessSpainRappelData: "ProcessSpainRappelData"
         };
     }
 }

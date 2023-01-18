@@ -80,7 +80,7 @@ inner join SAP.ItalyDeliveries as italydeliveries
 } ;
 //EHQUT-202495-Italy - fix for mapping of SAP Italy deliveries
 entity PaMainFOCView as select from PriceAgreementFOC as FOC
-inner join PriceAgreementData.PriceAgreements pa on pa.CountryCode = FOC.CountryCode
+inner join PriceAgreementData.PriceAgreements as pa on pa.CountryCode = FOC.CountryCode
                                                                         and pa.OfferId = FOC.OfferID
                                                                         and pa.ProductPackId = FOC.ProductCode
 
@@ -93,3 +93,13 @@ key FOC.ProductPackId as FOCproductId:String
 
     
 } group by pa.ID,FOC.CountryCode,FOC.OfferID,FOC.ProductCode,FOC.ProductPackId ;
+
+
+entity MaterialsConcatList as select from MasterData.PT_TMSKUPRDPCK as materials{
+  key materials.ProductPackID,
+  key materials.CountryCode,
+  key materials.ActiveRecord,
+  STRING_AGG(CAST(materials.SKUCode as String), ', ') as MaterialsList:String
+} group by materials.ProductPackID,
+           materials.CountryCode,
+           materials.ActiveRecord;

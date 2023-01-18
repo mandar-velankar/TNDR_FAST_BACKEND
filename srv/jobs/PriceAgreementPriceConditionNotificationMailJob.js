@@ -59,6 +59,7 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
         const { CustomerPrices, PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         const { PT_TMINST, PT_TMPRDPCK, PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+        const { PT_TMUSER } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
         return await tx.run(
             SELECT.from(`${CustomerPrices.name} as CP`)
@@ -69,6 +70,10 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             .join(`${PT_TMTEND.name} as TND`)
             .on({ 
                 'PA.TenderId': { '=': 'TND.TenderID' } 
+            })
+            .join(`${PT_TMUSER.name} as USR`)
+            .on({ 
+                'PA.createdBy': { '=': 'USR.CWID' } 
             })
             .leftJoin(`${PT_TMINST.name} as INST`)
             .on({ 
@@ -101,29 +106,40 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
     mapDataToMail = (template,mail,syncDate) => data => {
         const appEnv = cfenv.getAppEnv();
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
+        let outbox = [];
         // add/change some fields in the data array
         data.forEach(d => {
             d.EffectiveDate = new Date(d.EffectiveDate).toJSON().substring(0,10),
             d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10),
             d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.PriceAgreementId}`
         })
-        const outbox = {
-            CountryCode: data[0].CountryCode,
-            TenderID: data[0].TenderId,
-            OfferID: data[0].OfferId,
-            Sender: 'FAST-Admin@bayer.com',
-            Recipients: undefined,
-            Subject: template.title,
-            MailBody: this.generateMailBody(template, { 
-                data: { 
-                    SyncDate: syncDate.toDateString(), 
-                    CustomerPrices: data 
-                }
-            }),
-            Sent: false
+
+        //get unique created by users, this can be used to filter pa/cp data per user from the data array
+        const uniqueUsers = [...new Set(data.map(item => item.CWID))];
+
+        for (let user of uniqueUsers) {
+            let dataFilteredByUser = data.filter(d => d.CWID === user);
+            if(dataFilteredByUser && dataFilteredByUser.length > 0){
+                outbox.push({
+                    CountryCode: dataFilteredByUser[0].CountryCode,
+                    TenderID: dataFilteredByUser[0].TenderId,
+                    OfferID: dataFilteredByUser[0].OfferId,
+                    Sender: 'FAST-Admin@bayer.com',
+                    Recipients: dataFilteredByUser[0].UserEmail,
+                    Subject: template.title,
+                    MailBody: this.generateMailBody(template, { 
+                        data: { 
+                            SyncDate: syncDate.toDateString(), 
+                            CustomerPrices: dataFilteredByUser 
+                        }
+                    }),
+                    Sent: false
+                });
+            }
         }
-        if(!outbox.MailBody || outbox.MailBody === 'undefined') {
-            console.log(`No template found for Customer Price of tender ${outbox.TenderID} with countrycode ${outbox.CountryCode}`);
+
+        if(!outbox || (outbox && outbox.length> 0 && (!outbox[0].MailBody || outbox[0].MailBody === 'undefined'))) {
+            console.log(`No template found for Customer Price of tender ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
             return;
         }
         return outbox;
