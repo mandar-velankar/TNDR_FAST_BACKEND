@@ -7,7 +7,8 @@ using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 
 service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_admin','f_tndr_cag_priceagreements_user','f_tndr_cag_technical_user','authenticated-user']){
 
-    entity PriceAgreements @(cds.redirection.target:true) as select from PriceAgreementData.PriceAgreements as pa
+    entity PriceAgreements @(cds.redirection.target:true) as projection on PriceAgreementData.PriceAgreements;
+    entity PriceAgreementsMasterView @(cds.redirection.target:true) as select from PriceAgreementData.PriceAgreements as pa
     inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'{
         key pa.ID,
             pa.createdAt,

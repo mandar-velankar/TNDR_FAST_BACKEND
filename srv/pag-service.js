@@ -45,12 +45,19 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 
 
-
-
+    //we needed 2 separate views fr the priceagreements, as we are doing a join to display extra data on the master page.
+    //having the new view for the master page, implied that filtering was not executed anymore.
+    //Therefore, all filtering logic has been moved to a separate function, and is being called when reading both PriceAgreements entity as PriceAgreementsMasterView view.
     srv.on('READ', 'PriceAgreements', async (req, next) => {
+        return await filterPriceAgreements(req, next);
+    });
 
-
-        // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
+    srv.on('READ', 'PriceAgreementsMasterView', async (req, next) => {
+        return await filterPriceAgreements(req, next);
+    });
+    
+    async function filterPriceAgreements(req, next) {
+         // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
         //     return [{ counted: 5555 }]; 
         // } 
 
@@ -623,8 +630,8 @@ module.exports = async (srv) => {
         req.query.cqn.count = true;
         result.$count = result.length;
         return req.reply(result);
+    };
 
-    });
 
     srv.after('READ', 'PriceAgreements', async (data) => {
         const tx = db.tx();
