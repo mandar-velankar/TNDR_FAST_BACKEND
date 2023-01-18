@@ -6,7 +6,8 @@ module.exports = (srv) => {
 			tender: req.user.is('f_tndr_cag_tnd_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			tenderAccess:{
 				COGS:req.user.is('f_tndr_cag_cogs_user'),
-				SPAINTENDERVIEW:req.user.is('f_tndr_cag_spaintenderview_user')
+				SPAINTENDERVIEW:req.user.is('f_tndr_cag_spaintenderview_user'),
+				MEATENDERVIEW:req.user.is('f_tndr_cag_meatenderview_user')
 				
 			},
 			ppa: req.user.is('f_tndr_cag_ppa_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
