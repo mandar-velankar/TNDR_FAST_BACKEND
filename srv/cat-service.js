@@ -876,6 +876,124 @@ module.exports = (srv) => {
 		return price;
 	}
 
+	/**
+	 * Product validation for Brazil
+	 * @param {*} tx 
+	 * @param {*} offer 
+	 * @param {*} product 
+	 * @param {*} productInfo 
+	 * @param {*} aApproverTypes 
+	 * @param {*} institute 
+	 * @returns 
+	 */
+	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, institute) {
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+
+		const { BrazilPricingPolicy } = cds.entities("com.bayer.SXTENDER.MasterData");
+
+        const whereProductTypeProfitability = {
+            CountryCode: offer.COUNTRYCODE,
+            OfferId: offer.OFFERID,
+            ProductType: 'Total'
+        };
+
+        const whereProduct = {
+            CountryCode: offer.COUNTRYCODE,
+            ProductPackId: product.PRODUCTID
+        };
+
+        const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
+        
+        let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
+						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
+        let dRadiologyProfitability = 0;
+
+		const bDirectTender = offer.DISTRIBUTORNAME.toLowerCase() === 'bayer brazil' ? true : false;
+		const totalDiscount = product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT;
+		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where({
+			Brand: product.BRANDNAME,
+			ProductPackID: product.ProductCode,
+			Direct: bDirectTender,
+			Division: product.DIVISION
+		})); // TODO: check what should happen if no policy is found
+		const bWithinCommercialPolicy = totalDiscount <= brazilPricingPolicy.Discount ? true : false;
+
+        // if(product.DIVISION === 'Radiology'){
+        //     const ProductProfitability = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
+        //     dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
+
+        //     if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability > 40){
+        //         aApproverTypes.map(async function (oApproverType) {
+        //             switch (oApproverType.ApproverType) {
+        //                 case "KAMS":
+        //                     oApproverType.ValidationType = 3;
+        //                     break;
+        //                 default:
+        //                     oApproverType.ValidationType = oApproverType.ValidationType;
+        //             }
+        //         });
+        //     } else {
+        //         aApproverTypes.map(async function (oApproverType) {
+        //             switch (oApproverType.ApproverType) {
+        //                 case "KAMS":
+        //                     oApproverType.ValidationType = 3;
+        //                     break;
+        //                 case "CDH":
+        //                     oApproverType.ValidationType = 3;
+        //                     break;
+        //                 default:
+        //                     oApproverType.ValidationType = oApproverType.ValidationType;
+        //             }
+        //         });
+        //     }
+        // } else {
+        //     if(product.NET_PRICE > dFloorPrice){
+        //         aApproverTypes.map(async function (oApproverType) {
+        //             switch (oApproverType.ApproverType) {
+        //                 case "BU/RAM":
+        //                     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+        //                     break;
+        //                 case "Controlling":
+        //                     oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
+        //                     break;
+        //                 default:
+        //                     oApproverType.ValidationType = oApproverType.ValidationType;
+        //             }
+        //         });
+        //     } else {
+                
+        //         aApproverTypes.map(async function (oApproverType) {
+        //             switch (oApproverType.ApproverType) {
+        //                 case "BU/RAM":
+        //                     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+        //                     break;
+        //                 case "Legal":
+        //                     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+        //                     break;
+        //                 case "Financial Business Partner":
+        //                     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+        //                     break;
+        //                 case "Controlling":
+        //                     oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
+        //                     break;
+        //                 default:
+        //                     oApproverType.ValidationType = oApproverType.ValidationType;
+        //             }
+        //         });
+        //     }
+        // }
+		
+		let results = {
+			//In Policy flag
+			IN_POLICY: bWithinCommercialPolicy
+		};
+
+		return results;
+	}
+
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
 		//Legend
 		//1: Optional
@@ -1247,6 +1365,9 @@ module.exports = (srv) => {
 		}
         else if (offer.APPROVAL_TYPE === 10) { //Applicable for Spain
 			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes, institute)
+        }
+		else if (offer.APPROVAL_TYPE === 11) { //Applicable for Brazil
+			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, institute)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
