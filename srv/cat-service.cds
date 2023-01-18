@@ -11,6 +11,7 @@ using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
 using {com.bayer.SXTENDER.BankGuaranteeData} from '../db/BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
+using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {
     User,
     Country,
@@ -85,6 +86,9 @@ service CatalogService @(path : 'tender')@(requires : [
     entity BrazilInstituteDivision                      as projection on MasterData.BrazilInstituteDivision;
     entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
     entity DocumentsDownload                            as projection on TransactionalData.DocumentsDownload;
+    entity ContractStatuses                             as projection on AdminData.ContractStatus;
+    entity Contracts                                    as projection on BrazilContractingData.Contracts;
+    entity ContractProducts                             as projection on BrazilContractingData.ContractProducts;
 
 
     entity PT_TMCTRY @(restrict : [{
@@ -199,7 +203,7 @@ service CatalogService @(path : 'tender')@(requires : [
         * , SKUCountry : redirected to PT_TMCTPRDPCK, Offer : redirected to PT_TMOFRS
     };
 
-    entity PT_TMOFRS                                    as projection on TransactionalData.PT_TMOFRS {
+    entity PT_TMOFRS  @(cds.redirection.target:true)    as projection on TransactionalData.PT_TMOFRS {
         * , Product : redirected to PT_TMOFPR, Tender : redirected to PT_TMTEND
     };
 
@@ -218,7 +222,7 @@ service CatalogService @(path : 'tender')@(requires : [
         * , Offer : redirected to PT_TMOFRS
     };
 
-    entity PT_TMTEND                                    as projection on TransactionalData.PT_TMTEND {
+    entity PT_TMTEND  @(cds.redirection.target:true)    as projection on TransactionalData.PT_TMTEND {
         * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView, CountrySpecificInformation : redirected to CountrySpecificInformation, User : redirected to PT_TMUSER,
     };
 

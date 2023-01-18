@@ -21,6 +21,9 @@ module.exports = (srv) => {
             PT_TMTEND,
             PriceCondition
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+        const {
+            ContractStatus
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
 
         const tx = cds.tx(req);
         try {
@@ -29,6 +32,8 @@ module.exports = (srv) => {
             const contractProducts = await tx.run(SELECT.from(ContractProducts).where({ Contract_ID: req.data.contractID, OfferID: contract.OfferID }));
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
+            const contractStatus = await tx.run(SELECT.one.from(ContractStatus).where({Status: "Synchronized"}));
+            if (!contractStatus) req.reject(404, "Status Synchronized not found");
 
             if (!offer) {
                 return req.reject(404, "Offer is not found");
@@ -56,7 +61,7 @@ module.exports = (srv) => {
             if (!offerDistributor) {
                 return req.reject(404, "Offer distributor is not found");
             }
-
+            
             // Update all fields in sales order body template  
             const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions);
             // Send request to SAP
@@ -66,8 +71,8 @@ module.exports = (srv) => {
                 const errorMsg = createdContractResult["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_RETURN"]["item"]["LINE"];
                 return req.reject(404, errorMsg);
             }
-            // Update SalesOrder Status
-            await tx.run(UPDATE(Contracts).with({StatusID: "51a102b8-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.contractID}));
+            // Update Contract Status and add Contract Number in DB if EV_CONTRACT_NUMBER exists in response from SAP
+            await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.ID, ContractNumber: EV_CONTRACT_NUMBER}).where({ID: req.data.contractID}));
             // await tx.commit();
             return req.reply("Contract is synchronized successfully");
         } catch (error) {
@@ -100,8 +105,8 @@ module.exports = (srv) => {
         let items = contractProducts.map((el,index) => {
             let productPriceCondition = priceconditions.filter(cond => cond.ProductCode === el.ProductPackID)[0];
             return {
-                ITEM: addLeadingZeros(offerProducts[index].SORTER, 6),
-                MATERIAL: addLeadingZeros(offerProducts[index].ProductCode, 18),
+                ITEM: addLeadingZeros(offerProducts[index].SORTER, 6, "Sorter"),
+                MATERIAL: addLeadingZeros(offerProducts[index].ProductCode, 18, "ProductCode"),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
                 ITEM_QTD: offerProducts.filter(product => product.ProductCode === el.ProductPackID)[0]?.RequestedQty,
@@ -242,6 +247,9 @@ module.exports = (srv) => {
             PT_TMOFRS,
             PT_TMOFPR
         } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+        const {
+            SalesOrderStatus
+        } = cds.entities("com.bayer.SXTENDER.AdminData");
         const tx = cds.tx(req);
 
         try {
@@ -251,6 +259,8 @@ module.exports = (srv) => {
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
+            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "Synchronized"}));
+            if (!salesOrderStatus) req.reject(404, "Status Synchronized not found");
 
             if (!salesOrderProducts || salesOrderProducts.length <= 0) {
                 return req.reject(404, `No sales order products were found for the following sales order: ${salesOrder.EmpenhoNumber}`);
@@ -264,11 +274,12 @@ module.exports = (srv) => {
 
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
-            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
 
             if (!offer) {
                 return req.reject(404, "Offer not found");
             }
+            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+            
             if (!offerProducts || offerProducts.length <= 0) {
                 return req.reject(404, `No offer products were found for the following sales order product: ${salesOrderProductsProductPackIDs}`);
             }
@@ -286,7 +297,7 @@ module.exports = (srv) => {
                 return req.reject(404, errorMsg);
             }
             // Update SalesOrder Status
-            await tx.run(UPDATE(SalesOrders).with({StatusID: "87d5c04e-8119-11ed-a1eb-0242ac120002"}).where({ID: req.data.salesOrderID}));
+            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.ID, SalesOrderNumber: EV_ORDER_NUMBER}).where({ID: req.data.salesOrderID}));
             // await tx.commit();
             return req.reply("Sales order is successfully synchronized with SAP");
         } catch (error) {
@@ -299,6 +310,9 @@ module.exports = (srv) => {
 				console.error(error.message);
 				return req.reject(error.code, error.message);
 			}
+            if (error.message) {
+                return req.reject(400, error.message);
+            }
             // await tx.rollback(req);
 			return req.reject(500, error.message);
         }
@@ -309,7 +323,7 @@ module.exports = (srv) => {
         if (!body) {
             return false;
         }
-        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = addLeadingZeros(contract.ContractNumber, 10);
+        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = addLeadingZeros(contract.ContractNumber, 10, "ContractNumber");
         if (Number(divisionCode.HLEVEL1_CODE) == 8) {
             body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = "0" + divisionCode.HLEVEL1_CODE;
         }
@@ -317,8 +331,8 @@ module.exports = (srv) => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             if (offerProduct) {
                 return {
-                    ITEM: addLeadingZeros(offerProduct.SORTER, 6),
-                    MATERIAL: addLeadingZeros(offerProduct.ProductCode, 18),
+                    ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
+                    MATERIAL: addLeadingZeros(offerProduct.ProductCode, 18, "ProductCode"),
                     ITEM_QTD: `${el.RequestedQty}`,
                     IV_TEXT: ""
                 }
@@ -328,7 +342,10 @@ module.exports = (srv) => {
         return body;
     };
 
-    function addLeadingZeros (num, size) {
+    function addLeadingZeros (num, size, text) {
+        if (num === null) {
+            throw new Error(`${text} doesn't exist`);
+        }
         num = num.toString();
         while (num.length < size) num = "0" + num;
         return num;
