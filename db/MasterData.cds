@@ -807,3 +807,16 @@ entity BrazilInstituteDivision: managed {
 	PriceList: String(2);
 	InstituteType: String(50);
 }
+
+entity BrazilPricingPolicy: cuid, managed {
+	Brand			: String not null;
+	ProductPackID	: Integer not null;
+	Direct			: Boolean;
+	ICMS			: Double; // Tax threshold
+	CAP				: Boolean;
+	CustomerGroup	: String;
+	Division		: String;
+	Discount		: Double;
+	ValidFrom		: Date;
+	ValidTo			: Date;
+}
