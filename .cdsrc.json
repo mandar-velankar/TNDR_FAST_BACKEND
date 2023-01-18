@@ -61,6 +61,7 @@
                             },
                             "scopes": [
                                 "authenticated-user",
+                                "f_tndr_cag_meatenderview_user",
                                 "f_tndr_cag_admin"
                             ]
                         }
