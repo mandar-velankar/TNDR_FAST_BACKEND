@@ -78,20 +78,21 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             }
         }
     };
-
+    //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
     async updateCustomerPrice(customerPrice, tx){
         
         const { PT_TMINST, PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
-        const body = await this.getPriceAgreementRequestBodyTemplate(); 
+       
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
 
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+        const body = await this.getPriceAgreementRequestBodyTemplate(institute); 
         if (!institute) {
             console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
             return;
@@ -176,8 +177,8 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         return await this.updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
     }
-
-    async getPriceAgreementRequestBodyTemplate(){
+    //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
+    async getPriceAgreementRequestBodyTemplate(institute){
         return {
             "_-BAY0_-GZ_SDCOND_A04": {
               "IDOC": {
@@ -209,7 +210,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                 "E1KOMG": {
                   "SEGMENT": 1,
                   "KVEWE": "A",
-                  "KOTABNR": 878,
+                  "KOTABNR": institute.InstituteType === 'Region(s)' ? 879 : 878,
                   "KAPPL": "V",
                   "KSCHL": "YLTP",
                   "VKORG": "ITHC",
