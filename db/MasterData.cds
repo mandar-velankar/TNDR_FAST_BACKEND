@@ -809,10 +809,10 @@ entity BrazilInstituteDivision: managed {
 }
 
 entity BrazilPricingPolicy: cuid, managed {
-	Brand			: String not null;
+	BrandID			: String not null;
 	ProductPackID	: Integer not null;
 	Direct			: Boolean;
-	ICMS			: Double; // Tax threshold
+	ICMS			: Decimal; // Tax threshold
 	CAP				: Boolean;
 	CustomerGroup	: String;
 	Division		: String;

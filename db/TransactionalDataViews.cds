@@ -788,6 +788,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
         when 'Direct' then offer.Tender.Institute.InstituteName
         else offer.Distributor.DistributorName
     end as DISTRIBUTORNAME,
+    offer.Distributor.DistributorID as DISTRIBUTOR_ID,
 	case offer.Tender.TenderChannel
         when 'Direct' then offer.Tender.Institute.Address
         else offer.Distributor.Address
@@ -865,6 +866,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.SellingCompanyDetails.Remarks,
           offer.SellingCompanyDetails.FooterComment,
           offer.Distributor.DistributorName,
+          offer.Distributor.DistributorID,
           offer.Tender.Institute.Address,
           offer.Distributor.Address,
           offer.Tender.Institute.ContactNo,

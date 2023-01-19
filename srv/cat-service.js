@@ -878,6 +878,8 @@ module.exports = (srv) => {
 
 	/**
 	 * Product validation for Brazil
+	 * Legend : ValidationType: = 1: Optional, 2: Mandatory Notification, 3: Mandatory Approval
+	 * ApproverType Supply is set to ValidationType = 2 in the DB
 	 * @param {*} tx 
 	 * @param {*} offer 
 	 * @param {*} product 
@@ -886,105 +888,99 @@ module.exports = (srv) => {
 	 * @param {*} institute 
 	 * @returns 
 	 */
-	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, institute) {
-		//Legend
-		//1: Optional
-		//2: Mandatory Notification
-		//3: Mandatory Approval
+	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes) {
+		const { BrazilPricingPolicy, BrazilDistributorDivision, BrazilInstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
+		const { PriceCondition } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
-		const { BrazilPricingPolicy } = cds.entities("com.bayer.SXTENDER.MasterData");
-
-        const whereProductTypeProfitability = {
-            CountryCode: offer.COUNTRYCODE,
-            OfferId: offer.OFFERID,
-            ProductType: 'Total'
-        };
-
-        const whereProduct = {
-            CountryCode: offer.COUNTRYCODE,
-            ProductPackId: product.PRODUCTID
-        };
-
-        const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
-        
-        let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
-						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
-        let dRadiologyProfitability = 0;
+		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({OfferID: product.OFFERID, ProductCode: product.ProductCode}));
+        const distributorDivision = await tx.run(SELECT.one.from(BrazilDistributorDivision).where({DistributorID: offer.DISTRIBUTOR_ID, DivisionName: product.DIVISION}));
+        const institudeDivision = await tx.run(SELECT.one.from(BrazilInstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
 
 		const bDirectTender = offer.DISTRIBUTORNAME.toLowerCase() === 'bayer brazil' ? true : false;
-		const totalDiscount = product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT;
-		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where({
-			Brand: product.BRANDNAME,
-			ProductPackID: product.ProductCode,
-			Direct: bDirectTender,
-			Division: product.DIVISION
-		})); // TODO: check what should happen if no policy is found
-		const bWithinCommercialPolicy = totalDiscount <= brazilPricingPolicy.Discount ? true : false;
+		const totalDiscount = Math.round((product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT + Number.EPSILON) * 100) / 100;
+		const whereBrazilPricingPolicyCondition = getBrazilPricingPolicyWhereCondition(bDirectTender, product, offer, priceCondition, institudeDivision, distributorDivision);
 
-        // if(product.DIVISION === 'Radiology'){
-        //     const ProductProfitability = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
-        //     dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
+		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where(whereBrazilPricingPolicyCondition));
+		const pricingPolicyDiscount = brazilPricingPolicy?.Discount || 1; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy and discount = 100%
+		const bWithinCommercialPolicy = !brazilPricingPolicy || totalDiscount <= brazilPricingPolicy?.Discount ? true : false; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy
+		const maxAllowedDiscount = Math.round((pricingPolicyDiscount + 0.5 + Number.EPSILON) * 100) / 100; // max allowed discount is 5$ more than the policy discount
 
-        //     if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability > 40){
-        //         aApproverTypes.map(async function (oApproverType) {
-        //             switch (oApproverType.ApproverType) {
-        //                 case "KAMS":
-        //                     oApproverType.ValidationType = 3;
-        //                     break;
-        //                 default:
-        //                     oApproverType.ValidationType = oApproverType.ValidationType;
-        //             }
-        //         });
-        //     } else {
-        //         aApproverTypes.map(async function (oApproverType) {
-        //             switch (oApproverType.ApproverType) {
-        //                 case "KAMS":
-        //                     oApproverType.ValidationType = 3;
-        //                     break;
-        //                 case "CDH":
-        //                     oApproverType.ValidationType = 3;
-        //                     break;
-        //                 default:
-        //                     oApproverType.ValidationType = oApproverType.ValidationType;
-        //             }
-        //         });
-        //     }
-        // } else {
-        //     if(product.NET_PRICE > dFloorPrice){
-        //         aApproverTypes.map(async function (oApproverType) {
-        //             switch (oApproverType.ApproverType) {
-        //                 case "BU/RAM":
-        //                     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
-        //                     break;
-        //                 case "Controlling":
-        //                     oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
-        //                     break;
-        //                 default:
-        //                     oApproverType.ValidationType = oApproverType.ValidationType;
-        //             }
-        //         });
-        //     } else {
-                
-        //         aApproverTypes.map(async function (oApproverType) {
-        //             switch (oApproverType.ApproverType) {
-        //                 case "BU/RAM":
-        //                     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
-        //                     break;
-        //                 case "Legal":
-        //                     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
-        //                     break;
-        //                 case "Financial Business Partner":
-        //                     oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
-        //                     break;
-        //                 case "Controlling":
-        //                     oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
-        //                     break;
-        //                 default:
-        //                     oApproverType.ValidationType = oApproverType.ValidationType;
-        //             }
-        //         });
-        //     }
-        // }
+		// Outside of commercial policy
+		if(!bWithinCommercialPolicy){ 
+			// Pharma
+			if(product.DIVISION === 'Pharma'){
+				aApproverTypes.map(oApproverType => {
+					switch (oApproverType.ApproverType) {
+						case "TA Head":
+						case "Pricing Manager":
+						case "Divisional Finance Manager or Director":
+						case "Bill to Cash coordinator":
+						case "Order to Cash":
+							oApproverType.ValidationType = 3;
+							break;
+						case "Legal department":
+						case "CDH Pharma":
+							if(totalDiscount > maxAllowedDiscount){
+								oApproverType.ValidationType = 3;
+								oApproverType.Hierarchy = 2;
+							}
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
+			// Consumer Health
+			if(product.DIVISION === 'Consumer Health'){
+				aApproverTypes.map(oApproverType => {
+					switch (oApproverType.ApproverType) {
+						case "Commercial Operations Manager Consumer Health":
+						case "Sales Department":
+						case "Director or Manager of Finance BP":
+						case "Legal / Antitrust Department":
+						case "Bill to Cash coordinator":
+						case "Country Division Head Consumer Health":
+							oApproverType.ValidationType = 3;
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
+			// Radiology
+			if(product.DIVISION === 'Radiology'){
+				aApproverTypes.map(oApproverType => {
+					switch (oApproverType.ApproverType) {
+						case "National Sales Manager":
+						case "Customer Service Manager":
+						case "Director or Coordinator of Finance BP":
+						case "National Sales Manager":
+						case "Country Division Head Radiology":
+						case "Legal / Competition Department":
+							oApproverType.ValidationType = 3;
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
+
+		}
+
+		// General approvers
+		// only for indirect tenders and if total value (all products) is above 500k BRL
+		const totalValue = ''; // TODO
+		if(!bDirectTender && totalValue > 500_000){
+			aApproverTypes.map(oApproverType => {
+				switch (oApproverType.ApproverType) {
+					case "Credit Team":
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		}
 		
 		let results = {
 			//In Policy flag
@@ -992,6 +988,32 @@ module.exports = (srv) => {
 		};
 
 		return results;
+	}
+
+	function getBrazilPricingPolicyWhereCondition(bDirectTender, product, offer, priceCondition, institudeDivision, distributorDivision){
+		if(product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health'){
+			if(product.BRANDNAME === 'Xarelto'){
+				return {
+					BrandID: product.BRANDID,
+					ProductPackID: product.ProductCode,
+					Direct: bDirectTender,
+					Division: product.DIVISION,
+					ICMS: priceCondition.ICMSTax,
+					CAP: priceCondition.CAP
+				};
+			}else {
+				return {
+					BrandID: product.BRANDID,
+					Direct: bDirectTender,
+					Division: product.DIVISION 
+				};
+			}
+		}else if(product.DIVISION === 'Radiology' ){
+			return {
+				ProductPackID: product.ProductCode,
+				CustomerGroup: bDirectTender ? institudeDivision.CustomerGroup : distributorDivision.CustomerGroup
+			};
+		}
 	}
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
@@ -1367,7 +1389,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes, institute)
         }
 		else if (offer.APPROVAL_TYPE === 11) { //Applicable for Brazil
-			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, institute)
+			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)

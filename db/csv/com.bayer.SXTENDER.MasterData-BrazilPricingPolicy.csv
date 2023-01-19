@@ -1,1 +1,1 @@
-ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,Brand,ProductPackID,Direct,ICMS,CAP,CustomerGroup,Division,Discount,ValidFrom,ValidTo
+ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,BrandID,ProductPackID,Direct,ICMS,CAP,CustomerGroup,Division,Discount,ValidFrom,ValidTo
