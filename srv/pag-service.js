@@ -775,16 +775,18 @@ module.exports = async (srv) => {
         // }
     };
 
-
+    //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
     async function updateCustomerPrice(customerPrice) {
         console.log(`Prepare sending update customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
-        const body = getPriceAgreementRequestBodyTemplate();
+        
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+        const body = getPriceAgreementRequestBodyTemplate(institute);
+      
         if (!institute) {
             console.error(`Error customer price: ${customerPrice.ID}`);
             console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
@@ -892,8 +894,8 @@ module.exports = async (srv) => {
         }
     }
 
-
-    function getPriceAgreementRequestBodyTemplate() {
+//EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
+    function getPriceAgreementRequestBodyTemplate(institute) {
         return {
             "_-BAY0_-GZ_SDCOND_A04": {
                 "IDOC": {
@@ -925,7 +927,7 @@ module.exports = async (srv) => {
                     "E1KOMG": {
                         "SEGMENT": 1,
                         "KVEWE": "A",
-                        "KOTABNR": 878,
+                        "KOTABNR":institute.InstituteType === 'Region(s)' ? 879 : 878,
                         "KAPPL": "V",
                         "KSCHL": "YLTP",
                         "VKORG": "ITHC",
@@ -1074,8 +1076,9 @@ module.exports = async (srv) => {
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
-
-        const body = getPriceAgreementRequestBodyTemplate();
+        //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
+        const body = getPriceAgreementRequestBodyTemplate(institute);
+        
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
@@ -1085,7 +1088,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KVEWE = 'N';
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KONMS = "PCE";
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MEINS = "PCE";
-
+    
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
