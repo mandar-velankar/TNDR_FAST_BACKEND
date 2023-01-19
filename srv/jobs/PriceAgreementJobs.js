@@ -178,6 +178,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
     }
     //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
+    
     async getPriceAgreementRequestBodyTemplate(institute){
         return {
             "_-BAY0_-GZ_SDCOND_A04": {

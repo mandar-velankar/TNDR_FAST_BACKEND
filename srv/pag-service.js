@@ -1078,6 +1078,7 @@ module.exports = async (srv) => {
         const expiryDate = new Date(customerPrice.ExpiryDate);
         //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
         const body = getPriceAgreementRequestBodyTemplate(institute);
+        
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
