@@ -25,7 +25,9 @@ module.exports = (srv) => {
         const {
             ContractStatus
         } = cds.entities("com.bayer.SXTENDER.AdminData");
-
+        const {
+            MostRecentCapView
+        } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
         const tx = cds.tx(req);
         try {
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: req.data.contractID }));
@@ -51,6 +53,7 @@ module.exports = (srv) => {
             const institute = await tx.run(SELECT.one.from(PT_TMINST).where({ InstituteID: contract.InstituteID }));
             const distributor = await tx.run(SELECT.one.from(PT_TMDIST).where({ DistributorID: contract.DistributorID }));
             const priceconditions = await tx.run(SELECT.from(PriceCondition).where({ OfferID: contract.OfferID }));
+            const capBrazil = await tx.run(SELECT.one.from(MostRecentCapView));
 
             if (!contract) {
                 return req.reject(404, "Contract is not found");
@@ -70,7 +73,7 @@ module.exports = (srv) => {
             }
             
             // Update all fields in sales order body template  
-            const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPck);
+            const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPck, capBrazil);
             // Send request to SAP
             const createdContractResult = await sendCreatedContractToSAP(tx, "BR", "Contract", updateContractBody);
             const EV_CONTRACT_NUMBER = createdContractResult["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["EV_CONTRACT_NUMBER"];
@@ -96,7 +99,7 @@ module.exports = (srv) => {
         }
     });
 
-    function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks) {
+    function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks, capBrazil) {
         const body = getContractRequestBodyTemplate();
         if (!body) {
             return false;
@@ -117,9 +120,9 @@ module.exports = (srv) => {
                 MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
-                ITEM_QTD: offerProducts.filter(product => product.ProductCode === el.ProductPackID)[0]?.RequestedQty,
+                ITEM_QTD: el?.RequestedVolume, //RequestedQty
                 MANUAL_D: (Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
-                CAP: productPriceCondition?.PriceAfterCAP
+                CAP: productPriceCondition?.CAP === "No" ? 0 : capBrazil.CAP
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;
@@ -335,9 +338,8 @@ module.exports = (srv) => {
             return false;
         }
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = addLeadingZeros(contract.ContractNumber, 10, "ContractNumber");
-        if (Number(divisionCode.HLEVEL1_CODE) == 8) {
-            body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = "0" + divisionCode.HLEVEL1_CODE;
-        }
+        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = Number(divisionCode.HLEVEL1_CODE) == 8 ? "0" + divisionCode.HLEVEL1_CODE : divisionCode.HLEVEL1_CODE;
+        
         let items = salesOrderProducts.map(el => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
