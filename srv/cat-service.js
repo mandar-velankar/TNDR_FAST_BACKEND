@@ -888,7 +888,7 @@ module.exports = (srv) => {
 	 * @param {*} institute 
 	 * @returns 
 	 */
-	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes) {
+	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
 		const { BrazilPricingPolicy, BrazilDistributorDivision, BrazilInstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
 		const { PriceCondition } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
@@ -903,12 +903,12 @@ module.exports = (srv) => {
 		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where(whereBrazilPricingPolicyCondition));
 		const pricingPolicyDiscount = brazilPricingPolicy?.Discount || 1; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy and discount = 100%
 		const bWithinCommercialPolicy = !brazilPricingPolicy || totalDiscount <= brazilPricingPolicy?.Discount ? true : false; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy
-		const maxAllowedDiscount = Math.round((pricingPolicyDiscount + 0.5 + Number.EPSILON) * 100) / 100; // max allowed discount is 5$ more than the policy discount
+		const maxAllowedDiscount = Math.round((pricingPolicyDiscount + 0.05 + Number.EPSILON) * 100) / 100; // max allowed discount is 5$ more than the policy discount
 
 		// Outside of commercial policy
 		if(!bWithinCommercialPolicy){ 
 			// Pharma
-			if(product.DIVISION === 'Pharma'){
+			if(product.DIVISION.toLowerCase() === 'pharma'){
 				aApproverTypes.map(oApproverType => {
 					switch (oApproverType.ApproverType) {
 						case "TA Head":
@@ -931,7 +931,7 @@ module.exports = (srv) => {
 				});
 			}
 			// Consumer Health
-			if(product.DIVISION === 'Consumer Health'){
+			if(product.DIVISION.toLowerCase() === 'consumer health'){
 				aApproverTypes.map(oApproverType => {
 					switch (oApproverType.ApproverType) {
 						case "Commercial Operations Manager Consumer Health":
@@ -948,7 +948,7 @@ module.exports = (srv) => {
 				});
 			}
 			// Radiology
-			if(product.DIVISION === 'Radiology'){
+			if(product.DIVISION.toLowerCase() === 'radiology'){
 				aApproverTypes.map(oApproverType => {
 					switch (oApproverType.ApproverType) {
 						case "National Sales Manager":
@@ -969,8 +969,7 @@ module.exports = (srv) => {
 
 		// General approvers
 		// only for indirect tenders and if total value (all products) is above 500k BRL
-		const totalValue = ''; // TODO
-		if(!bDirectTender && totalValue > 500_000){
+		if(!bDirectTender && offerProductsTotalValue > 500_000){
 			aApproverTypes.map(oApproverType => {
 				switch (oApproverType.ApproverType) {
 					case "Credit Team":
@@ -991,8 +990,8 @@ module.exports = (srv) => {
 	}
 
 	function getBrazilPricingPolicyWhereCondition(bDirectTender, product, offer, priceCondition, institudeDivision, distributorDivision){
-		if(product.DIVISION === 'Pharma' || product.DIVISION === 'Consumer Health'){
-			if(product.BRANDNAME === 'Xarelto'){
+		if(product.DIVISION.toLowerCase() === 'pharma' || product.DIVISION.toLowerCase() === 'consumer health'){
+			if(product.BRANDNAME.toLowerCase() === 'xarelto'){
 				return {
 					BrandID: product.BRANDID,
 					ProductPackID: product.ProductCode,
@@ -1008,7 +1007,7 @@ module.exports = (srv) => {
 					Division: product.DIVISION 
 				};
 			}
-		}else if(product.DIVISION === 'Radiology' ){
+		}else if(product.DIVISION.toLowerCase() === 'radiology' ){
 			return {
 				ProductPackID: product.ProductCode,
 				CustomerGroup: bDirectTender ? institudeDivision.CustomerGroup : distributorDivision.CustomerGroup
@@ -1364,7 +1363,7 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
@@ -1389,7 +1388,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes, institute)
         }
 		else if (offer.APPROVAL_TYPE === 11) { //Applicable for Brazil
-			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes)
+			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -1417,6 +1416,8 @@ module.exports = (srv) => {
 			return results;
 		}
 
+		const offerProductsTotalValue = aOfferProduct.reduce((acc, currentProduct) => acc + (currentProduct.REQUESTED_VOLUME * currentProduct.OFFER_PRICE), 0);
+
 		const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
@@ -1431,7 +1432,7 @@ module.exports = (srv) => {
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue);
 
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
