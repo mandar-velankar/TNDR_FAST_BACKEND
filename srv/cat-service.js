@@ -1065,17 +1065,18 @@ module.exports = (srv) => {
 				requiredApprovalLevel = 4;
 			};
 		}
+		//EHQUT-INC18040340-Please change price approval authority tracking system - Offer Management Application (FAST)
 		if (//This means it's first offer for account or net offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountNetOfferPrice, 0) ||
-			ServiceHelper.isDoubleXBelowY(product.NET_OFFER_PRICE, preApprovedAccountNetOfferPrice)
+			ServiceHelper.isDoubleXBelowY(product.NET_PRICE, preApprovedAccountNetOfferPrice)
 		) {
-			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_OFFER_PRICE)) {//NSM/SM/FM can approve
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_PRICE)) {//NSM/SM/FM can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_OFFER_PRICE)) {//HBU can approve
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_PRICE)) {//HBU can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_OFFER_PRICE)) {//CDH can approve
+			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_PRICE)) {//CDH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
 			}
 			else {
