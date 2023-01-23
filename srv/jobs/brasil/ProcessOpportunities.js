@@ -95,6 +95,33 @@ module.exports = class processOpportunities extends BaseJob {
         }
     }
 
+    /**
+     * This method fetches BrazilMasterPrices of type 'ZWP0' from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICES
+     * @param {customerIDs} - A list of customer IDs
+     * @param {productIDs} - A list of product IDs
+     * @returns - A list of Ibiz master prices
+     */
+    async getBrazilMasterPrices(tx, customerIDs, productIDs) {
+        if(!customerIDs || customerIDs.length <= 0) {
+            console.log("No CustomerIDs provided");
+            return [];
+        }
+        if(!productIDs || productIDs.length <= 0) {
+            console.log("No ProductIDs provided");
+            return [];
+        }
+        try {
+            console.log(`JOB (${this.jobName }): Fetching BrazilMasterPrices from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICES ...`);
+            const { MasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const result = await tx.run(SELECT.from(MasterPrices).where({'CustomerID': { in: customerIDs }, 'ProductID': { in: productIDs }, Type: 'ZWP0'}));
+            return result;
+        }catch (error) {
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of BrazilMasterPrices from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICE failed`);
+            console.error(error);
+            throw error;
+        }
+    }
+
      /**
      * This method fetches all the Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZDOCS
      * @returns - A list of Ibiz Documents
