@@ -360,6 +360,9 @@ module.exports = (srv) => {
         if (num === null) {
             throw new Error(`${text} doesn't exist`);
         }
+        if (text === "Sorter") {
+            num = Number(num) + 1;
+        }
         num = num.toString();
         while (num.length < size) num = "0" + num;
         return num;
