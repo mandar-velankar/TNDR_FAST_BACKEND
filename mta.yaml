@@ -27,8 +27,8 @@ modules:
     type: nodejs
     path: srv
     parameters:
-      memory: 4096M
-      disk-quota: 4096M
+      memory: 8192M
+      disk-quota: 8192M
     provides:
       - name: srv_api
         public: true

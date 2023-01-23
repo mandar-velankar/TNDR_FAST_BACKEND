@@ -679,7 +679,7 @@ module.exports = async (srv) => {
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
         // await this.syncPriceAgreements(customerPrices);
-        await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
+        syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
         return req.reply();
     });
