@@ -2018,7 +2018,7 @@ module.exports = (srv) => {
 		
 		//For Thailand specific
 		//EHQUT-197882-Thailand - Additional approver for Nalador
-		let index = aApproverTypes.findIndex(x => x.ApproverType === 'Additional CDH' );
+		let index = aApproverTypes.findIndex(x => x.ApproverType === 'Additional Approver' );
 		let total=offerProductValidation.length;
 		let BrandName=[];
 
