@@ -999,7 +999,7 @@ module.exports = (srv) => {
 					Direct: bDirectTender,
 					Division: product.DIVISION,
 					ICMS: priceCondition.ICMSTax,
-					CAP: priceCondition.CAP
+					CAP: priceCondition.CAP === 'Yes' ? true : false
 				};
 			}else {
 				return {
