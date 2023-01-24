@@ -982,8 +982,8 @@ module.exports = (srv) => {
 		}
 		
 		let results = {
-			//In Policy flag
-			IN_POLICY: bWithinCommercialPolicy
+			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
+			IN_POLICY: true
 		};
 
 		return results;
