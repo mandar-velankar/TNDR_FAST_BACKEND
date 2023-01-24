@@ -35,12 +35,22 @@ module.exports = class processOpportunities extends BaseJob {
 
             const indirectIbizOpportunities = opportunities.filter(indirect => indirect.NU_DIRETO_INDIRETO === 1);
             const indirectIbizOpportunityParentIDs = indirectIbizOpportunities.map(dop => dop.ID);
+            const indirectIbizOpportunityCNPJs = indirectIbizOpportunities.map(el => el.COD_DONO_QP && el.COD_DONO_QP.replace(/\D/g,''));
             const indirectIbizOpportunityItems = await this.getOpportunitiesItems(tx, indirectIbizOpportunityParentIDs);
             const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); 
 
+            //find the DistributorIDs based on the cnpj from indirectIbizOpportunities
+            const indirectIbizOpportunityDistributorIDs = existingDistributorsFAST.reduce((prev, curr) => {
+                if(indirectIbizOpportunityCNPJs.find(cnpj => cnpj === curr.CNPJ)){
+                    prev.push(curr.DistributorID);
+                }
+                return prev;
+            }, []);
+            const brazilMasterPrices = await this.getBrazilMasterPrices(tx, indirectIbizOpportunityDistributorIDs);
+
             // Process data
             await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
-            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST);
+            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
 
             // Commit All
             await tx.commit();
@@ -98,27 +108,21 @@ module.exports = class processOpportunities extends BaseJob {
     /**
      * This method fetches BrazilMasterPrices of type 'ZWP0' from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICES
      * @param {customerIDs} - A list of customer IDs
-     * @param {productIDs} - A list of product IDs
      * @returns - A list of Ibiz master prices
      */
-    async getBrazilMasterPrices(tx, customerIDs, productIDs) {
+    async getBrazilMasterPrices(tx, customerIDs) {
         if(!customerIDs || customerIDs.length <= 0) {
             console.log("No CustomerIDs provided");
             return [];
         }
-        if(!productIDs || productIDs.length <= 0) {
-            console.log("No ProductIDs provided");
-            return [];
-        }
+
+        console.log(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICES ...`);
+        const { BrazilMasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
+
         try {
-            console.log(`JOB (${this.jobName }): Fetching BrazilMasterPrices from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICES ...`);
-            const { MasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
-            const result = await tx.run(SELECT.from(MasterPrices).where({'CustomerID': { in: customerIDs }, 'ProductID': { in: productIDs }, Type: 'ZWP0'}));
-            return result;
+            return await tx.run(SELECT.from(BrazilMasterPrices).where({'CustomerID': { in: customerIDs }, Type: 'ZWP0'}));
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching of BrazilMasterPrices from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICE failed`);
-            console.error(error);
-            throw error;
+            throw new Error(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICE failed`, { cause: error });
         }
     }
 
@@ -665,7 +669,7 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST) {
+ async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices) {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
@@ -674,7 +678,7 @@ module.exports = class processOpportunities extends BaseJob {
         const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST);
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
         const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST);
-        const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST);
+        const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices);
         const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(indirectIbizOpportunityDocs);
 
          // 1. Create/update entries in PT_TMTEND
@@ -975,12 +979,13 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} priceCondition
      */
- mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST) {
+ mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PriceCondition ...`);
     indirectIbizOpportunityItems = indirectIbizOpportunityItems.reduce((prev, curr, idx, indirectIbizOpportunityItems) => {
         const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
         const productPackID = sku && sku.ProductPackID || null;
+        const masterPrice = brazilMasterPrices.find(p => p.ProductID === productPackID);
         prev.push(
             {
                 parent_ID                           : curr.parent_ID,
@@ -1009,7 +1014,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 AnnualValue                         : null,
                 ReferencePriceAgreement             : null, 
                 LotID                               : curr.NU_LOTE,
-                PriceList                           : curr.VLR_BASE_CALCULO_UNITARIO,
+                PriceList                           : masterPrice && masterPrice.Value,
                 ICMSTax                             : curr.NU_PORCENTAGEM_ICMS,
                 TaxExemption                        : (!curr.NU_PORCENTAGEM_ICMS) ? 'No' : 'Yes',
                 PriceAfterTaxExemtion               : (!curr.NU_PORCENTAGEM_ICMS) ? null : (curr.VLR_BASE_CALCULO_UNITARIO * (1 - curr.NU_PORCENTAGEM_ICMS)),
