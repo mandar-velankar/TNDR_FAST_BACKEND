@@ -573,7 +573,7 @@ COUNTRYCODE,TABLEID,COLUMN,BINDINGPATH,VISIBLE,REQUIRED,DESCRIPTION
 "BR","editofferProductId","MaxPrice","MaxPrice","False","False","maxprice"
 "BR","editofferProductId","Unitpack","UnitPerPack","True","True","Unitpack"
 "BR","editofferProductId","Comment","Comment","True","False","Comment"
-"BR","editofferProductId","Decline","ActiveProduct","True","False","Decline"
+"BR","editofferProductId","Decline","ActiveProduct","False","False","Decline"
 "BR","editofferProductId","PaymentTerms","PaymentTerms","True","False","PaymentTerms"
 "BR","editofferProductId","INCOTerms","INCOTerms","True","False","INCOTerms"
 "BR","editofferProductId","IntervalBetweenShipments","IntervalBetweenShipments","True","True","inshipmnths"

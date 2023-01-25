@@ -48,7 +48,11 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.modifiedBy,
         Contracts.modifiedAt;
 
-entity ContractProductsView as select from BrazilContractingData.ContractProducts as ContractProducts {
+entity ContractProductsView as select from BrazilContractingData.ContractProducts as ContractProducts
+left outer join BrazilContractingViews.AdhesionContractCompositionView as AdhesionContract 
+    on ContractProducts.OfferID = AdhesionContract.OfferID
+    and ContractProducts.ProductPackID = AdhesionContract.ProductPackID
+    {
     key ContractProducts.ID,
         ContractProducts.Contract.ID as Contract_ID,
         ContractProducts.ProductPackID,                                          
@@ -60,8 +64,22 @@ entity ContractProductsView as select from BrazilContractingData.ContractProduct
         ContractProducts.OfferProduct.RequestedVolume as OfferProductVolume,                                       
         ContractProducts.OfferProduct.UnitPerPack as UoM,
         ContractProducts.OfferProduct.SKU.PRODUCTPACKNAME as ProductPackName,
-        ContractProducts.OfferProduct.PriceCondition.CommercialProposal as CommercialPrice
-};    
+        ContractProducts.OfferProduct.PriceCondition.CommercialProposal as CommercialPrice,
+        AdhesionContract.ExistingAdhesionContractsVolume,
+        AdhesionContract.RemainingAdhesionContractsVolume,
+};
+
+entity AdhesionContractCompositionView as select from BrazilContractingData.ContractProducts as ContractProducts
+{
+    ContractProducts.ProductPackID,
+    ContractProducts.OfferID,
+    sum(ContractProducts.RequestedVolume) as ExistingAdhesionContractsVolume:Integer,
+    (2 * ContractProducts.OfferProduct.RequestedVolume - sum(ContractProducts.RequestedVolume)) as RemainingAdhesionContractsVolume:Integer,
+}where ContractProducts.Contract.ContractType = 'Adhesion Contract'
+group by ContractProducts.ProductPackID,
+    ContractProducts.OfferID,
+    ContractProducts.OfferProduct.RequestedVolume;
+
 entity SalesOrdersView as select from BrazilContractingData.SalesOrders as SalesOrders {
     key SalesOrders.ID,
         SalesOrders.Contract.ID as Contract_ID,
