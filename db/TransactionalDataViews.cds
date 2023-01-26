@@ -1550,6 +1550,33 @@ left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices
     masterPrices.Value;
 
 
+entity DirectIndirectDistributor as select from MasterData.PT_TMDIST {
+    key DistributorID, 
+    key CountryCode,
+    DistributorName,
+    CustomerID,
+    case 
+        when DistributorName = 'Bayer Brazil' then true
+        else false
+    end as isDirect:Boolean,
+};
+
+entity DirectIndirectCustomers as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as o on o.TenderID = tender.TenderID and o.Active = 1
+inner join MasterData.PT_TMINST as inst on tender.InstituteID = inst.InstituteID 
+inner join DirectIndirectDistributor as dist on dist.DistributorID = o.DistributorID and dist.CountryCode = o.CountryCode
+{
+    key o.OfferID,
+    o.TenderID,
+    dist.isDirect,
+    inst.InstituteID ,
+    case 
+        when dist.isDirect = true then inst.CustomerID
+        else dist.CustomerID
+    end as CustomerID:Integer
+};
+
+
     /**
  * This view contains calculated fields used on the Brazil financial offers page
  */
@@ -1568,26 +1595,26 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
-inner join MasterData.PT_TMINST as institute 
-    on tender.InstituteID = institute.InstituteID 
+inner join DirectIndirectCustomers as customer 
+    on tender.InstituteID = customer.InstituteID 
 inner join TransactionalDataViews.PriceConditionPriceListView as masterPriceListPriceCondition
     on masterPriceListPriceCondition.TenderID = product.TenderID
     and masterPriceListPriceCondition.OfferID = product.OfferID
     and masterPriceListPriceCondition.ProductCode = product.ProductCode 
     and masterPriceListPriceCondition.InstituteID = tender.InstituteID
-    and masterPriceListPriceCondition.CustomerID = institute.CustomerID
+    and masterPriceListPriceCondition.CustomerID = customer.CustomerID
 inner join TransactionalDataViews.PriceConditionStandardDiscountView as masterStandardDiscountPriceCondition
     on masterStandardDiscountPriceCondition.TenderID = product.TenderID
     and masterStandardDiscountPriceCondition.OfferID = product.OfferID
     and masterStandardDiscountPriceCondition.ProductCode = product.ProductCode 
     and masterStandardDiscountPriceCondition.InstituteID = tender.InstituteID
-    and masterStandardDiscountPriceCondition.CustomerID = institute.CustomerID
+    and masterStandardDiscountPriceCondition.CustomerID = customer.CustomerID
 inner join TransactionalDataViews.PriceConditionICMSTaxesView as masterICMSTaxesPriceCondition
     on masterICMSTaxesPriceCondition.TenderID = product.TenderID
     and masterICMSTaxesPriceCondition.OfferID = product.OfferID
     and masterICMSTaxesPriceCondition.ProductCode = product.ProductCode 
     and masterICMSTaxesPriceCondition.InstituteID = tender.InstituteID
-    and masterICMSTaxesPriceCondition.CustomerID = institute.CustomerID    
+    and masterICMSTaxesPriceCondition.CustomerID = customer.CustomerID    
 left outer join TransactionalData.PriceCondition as priceCondition 
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
