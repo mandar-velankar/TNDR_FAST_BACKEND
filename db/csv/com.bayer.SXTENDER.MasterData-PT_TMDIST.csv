@@ -1,104 +1,245 @@
-COUNTRYCODE,DISTRIBUTORID,DISTRIBUTORNAME,ADDRESS,CONTACTNO,FAX,CONTACTPERSON,ACTIVERECORD,CONTACT_EMAIL,COMMISSIONRATE,INCOTERMS,PAYMENTTERMS,FORALLBRANDS
-"EG","4411546","Ibn Sina Pharma","Obour City, 1st Indusrial District, Area 2&3, Block 12015 Cairo Egypt","+202 4 489 1102","+202 44891137","Mr. Ahmed Samy","Yes","Ahmed.samy@ibnsina-pharma.com.eg","0.075","NA","365 days after receipt of goods","false"
-"KW","1493568","YIACO Medical Co. K.S.C.C.","Amr Bin Al Aas Street, Block 5, Sama Tower, P.O. Box 435, Safat, 13005","+965 22230600 ",,"Ms. Zeenat Mohammed Sharif","No",,"0.075","NA","365 days after receipt of goods","false"
-"AE","164390","Alphamed Drug Store","Dubai Investment Park, Al Khayyat Investment P.O. Box 11245","+971 4 8105555",,"Ms. Marwan Dawood","Yes","marwan.m@akigroup.com","0.075","NA","365 days after receipt of goods","false"
-"KW","1799155","Advanced Technology Company KSC","Salmiya, Salem Al-mubarak Str., block 62A, PO Box 44558 Hawalli, 32060","+965 22247204","+965 25711759","Mr. Aiman Pathan","Yes",,"0.075","NA","365 days after receipt of goods","false"
-"QA","1731868","Ahmed Khalil AL-Baker & Sons","Albaker Building, Airport Rd, P.O. Box 9","+974 44551764","+974 44550621","Mr. Madhab Dhakal","Yes","tender.qatar@al-baker.com","0.075","NA","365 days after receipt of goods","false"
-"SA","2024839","Batterjee National Pharmaceuticals","Batterjee Building, Palestine Street, Post Box 2,  Jeddah 21411","+966 12 660 2933 ","+966 12 668 7165","Mr. Moustafa Shaltout","No",,"0.075","NA","365 days after receipt of goods","false"
-"KW","100000061","Ali AbdulWahab Al Mutawa Commercial Co.","Shuwaikh Industrial, Block 1, Street 6, AAW Building, Al-Soor Street, Sharq, Kuwait","+965 22261800","+965 1804449","Mr. Sherif Younan","Yes","sfy@aaw.com","0.075","NA","365 days after receipt of goods","false"
-"LB","2025053","Droguerie R.Pharaon & Fils S.A.L","Pharaon Bldg.-Pasteur St.Medawar Quarter, P.O. Box 11-0022 - Riad el Solh 11072010","+961 1 580303","+961 1 563841","Ms. Jisele Saliba","Yes","jisele.saliba@ph-lb.com","0.075","NA","365 days after receipt of goods","false"
-"JO","2026793","Khoury Drug Store Co","Umm Mutawe Al-Aslamiyah St. Bldg no.8, Al Jandawil, Wadi Seer, P. O. Box 306 11118","+ 962 6 5827015",,"Ms. Amneh Alkhalaileh","Yes","amneh.alkhalaileh@khds.jo","0.075","NA","365 days after receipt of goods","false"
-"OM","2033919","Muscat Pharmacy & Stores LLC","Post Box 438, PC 100, Muscat, Sultanate of Oman.","+968 2481 4501","+968 2481 5201","Mr. Munzir Baig","Yes","mbaig@mpmct.com","0.075","NA","365 days after receipt of goods","false"
-"EG","2046036","United Company for Distribution & Pharmacies Supplies","5, Samir Sayed Ahmed Street, El Manial","+202 2 364 4052",,"Ms. Mona Lotfy","Yes","mona.lotfy@ho-ucp.com","0.075","NA","365 days after receipt of goods","false"
-"SY","3147434","Maatouk Drugstores","Abou Remaneh, Beside Al Jahez park, P.O. Box 695","+963 11 3325070","+ 963 11 3325079","Mr. Anas Maatouk","Yes","maatouk@gmail.com","0.075","NA","365 days after receipt of goods","false"
-"LB","3147445","Khalil Fattal & Fils S.A.L.","Dany Chamoun Street, Jisr El-Wati-Sin El-Fil, PO Box 110-773 Riad El Solh","+961 1 51 20 02","+961 1 49 48 20","Mr. Jack Haddad","Yes","jack.haddad@fattal.com.lb","0.075","NA","365 days after receipt of goods","false"
-"AE","3147448","Pharmaworld","Belhoul Group Building, Garhoud, Dubai, PO. Box 5527","+971 4 282 3737","+971 4 2822447","Mr. Mamdouh Meniawi","Yes","mmeniawi@pharmaworld-uae.com","0.075","NA","365 days after receipt of goods","false"
-"YE","3147468","Natco Al-Razi Co Ltd","Zubiry St. near UNICEF",,"+ 967 1 530718",,"Yes",,"0.075","NA","365 days after receipt of goods","false"
-"SA","3147458","Alkamal Import Office Co. Ltd.","Beside United Doctors Hospital, P.O.BOX 405, jeddah 21411","+966 12 288 9445","+966 12 651 3759","Mr. Mohammed AbdulJawad Sulaiman","Yes","abduljawad.mohamad@alkamal-sa.com","0.075","NA","365 days after receipt of goods","false"
-"SD","3148435","Shibeika Pharmaceutical Co.","Al-Sherif Alhindi Street, West of Alfayha Bldg, 3006","+249183 792545",,"Dr. Ahmed ","Yes",,"0.075","NA","365 days after receipt of goods","false"
-"LY","3147647","Al Elmia Company for Pharmaceuticals & Medical Supplies","Sedi Slim in front of Oil Tanks, P.O Box 83467","+218 4802433","+218 4802438","Dr. Ali Shibl","Yes","shibl@alelmiapharma.com","0.075","NA","365 days after receipt of goods","false"
-"EG","3148436","Soficopharm","12, Ismail El-Kabbani St. Nasr City P.O. Box 11371","+202 2 402 5942",,"Mr. Nasser Kassem","Yes","nasser_kassem@hotmail.com","0.075","NA","365 days after receipt of goods","false"
-"BH","4411545","Bahrain Pharmacy","P.O. Box: 403, Manama, Kingdom of Bahrain","+973 1726 4088","+973 1726 4099","Mr. Ashraf","Yes","bpmedic@bahrainpharmacy.com","0.075","NA","365 days after receipt of goods","false"
-"YE","3391329","National Pharma Company Ltd.","Djibouti Street, P.O. Box 1187",,,,"Yes",,"0.075","NA","365 days after receipt of goods","false"
-"JO","3148443","The Jordan Drugstore Co.","48 Isam Ajlouni St.  Shmaisani P.O. Box:  422 Amman 11118","+962 6 5665125","+962 6 5665126","Ms. Diala Hindeleh","Yes","diala@jdsco.net","0.075","NA","365 days after receipt of goods","false"
-"IQ","4411544","Najat Pharma","King Abdullah II St. #320 | P.O.Box 852098 Amman 11185 | Jordan","+962 6 585 8970","+962 6 582 7019","Ms. Ghada Nazzal","Yes","ghada.nazzal@najat-pharma.com","0.075","NA","365 days after receipt of goods","false"
-"SA","8039883","Saudi International Trading Company Limited","P.O. Box 5132, Riyadh 11422","+966 1 4757500","+966 1 4730525","Mr. Maher Adwan","Yes","maher@sitcopharma.com","0.075","NA","365 days after receipt of goods","false"
-"SA","8888888","Abdulla Fouad Holding Co.","Dammam Khobar Highway, Besides Al Jazeera Ford Showroom, P.O. Box 257, 31411","+966 13 814 1414","+966 13 810 2100","Mr. Rasem Adib","Yes","rasem.adib@abdulla-fouad.com","0.075","NA","365 days after receipt of goods","false"
-"GC","9999990",,"Not available",,,,"No",,"0.075","NA","365 days after receipt of goods","false"
-"BH","3148437","Jaffar Pharmacy","Bldg No.2616, Road 855, P.O. Box 122 Wadyan 608","+973 17 731316","+973 17 732533 ","Mr. Vijay","No",,"0.075","NA","365 days after receipt of goods","false"
-"AE","9349695","Al Ittihad Drug Store","P.O. Box 5374, Dubai Investment Park 2, Plot No. 597-254","+971 4 899 2222","+971 4 899 2223","Mr. Wesam Al Sayed","Yes","wesam.alsayed@ids.ae","0.075","NA","365 days after receipt of goods","false"
-"MO","99999999","TEST JH Distributor",,,,,"Yes",,"0.075","NA","365 days after receipt of goods","false"
-"GC","9999999","All","Gulf Health Council\Diplomatic Quarter - opp. Saudi\Commission for Health Specialties\Riyadh 11462, PO Box 7431, KSA","9.66E+11","9.66E+11","Mr. Fatthi Alkathiry","Yes","g.purchase@ghc.sa","0.075","NA","365 days after receipt of goods","false"
-"MX","100000004","ABASTECEDORA DE INSUMOS PARA LA SALUD S.A. DE C.V.","CALLE NORTE 31 A GUSTAVO A. MADERO CP 07700",,,"José Antonio Higareda","Yes","antonio.higareda@abisalud.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000005","ACCESOFARM S.A. DE C.V. ","Dr. FEDERICO GOMEZ SANTOS CUAUHTEMOC CP 06720",,,"Enrique Guadarrama","Yes","enrique.guadarrama@accesofarm.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000006","CASA MARZAM, S.A. DE C.V. ","AV. CIRCUNVALACIÓN ECATEPEC CP 55420",,,"Jaqueline Dimas","Yes","jdimas@marzam.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000007","COMERCIALIZADORA PENTAMED S.A. DE C.V.","ANTOINE LAVOISIER CUAUTITLAN IZCALLI CP 54730",,,"Monica Oloarte","Yes","monica.oloarte@pentamed.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000008","COMERCIALIZADORA PENTAMED S.A. DE C.V.","AV. PROL IND AUTOMOTRIZ TOLUCA CP 52000",,,"Monica Oloarte","Yes","monica.oloarte@pentamed.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000009","DAYAR DISTRIBUCIONES MEDICAS S.A. DE C.V.","13VA PRIVADA DE YAÑEZ HERMOSILLO CP 83190",,,"Paola Morales","Yes","pmorales@dayar.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000010","DIMEJAL, S.A. DE C.V. ","ORION ZAPOPAN CP 45070",,,"Josefina Navarro","Yes","dimejalsadecv@outlook.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000011","DISTRIBUCION ESPECIALIZADA DE MEDICAMENTOS, S.A. DE C.V.","ATOTONILCO 812 MONTERREY CP 64020",,,"Cesar Ramos","Yes","cramos@demsa.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000012","DISTRIBUIDORA DE FARMACOS Y FRAGANCIAS S.A. DE C.V.","TABLAJE CATASTRAL MERIDA CP 97302",,,"Gabriela Lira","Yes","mlira@difasa.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000013","DISTRIBUIDORA DE FARMACOS Y FRAGANCIAS S.A. DE C.V.","AV LAGUNA DE LAS ILUSIONES VILLAHERMOSA CP 86019",,,"Gabriela Lira","Yes","mlira@difasa.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000014","DISTRIBUIDORA DISUR, S.A. DE C.V. ","AV. CIRC. DE LA INDUSTRIA NTE. LERMA CP 52000",,,"Silvia Cuevas Perez","Yes","scuevas@disur.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000015","DISTRIBUIDORA ESPECIALIDADES 2001 S.A. DE C.V.","PRIVADA ALFREDO BONFIL COYOACÁN CP 04470",,,"Selene Escobar","Yes","selene.escobar@especialidades2001.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000016","DISTRIBUIDORA INTERNACIONAL DE MEDICAMENTOS Y EQUIPO MEDICO SA CV","CARR AUTOP MEXICO-QUERETARO CUAUTITLAN IZCALLI CP 54763",,,"Manuel Capetillo","Yes","macapetillo@dimesa.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000017","DISTRIBUIDORA INTERNACIONAL DE MEDICAMENTOS Y EQUIPO MEDICO SA CV","AVENIDA COLON JALISCO CP 44190",,,"Manuel Capetillo","Yes","macapetillo@dimesa.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000018","DISTRIBUIDORA INTERNACIONAL DE MEDICAMENTOS Y EQUIPO MEDICO SA CV","AV.REFORMA Y OLIVO TULTITLAN CP 54913",,,"Manuel Capetillo","Yes","macapetillo@dimesa.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000019","DROGUERIA Y FARMACIA EL GLOBO S.A. DE C.V.","NOGAL 47 CUAUHTEMOC CP 06400",,,"Cristian Calvillo","No","ccalvillo@dfg.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000020","FARMACEUTICA ALTHOS S.A. DE C.V. ","SANTA CRUZ NORTE CIUDAD DE MEXICO CP 03103",,,"Elsa Fuentes","Yes","e.fuentes@althos.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000021","FARMACEUTICOS MAYPO, S.A. DE C.V. ","VIADUCTO TLALPAN COYOACAN CP 04980",,,"Karib Cabello","Yes","apoyos@maypo.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000022","LABORATORIOS MECCH SA DE CV ","AMEYALCO HUIXQUILUCAN DE DEGOLLADO CP 03100",,,"Lizbeth Tovar","Yes","ltovar@laboratoriosmecch.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000023","LABORATORIOS MECCH SA DE CV ","AV. COATEPEC ESTADO DE MEXICO CP 52770",,,"Lizbeth Tovar","Yes","ltovar@laboratoriosmecch.com","0.075","NA","365 days after receipt of goods","false"
-"TH","4411547","DKSH (Thailand) Limited","2106 Sukhumvit Road, Phrakhanong-Tai, Phrakhanong, Bangkok 10260, Thailand","6622209317","6622209880","Suntree Phasuphasutha
-(Senior Executive Manager, Client Management)","Yes","suntree.p@dksh.com","0.075","NA","365 days after receipt of goods","false"
-"TH","4411548","Global Medical Solutions (Thailand) Co., Ltd.","1201/81 Soi Ladprao 94 (Panjamith), Ladprao Road, Plubpla, Wangthonglang, Bangkok 10310 Thailand","6625592740","6625307455","Nutthawuth Nainanont
-(Production Manager)","Yes","nutthawuth.nainanont@globalmedicalsolutions.com","0.075","NA","365 days after receipt of goods","false"
-"AR","4411549","Polyquimica","Salta 505, Mendoza, Argentina","2614238408",,"Farm. Diego Ferlaza","Yes","polyquimica@gmail.com","0.075","NA","365 days after receipt of goods","false"
-"BR","4411550","Distributor A","Dummy","Dummy","Dummy","Dummy","Yes","jh@pythia-consulting.com","0.075","NA","365 days after receipt of goods","false"
-"EG","5000020","PharmaOverseas","14 - Building Pharmacy - No-5- first floor. Smouha. Alexandria, Egypt","+202 3 424 4600",,"Mr. Aboulgoud Hassan Ahmed","Yes","Aboulgoud.Hassan@pharmaoverseas.com","0.075","NA","365 days after receipt of goods","false"
-"AR","100000000","Bellandi & Barrera","Carola Lorenzini 48, Godoy Cruz, Mendoza, Argentina","2614222428",,"Cintia Masi (Licitaciones)","Yes","cmasi@lbybsrl.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000001","Drogueria 20 de Junio","Pte. Roca 1553/55, Rosario, Santa Fe, Argentina","3414210222",,"Sandra Baiochi","Yes","sbaiochi@drogueria20dejunio.com.ar; adminstituciones@drogueria20dejunio.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000002","Cía. Farmaceutica (Ciafarma)","Av. Condarco 327 BIS, Rosario, Santa Fe, Argentina","3414261277",,"Ezequiel Semino","Yes","gestionesinstituciones@ciafarma.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000003","Drofar - Redimer","Av. Juan B. Justo 2713, CABA, Argentina","1148553564",,"Juan Pablo Accoroni","Yes","juanpablo.accoroni@drofar.com.ar ","0.075","NA","365 days after receipt of goods","false"
-"MX","100000024","NADRO, S.A.P.I. DE C.V. ","CALLE A PUEBLA CP 72019",,,"Oscar Flores","Yes","oscar_flores@nadro.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000025","NADRO, S.A.P.I. DE C.V. ","CARRETERA MEXICO-QUERETARO CUAUTITLAN IZCALLI CP 54715",,,"Oscar Flores","Yes","oscar_flores@nadro.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000026","ONCOMEDIC DISTRIBUIDORA DE MEDICAMENTOS S.A. DE C.V.","CUAUHTEMOC TLALPAN CP 14050",,,"Efrén Palacios","Yes","compras@oncomedicmexico.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000027","PVH DISTRIBUCIO S.A. DE C.V. ","BRASIL MEXICALI CP 21200",,,"Paul Ojeda","Yes","paul.ojeda@grupopvh.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000028","RALCA S.A. DE C.V. ","INDUSTRIA DE LA LOGISTICA LERMA CP 52000",,,"Ivonne de la Presa","Yes","ivillegas@ralca.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000029","RALCA S.A. DE C.V. ","BOSQUE DE RADIATAS CUAJIMALPA CP 05120",,,"Ivonne de la Presa","Yes","ivillegas@ralca.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000030","SALUBOX S.A.P.I. DE C.V. ","CORAS GUADALAJARA CP 44690",,,"Emmanuel Ysita","Yes","emmanuel.ysita@salubox.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000031","COBITER, S.A. DE C.V.","TRIGO 16 GRANJAS ESMERALDA IZTAPALAPA CIUDAD DE MEXICO CP 09810",,,"Jaqueline Maldonado","Yes","cobiter@hotmail.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000032","REINGENIERIA EN INSUMOS MEDICOS Y LOGISTICOS (RIMLA)","CHICHEN ITZA 473 JARDINES DEL SOL ZAPOPAN CP 45050",,,"Alfredo Alvarez","Yes","alfredo.alvarez@rimla.com.mx","0.075","NA","365 days after receipt of goods","false"
-"MX","100000033","DISTRIBUIDOR DE FARMACIAS Y HOSPTALES     (DISFARH)","VENUSTIANO CARRANZA 2810-A SANTA ROSA CHIHUAHUA CP 31050",,,"Santiago Jiménez","Yes","s.jimenez@disfarh.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000034","ORVI  DISTRIBUCIONES ","TAXCO 205 LA PASTORA MONTERREY CP 67140",,,"Luis Alberto Rodríguez","Yes","ventas8@orvidistribuciones.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000035","MARCRAN DISTRIBUCIONES ","PASEO DE LAS PALMAS 731 LOMAS DE CHAPULTEPEC V SECCION MIGUEL HIDALGO CP 11000",,,"Jenny Rodriguez Rincon","Yes","jrodriguez@marcran.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000036","OPERADORA Y COMERCIALIZADORA POLLUELATA (OCP)                           ","PRIVADA ACUEDUCTO RAFAEL MURILLO VIDAL NORTE XALAPA CP 91010",,,"Sergio Martínez Munguia","No","ventas@grupo-ocp.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000037","MEDIKAMENT DE MEXICO","BERMUDAS 154 VISTA HERMOSA MONTERREY CP 64620",,,"Francisco Ramirez","Yes","francisco.ramirez@medicament-mexico.com","0.075","NA","365 days after receipt of goods","false"
-"MX","100000038","ILS INTEGRADORA","JESUS DEL MONTE 271 PISO 1 JESUS DEL MONTE HUIXQUILUCAN ESTADO DE MEXICO CP 52764",,,"Carlos Santiago","Yes","carlos.santiago@ilsmexico.com.mx","0.075","NA","365 days after receipt of goods","false"
-"CL","100000039","No Distributor",,,,,"Yes",,"0.075","NA","365 days after receipt of goods","false"
-"AR","100000040","No Distributor",,,,,"Yes",,"0.075","NA","365 days after receipt of goods","false"
-"AR","100000041","Grupo BOSCH Sociedad colectiva","27 de Febrero 1152, Rosario, Santa Fe","54 341 482 2727",,"Leandro Fisicaro; Carolina Savietto; Graciela Gallina; Anabella Pesci","Yes","leandro.fisicaro@drogueriabosch.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000042","CO.FAR.MEN (Cooperativa farmaceutica Mendoza)","Belgrano 1294, Godoy Cruz, Mendoza","54 261 424 6600",,"Ivana Puga","Yes","ivana.puga@cofarmen.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000043","DISTRIFAR S.A.","Montecaseros 1357, Mendoza","54 261 423 5454",,"Oscar Rodriguez","Yes","oscar@distrifarsa.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000044","Medifarm - SCIENZA","Av. Juan de Garay 437, CABA","54 11 5554 7890",,"Jesica Pereira","Yes","jpereira@scienza.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000045","AUDIFARM Salud S.A.","Moreno 3057/59, PB, CABA","54 11 4956 9900",,"Fabian Languasco","Yes","flanguasco@audifarmsalud.com","0.075","NA","365 days after receipt of goods","false"
-"AR","100000046","DNM Farma","Juan B. Alberdi 3499, CABA","54 11 4610 9100",,"Simon Tovar; Nicolas Lugo","Yes","stovar@drogueriafarmasun.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000047","WENT - Farmacias Rp","Paracas 285, CABA",,,"Mercedes","Yes","comprasespeciales@farmaciasrp.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000048","CACERES - Droguería MEDITERRANEA","Avellaneda 1770, Cordoba","54 351 474 4550 ",,"Guillermo Pairone","Yes","guillermo@mediterranea.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000049","Droguería ER CO SRL","Fragueiro 1370, Alta Cordoba, Cordoba","54 351 474 0367",,"Cecilia","Yes","drogueria_erco@live.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000050","Droguería KELLERHOFF S.A.","Pueyrredon 1149, Rosario, Santa Fe","54 341 420 3300",,"Diego Curatolo","Yes","d.curatolo@kellerhoff.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000051","Drogueria DISVAL","Grito de Asencio 3736, CABA ","54 11 4912 1919; 54 9 11 4086 0118 ",,"Mauricio Oddone","Yes","licitaciones@disval.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000052","Drogueria ONCOFARMA","Chacabuco 209  - S. M. de Tucuman","54 381 431 0011",,"Carmen Abella","Yes","carmen@onco-farma.com","0.075","NA","365 days after receipt of goods","false"
-"AR","100000053","ORIEN S.A.","Camarones 1763, CABA","54 9 11 3111 4560; 54 11 5274 8500",,"Ignacio Trevisan; Anabella L´Episcopo","Yes","itrevisan@orien.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000054","DISTRIMED Jujuy SRL","Av. Párroco Marshke 928, S. S. de Jujuy","54 388 425 8820",,"Ariel Intimone","Yes","ventasdistrimedjujuysrl@gmail.com","0.075","NA","365 days after receipt of goods","false"
-"AR","100000055","Drogueria LIDER SRL","Nicaragua 638 BIS, Rosario, Santa Fe","54 341 458 1984 ",,"Mariano Benzaquen","Yes","liderdrogueria@hotmail.com","0.075","NA","365 days after receipt of goods","false"
-"AR","100000056","Drogueria COMARSA S.A.","Jujuy 2944, Rosario, Santa Fe","54 341 437 0353; 54 9 11 3610 3002",,"Federico Matsuo","Yes","compras@drogueriacomarsa.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000057","FARMA KD - Lafken","Lima 355, CABA","54 11 6205 2209",,"Florencia Berretta; David Vidovic; Silvina Tapia","Yes","fberretta@lafken.com","0.075","NA","365 days after receipt of goods","false"
-"AR","100000058","Drogueria ROSFAR","Gorriti 196, Rosario, Santa Fe","54 341 525 3000",,"Marcelo Soler","Yes","msoler@rosfar.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000059","Drogueria META S.A.","Av. Mitre 3690, Munro, Buenos Aires","54 11 4006 6382",,"Fabiana Sanchez; Fernanda Julian (Jefa licitaciones)","Yes","fsanchez@meta.com.ar","0.075","NA","365 days after receipt of goods","false"
-"AR","100000060","ABC Salud S.A.","Av. Juan de Garay 4138, CABA","54 11 4941 1001",,"Pablo Carreras","Yes","pcarreras@abcsalud.com.ar","0.075","NA","365 days after receipt of goods","false"
-"KW","1909161","Alghanim Healthcare","Shuwaikh Industrial Area 2, Block 1, Street 4, Plot 124H, PO Box 856 Code 13009","+965 22059000","+965 22059009","Mr. Gregory Dsouza","No","gregory.dsouza@alghanimhc.com","0.075","NA","365 days after receipt of goods","false"
-"IT","100000062","No Distributor",,,,,"Yes",,"0.075","NA","365 days after receipt of goods","false"
-"ES","100000063","No Distributor",,,,,"Yes",,"0.075","NA","365 days after receipt of goods","false"
-"BR","4411551","Distributor B","Dummy","Dummy","Dummy","Dummy","Yes","jh@pythia-consulting.com","0.075","NA","365 days after receipt of goods","false"
-"BR","4411552","Bayer Brazil","Dummy","Dummy","Dummy","Dummy","Yes","jh@pythia-consulting.com","0.075","NA","365 days after receipt of goods","false"
+COUNTRYCODE,DISTRIBUTORID,DISTRIBUTORNAME,ADDRESS,CONTACTNO,FAX,CONTACTPERSON,ACTIVERECORD,CONTACT_EMAIL,CITY,STATE,TAXCODE,CNPJ,CUSTOMERID,SHORTNAME,COMMISSIONRATE,INCOTERMS,PAYMENTTERMS,FORALLBRANDS
+"BR","4411552","Bayer Brazil","Dummy","Dummy","Dummy","Dummy","Yes","jh@pythia-consulting.com","NA","NA","NA","18459628000115","987654321","NA","0.075","NA","365 days after receipt of goods","true"
+"BR","100000096","PROHOSP DIST DE MED LTDA","R MARIA RODRIGUES 100
+OLARIA
+21031-490, RIO DE JANEIRO","21 2560 4500","",,"Yes","","RIO DE JANEIRO","RJ",,"04355394000232","30751","PROHOSP","33",,,"true"
+"BR","100000097","CRISFARMA COM REPRES SERV LTDA","R MINISTRO SALGADO FILHO 430
+BOA VIAGEM - GALPAOTERREO
+51130-500, RECIFE","81 2123 6186","",,"Yes","","RECIFE","PE",,"32734295000469","720626","CRISFARMA","33",,,"true"
+"BR","100000098","ADL CONEXAO COMERCIAL LTDA ME","R N SENHORA GRACAS 666 APT 202
+CENTRO
+25515-001, SAO JOAO DE MERITI","21 2651 1277","",,"Yes","","SAO JOAO DE MERITI","RJ",,"11933772000100","789744","ADL","33",,,"true"
+"BR","100000099","EXPRESSA DIST DE MEDICAMENTOS LTDA","AV DAS NACOES UNIDAS 21476
+VILA ALMEIDA - AREA P06
+04795-000, SAO PAULO","11 6957 9791","",,"Yes","","SAO PAULO","SP",,"06234797000259","1029279","EXPRESSA","33",,,"true"
+"BR","100000100","OVER REPRESENTACOES COMERCIAIS LTDA","R 05 S/N QUADRA16 LOTE 21
+CIDADE JARDIM
+75080-730, ANAPOLIS","21 3261 4118","",,"Yes","","ANAPOLIS","GO",,"40224719000554","1038673","OVER","33",,,"true"
+"BR","100000101","PROMEFARMA REP COM LTDA","R PROF LEONIDAS F DA COSTA 847
+PAROLIM
+80220-410, CURITIBA","41 3052 7900","",,"Yes","","CURITIBA","PR",,"81706251000198","1048649","PROMEFARMA","33",,,"true"
+"BR","100000102","PROFARMA SPECIALTY SA","R UM 239 QUADRA 2 LOTE 10
+CIVIT I
+29168-020, SERRA","41 2169 4847","",,"Yes","","SERRA","ES",,"81887838000736","1091617","PROFARMA","33",,,"true"
+"BR","100000103","D HOSP DISTR HOSP IMP E EXP LTDA","AV ALEXANDRINO DE ALENCAR 906 A
+LAGOA SECA
+59030-350, NATAL","62 3278 0260","",,"Yes","compras02.sp@dhosp.com.br","NATAL","RN",,"08076127000104","1211657","D-HOSP","33",,,"true"
+"BR","100000104","GOIANIA MEDICA PROD HOSP LTDA GOIANIA MEDICA","AV SEGUNDA RADIAL 288 Q 119 LT 1
+SETOR PEDRO LUDOVICO
+74820-090, GOIANIA","62 3281 6462","",,"Yes","licitacao@goianiamedica.com.br","GOIANIA","GO",,"01468098000179","1215004","GOIANIA","33",,,"true"
+"BR","100000105","MAJELA MEDICAMENTOS LTDA","R PRAIA DO JACARE
+JACARE
+58105-810, CABEDELO","85 4006 9026","",,"Yes","","CABEDELO","PB",,"09613374000157","1366283","MAJELA MED","33",,,"true"
+"BR","100000106","MAURO MARCIANO COM DE MED LTDA","R SAMUEL KRUCHIM 200
+PATRONATO
+97020-670, Santa Maria","(55) 3212-2447","(55) 3212-2447",,"Yes","FINANCEIRO@MAUROMARCIANO.COM.BR","Santa Maria","RS",,"94894169000186","1366607","MAURO MARC","33",,,"true"
+"BR","100000107","COSTA CAMARGO COM PROD HOSP LTDA","R JUIZ A MARTINS CASTRO FILHO 8
+PRAIA DE ITAPOA
+29101-800, VILA VELHA","27 3200 4746","",,"Yes","","VILA VELHA","ES",,"36325157000134","1366646","COSTA","33",,,"true"
+"BR","100000108","METROPOLE C PROD HOSP LTDA EPP EPP","ST SHCGN CR QD 716 BC B LOJA 30 SN
+ASA NORTE
+70770-620, BRASILIA","61 3327 5290","",,"Yes","","BRASILIA","DF",,"26453860000174","1369291","METROPOL","33",,,"true"
+"BR","100000109","DIST DE MED HOSP E ONCO LTDA EPP","R SILVA PAULET 769 SALA 301 E 303
+ALDEOTA
+60120-021, FORTALEZA","85 3023 9412","",,"Yes","","FORTALEZA","CE",,"11263101000171","1504316","DIST","33",,,"true"
+"BR","100000110","PRO MEDIC COM PROD MED HOSP LTDA ME","RUA ISAIAS REGIS DE MIRANDA 282
+HAUER
+81630-050, CURITIBA","3078 2200","",,"Yes","","CURITIBA","PR",,"15527709000117","1716830","PROMEDIC","33",,,"true"
+"BR","100000111","COTACAO COM REP IMP EXP LTDA","RUA CAMPO COMPRIDO 90
+IMIRIM
+02469-120, SAO PAULO","11 6239 6060","",,"Yes","","SAO PAULO","SP",,"58950775000108","1716833","COTACAO","33",,,"true"
+"BR","100000112","HLC COM DE MAT HOSP LTDA EPP","RUA SARMENTO LEITE 1098 CJT 401
+CIDADE BAIXA
+90050-170, PORTO ALEGRE","5132270339","",,"Yes","","PORTO ALEGRE","RS",,"90492927000189","1716841","HLC COMERC","33",,,"true"
+"BR","100000113","PROFARMA SPECIALTY SA","R GENERAL POTIGUARA 1428
+NOVO MUNDO
+81050-500, CURITIBA","41 2169 4858","",,"Yes","","CURITIBA","PR",,"81887838000655","1964571","PROFARMA","33",,,"true"
+"BR","100000114","ONCOEXO DISTR MED LTDA","R JUNDIA 264
+TAMARINEIRA
+52051-090, RECIFE","81 3034 5948","",,"Yes","","RECIFE","PE",,"08958628000106","1975405","ONCOEXO","33",,,"true"
+"BR","100000115","MEDWAY LOG COMERCIO E SERVICOS LTDA","AV DOUTOR MESSIAS BARROS 370
+DIST IND MIGUEL DE LOUCA
+37072-003, VARGINHA","35 3222 4132","",,"Yes","tobrito@bol.com.br","VARGINHA","MG",,"11735488000111","1992412","MEDWAY","33",,,"true"
+"BR","100000116","D HOSP DISTR HOSP IMP E EXP LTDA","AV DOS EXPEDICIONARIOS 4788
+MONTESE
+60410-302, FORTALEZA","85 3034 9200","",,"Yes","","FORTALEZA","CE",,"08076127000953","1992455","D-HOSP","33",,,"true"
+"BR","100000117","SANTE PROD HOSP LTDA  EPP","AV CONTORNO A ESPECIAL 13
+NUCLEO BANDEIRANTE LOTE I1 LOJA 01
+71705-535, BRASILIA","61 3386 0707","",,"Yes","","BRASILIA","DF",,"06238171000130","2017451","SANTE","33",,,"true"
+"BR","100000118","EXTRA DIST MED PROD HOSP EIRELI EPP","R RUI BARBOSA 69
+CENTRO
+88900-007, ARARANGUA","48 3524 4524","",,"Yes","","ARARANGUA","SC",,"06035038000186","2081798","EXTRA","33",,,"true"
+"BR","100000119","UNI HOSPITALAR LTDA","R ALAGOAS 253
+IPSEP
+51350-560, RECIFE","81 3472 7218","",,"Yes","","RECIFE","PE",,"07484373000124","2081854","UNI","33",,,"true"
+"BR","100000120","FARMALIBRA COM PROD HOSP LTDA","R PRESIDENTE LIMA 325
+CENTRO DE VILA VELHA
+29100-330, VILA VELHA","27 3077 7711","",,"Yes","","VILA VELHA","ES",,"00809672000142","2157889","FARMALIBRA","33",,,"true"
+"BR","100000121","BASEMEDI COM DIST MEDICAMENTOS LTDA","AV AMYNTHAS JACQUES MORAES 63
+HUMAITA
+90245-050, PORTO ALEGRE","51 3337 0049","",,"Yes","","PORTO ALEGRE","RS",,"20137503000110","2180258","BASEMEDI","33",,,"true"
+"BR","100000122","CIRURGICA JAW COM MAT MED HOSP LTDA","AV SEVERO DULLIUS 195 102A E 102B
+SAO JOAO
+90200-310, PORTO ALEGRE","48 3244 3524","",,"Yes","licitacao@cirurgicajaw.com.br","PORTO ALEGRE","RS",,"79250676000355","2761678","JAW","33",,,"true"
+"BR","100000123","D HOSP DISTR HOSP IMP E EXP LTDA","AV RIO VERDE SN QD044 LT12 GP02
+LOTEAMENTO VILA ROSA
+74935-851, APARECIDA DE GOIANIA","11 3526 0651","",,"Yes","","APARECIDA DE GOIANIA","GO",,"08076127000872","2781912","D HOSP","33",,,"true"
+"BR","100000124","MSR EXPRESS MED ESPECIAIS LTDA EPP","R ARAXA  130
+LAGOINHA
+31110-280, BELO HORIZONTE","31 3657 7110","",,"Yes","","BELO HORIZONTE","MG",,"14842681000140","2784578","MSR EXPRE","33",,,"true"
+"BR","100000125","DISCOMED COM DE PROD HOSP LTDA","R SAO LUIS 1064
+SANTANA
+90620-170, PORTO ALEGRE","51 32191676","",,"Yes","","PORTO ALEGRE","RS",,"00417145000192","2819240","DISCOMED","33",,,"true"
+"BR","100000126","UNI HOSPITALAR CEARA LTDA EPP","R FRANCISCO J A PEREIRA 1085
+CAJAZEIRAS
+60864-520, FORTALEZA","85 3237 7349","",,"Yes","","FORTALEZA","CE",,"21595464000168","2938829","UNI","33",,,"true"
+"BR","100000127","TECNICA DEMANDA DISTR HOSP LTDA EPP","R PEDRO AMERICO 1109
+POCO
+57025-890, MACEIO","82 3327-0000","",,"Yes","","MACEIO","AL",,"11928476000103","2940785","TECNICA","33",,,"true"
+"BR","100000128","EXPRESSA DIST DE MEDICAMENTOS LTDA","ROD DF-290 GL.21 KM341 LT1E4
+NUCLEO RURAL
+72578-000, BRASILIA","71 2104-9488","",,"Yes","","BRASILIA","DF",,"06234797000178","3185758","EXPDISMEDL","33",,,"true"
+"BR","100000129","AGLON COM E REPRES. LTDA","AV. VISCONDE NOVA GRANADA 1105
+VL.GROSSKLAUSS
+13617-400, LEME","19-3573-7300-","19 3571-2733",,"Yes","","LEME","SP",,"65817900000171","3185848","AGLCOMREP","33",,,"true"
+"BR","100000130","DUPATRI HOSP COM  IMP E EXP LTDA","SAO PAULO  31
+VILA BELMIRO
+11075-330, SANTOS","13 32288700","",,"Yes","","SANTOS","SP",,"04027894000164","3185876","DUPRATI","33",,,"true"
+"BR","100000131","LICIMED DIST MED C P MED HOSP LTDA","AV DAS INDUSTRIAS 275 CJ107
+ANCHIETA
+90200-290, PORTO ALEGRE","51-33234516","51-33234546",,"Yes","","PORTO ALEGRE","RS",,"04071245000160","3186063","LICIMED","33",,,"true"
+"BR","100000132","ALIANZAFARMA DISTR DE MED LTDA EPP","R JOSE VIVACQUA 645 LJ02
+JABOUR
+29072-285, VITORIA","27 3066 6200","",,"Yes","","VITORIA","ES",,"16803930000113","3231865","ALIANZA","33",,,"true"
+"BR","100000133","BR SUL DIST MEDICAMENTOS EIRELI ME","R SEVERINO AUGUSTO PRETTO 574
+SANTO ANTAO
+95960-000, ENCANTADO","51 3751-3149","",,"Yes","","ENCANTADO","RS",,"21438123000189","3250995","BR SUL","33",,,"true"
+"BR","100000134","F R DE FREITAS EPP MUNDIAL CATETERES","R MERCES CARSALADE VILLELA 220
+IPE
+34000-000, NOVA LIMA","31 3541 1809","",,"Yes","flavia@mundialhospitalar.com.br","NOVA LIMA","MG",,"08002459000136","3264234","MUNDIAL","33",,,"true"
+"BR","100000135","ONCO PROD DIST PRODS HOSP ONCO LTDA","RUA TANCREDO NEVES 337
+SAO DIOGO I
+29163-267, SERRA","11 2185-8092","",,"Yes","","SERRA","ES",,"04307650001298","3284340","ONCO","33",,,"true"
+"BR","100000136","MAJELA HOSPTR.LTDA","R JORGE ACURCIO , 777
+VILA UNIAO
+60410-802, FORTALEZA","85 31313232","85 31313232",,"Yes","","FORTALEZA","CE",,"02483928000108","3303099","D-MAJELA","33",,,"true"
+"BR","100000137","BSB COM DE PROD HOSPITALARES LTDA","TR POLO DESENV JUSCEL KUBITSCHEK
+SANTA MARIA  TRECHO 1 CONJ 10 LT 20
+72549-550, BRASILIA","61 2104-3401","",,"Yes","","BRASILIA","DF",,"05777772000158","3367601","BSB COM","33",,,"true"
+"BR","100000138","FG FARMA GOIAS DISTRIB MEDTOS LTDA","AV.2a.AVEN., S/N Q.1 B LT 48/50
+AND.6 S.616A620 ED.MONTREAL OFFICE
+74935-900, APARECIDA DE GOIANIA","11-37433923","",,"Yes","","APARECIDA DE GOIANIA","GO",,"08041822000122","3427046","FG","33",,,"true"
+"BR","100000139","CIRURGICA JAW COM MAT MED HOSP LTDA","R.IOLANDA TULIO BORBA, 405
+VILA TARUMA
+83323-380, PINHAIS","41-35575200","",,"Yes","","PINHAIS","PR",,"79250676000274","3432670","CJCMMH","33",,,"true"
+"BR","100000140","DUPATRI HOSP COM  IMP E EXP LTDA","AV JOSE SEVERINO 3530
+VEREDA DOS BURITIS
+75709-616, CATALAO","13 3228 8700","13 3228 8700",,"Yes","","CATALAO","GO",,"04027894000326","3434029","DUPATRI","33",,,"true"
+"BR","100000141","ALTA FARMA COM E REPRES. LTDA","AV PORTUGAL, 2145
+SANTA AMELIA
+31555-000, BELO HORIZONTE","31 21274398-4399","31 9361-8482",,"Yes","","BELO HORIZONTE","MG",,"08628861000120","3455458","ALTA FARMA","33",,,"true"
+"BR","100000142","MG ONCOLOGIA MED ESPECIAIS LTDA","R PIAUI,646
+SANTA EFIGENIA
+30150-320, BELO HORIZONTE","31 3222 6099","31 3222 6099",,"Yes","","BELO HORIZONTE","MG",,"06982320000170","3461615","MG","33",,,"true"
+"BR","100000143","GENESYS COMERCIAL LTDA","R BARREIROS, 956
+RAMOS
+21031-755, RIO DE JANEIRO","21 2560-9292","",,"Yes","","RIO DE JANEIRO","RJ",,"05925340000147","3508903","GENESYS","33",,,"true"
+"BR","100000144","FG FARMA GOIAS DISTRIB MEDTOS LTDA","ST SHC SW CLSW QDA 105 BLOCO A .
+SUDOESTE SLS 23 24 E 25 PAV SUPE
+70670-431, BRASILIA","11 3502-4350","11 3502-4350",,"Yes","","BRASILIA","DF",,"08041822000203","3510312","FG-FARMA","33",,,"true"
+"BR","100000145","LABORSYS PRODS EQUIP LAB LTDA EPP","R DR GERALDO C MOREIRA, 164
+CJ 74/75
+04571-020, SAO PAULO","11 51022911","",,"Yes","","SAO PAULO","SP",,"08577112000111","3536222","LABORSYS","33",,,"true"
+"BR","100000146","REPRESS DISTRIBUIDORA LTDA","ALTOCANTINS,630RMZ 10TOC3QUADR4 L8
+ALPHAVILLE CENTRO IND E EMPRESARIAL
+06455-020, BARUERI","","11 38326536",,"Yes","","BARUERI","SP",,"03948933000101","3536819","REPRESS","33",,,"true"
+"BR","100000147","DMAX DIST MEDTOS MAT HOSP LTDA EPP","R DOUTOR ENEAS DE LUCENA 327
+ENCRUZILHADA
+52041-090, RECIFE","81 3229 7114","",,"Yes","","RECIFE","PE",,"09390408000191","3574503","DMAX","33",,,"true"
+"BR","100000148","ONCOVIT DISTRIB MEDICAMENTOS LTDA","RUA JOSE VIVACQUA 645
+JABOUR
+29072-285, VITORIA","27 3064 0124","27 3064 0124",,"Yes","","VITORIA","ES",,"10586940000168","3582719","ONCOVIT","33",,,"true"
+"BR","100000149","CM HOSPITALAR SA","EX 3 S/N Q 9 A - MODULO 26 A 30
+DIMIC
+75709-685, CATALAO","64 344 26871","64 3442 6541",,"Yes","","CATALAO","GO",,"12420164000319","3594195","CM","33",,,"true"
+"BR","100000150","CM HOSPITALAR SA","AV LUIZ MAGGIONI 2727 BL A
+DISTRITO EMPRESARIAL
+14072-055, RIBEIRAO PRETO","16 3995 9401","16 2101 9401",,"Yes","","RIBEIRAO PRETO","SP",,"12420164000157","3594201","CM","33",,,"true"
+"BR","100000151","CIRURGICA JAW COM MAT MED HOSP LTDA","R HENRIQUE R ALMEIDA 261 QE L8 S1
+BREJARU
+88133-512, PALHOCA","48 3244 3524","48 3244 3524",,"Yes","","PALHOCA","SC",,"79250676000193","3608012","JAW","33",,,"true"
+"BR","100000152","ELFA MEDICAMENTOS LTDA","R PROJETADA 106 LT D SL 3
+PRAIA DE JACARE SITIO ATHAYDE PROP
+58310-000, CABEDELO","83 2106 2539","",,"Yes","","CABEDELO","PB",,"09053134000226","3656430","ELFA","33",,,"true"
+"BR","100000153","X MEDIC HOSPITALAR LTDA ME","R VEREADOR JULIO PEREIRA,909B
+JARDIM FELICIDADE
+68909-000, MACAPA","91 9131 0579","",,"Yes","","MACAPA","AP",,"14841442000175","3674075","X MEDIC","33",,,"true"
+"BR","100000154","LOTUS COM MED PRODUTOS HOSP LTDA EP","R IPIRU 159 LOJA B
+CACUIA ILHA DO GOVERNADOR
+21931-095, RIO DE JANEIRO","21 3393 8001","21 3393 8001",,"Yes","","RIO DE JANEIRO","RJ",,"14125318000103","3798266","LOTUS","33",,,"true"
+"BR","100000155","PROHOSP DIST DE MED LTDA","R JOSE FERREIRA BARROS 89
+VILA FANNY
+81030-320, CURITIBA","21 2560 4500","41 3246 3376",,"Yes","","CURITIBA","PR",,"04355394000151","3836792","PROHOSP","33",,,"true"
+"BR","100000156","CIAMED DISTR DE MEDIC LTDA","R SEVERINO AUGUSTO PRETTO 560
+SANTO ANTAO
+95960-000, ENCANTADO","51 37519300","",,"Yes","","ENCANTADO","RS",,"05782733000149","3837012","CIAMED","33",,,"true"
+"BR","100000157","PORTAL LTDA","R DOMINGOS SIMOES 22 E 34
+VILA SUZANA
+05630-010, SAO PAULO","11 3740 7170","",,"Yes","","SAO PAULO","SP",,"05005873000100","3839013","PORTAL","33",,,"true"
+"BR","100000158","JB FARMA COM MEDIC E REP EIRELI","ROD BR-116 10005
+ALTO DA BALANCA
+60851-025, FORTALEZA","(85) 30391922","",,"Yes","","FORTALEZA","CE",,"20301535000100","3913931","JB FARMA","33",,,"true"
+"BR","100000159","CIRURGICA BEZERRA DIST LTDA","R SAO JOSE 1523
+LAGOA NOVA
+59063-150, NATAL","84 3216 3970","",,"Yes","","NATAL","RN",,"02800122000198","3938910","BEZERRA","33",,,"true"
+"BR","100000160","MEDCOM COM DE MED HOSP LTDA","AL DAS ESPATODIAS 452 QD2 LT04
+SITIO RECREIO M BERNARDO SAYAO
+74681-220, GOIANIA","62 3581 5511","",,"Yes","","GOIANIA","GO",,"25211499000107","3965065","MEDCOMGO","33",,,"true"
+"BR","100000161","SOGER COMERCIO DE MEDICAMENTOS LTDA","RUA SILVA RAMOS 420
+CENTRO
+69025-030, MANAUS","92 99118 5707","",,"Yes","","MANAUS","AM",,"20644065000187","3973696","SOGER","33",,,"true"
+"BR","100000162","JOSIANE CRISTINA FUSCO CARRARO EPP ATENA PHARMA","AV JOSE ANTUNES DE LISBOA 56
+JARDIM DO BOSQUE
+13613-130, LEME","(19) 3572-1087","(19) 3572-1087",,"Yes","","LEME","SP",,"21940274000130","3977144","JOSIANE","33",,,"true"
+"BR","100000163","M DIAS COM  DE  PROD HOSP  LTDA","RUA CAPRI 318
+PASSA VINTE
+88132-229, PALHOÇA","48 99971-4817","48 3237-4065",,"Yes","","PALHOÇA","SC",,"14461796000194","3980485","MDIAS","33",,,"true"
+"BR","100000164","MEDCOM COM DE MED HOSPITAL","AV BOSQUE DA SAUDE,140-LT 06070809
+BOSQUE DA SAUDE
+78050-070, CUIABÁ","(62) 35815511","",,"Yes","","CUIABÁ","MT",,"25211499000298","3984105","MEDCOMCG","33",,,"true"
+"BR","100000165","HOSPFAR IND COM DE PRODS HOSP SA","R POTYRA 31 E 65
+PRADO
+50751-310, RECIFE","(62) 3269-3500","(62) 3269-3500",,"Yes","","RECIFE","PE",,"26921908000393","4018377","HOSPFAR","33",,,"true"
+"BR","100000166","ALFA MEDICO HOSPITALAR LTDA - EPP","AV PREFEITO WALL FERRAZ 15385
+BRASILAR
+64035-365, TERESINA","(86) 3223-1743","(86) 3223-1743",,"Yes","","TERESINA","PI",,"17129904000114","4030890","ALFA","33",,,"true"
+"BR","100000167","UNIAO MED COMER D MATER HP","R BEZERRA DE MENEZES 87 SALA 203
+PASSO DAREIA
+91350-130, PORTO ALEGRE","51-33418000","",,"Yes","","PORTO ALEGRE","RS",,"10954318000165","4033370","UNIAO","33",,,"true"
+"BR","100000168","MUNICIPIO DE MANHAÇU","PC CORDOVIL PINTO COELHO 460
+CENTRO
+36900-000, MANHAÇU","(33) 3339-2710","(33) 3339-2710",,"Yes","licitamanhuacu@yahoo.com.br","MANHAÇU","MG",,"18385088000172","4055401","MANHACU","33",,,"true"
+"BR","100000169","PRESCRITA MEDICAMENTOS LTDA","RUA DOS AIMORES 3018 SL809
+BARRO PRETO
+30140-073, BELO HORIZONTE","83 21062422","",,"Yes","","BELO HORIZONTE","MG",,"10515224000785","4101742","PRESCRITA","33",,,"true"
+"BR","100000170","RIOBAHIAFARMA COM E DISTRIBUICAO","R DO LUXEMBURGO 0 GALPAO 01
+GRANJAS RURAIS PRESIDENTE VARGAS
+41230-130, SALVADOR","71 3018 9886","",,"Yes","","SALVADOR","BA",,"15145035000196","4107305","RIOBAHIA","33",,,"true"
+"BR","100000171","VOETUR CARGAS E ENCOMENDAS LTDA","R JAMIL JOAO ZARIF 684
+JARDIM SANTA VICENCIA
+07143-000, GUARULHOS","61 2106 6400","",,"Yes","","GUARULHOS","SP",,"24893687001171","4116754","VOETUR","33",,,"true"
+"BR","100000172","FUTURA DIST MED E PROD DE SAU LTDA","R RECIFE S/N QD 1 LT82A
+
+25243-570, DUQUE DE CAXIAS","(21) 3311-5186","",,"Yes","","DUQUE DE CAXIAS","RJ",,"17700763000148","4119082","FUTURA","33",,,"true"
+"BR","100000173","FUTURA DIST MED PROD SAU LTDA","ROD GOVERNADOR MARIO COVAS 882
+PADRE MATHIAS
+29157-100, CARIACICA","(27) 3185-7557","",,"Yes","","CARIACICA","ES",,"17700763000300","4119417","FUTURA","33",,,"true"
+"BR","100000174","DRM DISTRI REG MEDICAMENTOS","R IRMA MARTA MORATO 51
+BOM PASTOR
+35500-140, DIVINOPOLIS","","",,"Yes","","DIVINOPOLIS","MG",,"26760171000102","4128505","DRM","33",,,"true"
+"BR","100000175","ONCOEXO DISTRIBUIDORA DE MEDICAMENT","NOSSASENHORADOSNAVEGANTES104 SAL501
+TAMBAU
+58039-110, JOAO PESSOA","81 3034 9948","",,"Yes","","JOAO PESSOA","PB",,"08958628000297","4157489","ONCOEXO","33",,,"true"
+"BR","100000176","HYBRIDA PRODUTOS HOSPITALARES LTDA HYBRIDA HOSPITALAR","TV BARAO DO TRIUNFO 3540
+MARCO
+66095-055, BELEM","(91) 9272 4312","",,"Yes","","BELEM","PA",,"12544921000102","4188671","HYBRIDA","33",,,"true"
