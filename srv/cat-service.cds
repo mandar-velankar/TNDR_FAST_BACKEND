@@ -394,6 +394,9 @@ service CatalogService @(path : 'tender')@(requires : [
             PRODUCT_FULL_DESCRIPTION                    : String(255);
             //end of missing SKU & SKUCountry fields
         key LOTID                                       : Integer default 1;
+            LINE                                        : String;
+            REFERENCE                                   : String(255);
+            IBIZWORKFLOWID                              : Integer;
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -494,6 +497,7 @@ service CatalogService @(path : 'tender')@(requires : [
             SPOT_RATE             : Double;
             EXTERNAL_ID           : String;
 			SAP_ID                : String;
+            TENDER_TYPE           : String; 
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
