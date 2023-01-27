@@ -1771,7 +1771,7 @@ module.exports = (srv) => {
 			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;
 
 			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
-			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation);
+			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation, tender);
 
 		}
 
@@ -2113,7 +2113,7 @@ module.exports = (srv) => {
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
 	//EHQUT-197468-MEA – Nucleus heads notifications flow
-	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation) {
+	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation, tender) {
 		let tenderid = offerProductValidation[0].TENDER_ID;
 
 		tenderid = tenderid.split("-")[1].substring(0, 2);
@@ -2149,7 +2149,7 @@ module.exports = (srv) => {
 		if (oCountryBusiness && oRegionalBusiness) {
 			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
 		}
-		if(tenderid > '22'){
+		if(tenderid > '22' && tender.CountryCode !== "BR"){
 			aApproverTypes.splice(oCountryBusiness,1);
 		}
 		//For Thailand specific
