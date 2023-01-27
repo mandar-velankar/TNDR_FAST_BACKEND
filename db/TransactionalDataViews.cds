@@ -595,7 +595,9 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.IntervalBetweenShipments as INTERVAL_SHIPMENTS,
 	offerProduct.PaymentTerms as PAYMENT_TERMS,
 	offerProduct.INCOTerms as INCO_TERMS,
-    
+    offerProduct.Line as LINE,
+    offerProduct.Reference as REFERENCE,
+    offerProduct.IbizWorkflowID as IBIZWORKFLOWID,
     case when offerProduct.TENDER_CHANNEL = 'Distributor'
         then
             case when offerProduct.PaymentTerms <> distributorBrand.PAYMENT_TERMS or offerProduct.INCOTerms <> distributorBrand.INCO_TERMS then 0 else 1 end
@@ -656,7 +658,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     productPricing.MinContractual as MinContractual,
     productPricing.MinAnnPurch as MinAnnPurch,
     offerProduct.SKU.ProductClass as ProductClass,
-    offerProduct.SKU.ProductDescription as ProductDescription,
+    offerProduct.SKU.ProductDescription as ProductDescription
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer

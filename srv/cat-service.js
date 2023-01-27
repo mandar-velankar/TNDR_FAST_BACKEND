@@ -27,7 +27,7 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView
@@ -37,6 +37,7 @@ module.exports = (srv) => {
 		PT_TMDLVTR, 
 		PT_TMUDLTRS, 
 		PT_TMAPPRST, 
+		PT_TMOFPR,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -1433,7 +1434,6 @@ module.exports = (srv) => {
 		results = aOfferProduct.map(async function (offerProduct) {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
 			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue);
-
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
 				OfferID: offer.OFFERID,
@@ -1721,7 +1721,10 @@ module.exports = (srv) => {
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials,
-                //PriceCondition: aPriceConditions
+                //PriceCondition: aPriceConditions,
+				LINE: offerProduct.LINE,
+				REFERENCE: offerProduct.REFERENCE,
+				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1749,7 +1752,7 @@ module.exports = (srv) => {
 		const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
 		let tender = await tx.run(SELECT.from(PT_TMTEND).where(whereTender));
 		tender = tender[0];
-
+		const tenderType = await tx.run(SELECT.from(MASTER_TENDER_TYPE).where({ID: tender.TENDER_TYPE_ID}));
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		let aApproverTypes = [];
         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
@@ -2102,7 +2105,8 @@ module.exports = (srv) => {
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
-			SAP_ID: tender.SAPID
+			SAP_ID: tender.SAPID,
+			TENDER_TYPE: tenderType[0].NAME
 		};
 		return results;
 	}
@@ -3169,9 +3173,10 @@ module.exports = (srv) => {
                     usString = usString.replace(/\./g,',');  
                     usString = usString.replace('$','.');   
                     return  usString; 
-			   },
-				   dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-                   extract2Decimals: (input) => {
+			   	},
+				dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+				dateYear: (input) => input.substring(0,4),
+                extract2Decimals: (input) => {
                     if(typeof input === 'string'){
                         return input.split(".")[1].substring(0, 2);
                     } else {
