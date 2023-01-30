@@ -1579,6 +1579,8 @@ inner join DirectIndirectDistributor as dist on dist.DistributorID = o.Distribut
 
     /**
  * This view contains calculated fields used on the Brazil financial offers page
+ * TODO: use the below join if you want to use DirectIndirectCustomers
+ * inner join DirectIndirectCustomers as customer on tender.InstituteID = customer.InstituteID and tender.TenderID = customer.TenderID and tender.OfferID = customer.OfferID
  */
 entity PriceConditionBrazilView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
