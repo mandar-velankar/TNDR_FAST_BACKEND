@@ -500,7 +500,7 @@ entity PT_TMQUTO {
                                 on Signatory2.AUTHORIZED_SIGNATORY = AS2 and Signatory2.COUNTRY_CODE = CountryCode and Signatory2.LEGAL_ENTITY_CODE = 'BIT';
 }
 
-//
+//EFRCL-217931-Italy - Tender expiry date field
 entity PT_TMTEND: managed {
     key TenderID             : String(50) not null;
         CountryCode          : String(2) not null;
