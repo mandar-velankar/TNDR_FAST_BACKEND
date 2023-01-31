@@ -898,7 +898,7 @@ module.exports = (srv) => {
         const institudeDivision = await tx.run(SELECT.one.from(BrazilInstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
 
 		const bDirectTender = offer.DISTRIBUTORNAME.toLowerCase() === 'bayer brazil' ? true : false;
-		const totalDiscount = Math.round((product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT + Number.EPSILON) * 100) / 100;
+		const totalDiscount = Math.round((product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000; // we want 4 decimal places after the comma, that's why / 10_000
 		const whereBrazilPricingPolicyCondition = getBrazilPricingPolicyWhereCondition(bDirectTender, product, offer, priceCondition, institudeDivision, distributorDivision);
 
 		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where(whereBrazilPricingPolicyCondition));
@@ -1011,7 +1011,7 @@ module.exports = (srv) => {
 		}else if(product.DIVISION.toLowerCase() === 'radiology' ){
 			return {
 				ProductPackID: product.ProductCode,
-				CustomerGroup: bDirectTender ? institudeDivision.CustomerGroup : distributorDivision.CustomerGroup
+				CustomerGroup: bDirectTender ? institudeDivision && institudeDivision.CustomerGroup : distributorDivision && distributorDivision.CustomerGroup
 			};
 		}
 	}
