@@ -1550,8 +1550,37 @@ left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices
     masterPrices.Value;
 
 
+entity DirectIndirectDistributor as select from MasterData.PT_TMDIST {
+    key DistributorID, 
+    key CountryCode,
+    DistributorName,
+    CustomerID,
+    case 
+        when DistributorName = 'Bayer Brazil' then true
+        else false
+    end as isDirect:Boolean,
+};
+
+entity DirectIndirectCustomers as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as o on o.TenderID = tender.TenderID and o.Active = 1
+inner join MasterData.PT_TMINST as inst on tender.InstituteID = inst.InstituteID 
+inner join DirectIndirectDistributor as dist on dist.DistributorID = o.DistributorID and dist.CountryCode = o.CountryCode
+{
+    key o.OfferID,
+    o.TenderID,
+    dist.isDirect,
+    inst.InstituteID ,
+    case 
+        when dist.isDirect = true then inst.CustomerID
+        else dist.CustomerID
+    end as CustomerID:Integer
+};
+
+
     /**
  * This view contains calculated fields used on the Brazil financial offers page
+ * TODO: use the below join if you want to use DirectIndirectCustomers
+ * inner join DirectIndirectCustomers as customer on tender.InstituteID = customer.InstituteID and tender.TenderID = customer.TenderID and tender.OfferID = customer.OfferID
  */
 entity PriceConditionBrazilView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
