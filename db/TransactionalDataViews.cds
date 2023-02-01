@@ -1621,10 +1621,12 @@ left outer join TransactionalData.PriceCondition as priceCondition
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
+    and product.LotID = priceCondition.LotID
     {
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
+    key product.LotID,
     priceCondition.ID as ExistingPriceConditionID: UUID,
     priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
     tender.CountryCode,
