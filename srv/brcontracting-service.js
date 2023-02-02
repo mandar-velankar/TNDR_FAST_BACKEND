@@ -112,11 +112,12 @@ module.exports = (srv) => {
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PR_DATE"]      = tender.PublicationDate ? tender.PublicationDate.split("-").join("") : tender.PublicationDate;
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PO_DATE"]      = tender.PublicationDate ? tender.PublicationDate.split("-").join("") : tender.PublicationDate;
 
-        let items = contractProducts.map((el,index) => {
+        let items = contractProducts.map((el) => {
             let productPriceCondition = priceconditions.filter(cond => cond.ProductCode === el.ProductPackID)[0];
+            const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
             return {
-                ITEM: addLeadingZeros(offerProducts[index].SORTER, 6, "Sorter"),
+                ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                 MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
