@@ -1443,7 +1443,7 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     on priceConditionClassification.CountryCode = product.CountryCode
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division
-    and priceConditionClassification.isMain = 'true' 
+    and priceConditionClassification.isMain = true 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
 inner join MasterData.PT_TMINST as institute 
     on tender.InstituteID = institute.InstituteID 
@@ -1453,9 +1453,12 @@ inner join MasterDataViews.MostRecentMasterPricesView as masterPrices
     on product.ProductCode = masterPrices.ProductPackId
     and product.CountryCode = masterPrices.CountryCode    
 inner join TransactionalData.PriceCondition as priceCondition 
-    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    on priceCondition.PriceConditionClassification_ID = priceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
+inner join TransactionalData.PT_TMTNOFST as offerStatus
+	on offerStatus.OfferID = offer.OfferID
+	and offerStatus.Active = 1
 left outer join BrazilContractingData.Contracts as contract
     on tender.TenderID = contract.TenderID
     and offer.OfferID = contract.OfferID
@@ -1482,7 +1485,7 @@ left outer join BrazilContractingData.ContractProducts as contractProduct
             end as ADHESION:Double,
         ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
 }
-where tender.CountryCode = 'BR' and (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+where tender.CountryCode = 'BR' and (offerStatus.STATUS = 'Quotation Submitted' or offerStatus.STATUS = 'Results Recorded' or offerStatus.STATUS = 'Delivery Ongoing')
 group by tender.TenderID,
     offer.OfferID,
     product.ProductCode,
