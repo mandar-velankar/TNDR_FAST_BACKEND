@@ -1475,7 +1475,7 @@ left outer join BrazilContractingData.ContractProducts as contractProduct
         priceCondition.TaxExemption as TAX_EXEMPTION,
         ifnull(priceCondition.CAP, 'No') as CAP:String(10),
         priceCondition.StandardDiscount+priceCondition.AdditionalDiscount as TOTAL_DISCOUNT:Double,
-        priceCondition.CommercialProposal as COMMERCIAL_PROPOSAL,
+        priceCondition.CommercialProposal as COMM_PROPOSAL,
         case 
                 when contract.ContractType = 'Adhesion Contract' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100)) 
                 else '0'
