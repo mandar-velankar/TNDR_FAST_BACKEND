@@ -439,7 +439,7 @@ entity PriceCondition: cuid, managed {
 //EHQUT-INC18178128-FAST - Error decimals discounts
 entity DiscountCondition: cuid, managed {
     Volume              : Integer;
-    Discount            : Decimal;
+    Discount            : Double;
     NetPriceWithoutTax  : Decimal;
     NetPriceWithTax     : Decimal;
     PriceCondition      : Association to PriceCondition;
