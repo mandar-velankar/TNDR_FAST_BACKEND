@@ -25,7 +25,7 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain
@@ -1618,7 +1618,9 @@ module.exports = (srv) => {
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
          //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
-
+		let Countryregion= await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
+		let regionname=Countryregion.Region;
+		
 		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
 			//no products
@@ -1629,7 +1631,7 @@ module.exports = (srv) => {
 			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;
 
 			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
-			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation);
+			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation,regionname);
 
 		}
 
@@ -1970,10 +1972,11 @@ module.exports = (srv) => {
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
 	//EHQUT-197468-MEA – Nucleus heads notifications flow
-	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation) {
+	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation,regionname) {
 		let tenderid = offerProductValidation[0].TENDER_ID;
+		let Countrycode=offerProductValidation[0].COUNTRY_CODE;
 
-		tenderid = tenderid.split("-")[1].substring(0, 2);
+		let tenderyear = tenderid.split("-")[1].substring(0, 2);
 		
 		//Calculate max validation type for each type in each product
 		aApproverTypes.map(async function (oApproverType) {
@@ -2011,9 +2014,9 @@ module.exports = (srv) => {
 		// }
 		
 		let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
-		if(tenderid > '22' && CountryBusinessindex !== -1){
+		if(tenderyear> '22' && regionname === 'MEA'){
 			aApproverTypes.splice(CountryBusinessindex,1);
-			
+						
 		}
 		
 		//For Thailand specific
@@ -2026,7 +2029,7 @@ module.exports = (srv) => {
 			BrandName.push(offerProductValidation[i].BRANDNAME);	
 			}
 
-			if(!(BrandName.includes('Nalador')) && index !== -1){
+			if(!(BrandName.includes('Nalador')) && Countrycode === 'TH'){
 				aApproverTypes.splice(index,1);
 				
 			}
