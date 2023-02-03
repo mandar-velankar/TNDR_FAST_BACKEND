@@ -1453,7 +1453,7 @@ inner join MasterDataViews.MostRecentMasterPricesView as masterPrices
     on product.ProductCode = masterPrices.ProductPackId
     and product.CountryCode = masterPrices.CountryCode    
 inner join TransactionalData.PriceCondition as priceCondition 
-    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    on priceCondition.PriceConditionClassification_ID = priceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
 inner join TransactionalData.PT_TMTNOFST as offerStatus
