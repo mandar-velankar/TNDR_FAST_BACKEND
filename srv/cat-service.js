@@ -1618,6 +1618,8 @@ module.exports = (srv) => {
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
          //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+
+		 //EHQUT-197468-MEA – Nucleus heads notifications flow
 		let Countryregion= await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
 		let regionname=Countryregion.Region;
 		
