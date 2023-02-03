@@ -1456,16 +1456,6 @@ inner join TransactionalData.PriceCondition as priceCondition
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
-left outer join TransactionalDataViews.TenderFOCView as tenderFOC
-    on tender.TenderID = tenderFOC.TenderID
-    and offer.OfferID = tenderFOC.OfferID
-    and product.ProductCode = tenderFOC.ProductCode
-    and institute.InstituteID = tenderFOC.INSTITUTE_ID
-left outer join TransactionalDataViews.TenderRappelView as tenderRappel
-    on tender.TenderID = tenderRappel.TenderID
-    and offer.OfferID = tenderRappel.OfferID
-    and product.ProductCode = tenderRappel.ProductCode
-    and institute.InstituteID = tenderRappel.INSTITUTE_ID
 left outer join BrazilContractingData.Contracts as contract
     on tender.TenderID = contract.TenderID
     and offer.OfferID = contract.OfferID
@@ -1487,12 +1477,12 @@ left outer join BrazilContractingData.ContractProducts as contractProduct
         priceCondition.StandardDiscount+priceCondition.AdditionalDiscount as TOTAL_DISCOUNT:Double,
         priceCondition.CommercialProposal as COMMERCIAL_PROPOSAL,
         case 
-                when contract.ContractType = 'Adhesion' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100)) 
+                when contract.ContractType = 'Adhesion Contract' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100)) 
                 else '0'
             end as ADHESION:Double,
         ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
 }
-where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+where tender.CountryCode = 'BR' and (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
 group by tender.TenderID,
     offer.OfferID,
     product.ProductCode,
