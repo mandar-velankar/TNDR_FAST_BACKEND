@@ -49,8 +49,14 @@ module.exports = class processOpportunities extends BaseJob {
             const brazilMasterPrices = await this.getBrazilMasterPrices(tx, indirectIbizOpportunityDistributorIDs);
 
             // Process data
-            await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
-            await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
+            if(directIbizOpportunities.length > 0){
+                await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
+
+            }
+
+            if(indirectIbizOpportunities.length > 0){
+                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
+            }
 
             // Commit All
             await tx.commit();
@@ -260,7 +266,7 @@ module.exports = class processOpportunities extends BaseJob {
 }
 
 /**
- * Creates or Updates Tenders in FAST
+ * Creates Tenders in FAST
  * @param {Array.Object} Mapped Tenders 
  * @returns 
  */
@@ -279,13 +285,11 @@ module.exports = class processOpportunities extends BaseJob {
 
     // 2. devide mappedTenders into New or Changed tenders
     const FASTNewTenders = [];
-    const FASTChangedTenders = []; //TO-DO CHECK IF WE NEED THIS 
     for (const tender of uniqueMappedTenders) {
-        let FASTTenderIdx = tendersExistingInFAST.findIndex(FASTTender => FASTTender.ExternalID === tender.ExternalID);
+        let FASTTenderIdx = tendersExistingInFAST.findIndex(FASTTender => FASTTender.ExternalID == tender.ExternalID);
         if (FASTTenderIdx > -1) {
             // copy over the TenderID from existing Tender
             tender.TenderID = tendersExistingInFAST[FASTTenderIdx].TenderID;
-            FASTChangedTenders.push(tender); 
         } else {
             // generate new TenderID
             tender.TenderNo = nextTenderID++;
@@ -295,16 +299,16 @@ module.exports = class processOpportunities extends BaseJob {
             FASTNewTenders.push(tender);
         }
     }
-    // 3. Upsert records into PT_TMTEND
+    // 3. Insert records into PT_TMTEND
     //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
-    console.log(`JOB (${this.jobName }): Upserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
+    console.log(`JOB (${this.jobName }): Inserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
     try {
         FASTNewTenders && FASTNewTenders.length > 0 && await tx.run(INSERT(FASTNewTenders).into(PT_TMTEND));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ Tenders into FAST table (PT_TMTEND) successfully completed.`);
-        console.log(`JOB (${this.jobName }): PT_TMTEND -> created: ${FASTNewTenders.length}, updated: ${FASTChangedTenders.length}`);
+        console.log(`JOB (${this.jobName }): Inserting of IBIZ Tenders into FAST table (PT_TMTEND) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMTEND -> created: ${FASTNewTenders.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Tenders into FAST table (PT_TMTEND) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting of IBIZ Tenders into FAST table (PT_TMTEND) failed`);
         console.error(error);
         throw error;
     }
@@ -346,9 +350,9 @@ module.exports = class processOpportunities extends BaseJob {
             offer.OfferID = parentFASTOffer.TenderID + '-' + parentFASTOffer.TenderOfferNo + '-R' + offer.RevisedOfferNo;
         }else{ // new offer
             let nextOfferID = 1;
-            let nextOfferNumber = nextOfferIDs.find(id => id.TenderID === offer.TenderID);
+            let nextOfferNumber = nextOfferIDs.find(id => id.TENDERID === offer.TenderID);
             if(nextOfferNumber && nextOfferNumber.NEXTOFFERID) {
-                offer.TenderOfferNo = ++nextOfferNumber.NEXTOFFERID;
+                offer.TenderOfferNo = nextOfferNumber.NEXTOFFERID++;
             }else{
                 offer.TenderOfferNo = nextOfferID++;
                 nextOfferIDs.push({

@@ -7,6 +7,7 @@ using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 using { com.bayer.SXTENDER.PricingAppData } from './PricingAppData';
+using { com.bayer.SXTENDER.BrazilContractingData } from './BrazilContractingData';
 
 entity LatestApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals{
     key approvals.OfferId,
@@ -1358,7 +1359,7 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     and priceConditionClassification.isMain = 'true' 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
 inner join MasterData.PT_TMINST as institute 
-    on tender.InstituteID = institute.InstituteID 
+    on tender.InstituteID = institute.InstituteID
 inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
     on product.ProductCode = masterPrices.ProductPackId
     and product.CountryCode = masterPrices.CountryCode    
@@ -1425,6 +1426,85 @@ group by tender.TenderID,
     priceCondition.RoyalDecree,
     priceCondition.PriceConditionCode,
     priceCondition.Discount,    
+    product.Results.Outcome;
+
+entity TenderHistoryBrazil as select from TransactionalData.PT_TMTEND as tender
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1
+    and product.ActiveProduct = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division
+    and priceConditionClassification.isMain = true 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+inner join MasterData.PT_TMINST as institute 
+    on tender.InstituteID = institute.InstituteID 
+inner join MasterData.PT_TMDIST as distributor
+    on offer.DistributorID = distributor.DistributorID
+inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+    on product.ProductCode = masterPrices.ProductPackId
+    and product.CountryCode = masterPrices.CountryCode    
+inner join TransactionalData.PriceCondition as priceCondition 
+    on priceCondition.PriceConditionClassification.ID = priceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
+inner join TransactionalData.PT_TMTNOFST as offerStatus
+	on offerStatus.OfferID = offer.OfferID
+	and offerStatus.Active = 1
+left outer join BrazilContractingData.Contracts as contract
+    on tender.TenderID = contract.TenderID
+    and offer.OfferID = contract.OfferID
+left outer join BrazilContractingData.ContractProducts as contractProduct
+    on offer.OfferID = contract.OfferID
+    and product.ProductCode = contractProduct.ProductPackID {
+        key tender.TenderID,
+        key offer.OfferID,
+        key product.ProductCode,
+        tender.TenderName as TENDER_NAME,
+        offer.SubmittedOn as OFFER_DATE,
+        key institute.InstituteID as INSTITUTE_ID,
+        institute.InstituteName as INSTITUTE_NAME,
+        product.SKU.PRODUCTPACKNAME as PRODUCT_NAME,
+        distributor.DistributorName as DISTRIBUTOR_NAME,
+        priceCondition.PriceList as PRICE_LIST,
+        priceCondition.TaxExemption as TAX_EXEMPTION,
+        ifnull(priceCondition.CAP, 'No') as CAP:String(10),
+        priceCondition.StandardDiscount+priceCondition.AdditionalDiscount as TOTAL_DISCOUNT:Double,
+        priceCondition.CommercialProposal as COMM_PROPOSAL,
+        case 
+                when contract.ContractType = 'Adhesion Contract' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100)) 
+                else '0'
+            end as ADHESION:Double,
+        ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
+}
+where tender.CountryCode = 'BR' and (offerStatus.STATUS = 'Quotation Submitted' or offerStatus.STATUS = 'Results Recorded' or offerStatus.STATUS = 'Delivery Ongoing')
+group by tender.TenderID,
+    offer.OfferID,
+    product.ProductCode,
+    tender.TenderName,
+    offer.SubmittedOn,
+    institute.InstituteID,
+    institute.InstituteName,
+    distributor.DistributorID,
+    distributor.DistributorName,
+    product.SKU.PRODUCTPACKNAME,
+    priceCondition.PriceList,
+    priceCondition.TaxExemption,
+    priceCondition.CAP,
+    priceCondition.StandardDiscount,
+    priceCondition.AdditionalDiscount,
+    priceCondition.CommercialProposal,
+    contract.ContractType,
+    contractProduct.RequestedVolume,
+    product.RequestedVolume,
     product.Results.Outcome;
 
     /**
@@ -1621,10 +1701,12 @@ left outer join TransactionalData.PriceCondition as priceCondition
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
+    and product.LotID = priceCondition.LotID
     {
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
+    key product.LotID,
     priceCondition.ID as ExistingPriceConditionID: UUID,
     priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
     tender.CountryCode,
