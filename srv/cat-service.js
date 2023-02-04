@@ -956,7 +956,7 @@ module.exports = (srv) => {
 						case "Customer Service Manager":
 						case "Director or Coordinator of Finance BP":
 						case "National Sales Manager":
-						case "Country Division Head Radiology":
+						case "CDH Radiology":
 						case "Legal / Competition Department":
 							oApproverType.ValidationType = 3;
 							break;

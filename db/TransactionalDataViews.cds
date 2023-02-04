@@ -1428,6 +1428,7 @@ group by tender.TenderID,
     priceCondition.Discount,    
     product.Results.Outcome;
 
+
 entity TenderHistoryBrazil as select from TransactionalData.PT_TMTEND as tender
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1443,29 +1444,19 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     on priceConditionClassification.CountryCode = product.CountryCode
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division
-    and priceConditionClassification.isMain = 'true' 
+    and priceConditionClassification.isMain = true 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
 inner join MasterData.PT_TMINST as institute 
     on tender.InstituteID = institute.InstituteID 
 inner join MasterData.PT_TMDIST as distributor
     on offer.DistributorID = distributor.DistributorID
-inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
-    on product.ProductCode = masterPrices.ProductPackId
-    and product.CountryCode = masterPrices.CountryCode    
 inner join TransactionalData.PriceCondition as priceCondition 
-    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    on priceCondition.PriceConditionClassification.ID = priceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
-left outer join TransactionalDataViews.TenderFOCView as tenderFOC
-    on tender.TenderID = tenderFOC.TenderID
-    and offer.OfferID = tenderFOC.OfferID
-    and product.ProductCode = tenderFOC.ProductCode
-    and institute.InstituteID = tenderFOC.INSTITUTE_ID
-left outer join TransactionalDataViews.TenderRappelView as tenderRappel
-    on tender.TenderID = tenderRappel.TenderID
-    and offer.OfferID = tenderRappel.OfferID
-    and product.ProductCode = tenderRappel.ProductCode
-    and institute.InstituteID = tenderRappel.INSTITUTE_ID
+inner join TransactionalData.PT_TMTNOFST as offerStatus
+	on offerStatus.OfferID = offer.OfferID
+	and offerStatus.Active = 1
 left outer join BrazilContractingData.Contracts as contract
     on tender.TenderID = contract.TenderID
     and offer.OfferID = contract.OfferID
@@ -1475,6 +1466,7 @@ left outer join BrazilContractingData.ContractProducts as contractProduct
         key tender.TenderID,
         key offer.OfferID,
         key product.ProductCode,
+        key product.LotID,
         tender.TenderName as TENDER_NAME,
         offer.SubmittedOn as OFFER_DATE,
         key institute.InstituteID as INSTITUTE_ID,
@@ -1485,17 +1477,18 @@ left outer join BrazilContractingData.ContractProducts as contractProduct
         priceCondition.TaxExemption as TAX_EXEMPTION,
         ifnull(priceCondition.CAP, 'No') as CAP:String(10),
         priceCondition.StandardDiscount+priceCondition.AdditionalDiscount as TOTAL_DISCOUNT:Double,
-        priceCondition.CommercialProposal as COMMERCIAL_PROPOSAL,
+        priceCondition.CommercialProposal as COMM_PROPOSAL,
         case 
-                when contract.ContractType = 'Adhesion' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100)) 
+                when contract.ContractType = 'Adhesion Contract' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100)) 
                 else '0'
             end as ADHESION:Double,
         ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
 }
-where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+where tender.CountryCode = 'BR' and (offerStatus.STATUS = 'Quotation Submitted' or offerStatus.STATUS = 'Results Recorded' or offerStatus.STATUS = 'Delivery Ongoing')
 group by tender.TenderID,
     offer.OfferID,
     product.ProductCode,
+    product.LotID,
     tender.TenderName,
     offer.SubmittedOn,
     institute.InstituteID,
