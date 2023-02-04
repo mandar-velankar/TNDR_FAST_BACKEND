@@ -1428,6 +1428,7 @@ group by tender.TenderID,
     priceCondition.Discount,    
     product.Results.Outcome;
 
+
 entity TenderHistoryBrazil as select from TransactionalData.PT_TMTEND as tender
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1449,9 +1450,6 @@ inner join MasterData.PT_TMINST as institute
     on tender.InstituteID = institute.InstituteID 
 inner join MasterData.PT_TMDIST as distributor
     on offer.DistributorID = distributor.DistributorID
-inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
-    on product.ProductCode = masterPrices.ProductPackId
-    and product.CountryCode = masterPrices.CountryCode    
 inner join TransactionalData.PriceCondition as priceCondition 
     on priceCondition.PriceConditionClassification.ID = priceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
@@ -1468,6 +1466,7 @@ left outer join BrazilContractingData.ContractProducts as contractProduct
         key tender.TenderID,
         key offer.OfferID,
         key product.ProductCode,
+        key product.LotID,
         tender.TenderName as TENDER_NAME,
         offer.SubmittedOn as OFFER_DATE,
         key institute.InstituteID as INSTITUTE_ID,
@@ -1489,6 +1488,7 @@ where tender.CountryCode = 'BR' and (offerStatus.STATUS = 'Quotation Submitted' 
 group by tender.TenderID,
     offer.OfferID,
     product.ProductCode,
+    product.LotID,
     tender.TenderName,
     offer.SubmittedOn,
     institute.InstituteID,
