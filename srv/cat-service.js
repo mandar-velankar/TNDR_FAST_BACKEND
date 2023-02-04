@@ -306,6 +306,10 @@ module.exports = (srv) => {
 		}
 		//Delivery terms
 		let deliveryTerms = "";
+		//EHQUT-RITM12706398-SEWA Change Request
+		if(offer.REGION_NAME === "SEWA"){
+			deliveryTerms = product.FIRST_SHIPMENT;
+		}else{
 		if (product.NUMBER_LOTS === 0 && product.INTERVAL_SHIPMENTS === 0) {
 			deliveryTerms = "Multiple deliveries from local stocks with first ";
 			deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
@@ -319,8 +323,11 @@ module.exports = (srv) => {
 				.concat(" lots at interval of ")
 				.concat(product.INTERVAL_SHIPMENTS.toString())
 				.concat(" months with first ")
+			
 				.concat(product.FIRST_SHIPMENT);
 		}
+	}
+	
 		//Requested Quantity & FOC string
 		let focString = "";
 		let requestedQuantityString = requestedVolume.toString().concat(" ").concat(product.UNIT);
@@ -396,9 +403,9 @@ module.exports = (srv) => {
 		//Optional if business approved (country or regional)
 		//Notification if NetOfferPrice = Registered Price (and registered price exists)
 		let regulatory = 1;
-		if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
-			regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
-		}
+		// if (product.BUSINESS_APPROVED === 0 && product.REGISTERED_PRICE !== 0) {
+		// 	regulatory = ServiceHelper.isDoubleEqual(product.REGISTERED_PRICE, product.NET_OFFER_PRICE) ? 2 : 1;
+		// }
 
 		//Legal
 		//Optional if legal approved
@@ -433,16 +440,16 @@ module.exports = (srv) => {
 		//Optional if business approved
 		//Mandatory if OfferPrice below lowest price
 		//Mandatory if not default payment terms
-		let regionalBusiness = 1;
-		if (product.BUSINESS_APPROVED !== 1) {
-			if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
-				regionalBusiness = 3;
-			}
-			else if (product.IS_DEFAULT_TERMS === 0) {
-				regionalBusiness = 3;
-			}
-		}
-		//let regionalBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : 3;
+		//let regionalBusiness = 1;
+		// if (product.BUSINESS_APPROVED !== 1) {
+		// 	if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+		// 		regionalBusiness = 3;
+		// 	}
+		// 	else if (product.IS_DEFAULT_TERMS === 0) {
+		// 		regionalBusiness = 3;
+		// 	}
+		// }
+		let regionalBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : 3;
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
@@ -1200,17 +1207,18 @@ module.exports = (srv) => {
 				requiredApprovalLevel = 4;
 			};
 		}
+		//EHQUT-INC18040340-Please change price approval authority tracking system - Offer Management Application (FAST)
 		if (//This means it's first offer for account or net offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountNetOfferPrice, 0) ||
-			ServiceHelper.isDoubleXBelowY(product.NET_OFFER_PRICE, preApprovedAccountNetOfferPrice)
+			ServiceHelper.isDoubleXBelowY(product.NET_PRICE, preApprovedAccountNetOfferPrice)
 		) {
-			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_OFFER_PRICE)) {//NSM/SM/FM can approve
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_PRICE)) {//NSM/SM/FM can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_OFFER_PRICE)) {//HBU can approve
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_PRICE)) {//HBU can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_OFFER_PRICE)) {//CDH can approve
+			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_PRICE)) {//CDH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
 			}
 			else {
@@ -2004,9 +2012,9 @@ module.exports = (srv) => {
 		let alternativeRequestedRemark = (isAlternativeToRequested !== 0)
 			? "* marked products are alternative to requested products"
 			: "";
-
+			//EHQUT-INC17933752-FAST SEWA - Workflow issue
 		//In case of distributor sales, we have a specific note to distributor
-		let remarks = (offer.TENDER_CHANNEL === "Distributor")
+		let remarks = (offer.TENDER_CHANNEL === "Distributor" && offer.REGION_NAME !== "SEWA")
 			? "With reference to the above tender, you must not on-sell the above mentioned products at a price higher than those listed above. However, you are always free to price lower, at your discretion.<br>"
 			: "";
 		//Building full remarks text
@@ -2149,10 +2157,32 @@ module.exports = (srv) => {
 		if (oCountryBusiness && oRegionalBusiness) {
 			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
 		}
-		if(tenderid > '22' && tender.CountryCode !== "BR"){
-			aApproverTypes.splice(oCountryBusiness,1);
+		// if(tenderid > '22'){
+		// 	aApproverTypes.splice(oCountryBusiness,1);
+		// }
+		
+		let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
+		if(tenderid > '22' && CountryBusinessindex !== -1){
+			aApproverTypes.splice(CountryBusinessindex,1);
+			
 		}
+		
 		//For Thailand specific
+		//EHQUT-197882-Thailand - Additional approver for Nalador
+		let index = aApproverTypes.findIndex(x => x.ApproverType === 'Additional Approver' );
+		let total=offerProductValidation.length;
+		let BrandName=[];
+
+		for(var i=0;i<total;i++){
+			BrandName.push(offerProductValidation[i].BRANDNAME);	
+			}
+
+			if(!(BrandName.includes('Nalador')) && index !== -1){
+				aApproverTypes.splice(index,1);
+				
+			}
+
+		//EHQUT-197882-Thailand - Additional approver for Nalador
 		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
 		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
 		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
