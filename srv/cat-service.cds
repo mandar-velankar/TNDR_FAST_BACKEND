@@ -246,6 +246,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity CountryMinPrice @readonly                    as projection on TransactionalDataViews.CountryMinPrice;
     entity PreApprovedPrices @readonly                  as projection on TransactionalDataViews.PreApprovedPrices;
     entity TenderHistorySpain @readonly                 as projection on TransactionalDataViews.TenderHistorySpain;
+    entity TenderHistoryBrazil @readonly                as projection on TransactionalDataViews.TenderHistoryBrazil;
 
     //Transactional Data Services
     entity OfferProductValidation {

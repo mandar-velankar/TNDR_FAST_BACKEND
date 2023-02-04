@@ -898,7 +898,7 @@ module.exports = (srv) => {
         const institudeDivision = await tx.run(SELECT.one.from(BrazilInstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
 
 		const bDirectTender = offer.DISTRIBUTORNAME.toLowerCase() === 'bayer brazil' ? true : false;
-		const totalDiscount = Math.round((product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT + Number.EPSILON) * 100) / 100;
+		const totalDiscount = Math.round((product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000; // we want 4 decimal places after the comma, that's why / 10_000
 		const whereBrazilPricingPolicyCondition = getBrazilPricingPolicyWhereCondition(bDirectTender, product, offer, priceCondition, institudeDivision, distributorDivision);
 
 		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where(whereBrazilPricingPolicyCondition));
@@ -956,7 +956,7 @@ module.exports = (srv) => {
 						case "Customer Service Manager":
 						case "Director or Coordinator of Finance BP":
 						case "National Sales Manager":
-						case "Country Division Head Radiology":
+						case "CDH Radiology":
 						case "Legal / Competition Department":
 							oApproverType.ValidationType = 3;
 							break;
@@ -1011,7 +1011,7 @@ module.exports = (srv) => {
 		}else if(product.DIVISION.toLowerCase() === 'radiology' ){
 			return {
 				ProductPackID: product.ProductCode,
-				CustomerGroup: bDirectTender ? institudeDivision.CustomerGroup : distributorDivision.CustomerGroup
+				CustomerGroup: bDirectTender ? institudeDivision && institudeDivision.CustomerGroup : distributorDivision && distributorDivision.CustomerGroup
 			};
 		}
 	}
@@ -1771,7 +1771,7 @@ module.exports = (srv) => {
 			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;
 
 			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
-			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation);
+			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation, tender);
 
 		}
 
@@ -2113,7 +2113,7 @@ module.exports = (srv) => {
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
 	//EHQUT-197468-MEA – Nucleus heads notifications flow
-	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation) {
+	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation, tender) {
 		let tenderid = offerProductValidation[0].TENDER_ID;
 
 		tenderid = tenderid.split("-")[1].substring(0, 2);
@@ -2149,7 +2149,7 @@ module.exports = (srv) => {
 		if (oCountryBusiness && oRegionalBusiness) {
 			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
 		}
-		if(tenderid > '22'){
+		if(tenderid > '22' && tender.CountryCode !== "BR"){
 			aApproverTypes.splice(oCountryBusiness,1);
 		}
 		//For Thailand specific
