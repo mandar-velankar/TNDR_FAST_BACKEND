@@ -1885,8 +1885,9 @@ module.exports = (srv) => {
 
 		// get SUBMITTED_BY user info 
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
+		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
-
+		//EHQUT- Spain - correct mistakes on Commercial agreement templates
 		results = {
 			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
 			TENDERID: offer.TENDERID,
@@ -1967,9 +1968,12 @@ module.exports = (srv) => {
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
-			SAP_ID: tender.SAPID
+			SAP_ID: tender.SAPID,
+			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
+            CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
 		};
 		return results;
+		
 	}
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation

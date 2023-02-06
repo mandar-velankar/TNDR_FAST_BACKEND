@@ -479,6 +479,8 @@ service CatalogService @(path : 'tender')@(requires : [
             SPOT_RATE             : Double;
             EXTERNAL_ID           : String;
 			SAP_ID                : String;
+            CREATED_BY_USER_ROLE  : String(100);
+            CREATED_BY_USER_CONTACTNUMBER :String (20);
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
