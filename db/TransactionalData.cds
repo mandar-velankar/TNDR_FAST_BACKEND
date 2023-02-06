@@ -560,7 +560,7 @@ entity PT_TMQUTO {
                                 on Signatory2.AUTHORIZED_SIGNATORY = AS2 and Signatory2.COUNTRY_CODE = CountryCode and Signatory2.LEGAL_ENTITY_CODE = 'BIT';
 }
 
-
+//EFRCL-217931-Italy - Tender expiry date field
 entity PT_TMTEND: managed {
     key TenderID             : String(50) not null;
         CountryCode          : String(2) not null;
@@ -609,6 +609,7 @@ entity PT_TMTEND: managed {
         Purpose              : String;
         ParticiationType     : String;
         ParticipationIntention : String;
+        TerminationDate      : Date;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID
@@ -645,6 +646,14 @@ entity PT_TMTEND: managed {
                                          on PriceAgreements.TenderId  = TenderID;
         User: Association to AdminData.PT_TMUSER
                                          on User.UserID = SubmittedBy;
+        TenderType1: Association to MasterData.MASTER_TENDER_TYPE
+                                on TenderType1.ID = TENDER_TYPE_ID;
+        TenderType2: Association to MasterData.MASTER_TENDER_TYPE
+                                on TenderType2.ID = TENDER_TYPE_2_ID;
+        ContractType: Association to MasterData.MASTER_CONTRACT_TYPE
+                                on ContractType.ID = CONTRACT_TYPE_ID;
+        SalesType: Association to MasterData.MASTER_SALES_TYPE
+                                on SalesType.ID = SALES_TYPE_ID;
 }
 
 entity PT_TMTNOFST {

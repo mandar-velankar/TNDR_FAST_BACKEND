@@ -8,6 +8,65 @@ using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_admin','f_tndr_cag_priceagreements_user','f_tndr_cag_technical_user','authenticated-user']){
 
     entity PriceAgreements @(cds.redirection.target:true) as projection on PriceAgreementData.PriceAgreements;
+    entity PriceAgreementsMasterView @(cds.redirection.target:true) as select from PriceAgreementData.PriceAgreements as pa
+    inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'{
+        key pa.ID,
+            pa.createdAt,
+            pa.createdBy,
+            pa.modifiedAt,
+            pa.modifiedBy,
+            pa.ExpiryDate,
+            pa.EffectiveDate,
+            pa.OriginalEffectiveDate,
+            pa.ListPrice,
+            pa.RetailPrice,
+            pa.Price,
+            pa.Currency,
+            pa.UoM,
+            pa.Discount,
+            pa.DeliveredVolume,
+            pa.AwardedVolume,
+            pa.CountryCode,
+            pa.InstituteId,
+            pa.TenderId,
+            pa.ProductPackId,
+            pa.Synchronized,
+            pa.SynchronizationStatus,
+            pa.hasNewMaterials,
+            pa.hasNewPrice,
+            pa.hasNewYLLP,
+            pa.hasNewYLAP,
+            pa.hasProductPackId,
+            pa.IgnorePVLPriceChange,
+            pa.IgnoreConfPriceChange,
+            pa.ExpiringSoon,
+            pa.Expired,
+            pa.isNewPriceAgreement,
+            pa.AppliedCount,
+            pa.isCancelled,
+            pa.OfferId,
+            pa.ExtendPriceAgreement,
+            pa.ExpiryExtensionPeriod,
+            pa.ExpiryExtensionAcknowledged,
+            pa.Status,
+            pa.CancellationComment,
+            pa.Product,
+            pa.Institute,
+            pa.Tender,
+            pa.Candidates,
+            pa.Materials,
+            pa.CustomerPrices,
+            pa.ConsumerPrice,
+            pa.OfferProduct,
+            pa.Deliveries,
+            pa.FOC,
+            pa.MaterialsFOC,
+            pa.PriceConditions,
+            pa.SettlementDates,
+            pa.MasterPrices,
+            pa.User,
+            list.MaterialsList
+    };
     entity Candidates as projection on PriceAgreementData.CandidatesView;
     entity CandidatePrices as projection on PriceAgreementData.CandidatePrices;
     entity CustomerPrices as select from PriceAgreementData.CustomerPrices;
@@ -26,7 +85,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity PriceAgreementFOC as projection on PriceAgreementDataViews.PriceAgreementFOC;
     entity Deliveries as projection on PriceAgreementDataViews.Deliveries;
     entity MaterialsFOC as projection on TransactionalData.ProductPricing;
-    entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
+    entity PT_TMSKUPRDPCK @(cds.redirection.target:true) as projection on MasterData.PT_TMSKUPRDPCK;
     entity FreeGoodsOther as projection on TransactionalData.FreeGoodsOther;
     entity PaMainFOCView as projection on PriceAgreementDataViews.PaMainFOCView;
     entity Settlements as projection on MasterData.Settlements;
@@ -39,6 +98,8 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
+    entity MaterialsConcatList as projection on PriceAgreementDataViews.MaterialsConcatList;
+    entity User @(cds.redirection.target:true) as projection on AdminData.PT_TMUSER;
     
     //Countries where user has accesss to
     entity UserCountry @(restrict: [
