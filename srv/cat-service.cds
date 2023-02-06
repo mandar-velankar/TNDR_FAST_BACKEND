@@ -541,7 +541,7 @@ service CatalogService @(path : 'tender')@(requires : [
     //Admin Data Tables
     entity CONDITIONAL_ACCESS                           as projection on AdminData.CONDITIONAL_ACCESS;
 
-    entity PT_TMUSER                                    as projection on AdminData.PT_TMUSER {
+    entity PT_TMUSER @(cds.redirection.target:true)     as projection on AdminData.PT_TMUSER {
         * , Countries : redirected to PT_TMUSERCTRY
     };
 
