@@ -51,7 +51,8 @@ entity ContractProducts: managed, cuid {
         //Associations
         OfferProduct                : Association to TransactionalData.PT_TMOFPR
                                         on OfferProduct.ProductCode = ProductPackID
-                                        and OfferProduct.OfferID = OfferID;
+                                        and OfferProduct.OfferID = OfferID
+                                        and OfferProduct.LotID = LotID;
         Contract                    : Association to Contracts;                        
 }
 
