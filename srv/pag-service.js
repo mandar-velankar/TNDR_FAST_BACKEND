@@ -866,7 +866,7 @@ module.exports = async (srv) => {
         //EHQUT-INC17748342-Rates incorrectly synchronized.
         //we should add "-" only in case of Price Condition "YL60" and "YDC0"
         if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
-            kbetr = kbetr.toFixed(2) + "-";
+            kbetr = kbetr.toFixed(3) + "-";
         }
 
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
