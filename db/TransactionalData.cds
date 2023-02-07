@@ -57,6 +57,7 @@ entity PT_TMOFRS { //Offers
         Responded              : Integer;
         DistributorDeadline    : Date;
         DistributorComments    : String;
+        ChannelSwitched        : Boolean default false;
         //Associations
         Tender                : Association to PT_TMTEND
                                     on Tender.TenderID = TenderID;
@@ -333,7 +334,6 @@ entity PT_TMOFPR {
     key LotID                    : Integer default 1;
         WorkflowProductID        : Integer;
         IbizWorkflowID           : Integer;
-        ChannelSwitched          : Boolean default false;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
