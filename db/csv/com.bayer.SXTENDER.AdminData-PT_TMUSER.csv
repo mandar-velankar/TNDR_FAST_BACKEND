@@ -1,4 +1,4 @@
-"TOOLIDENTITY","TOOLID","USERID","USERNAME","LOGINTIME","CWID","USEREMAIL","ROLE","CONTACTNUMBER"
+TOOLIDENTITY,TOOLID,USERID,USERNAME,LOGINTIME,CWID,USEREMAIL,ROLE,CONTACTNUMBER
 "FAST",1000,"EUTVP","Jonathan Hubeau",,"EUTVP","jonathan.hubeau.ext@bayer.com",,
 "FAST",1000,"ELLUI","Nils Vanderheyden",,"ELLUI","nils.vanderheyden.ext@bayer.com",,
 "FAST",1000,"EGSZO","Mandar Velankar",,"EGSZO","mandar.velankar.ext@bayer.com",,
