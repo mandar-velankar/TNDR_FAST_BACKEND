@@ -86,9 +86,11 @@ entity SalesOrderProducts: managed, cuid {
         IbizEmpenhoProductID    : Integer;
         IbizContractProductID   : Integer;
         SalesOrderPrice         : Double;
+        LotID                   : Integer;
         //Associations
         SalesOrder              : Association to SalesOrders;
         OfferProduct            : Association to TransactionalData.PT_TMOFPR
                                      on OfferProduct.ProductCode = ProductPackID
-                                     and OfferProduct.OfferID = OfferID;
+                                     and OfferProduct.OfferID = OfferID
+                                     and OfferProduct.LotID = LotID;
 }
