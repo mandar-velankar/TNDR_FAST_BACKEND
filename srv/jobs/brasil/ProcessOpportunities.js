@@ -340,14 +340,14 @@ module.exports = class processOpportunities extends BaseJob {
         const parentTender = uniqueMappedTenders.find(ut => ut.IbizID == ibizID);
         offer.TenderID = parentTender && parentTender.TenderID;
 
-        const isRevisedOffer = !!offer.PreviousIbizWorkflowID;
-        let parentFASTOffer = parentOffersExistingInFAST.find(FASTOffer => FASTOffer.IbizWorkflowID == offer.PreviousIbizWorkflowID);
+        let parentFASTOffer = parentOffersExistingInFAST.find(FASTOffer => FASTOffer.IbizWorkflowID == offer.IbizWorkflowID && FASTOffer.ActiveOffer == 1);
         // if we can't find an existing parent offer in FAST, a.k.a cannot map to any qp_id, we consider it as a new offer.
-        if(isRevisedOffer && parentFASTOffer){ // revised offer
+        if(parentFASTOffer){ // revised offer
             parentFASTOffer.ActiveOffer = 0;
             offer.RevisedOfferNo = parentFASTOffer.RevisedOfferNo + 1;
             offer.TenderID = parentFASTOffer.TenderID;
             offer.OfferID = parentFASTOffer.TenderID + '-' + parentFASTOffer.TenderOfferNo + '-R' + offer.RevisedOfferNo;
+            offer.TenderOfferNo = parentFASTOffer.TenderOfferNo;
         }else{ // new offer
             let nextOfferID = 1;
             let nextOfferNumber = nextOfferIDs.find(id => id.TENDERID === offer.TenderID);
@@ -845,7 +845,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST, pri
                 ProfitabilityGrowthRate: null,
                 IbizWorkflowID         : curr.ID_QP,
                 isDirectIbizOpportunity: curr.NU_DIRETO_INDIRETO == 0 ? true : false,
-                PreviousIbizWorkflowID : curr.ID_PRE_QP,
+                PreviousIbizWorkflowID : null,
                 TenderDistributorID    : curr.ID_LIC_ATRIBUIDA,
                 BusinessUnit           : curr.NM_BU_ABREV,
                 Responded              : curr.NU_2D_NOTIF_APPLIED_NO_DN_RESPONDED,
