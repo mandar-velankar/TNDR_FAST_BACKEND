@@ -20,6 +20,7 @@ entity CONDITIONAL_ACCESS {
         CWIDs_MarketData : String(5000);
 }
 
+//EHQUT-268955-Spain - correct mistakes on Commercial agreement templates
 entity PT_TMUSER {
         ToolIdentity    : String(20);
         ToolID          : Integer;
@@ -28,6 +29,8 @@ entity PT_TMUSER {
         LoginTime       : String(255);
         CWID            : String(12);
         UserEmail       : String(255);
+        Role            : String(100);
+        ContactNumber   : String(20);
         //Associations
         Countries       : Association to many PT_TMUSERCTRY
                               on Countries.User = $self;
