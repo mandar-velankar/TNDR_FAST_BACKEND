@@ -864,9 +864,10 @@ module.exports = async (srv) => {
         }
         //} 
         //EHQUT-INC17748342-Rates incorrectly synchronized.
+        //EHQUT-INC18178128-FAST - Error decimals discounts
         //we should add "-" only in case of Price Condition "YL60" and "YDC0"
         if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
-            kbetr = kbetr.toFixed(2) + "-";
+            kbetr = kbetr.toFixed(3) + "-";
         }
 
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
@@ -1232,13 +1233,13 @@ module.exports = async (srv) => {
             discountConditions.forEach(dc => {
                 body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].E1KONW.push({
                     "KSTBW": dc.Volume,
-                    "KBETR": dc.Discount.toFixed(2) + "-"
+                    "KBETR": dc.Discount.toFixed(3) + "-"
                 });
             });
         }
 
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(2).concat("-") || ""; // KBETR from the minimum(KSTBW)
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(2).concat("-") || ""; // minimum(KSTBW) value from the DiscountConditions array
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || ""; // KBETR from the minimum(KSTBW)
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || ""; // minimum(KSTBW) value from the DiscountConditions array
 
         await tx.commit();//to release db connection
 
