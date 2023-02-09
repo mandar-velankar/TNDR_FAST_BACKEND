@@ -27,7 +27,7 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView
@@ -38,6 +38,7 @@ module.exports = (srv) => {
 		PT_TMUDLTRS, 
 		PT_TMAPPRST, 
 		PT_TMOFPR,
+		PT_TMOFRS,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -3552,4 +3553,156 @@ module.exports = (srv) => {
 
         throw Error("Missing OAUTH config parameters");
     };
+
+
+	srv.on("simulateTaxes", async req => {
+        const tx = cds.tx(req);
+        try {
+            
+            const contract = await getContract(tx, req.data.offerID, req.data.lotID, req.data.productCode, req.data.conditionType);
+            // Send request to SAP
+            const result = await simulateTaxes(tx, contract);
+            const TT_CONTRACT_DETAILS = result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"];
+            if (!TT_CONTRACT_DETAILS) {
+                return req.reject(404, JSON.stringify(result.data));
+            }
+            return req.reply(200, result.data);
+        } catch (error) {
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+			return req.reject(500, error.message);
+        }
+    });
+
+
+
+	async function getContract(tx, offerID, lotID, productCode, conditionType){
+
+		const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: offerID }));
+		if (!offer) return req.reject(404, `Offer ${offerID} was not found in ${PT_TMOFRS.name}`);
+
+		const division = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+		if (!division) return req.reject(404, `Division ${offer.Division} was not found in ${PT_TMPRDHIER.name}`);
+
+		const offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where({ OfferID: offerID,  ProductCode: productCode, LotID: lotID}));
+		if (!offerProduct) return req.reject(404, `Product ${productCode} in Lot ${lotID} was not found in ${PT_TMOFPR.name}`);
+
+		const skuPrdPck = await tx.run(SELECT.one.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: productCode, ActiveRecord: 'Yes'}));
+		if (!skuPrdPck) return req.reject(404, `No SkuCode was found for product ${productCode} in ${PT_TMSKUPRDPCK.name}`);
+
+		const priceConditionBrazilView = await tx.run(SELECT.one.from(PriceConditionBrazilView).where({ 
+			OfferID: offerID, 
+			TenderID: offer.TenderID, 
+			ProductCode: productCode, 
+			LotID: lotID, 
+			ConditionType: conditionType 
+		}));
+		if (!priceConditionBrazilView) return req.reject(404, `No result found in ${PriceConditionBrazilView.name} for Offer: ${offerID}`);
+
+
+        const body = getContractRequestBodyTemplate();
+
+        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_DIVISION"] = division.HLEVEL1_CODE;
+        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PARTNER"] = priceConditionBrazilView.CustomerID;
+
+        const items = [{
+			ITEM: addLeadingZeros(++offerProduct.SORTER, 6),
+			MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18),
+			UNIT_PRICE: "0",
+			EFFORT_A: "0",
+			ITEM_QTD: "1",
+			MANUAL_D: (Number(priceConditionBrazilView?.StandardDiscount) + Number(priceConditionBrazilView?.AdditionalDiscount)).toFixed(2),
+			CAP: priceConditionBrazilView?.CAP === "Yes" ? priceConditionBrazilView?.CapValue : 0
+		}];
+
+        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;
+        return body;
+    };
+
+
+	function getContractRequestBodyTemplate() {
+		const today = new Date();
+		const todayPlusOneYear = addOneYear(today);
+        return {
+            "_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT": {
+             "IV_DIVISION": "",
+             "IV_DOC_TYPE": "ZWCT", // Fixed
+             "IV_PARTNER": "",
+             "IV_PO_DATE": formatDateYYYYMMDD(today), 
+             "IV_PO_NUMBER": "XXX", // Fixed
+             "IV_PR_DATE": formatDateYYYYMMDD(today),
+             "IV_SALES_ORG": "MWHC", // Fixed
+             "IV_SIMULATE": "X", //Fixed (X indicate that we are SIMULATING a contract and not creating one in SAP)
+             "IV_VALID_F": formatDateYYYYMMDD(today),
+             "IV_VALID_T": formatDateYYYYMMDD(todayPlusOneYear),
+             "TT_ITEMS": {
+                "item": [
+                    {
+						"ITEM": "",
+						"MATERIAL": "",
+						"UNIT_PRICE": "0", // Fixed
+						"EFFORT_A": "0", // Fixed
+						"ITEM_QTD": "1", // Fixed
+						"MANUAL_D": "",
+						"CAP": "0"
+                    }
+                ]
+            }
+            }
+        }
+    };
+
+	async function simulateTaxes (tx, body) {
+        if (!body) {
+            throw new Error("ERR_MISSING_PARAMETER:body");
+        }
+        try {
+            const apiConfig = await tx.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'Contract', CountryCode: "BR", Resource: "Contract" })); 
+            const oauthAuth = await tx.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+            const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+
+            const oauthCredentials = await getBearerToken(oauthAuth);
+
+            return axios({
+                method: 'post',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body)
+            });
+        } catch (error) {
+            throw error
+        }
+        
+
+    };
+
+	function addOneYear(date) {
+		const dateCopy = new Date(date);
+		dateCopy.setFullYear(dateCopy.getFullYear() + 1);
+		return dateCopy;
+	};
+
+	function formatDateYYYYMMDD(date) {
+		return date.toJSON().slice(0,10).replace(/-/g,'');
+	}
+
+
+	function addLeadingZeros (num, size) {
+        if (num === null) {
+            throw new Error(`${text} doesn't exist`);
+        }
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
+    };
+
 }

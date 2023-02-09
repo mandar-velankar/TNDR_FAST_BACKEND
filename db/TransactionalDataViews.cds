@@ -1718,6 +1718,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key offer.OfferID,
     key product.ProductCode,
     key product.LotID,
+    customer.CustomerID,
     priceCondition.ID as ExistingPriceConditionID: UUID,
     priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
     tender.CountryCode,

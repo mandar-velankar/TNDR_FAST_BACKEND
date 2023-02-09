@@ -272,59 +272,6 @@ module.exports = (srv) => {
         }
     });
 
-    srv.on("simulateTaxes", async req => {
-        const tx = cds.tx(req);
-        try {
-            const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: req.data.offerID }));
-            if (!offer) return req.reject(404, `Offer ${req.data.offerID} was not found in ${PT_TMOFRS.name}`);
-
-            const directIndirectCustomers = await tx.run(SELECT.one.from(DirectIndirectCustomers).where({OfferID: req.data.offerID})); // TODO: add/get CustomerID from priceConditionBrazilView
-
-            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
-            if (!divisionCode) return req.reject(404, `Division ${offer.Division} was not found in ${PT_TMPRDHIER.name}`);
-
-            const offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where({ OfferID: req.data.offerID,  ProductCode: req.data.productCode, LotID: req.data.lotID}));
-            if (!offerProduct) return req.reject(404, `Product ${req.data.productCode} in Lot ${req.data.lotID} was not found in ${PT_TMOFPR.name}`);
-
-            const skuPrdPck = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: req.data.productCode, ActiveRecord: 'Yes'}));
-            if (!skuPrdPck) return req.reject(404, `No SkuCode was found for product ${req.data.productCode} in ${PT_TMSKUPRDPCK.name}`);
-
-            const priceConditionBrazilView = await tx.run(SELECT.from(PriceConditionBrazilView).where({ 
-                OfferID: req.data.offerID, 
-                TenderID: offer.TenderID, 
-                ProductCode: req.data.productCode, 
-                LotID: req.data.lotID, 
-                ConditionType: req.data.conditionType 
-            }));
-            if (!priceConditionBrazilView) return req.reject(404, `No result found in ${PriceConditionBrazilView.name} for Offer: ${req.data.offerID}`);
-            
-            // // Update all fields in sales order body template  
-            // const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPck, capBrazil);
-            // // Send request to SAP
-            // const createdContractResult = await sendCreatedContractToSAP(tx, "BR", "Contract", updateContractBody);
-            // const EV_CONTRACT_NUMBER = createdContractResult["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["EV_CONTRACT_NUMBER"];
-            // if (!EV_CONTRACT_NUMBER) {
-            //     const errorMsg = createdContractResult["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_RETURN"]["item"]["LINE"];
-            //     return req.reject(404, errorMsg);
-            // }
-            // // Update Contract Status and add Contract Number in DB if EV_CONTRACT_NUMBER exists in response from SAP
-            // await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.ID, ContractNumber: EV_CONTRACT_NUMBER}).where({ID: req.data.contractID}));
-            // // await tx.commit();
-            // return req.reply("Contract is synchronized successfully");
-        } catch (error) {
-            if(error.response && error.response.data){
-				console.error(error.response.data);
-				return req.reject(error.response.status, JSON.stringify(error.response.data));
-			}
-            if(error.code && error.message){
-				console.error(error.message);
-				return req.reject(error.code, error.message);
-			}
-            // await tx.rollback(req);
-			return req.reject(500, error.message);
-        }
-    });
-
     function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks, capBrazil) {
         const body = getContractRequestBodyTemplate();
         if (!body) {
