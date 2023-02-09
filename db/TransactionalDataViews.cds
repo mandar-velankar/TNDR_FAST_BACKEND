@@ -708,7 +708,7 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     ifnull(quotation.Signatory2.TITLE, signatory.TITLE) as TITLE:String
 };
 
-
+//EHQUT-RITM12706398-OfferValidity for SEWA
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
 left outer join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory1Default
     on offer.SellingCompany = signatory1Default.LEGAL_ENTITY_CODE
@@ -748,7 +748,10 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
-	ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay))) as OFFERVALIDITY,
+	 case offer.Tender.Institute.Region.Name
+        when 'SEWA' then ADD_DAYS(CURRENT_DATE, 60)
+        else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
+    end as OFFERVALIDITY,
 	ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate,
 	ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate,
 	offer.CountryCode as COUNTRYCODE,
@@ -1525,18 +1528,20 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
-inner join MasterData.PT_TMINST as institute 
-    on tender.InstituteID = institute.InstituteID
+inner join DirectIndirectCustomers as customer 
+    on tender.InstituteID = customer.InstituteID 
+    and tender.TenderID = customer.TenderID 
+    and offer.OfferID = customer.OfferID
 left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices 
     on product.ProductCode = masterPrices.ProductID
-    and institute.CustomerID = masterPrices.CustomerID
+    and customer.CustomerID = masterPrices.CustomerID
     and masterPrices.Type = 'ZWP0'
     {
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
-    key institute.InstituteID,
-    key institute.CustomerID,
+    key customer.InstituteID,
+    key customer.CustomerID,
     masterPrices.Value as masterPriceList,
     masterPrices.Currency as masterPriceCurrency,
     masterPrices.UOM as UoM,
@@ -1544,8 +1549,8 @@ left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices
     group by product.TenderID,
     offer.OfferID,
     product.ProductCode,
-    institute.InstituteID,
-    institute.CustomerID,
+    customer.InstituteID,
+    customer.CustomerID,
     masterPrices.Value,
     masterPrices.Currency,
     masterPrices.UOM;
@@ -1568,25 +1573,27 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
-inner join MasterData.PT_TMINST as institute 
-    on tender.InstituteID = institute.InstituteID
+inner join DirectIndirectCustomers as customer 
+    on tender.InstituteID = customer.InstituteID 
+    and tender.TenderID = customer.TenderID 
+    and offer.OfferID = customer.OfferID
 left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices 
     on product.ProductCode = masterPrices.ProductID
-    and institute.CustomerID = masterPrices.CustomerID
+    and customer.CustomerID = masterPrices.CustomerID
     and masterPrices.Type = 'ZWD4'
     {
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
-    key institute.InstituteID,
-    key institute.CustomerID,
+    key customer.InstituteID,
+    key customer.CustomerID,
     masterPrices.Value as masterStandardDiscount
     }where tender.Active = 1 and tender.CountryCode = 'BR'
     group by product.TenderID,
     offer.OfferID,
     product.ProductCode,
-    institute.InstituteID,
-    institute.CustomerID,
+    customer.InstituteID,
+    customer.CustomerID,
     masterPrices.Value;
 
 
@@ -1608,25 +1615,27 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
-inner join MasterData.PT_TMINST as institute 
-    on tender.InstituteID = institute.InstituteID
+inner join DirectIndirectCustomers as customer 
+    on tender.InstituteID = customer.InstituteID 
+    and tender.TenderID = customer.TenderID 
+    and offer.OfferID = customer.OfferID
 left outer join MasterDataViews.MostRecentBrazilMasterPricesView as masterPrices 
     on product.ProductCode = masterPrices.ProductID
-    and institute.CustomerID = masterPrices.CustomerID
+    and customer.CustomerID = masterPrices.CustomerID
     and masterPrices.Type = 'IBRX'
     {
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
-    key institute.InstituteID,
-    key institute.CustomerID,
+    key customer.InstituteID,
+    key customer.CustomerID,
     masterPrices.Value as masterICMSTaxes
     }where tender.Active = 1 and tender.CountryCode = 'BR'
     group by product.TenderID,
     offer.OfferID,
     product.ProductCode,
-    institute.InstituteID,
-    institute.CustomerID,
+    customer.InstituteID,
+    customer.CustomerID,
     masterPrices.Value;
 
 
@@ -1677,26 +1686,28 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
     and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
-inner join MasterData.PT_TMINST as institute 
-    on tender.InstituteID = institute.InstituteID 
+inner join DirectIndirectCustomers as customer 
+    on tender.InstituteID = customer.InstituteID 
+    and tender.TenderID = customer.TenderID 
+    and offer.OfferID = customer.OfferID
 inner join TransactionalDataViews.PriceConditionPriceListView as masterPriceListPriceCondition
     on masterPriceListPriceCondition.TenderID = product.TenderID
     and masterPriceListPriceCondition.OfferID = product.OfferID
     and masterPriceListPriceCondition.ProductCode = product.ProductCode 
     and masterPriceListPriceCondition.InstituteID = tender.InstituteID
-    and masterPriceListPriceCondition.CustomerID = institute.CustomerID
+    and masterPriceListPriceCondition.CustomerID = customer.CustomerID
 inner join TransactionalDataViews.PriceConditionStandardDiscountView as masterStandardDiscountPriceCondition
     on masterStandardDiscountPriceCondition.TenderID = product.TenderID
     and masterStandardDiscountPriceCondition.OfferID = product.OfferID
     and masterStandardDiscountPriceCondition.ProductCode = product.ProductCode 
     and masterStandardDiscountPriceCondition.InstituteID = tender.InstituteID
-    and masterStandardDiscountPriceCondition.CustomerID = institute.CustomerID
+    and masterStandardDiscountPriceCondition.CustomerID = customer.CustomerID
 inner join TransactionalDataViews.PriceConditionICMSTaxesView as masterICMSTaxesPriceCondition
     on masterICMSTaxesPriceCondition.TenderID = product.TenderID
     and masterICMSTaxesPriceCondition.OfferID = product.OfferID
     and masterICMSTaxesPriceCondition.ProductCode = product.ProductCode 
     and masterICMSTaxesPriceCondition.InstituteID = tender.InstituteID
-    and masterICMSTaxesPriceCondition.CustomerID = institute.CustomerID    
+    and masterICMSTaxesPriceCondition.CustomerID = customer.CustomerID    
 left outer join TransactionalData.PriceCondition as priceCondition 
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID

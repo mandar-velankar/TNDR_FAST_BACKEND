@@ -10,6 +10,7 @@ const ProcessBrazilOpportunities = require("./brasil/ProcessOpportunities");
 const ProcessEmpenho = require("./brasil/ProcessEmpenho");
 const ProcessBrazilIbizContracts = require("./brasil/ProcessIbizContracts");
 const ProcessTenderResults = require("./brasil/ProcessTenderResults");
+const ProcessSpainRappelData = require("./ProcessSpainRappelData");
 
 module.exports = class JobFactory {
     static create(jobName, jobTime) {
@@ -56,6 +57,9 @@ module.exports = class JobFactory {
             case this.jobNames.ProcessTenderResults:
                 return new ProcessTenderResults(jobName,jobTime);
                 break;
+            case this.jobNames.ProcessSpainRappelData:
+                return new ProcessSpainRappelData(jobName,jobTime)
+                break;
             default:
                 throw new Error('Job type not supported');
                 break;
@@ -76,7 +80,8 @@ module.exports = class JobFactory {
             ProcessBrazilOpportunities:"ProcessBrazilOpportunities",
             ProcessEmpenho:"ProcessEmpenho",
             ProcessBrazilIbizContracts:"ProcessBrazilIbizContracts",
-            ProcessTenderResults:"ProcessTenderResults"
+            ProcessTenderResults:"ProcessTenderResults",
+            ProcessSpainRappelData: "ProcessSpainRappelData"
         };
     }
 }

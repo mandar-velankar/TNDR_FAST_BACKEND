@@ -789,16 +789,18 @@ entity MasterTABrandMap as select from MasterData.PT_TMTABRMP as MasterTABrandMa
 order by MasterTABrandMap.TA,
 		 min(MasterTABrandMap.Product.HLEVEL4_NAME);
 
-//DONE
+////EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity MasterBudgetedProfitability as select from MasterDataLatestValues.VWBUDGETEDPROFITABILITY as MasterBudgetedProfitability
 inner join MasterData.PT_TMPRDHIER as h on MasterBudgetedProfitability.HLEVEL4_CODE = h.HLEVEL4_CODE {
 	key MasterBudgetedProfitability.HLEVEL4_CODE,
     key MasterBudgetedProfitability.PRODUCTPACKID,
+    MasterBudgetedProfitability.PRODUCTPACKNAME,
 	key MasterBudgetedProfitability.COUNTRYCODE,
 	min(h.HLEVEL4_NAME) as BRAND:String,
 	MasterBudgetedProfitability.PROFITABILITY
 } group by MasterBudgetedProfitability.HLEVEL4_CODE,
             MasterBudgetedProfitability.PRODUCTPACKID,
+           MasterBudgetedProfitability.PRODUCTPACKNAME,
 		   MasterBudgetedProfitability.COUNTRYCODE,
 		   MasterBudgetedProfitability.PROFITABILITY
   order by MasterBudgetedProfitability.COUNTRYCODE,
@@ -991,3 +993,375 @@ left outer join MasterData.PT_TMRCM as region on region.CountryCode = 'CL'
     ifnull(access.CWIDs_MarketData, '') as CWIDs_MarketData:String,
     ifnull(ctryCWID.CWIDs, '') as CWIDs_Country:String
 };
+
+entity OfferExhangeRateDates as select from TransactionalData.PT_TMOFRS as offer
+inner join MasterData.PT_TMCTRY as country on offer.CountryCode = country.CountryCode
+left outer join MasterData.PT_TMFXRTS as xRate_Local
+    on offer.Currency = xRate_Local.CurrencyFrom and country.LocalCurrency = xRate_Local.CurrencyTo
+    and xRate_Local.ExchangeType = 'Monthly Average' and xRate_Local.EffDate <= offer.SubmittedOn
+left outer join MasterData.PT_TMFXRTS as xRate_EUR
+    on offer.Currency = xRate_EUR.CurrencyFrom and xRate_EUR.CurrencyTo = 'EUR'
+	and xRate_EUR.ExchangeType = 'Monthly Average' and xRate_EUR.EffDate <= offer.SubmittedOn
+left outer join MasterData.PT_TMFXRTS as xRate_USD
+    on xRate_USD.CurrencyFrom = 'USD' and xRate_USD.CurrencyTo = 'EUR'
+	and xRate_USD.ExchangeType = 'Monthly Average' and xRate_USD.EffDate <= offer.SubmittedOn
+left outer join MasterData.PT_TMFXRTS as xRate_LocalDefault			
+	on offer.Currency = xRate_LocalDefault.CurrencyFrom and country.LocalCurrency = xRate_LocalDefault.CurrencyTo
+	and xRate_Local.ExchangeType = 'Monthly Average'
+left outer join MasterData.PT_TMFXRTS as xRate_EURDefault
+    on offer.Currency = xRate_EURDefault.CurrencyFrom and xRate_EURDefault.CurrencyTo = 'EUR'
+	and xRate_EURDefault.ExchangeType = 'Monthly Average'
+left outer join MasterData.PT_TMFXRTS as xRate_USDDefault			
+	on xRate_USDDefault.CurrencyFrom = 'USD' and xRate_USDDefault.CurrencyTo = 'EUR'
+	and xRate_USDDefault.ExchangeType = 'Monthly Average'		
+{
+    key offer.OfferID,
+	offer.Currency as OfferCurrency,
+	offer.SubmittedOn as OfferDate,
+	country.LocalCurrency as LocalCurrency,
+	case when offer.Currency=country.LocalCurrency then true else false end as OfferIsLocal,
+	max(xRate_Local.EffDate) as Local_Date,
+	max(xRate_EUR.EffDate) as EUR_Date,
+	max(xRate_USD.EffDate) as USD_EUR_Date,
+	min(xRate_LocalDefault.EffDate) as Local_DateDefault,
+	min(xRate_EURDefault.EffDate) as EUR_DateDefault,
+	min(xRate_USDDefault.EffDate) as USD_EUR_DateDefault
+}
+group by
+    offer.OfferID,
+    offer.Currency,
+    country.LocalCurrency,
+    offer.SubmittedOn;
+
+entity OfferExhangeRates as select from OfferExhangeRateDates as xRate0
+left outer join MasterData.PT_TMFXRTS as xRate_Local
+	on xRate0.OfferCurrency = xRate_Local.CurrencyFrom and xRate0.LocalCurrency = xRate_Local.CurrencyTo
+	and xRate_Local.ExchangeType = 'Monthly Average' and xRate_Local.EffDate = xRate0.Local_Date 
+left outer join MasterData.PT_TMFXRTS as xRate_EUR
+    on xRate0.OfferCurrency = xRate_EUR.CurrencyFrom and xRate_EUR.CurrencyTo = 'EUR'
+    and xRate_EUR.ExchangeType = 'Monthly Average' and xRate_EUR.EffDate = xRate0.EUR_Date
+left outer join MasterData.PT_TMFXRTS as xRate_USD
+    on xRate_USD.CurrencyFrom = 'USD' and xRate_USD.CurrencyTo = 'EUR'
+	and xRate_USD.ExchangeType = 'Monthly Average' and xRate_USD.EffDate = xRate0.USD_EUR_Date
+left outer join MasterData.PT_TMFXRTS as xRate_LocalDefault
+    on xRate0.OfferCurrency = xRate_LocalDefault.CurrencyFrom and xRate0.LocalCurrency = xRate_LocalDefault.CurrencyTo
+	and xRate_LocalDefault.ExchangeType = 'Monthly Average' and xRate_LocalDefault.EffDate = xRate0.Local_DateDefault
+left outer join MasterData.PT_TMFXRTS as xRate_EURDefault
+    on xRate0.OfferCurrency = xRate_EURDefault.CurrencyFrom and xRate_EURDefault.CurrencyTo = 'EUR'
+	and xRate_EURDefault.ExchangeType = 'Monthly Average' and xRate_EURDefault.EffDate = xRate0.EUR_DateDefault
+left outer join MasterData.PT_TMFXRTS as xRate_USDDefault
+    on xRate_USDDefault.CurrencyFrom = 'USD' and xRate_USDDefault.CurrencyTo = 'EUR'
+	and xRate_USDDefault.ExchangeType = 'Monthly Average' and xRate_USDDefault.EffDate = xRate0.USD_EUR_DateDefault
+{
+    key xRate0.OfferID,
+    xRate0.OfferCurrency,
+    xRate0.LocalCurrency,
+    xRate0.OfferDate,
+    case
+        when xRate0.OfferIsLocal = true then 1
+        else ifnull(xRate_Local.ExchangeRate, ifnull(xRate_LocalDefault.ExchangeRate,0))
+    end as xRate_Local,
+    case
+        when xRate0.OfferCurrency = 'EUR' then 1
+        when xRate0.OfferCurrency = 'USD' then case when ifnull(xRate_USD.ExchangeRate, ifnull(xRate_USDDefault.ExchangeRate, -3))<> 0 then 1/ifnull(xRate_USD.ExchangeRate, ifnull(xRate_USDDefault.ExchangeRate, -3)) else -4 end
+        else
+            1 / case when ifnull(xRate_EUR.ExchangeRate, ifnull(xRate_EURDefault.ExchangeRate, -1))<>0 then ifnull(xRate_EUR.ExchangeRate, ifnull(xRate_EURDefault.ExchangeRate, -1)) else -2 end
+    end as xRate_EUR,
+    case
+        when xRate0.OfferCurrency = 'USD' then 1
+        when xRate0.OfferCurrency = 'EUR' then ifnull(xRate_USD.ExchangeRate, ifnull(xRate_USDDefault.ExchangeRate, -3))
+        else
+            1
+                / case when ifnull(xRate_EUR.ExchangeRate, ifnull(xRate_EURDefault.ExchangeRate, -1))<>0 then ifnull(xRate_EUR.ExchangeRate, ifnull(xRate_EURDefault.ExchangeRate, -1)) else -2 end
+                * ifnull(xRate_USD.ExchangeRate, ifnull(xRate_USDDefault.ExchangeRate, -3))
+    end as xRate_USD
+};
+
+
+entity RawOfferPriceVolumeInfo as select from TransactionalData.PT_TMOFPR as offerProducts
+{
+    key offerProducts.OfferID,
+    key offerProducts.ProductCode,
+    case when offerProducts.Price.FOC_ABS_PCT='ABS'
+        then ifnull(offerProducts.Price.FOC, 0)
+        else ifnull(offerProducts.Price.FOC, 0) * offerProducts.RequestedVolume
+    end
+    /
+    case when offerProducts.UnitPerPack='Unit' and offerProducts.SKU.PACKFACTOR<>0 then offerProducts.SKU.PACKFACTOR else 1 end
+    as FocPacks,
+    offerProducts.RequestedVolume
+    /
+    case when offerProducts.UnitPerPack='Unit' and offerProducts.SKU.PACKFACTOR<>0 then offerProducts.SKU.PACKFACTOR else 1 end
+    as RequestedPacks,
+    case when offerProducts.Price.FOCType='FOC 1' then 'Included' else 'Added' end as FocType,
+    offerProducts.Price.RegPrice * case when offerProducts.UnitPerPack='Unit' then offerProducts.SKU.PACKFACTOR else 1 end as RegisteredPricePack,
+    offerProducts.Price.OfferPrice * case when offerProducts.UnitPerPack='Unit' then offerProducts.SKU.PACKFACTOR else 1 end as OfferPricePack,
+    offerProducts.Price.NetPrice * case when offerProducts.UnitPerPack='Unit' then offerProducts.SKU.PACKFACTOR else 1 end as NetPricePack
+}
+where
+    offerProducts.Active = 1 and
+    offerProducts.Price.Active = 1;
+
+entity OfferPriceVolumeInfo as select from RawOfferPriceVolumeInfo as info
+{
+    info.OfferID,
+    info.ProductCode,
+    info.FocPacks,
+    info.RequestedPacks,
+    info.FocType,
+    case when FocType='Included'
+        then info.RequestedPacks - info.FocPacks
+        else info.RequestedPacks
+    end as PaidPacks,
+    case when FocType='Included'
+        then info.RequestedPacks
+        else info.RequestedPacks  + info.FocPacks
+    end as TotalPacks,
+    info.RegisteredPricePack,
+    info.OfferPricePack,
+    info.NetPricePack
+};
+
+entity FastReportingData as select from TransactionalData.PT_TMOFPR as offerProducts
+inner join OfferExhangeRates as xRates on offerProducts.OfferID = xRates.OfferID
+inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = price_volume_info.OfferID and offerProducts.ProductCode = price_volume_info.ProductCode
+{
+	offerProducts.TenderID as OpportunityID:String,
+    offerProducts.Offer.Country.Region as BayerRegion:String,
+	offerProducts.Offer.Country.CountryCode as CountryCode:String,
+	offerProducts.Offer.Country.CountryName as Country:String,
+	offerProducts.Offer.Tender.TenderName as OpportunityName:String,
+	offerProducts.Offer.Tender.Classification as Classification:String,
+	offerProducts.Offer.Tender.PublicationDate as PublicationDate:DateTime,
+	offerProducts.Offer.Tender.TenderChannel as Channel:String,
+	offerProducts.Offer.Tender.SubmittedBy as Owner:String,
+	offerProducts.Offer.Tender.AwardDate as ExpectedAwardDate:DateTime,
+	offerProducts.Offer.Tender.NextPublicationDye as ExpectedNextPublicationDate:DateTime,
+	offerProducts.Offer.Tender.ContractLength as ExpectedContractDuration:Integer,
+	offerProducts.Offer.Tender.ContractExtenseion as ExpectedContractExtension:Integer,
+	offerProducts.Offer.Tender.Institute.InstituteName as InstituteName:String,
+	offerProducts.Offer.Tender.Institute.InstituteType as InstituteType:String,
+	offerProducts.Offer.Tender.Institute.CustomerID as CustomerNumber:Integer,
+
+	ifnull(offerProducts.Offer.Tender.Institute.Hierarchy.NAME, 'Not Specified') as InstituteHierarchy:String,
+	ifnull(offerProducts.Offer.Tender.Institute.Region.Name, 'Not Specified') as Region:String,
+	ifnull(offerProducts.Offer.Tender.Institute.Province.Name, 'Not Specified') as Province:String,
+	ifnull(offerProducts.Offer.Tender.Institute.CustomerGroup, 'Not Specified') as CustomerGroup:String,
+	ifnull(offerProducts.Offer.Tender.BiddingTypeLevel1, 'Not Specified') as BiddingTypeLevel1:String,
+    ifnull(offerProducts.Offer.Tender.BiddingTypeLevel2, 'Not Specified') as BiddingTypeLevel2:String,
+    ifnull(offerProducts.Offer.Tender.BiddingTypeLevel3, 'Not Specified') as BiddingTypeLevel3:String,
+	ifnull(offerProducts.Offer.Tender.HighValue, false) as HighValue:Boolean,
+	ifnull(offerProducts.Offer.Tender.PublicNotice, 'Not Specified') as PublicNotice:String,
+	case when offerProducts.Offer.Tender.GroupPurchasing<>1 then false else true end as GroupPurchasing:Boolean,
+	ifnull(offerProducts.Offer.Tender.PROCUREMENT_REASON, 'Not Specified') as ProcurementReason:String,
+	ifnull(offerProducts.Offer.Tender.CONTENT, '') as OpportunityComment:String,
+	ifnull(offerProducts.Offer.Tender.PORTAL, 'Not Specified') as Portal:String,
+	ifnull(offerProducts.Offer.Tender.TenderType1.NAME, 'Not Specified') as TenderType1:String,
+    ifnull(offerProducts.Offer.Tender.TenderType2.NAME, 'Not Specified') as TenderType2:String,
+	ifnull(offerProducts.Offer.Tender.ContractType.NAME, 'Not Specified') as ContractType:String,
+	ifnull(offerProducts.Offer.Tender.SalesType.NAME, 'Not Specified') as SalesType:String,
+	ifnull(offerProducts.Offer.Tender.Origin.NAME, 'Not Specified') as Origin:String,
+	ifnull(offerProducts.Offer.Tender.PROCUREMENT_METHOD_ID, 'Not Specified') as ProcurementMethod:String,
+	ifnull(offerProducts.Offer.Tender.ExternalID, '') as ExternalID:String,
+	offerProducts.OfferID as OfferID:String,
+	ifnull(offerProducts.Offer.PfiNumber.PFINo, offerProducts.OfferID) as OfferNumber:String,
+	case when offerProducts.Offer.ActiveOffer=1 then true else false end as ActiveOffer:Boolean,
+	'Selling' as OfferType:String,
+	offerProducts.Offer.DistributorID as DistributorID:String,
+	offerProducts.Offer.OfferStatus.STATUS as OfferStatus:String,
+	offerProducts.Offer.Distributor.DistributorName as DistributorName:String,
+	case when offerProducts.Offer.RevisedOfferNo<>0 or offerProducts.Offer.ContinuationOfferNo<>0
+		then offerProducts.Offer.NewOfferDueDate
+		else offerProducts.Offer.Tender.BidDueDate
+	end as OfferSubmissionDeadline:DateTime,
+
+	case
+        when offerProducts.Offer.SubmissionDate = '' or offerProducts.Offer.SubmissionDate is null then
+            case when offerProducts.Offer.Quotation.SubmittedOn = '' or offerProducts.Offer.Quotation.SubmittedOn is null
+                then offerProducts.Offer.Tender.PublicationDate
+                else offerProducts.Offer.Quotation.SubmittedOn
+            end
+        else
+            offerProducts.Offer.SubmissionDate
+    end as OfferSubmissionDate:DateTime,
+
+	case
+        when offerProducts.PriceAgreement.EffectiveDate is not null then offerProducts.PriceAgreement.EffectiveDate
+        else
+            case
+                when offerProducts.Offer.SubmissionDate = '' or offerProducts.Offer.SubmissionDate is null then
+                    case when offerProducts.Offer.Quotation.SubmittedOn = '' or offerProducts.Offer.Quotation.SubmittedOn is null
+                        then offerProducts.Offer.Tender.PublicationDate
+                        else offerProducts.Offer.Quotation.SubmittedOn
+                    end
+                else
+                    offerProducts.Offer.SubmissionDate
+            end
+    end as ContractEffectiveDate:DateTime,
+
+	case
+        when offerProducts.PriceAgreement.ExpiryDate is not null then offerProducts.PriceAgreement.ExpiryDate
+        else
+            ADD_MONTHS(
+                case
+                when offerProducts.Offer.SubmissionDate = '' or offerProducts.Offer.SubmissionDate is null then
+                    case when offerProducts.Offer.Quotation.SubmittedOn = '' or offerProducts.Offer.Quotation.SubmittedOn is null
+                        then offerProducts.Offer.Tender.PublicationDate
+                        else offerProducts.Offer.Quotation.SubmittedOn
+                    end
+                else
+                    offerProducts.Offer.SubmissionDate
+            end,
+            12
+            )
+    end as ContractExpiryDate:DateTime,
+
+
+    case
+        when
+            offerProducts.Offer.OfferStatus.STATUS = 'Quotation Submitted' or
+            offerProducts.Offer.OfferStatus.STATUS = 'Results Recorded' or
+            offerProducts.Offer.OfferStatus.STATUS = 'Delivery Ongoing'
+        then
+            case
+                when offerProducts.Offer.SubmissionDate = '' or offerProducts.Offer.SubmissionDate is null then
+                    case when offerProducts.Offer.Quotation.SubmittedOn = '' or offerProducts.Offer.Quotation.SubmittedOn is null
+                        then offerProducts.Offer.Tender.PublicationDate
+                        else offerProducts.Offer.Quotation.SubmittedOn
+                    end
+                else
+                    offerProducts.Offer.SubmissionDate
+            end
+        else null
+    end as ActualOfferSubmissionDate:DateTime,
+
+    offerProducts.Offer.SellingCompanyDetails.LegalEntityName as SellingCompany:String,
+	case when offerProducts.Offer.RevisedOfferNo<>0
+		then true
+		else false
+	end as RevisedOffer:Boolean,
+	case when offerProducts.Offer.ContinuationOfferNo<>0
+		then true
+		else false
+	end as ContinuedOffer:Boolean,
+	offerProducts.Offer.Currency as OfferCurrency:String,
+	offerProducts.Offer.Country.LocalCurrency as LocalCurrency:String,
+	offerProducts.Offer.Country.ReportingCurrency as ReportingCurrency:String,
+	offerProducts.Offer.Comment as OfferComment:String,
+	offerProducts.Offer.Division as Division:String,
+	offerProducts.Offer.Division as BU:String,
+	ifnull(offerProducts.Offer.WholesaleOffer, 'No') as WholesaleOffer:String,
+	offerProducts.ProductCode as FastProductID:Integer,
+	case when offerProducts.ActiveProduct=1 then true else false end as ActiveProduct:Boolean,
+	offerProducts.SKU.Product.TA.TA as TherapeuticArea:String,
+    offerProducts.SKU.Product.HLEVEL4_NAME as Brand:String,
+    offerProducts.SKU.PRODUCTPACKNAME as Product:String,
+	offerProducts.SKU.PACKFACTOR as PackSize:Integer,
+	offerProducts.SKU.CONCENTRATION as Strength:Double,
+	offerProducts.UnitPerPack as OfferUoM:String,
+	ifnull(offerProducts.AnticipatedRequestedQuantity, 'Requested') as RequestedOrAnticipated:String,
+
+    price_volume_info.RequestedPacks as Volume:Integer,
+    price_volume_info.PaidPacks as PaidVolume:Integer,
+	price_volume_info.TotalPacks as TotalVolume:Integer,
+	price_volume_info.FocPacks as FreeVolume:Integer,
+	price_volume_info.RegisteredPricePack * xRates.xRate_Local as NonDiscountedPrice_Local:Double,
+	price_volume_info.RegisteredPricePack * xRates.xRate_EUR  as NonDiscountedPrice_EUR:Double,
+	price_volume_info.RegisteredPricePack * xRates.xRate_USD as NonDiscountedPrice_USD:Double,
+
+	price_volume_info.OfferPricePack * xRates.xRate_Local as QuotationPrice_Local:Double,
+	price_volume_info.OfferPricePack * xRates.xRate_EUR as QuotationPrice_EUR:Double,
+	price_volume_info.OfferPricePack * xRates.xRate_USD as QuotationPrice_USD:Double,
+
+	price_volume_info.NetPricePack * xRates.xRate_Local as NetPrice_Local:Double,
+	price_volume_info.NetPricePack * xRates.xRate_EUR as NetPrice_EUR:Double,
+	price_volume_info.NetPricePack * xRates.xRate_USD as NetPrice_USD:Double,
+
+	offerProducts.Price.COGS / case when xRates.xRate_EUR<>0 then xRates.xRate_EUR else 1 end as COGS_Local:Double,
+	offerProducts.Price.COGS as COGS_EUR:Double,
+	offerProducts.Price.COGS * xRates.xRate_USD / case when xRates.xRate_EUR<>0 then xRates.xRate_EUR else 1 end as COGS_USD:Double,
+
+    price_volume_info.TotalPacks * offerProducts.Price.COGS / case when xRates.xRate_EUR<>0 then xRates.xRate_EUR else 1 end as TotalCost_Local:Double,
+    price_volume_info.TotalPacks * offerProducts.Price.COGS as TotalCost_EUR:Double,
+    price_volume_info.TotalPacks * offerProducts.Price.COGS * xRates.xRate_USD / case when xRates.xRate_EUR<>0 then xRates.xRate_EUR else 1 end as TotalCost_USD:Double,
+	case when price_volume_info.NetPricePack <> 0 and price_volume_info.RequestedPacks<>0
+		then
+			(price_volume_info.NetPricePack * xRates.xRate_EUR * price_volume_info.RequestedPacks - offerProducts.Price.COGS * price_volume_info.RequestedPacks)
+			/ (price_volume_info.NetPricePack* xRates.xRate_EUR * price_volume_info.RequestedPacks)
+		else 1
+	end as Profitability:Double,
+
+	price_volume_info.OfferPricePack * price_volume_info.PaidPacks * xRates.xRate_Local as QuotationValue_Local:Double,
+	price_volume_info.OfferPricePack * price_volume_info.PaidPacks * xRates.xRate_EUR as QuotationValue_EUR:Double,
+	price_volume_info.OfferPricePack * price_volume_info.PaidPacks * xRates.xRate_USD as QuotationValue_USD:Double,
+	price_volume_info.FocType as FocType:String,
+	offerProducts.Price.FOC_ABS_PCT as FocAbsPct:String,
+	offerProducts.Price.FOC as FOC:Double,
+	offerProducts.Results.Outcome as Outcome:String,
+	case when offerProducts.Results.Outcome <> 'Won' then 0
+    else
+        case when offerProducts.UnitPerPack='Unit' and offerProducts.SKU.PACKFACTOR<>0
+            then offerProducts.Results.AwardedQty / offerProducts.SKU.PACKFACTOR
+            else offerProducts.Results.AwardedQty
+        end
+    end as AwardedQuantity:Integer,
+
+    case when offerProducts.Results.Outcome <> 'Won' then 0
+    else offerProducts.Price.OfferPrice * offerProducts.Results.AwardedQty * xRates.xRate_Local
+    end as AwardedValue_Local:Double,
+
+    case when offerProducts.Results.Outcome <> 'Won' then 0
+    else offerProducts.Price.OfferPrice * offerProducts.Results.AwardedQty * xRates.xRate_EUR
+    end as AwardedValue_EUR:Double,
+
+    case when offerProducts.Results.Outcome <> 'Won' then 0
+    else offerProducts.Price.OfferPrice * offerProducts.Results.AwardedQty * xRates.xRate_USD
+    end as AwardedValue_USD:Double,
+
+    offerProducts.Results.ResultDate as ActualAwardDate:DateTime,
+	
+    offerProducts.Results.CompetitorResult.AWARDEDCOMPANY as Competitor:String,
+	offerProducts.Results.CompetitorResult.AWARDEDPRODUCT as CompetitorProduct:String,
+	offerProducts.Results.CompetitorResult.OUTCOME as CompetitorOutcome:String,
+	offerProducts.Results.CompetitorResult.AWARDEDPRICE * xRates.xRate_Local as CompetitorPrice_Local:Double,
+	offerProducts.Results.CompetitorResult.AWARDEDPRICE * xRates.xRate_EUR as CompetitorPrice_EUR:Double,
+	offerProducts.Results.CompetitorResult.AWARDEDPRICE * xRates.xRate_USD as CompetitorPrice_USD:Double,
+	offerProducts.Results.CompetitorResult.AWARDEDQTY as CompetitorAwardedQuantity:Integer,
+	offerProducts.Results.CompetitorResult.TOTALAWARDEDVALUE * xRates.xRate_Local as CompetitorAwardedValue_Local:Double,
+	offerProducts.Results.CompetitorResult.TOTALAWARDEDVALUE * xRates.xRate_EUR as CompetitorAwardedValue_EUR:Double,
+	offerProducts.Results.CompetitorResult.TOTALAWARDEDVALUE * xRates.xRate_USD as CompetitorAwardedValue_USD:Double,
+	
+	ifnull(offerProducts.PriceAgreement.Deliveries.VGBEL ,offerProducts.Deliveries.PO) as DeliveryPO:String,
+	offerProducts.Deliveries.SNo as DeliveryNo:Integer,
+    offerProducts.PriceAgreement.Deliveries.ID as DeliveryID:String,
+
+	case when offerProducts.Deliveries.LocalOrDirectDelivery='L' then 'Sell-Out' else 'Sell-In' end as DeliveryType:String,
+	ifnull(offerProducts.PriceAgreement.Deliveries.WADAT_IST, offerProducts.Deliveries.ActualDeliveryDate) as DeliveryDate:DateTime,
+	ifnull(offerProducts.PriceAgreement.Deliveries.WADAT_IST, offerProducts.Deliveries.RequestedDeliveryDate) as RequestedDeliveryDate:DateTime,
+	ifnull(offerProducts.PriceAgreement.Deliveries.LFIMG, offerProducts.Deliveries.ActualDeliveryQuantity)
+	/
+	case when offerProducts.UnitPerPack='Unit' and offerProducts.SKU.PACKFACTOR<>0
+            then offerProducts.SKU.PACKFACTOR
+            else 1
+    end
+	as DeliveryQuantity:Integer,
+	ifnull(offerProducts.PriceAgreement.Deliveries.LFIMG, offerProducts.Deliveries.RequestedQuantity)
+	/
+	case when offerProducts.UnitPerPack='Unit' and offerProducts.SKU.PACKFACTOR<>0
+            then offerProducts.SKU.PACKFACTOR
+            else 1
+    end
+	as RequestedDeliveryQuantity:Integer,
+	case when offerProducts.Deliveries.PaidOrFree='Free' then false else true end as PaidGoodsDelivery:Boolean,
+	
+	ifnull(offerProducts.Offer.Tender.Criteria.AwardCriteria, 'Not Specified') as AwardCriteria:String,
+	ifnull(offerProducts.Offer.Tender.Criteria.Weight, 1) as AwardCriteriaWeight:Double
+}
+where
+    offerProducts.Offer.Tender.Active = 1 and
+	offerProducts.Offer.Active = 1 and
+	offerProducts.Active = 1 and
+	(offerProducts.OfferType is null or offerProducts.OfferType = 'Selling') and
+	offerProducts.Price.Active = 1;
+				
+

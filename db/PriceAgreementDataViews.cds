@@ -93,3 +93,13 @@ key FOC.ProductPackId as FOCproductId:String
 
     
 } group by pa.ID,FOC.CountryCode,FOC.OfferID,FOC.ProductCode,FOC.ProductPackId ;
+
+
+entity MaterialsConcatList as select from MasterData.PT_TMSKUPRDPCK as materials{
+  key materials.ProductPackID,
+  key materials.CountryCode,
+  key materials.ActiveRecord,
+  STRING_AGG(CAST(materials.SKUCode as String), ', ') as MaterialsList:String
+} group by materials.ProductPackID,
+           materials.CountryCode,
+           materials.ActiveRecord;
