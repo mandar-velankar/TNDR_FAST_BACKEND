@@ -1217,9 +1217,13 @@ module.exports = async (srv) => {
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = kunnr;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = matnr;
 
+        //Transforming the Date in correct format
+        const dataB = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
+        const datbI = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
+        
         // Specify existing SAP rappel reference when exists for customer/material
         // when KNUMA_BO is specified then it is an update in the SAP backend else, it is a create
-        const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: datab, DATBI: datbi}));
+        const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: dataB, DATBI: datbI}));
         if(spainRappelData){
             body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].KNUMA_BO = spainRappelData.KNUMA;
         }
