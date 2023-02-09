@@ -3565,8 +3565,17 @@ module.exports = (srv) => {
             const TT_CONTRACT_DETAILS = result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"];
             if (!TT_CONTRACT_DETAILS) {
                 return req.reject(404, JSON.stringify(result.data));
+				// add dummy data. REMOVE THIS IN AFTER IMPLEMENTATION
+				// result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"] = {
+				// 	"item": {
+				// 		"ITM_NUMBER": "000001",
+				// 		"MATERIAL": "000000000087079341",
+				// 		"TAX_AMOUNT": "2.3200000000",
+				// 		"NET_VALUE": "45.340000000"
+				// 	}
+				// }
             }
-            return req.reply(200, result.data);
+            return req.reply(result.data);
         } catch (error) {
             if(error.response && error.response.data){
 				console.error(error.response.data);
@@ -3608,7 +3617,7 @@ module.exports = (srv) => {
 
         const body = getContractRequestBodyTemplate();
 
-        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_DIVISION"] = division.HLEVEL1_CODE;
+        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_DIVISION"] = division.HLEVEL1_CODE < 10 ? addLeadingZeros(division.HLEVEL1_CODE, 2) : division.HLEVEL1_CODE;
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PARTNER"] = priceConditionBrazilView.CustomerID;
 
         const items = [{
