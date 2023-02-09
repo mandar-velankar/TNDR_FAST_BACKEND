@@ -53,7 +53,11 @@ entity ContractProducts: managed, cuid {
                                         on OfferProduct.ProductCode = ProductPackID
                                         and OfferProduct.OfferID = OfferID
                                         and OfferProduct.LotID = LotID;
-        Contract                    : Association to Contracts;                        
+        Contract                    : Association to Contracts;    
+        SalesOrderProducts          : Association to SalesOrderProducts 
+                                        on SalesOrderProducts.OfferID = OfferID
+                                        and SalesOrderProducts.ProductPackID = ProductPackID
+                                        and SalesOrderProducts.LotID = LotID       
 }
 
 entity SalesOrders: managed, cuid {
