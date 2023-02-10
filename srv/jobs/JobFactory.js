@@ -9,6 +9,7 @@ const ProcessBrazilMaterials = require("./brasil/ProcessMaterials");
 const ProcessBrazilOpportunities = require("./brasil/ProcessOpportunities");
 const ProcessEmpenho = require("./brasil/ProcessEmpenho");
 const ProcessBrazilIbizContracts = require("./brasil/ProcessIbizContracts");
+const NewIBIZTenderNotifications = require("./brasil/ProcessIbizTenderNotifications");
 const ProcessTenderResults = require("./brasil/ProcessTenderResults");
 const ProcessSpainRappelData = require("./ProcessSpainRappelData");
 
@@ -54,6 +55,8 @@ module.exports = class JobFactory {
             case this.jobNames.ProcessBrazilIbizContracts:
                 return new ProcessBrazilIbizContracts(jobName,jobTime);
                 break;
+            case this.jobNames.NewIBIZTenderNotifications:
+                return new NewIBIZTenderNotifications(jobName, jobTime);
             case this.jobNames.ProcessTenderResults:
                 return new ProcessTenderResults(jobName,jobTime);
                 break;
@@ -80,6 +83,7 @@ module.exports = class JobFactory {
             ProcessBrazilOpportunities:"ProcessBrazilOpportunities",
             ProcessEmpenho:"ProcessEmpenho",
             ProcessBrazilIbizContracts:"ProcessBrazilIbizContracts",
+            NewIBIZTenderNotifications:"NewIBIZTenderNotifications",
             ProcessTenderResults:"ProcessTenderResults",
             ProcessSpainRappelData: "ProcessSpainRappelData"
         };
