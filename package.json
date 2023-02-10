@@ -6,7 +6,7 @@
   "license": "ISC",
   "dependencies": {
     "@sap-cloud-sdk/core": "^1.54.2",
-    "@sap/cds": "6.3.0",
+    "@sap/cds": "~6.3.0",
     "@sap/cds-odata-v2-adapter-proxy": "1.9.13",
     "@sap/hana-client": "2.14.22",
     "@sap/logging": "^6.1.1",
@@ -45,6 +45,7 @@
     "setup:ui": "cd app && npm install",
     "deploy": "cds deploy db --to sqlite:db/sxtender.db",
     "deploy:hana": "cds deploy --to hana --vcap-file ./default-env.json",
+    "deploy:hana:as": "cds deploy --to hana:FAST-db-hdi-container-as --auto-undeploy",
     "build": "cds build/all --clean",
     "build:prd": "cds -v && cds build --production",
     "build:local": "rm -rf ./srv/node_modules && cds build/all --clean ",
@@ -88,6 +89,5 @@
   "files": [
     "db",
     "srv"
-  ],
-  "devDependencies": {}
+  ]
 }
