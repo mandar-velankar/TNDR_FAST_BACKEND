@@ -301,9 +301,9 @@ module.exports = (srv) => {
             if (!divisionCode) {
                 return req.reject(404, "divisionCode not found");
             }
-
+            const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
             // Update all fields in sales order body template  
-            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks);
+            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT);
             // Send request to SAP
             const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
             const EV_ORDER_NUMBER = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["EV_ORDER_NUMBER"];
@@ -333,7 +333,7 @@ module.exports = (srv) => {
         }
     });
 
-    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks) {
+    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT) {
         const body = getSalesOrderRequestBodyTemplate();
         if (!body) {
             return false;
@@ -349,14 +349,45 @@ module.exports = (srv) => {
                     ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                     MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
                     ITEM_QTD: `${el.RequestedQty}`,
-                    IV_TEXT: ""
+                    IV_TEXT: IV_TEXT
                 }
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["TT_ITEMS"].item = items;
         return body;
     };
+    async function mappedSalesOrder_IV_TEXT (req, tx, salesOrder, contract) {
+        const {
+            DirectIndirectCustomers
+        } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
+        const {
+            PT_TMDIST,
+            PT_TMINST
+        } = cds.entities("com.bayer.SXTENDER.MasterData");
 
+        try {
+            const directIndirectCustomers = await tx.run(SELECT.one.from(DirectIndirectCustomers).where({OfferID: contract.OfferID}));
+            if (!directIndirectCustomers || directIndirectCustomers.length == 0) req.reject(404, "CustomerID is not found");
+            let IV_TEXT = "";
+            if (directIndirectCustomers.isDirect) {
+                let inst = await tx.run(SELECT.one.from(PT_TMINST).where({CountryCode: "BR", InstituteID: contract.InstituteID ,CustomerID: directIndirectCustomers.CustomerID}));
+                if (!inst) req.reject(404, "Institute not found for direct offer");
+                IV_TEXT = `${inst.State} ${inst.InstituteName} ${contract.OfferID} ${contract.IbizContractNumber} ${salesOrder.EmpenhoNumber} Institute ${salesOrder.EmpenhoNumber}`;
+            }else {
+                let dist = await tx.run(SELECT.one.from(PT_TMDIST).where({CountryCode: "BR", DistributorID: contract.DistributorID, CustomerID: directIndirectCustomers.CustomerID}));
+                if (!dist) req.reject(404, "Institute not found for direct offer");
+                IV_TEXT = `${dist.State} ${dist.DistributorName} ${contract.OfferID} ${contract.IbizContractNumber} ${salesOrder.EmpenhoNumber} Distributor ${salesOrder.EmpenhoNumber}`;
+            }
+            return IV_TEXT;
+        } catch (error) {
+            console.log(error);
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+			return req.reject(500, error.message);
+        }
+    };
     function addLeadingZeros (num, size, text) {
         if (num === null) {
             throw new Error(`${text} doesn't exist`);

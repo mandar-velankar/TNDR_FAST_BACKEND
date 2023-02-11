@@ -37,7 +37,7 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
-        PT_TMTEND, PT_TMOFPR, PT_TMOFRS, PriceCondition, FreeGoodsOther, DiscountCondition
+        PT_TMTEND, PT_TMOFPR, PT_TMOFRS, PriceCondition, FreeGoodsOther, DiscountCondition, SpainRappelData
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
     const {
@@ -45,12 +45,19 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 
 
-
-
+    //we needed 2 separate views fr the priceagreements, as we are doing a join to display extra data on the master page.
+    //having the new view for the master page, implied that filtering was not executed anymore.
+    //Therefore, all filtering logic has been moved to a separate function, and is being called when reading both PriceAgreements entity as PriceAgreementsMasterView view.
     srv.on('READ', 'PriceAgreements', async (req, next) => {
+        return await filterPriceAgreements(req, next);
+    });
 
-
-        // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
+    srv.on('READ', 'PriceAgreementsMasterView', async (req, next) => {
+        return await filterPriceAgreements(req, next);
+    });
+    
+    async function filterPriceAgreements(req, next) {
+         // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
         //     return [{ counted: 5555 }]; 
         // } 
 
@@ -627,8 +634,8 @@ module.exports = async (srv) => {
         }
         result.$count = result.length;
         return req.reply(result);
+    };
 
-    });
 
     srv.after('READ', 'PriceAgreements', async (data) => {
         const tx = db.tx();
@@ -676,8 +683,9 @@ module.exports = async (srv) => {
         }
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
-        // await this.syncPriceAgreements(customerPrices);
+       
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
+       // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
         return req.reply();
     });
@@ -773,16 +781,18 @@ module.exports = async (srv) => {
         // }
     };
 
-
+    //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
     async function updateCustomerPrice(customerPrice) {
         console.log(`Prepare sending update customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
-        const body = getPriceAgreementRequestBodyTemplate();
+        
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+        const body = getPriceAgreementRequestBodyTemplate(institute);
+      
         if (!institute) {
             console.error(`Error customer price: ${customerPrice.ID}`);
             console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
@@ -857,11 +867,11 @@ module.exports = async (srv) => {
         } else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack") { // => radiology so per unit
             kbetr = kbetr / packFactor;
         }
-        //}
-
+        //} 
+        //EHQUT-INC17748342-Rates incorrectly synchronized.
         //we should add "-" only in case of Price Condition "YL60" and "YDC0"
         if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
-            kbetr = kbetr + "-";
+            kbetr = kbetr.toFixed(2) + "-";
         }
 
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
@@ -890,8 +900,8 @@ module.exports = async (srv) => {
         }
     }
 
-
-    function getPriceAgreementRequestBodyTemplate() {
+//EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
+    function getPriceAgreementRequestBodyTemplate(institute) {
         return {
             "_-BAY0_-GZ_SDCOND_A04": {
                 "IDOC": {
@@ -923,7 +933,7 @@ module.exports = async (srv) => {
                     "E1KOMG": {
                         "SEGMENT": 1,
                         "KVEWE": "A",
-                        "KOTABNR": 878,
+                        "KOTABNR":institute.InstituteType === 'Region(s)' ? 879 : 878,
                         "KAPPL": "V",
                         "KSCHL": "YLTP",
                         "VKORG": "ITHC",
@@ -981,6 +991,7 @@ module.exports = async (srv) => {
                 'Content-Type': 'application/json'
             },
             data: JSON.stringify(body)
+            
         });
 
     };
@@ -1071,8 +1082,9 @@ module.exports = async (srv) => {
 
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
-
-        const body = getPriceAgreementRequestBodyTemplate();
+        //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
+        const body = getPriceAgreementRequestBodyTemplate(institute);
+        
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
@@ -1082,7 +1094,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KVEWE = 'N';
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KONMS = "PCE";
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MEINS = "PCE";
-
+    
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
@@ -1188,18 +1200,31 @@ module.exports = async (srv) => {
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 
+        let priceAgreementInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where({InstituteID: priceAgreement.InstituteId}));
+
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
 
+        const bonem = parseInt(priceAgreementInstitute.CustomerID);
+        const kunnr = parseInt(institute.CustomerID);
+        const matnr = parseInt(customerPrice.MaterialNumber);
+
         const body = getES01RequestBodyTemplate(institute);
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = parseInt(institute.CustomerID);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = bonem;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATBI_GR = body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = parseInt(institute.CustomerID);
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = parseInt(customerPrice.MaterialNumber);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = kunnr;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = matnr;
+
+        // Specify existing SAP rappel reference when exists for customer/material
+        // when KNUMA_BO is specified then it is an update in the SAP backend else, it is a create
+        const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr }));
+        if(spainRappelData){
+            body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].KNUMA_BO = spainRappelData.KNUMA;
+        }
 
 
         // DiscountConditions

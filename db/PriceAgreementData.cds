@@ -8,6 +8,7 @@ using {
 } from '@sap/cds/common';
 using {com.bayer.SXTENDER.TransactionalData} from './TransactionalData';
 using {com.bayer.SXTENDER.AdminDataViews} from './AdminDataViews';
+using {com.bayer.SXTENDER.AdminData} from './AdminData';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
 using {com.bayer.SXTENDER.PriceAgreementDataViews} from './PriceAgreementDataViews';
@@ -82,6 +83,7 @@ entity PriceAgreements: cuid, managed {
     SettlementDates: Composition of many SettlementDates on SettlementDates.PriceAgreementId = ID;
     MasterPrices: Association to MasterDataViews.MostRecentMasterPricesView on MasterPrices.ProductPackId = ProductPackId
                                                                             and MasterPrices.CountryCode = CountryCode  ;
+    User: Association to AdminData.PT_TMUSER on User.CWID = createdBy;
 }
 
 entity PriceAgreementAcknowledgementHistory: cuid, managed {
@@ -252,7 +254,7 @@ inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID
 inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
 inner join MasterData.PT_TMINST AS ins on pa.CountryCode = ins.CountryCode and ca.CandidateID = ins.InstituteID
 left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId 
-    and cp.MaterialNumber = ma.SKUCode 
+    and cp.MaterialNumber = ma.SKUCode
     and cp.InstituteId = ca.CandidateID 
     and cp.PriceCondition <> 'YA03' // Italy FOC
     and cp.PriceCondition <> 'YA01' // Spain FOC
@@ -280,10 +282,18 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         // pa.Institute.CustomerID //by price agreement
 };
 
-
+//EHQUT-199066-Italy – Brand filter in Price Agreements
 //Distinct list of Products
-entity PriceAgreementProductNames as select from PriceAgreements {
-	key ProductPackId,
-    CountryCode,
-    Product.ProductPack.PRODUCTPACKNAME as ProductName
-} group by ProductPackId, CountryCode, Product.ProductPack.PRODUCTPACKNAME;
+// entity PriceAgreementProductNames as select from PriceAgreements {
+// 	key ProductPackId,
+//     CountryCode,
+//     Product.ProductPack.PRODUCTPACKNAME as ProductName
+// } group by ProductPackId, CountryCode, Product.ProductPack.PRODUCTPACKNAME;
+entity PriceAgreementProductNames as select from PriceAgreements as pa
+inner join MasterDataViews.CountryBrandProducts as ca on pa.ProductPackId= ca.PRODUCT_ID{
+	key pa.ProductPackId,
+    pa.CountryCode,
+    Product.ProductPack.PRODUCTPACKNAME as ProductName,
+    ca.BRAND_ID,
+    ca.BRAND_NAME
+} group by pa.ProductPackId, pa.CountryCode, Product.ProductPack.PRODUCTPACKNAME,ca.BRAND_ID,ca.BRAND_NAME;

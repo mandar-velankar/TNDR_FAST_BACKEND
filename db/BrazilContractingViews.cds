@@ -27,7 +27,8 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.Status.Status,
         sum(Contracts.ContractProducts.OfferProduct.PriceCondition.CommercialProposal * Contracts.ContractProducts.OfferProduct.RequestedVolume) as TotalValue:Decimal,
         Contracts.modifiedBy,
-        Contracts.modifiedAt
+        Contracts.modifiedAt,
+        Contracts.createdBy
 }group by Contracts.ID,
         Contracts.TenderID,
         Contracts.OfferID,
@@ -46,7 +47,8 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.EndDate,
         Contracts.Status.Status,
         Contracts.modifiedBy,
-        Contracts.modifiedAt;
+        Contracts.modifiedAt,
+        Contracts.createdBy;
 
 entity ContractProductsView as select from BrazilContractingData.ContractProducts as ContractProducts
 left outer join BrazilContractingViews.AdhesionContractCompositionView as AdhesionContract 
@@ -65,9 +67,23 @@ left outer join BrazilContractingViews.AdhesionContractCompositionView as Adhesi
         ContractProducts.OfferProduct.UnitPerPack as UoM,
         ContractProducts.OfferProduct.SKU.PRODUCTPACKNAME as ProductPackName,
         ContractProducts.OfferProduct.PriceCondition.CommercialProposal as CommercialPrice,
+        sum(ContractProducts.SalesOrderProducts.RequestedQty) / ContractProducts.RequestedVolume as DeliveredVolume: Integer,
         AdhesionContract.ExistingAdhesionContractsVolume,
         AdhesionContract.RemainingAdhesionContractsVolume,
-};
+}group by ContractProducts.ID,
+        ContractProducts.Contract.ID,
+        ContractProducts.ProductPackID,                                          
+        ContractProducts.OfferID,                                      
+        ContractProducts.RequestedVolume,   
+        ContractProducts.IbizItemType,
+        ContractProducts.LotID,
+        ContractProducts.ContractPrice,        
+        ContractProducts.OfferProduct.RequestedVolume,                                       
+        ContractProducts.OfferProduct.UnitPerPack,
+        ContractProducts.OfferProduct.SKU.PRODUCTPACKNAME,
+        ContractProducts.OfferProduct.PriceCondition.CommercialProposal,
+        AdhesionContract.ExistingAdhesionContractsVolume,
+        AdhesionContract.RemainingAdhesionContractsVolume;
 
 entity AdhesionContractCompositionView as select from BrazilContractingData.ContractProducts as ContractProducts
 {
@@ -108,6 +124,7 @@ entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderPro
         SalesOrderProducts.IbizEmpenhoProductID,
         SalesOrderProducts.IbizContractProductID,
         SalesOrderProducts.SalesOrderPrice,
+        SalesOrderProducts.LotID,
         SalesOrderProducts.OfferProduct.SKU.PRODUCTPACKNAME as ProductPackName,
         SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveredProductQty as ActualDeliveredProductQty,  
         SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveryDate as ActualDeliveryDate,  
