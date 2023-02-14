@@ -11,6 +11,7 @@ using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
 using {com.bayer.SXTENDER.BankGuaranteeData} from '../db/BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
+using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {
     User,
     Country,
@@ -34,6 +35,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountrySalesType                             as projection on MasterData.MASTER_COUNTRY_SALES_TYPE;
     entity CountryTenderOrigin                          as projection on MasterData.MASTER_COUNTRY_TENDER_ORIGIN;
     entity CountryTenderType                            as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE;
+    entity CountryTenderType2                           as projection on MasterData.MASTER_COUNTRY_TENDER_TYPE2;
     entity MASTER_INSTITUTE_HIERARCHY                   as projection on MasterData.MASTER_INSTITUTE_HIERARCHY;
     entity SalesType                                    as projection on MasterData.MASTER_SALES_TYPE;
     entity TenderOrigin                                 as projection on MasterData.MASTER_TENDER_ORIGIN;
@@ -41,6 +43,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MASTER_COUNTRY_STATUS                        as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity MASTER_COUNTRY_OUTCOMES                      as projection on MasterData.MASTER_COUNTRY_OUTCOMES;
     entity CountryApprovers                             as projection on MasterData.CountryApprovers;
+    entity AccountPreApprovedPrices                     as projection on MasterData.AccountPreApprovedPrices;
     entity ApproverTypes                                as projection on MasterData.ApproverTypes;
     entity PT_TMCOGS                                    as projection on MasterData.PT_TMCOGS;
     entity PT_TMCTLE                                    as projection on MasterData.PT_TMCTLE;
@@ -62,8 +65,31 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity ConsumerPrices                               as projection on MasterData.ConsumerPrices;
     entity MostRecentConsumerPricesView                 as projection on MasterDataViews.MostRecentConsumerPricesView;
     entity ProductPricing                               as projection on TransactionalData.ProductPricing;
+    entity PriceCondition                               as projection on TransactionalData.PriceCondition;
+    entity PriceConditionClassification                 as projection on TransactionalData.PriceConditionClassification;
+    entity DiscountCondition                            as projection on TransactionalData.DiscountCondition;
     entity FreeGoodsOther                               as projection on TransactionalData.FreeGoodsOther;
+    entity ProductTypeProfitability                     as projection on TransactionalData.ProductTypeProfitability;
     entity ProductPricingView                           as projection on TransactionalDataViews.ProductPricingView;
+    entity PriceConditionView                           as projection on TransactionalDataViews.PriceConditionView;
+    //spain
+    entity MasterPrices                                 as projection on MasterData.MasterPrices;
+    entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
+    entity Settlements                                  as projection on MasterData.Settlements;
+    entity RoyalDecreePercentage                        as projection on MasterData.RoyalDecree;
+    //Brazil
+    entity Lots                                         as projection on TransactionalData.Lots;
+    entity LotProducts                                  as projection on TransactionalData.LotProduct;
+    entity BrazilCap                                    as projection on MasterData.BrazilCap;
+    entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
+    entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
+    entity BrazilInstituteDivision                      as projection on MasterData.BrazilInstituteDivision;
+    entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
+    entity DocumentsDownload                            as projection on TransactionalData.DocumentsDownload;
+    entity ContractStatuses                             as projection on AdminData.ContractStatus;
+    entity Contracts                                    as projection on BrazilContractingData.Contracts;
+    entity ContractProducts                             as projection on BrazilContractingData.ContractProducts;
+
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -80,6 +106,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PT_TMINSBRTR                                 as projection on MasterData.PT_TMINSBRTR;
     entity PT_TMINSHIER                                 as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINST                                    as projection on MasterData.PT_TMINST;
+    entity Province                                     as projection on MasterData.CountryProvinces;
 
     entity PT_TMLE                                      as projection on MasterData.PT_TMLE {
         * , Countries : redirected to PT_TMCTLE
@@ -145,6 +172,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             COGS              : Double;
             PACKFACTOR        : Integer;
             DIVISION          : String;
+            SKUS              : String;
     };
 
     //Transactional Data Tables
@@ -175,7 +203,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         * , SKUCountry : redirected to PT_TMCTPRDPCK, Offer : redirected to PT_TMOFRS
     };
 
-    entity PT_TMOFRS                                    as projection on TransactionalData.PT_TMOFRS {
+    entity PT_TMOFRS  @(cds.redirection.target:true)    as projection on TransactionalData.PT_TMOFRS {
         * , Product : redirected to PT_TMOFPR, Tender : redirected to PT_TMTEND
     };
 
@@ -194,14 +222,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         * , Offer : redirected to PT_TMOFRS
     };
 
-    entity PT_TMTEND                                    as projection on TransactionalData.PT_TMTEND {
-        * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView, CountrySpecificInformation : redirected to CountrySpecificInformation
+    entity PT_TMTEND  @(cds.redirection.target:true)    as projection on TransactionalData.PT_TMTEND {
+        * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView, CountrySpecificInformation : redirected to CountrySpecificInformation, User : redirected to PT_TMUSER,
     };
 
     entity PT_TMTNOFST                                  as projection on TransactionalData.PT_TMTNOFST;
     entity PT_TMTRRES                                   as projection on TransactionalData.PT_TMTRRES;
     entity PT_TMUDLTRS                                  as projection on TransactionalData.PT_TMUDLTRS;
     entity TransCompetitorResult                        as projection on TransactionalData.TransCompetitorResult;
+    entity SpainRappelData                              as projection on TransactionalData.SpainRappelData;
     //Transactional Data Views
     entity TenderOffers @readonly                       as projection on TransactionalDataViews.TenderOffers;
     entity OfferRevisions @readonly                     as projection on TransactionalDataViews.OfferRevisions;
@@ -216,115 +245,177 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity BrandsInTender @readonly                     as projection on TransactionalDataViews.BrandsInTender;
     entity CountryMinPrice @readonly                    as projection on TransactionalDataViews.CountryMinPrice;
     entity PreApprovedPrices @readonly                  as projection on TransactionalDataViews.PreApprovedPrices;
+    entity TenderHistorySpain @readonly                 as projection on TransactionalDataViews.TenderHistorySpain;
+    entity TenderHistoryBrazil @readonly                as projection on TransactionalDataViews.TenderHistoryBrazil;
 
     //Transactional Data Services
     entity OfferProductValidation {
-            TENDER_ID                         : String(30);
-            COUNTRY_CODE                      : String(2);
-        key OFFER_ID                          : String(30) not null;
-            DIVISION                          : String(100);
-            BRANDID                           : String(50);
-            BRANDNAME                         : String(100);
-            PRODUCT_UNIT_NAME                 : String(100); //thailand
-            SKU                               : Integer;
-        key PRODUCTID                         : Integer not null;
-            CODE                              : String(255);
-            PRODUCTNAME                       : String(102);
-            PACKSIZE                          : Double not null;
-            DOSAGE                            : Double;
-            UOM                               : String(10);
-            COUNTRYOFORIGIN                   : String(120);
-            MANUFACTURER                      : String(500);
-            SHELFLIFE                         : Integer;
-            PRESENTATION                      : String(50);
-            VAT                               : Double; //percentage VAT (thailand)
-            PRODUCT_COMMENT                   : String(784);
-            UNIT                              : String(255);
-            PAID_VOLUME                       : Double;
-            SORTER                            : Integer;
-            CURRENCY                          : String(255);
-            REQUESTED_QUANTITY                : String(567);
-            SHIPMENT_TERMS                    : String(317);
-            PAYMENT_TERMS                     : String(255);
-            DELIVERY_TERMS                    : String(500);
-            SAMPLES                           : Integer;
-            SAMPLES_UNIT                      : Integer; //Thailand
-            SAMPLES_PACK                      : Integer;
-            REGISTERED_PRICE                  : Double;
-            OFFER_PRICE                       : Double;
-            FOC                               : String(25);
-            TOTAL_QUANTITY_UNITS              : Double;
-            FOC_QUANTITY_UNITS                : Double; // FOC Unit (thailand)
-            PAID_QUANTITY_UNITS               : Double;
-            REQ_PRICE_UNIT_OFFER_CURRENCY     : Double; //MSP excl VAT (thailand)
-            REQ_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; //MSP incl VAT (thailand)
-            REQ_PRICE_PACK_OFFER_CURRENCY     : Double;
-            REQ_PRICE_UNIT_EUR_BUDGET         : Double;
-            REQ_PRICE_UNIT_EUR_SPOT           : Double;
-            NET_PRICE_UNIT_OFFER_CURRENCY     : Double; //NSP excl VAT (thailand)
-            NET_PRICE_UNIT_OFFER_CURRENCY_VAT : Double; //NSP incl VAT (thailand)
-            NET_PRICE_PACK_OFFER_CURRENCY     : Double;
-            NET_PRICE_UNIT_EUR_BUDGET         : Double;
-            NET_PRICE_UNIT_EUR_SPOT           : Double;
-            NET_OFFER_PRICE                   : Double;
-            NET_PRICE                         : Double;
-            COGS                              : Double;
-            COGS_EUR_UNIT                     : Double;
-            COGS_EUR_PACK                     : Double;
-            GROSS_SALES_OFFER_CURRENCY        : Double;
-            GROSS_SALES_OFFER_CURRENCY_VAT    : Double;
-            VAT_TOTAL                         : Double;
-            NET_SALES_OFFER_CURRENCY          : Double;
-            NET_SALES_EUR_BUDGET              : Double;
-            NET_SALES_EUR_SPOT                : Double;
-            GROSS_MARGIN_EUR_BUDGET           : Double;
-            GROSS_MARGIN_EUR_SPOT             : Double;
-            GROSS_PROFIT_EUR_BUDGET           : Double;
-            GROSS_PROFIT_EUR_SPOT             : Double;
-            //REGULATORY                     : Integer not null;//MEA only
-            //LEGAL                          : Integer not null;//MEA only
-            //CONTROLLING                    : Integer not null;//MEA only
-            //COUNTRY_BUSINESS               : Integer not null;//MEA and MX
-            //REGIONAL_BUSINESS              : Integer not null;//MEA only
-            //SUPPLY_CHAIN                   : Integer not null;//All countries
-            IS_LOWEST                         : Integer not null;
-            IS_DEFAULT_TERMS                  : Integer not null;
-            IS_REGISTERED                     : Integer not null;
-            IS_ALTERNATIVE_QUOTED             : Integer not null;
-            IS_ALTERNATIVE_REQUESTED          : Integer not null;
-            NEW_APPROVAL                      : Integer;
-            BUDGETED_PROFITABILITY            : Double;
-            //NSM_SM_FM                      : Integer not null;//TH only
-            //HBU                            : Integer not null;//TH only
-            //CDH                            : Integer not null;//TH and AR
-            IN_POLICY                         : Boolean;
-            //MACS                           : Integer not null;//AR only
-            //TA                             : Integer not null;//AR only
-            //FBP                            : Integer not null;//AR only
-            //LPC                            : Integer not null;//AR only
-            //COM_PGA                        : Integer not null;//AR only
-            //International_Trade            : Integer not null;//AR only
-            //Transfer_Pricing               : Integer not null;//AR only
-            //SBR                            : Integer not null;//AR only
-            MOLECULE_NAME                     : String; // Chile
-            FOC_STEP                          : Double;
-            OFFER_PRICE_VAT                   : Double;
-            BUDGET_RATE                       : Double;
-            SPOT_RATE                         : Double;
-            BUSINESS_CASE_PRICE               : Double;
-            WARRANTY                          : Double;
-            AGREEMENTDURATION                 : Integer;
-            MONTHLYRENT                       : Double;
-            MONTHSPERINVOICE                  : Integer;  
-            CONTRACTSTARTDATE                 : Timestamp;
-            VALUEOFDEVICES                    : Double;
-            STATUSOFDEVICE                    : String;
-            MINCONTRACTUAL                    : Double;
-            MINANNPURCH                       : Double;
-            FreeGoodsOther                    : Association to many FreeGoodsOther
-                                                    on FreeGoodsOther.ProductPackId = $self.PRODUCTID;
-            ApproverTypes                     : Association to many ApproverTypes
-                                                    on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
+            TENDER_ID                                   : String(30);
+            COUNTRY_CODE                                : String(2);
+        key OFFER_ID                                    : String(30) not null;
+            DIVISION                                    : String(100);
+            BRANDID                                     : String(50);
+            BRANDNAME                                   : String(100);
+            PRODUCT_UNIT_NAME                           : String(100); //thailand
+            SKU                                         : Integer;
+        key PRODUCTID                                   : Integer not null;
+            CODE                                        : String(255);
+            PRODUCTNAME                                 : String(102);
+            PACKSIZE                                    : Double not null;
+            DOSAGE                                      : Double;
+            UOM                                         : String(10);
+            COUNTRYOFORIGIN                             : String(120);
+            MANUFACTURER                                : String(500);
+            SHELFLIFE                                   : Integer;
+            PRESENTATION                                : String(50);
+            VAT                                         : Double; //percentage VAT (thailand)
+            VAT_IN_WORDS                                : String;
+            PRODUCT_COMMENT                             : String(784);
+            UNIT                                        : String(255);
+            PAID_VOLUME                                 : Double;
+            SORTER                                      : Integer;
+            CURRENCY                                    : String(255);
+            REQUESTED_QUANTITY                          : String(567);
+            SHIPMENT_TERMS                              : String(317);
+            PAYMENT_TERMS                               : String(255);
+            DELIVERY_TERMS                              : String(500);
+            SAMPLES                                     : Integer;
+            SAMPLES_UNIT                                : Integer; //Thailand
+            SAMPLES_PACK                                : Integer;
+            REGISTERED_PRICE                            : Double; // Consumer price per unit
+            REGISTERED_PRICE_IN_WORDS                   : String;
+            OFFER_PRICE                                 : Double;
+            FOC                                         : String(25);
+            FOC_ABS_PCT_STP                             : String;          
+            TOTAL_QUANTITY_UNITS                        : Double;
+            FOC_QUANTITY_UNITS                          : Double; // FOC Unit (thailand)
+            PAID_QUANTITY_UNITS                         : Double;
+            REQ_PRICE_UNIT_OFFER_CURRENCY               : Double; //MSP excl VAT (thailand)
+            REQ_PRICE_UNIT_OFFER_CURRENCY_VAT           : Double; //MSP incl VAT (thailand)
+            REQ_PRICE_PACK_OFFER_CURRENCY               : Double;
+            REQ_PRICE_UNIT_EUR_BUDGET                   : Double;
+            REQ_PRICE_UNIT_EUR_SPOT                     : Double;
+            NET_PRICE_UNIT_OFFER_CURRENCY               : Double; //NSP excl VAT (thailand)
+            NET_PRICE_UNIT_OFFER_CURRENCY_IN_WORDS      : String;
+            NET_PRICE_UNIT_OFFER_CURRENCY_VAT           : Double; //NSP incl VAT (thailand)
+            NET_PRICE_UNIT_OFFER_CURRENCY_VAT_IN_WORDS  : String;
+            NET_PRICE_PACK_OFFER_CURRENCY               : Double;
+            NET_PRICE_PACK_OFFER_CURRENCY_IN_WORDS      : String;
+            NET_PRICE_PACK_OFFER_CURRENCY_VAT           : Double;
+            NET_PRICE_PACK_OFFER_CURRENCY_VAT_IN_WORDS  : String;
+            NET_PRICE_UNIT_EUR_BUDGET                   : Double;
+            NET_PRICE_UNIT_EUR_SPOT                     : Double;
+            NET_OFFER_PRICE                             : Double;
+            NET_PRICE                                   : Double;
+            ADDITIONAL_DISCOUNT                         : Double;
+            ADDITIONAL_DISCOUNT_IN_WORDS                : String;
+            MAX_PRICE_NHS_PP                            : Double;
+            MAX_PRICE_NHS_PP_IN_WORDS                   : String;
+            MAX_PRICE_NHS_PU                            : Double;
+            MAX_PRICE_NHS_PU_IN_WORDS                   : String;
+            MAX_PRICE_NHS_PU_WITH_VAT                   : Double; //Italy change
+            MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS          : String; //Italy change
+            CONTRACT_START_DATE                         : String; //Italy change
+            NET_OFFER_PRICE_IN_WORDS                    : String; //Italy change
+            CUSTOMER_ID                                 : Integer; //Italy change
+            COGS                                        : Double;
+            COGS_EUR_UNIT                               : Double;
+            COGS_EUR_PACK                               : Double;
+            GROSS_SALES_OFFER_CURRENCY                  : Double; // Total amount for product
+            GROSS_SALES_OFFER_CURRENCY_IN_WORDS         : String;
+            GROSS_SALES_OFFER_CURRENCY_VAT              : Double;
+            GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS     : String;
+            VAT_TOTAL                                   : Double;
+            NET_SALES_OFFER_CURRENCY                    : Double;
+            NET_SALES_EUR_BUDGET                        : Double;
+            NET_SALES_EUR_SPOT                          : Double;
+            GROSS_MARGIN_EUR_BUDGET                     : Double;
+            GROSS_MARGIN_EUR_SPOT                       : Double;
+            GROSS_PROFIT_EUR_BUDGET                     : Double;
+            GROSS_PROFIT_EUR_SPOT                       : Double;
+            //REGULATORY                                : Integer not null;//MEA only
+            //LEGAL                                     : Integer not null;//MEA only
+            //CONTROLLING                               : Integer not null;//MEA only
+            //COUNTRY_BUSINESS                          : Integer not null;//MEA and MX
+            //REGIONAL_BUSINESS                         : Integer not null;//MEA only
+            //SUPPLY_CHAIN                              : Integer not null;//All countries
+            IS_LOWEST                                   : Integer not null;
+            IS_DEFAULT_TERMS                            : Integer not null;
+            IS_REGISTERED                               : Integer not null;
+            IS_ALTERNATIVE_QUOTED                       : Integer not null;
+            IS_ALTERNATIVE_REQUESTED                    : Integer not null;
+            NEW_APPROVAL                                : Integer;
+            BUDGETED_PROFITABILITY                      : Double;
+            //NSM_SM_FM                                 : Integer not null;//TH only
+            //HBU                                       : Integer not null;//TH only
+            //CDH                                       : Integer not null;//TH and AR
+            IN_POLICY                                   : Boolean;
+            //MACS                                      : Integer not null;//AR only
+            //TA                                        : Integer not null;//AR only
+            //FBP                                       : Integer not null;//AR only
+            //LPC                                       : Integer not null;//AR only
+            //COM_PGA                                   : Integer not null;//AR only
+            //International_Trade                       : Integer not null;//AR only
+            //Transfer_Pricing                          : Integer not null;//AR only
+            //SBR                                       : Integer not null;//AR only
+            MOLECULE_NAME                               : String; // Chile
+            FOC_STEP                                    : Double;
+            OFFER_PRICE_VAT                             : Double;
+            BUDGET_RATE                                 : Double;
+            SPOT_RATE                                   : Double;
+            BUSINESS_CASE_PRICE                         : Double;
+            WARRANTY                                    : Double;
+            AGREEMENTDURATION                           : Integer;
+            MONTHLYRENT                                 : Double;
+            MONTHLYRENT_IN_WORDS                        : String;
+            MONTHSPERINVOICE                            : Integer;  
+            CONTRACTSTARTDATE                           : Timestamp;
+            VALUEOFDEVICES                              : Double;
+            STATUSOFDEVICE                              : String;
+            MINCONTRACTUAL                              : Double;
+            MINANNPURCH                                 : Double;
+            OFFER_TYPE                                  : String;
+            //missing SKU & SKUCountry fields
+            ACTIVERECORD                                : String(10);
+            HLEVEL6_CODE                                : String(50);
+            PCI_NAME                                    : String(255);
+            ACTIVE_SUBSTANCE                            : String(50);
+            PRODUCT_TYPE                                : String(50);
+            SKUCOUNTRY_ACTIVERECORD                     : String(10);
+            PRESENTATION_2                              : String(1000);
+            GOV_CODE                                    : String(255);
+            CODE1                                       : String(255);
+            CODE2                                       : String(255);
+            CODE3                                       : String(255);
+            QTY_THRESHOLD                               : Integer;
+            ProductClass                                : String(2);
+            ProductDescription                          : String(255);
+            FINAL_DISCOUNT                              : Double;
+            FINAL_DISCOUNT_IN_WORDS                     : String(255);
+            PRODUCT_FULL_DESCRIPTION                    : String(255);
+            //end of missing SKU & SKUCountry fields
+        key LOTID                                       : Integer default 1;
+            LINE                                        : String;
+            REFERENCE                                   : String(255);
+            IBIZWORKFLOWID                              : Integer;
+            FreeGoodsOther                              : Association to many FreeGoodsOther
+                                                            on FreeGoodsOther.ProductPackId = $self.PRODUCTID
+                                                            and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
+            ProductPricing                              : Association to ProductPricing
+                                                            on ProductPricing.ProductCode = $self.PRODUCTID
+                                                            and ProductPricing.OfferID = $self.OFFER_ID;
+            ProductPack                                 : Association to many PT_TMPRDPCK 
+                                                            on ProductPack.PRODUCTPACKID = $self.PRODUCTID;
+            Materials                                   : Association to many PT_TMSKUPRDPCK
+                                                            on Materials.CountryCode = $self.COUNTRY_CODE
+                                                            and Materials.ProductPackID = $self.PRODUCTID
+                                                            and Materials.ActiveRecord = 'Yes';
+            ApproverTypes                               : Association to many ApproverTypes
+                                                            on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
+            PriceCondition                              : Composition of many PriceCondition 
+                                                                    on PriceCondition.OfferID = $self.OFFER_ID
+                                                                    and PriceCondition.ProductCode = $self.PRODUCTID
+                                                                    and PriceCondition.CountryCode = $self.COUNTRY_CODE;
     };
 
     entity OfferValidation {
@@ -337,14 +428,27 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             INSTITUTENAME         : String(500);
             INSTITUTE_TYPE        : String(50);
             INSTITUTE_STATE       : String;
+            INSTITUTE_REGION      : String;
+            INSTITUTE_PROVINCE    : String;
+            INSTITUTE_CIFCODE     : String(50);
+            INSTITUTE_REGIONALHEALTHSYSTEM: String(50);
+            INSTITUTE_CUSTOMER_GROUP: String(50);
+            TAXCODE               : String(50);
+            VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
             DIVISION              : String(100);
             OFFERDATE             : Date;
             OFFERVALIDITY         : Date not null;
+            EffectiveDate         : Date;
+            ExpiryDate            : Date;
             COUNTRYCODE           : String(2) not null;
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
+            SELLING_COMPANY_AS1_NAMEI: String(255);
+            SELLING_COMPANY_AS1_TITLEI: String(255);
+            SELLING_COMPANY_AS2_NAMEI: String(255);
+            SELLING_COMPANY_AS2_TITLEI: String(255);
             SELLING_COMPANY_AS2   : String(300);
             E_SIGNATURE1          : Boolean;
             E_SIGNATURE2          : Boolean;
@@ -392,6 +496,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             //SBR                            : Integer not null;//AR only
             BUDGET_RATE           : Double;
             SPOT_RATE             : Double;
+            EXTERNAL_ID           : String;
+			SAP_ID                : String;
+            TENDER_TYPE           : String; 
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -434,7 +541,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     //Admin Data Tables
     entity CONDITIONAL_ACCESS                           as projection on AdminData.CONDITIONAL_ACCESS;
 
-    entity PT_TMUSER                                    as projection on AdminData.PT_TMUSER {
+    entity PT_TMUSER @(cds.redirection.target:true)     as projection on AdminData.PT_TMUSER {
         * , Countries : redirected to PT_TMUSERCTRY
     };
 
@@ -459,6 +566,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryTablesCustomization @readonly         as projection on AdminData.CountryTablesCustomization;
     entity CountryTabsCustomization @readonly           as projection on AdminData.CountryTabsCustomization;
     entity CountryFragmentsCustomization @readonly      as projection on AdminData.CountryFragmentsCustomization;
+    entity AppConfig @readonly                          as projection on AdminData.AppConfig;
     function getCurrentUser() returns User;
     //Office365 PowerAutomate Approval Workflow Views
     entity QuotationUpdates @readonly                   as projection on TransactionalDataViews.QuotationUpdates;
@@ -470,6 +578,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             TENDERID              : String(50);
         key OFFERID               : String(50);
             INSTITUTENAME         : String(500);
+            TAXCODE               : String(50);
+            VATCODE               : String(50);
             CURRENCY              : String(3);
             AMOUNT_IN_NUMBERS     : String(1000);
             AMOUNT_IN_WORDS       : String(1000);
@@ -564,6 +674,21 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             MINCONTRACTUAL                    : Double;
             MINANNPURCH                       : Double;
             FOC_STEP                          : Double;
+            MOLECULE_NAME                     : String(255);
+            //missing SKU & SKUCountry fields
+            ACTIVERECORD                      : String(10);
+            HLEVEL6_CODE                      : String(50);
+            PCI_NAME                          : String(255);
+            ACTIVE_SUBSTANCE                  : String(50);
+            PRODUCT_TYPE                      : String(50);
+            SKUCOUNTRY_ACTIVERECORD           : String(10);
+            PRESENTATION_2                    : String(1000);
+            GOV_CODE                          : String(255);
+            CODE1                             : String(255);
+            CODE2                             : String(255);
+            CODE3                             : String(255);
+            QTY_THRESHOLD                     : Integer;
+            //end of missing SKU & SKUCountry fields  
             FreeGoodsOther                    : Association to many FreeGoodsOther
                                                    on FreeGoodsOther.ProductPackId = $self.PRODUCTCODE;
     };
@@ -610,17 +735,26 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         OfferProduct : redirected to PT_TMOFPR
     };
 
+    entity Candidates                                   as projection on PriceAgreementData.CandidatesView;
+
     //OTHER
     entity Templates                                    as projection on AdminData.Template;
     entity MailTemplates                                as projection on AdminData.MailTemplate;
+    entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
 
     entity Attachment {
         key OfferId : String(50);
             content : LargeBinary @Core.MediaType : 'application/pdf';
     }
+    entity ExcelAttachment// as projection on AdminData.ExcelAttachment;
+    {
+        key OfferId : String(50);
+        content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        mediaType:String @Core.IsMediaType;
+    }
 
-    entity ExcelAttachmentView                          as projection on AdminData.ExcelAttachment;
+    //entity ExcelAttachmentView                          as projection on AdminData.ExcelAttachment;
     // {
     //     key OfferId : String(50);
     //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -647,4 +781,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail(sRecipient : String, sSubject : String, sTemplate : String) returns Boolean;
     function getMailTemplate(countryCode : String, language : String, offerId : String) returns LargeString;
+
+    action notifyIbiz(ibizWorkflowID: Integer, directIndirect: Integer, lineNumbers: array of Integer) returns String; //  (0 = direct; 1 = indirect)
+    action sendApprovalToIbiz(ibizWorkflowID: Integer, offerStatus: Integer, comment: String) returns String;
+    action simulateTaxes(offerID: String, productCode: Integer, lotID: Integer, conditionType: String) returns String;
 }
