@@ -11,7 +11,7 @@
           "key": "FAST-db-hdi-container-as-key",
           "resolved": false
         },
-        "kind": "hana-cloud",
+        "kind": "hana",
         "vcap": {
           "name": "db"
         }
