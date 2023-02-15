@@ -107,7 +107,26 @@ inner join CountryBrands as cb on itr.CountryCode = cb.COUNTRY_CODE and itr.HLev
 }where itr.ActiveRecord = 'Yes'
 and idst.ActiveRecord = 'Yes'
 and itr.Institute.ActiveRecord = 'Yes'
-and idst.Distributor.ActiveRecord = 'Yes';
+and idst.Distributor.ActiveRecord = 'Yes'
+union 
+select from CountryBrands as cb 
+inner join MasterData.PT_TMINST as inst on cb.COUNTRY_CODE = inst.CountryCode
+inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode
+{
+    key cb.COUNTRY_CODE as COUNTRY_CODE,
+    key inst.InstituteID as INSTITUTE_ID,
+    inst.InstituteName as INSTITUTE_NAME,
+    key dst.DistributorID as DISTRIBUTOR_ID,
+    dst.DistributorName as DISTRIBUTOR_NAME,
+    key cb.BRAND_ID as BRAND_ID,
+    cb.BRAND_NAME as BRAND_NAME,
+    'Direct' as CHANNEL:String(11),
+    inst.INCOTerms as INCO_TERMS,
+    inst.PaymentTerms as PAYMENT_TERMS,
+    dst.CommissionRate as COMMISSION_RATE
+}where inst.ActiveRecord = 'Yes'
+and dst.ActiveRecord = 'Yes'
+and inst.ForAllBrands = true;
 
 entity DistributorBrand as select from MasterData.PT_TMDISBRD as dstbr
 inner join CountryBrands as cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLevel4_Code = cb.BRAND_ID
