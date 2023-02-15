@@ -141,21 +141,20 @@ inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode{
 union
 select from MasterData.BrazilDistributorDivision as bdd
 inner join MasterData.PT_TMDIST as dst on bdd.DistributorID = dst.DistributorID and bdd.CustomerID = dst.CustomerID
-inner join MasterData.PT_TMDISBRD as dstbr on dst.CountryCode = dstbr.CountryCode and dst.DistributorID = dstbr.DistributorID
-inner join CountryBrands as cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLevel4_Code = cb.BRAND_ID
+inner join CountryBrands as cb on dst.CountryCode = cb.COUNTRY_CODE and bdd.DivisionName = cb.DIVISION
 
 {
-	key dstbr.CountryCode as COUNTRY_CODE,
-	key dstbr.DistributorID as DISTRIBUTOR_ID,
-	dstbr.Distributor.DistributorName as DISTRIBUTOR_NAME,
+	key dst.CountryCode as COUNTRY_CODE,
+	key dst.DistributorID as DISTRIBUTOR_ID,
+	dst.DistributorName as DISTRIBUTOR_NAME,
 	key cb.BRAND_ID as BRAND_ID,
 	cb.BRAND_NAME as BRAND_NAME,
 	'Distributor' as CHANNEL:String(11),
-	dstbr.INCOTerms as INCO_TERMS,
-	dstbr.PaymentTerms as PAYMENT_TERMS,
-	dstbr.CommissionRate as COMMISSION_RATE,
-	dstbr.ActiveRecord as ACTIVE_RECORD
-} where dstbr.ActiveRecord = 'Yes' and dstbr.Distributor.ActiveRecord = 'Yes' and dstbr.Distributor.ForAllBrands = false;
+	dst.INCOTerms as INCO_TERMS,
+	dst.PaymentTerms as PAYMENT_TERMS,
+	dst.CommissionRate as COMMISSION_RATE,
+	dst.ActiveRecord as ACTIVE_RECORD
+} where dst.ForAllBrands = false and dst.ActiveRecord = 'Yes';
 
 //Distributor brand policy with aggregated data for front-end
 entity AggregatedDistributorBrandPolicies as SELECT from MasterData.PT_TMDISBRD as DistributorBrands
