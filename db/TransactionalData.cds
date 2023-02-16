@@ -345,7 +345,8 @@ entity PT_TMOFPR {
         Price                    : Association to PT_TMBDPR
                                        on  Price.ProductCode = ProductCode
                                        and Price.OfferID     = OfferID
-                                       and Price.Active = Active;
+                                       and Price.Active = Active
+                                       and Price.LotID = LotID;
         RegisteredPrice          : Association to many MasterDataLatestValues.CountryRegisteredPrice
                                        on  RegisteredPrice.COUNTRY_CODE = CountryCode
                                        and RegisteredPrice.PRODUCT_ID   = ProductCode;
