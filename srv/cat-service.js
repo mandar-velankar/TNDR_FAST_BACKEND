@@ -899,9 +899,17 @@ module.exports = (srv) => {
 	 */
 	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
 		const { BrazilPricingPolicy, BrazilDistributorDivision, BrazilInstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
-		const { PriceCondition } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		const { PriceCondition, PT_TMOFRS, PT_TMTNOFST } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		const { OfferProductConsolidation } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 
-		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({OfferID: product.OFFERID, ProductCode: product.ProductCode}));
+		const offers = await tx.run(SELECT.from(PT_TMOFRS).where({TenderID: offer.TENDERID, Active: 1}));
+		const offerIds = offers.map(dop => dop.OfferID);
+		const offerStatus = await tx.run(SELECT.from(PT_TMTNOFST).where({'OfferID': { in: offerIds }, Active: 1, STATUS: 'Offer Approved' }));
+		const offerstatusIds = offerStatus.map(dop => dop.OfferID);
+		const offerProductConsolidation  = offerStatus.length > 0 && await tx.run(SELECT.from(OfferProductConsolidation).where({'OFFERID': { in: offerstatusIds }})) || null;
+		const approvedOfferDiscount = offerProductConsolidation && offerProductConsolidation.find(opc => opc.ProductCode == product.ProductCode);
+		const totaldiscountApprovedOffer = approvedOfferDiscount && Math.round((approvedOfferDiscount.ADDITIONAL_DISCOUNT + approvedOfferDiscount.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000;
+		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
         const distributorDivision = await tx.run(SELECT.one.from(BrazilDistributorDivision).where({DistributorID: offer.DISTRIBUTOR_ID, DivisionName: product.DIVISION}));
         const institudeDivision = await tx.run(SELECT.one.from(BrazilInstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
 
@@ -911,7 +919,7 @@ module.exports = (srv) => {
 
 		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where(whereBrazilPricingPolicyCondition));
 		const pricingPolicyDiscount = brazilPricingPolicy?.Discount || 1; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy and discount = 100%
-		const bWithinCommercialPolicy = !brazilPricingPolicy || totalDiscount <= brazilPricingPolicy?.Discount ? true : false; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy
+		const bWithinCommercialPolicy = !brazilPricingPolicy || totalDiscount <= brazilPricingPolicy?.Discount ? true : totalDiscount <= totaldiscountApprovedOffer ? true : false; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy
 		const maxAllowedDiscount = Math.round((pricingPolicyDiscount + 0.05 + Number.EPSILON) * 100) / 100; // max allowed discount is 5$ more than the policy discount
 
 		// Outside of commercial policy
