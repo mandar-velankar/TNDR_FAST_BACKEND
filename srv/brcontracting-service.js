@@ -425,12 +425,12 @@ module.exports = (srv) => {
             if (!directIndirectCustomers || directIndirectCustomers.length == 0) req.reject(404, "CustomerID is not found");
             let IV_TEXT = "";
             if (directIndirectCustomers.isDirect) {
-                let inst = await tx.run(SELECT.one.from(PT_TMINST).where({CountryCode: "BR", InstituteID: contract.InstituteID ,CustomerID: directIndirectCustomers.CustomerID}));
+                let inst = await tx.run(SELECT.one.from(PT_TMINST).where({CountryCode: "BR", InstituteID: contract.InstituteID }));
                 if (!inst) req.reject(404, "Institute not found for direct offer");
                 IV_TEXT = `${inst.State} ${inst.InstituteName} ${contract.OfferID} ${contract.IbizContractNumber} ${salesOrder.EmpenhoNumber} Institute ${salesOrder.EmpenhoNumber}`;
             }else {
-                let dist = await tx.run(SELECT.one.from(PT_TMDIST).where({CountryCode: "BR", DistributorID: contract.DistributorID, CustomerID: directIndirectCustomers.CustomerID}));
-                if (!dist) req.reject(404, "Institute not found for direct offer");
+                let dist = await tx.run(SELECT.one.from(PT_TMDIST).where({CountryCode: "BR", DistributorID: contract.DistributorID }));
+                if (!dist) req.reject(404, "Distributor not found for indirect offer");
                 IV_TEXT = `${dist.State} ${dist.DistributorName} ${contract.OfferID} ${contract.IbizContractNumber} ${salesOrder.EmpenhoNumber} Distributor ${salesOrder.EmpenhoNumber}`;
             }
             return IV_TEXT;

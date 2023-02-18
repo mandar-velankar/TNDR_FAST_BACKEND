@@ -352,11 +352,12 @@ module.exports = class processOpportunities extends BaseJob {
             let nextOfferID = 1;
             let nextOfferNumber = nextOfferIDs.find(id => id.TENDERID === offer.TenderID);
             if(nextOfferNumber && nextOfferNumber.NEXTOFFERID) {
-                offer.TenderOfferNo = nextOfferNumber.NEXTOFFERID++;
+                nextOfferNumber.NEXTOFFERID++;
+                offer.TenderOfferNo = nextOfferNumber.NEXTOFFERID;
             }else{
                 offer.TenderOfferNo = nextOfferID++;
                 nextOfferIDs.push({
-                    TenderID: offer.TenderID,
+                    TENDERID: offer.TenderID,
                     NEXTOFFERID: offer.TenderOfferNo
                 }); 
             }
@@ -468,14 +469,15 @@ module.exports = class processOpportunities extends BaseJob {
  * PT_TMBDPR
  * @returns 
  */
- async upsertFASTPrice(tx, mappedPrice, mappedOffers) {
+ async upsertFASTPrice(tx, mappedPrice, mappedProducts) {
     const { PT_TMBDPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
 
     // 1. link existing Tenders and Offer with Products
-    for (const price of mappedPrice) {
-        let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === price.parent_ID);
-        price.TenderID = parentOffer.TenderID;
-        price.OfferID = parentOffer.OfferID;
+    for (const [idx, price] of mappedPrice.entries()) {
+        const product = mappedProducts[idx];
+        price.TenderID = product.TenderID;
+        price.OfferID = product.OfferID;
+        price.ProductCode = product.ProductCode;
     }
 
     // 2. delete parent_ID before saving to DB
@@ -695,7 +697,7 @@ module.exports = class processOpportunities extends BaseJob {
          await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
 
          // 4. Create/update entries in PT_TMBDPR
-         await this.upsertFASTPrice(tx, mappedPrice, mappedOffers);
+         await this.upsertFASTPrice(tx, mappedPrice, mappedProducts);
 
          // 5. Create/update entries in PRICECONDITION
          await this.upsertFASTPriceConditions(tx, mappedPriceCondition, mappedOffers);
@@ -869,7 +871,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFPR ...`);
     ibizOpportunityItems = ibizOpportunityItems.reduce((prev, curr, idx, ibizOpportunityItems) => {
         const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
-        const productPackID = sku && sku.ProductPackID || null;
+        const productPackID = sku && sku.ProductPackID || idx; // productCode must be unique
         prev.push(
             {
                 parent_ID                : curr.parent_ID,
@@ -898,7 +900,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 ActiveProduct            : 1,
                 Comment                  : null,
                 INCOTerms                : null,
-                SORTER                   : null,
+                SORTER                   : idx,
                 DEFAULT_COMMISSION_RATE  : 0,
                 SUPPLY_UPDATE            : null,
                 PAYMENT_UPDATE           : null,
@@ -931,7 +933,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMBDPR ...`);
     indirectIbizOpportunityItems = indirectIbizOpportunityItems.reduce((prev, curr, idx, indirectIbizOpportunityItems) => {
         const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
-        const productPackID = sku && sku.ProductPackID || null;
+        const productPackID = sku && sku.ProductPackID || 0;
         prev.push(
             {
                 parent_ID             : curr.parent_ID,
