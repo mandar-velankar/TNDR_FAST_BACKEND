@@ -495,7 +495,8 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.CountrySpecificInformation.TenderReference as TENDER_REFERENCE,
     tender.ExternalID as EXTERNAL_ID,
     tender.SAPID as SAP_ID,
-    tender.User.UserName
+    tender.User.UserName,
+    tender.Offer.IbizWorkflowID
 }where tender.Active = 1
 and ifnull(Offer.Active, 1) = 1;
 
@@ -1718,6 +1719,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key offer.OfferID,
     key product.ProductCode,
     key product.LotID,
+    customer.CustomerID,
     priceCondition.ID as ExistingPriceConditionID: UUID,
     priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
     tender.CountryCode,
@@ -1725,7 +1727,12 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceConditionClassification.Classification,
     priceConditionClassification.Division,
     priceConditionClassification.isMain,
-    priceCondition.AdditionalDiscount, // calculated in the UI based on User Input
+    case 
+        when priceCondition.AdditionalDiscount is null
+            then 0.0
+        else
+            priceCondition.AdditionalDiscount 
+    end as AdditionalDiscount:Decimal,
     masterPriceListPriceCondition.masterPriceList,
     masterStandardDiscountPriceCondition.masterStandardDiscount,
     masterICMSTaxesPriceCondition.masterICMSTaxes,

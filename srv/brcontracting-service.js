@@ -5,29 +5,43 @@ const axios = require('axios');
 const qs = require("qs");
 
 module.exports = (srv) => {
+
+    const {
+        Contracts,
+        ContractProducts,
+        SalesOrders,
+        SalesOrderProducts
+    } = cds.entities("com.bayer.SXTENDER.BrazilContractingData");
+    const {
+        PT_TMPRDHIER,
+        PT_TMDIST,
+        PT_TMINST,
+        PT_TMSKUPRDPCK
+    } = cds.entities("com.bayer.SXTENDER.MasterData");
+    const {
+        PT_TMOFRS,
+        PT_TMOFPR,
+        PT_TMTEND,
+        PriceCondition
+    } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+    const {
+        ContractStatus,
+        SalesOrderStatus,
+        SchedulerApiConfig,
+        SchedulerApiConfigOAuth
+    } = cds.entities("com.bayer.SXTENDER.AdminData");
+    const {
+        MostRecentCapView
+    } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
+
+    const {
+        DirectIndirectCustomers,
+        PriceConditionBrazilView
+    } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
+
+
     srv.on('createContract', async req => {
-        const {
-            Contracts,
-            ContractProducts
-        } = cds.entities("com.bayer.SXTENDER.BrazilContractingData");
-        const {
-            PT_TMPRDHIER,
-            PT_TMDIST,
-            PT_TMINST,
-            PT_TMSKUPRDPCK
-        } = cds.entities("com.bayer.SXTENDER.MasterData");
-        const {
-            PT_TMOFRS,
-            PT_TMOFPR,
-            PT_TMTEND,
-            PriceCondition
-        } = cds.entities("com.bayer.SXTENDER.TransactionalData");
-        const {
-            ContractStatus
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
-        const {
-            MostRecentCapView
-        } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
+        
         const tx = cds.tx(req);
         try {
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: req.data.contractID }));
@@ -99,6 +113,165 @@ module.exports = (srv) => {
         }
     });
 
+    srv.before("CREATE", "SalesOrders", async (req) => {
+        const tx = cds.tx(req);
+        try {
+            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "New FAST"}));
+            if (!salesOrderStatus) req.reject(404, "New FAST status not found");
+            req.data.StatusID = salesOrderStatus.ID;
+            // await tx.commit(); 
+        } catch (error) {
+            // await tx.rollback(error);
+        }
+    })
+
+    srv.on("createSalesOrder", async (req) => {
+        const tx = cds.tx(req);
+        try {
+            if (!req.data.salesOrderID) {
+                return req.reject(404, "Sales order ID not found");
+            }
+            const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
+            const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
+            const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
+            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "Synchronized"}));
+            if (!salesOrderStatus) req.reject(404, "Status Synchronized not found");
+
+            if (!salesOrderProducts || salesOrderProducts.length <= 0) {
+                return req.reject(404, `No sales order products were found for the following sales order: ${salesOrder.EmpenhoNumber}`);
+            }
+
+            const salesOrderProductsProductPackIDs = salesOrderProducts.map(el => el.ProductPackID);
+
+            if (salesOrderProductsProductPackIDs.length <= 0) {
+                return req.reject(404, `No sales order product ProductPackIDs were found`);
+            }
+
+            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
+            const skuPrdPcks = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: {in: salesOrderProductsProductPackIDs}}));
+            if (!skuPrdPcks || !skuPrdPcks.length) req.reject(404, "No SKUCodes were found in COM_BAYER_SXTENDER_MASTERDATA_PT_TMSKUPRDPCK");
+
+            const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
+            if (!offer) {
+                return req.reject(404, "Offer not found");
+            }
+            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+            
+            if (!offerProducts || offerProducts.length <= 0) {
+                return req.reject(404, `No offer products were found for the following sales order product: ${salesOrderProductsProductPackIDs}`);
+            }
+            if (!divisionCode) {
+                return req.reject(404, "divisionCode not found");
+            }
+            const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
+            // Update all fields in sales order body template  
+            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT);
+            // Send request to SAP
+            const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
+            const EV_ORDER_NUMBER = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["EV_ORDER_NUMBER"];
+            if (!EV_ORDER_NUMBER) {
+                const errorMsg = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["TT_RETURN"]["item"]["LINE"];
+                return req.reject(404, errorMsg);
+            }
+            // Update SalesOrder Status
+            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.ID, SalesOrderNumber: EV_ORDER_NUMBER}).where({ID: req.data.salesOrderID}));
+            // await tx.commit();
+            return req.reply("Sales order is successfully synchronized with SAP");
+        } catch (error) {
+            console.log("ERROR:SalesOrder" + error);
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            if (error.message) {
+                return req.reject(400, error.message);
+            }
+            // await tx.rollback(req);
+			return req.reject(500, error.message);
+        }
+    });
+
+    // Approve or reject Sales order
+    srv.on("approveRejectSalesOrder", async (req) => {
+        const tx = cds.tx(req);
+        try {
+            const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ID: req.data.salesOrderID}));
+            const contract = await tx.run(SELECT.one.from(Contracts).where({ID: salesOrder.Contract_ID}));
+            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: req.data.sSalesOrderStatus}));
+            if (!contract) {
+                return req.reject(404, `Contract not found`);
+            }
+            if (!salesOrder) {
+                return req.reject(404, `No Sales order found for Sales order with this ID: ${salesOrder.ID} in COM_BAYER_SXTENDER_ADMINDATA_SALESORDERSTATUS table`);
+            }
+            if (!salesOrderStatus) {
+                return req.reject(404, `No Sales order status found for the following contract: ${contract.ID}`);
+            }
+            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({TenderID: contract.TenderID, OfferID: contract.OfferID}));
+
+            if (!offerProducts || offerProducts.length <= 0) {
+                return req.reject(404, `No offer products were found for the following contract: ${contract.ID}`);
+            }
+            const body = updateSalesOrderApprovalTemplate(salesOrderStatus);
+            await shareSalesOrderApprovalToIBIZ(req, body, salesOrder, offerProducts[0]);
+            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.Status}).where({ID: req.data.salesOrderID}));
+            // await tx.commit();
+            return req.reply("Correct")
+        } catch (error) {
+            if(error.response && error.response.data){
+                console.error(error.response.data);
+                return req.reject(error.response.status, JSON.stringify(error.response.data));
+            }
+            if(error.code && error.message){
+                console.error(error.message);
+                return req.reject(error.code, error.message);
+            }
+            // await tx.rollback(req);
+            return req.reject(500, error.message); 
+        }
+    });
+
+    srv.after("READ", "ContractStatus", async (req) => {
+        // Add an empty line 
+        if (req && Array.isArray(req) && req.length > 0) {
+            req.unshift({ID: "99999999-9999-9999-9999-999999999999", Status: ""});
+        }
+    });
+
+    srv.on("approveRejectContract", async (req) => {
+        const tx = cds.tx(req);
+
+        try {
+            const contract = await tx.run(SELECT.one.from(Contracts).where({ID: req.data.contractID}));
+            const contractStatus = await tx.run(SELECT.one.from(ContractStatus).where({Status: req.data.sContractStatus}));
+            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({TenderID: contract.TenderID, OfferID: contract.OfferID}));
+
+            if (!offerProducts || offerProducts.length <= 0) {
+                return req.reject(404, `No offer products were found for the following contract: ${contract.ID}`);
+            }
+            const body = updateContractApprovalTemplate(contractStatus);
+            await shareContractApprovalToIBIZ(req, body, contract, offerProducts[0]);
+            await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.Status}).where({ID: req.data.contractID}));
+            // await tx.commit();
+            return req.reply("Correct")
+        } catch (error) {
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            // await tx.rollback(req);
+			return req.reject(500, error.message); 
+        }
+    });
+
     function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks, capBrazil) {
         const body = getContractRequestBodyTemplate();
         if (!body) {
@@ -131,11 +304,6 @@ module.exports = (srv) => {
     };
 
     async function sendCreatedContractToSAP (tx, countryCode, resource, body) {
-        const {
-            SchedulerApiConfig,
-            SchedulerApiConfigOAuth
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
-
         if (!body) {
             throw new Error("ERR_MISSING_PARAMETER:body");
         }
@@ -228,111 +396,6 @@ module.exports = (srv) => {
         }
     }
 
-    srv.before("CREATE", "SalesOrders", async (req) => {
-        const {
-            SalesOrderStatus
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
-
-        const tx = cds.tx(req);
-
-        try {
-            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "New FAST"}));
-            if (!salesOrderStatus) req.reject(404, "New FAST status not found");
-            req.data.StatusID = salesOrderStatus.ID;
-            // await tx.commit(); 
-        } catch (error) {
-            // await tx.rollback(error);
-        }
-    })
-
-
-    srv.on("createSalesOrder", async (req) => {
-        const {
-            Contracts,
-            SalesOrders,
-            SalesOrderProducts
-        } = cds.entities("com.bayer.SXTENDER.BrazilContractingData");
-        const {
-            PT_TMPRDHIER,
-            PT_TMSKUPRDPCK
-        } = cds.entities("com.bayer.SXTENDER.MasterData");
-        const {
-            PT_TMOFRS,
-            PT_TMOFPR
-        } = cds.entities("com.bayer.SXTENDER.TransactionalData");
-        const {
-            SalesOrderStatus
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
-        const tx = cds.tx(req);
-
-        try {
-            if (!req.data.salesOrderID) {
-                return req.reject(404, "Sales order ID not found");
-            }
-            const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
-            const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
-            const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
-            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "Synchronized"}));
-            if (!salesOrderStatus) req.reject(404, "Status Synchronized not found");
-
-            if (!salesOrderProducts || salesOrderProducts.length <= 0) {
-                return req.reject(404, `No sales order products were found for the following sales order: ${salesOrder.EmpenhoNumber}`);
-            }
-
-            const salesOrderProductsProductPackIDs = salesOrderProducts.map(el => el.ProductPackID);
-
-            if (salesOrderProductsProductPackIDs.length <= 0) {
-                return req.reject(404, `No sales order product ProductPackIDs were found`);
-            }
-
-            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
-            const skuPrdPcks = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: {in: salesOrderProductsProductPackIDs}}));
-            if (!skuPrdPcks || !skuPrdPcks.length) req.reject(404, "No SKUCodes were found in COM_BAYER_SXTENDER_MASTERDATA_PT_TMSKUPRDPCK");
-
-            const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
-            if (!offer) {
-                return req.reject(404, "Offer not found");
-            }
-            const divisionCode = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
-            
-            if (!offerProducts || offerProducts.length <= 0) {
-                return req.reject(404, `No offer products were found for the following sales order product: ${salesOrderProductsProductPackIDs}`);
-            }
-            if (!divisionCode) {
-                return req.reject(404, "divisionCode not found");
-            }
-            const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
-            // Update all fields in sales order body template  
-            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT);
-            // Send request to SAP
-            const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
-            const EV_ORDER_NUMBER = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["EV_ORDER_NUMBER"];
-            if (!EV_ORDER_NUMBER) {
-                const errorMsg = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["TT_RETURN"]["item"]["LINE"];
-                return req.reject(404, errorMsg);
-            }
-            // Update SalesOrder Status
-            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.ID, SalesOrderNumber: EV_ORDER_NUMBER}).where({ID: req.data.salesOrderID}));
-            // await tx.commit();
-            return req.reply("Sales order is successfully synchronized with SAP");
-        } catch (error) {
-            console.log("ERROR:SalesOrder" + error);
-            if(error.response && error.response.data){
-				console.error(error.response.data);
-				return req.reject(error.response.status, JSON.stringify(error.response.data));
-			}
-            if(error.code && error.message){
-				console.error(error.message);
-				return req.reject(error.code, error.message);
-			}
-            if (error.message) {
-                return req.reject(400, error.message);
-            }
-            // await tx.rollback(req);
-			return req.reject(500, error.message);
-        }
-    });
-
     function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT) {
         const body = getSalesOrderRequestBodyTemplate();
         if (!body) {
@@ -357,25 +420,17 @@ module.exports = (srv) => {
         return body;
     };
     async function mappedSalesOrder_IV_TEXT (req, tx, salesOrder, contract) {
-        const {
-            DirectIndirectCustomers
-        } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
-        const {
-            PT_TMDIST,
-            PT_TMINST
-        } = cds.entities("com.bayer.SXTENDER.MasterData");
-
         try {
             const directIndirectCustomers = await tx.run(SELECT.one.from(DirectIndirectCustomers).where({OfferID: contract.OfferID}));
             if (!directIndirectCustomers || directIndirectCustomers.length == 0) req.reject(404, "CustomerID is not found");
             let IV_TEXT = "";
             if (directIndirectCustomers.isDirect) {
-                let inst = await tx.run(SELECT.one.from(PT_TMINST).where({CountryCode: "BR", InstituteID: contract.InstituteID ,CustomerID: directIndirectCustomers.CustomerID}));
+                let inst = await tx.run(SELECT.one.from(PT_TMINST).where({CountryCode: "BR", InstituteID: contract.InstituteID }));
                 if (!inst) req.reject(404, "Institute not found for direct offer");
                 IV_TEXT = `${inst.State} ${inst.InstituteName} ${contract.OfferID} ${contract.IbizContractNumber} ${salesOrder.EmpenhoNumber} Institute ${salesOrder.EmpenhoNumber}`;
             }else {
-                let dist = await tx.run(SELECT.one.from(PT_TMDIST).where({CountryCode: "BR", DistributorID: contract.DistributorID, CustomerID: directIndirectCustomers.CustomerID}));
-                if (!dist) req.reject(404, "Institute not found for direct offer");
+                let dist = await tx.run(SELECT.one.from(PT_TMDIST).where({CountryCode: "BR", DistributorID: contract.DistributorID }));
+                if (!dist) req.reject(404, "Distributor not found for indirect offer");
                 IV_TEXT = `${dist.State} ${dist.DistributorName} ${contract.OfferID} ${contract.IbizContractNumber} ${salesOrder.EmpenhoNumber} Distributor ${salesOrder.EmpenhoNumber}`;
             }
             return IV_TEXT;
@@ -401,10 +456,6 @@ module.exports = (srv) => {
     };
 
     async function sendCreatedSalesOrderToSAP (tx, countryCode, resource, body) {
-        const {
-            SchedulerApiConfig,
-            SchedulerApiConfigOAuth
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
         if (!body) {
             throw new Error("ERR_MISSING_PARAMETER:body");
         }
@@ -456,45 +507,6 @@ module.exports = (srv) => {
         }
     };
 
-    srv.on("approveRejectContract", async (req) => {
-        const {
-            Contracts
-        } = cds.entities("com.bayer.SXTENDER.BrazilContractingData");
-        const {
-            ContractStatus
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
-        const {
-            PT_TMOFPR
-        } = cds.entities("com.bayer.SXTENDER.TransactionalData");
-        const tx = cds.tx(req);
-
-        try {
-            const contract = await tx.run(SELECT.one.from(Contracts).where({ID: req.data.contractID}));
-            const contractStatus = await tx.run(SELECT.one.from(ContractStatus).where({Status: req.data.sContractStatus}));
-            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({TenderID: contract.TenderID, OfferID: contract.OfferID}));
-
-            if (!offerProducts || offerProducts.length <= 0) {
-                return req.reject(404, `No offer products were found for the following contract: ${contract.ID}`);
-            }
-            const body = updateContractApprovalTemplate(contractStatus);
-            await shareContractApprovalToIBIZ(req, body, contract, offerProducts[0]);
-            await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.Status}).where({ID: req.data.contractID}));
-            // await tx.commit();
-            return req.reply("Correct")
-        } catch (error) {
-            if(error.response && error.response.data){
-				console.error(error.response.data);
-				return req.reject(error.response.status, JSON.stringify(error.response.data));
-			}
-            if(error.code && error.message){
-				console.error(error.message);
-				return req.reject(error.code, error.message);
-			}
-            // await tx.rollback(req);
-			return req.reject(500, error.message); 
-        }
-    });
-
     function updateContractApprovalTemplate (contractStatus) {
         let body = getContractApprovalTemplate();
         if (!body) return false;
@@ -505,11 +517,6 @@ module.exports = (srv) => {
     };
 
     async function shareContractApprovalToIBIZ (req, body, contract, offerProduct) {
-        const {
-            SchedulerApiConfig,
-            SchedulerApiConfigOAuth
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
-
         if (!offerProduct.IbizWorkflowID) {
             return req.reject(404, `No IbizWorkflowID found for: ${offerProduct.OfferID} - ${offerProduct.ProductCode} in COM_BAYER_SXTENDER_TRANSACTIONALDATA_PT_TMOFPR`);
         }
@@ -546,57 +553,6 @@ module.exports = (srv) => {
             "nm_motivo": "Item 123 it is not good for contract"
         };
     };
-    
-    // Approve or reject Sales order
-    srv.on("approveRejectSalesOrder", async (req) => {
-        const {
-            Contracts,
-            SalesOrders
-        } = cds.entities("com.bayer.SXTENDER.BrazilContractingData");
-        const {
-            SalesOrderStatus
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
-        const {
-            PT_TMOFPR
-        } = cds.entities("com.bayer.SXTENDER.TransactionalData");
-        const tx = cds.tx(req);
-
-        try {
-            const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ID: req.data.salesOrderID}));
-            const contract = await tx.run(SELECT.one.from(Contracts).where({ID: salesOrder.Contract_ID}));
-            const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: req.data.sSalesOrderStatus}));
-            if (!contract) {
-                return req.reject(404, `Contract not found`);
-            }
-            if (!salesOrder) {
-                return req.reject(404, `No Sales order found for Sales order with this ID: ${salesOrder.ID} in COM_BAYER_SXTENDER_ADMINDATA_SALESORDERSTATUS table`);
-            }
-            if (!salesOrderStatus) {
-                return req.reject(404, `No Sales order status found for the following contract: ${contract.ID}`);
-            }
-            const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({TenderID: contract.TenderID, OfferID: contract.OfferID}));
-
-            if (!offerProducts || offerProducts.length <= 0) {
-                return req.reject(404, `No offer products were found for the following contract: ${contract.ID}`);
-            }
-            const body = updateSalesOrderApprovalTemplate(salesOrderStatus);
-            await shareSalesOrderApprovalToIBIZ(req, body, salesOrder, offerProducts[0]);
-            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.Status}).where({ID: req.data.salesOrderID}));
-            // await tx.commit();
-            return req.reply("Correct")
-        } catch (error) {
-            if(error.response && error.response.data){
-				console.error(error.response.data);
-				return req.reject(error.response.status, JSON.stringify(error.response.data));
-			}
-            if(error.code && error.message){
-				console.error(error.message);
-				return req.reject(error.code, error.message);
-			}
-            // await tx.rollback(req);
-			return req.reject(500, error.message); 
-        }
-    });
 
     function updateSalesOrderApprovalTemplate (salesOrderStatus) {
         let body = getSalesOrderApprovalTemplate();
@@ -608,11 +564,6 @@ module.exports = (srv) => {
     };
 
     async function shareSalesOrderApprovalToIBIZ (req, body, salesOrder, offerProduct) {
-        const {
-            SchedulerApiConfig,
-            SchedulerApiConfigOAuth
-        } = cds.entities("com.bayer.SXTENDER.AdminData");
-
         if (!offerProduct.IbizWorkflowID) {
             return req.reject(404, `No IbizWorkflowID found for: ${offerProduct.OfferID} - ${offerProduct.ProductCode} in COM_BAYER_SXTENDER_TRANSACTIONALDATA_PT_TMOFPR`);
         }
@@ -650,10 +601,4 @@ module.exports = (srv) => {
         };
     };
 
-    srv.after("READ", "ContractStatus", async (req) => {
-        // Add an empty line 
-        if (req && Array.isArray(req) && req.length > 0) {
-            req.unshift({ID: "99999999-9999-9999-9999-999999999999", Status: ""});
-        }
-    })
 }
