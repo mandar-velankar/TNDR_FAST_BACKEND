@@ -159,6 +159,7 @@ entity IbizQps: cuid, managed {
 	DT_CAPTURA 							: String; 		//BID's date of capture
 	DT_ABERTURA 						: String; 		//Opening date
 	DT_FIM_ACOLHIMENTO 					: String; 		//Closing date
+	NM_ALTERA_COTACAO					: String; 		//Comment
 	NM_MODALIDADE 						: String; 		//BID's modality
 	NU_LICITACAO_EDITAL 				: String; 		//BID's document number
 	NM_PROCESSO 						: String; 		//Process number
