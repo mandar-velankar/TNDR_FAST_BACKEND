@@ -51,4 +51,11 @@ service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     entity OfferInfo @readonly as projection on ExternalDataViews.OfferInfo;
     entity OfferProductInfo @readonly as projection on ExternalDataViews.OfferProductInfo;
     entity ProductInfo @readonly as projection on ExternalDataViews.ProductInfo;
+
+    //Spain Excel views
+    entity SpainEspartaDoc @readonly as projection on ExternalDataViews.SpainEspartaDoc;
+    entity SpainEspartaLines @readonly as projection on ExternalDataViews.SpainEspartaLines;
+    entity SpainTenderDoc @readonly as projection on ExternalDataViews.SpainTenderDoc;
+    entity SpainTenderLines @readonly as projection on ExternalDataViews.SpainTenderLines;
+    entity SpainRiskAnalysis @readonly as projection on ExternalDataViews.SpainRiskAnalysis;
 }
