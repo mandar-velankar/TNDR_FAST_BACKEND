@@ -3574,6 +3574,12 @@ module.exports = (srv) => {
             if (!TT_CONTRACT_DETAILS) {
                 return req.reject(404, JSON.stringify(result.data));
             }
+
+			// When taxes are 0% (default when no correct response from SAP), Net Price should be same as Commercial Proposal
+			if(Number(result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"]["item"]["NET_VALUE"]) <= 0){
+				result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"]["item"]["NET_VALUE"] = req.data.commercialProposal;
+			}
+
             return req.reply(result.data);
         } catch (error) {
             if(error.response && error.response.data){
@@ -3593,16 +3599,16 @@ module.exports = (srv) => {
 	async function getContract(tx, offerID, lotID, productCode, conditionType){
 
 		const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: offerID }));
-		if (!offer) return req.reject(404, `Offer ${offerID} was not found in ${PT_TMOFRS.name}`);
+		if (!offer) throw new Error(`Offer ${offerID} was not found in ${PT_TMOFRS.name}`);
 
 		const division = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
-		if (!division) return req.reject(404, `Division ${offer.Division} was not found in ${PT_TMPRDHIER.name}`);
+		if (!division) throw new Error(`Division ${offer.Division} was not found in ${PT_TMPRDHIER.name}`);
 
 		const offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where({ OfferID: offerID,  ProductCode: productCode, LotID: lotID}));
-		if (!offerProduct) return req.reject(404, `Product ${productCode} in Lot ${lotID} was not found in ${PT_TMOFPR.name}`);
+		if (!offerProduct) throw new Error(`Product ${productCode} in Lot ${lotID} was not found in ${PT_TMOFPR.name}`);
 
 		const skuPrdPck = await tx.run(SELECT.one.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: productCode, ActiveRecord: 'Yes'}));
-		if (!skuPrdPck) return req.reject(404, `No SkuCode was found for product ${productCode} in ${PT_TMSKUPRDPCK.name}`);
+		if (!skuPrdPck) throw new Error(`No SkuCode was found for product ${productCode} in ${PT_TMSKUPRDPCK.name}`);
 
 		const priceConditionBrazilView = await tx.run(SELECT.one.from(PriceConditionBrazilView).where({ 
 			OfferID: offerID, 
@@ -3611,7 +3617,7 @@ module.exports = (srv) => {
 			LotID: lotID, 
 			ConditionType: conditionType 
 		}));
-		if (!priceConditionBrazilView) return req.reject(404, `No result found in ${PriceConditionBrazilView.name} for Offer: ${offerID}`);
+		if (!priceConditionBrazilView) throw new Error(`No result found in ${PriceConditionBrazilView.name} for Offer: ${offerID}`);
 
 
         const body = getContractRequestBodyTemplate();
