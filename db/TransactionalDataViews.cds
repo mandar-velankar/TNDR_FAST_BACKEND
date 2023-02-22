@@ -470,6 +470,7 @@ and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1;
 
 //EHQUT-189207-Creation Date instead of BidDueDate on main page
+//EHQUT-197392-MEA - additional edit access to Tender Results and Delivery Tracking tabs
 entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRY,
     key tender.TenderID as TENDER_ID,
@@ -477,6 +478,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.TenderName as TENDER_NAME,
     tender.Institute.InstituteName as INSTITUTE,
     tender.Brands as BRAND,
+    tender.Offer.Division as DIVISION,
     key ifnull(tender.Offer.OfferID, '') as OFFER_ID:String(30),
     tender.Offer.OfferValue.VALUE as VALUE:Double,
     tender.Offer.Currency as CURRENCY,
