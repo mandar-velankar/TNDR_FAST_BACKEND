@@ -5,6 +5,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         tenderAccess:{
             COGS:Boolean;
             SPAINTENDERVIEW:Boolean;
+            PHARMATENDERVIEW:Boolean;
             MEATENDERVIEW:Boolean;
            
         };
