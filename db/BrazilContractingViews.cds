@@ -74,7 +74,7 @@ left outer join BrazilContractingViews.AdhesionContractCompositionView as Adhesi
         ContractProducts.OfferProduct.UnitPerPack as UoM,
         ContractProducts.OfferProduct.SKU.PRODUCTPACKNAME as ProductPackName,
         ContractProducts.OfferProduct.PriceCondition.CommercialProposal as CommercialPrice,
-        sum(ContractProducts.SalesOrderProducts.RequestedQty) / ContractProducts.RequestedVolume as DeliveredVolume: Integer,
+        sum(ContractProducts.SalesOrderProducts.RequestedQty) / NULLIF(ContractProducts.RequestedVolume, 0) as DeliveredVolume: Integer,
         AdhesionContract.ExistingAdhesionContractsVolume,
         AdhesionContract.RemainingAdhesionContractsVolume,
 }group by ContractProducts.ID,
