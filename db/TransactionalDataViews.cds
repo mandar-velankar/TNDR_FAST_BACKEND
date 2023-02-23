@@ -471,6 +471,7 @@ and tender.Offer.Product.Active = 1;
 
 //EHQUT-189207-Creation Date instead of BidDueDate on main page
 //EHQUT-197392-MEA - additional edit access to Tender Results and Delivery Tracking tabs
+//EFRCL-283873- Italy replace Publication date with Termination date
 entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRY,
     key tender.TenderID as TENDER_ID,
@@ -478,12 +479,14 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.TenderName as TENDER_NAME,
     tender.Institute.InstituteName as INSTITUTE,
     tender.Brands as BRAND,
+    tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
     tender.Offer.Division as DIVISION,
     key ifnull(tender.Offer.OfferID, '') as OFFER_ID:String(30),
     tender.Offer.OfferValue.VALUE as VALUE:Double,
     tender.Offer.Currency as CURRENCY,
     ifnull(tender.Offer.OfferStatus.STATUS, 'Offer Created') as STATUS:String(255),
     tender.PublicationDate as PUBLICATION_DATE,
+    tender.TerminationDate as TERMINATION_DATE,
     tender.SubmittedOn as CREATION_DATE, 
     tender.Offer.InternalBidDueDate as INTERNAL_BID_DUE_DATE,
     case when tender.Offer.RevisedOfferNo = 0 and tender.Offer.ContinuationOfferNo = 0 then tender.BidDueDate else tender.Offer.NewOfferDueDate end as CLOSING_DATE:Date,
