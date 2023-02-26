@@ -835,6 +835,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST, pri
                 Comment               : null,
                 OfferRevisionSplitNo  : null,
                 NewOfferDueDate       : curr.DT_FIM_ACOLHIMENTO,
+                Comment               : curr.NM_ALTERA_COTACAO,
                 ContinuationOfferNo   : 0,
                 APPROVALS_SENT        : 0,
                 FOCType               : null,
