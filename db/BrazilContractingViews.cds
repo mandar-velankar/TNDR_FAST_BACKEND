@@ -7,7 +7,9 @@ using { com.bayer.SXTENDER.TransactionalData } from '../db/TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/TransactionalDataConversion';
 using { com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 
-entity ContractsView as select from BrazilContractingData.Contracts as Contracts{
+entity ContractsView as select from BrazilContractingData.Contracts as Contracts
+    inner join AdminData.PT_TMUSER as ModifiedByUser on ModifiedByUser.CWID = Contracts.modifiedBy
+    inner join AdminData.PT_TMUSER as CreatedByUser on CreatedByUser.CWID = Contracts.createdBy {
     key Contracts.ID,
         Contracts.TenderID,
         Contracts.OfferID,
@@ -28,7 +30,9 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         sum(Contracts.ContractProducts.OfferProduct.PriceCondition.CommercialProposal * Contracts.ContractProducts.OfferProduct.RequestedVolume) as TotalValue:Decimal,
         Contracts.modifiedBy,
         Contracts.modifiedAt,
-        Contracts.createdBy
+        Contracts.createdBy,
+        ModifiedByUser.UserName as modifiedByName,
+        CreatedByUser.UserName as createdByName
 }group by Contracts.ID,
         Contracts.TenderID,
         Contracts.OfferID,
@@ -48,12 +52,15 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.Status.Status,
         Contracts.modifiedBy,
         Contracts.modifiedAt,
-        Contracts.createdBy;
+        Contracts.createdBy,
+        ModifiedByUser.UserName,
+        CreatedByUser.UserName;
 
 entity ContractProductsView as select from BrazilContractingData.ContractProducts as ContractProducts
 left outer join BrazilContractingViews.AdhesionContractCompositionView as AdhesionContract 
     on ContractProducts.OfferID = AdhesionContract.OfferID
     and ContractProducts.ProductPackID = AdhesionContract.ProductPackID
+    and ContractProducts.LotID = AdhesionContract.LotID
     {
     key ContractProducts.ID,
         ContractProducts.Contract.ID as Contract_ID,
@@ -67,7 +74,7 @@ left outer join BrazilContractingViews.AdhesionContractCompositionView as Adhesi
         ContractProducts.OfferProduct.UnitPerPack as UoM,
         ContractProducts.OfferProduct.SKU.PRODUCTPACKNAME as ProductPackName,
         ContractProducts.OfferProduct.PriceCondition.CommercialProposal as CommercialPrice,
-        sum(ContractProducts.SalesOrderProducts.RequestedQty) / ContractProducts.RequestedVolume as DeliveredVolume: Integer,
+        sum(ContractProducts.SalesOrderProducts.RequestedQty) / NULLIF(ContractProducts.RequestedVolume, 0) as DeliveredVolume: Integer,
         AdhesionContract.ExistingAdhesionContractsVolume,
         AdhesionContract.RemainingAdhesionContractsVolume,
 }group by ContractProducts.ID,
@@ -89,11 +96,13 @@ entity AdhesionContractCompositionView as select from BrazilContractingData.Cont
 {
     ContractProducts.ProductPackID,
     ContractProducts.OfferID,
+    ContractProducts.LotID,
     sum(ContractProducts.RequestedVolume) as ExistingAdhesionContractsVolume:Integer,
     (2 * ContractProducts.OfferProduct.RequestedVolume - sum(ContractProducts.RequestedVolume)) as RemainingAdhesionContractsVolume:Integer,
 }where ContractProducts.Contract.ContractType = 'Adhesion Contract'
 group by ContractProducts.ProductPackID,
     ContractProducts.OfferID,
+    ContractProducts.LotID,
     ContractProducts.OfferProduct.RequestedVolume;
 
 entity SalesOrdersView as select from BrazilContractingData.SalesOrders as SalesOrders {

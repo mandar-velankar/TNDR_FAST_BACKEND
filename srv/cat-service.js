@@ -899,9 +899,17 @@ module.exports = (srv) => {
 	 */
 	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
 		const { BrazilPricingPolicy, BrazilDistributorDivision, BrazilInstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
-		const { PriceCondition } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		const { PriceCondition, PT_TMOFRS, PT_TMTNOFST } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		const { OfferProductConsolidation } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 
-		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({OfferID: product.OFFERID, ProductCode: product.ProductCode}));
+		const offers = await tx.run(SELECT.from(PT_TMOFRS).where({TenderID: offer.TENDERID, Active: 1}));
+		const offerIds = offers.map(dop => dop.OfferID);
+		const offerStatus = await tx.run(SELECT.from(PT_TMTNOFST).where({'OfferID': { in: offerIds }, Active: 1, STATUS: 'Offer Approved' }));
+		const offerstatusIds = offerStatus.map(dop => dop.OfferID);
+		const offerProductConsolidation  = offerStatus.length > 0 && await tx.run(SELECT.from(OfferProductConsolidation).where({'OFFERID': { in: offerstatusIds }})) || null;
+		const approvedOfferDiscount = offerProductConsolidation && offerProductConsolidation.find(opc => opc.ProductCode == product.ProductCode);
+		const totaldiscountApprovedOffer = approvedOfferDiscount && Math.round((approvedOfferDiscount.ADDITIONAL_DISCOUNT + approvedOfferDiscount.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000;
+		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
         const distributorDivision = await tx.run(SELECT.one.from(BrazilDistributorDivision).where({DistributorID: offer.DISTRIBUTOR_ID, DivisionName: product.DIVISION}));
         const institudeDivision = await tx.run(SELECT.one.from(BrazilInstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
 
@@ -911,7 +919,7 @@ module.exports = (srv) => {
 
 		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where(whereBrazilPricingPolicyCondition));
 		const pricingPolicyDiscount = brazilPricingPolicy?.Discount || 1; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy and discount = 100%
-		const bWithinCommercialPolicy = !brazilPricingPolicy || totalDiscount <= brazilPricingPolicy?.Discount ? true : false; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy
+		const bWithinCommercialPolicy = !brazilPricingPolicy || totalDiscount <= brazilPricingPolicy?.Discount ? true : totalDiscount <= totaldiscountApprovedOffer ? true : false; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy
 		const maxAllowedDiscount = Math.round((pricingPolicyDiscount + 0.05 + Number.EPSILON) * 100) / 100; // max allowed discount is 5$ more than the policy discount
 
 		// Outside of commercial policy
@@ -3566,6 +3574,12 @@ module.exports = (srv) => {
             if (!TT_CONTRACT_DETAILS) {
                 return req.reject(404, JSON.stringify(result.data));
             }
+
+			// When taxes are 0% (default when no correct response from SAP), Net Price should be same as Commercial Proposal
+			if(Number(result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"]["item"]["NET_VALUE"]) <= 0){
+				result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"]["item"]["NET_VALUE"] = req.data.commercialProposal;
+			}
+
             return req.reply(result.data);
         } catch (error) {
             if(error.response && error.response.data){
@@ -3585,16 +3599,16 @@ module.exports = (srv) => {
 	async function getContract(tx, offerID, lotID, productCode, conditionType){
 
 		const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: offerID }));
-		if (!offer) return req.reject(404, `Offer ${offerID} was not found in ${PT_TMOFRS.name}`);
+		if (!offer) throw new Error(`Offer ${offerID} was not found in ${PT_TMOFRS.name}`);
 
 		const division = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
-		if (!division) return req.reject(404, `Division ${offer.Division} was not found in ${PT_TMPRDHIER.name}`);
+		if (!division) throw new Error(`Division ${offer.Division} was not found in ${PT_TMPRDHIER.name}`);
 
 		const offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where({ OfferID: offerID,  ProductCode: productCode, LotID: lotID}));
-		if (!offerProduct) return req.reject(404, `Product ${productCode} in Lot ${lotID} was not found in ${PT_TMOFPR.name}`);
+		if (!offerProduct) throw new Error(`Product ${productCode} in Lot ${lotID} was not found in ${PT_TMOFPR.name}`);
 
 		const skuPrdPck = await tx.run(SELECT.one.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: productCode, ActiveRecord: 'Yes'}));
-		if (!skuPrdPck) return req.reject(404, `No SkuCode was found for product ${productCode} in ${PT_TMSKUPRDPCK.name}`);
+		if (!skuPrdPck) throw new Error(`No SkuCode was found for product ${productCode} in ${PT_TMSKUPRDPCK.name}`);
 
 		const priceConditionBrazilView = await tx.run(SELECT.one.from(PriceConditionBrazilView).where({ 
 			OfferID: offerID, 
@@ -3603,7 +3617,7 @@ module.exports = (srv) => {
 			LotID: lotID, 
 			ConditionType: conditionType 
 		}));
-		if (!priceConditionBrazilView) return req.reject(404, `No result found in ${PriceConditionBrazilView.name} for Offer: ${offerID}`);
+		if (!priceConditionBrazilView) throw new Error(`No result found in ${PriceConditionBrazilView.name} for Offer: ${offerID}`);
 
 
         const body = getContractRequestBodyTemplate();
