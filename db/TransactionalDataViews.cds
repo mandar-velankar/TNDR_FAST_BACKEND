@@ -479,7 +479,6 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     tender.TenderName as TENDER_NAME,
     tender.Institute.InstituteName as INSTITUTE,
     tender.Brands as BRAND,
-    tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
     tender.Offer.Division as DIVISION,
     key ifnull(tender.Offer.OfferID, '') as OFFER_ID:String(30),
     tender.Offer.OfferValue.VALUE as VALUE:Double,
