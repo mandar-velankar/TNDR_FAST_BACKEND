@@ -967,6 +967,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     offer.FOCType,
     offer.Currency,
     product.OfferType,
+    product.Channel,
     consumerPrices.ProductPackId,
     consumerPrices.ValidFrom,
 	consumerPrices.ValidTo,
