@@ -382,7 +382,7 @@ getIbizItemType(type){
 mapIbizContractProductsToFASTContractProducts(ibizContractProducts,existingOfferProductsInFAST,mappedContracts) {
     console.log(`JOB (${this.jobName }): Mapping IbizContratosItems to ContractProducts ...`);
     ibizContractProducts = ibizContractProducts.reduce((prev, curr, idx, ibizContractProducts) => {
-        const offerProduct = existingOfferProductsInFAST.find(pr => pr.ProductCode === curr.ID_CC_QP);
+        const offerProduct = existingOfferProductsInFAST.find(pr => pr.WorkflowProductID === curr.ID_CC_QP);
         const parentContract = mappedContracts.find(cr => cr.ID == curr.parent_ID);
         prev.push(
             {

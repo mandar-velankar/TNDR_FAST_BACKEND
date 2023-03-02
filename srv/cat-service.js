@@ -899,13 +899,13 @@ module.exports = (srv) => {
 	 */
 	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
 		const { BrazilPricingPolicy, BrazilDistributorDivision, BrazilInstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
-		const { PriceCondition, PT_TMOFRS, PT_TMTNOFST } = cds.entities("com.bayer.SXTENDER.TransactionalData");
-		const { OfferProductConsolidation } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
+		const { PriceCondition, PT_TMOFRS } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		const { OfferProductConsolidation, OfferStatus } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 
 		const offers = await tx.run(SELECT.from(PT_TMOFRS).where({TenderID: offer.TENDERID, Active: 1}));
 		const offerIds = offers.map(dop => dop.OfferID);
-		const offerStatus = await tx.run(SELECT.from(PT_TMTNOFST).where({'OfferID': { in: offerIds }, Active: 1, STATUS: 'Offer Approved' }));
-		const offerstatusIds = offerStatus.map(dop => dop.OfferID);
+		const offerStatus = await tx.run(SELECT.from(OfferStatus).where({'OFFER_ID': { in: offerIds }, STATUS: ['Offer Approved', 'Results Recorded', 'Quotation Submitted'] }));
+		const offerstatusIds = offerStatus.map(dop => dop.OFFER_ID);
 		const offerProductConsolidation  = offerStatus.length > 0 && await tx.run(SELECT.from(OfferProductConsolidation).where({'OFFERID': { in: offerstatusIds }})) || null;
 		const approvedOfferDiscount = offerProductConsolidation && offerProductConsolidation.find(opc => opc.ProductCode == product.ProductCode);
 		const totaldiscountApprovedOffer = approvedOfferDiscount && Math.round((approvedOfferDiscount.ADDITIONAL_DISCOUNT + approvedOfferDiscount.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000;
