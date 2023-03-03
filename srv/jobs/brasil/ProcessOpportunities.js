@@ -49,9 +49,9 @@ module.exports = class processOpportunities extends BaseJob {
             const brazilMasterPrices = await this.getBrazilMasterPrices(indirectIbizOpportunityDistributorIDs);
 
             // Process data
-            // if(directIbizOpportunities.length > 0){
-            //     await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
-            // }
+            if(directIbizOpportunities.length > 0){
+                await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
+            }
 
             if(indirectIbizOpportunities.length > 0){
                 await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
