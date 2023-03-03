@@ -49,13 +49,13 @@ module.exports = class processOpportunities extends BaseJob {
             const brazilMasterPrices = await this.getBrazilMasterPrices(indirectIbizOpportunityDistributorIDs);
 
             // Process data
-            if(directIbizOpportunities.length > 0){
-                await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
-            }
-
-            // if(indirectIbizOpportunities.length > 0){
-            //     await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
+            // if(directIbizOpportunities.length > 0){
+            //     await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
             // }
+
+            if(indirectIbizOpportunities.length > 0){
+                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
+            }
 
             console.log(`JOB (${this.jobName }): Processing Ibiz Opportunities successfully completed.`);
             const end = new Date().getTime();
@@ -613,14 +613,7 @@ async insertOfferProductLots(tx, lots) {
 }
 
 
-/**
- * Creates Price in FAST
- * PT_TMBDPR
- * @returns 
- */
- async upsertFASTPrice(tx, mappedPrice, mappedProducts) {
-    const { PT_TMBDPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-
+aggregatePrices(mappedPrice, mappedProducts){
     // 1. link existing Tenders and Offer with Products
     for (const [idx, price] of mappedPrice.entries()) {
         const product = mappedProducts[idx];
@@ -636,29 +629,31 @@ async insertOfferProductLots(tx, lots) {
         return copy;
     });  
 
-    // 3. Upsert records into PT_TMBDPR
-    console.log(`JOB (${this.jobName }): Upserting IBIZ Price into FAST table (PT_TMBDPR) ...`);
+    return pricesWithoutID;
+}
+
+
+/**
+ * Creates Price in FAST
+ * PT_TMBDPR
+ * @returns 
+ */
+ async insertFASTPrice(tx, prices) {
+    const { PT_TMBDPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    console.log(`JOB (${this.jobName }): Inserting records into (${PT_TMBDPR.name}) ...`);
     try {
-        pricesWithoutID && pricesWithoutID.length > 0 && await tx.run(INSERT(pricesWithoutID).into(PT_TMBDPR));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ Price into FAST table (PT_TMBDPR) successfully completed.`);
-        console.log(`JOB (${this.jobName }): PT_TMBDPR -> created: ${pricesWithoutID.length}`);
+        prices && prices.length > 0 && await tx.run(INSERT(prices).into(PT_TMBDPR));
+        console.log(`JOB (${this.jobName }): Inserting records into (${PT_TMBDPR.name}) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMBDPR -> created: ${prices.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Price into FAST table (PT_TMBDPR) failed`);
-        console.error(error);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting records into (${PT_TMBDPR.name}) failed`, `Cause: ${error}`);
         throw error;
     }
 }
 
 
-/**
- * Creates PriceCondition in FAST
- * PRICECONDITION
- * @returns 
- */
- async upsertFASTPriceConditions(tx, mappedPriceCondition, mappedOffers) {
-    const { PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-
+aggregatePriceConditions(mappedPriceCondition, mappedOffers){
     // 1. link existing Offer with PriceCondition
     for (const pc of mappedPriceCondition) {
         let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === pc.parent_ID);
@@ -673,16 +668,25 @@ async insertOfferProductLots(tx, lots) {
         return copy;
     });  
 
-    // 3. Upsert records into PRICECONDITION
-    console.log(`JOB (${this.jobName }): Upserting IBIZ PriceCondition into FAST table (PriceCondition) ...`);
+    return priceConditionsWithoutID;
+}
+
+
+/**
+ * Creates PriceCondition in FAST
+ * PRICECONDITION
+ * @returns 
+ */
+ async insertFASTPriceConditions(tx, priceConditions) {
+    const { PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    console.log(`JOB (${this.jobName }): Inserting records into (${PriceCondition.name}) ...`);
     try {
-        priceConditionsWithoutID && priceConditionsWithoutID.length > 0 && await tx.run(INSERT(priceConditionsWithoutID).into(PriceCondition));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ PriceCondition into FAST table (PriceCondition) successfully completed.`);
-        console.log(`JOB (${this.jobName }): PriceCondition -> created: ${priceConditionsWithoutID.length}`);
+        priceConditions && priceConditions.length > 0 && await tx.run(INSERT(priceConditions).into(PriceCondition));
+        console.log(`JOB (${this.jobName }): Inserting records into (${PriceCondition.name}) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PriceCondition -> created: ${priceConditions.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ PriceCondition into FAST table (PriceCondition) failed`);
-        console.error(error);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting records into (${PriceCondition.name}) failed`,`Cause: ${error}`);
         throw error;
     }
 }
@@ -837,33 +841,89 @@ aggregateDocuments(mappedDocs, mappedOffers){
         const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices);
         const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(indirectIbizOpportunityDocs);
 
+        // 0.1 Aggregate data
+        // 0.1 Aggregate Data - DO NOT CHANGE THE ORDER OF AGGREGATION METHODS - mapped records beging updated in each step of aggregation
+        const newTenders = await this.aggregateTenders(mappedTenders); 
+        const {
+            newOffers,
+            existingOffers,
+            newOfferStatusses
+        } = await this.aggregateOffers(mappedOffers, mappedTenders);
+        const { newProducts, newLots } = this.aggregateOfferProducts(mappedProducts, mappedOffers);
+        const newDocuments = this.aggregateDocuments(mappedDocs, mappedOffers);
+        const newPrices = this.aggregatePrices(mappedPrice, mappedProducts);
+        const newPriceConditions = this.aggregatePriceConditions(mappedPriceCondition, mappedOffers);
+
+
+        // Upsert aggregated data
+        for(const [index, tender] of newTenders.entries()){
+            const offers = newOffers.filter(ofr => ofr.TenderID === tender.TenderID);
+            // const offerStatusses = newOfferStatusses.filter(st => st.TenderID === tender.TenderID);
+            const products = newProducts.filter(prd => prd.TenderID === tender.TenderID);
+            // const lots = newLots.filter(lot => lot.OfferID.includes(tender.TenderID));
+            const documents = newDocuments.filter(d => d.TenderID === tender.TenderID);
+            const prices = newPrices.filter(p => p.TenderID === tender.TenderID);
+            const priceConditions = newPriceConditions.filter(pc => pc.OfferID.includes(tender.TenderID));
+
+            const opportunity = indirectIbizOpportunities[index]; // we know that the order of directIbizOpportunities and newTenders are correct. Index points to the same opportunity
+            const opportunityItems = indirectIbizOpportunityItems.filter(i => i.parent_ID === opportunity.ID);
+            const opportunityDocs = indirectIbizOpportunityDocs.filter(d => d.Qps_ID === opportunity.ID);
+
+            cds.spawn (async (tx) => {
+
+                // set transaction context
+                tx.context.data = { opportunity, opportunityItems, opportunityDocs, jobName:this.jobName }
+
+                // 1. Create/update entries in PT_TMTEND
+                await this.upsertFASTTenders(tx, [tender]);
+
+                // 2. Create/update entries in PT_TMOFRS
+                await this.upsertFASTOffers(tx, offers, existingOffers);
+
+                // 3. Create entries in PT_TMOFPR
+                await this.insertOfferProducts(tx, products);
+
+                 // 4. Create entries in PT_TMBDPR
+                await this.insertFASTPrice(tx, prices);
+
+                // 5. Create entries in PRICECONDITION
+                await this.insertFASTPriceConditions(tx, priceConditions);
+
+                // 6. Create entries in DocumentsDownload
+                await this.insertDocumentsDownload(tx, documents);
+                
+            })
+            .on('succeeded', this._onProcessingSuccess)
+            .on('failed', this._onProcessingFail);
+        };
+
          // 1. Create/update entries in PT_TMTEND
-         await this.upsertFASTTenders(tx, mappedTenders);
+        //  await this.upsertFASTTenders(tx, mappedTenders);
 
          // 2. Create/update entries in PT_TMOFRS
-         await this.upsertFASTOffers(tx, mappedOffers, mappedTenders);
+        //  await this.upsertFASTOffers(tx, mappedOffers, mappedTenders);
  
          // 3. Create/update entries in PT_TMOFPR
-         await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
+        //  await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
 
          // 4. Create/update entries in PT_TMBDPR
-         await this.upsertFASTPrice(tx, mappedPrice, mappedProducts);
+        //  await this.upsertFASTPrice(tx, mappedPrice, mappedProducts);
 
          // 5. Create/update entries in PRICECONDITION
-         await this.upsertFASTPriceConditions(tx, mappedPriceCondition, mappedOffers);
+        //  await this.upsertFASTPriceConditions(tx, mappedPriceCondition, mappedOffers);
 
          // 6. Create/update entries in DocumentsDownload
-        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers);
+        // await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers);
  
          // 7. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
-         const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-         await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 1}));
-         const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-         const parentIDs = mappedProducts.map(pr => pr.parent_ID);
-         Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
-         const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-         const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
-         Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}}));
+        //  const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        //  await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 1}));
+        //  const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        //  const parentIDs = mappedProducts.map(pr => pr.parent_ID);
+        //  Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
+        //  const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        //  const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
+        //  Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}}));
 
         console.log(`JOB (${this.jobName }): Processing of Indirect ibiz opportunities successfully completed.`);
 
