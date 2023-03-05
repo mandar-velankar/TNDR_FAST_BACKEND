@@ -126,6 +126,7 @@ entity SalesOrdersView as select from BrazilContractingData.SalesOrders as Sales
 entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderProducts as SalesOrderProducts {
     key SalesOrderProducts.ID,
         SalesOrderProducts.SalesOrder.ID as SalesOrder_ID,
+        SalesOrderProducts.SalesOrder.Contract.ID as Contract_ID,
         SalesOrderProducts.ProductPackID,           
         SalesOrderProducts.OfferID,                
         SalesOrderProducts.RequestedQty,           
