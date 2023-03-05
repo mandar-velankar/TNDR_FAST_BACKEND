@@ -967,6 +967,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     offer.FOCType,
     offer.Currency,
     product.OfferType,
+    product.Channel,
     consumerPrices.ProductPackId,
     consumerPrices.ValidFrom,
 	consumerPrices.ValidTo,
@@ -1432,6 +1433,30 @@ group by tender.TenderID,
     priceCondition.Discount,    
     product.Results.Outcome;
 
+entity TenderHistoryBrazilAdhesionContracts as select from BrazilContractingData.Contracts as contract
+    inner join BrazilContractingData.ContractProducts as contractProduct
+        on contractProduct.Contract.ID = contract.ID
+    inner join TransactionalData.PT_TMOFPR as product
+        on product.ProductCode = contractProduct.ProductPackID
+        and product.LotID = contractProduct.LotID
+        and product.OfferID = contractProduct.OfferID {
+            key contract.TenderID,
+            key contractProduct.LotID,
+            key contractProduct.OfferID,
+            key contractProduct.ProductPackID,
+            contract.ContractType,
+            contractProduct.RequestedVolume,
+            case 
+                when contract.ContractType = 'Adhesion Contract' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100))
+                else '0'
+            end as ADHESION:Double
+    } group by contract.TenderID, 
+         contractProduct.OfferID,
+		 contractProduct.ProductPackID,
+         contractProduct.LotID,
+		 contract.ContractType,
+		 contractProduct.RequestedVolume,
+		 product.RequestedVolume;    
 
 entity TenderHistoryBrazil as select from TransactionalData.PT_TMTEND as tender
 inner join TransactionalData.PT_TMOFRS as offer 
@@ -1458,15 +1483,14 @@ inner join TransactionalData.PriceCondition as priceCondition
     on priceCondition.PriceConditionClassification.ID = priceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
+    and product.LotID = priceCondition.LotID
 inner join TransactionalData.PT_TMTNOFST as offerStatus
 	on offerStatus.OfferID = offer.OfferID
 	and offerStatus.Active = 1
-left outer join BrazilContractingData.Contracts as contract
-    on tender.TenderID = contract.TenderID
-    and offer.OfferID = contract.OfferID
-left outer join BrazilContractingData.ContractProducts as contractProduct
-    on offer.OfferID = contract.OfferID
-    and product.ProductCode = contractProduct.ProductPackID {
+left outer join TenderHistoryBrazilAdhesionContracts as adhesionContract
+    on tender.TenderID = adhesionContract.TenderID
+    and offer.OfferID = adhesionContract.OfferID
+    and product.ProductCode = adhesionContract.ProductPackID {
         key tender.TenderID,
         key offer.OfferID,
         key product.ProductCode,
@@ -1482,17 +1506,13 @@ left outer join BrazilContractingData.ContractProducts as contractProduct
         ifnull(priceCondition.CAP, 'No') as CAP:String(10),
         priceCondition.StandardDiscount+priceCondition.AdditionalDiscount as TOTAL_DISCOUNT:Double,
         priceCondition.CommercialProposal as COMM_PROPOSAL,
-        case 
-                when contract.ContractType = 'Adhesion Contract' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100)) 
-                else '0'
-            end as ADHESION:Double,
+        sum(adhesionContract.ADHESION) as ADHESION:Double,
         ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
 }
 where tender.CountryCode = 'BR' and (offerStatus.STATUS = 'Quotation Submitted' or offerStatus.STATUS = 'Results Recorded' or offerStatus.STATUS = 'Delivery Ongoing')
 group by tender.TenderID,
     offer.OfferID,
     product.ProductCode,
-    product.LotID,
     tender.TenderName,
     offer.SubmittedOn,
     institute.InstituteID,
@@ -1506,10 +1526,9 @@ group by tender.TenderID,
     priceCondition.StandardDiscount,
     priceCondition.AdditionalDiscount,
     priceCondition.CommercialProposal,
-    contract.ContractType,
-    contractProduct.RequestedVolume,
-    product.RequestedVolume,
-    product.Results.Outcome;
+    adhesionContract.ADHESION,
+    product.Results.Outcome,
+    product.LotID;
 
     /**
  * This view contains Brazil PriceCondition ZWP0 price fields used in the PriceConditionBrazilView
