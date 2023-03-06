@@ -6,6 +6,7 @@ using { com.bayer.SXTENDER.MasterData } from './MasterData';
 using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataViews } from './TransactionalDataViews';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
+using { com.bayer.SXTENDER.PriceAgreementData } from './PriceAgreementData';
 
 entity DeliveryForProduct as select from TransactionalData.PT_TMDLVTR as delivery {
     key delivery.OfferID as OFFERID,
@@ -1364,4 +1365,201 @@ where
 	(offerProducts.OfferType is null or offerProducts.OfferType = 'Selling') and
 	offerProducts.Price.Active = 1;
 				
+entity SpainEspartaDoc as select from PriceAgreementData.PriceAgreements as pa left outer join
+AdminData.PT_TMUSER as uM on pa.modifiedBy = uM.CWID left outer join
+AdminData.PT_TMUSER as uC on pa.createdBy = uC.CWID
+{
+    key pa.ID:String,
+    pa.TenderId:String,
+    pa.OfferId:String,
+    pa.Tender.ExternalID:String,
+    pa.Product.ProductPack.Product.HLEVEL1_NAME:String,
+	pa.Status:String,
+    ifnull(uC.UserName, pa.createdBy) as CreatedBy:String,
+	pa.Tender.Institute.CustomerID:Integer,
+	pa.Tender.Institute.InstituteName:String,
+    pa.Tender.Institute.Address:String,
+    pa.Tender.Institute.City:String,
+    pa.Tender.Institute.Region.Name:String,
+	pa.EffectiveDate:DateTime,
+    pa.ExpiryDate:DateTime,
+    pa.modifiedAt:DateTime,
+    ifnull(uM.UserName, pa.modifiedBy) as ModifiedBy:String,
+	key ifnull(pa.OfferProduct.ApprovalStatus.ApproverName, 'Not Specified') as ApproverName:String,
+    ifnull(pa.OfferProduct.ApprovalStatus.ApprovalStatus, 'Not Specified')as ApprovalStatus:String
+}
+where pa.CountryCode='ES'
+group By
+    pa.ID,
+    pa.TenderId,
+    pa.OfferId,
+    pa.Tender.ExternalID,
+    pa.Product.ProductPack.Product.HLEVEL1_NAME,
+	pa.Status,
+    uC.UserName,
+    pa.createdBy,
+	pa.Tender.Institute.CustomerID,
+	pa.Tender.Institute.InstituteName,
+    pa.Tender.Institute.Address,
+    pa.Tender.Institute.City,
+    pa.Tender.Institute.Region.Name,
+	pa.EffectiveDate,
+    pa.ExpiryDate,
+    pa.modifiedAt,
+    uM.UserName,
+    pa.modifiedBy,
+	pa.OfferProduct.ApprovalStatus.ApproverName,
+    pa.OfferProduct.ApprovalStatus.ApprovalStatus;
 
+entity SpainEspartaLines as select from PriceAgreementData.CustomerPrices as cp inner join
+MasterData.PT_TMSKUPRDPCK as sku on cp.MaterialNumber=sku.SKUCode and cp.CountryCode=sku.CountryCode and sku.ActiveRecord='Yes' inner join
+PriceAgreementData.PriceAgreements as pa on cp.PriceAgreementId=pa.ID inner join
+TransactionalData.PriceCondition as pc on pa.OfferId=pc.OfferID and pa.ProductPackId=pc.ProductCode and cp.PriceCondition=pc.PriceConditionCode left outer join
+MasterData.PT_TMSKUPRDPCK as skuFOC on cp.MaterialNumber=skuFOC.SKUCode and cp.CountryCode=skuFOC.CountryCode and skuFOC.ActiveRecord='Yes' left outer join
+PriceAgreementData.PriceAgreementAcknowledgementHistory as ack on pa.ID=ack.PriceAgreementID left outer join
+AdminData.PT_TMUSER as uC on cp.createdBy = uC.CWID left outer join
+AdminData.PT_TMUSER as uM on cp.createdBy = uM.CWID
+{
+    key cp.Institute.CustomerID:Integer,
+    cp.Institute.InstituteName:String,
+    key cp.MaterialNumber:Integer,
+    sku.ProductPack.PRODUCTPACKNAME:String,
+    key pc.PriceConditionClassification.ConditionType:String,
+    pc.PVL:Double,
+    round(pc.Tax, 2) as Tax:Double,
+    pc.RoyalDecreeValue:Double,
+    pc.NetPriceWithoutTaxAfterDeductionRD:Double,
+    pc.NetPriceWithTaxAfterDeductionRD:Double,
+    pc.Discount:Double,
+    pa.AwardedVolume:Double,
+    pc.FreeGoodsOther.FOCMinAmount:Double,
+    pc.FreeGoodsOther.FOCBonus:Double,
+    cp.FOCmaterialNumber as FreeGoodMaterialNumber:Integer,
+    skuFOC.ProductPack.PRODUCTPACKNAME as FreeGoodProductName:String,
+	pc.Liquidation:String,
+	key ifnull(pc.DiscountCondition.Volume, 0) as RappelScales:Integer,
+	ifnull(pc.DiscountCondition.Discount, 0) as ScaleDiscount:Double,
+	key cp.EffectiveDate:DateTime,
+    key cp.ExpiryDate:DateTime,
+    pa.OfferId:String,
+    pa.Tender.ExternalID:String,
+	pc.PriceConditionClassification.Division:String,
+    pa.Status:String,
+    cp.Applied:Boolean,
+	cp.createdBy:String,
+    ifnull(uC.UserName, cp.createdBy) as CreatedByName:String,
+    pa.ExpiryExtensionPeriod:Integer,
+    ack.Acknowledged as ExtentionAcknowledged:Boolean,
+	cp.Synchronized:Boolean,
+	pa.SynchronizationStatus:String,
+	//must come from Node.js
+    pa.hasNewMaterials:Integer,
+    pa.hasNewPrice:Integer,
+    pa.hasNewYLLP:Integer,
+    pa.hasNewYLAP:Integer,
+	pa.hasProductPackId:Integer,
+	pa.IgnorePVLPriceChange:Boolean,
+    pa.IgnoreConfPriceChange:Boolean,
+	pa.ExpiringSoon:Boolean,
+    pa.Expired:Boolean,
+	pa.isNewPriceAgreement:Boolean,
+    //must come from Node.js
+	cp.RefIdocNumber:String,
+    cp.modifiedAt:DateTime,
+    ifnull(uM.UserName, cp.modifiedBy) as ModifiedBy:String
+}
+where cp.CountryCode = 'ES';
+
+entity SpainTenderDoc as select from TransactionalData.PT_TMTEND as t
+{
+    key t.TenderID as FastTenderId:String,
+    key ifnull(t.Offer.OfferID, 'No Offer Created') as OfferID:String,
+    t.Offer.OfferStatus.STATUS:String,
+	t.ExternalID as LocalTenderID:String,
+	t.Institute.CustomerID:String,
+	t.Institute.InstituteName as CustomerName:String,
+	t.Institute.Province.Name as Province:String,
+	t.Institute.RegionalHealthSystem:String,
+	t.Offer.Division:String,
+    sum(t.Offer.Product.Price.NetofferPrice * t.Offer.Product.RequestedVolume) as TOTAL_VALUE:Double,//Fabian uses sum of prices
+	year(t.Offer.SubmissionDate) as Year:Integer,
+	t.Offer.Product.PriceAgreement.EffectiveDate:DateTime,
+	t.Offer.Product.PriceAgreement.ExpiryDate:DateTime,
+	t.CONTENT:String,
+	key ifnull(t.Offer.Product.ApprovalStatus.ApproverName, 'Not Specified') as ApproverName:String,
+    ifnull(t.Offer.Product.ApprovalStatus.ApprovalStatus, 'Not Specified') as ApprovalStatus:String
+}
+where t.CountryCode = 'ES'
+group by
+    t.TenderID,
+    t.Offer.OfferID,
+    t.Offer.OfferStatus.STATUS,
+	t.ExternalID,
+	t.Institute.CustomerID,
+	t.Institute.InstituteName,
+	t.Institute.Province.Name,
+	t.Institute.RegionalHealthSystem,
+	t.Offer.Division,
+	t.Offer.SubmissionDate,
+	t.Offer.Product.PriceAgreement.EffectiveDate,
+	t.Offer.Product.PriceAgreement.ExpiryDate,
+	t.CONTENT,
+	t.Offer.Product.ApprovalStatus.ApproverName,
+    t.Offer.Product.ApprovalStatus.ApprovalStatus;
+
+entity SpainTenderLines as select from TransactionalData.PT_TMTEND as t left outer join
+AdminData.PT_TMUSER as uC on t.createdBy = uC.CWID left outer join
+AdminData.PT_TMUSER as uM on t.createdBy = uM.CWID
+{
+    year(t.Offer.CreationDate) AS Year:Integer,
+	t.Offer.Division:String, 
+	t.Institute.InstituteName AS CustomerName:String,
+	key ifnull(t.Institute.CustomerID, 0) as CustomerID:Integer,
+	t.ExternalID:String,
+    t.Institute.Province.Name as Region:String,
+	t.Institute.RegionalHealthSystem:String,
+    key ifnull(t.Offer.Product.SKU.PRODUCTPACKID, 0) as ProductPackID:Integer,
+	t.Offer.Product.SKU.PRODUCTPACKNAME:String,
+    key ifnull(t.Offer.Product.PriceAgreement.CustomerPrices.MaterialNumber, 0) as MaterialNumber:Integer,
+	t.Offer.Product.SKU.MoleculeName:String,
+	t.Offer.Product.Reference:String,
+	t.Offer.Product.PriceCondition.PVL:Double,
+    round(t.Offer.Product.PriceCondition.Tax, 2) as Tax:Double,
+	t.Offer.Product.MaxPrice:Double,
+	t.Offer.Product.Price.OfferPrice:Double,
+	t.Offer.Product.Results.Outcome:String,
+	t.Offer.Product.Results.Reason:String,
+	t.Offer.Product.PriceCondition.RoyalDecree:String,
+	t.Offer.Product.RequestedVolume:Integer,
+	t.Offer.Quotation.EffectiveDate:DateTime,
+    t.Offer.Quotation.ExpiryDate:DateTime,
+	t.Offer.Product.Results.Appeal:String,
+	t.Offer.OfferStatus.STATUS:String,
+	ifnull(uC.UserName, t.createdBy) as CreatedBy:String,
+    ifnull(uM.UserName, t.modifiedBy) as ModifiedBy:String,
+	t.PublicationDate:DateTime,
+	t.createdAt:DateTime,
+	t.Offer.InternalBidDueDate:DateTime,
+	t.BidDueDate as OfferDueDate:DateTime,
+	t.Offer.SubmissionDate:DateTime,
+	t.Offer.Quotation.OfferValidity:DateTime,
+	t.Offer.Product.Results.TotalAwardedValue:Double,
+	t.ContractLength:Integer,
+	t.ContractExtenseion as ContractExtension:Integer,
+    t.Offer.Product.PriceAgreement.CustomerPrices.RefIdocNumber:String
+}
+where t.CountryCode = 'ES';
+
+entity SpainRiskAnalysis as select from TransactionalData.PT_TMTEND as t
+{
+    key t.TenderID:String,
+	t.ExternalID AS LocalTenderID:String,
+	t.Institute.InstituteName:String,
+	t.Institute.Region.Name AS Region:String,
+    t.Institute.Province.Name as Province:String,
+	t.Institute.CustomerID:Integer,
+	key ifnull(t.Offer.Product.SKU.PRODUCTPACKNAME, 'No Product') as ProductPackName:String,
+	t.Offer.Product.SKU.MoleculeName:String,
+	t.Offer.Product.RequestedVolume * t.Offer.Product.Price.NetofferPrice AS TOTALVALUE_EUR:Double
+}
+where t.CountryCode = 'ES';

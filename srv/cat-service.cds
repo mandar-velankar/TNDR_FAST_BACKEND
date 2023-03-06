@@ -499,6 +499,9 @@ service CatalogService @(path : 'tender')@(requires : [
             EXTERNAL_ID           : String;
 			SAP_ID                : String;
             TENDER_TYPE           : String; 
+            CREATED_BY_USER_EMAIL :String(500);
+            CREATED_BY_USER_ROLE  : String(100);
+            CREATED_BY_USER_CONTACTNUMBER :String (20);
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };

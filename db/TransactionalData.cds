@@ -497,9 +497,10 @@ entity PriceCondition: cuid, managed {
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
 }
 
+//EHQUT-INC18178128-FAST - Error decimals discounts
 entity DiscountCondition: cuid, managed {
     Volume              : Integer;
-    Discount            : Integer;
+    Discount            : Double;
     NetPriceWithoutTax  : Decimal;
     NetPriceWithTax     : Decimal;
     PriceCondition      : Association to PriceCondition;
