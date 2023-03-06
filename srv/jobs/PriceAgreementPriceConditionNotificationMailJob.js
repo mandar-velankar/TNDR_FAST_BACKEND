@@ -137,8 +137,23 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
                 });
             }
         }
-
-        if(!outbox || (outbox && outbox.length> 0 && (!outbox[0].MailBody || outbox[0].MailBody === 'undefined'))) {
+        outbox.push({
+            CountryCode: data[0].CountryCode,
+            TenderID: data[0].TenderId,
+            OfferID: data[0].OfferId,
+            Sender: 'FAST-Admin@bayer.com',
+            Recipients: undefined,
+            Subject: template.title,
+            MailBody: this.generateMailBody(template, { 
+                data: { 
+                    SyncDate: syncDate.toDateString(), 
+                    CustomerPrices: data 
+                }
+            }),
+            Sent: false
+        });
+        
+        if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
             console.log(`No template found for Customer Price of tender ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
             return;
         }

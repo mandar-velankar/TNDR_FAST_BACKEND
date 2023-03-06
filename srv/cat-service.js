@@ -27,7 +27,7 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView
@@ -1778,6 +1778,10 @@ module.exports = (srv) => {
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
          //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
+		 //EHQUT-197468-MEA – Nucleus heads notifications flow
+		let Countryregion= await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
+		let regionname=Countryregion.Region;
+		
 		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
 			//no products
@@ -1788,7 +1792,7 @@ module.exports = (srv) => {
 			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;
 
 			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
-			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation, tender);
+			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation, tender, regionname);
 
 		}
 
@@ -2040,8 +2044,9 @@ module.exports = (srv) => {
 
 		// get SUBMITTED_BY user info 
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
+		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
-
+		//EHQUT- Spain - correct mistakes on Commercial agreement templates
 		results = {
 			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
 			TENDERID: offer.TENDERID,
@@ -2123,17 +2128,22 @@ module.exports = (srv) => {
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
-			TENDER_TYPE: tenderType[0].NAME
+			TENDER_TYPE: tenderType[0].NAME,
+			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
+			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
+            CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
 		};
 		return results;
+		
 	}
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
 	//EHQUT-197468-MEA – Nucleus heads notifications flow
-	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation, tender) {
+	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation, tender, regionname) {
 		let tenderid = offerProductValidation[0].TENDER_ID;
+		let Countrycode=offerProductValidation[0].COUNTRY_CODE;
 
-		tenderid = tenderid.split("-")[1].substring(0, 2);
+		let tenderyear = tenderid.split("-")[1].substring(0, 2);
 		
 		//Calculate max validation type for each type in each product
 		aApproverTypes.map(async function (oApproverType) {
@@ -2171,9 +2181,9 @@ module.exports = (srv) => {
 		// }
 		
 		let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
-		if(tenderid > '22' && CountryBusinessindex !== -1){
+		if(tenderyear> '22' && regionname === 'MEA'){
 			aApproverTypes.splice(CountryBusinessindex,1);
-			
+						
 		}
 		
 		//For Thailand specific
@@ -2186,7 +2196,7 @@ module.exports = (srv) => {
 			BrandName.push(offerProductValidation[i].BRANDNAME);	
 			}
 
-			if(!(BrandName.includes('Nalador')) && index !== -1){
+			if(!(BrandName.includes('Nalador')) && Countrycode === 'TH'){
 				aApproverTypes.splice(index,1);
 				
 			}
