@@ -293,8 +293,9 @@ module.exports = class processOpportunities extends BaseJob {
 
 
         // Upsert aggregated data
-        for(const [index, tender] of newTenders.entries()){
-            const offers = newOffers.filter(ofr => ofr.TenderID === tender.TenderID);
+        for(const [index, offer] of newOffers.entries()){
+            const tender = newTenders.filter(t => t.TenderID === offer.TenderID);
+            const existingOffer = existingOffers.filter(eo => eo.OfferID.includes(offer.OfferID.slice(0,12)));
             const offerStatusses = newOfferStatusses.filter(st => st.TenderID === tender.TenderID);
             const products = newProducts.filter(prd => prd.TenderID === tender.TenderID);
             const lots = newLots.filter(lot => lot.OfferID.includes(tender.TenderID));
@@ -313,7 +314,7 @@ module.exports = class processOpportunities extends BaseJob {
                 await this.upsertFASTTenders(tx, [tender]);
 
                 // 2. Create/update entries in PT_TMOFRS
-                await this.upsertFASTOffers(tx, offers, existingOffers);
+                await this.upsertFASTOffers(tx, [offer], [existingOffer]);
 
                 // 3. Create entries in PT_TMTNOFST
                 await this.insertFASTOfferStatusses(tx, offerStatusses);
@@ -856,8 +857,9 @@ aggregateDocuments(mappedDocs, mappedOffers){
 
 
         // Upsert aggregated data
-        for(const [index, tender] of newTenders.entries()){
-            const offers = newOffers.filter(ofr => ofr.TenderID === tender.TenderID);
+        for(const [index, offer] of newOffers.entries()){
+            const tender = newTenders.filter(t => t.TenderID === offer.TenderID);
+            const existingOffer = existingOffers.filter(eo => eo.OfferID.includes(offer.OfferID.slice(0,12)));
             // const offerStatusses = newOfferStatusses.filter(st => st.TenderID === tender.TenderID);
             const products = newProducts.filter(prd => prd.TenderID === tender.TenderID);
             // const lots = newLots.filter(lot => lot.OfferID.includes(tender.TenderID));
@@ -878,7 +880,7 @@ aggregateDocuments(mappedDocs, mappedOffers){
                 await this.upsertFASTTenders(tx, [tender]);
 
                 // 2. Create/update entries in PT_TMOFRS
-                await this.upsertFASTOffers(tx, offers, existingOffers);
+                await this.upsertFASTOffers(tx, [offer], [existingOffer]);
 
                 // 3. Create entries in PT_TMOFPR
                 await this.insertOfferProducts(tx, products);
