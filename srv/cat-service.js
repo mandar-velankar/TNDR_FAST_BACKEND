@@ -1330,6 +1330,12 @@ module.exports = (srv) => {
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
 				});
                 productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
+				// EFRCl- 268955-Spain - correct mistakes on Commercial agreement templates
+				let whereRoyalDecree = {
+					ProductPackID: offerProduct.ProductCode,
+					ValidTo : '9999-12-31'
+				}
+				productCondition.RoyalDecreePercentage = await tx.run(SELECT.from(RoyalDecree).where(whereRoyalDecree));
                 return productCondition;
             }));
             /*end of ProductCondition information */
