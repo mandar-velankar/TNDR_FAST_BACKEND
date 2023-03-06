@@ -27,11 +27,11 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             const mailTemplate = await this.getMailTemplate(templateName);
 
             //get customer prices
-            const synchronizedAggregatedData = await this.getSynchronizedCustomerPricesAggregatedData(syncDate);
+            const synchronizedAggregatedData = await this.getAggregatedData(); //MANDAR
 
             // console.dir(pas,{ depth: null });
             if (synchronizedAggregatedData && synchronizedAggregatedData.length > 0) {
-                let mail = this.mapDataToMail(mailTemplate,templateName, syncDate)(synchronizedAggregatedData);
+                let mail = this.mapDataToMail(mailTemplate,templateName, syncDate)(synchronizedAggregatedData); //MANDAR
                 // console.log(mails);
                 if(mail){
                     await this.addMailsToOutbox(mail, syncDate);
@@ -54,22 +54,27 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
      * @param {Date} date 
      * @returns {Array<Objects>}  A list of aggregated data
      */
-    async getSynchronizedCustomerPricesAggregatedData(date) {
-        console.log(`Fetching Customer Prices synchronized on ${date.toDateString()}`);
+    async getAggregatedData() {
+        console.log(`Fetching Aggregated Data for net prices below floor prices`);
         const { CustomerPrices, PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         const { PT_TMINST, PT_TMPRDPCK, PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+        const { PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const { PT_TMUSER } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
         return await tx.run(
-            SELECT.from(`${CustomerPrices.name} as CP`)
-            .join(`${PriceAgreements.name} as PA`)
+            SELECT.from(`${PriceAgreements.name} as PA`)
+            .join(`${PriceCondition.name} as PC`)
             .on({ 
-                'CP.PriceAgreementId': { '=': 'PA.ID' } 
+                'CP.PriceAgreement_ID': { '=': 'PA.ID' } 
             })
             .join(`${PT_TMTEND.name} as TND`)
             .on({ 
                 'PA.TenderId': { '=': 'TND.TenderID' } 
+            })
+            .join(`${PT_TMOFRS.name} as OFR`)
+            .on({ 
+                'PA.TenderId': { '=': 'OFR.TenderID' },
+                'PC.OfferID': { '=': 'OFR.OfferID' },
             })
             .join(`${PT_TMUSER.name} as USR`)
             .on({ 
@@ -92,13 +97,8 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
                 'PRD.ACTIVERECORD': 'Yes',
             })
             .where({ 
-                    'CP.CountryCode': 'ES', 
-                    'CP.Synchronized': true, 
-                    'CP.Notified': false,
-                    'CP.RefIdocNumber': { '!=': null }, 
-                     and: { 'CP.RefIdocNumber': {'!=': '' } },
-                    'CP.modifiedAt': { '>=': `${date.toJSON().substring(0,10)} 00:00:00.000000000` }, // only consider records synced on the day this job runs
-                    'TND.Classification': 'Commercial Agreement'
+                    'PA.CountryCode': 'ES',
+                    'PA.hasNewYLAP ': { '=': 3 },
             })
         ); 
     }
@@ -127,7 +127,7 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients: dataFilteredByUser[0].UserEmail,
                     Subject: template.title,
-                    MailBody: this.generateMailBody(template, { 
+                    MailBody: this.generateMailBody(template, { //MANDAR
                         data: { 
                             SyncDate: syncDate.toDateString(), 
                             CustomerPrices: dataFilteredByUser 
