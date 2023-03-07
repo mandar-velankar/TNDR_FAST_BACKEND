@@ -1315,6 +1315,12 @@ module.exports = (srv) => {
             }
             
 			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
+			// EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
+			let whereRoyalDecree = {
+				ProductPackID: offerProduct.ProductCode,
+				ValidTo : '9999-12-31'
+			}
+			let RoyalDecreePercentageValue = await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree));
 
             /*Get corresponding ProductConditions*/
 			const whereProductConditions = {
@@ -1330,12 +1336,6 @@ module.exports = (srv) => {
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
 				});
                 productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-				// EFRCl- 268955-Spain - correct mistakes on Commercial agreement templates
-				let whereRoyalDecree = {
-					ProductPackID: offerProduct.ProductCode,
-					ValidTo : '9999-12-31'
-				}
-				productCondition.RoyalDecreePercentage = await tx.run(SELECT.from(RoyalDecree).where(whereRoyalDecree));
                 return productCondition;
             }));
             /*end of ProductCondition information */
@@ -1585,6 +1585,7 @@ module.exports = (srv) => {
 				FINAL_DISCOUNT: finalDiscount,
 				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
+				PERCENTAGE: RoyalDecreePercentageValue.Percentage,
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials,
