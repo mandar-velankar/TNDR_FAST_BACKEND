@@ -340,8 +340,8 @@ module.exports = class processOpportunities extends BaseJob {
                 await this.insertDocumentsDownload(tx, documents);
                 
             })
-            .on('succeeded', this._onProcessingSuccess)
-            .on('failed', this._onProcessingFail)
+            .on('succeeded', this._onProcessingSuccess.bind(this))
+            .on('failed', this._onProcessingFail.bind(this))
             .on('done', this._onProcessingFinish.bind(this));
         };
 
@@ -902,14 +902,13 @@ aggregateDocuments(mappedDocs, mappedOffers){
                 await this.insertDocumentsDownload(tx, documents);
                 
             })
-            .on('succeeded', this._onProcessingSuccess)
-            .on('failed', this._onProcessingFail)
+            .on('succeeded', this._onProcessingSuccess.bind(this))
+            .on('failed', this._onProcessingFail.bind(this))
             .on('done', this._onProcessingFinish.bind(this));;
         };
 
     }catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Processing of Indirect ibiz opportunities failed.`);
-        console.error(error);
+        console.error(`JOB (${this.jobName }): ERROR - Processing of Indirect ibiz opportunities failed. Cause: ${error}`);
         throw error;
     }
 }
