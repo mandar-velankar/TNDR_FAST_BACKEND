@@ -67,6 +67,9 @@ module.exports = class processOpportunities extends BaseJob {
                 await this.processIndirectIbizOpportunities(indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
             }
 
+            // log finish
+            this._finishMessage(this.opportunityCount);
+
         } catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Processing of Ibiz Opportunities failed. \n\nCause: ${error}`);
             throw error;
@@ -86,6 +89,7 @@ module.exports = class processOpportunities extends BaseJob {
             Array.isArray(parentIDs) && parentIDs.length > 0 && await DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}});
             const docParentIDs = opportunityDocs.map(d => d.parent_ID);
             Array.isArray(docParentIDs) && docParentIDs.length > 0 && await DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}});
+            console.log(`JOB (${this.jobName}) - Opportunity: ${opportunity.ID } from ${IbizQps.name} processed successfully. `);
         }catch (error) {
             console.error(error);
             throw error;
@@ -96,7 +100,7 @@ module.exports = class processOpportunities extends BaseJob {
      * Logs and updates the status of the processed record in case of an error
      * @param {*} error 
      */
-    async _onProcessingFail (error, { opportunity, opportunityItems, opportunityDocs }){
+    async _onProcessingFail ({ opportunity, opportunityItems, opportunityDocs }, error){
         this.failed++;
         // const { opportunity, opportunityItems, opportunityDocs, jobName } = cds.context.data;
         const { IbizQps, IbizCcsQpsItems, IbizDocs } = cds.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -119,21 +123,10 @@ module.exports = class processOpportunities extends BaseJob {
                 doc.ERROR_MESSAGE = errMsg
                 await UPDATE(IbizDocs, {ID: doc.ID}).with(doc);
             }
-            console.log(`JOB (${jobName}) - Proccessing of record ${opportunity.ID } in ${IbizQps.name} failed. Error message logged.`);
+            console.log(`JOB (${this.jobName}) - Opportunity: ${opportunity.ID } from ${IbizQps.name} processing failed. Error message logged.`);
         }catch (error) {
             console.error(error);
             throw error;
-        }
-    }
-
-    /**
-     * runs when the jobs finishes the processing
-     */
-    _onProcessingFinish (){
-        const processed = this.failed + this.success;
-        // all records are processed
-        if(processed == this.opportunityCount){
-            this._finishMessage(processed);
         }
     }
 
@@ -880,7 +873,7 @@ aggregateDocuments(mappedDocs, mappedOffers){
         const newPrices = this.aggregatePrices(mappedPrice, mappedProducts);
         const newPriceConditions = this.aggregatePriceConditions(mappedPriceCondition, mappedOffers);
 
-
+        const spawnPromises = [];
         // Upsert aggregated data
         for(const [index, offer] of newOffers.entries()){
             const tender = newTenders.filter(t => t.TenderID === offer.TenderID);
@@ -896,34 +889,34 @@ aggregateDocuments(mappedDocs, mappedOffers){
             const opportunityItems = indirectIbizOpportunityItems.filter(i => i.parent_ID === opportunity.ID);
             const opportunityDocs = indirectIbizOpportunityDocs.filter(d => d.Qps_ID === opportunity.ID);
 
-            cds.spawn (async (tx) => {
+            spawnPromises.push(
+                this._runDetached(async (tx) => {
 
-                // set transaction context
-                tx.context.data = { opportunity, opportunityItems, opportunityDocs, jobName:this.jobName }
+                    // 1. Create/update entries in PT_TMTEND
+                    await this.upsertFASTTenders(tx, tender);
 
-                // 1. Create/update entries in PT_TMTEND
-                await this.upsertFASTTenders(tx, tender);
+                    // 2. Create/update entries in PT_TMOFRS
+                    await this.upsertFASTOffers(tx, [offer], existingOffer);
 
-                // 2. Create/update entries in PT_TMOFRS
-                await this.upsertFASTOffers(tx, [offer], existingOffer);
+                    // 3. Create entries in PT_TMOFPR
+                    await this.insertOfferProducts(tx, products);
 
-                // 3. Create entries in PT_TMOFPR
-                await this.insertOfferProducts(tx, products);
+                    // 4. Create entries in PT_TMBDPR
+                    await this.insertFASTPrice(tx, prices);
 
-                 // 4. Create entries in PT_TMBDPR
-                await this.insertFASTPrice(tx, prices);
+                    // 5. Create entries in PRICECONDITION
+                    await this.insertFASTPriceConditions(tx, priceConditions);
 
-                // 5. Create entries in PRICECONDITION
-                await this.insertFASTPriceConditions(tx, priceConditions);
-
-                // 6. Create entries in DocumentsDownload
-                await this.insertDocumentsDownload(tx, documents);
-                
-            })
-            .on('succeeded', this._onProcessingSuccess.bind(this))
-            .on('failed', this._onProcessingFail.bind(this))
-            .on('done', this._onProcessingFinish.bind(this));;
+                    // 6. Create entries in DocumentsDownload
+                    await this.insertDocumentsDownload(tx, documents);
+                    
+                })
+                .then(this._onProcessingSuccess.bind(this, { opportunity, opportunityItems, opportunityDocs} ))
+                .catch(this._onProcessingFail.bind(this, { opportunity, opportunityItems, opportunityDocs }))
+            );
         };
+
+        return Promise.all(spawnPromises);
 
     }catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Processing of Indirect ibiz opportunities failed. Cause: ${error}`);
