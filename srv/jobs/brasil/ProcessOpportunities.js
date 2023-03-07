@@ -31,14 +31,14 @@ module.exports = class processOpportunities extends BaseJob {
                 this._finishMessage(this.opportunityCount);
             }
 
-            // Fetch additional data
+            // Fetch additional data needed for mapping/aggregation
             const existingInstitutesInFAST = await this.getInstitutes();
             const existingTenderTypesFAST = await this.getTenderTypes();
             const existingDistributorsFAST = await this.getFASTDistributors();
             const existingSKUFAST = await this.getFASTSKUs();
             const priceConditionClassificationFAST = await this.getPriceConditionClassification();
 
-            // Filter opportunities (direct/indirect)
+            // Filter/split opportunities (direct/indirect)
             const directIbizOpportunities = opportunities.filter(direct => direct.NU_DIRETO_INDIRETO === 0);
             const directIbizOpportunityParentIDs = directIbizOpportunities.map(dop => dop.ID);
             const directIbizOpportunityItems = await this.getOpportunitiesItems(directIbizOpportunityParentIDs);
@@ -76,9 +76,9 @@ module.exports = class processOpportunities extends BaseJob {
     /**
      * Delete record from IbizQPS, IbizCcsQpsItems and IbizDocs after successful processing.
      */
-    async _onProcessingSuccess (){
+    async _onProcessingSuccess ({ opportunity, opportunityItems, opportunityDocs }){
         this.success++;
-        const { opportunity, opportunityItems, opportunityDocs, jobName } = cds.context.data;
+        // const { opportunity, opportunityItems, opportunityDocs, jobName } = cds.context.data;
         const { IbizQps, IbizCcsQpsItems, IbizDocs } = cds.entities("com.bayer.SXTENDER.MasterData.SAP");
         try {
             await DELETE.from(IbizQps).where({ID: opportunity.ID});
@@ -96,9 +96,9 @@ module.exports = class processOpportunities extends BaseJob {
      * Logs and updates the status of the processed record in case of an error
      * @param {*} error 
      */
-    async _onProcessingFail (error){
+    async _onProcessingFail (error, { opportunity, opportunityItems, opportunityDocs }){
         this.failed++;
-        const { opportunity, opportunityItems, opportunityDocs, jobName } = cds.context.data;
+        // const { opportunity, opportunityItems, opportunityDocs, jobName } = cds.context.data;
         const { IbizQps, IbizCcsQpsItems, IbizDocs } = cds.entities("com.bayer.SXTENDER.MasterData.SAP");
         try {
             const status = 'Failed';
@@ -300,7 +300,7 @@ module.exports = class processOpportunities extends BaseJob {
         const { newProducts, newLots } = this.aggregateOfferProducts(mappedProducts, mappedOffers);
         const newDocuments = this.aggregateDocuments(mappedDocs, mappedOffers);
 
-
+        const spawnPromises = [];
         // Upsert aggregated data
         for(const [index, offer] of newOffers.entries()){
             const tender = newTenders.filter(t => t.TenderID === offer.TenderID);
@@ -314,39 +314,59 @@ module.exports = class processOpportunities extends BaseJob {
             const opportunityItems = directIbizOpportunityItems.filter(i => i.parent_ID === opportunity.ID);
             const opportunityDocs = directIbizOpportunityDocs.filter(d => d.Qps_ID === opportunity.ID);
 
-            cds.spawn (async (tx) => {
+            spawnPromises.push(
+                this._runDetached(async (tx) => {
 
-                // set transaction context
-                tx.context.data = { opportunity, opportunityItems, opportunityDocs, jobName:this.jobName }
+                    // set transaction context
+                    tx.context.data = { opportunity, opportunityItems, opportunityDocs, jobName:this.jobName }
 
-                // 1. Create/update entries in PT_TMTEND
-                await this.upsertFASTTenders(tx, tender);
+                    // 1. Create/update entries in PT_TMTEND
+                    await this.upsertFASTTenders(tx, tender);
 
-                // 2. Create/update entries in PT_TMOFRS
-                await this.upsertFASTOffers(tx, [offer], existingOffer);
+                    // 2. Create/update entries in PT_TMOFRS
+                    await this.upsertFASTOffers(tx, [offer], existingOffer);
 
-                // 3. Create entries in PT_TMTNOFST
-                await this.insertFASTOfferStatusses(tx, offerStatusses);
+                    // 3. Create entries in PT_TMTNOFST
+                    await this.insertFASTOfferStatusses(tx, offerStatusses);
 
-                // 4. Create entries in PT_TMOFPR
-                await this.insertOfferProducts(tx, products );
+                    // 4. Create entries in PT_TMOFPR
+                    await this.insertOfferProducts(tx, products );
 
-                // 5. Create entries in Lots
-                await this.insertOfferProductLots(tx, lots);
+                    // 5. Create entries in Lots
+                    await this.insertOfferProductLots(tx, lots);
 
-                // 6. Create entries in DocumentsDownload
-                await this.insertDocumentsDownload(tx, documents);
-                
-            })
-            .on('succeeded', this._onProcessingSuccess.bind(this))
-            .on('failed', this._onProcessingFail.bind(this))
-            .on('done', this._onProcessingFinish.bind(this));
+                    // 6. Create entries in DocumentsDownload
+                    await this.insertDocumentsDownload(tx, documents);
+                    
+                })
+                .then(this._onProcessingSuccess.bind(this, { opportunity, opportunityItems, opportunityDocs} ))
+                .catch(this._onProcessingFail.bind(this, { opportunity, opportunityItems, opportunityDocs }))
+            );
+            
         };
+
+        return Promise.all(spawnPromises);
 
     }catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Processing of Direct ibiz opportunities failed. \n\nCause: ${error}`);
         throw error;
     }
+}
+
+/**
+ * Runs the given function as detached continuation in a specified event context.
+ * @see https://cap.cloud.sap/docs/node.js/cds-context-tx#cds-spawn
+ * @async
+ * @callback Even though the callback function is executed as a background job, all asynchronous operations inside the callback function must be awaited. Otherwise, transaction handling does not work properly.
+ * @param {*} fn 
+ * @returns {Promise}
+ */
+_runDetached(fn){
+    return new Promise((resolve, reject) => {
+        cds.spawn (fn)
+        .on('succeeded', resolve)
+        .on('failed', reject)
+    })
 }
 
 /**
