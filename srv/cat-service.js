@@ -1316,11 +1316,11 @@ module.exports = (srv) => {
             
 			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 			// EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
-			let whereRoyalDecree = {
-				ProductPackID: offerProduct.ProductCode,
-				ValidTo : '9999-12-31'
-			}
-			let RoyalDecreePercentageValue = await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree));
+			// let whereRoyalDecree = {
+			// 	ProductPackID: offerProduct.ProductCode,
+			// 	ValidTo : '9999-12-31'
+			// }
+			// let RoyalDecreePercentageValue = await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree));
 
             /*Get corresponding ProductConditions*/
 			const whereProductConditions = {
@@ -1585,7 +1585,7 @@ module.exports = (srv) => {
 				FINAL_DISCOUNT: finalDiscount,
 				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
-				PERCENTAGE: RoyalDecreePercentageValue.Percentage,
+				// PERCENTAGE: RoyalDecreePercentageValue.Percentage,
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials,

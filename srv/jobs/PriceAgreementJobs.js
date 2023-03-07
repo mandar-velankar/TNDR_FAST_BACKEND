@@ -143,6 +143,11 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             } else {
                 kbetr = priceCondition.Discount * 100;
             }
+            // set KRECH for Descuento Comercial and Descuento Comercial 
+            if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
+                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "A";
+
+            }
 
             // set partner and sales organisation
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
