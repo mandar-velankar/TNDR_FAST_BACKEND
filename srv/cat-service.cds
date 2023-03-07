@@ -234,6 +234,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity TenderHistorySpain @readonly                 as projection on TransactionalDataViews.TenderHistorySpain;
 
     //Transactional Data Services
+    // EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
     entity OfferProductValidation {
             TENDER_ID                                   : String(30);
             COUNTRY_CODE                                : String(2);
@@ -378,6 +379,7 @@ service CatalogService @(path : 'tender')@(requires : [
             FINAL_DISCOUNT                              : Double;
             FINAL_DISCOUNT_IN_WORDS                     : String(255);
             PRODUCT_FULL_DESCRIPTION                    : String(255);
+            PERCENTAGE                                  : Decimal; // Royal Decree Percentage
             //end of missing SKU & SKUCountry fields
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
