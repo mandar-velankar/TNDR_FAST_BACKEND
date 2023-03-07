@@ -28,7 +28,7 @@ module.exports = class processOpportunities extends BaseJob {
 
             // nothing to process
             if(this.opportunityCount == 0){
-                this._finishMessage(this.opportunityCount);
+                return this._finishMessage(this.opportunityCount);
             }
 
             // Fetch additional data needed for mapping/aggregation
