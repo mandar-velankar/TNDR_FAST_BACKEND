@@ -379,7 +379,7 @@ service CatalogService @(path : 'tender')@(requires : [
             FINAL_DISCOUNT                              : Double;
             FINAL_DISCOUNT_IN_WORDS                     : String(255);
             PRODUCT_FULL_DESCRIPTION                    : String(255);
-            PERCENTAGE                                  : Decimal; // Royal Decree Percentage
+            // PERCENTAGE                                  : Decimal; // Royal Decree Percentage
             //end of missing SKU & SKUCountry fields
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
