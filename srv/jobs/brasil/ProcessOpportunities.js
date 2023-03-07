@@ -144,8 +144,7 @@ module.exports = class processOpportunities extends BaseJob {
         try {
             // console.log(`JOB (${this.jobName }): Fetching Ibiz Opportunities from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS ...`);
             const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            const result = await SELECT.from(IbizQps);
-            return result;
+            return await SELECT.from(IbizQps);
         }catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${IbizQps.name} failed. Cause: ${error}`);
             throw error;
@@ -157,10 +156,9 @@ module.exports = class processOpportunities extends BaseJob {
      * @returns - A list of Ibiz opportunity items
      */
      async getOpportunitiesItems(parentIDs) {
-        if(!parentIDs || parentIDs.length <= 0) {
-            // console.log("No Parent Itmes found");
-            return [];
-        }
+        if(!parentIDs) return [];
+        if(parentIDs.length <= 0) return [];
+
         try {
             // console.log(`JOB (${this.jobName }): Fetching Ibiz Opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS ...`);
             const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -177,10 +175,9 @@ module.exports = class processOpportunities extends BaseJob {
      * @returns - A list of Ibiz master prices
      */
     async getBrazilMasterPrices(customerIDs) {
-        if(!customerIDs || customerIDs.length <= 0) {
-            // console.log("No CustomerIDs provided");
-            return [];
-        }
+        if(!customerIDs) return [];
+        if(customerIDs.length <= 0) return [];
+
         // console.log(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICES ...`);
         const { BrazilMasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
         try {
@@ -195,10 +192,9 @@ module.exports = class processOpportunities extends BaseJob {
      * @returns - A list of Ibiz Documents
      */
       async getOpportunitiesDocs(parentIDs) {
-        if(!parentIDs || parentIDs.length <= 0) {
-            // console.log("No Parent Itmes found");
-            return [];
-        }
+        if(!parentIDs) return [];
+        if(parentIDs.length <= 0) return [];
+
         try {
             // console.log(`JOB (${this.jobName }): Fetching Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IbizDocs ...`);
             const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -240,9 +236,9 @@ module.exports = class processOpportunities extends BaseJob {
     }
 
      async getNextOfferIDs(tenderIDs) {
-        if(!tenderIDs || tenderIDs.length <= 0) {
-            return [];
-        }
+        if(!tenderIDs) return [];
+        if(tenderIDs.length <= 0) return [];
+
         try {
             // console.log(`JOB (${this.jobName }): Fetching NextOfferID from com.bayer.SXTENDER.TransactionalDataViews.TenderOffers ...`);
             const { TenderOffers } = this.db.entities("com.bayer.SXTENDER.TransactionalDataViews");
@@ -407,10 +403,13 @@ _runDetached(fn){
  * @param {*} tenders 
  */
 async upsertFASTTenders(tx, tenders){
+    if(!tenders) return false;
+    if(tenders.length <= 0) return false;
+
     const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     // console.log(`JOB (${this.jobName }): Inserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
     try {
-        tenders && tenders.length > 0 && await tx.run(INSERT(tenders).into(PT_TMTEND));
+        await tx.run(INSERT(tenders).into(PT_TMTEND));
         console.log(`JOB (${this.jobName }): Inserting data into (${PT_TMTEND.name}) completed. -> created: ${tenders.length}`);
         return true;
     } catch (error) {
@@ -504,10 +503,13 @@ async upsertFASTTenders(tx, tenders){
  * @returns 
  */
 async upsertFASTOffers(tx, newOffers, existingOffers){
+    if(!newOffers) return false;
+    if(newOffers.length <= 0) return false;
+
     const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     // console.log(`JOB (${this.jobName }): Upserting data into (${PT_TMOFRS.name}) ...`);
     try {
-        newOffers && newOffers.length > 0 && await tx.run(INSERT(newOffers).into(PT_TMOFRS));
+        await tx.run(INSERT(newOffers).into(PT_TMOFRS));
         //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
         for (const parrentOffer of existingOffers) {
             await tx.run(UPDATE(PT_TMOFRS, {OfferID:parrentOffer.OfferID}).with(parrentOffer));
@@ -583,10 +585,13 @@ aggregateOfferProducts(mappedProducts, mappedOffers) {
  * @returns 
  */
  async insertOfferProducts(tx, products) {
+    if(!products) return false;
+    if(products.length <= 0) return false;
+
     const { PT_TMOFPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     // console.log(`JOB (${this.jobName }): Inserting records into (${PT_TMOFPR.name}) ...`);
     try {
-        products && products.length > 0 && await tx.run(INSERT(products).into(PT_TMOFPR));
+        await tx.run(INSERT(products).into(PT_TMOFPR));
         console.log(`JOB (${this.jobName }): Inserting records into (${PT_TMOFPR.name}) completed. -> created: ${products.length}`);
         return true;
     } catch (error) {
@@ -602,12 +607,14 @@ aggregateOfferProducts(mappedProducts, mappedOffers) {
  * @returns 
  */
 async insertOfferProductLots(tx, lots) {
+    if(!lots) return false;
+    if(lots.length <= 0) return false;
+
     const { Lots } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     console.log(`JOB (${this.jobName }): Inserting records into (${Lots.name}) ...`);
     try {
-        lots && lots.length > 0 && await tx.run(INSERT(lots).into(Lots));
-        console.log(`JOB (${this.jobName }): Inserting records into (${Lots.name}) successfully completed.`);
-        console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
+        await tx.run(INSERT(lots).into(Lots));
+        console.log(`JOB (${this.jobName }): Inserting records into (${Lots.name}) successfully completed. -> created: ${lots.length}`);
         return true;
     } catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Inserting records into (${Lots.name}) failed`,`Cause: ${error}`);
@@ -716,10 +723,13 @@ aggregateDocuments(mappedDocs, mappedOffers){
  * @returns 
  */
  async insertDocumentsDownload(tx, documents) {
+    if(!documents) return false;
+    if(documents.length <= 0) return false;
+
     const { DocumentsDownload } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     // console.log(`JOB (${this.jobName }): Inserting records into (${DocumentsDownload.name})  ...`);
     try {
-        documents && documents.length > 0 && await tx.run(INSERT(documents).into(DocumentsDownload));
+        await tx.run(INSERT(documents).into(DocumentsDownload));
         console.log(`JOB (${this.jobName }): Inserting records into (${DocumentsDownload.name}) successfully completed. -> created: ${documents.length}`);
         return true;
     } catch (error) {
@@ -734,10 +744,9 @@ aggregateDocuments(mappedDocs, mappedOffers){
  * @returns {Array<PT_TMTEND>} a list of existing tenders
  */
  async getFASTTenders(tenders) {
-    if(!tenders || tenders.length === 0){
-        console.log(`JOB (${this.jobName }): No Tenders were found in FAST`);
-        return [];
-    }
+    if(!tenders) return [];
+    if(tenders.length <= 0) return [];
+
     // console.log(`JOB (${this.jobName }): Prepare fetching IBIZ Opportunity Tenders from FAST table`);
 
     // get all the ExternalIDs from tenders
