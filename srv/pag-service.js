@@ -65,7 +65,9 @@ module.exports = async (srv) => {
         let end;
         let totalTime = 0;
         let type = "";
-        if (req.query.SELECT.columns[0]?.func === "count") {
+        console.log("Start price agreements");
+        if (req?.query?.SELECT?.columns?.length > 0 && req?.query?.SELECT?.columns[0]?.func === "count") {
+            console.log("Running price agreements for count");
             type = "COUNT";
         }
         const startTrace = (entity) => {
@@ -599,9 +601,9 @@ module.exports = async (srv) => {
         }
 
         stopTrace("apply filters");
-        startTrace("Commit");
-        await tx.commit();
-        stopTrace("Commit");
+        //startTrace("Commit");
+        //await tx.commit();
+        //stopTrace("Commit");
         if (req.query.SELECT.columns[0].func === 'count') {
             console.log(`COUNT WITH FILTER: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: result.length }];
@@ -627,7 +629,9 @@ module.exports = async (srv) => {
         console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
         //otherwise keep as is
         req.query.count = true;
-        req.query.cqn.count = true;
+        if(req.query.cqn){
+            req.query.cqn.count = true;
+        }
         result.$count = result.length;
         return req.reply(result);
     };
@@ -642,9 +646,10 @@ module.exports = async (srv) => {
             if (!deliveries) {
                 try {
                     deliveries = await tx.run(SELECT.from(Deliveries).where({ PriceAgreementId: pag.ID }));
-                    await tx.commit();
+                    // await tx.commit();
                 } catch (e) {
-                    await tx.rollback(e)
+                    // await tx.rollback(e)
+                    console.log(e);
                 }
             }
             pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.ANZPK, 0);

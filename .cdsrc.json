@@ -42,9 +42,32 @@
                         }
                     },
                     "ELLUI": {
+                        "password": "ELLUI",
                         "jwt": {
                             "userInfo": {
                                 "logonName": "ELLUI",
+                                "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin"
+                            ]
+                        }
+                    },"EHMHV": {
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "EHMHV",
+                                "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin"
+                            ]
+                        }
+                    },"EUTVP": {
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "EHMHV",
                                 "email": "P2001081482@example.com"
                             },
                             "scopes": [
@@ -89,6 +112,21 @@
                             "userInfo": {
                                 "logonName": "EICTW",
                                 "email": "P2001081482@example.com"
+                            },
+                            "scopes": [
+                                "authenticated-user",
+                                "f_tndr_cag_admin",
+                                "f_tndr_cag_ctr_user",
+                                "f_tndr_cag_tnd_user",
+                                "f_tndr_cag_cogs_user"
+                            ]
+                        }
+                    },
+                    "EFMWM": {
+                        "jwt": {
+                            "userInfo": {
+                                "logonName": "EFMWM",
+                                "email": "jorj.petrosyan.ext@bayer.com"
                             },
                             "scopes": [
                                 "authenticated-user",
