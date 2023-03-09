@@ -3,8 +3,10 @@ const BaseJob = require('./BaseJob');
 const Handlebars = require("handlebars");
 const cfenv = require("cfenv");
 const { tryCatch } = require('ramda');
+const ServiceHelper = require('../utils/ServiceHelper');
 
-module.exports = class PriceAgreementPriceConditionNotificationMailJob extends BaseJob {
+
+module.exports = class PriceAgreementNotificationNetPriceAbovePVLJob extends BaseJob {
 
     constructor(jobName, jobTime) {
         super(jobName, jobTime);
@@ -15,7 +17,6 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
      */
     //override
     async onTick() {
-
         const syncDate = new Date();
         console.log(`Processing notification mail for Net Price Above PVL on ${syncDate.toDateString()} STARTED ... `);
 
@@ -27,12 +28,11 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
             const mailTemplate = await this.getMailTemplate(templateName);
 
             //get customer prices
-            const synchronizedAggregatedData = await this.getSynchronizedCustomerPricesAggregatedData(syncDate);
+            const PriceAgreementService = await cds.connect.to ('PriceAgreementService');
+            let synchronizedAggregatedData = await PriceAgreementService.run(this.getAggregatedDataQuery());
 
-            // console.dir(pas,{ depth: null });
             if (synchronizedAggregatedData && synchronizedAggregatedData.length > 0) {
                 let mail = this.mapDataToMail(mailTemplate,templateName, syncDate)(synchronizedAggregatedData);
-                // console.log(mails);
                 if(mail){
                     await this.addMailsToOutbox(mail, syncDate);
                 } else{
@@ -54,53 +54,41 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
      * @param {Date} date 
      * @returns {Array<Objects>}  A list of aggregated data
      */
-    async getSynchronizedCustomerPricesAggregatedData(date) {
-        console.log(`Fetching Customer Prices synchronized on ${date.toDateString()}`);
-        const { CustomerPrices, PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        const { PT_TMINST, PT_TMPRDPCK, PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        const { PT_TMUSER } = this.db.entities("com.bayer.SXTENDER.AdminData");
-        const tx = this.db.tx();
-        return await tx.run(
-            SELECT.from(`${CustomerPrices.name} as CP`)
-            .join(`${PriceAgreements.name} as PA`)
-            .on({ 
-                'CP.PriceAgreementId': { '=': 'PA.ID' } 
-            })
-            .join(`${PT_TMTEND.name} as TND`)
-            .on({ 
-                'PA.TenderId': { '=': 'TND.TenderID' } 
-            })
-            .join(`${PT_TMUSER.name} as USR`)
-            .on({ 
-                'PA.createdBy': { '=': 'USR.CWID' } 
-            })
-            .leftJoin(`${PT_TMINST.name} as INST`)
-            .on({ 
-                'CP.InstituteId': { '=': 'INST.InstituteID' },
-                'CP.CountryCode': { '=': 'INST.CountryCode' },
-            })
-            .leftJoin(`${PT_TMSKUPRDPCK.name} as PRDPCK`)
-            .on({ 
-                'CP.MaterialNumber': { '=': 'PRDPCK.SKUCode' },
-                'CP.CountryCode': { '=': 'PRDPCK.CountryCode' },
-                'PRDPCK.ActiveRecord': 'Yes',
-            })
-            .leftJoin(`${PT_TMPRDPCK.name} as PRD`)
-            .on({ 
-                'PRDPCK.ProductPackID': { '=': 'PRD.PRODUCTPACKID' },
-                'PRD.ACTIVERECORD': 'Yes',
-            })
-            .where({ 
-                    'CP.CountryCode': 'ES', 
-                    'CP.Synchronized': true, 
-                    'CP.Notified': false,
-                    'CP.RefIdocNumber': { '!=': null }, 
-                     and: { 'CP.RefIdocNumber': {'!=': '' } },
-                    'CP.modifiedAt': { '>=': `${date.toJSON().substring(0,10)} 00:00:00.000000000` }, // only consider records synced on the day this job runs
-                    'TND.Classification': 'Commercial Agreement'
-            })
-        ); 
+    getAggregatedDataQuery() {
+        console.log(`Build query for Aggregated Data for net prices below floor prices`);
+
+        const {
+            PriceAgreementsMasterView
+        } = cds.entities('PriceAgreementService');
+
+        return SELECT.from(PriceAgreementsMasterView, pa => {
+            pa('*'),
+            pa.Tender('*'),
+            pa.Product(product => {
+                product('*'),
+                product.ProductPack('*')
+            }),
+            pa.Institute('*'),
+            pa.Materials('*'),
+            pa.CustomerPrices('*'),
+            pa.ConsumerPrice('*'),
+            pa.OfferProduct('*'),
+            pa.Deliveries('*'),
+            pa.FOC('*'),
+            pa.MaterialsFOC('*'),
+            pa.Candidates('*'),
+            pa.PriceConditions(pc => {
+                pc('*'),
+                pc.PriceConditionClassification('*'),
+                pc.DiscountCondition('*'),
+                pc.FreeGoodsOther('*'),
+                pc.RoyalDecreePercentage('*'),
+                pc.Settlement('*')
+            }),
+            pa.SettlementDates('*'),
+            pa.MasterPrices('*'),
+            pa.User('*')
+        }).where({CountryCode: 'ES', hasNewYLAP: 3, hasNewYLLP: 3, isCancelled: false});
     }
 
     mapDataToMail = (template,mail,syncDate) => data => {
@@ -109,59 +97,45 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
         let outbox = [];
         // add/change some fields in the data array
         data.forEach(d => {
-            d.EffectiveDate = new Date(d.EffectiveDate).toJSON().substring(0,10),
-            d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10),
+            d.PvlOld = d.MasterPrices.YLLP,
+            d.PvlNew = d.PriceConditions[0].PVL,
+            d.NetPrice = d.PriceConditions[0].NetPriceWithTax,
             d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.PriceAgreementId}`
         })
 
         //get unique created by users, this can be used to filter pa/cp data per user from the data array
-        const uniqueUsers = [...new Set(data.map(item => item.CWID))];
+        const uniqueUsers = [...new Set(data.map(item => item.createdBy))];
 
         for (let user of uniqueUsers) {
-            let dataFilteredByUser = data.filter(d => d.CWID === user);
+            let dataFilteredByUser = data.filter(d => d.createdBy === user);
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
                     CountryCode: dataFilteredByUser[0].CountryCode,
                     TenderID: dataFilteredByUser[0].TenderId,
                     OfferID: dataFilteredByUser[0].OfferId,
                     Sender: 'FAST-Admin@bayer.com',
-                    Recipients: dataFilteredByUser[0].UserEmail,
+                    Recipients: dataFilteredByUser[0].User.UserEmail,
                     Subject: template.title,
-                    MailBody: this.generateMailBody(template, { 
+                    MailBody: this.generateMailBody(template, { //MANDAR
                         data: { 
                             SyncDate: syncDate.toDateString(), 
-                            CustomerPrices: dataFilteredByUser 
+                            PriceAgreements: dataFilteredByUser 
                         }
                     }),
                     Sent: false
                 });
             }
         }
-        outbox.push({
-            CountryCode: data[0].CountryCode,
-            TenderID: data[0].TenderId,
-            OfferID: data[0].OfferId,
-            Sender: 'FAST-Admin@bayer.com',
-            Recipients: undefined,
-            Subject: template.title,
-            MailBody: this.generateMailBody(template, { 
-                data: { 
-                    SyncDate: syncDate.toDateString(), 
-                    CustomerPrices: data 
-                }
-            }),
-            Sent: false
-        });
         
         if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
-            console.log(`No template found for Customer Price of tender ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
+            console.log(`No template found for Net Price Above PVL ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
             return;
         }
         return outbox;
     }
 
     async addMailsToOutbox(mail, syncDate) {
-        console.log(`Adding notification mail for Price Conditions synchronised with SAP on: ${syncDate.toDateString()}`);
+        console.log(`Adding notification mail for Net Price Above PVL sent on: ${syncDate.toDateString()}`);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const tx = this.db.tx();
         try {
@@ -180,7 +154,7 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
     }
 
     async getMailTemplate(templateId) {
-        console.log('Get mail templates for price agreements');
+        console.log('Get mail templates for Net Price Above PVL');
         console.table(templateId);
         const tx = cds.tx();
         const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
