@@ -987,6 +987,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
 	consumerPrices.TotalDiscount,
 	consumerPrices.MaxPriceNhsPP,
 	consumerPrices.MaxPriceNhsPU,
+    priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
             then
