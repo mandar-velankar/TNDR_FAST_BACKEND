@@ -31,7 +31,9 @@ module.exports = class processEmpenho extends BaseJob {
             const empenhoDocs = await this.getEmpenhoDocs(tx, empenhoParentIDs); 
 
             // Process data
-            await this.processEmpenhos(tx, empenhos, empenhoItems, empenhoDocs, existingContractsInFAST, salesOrderStatuses);
+            if(empenhos.length > 0){
+                await this.processEmpenhos(tx, empenhos, empenhoItems, empenhoDocs, existingContractsInFAST, salesOrderStatuses);
+            }
 
             // Commit All
             await tx.commit();
@@ -181,13 +183,13 @@ module.exports = class processEmpenho extends BaseJob {
         const mappedDocs = this.mapIbizEmpenhoDocstoFASTDocumentsDownload(empenhoDocs);
 
         // 1. Create/update entries in SalesOrders
-        await this.upsertFASTSalesOrders(tx, mappedSalesOrders);
+        await this.insertFASTSalesOrders(tx, mappedSalesOrders);
 
         // 2. Create/update entries in SalesOrderProducts
-        await this.upsertFASTSalesOrderProducts(tx, mappedSalesOrders, mappedSalesOrderProducts);
+        await this.insertFASTSalesOrderProducts(tx, mappedSalesOrders, mappedSalesOrderProducts);
 
         // 3. Create/update entries in DocumentsDownload
-        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedSalesOrders);  
+        await this.insertFASTDocumentsDownload(tx, mappedDocs, mappedSalesOrders);  
 
         // 4. Delete all records from IbizEmpenhos, IbizCcsEmpenhosItems and IbizDocs after successful processing.
         const { IbizEmpenhos } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
@@ -268,6 +270,7 @@ module.exports = class processEmpenho extends BaseJob {
                 IbizEmpenhoProductID     : curr.ID_CC_EMPENHO,
                 IbizContractProductID    : curr.ID_CC_CONTRATO,
                 SalesOrderPrice          : curr.VLR_UNITARIO,
+                LotID                    : "",                      //map the filed during upsert
                 createdBy                : "IBIZ",
                 modifiedBy               : "IBIZ",
                 SalesOrder_ID            : ""                       //map the field during upsert
@@ -313,7 +316,7 @@ module.exports = class processEmpenho extends BaseJob {
  * @param {Array.Object} Mapped SalesOrders 
  * @returns 
  */
- async upsertFASTSalesOrders(tx, mappedSalesOrders) {
+ async insertFASTSalesOrders(tx, mappedSalesOrders) {
     const { SalesOrders } = this.db.entities("com.bayer.SXTENDER.BrazilContractingData");
 
     // 1. delete Ids before saving to DB
@@ -324,15 +327,15 @@ module.exports = class processEmpenho extends BaseJob {
         return copy;
     }); 
 
-    // 2. Upsert records into SalesOrders
-    console.log(`JOB (${this.jobName }): Upserting IBIZ Empenho into FAST table (SalesOrders) ...`);
+    // 2. Insert records into SalesOrders
+    console.log(`JOB (${this.jobName }): Inserting IBIZ Empenho into FAST table (SalesOrders) ...`);
     try {
         salesOrdersWithoutID && salesOrdersWithoutID.length > 0 && await tx.run(INSERT(salesOrdersWithoutID).into(SalesOrders));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ Empenho into FAST table (SalesOrders) successfully completed.`);
+        console.log(`JOB (${this.jobName }): Inserting of IBIZ Empenho into FAST table (SalesOrders) successfully completed.`);
         console.log(`JOB (${this.jobName }): SalesOrders -> created: ${salesOrdersWithoutID.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Empenho into FAST table (SalesOrders) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting of IBIZ Empenho into FAST table (SalesOrders) failed`);
         console.error(error);
         throw error;
     }
@@ -343,18 +346,19 @@ module.exports = class processEmpenho extends BaseJob {
  * @param {Array.Object} Mapped SalesOrderProducts
  * @returns 
  */
- async upsertFASTSalesOrderProducts(tx, mappedSalesOrders, mappedSalesOrderProducts) {
+ async insertFASTSalesOrderProducts(tx, mappedSalesOrders, mappedSalesOrderProducts) {
     const { SalesOrderProducts } = this.db.entities("com.bayer.SXTENDER.BrazilContractingData");
     const existingContractProductsInFAST = await this.getContractProducts(tx);
     
     // 1. link parentSalesOrder and existing contract with SalesOrderProducts
     for (const soprd of mappedSalesOrderProducts) {
         let parentSalesOrder = mappedSalesOrders.find(so => so.ID === soprd.parent_ID);
-        const contractProducts = (existingContractProductsInFAST.find(ctrtprd => ctrtprd.OfferID === parentSalesOrder.OfferID));
+        const contractProducts = (existingContractProductsInFAST.find(ctrtprd => ctrtprd.IbizContractProductID === soprd.IbizContractProductID));
         soprd.OfferID = parentSalesOrder.OfferID;
         soprd.RequestedDeliveryDate = parentSalesOrder.CommitmentDeliveryDate;
         soprd.ProductPackID = contractProducts.ProductPackID;
         soprd.SalesOrder_ID = parentSalesOrder.ID;
+        soprd.LotID = contractProducts.LotID;
     }
 
     // 2. delete Ids before saving to DB
@@ -364,15 +368,15 @@ module.exports = class processEmpenho extends BaseJob {
         return copy;
     }); 
 
-    // 3. Upsert records into SalesOrderProducts
-    console.log(`JOB (${this.jobName }): Upserting IBIZ EmpenhoItems into FAST table (SalesOrderProducts) ...`);
+    // 3. Insert records into SalesOrderProducts
+    console.log(`JOB (${this.jobName }): Inserting IBIZ EmpenhoItems into FAST table (SalesOrderProducts) ...`);
     try {
         salesOrderProductsWithoutID && salesOrderProductsWithoutID.length > 0 && await tx.run(INSERT(salesOrderProductsWithoutID).into(SalesOrderProducts));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ EmpenhoItems into FAST table (SalesOrderProducts) successfully completed.`);
+        console.log(`JOB (${this.jobName }): Inserting of IBIZ EmpenhoItems into FAST table (SalesOrderProducts) successfully completed.`);
         console.log(`JOB (${this.jobName }): SalesOrderProducts -> created: ${salesOrderProductsWithoutID.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ EmpenhoItems into FAST table (SalesOrderProducts) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting of IBIZ EmpenhoItems into FAST table (SalesOrderProducts) failed`);
         console.error(error);
         throw error;
     }
@@ -383,7 +387,7 @@ module.exports = class processEmpenho extends BaseJob {
  * DocumentsDownload
  * @returns 
  */
- async upsertFASTDocumentsDownload(tx, mappedDocs, mappedSalesOrders) {
+ async insertFASTDocumentsDownload(tx, mappedDocs, mappedSalesOrders) {
     const { DocumentsDownload } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
 
     // 1. link existing Tenders and Offer with Documents
@@ -400,15 +404,15 @@ module.exports = class processEmpenho extends BaseJob {
         return copy;
     });  
 
-    // 3. Upsert records into DocumentsDownload
-    console.log(`JOB (${this.jobName }): Upserting IBIZ Empenho Documents into FAST table (DocumentsDownload) ...`);
+    // 3. Insert records into DocumentsDownload
+    console.log(`JOB (${this.jobName }): Inserting IBIZ Empenho Documents into FAST table (DocumentsDownload) ...`);
     try {
         docsWithoutID && docsWithoutID.length > 0 && await tx.run(INSERT(docsWithoutID).into(DocumentsDownload));
-        console.log(`JOB (${this.jobName }): Upserting of IBIZ Empenho Documents into FAST table (DocumentsDownload) successfully completed.`);
+        console.log(`JOB (${this.jobName }): Inserting of IBIZ Empenho Documents into FAST table (DocumentsDownload) successfully completed.`);
         console.log(`JOB (${this.jobName }): DocumentsDownload -> created: ${docsWithoutID.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Empenho Documents into FAST table (DocumentsDownload) failed`);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting of IBIZ Empenho Documents into FAST table (DocumentsDownload) failed`);
         console.error(error);
         throw error;
     }
