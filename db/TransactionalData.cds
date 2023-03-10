@@ -492,7 +492,6 @@ entity PriceCondition: cuid, managed {
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
-    IsPricingUnlocked                   : Boolean default false;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
