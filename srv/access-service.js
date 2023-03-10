@@ -7,6 +7,7 @@ module.exports = (srv) => {
 			tenderAccess:{
 				COGS:req.user.is('f_tndr_cag_cogs_user'),
 				SPAINTENDERVIEW:req.user.is('f_tndr_cag_spaintenderview_user'),
+				PHARMATENDERVIEW:req.user.is('f_tndr_cag_Pharmatenderview_user'),
 				MEATENDERVIEW:req.user.is('f_tndr_cag_meatenderview_user')
 				
 			},

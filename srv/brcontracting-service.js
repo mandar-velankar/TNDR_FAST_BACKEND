@@ -255,7 +255,7 @@ module.exports = (srv) => {
             }
             const body = updateContractApprovalTemplate(contractStatus);
             await shareContractApprovalToIBIZ(req, body, contract, offerProducts[0]);
-            await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.Status}).where({ID: req.data.contractID}));
+            await tx.run(UPDATE(Contracts).with({StatusID: contractStatus.ID}).where({ID: req.data.contractID}));
             // await tx.commit();
             return req.reply("Correct")
         } catch (error) {

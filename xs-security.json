@@ -67,6 +67,10 @@
       "description": "f_tndr_cag_spaintenderview_user"
     },
     {
+      "name": "$XSAPPNAME.f_tndr_cag_Pharmatenderview_user",
+      "description": "f_tndr_cag_Pharmatenderview_user"
+    },
+    {
       "name": "$XSAPPNAME.f_tndr_cag_meatenderview_user",
       "description": "f_tndr_cag_meatenderview_user"
     }
@@ -199,6 +203,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_Pharmatenderview_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_Pharmatenderview_user"
       ],
       "attribute-references": []
     },
