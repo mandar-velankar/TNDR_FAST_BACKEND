@@ -249,6 +249,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity TenderHistoryBrazil @readonly                as projection on TransactionalDataViews.TenderHistoryBrazil;
 
     //Transactional Data Services
+    // EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
     entity OfferProductValidation {
             TENDER_ID                                   : String(30);
             COUNTRY_CODE                                : String(2);
@@ -393,6 +394,7 @@ service CatalogService @(path : 'tender')@(requires : [
             FINAL_DISCOUNT                              : Double;
             FINAL_DISCOUNT_IN_WORDS                     : String(255);
             PRODUCT_FULL_DESCRIPTION                    : String(255);
+            // PERCENTAGE                                  : Decimal; // Royal Decree Percentage
             //end of missing SKU & SKUCountry fields
         key LOTID                                       : Integer default 1;
             LINE                                        : String;
@@ -499,6 +501,9 @@ service CatalogService @(path : 'tender')@(requires : [
             EXTERNAL_ID           : String;
 			SAP_ID                : String;
             TENDER_TYPE           : String; 
+            CREATED_BY_USER_EMAIL :String(500);
+            CREATED_BY_USER_ROLE  : String(100);
+            CREATED_BY_USER_CONTACTNUMBER :String (20);
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
