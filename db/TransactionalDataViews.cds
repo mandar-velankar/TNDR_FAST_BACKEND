@@ -987,7 +987,6 @@ left outer join TransactionalData.PriceCondition as priceCondition
 	consumerPrices.TotalDiscount,
 	consumerPrices.MaxPriceNhsPP,
 	consumerPrices.MaxPriceNhsPU,
-    priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
             then
@@ -1271,7 +1270,8 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
     priceCondition.ReferencePriceAgreement,
-    priceCondition.Settlement.ID as Settlement_ID
+    priceCondition.Settlement.ID as Settlement_ID,
+    priceCondition.IsPricingUnlocked
 }where tender.Active = 1;
 
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
