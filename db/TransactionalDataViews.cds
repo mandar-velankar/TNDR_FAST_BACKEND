@@ -1451,17 +1451,14 @@ entity TenderHistoryBrazilAdhesionContracts as select from BrazilContractingData
             key contractProduct.OfferID,
             key contractProduct.ProductPackID,
             contract.ContractType,
-            contractProduct.RequestedVolume,
-            case 
-                when contract.ContractType = 'Adhesion Contract' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100))
-                else '0'
-            end as ADHESION:Double
-    } group by contract.TenderID, 
+            (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100)) * 100 as ADHESION:Double
+    } 
+    where contract.ContractType = 'Adhesion Contract'
+    group by contract.TenderID, 
          contractProduct.OfferID,
 		 contractProduct.ProductPackID,
          contractProduct.LotID,
 		 contract.ContractType,
-		 contractProduct.RequestedVolume,
 		 product.RequestedVolume;    
 
 entity TenderHistoryBrazil as select from TransactionalData.PT_TMTEND as tender
@@ -1512,7 +1509,7 @@ left outer join TenderHistoryBrazilAdhesionContracts as adhesionContract
         ifnull(priceCondition.CAP, 'No') as CAP:String(10),
         priceCondition.StandardDiscount+priceCondition.AdditionalDiscount as TOTAL_DISCOUNT:Double,
         priceCondition.CommercialProposal as COMM_PROPOSAL,
-        sum(adhesionContract.ADHESION) as ADHESION:Double,
+        ifnull(adhesionContract.ADHESION, 0) as ADHESION:Double,
         ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
 }
 where tender.CountryCode = 'BR' and (offerStatus.STATUS = 'Quotation Submitted' or offerStatus.STATUS = 'Results Recorded' or offerStatus.STATUS = 'Delivery Ongoing')

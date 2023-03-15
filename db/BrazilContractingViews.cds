@@ -135,6 +135,7 @@ entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderPro
         SalesOrderProducts.IbizContractProductID,
         SalesOrderProducts.SalesOrderPrice,
         SalesOrderProducts.LotID,
+        SalesOrderProducts.Comment,
         SalesOrderProducts.OfferProduct.SKU.PRODUCTPACKNAME as ProductPackName,
         SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveredProductQty as ActualDeliveredProductQty,  
         SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveryDate as ActualDeliveryDate,  

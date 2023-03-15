@@ -177,6 +177,8 @@ entity IbizQps: cuid, managed {
 	NU_2D_NOTIF_APPLIED_NO_DN_RESPONDED : Integer; 		//Determine if the opportunity wasn't interesting for any DN and was switched automaticly to direct 2 days before the opening date (0 = no; 1 = yes)
 	DT_FINALIZADO 						: String; 		//Determine if a workflow was ended by setting a date its end (if it is null, than the workflow is still on going)
 	NM_MOTIVO_FINALIZADO 				: String; 		//Determine the motive for ending a workflow
+	STATUS								: String;		//Status from the processing job. Will be set to Error when the processing fails
+	ERROR_MESSAGE						: String;		//Error message from the processing job
 	CCS_QPS								: Composition of many IbizCcsQpsItems on CCS_QPS.parent = $self;	//List of batch and items by products
 	DOCS								: Composition of many IbizDocs on DOCS.Qps = $self;	//List of opportunities documents
 }
@@ -202,6 +204,8 @@ entity IbizCcsQpsItems: cuid {
 	NU_PORCENTAGEM_DESCONTO 		: Double; 		//Total discount
 	NU_PORCENTAGEM_DESCONTO_INICIAL : Double; 		//Initial discount
 	NU_PORCENTAGEM_DESCONTO_ADD 	: Double; 		//Additional discount
+	STATUS							: String;		//Status from the processing job. Will be set to Error when the processing fails
+	ERROR_MESSAGE					: String;		//Error message from the processing job
 	parent							: Association to IbizQps;
 }
 
@@ -211,6 +215,8 @@ entity IbizDocs: cuid {
 	NM_TAG 				: String; 				//Doc's label
 	NM_DOC 				: String; 				//File name
 	FILE_URL 			: String;  				//Signed file url to be requested as GET (expires in 5 minutes)
+	STATUS				: String;				//Status from the processing job. Will be set to Error when the processing fails
+	ERROR_MESSAGE		: String;				//Error message from the processing job
 	Contratos			: Association to IbizContratos;	
 	Qps					: Association to IbizQps;	
 	Empenhos			: Association to IbizEmpenhos;	
