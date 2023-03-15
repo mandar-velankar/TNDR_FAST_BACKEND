@@ -214,7 +214,7 @@ module.exports = async (srv) => {
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
         let paQuery = SELECT.from(req.query.SELECT.from);
-        if (req.query.SELECT.columns[0]?.func !== "count") {
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
             paQuery.columns(req.query.SELECT.columns);
         }
         if (!hasFilter) {
@@ -235,7 +235,7 @@ module.exports = async (srv) => {
         stopTrace("PriceAgreements");
 
         //return directly without filters
-        if (req.query.SELECT.columns[0].func === 'count' && !hasFilter) {
+        if (req.query.SELECT.columns?.[0].func === 'count' && !hasFilter) {
             console.log(`COUNT: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: data.length }];
         }
@@ -300,7 +300,7 @@ module.exports = async (srv) => {
 
         if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
-            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
+            if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
                 customerPricesInPA = false;
                 customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
             }
@@ -350,7 +350,7 @@ module.exports = async (srv) => {
             stopTrace("MostRecentMasterPricesView");
 
             startTrace("MostRecentConsumerPricesView");
-            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
+            if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
                 consumerPricesInPA = false;
                 consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
                     .where({
@@ -604,7 +604,7 @@ module.exports = async (srv) => {
         //startTrace("Commit");
         //await tx.commit();
         //stopTrace("Commit");
-        if (req.query.SELECT.columns[0].func === 'count') {
+        if (req.query.SELECT.columns?.[0].func === 'count') {
             console.log(`COUNT WITH FILTER: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: result.length }];
         }
