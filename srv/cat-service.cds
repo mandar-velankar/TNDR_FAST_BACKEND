@@ -11,6 +11,7 @@ using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
 using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
 using {com.bayer.SXTENDER.BankGuaranteeData} from '../db/BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
+using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {
     User,
     Country,
@@ -76,6 +77,19 @@ service CatalogService @(path : 'tender')@(requires : [
     entity MostRecentMasterPricesView                   as projection on MasterDataViews.MostRecentMasterPricesView;
     entity Settlements                                  as projection on MasterData.Settlements;
     entity RoyalDecreePercentage                        as projection on MasterData.RoyalDecree;
+    //Brazil
+    entity Lots                                         as projection on TransactionalData.Lots;
+    entity LotProducts                                  as projection on TransactionalData.LotProduct;
+    entity BrazilCap                                    as projection on MasterData.BrazilCap;
+    entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
+    entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
+    entity BrazilInstituteDivision                      as projection on MasterData.BrazilInstituteDivision;
+    entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
+    entity DocumentsDownload                            as projection on TransactionalData.DocumentsDownload;
+    entity ContractStatuses                             as projection on AdminData.ContractStatus;
+    entity Contracts                                    as projection on BrazilContractingData.Contracts;
+    entity ContractProducts                             as projection on BrazilContractingData.ContractProducts;
+
 
     entity PT_TMCTRY @(restrict : [{
         grant : '*',
@@ -189,7 +203,7 @@ service CatalogService @(path : 'tender')@(requires : [
         * , SKUCountry : redirected to PT_TMCTPRDPCK, Offer : redirected to PT_TMOFRS
     };
 
-    entity PT_TMOFRS                                    as projection on TransactionalData.PT_TMOFRS {
+    entity PT_TMOFRS  @(cds.redirection.target:true)    as projection on TransactionalData.PT_TMOFRS {
         * , Product : redirected to PT_TMOFPR, Tender : redirected to PT_TMTEND
     };
 
@@ -208,7 +222,7 @@ service CatalogService @(path : 'tender')@(requires : [
         * , Offer : redirected to PT_TMOFRS
     };
 
-    entity PT_TMTEND                                    as projection on TransactionalData.PT_TMTEND {
+    entity PT_TMTEND  @(cds.redirection.target:true)    as projection on TransactionalData.PT_TMTEND {
         * , Offer : redirected to PT_TMOFRS, OfferView : redirected to OfferView, CountrySpecificInformation : redirected to CountrySpecificInformation, User : redirected to PT_TMUSER,
     };
 
@@ -232,6 +246,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity CountryMinPrice @readonly                    as projection on TransactionalDataViews.CountryMinPrice;
     entity PreApprovedPrices @readonly                  as projection on TransactionalDataViews.PreApprovedPrices;
     entity TenderHistorySpain @readonly                 as projection on TransactionalDataViews.TenderHistorySpain;
+    entity TenderHistoryBrazil @readonly                as projection on TransactionalDataViews.TenderHistoryBrazil;
 
     //Transactional Data Services
     // EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
@@ -381,6 +396,10 @@ service CatalogService @(path : 'tender')@(requires : [
             PRODUCT_FULL_DESCRIPTION                    : String(255);
             // PERCENTAGE                                  : Decimal; // Royal Decree Percentage
             //end of missing SKU & SKUCountry fields
+        key LOTID                                       : Integer default 1;
+            LINE                                        : String;
+            REFERENCE                                   : String(255);
+            IBIZWORKFLOWID                              : Integer;
             FreeGoodsOther                              : Association to many FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -481,6 +500,7 @@ service CatalogService @(path : 'tender')@(requires : [
             SPOT_RATE             : Double;
             EXTERNAL_ID           : String;
 			SAP_ID                : String;
+            TENDER_TYPE           : String; 
             CREATED_BY_USER_EMAIL :String(500);
             CREATED_BY_USER_ROLE  : String(100);
             CREATED_BY_USER_CONTACTNUMBER :String (20);
@@ -526,7 +546,7 @@ service CatalogService @(path : 'tender')@(requires : [
     //Admin Data Tables
     entity CONDITIONAL_ACCESS                           as projection on AdminData.CONDITIONAL_ACCESS;
 
-    entity PT_TMUSER                                    as projection on AdminData.PT_TMUSER {
+    entity PT_TMUSER @(cds.redirection.target:true)     as projection on AdminData.PT_TMUSER {
         * , Countries : redirected to PT_TMUSERCTRY
     };
 
@@ -766,4 +786,8 @@ service CatalogService @(path : 'tender')@(requires : [
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail(sRecipient : String, sSubject : String, sTemplate : String) returns Boolean;
     function getMailTemplate(countryCode : String, language : String, offerId : String) returns LargeString;
+
+    action notifyIbiz(ibizWorkflowID: Integer, directIndirect: Integer, lineNumbers: array of Integer) returns String; //  (0 = direct; 1 = indirect)
+    action sendApprovalToIbiz(ibizWorkflowID: Integer, offerStatus: Integer, comment: String) returns String;
+    action simulateTaxes(offerID: String, productCode: Integer, lotID: Integer, conditionType: String, commercialProposal: String) returns String;
 }

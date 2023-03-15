@@ -11,6 +11,7 @@ using {com.bayer.SXTENDER.AdminData} from './AdminData';
 //using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from './MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalDataViews} from './TransactionalDataViews';
+using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
 using {com.bayer.SXTENDER.BankGuaranteeData} from './BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from './PriceAgreementData';
 
@@ -48,6 +49,15 @@ entity PT_TMOFRS { //Offers
         ProfitabilityYrlyMntCost: Double;
         ProfitabilityDiscRate : Double;
         ProfitabilityGrowthRate: Double;
+        IbizWorkflowID         : Integer;
+        isDirectIbizOpportunity: Boolean;
+        PreviousIbizWorkflowID : Integer;
+        TenderDistributorID    : Integer;
+        BusinessUnit           : String;
+        Responded              : Integer;
+        DistributorDeadline    : Date;
+        DistributorComments    : String;
+        ChannelSwitched        : Boolean default false;
         //Associations
         Tender                : Association to PT_TMTEND
                                     on Tender.TenderID = TenderID;
@@ -78,6 +88,8 @@ entity PT_TMOFRS { //Offers
                                     on Country.CountryCode = CountryCode;
         ProductTypeProfitability: Association to ProductTypeProfitability
                                     on ProductTypeProfitability.OfferId = OfferID;
+        Lots                  : Association to many Lots
+                                    on Lots.OfferID = OfferID;
 }
 
 entity OfferView as
@@ -157,14 +169,16 @@ entity PT_TMAPPRST {
     key Statustime          : DateTime not null;
         Submittedby         : String(100);
         ApproverDate        : Date;
-    key ApproverType        : String(30) not null;
+    key ApproverType        : String(200) not null;
         FLOW_ID             : String(255);
         REQUIRED_ACTION     : String(12);
+    key LotID               : Integer default 1;
         //Associations
         OfferProduct        : Association to PT_TMOFPR
                                   on  OfferProduct.OfferID     = OfferId
                                   and OfferProduct.ProductCode = productcode
                                   and OfferProduct.Active = Active
+                                  and OfferProduct.LotID = LotID
 }
 
 entity PT_TMAWRDCR {
@@ -223,11 +237,13 @@ entity PT_TMBDPR {
         NetPrice              : Double;
         NetPrice_OfPaid       : Double;
         PRICE_UPDATE          : Integer;
+    key LotID                 : Integer default 1;
         Deductions_ABS_PCT     : String(4);
         //Associations
         Product               : Association to PT_TMOFPR
                                     on  Product.OfferID     = OfferID
-                                    and Product.ProductCode = ProductCode;
+                                    and Product.ProductCode = ProductCode
+                                    and Product.LotID       = LotID;
         Bundled_1_Cogs        : Association to MasterDataLatestValues.CountryCogs
                                     on  Bundled_1_Cogs.COUNTRY_CODE = CountryCode
                                     and Bundled_1_Cogs.PRODUCT_ID   = FOCProduct_Bundled_1;
@@ -271,6 +287,7 @@ entity PT_TMDLVTR {
         ActualDeliveredProductQty : Double;
         LocalDeliveryNoteNo :String(255);
         //EHEEX-OTT - 105262-Adding new 3 fields for delivery tracking tab
+    key LotID                  : Integer default 1;
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
@@ -313,6 +330,10 @@ entity PT_TMOFPR {
         OfferType                : String;
         AnticipatedRequestedQuantity: String(25);
         MaxPrice                 : Double;
+        Channel                  : String;
+    key LotID                    : Integer default 1;
+        WorkflowProductID        : Integer;
+        IbizWorkflowID           : Integer;
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -324,7 +345,8 @@ entity PT_TMOFPR {
         Price                    : Association to PT_TMBDPR
                                        on  Price.ProductCode = ProductCode
                                        and Price.OfferID     = OfferID
-                                       and Price.Active = Active;
+                                       and Price.Active = Active
+                                       and Price.LotID = LotID;
         RegisteredPrice          : Association to many MasterDataLatestValues.CountryRegisteredPrice
                                        on  RegisteredPrice.COUNTRY_CODE = CountryCode
                                        and RegisteredPrice.PRODUCT_ID   = ProductCode;
@@ -342,10 +364,12 @@ entity PT_TMOFPR {
                                        and PreviousApproval.PRODUCT_ID = ProductCode;
         Deliveries               : Association to many PT_TMDLVTR
                                        on  Deliveries.OfferID     = OfferID
-                                       and Deliveries.ProductCode = ProductCode;
+                                       and Deliveries.ProductCode = ProductCode
+                                       and Deliveries.LotID       = LotID;
         Letters                  : Association to many PT_TMUDLTRS
                                        on  Letters.OFFERID = OfferID
-                                       and Letters.SKUCODE = ProductCode;
+                                       and Letters.SKUCODE = ProductCode
+                                       and Letters.LOTID   = LotID;
         Scenario                 : Association to many PT_SCENARIOPLAN
                                        on  Scenario.OfferID     = OfferID
                                        and Scenario.ProductCode = ProductCode;
@@ -356,14 +380,38 @@ entity PT_TMOFPR {
         ProductPricing           : Association to ProductPricing
                                        on ProductPricing.OfferID = OfferID
                                        and ProductPricing.ProductCode = ProductCode
-                                       and ProductPricing.CountryCode = CountryCode;
+                                       and ProductPricing.CountryCode = CountryCode
+                                       and ProductPricing.LotID = LotID;
         PriceAgreement           : Association to PriceAgreementData.PriceAgreements
                                         on PriceAgreement.OfferId = OfferID
-                                        and PriceAgreement.ProductPackId = ProductCode;
-        PriceCondition: Composition of many PriceCondition 
+                                        and PriceAgreement.ProductPackId = ProductCode
+                                        and PriceAgreement.LotID = LotID;
+        PriceCondition           : Composition of many PriceCondition 
                                         on PriceCondition.OfferID = OfferID
                                         and PriceCondition.ProductCode = ProductCode
-                                        and PriceCondition.CountryCode = CountryCode;
+                                        and PriceCondition.CountryCode = CountryCode
+                                        and PriceCondition.LotID = LotID;
+        //Brazil
+        LotProduct               : Association to LotProduct
+                                        on LotProduct.OfferID = OfferID
+                                        and LotProduct.ProductCode = ProductCode
+                                        and LotProduct.LotID = LotID;
+}
+
+//brazil
+
+entity Lots: managed {
+    key LotID: Integer;
+    key OfferID: String;
+    LotProducts: Association to many LotProduct
+                    on LotProducts.LotID = LotID
+                    and LotProducts.OfferID = OfferID
+}
+
+entity LotProduct: managed { 
+    key LotID: Integer;
+    key OfferID: String;
+    key ProductCode: Integer;
 }
 
 //italy
@@ -380,6 +428,7 @@ entity ProductPricing: cuid, managed {
     StatusOfDevice: String;
     MinContractual: Double;
     MinAnnPurch: Double;
+    key LotID : Integer default 1;
     FreeGoodsOther: Composition of many FreeGoodsOther on FreeGoodsOther.ProductPricing = $self;
 }
 
@@ -426,13 +475,27 @@ entity PriceCondition: cuid, managed {
     MonthlyRentPerUnit                  : Double;
     AnnualValue                         : Double;
     ReferencePriceAgreement             : UUID; // reference to an existing price agreement related to a "Tender" **classification Tender** which is not expiring before tomorrow for the same product and customer
+    LotID                               : Integer default 1;
+    PriceList                           : Decimal; //PriceList from MasterData SAP
+    ICMSTax                             : Decimal;
+    TaxExemption                        : String;
+    PriceAfterTaxExemtion               : Decimal;
+    CAP                                 : String;
+    PriceAfterCap                       : Decimal;
+    CommercialProposal                  : Decimal;
+    TaxEqualization                     : Decimal; //will come from SAP simulation
+    Invoive                             : Decimal; //will come from SAP simulation
+    ICMS                                : Decimal; //will come from SAP simulation
+    NetPrice                            : Decimal; //will come from SAP simulation
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
+    IsPricingUnlocked                   : Boolean default false;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
-                                                                                and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000' ;
+                                                                                and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
+    CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
 }
 
 //EHQUT-INC18178128-FAST - Error decimals discounts
@@ -544,6 +607,12 @@ entity PT_TMTEND: managed {
         TENDER_TYPE_2_ID     : Integer;
         SAPID                : String;
         ExternalID           : String;
+        AlternativeID        : Integer;
+        IbizLicitaID         : Integer;
+        Liciedital           : String;
+        Purpose              : String;
+        ParticiationType     : String;
+        ParticipationIntention : String;
         TerminationDate      : Date;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
@@ -633,10 +702,12 @@ entity PT_TMTRRES {
         Appeal            : String;
         InfoNeeded        : String;
         TotalAwardedValue : Double;
+    key LotID             : Integer default 1;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
                                 on  CompetitorResult.OFFERID     = OfferID
-                                and CompetitorResult.PRODUCTCODE = ProductCode;
+                                and CompetitorResult.PRODUCTCODE = ProductCode
+                                and CompetitorResult.LOTID       = LotID;
 }
 
 entity PT_TMUDLTRS {
@@ -657,12 +728,14 @@ entity PT_TMUDLTRS {
         RETURNEDQTY       : Integer;
         UOM               : String(40);
     key SNO               : Integer not null;
+    key LOTID             : Integer default 1;
 }
 //EHQUT modified the entity for extending the key field.
 //EHQUT-218727-Requested Volume Field for competitor result
 entity TransCompetitorResult {
     key OFFERID        : String(30) not null;
     key PRODUCTCODE    : Integer not null;
+    key LOTID          : Integer default 1;
         OUTCOME        : String(255);
     key AWARDEDCOMPANY : String(255) not null;
     key AWARDEDPRODUCT : String(255) not null;
@@ -698,6 +771,19 @@ entity CountrySpecificTenderInfo: managed {
         PublicationDate      : Date;
         ClosingDate          : Date;
         MercadoPublicoIssuer : Integer;
+}
+
+entity DocumentsDownload: cuid, managed {
+    DocID 				: Integer; // id_doc
+    DocCreatedAt        : String;  // created_at
+    NameTag             : String;  // nm_tag
+    CountryCode         : String(2);
+    TenderID            : String(50) not null;
+    OfferID             : String(30) not null;
+    IbizAPIName         : String; // to store from which API the DOC are receiving, like from CONTRATOS,RESULTADOS or from QPS
+    URL                 : String; // file_url
+    Name                : String; // nm_doc
+    Downloaded          : Boolean default false;
 }
 
 entity SpainRappelData: cuid, managed {

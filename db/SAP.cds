@@ -6,29 +6,31 @@ using {
 } from './SAPTypes';
 
 
-entity BrazilMaterials: managed {
-	key COD				: String(18);			// SAP product code
+entity BrazilMaterials: cuid, managed {
+	COD					: String(18);			// SAP product code - key
 	NOME				: String(40);			// Product description
 	CENTRO				: String(4);			// Material plant code
 	APRES				: String;				// Sales text
 	ORG_VENDAS			: String(4);			// Sales Org
 	CANAL_DISTR			: String(2);			// Distribution channel
-	SECTOR_ATIV			: String(2);			// Division
+	SETOR_ATIV			: String(2);			// Division
 	NREG				: String(13);			// Register Number
 	CBAR				: String(18);			// Barcode (EAN)
-	GRUPO				: String(3);			// Material group 3 code
+	GRUPO_MAT3		    : String(3);			// Material group 3 code
 	BLOQ_MATERIAL		: String(2);			// Material Block
 	PROCEDENCIA			: String(3);			// Origin country
 	ORIGEM				: String(1);			// Material origin
 	STATUS				: String(1); 			// Material status - If the material is checked for deletion send B, else send A
+	BRAND               : String;               // not in spec? String ok?
 }
 
-entity BrazilCustomers: managed {
-	key CODIGO			: String(10);			// Customer code in SAP
-	REPRES				: String(3);			// Flag if the customer is a sales representative - 'M34' - Distributor
-	CANAL_DISTR			: String(2);			// Distribution channel
-	SECTOR_ATIV			: String(2);			// Division
-	RAZAO				: String(35);			// Customer real name
+entity BrazilCustomers: cuid, managed {
+	CODIGO			    : String(10);			// Customer code in SAP - key
+	REPRES				: String(3);			// Flag if the customer is a Distributor or Institute ( X = Distributor)
+	ORG_VENDAS			: String(4);			// Sales organization
+    CANAL_DISTR			: String(2);			// Distribution channel
+	SETOR_ATIV	        : String(2);		    // Division - key
+	RAZAO				: String;			    // Customer real name  (spec mis match, it was 35 long)
 	FANTASIA			: String(10);			// Customer nickname
 	ENDERECO			: String(35);			// Address
 	BAIRRO				: String(35);			// Neighborhood 
@@ -38,17 +40,18 @@ entity BrazilCustomers: managed {
 	FAX					: String(31);			// Fax
 	CNPJ				: String(16);			// Customer fiscal ID 1
 	IE					: String(18);			// Customer fiscal ID 1
-	EMAIL				: String(3);			// E-mail
+	EMAIL				: String;			    // E-mail (Spec different? this was specified as 3 long??)
 	REGIAO				: String(3);			// Customer federation state
-	UF					: String(1);			// Customer federation state
+	UF					: String(3);			// Customer federation state
 	BLOQ				: String(1);			// Flag if customer is blocked
 	GRP_CLIENTE			: String(3);			// Customer group 4
 	LISTA_PRC			: String(2);			// Customer price list
+	COND_PAGTO          : String(4);			// Not in spec? String(4) ok?
 	STATUS				: String(1); 			// Customer status - A = Insert / Change, D = Deletion
 }
 
-entity BrazilPrices : managed {
-	key CODIGO			: String(18);			// Material code
+entity BrazilPrices : cuid, managed {
+	CODIGO			    : String(18);			// Material code - key
 	NOME				: String(40);			// Material description
 	ORG_VENDAS			: String(4);			// Sales organization
 	SETOR_ATV			: String(2);			// Division
@@ -63,6 +66,7 @@ entity BrazilPrices : managed {
 	GRP_CLIENTE			: String(3);			// Customer group 4
 	REG_ORIGEM			: String(3);			// Plant federation state
 	REG_DESTINO			: String(3);			// Customer federation state
+    TYPE                : String(4);            // Price List Type
 }
 
 entity BrazilEmpenho : cuid, managed {
@@ -77,6 +81,15 @@ entity BrazilEmpenho : cuid, managed {
 	EMPENHO				: String(15);			// PO number in sales order
 	PEDIDO				: String(10);			// Sales order number
 	TOTAL_UNITARIO		: Double;				// Total item value in "Nota Fiscal"
+}
+
+entity BrazilTaxes: cuid, managed {
+	SHIPFROM			: String;
+	SHIPTO				: String;
+	TAX_GROUP			: String;
+	MATERIAL			: String;
+	RATE				: String;
+	BASE				: String;
 }
 
 entity BrazilDeliveriesHeader: cuid, managed {
@@ -101,6 +114,7 @@ entity BrazilDeliveriesHeader: cuid, managed {
 	KWERT_BILL			: Double;				// Net value billing document
 	ITEMS				: Association to many BrazilDeliveriesItems on ITEMS.HEADER = $self; 
 }
+
 entity BrazilDeliveriesItems: cuid, managed {
 	VBELN_SALES_DOC		: String(10); 			// Sales Document number reference to header
 	POSNR				: Integer;				// Sales Document Item
@@ -130,6 +144,183 @@ entity BrazilExemptions: cuid, managed {
 	RATE				: String(6);			// Aliquot used for exemption process
 	BASE				: String(6);			// Base uses for exemption process
 }
+
+entity IbizQps: cuid, managed {
+	ID_QP 								: Integer; 		//ID QP (workflow)
+	ID_PRE_QP 							: Integer; 		//ID Pre QP (pre-workflow)
+	ID_LIC_ATRIBUIDA 					: Integer; 		//ID BID by distributor or direct participation
+	ID_LIC 								: Integer; 		//ID BID
+	NU_SENT_EXT_LINK 					: Integer; 		//Determine if opportunity has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	NU_DIRETO_INDIRETO 					: Integer; 		//Determine if opportunity is direct or indirect (0 = direct; 1 = indirect)
+	ID_ALTERNATIVO 						: String; 		//ID Alternative (used for linking legacy bids)
+	ID_LICITACAO_IBIZ_LICITA  			: Integer; 		//ID IBIZ Licita (service of IBIZ that capture bids)
+	NM_BU_ABREV 						: String; 		//Business Unit
+	DT_PUBLICACAO						: String;		//Publication Date
+	DT_CAPTURA 							: String; 		//BID's date of capture
+	DT_ABERTURA 						: String; 		//Opening date
+	DT_FIM_ACOLHIMENTO 					: String; 		//Closing date
+	NM_ALTERA_COTACAO					: String; 		//Comment
+	NM_MODALIDADE 						: String; 		//BID's modality
+	NU_LICITACAO_EDITAL 				: String; 		//BID's document number
+	NM_PROCESSO 						: String; 		//Process number
+	COD_LICITADOR 						: String; 		//Main Institute's CNPJ
+	NM_LICITADOR 						: String; 		//Main Institute's name
+	NM_FANTASIA 						: String; 		//Main Institute's secondary name
+	NM_MUNICIPIO 						: String; 		//Main Institute's city
+	NM_UF_ABREV 						: String; 		//Main Institute's state
+	NM_PAIS 							: String; 		//Main Institute's country
+	NM_DONO_QP 							: String; 		//Distributor's name (for direct it will be Bayer's name)
+	COD_DONO_QP 						: String; 		//Distributor's CNPJ (for direct it will be Bayer's CNPJ)
+	NM_FINALIDADE_LIC 					: String; 		//Item's purpose
+	NM_LIC_TIPO_PARTICIPACAO 			: String; 		//Participation's type
+	NM_CARD_ATUAL 						: String; 		//Current workflow step
+	NU_2D_NOTIF_APPLIED_NO_DN_RESPONDED : Integer; 		//Determine if the opportunity wasn't interesting for any DN and was switched automaticly to direct 2 days before the opening date (0 = no; 1 = yes)
+	DT_FINALIZADO 						: String; 		//Determine if a workflow was ended by setting a date its end (if it is null, than the workflow is still on going)
+	NM_MOTIVO_FINALIZADO 				: String; 		//Determine the motive for ending a workflow
+	CCS_QPS								: Composition of many IbizCcsQpsItems on CCS_QPS.parent = $self;	//List of batch and items by products
+	DOCS								: Composition of many IbizDocs on DOCS.Qps = $self;	//List of opportunities documents
+}
+
+entity IbizCcsQpsItems: cuid {
+	ID_CC_QP  						: Integer; 		//ID QP item
+	ID_QP 							: Integer; 		//ID QP (workflow)
+	NU_LOTE 						: Integer; 		//Batch number
+	NU_ITEM 						: Integer; 		//Item number
+	ID_CONTEUDO_CATALOGO 			: Integer; 		//ID product
+	COD_REFERENCIA 					: String; 		//SAP code
+	NU_QTDE_UNITARIA 				: Integer;  	//Unit quantity
+	NU_QTDE_EMBALAGEM 				: Integer;  	//Package quantity
+	VLR_BASE_CALCULO_UNITARIO 		: Double;  		//Unit price for distributor -> institute sale (with taxes and without discounts)
+	VLR_BASE_CALCULO 				: Double; 		//Package price for distributor -> institute sale (with taxes and without discounts)
+	VLR_UNITARIO 					: Double;  		//Unit price for bayer -> distributor sale (with taxes and with discounts)
+	VLR_EMBALAGEM 					: Double; 		//Package price for bayer -> distributor sale (with taxes and with discounts)
+	NU_TIPO 						: Integer; 		//Item type (0=direct sales; 1=sample FOC; 2=lending; 3=consigned; 4=location; 5=service; 6=testing; 7=bonus FOC)
+	NU_UF_ICMS 						: String; 		//State
+	NU_PORCENTAGEM_ICMS 			: Double; 		//ICMS Tax
+	NU_CAP 							: Integer; 		//Determines if CAP is applied (0=no; 1=yes)
+	NU_PORCENTAGEM_CAP 				: Double; 		//CAP discount
+	NU_PORCENTAGEM_DESCONTO 		: Double; 		//Total discount
+	NU_PORCENTAGEM_DESCONTO_INICIAL : Double; 		//Initial discount
+	NU_PORCENTAGEM_DESCONTO_ADD 	: Double; 		//Additional discount
+	parent							: Association to IbizQps;
+}
+
+entity IbizDocs: cuid {
+	ID_DOC 				: Integer; 				//ID Document
+	CREATED_AT 			: String;  				//Doc's criation date
+	NM_TAG 				: String; 				//Doc's label
+	NM_DOC 				: String; 				//File name
+	FILE_URL 			: String;  				//Signed file url to be requested as GET (expires in 5 minutes)
+	Contratos			: Association to IbizContratos;	
+	Qps					: Association to IbizQps;	
+	Empenhos			: Association to IbizEmpenhos;	
+	Resultados			: Association to IbizResultados;	
+}
+
+entity IbizResultados: cuid, managed {
+	ID_CC_QP 					: Integer; 		// ID QP Item
+	ID_QP 						: Integer; 		// ID QP (workflow)
+	ID_RESULTADO				: Integer;
+	ID_LIC_ATRIBUIDA			: Integer;
+	ID_LIC 						: Integer; 		// ID Lic (BID)
+	NU_SENT_EXT_LINK 			: Integer; 		// Determine if result has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	NU_GANHEI 					: Integer; 		// Determine if item was won by distributor (-3 = Did not participate; -2 = No result registered; -1 = Result not published by institute; 0 = Lost; 1 = Won; 2 = There are no winners; 3 = Homologated but without a winner)
+	CREATED_AT 					: String; 		// Result's date of creation
+	NM_SITUACAO 				: String; 		// Result's situation
+	NM_MOTIVO_RESULTADO 		: String; 		// Result's reason
+	NM_DESC_MOTIVO_RESULTADO 	: String; 		// Result's reason description
+	DT_HOMOLOGACAO 				: String; 		// Result's date of homologation
+	POSICOES_RESULTADOS			: Composition of many IbizResultadosItems on POSICOES_RESULTADOS.parent = $self; // List of result items
+	DOCS						: Composition of many IbizDocs on DOCS.Resultados = $self;	//List of opportunities documents
+}
+
+entity IbizResultadosItems: cuid {
+	NU_POSICAO					: Integer;		// Position
+	NM_PARTICIPANTE				: String;		// Position's participant
+	COD_PARTICIPANTE			: String;		// Position's participant CNPJ
+	NM_PRODUTO					: String;		// Position's product
+	NM_FABRICANTE				: String;		// Position's product manufacturer
+	NU_QTDE						: Integer;		// Position's unit quantity
+	VLR_UNITARIO				: Double;		// Position's unit price
+	VLR_TOTAL					: Double;		// Position's total price
+	parent						: Association to IbizResultados;
+}
+
+entity IbizContratos: cuid, managed {
+	ID_QP						: Integer;		// 
+	ID_QP_CONTRATO				: String;		// 
+	ID_CONTRATO					: Integer;		// ID Contract
+	ID_LIC_ATRIBUIDA			: Integer;		// ID BID by distributor or direct participation
+	ID_LIC						: Integer;		// ID BID
+	NU_SENT_EXT_LINK			: Integer;		// Determine if contract has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	NM_COMPRADOR				: String;		// Buyer's name
+	COD_COMPRADOR				: String;		// Buyer's CNPJ
+	NM_VENDEDOR					: String;		// Seller's name
+	COD_VENDEDOR				: String;		// Seller's CNPJ
+	NM_PROCESSO					: String;		// Process number
+	NU_CONTRATO					: String;		// Contract number
+	DT_ASSINATURA				: String;		// Contract's date of signature
+	DT_INI_VIGENCIA				: String;		// Contract's date of start
+	DT_FIM_VIGENCIA				: String;		// Contract's date of end
+	NM_TIPO_CONTRATO			: String;		// Contract's type (ATA/Contrato; Adesao; ATA/Contrato Filho; Aditivo)
+	NM_OBS						: String;		// Contract's observation
+	CCS_CONTRATOS				: Composition of many IbizContratosItems on CCS_CONTRATOS.parent = $self;		// List of contract items
+	DOCS						: Composition of many IbizDocs on DOCS.Contratos = $self;		// List of contracts documents
+}
+
+entity IbizContratosItems: cuid {
+	ID_CC_CONTRATO				: Integer; 		// ID Contract Item
+	ID_CC_QP					: Integer; 		// ID QP Item
+	ID_CONTRATO					: Integer; 		// ID Contract
+	NU_SENT_EXT_LINK			: Integer; 		// Determine if contract item has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	ID_CONTEUDO_CATALOGO		: Integer; 		// ID product
+	COD_REFERENCIA				: String; 		// SAP code
+	NU_TIPO						: Integer; 		// Item type (0=direct sales; 1=sample FOC; 2=lending; 3=consigned; 4=location; 5=service; 6=testing; 7=bonus FOC)
+	NU_LOTE						: Integer; 		// Batch number
+	NU_ITEM						: Integer; 		// Item number
+	NU_QTDE_UNITARIA			: Integer; 		// Unit quantity
+	NU_QTDE_EMBALAGEM			: Integer; 		// Package quantity
+	VLR_UNITARIO				: Double; 		// Unit price for distributor -> institute sale (with taxes and without discounts)
+	VLR_EMBALAGEM				: Double; 		// Package price for distributor -> institute sale (with taxes and without discounts)
+	parent						: Association to IbizContratos;
+}
+
+
+entity IbizEmpenhos: cuid, managed {
+	ID_QP_EMPENHO	 : String;				//ID Opportunity and Commitment	
+	ID_EMPENHO 		 : Integer;             //ID Commitment
+	ID_CONTRATO 	 : Integer;           	//ID Contract
+	ID_QP			 : Integer;				//ID Opportunity
+	ID_LIC_ATRIBUIDA : Integer; 			//ID BID by distributor or direct participation
+	ID_LIC 			 : Integer; 			//ID BID
+	NU_SENT_EXT_LINK : Integer; 			//Determine if opportunity has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	NM_COMPRADOR 	 : String; 				//Buyer's name
+	COD_COMPRADOR 	 : String; 				//Buyer's CNPJ
+	NM_VENDEDOR 	 : String; 				//Seller's name
+	COD_VENDEDOR 	 : String; 				//Seller's CNPJ
+	NM_PROCESSO 	 : String; 				//Process number
+	NU_EMPENHO 	 	 : String; 				//Commitment number
+	DT_EMPENHO 		 : String; 				//Commitment date
+	DT_ENTREGA 		 : String; 				//Commitment delivery date
+	CREATED_AT 		 : String; 				//Commitment creation date
+	CCS_EMPENHOS	 : Composition of many IbizCcsEmpenhosItems on CCS_EMPENHOS.parent = $self;  //List of commiments items
+	DOCS			 : Composition of many IbizDocs on DOCS.Empenhos = $self; //List of commiments docuemnts
+}
+
+entity IbizCcsEmpenhosItems: cuid {
+	ID_CC_QP			: Integer;				//ID QP Item
+	ID_CC_EMPENHO 		: Integer; 				//ID Commitment Item
+	ID_CC_CONTRATO 		: Integer; 				//ID Contract Item
+	ID_EMPENHO 			: Integer; 				//ID Commitment
+	NU_SENT_EXT_LINK  	: Integer; 				//Determine if contract has already been sent (-1 = changed; 0 = never approved; 1 = yes)
+	COD_REFERENCIA 		: String; 				//SAP code
+	NU_QTDE_UNITARIA 	: Integer; 				//Unit quantity
+	NU_QTDE_EMBALAGEM 	: Integer; 				//Package quantity
+	VLR_UNITARIO 		: Double; 				//Unit price for distributor -> institute sale (with taxes and without discounts)
+	VLR_EMBALAGEM 		: Double; 				//Package price for distributor -> institute sale (with taxes and without discounts)
+	parent 				: Association to IbizEmpenhos;
+}
+
 
 entity ItalyMaterials: cuid, managed {
 	MATNR  				: String(18);			// Material Number

@@ -65,7 +65,9 @@ module.exports = async (srv) => {
         let end;
         let totalTime = 0;
         let type = "";
-        if (req.query.SELECT.columns[0]?.func === "count") {
+        console.log("Start price agreements");
+        if (req?.query?.SELECT?.columns?.length > 0 && req?.query?.SELECT?.columns[0]?.func === "count") {
+            console.log("Running price agreements for count");
             type = "COUNT";
         }
         const startTrace = (entity) => {
@@ -212,7 +214,7 @@ module.exports = async (srv) => {
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
         let paQuery = SELECT.from(req.query.SELECT.from);
-        if (req.query.SELECT.columns[0]?.func !== "count") {
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
             paQuery.columns(req.query.SELECT.columns);
         }
         if (!hasFilter) {
@@ -233,7 +235,7 @@ module.exports = async (srv) => {
         stopTrace("PriceAgreements");
 
         //return directly without filters
-        if (req.query.SELECT.columns[0].func === 'count' && !hasFilter) {
+        if (req.query.SELECT.columns?.[0].func === 'count' && !hasFilter) {
             console.log(`COUNT: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: data.length }];
         }
@@ -298,7 +300,7 @@ module.exports = async (srv) => {
 
         if (ids && ids.length > 0) {
             startTrace("CustomerPrices");
-            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
+            if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
                 customerPricesInPA = false;
                 customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
             }
@@ -348,7 +350,7 @@ module.exports = async (srv) => {
             stopTrace("MostRecentMasterPricesView");
 
             startTrace("MostRecentConsumerPricesView");
-            if (req.query.SELECT.columns[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
+            if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
                 consumerPricesInPA = false;
                 consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
                     .where({
@@ -599,10 +601,10 @@ module.exports = async (srv) => {
         }
 
         stopTrace("apply filters");
-        startTrace("Commit");
-        await tx.commit();
-        stopTrace("Commit");
-        if (req.query.SELECT.columns[0].func === 'count') {
+        //startTrace("Commit");
+        //await tx.commit();
+        //stopTrace("Commit");
+        if (req.query.SELECT.columns?.[0].func === 'count') {
             console.log(`COUNT WITH FILTER: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: result.length }];
         }
@@ -627,7 +629,9 @@ module.exports = async (srv) => {
         console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
         //otherwise keep as is
         req.query.count = true;
-        req.query.cqn.count = true;
+        if(req.query.cqn){
+            req.query.cqn.count = true;
+        }
         result.$count = result.length;
         return req.reply(result);
     };
@@ -642,9 +646,10 @@ module.exports = async (srv) => {
             if (!deliveries) {
                 try {
                     deliveries = await tx.run(SELECT.from(Deliveries).where({ PriceAgreementId: pag.ID }));
-                    await tx.commit();
+                    // await tx.commit();
                 } catch (e) {
-                    await tx.rollback(e)
+                    // await tx.rollback(e)
+                    console.log(e);
                 }
             }
             pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.ANZPK, 0);

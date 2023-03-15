@@ -17,6 +17,8 @@ const createResolver = require("./libs/easy-template-x-angular-expression").crea
 const { Service } = require('@sap/cds');
 const NumberHelper = require("./utils/NumberHelper");
 const cfenv = require("cfenv");
+const axios = require('axios');
+const qs = require("qs");
 
 module.exports = (srv) => {
 
@@ -25,16 +27,18 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices,PT_TMCTRY
+		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
 		PT_TMDLVTR, 
 		PT_TMUDLTRS, 
 		PT_TMAPPRST, 
+		PT_TMOFPR,
+		PT_TMOFRS,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -45,7 +49,7 @@ module.exports = (srv) => {
 		CountrySpecificTenderInfo
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate
+		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate,SchedulerApiConfig,SchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -881,6 +885,153 @@ module.exports = (srv) => {
 		return price;
 	}
 
+	/**
+	 * Product validation for Brazil
+	 * Legend : ValidationType: = 1: Optional, 2: Mandatory Notification, 3: Mandatory Approval
+	 * ApproverType Supply is set to ValidationType = 2 in the DB
+	 * @param {*} tx 
+	 * @param {*} offer 
+	 * @param {*} product 
+	 * @param {*} productInfo 
+	 * @param {*} aApproverTypes 
+	 * @param {*} institute 
+	 * @returns 
+	 */
+	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
+		const { BrazilPricingPolicy, BrazilDistributorDivision, BrazilInstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
+		const { PriceCondition, PT_TMOFRS } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		const { OfferProductConsolidation, OfferStatus } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
+
+		const offers = await tx.run(SELECT.from(PT_TMOFRS).where({TenderID: offer.TENDERID, Active: 1}));
+		const offerIds = offers.map(dop => dop.OfferID);
+		const offerStatus = await tx.run(SELECT.from(OfferStatus).where({'OFFER_ID': { in: offerIds }, STATUS: ['Offer Approved', 'Results Recorded', 'Quotation Submitted'] }));
+		const offerstatusIds = offerStatus.map(dop => dop.OFFER_ID);
+		const offerProductConsolidation  = offerStatus.length > 0 && await tx.run(SELECT.from(OfferProductConsolidation).where({'OFFERID': { in: offerstatusIds }})) || null;
+		const approvedOfferDiscount = offerProductConsolidation && offerProductConsolidation.find(opc => opc.ProductCode == product.ProductCode);
+		const totaldiscountApprovedOffer = approvedOfferDiscount && Math.round((approvedOfferDiscount.ADDITIONAL_DISCOUNT + approvedOfferDiscount.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000;
+		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
+        const distributorDivision = await tx.run(SELECT.one.from(BrazilDistributorDivision).where({DistributorID: offer.DISTRIBUTOR_ID, DivisionName: product.DIVISION}));
+        const institudeDivision = await tx.run(SELECT.one.from(BrazilInstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
+
+		const bDirectTender = offer.DISTRIBUTORNAME.toLowerCase() === 'bayer brazil' ? true : false;
+		const totalDiscount = Math.round((product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000; // we want 4 decimal places after the comma, that's why / 10_000
+		const whereBrazilPricingPolicyCondition = getBrazilPricingPolicyWhereCondition(bDirectTender, product, offer, priceCondition, institudeDivision, distributorDivision);
+
+		const brazilPricingPolicy = await tx.run(SELECT.one.from(BrazilPricingPolicy).where(whereBrazilPricingPolicyCondition));
+		const pricingPolicyDiscount = brazilPricingPolicy?.Discount || 1; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy and discount = 100%
+		const bWithinCommercialPolicy = !brazilPricingPolicy || totalDiscount <= brazilPricingPolicy?.Discount ? true : totalDiscount <= totaldiscountApprovedOffer ? true : false; // if no brazilPricingPolicy is found, then the policy is within the CommercialPolicy
+		const maxAllowedDiscount = Math.round((pricingPolicyDiscount + 0.05 + Number.EPSILON) * 100) / 100; // max allowed discount is 5$ more than the policy discount
+
+		// Outside of commercial policy
+		if(!bWithinCommercialPolicy){ 
+			// Pharma
+			if(product.DIVISION.toLowerCase() === 'pharma'){
+				aApproverTypes.map(oApproverType => {
+					switch (oApproverType.ApproverType) {
+						case "TA Head":
+						case "Pricing Manager":
+						case "Divisional Finance Manager or Director":
+						case "Bill to Cash coordinator":
+						case "Order to Cash":
+							oApproverType.ValidationType = 3;
+							break;
+						case "Legal department":
+						case "CDH Pharma":
+							if(totalDiscount > maxAllowedDiscount){
+								oApproverType.ValidationType = 3;
+								oApproverType.Hierarchy = 2;
+							}
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
+			// Consumer Health
+			if(product.DIVISION.toLowerCase() === 'consumer health'){
+				aApproverTypes.map(oApproverType => {
+					switch (oApproverType.ApproverType) {
+						case "Commercial Operations Manager Consumer Health":
+						case "Sales Department":
+						case "Director or Manager of Finance BP":
+						case "Legal / Antitrust Department":
+						case "Bill to Cash coordinator":
+						case "Country Division Head Consumer Health":
+							oApproverType.ValidationType = 3;
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
+			// Radiology
+			if(product.DIVISION.toLowerCase() === 'radiology'){
+				aApproverTypes.map(oApproverType => {
+					switch (oApproverType.ApproverType) {
+						case "National Sales Manager":
+						case "Customer Service Manager":
+						case "Director or Coordinator of Finance BP":
+						case "National Sales Manager":
+						case "CDH Radiology":
+						case "Legal / Competition Department":
+							oApproverType.ValidationType = 3;
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
+
+		}
+
+		// General approvers
+		// only for indirect tenders and if total value (all products) is above 500k BRL
+		if(!bDirectTender && offerProductsTotalValue > 500_000){
+			aApproverTypes.map(oApproverType => {
+				switch (oApproverType.ApproverType) {
+					case "Credit Team":
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		}
+		
+		let results = {
+			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
+	function getBrazilPricingPolicyWhereCondition(bDirectTender, product, offer, priceCondition, institudeDivision, distributorDivision){
+		if(product.DIVISION.toLowerCase() === 'pharma' || product.DIVISION.toLowerCase() === 'consumer health'){
+			if(product.BRANDNAME.toLowerCase() === 'xarelto'){
+				return {
+					BrandID: product.BRANDID,
+					ProductPackID: product.ProductCode,
+					Direct: bDirectTender,
+					Division: product.DIVISION,
+					ICMS: priceCondition.ICMSTax,
+					CAP: priceCondition.CAP === 'Yes' ? true : false
+				};
+			}else {
+				return {
+					BrandID: product.BRANDID,
+					Direct: bDirectTender,
+					Division: product.DIVISION 
+				};
+			}
+		}else if(product.DIVISION.toLowerCase() === 'radiology' ){
+			return {
+				ProductPackID: product.ProductCode,
+				CustomerGroup: bDirectTender ? institudeDivision && institudeDivision.CustomerGroup : distributorDivision && distributorDivision.CustomerGroup
+			};
+		}
+	}
+
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
 		//Legend
 		//1: Optional
@@ -1230,7 +1381,7 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
@@ -1253,6 +1404,9 @@ module.exports = (srv) => {
 		}
         else if (offer.APPROVAL_TYPE === 10) { //Applicable for Spain
 			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes, institute)
+        }
+		else if (offer.APPROVAL_TYPE === 11) { //Applicable for Brazil
+			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -1280,6 +1434,8 @@ module.exports = (srv) => {
 			return results;
 		}
 
+		const offerProductsTotalValue = aOfferProduct.reduce((acc, currentProduct) => acc + (currentProduct.REQUESTED_VOLUME * currentProduct.OFFER_PRICE), 0);
+
 		const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
@@ -1294,8 +1450,7 @@ module.exports = (srv) => {
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute);
-
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue);
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
 				OfferID: offer.OFFERID,
@@ -1585,11 +1740,15 @@ module.exports = (srv) => {
 				FINAL_DISCOUNT: finalDiscount,
 				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
+                LOTID: offerProduct.LOTID,
 				// PERCENTAGE: RoyalDecreePercentageValue.Percentage,
 				ProductPricing: productPricingTable,
 				ProductPack: productPack,
 				Materials: materials,
-                //PriceCondition: aPriceConditions
+                //PriceCondition: aPriceConditions,
+				LINE: offerProduct.LINE,
+				REFERENCE: offerProduct.REFERENCE,
+				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1617,7 +1776,7 @@ module.exports = (srv) => {
 		const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
 		let tender = await tx.run(SELECT.from(PT_TMTEND).where(whereTender));
 		tender = tender[0];
-
+		const tenderType = await tx.run(SELECT.from(MASTER_TENDER_TYPE).where({ID: tender.TENDER_TYPE_ID}));
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		let aApproverTypes = [];
         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
@@ -1640,7 +1799,7 @@ module.exports = (srv) => {
 			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;
 
 			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
-			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation,regionname);
+			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation, tender, regionname);
 
 		}
 
@@ -1976,6 +2135,7 @@ module.exports = (srv) => {
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
+			TENDER_TYPE: tenderType[0].NAME,
 			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
             CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
@@ -1986,7 +2146,7 @@ module.exports = (srv) => {
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
 	//EHQUT-197468-MEA – Nucleus heads notifications flow
-	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation,regionname) {
+	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation, tender, regionname) {
 		let tenderid = offerProductValidation[0].TENDER_ID;
 		let Countrycode=offerProductValidation[0].COUNTRY_CODE;
 
@@ -2375,7 +2535,7 @@ module.exports = (srv) => {
 				TENDERID: d.TENDER_ID,
 				OFFERID: d.OFFER_ID,
 				COUNTRYCODE: d.COUNTRY_CODE,
-				PRODUCTCODE: d.CODE.toString(),
+				PRODUCTCODE: d.CODE && d.CODE.toString() || "",
 				SORTER: d.SORTER,
 				BRANDNAME: d.BRANDNAME,
 				PRODUCT_UNIT_NAME: d.PRODUCT_UNIT_NAME,
@@ -2478,7 +2638,10 @@ module.exports = (srv) => {
 					.concat(p.PRODUCTID).concat(",ApproverEmailID='")
 					.concat(d.ApproverEmailID).concat("',Active=1,Statustime=")
 					.concat(d.Statustime.replace(" ", "T")).concat(",ApproverType='")
-					.concat(d.ApproverType).concat("')");
+					.concat(d.ApproverType)
+					.concat("',LotID=")
+					.concat(p.LOTID)
+					.concat(")");
 				return result;
 			});
 			statusPath = statusPath.join(";")
@@ -3066,9 +3229,10 @@ module.exports = (srv) => {
                     usString = usString.replace(/\./g,',');  
                     usString = usString.replace('$','.');   
                     return  usString; 
-			   },
-				   dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-                   extract2Decimals: (input) => {
+			   	},
+				dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+				dateYear: (input) => input.substring(0,4),
+                extract2Decimals: (input) => {
                     if(typeof input === 'string'){
                         return input.split(".")[1].substring(0, 2);
                     } else {
@@ -3250,4 +3414,326 @@ module.exports = (srv) => {
         const data = await next(); 
         return data;
     });
+
+
+
+	srv.on('notifyIbiz', async (req) => {
+
+		const id_qp = req.data.ibizWorkflowID;
+		const nu_direto_indireto = req.data.directIndirect; //  (0 = direct; 1 = indirect)
+		const ccs_qps = req.data.lineNumbers; 
+
+		if(typeof nu_direto_indireto != "number" || typeof id_qp != "number"|| (!ccs_qps && !Array.isArray(ccs_qps))) return req.reject(400, "Invalid request: missing/invalid parameters.");
+
+		const body = {
+			"nu_direto_indireto": nu_direto_indireto,
+			"ccs_qps": ccs_qps
+		};
+
+		try {
+            const result = await notifyIbiz(id_qp, body);
+			const msg = `Ibiz channel switch notification successful. WorkflowID: ${id_qp}`;
+            console.log(msg);
+            return msg;
+        } catch (error) {
+			if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+			console.error(`ERROR: Ibiz channel switch notification failed. WorkflowID: ${id_qp}`);
+			return req.reject(500, error.message);
+        }
+
+	});
+
+
+	async function notifyIbiz(id_qp, body) {
+
+		if (!id_qp) {
+            console.error("The Ibiz workflow ID is missing.");
+            return false;
+        }
+
+        if (!body) {
+            console.error("The body of the request is missing.");
+            return false;
+        }
+
+        console.log(`Get api config ...`);
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "OfferProductChannel" }));
+        
+        console.log(`Get bearer token ...`);
+		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+        const oauthCredentials = await getBearerToken(oauthAuth);
+
+		const queryString = qs.stringify({
+			'id_qp': id_qp
+		});
+
+		const url = `${apiConfig.Host}${apiConfig.BasePath}?${queryString}`;
+
+        console.log(`Calling endpoint ${url}`);
+
+
+        return axios({
+            method: 'post',
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(body)
+        });
+
+    };
+
+
+	srv.on('sendApprovalToIbiz', async (req) => {
+
+		const id_qp = req.data.ibizWorkflowID;
+		const is_ok = req.data.offerStatus; //  (0 = not approved; 1 = approved)
+		const nm_motivo = req.data.comment; 
+
+		if(typeof is_ok != "number" || typeof id_qp != "number" || typeof nm_motivo != "string" ) return req.reject(400, "Invalid request: missing/invalid parameters.");
+
+		const body = {
+			"is_ok": is_ok,
+			"nm_motivo": nm_motivo
+		};
+
+		try {
+            const result = await sendOfferApproval(id_qp, body);
+			const msg = `Ibiz Offer approval successful. WorkflowID: ${id_qp}`;
+            console.log(msg);
+            return msg;
+        } catch (error) {
+			if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+			console.error(`ERROR: Ibiz Offer approval failed. WorkflowID: ${id_qp}`);
+			return req.reject(500, error.message);
+        }
+
+	});
+
+
+	async function sendOfferApproval(id_qp, body) {
+
+		if (!id_qp) {
+            console.error("The Ibiz workflow ID is missing.");
+            return false;
+        }
+
+        if (!body) {
+            console.error("The body of the request is missing.");
+            return false;
+        }
+
+        console.log(`Get api config ...`);
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'IBIZ', CountryCode: "BR", Resource: "OfferApproval" }));
+        
+        console.log(`Get bearer token ...`);
+		const oauthAuth = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+        const oauthCredentials = await getBearerToken(oauthAuth);
+
+		const queryString = qs.stringify({
+			'id_qp': id_qp
+		});
+
+		const url = `${apiConfig.Host}${apiConfig.BasePath}?${queryString}`;
+
+        console.log(`Calling endpoint ${url}`);
+
+
+        return axios({
+            method: 'post',
+            url: url,
+            headers: {
+                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(body)
+        });
+
+    };
+
+
+	async function getBearerToken(oauthAuth) {
+
+        if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
+            console.log(`Calling ${oauthAuth.OAuthProvider}`);
+            return axios({
+                method: 'post',
+                url: oauthAuth.OAuthProvider,
+                headers: {
+                    'Authorization': `Basic ${Buffer.from(`${oauthAuth.ClientID}:${oauthAuth.ClientSecret}`).toString('base64')}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                data: qs.stringify({
+                    'grant_type': oauthAuth.GrantType
+                })
+            });
+        }
+
+        throw Error("Missing OAUTH config parameters");
+    };
+
+
+	srv.on("simulateTaxes", async req => {
+        const tx = cds.tx(req);
+        try {
+            
+            const contract = await getContract(tx, req.data.offerID, req.data.lotID, req.data.productCode, req.data.conditionType);
+            // Send request to SAP
+            const result = await simulateTaxes(tx, contract);
+            const TT_CONTRACT_DETAILS = result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"];
+            if (!TT_CONTRACT_DETAILS) {
+                return req.reject(404, JSON.stringify(result.data));
+            }
+
+			// When taxes are 0% (default when no correct response from SAP), Net Price should be same as Commercial Proposal
+			if(Number(result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"]["item"]["NET_VALUE"]) <= 0){
+				result["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["TT_CONTRACT_DETAILS"]["item"]["NET_VALUE"] = req.data.commercialProposal;
+			}
+
+            return req.reply(result.data);
+        } catch (error) {
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+			return req.reject(500, error.message);
+        }
+    });
+
+
+
+	async function getContract(tx, offerID, lotID, productCode, conditionType){
+
+		const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: offerID }));
+		if (!offer) throw new Error(`Offer ${offerID} was not found in ${PT_TMOFRS.name}`);
+
+		const division = await tx.run(SELECT.one.from(PT_TMPRDHIER).where({ HLEVEL1_NAME: offer.Division }));
+		if (!division) throw new Error(`Division ${offer.Division} was not found in ${PT_TMPRDHIER.name}`);
+
+		const offerProduct = await tx.run(SELECT.one.from(PT_TMOFPR).where({ OfferID: offerID,  ProductCode: productCode, LotID: lotID}));
+		if (!offerProduct) throw new Error(`Product ${productCode} in Lot ${lotID} was not found in ${PT_TMOFPR.name}`);
+
+		const skuPrdPck = await tx.run(SELECT.one.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: productCode, ActiveRecord: 'Yes'}));
+		if (!skuPrdPck) throw new Error(`No SkuCode was found for product ${productCode} in ${PT_TMSKUPRDPCK.name}`);
+
+		const priceConditionBrazilView = await tx.run(SELECT.one.from(PriceConditionBrazilView).where({ 
+			OfferID: offerID, 
+			TenderID: offer.TenderID, 
+			ProductCode: productCode, 
+			LotID: lotID, 
+			ConditionType: conditionType 
+		}));
+		if (!priceConditionBrazilView) throw new Error(`No result found in ${PriceConditionBrazilView.name} for Offer: ${offerID}`);
+
+
+        const body = getContractRequestBodyTemplate();
+
+        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_DIVISION"] = division.HLEVEL1_CODE < 10 ? addLeadingZeros(division.HLEVEL1_CODE, 2) : division.HLEVEL1_CODE;
+        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PARTNER"] = priceConditionBrazilView.CustomerID;
+
+        const items = [{
+			ITEM: addLeadingZeros(++offerProduct.SORTER, 6),
+			MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18),
+			UNIT_PRICE: "0",
+			EFFORT_A: "0",
+			ITEM_QTD: "1",
+			MANUAL_D: (Number(priceConditionBrazilView?.StandardDiscount) + Number(priceConditionBrazilView?.AdditionalDiscount)).toFixed(2),
+			CAP: priceConditionBrazilView?.CAP === "Yes" ? priceConditionBrazilView?.CapValue : 0
+		}];
+
+        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;
+        return body;
+    };
+
+
+	function getContractRequestBodyTemplate() {
+		const today = new Date();
+		const todayPlusOneYear = addOneYear(today);
+        return {
+            "_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT": {
+             "IV_DIVISION": "",
+             "IV_DOC_TYPE": "ZWCT", // Fixed
+             "IV_PARTNER": "",
+             "IV_PO_DATE": formatDateYYYYMMDD(today), 
+             "IV_PO_NUMBER": "XXX", // Fixed
+             "IV_PR_DATE": formatDateYYYYMMDD(today),
+             "IV_SALES_ORG": "MWHC", // Fixed
+             "IV_SIMULATE": "X", //Fixed (X indicate that we are SIMULATING a contract and not creating one in SAP)
+             "IV_VALID_F": formatDateYYYYMMDD(today),
+             "IV_VALID_T": formatDateYYYYMMDD(todayPlusOneYear),
+             "TT_ITEMS": {
+                "item": [
+                    {
+						"ITEM": "",
+						"MATERIAL": "",
+						"UNIT_PRICE": "0", // Fixed
+						"EFFORT_A": "0", // Fixed
+						"ITEM_QTD": "1", // Fixed
+						"MANUAL_D": "",
+						"CAP": "0"
+                    }
+                ]
+            }
+            }
+        }
+    };
+
+	async function simulateTaxes (tx, body) {
+        if (!body) {
+            throw new Error("ERR_MISSING_PARAMETER:body");
+        }
+        try {
+            const apiConfig = await tx.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'Contract', CountryCode: "BR", Resource: "Contract" })); 
+            const oauthAuth = await tx.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+            const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+
+            const oauthCredentials = await getBearerToken(oauthAuth);
+
+            return axios({
+                method: 'post',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body)
+            });
+        } catch (error) {
+            throw error
+        }
+        
+
+    };
+
+	function addOneYear(date) {
+		const dateCopy = new Date(date);
+		dateCopy.setFullYear(dateCopy.getFullYear() + 1);
+		return dateCopy;
+	};
+
+	function formatDateYYYYMMDD(date) {
+		return date.toJSON().slice(0,10).replace(/-/g,'');
+	}
+
+
+	function addLeadingZeros (num, size) {
+        if (num === null) {
+            throw new Error(`${text} doesn't exist`);
+        }
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
+    };
+
 }
