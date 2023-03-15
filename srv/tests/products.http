@@ -1,0 +1,29 @@
+### Create new Product
+POST http://localhost:8083/v2/mdm//PT_TMCTPRDPCK
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+        "COUNTRYPRODUCTPACKID": null,
+        "COUNTRYCODE": "AL",
+        "ACTIVERECORD": "Yes",
+        "PRODUCTPACKID": 0,
+        "Presentation_2": "test1111",
+        "GOV_CODE": null,
+        "QTY_THRESHOLD": null
+}
+
+### PUT
+PUT http://localhost:8083/v2/mdm/PT_TMCTPRDPCK(COUNTRYCODE='AL',ACTIVERECORD='Yes',PRODUCTPACKID=0)
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+        "COUNTRYPRODUCTPACKID": null,
+        "COUNTRYCODE": "AL",
+        "ACTIVERECORD": "Yes",
+        "PRODUCTPACKID": 0,
+        "Presentation_2": "test1111",
+        "GOV_CODE": null,
+        "QTY_THRESHOLD": null
+}

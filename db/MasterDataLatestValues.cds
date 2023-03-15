@@ -37,7 +37,12 @@ INNER JOIN MostRecentCogs as l on Cogs.CountryCode=l.CountryCode and Cogs.Produc
     key Cogs.COGSType as COGS_TYPE,
     'Pack' as UOM:String(10),
     Cogs.Currency as CURRENCY,
-    Cogs.COGS as COGS
+    Cogs.COGS as COGS,
+    Cogs.COGSID,
+    Cogs.EffectiveDate,
+    Cogs.EndDate,
+    Cogs.COGSType,
+    Cogs.ActiveRecord
 }where Cogs.ActiveRecord = 'Yes';
 
 entity MostRecentExchangeRates as SELECT from MasterData.PT_TMFXRTS as XRates

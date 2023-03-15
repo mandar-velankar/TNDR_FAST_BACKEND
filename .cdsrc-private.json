@@ -1,0 +1,21 @@
+{
+  "requires": {
+    "[hybrid]": {
+      "db": {
+        "binding": {
+          "type": "cf",
+          "apiEndpoint": "https://api.cf.eu20.hana.ondemand.com",
+          "org": "Bayer-FAST-DEV",
+          "space": "FAST",
+          "instance": "FAST-db-hdi-container-as",
+          "key": "FAST-db-hdi-container-as-key",
+          "resolved": false
+        },
+        "kind": "hana",
+        "vcap": {
+          "name": "db"
+        }
+      }
+    }
+  }
+}

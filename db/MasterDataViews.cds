@@ -10,15 +10,22 @@ entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK 
 	max(sku.SKUCode) as SKU
 }where sku.ActiveRecord='Yes'  group by sku.ProductPackID, sku.CountryCode;
 
+
+entity ProductPackSKUs as select from MasterData.PT_TMSKUPRDPCK;
+
 entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product left outer join
 MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPackID and Product.COUNTRYCODE = sku.CountryCode {
 	key Product.COUNTRYCODE as COUNTRY_CODE,
+	Product.COUNTRYCODE,
+	Product.ACTIVERECORD,
 	Product.ProductPack.Product.HLEVEL1_NAME as DIVISION,
 	Product.ProductPack.Product.HLEVEL4_CODE as BRAND_ID,
 	Product.ProductPack.Product.HLEVEL4_NAME as BRAND_NAME,
-	//Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
+	Product.ProductPack.Product.HLEVEL6_CODE as PRODUCT_UNIT_ID,
+	Product.ProductPack.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, //thailand
 	//sku.SKU, //thailand
 	key Product.PRODUCTPACKID as PRODUCT_ID,
+	Product.PRODUCTPACKID,
 	Product.ProductPack.PRODUCTPACKNAME as PRODUCT_NAME,
 	Product.ProductPack.PACKFACTOR as PACK_SIZE,
 	Product.ProductPack.CONCENTRATION as DOSAGE,
@@ -30,7 +37,8 @@ MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPac
 	Product.VTATax as VAT,
 	case when Product.REGISTERED=0 then 0 else 1 end as REGISTERED:Integer,
 	Product.COMMENT as COMMENT,
-	Product.COGS.COGS
+	Product.COGS.COGS,
+	Product.ProductPackSKU: redirected to ProductPackSKUs
 }where Product.ACTIVERECORD = 'Yes'
 and Product.ProductPack.ACTIVERECORD = 'Yes'
 order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.ProductPack.PRODUCTPACKNAME;
@@ -38,9 +46,19 @@ order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.
 entity CountryBrands as select from CountryBrandProducts as Product{
 	key Product.COUNTRY_CODE,
 	key Product.BRAND_ID,
-	min(Product.BRAND_NAME) as BRAND_NAME:String(500)
+	min(Product.BRAND_NAME) as BRAND_NAME:String(500),
+	min(Product.DIVISION) as DIVISION:String(500),
 }where Product.BRAND_ID is not null
 group by Product.COUNTRY_CODE, Product.BRAND_ID;
+
+entity CountryProductUnits as select from CountryBrandProducts as Product{
+	key Product.COUNTRY_CODE,
+	key Product.PRODUCT_UNIT_ID,
+	min(Product.PRODUCT_UNIT_NAME) as PRODUCT_UNIT_NAME:String(500),
+	min(Product.BRAND_ID) as BRAND_ID:String(500), 
+	min(Product.BRAND_NAME) as BRAND_NAME:String(500)
+}where Product.PRODUCT_UNIT_ID is not null
+group by Product.COUNTRY_CODE, Product.PRODUCT_UNIT_ID;
 
 //TODO no need to do a select here... there could be just a projection... but if we do this.. we need to rename the places where SORTER instead of Sorter & COUNTRY_CODE instead of CountryCode & CURRENCY instead of Currency
 entity CountryCurrency as select from MasterData.CountryCurrency as Country{
@@ -69,7 +87,7 @@ inner join MasterData.PT_TMCTLE as cle on cb.COUNTRY_CODE = cle.CountryCode{
 	cb.BRAND_ID as BRAND_ID,
 	cle.LegalEntity.LegalEntityCode as LEGAL_ENTITY_CODE,
 	cb.BRAND_NAME as BRAND_NAME
-}where cle.Brand = 'All'
+}where cle.ForAllBrands = true
 and cle.LegalEntity.LegalEntityCode is not null;
 
 entity DirectBrand as select from MasterData.PT_TMINSBRTR as itr
@@ -89,21 +107,73 @@ inner join CountryBrands as cb on itr.CountryCode = cb.COUNTRY_CODE and itr.HLev
 }where itr.ActiveRecord = 'Yes'
 and idst.ActiveRecord = 'Yes'
 and itr.Institute.ActiveRecord = 'Yes'
-and idst.Distributor.ActiveRecord = 'Yes';
+and idst.Distributor.ActiveRecord = 'Yes'
+union 
+select from CountryBrands as cb 
+inner join MasterData.PT_TMINST as inst on cb.COUNTRY_CODE = inst.CountryCode
+inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode
+{
+    key cb.COUNTRY_CODE as COUNTRY_CODE,
+    key inst.InstituteID as INSTITUTE_ID,
+    inst.InstituteName as INSTITUTE_NAME,
+    key dst.DistributorID as DISTRIBUTOR_ID,
+    dst.DistributorName as DISTRIBUTOR_NAME,
+    key cb.BRAND_ID as BRAND_ID,
+    cb.BRAND_NAME as BRAND_NAME,
+    'Direct' as CHANNEL:String(11),
+    inst.INCOTerms as INCO_TERMS,
+    inst.PaymentTerms as PAYMENT_TERMS,
+    dst.CommissionRate as COMMISSION_RATE
+}where inst.ActiveRecord = 'Yes'
+and dst.ActiveRecord = 'Yes'
+and inst.ForAllBrands = true;
 
 entity DistributorBrand as select from MasterData.PT_TMDISBRD as dstbr
-inner join CountryBrands as cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLevel4_Code = cb.BRAND_ID{
+inner join CountryBrands as cb on dstbr.CountryCode = cb.COUNTRY_CODE and dstbr.HLevel4_Code = cb.BRAND_ID
+inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode{
 	key dstbr.CountryCode as COUNTRY_CODE,
 	key dstbr.DistributorID as DISTRIBUTOR_ID,
 	dstbr.Distributor.DistributorName as DISTRIBUTOR_NAME,
 	key cb.BRAND_ID as BRAND_ID,
 	cb.BRAND_NAME as BRAND_NAME,
 	'Distributor' as CHANNEL:String(11),
+	//TODO: check what we need to keep
 	dstbr.INCOTerms as INCO_TERMS,
 	dstbr.PaymentTerms as PAYMENT_TERMS,
 	dstbr.CommissionRate as COMMISSION_RATE,
 	dstbr.ActiveRecord as ACTIVE_RECORD
-} where dstbr.ActiveRecord = 'Yes' and dstbr.Distributor.ActiveRecord = 'Yes';
+} where dstbr.ActiveRecord = 'Yes' and dstbr.Distributor.ActiveRecord = 'Yes' and dstbr.Distributor.ForAllBrands = false
+union
+select from CountryBrands as cb 
+inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode{
+	dst.CountryCode as COUNTRY_CODE,
+	dst.DistributorID as DISTRIBUTOR_ID,
+	dst.DistributorName as DISTRIBUTOR_NAME,
+	cb.BRAND_ID as BRAND_ID,
+	cb.BRAND_NAME as BRAND_NAME,
+	'Distributor' as CHANNEL:String(11),
+	dst.INCOTerms as INCO_TERMS,
+	dst.PaymentTerms as PAYMENT_TERMS,
+	dst.CommissionRate as COMMISSION_RATE,
+	'Yes' as ACTIVE_RECORD
+}where dst.ForAllBrands = true and dst.ActiveRecord = 'Yes'
+union
+select from MasterData.BrazilDistributorDivision as bdd
+inner join MasterData.PT_TMDIST as dst on bdd.DistributorID = dst.DistributorID and bdd.CustomerID = dst.CustomerID
+inner join CountryBrands as cb on dst.CountryCode = cb.COUNTRY_CODE and bdd.DivisionName = cb.DIVISION
+
+{
+	key dst.CountryCode as COUNTRY_CODE,
+	key dst.DistributorID as DISTRIBUTOR_ID,
+	dst.DistributorName as DISTRIBUTOR_NAME,
+	key cb.BRAND_ID as BRAND_ID,
+	cb.BRAND_NAME as BRAND_NAME,
+	'Distributor' as CHANNEL:String(11),
+	dst.INCOTerms as INCO_TERMS,
+	dst.PaymentTerms as PAYMENT_TERMS,
+	dst.CommissionRate as COMMISSION_RATE,
+	dst.ActiveRecord as ACTIVE_RECORD
+} where dst.ForAllBrands = false and dst.ActiveRecord = 'Yes';
 
 //Distributor brand policy with aggregated data for front-end
 entity AggregatedDistributorBrandPolicies as SELECT from MasterData.PT_TMDISBRD as DistributorBrands
@@ -152,3 +222,9 @@ entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
 
 entity MostRecentMasterPricesView as projection on MasterData.MasterPrices 
 where ValidTo = '9999-12-31 00:00:00.000000000';
+
+entity MostRecentCapView as projection on MasterData.BrazilCap 
+where ValidTo = '9999-12-31 00:00:00.000000000';
+
+entity MostRecentBrazilMasterPricesView as projection on MasterData.BrazilMasterPrices 
+where ValidTo = '9999-12-31';

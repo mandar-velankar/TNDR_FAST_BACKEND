@@ -104,7 +104,7 @@ service CreateOpportunityService @(path: 'createopportunity') @(requires:['f_tnd
         opp.Products: redirected to SalesOpportunityProducts
     };
 
-    entity ParticipatedPublicMarketOpportunities as select from CountrySpecificInformation countryInfo
+    entity ParticipatedPublicMarketOpportunities as select from CountrySpecificInformation as countryInfo
     left outer join PT_TMTEND as tndr 
         on countryInfo.TenderID = tndr.TenderID 
     left outer join PT_TMTNOFST as status 
