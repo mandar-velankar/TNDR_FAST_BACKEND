@@ -120,8 +120,23 @@ entity SalesOrdersView as select from BrazilContractingData.SalesOrders as Sales
         SalesOrders.CommitmentDeliveryDate, 
         SalesOrders.CommitmentCreationDate,
         SalesOrders.Status.Status,
-        SalesOrders.createdAt
-};
+        SalesOrders.createdAt,
+        ifnull(sum((SalesOrders.SalesOrderProducts.SalesOrderPrice * SalesOrders.SalesOrderProducts.RequestedQty)), '0') as TotalAmount:Double
+} group by SalesOrders.ID,
+        SalesOrders.Contract.ID,
+        SalesOrders.EmpenhoNumber,      
+        SalesOrders.InstituteID,
+        SalesOrders.Contract.Institute.InstituteName,                                      
+        SalesOrders.DistributorID,
+        SalesOrders.Contract.Distributor.DistributorName,                                      
+        SalesOrders.EmpenhoID,             
+        SalesOrders.SalesOrderNumber,       
+        SalesOrders.IbizProcessNumber,          
+        SalesOrders.CommitmentDate,         
+        SalesOrders.CommitmentDeliveryDate, 
+        SalesOrders.CommitmentCreationDate,
+        SalesOrders.Status.Status,
+        SalesOrders.createdAt;
 
 entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderProducts as SalesOrderProducts {
     key SalesOrderProducts.ID,
