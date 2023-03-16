@@ -9,6 +9,11 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
     constructor(jobName,jobTime) {
         super(jobName,jobTime);
+        this.jobName = jobName.toUpperCase();
+        this.startTime = 0;
+        this.failed = 0;
+        this.success = 0;
+        this.numberOfRecords = 0;
     }
 
      /**
@@ -17,20 +22,52 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
     //override
     async onTick() {
 
-        console.log('Update expiry date started ...');
+        console.log(`JOB (${this.jobName }): Processing started ...`);
+        this.startTime = new Date().getTime();
+        this.db = await cds.connect.to('db');
 
         try {
-            this.db = await cds.connect.to('db'); 
-            let aUpdatedPriceAgreements = await this.updatePriceAgreementExpiration();
-            await this.syncPriceAgreements(aUpdatedPriceAgreements);
-        } catch (error) {
-            console.log(error);
-        }
+            // Fetch data
+            const customerPricesQC = await this.getCustomerPricesQC();
+            this.numberOfRecords = customerPricesQC.length;
 
-        // when the job has finished, call the stop()
-        // this will trigger onComplete method
-        // this.stop();
-        console.log('Updating expiry dates finished.');
+            // nothing to process
+            if(this.numberOfRecords == 0){
+                return this._finishMessage(this.numberOfRecords);
+            }
+
+            // Fetch additional data needed for mapping/aggregation
+            // const existingInstitutesInFAST = await this.getInstitutes();
+            // const existingTenderTypesFAST = await this.getTenderTypes();
+            // const existingDistributorsFAST = await this.getFASTDistributors();
+            // const existingSKUFAST = await this.getFASTSKUs();
+            // const priceConditionClassificationFAST = await this.getPriceConditionClassification();
+
+            // Process data
+            await this.processCustomerPricesQC(customerPricesQC);
+
+            // log finish
+            this._finishMessage(this.numberOfRecords);
+
+        } catch (error) {
+            console.error(`JOB (${this.jobName }): ERROR - Processing failed. \n\nCause: ${error}`);
+            throw error;
+        }
+    }
+
+    _finishMessage(processed){
+        const end = new Date().getTime();
+        const time = end - this.startTime;
+        console.log(`JOB (${this.jobName }): Processing completed. - Processed: ${processed} Success: ${this.success} Failed: ${this.failed} - Execution time: ${time} ms`);
+    }
+
+    async getCustomerPricesQC() {
+        const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        try {
+            return await SELECT.from(CustomerPricesQC).where({Status: 'ToCheck'});
+        }catch (error) {
+            throw new Error(`JOB (${this.jobName }): Fetching data from ${CustomerPricesQC.name} failed`, { cause: error });
+        }
     }
 
     //this code is copied from pag-service file - make sure that these ones are in sync -- add comment to pag-service.js so we don't forget to do this in both places
