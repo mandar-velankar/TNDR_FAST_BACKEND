@@ -1451,7 +1451,7 @@ entity TenderHistoryBrazilAdhesionContracts as select from BrazilContractingData
             key contractProduct.OfferID,
             key contractProduct.ProductPackID,
             contract.ContractType,
-            (sum(contractProduct.RequestedVolume) / (product.RequestedVolume*2)) * 100 as ADHESION:Double
+            (sum(contractProduct.RequestedVolume) / (product.RequestedVolume*2)) as ADHESION:Double
     } 
     where contract.ContractType = 'Adhesion Contract'
     group by contract.TenderID, 
