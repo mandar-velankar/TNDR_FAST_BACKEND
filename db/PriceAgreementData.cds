@@ -297,3 +297,36 @@ inner join MasterDataViews.CountryBrandProducts as ca on pa.ProductPackId= ca.PR
     ca.BRAND_ID,
     ca.BRAND_NAME
 } group by pa.ProductPackId, pa.CountryCode, Product.ProductPack.PRODUCTPACKNAME,ca.BRAND_ID,ca.BRAND_NAME;
+
+
+entity CustomerPricesQC: cuid, managed {
+    CustomerPriceId             : UUID;
+    CountryCode                 : String;
+    VKORG                       : String;   // Sales Organisation
+    KSCHL                       : String;   // Condition Type
+    KUNNR                       : String;   // Customer Number
+    MATNR                       : String;   // Material Number
+    YCIG                        : String;   // Contract Reference
+    KBETR                       : String;   // Condition Value
+    KPEIN                       : String;   // Unit for price
+    DATAB                       : String;   // Effective Date
+    DATBI                       : String;   // Expiry Date
+    SAP_VKORG                   : String;   // Sales Organisation
+    SAP_KSCHL                   : String;   // Condition Type
+    SAP_KUNNR                   : String;   // Customer Number
+    SAP_MATNR                   : String;   // Material Number
+    SAP_YCIG                    : String;   // Contract Reference
+    SAP_KBETR                   : String;   // Condition Value
+    SAP_KPEIN                   : String;   // Unit for price
+    SAP_KONWA                   : String;   // To be checked
+    SAP_DATAB                   : String;   // Effective Date
+    SAP_DATBI                   : String;   // Expiry Date
+    SAP_KNUMH                   : String;   // To be checked
+    Status                      : String enum {
+        ToCheck;
+        Failed;
+        OK;
+        NotInSAP;
+    }; 
+    CountChecks                 : Integer; // Number of 
+}
