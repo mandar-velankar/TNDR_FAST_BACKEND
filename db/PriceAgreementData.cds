@@ -311,6 +311,13 @@ entity CustomerPricesQC: cuid, managed {
     KPEIN                       : String;   // Unit for price
     DATAB                       : String;   // Effective Date
     DATBI                       : String;   // Expiry Date
+    KRECH                       : String;   // 
+    KONMS                       : String;   // 
+    MEINS                       : String;   // 
+    BOMAT                       : String;   // 
+    KSTBM                       : String;   // 
+    MIKBAS                      : String;   // 
+    MXBAS                       : String;   // 
     SAP_VKORG                   : String;   // Sales Organisation
     SAP_KSCHL                   : String;   // Condition Type
     SAP_KUNNR                   : String;   // Customer Number
@@ -321,7 +328,16 @@ entity CustomerPricesQC: cuid, managed {
     SAP_KONWA                   : String;   // To be checked
     SAP_DATAB                   : String;   // Effective Date
     SAP_DATBI                   : String;   // Expiry Date
-    SAP_KNUMH                   : String;   // To be checked
+    SAP_VTWEG                   : String;   // To be checked
+    SAP_MAKTX                   : String;
+    SAP_DISPKNRMM               : String;   // Minimum quantity
+    SAP_DISPKNRNM               : String;   // Maximum quantity
+    SAP_KNRME                   : String;
+    SAP_DISPKNRZM               : String;   // Free goods quantity
+    SAP_KNREZ                   : String;
+    SAP_KNRDD                   : String;
+    SAP_KPMEIN                  : String;
+    SAP_KNRMAT                  : String;   // Free goods product
     Status                      : String enum {
         ToCheck;
         Failed;
