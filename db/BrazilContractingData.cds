@@ -91,6 +91,7 @@ entity SalesOrderProducts: managed, cuid {
         IbizContractProductID   : Integer;
         SalesOrderPrice         : Double;
         LotID                   : Integer;
+        Comment                 : String;
         //Associations
         SalesOrder              : Association to SalesOrders;
         OfferProduct            : Association to TransactionalData.PT_TMOFPR
