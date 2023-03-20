@@ -31,18 +31,6 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
             const customerPricesQC = await this.getCustomerPricesQC();
             this.numberOfRecords = customerPricesQC.length;
 
-            // nothing to process
-            if(this.numberOfRecords == 0){
-                return this._finishMessage(this.numberOfRecords);
-            }
-
-            // Fetch additional data needed for mapping/aggregation
-            // const existingInstitutesInFAST = await this.getInstitutes();
-            // const existingTenderTypesFAST = await this.getTenderTypes();
-            // const existingDistributorsFAST = await this.getFASTDistributors();
-            // const existingSKUFAST = await this.getFASTSKUs();
-            // const priceConditionClassificationFAST = await this.getPriceConditionClassification();
-
             // Process data
             await this.processCustomerPricesQC(customerPricesQC);
 
@@ -61,246 +49,171 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
         console.log(`JOB (${this.jobName }): Processing completed. - Processed: ${processed} Success: ${this.success} Failed: ${this.failed} - Execution time: ${time} ms`);
     }
 
-    async getCustomerPricesQC() {
+    /**
+     * Gets CustomerPricesQC records with status 'ToCheck'
+     * @returns {Promise}
+     */
+    getCustomerPricesQC() {
         const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        try {
-            return await SELECT.from(CustomerPricesQC).where({Status: 'ToCheck'});
-        }catch (error) {
-            throw new Error(`JOB (${this.jobName }): Fetching data from ${CustomerPricesQC.name} failed`, { cause: error });
-        }
+        return SELECT.from(CustomerPricesQC).where({Status: 'ToCheck'});
     }
 
-    //this code is copied from pag-service file - make sure that these ones are in sync -- add comment to pag-service.js so we don't forget to do this in both places
-    async syncPriceAgreements(ids){
-        const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-
-        if(ids.length === 0){
-            throw `No price agreements found for synchronization`;
-        }
-
-        const tx = cds.tx();
-        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
-        if (customerPrices && customerPrices.length <= 0) {
-            throw `No customer prices were found for the following PriceAgreement: ${ids}`;
-        }
-        const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        const updateMainConditionPromises = mainPriceConditions.map(custPrice => {
-            return this.updateCustomerPrice(custPrice, tx);
-        });
-        // Synchronize
-        let result = await Promise.all(updateMainConditionPromises); 
-        // Set 'Synchronized' to true and add IDOC number from the response
-        result = result.filter(res => res !== undefined);
-        result.length > 0 && await this.updateCustomerPrices(result, mainPriceConditions); // !!the order of PriceCondition arrays is important
-
-        return result;
+    /**
+     * Updates CustomerPricesQC
+     * @param {*} customerPriceQC 
+     * @returns {Promise}
+     */
+    updateCustomerPriceQC(tx, customerPriceQC){
+        if(!customerPriceQC) return false;
+        const { customerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        return tx.run(UPDATE(customerPricesQC).with(customerPriceQC).where({ ID: customerPriceQC.ID }));
     };
 
-    async updateCustomerPrices(response, priceConditions){
-        const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
-        const tx = cds.tx();
-        const refIdocIDs = response && response.map(res => res.headers.sapidocdbid) || [];
-        const customerPriceIDs = priceConditions && priceConditions.map(condition => condition.ID) || [];
-        if(refIdocIDs.length === customerPriceIDs.length){
-            try {     
-                const updatePromises = refIdocIDs.map((IdocID, index) => {
-                    return tx.run(UPDATE(CustomerPrices).with({Synchronized: true, RefIdocNumber: IdocID}).where({ ID: customerPriceIDs[index] }));
-                });
-                await Promise.all(updatePromises);
-                await tx.commit();
-            } catch (error) {
-                await tx.rollback(error);
-            }
-        }
-    };
-    //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
-    async updateCustomerPrice(customerPrice, tx){
-        
-        const { PT_TMINST, PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-
-       
-        const effectiveDate = new Date(customerPrice.EffectiveDate);
-        const expiryDate = new Date(customerPrice.ExpiryDate);
-        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
-        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
-
-        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
-        const body = await this.getPriceAgreementRequestBodyTemplate(institute); 
-        if (!institute) {
-            console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
-            return;
-        }
-
-        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve(); //Customer prices should not be synchronized for ship to parties
-
-        const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
-        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
-        if (!priceAgreement) {
-            console.error(`No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
-            return;
-        }
-        const whereOfferID = ServiceHelper.buildFullWhere("OfferID", "=", priceAgreement.OfferId);
-        const whereProductpackID = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", customerPrice.ProductPackId);
-        let offer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereOfferID));     
-        if (!offer) {
-            console.error(`No offer was found for OfferID: ${priceAgreement.OfferId}`);
-            return;
-        }
-
-        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: priceAgreement.TenderId}));
-
-        let packFactor;
-        if(customerPrice.ProductPackId){
-            let productPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereProductpackID));
-            packFactor = productPack.PACKFACTOR;
-        } else {
-            packFactor = 1;
-        }
-
-        let kbetr = parseFloat(customerPrice.Price);
-        
-        // Spain only
-        if(customerPrice.CountryCode === 'ES'){
-            const wherePriceAgreement_ID = ServiceHelper.buildFullWhere("PriceAgreement_ID", "=", customerPrice.PriceAgreementId);
-            const wherePriceConditionCode = ServiceHelper.buildFullWhere("PriceConditionCode", "=", customerPrice.PriceCondition);
-            let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceAgreement_ID).where(wherePriceConditionCode));     
-            if (!priceCondition) {
-                console.error(`No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
-                return;
-            }
-            // set KBETR value
-            if(customerPrice.PriceCondition === "YLTF" || customerPrice.PriceCondition === "YLTP"){
-                kbetr = Number(priceCondition.NetPriceWithoutTaxBeforeDeductionRD * 10000).toFixed(2);
-                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KPEIN = 10000;
-                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "C";   
-            } else {
-                kbetr = priceCondition.Discount * 100;
-            }
-            // set KRECH for Descuento Comercial and Descuento Comercial 
-            if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0") {
-                body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KRECH = "A";
-
-            }
-
-            // set partner and sales organisation
-            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.VKORG = "QFHC";
-            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.EDI_DC40.SNDPRN = "FAST_ES";
-
-        }
-        
-        // KBETR per Pack or Unit
-        //if(customerPrice.CountryCode === 'IT'){
-            if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" ){// convert and send per pack
-                kbetr  = kbetr * packFactor;
-            }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
-                kbetr  = kbetr / packFactor;
-            }
-        //}
-        //EHQUT-INC17748342-Rates incorrectly synchronized.
-        //EHQUT-INC18178128-FAST - Error decimals discounts
-        //we should add "-" only in case of Price Condition "YL60" and "YDC0"
-        if (customerPrice.PriceCondition === "YL60" || customerPrice.PriceCondition === "YDC0"){
-            kbetr = kbetr.toFixed(3) + "-";
-        }
-        
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth()+1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATBI = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth()+1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KBETR = kbetr;
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KSCHL = customerPrice.PriceCondition;
-        body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KSCHL = customerPrice.PriceCondition;
-
-        tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
-
-        return await this.updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
-
+    /**
+     * Runs the given function as detached continuation in a specified event context.
+     * @see https://cap.cloud.sap/docs/node.js/cds-context-tx#cds-spawn
+     * @async
+     * @callback Even though the callback function is executed as a background job, all asynchronous operations inside the callback function must be awaited. Otherwise, transaction handling does not work properly.
+     * @param {*} fn 
+     * @returns {Promise}
+     */
+    _runDetached(fn){
+        return new Promise((resolve, reject) => {
+            cds.spawn (fn)
+            .on('succeeded', resolve)
+            .on('failed', reject)
+        })
     }
-    //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
     
-    async getPriceAgreementRequestBodyTemplate(institute){
-        return {
-            "_-BAY0_-GZ_SDCOND_A04": {
-              "IDOC": {
-                "BEGIN": 1,
-                "EDI_DC40": {
-                  "SEGMENT": 1,
-                  "TABNAM": "EDI_DC40",
-                  "MANDT": 508,
-                  "DOCNUM": 34952510,
-                  "DOCREL": 740,
-                  "STATUS": 53,
-                  "DIRECT": 2,
-                  "OUTMOD": "",
-                  "IDOCTYP": "COND_A04",
-                  "CIMTYP": "/BAY0/GZ_SDCOND_A04",
-                  "MESTYP": "COND_A",
-                  "MESCOD": "EXT",
-                  "MESFCT": "ES",
-                  "SNDPOR": "",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
-                  "SNDPRT": "LS",
-                  "SNDPRN": "FAST_IT",
-                  "RCVPOR": "",  //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
-                  "RCVPRT": "LS",
-                  "RCVPRN": "",  //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | | the value is added per environment in the CPI configuration
-                  "CREDAT": 20210916,
-                  "CRETIM": 144213,
-                  "SERIAL": 20210810101046
-                },
-                "E1KOMG": {
-                  "SEGMENT": 1,
-                  "KVEWE": "A",
-                  "KOTABNR": institute.InstituteType === 'Region(s)' ? 879 : 878,
-                  "KAPPL": "V",
-                  "KSCHL": "YLTP",
-                  "VKORG": "ITHC",
-                  "VTWEG": 0,
-                  "SPART": 0,
-                  "KUNNR": 0,
-                  "MATNR": 0,
-                  "_-BAY0_-GZ_SDREFINFO01": {
-                    "SEGMENT": 1,
-                    "EDIQUAL": "CIG",
-                    "REFVAL": "Z18178A124"
-                  },
-                  "E1KONH": {
-                    "SEGMENT": 1,
-                    "DATAB": 99991231,
-                    "DATBI": 99991231,
-                    "E1KONP": {
-                      "SEGMENT": 1,
-                      "KSCHL": "YLTP",
-                      "KBETR": 0
+    async processCustomerPricesQC(customerPricesQC){
+
+        if(!customerPricesQC || customerPricesQC.length <= 0) return;
+
+        const spawnPromises = [];
+        for(let qcPrice of customerPricesQC){
+
+            spawnPromises.push(
+                this._runDetached(async (tx) => {
+
+                    // 1. create SAP request message
+                    const requestMessage = this.createRequestMessage(qcPrice); 
+
+                    // 2. get SAP response 
+                    const response = await this.getPriceConditionFromSAP(requestMessage);
+                    const item = response["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.[0]?.["LT_OUT_FREE_PRICE_COND"]?.[0]?.["item"]?.[0];
+
+                    // 3. map and validate response 
+                    if(item){
+                        qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
+                        qcPrice.Status = this.validatePriceCondition(qcPrice);
+                    }else{
+                        if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
+                        else qcPrice.Status = "NotInSAP";
                     }
+
+                    // 4. update PriceCondition QC
+                    await this.updateCustomerPriceQC(tx, qcPrice);
+                    
+                })
+            );
+            
+        };
+
+        return Promise.all(spawnPromises);
+
+    }
+
+    
+    createRequestMessage(qcPrice){
+        const conditionType = qcPrice.KSCHL;
+        return {
+            "_-BAY0_-GZ_FAST_PRIC_COND": {
+              "IT_INPUT_COND": {
+                "item": [
+                  {
+                    "VKORG": qcPrice.VKORG,
+                    "KSCHL": qcPrice.KSCHL,
+                    "KUNNR": qcPrice.KUNNR,
+                    "MATNR": qcPrice.MATNR,
+                    "YCIG": qcPrice.YCIG
                   }
-                }
-              }
+                 
+                ]
+              },
+              "IV_PRICE_COND": (conditionType !== "YA01" &&  conditionType !== "YA03") ? "X" : "",
+              "IV_FREE_COND": (conditionType === "YA01" ||  conditionType === "YA03") ? "X" : ""
             }
-          };
-    };
+        }
+          
+    }
 
-    async updatePriceConditions(countryCode, resource, body){
+    mapResponseToFASTCustomerPricesQC(response, qcPrice){
+        return Object.assign({}, qcPrice, {
+            SAP_VKORG : response.VKORG,
+            SAP_KSCHL : response.KSCHL,
+            SAP_KUNNR : response.KUNNR,
+            SAP_MATNR : response.MATNR,
+            SAP_YCIG  : response.YCIG
+        }); 
+    }
 
-        const { SchedulerApiConfig } = this.db.entities("com.bayer.SXTENDER.AdminData");
 
+    validatePriceCondition(qcPrice){
+        switch(qcPrice.KSCHL){
+            case "YLTP":
+            case "YL60":
+            case "YDC0":
+                if (
+                    qcPrice.KBETR === qcPrice.SAP_KBETR
+                    && qcPrice.DATAB === qcPrice.SAP_DATAB
+                    && qcPrice.DATBI === qcPrice.SAP_DATBI
+                )
+                {
+                    return "OK";
+                }
+            case "YLTP":
+            case "YLTF":
+                if (
+                    qcPrice.KBETR === qcPrice.SAP_KBETR
+                    && qcPrice.KPEIN === qcPrice.SAP_KPEIN
+                    && qcPrice.DATAB === qcPrice.SAP_DATAB
+                    && qcPrice.DATBI === qcPrice.SAP_DATBI
+                )
+                {
+                    return "OK";
+                }
+            case "YA01":
+            case "YA03":
+                if (
+                    qcPrice.DATAB.getTime() === qcPrice.SAP_DATB.getTime()
+                    && qcPrice.DATBI.getTime() === qcPrice.SAP_DATBI.getTime()
+                    && qcPrice.BOMAT === qcPrice.SAP_KNRMAT
+                    && qcPrice.KSTBM === qcPrice.SAP_DISPKNRZM
+                    && qcPrice.MIKBAS === qcPrice.SAP_DISPKNRMM
+                    && qcPrice.MXBAS === qcPrice.SAP_DISPKNRNM
+                )
+                {
+                    return "OK";
+                }
+        }
+
+        return "Failed";
+
+    }
+
+    async getPriceConditionFromSAP(countryCode, body){
         if (!body) {
             throw Error("The body of the request is missing.");
         }
         
-        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement', CountryCode: countryCode, Resource: resource}));
-
+        const { SchedulerApiConfig } = this.db.entities("com.bayer.SXTENDER.AdminData");
+        const apiConfig = await SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement', CountryCode: countryCode, Resource: "PriceConditionQC"});
         const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
         const oauthCredentials = await this.getBearerToken();
 
-        console.log(`Synchronizing Price Conditions ...`);
-        console.log(`Calling endpoint ${url}`);
-
-
         return axios({
-            method: 'post',
+            method: 'get',
             url: url,
             headers: {
                 'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
@@ -337,60 +250,5 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
         throw Error("Missing OAUTH config parameters");
     };
 
-    async updatePriceAgreementExpiration(){
-        const tx = cds.tx();
-        try {
 
-            const { PriceAgreements, CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-
-            //get all price agreements which have to be extended
-            //first, calculate todays date - 1 day, as such that we can use this as a filter in our select
-
-
-            const whereExpr = `ExtendPriceAgreement = true` //and expiry date is today - 1 
-            const priceAgreements = await tx.run(SELECT.from(PriceAgreements).where(whereExpr));
-
-            let aPriceAgreementsUpdated = [];
-            const promises = [];
-            
-            priceAgreements.forEach(agreement => {
-                let todayMinus1 = new Date();
-                todayMinus1 = new Date(todayMinus1.setDate(todayMinus1.getDate()-1));
-                if(!agreement.ExpiryDate || agreement.ExpiryDate.indexOf("T") === -1){
-                    console.log(`AgreementID ${agreement.ID}:Expiry date ${agreement.ExpiryDate} is not valid, will not be processed...`);
-                    return;
-                }
-                todayMinus1 = todayMinus1.toISOString().substr(0, agreement.ExpiryDate.lastIndexOf("T"));
-                let agreementExpiryDate = agreement.ExpiryDate.substr(0, agreement.ExpiryDate.lastIndexOf("T"));
-
-                if(agreementExpiryDate === todayMinus1){
-                    let newDate = new Date(agreement.ExpiryDate);
-                    newDate.setMonth(newDate.getMonth()+agreement.ExpiryExtensionPeriod);
-                    newDate = newDate.toISOString().replace('T', ' ').replace('Z', '');
-                    aPriceAgreementsUpdated.push(agreement.ID);
-
-                    //update the actual price agreement withh the new price agreement date
-                    promises.push(Promise.all([
-                        tx.run(UPDATE(PriceAgreements).with({ExpiryDate: newDate, ExpiryExtensionAcknowledged: false}).where({ ID: agreement.ID })),
-                        tx.run(UPDATE(CustomerPrices).with({ExpiryDate: newDate}).where({ PriceAgreementId: agreement.ID }))
-                    ]));
-                }
-            });
-
-            //execute the promises and log the output
-            if(promises.length > 0){
-                console.log(`Updating ${PriceAgreements.name} ...`);
-                await Promise.all(promises);
-                await tx.commit();
-                console.log(`${promises.length} Expiry date(s) successfully updated in ${PriceAgreements.name}.`);
-            }
-            
-            return aPriceAgreementsUpdated;
-
-        } catch (error) {
-            console.log('Updating expiry dates has failed.');
-            console.log(error);
-            await tx.rollback(error);
-        }   
-    };
 };
