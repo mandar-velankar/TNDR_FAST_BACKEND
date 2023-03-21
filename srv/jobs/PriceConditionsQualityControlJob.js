@@ -43,6 +43,19 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
         }
     }
 
+    async _onProcessingSuccess (){
+        this.success++;
+    }
+
+    /**
+     * Logs and updates the status of the processed record in case of an error
+     * @param {*} error 
+     */
+    async _onProcessingFail (error){
+        this.failed++;
+        console.log(error);
+    }
+
     _finishMessage(processed){
         const end = new Date().getTime();
         const time = end - this.startTime;
@@ -100,7 +113,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                     const requestMessage = this.createRequestMessage(qcPrice); 
 
                     // 2. get SAP response 
-                    const response = await this.getPriceConditionFromSAP(requestMessage);
+                    const response = await this.getPriceConditionFromSAP(qcPrice.CountryCode,requestMessage);
                     const item = response["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.[0]?.["LT_OUT_FREE_PRICE_COND"]?.[0]?.["item"]?.[0];
 
                     // 3. map and validate response 
@@ -116,6 +129,8 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                     await this.updateCustomerPriceQC(tx, qcPrice);
                     
                 })
+                .then(this._onProcessingSuccess.bind(this))
+                .catch(this._onProcessingFail.bind(this))
             );
             
         };
@@ -212,8 +227,10 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
         const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
         const oauthCredentials = await this.getBearerToken();
 
+        console.log(`JOB (${this.jobName }): Calling ${url} ...`);
+
         return axios({
-            method: 'get',
+            method: 'post',
             url: url,
             headers: {
                 'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
@@ -229,7 +246,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
         const { SchedulerApiConfig, SchedulerApiConfigOAuth } = this.db.entities("com.bayer.SXTENDER.AdminData");
 
         // get api config
-        const priceAgreementApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement'}));
+        const priceAgreementApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement', Resource: 'PriceConditionQC'}));
         const oauthAuth  = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, priceAgreementApi.OAuth_ID));
         
         if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
