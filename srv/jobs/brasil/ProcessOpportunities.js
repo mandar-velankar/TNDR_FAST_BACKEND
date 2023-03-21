@@ -6,10 +6,6 @@ module.exports = class processOpportunities extends BaseJob {
     constructor(jobName, jobTime) {
         super(jobName, jobTime);
         this.jobName = jobName.toUpperCase();
-        this.startTime = 0;
-        this.failed = 0;
-        this.success = 0;
-        this.opportunityCount = 0;
     }
 
  /**
@@ -18,36 +14,30 @@ module.exports = class processOpportunities extends BaseJob {
     //override
     async onTick() {
         console.log(`JOB (${this.jobName }): Processing Ibiz Opportunities ...`);
-        this.startTime = new Date().getTime();
+        const start = new Date().getTime();
+        
         this.db = await cds.connect.to('db');
+        const tx = this.db.tx();
 
         try {
-            // Fetch opportunities
-            const opportunities = await this.getOpportunities();
-            this.opportunityCount = opportunities.length;
+            // Fetch data
+            const opportunities = await this.getOpportunities(tx);
+            const existingInstitutesInFAST = await this.getInstitutes(tx);
+            const existingTenderTypesFAST = await this.getTenderTypes(tx);
+            const existingDistributorsFAST = await this.getFASTDistributors(tx);
+            const existingSKUFAST = await this.getFASTSKUs(tx);
+            const priceConditionClassificationFAST = await this.getPriceConditionClassification(tx);
 
-            // nothing to process
-            if(this.opportunityCount == 0){
-                return this._finishMessage(this.opportunityCount);
-            }
-
-            // Fetch additional data needed for mapping/aggregation
-            const existingInstitutesInFAST = await this.getInstitutes();
-            const existingTenderTypesFAST = await this.getTenderTypes();
-            const existingDistributorsFAST = await this.getFASTDistributors();
-            const existingSKUFAST = await this.getFASTSKUs();
-            const priceConditionClassificationFAST = await this.getPriceConditionClassification();
-
-            // Filter/split opportunities (direct/indirect)
             const directIbizOpportunities = opportunities.filter(direct => direct.NU_DIRETO_INDIRETO === 0);
             const directIbizOpportunityParentIDs = directIbizOpportunities.map(dop => dop.ID);
-            const directIbizOpportunityItems = await this.getOpportunitiesItems(directIbizOpportunityParentIDs);
-            const directIbizOpportunityDocs = await this.getOpportunitiesDocs(directIbizOpportunityParentIDs); 
+            const directIbizOpportunityItems = await this.getOpportunitiesItems(tx, directIbizOpportunityParentIDs);
+            const directIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, directIbizOpportunityParentIDs); 
+
             const indirectIbizOpportunities = opportunities.filter(indirect => indirect.NU_DIRETO_INDIRETO === 1);
             const indirectIbizOpportunityParentIDs = indirectIbizOpportunities.map(dop => dop.ID);
             const indirectIbizOpportunityCNPJs = indirectIbizOpportunities.map(el => el.COD_DONO_QP && el.COD_DONO_QP.replace(/\D/g,''));
-            const indirectIbizOpportunityItems = await this.getOpportunitiesItems(indirectIbizOpportunityParentIDs);
-            const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(indirectIbizOpportunityParentIDs); 
+            const indirectIbizOpportunityItems = await this.getOpportunitiesItems(tx, indirectIbizOpportunityParentIDs);
+            const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); 
 
             //find the DistributorIDs based on the cnpj from indirectIbizOpportunities
             const indirectIbizOpportunityDistributorIDs = existingDistributorsFAST.reduce((prev, curr) => {
@@ -56,97 +46,46 @@ module.exports = class processOpportunities extends BaseJob {
                 }
                 return prev;
             }, []);
-            const brazilMasterPrices = await this.getBrazilMasterPrices(indirectIbizOpportunityDistributorIDs);
+            const brazilMasterPrices = await this.getBrazilMasterPrices(tx, indirectIbizOpportunityDistributorIDs);
 
             // Process data
             if(directIbizOpportunities.length > 0){
-                await this.processDirectIbizOpportunities(directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
+                await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
+
             }
 
             if(indirectIbizOpportunities.length > 0){
-                await this.processIndirectIbizOpportunities(indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
+                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
             }
 
-            // log finish
-            this._finishMessage(this.opportunityCount);
+            // Commit All
+            await tx.commit();
+            console.log(`JOB (${this.jobName }): Processing Ibiz Opportunities successfully completed.`);
+            const end = new Date().getTime();
+            const time = end - start;
+            console.log(`JOB (${this.jobName }): SUCCESS --> Execution time: ${time} ms`);
 
         } catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Processing of Ibiz Opportunities failed. \n\nCause: ${error}`);
-            throw error;
-        }
-    }
-
-    /**
-     * Delete record from IbizQPS, IbizCcsQpsItems and IbizDocs after successful processing.
-     */
-    async _onProcessingSuccess ({ opportunity, opportunityItems, opportunityDocs }){
-        this.success++;
-        // const { opportunity, opportunityItems, opportunityDocs, jobName } = cds.context.data;
-        const { IbizQps, IbizCcsQpsItems, IbizDocs } = cds.entities("com.bayer.SXTENDER.MasterData.SAP");
-        try {
-            await DELETE.from(IbizQps).where({ID: opportunity.ID});
-            const parentIDs = opportunityItems.map(i => i.parent_ID);
-            Array.isArray(parentIDs) && parentIDs.length > 0 && await DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}});
-            const docParentIDs = opportunityDocs.map(d => d.parent_ID);
-            Array.isArray(docParentIDs) && docParentIDs.length > 0 && await DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}});
-            console.log(`JOB (${this.jobName}) - Opportunity: ${opportunity.ID } from ${IbizQps.name} processed successfully. `);
-        }catch (error) {
+            console.error(`JOB (${this.jobName }): ERROR - Processing of Ibiz Opportunities failed.`);
             console.error(error);
+            await tx.rollback();
             throw error;
         }
-    }
-
-    /**
-     * Logs and updates the status of the processed record in case of an error
-     * @param {*} error 
-     */
-    async _onProcessingFail ({ opportunity, opportunityItems, opportunityDocs }, error){
-        this.failed++;
-        // const { opportunity, opportunityItems, opportunityDocs, jobName } = cds.context.data;
-        const { IbizQps, IbizCcsQpsItems, IbizDocs } = cds.entities("com.bayer.SXTENDER.MasterData.SAP");
-        try {
-            const status = 'Failed';
-            const errMsg = `Message: ${error.originalMessage} \n\nQuery : ${error.query} \n\nValues: ${JSON.stringify(error.values)}`;
-            // QPS
-            opportunity.STATUS = status;
-            opportunity.ERROR_MESSAGE = errMsg
-            await UPDATE(IbizQps, {ID: opportunity.ID}).with(opportunity);
-            // QPS_ITEMS
-            for (let item of opportunityItems) {
-                item.STATUS = status;
-                item.ERROR_MESSAGE = errMsg
-                await UPDATE(IbizCcsQpsItems, {ID: item.ID}).with(item);
-            }
-            // QPS_DOCS
-            for (let doc of opportunityDocs) {
-                doc.STATUS = status;
-                doc.ERROR_MESSAGE = errMsg
-                await UPDATE(IbizDocs, {ID: doc.ID}).with(doc);
-            }
-            console.log(`JOB (${this.jobName}) - Opportunity: ${opportunity.ID } from ${IbizQps.name} processing failed. Error message logged.`);
-        }catch (error) {
-            console.error(error);
-            throw error;
-        }
-    }
-
-    _finishMessage(processed){
-        const end = new Date().getTime();
-        const time = end - this.startTime;
-        console.log(`JOB (${this.jobName }): Processing of Ibiz Opportunities completed. - Processed: ${processed} Success: ${this.success} Failed: ${this.failed} - Execution time: ${time} ms`);
     }
 
       /**
      * This method fetches all the Ibiz opportunities from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS
      * @returns - A list of direct and indirect Ibiz opportunities
      */
-       async getOpportunities() {
+       async getOpportunities(tx) {
         try {
-            // console.log(`JOB (${this.jobName }): Fetching Ibiz Opportunities from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS ...`);
+            console.log(`JOB (${this.jobName }): Fetching Ibiz Opportunities from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS ...`);
             const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            return await SELECT.from(IbizQps);
+            const result = await tx.run(SELECT.from(IbizQps));
+            return result;
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${IbizQps.name} failed. Cause: ${error}`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of Ibiz Opportunities from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS failed`);
+            console.error(error);
             throw error;
         }
     }
@@ -155,16 +94,19 @@ module.exports = class processOpportunities extends BaseJob {
      * This method fetches all the Ibiz opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS
      * @returns - A list of Ibiz opportunity items
      */
-     async getOpportunitiesItems(parentIDs) {
-        if(!parentIDs) return [];
-        if(parentIDs.length <= 0) return [];
-
+     async getOpportunitiesItems(tx, parentIDs) {
+        if(!parentIDs || parentIDs.length <= 0) {
+            console.log("No Parent Itmes found");
+            return [];
+        }
         try {
-            // console.log(`JOB (${this.jobName }): Fetching Ibiz Opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS ...`);
+            console.log(`JOB (${this.jobName }): Fetching Ibiz Opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS ...`);
             const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            return await SELECT.from(IbizCcsQpsItems).where({'parent_ID': { in: parentIDs }});
+            const result = await tx.run(SELECT.from(IbizCcsQpsItems).where({'parent_ID': { in: parentIDs }}));
+            return result;
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${IbizCcsQpsItems.name} failed. Cause: ${error}`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of Ibiz Opportunity items from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCCSQPSITEMS failed`);
+            console.error(error);
             throw error;
         }
     }
@@ -174,16 +116,19 @@ module.exports = class processOpportunities extends BaseJob {
      * @param {customerIDs} - A list of customer IDs
      * @returns - A list of Ibiz master prices
      */
-    async getBrazilMasterPrices(customerIDs) {
-        if(!customerIDs) return [];
-        if(customerIDs.length <= 0) return [];
+    async getBrazilMasterPrices(tx, customerIDs) {
+        if(!customerIDs || customerIDs.length <= 0) {
+            console.log("No CustomerIDs provided");
+            return [];
+        }
 
-        // console.log(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICES ...`);
+        console.log(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICES ...`);
         const { BrazilMasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
+
         try {
-            return await SELECT.from(BrazilMasterPrices).where({'CustomerID': { in: customerIDs }, Type: 'ZWP0'});
+            return await tx.run(SELECT.from(BrazilMasterPrices).where({'CustomerID': { in: customerIDs }, Type: 'ZWP0'}));
         }catch (error) {
-            throw new Error(`JOB (${this.jobName }): Fetching data from ${BrazilMasterPrices.name} failed`, { cause: error });
+            throw new Error(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICE failed`, { cause: error });
         }
     }
 
@@ -191,16 +136,19 @@ module.exports = class processOpportunities extends BaseJob {
      * This method fetches all the Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZDOCS
      * @returns - A list of Ibiz Documents
      */
-      async getOpportunitiesDocs(parentIDs) {
-        if(!parentIDs) return [];
-        if(parentIDs.length <= 0) return [];
-
+      async getOpportunitiesDocs(tx, parentIDs) {
+        if(!parentIDs || parentIDs.length <= 0) {
+            console.log("No Parent Itmes found");
+            return [];
+        }
         try {
-            // console.log(`JOB (${this.jobName }): Fetching Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IbizDocs ...`);
+            console.log(`JOB (${this.jobName }): Fetching Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IbizDocs ...`);
             const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            return await SELECT.from(IbizDocs).where({'Qps_ID': { in: parentIDs } });
+            const result = await tx.run(SELECT.from(IbizDocs).where({'Qps_ID': { in: parentIDs } }));
+            return result;
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${IbizDocs.name} failed. Cause: ${error}`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of Ibiz Documents from COM_BAYER_SXTENDER_MASTERDATA_SAP_IbizDocs failed`);
+            console.error(error);
             throw error;
         }
     }
@@ -209,13 +157,15 @@ module.exports = class processOpportunities extends BaseJob {
      * This method fetches all the Institutes from COM_BAYER_SXTENDER_MASTERDATA_PT_TMINST where CNPJ is not null
      * @returns - 
      */
-     async getInstitutes() {
+     async getInstitutes(tx) {
         try {
-            // console.log(`JOB (${this.jobName }): Fetching Institutes from COM_BAYER_SXTENDER_MASTERDATA_PT_TMINST ...`);
+            console.log(`JOB (${this.jobName }): Fetching Institutes from COM_BAYER_SXTENDER_MASTERDATA_PT_TMINST ...`);
             const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-            return await SELECT.from(PT_TMINST).where({'CNPJ': {"!=": null}, CountryCode: 'BR' });
+            const result = await tx.run(SELECT.from(PT_TMINST).where({'CNPJ': {"!=": null}, CountryCode: 'BR' }));
+            return result;
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${PT_TMINST.name} failed. Cause: ${error}`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of Institutes from COM_BAYER_SXTENDER_MASTERDATA_PT_TMINST failed`);
+            console.error(error);
             throw error;
         }
     }
@@ -224,39 +174,44 @@ module.exports = class processOpportunities extends BaseJob {
      * This method fetches all the TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE
      * @returns - 
      */
-     async getTenderTypes() {
+     async getTenderTypes(tx) {
         try {
-            // console.log(`JOB (${this.jobName }): Fetching TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE ...`);
+            console.log(`JOB (${this.jobName }): Fetching TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE ...`);
             const { MASTER_TENDER_TYPE } = this.db.entities("com.bayer.SXTENDER.MasterData");
-            return await SELECT.from(MASTER_TENDER_TYPE);
+            const result = await tx.run(SELECT.from(MASTER_TENDER_TYPE));
+            return result;
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${MASTER_TENDER_TYPE.name} failed. Cause: ${error}`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching of TenderTypes from COM_BAYER_SXTENDER_MASTERDATA_MASTER_TENDER_TYPE failed`);
+            console.error(error);
             throw error;
         }
     }
 
-     async getNextOfferIDs(tenderIDs) {
-        if(!tenderIDs) return [];
-        if(tenderIDs.length <= 0) return [];
-
+     async getNextOfferIDs(tx, tenderIDs) {
+        if(!tenderIDs || tenderIDs.length <= 0) {
+            return [];
+        }
         try {
-            // console.log(`JOB (${this.jobName }): Fetching NextOfferID from com.bayer.SXTENDER.TransactionalDataViews.TenderOffers ...`);
+            console.log(`JOB (${this.jobName }): Fetching NextOfferID from com.bayer.SXTENDER.TransactionalDataViews.TenderOffers ...`);
             const { TenderOffers } = this.db.entities("com.bayer.SXTENDER.TransactionalDataViews");
-            return await SELECT.from(TenderOffers).where({TENDERID: {in: tenderIDs }});
+            const result = await tx.run(SELECT.from(TenderOffers).where({TENDERID: {in: tenderIDs }}));
+            return result;
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${TenderOffers.name} failed. Cause: ${error}`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching NextOfferID from com.bayer.SXTENDER.TransactionalDataViews.TenderOffers failed`);
+            console.error(error);
             throw error;
         }
     }
 
-    async getNextTenderID() {
+    async getNextTenderID(tx) {
         try {
-            // console.log(`JOB (${this.jobName }): Fetching NextTenderID from com.bayer.SXTENDER.TransactionalDataViews.CountryTenderNo ...`);
+            console.log(`JOB (${this.jobName }): Fetching NextTenderID from com.bayer.SXTENDER.TransactionalDataViews.CountryTenderNo ...`);
             const { CountryTenderNo } = this.db.entities("com.bayer.SXTENDER.TransactionalDataViews");
-            const result = await SELECT.one.from(CountryTenderNo).where({COUNTRY_CODE: 'BR'});
+            const result = await tx.run(SELECT.one.from(CountryTenderNo).where({COUNTRY_CODE: 'BR'}));
             return result.NEXT_TENDER_NO;
         }catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${CountryTenderNo.name} failed. Cause: ${error}`);
+            console.error(`JOB (${this.jobName }): ERROR - Fetching NextTenderID from com.bayer.SXTENDER.TransactionalDataViews.CountryTenderNo failed`);
+            console.error(error);
             throw error;
         }
     }
@@ -269,7 +224,7 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async processDirectIbizOpportunities(directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST) {
+ async processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST) {
     console.log(`JOB (${this.jobName }): Processing Direct Ibiz Opportunities ...`);
     try {
 
@@ -279,96 +234,48 @@ module.exports = class processOpportunities extends BaseJob {
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, directIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
         const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(directIbizOpportunityDocs);
 
-        // 0.1 Aggregate Data - DO NOT CHANGE THE ORDER OF AGGREGATION METHODS - mapped records beging updated in each step of aggregation
-        const newTenders = await this.aggregateTenders(mappedTenders); 
-        const {
-            newOffers,
-            existingOffers,
-            newOfferStatusses
-        } = await this.aggregateOffers(mappedOffers, mappedTenders);
-        const { newProducts, newLots } = this.aggregateOfferProducts(mappedProducts, mappedOffers);
-        const newDocuments = this.aggregateDocuments(mappedDocs, mappedOffers);
+        // 1. Create/update entries in PT_TMTEND
+        await this.upsertFASTTenders(tx, mappedTenders);
 
-        const spawnPromises = [];
-        // Upsert aggregated data
-        for(const [index, offer] of newOffers.entries()){
-            const tender = newTenders.filter(t => t.TenderID === offer.TenderID);
-            const existingOffer = existingOffers.filter(eo => eo.OfferID.includes(offer.OfferID.slice(0,12)));
-            const offerStatusses = newOfferStatusses.filter(st => st.TenderID === offer.TenderID);
-            const products = newProducts.filter(prd => prd.TenderID === offer.TenderID);
-            const lots = newLots.filter(lot => lot.OfferID.includes(offer.TenderID));
-            const documents = newDocuments.filter(d => d.TenderID === offer.TenderID);
+        // 2. Create/update entries in PT_TMOFRS
+        await this.upsertFASTOffers(tx, mappedOffers, mappedTenders);
 
-            const opportunity = directIbizOpportunities[index]; // we know that the order of directIbizOpportunities and newTenders are correct. Index points to the same opportunity
-            const opportunityItems = directIbizOpportunityItems.filter(i => i.parent_ID === opportunity.ID);
-            const opportunityDocs = directIbizOpportunityDocs.filter(d => d.Qps_ID === opportunity.ID);
+        // 3. Create/update entries in PT_TMOFPR
+        await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
 
-            spawnPromises.push(
-                this._runDetached(async (tx) => {
+        // 4. Create/update entries in DocumentsDownload
+        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers);  
 
-                    // set transaction context
-                    tx.context.data = { opportunity, opportunityItems, opportunityDocs, jobName:this.jobName }
+        // 5. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
+        const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 0}));
+        const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const parentIDs = mappedProducts.map(pr => pr.parent_ID);
+        Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
+        const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
+        Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}}));
 
-                    // 1. Create/update entries in PT_TMTEND
-                    await this.upsertFASTTenders(tx, tender);
-
-                    // 2. Create/update entries in PT_TMOFRS
-                    await this.upsertFASTOffers(tx, [offer], existingOffer);
-
-                    // 3. Create entries in PT_TMTNOFST
-                    await this.insertFASTOfferStatusses(tx, offerStatusses);
-
-                    // 4. Create entries in PT_TMOFPR
-                    await this.insertOfferProducts(tx, products );
-
-                    // 5. Create entries in Lots
-                    await this.insertOfferProductLots(tx, lots);
-
-                    // 6. Create entries in DocumentsDownload
-                    await this.insertDocumentsDownload(tx, documents);
-                    
-                })
-                .then(this._onProcessingSuccess.bind(this, { opportunity, opportunityItems, opportunityDocs} ))
-                .catch(this._onProcessingFail.bind(this, { opportunity, opportunityItems, opportunityDocs }))
-            );
-            
-        };
-
-        return Promise.all(spawnPromises);
+        console.log(`JOB (${this.jobName }): Processing of Direct ibiz opportunities successfully completed.`);
 
     }catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Processing of Direct ibiz opportunities failed. \n\nCause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Processing of Direct ibiz opportunities failed.`);
+        console.error(error);
         throw error;
     }
 }
 
 /**
- * Runs the given function as detached continuation in a specified event context.
- * @see https://cap.cloud.sap/docs/node.js/cds-context-tx#cds-spawn
- * @async
- * @callback Even though the callback function is executed as a background job, all asynchronous operations inside the callback function must be awaited. Otherwise, transaction handling does not work properly.
- * @param {*} fn 
- * @returns {Promise}
- */
-_runDetached(fn){
-    return new Promise((resolve, reject) => {
-        cds.spawn (fn)
-        .on('succeeded', resolve)
-        .on('failed', reject)
-    })
-}
-
-/**
- * Aggregate tender data
+ * Creates Tenders in FAST
  * @param {Array.Object} Mapped Tenders 
  * @returns 
  */
- async aggregateTenders(mappedTenders) {
-    
-    let nextTenderID = await this.getNextTenderID();
+ async upsertFASTTenders(tx, mappedTenders) {
+    const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    let nextTenderID = await this.getNextTenderID(tx);
 
     // 1. get a list of existing Tenders with an ExternalID from FAST
-    const tendersExistingInFAST = await this.getFASTTenders(mappedTenders);
+    const tendersExistingInFAST = await this.getFASTTenders(tx, mappedTenders);
 
     // 1.1 SAP material may contain the same ProductPack per SKU, we must not process the same ProductPack more than ones
     const uniqueMappedTenders = Array.from(new Set(mappedTenders.map(t => t.IbizID)))
@@ -392,47 +299,36 @@ _runDetached(fn){
             FASTNewTenders.push(tender);
         }
     }
-
-    return FASTNewTenders;
-}
-
-/**
- * Insert records into PT_TMTEND
- * FYI: Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
- * @param {*} tx 
- * @param {*} tenders 
- */
-async upsertFASTTenders(tx, tenders){
-    if(!tenders) return false;
-    if(tenders.length <= 0) return false;
-
-    const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    // console.log(`JOB (${this.jobName }): Inserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
+    // 3. Insert records into PT_TMTEND
+    //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
+    console.log(`JOB (${this.jobName }): Inserting IBIZ Tenders into FAST table (PT_TMTEND) ...`);
     try {
-        await tx.run(INSERT(tenders).into(PT_TMTEND));
-        console.log(`JOB (${this.jobName }): Inserting data into (${PT_TMTEND.name}) completed. -> created: ${tenders.length}`);
+        FASTNewTenders && FASTNewTenders.length > 0 && await tx.run(INSERT(FASTNewTenders).into(PT_TMTEND));
+        console.log(`JOB (${this.jobName }): Inserting of IBIZ Tenders into FAST table (PT_TMTEND) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMTEND -> created: ${FASTNewTenders.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Inserting data into (${PT_TMTEND.name}) failed. Cause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Inserting of IBIZ Tenders into FAST table (PT_TMTEND) failed`);
+        console.error(error);
         throw error;
     }
 }
 
 
 /**
- * Aggregate offer data
+ * Creates or Updates Offers in FAST
  * @param {Array.Object} Mapped Offers 
  * @returns 
  */
- async aggregateOffers(mappedOffers, mappedTenders) {
-    
+ async upsertFASTOffers(tx, mappedOffers, mappedTenders) {
+    const { PT_TMOFRS, PT_TMTNOFST } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     const uniqueMappedTenders = mappedTenders.filter(t => t.TenderID);
     const tenderIDs = uniqueMappedTenders.map(tender => tender.TenderID);
-    let nextOfferIDs = await this.getNextOfferIDs(tenderIDs);
+    let nextOfferIDs = await this.getNextOfferIDs(tx, tenderIDs);
     const offerStatusses = [];
 
     // 1. get a list of existing Offers with an IBIZWORKFLOWID from FAST
-    const parentOffersExistingInFAST = await this.getFASTOffersWithIbizWorkflowID();
+    const parentOffersExistingInFAST = await this.getFASTOffersWithIbizWorkflowID(tx);
     
     // 2. link existing Tenders with Offers
     // IMPORTANT: the indexes of mappedOffers and mappedTenders are pointing to the same IBIZ object
@@ -486,62 +382,36 @@ async upsertFASTTenders(tx, tenders){
         delete copy.NU_DIRETO_INDIRETO;
         delete copy.PriceConditionClassificationID;
         return copy;
-    }); 
+    });  
 
-    return {
-        newOffers: offersWithoutID,
-        existingOffers: parentOffersExistingInFAST,
-        newOfferStatusses: offerStatusses
-    }
-}
-
-/**
- * Creates or Updates Offers in FAST
- * @param {*} tx 
- * @param {*} newOffers 
- * @param {*} existingOffers (parentOffersExistingInFAST)
- * @returns 
- */
-async upsertFASTOffers(tx, newOffers, existingOffers){
-    if(!newOffers) return false;
-    if(newOffers.length <= 0) return false;
-
-    const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    // console.log(`JOB (${this.jobName }): Upserting data into (${PT_TMOFRS.name}) ...`);
+    // 3. Upsert records into PT_TMOFRS
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Offers into FAST table (PT_TMOFRS) ...`);
     try {
-        await tx.run(INSERT(newOffers).into(PT_TMOFRS));
+        offersWithoutID && offersWithoutID.length > 0 && await tx.run(INSERT(offersWithoutID).into(PT_TMOFRS));
+        offerStatusses && offerStatusses.length > 0 && await tx.run(INSERT(offerStatusses).into(PT_TMTNOFST));
         //Update is one by one: https://answers.sap.com/questions/13676137/bulk-update-in-cap-nodejs.html
-        for (const parrentOffer of existingOffers) {
+        for (const parrentOffer of parentOffersExistingInFAST) {
             await tx.run(UPDATE(PT_TMOFRS, {OfferID:parrentOffer.OfferID}).with(parrentOffer));
         }
-        console.log(`JOB (${this.jobName }): Upserting data into (${PT_TMOFRS.name}) completed. -> created: ${newOffers.length} updated: ${existingOffers.length}`);
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Offers into FAST table (PT_TMOFRS) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMOFRS -> created: ${offersWithoutID.length} updated: ${parentOffersExistingInFAST.length}`);
+        console.log(`JOB (${this.jobName }): PT_TMTNOFST -> created: ${offerStatusses.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Upserting data into (${PT_TMOFRS.name}) failed. Cause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Offers or OfferStatuses into FAST table (PT_TMOFRS, PT_TMTNOFST) failed`);
+        console.error(error);
         throw error;
     }
 }
+
 
 /**
- * Insert offer statusses PT_TMTNOFST
- * @param {*} tx 
- * @param {*} statusses 
+ * Creates Product in FAST
  * @returns 
  */
-async insertFASTOfferStatusses(tx, statusses){
-    const { PT_TMTNOFST } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    // console.log(`JOB (${this.jobName }): Inserting data into (${PT_TMTNOFST.name}) ...`);
-    try {
-        statusses && statusses.length > 0 && await tx.run(INSERT(statusses).into(PT_TMTNOFST));
-        console.log(`JOB (${this.jobName }): Inserting data into ${PT_TMTNOFST.name}. -> created: ${statusses.length}`);
-        return true;
-    } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Inserting data into (${PT_TMTNOFST.name}) failed. Cause: ${error}`);
-        throw error;
-    }
-}
+ async upsertFASTOfferProducts(tx, mappedProducts, mappedOffers) {
+    const { PT_TMOFPR, Lots, LotProduct } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
 
-aggregateOfferProducts(mappedProducts, mappedOffers) {
     const lots = [];
 
     // 1. link existing Tenders and Offer with Products
@@ -574,56 +444,34 @@ aggregateOfferProducts(mappedProducts, mappedOffers) {
         return copy;
     });  
 
-    return {
-        newProducts: productsWithoutID,
-        newLots: lots
-    }
-}
-
-/**
- * Creates Product in FAST PT_TMOFPR
- * @returns 
- */
- async insertOfferProducts(tx, products) {
-    if(!products) return false;
-    if(products.length <= 0) return false;
-
-    const { PT_TMOFPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    // console.log(`JOB (${this.jobName }): Inserting records into (${PT_TMOFPR.name}) ...`);
+    // 3. Upsert records into PT_TMOFPR and Lots
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Products into FAST table (PT_TMOFPR) ...`);
     try {
-        await tx.run(INSERT(products).into(PT_TMOFPR));
-        console.log(`JOB (${this.jobName }): Inserting records into (${PT_TMOFPR.name}) completed. -> created: ${products.length}`);
+        // PT_TMOFPR
+        productsWithoutID && productsWithoutID.length > 0 && await tx.run(INSERT(productsWithoutID).into(PT_TMOFPR));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Products into FAST table (PT_TMOFPR) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMOFPR -> created: ${productsWithoutID.length}`);
+        // Lots
+        lots && lots.length > 0 && await tx.run(INSERT(lots).into(Lots));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Product Lots into FAST table (Lots) successfully completed.`);
+        console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Inserting records into (${PT_TMOFPR.name}) failed`, `Cause: ${error}`);
-        throw error;
-    }
-}
-
-/**
- * Creates Lots in DB
- * @param {*} tx 
- * @param {*} lots 
- * @returns 
- */
-async insertOfferProductLots(tx, lots) {
-    if(!lots) return false;
-    if(lots.length <= 0) return false;
-
-    const { Lots } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    console.log(`JOB (${this.jobName }): Inserting records into (${Lots.name}) ...`);
-    try {
-        await tx.run(INSERT(lots).into(Lots));
-        console.log(`JOB (${this.jobName }): Inserting records into (${Lots.name}) successfully completed. -> created: ${lots.length}`);
-        return true;
-    } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Inserting records into (${Lots.name}) failed`,`Cause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Products/Lots into FAST tables failed`);
+        console.error(error);
         throw error;
     }
 }
 
 
-aggregatePrices(mappedPrice, mappedProducts){
+/**
+ * Creates Price in FAST
+ * PT_TMBDPR
+ * @returns 
+ */
+ async upsertFASTPrice(tx, mappedPrice, mappedProducts) {
+    const { PT_TMBDPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+
     // 1. link existing Tenders and Offer with Products
     for (const [idx, price] of mappedPrice.entries()) {
         const product = mappedProducts[idx];
@@ -639,30 +487,29 @@ aggregatePrices(mappedPrice, mappedProducts){
         return copy;
     });  
 
-    return pricesWithoutID;
-}
-
-
-/**
- * Creates Price in FAST
- * PT_TMBDPR
- * @returns 
- */
- async insertFASTPrice(tx, prices) {
-    const { PT_TMBDPR } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    // console.log(`JOB (${this.jobName }): Inserting records into (${PT_TMBDPR.name}) ...`);
+    // 3. Upsert records into PT_TMBDPR
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Price into FAST table (PT_TMBDPR) ...`);
     try {
-        prices && prices.length > 0 && await tx.run(INSERT(prices).into(PT_TMBDPR));
-        console.log(`JOB (${this.jobName }): Inserting records into (${PT_TMBDPR.name}) successfully completed. -> created: ${prices.length}`);
+        pricesWithoutID && pricesWithoutID.length > 0 && await tx.run(INSERT(pricesWithoutID).into(PT_TMBDPR));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Price into FAST table (PT_TMBDPR) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PT_TMBDPR -> created: ${pricesWithoutID.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Inserting records into (${PT_TMBDPR.name}) failed`, `Cause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Price into FAST table (PT_TMBDPR) failed`);
+        console.error(error);
         throw error;
     }
 }
 
 
-aggregatePriceConditions(mappedPriceCondition, mappedOffers){
+/**
+ * Creates PriceCondition in FAST
+ * PRICECONDITION
+ * @returns 
+ */
+ async upsertFASTPriceConditions(tx, mappedPriceCondition, mappedOffers) {
+    const { PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+
     // 1. link existing Offer with PriceCondition
     for (const pc of mappedPriceCondition) {
         let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === pc.parent_ID);
@@ -677,29 +524,28 @@ aggregatePriceConditions(mappedPriceCondition, mappedOffers){
         return copy;
     });  
 
-    return priceConditionsWithoutID;
-}
-
-
-/**
- * Creates PriceCondition in FAST
- * PRICECONDITION
- * @returns 
- */
- async insertFASTPriceConditions(tx, priceConditions) {
-     // console.log(`JOB (${this.jobName }): Inserting records into (${PriceCondition.name}) ...`);
-     try {
-        const { PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        priceConditions && priceConditions.length > 0 && await tx.run(INSERT(priceConditions).into(PriceCondition));
-        console.log(`JOB (${this.jobName }): Inserting records into ${PriceCondition.name} completed. -> created: ${priceConditions.length}`);
+    // 3. Upsert records into PRICECONDITION
+    console.log(`JOB (${this.jobName }): Upserting IBIZ PriceCondition into FAST table (PriceCondition) ...`);
+    try {
+        priceConditionsWithoutID && priceConditionsWithoutID.length > 0 && await tx.run(INSERT(priceConditionsWithoutID).into(PriceCondition));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ PriceCondition into FAST table (PriceCondition) successfully completed.`);
+        console.log(`JOB (${this.jobName }): PriceCondition -> created: ${priceConditionsWithoutID.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Inserting records into (${PriceCondition.name}) failed`,`Cause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ PriceCondition into FAST table (PriceCondition) failed`);
+        console.error(error);
         throw error;
     }
 }
 
-aggregateDocuments(mappedDocs, mappedOffers){
+/**
+ * Creates Opportunity Documents in FAST
+ * DocumentsDownload
+ * @returns 
+ */
+ async upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers) {
+    const { DocumentsDownload } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+
     // 1. link existing Tenders and Offer with Documents
     for (const docs of mappedDocs) {
         let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === docs.parent_ID);
@@ -714,26 +560,16 @@ aggregateDocuments(mappedDocs, mappedOffers){
         return copy;
     });  
 
-    return docsWithoutID;
-}
-
-/**
- * Creates Opportunity Documents in FAST
- * DocumentsDownload
- * @returns 
- */
- async insertDocumentsDownload(tx, documents) {
-    if(!documents) return false;
-    if(documents.length <= 0) return false;
-
-    const { DocumentsDownload } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-    // console.log(`JOB (${this.jobName }): Inserting records into (${DocumentsDownload.name})  ...`);
+    // 3. Upsert records into DocumentsDownload
+    console.log(`JOB (${this.jobName }): Upserting IBIZ Opportunity Documents into FAST table (DocumentsDownload) ...`);
     try {
-        await tx.run(INSERT(documents).into(DocumentsDownload));
-        console.log(`JOB (${this.jobName }): Inserting records into (${DocumentsDownload.name}) successfully completed. -> created: ${documents.length}`);
+        docsWithoutID && docsWithoutID.length > 0 && await tx.run(INSERT(docsWithoutID).into(DocumentsDownload));
+        console.log(`JOB (${this.jobName }): Upserting of IBIZ Opportunity Documents into FAST table (DocumentsDownload) successfully completed.`);
+        console.log(`JOB (${this.jobName }): DocumentsDownload -> created: ${docsWithoutID.length}`);
         return true;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Inserting records into (${DocumentsDownload.name}) failed`, `Cause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Upserting of IBIZ Opportunity Documents into FAST table (DocumentsDownload) failed`);
+        console.error(error);
         throw error;
     }
 }
@@ -743,49 +579,46 @@ aggregateDocuments(mappedDocs, mappedOffers){
  * @param {Array} tenders 
  * @returns {Array<PT_TMTEND>} a list of existing tenders
  */
- async getFASTTenders(tenders) {
-    if(!tenders) return [];
-    if(tenders.length <= 0) return [];
-
-    // console.log(`JOB (${this.jobName }): Prepare fetching IBIZ Opportunity Tenders from FAST table`);
+ async getFASTTenders(tx, tenders) {
+    if(!tenders || tenders.length === 0){
+        console.log(`JOB (${this.jobName }): No Tenders were found in FAST`);
+        return [];
+    }
+    console.log(`JOB (${this.jobName }): Prepare fetching IBIZ Opportunity Tenders from FAST table`);
 
     // get all the ExternalIDs from tenders
     let externalIDs = [];
     for (const tender of tenders) {
         externalIDs.push(tender.ExternalID);
     }
-    // console.log(`JOB (${this.jobName }): Start fetching IBIZ Opportunity Tenders from FAST table`);
+    console.log(`JOB (${this.jobName }): Start fetching IBIZ Opportunity Tenders from FAST table`);
 
     // get a list of tenders for given list of ExternalIDs
-    try {
-        const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        let result = [];
-        Array.isArray(externalIDs) && externalIDs.length > 0 && (result = await SELECT.from(PT_TMTEND).where({ ExternalID: { in: externalIDs}, CountryCode: 'BR' } ));
-        return result;
-    } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Fetching data form ${PT_TMTEND.name} failed`, `Cause: ${error}`);
-        throw error;
-    }
+    const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    let result = [];
+    Array.isArray(externalIDs) && externalIDs.length > 0 && (result = await tx.run(SELECT.from(PT_TMTEND).where({ ExternalID: { in: externalIDs}, CountryCode: 'BR' } )));
+    console.log(`JOB (${this.jobName }): End fetching IBIZ Opportunity Tenders from FAST table`);
+    return result;
 }
 
 /**
  * Gets a list of existing Offers from FAST with an IbizWorkflowID set
  * @returns {Array<PT_TMOFRS>} a list of existing offers
  */
- async getFASTOffersWithIbizWorkflowID() {
+ async getFASTOffersWithIbizWorkflowID(tx) {
     try {
-        // console.log(`JOB (${this.jobName }): Start fetching Offers with IbizWorkflowID from FAST table`);
+        console.log(`JOB (${this.jobName }): Start fetching Offers with IbizWorkflowID from FAST table`);
         const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        let result = await SELECT.from(PT_TMOFRS).where(
+        let result = await tx.run(SELECT.from(PT_TMOFRS).where(
             { 
                     IbizWorkflowID: {'!=': null}, 
                     CountryCode: 'BR' 
             } 
-        );
-        // console.log(`JOB (${this.jobName }): End fetching Offers with IbizWorkflowID from FAST table`);
+        ));
+        console.log(`JOB (${this.jobName }): End fetching Offers with IbizWorkflowID from FAST table`);
         return result;
     } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Fetching data form ${PT_TMOFRS.name} failed`, `Cause: ${error}`);
+        console.error(error);
         throw(error);
     }
 }
@@ -795,18 +628,13 @@ aggregateDocuments(mappedDocs, mappedOffers){
  * @param {Array} distributors 
  * @returns {Array<PT_TMDIST>} a list of existing distributors
  */
- async getFASTDistributors() { 
-    try {
-        // console.log(`JOB (${this.jobName }): Start fetching Brazil Distributors from FAST table`);
-        // get a list of distributors entities for given list of CustomerIDs
-        const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const result = await SELECT.from(PT_TMDIST).where({ CountryCode: 'BR' } );
-        // console.log(`JOB (${this.jobName }): End fetching Brazil Distributors from FAST table`);
-        return result;
-    } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Fetching data form ${PT_TMDIST.name} failed`, `Cause: ${error}`);
-        throw error;
-    }
+ async getFASTDistributors(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil Distributors from FAST table`);
+    // get a list of distributors entities for given list of CustomerIDs
+    const { PT_TMDIST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+    const result = await tx.run(SELECT.from(PT_TMDIST).where({ CountryCode: 'BR' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil Distributors from FAST table`);
+    return result;
 }
 
 /**
@@ -814,18 +642,13 @@ aggregateDocuments(mappedDocs, mappedOffers){
  * @param {Array} SKUs 
  * @returns {Array<PT_TMSKUPRDPCK>} a list of existing SKU
  */
- async getFASTSKUs() {
-    try {
-        // console.log(`JOB (${this.jobName }): Start fetching Brazil SKUs from FAST table`);
-        // get a list of distributors entities for given list of CustomerIDs
-        const { PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const result = await SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'BR', ActiveRecord: 'Yes' } );
-        // console.log(`JOB (${this.jobName }): End fetching Brazil SKUs from FAST table`);
-        return result;
-    } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Fetching data form ${PT_TMSKUPRDPCK.name} failed`, `Cause: ${error}`);
-        throw error;
-    }
+ async getFASTSKUs(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil SKUs from FAST table`);
+    // get a list of distributors entities for given list of CustomerIDs
+    const { PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
+    const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'BR', ActiveRecord: 'Yes' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil SKUs from FAST table`);
+    return result;
 }
 
 /**
@@ -833,18 +656,13 @@ aggregateDocuments(mappedDocs, mappedOffers){
  * @param {Array} priceConditionClassifications 
  * @returns {Array<PriceConditionClassification>} a list of existing SKU
  */
- async getPriceConditionClassification() {
-    try {
-        // console.log(`JOB (${this.jobName }): Start fetching Brazil PriceConditionClassification from FAST table`);
-        // get a list of PriceConditionClassifications
-        const { PriceConditionClassification } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        const result = await SELECT.from(PriceConditionClassification).where({ CountryCode: 'BR', Classification: 'Tender', ProductType: 'All', ConditionType: 'Discount' } );
-        // console.log(`JOB (${this.jobName }): End fetching Brazil PriceConditionClassification from FAST table`);
-        return result;
-    } catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Fetching data form ${PriceConditionClassification.name} failed`, `Cause: ${error}`);
-        throw error;
-    }
+ async getPriceConditionClassification(tx) {
+    console.log(`JOB (${this.jobName }): Start fetching Brazil PriceConditionClassification from FAST table`);
+    // get a list of PriceConditionClassifications
+    const { PriceConditionClassification } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    const result = await tx.run(SELECT.from(PriceConditionClassification).where({ CountryCode: 'BR', Classification: 'Tender', ProductType: 'All', ConditionType: 'Discount' } ));
+    console.log(`JOB (${this.jobName }): End fetching Brazil PriceConditionClassification from FAST table`);
+    return result;
 }
 
 /**
@@ -857,7 +675,7 @@ aggregateDocuments(mappedDocs, mappedOffers){
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async  processIndirectIbizOpportunities(indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices) {
+ async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices) {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
@@ -869,66 +687,39 @@ aggregateDocuments(mappedDocs, mappedOffers){
         const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices);
         const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(indirectIbizOpportunityDocs);
 
-        // 0.1 Aggregate data
-        // 0.1 Aggregate Data - DO NOT CHANGE THE ORDER OF AGGREGATION METHODS - mapped records beging updated in each step of aggregation
-        const newTenders = await this.aggregateTenders(mappedTenders); 
-        const {
-            newOffers,
-            existingOffers,
-            newOfferStatusses
-        } = await this.aggregateOffers(mappedOffers, mappedTenders);
-        const { newProducts, newLots } = this.aggregateOfferProducts(mappedProducts, mappedOffers);
-        const newDocuments = this.aggregateDocuments(mappedDocs, mappedOffers);
-        const newPrices = this.aggregatePrices(mappedPrice, mappedProducts);
-        const newPriceConditions = this.aggregatePriceConditions(mappedPriceCondition, mappedOffers);
+         // 1. Create/update entries in PT_TMTEND
+         await this.upsertFASTTenders(tx, mappedTenders);
 
-        const spawnPromises = [];
-        // Upsert aggregated data
-        for(const [index, offer] of newOffers.entries()){
-            const tender = newTenders.filter(t => t.TenderID === offer.TenderID);
-            const existingOffer = existingOffers.filter(eo => eo.OfferID.includes(offer.OfferID.slice(0,12)));
-            // const offerStatusses = newOfferStatusses.filter(st => st.TenderID === tender.TenderID);
-            const products = newProducts.filter(prd => prd.TenderID === offer.TenderID);
-            // const lots = newLots.filter(lot => lot.OfferID.includes(tender.TenderID));
-            const documents = newDocuments.filter(d => d.TenderID === offer.TenderID);
-            const prices = newPrices.filter(p => p.TenderID === offer.TenderID);
-            const priceConditions = newPriceConditions.filter(pc => pc.OfferID.includes(offer.TenderID));
+         // 2. Create/update entries in PT_TMOFRS
+         await this.upsertFASTOffers(tx, mappedOffers, mappedTenders);
+ 
+         // 3. Create/update entries in PT_TMOFPR
+         await this.upsertFASTOfferProducts(tx, mappedProducts, mappedOffers);
 
-            const opportunity = indirectIbizOpportunities[index]; // we know that the order of directIbizOpportunities and newTenders are correct. Index points to the same opportunity
-            const opportunityItems = indirectIbizOpportunityItems.filter(i => i.parent_ID === opportunity.ID);
-            const opportunityDocs = indirectIbizOpportunityDocs.filter(d => d.Qps_ID === opportunity.ID);
+         // 4. Create/update entries in PT_TMBDPR
+         await this.upsertFASTPrice(tx, mappedPrice, mappedProducts);
 
-            spawnPromises.push(
-                this._runDetached(async (tx) => {
+         // 5. Create/update entries in PRICECONDITION
+         await this.upsertFASTPriceConditions(tx, mappedPriceCondition, mappedOffers);
 
-                    // 1. Create/update entries in PT_TMTEND
-                    await this.upsertFASTTenders(tx, tender);
+         // 6. Create/update entries in DocumentsDownload
+        await this.upsertFASTDocumentsDownload(tx, mappedDocs, mappedOffers);
+ 
+         // 7. Delete all records from IbizQPS and IbizCcsQpsItems after successful processing.
+         const { IbizQps } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+         await tx.run(DELETE.from(IbizQps).where({NU_DIRETO_INDIRETO: 1}));
+         const { IbizCcsQpsItems } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+         const parentIDs = mappedProducts.map(pr => pr.parent_ID);
+         Array.isArray(parentIDs) && parentIDs.length > 0 && await tx.run(DELETE.from(IbizCcsQpsItems).where({parent_ID: {in: parentIDs}}));
+         const { IbizDocs } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+         const docParentIDs = mappedDocs.map(pr => pr.parent_ID);
+         Array.isArray(docParentIDs) && docParentIDs.length > 0 && await tx.run(DELETE.from(IbizDocs).where({Qps_ID: {in: docParentIDs}}));
 
-                    // 2. Create/update entries in PT_TMOFRS
-                    await this.upsertFASTOffers(tx, [offer], existingOffer);
-
-                    // 3. Create entries in PT_TMOFPR
-                    await this.insertOfferProducts(tx, products);
-
-                    // 4. Create entries in PT_TMBDPR
-                    await this.insertFASTPrice(tx, prices);
-
-                    // 5. Create entries in PRICECONDITION
-                    await this.insertFASTPriceConditions(tx, priceConditions);
-
-                    // 6. Create entries in DocumentsDownload
-                    await this.insertDocumentsDownload(tx, documents);
-                    
-                })
-                .then(this._onProcessingSuccess.bind(this, { opportunity, opportunityItems, opportunityDocs} ))
-                .catch(this._onProcessingFail.bind(this, { opportunity, opportunityItems, opportunityDocs }))
-            );
-        };
-
-        return Promise.all(spawnPromises);
+        console.log(`JOB (${this.jobName }): Processing of Indirect ibiz opportunities successfully completed.`);
 
     }catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Processing of Indirect ibiz opportunities failed. Cause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Processing of Indirect ibiz opportunities failed.`);
+        console.error(error);
         throw error;
     }
 }
@@ -1286,21 +1077,22 @@ mapIbizOpportunitiesDocstoFASTDocumentsDownload(ibizOpportunityDocs){
  * @param {*} fieldname 
  * @returns - next highest value
  */
- async getNextValue (table, fieldname, countryCode,){
+ async getNextValue (tx, table, fieldname, countryCode,){
     let nextValue = 1;
     try {
         let results = [];
         if(countryCode){
-            results = await SELECT.from(table, ['Max(' + fieldname + ') as max']).where({CountryCode: countryCode});
+            results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']).where({CountryCode: countryCode}));
         }else{
-            results = await SELECT.from(table, ['Max(' + fieldname + ') as max']);
+            results = await tx.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
         }
         if (results[0].max) {
             nextValue = results[0].max + 1
         }
         return nextValue;
     }catch (error) {
-        console.error(`JOB (${this.jobName }): ERROR - Fetching next highest value for ${fieldname} from ${table.name} failed. Cause: ${error}`);
+        console.error(`JOB (${this.jobName }): ERROR - Fetching next highest value for ${fieldname} from ${table.name} failed`);
+        console.error(error);
         throw error;
     }
 }
