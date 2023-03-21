@@ -172,11 +172,26 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
     mapResponseToFASTCustomerPricesQC(response, qcPrice){
         return Object.assign({}, qcPrice, {
-            SAP_VKORG : response.VKORG,
-            SAP_KSCHL : response.KSCHL,
-            SAP_KUNNR : response.KUNNR,
-            SAP_MATNR : response.MATNR,
-            SAP_YCIG  : response.YCIG
+            SAP_VKORG : response.VKORG || null,
+            SAP_KSCHL : response.KSCHL || null,
+            SAP_KUNNR : response.KUNNR || null,
+            SAP_MATNR : response.MATNR || null,
+            SAP_YCIG  : response.YCIG || null,          
+            SAP_KBETR : response.KBETR || null,   
+            SAP_KPEIN : response.KPEIN || null,   
+            SAP_KONWA : response.KONWA || null,   
+            SAP_DATAB : response.DATAB || null,   
+            SAP_DATBI : response.DATBI || null,   
+            SAP_VTWEG : response.VTWEG || null,   
+            SAP_MAKTX : response.MAKTX || null,   
+            SAP_DISPKNRMM : response.DISPKNRMM || null,
+            SAP_DISPKNRNM : response.DISPKNRNM || null,
+            SAP_KNRME : response.KNRME || null,   
+            SAP_DISPKNRZM : response.DISPKNRZM || null,
+            SAP_KNREZ : response.KNREZ || null,   
+            SAP_KNRDD : response.KNRDD || null,   
+            SAP_KPMEIN : response.KPMEIN || null,  
+            SAP_KNRMAT : response.KNRMAT || null  
         }); 
     }
 
