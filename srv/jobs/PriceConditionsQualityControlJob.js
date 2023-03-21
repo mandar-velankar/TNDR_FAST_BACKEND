@@ -78,8 +78,8 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
      */
     updateCustomerPriceQC(tx, customerPriceQC){
         if(!customerPriceQC) return false;
-        const { customerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        return tx.run(UPDATE(customerPricesQC).with(customerPriceQC).where({ ID: customerPriceQC.ID }));
+        const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        return tx.run(UPDATE(CustomerPricesQC).with(customerPriceQC).where({ ID: customerPriceQC.ID }));
     };
 
 
@@ -114,7 +114,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
                     // 2. get SAP response 
                     const response = await this.getPriceConditionFromSAP(qcPrice.CountryCode,requestMessage);
-                    const item = response["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.[0]?.["LT_OUT_FREE_PRICE_COND"]?.[0]?.["item"]?.[0];
+                    const item = response["data"]?.["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.[0]?.["LT_OUT_FREE_PRICE_COND"]?.[0]?.["item"]?.[0];
 
                     // 3. map and validate response 
                     if(item){
