@@ -114,9 +114,16 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
                     // 2. get SAP response 
                     const response = await this.getPriceConditionFromSAP(qcPrice.CountryCode,requestMessage);
-                    const item = response["data"]?.["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.[0]?.["LT_OUT_FREE_PRICE_COND"]?.[0]?.["item"]?.[0];
 
-                    // 3. map and validate response 
+                    // 3. get response item
+                    let item;
+                    if(qcPrice.KSCHL === "YA01" || qcPrice.KSCHL === "YA03"){
+                        item = response["data"]?.["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.["LT_OUT_FREE_PRICE_COND"]?.["item"];
+                    }else {
+                        item = response["data"]?.["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.["LT_OUT_PRICE_COND"]?.["item"];
+                    }
+
+                    // 4. map and validate response 
                     if(item){
                         qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
                         qcPrice.Status = this.validatePriceCondition(qcPrice);
@@ -125,7 +132,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                         else qcPrice.Status = "NotInSAP";
                     }
 
-                    // 4. update PriceCondition QC
+                    // 5. update PriceCondition QC
                     await this.updateCustomerPriceQC(tx, qcPrice);
                     
                 })
@@ -201,8 +208,8 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
             case "YA01":
             case "YA03":
                 if (
-                    qcPrice.DATAB.getTime() === qcPrice.SAP_DATB.getTime()
-                    && qcPrice.DATBI.getTime() === qcPrice.SAP_DATBI.getTime()
+                    qcPrice.DATAB === qcPrice.SAP_DATB
+                    && qcPrice.DATBI === qcPrice.SAP_DATBI
                     && qcPrice.BOMAT === qcPrice.SAP_KNRMAT
                     && qcPrice.KSTBM === qcPrice.SAP_DISPKNRZM
                     && qcPrice.MIKBAS === qcPrice.SAP_DISPKNRMM
