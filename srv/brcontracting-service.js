@@ -295,7 +295,7 @@ module.exports = (srv) => {
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
                 ITEM_QTD: el?.RequestedVolume, //RequestedQty
-                MANUAL_D: (Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
+                MANUAL_D: Math.round(100 * ( Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount))),
                 CAP: productPriceCondition?.CAP === "No" ? 0 : capBrazil.CAP
             }
         })
