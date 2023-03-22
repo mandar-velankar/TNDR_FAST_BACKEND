@@ -27,12 +27,16 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         this.db = await cds.connect.to('db');
 
         try {
+
+            // get mail Template
+            const mailTemplate = await this.getMailTemplate('PriceConditionsQualityControlNotificationMail_ES');
+
             // Fetch data
-            const customerPricesQC = await this.getCustomerPricesQC();
-            this.numberOfRecords = customerPricesQC.length;
+            const failedCustomerPricesQC = await this.getCustomerPricesQC();
+            this.numberOfRecords = failedCustomerPricesQC.length;
 
             // Process data
-            await this.processCustomerPricesQC(customerPricesQC);
+            await this.processCustomerPricesQC(failedCustomerPricesQC);
 
             // log finish
             this._finishMessage(this.numberOfRecords);
@@ -63,12 +67,12 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
     }
 
     /**
-     * Gets CustomerPricesQC records with status 'ToCheck'
+     * Gets CustomerPricesQC records with status 'Failed' and notification e-mail not yet sent
      * @returns {Promise}
      */
     getCustomerPricesQC() {
         const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        return SELECT.from(CustomerPricesQC).where({Status: 'ToCheck'});
+        return SELECT.from(CustomerPricesQC).where({Status: 'Failed', emailNotificationSent: false});
     }
 
     /**
@@ -97,6 +101,20 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
             .on('succeeded', resolve)
             .on('failed', reject)
         })
+    }
+
+    async getMailTemplate(templateId) {
+        console.log('Fetching mail templates ...');
+        console.table(templateId);
+        const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
+        try{
+            const result = await SELECT.one.from(MailTemplate)
+            .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+            .where({ TemplateId: templateId });
+            return result;
+        }catch(error){
+            console.error(`No mail template found for ${templateId} `, `Cause: ${error}`);
+        }
     }
     
     async processCustomerPricesQC(customerPricesQC){
