@@ -2,6 +2,8 @@ const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 const { ProcessMaterialsBrazil, ProcessCustomersBrazil } = require('./BrazilJobs');
 const PriceAgreementMailJob = require("./PriceAgreementMailJob");
 const PriceAgreementPriceConditionNotificationMailJob = require("./PriceAgreementPriceConditionNotificationMailJob");
+const PriceAgreementNotificationNetPriceAbovePVLJob = require("./PriceAgreementNotificationNetPriceAbovePVLJob");
+const PriceAgreementNotificationNetPriceBelowFloorJob = require("./PriceAgreementNotificationNetPriceBelowFloorJob");
 const ExtendPriceAgreements = require("./PriceAgreementJobs");
 const ProcessMasterDataPrices = require("./brasil/ProcessMasterDataPrices");
 const ProcessBrazilCustomers = require("./brasil/ProcessCustomers");
@@ -34,6 +36,12 @@ module.exports = class JobFactory {
                 break;
             case this.jobNames.PriceAgreementPriceConditionNotificationMailJob:
                 return new PriceAgreementPriceConditionNotificationMailJob(jobName,jobTime)
+                break;
+            case this.jobNames.PriceAgreementNotificationNetPriceAbovePVLJob:
+                return new PriceAgreementNotificationNetPriceAbovePVLJob(jobName,jobTime)
+                break;
+            case this.jobNames.PriceAgreementNotificationNetPriceBelowFloorJob:
+                return new PriceAgreementNotificationNetPriceBelowFloorJob(jobName,jobTime)
                 break;
             case this.jobNames.ExtendPriceAgreements:
                 return new ExtendPriceAgreements(jobName,jobTime)
@@ -80,6 +88,8 @@ module.exports = class JobFactory {
             ProcessCustomersBrazilJob: "ProcessCustomersBrazilJob", // TODO: are these old jobs? if yes, remove them
             PriceAgreementMailJob: "PriceAgreementMailJob",
             PriceAgreementPriceConditionNotificationMailJob: "PriceAgreementPriceConditionNotificationMailJob",
+            PriceAgreementNotificationNetPriceAbovePVLJob: "PriceAgreementNotificationNetPriceAbovePVLJob",
+            PriceAgreementNotificationNetPriceBelowFloorJob: "PriceAgreementNotificationNetPriceBelowFloorJob",
             ExtendPriceAgreements: "ExtendPriceAgreements",
             ProcessMasterDataPrices:"ProcessMasterDataPrices",
             ProcessBrazilCustomers:"ProcessBrazilCustomers",
