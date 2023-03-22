@@ -652,9 +652,7 @@ module.exports = async (srv) => {
                     console.log(e);
                 }
             }
-            // pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.ANZPK, 0);
-            // EFRCL- 305028-Italy-Delivery monitoring never worked
-            pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.LFIMG, 0);
+            pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.ANZPK, 0);
         }
     });
 
