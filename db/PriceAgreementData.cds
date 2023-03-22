@@ -345,4 +345,5 @@ entity CustomerPricesQC: cuid, managed {
         NotInSAP;
     }; 
     CountChecks                 : Integer; // Number of 
+    emailNotificationSent       : Boolean; // Owners have been notified in case QC failed
 }
