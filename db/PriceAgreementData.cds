@@ -103,7 +103,7 @@ entity CustomerPrices: cuid, managed {
     EffectiveDate: DateTime;
     ExpiryDate: DateTime;
     PriceAgreementId: String not null;
-    PriceAgreement: Association to PriceAgreements;
+    PriceAgreement: Association to PriceAgreements on PriceAgreement.ID = PriceAgreementId;
     InstituteId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     CountryCode: String not null;
@@ -117,6 +117,7 @@ entity CustomerPrices: cuid, managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
+    ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
 }
 
 entity SettlementDates: managed {
@@ -131,7 +132,7 @@ entity CustomerPrices_History: managed {
     EffectiveDate: DateTime;
     ExpiryDate: DateTime;
     PriceAgreementId: String not null;
-    PriceAgreement: Association to PriceAgreements;
+    PriceAgreement: Association to PriceAgreements on PriceAgreement.ID = PriceAgreementId;
     InstituteId: Integer;
     CountryCode: String not null;
     ProductPackId: Integer not null;
@@ -343,7 +344,10 @@ entity CustomerPricesQC: cuid, managed {
         Failed;
         OK;
         NotInSAP;
-    }; 
+    } default 'ToCheck'; 
     CountChecks                 : Integer; // Number of 
     emailNotificationSent       : Boolean default false; // Owners have been notified in case QC failed
+    // Associations
+    CustomerPrice               : Association to CustomerPrices on CustomerPrice.ID = CustomerPriceId;
+    Institute                   : Association to MasterData.PT_TMINST on Institute.CustomerID = LTRIM(KUNNR, '0') and Institute.CountryCode = CountryCode;
 }
