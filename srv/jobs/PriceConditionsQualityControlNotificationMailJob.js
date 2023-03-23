@@ -35,8 +35,8 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
             const customerPricesQC_IT = failedCustomerPricesQC.filter(c => c.CountryCode === "IT");
 
             // Process data
-            // await this.processCustomerPricesQC(customerPricesQC_ES, "ES");
-            // await this.processCustomerPricesQC(customerPricesQC_IT, "IT");
+            await this.processCustomerPricesQC(customerPricesQC_ES, "ES");
+            await this.processCustomerPricesQC(customerPricesQC_IT, "IT");
 
             // log finish
             this._finishMessage(this.numberOfRecords);
@@ -130,11 +130,9 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         let outbox = [];
 
-        // add/change some fields in the data array
+        // update the Link with correct path
         data.forEach(d => {
-            d.EffectiveDate = new Date(d.EffectiveDate).toJSON().substring(0,10),
-            d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10),
-            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.PriceAgreementId}`
+            d.Link = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.Link}`
         })
 
         outbox.push({
