@@ -61,6 +61,7 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         return SELECT.from(CustomerPricesQC)
                 .columns(
+                    'ID',
                     'CountryCode',
                     `LTRIM(KUNNR, '0') as InstituteID`, 
                     'Institute.InstituteName', 
@@ -73,21 +74,21 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
                     'KBETR as PriceInFAST',
                     'SAP_KBETR as PriceInSAP',
                     'CustomerPrice.PriceAgreement.ID as Link',
-                    'CustomerPrice.PriceAgreement.User.UserName as PriceAgreementOwner'
+                    'CustomerPrice.PriceAgreement.User.UserEmail as PriceAgreementOwnerEmail'
                 )
                 .where({Status: 'Failed', emailNotificationSent: false});
     }
 
 
     /**
-     * Updates CustomerPricesQC
+     * Updates CustomerPricesQC emailNotificationSent
      * @param {*} customerPriceQC 
      * @returns {Promise}
      */
-    updateCustomerPriceQC(tx, customerPriceQC){
-        if(!customerPriceQC) return false;
+    async updateCustomerPriceQCNotification(customerPriceQCId){
+        if(!customerPriceQCId) return false;
         const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        return tx.run(UPDATE(CustomerPricesQC).with(customerPriceQC).where({ ID: customerPriceQC.ID }));
+        return UPDATE(CustomerPricesQC).with({emailNotificationSent: true}).where({ ID: customerPriceQCId });
     };
 
 
@@ -104,6 +105,8 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         // console.log(mails);
         if(mail){
             await this.addMailsToOutbox(mail);
+            // update QC with notification sent 
+            customerPricesQC.forEach(cp => this.updateCustomerPriceQCNotification(cp.ID));
         } else{
             console.log(`No mail to add to outbox for template ${templateId}`);
         }
@@ -129,18 +132,28 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         const appEnv = cfenv.getAppEnv();
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         let outbox = [];
+        const recipients = [];
 
         // update the Link with correct path
         data.forEach(d => {
-            d.Link = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.Link}`
+            d.Link = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.Link}`;
+            recipients.push(d.PriceAgreementOwnerEmail);
         })
+
+        // additional recipients per country
+        if(data[0].CountryCode === "IT"){
+            recipients.push("andrea.duranti@bayer.com");
+            recipients.push("massimo.bettinelli@bayer.com");
+        }else if(data[0].CountryCode === "ES"){
+            recipients.push("commercialagreements.es@bayer.com");
+        }
 
         outbox.push({
             CountryCode: data[0].CountryCode,
             TenderID: data[0].TenderId,
             OfferID: data[0].OfferId,
             Sender: 'FAST-Admin@bayer.com',
-            Recipients: undefined,
+            Recipients: recipients,
             Subject: template.title,
             MailBody: this.generateMailBody(template, { 
                 data: { 
@@ -151,7 +164,7 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         });
         
         if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
-            console.log(`No template found for Customer Price QC of offer ${outbox[0].OfferId} with countrycode ${outbox[0].CountryCode}`);
+            console.log(`No template found for Customer Price QC of offer ${outbox[0].OfferID} with countrycode ${outbox[0].CountryCode}`);
             return;
         }
         return outbox;
