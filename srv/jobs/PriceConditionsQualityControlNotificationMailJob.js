@@ -144,30 +144,26 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
             Subject: template.title,
             MailBody: this.generateMailBody(template, { 
                 data: { 
-                    CustomerPrices: data 
+                    CustomerPricesQC: data 
                 }
             }),
             Sent: false
         });
         
         if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
-            console.log(`No template found for Customer Price of tender ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
+            console.log(`No template found for Customer Price QC of offer ${outbox[0].OfferId} with countrycode ${outbox[0].CountryCode}`);
             return;
         }
         return outbox;
     }
 
     async addMailsToOutbox(mail, syncDate) {
-        console.log(`Adding notification mail for Price Conditions synchronised with SAP on: ${syncDate.toDateString()}`);
+        console.log(`Adding notification mail for Price Conditions QC ... `);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        const tx = this.db.tx();
         try {
-            const mailsResult = await tx.run(INSERT(mail).into(OutgoingMails));
-            await tx.commit();
-            return mailsResult;
+            return await INSERT(mail).into(OutgoingMails);
         } catch (error) {
             console.error(error);
-            await tx.rollback();
             throw error;
         }
     }
