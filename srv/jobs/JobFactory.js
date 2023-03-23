@@ -15,6 +15,7 @@ const NewIBIZTenderNotifications = require("./brasil/ProcessIbizTenderNotificati
 const ProcessTenderResults = require("./brasil/ProcessTenderResults");
 const ProcessSpainRappelData = require("./ProcessSpainRappelData");
 const PriceConditionQualityControl = require("./PriceConditionsQualityControlJob");
+const PriceConditionsQualityControlNotificationMail = require("./PriceConditionsQualityControlNotificationMailJob");
 
 module.exports = class JobFactory {
     static create(jobName, jobTime) {
@@ -75,6 +76,9 @@ module.exports = class JobFactory {
             case this.jobNames.PriceConditionQualityControl:
                 return new PriceConditionQualityControl(jobName,jobTime)
                 break;
+            case this.jobNames.PriceConditionsQualityControlNotificationMail:
+                return new PriceConditionsQualityControlNotificationMail(jobName,jobTime)
+                break;
             default:
                 throw new Error('Job type not supported');
                 break;
@@ -100,7 +104,8 @@ module.exports = class JobFactory {
             NewIBIZTenderNotifications:"NewIBIZTenderNotifications",
             ProcessTenderResults:"ProcessTenderResults",
             ProcessSpainRappelData: "ProcessSpainRappelData",
-            PriceConditionQualityControl: "PriceConditionQualityControl"
+            PriceConditionQualityControl: "PriceConditionQualityControl",
+            PriceConditionsQualityControlNotificationMail: "PriceConditionsQualityControlNotificationMail"
         };
     }
 }
