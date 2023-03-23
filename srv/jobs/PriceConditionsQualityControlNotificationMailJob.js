@@ -2,8 +2,8 @@ const cds = require('@sap/cds');
 const BaseJob = require('./BaseJob');
 const core = require('@sap-cloud-sdk/core');
 const ServiceHelper = require('../utils/ServiceHelper');
-const axios = require('axios');
-const qs = require("qs");
+const Handlebars = require("handlebars");
+const cfenv = require("cfenv");
 
 module.exports = class PriceConditionsQualityControlNotificationMail extends BaseJob {
 
@@ -11,8 +11,6 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         super(jobName,jobTime);
         this.jobName = jobName.toUpperCase();
         this.startTime = 0;
-        this.failed = 0;
-        this.success = 0;
         this.numberOfRecords = 0;
     }
 
@@ -28,15 +26,17 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
 
         try {
 
-            // get mail Template
-            const mailTemplate = await this.getMailTemplate('PriceConditionsQualityControlNotificationMail_ES');
-
             // Fetch data
             const failedCustomerPricesQC = await this.getCustomerPricesQC();
             this.numberOfRecords = failedCustomerPricesQC.length;
 
+            // split data
+            const customerPricesQC_ES = failedCustomerPricesQC.filter(c => c.CountryCode === "ES");
+            const customerPricesQC_IT = failedCustomerPricesQC.filter(c => c.CountryCode === "IT");
+
             // Process data
-            await this.processCustomerPricesQC(failedCustomerPricesQC);
+            // await this.processCustomerPricesQC(customerPricesQC_ES, "ES");
+            // await this.processCustomerPricesQC(customerPricesQC_IT, "IT");
 
             // log finish
             this._finishMessage(this.numberOfRecords);
@@ -47,23 +47,10 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         }
     }
 
-    async _onProcessingSuccess (){
-        this.success++;
-    }
-
-    /**
-     * Logs and updates the status of the processed record in case of an error
-     * @param {*} error 
-     */
-    async _onProcessingFail (error){
-        this.failed++;
-        console.log(error);
-    }
-
     _finishMessage(processed){
         const end = new Date().getTime();
         const time = end - this.startTime;
-        console.log(`JOB (${this.jobName }): Processing completed. - Processed: ${processed} Success: ${this.success} Failed: ${this.failed} - Execution time: ${time} ms`);
+        console.log(`JOB (${this.jobName }): Processing completed. - Processed: ${processed} - Execution time: ${time} ms`);
     }
 
     /**
@@ -72,8 +59,25 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
      */
     getCustomerPricesQC() {
         const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        return SELECT.from(CustomerPricesQC).where({Status: 'Failed', emailNotificationSent: false});
+        return SELECT.from(CustomerPricesQC)
+                .columns(
+                    'CountryCode',
+                    `LTRIM(KUNNR, '0') as InstituteID`, 
+                    'Institute.InstituteName', 
+                    `LTRIM(MATNR, '0') as MaterialNumber`,
+                    'CustomerPrice.ProductPack.PRODUCTPACKNAME as ProductPackName', 
+                    'CustomerPrice.PriceAgreement.OfferId',
+                    'KSCHL as PriceCondition',
+                    'DATAB as EffectiveDate',
+                    'DATBI as ExpiryDate',
+                    'KBETR as PriceInFAST',
+                    'SAP_KBETR as PriceInSAP',
+                    'CustomerPrice.PriceAgreement.ID as Link',
+                    'CustomerPrice.PriceAgreement.User.UserName as PriceAgreementOwner'
+                )
+                .where({Status: 'Failed', emailNotificationSent: false});
     }
+
 
     /**
      * Updates CustomerPricesQC
@@ -87,24 +91,27 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
     };
 
 
-    /**
-     * Runs the given function as detached continuation in a specified event context.
-     * @see https://cap.cloud.sap/docs/node.js/cds-context-tx#cds-spawn
-     * @async
-     * @callback Even though the callback function is executed as a background job, all asynchronous operations inside the callback function must be awaited. Otherwise, transaction handling does not work properly.
-     * @param {*} fn 
-     * @returns {Promise}
-     */
-    _runDetached(fn){
-        return new Promise((resolve, reject) => {
-            cds.spawn (fn)
-            .on('succeeded', resolve)
-            .on('failed', reject)
-        })
+    
+    async processCustomerPricesQC(customerPricesQC, countryCode){
+
+        if(!customerPricesQC || customerPricesQC.length <= 0) return;
+
+        // get mail Template
+        const templateId = `PriceConditionsQualityControlNotificationMail_${countryCode}`;
+        const mailTemplate = await this.getMailTemplate(templateId);
+
+        let mail = this.mapDataToMail(mailTemplate,templateId)(customerPricesQC);
+        // console.log(mails);
+        if(mail){
+            await this.addMailsToOutbox(mail);
+        } else{
+            console.log(`No mail to add to outbox for template ${templateId}`);
+        }
+
     }
 
     async getMailTemplate(templateId) {
-        console.log('Fetching mail templates ...');
+        console.log('Fetching mail template ...');
         console.table(templateId);
         const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
         try{
@@ -116,196 +123,63 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
             console.error(`No mail template found for ${templateId} `, `Cause: ${error}`);
         }
     }
-    
-    async processCustomerPricesQC(customerPricesQC){
-
-        if(!customerPricesQC || customerPricesQC.length <= 0) return;
-
-        const spawnPromises = [];
-        for(let qcPrice of customerPricesQC){
-
-            spawnPromises.push(
-                this._runDetached(async (tx) => {
-
-                    // 1. create SAP request message
-                    const requestMessage = this.createRequestMessage(qcPrice); 
-
-                    // 2. get SAP response 
-                    const response = await this.getPriceConditionFromSAP(qcPrice.CountryCode,requestMessage);
-
-                    // 3. get response item
-                    let item;
-                    if(qcPrice.KSCHL === "YA01" || qcPrice.KSCHL === "YA03"){
-                        item = response["data"]?.["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.["LT_OUT_FREE_PRICE_COND"]?.["item"];
-                    }else {
-                        item = response["data"]?.["_-BAY0_-GZ_FAST_PRIC_COND.Response"]?.["LT_OUT_PRICE_COND"]?.["item"];
-                    }
-
-                    // 4. map and validate response 
-                    if(item){
-                        qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
-                        qcPrice.Status = this.validatePriceCondition(qcPrice);
-                    }else{
-                        if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
-                        else qcPrice.Status = "NotInSAP";
-                    }
-
-                    // 5. update PriceCondition QC
-                    await this.updateCustomerPriceQC(tx, qcPrice);
-                    
-                })
-                .then(this._onProcessingSuccess.bind(this))
-                .catch(this._onProcessingFail.bind(this))
-            );
-            
-        };
-
-        return Promise.all(spawnPromises);
-
-    }
-
-    
-    createRequestMessage(qcPrice){
-        const conditionType = qcPrice.KSCHL;
-        return {
-            "_-BAY0_-GZ_FAST_PRIC_COND": {
-              "IT_INPUT_COND": {
-                "item": [
-                  {
-                    "VKORG": qcPrice.VKORG,
-                    "KSCHL": qcPrice.KSCHL,
-                    "KUNNR": qcPrice.KUNNR,
-                    "MATNR": qcPrice.MATNR,
-                    "YCIG": qcPrice.YCIG
-                  }
-                 
-                ]
-              },
-              "IV_PRICE_COND": (conditionType !== "YA01" &&  conditionType !== "YA03") ? "X" : "",
-              "IV_FREE_COND": (conditionType === "YA01" ||  conditionType === "YA03") ? "X" : ""
-            }
-        }
-          
-    }
-
-    mapResponseToFASTCustomerPricesQC(response, qcPrice){
-        return Object.assign({}, qcPrice, {
-            SAP_VKORG : response.VKORG || null,
-            SAP_KSCHL : response.KSCHL || null,
-            SAP_KUNNR : response.KUNNR || null,
-            SAP_MATNR : response.MATNR || null,
-            SAP_YCIG  : response.YCIG || null,          
-            SAP_KBETR : response.KBETR || null,   
-            SAP_KPEIN : response.KPEIN || null,   
-            SAP_KONWA : response.KONWA || null,   
-            SAP_DATAB : response.DATAB || null,   
-            SAP_DATBI : response.DATBI || null,   
-            SAP_VTWEG : response.VTWEG || null,   
-            SAP_MAKTX : response.MAKTX || null,   
-            SAP_DISPKNRMM : response.DISPKNRMM || null,
-            SAP_DISPKNRNM : response.DISPKNRNM || null,
-            SAP_KNRME : response.KNRME || null,   
-            SAP_DISPKNRZM : response.DISPKNRZM || null,
-            SAP_KNREZ : response.KNREZ || null,   
-            SAP_KNRDD : response.KNRDD || null,   
-            SAP_KPMEIN : response.KPMEIN || null,  
-            SAP_KNRMAT : response.KNRMAT || null  
-        }); 
-    }
 
 
-    validatePriceCondition(qcPrice){
-        switch(qcPrice.KSCHL){
-            case "YLTP":
-            case "YL60":
-            case "YDC0":
-                if (
-                    qcPrice.KBETR === qcPrice.SAP_KBETR
-                    && qcPrice.DATAB === qcPrice.SAP_DATAB
-                    && qcPrice.DATBI === qcPrice.SAP_DATBI
-                )
-                {
-                    return "OK";
+    mapDataToMail = (template,templateId) => data => {
+        const appEnv = cfenv.getAppEnv();
+        const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
+        let outbox = [];
+
+        // add/change some fields in the data array
+        data.forEach(d => {
+            d.EffectiveDate = new Date(d.EffectiveDate).toJSON().substring(0,10),
+            d.ExpiryDate = new Date(d.ExpiryDate).toJSON().substring(0,10),
+            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.PriceAgreementId}`
+        })
+
+        outbox.push({
+            CountryCode: data[0].CountryCode,
+            TenderID: data[0].TenderId,
+            OfferID: data[0].OfferId,
+            Sender: 'FAST-Admin@bayer.com',
+            Recipients: undefined,
+            Subject: template.title,
+            MailBody: this.generateMailBody(template, { 
+                data: { 
+                    CustomerPrices: data 
                 }
-            case "YLTP":
-            case "YLTF":
-                if (
-                    qcPrice.KBETR === qcPrice.SAP_KBETR
-                    && qcPrice.KPEIN === qcPrice.SAP_KPEIN
-                    && qcPrice.DATAB === qcPrice.SAP_DATAB
-                    && qcPrice.DATBI === qcPrice.SAP_DATBI
-                )
-                {
-                    return "OK";
-                }
-            case "YA01":
-            case "YA03":
-                if (
-                    qcPrice.DATAB === qcPrice.SAP_DATB
-                    && qcPrice.DATBI === qcPrice.SAP_DATBI
-                    && qcPrice.BOMAT === qcPrice.SAP_KNRMAT
-                    && qcPrice.KSTBM === qcPrice.SAP_DISPKNRZM
-                    && qcPrice.MIKBAS === qcPrice.SAP_DISPKNRMM
-                    && qcPrice.MXBAS === qcPrice.SAP_DISPKNRNM
-                )
-                {
-                    return "OK";
-                }
-        }
-
-        return "Failed";
-
-    }
-
-    async getPriceConditionFromSAP(countryCode, body){
-        if (!body) {
-            throw Error("The body of the request is missing.");
-        }
-        
-        const { SchedulerApiConfig } = this.db.entities("com.bayer.SXTENDER.AdminData");
-        const apiConfig = await SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement', CountryCode: countryCode, Resource: "PriceConditionQC"});
-        const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
-        const oauthCredentials = await this.getBearerToken();
-
-        console.log(`JOB (${this.jobName }): Calling ${url} ...`);
-
-        return axios({
-            method: 'post',
-            url: url,
-            headers: {
-                'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify(body)
+            }),
+            Sent: false
         });
         
-    };
-
-
-    async getBearerToken() {
-        const { SchedulerApiConfig, SchedulerApiConfigOAuth } = this.db.entities("com.bayer.SXTENDER.AdminData");
-
-        // get api config
-        const priceAgreementApi = await cds.run(SELECT.one.from(SchedulerApiConfig).where({Provider:'PriceAgreement', Resource: 'PriceConditionQC'}));
-        const oauthAuth  = await cds.run(SELECT.one.from(SchedulerApiConfigOAuth, priceAgreementApi.OAuth_ID));
-        
-        if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret) {
-            console.log(`Calling ${oauthAuth.OAuthProvider}`);
-            return axios({
-                method: 'post',
-                url: oauthAuth.OAuthProvider,
-                headers: {
-                    'Authorization': `Basic ${Buffer.from(`${oauthAuth.ClientID}:${oauthAuth.ClientSecret}`).toString('base64')}`,
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                data: qs.stringify({
-                    'grant_type': oauthAuth.GrantType
-                })
-            });
+        if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
+            console.log(`No template found for Customer Price of tender ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
+            return;
         }
+        return outbox;
+    }
 
-        throw Error("Missing OAUTH config parameters");
-    };
+    async addMailsToOutbox(mail, syncDate) {
+        console.log(`Adding notification mail for Price Conditions synchronised with SAP on: ${syncDate.toDateString()}`);
+        const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+        const tx = this.db.tx();
+        try {
+            const mailsResult = await tx.run(INSERT(mail).into(OutgoingMails));
+            await tx.commit();
+            return mailsResult;
+        } catch (error) {
+            console.error(error);
+            await tx.rollback();
+            throw error;
+        }
+    }
+
+    generateMailBody(mail, data) {
+        return Handlebars.compile("" + mail.content)(data);
+    }
+
+    
+
 
 
 };
