@@ -303,7 +303,7 @@ module.exports = (srv) => {
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
                 ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume : el?.RequestedVolume / productPack.PACKFACTOR,
-                MANUAL_D: Math.round(100 * ( Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount))),
+                MANUAL_D: (100 * ( Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount))).toFixed(2),
                 CAP: productPriceCondition?.CAP === "No" ? 0 : capBrazil.CAP
             }
         })
