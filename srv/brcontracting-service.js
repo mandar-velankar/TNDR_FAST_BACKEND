@@ -136,7 +136,6 @@ module.exports = (srv) => {
             }
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
-            const contractProducts = await tx.run(SELECT.from(ContractProducts).where({ Contract_ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
             const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "Synchronized"}));
             if (!salesOrderStatus) req.reject(404, "Status Synchronized not found");
@@ -172,7 +171,7 @@ module.exports = (srv) => {
             }
             const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
             // Update all fields in sales order body template  
-            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks, contractProducts);
+            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks);
             // Send request to SAP
             const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
             const EV_ORDER_NUMBER = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["EV_ORDER_NUMBER"];
@@ -404,7 +403,7 @@ module.exports = (srv) => {
         }
     }
 
-    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks, contractProducts) {
+    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks) {
         const body = getSalesOrderRequestBodyTemplate();
         if (!body) {
             return false;
@@ -416,12 +415,11 @@ module.exports = (srv) => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
             const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
-            const originalContarctProduct = contractProducts.find(pr => pr.ProductPackID == el.ProductPackID && pr.LotID == el.LotID);
             if (offerProduct) {
                 return {
                     ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                     MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
-                    ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? originalContarctProduct?.RequestedVolume : originalContarctProduct?.RequestedVolume / productPack.PACKFACTOR,
+                    ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedQty : el?.RequestedQty / productPack.PACKFACTOR,
                     IV_TEXT: IV_TEXT
                 }
             }
