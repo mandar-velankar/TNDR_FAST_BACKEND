@@ -1563,3 +1563,10 @@ entity SpainRiskAnalysis as select from TransactionalData.PT_TMTEND as t
 	t.Offer.Product.RequestedVolume * t.Offer.Product.Price.NetofferPrice AS TOTALVALUE_EUR:Double
 }
 where t.CountryCode = 'ES';
+
+//EITOG-271486-SCTASK14171577,RITM12871584 - Change request
+entity MasterNuclueusHeads as select from MasterData.NucleusHeads as MasterNuclueusHeads {
+key MasterNuclueusHeads.Nucleus,
+MasterNuclueusHeads.NucleusHeadsName,
+key MasterNuclueusHeads.NucleusHeadsEmailID
+};
