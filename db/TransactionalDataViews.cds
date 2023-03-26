@@ -1491,9 +1491,7 @@ inner join TransactionalData.PT_TMTNOFST as offerStatus
 	on offerStatus.OfferID = offer.OfferID
 	and offerStatus.Active = 1
 left outer join TenderHistoryBrazilAdhesionContracts as adhesionContract
-    on tender.TenderID = adhesionContract.TenderID
-    and offer.OfferID = adhesionContract.OfferID
-    and product.ProductCode = adhesionContract.ProductPackID {
+    on product.ProductCode = adhesionContract.ProductPackID {
         key tender.TenderID,
         key offer.OfferID,
         key product.ProductCode,
