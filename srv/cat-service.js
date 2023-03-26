@@ -3648,7 +3648,7 @@ module.exports = (srv) => {
 			UNIT_PRICE: "0",
 			EFFORT_A: "0",
 			ITEM_QTD: "1",
-			MANUAL_D: (Number(priceConditionBrazilView?.StandardDiscount) + Number(priceConditionBrazilView?.AdditionalDiscount)).toFixed(2),
+			MANUAL_D: (100 * (Number(priceConditionBrazilView?.StandardDiscount) + Number(priceConditionBrazilView?.AdditionalDiscount))).toFixed(2),
 			CAP: priceConditionBrazilView?.CAP === "Yes" ? priceConditionBrazilView?.CapValue : 0
 		}];
 

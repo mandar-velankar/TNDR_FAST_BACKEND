@@ -16,7 +16,8 @@ module.exports = (srv) => {
         PT_TMPRDHIER,
         PT_TMDIST,
         PT_TMINST,
-        PT_TMSKUPRDPCK
+        PT_TMSKUPRDPCK,
+        PT_TMPRDPCK
     } = cds.entities("com.bayer.SXTENDER.MasterData");
     const {
         PT_TMOFRS,
@@ -55,8 +56,10 @@ module.exports = (srv) => {
                 return req.reject(404, `No contract product ProductPackIDs were found`);
             }
             const skuPrdPck = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: {in: contractProductProductPackIDs}}));
+            const productPacks = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: {in: contractProductProductPackIDs}}));
             if (!contractStatus) req.reject(404, "Status Synchronized not found");
             if (!skuPrdPck || !skuPrdPck.length) req.reject(404, "No SKUCodes were found in COM_BAYER_SXTENDER_MASTERDATA_PT_TMSKUPRDPCK");
+            if (!productPacks || !productPacks.length) req.reject(404, `No PackFactors were found in ${PT_TMPRDPCK.name}`);
 
             if (!offer) {
                 return req.reject(404, "Offer is not found");
@@ -87,7 +90,7 @@ module.exports = (srv) => {
             }
             
             // Update all fields in sales order body template  
-            const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPck, capBrazil);
+            const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPck, capBrazil, productPacks);
             // Send request to SAP
             const createdContractResult = await sendCreatedContractToSAP(tx, "BR", "Contract", updateContractBody);
             const EV_CONTRACT_NUMBER = createdContractResult["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["EV_CONTRACT_NUMBER"];
@@ -133,6 +136,7 @@ module.exports = (srv) => {
             }
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
+            const contractProducts = await tx.run(SELECT.from(ContractProducts).where({ Contract_ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
             const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "Synchronized"}));
             if (!salesOrderStatus) req.reject(404, "Status Synchronized not found");
@@ -149,6 +153,9 @@ module.exports = (srv) => {
 
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const skuPrdPcks = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: {in: salesOrderProductsProductPackIDs}}));
+            const productPacks = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: {in: salesOrderProductsProductPackIDs}}));
+
+            if (!productPacks || !productPacks.length) req.reject(404, `No PackFactors were found in ${PT_TMPRDPCK.name}`);
             if (!skuPrdPcks || !skuPrdPcks.length) req.reject(404, "No SKUCodes were found in COM_BAYER_SXTENDER_MASTERDATA_PT_TMSKUPRDPCK");
 
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
@@ -165,7 +172,7 @@ module.exports = (srv) => {
             }
             const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
             // Update all fields in sales order body template  
-            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT);
+            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks, contractProducts);
             // Send request to SAP
             const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
             const EV_ORDER_NUMBER = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["EV_ORDER_NUMBER"];
@@ -272,7 +279,7 @@ module.exports = (srv) => {
         }
     });
 
-    function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks, capBrazil) {
+    function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks, capBrazil, productPacks) {
         const body = getContractRequestBodyTemplate();
         if (!body) {
             return false;
@@ -289,13 +296,14 @@ module.exports = (srv) => {
             let productPriceCondition = priceconditions.filter(cond => cond.ProductCode === el.ProductPackID)[0];
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
+            const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
             return {
                 ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                 MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
-                ITEM_QTD: el?.RequestedVolume, //RequestedQty
-                MANUAL_D: (Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
+                ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume : el?.RequestedVolume / productPack.PACKFACTOR,
+                MANUAL_D: (100 * ( Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount))).toFixed(2),
                 CAP: productPriceCondition?.CAP === "No" ? 0 : capBrazil.CAP
             }
         })
@@ -396,7 +404,7 @@ module.exports = (srv) => {
         }
     }
 
-    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT) {
+    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks, contractProducts) {
         const body = getSalesOrderRequestBodyTemplate();
         if (!body) {
             return false;
@@ -407,11 +415,13 @@ module.exports = (srv) => {
         let items = salesOrderProducts.map(el => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
+            const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
+            const originalContarctProduct = contractProducts.find(pr => pr.ProductPackID == el.ProductPackID && pr.LotID == el.LotID);
             if (offerProduct) {
                 return {
                     ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                     MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
-                    ITEM_QTD: `${el.RequestedQty}`,
+                    ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? originalContarctProduct?.RequestedVolume : originalContarctProduct?.RequestedVolume / productPack.PACKFACTOR,
                     IV_TEXT: IV_TEXT
                 }
             }
