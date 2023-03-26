@@ -820,3 +820,11 @@ entity BrazilPricingPolicy: cuid, managed {
 	ValidFrom		: Date;
 	ValidTo			: Date;
 }
+
+//EITOG-271486-SCTASK14171577,RITM12871584 - Change request
+entity NucleusHeads : managed {
+key Nucleus:String(100) not null;
+NucleusHeadsName:String(200);
+key NucleusHeadsEmailID : String(200);
+ 
+}
