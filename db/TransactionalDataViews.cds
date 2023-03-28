@@ -103,6 +103,7 @@ left outer join TransactionalData.PT_TMTEND as tender on country.CountryCode = t
 }where country.CountryCode is not null
 group by country.CountryCode;
 
+//EFRCL- 289937- MEA-Kindly exclude Patient Access Programs and Bonus letters from the offer history section at the bottom of the Financial Offer Tab
 entity TenderResults as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRY_CODE,
     tender.TenderID as TENDER_ID,
@@ -110,6 +111,7 @@ entity TenderResults as select from TransactionalData.PT_TMTEND as tender{
     tender.TenderName as TENDER_NAME,
     tender.InstituteID as INSTITUTE_ID,
     tender.Institute.InstituteName as INSTITUTE_NAME,
+    tender.Classification as CLASSIFICATION,
     tender.Offer.SubmittedOn as OFFER_DATE,
     tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRAND_ID,
     tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRAND_NAME,
@@ -325,6 +327,7 @@ select from MasterData.PT_TMINSHIER as hierarchy{
     hierarchy.InstituteID as CHILD_ID
 }where hierarchy.ActiveRecord = 'Yes';
 
+//EFRCL- 289937- MEA-Kindly exclude Patient Access Programs and Bonus letters from the offer history section at the bottom of the Financial Offer Tab
 entity TenderHistory as select from TenderResults as results
 inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_ID{
     results.COUNTRY_CODE,
@@ -350,7 +353,8 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
     results.UOM,
     results.OUTCOME,
     key max(institute.PARENT_ID) as PARENT_ID:Integer
-} group by results.COUNTRY_CODE,
+} where results.CLASSIFICATION not in ('Patient Access Programme','Bonus Letters')
+group by results.COUNTRY_CODE,
            results.TENDER_ID,
            results.OFFER_ID,
            results.TENDER_NAME,
