@@ -64,7 +64,10 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
 
         return SELECT.from(PriceAgreementsMasterView, pa => {
             pa('*'),
-            pa.Tender('*'),
+            pa.Tender(tender => {
+                tender('*'),
+                tender.User('*')
+            }),
             pa.Product(product => {
                 product('*'),
                 product.ProductPack('*')
@@ -110,10 +113,10 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
         })
 
         //get unique created by users, this can be used to filter pa/cp data per user from the data array
-        const uniqueUsers = [...new Set(data.map(item => item.createdBy))];
+        const uniqueUsers = [...new Set(data.map(item => item.Tender.User.CWID))];
 
         for (let user of uniqueUsers) {
-            let dataFilteredByUser = data.filter(d => d.createdBy === user);
+            let dataFilteredByUser = data.filter(d => d.Tender.User.CWID === user);
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
                     CountryCode: dataFilteredByUser[0].CountryCode,
