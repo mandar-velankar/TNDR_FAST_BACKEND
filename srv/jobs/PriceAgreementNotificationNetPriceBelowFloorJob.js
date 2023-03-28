@@ -101,7 +101,12 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
             d.FloorPriceOld = d.MasterPrices.YLAP,
             d.FloorPriceNew = d.PriceConditions[0].ConfidentialPrice,
             d.NetPrice = d.PriceConditions[0].NetPriceWithTax,
-            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.PriceAgreementId}`
+            d.ConditionType = d.PriceConditions[0].PriceConditionClassification.ConditionType,
+            d.CustomerID = d.Institute.CustomerID,
+            d.InstituteName = d.Institute.InstituteName,
+            d.MaterialNumber = d.Materials[0].SKUCode,
+            d.PRODUCTPACKNAME = d.Product.ProductPack.PRODUCTPACKNAME,
+            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.ID}`
         })
 
         //get unique created by users, this can be used to filter pa/cp data per user from the data array
@@ -117,7 +122,7 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients: dataFilteredByUser[0].User.UserEmail,
                     Subject: template.title,
-                    MailBody: this.generateMailBody(template, { //MANDAR
+                    MailBody: this.generateMailBody(template, {
                         data: { 
                             SyncDate: syncDate.toDateString(), 
                             PriceAgreements: dataFilteredByUser 
