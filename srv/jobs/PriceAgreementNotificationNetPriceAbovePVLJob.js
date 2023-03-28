@@ -63,7 +63,10 @@ module.exports = class PriceAgreementNotificationNetPriceAbovePVLJob extends Bas
 
         return SELECT.from(PriceAgreementsMasterView, pa => {
             pa('*'),
-            pa.Tender('*'),
+            pa.Tender(tender => {
+                tender('*'),
+                tender.User('*')
+            }),
             pa.Product(product => {
                 product('*'),
                 product.ProductPack('*')
@@ -99,15 +102,20 @@ module.exports = class PriceAgreementNotificationNetPriceAbovePVLJob extends Bas
         data.forEach(d => {
             d.PvlOld = d.MasterPrices.YLLP,
             d.PvlNew = d.PriceConditions[0].PVL,
-            d.NetPrice = d.PriceConditions[0].NetPriceWithTax,
-            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.PriceAgreementId}`
+            d.NetPrice = d.PriceConditions[0].NetPriceWithoutTaxBeforeDeductionRD,
+            d.ConditionType = d.PriceConditions[0].PriceConditionClassification.ConditionType,
+            d.CustomerID = d.Institute.CustomerID,
+            d.InstituteName = d.Institute.InstituteName,
+            d.MaterialNumber = d.Materials[0].SKUCode,
+            d.PRODUCTPACKNAME = d.Product.ProductPack.PRODUCTPACKNAME,
+            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.ID}`
         })
 
         //get unique created by users, this can be used to filter pa/cp data per user from the data array
-        const uniqueUsers = [...new Set(data.map(item => item.createdBy))];
+        const uniqueUsers = [...new Set(data.map(item => item.Tender.User.CWID))];
 
         for (let user of uniqueUsers) {
-            let dataFilteredByUser = data.filter(d => d.createdBy === user);
+            let dataFilteredByUser = data.filter(d => d.Tender.User.CWID === user);
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
                     CountryCode: dataFilteredByUser[0].CountryCode,
@@ -116,7 +124,7 @@ module.exports = class PriceAgreementNotificationNetPriceAbovePVLJob extends Bas
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients: dataFilteredByUser[0].User.UserEmail,
                     Subject: template.title,
-                    MailBody: this.generateMailBody(template, { //MANDAR
+                    MailBody: this.generateMailBody(template, {
                         data: { 
                             SyncDate: syncDate.toDateString(), 
                             PriceAgreements: dataFilteredByUser 
