@@ -1566,7 +1566,7 @@ where t.CountryCode = 'ES';
 
 //EITOG-271486-SCTASK14171577,RITM12871584 - Change request
 entity MasterNuclueusHeads as select from MasterData.NucleusHeads as MasterNuclueusHeads {
-key MasterNuclueusHeads.Nucleus,
-MasterNuclueusHeads.NucleusHeadsName,
-key MasterNuclueusHeads.NucleusHeadsEmailID
+key MasterNuclueusHeads.Nucleus:String,
+MasterNuclueusHeads.NucleusHeadsName:String,
+key MasterNuclueusHeads.NucleusHeadsEmailID: String
 };
