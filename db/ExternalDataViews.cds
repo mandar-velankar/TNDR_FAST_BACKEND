@@ -1476,7 +1476,7 @@ entity SpainTenderDoc as select from TransactionalData.PT_TMTEND as t
     key ifnull(t.Offer.OfferID, 'No Offer Created') as OfferID:String,
     t.Offer.OfferStatus.STATUS:String,
 	t.ExternalID as LocalTenderID:String,
-	t.Institute.CustomerID:String,
+	t.Institute.CustomerID:Integer,
 	t.Institute.InstituteName as CustomerName:String,
 	t.Institute.Province.Name as Province:String,
 	t.Institute.RegionalHealthSystem:String,
