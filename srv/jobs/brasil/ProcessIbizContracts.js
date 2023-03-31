@@ -283,7 +283,7 @@ async insertFASTContractProducts(tx, mappedContractProducts) {
     const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     console.log(`JOB (${this.jobName }): Fetching data from ${PT_TMOFRS.name} ...`);
     try {
-        return await tx.run(SELECT.from(PT_TMOFRS).where({'IbizWorkflowID': {"!=": null}, CountryCode: 'BR', ActiveOffer: 1 }));
+        return await tx.run(SELECT.from(PT_TMOFRS).where({'IbizWorkflowID': {"!=": null}, CountryCode: 'BR', Active: 1 }));
     }catch (error) {
         console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${PT_TMOFRS.name} failed`);
         console.error(error);
