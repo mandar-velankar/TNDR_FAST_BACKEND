@@ -112,6 +112,7 @@ entity TenderResults as select from TransactionalData.PT_TMTEND as tender{
     tender.InstituteID as INSTITUTE_ID,
     tender.Institute.InstituteName as INSTITUTE_NAME,
     tender.Classification as CLASSIFICATION,
+    tender.Offer.OfferStatus.STATUS as OFFERSTATUS,
     tender.Offer.SubmittedOn as OFFER_DATE,
     tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRAND_ID,
     tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRAND_NAME,
@@ -355,6 +356,7 @@ inner join InstituteMap as institute on results.INSTITUTE_ID = institute.CHILD_I
     results.FOC_DESCRIPTION as FOC:String(255),
     results.UOM,
     results.OUTCOME,
+    results.OFFERSTATUS,
     key max(institute.PARENT_ID) as PARENT_ID:Integer
 } where results.CLASSIFICATION is null or results.CLASSIFICATION not in
 (case when results.COUNTRY_CODE in (select CountryCode from MasterData.PT_TMCTRY as ctry where ctry.Region = 'MEA') and results.CLASSIFICATION in ('Patient Access Programme','Bonus Letters')then results.CLASSIFICATION else 'CLASSIFICATION' end)
@@ -379,7 +381,8 @@ group by results.COUNTRY_CODE,
             results.QUANTITY,
             results.FOC_DESCRIPTION,
             results.UOM,
-            results.OUTCOME;
+            results.OUTCOME,
+            results.OFFERSTATUS;
 
 entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC negotiation';
 entity ResultsWithAppealInProgress as select TenderID, OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'Appeal in Progress';
