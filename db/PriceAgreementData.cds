@@ -102,7 +102,7 @@ entity CustomerPrices: cuid, managed {
     ValidTo: Timestamp not null;
     EffectiveDate: DateTime;
     ExpiryDate: DateTime;
-    PriceAgreementId: String not null;
+    PriceAgreementId: UUID not null;
     PriceAgreement: Association to PriceAgreements on PriceAgreement.ID = PriceAgreementId;
     InstituteId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
@@ -131,7 +131,7 @@ entity CustomerPrices_History: managed {
     ValidTo: Timestamp;
     EffectiveDate: DateTime;
     ExpiryDate: DateTime;
-    PriceAgreementId: String not null;
+    PriceAgreementId: UUID not null;
     PriceAgreement: Association to PriceAgreements on PriceAgreement.ID = PriceAgreementId;
     InstituteId: Integer;
     CountryCode: String not null;
