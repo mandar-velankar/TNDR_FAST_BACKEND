@@ -1564,7 +1564,7 @@ entity SpainRiskAnalysis as select from TransactionalData.PT_TMTEND as t
 }
 where t.CountryCode = 'ES';
 
-//EITOG-271486-SCTASK14171577,RITM12871584 - Change request
+//EITOG-271486-SCTASK14171577 RITM12871584 - Change request
 entity MasterNucleusHeads as select from MasterData.NucleusHeads as MasterNucleusHeads {
 key MasterNucleusHeads.Nucleus:String,
 MasterNucleusHeads.NucleusHeadsName:String,
