@@ -178,4 +178,11 @@ service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     @cov2ap.isoTimestamp:true
     @cov2ap.isoDateTimeOffset:true
     entity SpainRiskAnalysis @readonly as projection on ExternalDataViews.SpainRiskAnalysis;
+    @cov2ap.isoTime:true
+    @cov2ap.isoDate:true
+    @cov2ap.isoDateTime:true
+    @cov2ap.isoTimestamp:true
+    @cov2ap.isoDateTimeOffset:true
+    entity MasterNucleusHeads @readonly as projection on ExternalDataViews.MasterNucleusHeads;
+    
 }

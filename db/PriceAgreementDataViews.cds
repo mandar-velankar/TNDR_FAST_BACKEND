@@ -66,6 +66,7 @@ inner join MasterData.PT_TMINST as institutes
 inner join SAP.ItalyDeliveries as italydeliveries
   on ltrim(materials.MaterialNumber,'0') = ltrim(italydeliveries.MATNR,'0')
   and institutes.CustomerID = ltrim(italydeliveries.KUNAG,'0')
+  and italydeliveries.WADAT_IST >=  materials.EffectiveDate
 {
     key italydeliveries.ID,//unique identifier for SAP delivery entry
     italydeliveries.WADAT_IST,//actual delivery date

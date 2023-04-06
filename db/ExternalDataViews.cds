@@ -737,7 +737,7 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	'Pack' as COGS_UOM:String,
 	cogs.COGS,
 	'' as NEW_COGS:String,
-	sku.SKUCode as MaterialNumbers:String,
+	sku.SKUCode as MaterialNumbers:Integer,
 	CP.QTY_THRESHOLD,
 	P.ACTIVERECORD as ACTIVE_PRODUCT,
 	CP.ACTIVERECORD as ACTIVE_COUNTRY_PRODUCT
@@ -1564,9 +1564,9 @@ entity SpainRiskAnalysis as select from TransactionalData.PT_TMTEND as t
 }
 where t.CountryCode = 'ES';
 
-//EITOG-271486-SCTASK14171577,RITM12871584 - Change request
-entity MasterNuclueusHeads as select from MasterData.NucleusHeads as MasterNuclueusHeads {
-key MasterNuclueusHeads.Nucleus:String,
-MasterNuclueusHeads.NucleusHeadsName:String,
-key MasterNuclueusHeads.NucleusHeadsEmailID: String
+//EITOG-271486-SCTASK14171577 RITM12871584 - Change request
+entity MasterNucleusHeads as select from MasterData.NucleusHeads as MasterNucleusHeads {
+key MasterNucleusHeads.Nucleus:String,
+MasterNucleusHeads.NucleusHeadsName:String,
+key MasterNucleusHeads.NucleusHeadsEmailID: String
 };
