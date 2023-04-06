@@ -84,6 +84,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const { PT_TMINST, PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
         let customerPricesQC = [];
         const effectiveDate = new Date(customerPrice.EffectiveDate);
@@ -184,11 +185,11 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const datab = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
         const datbi = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
 
-        customerPricesQC.push({CountryCode: customerPrice.CountryCode, KSCHL: customerPrice.PriceCondition, KUNNR: institute.CustomerID, MATNR: customerPrice.MaterialNumber,KBETR: kbetr, REFVAL: tender.SAPID, DATAB: datab, DATBI: datbi});
+        customerPricesQC.push({CustomerPriceId: customerPrice.PriceAgreementId, CountryCode: customerPrice.CountryCode, KSCHL: customerPrice.PriceCondition, KUNNR: institute.CustomerID, MATNR: customerPrice.MaterialNumber,KBETR: kbetr, REFVAL: tender.SAPID, DATAB: datab, DATBI: datbi});
         const mappedcustomerPricesQC = this.mappedcustomerPrices(customerPricesQC);
 
         // 5. Insert PriceCondition QC
-        await this.insertCustomerPriceQC(tx, mappedcustomerPricesQC);
+        mappedcustomerPricesQC && await tx.run(INSERT(mappedcustomerPricesQC).into(CustomerPricesQC));
 
         return await this.updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
@@ -262,6 +263,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         customerPrices = customerPrices.reduce((prev, curr, idx, customerPrices) => {
             prev.push(
                 {
+                    CustomerPriceId             : curr.CustomerPriceId || null,
                     CountryCode                 : curr.CountryCode || null,
                     VKORG                       : curr.CountryCode == 'ES' ? "QFHC" : "ITHC" || null,   // Sales Organisation
                     KSCHL                       : curr.KSCHL || null,   // Condition Type
@@ -287,13 +289,13 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
     };
 
-    async insertCustomerPriceQC(tx, customerPrices) {
+    // async insertCustomerPriceQC(tx, customerPrices) {
 
-        if(!customerPrices) return false;
-        const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        return tx.run(INSERT(customerPrices).into(CustomerPricesQC));
+    //     if(!customerPrices) return false;
+        
+    //     return tx.run(INSERT(customerPrices).into(CustomerPricesQC));
 
-    };
+    // };
 
     async updatePriceConditions(countryCode, resource, body){
 
