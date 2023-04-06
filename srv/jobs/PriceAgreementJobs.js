@@ -84,8 +84,9 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const { PT_TMINST, PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
-       
+        let customerPricesQC = [];
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
@@ -180,6 +181,16 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
+        //Transforming the Date in correct format
+        const datab = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
+        const datbi = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
+
+        customerPricesQC.push({CustomerPriceId: customerPrice.PriceAgreementId, CountryCode: customerPrice.CountryCode, KSCHL: customerPrice.PriceCondition, KUNNR: institute.CustomerID, MATNR: customerPrice.MaterialNumber,KBETR: kbetr, REFVAL: tender.SAPID, DATAB: datab, DATBI: datbi});
+        const mappedcustomerPricesQC = this.mappedcustomerPrices(customerPricesQC);
+
+        // 5. Insert PriceCondition QC
+        mappedcustomerPricesQC && await tx.run(INSERT(mappedcustomerPricesQC).into(CustomerPricesQC));
+
         return await this.updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
     }
@@ -245,6 +256,46 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             }
           };
     };
+
+    mappedcustomerPrices(customerPrices) {
+
+        console.log(`Mapping customerPrices to customerPricesQC ...`);
+        customerPrices = customerPrices.reduce((prev, curr, idx, customerPrices) => {
+            prev.push(
+                {
+                    CustomerPriceId             : curr.CustomerPriceId || null,
+                    CountryCode                 : curr.CountryCode || null,
+                    VKORG                       : curr.CountryCode == 'ES' ? "QFHC" : "ITHC" || null,   // Sales Organisation
+                    KSCHL                       : curr.KSCHL || null,   // Condition Type
+                    KUNNR                       : curr.KUNNR || null,   // Customer Number
+                    MATNR                       : curr.MATNR || null,   // Material Number
+                    YCIG                        : curr.REFVAL || null,   // Contract Reference
+                    KBETR                       : curr.KBETR || null,   // Condition Value
+                    KPEIN                       : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null || null,   // Unit for price
+                    DATAB                       : curr.DATAB || null,   // Effective Date
+                    DATBI                       : curr.DATBI || null,   // Expiry Date
+                    KRECH                       : (curr.KSCHL == 'YL60' || curr.KSCHL == 'YDC0') ? "A" : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? "C" : null || null,   // 
+                    KONMS                       : null,   // 
+                    MEINS                       : null,   // 
+                    BOMAT                       : null,   // 
+                    KSTBM                       : null,   // 
+                    MIKBAS                      : null,   // 
+                    MXBAS                       : null   //
+                }
+            );
+            return prev;
+        }, []);
+        return customerPrices;
+
+    };
+
+    // async insertCustomerPriceQC(tx, customerPrices) {
+
+    //     if(!customerPrices) return false;
+        
+    //     return tx.run(INSERT(customerPrices).into(CustomerPricesQC));
+
+    // };
 
     async updatePriceConditions(countryCode, resource, body){
 

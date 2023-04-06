@@ -102,8 +102,8 @@ entity CustomerPrices: cuid, managed {
     ValidTo: Timestamp not null;
     EffectiveDate: DateTime;
     ExpiryDate: DateTime;
-    PriceAgreementId: String not null;
-    PriceAgreement: Association to PriceAgreements;
+    PriceAgreementId: UUID not null;
+    PriceAgreement: Association to PriceAgreements on PriceAgreement.ID = PriceAgreementId;
     InstituteId: Integer;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId;
     CountryCode: String not null;
@@ -117,6 +117,7 @@ entity CustomerPrices: cuid, managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
+    ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
 }
 
 entity SettlementDates: managed {
@@ -130,8 +131,8 @@ entity CustomerPrices_History: managed {
     ValidTo: Timestamp;
     EffectiveDate: DateTime;
     ExpiryDate: DateTime;
-    PriceAgreementId: String not null;
-    PriceAgreement: Association to PriceAgreements;
+    PriceAgreementId: UUID not null;
+    PriceAgreement: Association to PriceAgreements on PriceAgreement.ID = PriceAgreementId;
     InstituteId: Integer;
     CountryCode: String not null;
     ProductPackId: Integer not null;
@@ -297,3 +298,56 @@ inner join MasterDataViews.CountryBrandProducts as ca on pa.ProductPackId= ca.PR
     ca.BRAND_ID,
     ca.BRAND_NAME
 } group by pa.ProductPackId, pa.CountryCode, Product.ProductPack.PRODUCTPACKNAME,ca.BRAND_ID,ca.BRAND_NAME;
+
+
+entity CustomerPricesQC: cuid, managed {
+    CustomerPriceId             : UUID;
+    CountryCode                 : String;
+    VKORG                       : String;   // Sales Organisation
+    KSCHL                       : String;   // Condition Type
+    KUNNR                       : String;   // Customer Number
+    MATNR                       : String;   // Material Number
+    YCIG                        : String;   // Contract Reference
+    KBETR                       : String;   // Condition Value
+    KPEIN                       : String;   // Unit for price
+    DATAB                       : String;   // Effective Date
+    DATBI                       : String;   // Expiry Date
+    KRECH                       : String;   // 
+    KONMS                       : String;   // 
+    MEINS                       : String;   // 
+    BOMAT                       : String;   // 
+    KSTBM                       : String;   // 
+    MIKBAS                      : String;   // 
+    MXBAS                       : String;   // 
+    SAP_VKORG                   : String;   // Sales Organisation
+    SAP_KSCHL                   : String;   // Condition Type
+    SAP_KUNNR                   : String;   // Customer Number
+    SAP_MATNR                   : String;   // Material Number
+    SAP_YCIG                    : String;   // Contract Reference
+    SAP_KBETR                   : String;   // Condition Value
+    SAP_KPEIN                   : String;   // Unit for price
+    SAP_KONWA                   : String;   // To be checked
+    SAP_DATAB                   : String;   // Effective Date
+    SAP_DATBI                   : String;   // Expiry Date
+    SAP_VTWEG                   : String;   // To be checked
+    SAP_MAKTX                   : String;
+    SAP_DISPKNRMM               : String;   // Minimum quantity
+    SAP_DISPKNRNM               : String;   // Maximum quantity
+    SAP_KNRME                   : String;
+    SAP_DISPKNRZM               : String;   // Free goods quantity
+    SAP_KNREZ                   : String;
+    SAP_KNRDD                   : String;
+    SAP_KPMEIN                  : String;
+    SAP_KNRMAT                  : String;   // Free goods product
+    Status                      : String enum {
+        ToCheck;
+        Failed;
+        OK;
+        NotInSAP;
+    } default 'ToCheck'; 
+    CountChecks                 : Integer; // Number of 
+    emailNotificationSent       : Boolean default false; // Owners have been notified in case QC failed
+    // Associations
+    CustomerPrice               : Association to CustomerPrices on CustomerPrice.ID = CustomerPriceId;
+    Institute                   : Association to MasterData.PT_TMINST on Institute.CustomerID = LTRIM(KUNNR, '0') and Institute.CountryCode = CountryCode;
+}
