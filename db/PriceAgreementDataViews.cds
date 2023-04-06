@@ -4,6 +4,7 @@ using {com.bayer.SXTENDER.PriceAgreementData} from './PriceAgreementData';
 using {com.bayer.SXTENDER.TransactionalData} from './TransactionalData';
 using { com.bayer.SXTENDER.MasterData.SAP } from '../db/SAP';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
+using {com.bayer.SXTENDER.AdminData} from './AdminData';
 
 
 
@@ -104,3 +105,45 @@ entity MaterialsConcatList as select from MasterData.PT_TMSKUPRDPCK as materials
 } group by materials.ProductPackID,
            materials.CountryCode,
            materials.ActiveRecord;
+
+
+entity PriceAgreementPriceConditionNotificationMailJobView as select from PriceAgreementData.CustomerPrices as CP 
+inner join PriceAgreementData.PriceAgreements as PA 
+  on CP.PriceAgreementId = PA.ID
+inner join TransactionalData.PT_TMTEND as TND
+  on TND.TenderID = PA.TenderId
+inner join AdminData.PT_TMUSER as USR
+  on USR.CWID = TND.SubmittedBy
+left join MasterData.PT_TMINST as INST
+  on CP.InstituteId=INST.InstituteID and CP.CountryCode = INST.CountryCode
+left join MasterData.PT_TMSKUPRDPCK as PRDPCK 
+  on CP.MaterialNumber = PRDPCK.SKUCode
+  and CP.CountryCode = PRDPCK.CountryCode
+  and PRDPCK.ActiveRecord = 'Yes'
+left join MasterData.PT_TMPRDPCK as PRD
+  on PRDPCK.ProductPackID = PRD.PRODUCTPACKID
+  and PRD.ACTIVERECORD = 'Yes'
+{
+  year(CP.modifiedAt) as Year,
+	month(CP.modifiedAt) as Month,
+	dayofmonth(CP.modifiedAt) as Day,
+  CP.modifiedAt as ModifiedAt,
+  TND.TenderID as TenderId,
+	USR.UserName,
+  USR.UserEmail,
+  CP.CountryCode,
+	INST.InstituteName,
+	INST.CustomerID as InstituteID,
+	PRD.PRODUCTPACKNAME,
+	CP.MaterialNumber as MaterialNumber,
+	PA.OfferId as OfferId,
+	CP.PriceCondition as PriceCondition,
+	CP.EffectiveDate as EffectiveDate,
+	CP.ExpiryDate as ExpiryDate,
+  PA.ID as PriceAgreementId
+	
+} Where CP.CountryCode = 'ES' 
+  and CP.Synchronized =  true 
+  and CP.RefIdocNumber is not null 
+  and CP.RefIdocNumber <> ''
+  and TND.Classification = 'Commercial Agreement';

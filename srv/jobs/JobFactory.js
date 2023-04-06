@@ -2,6 +2,8 @@ const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 const { ProcessMaterialsBrazil, ProcessCustomersBrazil } = require('./BrazilJobs');
 const PriceAgreementMailJob = require("./PriceAgreementMailJob");
 const PriceAgreementPriceConditionNotificationMailJob = require("./PriceAgreementPriceConditionNotificationMailJob");
+const PriceAgreementNotificationNetPriceAbovePVLJob = require("./PriceAgreementNotificationNetPriceAbovePVLJob");
+const PriceAgreementNotificationNetPriceBelowFloorJob = require("./PriceAgreementNotificationNetPriceBelowFloorJob");
 const ExtendPriceAgreements = require("./PriceAgreementJobs");
 const ProcessMasterDataPrices = require("./brasil/ProcessMasterDataPrices");
 const ProcessBrazilCustomers = require("./brasil/ProcessCustomers");
@@ -12,6 +14,8 @@ const ProcessBrazilIbizContracts = require("./brasil/ProcessIbizContracts");
 const NewIBIZTenderNotifications = require("./brasil/ProcessIbizTenderNotifications");
 const ProcessTenderResults = require("./brasil/ProcessTenderResults");
 const ProcessSpainRappelData = require("./ProcessSpainRappelData");
+const PriceConditionQualityControl = require("./PriceConditionsQualityControlJob");
+const PriceConditionsQualityControlNotificationMail = require("./PriceConditionsQualityControlNotificationMailJob");
 
 module.exports = class JobFactory {
     static create(jobName, jobTime) {
@@ -33,6 +37,12 @@ module.exports = class JobFactory {
                 break;
             case this.jobNames.PriceAgreementPriceConditionNotificationMailJob:
                 return new PriceAgreementPriceConditionNotificationMailJob(jobName,jobTime)
+                break;
+            case this.jobNames.PriceAgreementNotificationNetPriceAbovePVLJob:
+                return new PriceAgreementNotificationNetPriceAbovePVLJob(jobName,jobTime)
+                break;
+            case this.jobNames.PriceAgreementNotificationNetPriceBelowFloorJob:
+                return new PriceAgreementNotificationNetPriceBelowFloorJob(jobName,jobTime)
                 break;
             case this.jobNames.ExtendPriceAgreements:
                 return new ExtendPriceAgreements(jobName,jobTime)
@@ -63,6 +73,12 @@ module.exports = class JobFactory {
             case this.jobNames.ProcessSpainRappelData:
                 return new ProcessSpainRappelData(jobName,jobTime)
                 break;
+            case this.jobNames.PriceConditionQualityControl:
+                return new PriceConditionQualityControl(jobName,jobTime)
+                break;
+            case this.jobNames.PriceConditionsQualityControlNotificationMail:
+                return new PriceConditionsQualityControlNotificationMail(jobName,jobTime)
+                break;
             default:
                 throw new Error('Job type not supported');
                 break;
@@ -76,6 +92,8 @@ module.exports = class JobFactory {
             ProcessCustomersBrazilJob: "ProcessCustomersBrazilJob", // TODO: are these old jobs? if yes, remove them
             PriceAgreementMailJob: "PriceAgreementMailJob",
             PriceAgreementPriceConditionNotificationMailJob: "PriceAgreementPriceConditionNotificationMailJob",
+            PriceAgreementNotificationNetPriceAbovePVLJob: "PriceAgreementNotificationNetPriceAbovePVLJob",
+            PriceAgreementNotificationNetPriceBelowFloorJob: "PriceAgreementNotificationNetPriceBelowFloorJob",
             ExtendPriceAgreements: "ExtendPriceAgreements",
             ProcessMasterDataPrices:"ProcessMasterDataPrices",
             ProcessBrazilCustomers:"ProcessBrazilCustomers",
@@ -85,7 +103,9 @@ module.exports = class JobFactory {
             ProcessBrazilIbizContracts:"ProcessBrazilIbizContracts",
             NewIBIZTenderNotifications:"NewIBIZTenderNotifications",
             ProcessTenderResults:"ProcessTenderResults",
-            ProcessSpainRappelData: "ProcessSpainRappelData"
+            ProcessSpainRappelData: "ProcessSpainRappelData",
+            PriceConditionQualityControl: "PriceConditionQualityControl",
+            PriceConditionsQualityControlNotificationMail: "PriceConditionsQualityControlNotificationMail"
         };
     }
 }
