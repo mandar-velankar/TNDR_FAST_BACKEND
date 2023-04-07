@@ -93,47 +93,47 @@ entity BrazilTaxes: cuid, managed {
 }
 
 entity BrazilDeliveriesHeader: cuid, managed {
-	VBELN_SALES_DOC		: String(10); 			// Sales Document number
-	VTWEG				: String(2);			// Canal de distribuição
-	SPART				: String(2);			// Setor de Atividade
-	KUNNR				: String(10);			// Customer SP
-	NAME1				: String(35);			// Name SP
-	ABSTK				: String(1);			// Rejection status
-	GBSTK				: String(1);			// Status
-	ERNAM				: String(12);			// SO Created by
-	ERDAT_SO			: Date;					// Sales order Created on
-	ZTERM				: String(4);			// Terms of Payment
-	KWERT				: Double;				// Sales order header net value
-	WAERK				: String(5);				// Document Currency
-	VBELN_DELIVERY_DOC	: String(10);			// Delivery document number
-	LFDAT				: Date;					// Delivery created on
-	VDATU				: Date;					// Requested delivery date
-	WADAT_IST			: Date;					// Goods Issue Date
-	VBELN_BILL			: String(10);			// Number of invoice
-	ERDAT_BILL			: Date;					// Billing date
-	KWERT_BILL			: Double;				// Net value billing document
-	ITEMS				: Association to many BrazilDeliveriesItems on ITEMS.HEADER = $self; 
+	SALES_DOCUMENT			: String(10); 			// Sales Document number
+	DISTR_CHAN				: String(2);			// Canal de distribuição
+	DIVISION				: String(2);			// Setor de Atividade
+	CUSTOMER				: String(10);			// Customer SP
+	CUSTOMER_NAME			: String(35);			// Name SP
+	STATUS_REJECTION		: String(1);			// Rejection status
+	STATUS					: String(1);			// Status
+	CREATED_BY				: String(12);			// SO Created by
+	SALES_CREATED_ON		: Date;					// Sales order Created on
+	TERMS_PAY				: String(4);			// Terms of Payment
+	SALES_NET				: Double;				// Sales order header net value
+	CURRENCY				: String(5);			// Document Currency
+	DELIVERY_DOCUMENT		: String(10);			// Delivery document number
+	DELIVERY_CREATED_ON		: Date;					// Delivery created on
+	DATE_REQUESTED_HEADER	: Date;					// Requested delivery date
+	DATE_GOODS_ISSUE		: Date;					// Goods Issue Date
+	NUMBER_BILL				: String(10);			// Number of invoice
+	DATE_BILL				: Date;					// Billing date
+	NET_BILL				: Double;				// Net value billing document
+	ITEMS					: Association to many BrazilDeliveriesItems on ITEMS.HEADER = $self; 
 }
 
 entity BrazilDeliveriesItems: cuid, managed {
-	VBELN_SALES_DOC		: String(10); 			// Sales Document number reference to header
-	POSNR				: Integer;				// Sales Document Item
-	ABGRU				: String(2);			// Reason for rejection
-	MATNR				: String(18);			// Material
-	ARKTX				: String(40);			// Description
-	PRODH				: String(18);			// Product hierarchy
-	KWMENG				: Double;				// Order Quantity
-	BMENG				: Double;				// Confirmed Quantity
-	PSTYV				: String(4);			// Item category
-	VRKME				: String(3);			// Unit of measure
-	UMVKN				: Double;				// Pricing unit
-	KWERT				: Double;				// Sales order item net price
-	KWERT_VALUE			: Double;				// Sales order item net value
-	KCMENG				: Integer;				// Delivery quantity
-	EDATU				: Date;					// Conf.Delv.Date
-	EDATU_REQ			: Date;					// Requested deliv.date (position)
-	FKIMG				: Double;				// Billed Quantity
-	HEADER				: Association to BrazilDeliveriesHeader;
+	SALES_DOCUMENT			: String(10); 			// Sales Document number reference to header
+	SALES_ITEM				: Integer;				// Sales Document Item
+	SALES_REJECTION			: String(2);			// Reason for rejection
+	MATERIAL				: String(18);			// Material
+	DESCRPTION				: String(40);			// Description                                       
+	PRODUCT_HIERARCHY		: String(18);			// Product hierarchy
+	SALES_QUTY				: Double;				// Order Quantity
+	QUTY_CONFIRMED			: Double;				// Confirmed Quantity
+	ITEM_CATEGORY			: String(4);			// Item category
+	UNIT_MEASURE			: String(3);			// Unit of measure
+	PRICE_UNIT				: Double;				// Pricing unit
+	SALES_NET_PRICE			: Double;				// Sales order item net price
+	SALES_NET_VALUE			: Double;				// Sales order item net value
+	DELIVERY_QUANTITY		: Integer;				// Delivery quantity
+	DATE_DELIVERY			: Date;					// Conf.Delv.Date
+	DATE_REQUESTED_POSITION	: Date;					// Requested deliv.date (position)
+	QUANT_BILL				: Double;				// Billed Quantity
+	HEADER					: Association to BrazilDeliveriesHeader;
 }
 
 entity BrazilExemptions: cuid, managed {
@@ -177,8 +177,6 @@ entity IbizQps: cuid, managed {
 	NU_2D_NOTIF_APPLIED_NO_DN_RESPONDED : Integer; 		//Determine if the opportunity wasn't interesting for any DN and was switched automaticly to direct 2 days before the opening date (0 = no; 1 = yes)
 	DT_FINALIZADO 						: String; 		//Determine if a workflow was ended by setting a date its end (if it is null, than the workflow is still on going)
 	NM_MOTIVO_FINALIZADO 				: String; 		//Determine the motive for ending a workflow
-	STATUS								: String;		//Status from the processing job. Will be set to Error when the processing fails
-	ERROR_MESSAGE						: String;		//Error message from the processing job
 	CCS_QPS								: Composition of many IbizCcsQpsItems on CCS_QPS.parent = $self;	//List of batch and items by products
 	DOCS								: Composition of many IbizDocs on DOCS.Qps = $self;	//List of opportunities documents
 }
@@ -204,8 +202,6 @@ entity IbizCcsQpsItems: cuid {
 	NU_PORCENTAGEM_DESCONTO 		: Double; 		//Total discount
 	NU_PORCENTAGEM_DESCONTO_INICIAL : Double; 		//Initial discount
 	NU_PORCENTAGEM_DESCONTO_ADD 	: Double; 		//Additional discount
-	STATUS							: String;		//Status from the processing job. Will be set to Error when the processing fails
-	ERROR_MESSAGE					: String;		//Error message from the processing job
 	parent							: Association to IbizQps;
 }
 
@@ -215,8 +211,6 @@ entity IbizDocs: cuid {
 	NM_TAG 				: String; 				//Doc's label
 	NM_DOC 				: String; 				//File name
 	FILE_URL 			: String;  				//Signed file url to be requested as GET (expires in 5 minutes)
-	STATUS				: String;				//Status from the processing job. Will be set to Error when the processing fails
-	ERROR_MESSAGE		: String;				//Error message from the processing job
 	Contratos			: Association to IbizContratos;	
 	Qps					: Association to IbizQps;	
 	Empenhos			: Association to IbizEmpenhos;	

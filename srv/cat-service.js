@@ -3432,6 +3432,7 @@ module.exports = (srv) => {
 
 		try {
             const result = await notifyIbiz(id_qp, body);
+			await UPDATE(PT_TMOFRS).with({isIBIZNotified: true}).where({IbizWorkflowID: id_qp, ActiveOffer: 1});
 			const msg = `Ibiz channel switch notification successful. WorkflowID: ${id_qp}`;
             console.log(msg);
             return msg;
