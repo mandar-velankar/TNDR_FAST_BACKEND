@@ -34,12 +34,14 @@ module.exports = (srv) => {
     const {
         MostRecentCapView
     } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
-
     const {
         DirectIndirectCustomers,
         PriceConditionBrazilView
     } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
-
+    const {
+        BrazilDeliveriesHeader,
+        BrazilDeliveriesItems
+    } = cds.entities("com.bayer.SXTENDER.MasterData.SAP");
 
     srv.on('createContract', async req => {
         
@@ -136,7 +138,6 @@ module.exports = (srv) => {
             }
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ ID: req.data.salesOrderID }));
             const contract = await tx.run(SELECT.one.from(Contracts).where({ ID: salesOrder.Contract_ID }));
-            const contractProducts = await tx.run(SELECT.from(ContractProducts).where({ Contract_ID: salesOrder.Contract_ID }));
             const salesOrderProducts = await tx.run(SELECT.from(SalesOrderProducts).where({ SalesOrder_ID: req.data.salesOrderID, OfferID: contract.OfferID }));
             const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: "Synchronized"}));
             if (!salesOrderStatus) req.reject(404, "Status Synchronized not found");
@@ -172,7 +173,7 @@ module.exports = (srv) => {
             }
             const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
             // Update all fields in sales order body template  
-            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks, contractProducts);
+            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks);
             // Send request to SAP
             const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
             const EV_ORDER_NUMBER = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["EV_ORDER_NUMBER"];
@@ -279,6 +280,141 @@ module.exports = (srv) => {
         }
     });
 
+    srv.on("checkSAPDeliveries", async (req) => {
+        const tx = cds.tx(req);
+
+        try {
+            const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ID: req.data.salesOrderID}));
+            if (!salesOrder) {
+                return req.reject(404, `No Sales order was found with this Sales Order ID: ${req.data.salesOrderID}`);
+            }
+            const body = updateSAPDeliveriesReqBody(salesOrder);
+            const response = await getSAPDeliveries(tx, "BR", "SalesOrder", body);
+            const TT_ITEMS = response["data"]["rfc:_-BAY3_-8B_SD_RFC_TBN_DELIVERY.Response"]["TT_ITEMS"];
+            const TT_SALES_DOCUMENTS = response["data"]["rfc:_-BAY3_-8B_SD_RFC_TBN_DELIVERY.Response"]["TT_SALES_DOCUMENTS"];
+            if (!TT_ITEMS || !TT_SALES_DOCUMENTS) {
+                return req.reject(404, "No deliveries exist in SAP");
+            }
+            for (let item in TT_ITEMS) {
+                TT_ITEMS[item] = mappedBrazilDeliveryItems(TT_ITEMS[item]);
+            }
+            for (let item in TT_SALES_DOCUMENTS) {
+                TT_SALES_DOCUMENTS[item] = mappedBrazilDeliveryHeader(TT_SALES_DOCUMENTS[item]);
+            }
+            await tx.run(INSERT.into(BrazilDeliveriesItems).entries(TT_ITEMS["item"]));
+            await tx.run(INSERT.into(BrazilDeliveriesHeader).entries(TT_SALES_DOCUMENTS["item"]));
+            return req.reply("Deliveries were received from SAP");
+        } catch (error) {
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            // await tx.rollback(req);
+			return req.reject(500, error.message);
+        }
+    });
+
+    async function getSAPDeliveries (tx, countryCode, resource, body) {
+        if (!body) {
+            throw new Error("ERR_MISSING_PARAMETER:body");
+        }
+        try {
+            const apiConfig = await tx.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'SAPDelivery', CountryCode: countryCode, Resource: resource })); 
+            const oauthAuth = await tx.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+            const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+
+            const oauthCredentials = await getBearerToken(oauthAuth);
+
+            return axios({
+                method: 'get',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body)
+            });
+        } catch (error) {
+            throw error
+        }
+    }
+
+    function updateSAPDeliveriesReqBody (salesOrder) {
+        let body = getSAPDeliveriesRequestbody();
+        if (!body) {
+            return false;
+        }
+        const item = [
+            {
+                "VBELN": addLeadingZeros(salesOrder.SalesOrderNumber, 10, "SalesOrderNumber")
+            }
+        ]
+        body["_-BAY3_-8B_SD_RFC_TBN_DELIVERY"]["IT_DOC_NUMBER"]["item"] = item;
+        return body;
+    }
+
+    function mappedBrazilDeliveryItems (item) {
+        return {
+            "SALES_DOCUMENT"			: removeLeadingZeros(item.SALES_DOCUMENT, 4, "SALES_DOCUMENT"),		
+			"SALES_ITEM"				: removeLeadingZeros(item.SALES_ITEM, 4, "SALES_ITEM"),		
+			"SALES_REJECTION"			: item.SALES_REJECTION,
+			"MATERIAL"					: removeLeadingZeros(item.MATERIAL, 10, "MATERIAL"),		
+			"DESCRPTION"				: item.DESCRPTION,	                                     
+			"PRODUCT_HIERARCHY"			: item.PRODUCT_HIERARCHY,
+			"SALES_QUTY"				: item.SALES_QUTY,
+			"QUTY_CONFIRMED"			: item.QUTY_CONFIRMED,				
+			"ITEM_CATEGORY"				: item.ITEM_CATEGORY,			
+			"UNIT_MEASURE"				: item.UNIT_MEASURE,		
+			"PRICE_UNIT"				: item.PRICE_UNIT,			
+			"SALES_NET_PRICE"			: item.SALES_NET_PRICE,			
+			"SALES_NET_VALUE"			: item.SALES_NET_VALUE,				
+			"DELIVERY_QUANTITY"			: item.DELIVERY_QUANTITY,			
+			"DATE_DELIVERY"				: item.DATE_DELIVERY,			
+			"DATE_REQUESTED_POSITION"	: item.DATE_REQUESTED_POSITION,				
+			"QUANT_BILL"				: item.QUANT_BILL
+        }
+    }
+
+    function mappedBrazilDeliveryHeader (item) {
+        return {
+            "SALES_DOCUMENT"			: removeLeadingZeros(item.SALES_DOCUMENT, 4, "SALES_DOCUMENT"),
+			"DISTR_CHAN"				: item.DISTR_CHAN,
+			"DIVISION"				    : item.DIVISION,
+			"CUSTOMER"				    : removeLeadingZeros(item.CUSTOMER, 3, "CUSTOMER"),
+			"CUSTOMER_NAME"			    : item.CUSTOMER_NAME,
+			"STATUS_REJECTION"		    : item.STATUS_REJECTION,
+			"STATUS"					: item.STATUS,
+			"CREATED_BY"				: item.CREATED_BY,
+			"SALES_CREATED_ON"		    : item.SALES_CREATED_ON,
+			"TERMS_PAY"				    : item.TERMS_PAY,
+			"SALES_NET"				    : item.SALES_NET,
+			"CURRENCY"				    : item.CURRENCY,
+			"DELIVERY_DOCUMENT"		    : removeLeadingZeros(item.DELIVERY_DOCUMENT, 2, "DELIVERY_DOCUMENT"),
+			"DELIVERY_CREATED_ON"		: item.DELIVERY_CREATED_ON,
+			"DATE_REQUESTED_HEADER"	    : item.DATE_REQUESTED_HEADER,
+			"DATE_GOODS_ISSUE"		    : item.DATE_GOODS_ISSUE,
+			"NUMBER_BILL"				: removeLeadingZeros(item.NUMBER_BILL, 2, "NUMBER_BILL"),
+			"DATE_BILL"				    : item.DATE_BILL,
+			"NET_BILL"				    : item.NET_BILL
+        }
+    }
+
+    function getSAPDeliveriesRequestbody () {
+        return {
+            "_-BAY3_-8B_SD_RFC_TBN_DELIVERY": {
+              "IT_DOC_NUMBER": {
+                "item": [
+                  {"VBELN": "0000828072"}
+                ]
+              }
+            }
+        }
+    }
+
     function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks, capBrazil, productPacks) {
         const body = getContractRequestBodyTemplate();
         if (!body) {
@@ -303,7 +439,7 @@ module.exports = (srv) => {
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
                 ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume : el?.RequestedVolume / productPack.PACKFACTOR,
-                MANUAL_D: (100 * ( Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount))).toFixed(2),
+                MANUAL_D: (100 * Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
                 CAP: productPriceCondition?.CAP === "No" ? 0 : capBrazil.CAP
             }
         })
@@ -404,7 +540,7 @@ module.exports = (srv) => {
         }
     }
 
-    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks, contractProducts) {
+    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks) {
         const body = getSalesOrderRequestBodyTemplate();
         if (!body) {
             return false;
@@ -416,12 +552,11 @@ module.exports = (srv) => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
             const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
-            const originalContarctProduct = contractProducts.find(pr => pr.ProductPackID == el.ProductPackID && pr.LotID == el.LotID);
             if (offerProduct) {
                 return {
                     ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                     MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
-                    ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? originalContarctProduct?.RequestedVolume : originalContarctProduct?.RequestedVolume / productPack.PACKFACTOR,
+                    ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedQty : el?.RequestedQty / productPack.PACKFACTOR,
                     IV_TEXT: IV_TEXT
                 }
             }
@@ -463,6 +598,14 @@ module.exports = (srv) => {
         num = num.toString();
         while (num.length < size) num = "0" + num;
         return num;
+    };
+    function removeLeadingZeros (num, size, text) {
+        if (num === null) {
+            throw new Error(`${text} doesn't exist`);
+        }
+        num = num.toString();
+        let subStr = num.substring(0, size);
+        return num.replace(subStr, "");
     };
 
     async function sendCreatedSalesOrderToSAP (tx, countryCode, resource, body) {
