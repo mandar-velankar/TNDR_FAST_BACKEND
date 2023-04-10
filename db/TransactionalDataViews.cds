@@ -169,8 +169,9 @@ entity TenderResults as select from TransactionalData.PT_TMTEND as tender{
 and tender.Offer.Active = 1
 //and tender.Offer.ActiveOffer = 1
 and tender.Offer.Product.Active = 1
-and tender.Offer.Product.ActiveProduct = 1 or 
-(tender.CountryCode in (select CountryCode from MasterData.PT_TMCTRY as ctry where ctry.Region = 'MEA') and tender.Offer.Product.ActiveProduct = 2 )
+and (tender.Offer.Product.ActiveProduct = 1 or 
+(tender.CountryCode in (select CountryCode from MasterData.PT_TMCTRY as ctry 
+where ctry.Region = 'MEA') and tender.Offer.Product.ActiveProduct = 2 ))
 and (tender.Offer.OfferStatusTable.STATUS = 'Quotation Submitted' or tender.Offer.OfferStatusTable.STATUS = 'Results Recorded' or tender.Offer.OfferStatusTable.STATUS = 'Delivery Ongoing' or (tender.CountryCode in (select CountryCode from MasterData.PT_TMCTRY as ctry where ctry.Region = 'MEA')
 and tender.Offer.OfferStatus.STATUS in ('Offer Declined','Wholesale Offer') ));
 
