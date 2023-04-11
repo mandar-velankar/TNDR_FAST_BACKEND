@@ -68,6 +68,7 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
                     `LTRIM(MATNR, '0') as MaterialNumber`,
                     'CustomerPrice.ProductPack.PRODUCTPACKNAME as ProductPackName', 
                     'CustomerPrice.PriceAgreement.OfferId',
+                    'CustomerPrice.PriceAgreement.TenderId',
                     'KSCHL as PriceCondition',
                     'DATAB as EffectiveDate',
                     'DATBI as ExpiryDate',
