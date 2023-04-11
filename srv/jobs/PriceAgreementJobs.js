@@ -289,13 +289,6 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
     };
 
-    // async insertCustomerPriceQC(tx, customerPrices) {
-
-    //     if(!customerPrices) return false;
-        
-    //     return tx.run(INSERT(customerPrices).into(CustomerPricesQC));
-
-    // };
 
     async updatePriceConditions(countryCode, resource, body){
 
