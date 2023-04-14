@@ -102,8 +102,8 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
         // add/change some fields in the data array
         data.forEach(d => {
             d.FloorPriceOld = d.MasterPrices.YLAP,
-            d.FloorPriceNew = d.PriceConditions[0].ConfidentialPrice,
-            d.NetPrice = d.PriceConditions[0].NetPriceWithTax,
+            d.FloorPriceNew = d.MasterPrices && ( d.Institute.InstituteType === 'Private Account' || d.Institute.InstituteType === 'Cluster' ) ? d.MasterPrices.PRAF_Private : d.MasterPrices && d.Institute.InstituteType !== 'Private Account' && d.Institute.InstituteType !== 'Cluster' ? d.MasterPrices.PRAF_Public : 0;
+            d.NetPrice = d.PriceConditions[0].NetPriceWithoutTax,
             d.ConditionType = d.PriceConditions[0].PriceConditionClassification.ConditionType,
             d.CustomerID = d.Institute.CustomerID,
             d.InstituteName = d.Institute.InstituteName,
@@ -123,7 +123,7 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
                     TenderID: dataFilteredByUser[0].TenderId,
                     OfferID: dataFilteredByUser[0].OfferId,
                     Sender: 'FAST-Admin@bayer.com',
-                    Recipients: dataFilteredByUser[0].User.UserEmail,
+                    Recipients: dataFilteredByUser[0].Tender.User.UserEmail,
                     Subject: template.title,
                     MailBody: this.generateMailBody(template, {
                         data: { 
