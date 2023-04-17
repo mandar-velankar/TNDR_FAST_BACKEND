@@ -56,16 +56,12 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
      */
     async getSynchronizedCustomerPricesAggregatedData(date) {
         console.log(`Fetching Customer Prices synchronized on ${date.toDateString()}`);
-        const { CustomerPrices, PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        const { PT_TMINST, PT_TMPRDPCK, PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        const { PT_TMUSER } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const {PriceAgreementPriceConditionNotificationMailJobView} = this.db.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
         const tx = this.db.tx();
         return await tx.run(
-            SELECT.from(`${PriceAgreementPriceConditionNotificationMailJobView.name} as PAPCNJ`)
+            SELECT.from(PriceAgreementPriceConditionNotificationMailJobView)
             .where({ 
-                     'PAPCNJ.ModifiedAt': { '>=': `${date.toJSON().substring(0,10)} 00:00:00.000000000` } // only consider records synced on the day this job runs        
+                     ModifiedAt: { '>=': date.toJSON().substring(0,10)}  // only consider records synced on the day this job runs        
             })
         );    
     }
