@@ -989,7 +989,7 @@ module.exports = async (srv) => {
                     MATNR                       : addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
                     YCIG                        : curr.REFVAL || null,   // Contract Reference
                     KBETR                       : curr.KBETR || null,   // Condition Value
-                    KPEIN                       : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null || null,   // Unit for price
+                    KPEIN                       : curr.CountryCode == 'ES' ? ((curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null) : 1 || null,   // Unit for price
                     DATAB                       : curr.DATAB || null,   // Effective Date
                     DATBI                       : curr.DATBI || null,   // Expiry Date
                     KRECH                       : (curr.KSCHL == 'YL60' || curr.KSCHL == 'YDC0') ? "A" : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? "C" : null || null,   // 
