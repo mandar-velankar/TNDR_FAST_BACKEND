@@ -267,8 +267,8 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                     CountryCode                 : curr.CountryCode || null,
                     VKORG                       : curr.CountryCode == 'ES' ? "QFHC" : "ITHC" || null,   // Sales Organisation
                     KSCHL                       : curr.KSCHL || null,   // Condition Type
-                    KUNNR                       : curr.KUNNR || null,   // Customer Number
-                    MATNR                       : curr.MATNR || null,   // Material Number
+                    KUNNR                       : addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
+                    MATNR                       : addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
                     YCIG                        : curr.REFVAL || null,   // Contract Reference
                     KBETR                       : curr.KBETR || null,   // Condition Value
                     KPEIN                       : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null || null,   // Unit for price
@@ -407,5 +407,15 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             console.log(error);
             await tx.rollback(error);
         }   
+    };
+
+    addLeadingZeros (num, size) {
+        if (num === null) {
+            throw new Error(`${num} doesn't exist`);
+        }
+        
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
     };
 };
