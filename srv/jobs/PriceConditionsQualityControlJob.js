@@ -197,46 +197,66 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
 
     validatePriceCondition(qcPrice){
-        switch(qcPrice.KSCHL){
-            case "YLTP":
-            case "YL60":
-            case "YDC0":
-                if (
-                    qcPrice.KBETR === qcPrice.SAP_KBETR
-                    && qcPrice.DATAB === qcPrice.SAP_DATAB
-                    && qcPrice.DATBI === qcPrice.SAP_DATBI
-                )
-                {
-                    return "OK";
-                }
-            case "YLTP":
-            case "YLTF":
-                if (
-                    qcPrice.KBETR === qcPrice.SAP_KBETR
-                    && qcPrice.KPEIN === qcPrice.SAP_KPEIN
-                    && qcPrice.DATAB === qcPrice.SAP_DATAB
-                    && qcPrice.DATBI === qcPrice.SAP_DATBI
-                )
-                {
-                    return "OK";
-                }
-            case "YA01":
-            case "YA03":
-                if (
-                    qcPrice.DATAB === qcPrice.SAP_DATB
-                    && qcPrice.DATBI === qcPrice.SAP_DATBI
-                    && qcPrice.BOMAT === qcPrice.SAP_KNRMAT
-                    && qcPrice.KSTBM === qcPrice.SAP_DISPKNRZM
-                    && qcPrice.MIKBAS === qcPrice.SAP_DISPKNRMM
-                    && qcPrice.MXBAS === qcPrice.SAP_DISPKNRNM
-                )
-                {
-                    return "OK";
-                }
+
+        if(qcPrice.KSCHL === "YLTP" && qcPrice.CountryCode === "IT"){
+            if (
+                qcPrice.KBETR === qcPrice.SAP_KBETR
+                && qcPrice.DATAB === qcPrice.SAP_DATAB
+                && qcPrice.DATBI === qcPrice.SAP_DATBI
+            )
+            {
+                return "OK";
+            }
+        }
+
+        if(qcPrice.KSCHL === "YL60" || qcPrice.KSCHL === "YDC0"){
+            if (
+                qcPrice.KBETR === formatKBETR(qcPrice.SAP_KBETR)
+                && qcPrice.DATAB === qcPrice.SAP_DATAB
+                && qcPrice.DATBI === qcPrice.SAP_DATBI
+            )
+            {
+                return "OK";
+            }
+        }
+        
+        if((qcPrice.KSCHL === "YLTP" && qcPrice.CountryCode === "ES") || qcPrice.KSCHL === "YLTF"){
+            if (
+                qcPrice.KBETR === qcPrice.SAP_KBETR
+                && qcPrice.KPEIN === qcPrice.SAP_KPEIN
+                && qcPrice.DATAB === qcPrice.SAP_DATAB
+                && qcPrice.DATBI === qcPrice.SAP_DATBI
+            )
+            {
+                return "OK";
+            }
+        }
+
+        if(qcPrice.KSCHL === "YA01" || qcPrice.KSCHL === "YA03"){
+            if (
+                qcPrice.DATAB === qcPrice.SAP_DATB
+                && qcPrice.DATBI === qcPrice.SAP_DATBI
+                && qcPrice.BOMAT === qcPrice.SAP_KNRMAT
+                && qcPrice.KSTBM === qcPrice.SAP_DISPKNRZM
+                && qcPrice.MIKBAS === qcPrice.SAP_DISPKNRMM
+                && qcPrice.MXBAS === qcPrice.SAP_DISPKNRNM
+            )
+            {
+                return "OK";
+            }
         }
 
         return "Failed";
 
+    }
+
+    /**
+     * fotmat value from -12.00 to 12.000-
+     * @param {string} val 
+     * @returns 
+     */
+    formatKBETR(val){
+        return Math.abs(val).toFixed(3).concat("-");
     }
 
     async getPriceConditionFromSAP(countryCode, body){
