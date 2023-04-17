@@ -108,10 +108,10 @@ left outer join DeliveryForProduct as delivery on offerProduct.OfferID = deliver
     ifnull(offerProduct.Results.Outcome, '') as Outcome:String,
     ifnull(offerProduct.Results.AwardedQty, 0) as AwardedQty:Integer,
     ifnull(offerProduct.Results.Reason, '') as Reason:String,
-    ifnull(delivery.LocalRequestedQuantity, 0) as LocalRequestedQuantity:Integer,
-    ifnull(delivery.DirectRequestedQuantity, 0) as DirectRequestedQuantity:Integer,
-    ifnull(delivery.LocalDeliveredQuantity, 0) as LocalDeliveredQuantity:Integer,
-    ifnull(delivery.DirectDeliveredQuantity, 0) as DirectDeliveredQuantity:Integer,
+    ifnull(delivery.LocalRequestedQuantity, 0) as LocalRequestedQuantity:Double,
+    ifnull(delivery.DirectRequestedQuantity, 0) as DirectRequestedQuantity:Double,
+    ifnull(delivery.LocalDeliveredQuantity, 0) as LocalDeliveredQuantity:Double,
+    ifnull(delivery.DirectDeliveredQuantity, 0) as DirectDeliveredQuantity:Double,
     case when offerProduct.Results.CompetitorResult.AWARDEDCOMPANY is null
         then ''
         else offerProduct.Results.CompetitorResult.AWARDEDCOMPANY || ' - ' || offerProduct.Results.CompetitorResult.AWARDEDPRODUCT
@@ -135,7 +135,7 @@ left outer join DeliveryForProduct as delivery on offerProduct.OfferID = deliver
     ifnull(offerProduct.Price.RegPrice, 0) as RegisteredPrice:Double,
     ifnull(offerProduct.Price.Discount, 0) as Discount:Double,
     ifnull(offerProduct.Offer.Currency, '') as RegisteredPriceCurrency:String,
-    ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Integer,
+    ifnull(offerProduct.SKU.PACKFACTOR, 0) as Packfactor:Double,
     ifnull(offerProduct.Price.NetPrice, 0) as NetPrice:Double
 }where offerProduct.Offer.Tender.Active = 1
 and offerProduct.Offer.Active = 1
@@ -868,7 +868,7 @@ entity ProductInfo as select from MasterData.PT_TMPRDPCK as product {
     key case when ProductPackSKUs.SKUCode is null 
         then '-1' 
         else ProductPackSKUs.SKUCode 
-    end as SKUCode:String,
+    end as SKUCode:Integer,
     product.PACKFACTOR 
 };
 
