@@ -100,8 +100,8 @@ module.exports = class PriceAgreementNotificationNetPriceAbovePVLJob extends Bas
         let outbox = [];
         // add/change some fields in the data array
         data.forEach(d => {
-            d.PvlOld = d.MasterPrices.YLLP,
-            d.PvlNew = d.PriceConditions[0].PVL,
+            d.PvlOld = d.PriceConditions[0].PVL,
+            d.PvlNew = d.MasterPrices.YLLP,
             d.NetPrice = d.PriceConditions[0].NetPriceWithoutTaxBeforeDeductionRD,
             d.ConditionType = d.PriceConditions[0].PriceConditionClassification.ConditionType,
             d.CustomerID = d.Institute.CustomerID,
@@ -122,7 +122,7 @@ module.exports = class PriceAgreementNotificationNetPriceAbovePVLJob extends Bas
                     TenderID: dataFilteredByUser[0].TenderId,
                     OfferID: dataFilteredByUser[0].OfferId,
                     Sender: 'FAST-Admin@bayer.com',
-                    Recipients: dataFilteredByUser[0].User.UserEmail,
+                    Recipients: dataFilteredByUser[0].Tender.User.UserEmail,
                     Subject: template.title,
                     MailBody: this.generateMailBody(template, {
                         data: { 
