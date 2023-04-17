@@ -101,7 +101,7 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
         let outbox = [];
         // add/change some fields in the data array
         data.forEach(d => {
-            d.FloorPriceOld = d.MasterPrices.YLAP,
+            d.FloorPriceOld = 0, //never used for this email
             d.FloorPriceNew = d.MasterPrices && ( d.Institute.InstituteType === 'Private Account' || d.Institute.InstituteType === 'Cluster' ) ? d.MasterPrices.PRAF_Private : d.MasterPrices && d.Institute.InstituteType !== 'Private Account' && d.Institute.InstituteType !== 'Cluster' ? d.MasterPrices.PRAF_Public : 0;
             d.NetPrice = d.PriceConditions[0].NetPriceWithoutTax,
             d.ConditionType = d.PriceConditions[0].PriceConditionClassification.ConditionType,
