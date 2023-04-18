@@ -211,7 +211,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
         if(qcPrice.KSCHL === "YL60" || qcPrice.KSCHL === "YDC0"){
             if (
-                qcPrice.KBETR === formatKBETR(qcPrice.SAP_KBETR)
+                this.formatKBETR(qcPrice.KBETR.slice(0,qcPrice.KBETR.length -1)) === this.formatKBETR(qcPrice.SAP_KBETR)
                 && qcPrice.DATAB === qcPrice.SAP_DATAB
                 && qcPrice.DATBI === qcPrice.SAP_DATBI
             )
@@ -234,12 +234,12 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
         if(qcPrice.KSCHL === "YA01" || qcPrice.KSCHL === "YA03"){
             if (
-                qcPrice.DATAB === qcPrice.SAP_DATB
+                qcPrice.DATAB === qcPrice.SAP_DATAB
                 && qcPrice.DATBI === qcPrice.SAP_DATBI
-                && qcPrice.BOMAT === qcPrice.SAP_KNRMAT
-                && qcPrice.KSTBM === qcPrice.SAP_DISPKNRZM
-                && qcPrice.MIKBAS === qcPrice.SAP_DISPKNRMM
-                && qcPrice.MXBAS === qcPrice.SAP_DISPKNRNM
+                && this.addLeadingZeros(qcPrice.BOMAT,18) === qcPrice.SAP_KNRMAT
+                && this.roundKBETR(qcPrice.KSTBM) === this.roundKBETR(qcPrice.SAP_DISPKNRZM)
+                && this.roundKBETR(qcPrice.MIKBAS) === this.roundKBETR(qcPrice.SAP_DISPKNRMM)
+                && this.roundKBETR(qcPrice.MXBAS) === this.roundKBETR(qcPrice.SAP_DISPKNRNM)
             )
             {
                 return "OK";
@@ -256,7 +256,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
      * @returns 
      */
     formatKBETR(val){
-        return Math.abs(val).toFixed(3).concat("-");
+        return Math.abs(val).toFixed(2).concat("-");
     }
 
     /**
@@ -316,6 +316,16 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
         }
 
         throw Error("Missing OAUTH config parameters");
+    };
+
+    addLeadingZeros (num, size) {
+        if (num === null) {
+            throw new Error(`${num} doesn't exist`);
+        }
+        
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
     };
 
 
