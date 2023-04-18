@@ -92,7 +92,7 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
             pa.SettlementDates('*'),
             pa.MasterPrices('*'),
             pa.User('*')
-        }).where({CountryCode: 'ES', hasNewYLAP: 4, hasNewYLLP: 4, isCancelled: false});
+        }).where({CountryCode: 'ES', hasNewYLAP: 4, hasNewYLLP: 4});
     }
 
     mapDataToMail = (template,mail,syncDate) => data => {
@@ -100,23 +100,33 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         let outbox = [];
         // add/change some fields in the data array
+        data = data.filter(d => d.isCancelled === false && d.Expired === false);
         data.forEach(d => {
-            d.FloorPriceOld = d.MasterPrices.YLAP,
-            d.FloorPriceNew = d.MasterPrices && ( d.Institute.InstituteType === 'Private Account' || d.Institute.InstituteType === 'Cluster' ) ? d.MasterPrices.PRAF_Private : d.MasterPrices && d.Institute.InstituteType !== 'Private Account' && d.Institute.InstituteType !== 'Cluster' ? d.MasterPrices.PRAF_Public : 0;
-            d.NetPrice = d.PriceConditions[0].NetPriceWithoutTax,
-            d.ConditionType = d.PriceConditions[0].PriceConditionClassification.ConditionType,
-            d.CustomerID = d.Institute.CustomerID,
-            d.InstituteName = d.Institute.InstituteName,
-            d.MaterialNumber = d.Materials[0].SKUCode,
-            d.PRODUCTPACKNAME = d.Product.ProductPack.PRODUCTPACKNAME,
-            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.ID}`
+            let priceConditionsDescCom = d.PriceConditions?.filter(pc => pc.PriceConditionClassification.ConditionType === 'Descuento Comercial'); //we should only get descuento comercial & rappel conditions for net price below floor price
+            let priceConditionsRappel = d.PriceConditions?.filter(pc => pc.PriceConditionClassification.ConditionType === 'Rappel');
+
+            if(priceConditionsDescCom && priceConditionsDescCom.length > 0 || priceConditionsRappel && priceConditionsRappel.length > 0){
+                d.FloorPriceOld = 0, //never used for this email
+                d.FloorPriceNew = d.MasterPrices && ( d.Institute.InstituteType === 'Private Account' || d.Institute.InstituteType === 'Cluster' ) ? d.MasterPrices.PRAF_Private : d.MasterPrices && d.Institute.InstituteType !== 'Private Account' && d.Institute.InstituteType !== 'Cluster' ? d.MasterPrices.PRAF_Public : 0;
+                d.NetPrice = (priceConditionsRappel && priceConditionsRappel.length > 0) ? Math.min(priceConditionsRappel[0]?.DiscountCondition.NetPriceWithoutTax) : priceConditionsDescCom[0].NetPriceWithoutTax,
+                d.ConditionType = (priceConditionsRappel && priceConditionsRappel.length > 0) ? priceConditionsRappel[0].PriceConditionClassification.ConditionType : priceConditionsDescCom[0].PriceConditionClassification.ConditionType,
+                d.CustomerID = d.Institute.CustomerID,
+                d.InstituteName = d.Institute.InstituteName,
+                d.MaterialNumber = d.Materials[0].SKUCode,
+                d.PRODUCTPACKNAME = d.Product.ProductPack.PRODUCTPACKNAME,
+                d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.ID}`,
+                d.include = true
+            } else {
+                d.include = false;
+            }
         })
 
         //get unique created by users, this can be used to filter pa/cp data per user from the data array
         const uniqueUsers = [...new Set(data.map(item => item.Tender.User.CWID))];
 
         for (let user of uniqueUsers) {
-            let dataFilteredByUser = data.filter(d => d.Tender.User.CWID === user);
+            let dataFilteredByUser = data.filter(d => d.include === true);
+            dataFilteredByUser = data.filter(d => d.Tender.User.CWID === user);
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
                     CountryCode: dataFilteredByUser[0].CountryCode,
