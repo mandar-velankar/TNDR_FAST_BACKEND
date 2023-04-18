@@ -115,6 +115,8 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
                 d.MaterialNumber = d.Materials[0].SKUCode,
                 d.PRODUCTPACKNAME = d.Product.ProductPack.PRODUCTPACKNAME,
                 d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.ID}`,
+                d.UoMFloorPrice = d.MasterPrices.UoM,
+                d.UoMNetPrice = d.UoM,
                 d.include = true
             } else {
                 d.include = false;
