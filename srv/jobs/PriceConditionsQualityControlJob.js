@@ -200,7 +200,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
         if(qcPrice.KSCHL === "YLTP" && qcPrice.CountryCode === "IT"){
             if (
-                qcPrice.KBETR === qcPrice.SAP_KBETR
+                this.roundKBETR(qcPrice.KBETR) === this.roundKBETR(qcPrice.SAP_KBETR)
                 && qcPrice.DATAB === qcPrice.SAP_DATAB
                 && qcPrice.DATBI === qcPrice.SAP_DATBI
             )
@@ -222,7 +222,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
         
         if((qcPrice.KSCHL === "YLTP" && qcPrice.CountryCode === "ES") || qcPrice.KSCHL === "YLTF"){
             if (
-                qcPrice.KBETR === qcPrice.SAP_KBETR
+                this.roundKBETR(qcPrice.KBETR) === this.roundKBETR(qcPrice.SAP_KBETR)
                 && qcPrice.KPEIN === qcPrice.SAP_KPEIN
                 && qcPrice.DATAB === qcPrice.SAP_DATAB
                 && qcPrice.DATBI === qcPrice.SAP_DATBI
@@ -257,6 +257,15 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
      */
     formatKBETR(val){
         return Math.abs(val).toFixed(3).concat("-");
+    }
+
+    /**
+     * round given value
+     * @param {string} val 
+     * @returns 
+     */
+    roundKBETR(val){
+        return Number(val).toFixed(2);
     }
 
     async getPriceConditionFromSAP(countryCode, body){
