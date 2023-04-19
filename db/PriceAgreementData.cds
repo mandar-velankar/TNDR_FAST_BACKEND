@@ -348,6 +348,6 @@ entity CustomerPricesQC: cuid, managed {
     CountChecks                 : Integer; // Number of 
     emailNotificationSent       : Boolean default false; // Owners have been notified in case QC failed
     // Associations
-    CustomerPrice               : Association to CustomerPrices on CustomerPrice.ID = CustomerPriceId;
+    CustomerPrice               : Association to CustomerPrices on CustomerPrice.PriceAgreementId = CustomerPriceId;
     Institute                   : Association to MasterData.PT_TMINST on Institute.CustomerID = LTRIM(KUNNR, '0') and Institute.CountryCode = CountryCode;
 }
