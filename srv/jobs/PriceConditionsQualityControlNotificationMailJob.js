@@ -77,7 +77,26 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
                     'CustomerPrice.PriceAgreement.ID as Link',
                     'CustomerPrice.PriceAgreement.User.UserEmail as PriceAgreementOwnerEmail'
                 )
-                .where({Status: 'Failed', emailNotificationSent: false});
+                .where({Status: 'Failed', emailNotificationSent: false})
+                .groupBy(
+                    'ID',
+                    'CountryCode',
+                    `LTRIM(KUNNR, '0')`, 
+                    `LTRIM(MATNR, '0')`,
+                    'CustomerPrice.ProductPack.PRODUCTPACKNAME', 
+                    'CustomerPrice.PriceAgreement.OfferId',
+                    'CustomerPrice.PriceAgreement.TenderId',
+                    'KSCHL',
+                    'DATAB',
+                    'DATBI',
+                    'KBETR',
+                    'SAP_KBETR',
+                    'CustomerPrice.PriceAgreement.ID',
+                    'CustomerPrice.PriceAgreement.User.UserEmail',
+                    'KUNNR',
+                    'MATNR',
+                    'Institute.InstituteName'
+                );
     }
 
 
