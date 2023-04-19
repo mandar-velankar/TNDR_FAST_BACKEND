@@ -84,7 +84,6 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const { PT_TMINST, PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
         const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
         let customerPricesQC = [];
         const effectiveDate = new Date(customerPrice.EffectiveDate);
@@ -189,7 +188,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const mappedcustomerPricesQC = this.mappedcustomerPrices(customerPricesQC);
 
         // 5. Insert PriceCondition QC
-        mappedcustomerPricesQC && await tx.run(INSERT(mappedcustomerPricesQC).into(CustomerPricesQC));
+        mappedcustomerPricesQC && await this.insertCustomerPriceQC(mappedcustomerPricesQC);
 
         return await this.updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
@@ -267,8 +266,8 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                     CountryCode                 : curr.CountryCode || null,
                     VKORG                       : curr.CountryCode == 'ES' ? "QFHC" : "ITHC" || null,   // Sales Organisation
                     KSCHL                       : curr.KSCHL || null,   // Condition Type
-                    KUNNR                       : addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
-                    MATNR                       : addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
+                    KUNNR                       : this.addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
+                    MATNR                       : this.addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
                     YCIG                        : curr.REFVAL || null,   // Contract Reference
                     KBETR                       : curr.KBETR || null,   // Condition Value
                     KPEIN                       : curr.CountryCode == 'ES' ? ((curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null) : 1 || null,   // Unit for price
@@ -289,6 +288,25 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
     };
 
+    async insertCustomerPriceQC(customerPrices) {
+        console.log(`JOB (${this.jobName }): Inserting of CustomerPrices into FAST table (CustomerPricesQC) ...`);
+        const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        const tx = cds.tx();
+        if(!customerPrices) return false;
+        try{
+            await tx.run(INSERT(customerPrices).into(CustomerPricesQC));
+            await tx.commit();
+            console.log(`JOB (${this.jobName }): Inserting of CustomerPrices into FAST table (CustomerPricesQC) successfully completed.`);
+            console.log(`JOB (${this.jobName }): CustomerPricesQC -> created: ${customerPrices.length}`);
+            return true;
+        }
+        catch(error){
+            await tx.rollback(error);
+            console.error(`JOB (${this.jobName }): ERROR - Inserting of CustomerPrices into FAST table (CustomerPricesQC) failed`);
+            console.error(error);
+            throw error;
+        }         
+    };
 
     async updatePriceConditions(countryCode, resource, body){
 
