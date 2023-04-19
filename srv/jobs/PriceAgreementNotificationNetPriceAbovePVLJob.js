@@ -99,30 +99,38 @@ module.exports = class PriceAgreementNotificationNetPriceAbovePVLJob extends Bas
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         let outbox = [];
         // add/change some fields in the data array
+        data = data.filter(d => d.isCancelled === false && d.Expired === false);
         data.forEach(d => {
-            d.PvlOld = d.MasterPrices.YLLP,
-            d.PvlNew = d.PriceConditions[0].PVL,
-            d.NetPrice = d.PriceConditions[0].NetPriceWithoutTaxBeforeDeductionRD,
-            d.ConditionType = d.PriceConditions[0].PriceConditionClassification.ConditionType,
-            d.CustomerID = d.Institute.CustomerID,
-            d.InstituteName = d.Institute.InstituteName,
-            d.MaterialNumber = d.Materials[0].SKUCode,
-            d.PRODUCTPACKNAME = d.Product.ProductPack.PRODUCTPACKNAME,
-            d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.ID}`
+            let priceConditions = d.PriceConditions?.filter(pc => pc.PriceConditionClassification.ConditionType === 'Precio Neto'); //we should only get precio neto conditions for net price above pvl
+
+            if(priceConditions && priceConditions.length > 0){
+                d.PvlOld = d.PriceConditions[0]?.PVL,
+                d.PvlNew = d.MasterPrices.YLLP,
+                d.NetPrice = priceConditions[0]?.NetPriceWithoutTaxBeforeDeductionRD,
+                d.ConditionType = priceConditions[0]?.PriceConditionClassification.ConditionType,
+                d.CustomerID = d.Institute.CustomerID,
+                d.InstituteName = d.Institute.InstituteName,
+                d.MaterialNumber = d.Materials[0].SKUCode,
+                d.PRODUCTPACKNAME = d.Product.ProductPack.PRODUCTPACKNAME,
+                d.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.ID}`,
+                d.include = true
+            } else {
+                d.include = false
+            }
         })
 
         //get unique created by users, this can be used to filter pa/cp data per user from the data array
         const uniqueUsers = [...new Set(data.map(item => item.Tender.User.CWID))];
 
         for (let user of uniqueUsers) {
-            let dataFilteredByUser = data.filter(d => d.Tender.User.CWID === user);
+            let dataFilteredByUser = data.filter(d => d.Tender.User.CWID === user && d.include === true);
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
                     CountryCode: dataFilteredByUser[0].CountryCode,
                     TenderID: dataFilteredByUser[0].TenderId,
                     OfferID: dataFilteredByUser[0].OfferId,
                     Sender: 'FAST-Admin@bayer.com',
-                    Recipients: dataFilteredByUser[0].User.UserEmail,
+                    Recipients: dataFilteredByUser[0].Tender.User.UserEmail,
                     Subject: template.title,
                     MailBody: this.generateMailBody(template, {
                         data: { 
