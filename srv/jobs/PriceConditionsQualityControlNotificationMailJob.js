@@ -133,20 +133,20 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
         const appEnv = cfenv.getAppEnv();
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         let outbox = [];
-        const recipients = [];
+        const recipients = new Set();
 
         // update the Link with correct path
         data.forEach(d => {
             d.Link = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${d.Link}`;
-            recipients.push(d.PriceAgreementOwnerEmail);
+            recipients.add(d.PriceAgreementOwnerEmail);
         })
 
         // additional recipients per country
         if(data[0].CountryCode === "IT"){
-            recipients.push("andrea.duranti@bayer.com");
-            recipients.push("massimo.bettinelli@bayer.com");
+            recipients.add("andrea.duranti@bayer.com");
+            recipients.add("massimo.bettinelli@bayer.com");
         }else if(data[0].CountryCode === "ES"){
-            recipients.push("commercialagreements.es@bayer.com");
+            recipients.add("commercialagreements.es@bayer.com");
         }
 
         outbox.push({
@@ -154,7 +154,7 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
             TenderID: data[0].TenderId,
             OfferID: data[0].OfferId,
             Sender: 'FAST-Admin@bayer.com',
-            Recipients: recipients,
+            Recipients: Array.from(recipients).join(";"),
             Subject: template.title,
             MailBody: this.generateMailBody(template, { 
                 data: { 
