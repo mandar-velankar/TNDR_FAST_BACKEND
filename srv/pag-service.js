@@ -995,7 +995,7 @@ module.exports = async (srv) => {
                     KRECH                       : (curr.KSCHL == 'YL60' || curr.KSCHL == 'YDC0') ? "A" : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? "C" : null || null,   // 
                     KONMS                       : curr.KONMS || null,   // 
                     MEINS                       : curr.MEINS || null,   // 
-                    BOMAT                       : curr.BOMAT || null,   // 
+                    BOMAT                       : addLeadingZeros(curr.BOMAT, 18) || null,   // 
                     KSTBM                       : curr.KSTBM || null,   // 
                     MIKBAS                      : curr.MIKBAS || null,   // 
                     MXBAS                       : curr.MXBAS || null   //
