@@ -266,11 +266,11 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                     CountryCode                 : curr.CountryCode || null,
                     VKORG                       : curr.CountryCode == 'ES' ? "QFHC" : "ITHC" || null,   // Sales Organisation
                     KSCHL                       : curr.KSCHL || null,   // Condition Type
-                    KUNNR                       : this.addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
-                    MATNR                       : this.addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
+                    KUNNR                       : curr.KUNNR && this.addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
+                    MATNR                       : curr.MATNR && this.addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
                     YCIG                        : curr.REFVAL || null,   // Contract Reference
                     KBETR                       : curr.KBETR || null,   // Condition Value
-                    KPEIN                       : curr.CountryCode == 'ES' ? ((curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null) : 1 || null,   // Unit for price
+                    KPEIN                       : curr.CountryCode == 'IT' ? 1 : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null || null,   // Unit for price
                     DATAB                       : curr.DATAB || null,   // Effective Date
                     DATBI                       : curr.DATBI || null,   // Expiry Date
                     KRECH                       : (curr.KSCHL == 'YL60' || curr.KSCHL == 'YDC0') ? "A" : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? "C" : null || null,   // 
