@@ -100,7 +100,7 @@ module.exports = (srv) => {
 					INSERT.into(PT_TMCTPRDPCK).entries(Product)
 				);
 
-				tx.commit(results);
+				//tx.commit(results);
 
 			}catch(err){
 				console.log(err);
@@ -115,7 +115,7 @@ module.exports = (srv) => {
 					INSERT.into(PT_TMPRDPCK).entries(ProductPack)
 				);
 
-				tx.commit(results);
+				//tx.commit(results);
 
 			}catch(err){
 				console.log(err);
@@ -151,7 +151,7 @@ module.exports = (srv) => {
 					UPDATE(PT_TMCTPRDPCK, {"COUNTRYCODE":Product.COUNTRYCODE, "PRODUCTPACKID":Product.PRODUCTPACKID}).with(Product)
 				);
 
-				tx.commit(results);
+				//tx.commit(results);
 
 			}catch(err){
 				console.log(err);
@@ -166,7 +166,7 @@ module.exports = (srv) => {
 					UPDATE.entity(PT_TMPRDPCK, ProductPack.PRODUCTPACKID).data(ProductPack)
 				);
 
-				tx.commit(results);
+				//tx.commit(results);
 
 			}catch(err){
 				console.log(err);
