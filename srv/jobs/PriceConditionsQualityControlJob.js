@@ -125,6 +125,10 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
                     // 4. map and validate response 
                     if(item){
+                        if(qcPrice.VKORG === "ITHC" && Array.isArray(item))
+                        {
+                            item = item.find(i => i.DATAB === qcPrice.DATAB);
+                        }
                         qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
                         qcPrice.Status = this.validatePriceCondition(qcPrice);
                     }else{
