@@ -2,6 +2,7 @@ namespace com.bayer.SXTENDER.MasterData;
 using { User, Country, managed, cuid, temporal } from '@sap/cds/common';
 using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
+using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using { com.bayer.SXTENDER.AdminData } from './AdminData';
 
 //Country
@@ -738,6 +739,10 @@ entity ConsumerPrices: cuid, managed {
 	TotalDiscount: Double;
 	MaxPriceNhsPP: Double;
 	MaxPriceNhsPU: Double;
+	//Associations
+	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+	CurrencyRate:Association to many PT_TMFXRTS on CurrencyRate.CurrencyFrom = Currency;
 }
 
 entity RoyalDecree {
