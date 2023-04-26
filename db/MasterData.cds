@@ -83,7 +83,7 @@ entity PT_TMINST{
 	ContactEmail:String(100);
 	CNPJ:String;
 	Shortname:String;
-	KAM_Region: String(12);
+	KAM_Territory: String(12);
 	External_InstituteId: String(50);
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
