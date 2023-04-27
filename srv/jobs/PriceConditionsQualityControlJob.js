@@ -125,6 +125,10 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
                     // 4. map and validate response 
                     if(item){
+                        if(qcPrice.VKORG === "ITHC" && Array.isArray(item))
+                        {
+                            item = item.find(i => i.DATAB === qcPrice.DATAB);
+                        }
                         qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
                         qcPrice.Status = this.validatePriceCondition(qcPrice);
                     }else{
@@ -234,9 +238,9 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
         if(qcPrice.KSCHL === "YA01" || qcPrice.KSCHL === "YA03"){
             if (
-                // qcPrice.DATAB === qcPrice.SAP_DATAB
-                // && qcPrice.DATBI === qcPrice.SAP_DATBI
-                this.addLeadingZeros(qcPrice.BOMAT,18) === qcPrice.SAP_KNRMAT
+                qcPrice.DATAB === qcPrice.SAP_DATAB
+                && qcPrice.DATBI === qcPrice.SAP_DATBI
+                && this.addLeadingZeros(qcPrice.BOMAT,18) === qcPrice.SAP_KNRMAT
                 && this.roundKBETR(qcPrice.KSTBM) === this.roundKBETR(qcPrice.SAP_DISPKNRZM)
                 && this.roundKBETR(qcPrice.MIKBAS) === this.roundKBETR(qcPrice.SAP_DISPKNRMM)
                 && this.roundKBETR(qcPrice.MXBAS) === this.roundKBETR(qcPrice.SAP_DISPKNRNM)
