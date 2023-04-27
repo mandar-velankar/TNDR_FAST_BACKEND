@@ -1997,18 +1997,25 @@ module.exports = (srv) => {
         //EUTVP: fix wrong condition                            
        // if (typeof (productRemarkDistinct[0])!=="undefined")
        // {
-       	if (productRemarkDistinct.length === 1) {
-			producRemark  = productRemarkDistinct[0];
-		}
-		else {
-			let productTermsRow = [];
-			for (let i = 0; i < productRemarkDistinct.length; i++) {
-				let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				productTermsRow[i] = productTermsItems.concat(" ").concat(productRemarkDistinct[i]);//removed the colon
+	//EFRCL- 331661- SCTASK14558875 MEA Remarks issue in quotation tab
+	if (productRemarkDistinct.length === 1) {
+		producRemark  = productRemarkDistinct[0];
+	}
+	else{
+		if(regionname === 'MEA'){
+			let emptyindex = productRemarkDistinct.findIndex(x => x === ' ');
+		if(emptyindex !== -1){
+				productRemarkDistinct.splice(emptyindex,1);
 			}
-			producRemark = productTermsRow.join("<br>")
-
 		}
+
+		let productTermsRow = [];
+		for (let i = 0; i < productRemarkDistinct.length; i++) {
+			let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
+			productTermsRow[i] = productTermsItems.concat(" ").concat(productRemarkDistinct[i]);//removed the colon
+		}
+		producRemark = productTermsRow.join("<br>")
+	}
     //}
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 		//Comment shows in remarks if any product is not registered in country
