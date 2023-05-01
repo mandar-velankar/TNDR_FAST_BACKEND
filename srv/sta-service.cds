@@ -24,7 +24,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     'authenticated-user',
     'f_tndr_cag_admin',
     'f_tndr_cag_tnd_user',
-    'f_tndr_cag_technical_user'
+    'f_tndr_cag_technical_user',
+    'f_tndr_cag_standardtender_user'
 ]) {
     //Master Data Tables
     entity CountryLegalEntitySignatories                as projection on MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES;

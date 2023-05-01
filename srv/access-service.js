@@ -19,7 +19,8 @@ module.exports = (srv) => {
 			salesopportunity: req.user.is('f_tndr_cag_salesopportunity_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			createopportunity: req.user.is('f_tndr_cag_createopportunity_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			brazilcontracting: req.user.is('f_tndr_cag_brcontracting_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
-			cpi: req.user.is('f_tndr_cag_cpi_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user')
+			cpi: req.user.is('f_tndr_cag_cpi_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
+			standardtender: req.user.is('f_tndr_cag_standardtender_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 		};
     });
 };
