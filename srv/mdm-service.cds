@@ -38,8 +38,9 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
 
 
     entity PT_TMREGPR      as projection on MasterData.PT_TMREGPR;
-    entity ConsumerPrices as select from MasterData.ConsumerPrices as cs
+    entity ConsumerPricesMasterView as select from MasterData.ConsumerPrices as cs
     inner join CountryBrandProducts as bp on cs.ProductPackId = bp.PRODUCT_ID{
+        key cs.ID,
         key cs.CountryCode,
         key cs.ProductPackId,
         cs.Currency,
@@ -62,6 +63,8 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
         bp.PRODUCT_NAME,
         cs.ProductPack: redirected to PT_TMPRDPCK
     };
+
+    entity ConsumerPrices as projection on MasterData.ConsumerPrices;
 
    
 
