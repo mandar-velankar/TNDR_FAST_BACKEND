@@ -125,12 +125,27 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
                     // 4. map and validate response 
                     if(item){
-                        if(qcPrice.VKORG === "ITHC" && Array.isArray(item))
-                        {
-                            item = item.find(i => i.DATAB === qcPrice.DATAB);
+                        if(!Array.isArray(item)){
+                            if(item.DATAB === qcPrice.DATAB){
+                                qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
+                                qcPrice.Status = this.validatePriceCondition(qcPrice);
+                            }
+                            else{
+                                if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
+                                else qcPrice.Status = "NotInSAP";
+                            }
                         }
-                        qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
-                        qcPrice.Status = this.validatePriceCondition(qcPrice);
+                        else{
+                            item = item.find(i => i.DATAB === qcPrice.DATAB);
+                            if(item){
+                                qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
+                                qcPrice.Status = this.validatePriceCondition(qcPrice);
+                            }
+                            else{
+                                if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
+                                else qcPrice.Status = "NotInSAP";
+                            }
+                        }                           
                     }else{
                         if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
                         else qcPrice.Status = "NotInSAP";
