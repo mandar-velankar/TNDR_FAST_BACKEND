@@ -131,6 +131,7 @@ left join MasterData.PT_TMPRDPCK as PRD
   TND.TenderID as TenderId,
 	USR.UserName,
   USR.UserEmail,
+  USR.CWID,
   CP.CountryCode,
 	INST.InstituteName,
 	INST.CustomerID as InstituteID,

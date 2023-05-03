@@ -77,7 +77,7 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
                     'CustomerPrice.PriceAgreement.ID as Link',
                     'CustomerPrice.PriceAgreement.User.UserEmail as PriceAgreementOwnerEmail'
                 )
-                .where({Status: 'Failed', emailNotificationSent: false})
+                .where({Status: ['Failed','NotInSAP'], emailNotificationSent: false})
                 .groupBy(
                     'ID',
                     'CountryCode',
