@@ -19,6 +19,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         createopportunity:Boolean;
         cpi:Boolean;
         brazilcontracting:Boolean;
+        standardtender:Boolean;
     };
 
     function getAccess() returns Access;
