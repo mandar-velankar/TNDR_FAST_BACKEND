@@ -21,10 +21,13 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMSKUPRDPCK @(cds.redirection.target:false) as projection on MasterData.PT_TMSKUPRDPCK;
     entity CountryRegions           as projection on MasterData.CountryRegions;
     entity CountryProvinces         as projection on MasterData.CountryProvinces;
+    entity InstituteDivision        as projection on MasterData.InstituteDivision;
+    
     entity PT_TMINST                as select from MasterData.PT_TMINST{
         *,
         Region: redirected to CountryRegions,
-        Province: redirected to CountryProvinces
+        Province: redirected to CountryProvinces,
+        InstituteDivision: redirected to InstituteDivision
     };
 
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
