@@ -786,4 +786,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     action notifyIbiz(ibizWorkflowID: Integer, directIndirect: Integer, lineNumbers: array of Integer) returns String; //  (0 = direct; 1 = indirect)
     action sendApprovalToIbiz(ibizWorkflowID: Integer, offerStatus: Integer, comment: String) returns String;
     action simulateTaxes(offerID: String, productCode: Integer, lotID: Integer, conditionType: String) returns String;
+
+
+    // Standard Tender application UI views
+    entity TenderFormView as projection on PT_TMTEND; // Form used in the Tender tab
 }
