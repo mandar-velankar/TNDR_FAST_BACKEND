@@ -789,5 +789,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
 
     // Standard Tender application UI views
-    entity TenderFormView as projection on PT_TMTEND; // Form used in the Tender tab
+
+    // Form used in the Tender tab
+    entity TenderFormView as projection on PT_TMTEND {
+        *,
+        Institute.InstituteType,
+        Institute.InstituteName,
+    }; 
 }
