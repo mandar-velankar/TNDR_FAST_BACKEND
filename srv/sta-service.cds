@@ -84,7 +84,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity BrazilCap                                    as projection on MasterData.BrazilCap;
     entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
     entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
-    entity InstituteDivision                            as projection on MasterData.InstituteDivision;
+    entity BrazilInstituteDivision                      as projection on MasterData.BrazilInstituteDivision;
     entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
     entity DocumentsDownload                            as projection on TransactionalData.DocumentsDownload;
     entity ContractStatuses                             as projection on AdminData.ContractStatus;
@@ -799,18 +799,38 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity AwardCriteriaTableView as select from PT_TMTEND as tend
     left outer join PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
-    left outer join MasterData.AwardCriteriaValueHelp as ac ON cr.AwardCriteria is null and ac.Criteria is not null
+    left outer join MasterData.AwardCriteriaValueHelp as ac ON cr.AwardCriteria is null and ac.Criteria is not null and ac.CountryCode = tend.CountryCode
     {
-        tend.CountryCode,
-        tend.TenderID,
+        key tend.CountryCode,
+        key tend.TenderID,
 	    // COALESCE( cr.AwardCriteria, ac.Criteria ) AS Criteria:String,
-        case when cr.AwardCriteria is not null
+        key case when cr.AwardCriteria is not null
             then cr.AwardCriteria
-            else ac.Criteria
+            else ifnull(ac.Criteria, 'NotDefined')
         end as Criteria:String,
         case when cr.Weight is not null
             then cr.Weight
             else 0
         end as Weight:Double
     };
+
+    entity TenderMasterView as select from TransactionalData.PT_TMTEND as tender{
+        tender.CountryCode,
+        key tender.TenderID,
+        tender.Classification,
+        tender.TenderName,
+        tender.createdBy,
+        tender.Offer.Distributor.DistributorName,
+        tender.Institute.InstituteName,
+        key tender.Offer.OfferID,
+        tender.Offer.OfferValue.VALUE,
+        tender.Offer.OfferStatus.STATUS,         
+        tender.PublicationDate,
+        tender.Offer.InternalBidDueDate,
+        tender.BidDueDate,
+        tender.createdAt,
+        tender.modifiedBy,
+        tender.modifiedAt, 
+    }where tender.Active = 1
+    and ifnull(tender.Offer.Active, 1) = 1;
 }
