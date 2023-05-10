@@ -8,6 +8,7 @@ module.exports = (srv) => {
 				COGS:req.user.is('f_tndr_cag_cogs_user'),
 				SPAINTENDERVIEW:req.user.is('f_tndr_cag_spaintenderview_user'),
 				PHARMATENDERVIEW:req.user.is('f_tndr_cag_Pharmatenderview_user'),
+				RADIOLOGYTENDERVIEW:req.user.is('f_tndr_cag_Radiologytenderview_user'),
 				MEATENDERVIEW:req.user.is('f_tndr_cag_meatenderview_user')
 				
 			},

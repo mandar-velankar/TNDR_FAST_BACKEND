@@ -71,6 +71,10 @@
       "description": "f_tndr_cag_Pharmatenderview_user"
     },
     {
+      "name": "$XSAPPNAME.f_tndr_cag_Radiologytenderview_user",
+      "description": "f_tndr_cag_Radiologytenderview_user"
+    },
+    {
       "name": "$XSAPPNAME.f_tndr_cag_meatenderview_user",
       "description": "f_tndr_cag_meatenderview_user"
     }
@@ -211,6 +215,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_Pharmatenderview_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_Radiologytenderview_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_Radiologytenderview_user"
       ],
       "attribute-references": []
     },
