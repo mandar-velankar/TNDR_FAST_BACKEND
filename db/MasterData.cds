@@ -827,3 +827,8 @@ entity BrazilPricingPolicy: cuid, managed {
 	ValidFrom		: Date;
 	ValidTo			: Date;
 }
+
+entity AwardCriteriaValueHelp: cuid, managed {
+	CountryCode		: String(2) not null;
+	Criteria		: String;
+}

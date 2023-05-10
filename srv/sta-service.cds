@@ -84,7 +84,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity BrazilCap                                    as projection on MasterData.BrazilCap;
     entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
     entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
-    entity BrazilInstituteDivision                      as projection on MasterData.BrazilInstituteDivision;
+    entity InstituteDivision                            as projection on MasterData.InstituteDivision;
     entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
     entity DocumentsDownload                            as projection on TransactionalData.DocumentsDownload;
     entity ContractStatuses                             as projection on AdminData.ContractStatus;
@@ -796,4 +796,21 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteType,
         Institute.InstituteName,
     }; 
+
+    entity AwardCriteriaTableView as select from PT_TMTEND as tend
+    left outer join PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
+    left outer join MasterData.AwardCriteriaValueHelp as ac ON cr.AwardCriteria is null and ac.Criteria is not null
+    {
+        tend.CountryCode,
+        tend.TenderID,
+	    // COALESCE( cr.AwardCriteria, ac.Criteria ) AS Criteria:String,
+        case when cr.AwardCriteria is not null
+            then cr.AwardCriteria
+            else ac.Criteria
+        end as Criteria:String,
+        case when cr.Weight is not null
+            then cr.Weight
+            else 0
+        end as Weight:Double
+    };
 }
