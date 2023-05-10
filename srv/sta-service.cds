@@ -799,14 +799,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity AwardCriteriaTableView as select from PT_TMTEND as tend
     left outer join PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
-    left outer join MasterData.AwardCriteriaValueHelp as ac ON cr.AwardCriteria is null and ac.Criteria is not null
+    left outer join MasterData.AwardCriteriaValueHelp as ac ON cr.AwardCriteria is null and ac.Criteria is not null and ac.CountryCode = tend.CountryCode
     {
-        tend.CountryCode,
-        tend.TenderID,
+        key tend.CountryCode,
+        key tend.TenderID,
 	    // COALESCE( cr.AwardCriteria, ac.Criteria ) AS Criteria:String,
-        case when cr.AwardCriteria is not null
+        key case when cr.AwardCriteria is not null
             then cr.AwardCriteria
-            else ac.Criteria
+            else ifnull(ac.Criteria, 'NotDefined')
         end as Criteria:String,
         case when cr.Weight is not null
             then cr.Weight
