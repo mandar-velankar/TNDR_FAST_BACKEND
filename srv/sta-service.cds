@@ -813,4 +813,23 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             else 0
         end as Weight:Double
     };
+
+    entity TenderMasterView as projection on PT_TMTEND {
+        CountryCode,
+        TenderID,
+        Classification,
+        TenderName,
+        createdBy,
+        Offer.Distributor.DistributorName,
+        Institute.InstituteName,
+        Offer.OfferID,
+        Offer.OfferValue.VALUE,
+        Offer.OfferStatus.STATUS,         
+        PublicationDate,
+        Offer.InternalBidDueDate,
+        BidDueDate,
+        createdAt,
+        modifiedBy,
+        modifiedAt, 
+    };
 }
