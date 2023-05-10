@@ -814,22 +814,23 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         end as Weight:Double
     };
 
-    entity TenderMasterView as projection on PT_TMTEND {
-        CountryCode,
-        TenderID,
-        Classification,
-        TenderName,
-        createdBy,
-        Offer.Distributor.DistributorName,
-        Institute.InstituteName,
-        Offer.OfferID,
-        Offer.OfferValue.VALUE,
-        Offer.OfferStatus.STATUS,         
-        PublicationDate,
-        Offer.InternalBidDueDate,
-        BidDueDate,
-        createdAt,
-        modifiedBy,
-        modifiedAt, 
-    };
+    entity TenderMasterView as select from TransactionalData.PT_TMTEND as tender{
+        tender.CountryCode,
+        key tender.TenderID,
+        tender.Classification,
+        tender.TenderName,
+        tender.createdBy,
+        tender.Offer.Distributor.DistributorName,
+        tender.Institute.InstituteName,
+        key tender.Offer.OfferID,
+        tender.Offer.OfferValue.VALUE,
+        tender.Offer.OfferStatus.STATUS,         
+        tender.PublicationDate,
+        tender.Offer.InternalBidDueDate,
+        tender.BidDueDate,
+        tender.createdAt,
+        tender.modifiedBy,
+        tender.modifiedAt, 
+    }where tender.Active = 1
+    and ifnull(tender.Offer.Active, 1) = 1;
 }
