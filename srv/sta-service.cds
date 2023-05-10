@@ -796,4 +796,21 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteType,
         Institute.InstituteName,
     }; 
+
+    entity AwardCriteriaTableView as select from PT_TMTEND as tend
+    left outer join PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
+    left outer join MasterData.AwardCriteriaValueHelp as ac ON cr.AwardCriteria is null and ac.Criteria is not null
+    {
+        tend.CountryCode,
+        tend.TenderID,
+	    // COALESCE( cr.AwardCriteria, ac.Criteria ) AS Criteria:String,
+        case when cr.AwardCriteria is not null
+            then cr.AwardCriteria
+            else ac.Criteria
+        end as Criteria:String,
+        case when cr.Weight is not null
+            then cr.Weight
+            else 0
+        end as Weight:Double
+    };
 }
