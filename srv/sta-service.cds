@@ -185,9 +185,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         * , OfferProduct : redirected to PT_TMOFPR
     };
 
-    entity PT_TMAWRDCR                                  as projection on TransactionalData.PT_TMAWRDCR {
-        * , Tender : redirected to PT_TMTEND
-    };
+   
 
     entity Specifications                               as projection on TransactionalData.Specifications {
         * , Tender : redirected to PT_TMTEND
@@ -796,7 +794,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteType,
         Institute.InstituteName,
     }; 
-
+    entity PT_TMAWRDCR                                  as projection on TransactionalData.PT_TMAWRDCR {
+        * , Tender : redirected to PT_TMTEND
+    };
     entity AwardCriteriaTableView as select from PT_TMTEND as tend
     left outer join PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
     left outer join MasterData.AwardCriteriaValueHelp as ac ON cr.AwardCriteria is null and ac.Criteria is not null and ac.CountryCode = tend.CountryCode
