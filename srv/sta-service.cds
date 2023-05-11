@@ -833,4 +833,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedAt, 
     }where tender.Active = 1
     and ifnull(tender.Offer.Active, 1) = 1;
+
+    entity OfferFormView as projection on PT_TMOFRS; // Form used in the Offer tab
+    entity OfferProductsTableView as projection on PT_TMOFPR; // Form used in the Offer tab - offer products
 }
