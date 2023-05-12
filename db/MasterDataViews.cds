@@ -158,7 +158,7 @@ inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode{
 	'Yes' as ACTIVE_RECORD
 }where dst.ForAllBrands = true and dst.ActiveRecord = 'Yes'
 union
-select from MasterData.BrazilDistributorDivision as bdd
+select from MasterData.DistributorDivision as bdd
 inner join MasterData.PT_TMDIST as dst on bdd.DistributorID = dst.DistributorID and bdd.CustomerID = dst.CustomerID
 inner join CountryBrands as cb on dst.CountryCode = cb.COUNTRY_CODE and bdd.DivisionName = cb.DIVISION
 

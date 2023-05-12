@@ -83,7 +83,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity LotProducts                                  as projection on TransactionalData.LotProduct;
     entity BrazilCap                                    as projection on MasterData.BrazilCap;
     entity BrazilMasterPrices                           as projection on MasterData.BrazilMasterPrices;
-    entity BrazilDistributorDivision                    as projection on MasterData.BrazilDistributorDivision;
+    entity DistributorDivision                          as projection on MasterData.DistributorDivision;
     entity InstituteDivision                            as projection on MasterData.InstituteDivision;
     entity PriceConditionBrazilView                     as projection on TransactionalDataViews.PriceConditionBrazilView;
     entity DocumentsDownload                            as projection on TransactionalData.DocumentsDownload;

@@ -898,11 +898,11 @@ module.exports = (srv) => {
 	 * @returns 
 	 */
 	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
-		const { BrazilPricingPolicy, BrazilDistributorDivision, InstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
+		const { BrazilPricingPolicy, DistributorDivision, InstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
 		const { PriceCondition } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({OfferID: product.OFFERID, ProductCode: product.ProductCode}));
-        const distributorDivision = await tx.run(SELECT.one.from(BrazilDistributorDivision).where({DistributorID: offer.DISTRIBUTOR_ID, DivisionName: product.DIVISION}));
+        const distributorDivision = await tx.run(SELECT.one.from(DistributorDivision).where({DistributorID: offer.DISTRIBUTOR_ID, DivisionName: product.DIVISION}));
         const institudeDivision = await tx.run(SELECT.one.from(InstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
 
 		const bDirectTender = offer.DISTRIBUTORNAME.toLowerCase() === 'bayer brazil' ? true : false;

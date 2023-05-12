@@ -14,7 +14,6 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity CountryProductUnits @readonly  as projection on MasterDataViews.CountryProductUnits;
     entity PT_TMINSHIER             as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINSBRTR @readonly   as projection on MasterData.PT_TMINSBRTR;
-    entity PT_TMDIST                as projection on MasterData.PT_TMDIST;
     entity PT_TMDISBRD              as projection on MasterData.PT_TMDISBRD;
     entity PT_TMPRDPCK @readonly    as projection on MasterData.PT_TMPRDPCK;
     entity PT_TMCTPRDPCK            as projection on MasterData.PT_TMCTPRDPCK;
@@ -22,12 +21,17 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity CountryRegions           as projection on MasterData.CountryRegions;
     entity CountryProvinces         as projection on MasterData.CountryProvinces;
     entity InstituteDivision        as projection on MasterData.InstituteDivision;
+    entity DistributorDivision      as projection on MasterData.DistributorDivision;
     
     entity PT_TMINST                as select from MasterData.PT_TMINST{
         *,
         Region: redirected to CountryRegions,
         Province: redirected to CountryProvinces,
         InstituteDivision: redirected to InstituteDivision
+    };
+    entity PT_TMDIST                as select from MasterData.PT_TMDIST{
+        *,
+        DistributorDivision: redirected to DistributorDivision
     };
 
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;

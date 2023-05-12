@@ -130,8 +130,7 @@ entity PT_TMDIST{
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Distributor = $self;
-	DistributorDivision: Composition of many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID 
-																	   and DistributorDivision.CustomerID = CustomerID;
+	DistributorDivision: Composition of many DistributorDivision on DistributorDivision.DistributorID = DistributorID;
 }
 
 //Product Pack
@@ -795,7 +794,7 @@ entity BrazilMasterPrices: cuid, managed {
 	UOM			: String;
 }
 
-entity BrazilDistributorDivision: managed {
+entity DistributorDivision: managed {
 	key DistributorID: Integer; 
 	key DivisionCode: String(50); // setor_ativ
 	CustomerID: Integer; // Codigo
