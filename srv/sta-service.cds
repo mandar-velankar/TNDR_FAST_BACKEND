@@ -34,6 +34,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteType,
         Institute.InstituteName,
     }; 
+
+    entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
   
     entity AwardCriteriaTableView as select from TransactionalData.PT_TMTEND as tend
     left outer join TransactionalData.PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
