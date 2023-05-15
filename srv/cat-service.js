@@ -778,7 +778,7 @@ module.exports = (srv) => {
 		});
 		return price;
 	}
-//EHQUT-356177-Spain-Legal is Optional always
+
     async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
 		//Legend
 		//1: Optional
@@ -849,6 +849,9 @@ module.exports = (srv) => {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "BU/RAM":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                            break;
+                        case "Legal":
                             oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
                             break;
                         case "Financial Business Partner":
