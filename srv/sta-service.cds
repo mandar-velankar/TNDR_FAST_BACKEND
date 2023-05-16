@@ -34,6 +34,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteType,
         Institute.InstituteName,
     }; 
+
+    entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
   
     entity AwardCriteriaTableView as select from TransactionalData.PT_TMTEND as tend
     left outer join TransactionalData.PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
@@ -72,6 +74,34 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }where tender.Active = 1
     and ifnull(tender.Offer.Active, 1) = 1;
 
-    entity OfferFormView as projection on TransactionalData.PT_TMOFRS; // Form used in the Offer tab
-    entity OfferProductsTableView as projection on TransactionalData.PT_TMOFPR; // Form used in the Offer tab - offer products
+    @cds.redirection.target
+    entity OfferFormView as select from TransactionalData.PT_TMOFRS as offer
+    inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID {
+        key offer.OfferID,
+        key offer.TenderID,
+        offer.InternalBidDueDate,
+        offer.WholesaleOffer,
+        offer.Division,
+        tender.BidDueDate,
+        offer.Distributor.DistributorName,
+        offer.Distributor.DistributorID,
+        offer.SellingCompanyDetails.LegalEntityName,
+        offer.SellingCompanyDetails.LegalEntityID
+    }; // Form used in the Offer tab
+
+    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR as product
+        inner join TransactionalData.PT_TMBDPR as price on price.ProductCode = product.ProductCode 
+                                                        and price.OfferID = product.OfferID 
+                                                        and price.Active = product.Active
+        inner join MasterData.PT_TMPRDPCK as productpack on productpack.PRODUCTPACKID = product.ProductCode {
+            product.ProductCode,
+            key product.OfferID,
+            key product.TenderID,
+            product.Active,
+            productpack.PRODUCTPACKNAME as ProductPackName,
+            product.UnitPerPack as UoM,
+            price.NetPrice as NetPrice,
+            product.RequestedVolume,
+            (product.RequestedVolume * price.NetPrice) as TotalAmount:Double
+    }; // Form used in the Offer tab - offer products
 }
