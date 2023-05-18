@@ -68,6 +68,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.PublicationDate,
         tender.Offer.InternalBidDueDate,
         tender.BidDueDate,
+        tender.Brands.BRANDID as BrandID,
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
@@ -104,4 +105,16 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             product.RequestedVolume,
             (product.RequestedVolume * price.NetPrice) as TotalAmount:Double
     }; // Form used in the Offer tab - offer products
+
+    entity Country as projection on MasterData.PT_TMCTRY;
+    entity Users as projection on AdminData.PT_TMUSER;
+    entity UserCountries @readonly @(restrict: [
+		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
+	])as projection on AdminData.PT_TMUSERCTRY {
+        *,
+        Country: redirected to Country,
+        User: redirected to Users,
+    };
+    entity CountryTenderBrands @readonly as projection on TransactionalDataViews.CountryTenderBrands;
+    entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
 }
