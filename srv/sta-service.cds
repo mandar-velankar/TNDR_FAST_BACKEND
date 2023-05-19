@@ -74,4 +74,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity OfferFormView as projection on TransactionalData.PT_TMOFRS; // Form used in the Offer tab
     entity OfferProductsTableView as projection on TransactionalData.PT_TMOFPR; // Form used in the Offer tab - offer products
+
+    @cds.redirection.target
+    entity InstitutesView as projection on MasterData.PT_TMINST;
+    entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
+        *,
+        classification.COUNTRY_CODE as CountryCode: String(2)
+    };
+    entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+    entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
 }
