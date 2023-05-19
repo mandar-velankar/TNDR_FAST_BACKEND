@@ -81,7 +81,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         *,
         classification.COUNTRY_CODE as CountryCode: String(2)
     };
-    entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+    entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS as instType {
+        *,
+        instType.ChannelCountry as CountryCode: String(2)
+    };
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
     @cds.redirection.target
     entity OfferFormView as select from TransactionalData.PT_TMOFRS as offer
@@ -126,8 +129,4 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryTenderBrands @readonly as projection on TransactionalDataViews.CountryTenderBrands;
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
 
-    entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS as instType {
-        *,
-        instType.ChannelCountry as CountryCode: String(2)
-    };
 }
