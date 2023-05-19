@@ -19,6 +19,7 @@ const NumberHelper = require("./utils/NumberHelper");
 const cfenv = require("cfenv");
 const axios = require('axios');
 const qs = require("qs");
+const { nextTick } = require('process');
 
 module.exports = (srv) => {
 
@@ -243,5 +244,24 @@ module.exports = (srv) => {
 		return results;
 	});
 	*/
+
+	// srv.on(['CREATE','UPDATE','DELETE'], 'AwardCriteriaTableView', async (req, next) => { 
+			
+	// 	debugger;	
+	// 	let result = {
+	// 		"CountryCode":"AE",
+	// 		"TenderID":"AE-15-100-1002",
+	// 		"Criteria":"Documents",
+	// 		"Weight":0.05
+	// 	}
+
+	// 	return result;
+		
+	// });
+
+	// srv.on(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req, next) => {
+	// 	debugger;
+	// });
+
 
 }
