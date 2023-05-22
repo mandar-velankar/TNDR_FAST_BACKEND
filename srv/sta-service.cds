@@ -128,5 +128,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
     entity CountryTenderBrands @readonly as projection on TransactionalDataViews.CountryTenderBrands;
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
+    entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
 
 }
