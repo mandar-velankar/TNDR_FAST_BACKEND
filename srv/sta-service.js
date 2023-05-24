@@ -50,7 +50,17 @@ module.exports = (srv) => {
 		CountrySpecificTenderInfo
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate,SchedulerApiConfig,SchedulerApiConfigOAuth
+		Template, 
+		TemplateCountry, 
+		MandatoryTableFieldsCountry, 
+		MailTemplate, 
+		PT_TMUSER, 
+		ExcelAttachment, 
+		WordAttachment, 
+		WordTemplateCountry,
+		WordTemplate,
+		SchedulerApiConfig,
+		SchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -259,9 +269,10 @@ module.exports = (srv) => {
 		
 	// });
 
-	// srv.on(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req, next) => {
-	// 	debugger;
-	// });
+	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
+		delete req.data.InstituteName;
+		delete req.data.InstituteType;
+	});
 
 
 }
