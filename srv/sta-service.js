@@ -270,8 +270,17 @@ module.exports = (srv) => {
 	// });
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
+		// remove associations 
 		delete req.data.InstituteName;
 		delete req.data.InstituteType;
+
+		// validate form
+		!req.data.TenderName && req.error({ code: 404, message: "TenderName is required", target: "TenderName" });
+		!req.data.Classification && req.error({ code: 404, message: "Classification is required", target: "Classification" });
+		!req.data.InstituteID && req.error({ code: 404, message: "InstituteName is required", target: "InstituteName" });
+		!req.data.TenderChannel && req.error({ code: 404, message: "TenderChannel is required", target: "TenderChannel" });
+		!req.data.PublicationDate && req.error({ code: 404, message: "PublicationDate is required", target: "PublicationDate" });
+		!req.data.BidDueDate && req.error({ code: 404, message: "BidDueDate is required", target: "BidDueDate" });
 	});
 
 
