@@ -12,6 +12,7 @@ using {com.bayer.SXTENDER.AdminDataViews} from '../db/AdminDataViews';
 using {com.bayer.SXTENDER.BankGuaranteeData} from '../db/BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
+using {com.bayer.SXTENDER.ExternalDataViews} from '../db/ExternalDataViews';
 using {
     User,
     Country,
@@ -129,5 +130,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryTenderBrands @readonly as projection on TransactionalDataViews.CountryTenderBrands;
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
+    entity MasterDistributors @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterDistributors;
 
 }
