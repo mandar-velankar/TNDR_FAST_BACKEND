@@ -69,12 +69,27 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.PublicationDate,
         tender.Offer.InternalBidDueDate,
         tender.BidDueDate,
-        tender.Brands.BRANDID as BrandID,
+        max(tender.Brands.BRANDID) as BrandID,
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
-    }where tender.Active = 1
-    and ifnull(tender.Offer.Active, 1) = 1;
+    }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
+    group By tender.CountryCode,
+        tender.TenderID,
+        tender.Classification,
+        tender.TenderName,
+        tender.createdBy,
+        tender.Offer.Distributor.DistributorName,
+        tender.Institute.InstituteName,
+        tender.Offer.OfferID,
+        tender.Offer.OfferValue.VALUE,
+        tender.Offer.OfferStatus.STATUS,         
+        tender.PublicationDate,
+        tender.Offer.InternalBidDueDate,
+        tender.BidDueDate,
+        tender.createdAt,
+        tender.modifiedBy,
+        tender.modifiedAt;
 
     @cds.redirection.target
     entity InstitutesView as projection on MasterData.PT_TMINST;
