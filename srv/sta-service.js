@@ -283,5 +283,4 @@ module.exports = (srv) => {
 		!req.data.BidDueDate && req.error({ code: 404, message: "BidDueDate is required", target: "BidDueDate" });
 	});
 
-
 }

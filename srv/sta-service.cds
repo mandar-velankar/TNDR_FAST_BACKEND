@@ -88,8 +88,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
     @cds.redirection.target
-    entity OfferFormView as select from TransactionalData.PT_TMOFRS as offer
-    inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID {
+    entity OfferFormView as select from TransactionalData.PT_TMOFRS;
+    //inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID ;
+    /*{
         key offer.OfferID,
         key offer.TenderID,
         offer.InternalBidDueDate,
@@ -100,7 +101,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.Distributor.DistributorID,
         offer.SellingCompanyDetails.LegalEntityName,
         offer.SellingCompanyDetails.LegalEntityID
-    }; // Form used in the Offer tab
+    };*/ // Form used in the Offer tab
 
     entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR as product
         inner join TransactionalData.PT_TMBDPR as price on price.ProductCode = product.ProductCode 
@@ -131,5 +132,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
     entity MasterDistributors @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterDistributors;
+    entity CountryLegalEntity @readonly @(cds.redirection.target:false) as projection on MasterDataViews.CountryLegalEntity;
 
 }
