@@ -20,6 +20,7 @@ const cfenv = require("cfenv");
 const axios = require('axios');
 const qs = require("qs");
 const { nextTick } = require('process');
+const moment = require('moment');
 
 module.exports = (srv) => {
 
@@ -50,7 +51,17 @@ module.exports = (srv) => {
 		CountrySpecificTenderInfo
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate,SchedulerApiConfig,SchedulerApiConfigOAuth
+		Template, 
+		TemplateCountry, 
+		MandatoryTableFieldsCountry, 
+		MailTemplate, 
+		PT_TMUSER, 
+		ExcelAttachment, 
+		WordAttachment, 
+		WordTemplateCountry,
+		WordTemplate,
+		SchedulerApiConfig,
+		SchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -259,9 +270,32 @@ module.exports = (srv) => {
 		
 	// });
 
-	// srv.on(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req, next) => {
-	// 	debugger;
-	// });
+	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
+		// remove associations data
+		delete req.data.InstituteName;
+		delete req.data.InstituteType;
 
+		// validate form
+		!req.data.TenderName && req.error({ code: 404, message: "TenderName is required.", target: "TenderName" });
+		!req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
+		!req.data.InstituteID && req.error({ code: 404, message: "InstituteName is required.", target: "InstituteName" });
+		!req.data.TenderChannel && req.error({ code: 404, message: "TenderChannel is required.", target: "TenderChannel" });
+		!req.data.PublicationDate && req.error({ code: 404, message: "PublicationDate is required.", target: "PublicationDate" });
+		!req.data.BidDueDate && req.error({ code: 404, message: "BidDueDate is required.", target: "BidDueDate" });
+
+		//check if dates are correct
+		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
+			req.error({ code: 404, message: "Publication date should be before the offer due date.", target: "PublicationDate" });
+
+		if(req.data.AwardDate){
+
+			if(!moment(req.data.BidDueDate).isBefore(req.data.AwardDate))
+				req.error({ code: 404, message: "BidDueDate date should be before the Award date.", target: "BidDueDate" });
+
+			if(req.data.NextPublicationDye && !moment(req.data.AwardDate).isBefore(req.data.NextPublicationDye))
+				req.error({ code: 404, message: "Award date should be before the next publication date.", target: "NextPublicationDye" });
+		}	
+		
+	});
 
 }
