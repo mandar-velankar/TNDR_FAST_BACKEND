@@ -69,7 +69,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.PublicationDate,
         tender.Offer.InternalBidDueDate,
         tender.BidDueDate,
-        max(tender.Brands.BRANDID) as BrandID,
+        max(tender.Brands.BRANDID) as BrandID:String,
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
