@@ -609,24 +609,26 @@ module.exports = async (srv) => {
             console.log(`COUNT WITH FILTER: Total time trace fetching Price Agreements: ${totalTime}`);
             return [{ counted: result.length }];
         }
-        if (hasFilter) {
-            startTrace("SkipTop");
-            const limit = req.query.SELECT.limit;
-            let startFrom = 0;
-            let endAt = 0;
-            if (limit?.offset?.val) {
-                startFrom = limit?.offset?.val;
-            }
-            if (limit?.rows?.val) {
-                endAt = startFrom + limit.rows.val;
-            }
-            if (endAt > 0) {
-                result = result.slice(startFrom, endAt);
-            } else if (startFrom > 0) {
-                result = result.slice(startFrom);
-            }
-            stopTrace("SkipTop");
-        }
+
+    // EFRCL- 358586- Italy- Price agreements- search function shows limited results
+        // if (hasFilter) {
+        //     startTrace("SkipTop");
+        //     const limit = req.query.SELECT.limit;
+        //     let startFrom = 0;
+        //     let endAt = 0;
+        //     if (limit?.offset?.val) {
+        //         startFrom = limit?.offset?.val;
+        //     }
+        //     if (limit?.rows?.val) {
+        //         endAt = startFrom + limit.rows.val;
+        //     }
+        //     if (endAt > 0) {
+        //         result = result.slice(startFrom, endAt);
+        //     } else if (startFrom > 0) {
+        //         result = result.slice(startFrom);
+        //     }
+        //     stopTrace("SkipTop");
+        // }
         console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
         //otherwise keep as is
         req.query.count = true;
