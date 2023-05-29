@@ -158,5 +158,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
 
     entity PriceConditionPriceView as projection on TransactionalDataViews.PriceConditionPriceView;
+    entity PriceConditionClassification as projection on TransactionalData.PriceConditionClassification
 
 }
