@@ -490,17 +490,17 @@ entity PriceCondition: cuid, managed {
     ICMS                                : Decimal; //will come from SAP simulation
     NetPrice                            : Decimal; //will come from SAP simulation
     Price0                              : Decimal;
-    Level1Discount1                     : Decimal;
-    Level1Discount2                     : Decimal;
-    Level1Discount3                     : Decimal;
+    Level1Discount1                     : Double;
+    Level1Discount2                     : Double;
+    Level1Discount3                     : Double;
     Price1                              : Decimal;
-    Level2Discount1                     : Decimal;
-    Level2Discount2                     : Decimal;
-    Level2Discount3                     : Decimal;
+    Level2Discount1                     : Double;
+    Level2Discount2                     : Double;
+    Level2Discount3                     : Double;
     Price2                              : Decimal;
-    Level3Discount1                     : Decimal;
-    Level3Discount2                     : Decimal;
-    Level3Discount3                     : Decimal;
+    Level3Discount1                     : Double;
+    Level3Discount2                     : Double;
+    Level3Discount3                     : Double;
     Price3                              : Decimal;
     OfferPrice                          : Decimal;
     NetOfferPrice                       : Decimal;
