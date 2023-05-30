@@ -134,6 +134,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             (product.RequestedVolume * price.NetPrice) as TotalAmount:Double
     }; // Form used in the Offer tab - offer products
 
+    entity OfferProductsDetailView as projection on TransactionalData.PT_TMOFPR;
+
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
         inner join OfferProductsTableView as product on product.OfferID = offer.OfferID {
         key offer.OfferID,
