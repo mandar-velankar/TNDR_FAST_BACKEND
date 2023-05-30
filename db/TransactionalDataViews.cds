@@ -1321,7 +1321,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.Price1, // calculated in the UI based on User Input
     case   
         when priceCondition.Level2Discount1 is null
-            then offer.Distributor.CommissionRate
+            then offer.Distributor.CommissionRate / 100 // TODO: check if CommissionRate should be devided by 100
         else priceCondition.Level2Discount1
     end as Level2Discount1:Double,
     priceCondition.Price2, 
