@@ -805,8 +805,9 @@ module.exports = (srv) => {
         if(product.DIVISION === 'Radiology'){
             const ProductProfitability = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
             dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
-
-            if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability > 40){
+			
+// EFRCL- 360368- Spain- changes in approval workflow for Radiology(Profit, floor price)
+            if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability >= 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "KAMS":
@@ -816,13 +817,13 @@ module.exports = (srv) => {
                             oApproverType.ValidationType = oApproverType.ValidationType;
                     }
                 });
-            } else {
+            } else if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability < 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "KAMS":
                             oApproverType.ValidationType = 3;
                             break;
-                        case "CDH":
+                        case "BU/RAM":
                             oApproverType.ValidationType = 3;
                             break;
                         default:
@@ -830,21 +831,25 @@ module.exports = (srv) => {
                     }
                 });
             }
-        } else {
-            if(product.NET_PRICE > dFloorPrice){
+         else {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
+						case "KAMS":
+							oApproverType.ValidationType = 3;
+							break;
+						case "CDH":
+							oApproverType.ValidationType = 3;
+							break;
                         case "BU/RAM":
-                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
-                            break;
-                        case "Controlling":
-                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = 3;
                             break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
                     }
                 });
-            } else {
+		 }
+		}
+             else {
                 
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
@@ -865,7 +870,7 @@ module.exports = (srv) => {
                     }
                 });
             }
-        }
+        
 		
 		let results = {
 			//In Policy flag
