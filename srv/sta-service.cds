@@ -69,12 +69,27 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.PublicationDate,
         tender.Offer.InternalBidDueDate,
         tender.BidDueDate,
-        tender.Brands.BRANDID as BrandID,
+        max(tender.Brands.BRANDID) as BrandID:String,
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
-    }where tender.Active = 1
-    and ifnull(tender.Offer.Active, 1) = 1;
+    }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
+    group By tender.CountryCode,
+        tender.TenderID,
+        tender.Classification,
+        tender.TenderName,
+        tender.createdBy,
+        tender.Offer.Distributor.DistributorName,
+        tender.Institute.InstituteName,
+        tender.Offer.OfferID,
+        tender.Offer.OfferValue.VALUE,
+        tender.Offer.OfferStatus.STATUS,         
+        tender.PublicationDate,
+        tender.Offer.InternalBidDueDate,
+        tender.BidDueDate,
+        tender.createdAt,
+        tender.modifiedBy,
+        tender.modifiedAt;
 
     @cds.redirection.target
     entity InstitutesView as projection on MasterData.PT_TMINST;
@@ -119,6 +134,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             (product.RequestedVolume * price.NetPrice) as TotalAmount:Double
     }; // Form used in the Offer tab - offer products
 
+    entity OfferProductsDetailView as projection on TransactionalData.PT_TMOFPR;
+
+    entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
+        inner join OfferProductsTableView as product on product.OfferID = offer.OfferID {
+        key offer.OfferID,
+        sum(product.TotalAmount) as OfferTotal:Double
+    } group by offer.OfferID,
+               product.TotalAmount;
+
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
     entity UserCountries @readonly @(restrict: [
@@ -133,5 +157,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
     entity MasterDistributors @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterDistributors;
     entity CountryLegalEntity @readonly @(cds.redirection.target:false) as projection on MasterDataViews.CountryLegalEntity;
+
+
+    entity PriceConditionPriceView as projection on TransactionalDataViews.PriceConditionPriceView;
+    entity PriceConditionClassification as projection on TransactionalData.PriceConditionClassification
 
 }

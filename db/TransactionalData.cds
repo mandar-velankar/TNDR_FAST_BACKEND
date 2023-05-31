@@ -489,6 +489,21 @@ entity PriceCondition: cuid, managed {
     Invoive                             : Decimal; //will come from SAP simulation
     ICMS                                : Decimal; //will come from SAP simulation
     NetPrice                            : Decimal; //will come from SAP simulation
+    Price0                              : Decimal;
+    Level1Discount1                     : Double;
+    Level1Discount2                     : Double;
+    Level1Discount3                     : Double;
+    Price1                              : Decimal;
+    Level2Discount1                     : Double;
+    Level2Discount2                     : Double;
+    Level2Discount3                     : Double;
+    Price2                              : Decimal;
+    Level3Discount1                     : Double;
+    Level3Discount2                     : Double;
+    Level3Discount3                     : Double;
+    Price3                              : Decimal;
+    OfferPrice                          : Decimal;
+    NetOfferPrice                       : Decimal;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;

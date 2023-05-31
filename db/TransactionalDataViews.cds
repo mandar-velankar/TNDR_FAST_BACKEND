@@ -1275,6 +1275,58 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.IsPricingUnlocked
 }where tender.Active = 1;
 
+/**
+ * This view contains calculated fields used in the Standard Tender application financial offers page
+ * for the ConditionType 'Price
+ */
+entity PriceConditionPriceView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+    and priceConditionClassification.ConditionType = 'Price'
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
+{
+    tender.CountryCode,
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    case   
+        when priceCondition.ID is not null then True
+        else False
+    end as hasPriceCondition:Boolean,
+    priceCondition.ID as PriceConditionID: UUID,
+    priceConditionClassification.Classification,
+    priceConditionClassification.Division,
+    priceConditionClassification.isMain,
+    ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE) as Price0:Decimal,
+    priceCondition.Level1Discount1,
+    priceCondition.Price1, // calculated in the UI based on User Input
+    case   
+        when priceCondition.Level2Discount1 is null
+            then ifnull(offer.Distributor.CommissionRate,0) / 100
+        else priceCondition.Level2Discount1
+    end as Level2Discount1:Double,
+    priceCondition.Price2, 
+    priceCondition.OfferPrice,
+    priceCondition.NetOfferPrice,
+    priceCondition.NetPrice,
+    priceCondition.Tax,
+}where tender.Active = 1;
+
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID

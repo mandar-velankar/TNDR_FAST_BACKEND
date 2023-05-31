@@ -32,3 +32,6 @@ ID,COUNTRYCODE,CONDITIONTYPE,CLASSIFICATION,DIVISION,PRODUCTTYPE,ISMAIN
 "a625fc08-4b95-11ed-bdc3-0242ac120002","BR","Commercial Proposal","Tender","Consumer Health","All","True"
 "a625fd16-4b95-11ed-bdc3-0242ac120002","BR","Commercial Proposal","Tender","Pharma","All","True"
 "a625fe1a-4b95-11ed-bdc3-0242ac120002","BR","Commercial Proposal","Tender","Radiology","All","True"
+"b7945f52-965e-4519-966d-ed73ce21ff0e","ES","Price","Tender","Radiology","All","True"
+"6663b422-11fb-4424-93a2-fd259442fec6","ES","Price","Tender","Pharma","All","True"
+"44b5439a-6ca1-4453-ba09-7fcaa93f0936","ES","Price","Tender","Consumer Health","All","True"
