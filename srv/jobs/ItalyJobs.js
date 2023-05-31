@@ -593,15 +593,20 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             let customerNumbers =  await tx.run(cds.parse.cql (`SELECT CustomerID from ${PT_TMINST.name} WHERE CountryCode = 'IT'`));
             customerNumbers = customerNumbers.map(item => this.addLeadingZeros(item.CustomerID, 10));
 
-            let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
-            inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name`);
+            // let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
+            // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name`);
 
-            // 'not in' where expression was not wokring properly
-            // because of this we are using this hack
-            // TODO: find a better way to handle this
-            let {xpr} = cds.parse.expr(`customer.E1KNA1M_KUNNR not in '${customerNumbers}' AND customer.E1KNA1M_LAND1 = 'IT'`);
-            xpr[3].val = customerNumbers;
-            query.SELECT.where = xpr;
+            // // 'not in' where expression was not wokring properly
+            // // because of this we are using this hack
+            // // TODO: find a better way to handle this
+            // let {xpr} = cds.parse.expr(`customer.E1KNA1M_KUNNR not in '${customerNumbers}' AND customer.E1KNA1M_LAND1 = 'IT'`);
+            // xpr[3].val = customerNumbers;
+            // query.SELECT.where = xpr;
+
+            let query = SELECT.from(`${ItalyCustomers.name} as customer`)
+                        .join(`${CountryProvinces.name} as province`)
+                        .on({'customer.E1KNA1M_REGIO' : 'province.Name'})
+                        .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT'});
 
             const customers = await tx.run(query);
             let nextInstituteID = await this.getLastInstituteID();
@@ -658,15 +663,15 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         try {
 
 
-            const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const { ItalyCustomerUpdateInstituteEntriesView } = this.db.entities("com.bayer.SXTENDER.MasterDataViews");
+            const { PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-            let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
-            inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name
-            inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
-            where customer.E1KNA1M_LAND1 = 'IT'`);
+            // let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
+            // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name
+            // inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
+            // where customer.E1KNA1M_LAND1 = 'IT'`);
 
-            const customers = await tx.run(query);
+            const customers = await tx.run(SELECT.from(ItalyCustomerUpdateInstituteEntriesView));
 
             const promises = customers.map(cust => {
                 const obj = {
@@ -788,26 +793,27 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         const tx = cds.tx();
         try {
 
-            const { PT_TMINST, PT_TMINSBRTR, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const { PT_TMINSBRTR } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const {ItalyCustomerCreateInstituteBrandView} = this.db.entities("com.bayer.SXTENDER.MasterDataViews")
 
-            let instituteBrandTermsCompoundKeys =  await tx.run(cds.parse.cql (`SELECT CountryCode || InstituteID || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINSBRTR.name} WHERE CountryCode = 'IT'`));
-            instituteBrandTermsCompoundKeys = instituteBrandTermsCompoundKeys.map(item => item.CompoundKey);
+            // let instituteBrandTermsCompoundKeys =  await tx.run(cds.parse.cql (`SELECT CountryCode || InstituteID || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINSBRTR.name} WHERE CountryCode = 'IT'`));
+            // instituteBrandTermsCompoundKeys = instituteBrandTermsCompoundKeys.map(item => item.CompoundKey);
 
-            let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
-            INNER JOIN ${PT_TMCTPRDPCK.name} AS cp ON i.CountryCode = cp.CountryCode
-            INNER JOIN ${PT_TMPRDPCK.name} AS p ON cp.ProductPackId = p.ProductPackId
-            INNER JOIN ${PT_TMPRDHIER.name} AS h ON p.HLevel6_Code = h.HLevel6_Code
-            GROUP BY i.CountryCode,i.InstituteId,h.HLevel4_Code
-            ORDER BY i.InstituteId,h.HLevel4_Code`);
+            // let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
+            // INNER JOIN ${PT_TMCTPRDPCK.name} AS cp ON i.CountryCode = cp.CountryCode
+            // INNER JOIN ${PT_TMPRDPCK.name} AS p ON cp.ProductPackId = p.ProductPackId
+            // INNER JOIN ${PT_TMPRDHIER.name} AS h ON p.HLevel6_Code = h.HLevel6_Code
+            // GROUP BY i.CountryCode,i.InstituteId,h.HLevel4_Code
+            // ORDER BY i.InstituteId,h.HLevel4_Code`);
 
-             // 'not in' where expression was not wokring properly
-            // because of this we are using this hack
-            // TODO: find a better way to handle this
-            let {xpr} = cds.parse.expr(`i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || h.HLEVEL4_CODE || 'Yes') not in '${instituteBrandTermsCompoundKeys}'`);
-            xpr[15].val = instituteBrandTermsCompoundKeys;
-            query.SELECT.where = xpr;
+            //  // 'not in' where expression was not wokring properly
+            // // because of this we are using this hack
+            // // TODO: find a better way to handle this
+            // let {xpr} = cds.parse.expr(`i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || h.HLEVEL4_CODE || 'Yes') not in '${instituteBrandTermsCompoundKeys}'`);
+            // xpr[15].val = instituteBrandTermsCompoundKeys;
+            // query.SELECT.where = xpr;
 
-            const brandTerms = await tx.run(query);
+            const brandTerms = await tx.run(SELECT.from(ItalyCustomerCreateInstituteBrandView));
 
             if(brandTerms.length <= 0) return;
 
@@ -821,8 +827,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     INCOTerms: "",
                     PaymentTerms: "",
                     ActiveRecord: "Yes",
-                    InstituteID: brandTerm.InstituteId,
-                    HLevel4_Code: brandTerm.HLevel4_Code
+                    InstituteID: brandTerm.InstituteID,
+                    HLevel4_Code: brandTerm.HLEVEL4_CODE
                 }
             });
 
@@ -848,28 +854,29 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         const tx = cds.tx();
         try {
 
-            const { PT_TMINST, PT_TMDIST, PT_TMCTPRDPCK, PT_TMPRDPCK, PT_TMPRDHIER, PT_TMINDSBR } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const { PT_TMINDSBR } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const {ItalyCustomerCreateInstituteDistributorBrandView} = this.db.entities("com.bayer.SXTENDER.MasterDataViews")
 
-            let instituteDistributorBrandCompoundKeys =  await tx.run(cds.parse.cql (`SELECT CountryCode || InstituteID || DistributorId || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINDSBR.name} WHERE CountryCode = 'IT'`));
-            instituteDistributorBrandCompoundKeys = instituteDistributorBrandCompoundKeys.map(item => item.CompoundKey);
+            // let instituteDistributorBrandCompoundKeys =  await tx.run(cds.parse.cql (`SELECT CountryCode || InstituteID || DistributorId || HLEVEL4_CODE || ActiveRecord AS CompoundKey FROM ${PT_TMINDSBR.name} WHERE CountryCode = 'IT'`));
+            // instituteDistributorBrandCompoundKeys = instituteDistributorBrandCompoundKeys.map(item => item.CompoundKey);
 
-            let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, d.DistributorId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
-            INNER JOIN ${PT_TMDIST.name} AS d ON i.CountryCode = d.CountryCode
-            INNER JOIN ${PT_TMCTPRDPCK.name} AS cp ON i.CountryCode = cp.CountryCode
-            INNER JOIN ${PT_TMPRDPCK.name} AS p ON cp.ProductPackId = p.ProductPackId
-            INNER JOIN ${PT_TMPRDHIER.name} AS h ON p.HLevel6_Code = h.HLevel6_Code
-            WHERE i.CountryCode = 'IT'
-            GROUP BY i.CountryCode,i.InstituteId,h.HLevel4_Code,d.DistributorId
-            ORDER BY i.InstituteId,d.DistributorId,h.HLevel4_Code`);
+            // let query = cds.parse.cql (`SELECT i.CountryCode, i.InstituteId, d.DistributorId, h.HLevel4_Code FROM ${PT_TMINST.name} AS i 
+            // INNER JOIN ${PT_TMDIST.name} AS d ON i.CountryCode = d.CountryCode
+            // INNER JOIN ${PT_TMCTPRDPCK.name} AS cp ON i.CountryCode = cp.CountryCode
+            // INNER JOIN ${PT_TMPRDPCK.name} AS p ON cp.ProductPackId = p.ProductPackId
+            // INNER JOIN ${PT_TMPRDHIER.name} AS h ON p.HLevel6_Code = h.HLevel6_Code
+            // WHERE i.CountryCode = 'IT'
+            // GROUP BY i.CountryCode,i.InstituteId,h.HLevel4_Code,d.DistributorId
+            // ORDER BY i.InstituteId,d.DistributorId,h.HLevel4_Code`);
 
-             // 'not in' where expression was not wokring properly
-            // because of this we are using this hack
-            // TODO: find a better way to handle this
-            let {xpr} = cds.parse.expr(`i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || d.DistributorId || h.HLEVEL4_CODE || 'Yes') not in '${instituteDistributorBrandCompoundKeys}'`);
-            xpr[17].val = instituteDistributorBrandCompoundKeys;
-            query.SELECT.where = xpr;
+            //  // 'not in' where expression was not wokring properly
+            // // because of this we are using this hack
+            // // TODO: find a better way to handle this
+            // let {xpr} = cds.parse.expr(`i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || d.DistributorId || h.HLEVEL4_CODE || 'Yes') not in '${instituteDistributorBrandCompoundKeys}'`);
+            // xpr[17].val = instituteDistributorBrandCompoundKeys;
+            // query.SELECT.where = xpr;
 
-            const brands = await tx.run(query);
+            const brands = await tx.run(SELECT.from(ItalyCustomerCreateInstituteDistributorBrandView));
 
             if(brands.length <= 0) return;
 
@@ -882,9 +889,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     CountryCode: brand.CountryCode,
                     Commissionrate: 0,
                     ActiveRecord: "Yes",
-                    InstituteID: brand.InstituteId,
-                    DistributorID: brand.DistributorId,
-                    HLevel4_Code: brand.HLevel4_Code
+                    InstituteID: brand.InstituteID,
+                    DistributorID: brand.DistributorID,
+                    HLevel4_Code: brand.HLEVEL4_CODE
                 }
             });
 
