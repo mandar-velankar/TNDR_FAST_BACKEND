@@ -1312,16 +1312,12 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceConditionClassification.Classification,
     priceConditionClassification.Division,
     priceConditionClassification.isMain,
-    case   
-        when priceCondition.Price0 is null
-            then product.RegisteredPrice.REGISTERED_PRICE
-        else priceCondition.Price0
-    end as Price0:Decimal,
+    ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE) as Price0:Decimal,
     priceCondition.Level1Discount1,
     priceCondition.Price1, // calculated in the UI based on User Input
     case   
         when priceCondition.Level2Discount1 is null
-            then offer.Distributor.CommissionRate / 100 // TODO: check if CommissionRate should be devided by 100
+            then ifnull(offer.Distributor.CommissionRate,0) / 100
         else priceCondition.Level2Discount1
     end as Level2Discount1:Double,
     priceCondition.Price2, 
