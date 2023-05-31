@@ -60,8 +60,21 @@ select from TransactionalData.ProductPricing
 //     materials.Institute.InstituteName
     
 // } ;
+
+//EHTWQ-369968-Italy-Issue with doubled values in FAST dashboards
+entity DistinctCustomerPrice as select from PriceAgreementData.CustomerPrices as materials{
+key materials.InstituteId,
+key materials.MaterialNumber,
+key materials.PriceAgreementId,
+key materials.EffectiveDate
+}group by materials.InstituteId,materials.MaterialNumber,materials.PriceAgreementId ,
+materials.EffectiveDate;
+//EHTWQ-369968-Italy-Issue with doubled values in FAST dashboards
+
+
 //EHQUT-202495-Italy - fix for mapping of SAP Italy deliveries
-entity Deliveries as select from PriceAgreementData.CustomerPrices as materials
+//EHTWQ-369968-Italy-Issue with doubled values in FAST dashboards
+entity Deliveries as select from DistinctCustomerPrice as materials
 inner join MasterData.PT_TMINST as institutes
   on materials.InstituteId=institutes.InstituteID
 inner join SAP.ItalyDeliveries as italydeliveries
