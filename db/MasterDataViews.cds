@@ -12,6 +12,7 @@ entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK 
 
 
 entity ProductPackSKUs as select from MasterData.PT_TMSKUPRDPCK;
+entity ProductPack as projection on MasterData.PT_TMPRDPCK;
 
 entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product left outer join
 MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPackID and Product.COUNTRYCODE = sku.CountryCode {
@@ -38,7 +39,14 @@ MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPac
 	case when Product.REGISTERED=0 then 0 else 1 end as REGISTERED:Integer,
 	Product.COMMENT as COMMENT,
 	Product.COGS.COGS,
-	Product.ProductPackSKU: redirected to ProductPackSKUs
+	Product.GOV_CODE,
+	Product.CODE1,
+	Product.CODE2,
+	Product.CODE3,
+	Product.REGISTRATION_DATE,
+	Product.REGISTRATION_VALID,
+	Product.ProductPackSKU: redirected to ProductPackSKUs,
+	Product.ProductPack: redirected to ProductPack
 }where Product.ACTIVERECORD = 'Yes'
 and Product.ProductPack.ACTIVERECORD = 'Yes'
 order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.ProductPack.PRODUCTPACKNAME;

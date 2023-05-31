@@ -15,7 +15,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMINSHIER             as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINSBRTR @readonly   as projection on MasterData.PT_TMINSBRTR;
     entity PT_TMDISBRD              as projection on MasterData.PT_TMDISBRD;
-    entity PT_TMPRDPCK @readonly    as projection on MasterData.PT_TMPRDPCK;
+    entity PT_TMPRDPCK @(cds.redirection.target:false) @readonly    as projection on MasterData.PT_TMPRDPCK;
     entity PT_TMCTPRDPCK            as projection on MasterData.PT_TMCTPRDPCK;
     entity PT_TMSKUPRDPCK @(cds.redirection.target:false) as projection on MasterData.PT_TMSKUPRDPCK;
     entity CountryRegions           as projection on MasterData.CountryRegions;
@@ -37,9 +37,11 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
 
     entity ProductPackSKUs as projection on MasterDataViews.ProductPackSKUs;
+    entity ProductPack @(cds.redirection.target:false) as projection on MasterDataViews.ProductPack;
     entity CountryBrandProducts    as select from MasterDataViews.CountryBrandProducts {
         *,
-        ProductPackSKU: redirected to ProductPackSKUs
+        ProductPackSKU: redirected to ProductPackSKUs,
+        ProductPack: redirected to ProductPack
     };
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
 
