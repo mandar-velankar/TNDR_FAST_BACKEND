@@ -333,6 +333,8 @@ entity PT_TMCTPRDPCK{
     LAP_UNIT : String(15);
     PRAF_ID: String(50);
     PRAF_COMMENTS : String(255);
+	REGISTRATION_DATE: DateTime;
+	REGISTRATION_VALID: DateTime;
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
