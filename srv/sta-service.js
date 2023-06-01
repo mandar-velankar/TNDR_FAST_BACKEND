@@ -299,4 +299,8 @@ module.exports = (srv) => {
 		delete req.data.InstituteType;
 	});
 
+	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
+		delete req.data.OfferDueDate;
+	});
+
 }

@@ -103,7 +103,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
     @cds.redirection.target
-    entity OfferFormView as select from TransactionalData.PT_TMOFRS;
+    entity OfferFormView as select from TransactionalData.PT_TMOFRS{
+        *,
+        Tender.BidDueDate as OfferDueDate
+    };
     //inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID ;
     /*{
         key offer.OfferID,
