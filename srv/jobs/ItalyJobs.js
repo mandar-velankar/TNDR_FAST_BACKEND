@@ -602,6 +602,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // let {xpr} = cds.parse.expr(`customer.E1KNA1M_KUNNR not in '${customerNumbers}' AND customer.E1KNA1M_LAND1 = 'IT'`);
             // xpr[3].val = customerNumbers;
             // query.SELECT.where = xpr;
+        //EFRCL- 305173- Italy-Again missing historical customers
 
             let query = SELECT.from(`${ItalyCustomers.name} as customer`)
                         .join(`${CountryProvinces.name} as province`)
@@ -618,7 +619,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     CustomerID: cust.E1KNA1M_KUNNR,
                     InstituteName: cust.E1KNA1M_NAME1,
                     InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3),
-                    Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01} \ VAT: ${cust.E1KNA1M_STCEG} \ Fiscal Code: ${cust.E1KNA1M_STCD1}`,
+                    Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01}`,
                     ContactNo: cust.E1KNA1M_TELF1,
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
@@ -628,7 +629,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     INSTITUTE_HIERARCHY_ID: 1,
                     State: "",
                     MercadoPublicoIssuer: "",
-                    RegionID: cust.RegionID
+                    RegionID: cust.RegionID,
+                    VatCode:cust.E1KNA1M_STCEG,
+                    TaxCode:cust.E1KNA1M_STCD1
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
                     // --"E1KNVVM_ZTERM",--PaymentTerms
@@ -670,6 +673,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name
             // inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
             // where customer.E1KNA1M_LAND1 = 'IT'`);
+            // EFRCL- 305173- Italy-Again missing historical customers  (INC18398333)
 
             const customers = await tx.run(SELECT.from(ItalyCustomerUpdateInstituteEntriesView));
 
@@ -678,8 +682,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     CountryCode: cust.E1KNA1M_LAND1,
                     CustomerID: cust.E1KNA1M_KUNNR,
                     InstituteName: cust.E1KNA1M_NAME1,
-                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3) || "",
-                    Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01} \ VAT: ${cust.E1KNA1M_STCEG} \ Fiscal Code: ${cust.E1KNA1M_STCD1}`,
+                    //InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3) || "",
+                    Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01}`,
                     ContactNo: cust.E1KNA1M_TELF1,
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
@@ -689,7 +693,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     INSTITUTE_HIERARCHY_ID: 1,
                     // State: "",
                     // MercadoPublicoIssuer: "",
-                    RegionID: cust.RegionID
+                    RegionID: cust.RegionID,
+                    VatCode:cust.E1KNA1M_STCEG,
+                    TaxCode:cust.E1KNA1M_STCD1
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
                     // --"E1KNVVM_ZTERM",--PaymentTerms
