@@ -602,7 +602,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // let {xpr} = cds.parse.expr(`customer.E1KNA1M_KUNNR not in '${customerNumbers}' AND customer.E1KNA1M_LAND1 = 'IT'`);
             // xpr[3].val = customerNumbers;
             // query.SELECT.where = xpr;
-        //EFRCL- 305173- Italy-Again missing historical customers
+
 
             let query = SELECT.from(`${ItalyCustomers.name} as customer`)
                         .join(`${CountryProvinces.name} as province`)
@@ -673,7 +673,6 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name
             // inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
             // where customer.E1KNA1M_LAND1 = 'IT'`);
-            // EFRCL- 305173- Italy-Again missing historical customers  (INC18398333)
 
             const customers = await tx.run(SELECT.from(ItalyCustomerUpdateInstituteEntriesView));
 
