@@ -805,8 +805,9 @@ module.exports = (srv) => {
         if(product.DIVISION === 'Radiology'){
             const ProductProfitability = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
             dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
-
-            if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability > 40){
+			
+// EFRCL- 360368- Spain- changes in approval workflow for Radiology(Profit, floor price)
+            if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability >= 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "KAMS":
@@ -816,13 +817,13 @@ module.exports = (srv) => {
                             oApproverType.ValidationType = oApproverType.ValidationType;
                     }
                 });
-            } else {
+            } else if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability < 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
                         case "KAMS":
                             oApproverType.ValidationType = 3;
                             break;
-                        case "CDH":
+                        case "BU/RAM":
                             oApproverType.ValidationType = 3;
                             break;
                         default:
@@ -830,21 +831,25 @@ module.exports = (srv) => {
                     }
                 });
             }
-        } else {
-            if(product.NET_PRICE > dFloorPrice){
+         else {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
+						case "KAMS":
+							oApproverType.ValidationType = 3;
+							break;
+						case "CDH":
+							oApproverType.ValidationType = 3;
+							break;
                         case "BU/RAM":
-                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
-                            break;
-                        case "Controlling":
-                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
+                            oApproverType.ValidationType = 3;
                             break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
                     }
                 });
-            } else {
+		 }
+		}
+             else {
                 
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
@@ -865,7 +870,7 @@ module.exports = (srv) => {
                     }
                 });
             }
-        }
+        
 		
 		let results = {
 			//In Policy flag
@@ -1997,18 +2002,25 @@ module.exports = (srv) => {
         //EUTVP: fix wrong condition                            
        // if (typeof (productRemarkDistinct[0])!=="undefined")
        // {
-       	if (productRemarkDistinct.length === 1) {
-			producRemark  = productRemarkDistinct[0];
-		}
-		else {
-			let productTermsRow = [];
-			for (let i = 0; i < productRemarkDistinct.length; i++) {
-				let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				productTermsRow[i] = productTermsItems.concat(" ").concat(productRemarkDistinct[i]);//removed the colon
+	//EFRCL- 331661- SCTASK14558875 MEA Remarks issue in quotation tab
+	if (productRemarkDistinct.length === 1) {
+		producRemark  = productRemarkDistinct[0];
+	}
+	else{
+		if(regionname === 'MEA'){
+			let emptyindex = productRemarkDistinct.findIndex(x => x === ' ');
+		if(emptyindex !== -1){
+				productRemarkDistinct.splice(emptyindex,1);
 			}
-			producRemark = productTermsRow.join("<br>")
-
 		}
+
+		let productTermsRow = [];
+		for (let i = 0; i < productRemarkDistinct.length; i++) {
+			let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
+			productTermsRow[i] = productTermsItems.concat(" ").concat(productRemarkDistinct[i]);//removed the colon
+		}
+		producRemark = productTermsRow.join("<br>")
+	}
     //}
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 		//Comment shows in remarks if any product is not registered in country

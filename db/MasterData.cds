@@ -700,7 +700,7 @@ entity ChannelProductPolicies: cuid, managed {
 
 entity CountryProvinces: cuid {
 	CountryCode     	: String(2);
-	RegionID            : String;
+	RegionID            : UUID;
 	Name				: String;
 }
 
@@ -718,7 +718,7 @@ entity TenderRegions {
 // link table to reflect many-to-many relationship between CountryRegions and TenderRegions
 entity Tenders_in_Regions {
 	key TenderID        : String;
-	key RegionID        : String;
+	key RegionID        : UUID;
 	Tender				: Association to TenderRegions on Tender.TenderID = TenderID;
 	Region				: Association to CountryRegions on Region.ID = RegionID;
 }
@@ -832,4 +832,12 @@ entity BrazilPricingPolicy: cuid, managed {
 entity AwardCriteriaValueHelp: cuid, managed {
 	CountryCode		: String(2) not null;
 	Criteria		: String;
+}
+
+//EITOG-271486-SCTASK14171577,RITM12871584 - Change request
+entity NucleusHeads : managed {
+key Nucleus:String(100) not null;
+NucleusHeadsName:String(200);
+key NucleusHeadsEmailID : String(200);
+ 
 }

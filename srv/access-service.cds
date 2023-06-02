@@ -6,6 +6,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             COGS:Boolean;
             SPAINTENDERVIEW:Boolean;
             PHARMATENDERVIEW:Boolean;
+            RADIOLOGYTENDERVIEW:Boolean;
             MEATENDERVIEW:Boolean;
            
         };
