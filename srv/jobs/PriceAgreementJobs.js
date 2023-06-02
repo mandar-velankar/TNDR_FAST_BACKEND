@@ -85,7 +85,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const { PT_TMOFRS, PT_TMTEND, PriceCondition } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
 
-       
+        let customerPricesQC = [];
         const effectiveDate = new Date(customerPrice.EffectiveDate);
         const expiryDate = new Date(customerPrice.ExpiryDate);
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
@@ -180,6 +180,16 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
+        //Transforming the Date in correct format
+        const datab = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
+        const datbi = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
+
+        customerPricesQC.push({CustomerPriceId: customerPrice.PriceAgreementId, CountryCode: customerPrice.CountryCode, KSCHL: customerPrice.PriceCondition, KUNNR: institute.CustomerID, MATNR: customerPrice.MaterialNumber,KBETR: kbetr, REFVAL: tender.SAPID, DATAB: datab, DATBI: datbi});
+        const mappedcustomerPricesQC = this.mappedcustomerPrices(customerPricesQC);
+
+        // 5. Insert PriceCondition QC
+        mappedcustomerPricesQC && await this.insertCustomerPriceQC(mappedcustomerPricesQC);
+
         return await this.updatePriceConditions(customerPrice.CountryCode, "PriceCondition", body);
 
     }
@@ -244,6 +254,58 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
               }
             }
           };
+    };
+
+    mappedcustomerPrices(customerPrices) {
+
+        console.log(`Mapping customerPrices to customerPricesQC ...`);
+        customerPrices = customerPrices.reduce((prev, curr, idx, customerPrices) => {
+            prev.push(
+                {
+                    CustomerPriceId             : curr.CustomerPriceId || null,
+                    CountryCode                 : curr.CountryCode || null,
+                    VKORG                       : curr.CountryCode == 'ES' ? "QFHC" : "ITHC" || null,   // Sales Organisation
+                    KSCHL                       : curr.KSCHL || null,   // Condition Type
+                    KUNNR                       : curr.KUNNR && this.addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
+                    MATNR                       : curr.MATNR && this.addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
+                    YCIG                        : curr.REFVAL || null,   // Contract Reference
+                    KBETR                       : curr.KBETR || null,   // Condition Value
+                    KPEIN                       : curr.CountryCode == 'IT' ? 1 : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null || null,   // Unit for price
+                    DATAB                       : curr.DATAB || null,   // Effective Date
+                    DATBI                       : curr.DATBI || null,   // Expiry Date
+                    KRECH                       : (curr.KSCHL == 'YL60' || curr.KSCHL == 'YDC0') ? "A" : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? "C" : null || null,   // 
+                    KONMS                       : null,   // 
+                    MEINS                       : null,   // 
+                    BOMAT                       : null,   // 
+                    KSTBM                       : null,   // 
+                    MIKBAS                      : null,   // 
+                    MXBAS                       : null   //
+                }
+            );
+            return prev;
+        }, []);
+        return customerPrices;
+
+    };
+
+    async insertCustomerPriceQC(customerPrices) {
+        console.log(`JOB (${this.jobName }): Inserting of CustomerPrices into FAST table (CustomerPricesQC) ...`);
+        const { CustomerPricesQC } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        const tx = cds.tx();
+        if(!customerPrices) return false;
+        try{
+            await tx.run(INSERT(customerPrices).into(CustomerPricesQC));
+            await tx.commit();
+            console.log(`JOB (${this.jobName }): Inserting of CustomerPrices into FAST table (CustomerPricesQC) successfully completed.`);
+            console.log(`JOB (${this.jobName }): CustomerPricesQC -> created: ${customerPrices.length}`);
+            return true;
+        }
+        catch(error){
+            await tx.rollback(error);
+            console.error(`JOB (${this.jobName }): ERROR - Inserting of CustomerPrices into FAST table (CustomerPricesQC) failed`);
+            console.error(error);
+            throw error;
+        }         
     };
 
     async updatePriceConditions(countryCode, resource, body){
@@ -356,5 +418,15 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             console.log(error);
             await tx.rollback(error);
         }   
+    };
+
+    addLeadingZeros (num, size) {
+        if (num === null) {
+            throw new Error(`${num} doesn't exist`);
+        }
+        
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
     };
 };
