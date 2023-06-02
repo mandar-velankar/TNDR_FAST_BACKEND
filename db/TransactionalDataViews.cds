@@ -1312,18 +1312,18 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceConditionClassification.Classification,
     priceConditionClassification.Division,
     priceConditionClassification.isMain,
-    ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE) as Price0:Decimal,
-    priceCondition.Level1Discount1,
-    priceCondition.Price1, // calculated in the UI based on User Input
+    @Core.Computed: false
+    ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE) as BasePrice:Decimal,
+    ifnull(priceCondition.Price1, 0) as OfferPrice:Decimal,
+    priceCondition.Level1Discount1 as Discount,
+    @Core.Computed: false
     case   
         when priceCondition.Level2Discount1 is null
             then ifnull(offer.Distributor.CommissionRate,0) / 100
         else priceCondition.Level2Discount1
-    end as Level2Discount1:Double,
-    priceCondition.Price2, 
-    priceCondition.OfferPrice,
+    end as Deductions:Double,
+    priceCondition.Price2 as NetPrice, 
     priceCondition.NetOfferPrice,
-    priceCondition.NetPrice,
     priceCondition.Tax,
 }where tender.Active = 1;
 

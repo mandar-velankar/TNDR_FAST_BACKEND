@@ -303,4 +303,23 @@ module.exports = (srv) => {
 		delete req.data.OfferDueDate;
 	});
 
+
+	srv.before(['CREATE','UPDATE'], 'PriceConditionPriceView', async (req) => {
+
+		// validate form
+		req.data.OfferPrice && req.data.OfferPrice > req.data.BasePrice && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+
+
+		
+	});
+
+	srv.after('READ', 'PriceConditionPriceView', (items, req) => {
+
+		return items.map(async item => {
+		  item.Discount = (item.BasePrice - item.OfferPrice) / 100;
+		  item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+		})
+	
+	});
+
 }
