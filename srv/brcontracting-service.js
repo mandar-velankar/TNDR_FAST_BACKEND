@@ -440,7 +440,7 @@ module.exports = (srv) => {
                 EFFORT_A: "0",
                 ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume : el?.RequestedVolume / productPack.PACKFACTOR,
                 MANUAL_D: (100 * Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
-                CAP: productPriceCondition?.CAP === "No" ? 0 : capBrazil.CAP
+                CAP: productPriceCondition?.CAP === "No" ? 0 : (100 * Number(capBrazil.CAP)).toFixed(2)
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;
