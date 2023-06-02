@@ -3650,7 +3650,7 @@ module.exports = (srv) => {
 			EFFORT_A: "0",
 			ITEM_QTD: "1",
 			MANUAL_D: (100 * Number(priceConditionBrazilView?.AdditionalDiscount)).toFixed(2),
-			CAP: priceConditionBrazilView?.CAP === "Yes" ? priceConditionBrazilView?.CapValue * 100 : 0
+			CAP: priceConditionBrazilView?.CAP === "Yes" ? (priceConditionBrazilView?.CapValue * 100).toFixed(2) : 0
 		}];
 
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;
