@@ -56,51 +56,14 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
      */
     async getSynchronizedCustomerPricesAggregatedData(date) {
         console.log(`Fetching Customer Prices synchronized on ${date.toDateString()}`);
-        const { CustomerPrices, PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        const { PT_TMINST, PT_TMPRDPCK, PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const { PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
-        const { PT_TMUSER } = this.db.entities("com.bayer.SXTENDER.AdminData");
+        const {PriceAgreementPriceConditionNotificationMailJobView} = this.db.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
         const tx = this.db.tx();
         return await tx.run(
-            SELECT.from(`${CustomerPrices.name} as CP`)
-            .join(`${PriceAgreements.name} as PA`)
-            .on({ 
-                'CP.PriceAgreementId': { '=': 'PA.ID' } 
-            })
-            .join(`${PT_TMTEND.name} as TND`)
-            .on({ 
-                'PA.TenderId': { '=': 'TND.TenderID' } 
-            })
-            .join(`${PT_TMUSER.name} as USR`)
-            .on({ 
-                'PA.createdBy': { '=': 'USR.CWID' } 
-            })
-            .leftJoin(`${PT_TMINST.name} as INST`)
-            .on({ 
-                'CP.InstituteId': { '=': 'INST.InstituteID' },
-                'CP.CountryCode': { '=': 'INST.CountryCode' },
-            })
-            .leftJoin(`${PT_TMSKUPRDPCK.name} as PRDPCK`)
-            .on({ 
-                'CP.MaterialNumber': { '=': 'PRDPCK.SKUCode' },
-                'CP.CountryCode': { '=': 'PRDPCK.CountryCode' },
-                'PRDPCK.ActiveRecord': 'Yes',
-            })
-            .leftJoin(`${PT_TMPRDPCK.name} as PRD`)
-            .on({ 
-                'PRDPCK.ProductPackID': { '=': 'PRD.PRODUCTPACKID' },
-                'PRD.ACTIVERECORD': 'Yes',
-            })
+            SELECT.from(PriceAgreementPriceConditionNotificationMailJobView)
             .where({ 
-                    'CP.CountryCode': 'ES', 
-                    'CP.Synchronized': true, 
-                    'CP.Notified': false,
-                    'CP.RefIdocNumber': { '!=': null }, 
-                     and: { 'CP.RefIdocNumber': {'!=': '' } },
-                    'CP.modifiedAt': { '>=': `${date.toJSON().substring(0,10)} 00:00:00.000000000` }, // only consider records synced on the day this job runs
-                    'TND.Classification': 'Commercial Agreement'
+                     ModifiedAt: { '>=': date.toJSON().substring(0,10)}  // only consider records synced on the day this job runs        
             })
-        ); 
+        );    
     }
 
     mapDataToMail = (template,mail,syncDate) => data => {

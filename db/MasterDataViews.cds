@@ -2,6 +2,7 @@ namespace com.bayer.SXTENDER.MasterDataViews;
 
 using { User, Country, managed } from '@sap/cds/common';
 using { com.bayer.SXTENDER.MasterData } from './MasterData';
+using { com.bayer.SXTENDER.MasterData.SAP } from './SAP';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 
 entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK as sku {
@@ -228,3 +229,79 @@ where ValidTo = '9999-12-31 00:00:00.000000000';
 
 entity MostRecentBrazilMasterPricesView as projection on MasterData.BrazilMasterPrices 
 where ValidTo = '9999-12-31';
+
+/**
+ * This view is created for the processing of ItalyCustomer job
+ */
+entity ItalyCustomerUpdateInstituteEntriesView as select from SAP.ItalyCustomers as customer 
+inner join MasterData.CountryProvinces as province 
+    on customer.E1KNA1M.REGIO = province.Name
+inner join MasterData.PT_TMINST as institute 
+    on customer.E1KNA1M.KUNNR = institute.CustomerID {
+	customer.E1KNA1M.LAND1 as E1KNA1M_LAND1,
+	customer.E1KNA1M.KUNNR as E1KNA1M_KUNNR,
+	customer.E1KNA1M.ANRED as E1KNA1M_ANRED,
+	customer.E1KNA1M.STRAS as E1KNA1M_STRAS,
+	customer.E1KNA1M.PSTLZ as E1KNA1M_PSTLZ,
+	customer.E1KNA1M.STCEG as E1KNA1M_STCEG,
+	customer.E1KNA1M.STCD1 as E1KNA1M_STCD1,
+	customer.E1KNA1M.TELF1 as E1KNA1M_TELF1,
+	customer.E1KNA1M.TELFX as E1KNA1M_TELFX,
+	customer.E1KNA1M.STKZN as E1KNA1M_STKZN,
+	customer.E1KNVVM.KVGR3 as E1KNVVM_KVGR3,
+	customer.E1KNA1M.ORT01 as E1KNA1M_ORT01,
+	province.RegionID,
+	institute.InstituteID,
+	institute.CountryCode,
+}where customer.E1KNA1M.LAND1 = 'IT';
+
+/**
+ * This view is created for the processing of ItalyCustomer job
+ */
+entity ItalyCustomerInstituteBrandTermCompoundKeyView as select from MasterData.PT_TMINSBRTR {
+	CountryCode || InstituteID || HLevel4_Code || ActiveRecord as CompoundKey
+}where CountryCode = 'IT';
+
+/**
+ * This view is created for the processing of ItalyCustomer job
+ */
+entity ItalyCustomerCreateInstituteBrandView as SELECT from MasterData.PT_TMINST as i
+inner join MasterData.PT_TMCTPRDPCK as cp 
+	on i.CountryCode = cp.COUNTRYCODE 
+inner join MasterData.PT_TMPRDPCK as p
+	on cp.PRODUCTPACKID = p.PRODUCTPACKID
+inner join MasterData.PT_TMPRDHIER as h
+	on p.HLEVEL6_CODE = h.HLEVEL6_CODE {
+	i.CountryCode, 
+	i.InstituteID, 
+	h.HLEVEL4_CODE 
+}where i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || h.HLEVEL4_CODE || 'Yes') not in (Select CompoundKey from MasterDataViews.ItalyCustomerInstituteBrandTermCompoundKeyView)
+GROUP BY i.CountryCode,i.InstituteID,h.HLEVEL4_CODE
+ORDER BY i.InstituteID,h.HLEVEL4_CODE;
+
+/**
+ * This view is created for the processing of ItalyCustomer job
+ */
+entity ItalyCustomerInstituteDistributorBrandCompoundKeyView as select from MasterData.PT_TMINDSBR {
+	CountryCode || InstituteID || DistributorID || HLevel4_Code || ActiveRecord as CompoundKey
+}where CountryCode = 'IT';
+
+/**
+ * This view is created for the processing of ItalyCustomer job
+ */
+entity ItalyCustomerCreateInstituteDistributorBrandView as SELECT from MasterData.PT_TMINST as i
+inner join MasterData.PT_TMDIST as d
+	on i.CountryCode = d.CountryCode
+inner join MasterData.PT_TMCTPRDPCK as cp 
+	on i.CountryCode = cp.COUNTRYCODE 
+inner join MasterData.PT_TMPRDPCK as p
+	on cp.PRODUCTPACKID = p.PRODUCTPACKID
+inner join MasterData.PT_TMPRDHIER as h
+	on p.HLEVEL6_CODE = h.HLEVEL6_CODE {
+	i.CountryCode, 
+	i.InstituteID, 
+	d.DistributorID,
+	h.HLEVEL4_CODE 
+}where i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || d.DistributorID || h.HLEVEL4_CODE || 'Yes') not in (Select CompoundKey from MasterDataViews.ItalyCustomerInstituteDistributorBrandCompoundKeyView)
+GROUP BY i.CountryCode,i.InstituteID,h.HLEVEL4_CODE, d.DistributorID
+ORDER BY i.InstituteID,h.HLEVEL4_CODE, d.DistributorID;
