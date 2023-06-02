@@ -1314,6 +1314,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceConditionClassification.isMain,
     @Core.Computed: false
     ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE) as BasePrice:Decimal,
+    @Core.Computed: false
     ifnull(priceCondition.Price1, 0) as OfferPrice:Decimal,
     priceCondition.Level1Discount1 as Discount,
     @Core.Computed: false
