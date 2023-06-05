@@ -1309,6 +1309,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else False
     end as hasPriceCondition:Boolean,
     priceCondition.ID as PriceConditionID: UUID,
+    priceConditionClassification.ID as ClassificationID: UUID,
     priceConditionClassification.Classification,
     priceConditionClassification.Division,
     priceConditionClassification.isMain,
