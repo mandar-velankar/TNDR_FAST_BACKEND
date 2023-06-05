@@ -324,7 +324,7 @@ module.exports = (srv) => {
 			return INSERT.into(PriceCondition).entries({
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
-				Level1Discount: req.data.Discount,
+				Level1Discount1: req.data.Discount,
 				NetOfferPrice: req.data.NetOfferPrice,
 				Price2: req.data.NetPrice,
 				OfferID: req.data.OfferID,
