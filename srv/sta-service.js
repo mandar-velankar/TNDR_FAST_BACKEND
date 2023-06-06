@@ -308,11 +308,14 @@ module.exports = (srv) => {
 
 		// validate form
 		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+		
+	});
 
+	srv.on(['CREATE','UPDATE'], 'PriceConditionPriceView', async (req) => {
 
 		// save/update PriceCondition
 		if(req.data.PriceConditionID){
-			return UPDATE(PriceCondition)
+			await UPDATE(PriceCondition)
 				.with ({
 					Price1: req.data.OfferPrice, 
 					Level2Discount1: req.data.Deductions
@@ -321,7 +324,7 @@ module.exports = (srv) => {
 					ID:req.data.PriceConditionID
 				})
 		}else{
-			return INSERT.into(PriceCondition).entries({
+			await INSERT.into(PriceCondition).entries({
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
@@ -333,8 +336,10 @@ module.exports = (srv) => {
 				Price1: req.data.OfferPrice, 
 				Level2Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
-			})
+			});
 		}
+
+		return req.data;
 		
 	});
 
