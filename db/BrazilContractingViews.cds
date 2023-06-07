@@ -6,6 +6,7 @@ using { com.bayer.SXTENDER.AdminData } from './AdminData';
 using { com.bayer.SXTENDER.TransactionalData } from '../db/TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataConversion} from '../db/TransactionalDataConversion';
 using { com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
+using { com.bayer.SXTENDER.MasterData.SAP} from './SAP';
 
 entity ContractsView as select from BrazilContractingData.Contracts as Contracts
     inner join AdminData.PT_TMUSER as ModifiedByUser on ModifiedByUser.CWID = Contracts.modifiedBy
@@ -120,10 +121,54 @@ entity SalesOrdersView as select from BrazilContractingData.SalesOrders as Sales
         SalesOrders.CommitmentDeliveryDate, 
         SalesOrders.CommitmentCreationDate,
         SalesOrders.Status.Status,
-        SalesOrders.createdAt
-};
+        SalesOrders.createdAt,
+        ifnull(sum((SalesOrders.SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal * SalesOrders.SalesOrderProducts.RequestedQty)), '0') as TotalAmount:Double
+} group by SalesOrders.ID,
+        SalesOrders.Contract.ID,
+        SalesOrders.EmpenhoNumber,      
+        SalesOrders.InstituteID,
+        SalesOrders.Contract.Institute.InstituteName,                                      
+        SalesOrders.DistributorID,
+        SalesOrders.Contract.Distributor.DistributorName,                                      
+        SalesOrders.EmpenhoID,             
+        SalesOrders.SalesOrderNumber,       
+        SalesOrders.IbizProcessNumber,          
+        SalesOrders.CommitmentDate,         
+        SalesOrders.CommitmentDeliveryDate, 
+        SalesOrders.CommitmentCreationDate,
+        SalesOrders.Status.Status,
+        SalesOrders.createdAt;
 
-entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderProducts as SalesOrderProducts {
+entity OfferProductCompositionView as select from ContractProductsView as ContractProductsView
+inner join TransactionalData.PT_TMOFPR as OfferProduct
+    on OfferProduct.OfferID = ContractProductsView.OfferID
+    and OfferProduct.ProductCode = ContractProductsView.ProductPackID
+    and OfferProduct.LotID = ContractProductsView.LotID
+{
+    OfferProduct.OfferID,
+    OfferProduct.ProductCode,
+    OfferProduct.LotID,
+    (OfferProduct.SORTER + 1) as SORTER: Integer
+}group by OfferProduct.OfferID,
+    OfferProduct.ProductCode,
+    OfferProduct.LotID,
+    OfferProduct.SORTER;
+
+entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderProducts as SalesOrderProducts
+inner join SalesOrdersView as SalesOrdersView
+    on SalesOrdersView.ID = SalesOrderProducts.SalesOrder.ID
+left outer join MasterData.PT_TMSKUPRDPCK as sku
+    on sku.CountryCode = 'BR'
+    and sku.ProductPackID = SalesOrderProducts.ProductPackID
+inner join OfferProductCompositionView as OfferProductView
+    on OfferProductView.OfferID = SalesOrderProducts.OfferID
+    and OfferProductView.ProductCode = SalesOrderProducts.ProductPackID
+    and OfferProductView.LotID = SalesOrderProducts.LotID
+left outer join SAP.BrazilDeliveriesItems as BrazilDeliveriesItems
+    on OfferProductView.SORTER = BrazilDeliveriesItems.SALES_ITEM 
+    and SalesOrdersView.SalesOrderNumber = BrazilDeliveriesItems.SALES_DOCUMENT
+    and sku.SKUCode = BrazilDeliveriesItems.MATERIAL
+{
     key SalesOrderProducts.ID,
         SalesOrderProducts.SalesOrder.ID as SalesOrder_ID,
         SalesOrderProducts.SalesOrder.Contract.ID as Contract_ID,
@@ -135,9 +180,26 @@ entity SalesOrderProductsView as select from BrazilContractingData.SalesOrderPro
         SalesOrderProducts.IbizContractProductID,
         SalesOrderProducts.SalesOrderPrice,
         SalesOrderProducts.LotID,
+        SalesOrderProducts.Comment,
         SalesOrderProducts.OfferProduct.SKU.PRODUCTPACKNAME as ProductPackName,
-        SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveredProductQty as ActualDeliveredProductQty,  
-        SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveryDate as ActualDeliveryDate,  
+        sum(BrazilDeliveriesItems.DELIVERY_QUANTITY) as DeliveryQuantity: Integer,
+        max(BrazilDeliveriesItems.DATE_DELIVERY) as ActualDeliveryDate: Date,
+        // SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveredProductQty as ActualDeliveredProductQty,  
+        // SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveryDate as ActualDeliveryDate,  
         SalesOrderProducts.OfferProduct.UnitPerPack as UoM,
         SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal as Price
-};
+}group by SalesOrderProducts.ID,
+        SalesOrderProducts.SalesOrder.ID,
+        SalesOrderProducts.SalesOrder.Contract.ID,
+        SalesOrderProducts.ProductPackID,           
+        SalesOrderProducts.OfferID,                
+        SalesOrderProducts.RequestedQty,           
+        SalesOrderProducts.RequestedDeliveryDate,
+        SalesOrderProducts.IbizEmpenhoProductID,
+        SalesOrderProducts.IbizContractProductID,
+        SalesOrderProducts.SalesOrderPrice,
+        SalesOrderProducts.LotID,
+        SalesOrderProducts.Comment,
+        SalesOrderProducts.OfferProduct.SKU.PRODUCTPACKNAME,
+        SalesOrderProducts.OfferProduct.UnitPerPack,
+        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal;

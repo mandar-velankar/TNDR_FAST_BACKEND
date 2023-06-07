@@ -393,7 +393,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     case
         when offer.WholesaleOffer = 'Yes'
             then 'Wholesale Offer'
-        when count(offer.Product.ActiveProduct)<>0 and sum(case when offer.Product.ActiveProduct <> 1 then 1 else 0 end) = count(offer.Product.ActiveProduct)
+        when count(offer.Product.ActiveProduct)<>0 and sum(case when offer.Product.ActiveProduct <> 1 and offer.Product.Channel = 'Decline' then 1 else 0 end) = count(offer.Product.ActiveProduct)
             then 'Offer Declined'
         when offer.OfferStatusTable.STATUS = 'Offer Created'
         or offer.OfferStatusTable.STATUS = 'Awaiting Approval'
@@ -1463,17 +1463,14 @@ entity TenderHistoryBrazilAdhesionContracts as select from BrazilContractingData
             key contractProduct.OfferID,
             key contractProduct.ProductPackID,
             contract.ContractType,
-            contractProduct.RequestedVolume,
-            case 
-                when contract.ContractType = 'Adhesion Contract' then (sum(contractProduct.RequestedVolume) / (product.RequestedVolume/100))
-                else '0'
-            end as ADHESION:Double
-    } group by contract.TenderID, 
+            (sum(contractProduct.RequestedVolume) / (product.RequestedVolume*2)) as ADHESION:Double
+    } 
+    where contract.ContractType = 'Adhesion Contract'
+    group by contract.TenderID, 
          contractProduct.OfferID,
 		 contractProduct.ProductPackID,
          contractProduct.LotID,
 		 contract.ContractType,
-		 contractProduct.RequestedVolume,
 		 product.RequestedVolume;    
 
 entity TenderHistoryBrazil as select from TransactionalData.PT_TMTEND as tender
@@ -1506,9 +1503,7 @@ inner join TransactionalData.PT_TMTNOFST as offerStatus
 	on offerStatus.OfferID = offer.OfferID
 	and offerStatus.Active = 1
 left outer join TenderHistoryBrazilAdhesionContracts as adhesionContract
-    on tender.TenderID = adhesionContract.TenderID
-    and offer.OfferID = adhesionContract.OfferID
-    and product.ProductCode = adhesionContract.ProductPackID {
+    on product.ProductCode = adhesionContract.ProductPackID {
         key tender.TenderID,
         key offer.OfferID,
         key product.ProductCode,
@@ -1524,7 +1519,7 @@ left outer join TenderHistoryBrazilAdhesionContracts as adhesionContract
         ifnull(priceCondition.CAP, 'No') as CAP:String(10),
         priceCondition.StandardDiscount+priceCondition.AdditionalDiscount as TOTAL_DISCOUNT:Double,
         priceCondition.CommercialProposal as COMM_PROPOSAL,
-        sum(adhesionContract.ADHESION) as ADHESION:Double,
+        ifnull(adhesionContract.ADHESION, 0) as ADHESION:Double,
         ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
 }
 where tender.CountryCode = 'BR' and (offerStatus.STATUS = 'Quotation Submitted' or offerStatus.STATUS = 'Results Recorded' or offerStatus.STATUS = 'Delivery Ongoing')
