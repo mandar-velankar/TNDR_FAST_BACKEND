@@ -3444,6 +3444,7 @@ module.exports = (srv) => {
 
 		try {
             const result = await notifyIbiz(id_qp, body);
+			await UPDATE(PT_TMOFRS).with({isIBIZNotified: true}).where({IbizWorkflowID: id_qp, ActiveOffer: 1});
 			const msg = `Ibiz channel switch notification successful. WorkflowID: ${id_qp}`;
             console.log(msg);
             return msg;
@@ -3660,8 +3661,8 @@ module.exports = (srv) => {
 			UNIT_PRICE: "0",
 			EFFORT_A: "0",
 			ITEM_QTD: "1",
-			MANUAL_D: (Number(priceConditionBrazilView?.StandardDiscount) + Number(priceConditionBrazilView?.AdditionalDiscount)).toFixed(2),
-			CAP: priceConditionBrazilView?.CAP === "Yes" ? priceConditionBrazilView?.CapValue : 0
+			MANUAL_D: (100 * Number(priceConditionBrazilView?.AdditionalDiscount)).toFixed(2),
+			CAP: priceConditionBrazilView?.CAP === "Yes" ? (priceConditionBrazilView?.CapValue * 100).toFixed(2) : 0
 		}];
 
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;

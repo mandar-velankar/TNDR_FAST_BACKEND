@@ -30,10 +30,13 @@ module.exports = class processTenderResults extends BaseJob {
             const ibizWorkFlowIds = tenderResults.map(trs => trs.ID_QP);
             const existingProductsFAST = await this.getFASTProducts(tx, ibizWorkFlowIds);
             const existingTendersFAST = await this.getFASTTenders(tx);
+            const existingOffersFAST = await this.getFASTOffers(tx);
             const existingDistributorsFAST = await this.getFASTDistributors(tx);
 
             // Process data
-            await this.processTenderResults(tx, tenderResults, tenderResultItems, tenderResultDocs, existingProductsFAST, existingTendersFAST, existingDistributorsFAST);
+            if(tenderResults.length > 0){
+                await this.processTenderResults(tx, tenderResults, tenderResultItems, tenderResultDocs, existingProductsFAST, existingTendersFAST, existingDistributorsFAST, existingOffersFAST);
+            }
 
             // Commit All
             await tx.commit();
@@ -145,6 +148,21 @@ module.exports = class processTenderResults extends BaseJob {
     return result;
 }
 
+ /**
+ * This method fetches all Offers from COM_BAYER_SXTENDER_TRANSACTIONALDATA_PT_TMOFRS where IbizWorkflowID is not null
+ */
+ async getFASTOffers(tx) {
+    const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+    console.log(`JOB (${this.jobName }): Fetching data from ${PT_TMOFRS.name} ...`);
+    try {
+        return await tx.run(SELECT.from(PT_TMOFRS).where({'IbizWorkflowID': {"!=": null}, CountryCode: 'BR', ActiveOffer: 1 }));
+    }catch (error) {
+        console.error(`JOB (${this.jobName }): ERROR - Fetching data from ${PT_TMOFRS.name} failed`);
+        console.error(error);
+        throw error;
+    }
+}
+
 /**
  * Gets a list of existing Distributors from FAST
  * @param {Array} distributors 
@@ -181,12 +199,12 @@ getOutcome(code){
      *  - COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZDOCS
      * @param {[Object]} tenderResults
      */
- async  processTenderResults(tx, tenderResults, tenderResultItems, tenderResultDocs, existingProductsFAST, existingTendersFAST, existingDistributorsFAST) {
+ async  processTenderResults(tx, tenderResults, tenderResultItems, tenderResultDocs, existingProductsFAST, existingTendersFAST, existingDistributorsFAST, existingOffersFAST) {
     console.log(`JOB (${this.jobName }): Processing Ibiz TenderResult ...`);
     try {
 
         // 0 Mapping
-        const mappedTenderResults = this.mapIbizTenderResultstoFASTResults(tenderResults, tenderResultItems, existingProductsFAST, existingTendersFAST, existingDistributorsFAST);
+        const mappedTenderResults = this.mapIbizTenderResultstoFASTResults(tenderResults, tenderResultItems, existingProductsFAST, existingTendersFAST, existingDistributorsFAST, existingOffersFAST);
         const mappedDocs = this.mapIbizTenderResultDocstoFASTDocumentsDownload(tenderResultDocs);
 
          // 1. Create entries in PT_TMTRRES
@@ -218,11 +236,12 @@ getOutcome(code){
      * @param {[Objects]} tenderResults 
      * @returns {[Objects]} tenderResults
      */
- mapIbizTenderResultstoFASTResults(tenderResults, tenderResultItems, existingProductsFAST, existingTendersFAST, existingDistributorsFAST) {
+ mapIbizTenderResultstoFASTResults(tenderResults, tenderResultItems, existingProductsFAST, existingTendersFAST, existingDistributorsFAST, existingOffersFAST) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ TenderResults to PT_TMTRRES ...`);
     tenderResults = tenderResults.reduce((prev, curr, idx, tenderResults) => {
-        const product = existingProductsFAST.find(prd => prd.IbizWorkflowID === curr.ID_QP);
+        //const parentOffer = existingOffersFAST.find(ofr => ofr.IbizWorkflowID === curr.ID_QP);
+        let product = existingProductsFAST.find(prd => prd.IbizWorkflowID === curr.ID_QP && prd.WorkflowProductID === curr.ID_CC_QP);
         if(!product){return prev;}
         const institute = existingTendersFAST.find(inst => inst.TenderID === product.TenderID);
         const resultItem = tenderResultItems.find(inst => inst.parent_ID === curr.ID);
@@ -231,6 +250,8 @@ getOutcome(code){
         const cnpj = resultItem.COD_PARTICIPANTE && resultItem.COD_PARTICIPANTE.replace(/\D/g,'');
         prev.push(
             {
+                ID_QP             : curr.ID_QP,
+                ID_CC_QP          : curr.ID_CC_QP,
                 IBIZ_TECHNICAL_ID : curr.ID,
                 TenderID          : product.TenderID,
                 OfferID           : product.OfferID,
@@ -310,7 +331,7 @@ getOutcome(code){
     const { PT_TMTNOFST } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
     const offerStatusses = [];
     
-    const uniqueMappedTenderResults = [...new Map(mappedTenderResults.map(item => [item['OfferID'], item])).values()];
+    const uniqueMappedTenderResults = [...new Map(mappedTenderResults.map(item => [item['ID_QP', 'ID_CC_QP'], item])).values()];
 
     for (const ofsts of uniqueMappedTenderResults){
         //add status
@@ -328,6 +349,8 @@ getOutcome(code){
     const tenderResultsWithoutID = uniqueMappedTenderResults.map(so => { 
         const copy = {...so}; 
         delete copy.IBIZ_TECHNICAL_ID;
+        delete copy.ID_QP;
+        delete copy.ID_CC_QP;
         return copy;
     }); 
 
