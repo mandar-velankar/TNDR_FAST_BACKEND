@@ -345,7 +345,7 @@ module.exports = (srv) => {
 
 	srv.after('READ', 'PriceConditionPriceView', (items, req) => {
 		const fnCalculateFields = async item => {
-			item.Discount = ((item.BasePrice - item.OfferPrice) / 100).toFixed(2);
+			item.Discount = ((item.BasePrice - item.OfferPrice) / item.BasePrice).toFixed(2);
 			item.NetPrice = (item.OfferPrice * (1 - item.Deductions)).toFixed(2); 
 		};
 		if(Array.isArray(items)){
