@@ -303,4 +303,56 @@ module.exports = (srv) => {
 		delete req.data.OfferDueDate;
 	});
 
+
+	srv.before(['CREATE','UPDATE'], 'PriceConditionPriceView', async (req) => {
+
+		// validate form
+		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+		
+	});
+
+	srv.on(['CREATE','UPDATE'], 'PriceConditionPriceView', async (req) => {
+
+		// save/update PriceCondition
+		if(req.data.PriceConditionID){
+			await UPDATE(PriceCondition)
+				.with ({
+					Price1: req.data.OfferPrice, 
+					Level2Discount1: req.data.Deductions
+				})
+				.where({
+					ID:req.data.PriceConditionID
+				})
+		}else{
+			await INSERT.into(PriceCondition).entries({
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				Price2: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level2Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			});
+		}
+
+		return req.data;
+		
+	});
+
+	srv.after('READ', 'PriceConditionPriceView', (items, req) => {
+		const fnCalculateFields = async item => {
+			item.Discount = ((item.BasePrice - item.OfferPrice) / item.BasePrice).toFixed(2);
+			item.NetPrice = (item.OfferPrice * (1 - item.Deductions)).toFixed(2); 
+		};
+		if(Array.isArray(items)){
+			return items.map(fnCalculateFields)
+		}else{
+			return fnCalculateFields(items);
+		}
+	});
+
 }
