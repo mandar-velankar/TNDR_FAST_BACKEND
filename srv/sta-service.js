@@ -304,14 +304,14 @@ module.exports = (srv) => {
 	});
 
 
-	srv.before(['CREATE','UPDATE'], 'PriceConditionPriceView', async (req) => {
+	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
 		// validate form
 		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 		
 	});
 
-	srv.on(['CREATE','UPDATE'], 'PriceConditionPriceView', async (req) => {
+	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
 		// save/update PriceCondition
 		if(req.data.PriceConditionID){
@@ -343,10 +343,10 @@ module.exports = (srv) => {
 		
 	});
 
-	srv.after('READ', 'PriceConditionPriceView', (items, req) => {
+	srv.after('READ', ['PriceConditionPriceView','PriceConditionDiscountView'], (items, req) => {
 		const fnCalculateFields = async item => {
-			item.Discount = ((item.BasePrice - item.OfferPrice) / 100).toFixed(2);
-			item.NetPrice = (item.OfferPrice * (1 - item.Deductions)).toFixed(2); 
+			item.Discount = (item.BasePrice - item.OfferPrice) / 100;
+			item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
 		};
 		if(Array.isArray(items)){
 			return items.map(fnCalculateFields)
