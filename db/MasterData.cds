@@ -144,9 +144,9 @@ entity PT_TMPRDPCK{
 	UOM:String(10);
 	ACTIVERECORD:String(10);
 	HLEVEL6_CODE:String(50);
-	CONCENTRATION:hana.REAL;
+	CONCENTRATION:Double;
 	
-	PACKFACTOR:hana.REAL;
+	PACKFACTOR:Double;
 	PCIName:String(255);
 	MoleculeName:String(255);
 	ACTIVE_SUBSTANCE:String(50);
@@ -319,7 +319,7 @@ entity PT_TMCTPRDPCK{
 	key PRODUCTPACKID:Integer;
 	MANUFACTURER:String(500);
 	Presentation_2:String(1000);
-	VTATax:hana.REAL;
+	VTATax:Double;
 	COMMENT:String(255);
 	GOV_CODE:String(255);
 	CODE1:String(255);

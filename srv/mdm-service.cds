@@ -15,7 +15,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMINSHIER             as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINSBRTR @readonly   as projection on MasterData.PT_TMINSBRTR;
     entity PT_TMDISBRD              as projection on MasterData.PT_TMDISBRD;
-    entity PT_TMPRDPCK @(cds.redirection.target:false) @readonly    as projection on MasterData.PT_TMPRDPCK;
+    entity PT_TMPRDPCK @(cds.redirection.target:false) as projection on MasterData.PT_TMPRDPCK;
     entity PT_TMCTPRDPCK            as projection on MasterData.PT_TMCTPRDPCK;
     entity PT_TMSKUPRDPCK @(cds.redirection.target:false) as projection on MasterData.PT_TMSKUPRDPCK;
     entity CountryRegions           as projection on MasterData.CountryRegions;
