@@ -306,3 +306,11 @@ COUNTRYCODE,STATUS,SORTER
 "ES","Delivery Ongoing",8
 "ES","Offer Declined",10
 "ES","All",13
+"GB","Awaiting Approval","1"
+"GB","Offer Created","2"
+"GB","Offer Approved","3"
+"GB","Offer Rejected","4"
+"GB","Quotation Submitted","5"
+"GB","Results Recorded","7"
+"GB","Offer Declined","10"
+"GB","All","13"

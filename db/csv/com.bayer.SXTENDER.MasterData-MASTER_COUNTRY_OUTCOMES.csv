@@ -113,3 +113,5 @@ COUNTRYCODE,OUTCOME,SORTER
 "BR","Process Failed",6
 "BR","Disabled",7
 "BR","Disqualified",8
+"GB","Won","1"
+"GB","Lost","2"
