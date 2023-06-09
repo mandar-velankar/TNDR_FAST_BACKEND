@@ -807,6 +807,7 @@ module.exports = (srv) => {
             dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
 			
 // EFRCL- 360368- Spain- changes in approval workflow for Radiology(Profit, floor price)
+// EFRCL- 377753- Spain - changes in approval workflow for Pharma
             if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability >= 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
@@ -848,8 +849,36 @@ module.exports = (srv) => {
                     }
                 });
 		 }
+		} else if (product.DIVISION === 'Pharma') {
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "BU/RAM 1":
+						oApproverType.ValidationType = 3;
+						break;
+					case "BU/RAM 2":
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+
+			if (product.NET_PRICE < dFloorPrice) {
+				aApproverTypes.map(async function (oApproverType) {
+					switch (oApproverType.ApproverType) {
+						case "Legal":
+							oApproverType.ValidationType = 3;
+							break;
+						case "Financial Business Partner":
+							oApproverType.ValidationType = 3;
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
 		}
-             else {
+            else {
                 
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
