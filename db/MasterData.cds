@@ -834,3 +834,9 @@ entity AwardCriteriaValueHelp: cuid, managed {
 	CountryCode		: String(2) not null;
 	Criteria		: String;
 }
+
+entity TenderChannel: cuid {
+	CountryCode		: String(2) not null;
+	ChannelName		: String;
+	DirectTender	: Boolean;
+}

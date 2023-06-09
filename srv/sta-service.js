@@ -297,6 +297,7 @@ module.exports = (srv) => {
 		// remove associations data
 		delete req.data.InstituteName;
 		delete req.data.InstituteType;
+		delete req.data.DirectTender
 	});
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {

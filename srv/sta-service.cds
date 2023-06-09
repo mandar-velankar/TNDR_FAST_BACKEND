@@ -34,6 +34,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         *,
         Institute.InstituteType,
         Institute.InstituteName,
+        Institute.DirectTender,
     }; 
 
     entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
@@ -171,4 +172,5 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionClassification as projection on TransactionalData.PriceConditionClassification
 
+    entity TenderChannel as projection on MasterData.TenderChannel;
 }
