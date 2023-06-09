@@ -102,6 +102,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         instType.ChannelCountry as CountryCode: String(2)
     };
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
+
+    entity TenderOffers as projection on TransactionalDataViews.TenderOffers;
+
+    entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
+
     @cds.redirection.target
     entity OfferFormView as select from TransactionalData.PT_TMOFRS{
         *,

@@ -300,6 +300,14 @@ module.exports = (srv) => {
 	});
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
+
+		// validate form
+		!req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
+		!req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
+		!req.data.WholesaleOffer && req.error({ code: 404, message: "WholesaleOffer is required.", target: "WholesaleOffer" });
+		!req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
+		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
+
 		delete req.data.OfferDueDate;
 	});
 
