@@ -1291,7 +1291,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
  * This view contains calculated fields used in the Standard Tender application financial offers page
  * for the ConditionType 'Price
  */
-entity PriceConditionPriceView as select from TransactionalData.PT_TMTEND as tender 
+entity StandardTenderPriceConditionView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
     and offer.Active = 1

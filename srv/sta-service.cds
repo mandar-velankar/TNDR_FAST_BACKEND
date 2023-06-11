@@ -34,6 +34,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         *,
         Institute.InstituteType,
         Institute.InstituteName,
+        Institute.DirectTender,
     }; 
 
     entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
@@ -102,6 +103,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         instType.ChannelCountry as CountryCode: String(2)
     };
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
+
+    entity TenderOffers as projection on TransactionalDataViews.TenderOffers;
+
+    entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
+
     @cds.redirection.target
     entity OfferFormView as select from TransactionalData.PT_TMOFRS{
         *,
@@ -162,7 +168,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryLegalEntity @readonly @(cds.redirection.target:false) as projection on MasterDataViews.CountryLegalEntity;
 
 
-    entity PriceConditionPriceView as projection on TransactionalDataViews.PriceConditionPriceView;
+    entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionClassification as projection on TransactionalData.PriceConditionClassification
 
+    entity TenderChannel as projection on MasterData.TenderChannel;
 }

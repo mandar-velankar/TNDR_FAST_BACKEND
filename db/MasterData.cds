@@ -335,6 +335,8 @@ entity PT_TMCTPRDPCK{
     PRAF_COMMENTS : String(255);
 	REGISTRATION_DATE: DateTime;
 	REGISTRATION_VALID: DateTime;
+	RegistrationDate : Date;
+	RegistrationValidUntil : Date; 
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
@@ -836,8 +838,13 @@ entity AwardCriteriaValueHelp: cuid, managed {
 
 //EITOG-271486-SCTASK14171577,RITM12871584 - Change request
 entity NucleusHeads : managed {
-key Nucleus:String(100) not null;
-NucleusHeadsName:String(200);
-key NucleusHeadsEmailID : String(200);
- 
+	key Nucleus:String(100) not null;
+	NucleusHeadsName:String(200);
+	key NucleusHeadsEmailID : String(200);
+}
+
+entity TenderChannel: cuid {
+	CountryCode		: String(2) not null;
+	ChannelName		: String;
+	DirectTender	: Boolean;
 }

@@ -297,21 +297,30 @@ module.exports = (srv) => {
 		// remove associations data
 		delete req.data.InstituteName;
 		delete req.data.InstituteType;
+		delete req.data.DirectTender
 	});
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
+
+		// validate form
+		!req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
+		!req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
+		!req.data.WholesaleOffer && req.error({ code: 404, message: "WholesaleOffer is required.", target: "WholesaleOffer" });
+		!req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
+		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
+
 		delete req.data.OfferDueDate;
 	});
 
 
-	srv.before(['CREATE','UPDATE'], 'PriceConditionPriceView', async (req) => {
+	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
 		// validate form
 		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 		
 	});
 
-	srv.on(['CREATE','UPDATE'], 'PriceConditionPriceView', async (req) => {
+	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
 		// save/update PriceCondition
 		if(req.data.PriceConditionID){
@@ -343,10 +352,10 @@ module.exports = (srv) => {
 		
 	});
 
-	srv.after('READ', 'PriceConditionPriceView', (items, req) => {
+	srv.after('READ', ['PriceConditionPriceView','PriceConditionDiscountView'], (items, req) => {
 		const fnCalculateFields = async item => {
-			item.Discount = ((item.BasePrice - item.OfferPrice) / item.BasePrice).toFixed(2);
-			item.NetPrice = (item.OfferPrice * (1 - item.Deductions)).toFixed(2); 
+			item.Discount = (item.BasePrice - item.OfferPrice) / 100;
+			item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
 		};
 		if(Array.isArray(items)){
 			return items.map(fnCalculateFields)
