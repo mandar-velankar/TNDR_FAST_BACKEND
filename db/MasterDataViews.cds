@@ -47,8 +47,8 @@ MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPac
 	Product.CODE3,
 	Product.QTY_THRESHOLD,
 	Product.BU,
-	Product.REGISTRATION_DATE,
-	Product.REGISTRATION_VALID,
+	Product.RegistrationDate,
+	Product.RegistrationValidUntil,
 	Product.ProductPackSKU: redirected to ProductPackSKUs,
 	Product.ProductPack: redirected to ProductPack
 }where Product.ACTIVERECORD = 'Yes'
