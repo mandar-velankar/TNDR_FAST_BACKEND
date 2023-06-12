@@ -173,4 +173,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionClassification as projection on TransactionalData.PriceConditionClassification
 
     entity TenderChannel as projection on MasterData.TenderChannel;
+
+    entity OfferProductOfferStatus as projection on TransactionalData.OfferProductOfferStatus;
 }

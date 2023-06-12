@@ -811,3 +811,38 @@ entity SpainRappelData: cuid, managed {
     KUNNR       : String;
     MATNR       : String;
 }
+
+entity OfferProductOfferStatus {
+            TenderID            : String(50) not null;
+        key OfferId             : String(30) not null;
+            CountryCode         : String(2) not null;
+            ApprovalContent     : String(13);
+            ApproverTypeSection : Integer;
+            REQUIRED_ACTION     : String(12);
+            ApprovalStatus      : String(100) not null;
+            ApproverName        : String(100);
+            ApproverEmailID     : String(100);
+            SenderComment       : String(500);
+            ApproverComment     : String(500);
+            Active              : Integer not null;
+            //Hierarchy           : Integer;
+            AP_ID               : String(10);
+            RestoreKey          : String(100);
+            Statustime          : DateTime;
+            Submittedby         : String(100);
+            ApproverDate        : Date;
+        key ApproverType        : String(200) not null;
+            Division            : String(200) not null;
+            FLOW_ID             : String(255);
+            CountryName         : String(255);
+            UserName            : String(255);
+            UserEmail           : String(255);
+            //Associations
+            ApproverList        : Association to many MasterData.CountryApprovers
+                                      on  ApproverList.CountryCode  = CountryCode
+                                      and ApproverList.ApproverType = ApproverType
+                                      and ApproverList.Division     = Division;
+            ApproverTypes       : Association to many MasterData.ApproverTypes
+                                      on  ApproverTypes.CountryCode  = CountryCode
+                                      and ApproverTypes.ApproverType = ApproverType;
+};

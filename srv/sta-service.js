@@ -364,4 +364,16 @@ module.exports = (srv) => {
 		}
 	});
 
+	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
+		// const tx = cds.transaction(req)
+		const tx = cds.tx(req);
+		let results = [];
+		if (req.query.SELECT.where) {
+			//Get filters
+			let whereOffer = ServiceHelper.buildWhere(req, "OfferId");
+			results = await buildOfferApproval(tx, whereOffer);
+		}
+		return results;
+	});
+
 }
