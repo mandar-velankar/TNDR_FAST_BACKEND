@@ -1387,88 +1387,21 @@ module.exports = (srv) => {
 	}
 
 	async function buildProductValidationForType12(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
-		const { DistributorDivision, InstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
-		const { PriceCondition, PT_TMOFRS } = cds.entities("com.bayer.SXTENDER.TransactionalData");
-		const { OfferProductConsolidation, OfferStatus } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
+		const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
 
-		/*
-		// Outside of commercial policy
-		if(!bWithinCommercialPolicy){ 
-			// Pharma
-			if(product.DIVISION.toLowerCase() === 'pharma'){
-				aApproverTypes.map(oApproverType => {
-					switch (oApproverType.ApproverType) {
-						case "TA Head":
-						case "Pricing Manager":
-						case "Divisional Finance Manager or Director":
-						case "Bill to Cash coordinator":
-						case "Order to Cash":
-							oApproverType.ValidationType = 3;
-							break;
-						case "Legal department":
-						case "CDH Pharma":
-							if(totalDiscount > maxAllowedDiscount){
-								oApproverType.ValidationType = 3;
-								oApproverType.Hierarchy = 2;
-							}
-							break;
-						default:
-							oApproverType.ValidationType = oApproverType.ValidationType;
-					}
-				});
-			}
-			// Consumer Health
-			if(product.DIVISION.toLowerCase() === 'consumer health'){
-				aApproverTypes.map(oApproverType => {
-					switch (oApproverType.ApproverType) {
-						case "Commercial Operations Manager Consumer Health":
-						case "Sales Department":
-						case "Director or Manager of Finance BP":
-						case "Legal / Antitrust Department":
-						case "Bill to Cash coordinator":
-						case "Country Division Head Consumer Health":
-							oApproverType.ValidationType = 3;
-							break;
-						default:
-							oApproverType.ValidationType = oApproverType.ValidationType;
-					}
-				});
-			}
-			// Radiology
-			if(product.DIVISION.toLowerCase() === 'radiology'){
-				aApproverTypes.map(oApproverType => {
-					switch (oApproverType.ApproverType) {
-						case "National Sales Manager":
-						case "Customer Service Manager":
-						case "Director or Coordinator of Finance BP":
-						case "National Sales Manager":
-						case "CDH Radiology":
-						case "Legal / Competition Department":
-							oApproverType.ValidationType = 3;
-							break;
-						default:
-							oApproverType.ValidationType = oApproverType.ValidationType;
-					}
-				});
-			}
-
-		}
-
-		// General approvers
-		// only for indirect tenders and if total value (all products) is above 500k BRL
-		if(!bDirectTender && offerProductsTotalValue > 500_000){
-			aApproverTypes.map(oApproverType => {
-				switch (oApproverType.ApproverType) {
-					case "Credit Team":
-						oApproverType.ValidationType = 3;
-						break;
-					default:
-						oApproverType.ValidationType = oApproverType.ValidationType;
-				}
+		if(priceCondition.Price1 < priceCondition.Price0){
+			aApproverTypes.map(async function (oApproverType) {
+				oApproverType.ValidationType = 3;
 			});
-		}*/
+		}
+		
+		if(priceCondition.Price1 > priceCondition.Price0){
+			aApproverTypes.map(async function (oApproverType) {
+				oApproverType.ValidationType = oApproverType.ValidationType;
+			});
+		}
 		
 		let results = {
 			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
