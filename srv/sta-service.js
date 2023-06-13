@@ -364,4 +364,23 @@ module.exports = (srv) => {
 		}
 	});
 
+	// srv.after('READ', 'OfferValidation', async (req) => {
+	// 	// const tx = cds.transaction(req)
+	// 	const tx = cds.tx(req);
+	// 	// let results = [];
+	// 	// if (req.query.SELECT.where) {
+	// 	// 	//Get filters
+	// 	// 	let whereOffer = ServiceHelper.buildWhere(req, "OFFERID");
+	// 	// 	results = await buildOfferValidation(tx, whereOffer);
+	// 	// }
+	// 	return {
+	// 		OfferDate: "2023-06-12",
+	// 		OfferValidaity: "2023-07-12",
+	// 		Remarks: "Test",
+	// 		DeliveryTerms: "30 Days",
+	// 		PaymentTerms: "30 Days",
+	// 		ShippingTerms: "Test"
+	// 	};
+	// });
+
 }

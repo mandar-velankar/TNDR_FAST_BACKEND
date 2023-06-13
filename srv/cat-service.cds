@@ -89,6 +89,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity ContractStatuses                             as projection on AdminData.ContractStatus;
     entity Contracts                                    as projection on BrazilContractingData.Contracts;
     entity ContractProducts                             as projection on BrazilContractingData.ContractProducts;
+    entity OfferValidation                              as projection on TransactionalDataViews.OfferValidation;
 
 
     entity PT_TMCTRY @(restrict : [{
@@ -420,93 +421,7 @@ service CatalogService @(path : 'tender')@(requires : [
                                                                     and PriceCondition.CountryCode = $self.COUNTRY_CODE;
     };
 
-    entity OfferValidation {
-            OFFERSTATUSPATH       : String(124) not null;
-            TENDERID              : String(50) not null;
-            CLASSIFICATION        : String(50) not null; //Added Classification (db#1)
-            TENDER_REFERENCE      : String(753);
-            PROCUREMENT_REASON    : String;
-        key OFFERID               : String(30) not null;
-            INSTITUTENAME         : String(500);
-            INSTITUTE_TYPE        : String(50);
-            INSTITUTE_STATE       : String;
-            INSTITUTE_REGION      : String;
-            INSTITUTE_PROVINCE    : String;
-            INSTITUTE_CIFCODE     : String(50);
-            INSTITUTE_REGIONALHEALTHSYSTEM: String(50);
-            INSTITUTE_CUSTOMER_GROUP: String(50);
-            TAXCODE               : String(50);
-            VATCODE               : String(50);       
-            CUSTOMER_CODE         : Integer;
-            DIVISION              : String(100);
-            OFFERDATE             : Date;
-            OFFERVALIDITY         : Date not null;
-            EffectiveDate         : Date;
-            ExpiryDate            : Date;
-            COUNTRYCODE           : String(2) not null;
-            SELLINGCOMPANY        : String(300);
-            SELLINGCOMPANYBANK    : String(5000);
-            SELLING_COMPANY_AS1   : String(300);
-            SELLING_COMPANY_AS1_NAMEI: String(255);
-            SELLING_COMPANY_AS1_TITLEI: String(255);
-            SELLING_COMPANY_AS2_NAMEI: String(255);
-            SELLING_COMPANY_AS2_TITLEI: String(255);
-            SELLING_COMPANY_AS2   : String(300);
-            E_SIGNATURE1          : Boolean;
-            E_SIGNATURE2          : Boolean;
-            CURRENCY              : String(255);
-            AMOUNT_IN_NUMBERS     : Double;
-            AMOUNT_IN_WORDS       : String(1024);
-            AMOUNT_IN_NUMBERS_VAT : Double;
-            AMOUNT_IN_WORDS_VAT   : String(1024);
-            VAT_TOTAL             : Double;
-            LETTERHEAD            : String(5000);
-            //REGULATORY            : Integer;//MEA only
-            //LEGAL                 : Integer not null;//MEA only
-            //CONTROLLING           : Integer not null;//MEA only
-            //COUNTRY_BUSINESS      : Integer;//MEA and MX
-            //REGIONAL_BUSINESS     : Integer not null;//MEA only
-            //SUPPLY_CHAIN          : Integer not null;//All countries
-            DISTRIBUTORNAME       : String(500);
-            DISTRIBUTORADDRESS    : String(5000);
-            DISTRIBUTORPHONE      : String(500);
-            DISTRIBUTORFAX        : String(500);
-            DISTRIBUTORCONTACT    : String(500);
-            DISTRIBUTOREMAIL      : String(500); // Chile
-            PUBLICATION_DATE      : Date; // Chile
-            BID_DUE_DATE          : Date; // Chile
-            TENDER_SUBMITTED_BY   : String; // Chile
-            REMARKS               : String(5000);
-            CUSTOM_REMARKS        : String(500) not null;
-            DELIVERYTERMS         : String(5000);
-            PAYMENTTERMS          : String(5000);
-            SHIPMENTTERMS         : String(5000);
-            IS_LOWEST             : Integer not null;
-            IS_DEFAULT_TERMS      : Integer not null;
-            NEW_APPROVAL          : Integer;
-            //NSM_SM_FM             : Integer not null;//TH only
-            //HBU                   : Integer not null;//TH only
-            //CDH                   : Integer not null;//TH and AR
-            IN_POLICY             : Boolean;
-            //MACS                           : Integer not null;//AR only
-            //TA                             : Integer not null;//AR only
-            //FBP                            : Integer not null;//AR only
-            //LPC                            : Integer not null;//AR only
-            //COM_PGA                        : Integer not null;//AR only
-            //International_Trade            : Integer not null;//AR only
-            //Transfer_Pricing               : Integer not null;//AR only
-            //SBR                            : Integer not null;//AR only
-            BUDGET_RATE           : Double;
-            SPOT_RATE             : Double;
-            EXTERNAL_ID           : String;
-			SAP_ID                : String;
-            TENDER_TYPE           : String; 
-            CREATED_BY_USER_EMAIL :String(500);
-            CREATED_BY_USER_ROLE  : String(100);
-            CREATED_BY_USER_CONTACTNUMBER :String (20);
-            ApproverTypes         : Association to many ApproverTypes
-                                        on ApproverTypes.CountryCode = $self.COUNTRYCODE;
-    };
+    
 
     entity OfferProductOfferStatus {
             TenderID            : String(50) not null;
