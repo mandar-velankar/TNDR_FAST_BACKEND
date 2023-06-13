@@ -29,7 +29,20 @@ module.exports = (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
-		PT_TMINST, PT_TMDIST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER
+		PT_TMINST, 
+		PT_TMDIST, 
+		CountryApprovers, 
+		ApproverTypes, 
+		MASTER_COUNTRY_CHANNELS, 
+		PT_TMPRDPCK, 
+		CountryPreApprovedPrices, 
+		AccountPreApprovedPrices, 
+		PT_TMSKUPRDPCK, 
+		RoyalDecree, 
+		MasterPrices, 
+		MASTER_TENDER_TYPE,
+		PT_TMPRDHIER,
+		PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, OfferValues, OfferStatus
@@ -364,24 +377,27 @@ module.exports = (srv) => {
 		}
 	});
 
-	// srv.after('READ', 'OfferValidation', async (req) => {
-	// 	// const tx = cds.transaction(req)
-	// 	const tx = cds.tx(req);
-	// 	// let results = [];
-	// 	// if (req.query.SELECT.where) {
-	// 	// 	//Get filters
-	// 	// 	let whereOffer = ServiceHelper.buildWhere(req, "OFFERID");
-	// 	// 	results = await buildOfferValidation(tx, whereOffer);
-	// 	// }
-	// 	return {
-	// 		OfferDate: "2023-06-12",
-	// 		OfferValidaity: "2023-07-12",
-	// 		Remarks: "Test",
-	// 		DeliveryTerms: "30 Days",
-	// 		PaymentTerms: "30 Days",
-	// 		ShippingTerms: "Test"
-	// 	};
-	// });
+	srv.on('READ', 'OfferValidation', async (req) => {
+		const tx = cds.tx(req);
+		let results = [];
+		if (req.query.SELECT.where) {
+			//Get filters
+			let whereOffer = ServiceHelper.buildWhere(req, "OFFERID");
+			results = await buildOfferValidation(tx, whereOffer);
+		}
+		return results;
+	});
+
+	srv.on('READ', 'OfferProductValidation', async (req) => {
+		const tx = cds.tx(req);
+		let results = [];
+		if (req.query.SELECT.where) {
+			//Get filters
+			let whereOffer = ServiceHelper.buildWhere(req, "OFFER_ID");
+			results = await buildOfferProductValidation(tx, whereOffer);
+		}
+		return results;
+	});
 
 	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
 		// const tx = cds.transaction(req)
