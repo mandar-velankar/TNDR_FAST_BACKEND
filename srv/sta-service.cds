@@ -175,4 +175,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity TenderChannel as projection on MasterData.TenderChannel;
     entity OverViewFormView as select from TransactionalDataViews.TenderResults;
     entity OfferValidation as projection on TransactionalDataViews.OfferValidation;
+
+    entity OfferProductOfferStatus as projection on TransactionalData.OfferProductOfferStatus;
 }
