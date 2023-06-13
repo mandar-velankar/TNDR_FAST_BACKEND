@@ -171,9 +171,9 @@ module.exports = (srv) => {
             if (!divisionCode) {
                 return req.reject(404, "divisionCode not found");
             }
-            const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
+            //const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
             // Update all fields in sales order body template  
-            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks);
+            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, productPacks);
             // Send request to SAP
             const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
             const EV_ORDER_NUMBER = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["EV_ORDER_NUMBER"];
@@ -540,14 +540,15 @@ module.exports = (srv) => {
         }
     }
 
-    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT, productPacks) {
+    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, productPacks) {
         const body = getSalesOrderRequestBodyTemplate();
         if (!body) {
             return false;
         }
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = addLeadingZeros(contract.ContractNumber, 10, "ContractNumber");
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = Number(divisionCode.HLEVEL1_CODE) == 8 ? "0" + divisionCode.HLEVEL1_CODE : divisionCode.HLEVEL1_CODE;
-        
+        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_TEXT"] = salesOrderProducts[0].Comment.replace(/\r?\n|\r/g," ");
+
         let items = salesOrderProducts.map(el => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
@@ -557,14 +558,13 @@ module.exports = (srv) => {
                     ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                     MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
                     ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedQty : el?.RequestedQty / productPack.PACKFACTOR,
-                    IV_TEXT: IV_TEXT
                 }
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["TT_ITEMS"].item = items;
         return body;
     };
-    async function mappedSalesOrder_IV_TEXT (req, tx, salesOrder, contract) {
+    /*async function mappedSalesOrder_IV_TEXT (req, tx, salesOrder, contract) {
         try {
             const directIndirectCustomers = await tx.run(SELECT.one.from(DirectIndirectCustomers).where({OfferID: contract.OfferID}));
             if (!directIndirectCustomers || directIndirectCustomers.length == 0) req.reject(404, "CustomerID is not found");
@@ -587,7 +587,7 @@ module.exports = (srv) => {
 			}
 			return req.reject(500, error.message);
         }
-    };
+    };*/
     function addLeadingZeros (num, size, text) {
         if (num === null) {
             throw new Error(`${text} doesn't exist`);
@@ -641,18 +641,17 @@ module.exports = (srv) => {
               "IV_DOC_TYPE": "ZWTB",
               "IV_DIVISION": "16",
               "IV_SALES_ORG": "MWHC",
+              "IV_TEXT": "Brazil Workshop Test",
               "TT_ITEMS": {
                   "item": [
                     {
                         "ITEM": "000001",
                         "MATERIAL": "000000000004432952",
-                        "ITEM_QTD": "90",
-                        "IV_TEXT": "Brazil Workshop Test"
+                        "ITEM_QTD": "90"
                     },{
                         "ITEM": "000002",
                         "MATERIAL": "000000000004432952",
-                        "ITEM_QTD": "90",
-                        "IV_TEXT": "Brazil Workshop Test"
+                        "ITEM_QTD": "90"
                     }
                   ]
               }
