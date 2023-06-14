@@ -466,6 +466,11 @@ module.exports = (srv) => {
 		return results;
 	});
 
+
+	srv.after('READ', 'CountryLegalEntitySignatories', data => {
+		data.unshift({AUTHORIZED_SIGNATORY: null, NAME: null})
+	});
+
 	async function buildOfferApproval(tx, whereOffer) {
 		let results = [];
 		let approverTypes = [];
