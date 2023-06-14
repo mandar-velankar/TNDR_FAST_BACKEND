@@ -16,7 +16,8 @@ module.exports = (srv) => {
         PT_TMPRDHIER,
         PT_TMDIST,
         PT_TMINST,
-        PT_TMSKUPRDPCK
+        PT_TMSKUPRDPCK,
+        PT_TMPRDPCK
     } = cds.entities("com.bayer.SXTENDER.MasterData");
     const {
         PT_TMOFRS,
@@ -33,12 +34,14 @@ module.exports = (srv) => {
     const {
         MostRecentCapView
     } = cds.entities("com.bayer.SXTENDER.MasterDataViews");
-
     const {
         DirectIndirectCustomers,
         PriceConditionBrazilView
     } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
-
+    const {
+        BrazilDeliveriesHeader,
+        BrazilDeliveriesItems
+    } = cds.entities("com.bayer.SXTENDER.MasterData.SAP");
 
     srv.on('createContract', async req => {
         
@@ -55,8 +58,10 @@ module.exports = (srv) => {
                 return req.reject(404, `No contract product ProductPackIDs were found`);
             }
             const skuPrdPck = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: {in: contractProductProductPackIDs}}));
+            const productPacks = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: {in: contractProductProductPackIDs}}));
             if (!contractStatus) req.reject(404, "Status Synchronized not found");
             if (!skuPrdPck || !skuPrdPck.length) req.reject(404, "No SKUCodes were found in COM_BAYER_SXTENDER_MASTERDATA_PT_TMSKUPRDPCK");
+            if (!productPacks || !productPacks.length) req.reject(404, `No PackFactors were found in ${PT_TMPRDPCK.name}`);
 
             if (!offer) {
                 return req.reject(404, "Offer is not found");
@@ -87,7 +92,7 @@ module.exports = (srv) => {
             }
             
             // Update all fields in sales order body template  
-            const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPck, capBrazil);
+            const updateContractBody = updateContract(contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPck, capBrazil, productPacks);
             // Send request to SAP
             const createdContractResult = await sendCreatedContractToSAP(tx, "BR", "Contract", updateContractBody);
             const EV_CONTRACT_NUMBER = createdContractResult["data"]["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT.Response"]["EV_CONTRACT_NUMBER"];
@@ -149,6 +154,9 @@ module.exports = (srv) => {
 
             const offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({ OfferID: contract.OfferID, ProductCode: {in: salesOrderProductsProductPackIDs} }));
             const skuPrdPcks = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: "BR", ProductPackID: {in: salesOrderProductsProductPackIDs}}));
+            const productPacks = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: {in: salesOrderProductsProductPackIDs}}));
+
+            if (!productPacks || !productPacks.length) req.reject(404, `No PackFactors were found in ${PT_TMPRDPCK.name}`);
             if (!skuPrdPcks || !skuPrdPcks.length) req.reject(404, "No SKUCodes were found in COM_BAYER_SXTENDER_MASTERDATA_PT_TMSKUPRDPCK");
 
             const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: contract.OfferID }));
@@ -163,9 +171,9 @@ module.exports = (srv) => {
             if (!divisionCode) {
                 return req.reject(404, "divisionCode not found");
             }
-            const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
+            //const IV_TEXT = await mappedSalesOrder_IV_TEXT(req, tx, salesOrder, contract);
             // Update all fields in sales order body template  
-            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT);
+            const updateSalesOrderBody = updateSalesOrder(contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, productPacks);
             // Send request to SAP
             const createSalesOrderResult = await sendCreatedSalesOrderToSAP(tx, "BR", "SalesOrder", updateSalesOrderBody);
             const EV_ORDER_NUMBER = createSalesOrderResult["data"]["_-BAY3_-8B_SD_RFC_TBN_SALESORD.Response"]["EV_ORDER_NUMBER"];
@@ -272,7 +280,142 @@ module.exports = (srv) => {
         }
     });
 
-    function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks, capBrazil) {
+    srv.on("checkSAPDeliveries", async (req) => {
+        const tx = cds.tx(req);
+
+        try {
+            const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ID: req.data.salesOrderID}));
+            if (!salesOrder) {
+                return req.reject(404, `No Sales order was found with this Sales Order ID: ${req.data.salesOrderID}`);
+            }
+            const body = updateSAPDeliveriesReqBody(salesOrder);
+            const response = await getSAPDeliveries(tx, "BR", "SalesOrder", body);
+            const TT_ITEMS = response["data"]["rfc:_-BAY3_-8B_SD_RFC_TBN_DELIVERY.Response"]["TT_ITEMS"];
+            const TT_SALES_DOCUMENTS = response["data"]["rfc:_-BAY3_-8B_SD_RFC_TBN_DELIVERY.Response"]["TT_SALES_DOCUMENTS"];
+            if (!TT_ITEMS || !TT_SALES_DOCUMENTS) {
+                return req.reject(404, "No deliveries exist in SAP");
+            }
+            for (let item in TT_ITEMS) {
+                TT_ITEMS[item] = mappedBrazilDeliveryItems(TT_ITEMS[item]);
+            }
+            for (let item in TT_SALES_DOCUMENTS) {
+                TT_SALES_DOCUMENTS[item] = mappedBrazilDeliveryHeader(TT_SALES_DOCUMENTS[item]);
+            }
+            await tx.run(INSERT.into(BrazilDeliveriesItems).entries(TT_ITEMS["item"]));
+            await tx.run(INSERT.into(BrazilDeliveriesHeader).entries(TT_SALES_DOCUMENTS["item"]));
+            return req.reply("Deliveries were received from SAP");
+        } catch (error) {
+            if(error.response && error.response.data){
+				console.error(error.response.data);
+				return req.reject(error.response.status, JSON.stringify(error.response.data));
+			}
+            if(error.code && error.message){
+				console.error(error.message);
+				return req.reject(error.code, error.message);
+			}
+            // await tx.rollback(req);
+			return req.reject(500, error.message);
+        }
+    });
+
+    async function getSAPDeliveries (tx, countryCode, resource, body) {
+        if (!body) {
+            throw new Error("ERR_MISSING_PARAMETER:body");
+        }
+        try {
+            const apiConfig = await tx.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'SAPDelivery', CountryCode: countryCode, Resource: resource })); 
+            const oauthAuth = await tx.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+            const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+
+            const oauthCredentials = await getBearerToken(oauthAuth);
+
+            return axios({
+                method: 'get',
+                url: url,
+                headers: {
+                    'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(body)
+            });
+        } catch (error) {
+            throw error
+        }
+    }
+
+    function updateSAPDeliveriesReqBody (salesOrder) {
+        let body = getSAPDeliveriesRequestbody();
+        if (!body) {
+            return false;
+        }
+        const item = [
+            {
+                "VBELN": addLeadingZeros(salesOrder.SalesOrderNumber, 10, "SalesOrderNumber")
+            }
+        ]
+        body["_-BAY3_-8B_SD_RFC_TBN_DELIVERY"]["IT_DOC_NUMBER"]["item"] = item;
+        return body;
+    }
+
+    function mappedBrazilDeliveryItems (item) {
+        return {
+            "SALES_DOCUMENT"			: removeLeadingZeros(item.SALES_DOCUMENT, 4, "SALES_DOCUMENT"),		
+			"SALES_ITEM"				: removeLeadingZeros(item.SALES_ITEM, 4, "SALES_ITEM"),		
+			"SALES_REJECTION"			: item.SALES_REJECTION,
+			"MATERIAL"					: removeLeadingZeros(item.MATERIAL, 10, "MATERIAL"),		
+			"DESCRPTION"				: item.DESCRPTION,	                                     
+			"PRODUCT_HIERARCHY"			: item.PRODUCT_HIERARCHY,
+			"SALES_QUTY"				: item.SALES_QUTY,
+			"QUTY_CONFIRMED"			: item.QUTY_CONFIRMED,				
+			"ITEM_CATEGORY"				: item.ITEM_CATEGORY,			
+			"UNIT_MEASURE"				: item.UNIT_MEASURE,		
+			"PRICE_UNIT"				: item.PRICE_UNIT,			
+			"SALES_NET_PRICE"			: item.SALES_NET_PRICE,			
+			"SALES_NET_VALUE"			: item.SALES_NET_VALUE,				
+			"DELIVERY_QUANTITY"			: item.DELIVERY_QUANTITY,			
+			"DATE_DELIVERY"				: item.DATE_DELIVERY,			
+			"DATE_REQUESTED_POSITION"	: item.DATE_REQUESTED_POSITION,				
+			"QUANT_BILL"				: item.QUANT_BILL
+        }
+    }
+
+    function mappedBrazilDeliveryHeader (item) {
+        return {
+            "SALES_DOCUMENT"			: removeLeadingZeros(item.SALES_DOCUMENT, 4, "SALES_DOCUMENT"),
+			"DISTR_CHAN"				: item.DISTR_CHAN,
+			"DIVISION"				    : item.DIVISION,
+			"CUSTOMER"				    : removeLeadingZeros(item.CUSTOMER, 3, "CUSTOMER"),
+			"CUSTOMER_NAME"			    : item.CUSTOMER_NAME,
+			"STATUS_REJECTION"		    : item.STATUS_REJECTION,
+			"STATUS"					: item.STATUS,
+			"CREATED_BY"				: item.CREATED_BY,
+			"SALES_CREATED_ON"		    : item.SALES_CREATED_ON,
+			"TERMS_PAY"				    : item.TERMS_PAY,
+			"SALES_NET"				    : item.SALES_NET,
+			"CURRENCY"				    : item.CURRENCY,
+			"DELIVERY_DOCUMENT"		    : removeLeadingZeros(item.DELIVERY_DOCUMENT, 2, "DELIVERY_DOCUMENT"),
+			"DELIVERY_CREATED_ON"		: item.DELIVERY_CREATED_ON,
+			"DATE_REQUESTED_HEADER"	    : item.DATE_REQUESTED_HEADER,
+			"DATE_GOODS_ISSUE"		    : item.DATE_GOODS_ISSUE,
+			"NUMBER_BILL"				: removeLeadingZeros(item.NUMBER_BILL, 2, "NUMBER_BILL"),
+			"DATE_BILL"				    : item.DATE_BILL,
+			"NET_BILL"				    : item.NET_BILL
+        }
+    }
+
+    function getSAPDeliveriesRequestbody () {
+        return {
+            "_-BAY3_-8B_SD_RFC_TBN_DELIVERY": {
+              "IT_DOC_NUMBER": {
+                "item": [
+                  {"VBELN": "0000828072"}
+                ]
+              }
+            }
+        }
+    }
+
+    function updateContract (contract, contractProducts, offerProducts, divisionCode, offerDistributor, institute, distributor, tender, priceconditions, skuPrdPcks, capBrazil, productPacks) {
         const body = getContractRequestBodyTemplate();
         if (!body) {
             return false;
@@ -289,14 +432,15 @@ module.exports = (srv) => {
             let productPriceCondition = priceconditions.filter(cond => cond.ProductCode === el.ProductPackID)[0];
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
+            const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
             return {
                 ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                 MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
-                ITEM_QTD: el?.RequestedVolume, //RequestedQty
-                MANUAL_D: (Number(productPriceCondition?.StandardDiscount) + Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
-                CAP: productPriceCondition?.CAP === "No" ? 0 : capBrazil.CAP
+                ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume : el?.RequestedVolume / productPack.PACKFACTOR,
+                MANUAL_D: (100 * Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
+                CAP: productPriceCondition?.CAP === "No" ? 0 : (100 * Number(capBrazil.CAP)).toFixed(2)
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;
@@ -396,30 +540,31 @@ module.exports = (srv) => {
         }
     }
 
-    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, IV_TEXT) {
+    function updateSalesOrder (contract, salesOrderProducts, offerProducts, divisionCode, skuPrdPcks, productPacks) {
         const body = getSalesOrderRequestBodyTemplate();
         if (!body) {
             return false;
         }
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_CONTRACT"] = addLeadingZeros(contract.ContractNumber, 10, "ContractNumber");
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_DIVISION"] = Number(divisionCode.HLEVEL1_CODE) == 8 ? "0" + divisionCode.HLEVEL1_CODE : divisionCode.HLEVEL1_CODE;
-        
+        body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["IV_TEXT"] = salesOrderProducts[0].Comment.replace(/\r?\n|\r/g," ");
+
         let items = salesOrderProducts.map(el => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
+            const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
             if (offerProduct) {
                 return {
                     ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                     MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
-                    ITEM_QTD: `${el.RequestedQty}`,
-                    IV_TEXT: IV_TEXT
+                    ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedQty : el?.RequestedQty / productPack.PACKFACTOR,
                 }
             }
         })
         body["_-BAY3_-8B_SD_RFC_TBN_SALESORD"]["TT_ITEMS"].item = items;
         return body;
     };
-    async function mappedSalesOrder_IV_TEXT (req, tx, salesOrder, contract) {
+    /*async function mappedSalesOrder_IV_TEXT (req, tx, salesOrder, contract) {
         try {
             const directIndirectCustomers = await tx.run(SELECT.one.from(DirectIndirectCustomers).where({OfferID: contract.OfferID}));
             if (!directIndirectCustomers || directIndirectCustomers.length == 0) req.reject(404, "CustomerID is not found");
@@ -442,7 +587,7 @@ module.exports = (srv) => {
 			}
 			return req.reject(500, error.message);
         }
-    };
+    };*/
     function addLeadingZeros (num, size, text) {
         if (num === null) {
             throw new Error(`${text} doesn't exist`);
@@ -453,6 +598,14 @@ module.exports = (srv) => {
         num = num.toString();
         while (num.length < size) num = "0" + num;
         return num;
+    };
+    function removeLeadingZeros (num, size, text) {
+        if (num === null) {
+            throw new Error(`${text} doesn't exist`);
+        }
+        num = num.toString();
+        let subStr = num.substring(0, size);
+        return num.replace(subStr, "");
     };
 
     async function sendCreatedSalesOrderToSAP (tx, countryCode, resource, body) {
@@ -488,18 +641,17 @@ module.exports = (srv) => {
               "IV_DOC_TYPE": "ZWTB",
               "IV_DIVISION": "16",
               "IV_SALES_ORG": "MWHC",
+              "IV_TEXT": "Brazil Workshop Test",
               "TT_ITEMS": {
                   "item": [
                     {
                         "ITEM": "000001",
                         "MATERIAL": "000000000004432952",
-                        "ITEM_QTD": "90",
-                        "IV_TEXT": "Brazil Workshop Test"
+                        "ITEM_QTD": "90"
                     },{
                         "ITEM": "000002",
                         "MATERIAL": "000000000004432952",
-                        "ITEM_QTD": "90",
-                        "IV_TEXT": "Brazil Workshop Test"
+                        "ITEM_QTD": "90"
                     }
                   ]
               }

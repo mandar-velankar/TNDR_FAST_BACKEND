@@ -58,6 +58,8 @@ entity PT_TMOFRS { //Offers
         DistributorDeadline    : Date;
         DistributorComments    : String;
         ChannelSwitched        : Boolean default false;
+        DecisionSharedWithIBIZ : Boolean default false;
+        isIBIZNotified         : Boolean default false; 
         //Associations
         Tender                : Association to PT_TMTEND
                                     on Tender.TenderID = TenderID;
