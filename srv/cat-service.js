@@ -807,6 +807,7 @@ module.exports = (srv) => {
             dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
 			
 // EFRCL- 360368- Spain- changes in approval workflow for Radiology(Profit, floor price)
+// EFRCL- 377753- Spain - changes in approval workflow for Pharma
             if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability >= 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
@@ -848,8 +849,36 @@ module.exports = (srv) => {
                     }
                 });
 		 }
+		} else if (product.DIVISION === 'Pharma') {
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "BU/RAM 1":
+						oApproverType.ValidationType = 3;
+						break;
+					case "BU/RAM 2":
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+
+			if (product.NET_PRICE < dFloorPrice) {
+				aApproverTypes.map(async function (oApproverType) {
+					switch (oApproverType.ApproverType) {
+						case "Legal":
+							oApproverType.ValidationType = 3;
+							break;
+						case "Financial Business Partner":
+							oApproverType.ValidationType = 3;
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
 		}
-             else {
+            else {
                 
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
@@ -3444,6 +3473,7 @@ module.exports = (srv) => {
 
 		try {
             const result = await notifyIbiz(id_qp, body);
+			await UPDATE(PT_TMOFRS).with({isIBIZNotified: true}).where({IbizWorkflowID: id_qp, ActiveOffer: 1});
 			const msg = `Ibiz channel switch notification successful. WorkflowID: ${id_qp}`;
             console.log(msg);
             return msg;
@@ -3660,8 +3690,8 @@ module.exports = (srv) => {
 			UNIT_PRICE: "0",
 			EFFORT_A: "0",
 			ITEM_QTD: "1",
-			MANUAL_D: (Number(priceConditionBrazilView?.StandardDiscount) + Number(priceConditionBrazilView?.AdditionalDiscount)).toFixed(2),
-			CAP: priceConditionBrazilView?.CAP === "Yes" ? priceConditionBrazilView?.CapValue : 0
+			MANUAL_D: (100 * Number(priceConditionBrazilView?.AdditionalDiscount)).toFixed(2),
+			CAP: priceConditionBrazilView?.CAP === "Yes" ? (priceConditionBrazilView?.CapValue * 100).toFixed(2) : 0
 		}];
 
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["TT_ITEMS"].item = items;
