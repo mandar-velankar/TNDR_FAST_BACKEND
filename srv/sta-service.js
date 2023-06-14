@@ -49,6 +49,7 @@ module.exports = (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
+		PT_TMQUTO,
 		PT_TMDLVTR, 
 		PT_TMUDLTRS, 
 		PT_TMAPPRST, 
@@ -359,6 +360,60 @@ module.exports = (srv) => {
 				Level2Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			});
+		}
+
+		return req.data;
+		
+	});
+
+	srv.before(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
+
+		// validate form
+		// req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+		
+	});
+
+	srv.on(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
+
+
+		const mappedPTTMQUTO = {
+			TenderID          : req.data.TENDERID,
+			OfferID           : req.data.OFFERID,
+			CountryCode       : req.data.COUNTRYCODE,
+			DistributorID     : req.data.DISTRIBUTORID, // TODO: this field needs to be added to OfferValidation entity
+			SubmittedOn       : new Date().toISOString(),
+			SubmittedBy       : req.user.id,
+			Active            : 1, 
+			OfferValidity     : req.data.OFFERVALIDITY,
+			DelayInSubmission : null,
+			AS1               : req.data.SELLING_COMPANY_AS1_NAMEI,
+			AS2               : req.data.SELLING_COMPANY_AS2_NAMEI,
+			OfferDate         : req.data.OFFERDATE,
+			DeliveryTerms     : req.data.DELIVERYTERMS,
+			I_Q_1             : null,
+			I_Q_2             : null,
+			I_Q_3             : null,
+			Comment           : req.data.CUSTOM_REMARKS,
+			UPDATED           : 1,
+			EffectiveDate     : req.data.EffectiveDate,
+			ExpiryDate        : req.data.ExpiryDate
+		}
+
+		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+			OfferID: req.data.OFFERID,
+			Active: 1,
+			OfferDate: req.data.OFFERDATE
+		});
+
+		// save/update PT_TMQUTO
+		if(submittedQoutation){
+			await UPDATE(PT_TMQUTO).with (mappedPTTMQUTO).where({
+				OfferID: req.data.OFFERID,
+				Active: 1,
+				OfferDate: req.data.OFFERDATE
+			})
+		}else{
+			await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
 		}
 
 		return req.data;
