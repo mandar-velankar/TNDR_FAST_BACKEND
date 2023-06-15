@@ -49,6 +49,7 @@ module.exports = (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
+		PT_TMQUTO,
 		PT_TMDLVTR, 
 		PT_TMUDLTRS, 
 		PT_TMAPPRST, 
@@ -365,6 +366,60 @@ module.exports = (srv) => {
 		
 	});
 
+	srv.before(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
+
+		// validate form
+		// req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+		
+	});
+
+	srv.on(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
+
+
+		const mappedPTTMQUTO = {
+			TenderID          : req.data.TENDERID,
+			OfferID           : req.data.OFFERID,
+			CountryCode       : req.data.COUNTRYCODE,
+			DistributorID     : req.data.DISTRIBUTORID, // TODO: this field needs to be added to OfferValidation entity
+			SubmittedOn       : new Date().toISOString(),
+			SubmittedBy       : req.user.id,
+			Active            : 1, 
+			OfferValidity     : req.data.OFFERVALIDITY,
+			DelayInSubmission : null,
+			AS1               : req.data.SELLING_COMPANY_AS1,
+			AS2               : req.data.SELLING_COMPANY_AS2,
+			OfferDate         : req.data.OFFERDATE,
+			DeliveryTerms     : req.data.DELIVERYTERMS,
+			I_Q_1             : null,
+			I_Q_2             : null,
+			I_Q_3             : null,
+			Comment           : req.data.CUSTOM_REMARKS,
+			UPDATED           : 1,
+			EffectiveDate     : req.data.EffectiveDate,
+			ExpiryDate        : req.data.ExpiryDate
+		}
+
+		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+			OfferID: req.data.OFFERID,
+			Active: 1,
+			OfferDate: req.data.OFFERDATE
+		});
+
+		// save/update PT_TMQUTO
+		if(submittedQoutation){
+			await UPDATE(PT_TMQUTO).with (mappedPTTMQUTO).where({
+				OfferID: req.data.OFFERID,
+				Active: 1,
+				OfferDate: req.data.OFFERDATE
+			})
+		}else{
+			await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
+		}
+
+		return req.data;
+		
+	});
+
 	srv.after('READ', ['PriceConditionPriceView','PriceConditionDiscountView'], (items, req) => {
 		const fnCalculateFields = async item => {
 			item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
@@ -409,6 +464,11 @@ module.exports = (srv) => {
 			results = await buildOfferApproval(tx, whereOffer);
 		}
 		return results;
+	});
+
+
+	srv.after('READ', 'CountryLegalEntitySignatories', data => {
+		data.unshift({AUTHORIZED_SIGNATORY: null, NAME: null})
 	});
 
 	async function buildOfferApproval(tx, whereOffer) {
@@ -600,26 +660,34 @@ module.exports = (srv) => {
 			paymentTerms = paymentTermsRow.join("<br>")
 		}
 
+		// This code was commented out after discussion with Vasu.
+		// This code is affecting the Standard Tender application for saving the DELIVERYTERMS
 		//Delivery Terms need to be specified by item number if not same for all
-		let deliveryTerms = "";
-		let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
-			if(d && d.DELIVERY_TERMS){
-				return d.DELIVERY_TERMS;
-			}else{
-				return 'NA';
-			}	
-		}));
-		if (deliveryTermsDistinct.length === 1) {
-			deliveryTerms = deliveryTermsDistinct[0];
-		}
-		else {
-			let deliveryTermsRow = [];
-			for (let i = 0; i < deliveryTermsDistinct.length; i++) {
-				let deliveryTermsItems = offerProductValidation.filter((d) => d.DELIVERY_TERMS === deliveryTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				deliveryTermsRow[i] = deliveryTermsItems.concat(": ").concat(deliveryTermsDistinct[i]);
-			}
-			deliveryTerms = deliveryTermsRow.join("<br>")
-		}
+		// let deliveryTerms = "";
+		// let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+		// 	if(d && d.DELIVERY_TERMS){
+		// 		return d.DELIVERY_TERMS;
+		// 	}else{
+		// 		return 'NA';
+		// 	}	
+		// }));
+		// if (deliveryTermsDistinct.length === 1) {
+		// 	deliveryTerms = deliveryTermsDistinct[0];
+		// }
+		// else {
+		// 	let deliveryTermsRow = [];
+		// 	for (let i = 0; i < deliveryTermsDistinct.length; i++) {
+		// 		let deliveryTermsItems = offerProductValidation.filter((d) => d.DELIVERY_TERMS === deliveryTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+		// 		deliveryTermsRow[i] = deliveryTermsItems.concat(": ").concat(deliveryTermsDistinct[i]);
+		// 	}
+		// 	deliveryTerms = deliveryTermsRow.join("<br>")
+		// }
+
+		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+			OfferID: offer.OFFERID,
+			Active: 1,
+			OfferDate: offer.OFFERDATE
+		});
 
 		
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
@@ -753,7 +821,7 @@ module.exports = (srv) => {
 			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
 			REMARKS: remarks,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
-			DELIVERYTERMS: deliveryTerms,
+			DELIVERYTERMS: submittedQoutation?.DeliveryTerms,
 			PAYMENTTERMS: paymentTerms,
 			SHIPMENTTERMS: shipmentTerms,
 			IS_LOWEST: isLowest,
@@ -782,7 +850,7 @@ module.exports = (srv) => {
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
-			TENDER_TYPE: tenderType[0].NAME,
+			// TENDER_TYPE: tenderType[0].NAME,
 			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
             CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
