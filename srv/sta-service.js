@@ -386,8 +386,8 @@ module.exports = (srv) => {
 			Active            : 1, 
 			OfferValidity     : req.data.OFFERVALIDITY,
 			DelayInSubmission : null,
-			AS1               : req.data.SELLING_COMPANY_AS1_TITLEI,
-			AS2               : req.data.SELLING_COMPANY_AS2_TITLEI,
+			AS1               : req.data.SELLING_COMPANY_AS1,
+			AS2               : req.data.SELLING_COMPANY_AS2,
 			OfferDate         : req.data.OFFERDATE,
 			DeliveryTerms     : req.data.DELIVERYTERMS,
 			I_Q_1             : null,
@@ -660,26 +660,34 @@ module.exports = (srv) => {
 			paymentTerms = paymentTermsRow.join("<br>")
 		}
 
+		// This code was commented out after discussion with Vasu.
+		// This code is affecting the Standard Tender application for saving the DELIVERYTERMS
 		//Delivery Terms need to be specified by item number if not same for all
-		let deliveryTerms = "";
-		let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
-			if(d && d.DELIVERY_TERMS){
-				return d.DELIVERY_TERMS;
-			}else{
-				return 'NA';
-			}	
-		}));
-		if (deliveryTermsDistinct.length === 1) {
-			deliveryTerms = deliveryTermsDistinct[0];
-		}
-		else {
-			let deliveryTermsRow = [];
-			for (let i = 0; i < deliveryTermsDistinct.length; i++) {
-				let deliveryTermsItems = offerProductValidation.filter((d) => d.DELIVERY_TERMS === deliveryTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				deliveryTermsRow[i] = deliveryTermsItems.concat(": ").concat(deliveryTermsDistinct[i]);
-			}
-			deliveryTerms = deliveryTermsRow.join("<br>")
-		}
+		// let deliveryTerms = "";
+		// let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+		// 	if(d && d.DELIVERY_TERMS){
+		// 		return d.DELIVERY_TERMS;
+		// 	}else{
+		// 		return 'NA';
+		// 	}	
+		// }));
+		// if (deliveryTermsDistinct.length === 1) {
+		// 	deliveryTerms = deliveryTermsDistinct[0];
+		// }
+		// else {
+		// 	let deliveryTermsRow = [];
+		// 	for (let i = 0; i < deliveryTermsDistinct.length; i++) {
+		// 		let deliveryTermsItems = offerProductValidation.filter((d) => d.DELIVERY_TERMS === deliveryTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+		// 		deliveryTermsRow[i] = deliveryTermsItems.concat(": ").concat(deliveryTermsDistinct[i]);
+		// 	}
+		// 	deliveryTerms = deliveryTermsRow.join("<br>")
+		// }
+
+		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+			OfferID: offer.OFFERID,
+			Active: 1,
+			OfferDate: offer.OFFERDATE
+		});
 
 		
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
@@ -813,7 +821,7 @@ module.exports = (srv) => {
 			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
 			REMARKS: remarks,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
-			DELIVERYTERMS: deliveryTerms,
+			DELIVERYTERMS: submittedQoutation?.DeliveryTerms,
 			PAYMENTTERMS: paymentTerms,
 			SHIPMENTTERMS: shipmentTerms,
 			IS_LOWEST: isLowest,
