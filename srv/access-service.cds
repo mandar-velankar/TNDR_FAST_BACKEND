@@ -10,6 +10,9 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             MEATENDERVIEW:Boolean;
            
         };
+        adminAccess:{
+            ConsumerPrices:Boolean;
+        };
         ppa:Boolean;
         contract:Boolean;
         epa:Boolean;

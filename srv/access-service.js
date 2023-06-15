@@ -12,6 +12,9 @@ module.exports = (srv) => {
 				MEATENDERVIEW:req.user.is('f_tndr_cag_meatenderview_user')
 				
 			},
+			adminAccess:{
+				ConsumerPrices:req.user.is('f_tndr_cag_consumerprice_user'),
+			},
 			ppa: req.user.is('f_tndr_cag_ppa_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			contract: req.user.is('f_tndr_cag_ctr_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			epa: req.user.is('f_tndr_cag_epa_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
