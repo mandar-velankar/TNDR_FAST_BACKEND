@@ -1305,8 +1305,7 @@ inner join TransactionalData.PriceConditionClassification as priceConditionClass
     on priceConditionClassification.CountryCode = product.CountryCode
     and priceConditionClassification.Classification = tender.Classification
     and priceConditionClassification.Division = offer.Division 
-    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
-    and priceConditionClassification.ConditionType = 'Price'
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType) 
 left outer join TransactionalData.PriceCondition as priceCondition 
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
@@ -1323,8 +1322,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.ID as PriceConditionID: UUID,
     priceConditionClassification.ID as ClassificationID: UUID,
     priceConditionClassification.Classification,
+    key priceConditionClassification.ConditionType,
     priceConditionClassification.Division,
     priceConditionClassification.isMain,
+    product.RegisteredPrice.REGISTERED_PRICE as CurrentBasePrice,
     @Core.Computed: false
     ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE) as BasePrice:Decimal,
     @Core.Computed: false
