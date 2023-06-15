@@ -1459,13 +1459,13 @@ module.exports = (srv) => {
 
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
 
-		if(priceCondition.Price1 < priceCondition.Price0){
+		if(ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
 			aApproverTypes.map(async function (oApproverType) {
 				oApproverType.ValidationType = 3;
 			});
 		}
 		
-		if(priceCondition.Price1 > priceCondition.Price0){
+		if(ServiceHelper.isDoubleEqual(priceCondition.Price1, priceCondition.Price0) || ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price0, priceCondition.Price1)){
 			aApproverTypes.map(async function (oApproverType) {
 				oApproverType.ValidationType = oApproverType.ValidationType;
 			});
