@@ -285,6 +285,7 @@ module.exports = (srv) => {
 	// });
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
+		const today = new Date().toISOString().slice(0, 10);
 
 		// validate form
 		!req.data.TenderName && req.error({ code: 404, message: "TenderName is required.", target: "TenderName" });
@@ -296,6 +297,8 @@ module.exports = (srv) => {
 		!req.data.BidDueDate && req.error({ code: 404, message: "BidDueDate is required.", target: "BidDueDate" });
 
 		//check if dates are correct
+		if(moment(req.data.PublicationDate).isBefore(today))
+			req.error({ code: 404, message: "Publication date can not be in the past.", target: "PublicationDate" });
 		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
 			req.error({ code: 404, message: "Publication date should be before the offer due date.", target: "PublicationDate" });
 
