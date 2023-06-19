@@ -188,10 +188,12 @@ module.exports = (srv) => {
 		return req;
 	});
 
-	srv.before('CREATE', 'PT_TMSKUPRDPCK', async (req) => {
-		req.data.CountrySKUID = await getNextValue(PT_TMSKUPRDPCK, "CountrySKUID");
+	/*srv.before('CREATE', 'PT_TMSKUPRDPCK', async (req) => {
+		if(req.data.CountrySKUID === 0){
+			req.data.CountrySKUID = await getNextValue(PT_TMSKUPRDPCK, "CountrySKUID");
+		}
 		return req;
-	});
+	});*/
 
 
 

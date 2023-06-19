@@ -162,5 +162,9 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMCTRY @readonly as projection on MasterData.PT_TMCTRY;
     entity CountryChannels                   as projection on MasterData.MASTER_COUNTRY_CHANNELS;
 
+    entity NextValueCountrySKUID as select from PT_TMSKUPRDPCK {
+        max(CountrySKUID) as nextCountrySkuID:Integer
+    }
+
 
 }
