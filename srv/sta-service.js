@@ -55,6 +55,7 @@ module.exports = (srv) => {
 		PT_TMAPPRST, 
 		PT_TMOFPR,
 		PT_TMOFRS,
+		PT_TMBDPR,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -339,7 +340,21 @@ module.exports = (srv) => {
 
 	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
-		// save/update PriceCondition
+		upsertPriceCondition(req);
+		upsertProductPricing(req);
+		return req.data;
+		
+	});
+
+	/**
+	 * Upserts a price condition based on the provided request data.
+	 * If `req.data.PriceConditionID` exists, updates the existing price condition.
+	 * Otherwise, inserts a new price condition.
+	 *
+	 * @param {Object} req - The request object containing the data for the price condition.
+	 * @returns {Promise<void>} A promise that resolves when the upsert operation is complete.
+	 */
+	const upsertPriceCondition = async function(req){
 		if(req.data.PriceConditionID){
 			await UPDATE(PriceCondition)
 				.with ({
@@ -365,10 +380,65 @@ module.exports = (srv) => {
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			});
 		}
+	}
 
-		return req.data;
-		
-	});
+	const upsertProductPricing = async function(req){
+
+		const whereCondition = {
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Active: 1,
+			ActiveTier: 0,
+			LotID: 1
+		};
+
+		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
+
+		const mappedPTTMBDPR = {
+			TenderID              : req.data.TenderID, 
+			OfferID               : req.data.OfferID, 
+			CountryCode           : req.data.CountryCode, 
+			ProductCode           : req.data.ProductCode, 
+			SubmittedOn           : new Date().toISOString(), 
+			SubmittedBy           : req.user.id, 
+			Active                : 1, 
+			Tier                  : 1, 
+			VolumeFrom            : 0, 
+			VolumeTo              : 0, 
+			RegPrice              : req.data.BasePrice, 
+			FOC                   : 0, 
+			// FOCStep               : null, 
+			// FOCType               : null, 
+			Discount              : 0, 
+			OfferPrice            : req.data.OfferPrice, 
+			Deductions            : 0, 
+			StandardDiscount      : 0, 
+			AdditionalDiscount    : 0, 
+			NetofferPrice         : req.data.NetOfferPrice, 
+			BusinessCasePrice     : 0, 
+			// WholesalePrice        : null, 
+			COGS                  : 0, 
+			SpotRate              : 0, 	
+			BudgetRate            : 0, 
+			Scenario              : 0, 
+			// FOC_ABS_PCT           : null, 
+			FOC_Bundled_1         : 0, 
+			FOC_ABS_PCT_Bundled_1 : 0, 
+			FOCProduct_Bundled_1  : 0, 
+			ActiveTier            : 0, 
+			NetPrice              : req.data.NetPrice, 
+			NetPrice_OfPaid       : 0, 
+			PRICE_UPDATE          : req.data.dummy, //TODO: Vasu needs to provide info from where to get this value  
+			LotID                 : 1, 
+			// Deductions_ABS_PCT    : null
+		}
+
+		if(productPricing){
+			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
+		}else{
+			await INSERT.into(PT_TMBDPR).entries(mappedPTTMBDPR);
+		}
+	}
 
 	srv.after('READ', ['PriceConditionPriceView','PriceConditionDiscountView'], (items, req) => {
 		const fnCalculateFields = async item => {
