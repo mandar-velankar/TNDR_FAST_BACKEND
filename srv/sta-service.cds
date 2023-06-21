@@ -111,7 +111,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     @cds.redirection.target
     entity OfferFormView as select from TransactionalData.PT_TMOFRS{
         *,
-        Tender.BidDueDate as OfferDueDate
+        Tender.BidDueDate as OfferDueDate,
+        OfferStatus.STATUS as OfferStatus
     };
     //inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID ;
     /*{
