@@ -182,4 +182,16 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity OfferProductOfferStatus as projection on TransactionalData.OfferProductOfferStatus;
+
+    @cds.redirection.target
+    entity ProductPricesCheckView as select from TransactionalData.PT_TMOFPR as product{
+        key product.OfferID,
+        product.Active,
+        case 
+                    when count(product.PriceCondition.ProductCode) = count(product.ProductCode)
+                        theN true
+            			else false 
+        end as allProductPricesSet:Boolean
+    }where product.Offer.OfferStatus.STATUS = 'Offer Created' and product.ActiveProduct = 1
+    group by product.OfferID, product.Active, product.Offer.OfferStatus.STATUS, product.ActiveProduct;
 }

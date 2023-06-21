@@ -55,6 +55,7 @@ module.exports = (srv) => {
 		PT_TMAPPRST, 
 		PT_TMOFPR,
 		PT_TMOFRS,
+		PT_TMBDPR,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -285,6 +286,7 @@ module.exports = (srv) => {
 	// });
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
+		const today = new Date().toISOString().slice(0, 10);
 
 		// validate form
 		!req.data.TenderName && req.error({ code: 404, message: "TenderName is required.", target: "TenderName" });
@@ -296,6 +298,8 @@ module.exports = (srv) => {
 		!req.data.BidDueDate && req.error({ code: 404, message: "BidDueDate is required.", target: "BidDueDate" });
 
 		//check if dates are correct
+		if(moment(req.data.PublicationDate).isBefore(today))
+			req.error({ code: 404, message: "Publication date can not be in the past.", target: "PublicationDate" });
 		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
 			req.error({ code: 404, message: "Publication date should be before the offer due date.", target: "PublicationDate" });
 
@@ -335,37 +339,117 @@ module.exports = (srv) => {
 	});
 
 	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
+		upsertPriceCondition(req);
+		upsertProductPricing(req);
+		return req.data;
+	});
 
-		// save/update PriceCondition
-		if(req.data.PriceConditionID){
-			await UPDATE(PriceCondition)
-				.with ({
-					Price0: req.data.BasePrice,
-					Price1: req.data.OfferPrice, 
-					Level2Discount1: req.data.Deductions
-				})
-				.where({
-					ID:req.data.PriceConditionID
-				})
-		}else{
-			await INSERT.into(PriceCondition).entries({
-				Price0: req.data.BasePrice,
-				CountryCode: req.data.CountryCode,
-				Level1Discount1: req.data.Discount,
-				NetOfferPrice: req.data.NetOfferPrice,
-				Price2: req.data.NetPrice,
-				OfferID: req.data.OfferID,
-				ProductCode: req.data.ProductCode,
-				Tax: req.data.Tax,
-				Price1: req.data.OfferPrice, 
-				Level2Discount1: req.data.Deductions,
-				PriceConditionClassification_ID: req.data.ClassificationID 
-			});
+	/**
+	 * Upserts a price condition based on the provided request data.
+	 * If `req.data.PriceConditionID` exists, updates the existing price condition.
+	 * Otherwise, inserts a new price condition.
+	 *
+	 * @param {Object} req - The request object containing the data for the price condition.
+	 * @returns {Promise<void>} A promise that resolves when the upsert operation is complete.
+	 */
+	const upsertPriceCondition = async function(req){
+
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		const mappedPriceCondition = {
+			Price0: req.data.BasePrice,
+			CountryCode: req.data.CountryCode,
+			Level1Discount1: req.data.Discount,
+			NetOfferPrice: req.data.NetOfferPrice,
+			Price2: req.data.NetPrice,
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Tax: req.data.Tax,
+			Price1: req.data.OfferPrice, 
+			Level2Discount1: req.data.Deductions,
+			PriceConditionClassification_ID: req.data.ClassificationID 
 		}
 
-		return req.data;
-		
-	});
+		if(priceCondition){
+			await UPDATE(PriceCondition)
+				.with (mappedPriceCondition)
+				.where({
+					ID: priceCondition.ID
+				})
+		}else{
+			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
+		}
+	}
+
+	/**
+	 * Upserts product pricing based on the provided request data.
+	 * If the product pricing exists, updates the existing record.
+	 * Otherwise, inserts a new product pricing entry.
+	 *
+	 * @param {Object} req - The request object containing the data for the product pricing.
+	 * @returns {Promise<void>} A promise that resolves when the upsert operation is complete.
+	 */
+	const upsertProductPricing = async function(req){
+
+		const whereCondition = {
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Active: 1,
+			ActiveTier: 0,
+			LotID: 1
+		};
+
+		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID:  req.data.OfferID});
+
+		const mappedPTTMBDPR = {
+			TenderID              : req.data.TenderID, 
+			OfferID               : req.data.OfferID, 
+			CountryCode           : req.data.CountryCode, 
+			ProductCode           : req.data.ProductCode, 
+			SubmittedOn           : new Date().toISOString(), 
+			SubmittedBy           : req.user.id, 
+			Active                : 1, 
+			Tier                  : 1, 
+			VolumeFrom            : 0, 
+			VolumeTo              : 0, 
+			RegPrice              : req.data.BasePrice, 
+			FOC                   : 0, 
+			// FOCStep               : null, 
+			// FOCType               : null, 
+			Discount              : 0, 
+			OfferPrice            : req.data.OfferPrice, 
+			Deductions            : 0, 
+			StandardDiscount      : 0, 
+			AdditionalDiscount    : 0, 
+			NetofferPrice         : req.data.NetOfferPrice, 
+			BusinessCasePrice     : 0, 
+			// WholesalePrice        : null, 
+			COGS                  : 0, 
+			SpotRate              : 0, 	
+			BudgetRate            : 0, 
+			Scenario              : 0, 
+			// FOC_ABS_PCT           : null, 
+			FOC_Bundled_1         : 0, 
+			FOC_ABS_PCT_Bundled_1 : 0, 
+			FOCProduct_Bundled_1  : 0, 
+			ActiveTier            : 0, 
+			NetPrice              : req.data.NetPrice, 
+			NetPrice_OfPaid       : 0, 
+			PRICE_UPDATE          : offer.APPROVALS_SENT, 
+			LotID                 : 1, 
+			// Deductions_ABS_PCT    : null
+		}
+
+		if(productPricing){
+			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
+		}else{
+			await INSERT.into(PT_TMBDPR).entries(mappedPTTMBDPR);
+		}
+	}
 
 	srv.after('READ', ['PriceConditionPriceView','PriceConditionDiscountView'], (items, req) => {
 		const fnCalculateFields = async item => {
