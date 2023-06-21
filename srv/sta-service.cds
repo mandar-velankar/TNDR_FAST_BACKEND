@@ -182,7 +182,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         signatory.COUNTRY_CODE as CountryCode
     };
 
-    entity OfferProductOfferStatus as projection on TransactionalData.OfferProductOfferStatus;
+    entity ApproverList as projection on MasterData.CountryApprovers;
+    entity ApproverTypes as projection on MasterData.ApproverTypes;
+
+    entity OfferProductOfferStatus as projection on TransactionalData.OfferProductOfferStatus{
+        *,
+        ApproverList: redirected to ApproverList,
+        ApproverTypes: redirected to ApproverTypes
+    };
 
     @cds.redirection.target
     entity ProductPricesCheckView as select from TransactionalData.PT_TMOFPR as product{
@@ -195,4 +202,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         end as allProductPricesSet:Boolean
     }where product.Offer.OfferStatus.STATUS = 'Offer Created' and product.ActiveProduct = 1
     group by product.OfferID, product.Active, product.Offer.OfferStatus.STATUS, product.ActiveProduct;
+
+    entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
+    entity AccountPreApprovedPrices as projection on MasterData.AccountPreApprovedPrices;
 }
