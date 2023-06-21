@@ -339,11 +339,9 @@ module.exports = (srv) => {
 	});
 
 	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
-
 		upsertPriceCondition(req);
 		upsertProductPricing(req);
 		return req.data;
-		
 	});
 
 	/**
@@ -382,6 +380,14 @@ module.exports = (srv) => {
 		}
 	}
 
+	/**
+	 * Upserts product pricing based on the provided request data.
+	 * If the product pricing exists, updates the existing record.
+	 * Otherwise, inserts a new product pricing entry.
+	 *
+	 * @param {Object} req - The request object containing the data for the product pricing.
+	 * @returns {Promise<void>} A promise that resolves when the upsert operation is complete.
+	 */
 	const upsertProductPricing = async function(req){
 
 		const whereCondition = {
@@ -393,6 +399,7 @@ module.exports = (srv) => {
 		};
 
 		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID:  req.data.OfferID});
 
 		const mappedPTTMBDPR = {
 			TenderID              : req.data.TenderID, 
@@ -428,7 +435,7 @@ module.exports = (srv) => {
 			ActiveTier            : 0, 
 			NetPrice              : req.data.NetPrice, 
 			NetPrice_OfPaid       : 0, 
-			PRICE_UPDATE          : req.data.dummy, //TODO: Vasu needs to provide info from where to get this value  
+			PRICE_UPDATE          : offer.APPROVALS_SENT, 
 			LotID                 : 1, 
 			// Deductions_ABS_PCT    : null
 		}
