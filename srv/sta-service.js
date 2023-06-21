@@ -353,30 +353,34 @@ module.exports = (srv) => {
 	 * @returns {Promise<void>} A promise that resolves when the upsert operation is complete.
 	 */
 	const upsertPriceCondition = async function(req){
-		if(req.data.PriceConditionID){
+
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		const mappedPriceCondition = {
+			Price0: req.data.BasePrice,
+			CountryCode: req.data.CountryCode,
+			Level1Discount1: req.data.Discount,
+			NetOfferPrice: req.data.NetOfferPrice,
+			Price2: req.data.NetPrice,
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Tax: req.data.Tax,
+			Price1: req.data.OfferPrice, 
+			Level2Discount1: req.data.Deductions,
+			PriceConditionClassification_ID: req.data.ClassificationID 
+		}
+
+		if(priceCondition){
 			await UPDATE(PriceCondition)
-				.with ({
-					Price0: req.data.BasePrice,
-					Price1: req.data.OfferPrice, 
-					Level2Discount1: req.data.Deductions
-				})
+				.with (mappedPriceCondition)
 				.where({
-					ID:req.data.PriceConditionID
+					ID: priceCondition.ID
 				})
 		}else{
-			await INSERT.into(PriceCondition).entries({
-				Price0: req.data.BasePrice,
-				CountryCode: req.data.CountryCode,
-				Level1Discount1: req.data.Discount,
-				NetOfferPrice: req.data.NetOfferPrice,
-				Price2: req.data.NetPrice,
-				OfferID: req.data.OfferID,
-				ProductCode: req.data.ProductCode,
-				Tax: req.data.Tax,
-				Price1: req.data.OfferPrice, 
-				Level2Discount1: req.data.Deductions,
-				PriceConditionClassification_ID: req.data.ClassificationID 
-			});
+			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
 		}
 	}
 
