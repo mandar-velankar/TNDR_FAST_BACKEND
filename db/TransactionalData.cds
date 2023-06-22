@@ -837,6 +837,7 @@ entity OfferProductOfferStatus {
             CountryName         : String(255);
             UserName            : String(255);
             UserEmail           : String(255);
+            send                : String(3);
             //Associations
             ApproverList        : Association to many MasterData.CountryApprovers
                                       on  ApproverList.CountryCode  = CountryCode
