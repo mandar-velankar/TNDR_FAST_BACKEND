@@ -195,4 +195,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         end as allProductPricesSet:Boolean
     }where product.Offer.OfferStatus.STATUS = 'Offer Created' and product.ActiveProduct = 1
     group by product.OfferID, product.Active, product.Offer.OfferStatus.STATUS, product.ActiveProduct;
+
+    entity AwardedProductsDetailView as select from TransactionalData.PT_TMTRRES;
 }
