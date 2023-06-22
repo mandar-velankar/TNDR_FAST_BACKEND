@@ -779,6 +779,7 @@ module.exports = (srv) => {
 		return price;
 	}
 
+//EFRCL- 384446- Spain - issues with the new approval process for PH
     async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
 		//Legend
 		//1: Optional
@@ -793,7 +794,8 @@ module.exports = (srv) => {
 
         const whereProduct = {
             CountryCode: offer.COUNTRYCODE,
-            ProductPackId: product.PRODUCTID
+            ProductPackId: product.PRODUCTID,
+			ValidTo :'9999-12-31 00:00:00.000000000'
         };
 
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
