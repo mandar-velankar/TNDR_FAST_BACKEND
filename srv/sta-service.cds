@@ -207,4 +207,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity AwardedProductsDetailView as select from TransactionalData.PT_TMTRRES;
     entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
     
+
+    entity CountryBrands @readonly as projection on MasterDataViews.CountryBrands;
+    entity CountryBrandProducts @readonly as projection on MasterDataViews.CountryBrandProducts;
 }
