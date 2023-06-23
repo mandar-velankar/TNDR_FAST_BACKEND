@@ -387,13 +387,13 @@ group by results.COUNTRY_CODE,
 
 entity ResultsWithNegotiation as select OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'FOC negotiation';
 entity ResultsWithAppealInProgress as select TenderID, OfferID, ProductCode from TransactionalData.PT_TMTRRES where Active = 1 and Outcome = 'Appeal in Progress';
-
+//EFRCL- 385024- SCTASK14842291 - Offer declined functionality not working
 entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     key offer.OfferID as OFFER_ID,
     case
         when offer.WholesaleOffer = 'Yes'
             then 'Wholesale Offer'
-        when count(offer.Product.ActiveProduct)<>0 and sum(case when offer.Product.ActiveProduct <> 1 and offer.Product.Channel = 'Decline' then 1 else 0 end) = count(offer.Product.ActiveProduct)
+        when count(offer.Product.ActiveProduct)<>0 and sum(case when offer.Product.ActiveProduct <> 1 and offer.Product.Channel = 'Decline' or offer.Product.Channel is NULL then 1 else 0 end) = count(offer.Product.ActiveProduct)
             then 'Offer Declined'
         when offer.OfferStatusTable.STATUS = 'Offer Created'
         or offer.OfferStatusTable.STATUS = 'Awaiting Approval'

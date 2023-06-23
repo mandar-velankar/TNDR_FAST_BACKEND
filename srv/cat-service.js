@@ -780,7 +780,7 @@ module.exports = (srv) => {
 	}
 
 //EFRCL- 384446- Spain - issues with the new approval process for PH
-//EFRCL- 383690- Spain - mandatory approval of Finance and Legal for commercial agreements where payment back date are above one month from the effective date
+//EFRCL- 383690- Spain- mandatory approval of Finance and Legal for commercial agreements where payment back date are above one month from the effective date
     async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
 		//Legend
 		//1: Optional
