@@ -805,10 +805,13 @@ module.exports = (srv) => {
         };
 
 		const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
-        const EffectiveDate=new Date(offer.EffectiveDate);
-        const PaymentBackdate= new Date(PriceConditionvalue[0].RefundDate);
-        const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
-        const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+		if(PriceConditionvalue){
+			const EffectiveDate=new Date(offer.EffectiveDate);
+			const PaymentBackdate= new Date(PriceConditionvalue.RefundDate);
+			const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
+			const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+		}
+        console.log(Difference_In_Days);
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
         let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
@@ -863,7 +866,7 @@ module.exports = (srv) => {
                 });
 		 }
 		} else if (product.DIVISION === 'Pharma') {
-			if(product.NET_PRICE < dFloorPrice || Difference_In_Days > 30 ){
+			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "BU/RAM 1":
