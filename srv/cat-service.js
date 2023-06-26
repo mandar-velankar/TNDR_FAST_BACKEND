@@ -786,17 +786,17 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
-
+		//let Difference_In_Days=0;
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
             OfferId: offer.OFFERID,
             ProductType: 'Total'
         };
 
-		const whereoffer={
-			OfferId: offer.OFFERID,
-			PriceConditionCode : 'YAW1'
-		};
+		// const whereoffer={
+		// 	OfferId: offer.OFFERID,
+		// 	PriceConditionCode : 'YAW1'
+		// };
 
         const whereProduct = {
             CountryCode: offer.COUNTRYCODE,
@@ -804,14 +804,15 @@ module.exports = (srv) => {
 			ValidTo :'9999-12-31 00:00:00.000000000'
         };
 
-		const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
-		if(PriceConditionvalue){
-			const EffectiveDate=new Date(offer.EffectiveDate);
-			const PaymentBackdate= new Date(PriceConditionvalue.RefundDate);
-			const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
-			const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-		}
-        console.log(Difference_In_Days);
+		// const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
+		// if(PriceConditionvalue){
+		// 	const EffectiveDate=new Date(offer.EffectiveDate);
+		// 	const PaymentBackdate= new Date(PriceConditionvalue.RefundDate);
+		// 	const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
+		//     Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+		// 	console.log(Difference_In_Days);
+		// }
+        
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
         let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
@@ -866,7 +867,7 @@ module.exports = (srv) => {
                 });
 		 }
 		} else if (product.DIVISION === 'Pharma') {
-			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
+			if(product.NET_PRICE < dFloorPrice ){
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "BU/RAM 1":
