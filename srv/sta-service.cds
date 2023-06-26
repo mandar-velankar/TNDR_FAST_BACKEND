@@ -111,7 +111,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     @cds.redirection.target
     entity OfferFormView as select from TransactionalData.PT_TMOFRS{
         *,
-        Tender.BidDueDate as OfferDueDate
+        Tender.BidDueDate as OfferDueDate,
+        OfferStatus.STATUS as OfferStatus
     };
     //inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID ;
     /*{
@@ -170,7 +171,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
-    entity PriceConditionClassification as projection on TransactionalData.PriceConditionClassification
+    entity PriceConditionClassification as select from TransactionalData.PriceConditionClassification;
+    entity FreeGoodsOther as select from TransactionalData.FreeGoodsOther;
 
     entity TenderChannel as projection on MasterData.TenderChannel;
 
@@ -181,7 +183,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         signatory.COUNTRY_CODE as CountryCode
     };
 
-    entity OfferProductOfferStatus as projection on TransactionalData.OfferProductOfferStatus;
+    entity ApproverList as projection on MasterData.CountryApprovers;
+    entity ApproverTypes as projection on MasterData.ApproverTypes;
+
+    entity OfferProductOfferStatus as projection on TransactionalData.OfferProductOfferStatus{
+        *,
+        ApproverList: redirected to ApproverList,
+        ApproverTypes: redirected to ApproverTypes
+    };
 
     @cds.redirection.target
     entity ProductPricesCheckView as select from TransactionalData.PT_TMOFPR as product{
@@ -194,4 +203,40 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         end as allProductPricesSet:Boolean
     }where product.Offer.OfferStatus.STATUS = 'Offer Created' and product.ActiveProduct = 1
     group by product.OfferID, product.Active, product.Offer.OfferStatus.STATUS, product.ActiveProduct;
+
+    entity AwardedProducts as select from TransactionalData.PT_TMTRRES;
+    entity AwardedProductFormView as select from TransactionalData.PT_TMTRRES as result
+        inner join TransactionalData.PT_TMOFPR as product on result.OfferID = product.OfferID
+                                                          and result.ProductCode = product.ProductCode
+                                                          and result.LotID = product.LotID
+    {
+        result.TenderID,
+        key result.OfferID,
+        key result.ProductCode,
+        result.CountryCode,
+        result.InstituteID,
+        result.ContractNo,
+        result.Outcome,
+        result.ErrorInSubmission,
+        result.AwardedCompany,
+        result.AwardedProduct,
+        result.AwardedPrice,
+        result.Currency,
+        result.AwardedQty,
+        result.UoM,
+        result.Reason,
+        result.Comment,
+        product.Active,
+        key result.LotID,
+        product.RequestedVolume as RequestedVolume: Integer
+    };
+    entity MasterCountryOutComes as select from MasterData.MASTER_COUNTRY_OUTCOMES;
+    entity MasterOutComeReasons as select from MasterData.PT_TMOUTRS;
+    entity MasterCountryCurrencies as select from MasterData.CountryCurrency;
+    
+    entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
+    
+
+    entity CountryBrands @readonly as projection on MasterDataViews.CountryBrands;
+    entity CountryBrandProducts @readonly as projection on MasterDataViews.CountryBrandProducts;
 }

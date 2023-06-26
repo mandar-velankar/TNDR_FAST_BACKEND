@@ -328,6 +328,7 @@ module.exports = (srv) => {
 		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
 
 		delete req.data.OfferDueDate;
+		delete req.data.OfferStatus;
 	});
 
 
