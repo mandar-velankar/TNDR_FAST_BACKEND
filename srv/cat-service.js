@@ -779,6 +779,8 @@ module.exports = (srv) => {
 		return price;
 	}
 
+//EFRCL- 384446- Spain - issues with the new approval process for PH
+//EFRCL- 383690- Spain- mandatory approval of Finance and Legal for commercial agreements where payment back date are above one month from the effective date
     async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
 		//Legend
 		//1: Optional
@@ -791,11 +793,22 @@ module.exports = (srv) => {
             ProductType: 'Total'
         };
 
+		const whereoffer={
+			OfferId: offer.OFFERID,
+			PriceConditionCode : 'YAW1'
+		};
+
         const whereProduct = {
             CountryCode: offer.COUNTRYCODE,
-            ProductPackId: product.PRODUCTID
+            ProductPackId: product.PRODUCTID,
+			ValidTo :'9999-12-31 00:00:00.000000000'
         };
 
+		const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
+        const EffectiveDate=new Date(offer.EffectiveDate);
+        const PaymentBackdate= new Date(PriceConditionvalue[0].RefundDate);
+        const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
+        const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
         let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
@@ -850,6 +863,7 @@ module.exports = (srv) => {
                 });
 		 }
 		} else if (product.DIVISION === 'Pharma') {
+			if(product.NET_PRICE < dFloorPrice || Difference_In_Days > 30 ){
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "BU/RAM 1":
@@ -858,18 +872,23 @@ module.exports = (srv) => {
 					case "BU/RAM 2":
 						oApproverType.ValidationType = 3;
 						break;
+					case "Legal":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Financial Business Partner":
+						oApproverType.ValidationType = 3;
+						break;
 					default:
 						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
 			});
-
-			if (product.NET_PRICE < dFloorPrice) {
+		}else{
 				aApproverTypes.map(async function (oApproverType) {
 					switch (oApproverType.ApproverType) {
-						case "Legal":
+						case "BU/RAM 1":
 							oApproverType.ValidationType = 3;
 							break;
-						case "Financial Business Partner":
+						case "BU/RAM 2":
 							oApproverType.ValidationType = 3;
 							break;
 						default:
