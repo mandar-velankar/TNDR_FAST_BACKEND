@@ -393,7 +393,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     case
         when offer.WholesaleOffer = 'Yes'
             then 'Wholesale Offer'
-        when count(offer.Product.ActiveProduct)<>0 and sum(case when offer.Product.ActiveProduct <> 1 and offer.Product.Channel = 'Decline' or offer.Product.Channel is NULL then 1 else 0 end) = count(offer.Product.ActiveProduct)
+        when count(offer.Product.ActiveProduct)<>0 and sum(case when offer.Product.ActiveProduct <> 1 and offer.Product.Channel = 'Decline' or offer.Product.Channel is NULL or offer.Product.Channel ='' then 1 else 0 end) = count(offer.Product.ActiveProduct)
             then 'Offer Declined'
         when offer.OfferStatusTable.STATUS = 'Offer Created'
         or offer.OfferStatusTable.STATUS = 'Awaiting Approval'
