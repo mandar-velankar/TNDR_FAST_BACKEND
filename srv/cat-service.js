@@ -786,7 +786,7 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
-
+		let Difference_In_Days=0;
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
             OfferId: offer.OFFERID,
@@ -809,9 +809,10 @@ module.exports = (srv) => {
 			const EffectiveDate=new Date(offer.EffectiveDate);
 			const PaymentBackdate= new Date(PriceConditionvalue.RefundDate);
 			const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
-			const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+		    Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+			console.log(Difference_In_Days);
 		}
-        console.log(Difference_In_Days);
+        
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
         let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
