@@ -204,7 +204,36 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }where product.Offer.OfferStatus.STATUS = 'Offer Created' and product.ActiveProduct = 1
     group by product.OfferID, product.Active, product.Offer.OfferStatus.STATUS, product.ActiveProduct;
 
-    entity AwardedProductsDetailView as select from TransactionalData.PT_TMTRRES;
+    entity AwardedProducts as select from TransactionalData.PT_TMTRRES;
+    entity AwardedProductFormView as select from TransactionalData.PT_TMTRRES as result
+        inner join TransactionalData.PT_TMOFPR as product on result.OfferID = product.OfferID
+                                                          and result.ProductCode = product.ProductCode
+                                                          and result.LotID = product.LotID
+    {
+        result.TenderID,
+        key result.OfferID,
+        key result.ProductCode,
+        result.CountryCode,
+        result.InstituteID,
+        result.ContractNo,
+        result.Outcome,
+        result.ErrorInSubmission,
+        result.AwardedCompany,
+        result.AwardedProduct,
+        result.AwardedPrice,
+        result.Currency,
+        result.AwardedQty,
+        result.UoM,
+        result.Reason,
+        result.Comment,
+        product.Active,
+        key result.LotID,
+        product.RequestedVolume as RequestedVolume: Integer
+    };
+    entity MasterCountryOutComes as select from MasterData.MASTER_COUNTRY_OUTCOMES;
+    entity MasterOutComeReasons as select from MasterData.PT_TMOUTRS;
+    entity MasterCountryCurrencies as select from MasterData.CountryCurrency;
+    
     entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
     
 
