@@ -173,6 +173,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionClassification as select from TransactionalData.PriceConditionClassification;
     entity FreeGoodsOther as select from TransactionalData.FreeGoodsOther;
+    entity InstituteDistributorBrandProduct as projection on MasterDataViews.InstituteDistributorBrandProduct;
 
     entity TenderChannel as projection on MasterData.TenderChannel;
 
