@@ -1668,25 +1668,29 @@ module.exports = (srv) => {
 
 	async function buildProductValidationForType12(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
 		const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		let results = {
+			IN_POLICY: false
+		}
 
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
 
-		if(ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
-			aApproverTypes.map(async function (oApproverType) {
-				oApproverType.ValidationType = 3;
-			});
-		}
+		if(priceCondition){
+			if(ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
+				aApproverTypes.map(async function (oApproverType) {
+					oApproverType.ValidationType = 3;
+				});
+			}
+			
+			if(ServiceHelper.isDoubleEqual(priceCondition.Price1, priceCondition.Price0) || ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price0, priceCondition.Price1)){
+				aApproverTypes.map(async function (oApproverType) {
+					oApproverType.ValidationType = oApproverType.ValidationType;
+				});
+			}
 		
-		if(ServiceHelper.isDoubleEqual(priceCondition.Price1, priceCondition.Price0) || ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price0, priceCondition.Price1)){
-			aApproverTypes.map(async function (oApproverType) {
-				oApproverType.ValidationType = oApproverType.ValidationType;
-			});
-		}
-		
-		let results = {
 			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
-			IN_POLICY: true
-		};
+			results.IN_POLICY = true
+			
+		}
 
 		return results;
 	}
