@@ -404,6 +404,8 @@ module.exports = (srv) => {
 
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
+		delete req.data.InstituteID;
+        delete req.data.Channel;
 	});
 
 

@@ -112,6 +112,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity OfferFormView as select from TransactionalData.PT_TMOFRS{
         *,
         Tender.BidDueDate as OfferDueDate,
+        Tender.InstituteID as InstituteID,
+        Tender.TenderChannel as Channel,
         OfferStatus.STATUS as OfferStatus
     };
     //inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID ;
