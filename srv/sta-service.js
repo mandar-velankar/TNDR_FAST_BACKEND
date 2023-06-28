@@ -56,6 +56,7 @@ module.exports = (srv) => {
 		PT_TMOFPR,
 		PT_TMOFRS,
 		PT_TMBDPR,
+		PT_TMTRRES,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -167,11 +168,13 @@ module.exports = (srv) => {
 		}
 		return results;
 	});
+	*/
   
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
 		// const tx = cds.transaction(req)
 		const tx = cds.tx(req);
 		let results = [];
+		let searchValue = null;
 		if (req.query.SELECT.where) {
 			//Get non-filter information
 			let channel = ServiceHelper.getWhereValue(req, "CHANNEL");
@@ -260,18 +263,90 @@ module.exports = (srv) => {
 				var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
 				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, aProductSKUs);
 			}
+
+			searchValue = req.query.SELECT.where[16]?.xpr[0]?.args[1]?.val;
 		}
 		// sort by countrycode, then brand name, then product name
 		results.sort((a,b)=> ( a.COUNTRY_CODE.localeCompare(b.COUNTRY_CODE) || a.BRAND_NAME.localeCompare(b.BRAND_NAME) || a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME)   ));
 
-
-
+		// TODO: this filtering should be improved
+		if(searchValue){
+			results = results.filter(
+				i=>i.PRODUCT_NAME.toLowerCase().includes(searchValue.toLowerCase()) || 
+				i.SKUS.toLowerCase().includes(searchValue.toLowerCase())
+			);
+		}
+	
 
 		return results;
 	});
-	*/
-
-	// srv.on(['CREATE','UPDATE','DELETE'], 'AwardCriteriaTableView', async (req, next) => { 
+	
+	function buildDirectProducts(entityBrands, directBrands, countryProducts, productSKUs) {
+		let results = [];
+		entityBrands.forEach(entityBrand => {
+			directBrand = directBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			if (directBrand && countryProductsList.length !== 0) {
+				countryProductsList.forEach((countryProduct) => {
+					results.push({
+						COUNTRY_CODE: entityBrand.COUNTRY_CODE,
+						INSTITUTE_ID: directBrand.INSTITUTE_ID,
+						INSTITUTE_NAME: directBrand.INSTITUTE_NAME,
+						DISTRIBUTOR_ID: directBrand.DISTRIBUTOR_ID,
+						DISTRIBUTOR_NAME: directBrand.DISTRIBUTOR_NAME,
+						BRAND_ID: entityBrand.BRAND_ID,
+						BRAND_NAME: countryProduct.BRAND_NAME,
+						PRODUCT_ID: countryProduct.PRODUCT_ID,
+						PRODUCT_NAME: countryProduct.PRODUCT_NAME,
+						INCO_TERMS: directBrand.INCO_TERMS,
+						PAYMENT_TERMS: directBrand.PAYMENT_TERMS,
+						COMMISSION_RATE: directBrand.COMMISSION_RATE,
+						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
+						CHANNEL: 'Direct',
+						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+                        DIVISION: countryProduct.DIVISION,
+                        PACKFACTOR: countryProduct.PACK_SIZE,                        
+						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
+					});
+				});
+			}
+		});
+		return results;
+	}
+	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, productSKUs) {
+		let results = [];
+		entityBrands.forEach(entityBrand => {
+			distributorBrand = distributorBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
+			if (distributorBrand && countryProductsList.length !== 0) {
+				countryProductsList.forEach((countryProduct) => {
+					instituteIds.forEach(instituteId => {
+						results.push({
+							COUNTRY_CODE: entityBrand.COUNTRY_CODE,
+							INSTITUTE_ID: instituteId,
+							INSTITUTE_NAME: 'NA',
+							DISTRIBUTOR_ID: distributorBrand.DISTRIBUTOR_ID,
+							DISTRIBUTOR_NAME: distributorBrand.DISTRIBUTOR_NAME,
+							BRAND_ID: entityBrand.BRAND_ID,
+							BRAND_NAME: countryProduct.BRAND_NAME,
+							PRODUCT_ID: countryProduct.PRODUCT_ID,
+							PRODUCT_NAME: countryProduct.PRODUCT_NAME,
+							INCO_TERMS: distributorBrand.INCO_TERMS,
+							PAYMENT_TERMS: distributorBrand.PAYMENT_TERMS,
+							COMMISSION_RATE: distributorBrand.COMMISSION_RATE,
+							LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
+							CHANNEL: 'Distributor',
+							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+							COGS: countryProduct.COGS,
+							PACKFACTOR: countryProduct.PACK_SIZE,
+							SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
+						});
+					});
+				});
+			}
+		});
+		return results;
+	}	// srv.on(['CREATE','UPDATE','DELETE'], 'AwardCriteriaTableView', async (req, next) => { 
 			
 	// 	debugger;	
 	// 	let result = {
@@ -338,6 +413,65 @@ module.exports = (srv) => {
 		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 		
 	});
+
+	srv.on(['CREATE','UPDATE','DELETE'], 'AwardedProductFormView', async (req) => {
+		await upsertAwardedProduct(req);
+		return req.data;
+	});
+
+	const upsertAwardedProduct = async function(req){
+
+		const offerProduct = await SELECT.one.from(PT_TMOFPR).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			LotID: req.data.LotID
+		});
+		const awardedProduct = await SELECT.one.from(PT_TMTRRES).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			LotID: req.data.LotID
+		});
+
+		const mappedAwardedProduct = {
+			TenderID: req.data.TenderID,
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			CountryCode: req.data.CountryCode,
+			InstituteID: req.data.InstituteID,
+			ContractNo: req.data.ContractNo,
+			Outcome: req.data.Outcome,
+			ErrorInSubmission: req.data.ErrorInSubmission,
+			AwardedCompany: req.data.AwardedCompany,
+			AwardedProduct: req.data.AwardedProduct,
+			AwardedPrice: req.data.AwardedPrice,
+			Currency: req.data.Currency,
+			AwardedQty: req.data.AwardedQty,
+			UoM: req.data.UoM,
+			Reason: req.data.Reason,
+			Comment: req.data.Comment,
+			Active: req.data.Active,
+			LotID: req.data.LotID
+		}
+
+		if(awardedProduct){
+			await UPDATE(PT_TMTRRES)
+				.with (mappedAwardedProduct)
+				.where({
+					OfferID: awardedProduct.OfferID,
+					ProductCode: awardedProduct.ProductCode,
+					LotID: awardedProduct.LotID
+				})
+			await UPDATE(PT_TMOFPR)
+				.with ({RequestedVolume: req.data.RequestedVolume})
+				.where({
+					OfferID: offerProduct.OfferID,
+					ProductCode: offerProduct.ProductCode,
+					LotID: offerProduct.LotID
+			})
+		}else{
+			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
+		}
+	}
 
 	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 		upsertPriceCondition(req);
