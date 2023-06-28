@@ -1,4 +1,6 @@
 [
 	"src/gen/CatalogService.InstituteDistributorBrandProduct.hdbview",
-	"src/gen/CatalogService.InstituteDistributorBrandProduct.hdbtable"
+	"src/gen/CatalogService.InstituteDistributorBrandProduct.hdbtable",
+    "src/gen/StandardAppService.InstituteDistributorBrandProduct.hdbview",
+    "src/gen/StandardAppService.InstituteDistributorBrandProduct.hdbtable"
 ]
