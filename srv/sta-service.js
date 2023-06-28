@@ -56,6 +56,7 @@ module.exports = (srv) => {
 		PT_TMOFPR,
 		PT_TMOFRS,
 		PT_TMBDPR,
+		PT_TMTRRES,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -412,6 +413,65 @@ module.exports = (srv) => {
 		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 		
 	});
+
+	srv.on(['CREATE','UPDATE','DELETE'], 'AwardedProductFormView', async (req) => {
+		await upsertAwardedProduct(req);
+		return req.data;
+	});
+
+	const upsertAwardedProduct = async function(req){
+
+		const offerProduct = await SELECT.one.from(PT_TMOFPR).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			LotID: req.data.LotID
+		});
+		const awardedProduct = await SELECT.one.from(PT_TMTRRES).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			LotID: req.data.LotID
+		});
+
+		const mappedAwardedProduct = {
+			TenderID: req.data.TenderID,
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			CountryCode: req.data.CountryCode,
+			InstituteID: req.data.InstituteID,
+			ContractNo: req.data.ContractNo,
+			Outcome: req.data.Outcome,
+			ErrorInSubmission: req.data.ErrorInSubmission,
+			AwardedCompany: req.data.AwardedCompany,
+			AwardedProduct: req.data.AwardedProduct,
+			AwardedPrice: req.data.AwardedPrice,
+			Currency: req.data.Currency,
+			AwardedQty: req.data.AwardedQty,
+			UoM: req.data.UoM,
+			Reason: req.data.Reason,
+			Comment: req.data.Comment,
+			Active: req.data.Active,
+			LotID: req.data.LotID
+		}
+
+		if(awardedProduct){
+			await UPDATE(PT_TMTRRES)
+				.with (mappedAwardedProduct)
+				.where({
+					OfferID: awardedProduct.OfferID,
+					ProductCode: awardedProduct.ProductCode,
+					LotID: awardedProduct.LotID
+				})
+			await UPDATE(PT_TMOFPR)
+				.with ({RequestedVolume: req.data.RequestedVolume})
+				.where({
+					OfferID: offerProduct.OfferID,
+					ProductCode: offerProduct.ProductCode,
+					LotID: offerProduct.LotID
+			})
+		}else{
+			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
+		}
+	}
 
 	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 		upsertPriceCondition(req);
