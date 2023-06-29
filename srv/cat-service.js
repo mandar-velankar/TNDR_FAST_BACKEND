@@ -807,7 +807,7 @@ module.exports = (srv) => {
 		const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
 		if(PriceConditionvalue.length>0){
 			const EffectiveDate=new Date(offer.EffectiveDate);
-			const PaymentBackdate= new Date(PriceConditionvalue.RefundDate);
+			const PaymentBackdate= new Date(PriceConditionvalue[0].RefundDate);
 			const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
 		    Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
 			console.log(Difference_In_Days);
