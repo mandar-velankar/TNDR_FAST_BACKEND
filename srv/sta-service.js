@@ -264,7 +264,7 @@ module.exports = (srv) => {
 				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, aProductSKUs);
 			}
 
-			searchValue = req.query.SELECT.where[16]?.xpr[0]?.args[1]?.val;
+			searchValue = req.query.SELECT.where[16]?.xpr?.[0]?.args[1]?.val;
 		}
 		// sort by countrycode, then brand name, then product name
 		results.sort((a,b)=> ( a.COUNTRY_CODE.localeCompare(b.COUNTRY_CODE) || a.BRAND_NAME.localeCompare(b.BRAND_NAME) || a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME)   ));
@@ -404,6 +404,8 @@ module.exports = (srv) => {
 
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
+		delete req.data.InstituteID;
+        delete req.data.Channel;
 	});
 
 
