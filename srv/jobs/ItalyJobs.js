@@ -609,6 +609,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                         .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT'});
 
             const customers = await tx.run(query);
+            console.log(customers,"Customers");
             let nextInstituteID = await this.getLastInstituteID();
             
         //EFRCL- 305173- Italy-Again missing historical customers
@@ -638,6 +639,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
             if(instituteEntries && instituteEntries.length > 0){
                 const result = await tx.run(INSERT(instituteEntries).into(PT_TMINST));
+                console.log(result);
                 await tx.commit(result);
                 console.log(`${instituteEntries.length} Institutes successfully created in ${PT_TMINST.name}.`);
                 return result;
