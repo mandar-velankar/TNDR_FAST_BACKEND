@@ -170,7 +170,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MasterDistributors @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterDistributors;
     entity CountryLegalEntity @readonly @(cds.redirection.target:false) as projection on MasterDataViews.CountryLegalEntity;
 
-
+    entity StandardTenderPriceConditionView as select from TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionClassification as select from TransactionalData.PriceConditionClassification;
