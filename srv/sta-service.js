@@ -64,7 +64,8 @@ module.exports = (srv) => {
 		DiscountCondition, 
 		PriceConditionClassification, 
 		ProductTypeProfitability,
-		CountrySpecificTenderInfo
+		CountrySpecificTenderInfo,
+		PT_TMTNOFST
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -473,6 +474,103 @@ module.exports = (srv) => {
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
 		}
+	}
+
+	srv.on(['CREATE','UPDATE','DELETE'], 'OfferProductOfferStatus', async (req) => {
+		const existingApprovals = await getExistingApprovals(req);
+		const offerProducts = await getOfferProducts(req);
+		await upsertProductApprovals(req, existingApprovals, offerProducts);
+		await upsertOfferApprovalsSent(req);
+		await upsertOfferStatus(req);
+		return req.data;
+	});
+
+	const getExistingApprovals = async function(req){
+		return await SELECT.from(PT_TMAPPRST).where({
+			OfferID: req.data.OfferId,
+			Active: 1
+		});
+	}
+
+	const getOfferProducts = async function(req){
+		return await SELECT.from(PT_TMOFPR).where({
+			OfferID: req.data.OfferId,
+		});
+	}
+
+	const upsertProductApprovals = async function(req, existingApprovals, offerProducts){
+
+		let aApprovalsSaveInfo = [];
+		const oApprovalData = req.data;
+		let sStatusTime = moment().utc().toDate();
+		//let sSubmittedBy = UserInfo.getCWID();
+
+		offerProducts.forEach(function (oProduct) {
+
+			//ActiveProduct = 2 (excluded product)
+			if (oProduct.ActiveProduct !== 2) {
+				aApprovalsSaveInfo.push({
+					//get information for saving
+					TenderID: oApprovalData.TenderID,
+					OfferId: oApprovalData.OfferId,
+					CountryCode: oApprovalData.CountryCode,
+					productcode: oProduct.ProductCode,
+					ApprovalContent: oApprovalData.ApprovalContent,
+					ApproverTypeSection: oApprovalData.ApproverTypeSection,
+					ApprovalStatus: oApprovalData.ApprovalStatus,
+					ApproverName: oApprovalData.ApproverName,
+					ApproverEmailID: oApprovalData.ApproverEmailID,
+					SenderComment: oApprovalData.SenderComment,
+					ApproverComment: "", //approvercomment is only set from backend process
+					Active: oApprovalData.Active,
+					Hierarchy: oApprovalData.Hierarchy ? oApprovalData.Hierarchy : 1,
+					AP_ID: oApprovalData.AP_ID,
+					RestoreKey: oApprovalData.RestoreKey,
+					Statustime: sStatusTime,
+					Submittedby: "ELLTZ", //sSubmittedBy,
+					ApproverDate: oApprovalData.ApproverDate,
+					ApproverType: oApprovalData.ApproverType,
+					FLOW_ID: oApprovalData.FLOW_ID,
+					REQUIRED_ACTION: oApprovalData.REQUIRED_ACTION,
+					LotID: oProduct.LotID
+				});
+
+			}
+		});
+
+		if(existingApprovals?.length > 0 && existingApprovals.findIndex(approval => approval.ApproverType === oApprovalData.ApproverType)){
+			//remove old entries before inserting
+			await DELETE.from(PT_TMAPPRST)
+				.where({
+					OfferID: req.data.OfferId
+				})
+		}
+		
+		await INSERT.into(PT_TMAPPRST).entries(aApprovalsSaveInfo);
+
+		return req.data;
+	};
+
+	const upsertOfferStatus = async function(req){
+		await UPDATE(PT_TMTNOFST)
+			.with({STATUS: req.data.send === 'Yes' ? 'Awaiting Approval' : 'Offer Created'})
+			.where({
+				OfferID: req.data.OfferId,
+				TenderID: req.data.TenderID,
+				Active: 1
+			})
+	}
+
+	const upsertOfferApprovalsSent = async function(req){
+		const offer = await SELECT.one.from(PT_TMOFRS).where({
+			OfferID: req.data.OfferId
+		});
+
+		await UPDATE(PT_TMOFRS)
+			.with({APPROVALS_SENT: offer.APPROVALS_SENT + 1})
+			.where({
+				OfferID: req.data.OfferId
+			})
 	}
 
 	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
