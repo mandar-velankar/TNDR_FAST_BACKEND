@@ -559,7 +559,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // 1. Create new Institute entries for new Customers
             await this.createInstituteEntries();
             // 2. Update Institute master data for existing Customers
-            await this.updateInstituteEntries();
+            //await this.updateInstituteEntries();
 
             // TODO: remove this code after the merge of Mater Data app
             // Until we have merged Master Data App branch
