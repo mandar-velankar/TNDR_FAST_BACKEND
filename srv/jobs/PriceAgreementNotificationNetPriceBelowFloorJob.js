@@ -107,11 +107,10 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
             
 
             if(priceConditionsDescCom && priceConditionsDescCom.length > 0 || priceConditionsRappel && priceConditionsRappel.length > 0){
-                console.log(priceConditionsRappel[0],"Rappel");
-                console.log(priceConditionsRappel[0].DiscountCondition,"DC");
+                console.log(priceConditionsRappel[0]?.DiscountCondition.map(dc=> dc.NetPriceWithoutTax),"value");
                 d.FloorPriceOld = 0, //never used for this email
                 d.FloorPriceNew = d.MasterPrices && ( d.Institute.InstituteType === 'Private Account' || d.Institute.InstituteType === 'Cluster' ) ? d.MasterPrices.PRAF_Private : d.MasterPrices && d.Institute.InstituteType !== 'Private Account' && d.Institute.InstituteType !== 'Cluster' ? d.MasterPrices.PRAF_Public : 0;
-                d.NetPrice = (priceConditionsRappel && priceConditionsRappel.length > 0) ? Math.min(priceConditionsRappel[0]?.DiscountCondition) : priceConditionsDescCom[0].NetPriceWithoutTax,
+                d.NetPrice = (priceConditionsRappel && priceConditionsRappel.length > 0) ? Math.min(...priceConditionsRappel[0]?.DiscountCondition.map(dc=> dc.NetPriceWithoutTax)): priceConditionsDescCom[0].NetPriceWithoutTax,
                 d.ConditionType = (priceConditionsRappel && priceConditionsRappel.length > 0) ? priceConditionsRappel[0].PriceConditionClassification.ConditionType : priceConditionsDescCom[0].PriceConditionClassification.ConditionType,
                 d.CustomerID = d.Institute.CustomerID,
                 d.InstituteName = d.Institute.InstituteName,
