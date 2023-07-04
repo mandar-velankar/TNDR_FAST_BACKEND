@@ -104,9 +104,11 @@ module.exports = class PriceAgreementNotificationNetPriceBelowFloorJob extends B
         data.forEach(d => {
             let priceConditionsDescCom = d.PriceConditions?.filter(pc => pc.PriceConditionClassification.ConditionType === 'Descuento Comercial'); //we should only get descuento comercial & rappel conditions for net price below floor price
             let priceConditionsRappel = d.PriceConditions?.filter(pc => pc.PriceConditionClassification.ConditionType === 'Rappel');
-            console.log(priceConditionsRappel,"Rappel");
+            
 
             if(priceConditionsDescCom && priceConditionsDescCom.length > 0 || priceConditionsRappel && priceConditionsRappel.length > 0){
+                console.log(priceConditionsRappel[0],"Rappel");
+                console.log(priceConditionsRappel[0].DiscountCondition,"DC");
                 d.FloorPriceOld = 0, //never used for this email
                 d.FloorPriceNew = d.MasterPrices && ( d.Institute.InstituteType === 'Private Account' || d.Institute.InstituteType === 'Cluster' ) ? d.MasterPrices.PRAF_Private : d.MasterPrices && d.Institute.InstituteType !== 'Private Account' && d.Institute.InstituteType !== 'Cluster' ? d.MasterPrices.PRAF_Public : 0;
                 d.NetPrice = (priceConditionsRappel && priceConditionsRappel.length > 0) ? Math.min(priceConditionsRappel[0].DiscountCondition.NetPriceWithoutTax) : priceConditionsDescCom[0].NetPriceWithoutTax,
