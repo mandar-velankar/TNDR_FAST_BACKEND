@@ -169,6 +169,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
     entity MasterDistributors @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterDistributors;
     entity CountryLegalEntity @readonly @(cds.redirection.target:false) as projection on MasterDataViews.CountryLegalEntity;
+    @cds.redirection.target
+    entity PT_TMAPPRST as projection on TransactionalData.PT_TMAPPRST{
+        *,
+        OfferProduct: redirected to TransactionalData.PT_TMOFPR on OfferProduct.OfferID     = OfferId
+                                  and OfferProduct.ProductCode = productcode
+                                  and OfferProduct.Active = Active
+                                  and OfferProduct.LotID = LotID
+    };
 
     entity StandardTenderPriceConditionView as select from TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
@@ -246,4 +254,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity CountryBrands @readonly as projection on MasterDataViews.CountryBrands;
     entity CountryBrandProducts @readonly as projection on MasterDataViews.CountryBrandProducts;
+
+    entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult as competitor {
+        *,
+        key competitor.OFFERID,
+        key competitor.PRODUCTCODE,
+        key competitor.LOTID
+    };
 }
