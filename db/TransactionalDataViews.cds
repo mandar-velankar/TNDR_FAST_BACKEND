@@ -1325,9 +1325,17 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key priceConditionClassification.ConditionType,
     priceConditionClassification.Division,
     priceConditionClassification.isMain,
-    product.RegisteredPrice.REGISTERED_PRICE as CurrentBasePrice,
+    case 
+        when product.UnitPerPack = 'Unit'
+            then product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR
+        else product.RegisteredPrice.REGISTERED_PRICE
+    end as CurrentBasePrice:Double,
     @Core.Computed: false
-    ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE) as BasePrice:Decimal,
+    case 
+        when product.UnitPerPack = 'Unit'
+            then  ifnull(priceCondition.Price0, (product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
+        else ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE)
+    end as BasePrice:Double,
     @Core.Computed: false
     ifnull(priceCondition.Price1, 0) as OfferPrice:Decimal,
     priceCondition.Level1Discount1 as Discount,
