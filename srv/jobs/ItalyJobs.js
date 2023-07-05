@@ -609,6 +609,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                         .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT'});
 
             const customers = await tx.run(query);
+           
             let nextInstituteID = await this.getLastInstituteID();
 
             const instituteEntries = customers.map(cust => {
