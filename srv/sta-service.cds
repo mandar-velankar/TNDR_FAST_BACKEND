@@ -263,4 +263,19 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity MasterCompetitors as select from MasterData.MasterCompetitors;
+
+    entity WordTemplate as projection on AdminData.WordTemplate;
+    entity WordTemplateCountry as projection on AdminData.WordTemplateCountry{
+        *,
+        WordTemplates.name,
+        WordTemplates.filename,
+        WordTemplates: Redirected to WordTemplate on WordTemplates.templateId = templateId
+    };
+
+    entity WordAttachments {
+        key offerId    : String(50);
+        key templateId : Integer;
+            content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType  : String      @Core.IsMediaType;
+    }
 }

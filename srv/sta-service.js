@@ -1965,4 +1965,162 @@ module.exports = (srv) => {
 		};
 		return results;
 	}
+
+	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'WordAttachments', async (req, next) => {
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
+		const offerId = req.data.offerId;
+		const templateId = req.data.templateId;
+		if (!offerId) {
+			return next();
+		}
+
+		const templates = await tx.run(SELECT.from(WordTemplate).where({ templateId: templateId }));
+		if (templates.length === 0) {
+			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
+		}
+		const templateContent = templates[0].content;
+		let wordData = {};
+		//Get offer data
+		if (offerId) {
+			try {
+				wordData = await getOfferData(tx,offerId);
+			} catch (error) {
+				return req.reject(404, 'No offer found');
+			}
+		}
+		const handler = new wordTemplate.TemplateHandler({
+			scopeDataResolver: createResolver({
+				angularFilters: {
+					upper: (input) => (input || "").toUpperCase(),
+					lower: (input) => (input || "").toLowerCase(),
+					numberEU2: (input) => {  
+                        if(Number(input) === 0 || input === null  ){
+                            return "0,00";
+                        }          
+                        var usString;
+						if(typeof input === 'string'){
+                            usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						} else {
+                            usString = input.toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						}
+                        usString = usString.replace(/\,/g,'$');
+                        usString = usString.replace(/\./g,',');  
+                        usString = usString.replace(/\$/g,'.');   
+                        return  usString;                  
+				   },
+				   numberEU5: (input) => {
+                    if(Number(input) === 0 || input === null  ){
+                        return "0,00000";
+                    } 
+                    var usString;
+                    if(typeof input === 'string'){
+                        usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+                    } else {
+                        usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+                    }
+                    usString = usString.replace(/\,/g,'$');
+                    usString = usString.replace(/\./g,',');  
+                    usString = usString.replace('$','.');   
+                    return  usString; 
+			   	},
+				dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+				dateYear: (input) => input.substring(0,4),
+                extract2Decimals: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 2);
+                    } else {
+                        return Number(input).toFixed(2).split(".")[1];
+                    }
+                },
+                   extract5Decimals: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 5);
+                    } else {
+                        return Number(input).toFixed(5).split(".")[1];
+                    }
+                },
+                //EHQUT-167492-Quotation Adjustment in word file
+                Decimals2Unit: (input) => {
+                    if(typeof input === 'string'){
+                        return input.split(".")[1].substring(0, 2);
+                    } else {
+                        return Number(input).toFixed(2);
+                    }
+                    
+                }
+                //EHQUT-167492-Quotation Adjustment in word file
+
+
+				}
+			})
+		});
+		const doc = await handler.process(templateContent, wordData);
+		const readableInstanceStream = new Readable({
+			read() {
+				this.push(doc);
+				this.push(null);
+			}
+		});
+		const filename = offerId+'.docx';
+		req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+		return {
+			value: readableInstanceStream
+		};
+	});
+
+	async function getOfferData(tx,offerId){
+		
+		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+		let offerValidation = await buildOfferValidation(tx, whereOffer);
+		if (!offerValidation) {
+			throw 'No offer found';
+		}
+
+		//Get product data
+		let productValidation = await buildOfferProductValidation(tx, whereOffer);
+
+		//format prices
+		productValidation.forEach(prd => {
+			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
+			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
+			prd.OFFER_PRICE = ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
+			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+		});
+
+		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
+		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
+		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
+		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
+			const { ConditionType } = product.PriceConditionClassification;
+			const foundGroup = groups.find(group=>group[ConditionType.replace(/\s/g, '')]);
+			if(!foundGroup){
+			  let test = {};
+			  test[ConditionType.replace(/\s/g, '')]=[{items:[product]}];
+			  groups.push(test);
+			}else{
+			  foundGroup[ConditionType.replace(/\s/g, '')][0].items.push(product);
+			}
+			return groups;
+		  }, []);
+		return {
+			offerValidation: offerValidation,
+			offerProductValidation: productValidation,
+			groupedOfferProductValidation: groupedOfferProductValidation
+			// flatOfferProductValidation.reduce((group, product) => {
+			// 	const { PriceConditionClassification } = product;
+			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
+			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')].items.push(product);
+			// 	return group;
+			//   }, {})
+		};
+	}
 }
