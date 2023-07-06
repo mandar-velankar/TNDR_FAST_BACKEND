@@ -248,6 +248,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MasterCountryOutComes as select from MasterData.MASTER_COUNTRY_OUTCOMES;
     entity MasterOutComeReasons as select from MasterData.PT_TMOUTRS;
     entity MasterCountryCurrencies as select from MasterData.CountryCurrency;
+    entity StandardDivisions as projection on MasterData.StandardDivisions;
     
     entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
     
