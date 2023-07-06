@@ -791,6 +791,13 @@ module.exports = (srv) => {
 		data.unshift({AUTHORIZED_SIGNATORY: null, NAME: null})
 	});
 
+	srv.after('READ', 'MasterCompetitors', data => {
+		data.unshift({
+			CompetitorProduct: "Other",
+			CompetitorCompany: "Other"
+		})
+	});
+
 	async function buildOfferApproval(tx, whereOffer) {
 		let results = [];
 		let approverTypes = [];
