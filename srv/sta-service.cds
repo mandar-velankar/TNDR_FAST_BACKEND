@@ -261,4 +261,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key competitor.PRODUCTCODE,
         key competitor.LOTID
     };
+
+    entity MasterCompetitors as select from MasterData.MasterCompetitors;
 }

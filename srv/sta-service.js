@@ -481,7 +481,7 @@ module.exports = (srv) => {
 		const offerProducts = await getOfferProducts(req);
 		await upsertProductApprovals(req, existingApprovals, offerProducts);
 		await upsertOfferApprovalsSent(req);
-		await upsertOfferStatus(req);
+		await upsertOfferStatus(req.data.OfferId, req.data.TenderID, req.data.send === 'Yes' ? 'Awaiting Approval' : 'Offer Created');
 		return req.data;
 	});
 
@@ -551,12 +551,12 @@ module.exports = (srv) => {
 		return req.data;
 	};
 
-	const upsertOfferStatus = async function(req){
+	const upsertOfferStatus = async function(offerId, tenderId, sStatus){
 		await UPDATE(PT_TMTNOFST)
-			.with({STATUS: req.data.send === 'Yes' ? 'Awaiting Approval' : 'Offer Created'})
+			.with({STATUS: sStatus})
 			.where({
-				OfferID: req.data.OfferId,
-				TenderID: req.data.TenderID,
+				OfferID: offerId,
+				TenderID: tenderId,
 				Active: 1
 			})
 	}
@@ -706,8 +706,16 @@ module.exports = (srv) => {
 	});
 
 	srv.on(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
+		if(req.data.Submitted === true){
+			await upsertOfferStatus(req.data.OFFERID, req.data.TENDERID, 'Quotation Submitted');
+			delete req.data.Submitted;
+		}
+		await upsertQuotation(req);
+		return req.data;
+		
+	});
 
-
+	const upsertQuotation = async function(req){
 		const mappedPTTMQUTO = {
 			TenderID          : req.data.TENDERID,
 			OfferID           : req.data.OFFERID,
@@ -747,10 +755,7 @@ module.exports = (srv) => {
 		}else{
 			await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
 		}
-
-		return req.data;
-		
-	});
+	}
 
 	srv.on('READ', 'OfferValidation', async (req) => {
 		const tx = cds.tx(req);
@@ -789,6 +794,13 @@ module.exports = (srv) => {
 
 	srv.after('READ', 'CountryLegalEntitySignatories', data => {
 		data.unshift({AUTHORIZED_SIGNATORY: null, NAME: null})
+	});
+
+	srv.after('READ', 'MasterCompetitors', data => {
+		data.unshift({
+			CompetitorProduct: "Other",
+			CompetitorCompany: "Other"
+		})
 	});
 
 	async function buildOfferApproval(tx, whereOffer) {
