@@ -130,20 +130,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.SellingCompanyDetails.LegalEntityID
     };*/ // Form used in the Offer tab
 
-    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR as product
-        inner join TransactionalData.PT_TMBDPR as price on price.ProductCode = product.ProductCode 
-                                                        and price.OfferID = product.OfferID 
-                                                        and price.Active = product.Active
-        inner join MasterData.PT_TMPRDPCK as productpack on productpack.PRODUCTPACKID = product.ProductCode {
-            product.ProductCode,
-            key product.OfferID,
-            key product.TenderID,
-            product.Active,
-            productpack.PRODUCTPACKNAME as ProductPackName,
-            product.UnitPerPack as UoM,
-            price.NetPrice as NetPrice,
-            product.RequestedVolume,
-            (product.RequestedVolume * price.NetPrice) as TotalAmount:Double
+    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR{
+        *,
+        key ProductCode,
+        key OfferID,
+        key TenderID,
+        Active,
+        SKU.PRODUCTPACKNAME as ProductPackName,
+        UnitPerPack as UoM,
+        Price.NetPrice as NetPrice,
+        RequestedVolume,
+        (RequestedVolume * Price.NetPrice) as TotalAmount:Double
     }; // Form used in the Offer tab - offer products
 
     entity OfferProductsDetailView as projection on TransactionalData.PT_TMOFPR;

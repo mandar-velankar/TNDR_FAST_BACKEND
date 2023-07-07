@@ -410,6 +410,13 @@ module.exports = (srv) => {
         delete req.data.Channel;
 	});
 
+	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsTableView', async (req) => {
+
+		delete req.data.ProductPackName;
+		delete req.data.NetPrice;
+		delete req.data.TotalAmount;
+	});
+
 
 	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
