@@ -803,6 +803,19 @@ module.exports = (srv) => {
 		})
 	});
 
+	srv.after('READ', 'MasterCountryOutComes', data => {
+		data.unshift({
+			Outcome: ""
+		})
+	});
+
+	srv.after('READ', 'MasterOutComeReasons', data => {
+		data.unshift({
+			TenderOutcomeReasons: ""
+		})
+	});
+
+
 	async function buildOfferApproval(tx, whereOffer) {
 		let results = [];
 		let approverTypes = [];
