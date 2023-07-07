@@ -365,13 +365,14 @@ module.exports = (srv) => {
 		const today = new Date().toISOString().slice(0, 10);
 
 		// validate form
-		!req.data.TenderName && req.error({ code: 404, message: "TenderName is required.", target: "TenderName" });
+		!req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
 		!req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
-		!req.data.InstituteID && req.error({ code: 404, message: "InstituteName is required.", target: "InstituteName" });
-		!req.data.InstituteType && req.error({ code: 404, message: "InstituteType is required.", target: "InstituteType" });
-		!req.data.TenderChannel && req.error({ code: 404, message: "TenderChannel is required.", target: "TenderChannel" });
-		!req.data.PublicationDate && req.error({ code: 404, message: "PublicationDate is required.", target: "PublicationDate" });
-		!req.data.BidDueDate && req.error({ code: 404, message: "BidDueDate is required.", target: "BidDueDate" });
+		!req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
+		!req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
+		!req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
+		!req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
+		!req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
+		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "BidDueDate" });
 
 		//check if dates are correct
 		if(moment(req.data.PublicationDate).isBefore(today))
@@ -391,7 +392,7 @@ module.exports = (srv) => {
 		// remove associations data
 		delete req.data.InstituteName;
 		delete req.data.InstituteType;
-		delete req.data.DirectTender
+		delete req.data.DirectTender;
 	});
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
