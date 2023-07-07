@@ -372,7 +372,7 @@ module.exports = (srv) => {
 		!req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
 		!req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
 		!req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
-		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "BidDueDate" });
+		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
 
 		//check if dates are correct
 		if(moment(req.data.PublicationDate).isBefore(today))
