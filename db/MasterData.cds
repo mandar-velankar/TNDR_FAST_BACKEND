@@ -846,3 +846,9 @@ entity TenderChannel: cuid {
 	ChannelName		: String;
 	DirectTender	: Boolean;
 }
+
+entity StandardDivisions: cuid{
+	CountryCode		: String(2) not null;
+	DivisionCode	: String(40);
+	DivisionName    : String(40);
+}

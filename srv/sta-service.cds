@@ -248,6 +248,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MasterCountryOutComes as select from MasterData.MASTER_COUNTRY_OUTCOMES;
     entity MasterOutComeReasons as select from MasterData.PT_TMOUTRS;
     entity MasterCountryCurrencies as select from MasterData.CountryCurrency;
+    entity StandardDivisions as projection on MasterData.StandardDivisions;
     
     entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
     
@@ -263,4 +264,19 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity MasterCompetitors as select from MasterData.MasterCompetitors;
+
+    entity WordTemplate as projection on AdminData.WordTemplate;
+    entity WordTemplateCountry as projection on AdminData.WordTemplateCountry{
+        *,
+        WordTemplates.name,
+        WordTemplates.filename,
+        WordTemplates: Redirected to WordTemplate on WordTemplates.templateId = templateId
+    };
+
+    entity WordAttachments {
+        key offerId    : String(50);
+        key templateId : Integer;
+            content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType  : String      @Core.IsMediaType;
+    }
 }
