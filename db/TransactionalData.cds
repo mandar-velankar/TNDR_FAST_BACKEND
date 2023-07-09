@@ -6,6 +6,9 @@ using {
     cuid,
     managed
 } from '@sap/cds/common';
+using { 
+	Custom
+} from './FASTTypes';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.AdminData} from './AdminData';
 //using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
@@ -60,6 +63,7 @@ entity PT_TMOFRS { //Offers
         ChannelSwitched        : Boolean default false;
         DecisionSharedWithIBIZ : Boolean default false;
         isIBIZNotified         : Boolean default false; 
+        Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND
                                     on Tender.TenderID = TenderID;
@@ -290,6 +294,7 @@ entity PT_TMDLVTR {
         LocalDeliveryNoteNo :String(255);
         //EHEEX-OTT - 105262-Adding new 3 fields for delivery tracking tab
     key LotID                  : Integer default 1;
+        Custom                 : Custom; // Custom attributes for templates usage
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
@@ -336,6 +341,7 @@ entity PT_TMOFPR {
     key LotID                    : Integer default 1;
         WorkflowProductID        : Integer;
         IbizWorkflowID           : Integer;
+        Custom                   : Custom; // Custom attributes for templates usage
         //Associations
         Offer                    : Association to PT_TMOFRS
                                        on Offer.OfferID = OfferID;
@@ -489,6 +495,21 @@ entity PriceCondition: cuid, managed {
     Invoive                             : Decimal; //will come from SAP simulation
     ICMS                                : Decimal; //will come from SAP simulation
     NetPrice                            : Decimal; //will come from SAP simulation
+    Price0                              : Decimal;
+    Level1Discount1                     : Double;
+    Level1Discount2                     : Double;
+    Level1Discount3                     : Double;
+    Price1                              : Decimal;
+    Level2Discount1                     : Double;
+    Level2Discount2                     : Double;
+    Level2Discount3                     : Double;
+    Price2                              : Decimal;
+    Level3Discount1                     : Double;
+    Level3Discount2                     : Double;
+    Level3Discount3                     : Double;
+    Price3                              : Decimal;
+    OfferPrice                          : Decimal;
+    NetOfferPrice                       : Decimal;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
@@ -557,6 +578,7 @@ entity PT_TMQUTO {
         UPDATED           : Integer;
         EffectiveDate     : Date;
         ExpiryDate        : Date;
+        Custom            : Custom; // Custom attributes for templates usage
         //Associations
         Offer             : Association to PT_TMOFRS
                                 on Offer.OfferID = OfferID;
@@ -616,6 +638,7 @@ entity PT_TMTEND: managed {
         ParticiationType     : String;
         ParticipationIntention : String;
         TerminationDate      : Date;
+        Custom               : Custom; // Custom attributes for templates usage
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID
@@ -704,6 +727,7 @@ entity PT_TMTRRES {
         Appeal            : String;
         InfoNeeded        : String;
         TotalAwardedValue : Double;
+        Custom            : Custom; // Custom attributes for templates usage
     key LotID             : Integer default 1;
         //Associations
         CompetitorResult  : Association to many TransCompetitorResult
@@ -752,6 +776,7 @@ entity TransCompetitorResult {
         UPDATEDBY      : String(255);
         DELETED        : Integer;
         TOTALAWARDEDVALUE: Double;
+        Custom         : Custom; // Custom attributes for templates usage
 }
 
 entity OutgoingMails : managed, cuid {
@@ -796,3 +821,39 @@ entity SpainRappelData: cuid, managed {
     KUNNR       : String;
     MATNR       : String;
 }
+
+entity OfferProductOfferStatus {
+            TenderID            : String(50) not null;
+        key OfferId             : String(30) not null;
+            CountryCode         : String(2) not null;
+            ApprovalContent     : String(13);
+            ApproverTypeSection : Integer;
+            REQUIRED_ACTION     : String(12);
+            ApprovalStatus      : String(100) not null;
+            ApproverName        : String(100);
+            ApproverEmailID     : String(100);
+            SenderComment       : String(500);
+            ApproverComment     : String(500);
+            Active              : Integer not null;
+            //Hierarchy           : Integer;
+            AP_ID               : String(10);
+            RestoreKey          : String(100);
+            Statustime          : DateTime;
+            Submittedby         : String(100);
+            ApproverDate        : Date;
+        key ApproverType        : String(200) not null;
+            Division            : String(200) not null;
+            FLOW_ID             : String(255);
+            CountryName         : String(255);
+            UserName            : String(255);
+            UserEmail           : String(255);
+            send                : String(3);
+            //Associations
+            ApproverList        : Association to many MasterData.CountryApprovers
+                                      on  ApproverList.CountryCode  = CountryCode
+                                      and ApproverList.ApproverType = ApproverType
+                                      and ApproverList.Division     = Division;
+            ApproverTypes       : Association to many MasterData.ApproverTypes
+                                      on  ApproverTypes.CountryCode  = CountryCode
+                                      and ApproverTypes.ApproverType = ApproverType;
+};

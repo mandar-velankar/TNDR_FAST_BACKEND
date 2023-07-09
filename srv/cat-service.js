@@ -903,7 +903,7 @@ module.exports = (srv) => {
 	 * @returns 
 	 */
 	async function buildProductValidationForType11(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
-		const { BrazilPricingPolicy, BrazilDistributorDivision, BrazilInstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
+		const { BrazilPricingPolicy, DistributorDivision, InstituteDivision } = cds.entities("com.bayer.SXTENDER.MasterData");
 		const { PriceCondition, PT_TMOFRS } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 		const { OfferProductConsolidation, OfferStatus } = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 
@@ -915,8 +915,8 @@ module.exports = (srv) => {
 		const approvedOfferDiscount = offerProductConsolidation && offerProductConsolidation.find(opc => opc.ProductCode == product.ProductCode);
 		const totaldiscountApprovedOffer = approvedOfferDiscount && Math.round((approvedOfferDiscount.ADDITIONAL_DISCOUNT + approvedOfferDiscount.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000;
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
-        const distributorDivision = await tx.run(SELECT.one.from(BrazilDistributorDivision).where({DistributorID: offer.DISTRIBUTOR_ID, DivisionName: product.DIVISION}));
-        const institudeDivision = await tx.run(SELECT.one.from(BrazilInstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
+        const distributorDivision = await tx.run(SELECT.one.from(DistributorDivision).where({DistributorID: offer.DISTRIBUTOR_ID, DivisionName: product.DIVISION}));
+        const institudeDivision = await tx.run(SELECT.one.from(InstituteDivision).where({InstituteID: offer.INSTITUTE_ID, DivisionName: product.DIVISION}));
 
 		const bDirectTender = offer.DISTRIBUTORNAME.toLowerCase() === 'bayer brazil' ? true : false;
 		const totalDiscount = Math.round((product.ADDITIONAL_DISCOUNT + product.STANDARD_DISCOUNT + Number.EPSILON) * 10_000) / 10_000; // we want 4 decimal places after the comma, that's why / 10_000

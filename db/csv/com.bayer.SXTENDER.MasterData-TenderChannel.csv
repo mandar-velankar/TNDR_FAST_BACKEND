@@ -1,0 +1,16 @@
+ID,COUNTRYCODE,CHANNELNAME,DIRECTTENDER
+c2d32ff5-b051-46ff-ae03-6b2450c1645c,AR,Direct,true
+ab1b201b-0bbc-4187-b1ce-c6a3de3ca623,AR,Distributor,true
+98d32675-5bf5-4163-abf6-a396e630c3f6,AR,Distributor,false
+9fdd29f9-4174-45dc-bc9a-0922264e2beb,BR,Direct,true
+c915f2a4-4e30-4e22-abd3-3acab8dc05af,BR,Distributor,true
+bb37a886-8852-4e1d-aa1e-85c89c478738,BR,Distributor,false
+12c3d4ce-baa8-4ec2-9776-ba1809530980,ES,Direct,true
+5613e986-393b-46b6-96e5-42fbbcfd2893,ES,Distributor,true
+dfe745f4-a559-4085-8279-bdd8c7657a6c,ES,Distributor,false
+5f077392-4c33-4fe7-bd01-90f5077fc072,UK,Direct,true
+e2b1d6f5-d395-4d2b-8df3-505381525661,UK,Distributor,true
+8f0a9e31-4c0f-43d2-bb89-370c806e3900,UK,Distributor,false
+"71ccb1ea-c32b-4be7-b069-a2ffb7fa5506","GB","Direct","true"
+"385b3424-f085-4796-935c-799dd9e6b46d","GB","Distributor","true"
+"7f4578dc-5695-4675-a25e-75a037f983be","GB","Distributor","false"

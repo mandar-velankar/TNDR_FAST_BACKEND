@@ -77,6 +77,10 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_meatenderview_user",
       "description": "f_tndr_cag_meatenderview_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_consumerprice_user",
+      "description": "f_tndr_cag_consumerprice_user"
     }
     
   ],
@@ -231,6 +235,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_meatenderview_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_consumerprice_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_consumerprice_user"
       ],
       "attribute-references": []
     }

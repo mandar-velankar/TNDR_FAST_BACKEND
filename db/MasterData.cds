@@ -2,6 +2,7 @@ namespace com.bayer.SXTENDER.MasterData;
 using { User, Country, managed, cuid, temporal } from '@sap/cds/common';
 using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
+using { com.bayer.SXTENDER.MasterDataViews } from './MasterDataViews';
 using { com.bayer.SXTENDER.AdminData } from './AdminData';
 
 //Country
@@ -82,6 +83,8 @@ entity PT_TMINST{
 	ContactEmail:String(100);
 	CNPJ:String;
 	Shortname:String;
+	KAM_Territory: String(12);
+	External_InstituteId: String(50);
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -91,7 +94,7 @@ entity PT_TMINST{
 	Hierarchy:Association to MASTER_INSTITUTE_HIERARCHY on Hierarchy.ID = INSTITUTE_HIERARCHY_ID;
 	Region:Association to CountryRegions on Region.ID = RegionID;
     Province: Association to CountryProvinces on Province.ID = ProvinceID;
-	InstituteDivision: Association to many BrazilInstituteDivision on InstituteDivision.InstituteID = InstituteID;
+	InstituteDivision: Association to many InstituteDivision on InstituteDivision.InstituteID = InstituteID;
 }
 
 //Institute Hierarchy Level
@@ -127,8 +130,7 @@ entity PT_TMDIST{
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Distributor = $self;
-	DistributorDivision: Composition of many BrazilDistributorDivision on DistributorDivision.DistributorID = DistributorID 
-																	   and DistributorDivision.CustomerID = CustomerID;
+	DistributorDivision: Composition of many DistributorDivision on DistributorDivision.DistributorID = DistributorID;
 }
 
 //Product Pack
@@ -142,9 +144,9 @@ entity PT_TMPRDPCK{
 	UOM:String(10);
 	ACTIVERECORD:String(10);
 	HLEVEL6_CODE:String(50);
-	CONCENTRATION:hana.REAL;
+	CONCENTRATION:Double;
 	
-	PACKFACTOR:hana.REAL;
+	PACKFACTOR:Double;
 	PCIName:String(255);
 	MoleculeName:String(255);
 	ACTIVE_SUBSTANCE:String(50);
@@ -317,7 +319,7 @@ entity PT_TMCTPRDPCK{
 	key PRODUCTPACKID:Integer;
 	MANUFACTURER:String(500);
 	Presentation_2:String(1000);
-	VTATax:hana.REAL;
+	VTATax:Double;
 	COMMENT:String(255);
 	GOV_CODE:String(255);
 	CODE1:String(255);
@@ -331,6 +333,8 @@ entity PT_TMCTPRDPCK{
     LAP_UNIT : String(15);
     PRAF_ID: String(50);
     PRAF_COMMENTS : String(255);
+	RegistrationDate : Date;
+	RegistrationValidUntil : Date; 
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
@@ -738,6 +742,10 @@ entity ConsumerPrices: cuid, managed {
 	TotalDiscount: Double;
 	MaxPriceNhsPP: Double;
 	MaxPriceNhsPU: Double;
+	//Associations
+	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
+	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+	CurrencyRate:Association to many PT_TMFXRTS on CurrencyRate.CurrencyFrom = Currency;
 }
 
 entity RoyalDecree {
@@ -788,7 +796,7 @@ entity BrazilMasterPrices: cuid, managed {
 	UOM			: String;
 }
 
-entity BrazilDistributorDivision: managed {
+entity DistributorDivision: managed {
 	key DistributorID: Integer; 
 	key DivisionCode: String(50); // setor_ativ
 	CustomerID: Integer; // Codigo
@@ -798,7 +806,7 @@ entity BrazilDistributorDivision: managed {
 	DistributorType: String(50);
 }
 
-entity BrazilInstituteDivision: managed {
+entity InstituteDivision: managed {
 	key InstituteID: Integer; 
 	key DivisionCode: String(50); // setor_ativ
 	CustomerID: Integer; // Codigo
@@ -821,10 +829,26 @@ entity BrazilPricingPolicy: cuid, managed {
 	ValidTo			: Date;
 }
 
+entity AwardCriteriaValueHelp: cuid, managed {
+	CountryCode		: String(2) not null;
+	Criteria		: String;
+}
+
 //EITOG-271486-SCTASK14171577,RITM12871584 - Change request
 entity NucleusHeads : managed {
-key Nucleus:String(100) not null;
-NucleusHeadsName:String(200);
-key NucleusHeadsEmailID : String(200);
- 
+	key Nucleus:String(100) not null;
+	NucleusHeadsName:String(200);
+	key NucleusHeadsEmailID : String(200);
+}
+
+entity TenderChannel: cuid {
+	CountryCode		: String(2) not null;
+	ChannelName		: String;
+	DirectTender	: Boolean;
+}
+
+entity StandardDivisions: cuid{
+	CountryCode		: String(2) not null;
+	DivisionCode	: String(40);
+	DivisionName    : String(40);
 }
