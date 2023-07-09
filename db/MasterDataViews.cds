@@ -13,6 +13,7 @@ entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK 
 
 
 entity ProductPackSKUs as select from MasterData.PT_TMSKUPRDPCK;
+entity ProductPack as projection on MasterData.PT_TMPRDPCK;
 
 entity CountryBrandProducts as select from MasterData.PT_TMCTPRDPCK as Product left outer join
 MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPackID and Product.COUNTRYCODE = sku.CountryCode {
@@ -37,9 +38,19 @@ MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPac
 	Product.ProductPack.PRESENTATION as PRESENTATION,
 	Product.VTATax as VAT,
 	case when Product.REGISTERED=0 then 0 else 1 end as REGISTERED:Integer,
+	Product.REGISTERED as REGISTERED_VALUE:Integer,
 	Product.COMMENT as COMMENT,
 	Product.COGS.COGS,
-	Product.ProductPackSKU: redirected to ProductPackSKUs
+	Product.GOV_CODE,
+	Product.CODE1,
+	Product.CODE2,
+	Product.CODE3,
+	Product.QTY_THRESHOLD,
+	Product.BU,
+	Product.RegistrationDate,
+	Product.RegistrationValidUntil,
+	Product.ProductPackSKU: redirected to ProductPackSKUs,
+	Product.ProductPack: redirected to ProductPack
 }where Product.ACTIVERECORD = 'Yes'
 and Product.ProductPack.ACTIVERECORD = 'Yes'
 order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.ProductPack.PRODUCTPACKNAME;
@@ -159,7 +170,7 @@ inner join MasterData.PT_TMDIST as dst on cb.COUNTRY_CODE = dst.CountryCode{
 	'Yes' as ACTIVE_RECORD
 }where dst.ForAllBrands = true and dst.ActiveRecord = 'Yes'
 union
-select from MasterData.BrazilDistributorDivision as bdd
+select from MasterData.DistributorDivision as bdd
 inner join MasterData.PT_TMDIST as dst on bdd.DistributorID = dst.DistributorID and bdd.CustomerID = dst.CustomerID
 inner join CountryBrands as cb on dst.CountryCode = cb.COUNTRY_CODE and bdd.DivisionName = cb.DIVISION
 
@@ -305,3 +316,26 @@ inner join MasterData.PT_TMPRDHIER as h
 }where i.CountryCode = 'IT' and (i.CountryCode || i.InstituteID || d.DistributorID || h.HLEVEL4_CODE || 'Yes') not in (Select CompoundKey from MasterDataViews.ItalyCustomerInstituteDistributorBrandCompoundKeyView)
 GROUP BY i.CountryCode,i.InstituteID,h.HLEVEL4_CODE, d.DistributorID
 ORDER BY i.InstituteID,h.HLEVEL4_CODE, d.DistributorID;
+
+
+entity InstituteDistributorBrandProduct {
+        key COUNTRY_CODE      : String(2) not null;
+        key INSTITUTE_ID      : Integer not null;
+            INSTITUTE_NAME    : String(500);
+        key DISTRIBUTOR_ID    : Integer not null;
+            DISTRIBUTOR_NAME  : String(500);
+        key BRAND_ID          : String(50) not null;
+            BRAND_NAME        : String(100);
+        key PRODUCT_ID        : Integer not null;
+            PRODUCT_NAME      : String(100);
+            INCO_TERMS        : String(500);
+            PAYMENT_TERMS     : String(500);
+            COMMISSION_RATE   : Double;
+        key LEGAL_ENTITY_CODE : String(3) not null;
+        key CHANNEL           : String(11) not null;
+            COUNTRY_OF_ORIGIN : String(120);
+            COGS              : Double;
+            PACKFACTOR        : Integer;
+            DIVISION          : String;
+            SKUS              : String;
+    };

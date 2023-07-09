@@ -1,0 +1,8 @@
+ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,CRITERIA
+85e42735-29da-4e50-9f85-624a242e434f,,,,,"BR","Price"
+401a1e07-507f-452c-bbcd-791832158edb,,,,,"BR","Documents"
+e15c12bd-888c-4d84-afc7-5b2e5e63ad24,,,,,"BR","Timeliness"
+51052db0-a044-4226-8134-7a08053b0bf2,,,,,"BR","Shipment"
+"a4629cbb-880c-441f-ae19-f8321450fc48",,,,,"GB","Price"
+"bb342bdf-321a-4416-bb0a-4b40b9926694",,,,,"GB","Documents"
+"7d5d2662-7c3a-492e-820b-d8ea50917293",,,,,"GB","Shipment"

@@ -12,26 +12,95 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity PT_TMCTLEBR     as projection on MasterData.PT_TMCTLEBR;
     entity CountryBrands @readonly  as projection on MasterDataViews.CountryBrands;
     entity CountryProductUnits @readonly  as projection on MasterDataViews.CountryProductUnits;
-    entity PT_TMINST                as projection on MasterData.PT_TMINST;
     entity PT_TMINSHIER             as projection on MasterData.PT_TMINSHIER;
     entity PT_TMINSBRTR @readonly   as projection on MasterData.PT_TMINSBRTR;
-    entity PT_TMDIST                as projection on MasterData.PT_TMDIST;
     entity PT_TMDISBRD              as projection on MasterData.PT_TMDISBRD;
-    entity PT_TMPRDPCK @readonly    as projection on MasterData.PT_TMPRDPCK;
+    entity PT_TMPRDPCK @(cds.redirection.target:false) as projection on MasterData.PT_TMPRDPCK;
     entity PT_TMCTPRDPCK            as projection on MasterData.PT_TMCTPRDPCK;
     entity PT_TMSKUPRDPCK @(cds.redirection.target:false) as projection on MasterData.PT_TMSKUPRDPCK;
+    entity CountryRegions           as projection on MasterData.CountryRegions;
+    entity CountryProvinces         as projection on MasterData.CountryProvinces;
+    entity InstituteDivision        as projection on MasterData.InstituteDivision;
+    entity DistributorDivision      as projection on MasterData.DistributorDivision;
+    
+    entity PT_TMINST                as select from MasterData.PT_TMINST{
+        *,
+        Region: redirected to CountryRegions,
+        Province: redirected to CountryProvinces,
+        InstituteDivision: redirected to InstituteDivision
+    };
+    entity PT_TMDIST                as select from MasterData.PT_TMDIST{
+        *,
+        DistributorDivision: redirected to DistributorDivision
+    };
 
     entity CountryCurrency @readonly as projection on MasterDataViews.CountryCurrency;
 
     entity ProductPackSKUs as projection on MasterDataViews.ProductPackSKUs;
+    entity ProductPack @(cds.redirection.target:false) as projection on MasterDataViews.ProductPack;
     entity CountryBrandProducts    as select from MasterDataViews.CountryBrandProducts {
         *,
-        ProductPackSKU: redirected to ProductPackSKUs
+        ProductPackSKU: redirected to ProductPackSKUs,
+        ProductPack: redirected to ProductPack
     };
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
 
 
     entity PT_TMREGPR      as projection on MasterData.PT_TMREGPR;
+    /*entity ConsumerPricesMasterView as select from MasterData.ConsumerPrices as cs
+    inner join CountryBrandProducts as bp on cs.ProductPackId = bp.PRODUCT_ID{
+        key cs.ID,
+        key cs.CountryCode,
+        key cs.ProductPackId,
+        cs.Currency,
+        cs.ValidFrom,
+        cs.ValidTo,
+        cs.ConsumerPriceExclPP,
+        cs.ConsumerPriceInclPP,
+        cs.ConsumerPriceExclPU,
+        cs.ConsumerPriceInclPU,
+        cs.VatPerPack,
+        cs.MandatoryDiscount,
+        cs.ExfPriceExclPP,
+        cs.ConfidentialDiscount1,
+        cs.ConfidentialDiscount2,
+        cs.TotalDiscount,
+        cs.MaxPriceNhsPP,
+        cs.MaxPriceNhsPU,
+        bp.BRAND_ID,
+        bp.BRAND_NAME,
+        bp.PRODUCT_NAME,
+        cs.ProductPack: redirected to PT_TMPRDPCK
+    };*/
+
+    entity ConsumerPricesMasterView as select from PT_TMCTPRDPCK as bp
+    left outer join MasterData.ConsumerPrices as cs on bp.PRODUCTPACKID = cs.ProductPackId {
+        cs.ID,
+        bp.COUNTRYCODE as CountryCode,
+        key bp.PRODUCTPACKID,
+        cs.Currency,
+        cs.ValidFrom,
+        cs.ValidTo,
+        cs.ConsumerPriceExclPP,
+        cs.ConsumerPriceInclPP,
+        cs.ConsumerPriceExclPU,
+        cs.ConsumerPriceInclPU,
+        cs.VatPerPack,
+        cs.MandatoryDiscount,
+        cs.ExfPriceExclPP,
+        cs.ConfidentialDiscount1,
+        cs.ConfidentialDiscount2,
+        cs.TotalDiscount,
+        cs.MaxPriceNhsPP,
+        cs.MaxPriceNhsPU,
+        //bp.BRAND_ID,
+        //bp.BRAND_NAME,
+        //bp.PRODUCT_NAME,
+        //cs.ProductPackId,
+        bp.ProductPack: redirected to PT_TMPRDPCK
+    };
+
+    entity ConsumerPrices as projection on MasterData.ConsumerPrices;
 
    
 
@@ -92,6 +161,10 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['f_tndr_cag_adm
     entity APPROVERTYPES  as projection on MasterData.ApproverTypes;
     entity PT_TMCTRY @readonly as projection on MasterData.PT_TMCTRY;
     entity CountryChannels                   as projection on MasterData.MASTER_COUNTRY_CHANNELS;
+
+    entity NextValueCountrySKUID as select from PT_TMSKUPRDPCK {
+        max(CountrySKUID) as nextCountrySkuID:Integer
+    }
 
 
 }

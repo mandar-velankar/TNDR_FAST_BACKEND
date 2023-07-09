@@ -30,6 +30,7 @@ modules:
     parameters:
       memory: 8192M
       disk-quota: 4096M
+      health-check-timeout: 120
     provides:
       - name: srv_api
         public: true

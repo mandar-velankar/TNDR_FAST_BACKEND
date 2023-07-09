@@ -10,6 +10,9 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             MEATENDERVIEW:Boolean;
            
         };
+        adminAccess:{
+            ConsumerPrices:Boolean;
+        };
         ppa:Boolean;
         contract:Boolean;
         epa:Boolean;
@@ -20,6 +23,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         createopportunity:Boolean;
         cpi:Boolean;
         brazilcontracting:Boolean;
+        standardtender:Boolean;
     };
 
     function getAccess() returns Access;
