@@ -425,7 +425,7 @@ module.exports = (srv) => {
 		
 	});
 
-	srv.on(['CREATE','UPDATE','DELETE'], 'AwardedProductFormView', async (req) => {
+	srv.on(['CREATE','UPDATE','DELETE'], ['AwardedProductFormView', 'AwardedProducts'], async (req) => {
 		await upsertAwardedProduct(req);
 		return req.data;
 	});
