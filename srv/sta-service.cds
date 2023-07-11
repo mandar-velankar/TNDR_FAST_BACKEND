@@ -216,7 +216,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }where product.Offer.OfferStatus.STATUS = 'Offer Created' and product.ActiveProduct = 1
     group by product.OfferID, product.Active, product.Offer.OfferStatus.STATUS, product.ActiveProduct;
 
-    entity AwardedProducts as select from TransactionalData.PT_TMTRRES;
+    entity AwardedProducts as projection on TransactionalData.PT_TMTRRES;
     entity AwardedProductFormView as select from TransactionalData.PT_TMTRRES as result
         inner join TransactionalData.PT_TMOFPR as product on result.OfferID = product.OfferID
                                                           and result.ProductCode = product.ProductCode
