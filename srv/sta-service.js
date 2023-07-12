@@ -417,6 +417,14 @@ module.exports = (srv) => {
 		delete req.data.TotalAmount;
 	});
 
+	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
+		delete req.data.MoleculeName,
+        delete req.data.Code1,
+        delete req.data.Code2,
+        delete req.data.Code3,
+        delete req.data.ProductGenericName,
+        delete req.data.Gov_Code
+	});
 
 	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
