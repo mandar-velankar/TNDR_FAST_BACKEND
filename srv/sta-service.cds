@@ -162,7 +162,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                product.TotalAmount;
 
     entity Country as projection on MasterData.PT_TMCTRY;
-    entity Users as projection on AdminData.PT_TMUSER;
+    entity Users as projection on AdminData.PT_TMUSER{
+        *,
+        Countries.CountryCode as countryCode
+    };
     entity UserCountries @readonly @(restrict: [
 		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
 	])as projection on AdminData.PT_TMUSERCTRY {
