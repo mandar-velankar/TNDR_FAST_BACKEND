@@ -234,6 +234,21 @@ entity WordTemplate {
     mediaType:String @Core.IsMediaType;
 }
 
+entity ExcelTemplateCountry {
+    key countryCode    : String(2);
+    key templateId     : Integer;
+        ExcelTemplates      : Association to ExcelTemplate
+                            on ExcelTemplates.templateId = templateId; //This can be found in OData
+}
+
+entity ExcelTemplate {
+    key templateId     : Integer;
+    name:String(100);
+    filename:String(250);
+    content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    mediaType:String @Core.IsMediaType;
+}
+
 entity ContractStatus: cuid {
     Status: String(200);
 }

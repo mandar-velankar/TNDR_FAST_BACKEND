@@ -78,6 +78,7 @@ module.exports = (srv) => {
 		WordAttachment, 
 		WordTemplateCountry,
 		WordTemplate,
+		ExcelTemplate,
 		SchedulerApiConfig,
 		SchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
@@ -2146,6 +2147,37 @@ module.exports = (srv) => {
 		return {
 			value: readableInstanceStream
 		};
+	});
+
+	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'ExcelAttachments', async (req, next) => {
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
+		const offerId = req.data.offerId;
+		const templateId = req.data.templateId;
+		if (!offerId) {
+			return next();
+		}
+
+		const templates = await tx.run(SELECT.from(ExcelTemplate).where({ templateId: templateId }));
+		if (templates.length === 0) {
+			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
+		}
+		const templateContent = templates[0].content;
+		let excelData = {};
+		//Get offer data
+		if (offerId) {
+			try {
+				excelData = await getOfferData(tx,offerId);
+			} catch (error) {
+				return req.reject(404, 'No offer found');
+			}
+		}
+		//generate XLSX
+		let excelStreamValue = XLSXHelper.generateXLSX(`${templates[0]?.filename}`,excelData);
+		req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
 	});
 
 	async function getOfferData(tx,offerId){

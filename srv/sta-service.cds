@@ -335,4 +335,19 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType  : String      @Core.IsMediaType;
     }
+
+    entity ExcelTemplate as projection on AdminData.ExcelTemplate;
+    entity ExcelTemplateCountry as projection on AdminData.ExcelTemplateCountry{
+        *,
+        ExcelTemplates.name,
+        ExcelTemplates.filename,
+        ExcelTemplates: Redirected to ExcelTemplate on ExcelTemplates.templateId = templateId
+    };
+
+    entity ExcelAttachments {
+        key offerId    : String(50);
+        key templateId : Integer;
+            content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType  : String      @Core.IsMediaType;
+    }
 }
