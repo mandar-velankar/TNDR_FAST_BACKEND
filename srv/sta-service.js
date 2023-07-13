@@ -65,7 +65,8 @@ module.exports = (srv) => {
 		PriceConditionClassification, 
 		ProductTypeProfitability,
 		CountrySpecificTenderInfo,
-		PT_TMTNOFST
+		PT_TMTNOFST,
+		TransCompetitorResult
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -481,6 +482,52 @@ module.exports = (srv) => {
 			})
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
+		}
+	}
+
+
+	srv.on(['CREATE','UPDATE','DELETE'], 'CompetitorResultsTableView', async (req) => {
+		await upsertCompetitorResults(req);
+		return req.data;
+	});
+
+	const upsertCompetitorResults = async function(req){
+
+		const competitorResults = await SELECT.one.from(TransCompetitorResult).where({
+			OFFERID: req.data.OFFERID,
+			PRODUCTCODE: req.data.PRODUCTCODE,
+			LOTID: req.data.LOTID,
+			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY,
+			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT,
+		});
+		const mappedCompetitorResults = {
+			OFFERID: req.data.OFFERID,
+			PRODUCTCODE: req.data.PRODUCTCODE,
+			OUTCOME: req.data.OUTCOME,
+			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY || '',
+			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT || '',
+			AWARDEDPRICE: req.data.AWARDEDPRICE,
+			CURRENCY: req.data.CURRENCY,
+			AWARDEDQTY: req.data.AWARDEDQTY,
+			UOM: req.data.UOM,
+			REASON: req.data.REASON,
+			COMMENT: req.data.COMMENT,
+			LOTID: req.data.LOTID,
+			TOTALAWARDEDVALUE: req.data.TOTALAWARDEDVALUE
+		}
+
+		if(competitorResults){
+			await UPDATE(TransCompetitorResult)
+				.with (mappedCompetitorResults)
+				.where({
+					OFFERID: competitorResults.OFFERID,
+					PRODUCTCODE: competitorResults.PRODUCTCODE,
+					LOTID: competitorResults.LOTID,
+					AWARDEDCOMPANY: competitorResults.AWARDEDCOMPANY,
+					AWARDEDPRODUCT: competitorResults.AWARDEDPRODUCT,
+				})
+		}else{
+			await INSERT.into(TransCompetitorResult).entries(mappedCompetitorResults);
 		}
 	}
 
