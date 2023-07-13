@@ -143,7 +143,16 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         (RequestedVolume * Price.NetPrice) as TotalAmount:Double
     }; // Form used in the Offer tab - offer products
 
-    entity OfferProductsDetailView as projection on TransactionalData.PT_TMOFPR;
+    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
+        *,
+        SKU.MoleculeName as MoleculeName,
+        SKUCountry.CODE1 as Code1,
+        SKUCountry.CODE2 as Code2,
+        SKUCountry.CODE3 as Code3,
+        SKU.ProductGenericName as ProductGenericName,
+        SKUCountry.GOV_CODE as Gov_Code,
+        BudgetedProfitability.PROFITABILITY as VwBudgetedProfitability
+    };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
         inner join OfferProductsTableView as product on product.OfferID = offer.OfferID {
@@ -158,6 +167,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
 	])as projection on AdminData.PT_TMUSERCTRY {
         *,
+        Country: redirected to Country,
+        User: redirected to Users,
+    };
+
+    entity UsersPerCountry @readonly @(cds.redirection.target:false) as projection on AdminData.PT_TMUSERCTRY {
+        *,
+        User.UserName as UserName,
         Country: redirected to Country,
         User: redirected to Users,
     };
@@ -240,7 +256,48 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.Comment,
         product.Active,
         key result.LotID,
-        product.RequestedVolume as RequestedVolume: Integer
+        product.RequestedVolume as RequestedVolume: Integer,
+        result.Custom.String_1 as Custom_String_1,
+        result.Custom.String_2 as Custom_String_2,
+        result.Custom.String_3 as Custom_String_3,
+        result.Custom.String_4 as Custom_String_4,
+        result.Custom.String_5 as Custom_String_5,
+        result.Custom.String_6 as Custom_String_6,
+        result.Custom.String_7 as Custom_String_7,
+        result.Custom.String_8 as Custom_String_8,
+        result.Custom.String_9 as Custom_String_9,
+        result.Custom.String_10 as Custom_String_10,
+        result.Custom.Integer_1 as Custom_Integer_1,
+        result.Custom.Integer_2 as Custom_Integer_2,
+        result.Custom.Integer_3 as Custom_Integer_3,
+        result.Custom.Integer_4 as Custom_Integer_4,
+        result.Custom.Integer_5 as Custom_Integer_5,
+        result.Custom.Integer_6 as Custom_Integer_6,
+        result.Custom.Integer_7 as Custom_Integer_7,
+        result.Custom.Integer_8 as Custom_Integer_8,
+        result.Custom.Integer_9 as Custom_Integer_9,
+        result.Custom.Integer_10 as Custom_Integer_10,
+        result.Custom.Double_1 as Custom_Double_1,
+        result.Custom.Double_2 as Custom_Double_2,
+        result.Custom.Double_3 as Custom_Double_3,
+        result.Custom.Double_4 as Custom_Double_4,
+        result.Custom.Double_5 as Custom_Double_5,
+        result.Custom.Double_6 as Custom_Double_6,
+        result.Custom.Double_7 as Custom_Double_7,
+        result.Custom.Double_8 as Custom_Double_8,
+        result.Custom.Double_9 as Custom_Double_9,
+        result.Custom.Double_10 as Custom_Double_10,
+        result.Custom.Date_1 as Custom_Date_1,
+        result.Custom.Date_2 as Custom_Date_2,
+        result.Custom.Date_3 as Custom_Date_3,
+        result.Custom.Date_4 as Custom_Date_4,
+        result.Custom.Date_5 as Custom_Date_5,
+        result.Custom.Date_6 as Custom_Date_6,
+        result.Custom.Date_7 as Custom_Date_7,
+        result.Custom.Date_8 as Custom_Date_8,
+        result.Custom.Date_9 as Custom_Date_9,
+        result.Custom.Date_10 as Custom_Date_10,
+
     };
     entity MasterCountryOutComes as select from MasterData.MASTER_COUNTRY_OUTCOMES;
     entity MasterOutComeReasons as select from MasterData.PT_TMOUTRS;

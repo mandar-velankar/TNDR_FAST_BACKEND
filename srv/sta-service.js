@@ -65,7 +65,8 @@ module.exports = (srv) => {
 		PriceConditionClassification, 
 		ProductTypeProfitability,
 		CountrySpecificTenderInfo,
-		PT_TMTNOFST
+		PT_TMTNOFST,
+		TransCompetitorResult
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -400,10 +401,10 @@ module.exports = (srv) => {
 		// validate form
 		!req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
 		!req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
-		!req.data.WholesaleOffer && req.error({ code: 404, message: "WholesaleOffer is required.", target: "WholesaleOffer" });
 		!req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
 		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
-
+        !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
+		
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
 		delete req.data.InstituteID;
@@ -417,6 +418,15 @@ module.exports = (srv) => {
 		delete req.data.TotalAmount;
 	});
 
+	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
+		delete req.data.MoleculeName;
+        delete req.data.Code1;
+        delete req.data.Code2;
+        delete req.data.Code3;
+        delete req.data.ProductGenericName;
+        delete req.data.Gov_Code;
+		delete req.data.VwBudgetedProfitability;
+	});
 
 	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
@@ -481,6 +491,52 @@ module.exports = (srv) => {
 			})
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
+		}
+	}
+
+
+	srv.on(['CREATE','UPDATE','DELETE'], 'CompetitorResultsTableView', async (req) => {
+		await upsertCompetitorResults(req);
+		return req.data;
+	});
+
+	const upsertCompetitorResults = async function(req){
+
+		const competitorResults = await SELECT.one.from(TransCompetitorResult).where({
+			OFFERID: req.data.OFFERID,
+			PRODUCTCODE: req.data.PRODUCTCODE,
+			LOTID: req.data.LOTID,
+			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY,
+			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT,
+		});
+		const mappedCompetitorResults = {
+			OFFERID: req.data.OFFERID,
+			PRODUCTCODE: req.data.PRODUCTCODE,
+			OUTCOME: req.data.OUTCOME,
+			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY || '',
+			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT || '',
+			AWARDEDPRICE: req.data.AWARDEDPRICE,
+			CURRENCY: req.data.CURRENCY,
+			AWARDEDQTY: req.data.AWARDEDQTY,
+			UOM: req.data.UOM,
+			REASON: req.data.REASON,
+			COMMENT: req.data.COMMENT,
+			LOTID: req.data.LOTID,
+			TOTALAWARDEDVALUE: req.data.TOTALAWARDEDVALUE
+		}
+
+		if(competitorResults){
+			await UPDATE(TransCompetitorResult)
+				.with (mappedCompetitorResults)
+				.where({
+					OFFERID: competitorResults.OFFERID,
+					PRODUCTCODE: competitorResults.PRODUCTCODE,
+					LOTID: competitorResults.LOTID,
+					AWARDEDCOMPANY: competitorResults.AWARDEDCOMPANY,
+					AWARDEDPRODUCT: competitorResults.AWARDEDPRODUCT,
+				})
+		}else{
+			await INSERT.into(TransCompetitorResult).entries(mappedCompetitorResults);
 		}
 	}
 
