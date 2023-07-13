@@ -157,9 +157,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
         inner join OfferProductsTableView as product on product.OfferID = offer.OfferID {
         key offer.OfferID,
-        sum(product.TotalAmount) as OfferTotal:Double
+        sum(product.TotalAmount) as OfferTotal:Double,
+        offer.Currency as Currency:String(3)
     } group by offer.OfferID,
-               product.TotalAmount;
+               product.TotalAmount,
+               offer.Currency;
 
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
