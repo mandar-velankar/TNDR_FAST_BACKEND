@@ -401,10 +401,10 @@ module.exports = (srv) => {
 		// validate form
 		!req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
 		!req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
-		!req.data.WholesaleOffer && req.error({ code: 404, message: "WholesaleOffer is required.", target: "WholesaleOffer" });
 		!req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
 		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
-
+        !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
+		
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
 		delete req.data.InstituteID;
@@ -418,6 +418,15 @@ module.exports = (srv) => {
 		delete req.data.TotalAmount;
 	});
 
+	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
+		delete req.data.MoleculeName;
+        delete req.data.Code1;
+        delete req.data.Code2;
+        delete req.data.Code3;
+        delete req.data.ProductGenericName;
+        delete req.data.Gov_Code;
+		delete req.data.VwBudgetedProfitability;
+	});
 
 	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
