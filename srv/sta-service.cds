@@ -312,12 +312,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryBrands @readonly as projection on MasterDataViews.CountryBrands;
     entity CountryBrandProducts @readonly as projection on MasterDataViews.CountryBrandProducts;
 
-    entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult as competitor {
-        *,
-        key competitor.OFFERID,
-        key competitor.PRODUCTCODE,
-        key competitor.LOTID
-    };
+    entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult;
 
     entity MasterCompetitors as select from MasterData.MasterCompetitors;
 
@@ -330,6 +325,21 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity WordAttachments {
+        key offerId    : String(50);
+        key templateId : Integer;
+            content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType  : String      @Core.IsMediaType;
+    }
+
+    entity ExcelTemplate as projection on AdminData.ExcelTemplate;
+    entity ExcelTemplateCountry as projection on AdminData.ExcelTemplateCountry{
+        *,
+        ExcelTemplates.name,
+        ExcelTemplates.filename,
+        ExcelTemplates: Redirected to ExcelTemplate on ExcelTemplates.templateId = templateId
+    };
+
+    entity ExcelAttachments {
         key offerId    : String(50);
         key templateId : Integer;
             content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
