@@ -312,12 +312,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryBrands @readonly as projection on MasterDataViews.CountryBrands;
     entity CountryBrandProducts @readonly as projection on MasterDataViews.CountryBrandProducts;
 
-    entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult as competitor {
-        *,
-        key competitor.OFFERID,
-        key competitor.PRODUCTCODE,
-        key competitor.LOTID
-    };
+    entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult;
 
     entity MasterCompetitors as select from MasterData.MasterCompetitors;
 

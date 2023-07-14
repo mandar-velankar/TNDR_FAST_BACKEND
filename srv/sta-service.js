@@ -536,7 +536,7 @@ module.exports = (srv) => {
 	}
 
 
-	srv.on(['CREATE','UPDATE','DELETE'], 'CompetitorResultsTableView', async (req) => {
+	srv.on(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
 		await upsertCompetitorResults(req);
 		return req.data;
 	});
