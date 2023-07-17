@@ -404,6 +404,10 @@ entity PT_TMOFPR {
                                         on LotProduct.OfferID = OfferID
                                         and LotProduct.ProductCode = ProductCode
                                         and LotProduct.LotID = LotID;
+        BudgetedProfitability    : Association to MasterDataLatestValues.VWBUDGETEDPROFITABILITY
+                                        on BudgetedProfitability.COUNTRYCODE = CountryCode
+                                        and BudgetedProfitability.PRODUCTPACKID = ProductCode
+                                        //and BudgetedProfitability.HLEVEL4_CODE = SKU.Product.HLEVEL4_CODE
 }
 
 //brazil

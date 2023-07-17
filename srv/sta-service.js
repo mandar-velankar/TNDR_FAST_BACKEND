@@ -65,7 +65,8 @@ module.exports = (srv) => {
 		PriceConditionClassification, 
 		ProductTypeProfitability,
 		CountrySpecificTenderInfo,
-		PT_TMTNOFST
+		PT_TMTNOFST,
+		TransCompetitorResult
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -77,6 +78,7 @@ module.exports = (srv) => {
 		WordAttachment, 
 		WordTemplateCountry,
 		WordTemplate,
+		ExcelTemplate,
 		SchedulerApiConfig,
 		SchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
@@ -400,10 +402,10 @@ module.exports = (srv) => {
 		// validate form
 		!req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
 		!req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
-		!req.data.WholesaleOffer && req.error({ code: 404, message: "WholesaleOffer is required.", target: "WholesaleOffer" });
 		!req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
 		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
-
+        !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
+		
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
 		delete req.data.InstituteID;
@@ -417,6 +419,15 @@ module.exports = (srv) => {
 		delete req.data.TotalAmount;
 	});
 
+	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
+		delete req.data.MoleculeName;
+        delete req.data.Code1;
+        delete req.data.Code2;
+        delete req.data.Code3;
+        delete req.data.ProductGenericName;
+        delete req.data.Gov_Code;
+		delete req.data.VwBudgetedProfitability;
+	});
 
 	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
 
@@ -461,7 +472,47 @@ module.exports = (srv) => {
 			Reason: req.data.Reason,
 			Comment: req.data.Comment,
 			Active: req.data.Active,
-			LotID: req.data.LotID
+			LotID: req.data.LotID,
+			Custom_String_1: req.data.Custom_String_1,
+			Custom_String_2: req.data.Custom_String_2,
+			Custom_String_3: req.data.Custom_String_3,
+			Custom_String_4: req.data.Custom_String_4,
+			Custom_String_5: req.data.Custom_String_5,
+			Custom_String_6: req.data.Custom_String_6,
+			Custom_String_7: req.data.Custom_String_7,
+			Custom_String_8: req.data.Custom_String_8,
+			Custom_String_9: req.data.Custom_String_9,
+			Custom_String_10: req.data.Custom_String_10,
+			Custom_Integer_1: req.data.Custom_Integer_1,
+			Custom_Integer_2: req.data.Custom_Integer_2,
+			Custom_Integer_3: req.data.Custom_Integer_3,
+			Custom_Integer_4: req.data.Custom_Integer_4,
+			Custom_Integer_5: req.data.Custom_Integer_5,
+			Custom_Integer_6: req.data.Custom_Integer_6,
+			Custom_Integer_7: req.data.Custom_Integer_7,
+			Custom_Integer_8: req.data.Custom_Integer_8,
+			Custom_Integer_9: req.data.Custom_Integer_9,
+			Custom_Integer_10: req.data.Custom_Integer_10,
+			Custom_Double_1: req.data.Custom_Double_1,
+			Custom_Double_2: req.data.Custom_Double_2,
+			Custom_Double_3: req.data.Custom_Double_3,
+			Custom_Double_4: req.data.Custom_Double_4,
+			Custom_Double_5: req.data.Custom_Double_5,
+			Custom_Double_6: req.data.Custom_Double_6,
+			Custom_Double_7: req.data.Custom_Double_7,
+			Custom_Double_8: req.data.Custom_Double_8,
+			Custom_Double_9: req.data.Custom_Double_9,
+			Custom_Double_10: req.data.Custom_Double_10,
+			Custom_Date_1: req.data.Custom_Date_1,
+			Custom_Date_2: req.data.Custom_Date_2,
+			Custom_Date_3: req.data.Custom_Date_3,
+			Custom_Date_4: req.data.Custom_Date_4,
+			Custom_Date_5: req.data.Custom_Date_5,
+			Custom_Date_6: req.data.Custom_Date_6,
+			Custom_Date_7: req.data.Custom_Date_7,
+			Custom_Date_8: req.data.Custom_Date_8,
+			Custom_Date_9: req.data.Custom_Date_9,
+			Custom_Date_10: req.data.Custom_Date_10,
 		}
 
 		if(awardedProduct){
@@ -481,6 +532,52 @@ module.exports = (srv) => {
 			})
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
+		}
+	}
+
+
+	srv.on(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
+		await upsertCompetitorResults(req);
+		return req.data;
+	});
+
+	const upsertCompetitorResults = async function(req){
+
+		const competitorResults = await SELECT.one.from(TransCompetitorResult).where({
+			OFFERID: req.data.OFFERID,
+			PRODUCTCODE: req.data.PRODUCTCODE,
+			LOTID: req.data.LOTID,
+			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY,
+			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT,
+		});
+		const mappedCompetitorResults = {
+			OFFERID: req.data.OFFERID,
+			PRODUCTCODE: req.data.PRODUCTCODE,
+			OUTCOME: req.data.OUTCOME,
+			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY || '',
+			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT || '',
+			AWARDEDPRICE: req.data.AWARDEDPRICE,
+			CURRENCY: req.data.CURRENCY,
+			AWARDEDQTY: req.data.AWARDEDQTY,
+			UOM: req.data.UOM,
+			REASON: req.data.REASON,
+			COMMENT: req.data.COMMENT,
+			LOTID: req.data.LOTID,
+			TOTALAWARDEDVALUE: req.data.TOTALAWARDEDVALUE
+		}
+
+		if(competitorResults){
+			await UPDATE(TransCompetitorResult)
+				.with (mappedCompetitorResults)
+				.where({
+					OFFERID: competitorResults.OFFERID,
+					PRODUCTCODE: competitorResults.PRODUCTCODE,
+					LOTID: competitorResults.LOTID,
+					AWARDEDCOMPANY: competitorResults.AWARDEDCOMPANY,
+					AWARDEDPRODUCT: competitorResults.AWARDEDPRODUCT,
+				})
+		}else{
+			await INSERT.into(TransCompetitorResult).entries(mappedCompetitorResults);
 		}
 	}
 
@@ -2090,6 +2187,37 @@ module.exports = (srv) => {
 		return {
 			value: readableInstanceStream
 		};
+	});
+
+	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
+	srv.on('READ', 'ExcelAttachments', async (req, next) => {
+		// const tx = cds.transaction(req);
+		const tx = cds.tx(req);
+		const offerId = req.data.offerId;
+		const templateId = req.data.templateId;
+		if (!offerId) {
+			return next();
+		}
+
+		const templates = await tx.run(SELECT.from(ExcelTemplate).where({ templateId: templateId }));
+		if (templates.length === 0) {
+			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
+		}
+		const templateContent = templates[0].content;
+		let excelData = {};
+		//Get offer data
+		if (offerId) {
+			try {
+				excelData = await getOfferData(tx,offerId);
+			} catch (error) {
+				return req.reject(404, 'No offer found');
+			}
+		}
+		//generate XLSX
+		let excelStreamValue = XLSXHelper.generateXLSX(`${templates[0]?.filename}`,excelData);
+		req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
 	});
 
 	async function getOfferData(tx,offerId){

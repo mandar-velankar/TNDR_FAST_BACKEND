@@ -1,0 +1,54 @@
+#Create template entry (needed before you can upload)
+POST http://localhost:4004/v2/sta_tender/ExcelTemplate
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "templateId":2,
+    "name":"Excel Template Test",
+    "filename" : "template.xlsx",
+    "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+}
+
+### upload Excel template
+PUT http://localhost:4004/v2/sta_tender/ExcelTemplate(templateId=2)/content
+Authorization: Basic YXJ0aW9t
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+< ./template.xlsx
+
+### create mapping between countrycode and template (for reusability)
+POST http://localhost:4004/v2/sta_tender/ExcelTemplateCountry
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "countryCode":"GB",
+    "templateId":2
+}
+### get list of templates
+GET http://localhost:4004/v2/tender/ExcelTemplate
+Authorization: Basic YXJ0aW9t
+
+### get list of mappings between country and templates
+GET http://localhost:4004/v2/tender/ExcelTemplateCountry
+Authorization: Basic YXJ0aW9t
+
+### get templates by countrycode
+GET http://localhost:4004/v2/tender/ExcelTemplateCountry?$expand=ExcelTemplates&$filter=countryCode%20eq%20%27IT%27
+Authorization: Basic YXJ0aW9t
+
+### download template - paste it in the browser
+GET http://localhost:4004/v2/tender/ExcelTemplate(templateId=1)/content
+Authorization: Basic YXJ0aW9t
+
+### download filled template with offer data - paste it in the browser
+GET http://localhost:4004/v2/tender/ExcelAttachments(templateId=1,offerId='AE-16-100-1049-BPH-11')/content
+Authorization: Basic YXJ0aW9t
+
+### delete mapping between countrycode and template
+DELETE http://localhost:4004/v2/tender/ExcelTemplateCountry(templateId=1,countryCode='IT')
+Authorization: Basic YXJ0aW9t
+### delete template
+DELETE http://localhost:4004/v2/tender/ExcelTemplate(templateId=3)
+Authorization: Basic YXJ0aW9t
