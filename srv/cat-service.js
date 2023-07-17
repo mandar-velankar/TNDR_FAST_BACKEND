@@ -2587,7 +2587,9 @@ module.exports = (srv) => {
 			LETTERHEAD: (!offerValidation.LETTERHEAD) ? "" : offerValidation.LETTERHEAD.replace(/<br>+/g, "</br>"),
 			CANCELLED: (approvalStatus === "Processing") ? "No" : "Yes",
 			BUDGET_RATE: offerValidation.BUDGET_RATE,
-			SPOT_RATE: offerValidation.SPOT_RATE
+			SPOT_RATE: offerValidation.SPOT_RATE,
+			EFFECTIVEDATE :offerValidation.EffectiveDate,
+			EXPIRYDATE : offerValidation.ExpiryDate
 		}
 	}
 //EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.
