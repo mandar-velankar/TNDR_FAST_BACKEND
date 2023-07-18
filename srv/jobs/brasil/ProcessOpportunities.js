@@ -47,6 +47,7 @@ module.exports = class processOpportunities extends BaseJob {
                 return prev;
             }, []);
             const brazilMasterPrices = await this.getBrazilMasterPrices(tx, indirectIbizOpportunityDistributorIDs);
+            const brazilCap = await this.getBrazilCAP(tx);
 
             // Process data
             if(directIbizOpportunities.length > 0){
@@ -55,7 +56,7 @@ module.exports = class processOpportunities extends BaseJob {
             }
 
             if(indirectIbizOpportunities.length > 0){
-                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices);
+                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices, brazilCap);
             }
 
             // Commit All
@@ -126,9 +127,20 @@ module.exports = class processOpportunities extends BaseJob {
         const { BrazilMasterPrices } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
         try {
-            return await tx.run(SELECT.from(BrazilMasterPrices).where({'CustomerID': { in: customerIDs }, Type: 'ZWP0'}));
+            return await tx.run(SELECT.from(BrazilMasterPrices).where({'CustomerID': { in: customerIDs }, Type: { in: ['ZWP0', 'IBRX']}}));
         }catch (error) {
             throw new Error(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILMASTERPRICE failed`, { cause: error });
+        }
+    }
+
+    async getBrazilCAP(tx) {
+        console.log(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILCAP ...`);
+        const { BrazilCap } = this.db.entities("com.bayer.SXTENDER.MasterData");
+
+        try {
+            return await tx.run(SELECT.one.from(BrazilCap));
+        }catch (error) {
+            throw new Error(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILCAP failed`, { cause: error });
         }
     }
 
@@ -675,16 +687,16 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices) {
+ async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices, brazilCap) {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
         // 0 Mapping
-        const mappedTenders = this.mapIbizOpportunitiestoFASTTender(indirectIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
-        const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST);
-        const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
-        const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST);
-        const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices);
+        // const mappedTenders = this.mapIbizOpportunitiestoFASTTender(indirectIbizOpportunities, existingInstitutesInFAST, existingTenderTypesFAST);
+        // const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST);
+        // const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
+        // const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST);
+        const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices, brazilCap);
         const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(indirectIbizOpportunityDocs);
 
          // 1. Create/update entries in PT_TMTEND
@@ -986,13 +998,22 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} priceCondition
      */
- mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices) {
+ mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices, brazilCap) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PriceCondition ...`);
     indirectIbizOpportunityItems = indirectIbizOpportunityItems.reduce((prev, curr, idx, indirectIbizOpportunityItems) => {
         const sku = existingSKUFAST.find(sku => sku.SKUCode == curr.COD_REFERENCIA);
         const productPackID = sku && sku.ProductPackID || null;
-        const masterPrice = brazilMasterPrices.find(p => p.ProductID === productPackID);
+        const masterPriceZWP0 = brazilMasterPrices.find(p => p.ProductID === productPackID && p.Type === "ZWP0");
+        const masterPriceIBRX = brazilMasterPrices.find(p => p.ProductID === productPackID && p.Type === "IBRX");
+
+        const taxExemption = (curr.NU_UF_ICMS === "desonerado") ? 'Yes' : 'No';
+        const cap = (!curr.NU_CAP || curr.NU_CAP === 0) ? 'No' : 'Yes';
+
+        const priceAfterTaxExemption = taxExemption === "Yes" ? (masterPriceZWP0.Value * (1 - masterPriceIBRX.Value)) : masterPriceZWP0.Value;
+        const priceAfterCap = taxExemption === "Yes" && cap === "Yes" ? priceAfterTaxExemption * (1 - brazilCap.CAP) : priceAfterTaxExemption;
+        
+
         prev.push(
             {
                 parent_ID                           : curr.parent_ID,
@@ -1021,12 +1042,12 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 AnnualValue                         : null,
                 ReferencePriceAgreement             : null, 
                 LotID                               : curr.NU_LOTE,
-                PriceList                           : masterPrice && masterPrice.Value,
+                PriceList                           : masterPriceZWP0 && masterPriceZWP0.Value,
                 ICMSTax                             : curr.NU_PORCENTAGEM_ICMS,
-                TaxExemption                        : (curr.NU_UF_ICMS === "desonerado") ? 'Yes' : 'No',
-                PriceAfterTaxExemtion               : (curr.NU_UF_ICMS === "desonerado") ? (curr.VLR_BASE_CALCULO_UNITARIO * (1 - curr.NU_PORCENTAGEM_ICMS)) : null,
-                CAP                                 : (!curr.NU_CAP || curr.NU_CAP === 0) ? 'No' : 'Yes',
-                PriceAfterCap                       : (!curr.NU_CAP || curr.NU_CAP === 0) ? (1 * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO) : ((1 - curr.NU_PORCENTAGEM_CAP) * (1 - curr.NU_PORCENTAGEM_ICMS) * curr.VLR_BASE_CALCULO_UNITARIO),
+                TaxExemption                        : taxExemption,
+                PriceAfterTaxExemtion               : priceAfterTaxExemption,
+                CAP                                 : cap,
+                PriceAfterCap                       : priceAfterCap,
                 CommercialProposal                  : curr.VLR_UNITARIO,
                 TaxEqualization                     : null, 
                 Invoive                             : null, 
