@@ -447,12 +447,16 @@ module.exports = (srv) => {
 		delete req.data.VwBudgetedProfitability;
 	});
 
-	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
+	srv.before(
+		['CREATE','UPDATE'], 
+		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		async (req) => {
 
-		// validate form
-		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+			// validate form
+			req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 		
-	});
+		}
+	);
 
 	srv.on(['CREATE','UPDATE','DELETE'], ['AwardedProductFormView', 'AwardedProducts'], async (req) => {
 		await upsertAwardedProduct(req);
@@ -696,11 +700,15 @@ module.exports = (srv) => {
 			})
 	}
 
-	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
-		upsertPriceCondition(req);
-		upsertProductPricing(req);
-		return req.data;
-	});
+	srv.on(
+		['CREATE','UPDATE'], 
+		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		async (req) => {
+			upsertPriceCondition(req);
+			upsertProductPricing(req);
+			return req.data;
+		}
+	);
 
 	/**
 	 * Upserts a price condition based on the provided request data.
@@ -809,17 +817,23 @@ module.exports = (srv) => {
 		}
 	}
 
-	srv.after('READ', ['PriceConditionPriceView','PriceConditionDiscountView'], (items, req) => {
-		const fnCalculateFields = async item => {
-			item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-			item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
-		};
-		if(Array.isArray(items)){
-			return items.map(fnCalculateFields)
-		}else{
-			return fnCalculateFields(items);
+	srv.after(
+		'READ', 
+		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		(items, req) => {
+			if(!items) return [];
+			const fnCalculateFields = async item => {
+				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+			};
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
 		}
-	});
+	);
+	
 
 	srv.before(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
 
