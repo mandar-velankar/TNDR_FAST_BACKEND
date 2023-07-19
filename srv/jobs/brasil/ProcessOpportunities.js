@@ -39,14 +39,14 @@ module.exports = class processOpportunities extends BaseJob {
             const indirectIbizOpportunityItems = await this.getOpportunitiesItems(tx, indirectIbizOpportunityParentIDs);
             const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); 
 
-            //find the CustomerIDs based on the cnpj from indirectIbizOpportunities
-            const indirectIbizOpportunityCustomerID = existingDistributorsFAST.reduce((prev, curr) => {
+            //find the DistributorIDs based on the cnpj from indirectIbizOpportunities
+            const indirectIbizOpportunityDistributorIDs = existingDistributorsFAST.reduce((prev, curr) => {
                 if(indirectIbizOpportunityCNPJs.find(cnpj => cnpj === curr.CNPJ)){
-                    prev.push(curr.CustomerID); 
+                    prev.push(curr.DistributorID);
                 }
                 return prev;
             }, []);
-            const brazilMasterPrices = await this.getBrazilMasterPrices(tx, indirectIbizOpportunityCustomerID);
+            const brazilMasterPrices = await this.getBrazilMasterPrices(tx, indirectIbizOpportunityDistributorIDs);
             const brazilCap = await this.getBrazilCAP(tx);
 
             // Process data
@@ -1010,7 +1010,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
         const taxExemption = (curr.NU_UF_ICMS === "desonerado") ? 'Yes' : 'No';
         const cap = (!curr.NU_CAP || curr.NU_CAP === 0) ? 'No' : 'Yes';
 
-        const priceAfterTaxExemption = taxExemption === "Yes" ? (masterPriceZWP0?.Value * (1 - masterPriceIBRX?.Value)) : masterPriceZWP0?.Value;
+        const priceAfterTaxExemption = taxExemption === "Yes" ? (masterPriceZWP0.Value * (1 - masterPriceIBRX.Value)) : masterPriceZWP0.Value;
         const priceAfterCap = taxExemption === "Yes" && cap === "Yes" ? priceAfterTaxExemption * (1 - brazilCap.CAP) : priceAfterTaxExemption;
         
 
@@ -1045,9 +1045,9 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 PriceList                           : masterPriceZWP0 && masterPriceZWP0.Value,
                 ICMSTax                             : curr.NU_PORCENTAGEM_ICMS,
                 TaxExemption                        : taxExemption,
-                PriceAfterTaxExemtion               : priceAfterTaxExemption || null,
+                PriceAfterTaxExemtion               : priceAfterTaxExemption,
                 CAP                                 : cap,
-                PriceAfterCap                       : priceAfterCap || null,
+                PriceAfterCap                       : priceAfterCap,
                 CommercialProposal                  : curr.VLR_UNITARIO,
                 TaxEqualization                     : null, 
                 Invoive                             : null, 
