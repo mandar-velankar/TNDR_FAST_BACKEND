@@ -1011,8 +1011,15 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
         const cap = (!curr.NU_CAP || curr.NU_CAP === 0) ? 'No' : 'Yes';
 
         const priceAfterTaxExemption = taxExemption === "Yes" ? (masterPriceZWP0?.Value * (1 - masterPriceIBRX?.Value)) : masterPriceZWP0?.Value;
-        const priceAfterCap = taxExemption === "Yes" && cap === "Yes" ? priceAfterTaxExemption * (1 - brazilCap.CAP) : priceAfterTaxExemption;
+        let priceAfterCap;
         
+        if (taxExemption === "Yes" && cap === "Yes") {
+            priceAfterCap = priceAfterTaxExemption * (1 - brazilCap.CAP);
+        }else if (taxExemption === "No" && cap === "Yes") {
+            priceAfterCap = masterPriceZWP0?.Value * (1 - brazilCap.CAP);
+        }else {
+            priceAfterCap = priceAfterTaxExemption;
+        }
 
         prev.push(
             {
@@ -1043,7 +1050,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 ReferencePriceAgreement             : null, 
                 LotID                               : curr.NU_LOTE,
                 PriceList                           : masterPriceZWP0 && masterPriceZWP0.Value,
-                ICMSTax                             : curr.NU_PORCENTAGEM_ICMS,
+                ICMSTax                             : masterPriceIBRX?.Value,
                 TaxExemption                        : taxExemption,
                 PriceAfterTaxExemtion               : priceAfterTaxExemption || null,
                 CAP                                 : cap,
