@@ -140,7 +140,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         UnitPerPack as UoM,
         Price.NetPrice as NetPrice,
         RequestedVolume,
-        (RequestedVolume * Price.NetPrice) as TotalAmount:Double
+        (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
+        Offer.Currency as Currency
     }; // Form used in the Offer tab - offer products
 
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{

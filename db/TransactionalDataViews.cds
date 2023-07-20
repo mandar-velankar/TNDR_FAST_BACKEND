@@ -1347,7 +1347,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
     end as Deductions:Double,
     priceCondition.Price2 as NetPrice, 
     priceCondition.NetOfferPrice,
-    priceCondition.Tax
+    priceCondition.Tax,
+    offer.Currency
 }where tender.Active = 1;
 
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
