@@ -405,6 +405,7 @@ module.exports = (srv) => {
 		!req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
 		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
         !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
+        !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
 		
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
@@ -420,6 +421,23 @@ module.exports = (srv) => {
 	});
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
+
+		// validate form
+		!req.data.RequestedVolume &&  req.error({ code: 404, message: "RequestedVolume is required.", target: "RequestedVolume" });
+		!req.data.UnitPerPack &&  req.error({ code: 404, message: "UoM is required.", target: "UnitPerPack" });
+		!req.data.ActiveProduct &&  req.error({ code: 404, message: "Decline is required.", target: "ActiveProduct" });
+		!req.data.MoleculeName &&  req.error({ code: 404, message: "Molecule Name is required.", target: "MoleculeName" });
+		!req.data.Code1 &&  req.error({ code: 404, message: "AAH product code is required.", target: "Code1" });
+		!req.data.Code2 &&  req.error({ code: 404, message: "License number is required.", target: "Code2" });
+		!req.data.ProductGenericName &&  req.error({ code: 404, message: "Generic Product Description is required.", target: "ProductGenericName" });
+		!req.data.Custom_String_1 &&  req.error({ code: 404, message: "Pharma QC is required.", target: "Custom_String_1" });
+		!req.data.Channel && req.error({ code: 404, message: "Distribution is required.", target: "Channel" });
+		!req.data.Gov_Code && req.error({ code: 404, message: "EAN/GTIN is required.", target: "Gov_Code" });
+        !req.data.Code3 && req.error({ code: 404, message: "PIP code is required.", target: "Code3" });
+		!req.data.Custom_Integer_1 && req.error({ code: 404, message: "Pack size is required.", target: "Custom_Integer_1" });
+		!req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
+		
+
 		delete req.data.MoleculeName;
         delete req.data.Code1;
         delete req.data.Code2;
@@ -429,12 +447,16 @@ module.exports = (srv) => {
 		delete req.data.VwBudgetedProfitability;
 	});
 
-	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
+	srv.before(
+		['CREATE','UPDATE'], 
+		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		async (req) => {
 
-		// validate form
-		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+			// validate form
+			req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 		
-	});
+		}
+	);
 
 	srv.on(['CREATE','UPDATE','DELETE'], ['AwardedProductFormView', 'AwardedProducts'], async (req) => {
 		await upsertAwardedProduct(req);
@@ -678,11 +700,15 @@ module.exports = (srv) => {
 			})
 	}
 
-	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
-		upsertPriceCondition(req);
-		upsertProductPricing(req);
-		return req.data;
-	});
+	srv.on(
+		['CREATE','UPDATE'], 
+		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		async (req) => {
+			upsertPriceCondition(req);
+			upsertProductPricing(req);
+			return req.data;
+		}
+	);
 
 	/**
 	 * Upserts a price condition based on the provided request data.
@@ -791,17 +817,23 @@ module.exports = (srv) => {
 		}
 	}
 
-	srv.after('READ', ['PriceConditionPriceView','PriceConditionDiscountView'], (items, req) => {
-		const fnCalculateFields = async item => {
-			item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-			item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
-		};
-		if(Array.isArray(items)){
-			return items.map(fnCalculateFields)
-		}else{
-			return fnCalculateFields(items);
+	srv.after(
+		'READ', 
+		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		(items, req) => {
+			if(!items) return [];
+			const fnCalculateFields = async item => {
+				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+			};
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
 		}
-	});
+	);
+	
 
 	srv.before(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
 
