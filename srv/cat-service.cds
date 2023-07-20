@@ -612,7 +612,9 @@ service CatalogService @(path : 'tender')@(requires : [
             CANCELLED             : String(3);
             BUDGET_RATE           : Double;
             SPOT_RATE             : Double;
-    };
+            EFFECTIVEDATE         : Date;
+            EXPIRYDATE            : Date;
+                };
 
     entity ApprovalProducts {
             TENDERID                      : String(50);
