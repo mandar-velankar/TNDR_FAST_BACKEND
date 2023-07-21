@@ -555,6 +555,15 @@ module.exports = (srv) => {
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
 		}
+		const existingAwardedProducts = await SELECT.from(PT_TMTRRES).where({
+			OfferID: req.data.OfferID
+		});
+
+		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+
+		if (awardedProductsHaveOutcome) {
+			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
+		}
 	}
 
 
