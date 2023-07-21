@@ -828,12 +828,30 @@ module.exports = (srv) => {
 
 	srv.after(
 		'READ', 
-		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		['PriceConditionPriceView','PriceConditionDiscountView'], 
 		(items, req) => {
 			if(!items) return [];
 			const fnCalculateFields = async item => {
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
 				item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+			};
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
+		}
+	);
+
+	srv.after(
+		'READ', 
+		['PriceConditionPriceWithFOCView'], 
+		(items, req) => {
+			if(!items) return [];
+			const fnCalculateFields = async item => {
+				//TODO: check how to calculate item.NetOfferPrice 
+				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 			};
 			if(Array.isArray(items)){
 				return items.map(fnCalculateFields)
