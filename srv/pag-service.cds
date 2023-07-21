@@ -8,6 +8,8 @@ using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_admin','f_tndr_cag_priceagreements_user','f_tndr_cag_technical_user','authenticated-user']){
 
     entity PriceAgreements @(cds.redirection.target:true) as projection on PriceAgreementData.PriceAgreements;
+
+    //EHQUT-383702-Spain search Division filter
     entity PriceAgreementsMasterView @(cds.redirection.target:true) as select from PriceAgreementData.PriceAgreements as pa
     inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'{
         key pa.ID,
@@ -65,6 +67,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
             pa.SettlementDates,
             pa.MasterPrices,
             pa.User,
+            pa.OfferProduct.Offer.Division as Division,
             list.MaterialsList
     };
     entity Candidates as projection on PriceAgreementData.CandidatesView;
