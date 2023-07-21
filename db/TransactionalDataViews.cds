@@ -1349,7 +1349,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.NetOfferPrice,
     priceCondition.Tax,
     ifnull(priceCondition.Price3, 0) as Price3:Decimal,
-    ifnull(priceCondition.Level3Discount1, 0) as Level3Discount1:Double,
+    ifnull(priceCondition.Level3Discount1, offer.Distributor.CommissionRate) as Level3Discount1:Double,
     offer.Currency
 }where tender.Active = 1;
 
