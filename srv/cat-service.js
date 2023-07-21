@@ -793,10 +793,10 @@ module.exports = (srv) => {
             ProductType: 'Total'
         };
 
-		// const whereoffer={
-		// 	OfferId: offer.OFFERID,
-		// 	PriceConditionCode : 'YAW1'
-		// };
+		const whereoffer={
+			OfferId: offer.OFFERID,
+			PriceConditionCode : 'YAW1'
+		};
 
         const whereProduct = {
             CountryCode: offer.COUNTRYCODE,
@@ -804,14 +804,13 @@ module.exports = (srv) => {
 			ValidTo :'9999-12-31 00:00:00.000000000'
         };
 
-		// const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
-		// if(PriceConditionvalue.length>0){
-		// 	const EffectiveDate=new Date(offer.EffectiveDate);
-		// 	const PaymentBackdate= new Date(PriceConditionvalue[0].RefundDate);
-		// 	const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
-		//     Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-		// 	console.log(Difference_In_Days);
-		// }
+		const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
+		if(PriceConditionvalue.length>0){
+			const EffectiveDate=new Date(offer.EffectiveDate);
+			const PaymentBackdate= new Date(PriceConditionvalue[0].RefundDate);
+			const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
+		    Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+		}
         
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
@@ -867,7 +866,7 @@ module.exports = (srv) => {
                 });
 		 }
 		} else if (product.DIVISION === 'Pharma') {
-			if(product.NET_PRICE < dFloorPrice){
+			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "BU/RAM 1":
