@@ -555,6 +555,15 @@ module.exports = (srv) => {
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
 		}
+		const existingAwardedProducts = await SELECT.from(PT_TMTRRES).where({
+			OfferID: req.data.OfferID
+		});
+
+		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+
+		if (awardedProductsHaveOutcome) {
+			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
+		}
 	}
 
 
@@ -819,12 +828,30 @@ module.exports = (srv) => {
 
 	srv.after(
 		'READ', 
-		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		['PriceConditionPriceView','PriceConditionDiscountView'], 
 		(items, req) => {
 			if(!items) return [];
 			const fnCalculateFields = async item => {
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
 				item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+			};
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
+		}
+	);
+
+	srv.after(
+		'READ', 
+		['PriceConditionPriceWithFOCView'], 
+		(items, req) => {
+			if(!items) return [];
+			const fnCalculateFields = async item => {
+				//TODO: check how to calculate item.NetOfferPrice 
+				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 			};
 			if(Array.isArray(items)){
 				return items.map(fnCalculateFields)

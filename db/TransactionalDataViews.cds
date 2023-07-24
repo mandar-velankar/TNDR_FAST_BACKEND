@@ -1346,9 +1346,11 @@ left outer join TransactionalData.PriceCondition as priceCondition
             then ifnull(offer.Distributor.CommissionRate,0) / 100
         else priceCondition.Level2Discount1
     end as Deductions:Double,
-    priceCondition.Price2 as NetPrice, 
+    ifnull(priceCondition.Price2, 0) as NetPrice:Decimal, 
     priceCondition.NetOfferPrice,
     priceCondition.Tax,
+    ifnull(priceCondition.Price3, 0) as Price3:Decimal,
+    ifnull(priceCondition.Level3Discount1, offer.Distributor.CommissionRate) as Level3Discount1:Double,
     offer.Currency
 }where tender.Active = 1;
 
