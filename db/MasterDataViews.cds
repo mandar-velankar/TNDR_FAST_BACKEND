@@ -247,10 +247,12 @@ where ValidTo = '9999-12-31';
 entity ItalyCustomerUpdateInstituteEntriesView as select from SAP.ItalyCustomers as customer 
 inner join MasterData.CountryProvinces as province 
     on customer.E1KNA1M.REGIO = province.Name
+	and province.CountryCode = 'IT'
 inner join MasterData.PT_TMINST as institute 
     on customer.E1KNA1M.KUNNR = institute.CustomerID {
 	customer.E1KNA1M.LAND1 as E1KNA1M_LAND1,
 	customer.E1KNA1M.KUNNR as E1KNA1M_KUNNR,
+	customer.E1KNA1M.NAME1 as E1KNA1M_NAME1,
 	customer.E1KNA1M.ANRED as E1KNA1M_ANRED,
 	customer.E1KNA1M.STRAS as E1KNA1M_STRAS,
 	customer.E1KNA1M.PSTLZ as E1KNA1M_PSTLZ,
@@ -264,7 +266,23 @@ inner join MasterData.PT_TMINST as institute
 	province.RegionID,
 	institute.InstituteID,
 	institute.CountryCode,
-}where customer.E1KNA1M.LAND1 = 'IT';
+}where customer.E1KNA1M.LAND1 = 'IT'
+group by customer.E1KNA1M.LAND1,
+	customer.E1KNA1M.KUNNR,
+	customer.E1KNA1M.NAME1,
+	customer.E1KNA1M.ANRED,
+	customer.E1KNA1M.STRAS,
+	customer.E1KNA1M.PSTLZ,
+	customer.E1KNA1M.STCEG,
+	customer.E1KNA1M.STCD1,
+	customer.E1KNA1M.TELF1,
+	customer.E1KNA1M.TELFX,
+	customer.E1KNA1M.STKZN,
+	customer.E1KNVVM.KVGR3,
+	customer.E1KNA1M.ORT01,
+	province.RegionID,
+	institute.InstituteID,
+	institute.CountryCode;
 
 /**
  * This view is created for the processing of ItalyCustomer job

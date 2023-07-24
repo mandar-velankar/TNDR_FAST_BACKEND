@@ -609,6 +609,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                         .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT'});
 
             const customers = await tx.run(query);
+           
             let nextInstituteID = await this.getLastInstituteID();
 
             const instituteEntries = customers.map(cust => {
@@ -678,7 +679,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     CountryCode: cust.E1KNA1M_LAND1,
                     CustomerID: cust.E1KNA1M_KUNNR,
                     InstituteName: cust.E1KNA1M_NAME1,
-                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3) || "",
+                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3) || this.updateInstituteType(cust.E1KNVVM_KUNNR),
                     Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01} \ VAT: ${cust.E1KNA1M_STCEG} \ Fiscal Code: ${cust.E1KNA1M_STCD1}`,
                     ContactNo: cust.E1KNA1M_TELF1,
                     Fax: cust.E1KNA1M_TELFX,
@@ -766,7 +767,18 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         }
         return KVGR3[id];
     };
+    async updateInstituteType(CustID){
+        const tx = cds.tx();
+    
+        const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
+        const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
+        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' AND CustomerID='CustID'`);
+
+        const Institutetype = await tx.run(query);
+        console.log(Institutetype);
+        return Institutetype;
+      };
 
     /**
      * Until we have merged Master Data App branch (that handles the "Few/All" for direct brands), we must 
