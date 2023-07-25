@@ -611,7 +611,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             const customers = await tx.run(query);
            
             let nextInstituteID = await this.getLastInstituteID();
-
+            
+        //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                 return {
                     CountryCode: cust.E1KNA1M_LAND1,
@@ -620,6 +621,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     InstituteName: cust.E1KNA1M_NAME1,
                     InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3),
                     Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01}`,
+                    // InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3),
+                    Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01} \ VAT: ${cust.E1KNA1M_STCEG} \ Fiscal Code: ${cust.E1KNA1M_STCD1}`,
                     ContactNo: cust.E1KNA1M_TELF1,
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
