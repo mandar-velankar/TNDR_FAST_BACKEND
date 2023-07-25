@@ -202,6 +202,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             TenderID,
             OfferID,
             ProductCode,
+            RequestedVolume,
             hasPriceCondition,
             PriceConditionID,
             ClassificationID,
@@ -218,7 +219,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             Price3 as NetPrice,
             Level3Discount1 as Deductions,
             NetPrice as NetOfferPrice
-    };
+    }where ConditionType = 'PriceWithFOC';
     entity PriceConditionClassification as select from TransactionalData.PriceConditionClassification;
     entity FreeGoodsOther as select from TransactionalData.FreeGoodsOther {
         *,

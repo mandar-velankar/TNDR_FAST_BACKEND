@@ -843,20 +843,75 @@ module.exports = (srv) => {
 		}
 	);
 
-	srv.after(
-		'READ', 
-		['PriceConditionPriceWithFOCView'], 
-		(items, req) => {
+	srv.after('READ', 'PriceConditionPriceWithFOCView', (items, req) => {
 			if(!items) return [];
-			const fnCalculateFields = async item => {
-				//TODO: check how to calculate item.NetOfferPrice 
-				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
-			};
+
 			if(Array.isArray(items)){
 				return items.map(fnCalculateFields)
 			}else{
 				return fnCalculateFields(items);
+			}
+
+			
+
+			async function fnCalculateFields(item){
+				const offerProduct = item.ProductCode;
+				let foc = [];
+				
+				if(item.PriceConditionID){
+					foc = await SELECT.from(FreeGoodsOther).where({
+						PriceCondition_ID: item.PriceConditionID
+					});
+				}
+
+				const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
+				const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
+				const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
+
+				/**
+				 * Calculate NetOfferPrice based on rules
+				 * Case1: No FOC in the pop up
+				 * Case2: One or more FOC products which are different from Offer Product
+				 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
+				 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+				**/
+				//Cases 1,2 and 3
+				if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) item.NetOfferPrice = item.OfferPrice;
+				// Cases 4
+				if(containsOfferProductAndIsIncluded) {
+					const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
+					switch(includedFOC.FreeGoodsOther_ABS_PCT){
+						case "ABS":
+							item.NetOfferPrice = (item.RequestedVolume - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							break;
+						case "PCT":
+							item.NetOfferPrice = item.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							break;
+						case "STP":
+							item.NetOfferPrice = (item.RequestedVolume - item.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							break;
+					}
+				}
+
+				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+
+			};
+
+			function hasObjectWithProductCode(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct);
+			}
+
+			function hasObjectWithProductCodeAndIsAdded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
+			}
+
+			function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 			}
 		}
 	);
