@@ -1316,6 +1316,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
+    product.RequestedVolume,
     case   
         when priceCondition.ID is not null then True
         else False

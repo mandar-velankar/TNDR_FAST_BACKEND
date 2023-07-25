@@ -202,6 +202,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             TenderID,
             OfferID,
             ProductCode,
+            RequestedVolume,
             hasPriceCondition,
             PriceConditionID,
             ClassificationID,
