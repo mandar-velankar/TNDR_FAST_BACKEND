@@ -879,15 +879,16 @@ module.exports = (srv) => {
 				if(!foc || !containsOfferProduct || containsOfferProductAndIsAdded) item.NetOfferPrice = item.OfferPrice;
 				// Cases 4
 				if(containsOfferProductAndIsIncluded) {
-					switch(item.FreeGoodsOther_ABS_PCT){
+					const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
+					switch(includedFOC.FreeGoodsOther_ABS_PCT){
 						case "ABS":
-							item.NetOfferPrice = (item.RequestedVolume - item.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							item.NetOfferPrice = (item.RequestedVolume - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
 							break;
 						case "PCT":
-							item.NetOfferPrice = item.RequestedVolume * (1 - item.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							item.NetOfferPrice = item.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
 							break;
 						case "STP":
-							item.NetOfferPrice = (item.RequestedVolume - item.RequestedVolume / item.FreeGoodsOther_Step * item.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							item.NetOfferPrice = (item.RequestedVolume - item.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
 							break;
 					}
 				}
@@ -907,6 +908,10 @@ module.exports = (srv) => {
 
 			function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
 				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 			}
 		}
 	);
