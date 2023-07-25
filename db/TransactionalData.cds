@@ -459,6 +459,7 @@ entity FreeGoodsOther: cuid, managed {
     FOCBonus                            : Decimal;
     PotentialGeneratedSavings           : Decimal;
     RoyalDecree                         : String;
+    ADD_INCLUDE                         : String;
     PriceCondition                      : Association to PriceCondition;
 }
 
