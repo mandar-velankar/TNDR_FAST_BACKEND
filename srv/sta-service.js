@@ -876,7 +876,7 @@ module.exports = (srv) => {
 				 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
 				**/
 				//Cases 1,2 and 3
-				if(!foc || !containsOfferProduct || containsOfferProductAndIsAdded) item.NetOfferPrice = item.OfferPrice;
+				if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) item.NetOfferPrice = item.OfferPrice;
 				// Cases 4
 				if(containsOfferProductAndIsIncluded) {
 					const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
