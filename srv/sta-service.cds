@@ -161,7 +161,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         sum(product.TotalAmount) as OfferTotal:Double,
         offer.Currency as Currency:String(3)
     } group by offer.OfferID,
-               product.TotalAmount,
                offer.Currency;
 
     entity Country as projection on MasterData.PT_TMCTRY;
