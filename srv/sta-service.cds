@@ -161,7 +161,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         sum(product.TotalAmount) as OfferTotal:Double,
         offer.Currency as Currency:String(3)
     } group by offer.OfferID,
-               product.TotalAmount,
                offer.Currency;
 
     entity Country as projection on MasterData.PT_TMCTRY;
@@ -369,4 +368,27 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType  : String      @Core.IsMediaType;
     }
+
+    entity DeliveryProductTableView as select from TransactionalData.PT_TMTRRES as result
+        inner join TransactionalData.PT_TMOFPR as product 
+            on result.OfferID = product.OfferID and result.ProductCode = product.ProductCode
+        inner join TransactionalData.PT_TMDLVTR as deliveries 
+            on deliveries.OfferID = result.OfferID and deliveries.ProductCode = result.ProductCode
+    {
+        result.TenderID,
+        key result.OfferID,
+        result.ProductCode,
+        result.CountryCode,
+        result.AwardedProduct,
+        result.AwardedQty,
+        sum(deliveries.ActualDeliveryQuantity) as SumOfDeliveredAmount:Double,
+        case 
+            when result.AwardedQty = 0 then NULL
+            else sum(deliveries.ActualDeliveryQuantity)/ result.AwardedQty
+        end as DeliveredPercentage:Double
+    }
+    where result.Outcome = 'Won'
+    group by result.TenderID, result.OfferID, result.ProductCode, result.CountryCode, result.AwardedProduct, result.AwardedQty;
+
+    
 }

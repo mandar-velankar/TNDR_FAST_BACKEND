@@ -734,19 +734,7 @@ module.exports = (srv) => {
 			ProductCode: req.data.ProductCode
 		});
 
-		const mappedPriceCondition = {
-			Price0: req.data.BasePrice,
-			CountryCode: req.data.CountryCode,
-			Level1Discount1: req.data.Discount,
-			NetOfferPrice: req.data.NetOfferPrice,
-			Price2: req.data.NetPrice,
-			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			Tax: req.data.Tax,
-			Price1: req.data.OfferPrice, 
-			Level2Discount1: req.data.Deductions,
-			PriceConditionClassification_ID: req.data.ClassificationID 
-		}
+		const mappedPriceCondition = mapPriceCondition(req);
 
 		if(priceCondition){
 			await UPDATE(PriceCondition)
@@ -757,6 +745,52 @@ module.exports = (srv) => {
 		}else{
 			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
 		}
+	}
+
+	const mapPriceCondition = function(req){
+		const mappings = {
+			"Discount" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				Price2: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level2Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"Price" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				Price2: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level2Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"PriceWithFOC" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Price2: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+		}
+
+		return mappings[req.data.ConditionType];
 	}
 
 	/**
