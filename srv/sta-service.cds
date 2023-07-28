@@ -369,26 +369,26 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             mediaType  : String      @Core.IsMediaType;
     }
 
-    entity DeliveryProductTableView as select from TransactionalData.PT_TMTRRES as result
-        inner join TransactionalData.PT_TMOFPR as product 
+    entity DeliveryProductTableView as select from TransactionalData.PT_TMOFPR as product
+        inner join TransactionalData.PT_TMTRRES as result 
             on result.OfferID = product.OfferID and result.ProductCode = product.ProductCode
-        inner join TransactionalData.PT_TMDLVTR as deliveries 
-            on deliveries.OfferID = result.OfferID and deliveries.ProductCode = result.ProductCode
+        left join TransactionalData.PT_TMDLVTR as deliveries 
+            on deliveries.OfferID = product.OfferID and deliveries.ProductCode = product.ProductCode
     {
-        result.TenderID,
-        key result.OfferID,
-        key result.ProductCode,
-        result.CountryCode,
+        product.TenderID,
+        key product.OfferID,
+        key product.ProductCode,
+        product.CountryCode,
         result.AwardedProduct,
         result.AwardedQty,
-        sum(deliveries.ActualDeliveryQuantity) as SumOfDeliveredAmount:Double,
+        sum(ifnull(deliveries.ActualDeliveryQuantity,0)) as SumOfDeliveredAmount:Double,
         case 
-            when result.AwardedQty = 0 then NULL
+            when result.AwardedQty = 0 OR deliveries.ActualDeliveryQuantity is NULL then 0
             else sum(deliveries.ActualDeliveryQuantity)/ result.AwardedQty
         end as DeliveredPercentage:Double
     }
     where result.Outcome = 'Won'
-    group by result.TenderID, result.OfferID, result.ProductCode, result.CountryCode, result.AwardedProduct, result.AwardedQty;
+    group by product.TenderID, product.OfferID, product.ProductCode, product.CountryCode, result.AwardedProduct, result.AwardedQty, deliveries.ActualDeliveryQuantity;
 
     
 }
