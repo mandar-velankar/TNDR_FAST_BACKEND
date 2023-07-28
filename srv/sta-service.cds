@@ -377,7 +377,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     {
         result.TenderID,
         key result.OfferID,
-        result.ProductCode,
+        key result.ProductCode,
         result.CountryCode,
         result.AwardedProduct,
         result.AwardedQty,
