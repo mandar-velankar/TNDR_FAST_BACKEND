@@ -1882,7 +1882,7 @@ module.exports = (srv) => {
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
 				SORTER: offerProduct.SORTER,
 				CURRENCY: offer.CURRENCY,
-				REQUESTED_QUANTITY: productInfo.CommnonProductInfo.RequestedQuantityString,
+				REQUESTED_QUANTITY: parseInt(productInfo.CommnonProductInfo.RequestedQuantityString),
 				DELIVERY_TERMS: productInfo.CommnonProductInfo.DeliveryTerms,
 				PAYMENT_TERMS: offerProduct.PAYMENT_TERMS,
 				SHIPMENT_TERMS: offerProduct.INCO_TERMS,
