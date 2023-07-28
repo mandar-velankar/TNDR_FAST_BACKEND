@@ -275,6 +275,7 @@ entity ApproverTypes: managed {
     key CountryCode         : String(2);
     Hierarchy				: Integer;
 	ValidationType			: Integer; //filled in node.js layer based upon other fields (1: Optional 2: Mandatory Notification 3: Mandatory Approval)
+	ValidationType2			: Integer; //filled in node.js layer based upon other fields (1: Optional 2: Mandatory Notification 3: Mandatory Approval)
 	Enabled                 : Boolean; //TODO Boolean not null;
     CountryApprovers        : Association to many CountryApprovers on CountryApprovers.ApproverType = ApproverType;
 }
