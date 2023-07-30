@@ -405,6 +405,7 @@ module.exports = (srv) => {
 		!req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
 		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
         !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
+        !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
 		
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
@@ -420,6 +421,23 @@ module.exports = (srv) => {
 	});
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
+
+		// validate form
+		!req.data.RequestedVolume &&  req.error({ code: 404, message: "RequestedVolume is required.", target: "RequestedVolume" });
+		!req.data.UnitPerPack &&  req.error({ code: 404, message: "UoM is required.", target: "UnitPerPack" });
+		!req.data.ActiveProduct &&  req.error({ code: 404, message: "Decline is required.", target: "ActiveProduct" });
+		!req.data.MoleculeName &&  req.error({ code: 404, message: "Molecule Name is required.", target: "MoleculeName" });
+		!req.data.Code1 &&  req.error({ code: 404, message: "AAH product code is required.", target: "Code1" });
+		!req.data.Code2 &&  req.error({ code: 404, message: "License number is required.", target: "Code2" });
+		!req.data.ProductGenericName &&  req.error({ code: 404, message: "Generic Product Description is required.", target: "ProductGenericName" });
+		!req.data.Custom_String_1 &&  req.error({ code: 404, message: "Pharma QC is required.", target: "Custom_String_1" });
+		!req.data.Channel && req.error({ code: 404, message: "Distribution is required.", target: "Channel" });
+		!req.data.Gov_Code && req.error({ code: 404, message: "EAN/GTIN is required.", target: "Gov_Code" });
+        !req.data.Code3 && req.error({ code: 404, message: "PIP code is required.", target: "Code3" });
+		!req.data.Custom_Integer_1 && req.error({ code: 404, message: "Pack size is required.", target: "Custom_Integer_1" });
+		!req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
+		
+
 		delete req.data.MoleculeName;
         delete req.data.Code1;
         delete req.data.Code2;
@@ -429,12 +447,16 @@ module.exports = (srv) => {
 		delete req.data.VwBudgetedProfitability;
 	});
 
-	srv.before(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
+	srv.before(
+		['CREATE','UPDATE'], 
+		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		async (req) => {
 
-		// validate form
-		req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+			// validate form
+			req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 		
-	});
+		}
+	);
 
 	srv.on(['CREATE','UPDATE','DELETE'], ['AwardedProductFormView', 'AwardedProducts'], async (req) => {
 		await upsertAwardedProduct(req);
@@ -532,6 +554,15 @@ module.exports = (srv) => {
 			})
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
+		}
+		const existingAwardedProducts = await SELECT.from(PT_TMTRRES).where({
+			OfferID: req.data.OfferID
+		});
+
+		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+
+		if (awardedProductsHaveOutcome) {
+			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
 		}
 	}
 
@@ -678,11 +709,15 @@ module.exports = (srv) => {
 			})
 	}
 
-	srv.on(['CREATE','UPDATE'], ['PriceConditionPriceView','PriceConditionDiscountView'], async (req) => {
-		upsertPriceCondition(req);
-		upsertProductPricing(req);
-		return req.data;
-	});
+	srv.on(
+		['CREATE','UPDATE'], 
+		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		async (req) => {
+			upsertPriceCondition(req);
+			upsertProductPricing(req);
+			return req.data;
+		}
+	);
 
 	/**
 	 * Upserts a price condition based on the provided request data.
@@ -699,19 +734,7 @@ module.exports = (srv) => {
 			ProductCode: req.data.ProductCode
 		});
 
-		const mappedPriceCondition = {
-			Price0: req.data.BasePrice,
-			CountryCode: req.data.CountryCode,
-			Level1Discount1: req.data.Discount,
-			NetOfferPrice: req.data.NetOfferPrice,
-			Price2: req.data.NetPrice,
-			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			Tax: req.data.Tax,
-			Price1: req.data.OfferPrice, 
-			Level2Discount1: req.data.Deductions,
-			PriceConditionClassification_ID: req.data.ClassificationID 
-		}
+		const mappedPriceCondition = mapPriceCondition(req);
 
 		if(priceCondition){
 			await UPDATE(PriceCondition)
@@ -722,6 +745,52 @@ module.exports = (srv) => {
 		}else{
 			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
 		}
+	}
+
+	const mapPriceCondition = function(req){
+		const mappings = {
+			"Discount" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				Price2: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level2Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"Price" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				Price2: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level2Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"PriceWithFOC" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Price2: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+		}
+
+		return mappings[req.data.ConditionType];
 	}
 
 	/**
@@ -791,17 +860,96 @@ module.exports = (srv) => {
 		}
 	}
 
-	srv.after('READ', ['PriceConditionPriceView','PriceConditionDiscountView'], (items, req) => {
-		const fnCalculateFields = async item => {
-			item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-			item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
-		};
-		if(Array.isArray(items)){
-			return items.map(fnCalculateFields)
-		}else{
-			return fnCalculateFields(items);
+	srv.after(
+		'READ', 
+		['PriceConditionPriceView','PriceConditionDiscountView'], 
+		(items, req) => {
+			if(!items) return [];
+			const fnCalculateFields = async item => {
+				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+			};
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
 		}
-	});
+	);
+
+	srv.after('READ', 'PriceConditionPriceWithFOCView', (items, req) => {
+			if(!items) return [];
+
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
+
+			
+
+			async function fnCalculateFields(item){
+				const offerProduct = item.ProductCode;
+				let foc = [];
+				
+				if(item.PriceConditionID){
+					foc = await SELECT.from(FreeGoodsOther).where({
+						PriceCondition_ID: item.PriceConditionID
+					});
+				}
+
+				const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
+				const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
+				const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
+
+				/**
+				 * Calculate NetOfferPrice based on rules
+				 * Case1: No FOC in the pop up
+				 * Case2: One or more FOC products which are different from Offer Product
+				 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
+				 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+				**/
+				//Cases 1,2 and 3
+				if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) item.NetOfferPrice = item.OfferPrice;
+				// Cases 4
+				if(containsOfferProductAndIsIncluded) {
+					const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
+					switch(includedFOC.FreeGoodsOther_ABS_PCT){
+						case "ABS":
+							item.NetOfferPrice = (item.RequestedVolume - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							break;
+						case "PCT":
+							item.NetOfferPrice = item.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							break;
+						case "STP":
+							item.NetOfferPrice = (item.RequestedVolume - item.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+							break;
+					}
+				}
+
+				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+
+			};
+
+			function hasObjectWithProductCode(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct);
+			}
+
+			function hasObjectWithProductCodeAndIsAdded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
+			}
+
+			function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+		}
+	);
+	
 
 	srv.before(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
 
@@ -1734,7 +1882,7 @@ module.exports = (srv) => {
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
 				SORTER: offerProduct.SORTER,
 				CURRENCY: offer.CURRENCY,
-				REQUESTED_QUANTITY: productInfo.CommnonProductInfo.RequestedQuantityString,
+				REQUESTED_QUANTITY: parseInt(productInfo.CommnonProductInfo.RequestedQuantityString),
 				DELIVERY_TERMS: productInfo.CommnonProductInfo.DeliveryTerms,
 				PAYMENT_TERMS: offerProduct.PAYMENT_TERMS,
 				SHIPMENT_TERMS: offerProduct.INCO_TERMS,

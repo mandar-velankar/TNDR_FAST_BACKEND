@@ -393,7 +393,8 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
     case
         when offer.WholesaleOffer = 'Yes'
             then 'Wholesale Offer'
-        when count(offer.Product.ActiveProduct)<>0 and sum(case when offer.Product.ActiveProduct <> 1 and offer.Product.Channel = 'Decline' then 1 else 0 end) = count(offer.Product.ActiveProduct)
+
+        when count(offer.Product.ActiveProduct)<>0 and sum(case when offer.Product.ActiveProduct <> 1 and (offer.Product.Channel = 'Decline' or offer.Product.Channel is NULL or offer.Product.Channel ='') then 1 else 0 end) = count(offer.Product.ActiveProduct)
             then 'Offer Declined'
         when offer.OfferStatusTable.STATUS = 'Offer Created'
         or offer.OfferStatusTable.STATUS = 'Awaiting Approval'
@@ -1315,6 +1316,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
+    product.RequestedVolume,
     case   
         when priceCondition.ID is not null then True
         else False
@@ -1345,9 +1347,19 @@ left outer join TransactionalData.PriceCondition as priceCondition
             then ifnull(offer.Distributor.CommissionRate,0) / 100
         else priceCondition.Level2Discount1
     end as Deductions:Double,
-    priceCondition.Price2 as NetPrice, 
+    @Core.Computed: false
+    ifnull(priceCondition.Price2, 0) as NetPrice:Decimal, 
     priceCondition.NetOfferPrice,
-    priceCondition.Tax
+    priceCondition.Tax,
+    @Core.Computed: false
+    ifnull(priceCondition.Price3, 0) as Price3:Decimal,
+    @Core.Computed: false
+    case   
+        when priceCondition.Level3Discount1 is null
+            then ifnull(offer.Distributor.CommissionRate,0) / 100
+        else priceCondition.Level3Discount1
+    end as Level3Discount1:Double,
+    offer.Currency
 }where tender.Active = 1;
 
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 

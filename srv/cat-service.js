@@ -779,23 +779,39 @@ module.exports = (srv) => {
 		return price;
 	}
 
+//EFRCL- 384446- Spain - issues with the new approval process for PH
+//EFRCL- 383690- Spain - mandatory approval of Finance and Legal for commercial agreements where payment back date are above one month from the effective date
     async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
-
+		//let Difference_In_Days=0;
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
             OfferId: offer.OFFERID,
             ProductType: 'Total'
         };
 
+		const whereoffer={
+			OfferId: offer.OFFERID,
+			PriceConditionCode : 'YAW1'
+		};
+
         const whereProduct = {
             CountryCode: offer.COUNTRYCODE,
-            ProductPackId: product.PRODUCTID
+            ProductPackId: product.PRODUCTID,
+			ValidTo :'9999-12-31 00:00:00.000000000'
         };
 
+		const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
+		if(PriceConditionvalue.length>0){
+			const EffectiveDate=new Date(offer.EffectiveDate);
+			const PaymentBackdate= new Date(PriceConditionvalue[0].RefundDate);
+			const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
+		    Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+		}
+        
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         
         let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
@@ -807,6 +823,7 @@ module.exports = (srv) => {
             dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
 			
 // EFRCL- 360368- Spain- changes in approval workflow for Radiology(Profit, floor price)
+// EFRCL- 377753- Spain - changes in approval workflow for Pharma
             if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability >= 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
@@ -848,8 +865,42 @@ module.exports = (srv) => {
                     }
                 });
 		 }
+		} else if (product.DIVISION === 'Pharma') {
+			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "BU/RAM 1":
+						oApproverType.ValidationType = 3;
+						break;
+					case "BU/RAM 2":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Legal":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Financial Business Partner":
+						oApproverType.ValidationType = 3;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		}else{
+				aApproverTypes.map(async function (oApproverType) {
+					switch (oApproverType.ApproverType) {
+						case "BU/RAM 1":
+							oApproverType.ValidationType = 3;
+							break;
+						case "BU/RAM 2":
+							oApproverType.ValidationType = 3;
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
 		}
-             else {
+            else {
                 
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
@@ -2535,7 +2586,9 @@ module.exports = (srv) => {
 			LETTERHEAD: (!offerValidation.LETTERHEAD) ? "" : offerValidation.LETTERHEAD.replace(/<br>+/g, "</br>"),
 			CANCELLED: (approvalStatus === "Processing") ? "No" : "Yes",
 			BUDGET_RATE: offerValidation.BUDGET_RATE,
-			SPOT_RATE: offerValidation.SPOT_RATE
+			SPOT_RATE: offerValidation.SPOT_RATE,
+			EFFECTIVEDATE :offerValidation.EffectiveDate,
+			EXPIRYDATE : offerValidation.ExpiryDate
 		}
 	}
 //EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.

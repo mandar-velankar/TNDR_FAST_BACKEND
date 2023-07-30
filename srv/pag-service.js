@@ -600,7 +600,7 @@ module.exports = async (srv) => {
             }
             result = filteredResult;
         }
-
+//EFRCL- 358586- Italy- Price agreements - search function shows limited results
         stopTrace("apply filters");
         //startTrace("Commit");
         //await tx.commit();
@@ -633,7 +633,7 @@ module.exports = async (srv) => {
         if(req.query.cqn){
             req.query.cqn.count = true;
         }
-        result.$count = result.length;
+        // result.$count = result.length;
         return req.reply(result);
     };
 
