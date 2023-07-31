@@ -786,7 +786,7 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
-		//let Difference_In_Days=0;
+		let Difference_In_Days=0;
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
             OfferId: offer.OFFERID,
