@@ -357,3 +357,27 @@ entity InstituteDistributorBrandProduct {
             DIVISION          : String;
             SKUS              : String;
     };
+
+
+entity PricingPolicyView as select from MasterData.PricingPolicy as policy 
+left outer join MasterData.PT_TMPRDHIER as hr 
+	on policy.DivisionCode = hr.HLEVEL1_CODE 
+	or policy.Brand = hr.HLEVEL4_CODE
+left outer join MasterData.PT_TMCTPRDPCK as prd 
+	on policy.ProductPackID = prd.PRODUCTPACKID
+	and policy.CountryCode = prd.COUNTRYCODE
+left outer join MasterData.InstituteDivision as cg
+	on policy.CustomerGroup = cg.CustomerGroup
+left outer join MasterData.PT_TMINST as inst
+	on policy.CountryCode=inst.CountryCode 
+	and ( policy.InstituteType=inst.InstituteType or policy.InstituteID=inst.InstituteID )
+{
+	policy.CountryCode,
+	policy.InstituteID,
+	policy.DistributorID,
+	policy.ProductPackID,
+	policy.Type,
+	policy.AbsOrPct,
+	policy.Value,
+	policy.Currency
+};
