@@ -390,5 +390,26 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     where result.Outcome = 'Won'
     group by product.TenderID, product.OfferID, product.ProductCode, product.CountryCode, result.AwardedProduct, result.AwardedQty, deliveries.ActualDeliveryQuantity;
 
-    
+    entity DeliveryTrackingDetailView as select from TransactionalData.PT_TMDLVTR
+    {
+        TenderID,
+    key OfferID,        
+        CountryCode,
+        InstituteID,
+        SKUCode,
+        SubmittedOn,
+        SubmittedBy,
+        Active,
+        RequestedDeliveryDate,
+        RequestedQuantity,
+        ActualDeliveryDate,
+        ActualDeliveryQuantity,
+    key ProductCode,
+        PaidOrFree,
+        PO,
+        InvoiceNo,
+        SNo,
+        LotID,
+        Institute.InstituteName
+    };
 }
