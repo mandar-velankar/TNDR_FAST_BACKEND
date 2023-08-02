@@ -370,7 +370,7 @@ left outer join MasterData.InstituteDivision as cg
 	on policy.CustomerGroup = cg.CustomerGroup
 left outer join MasterData.PT_TMINST as inst
 	on policy.CountryCode=inst.CountryCode 
-	and ( policy.InstituteType=inst.InstituteType or policy.InstituteID=inst.InstituteID )
+	and (policy.InstituteType=inst.InstituteType or policy.InstituteID=inst.InstituteID)
 {
 	policy.CountryCode,
 	policy.InstituteID,
