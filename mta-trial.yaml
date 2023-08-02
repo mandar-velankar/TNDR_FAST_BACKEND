@@ -36,6 +36,7 @@ modules:
     requires:
       - name: FAST-db-hdi-container
       - name: uaa_FAST
+      - name: FAST-logging
   - name: FAST-API-AppRouter
     type: html5
     path: app
@@ -47,6 +48,7 @@ modules:
           name: srv_api
           url: '~{url}'
       - name: uaa_FAST
+      - name: FAST-logging
 
 resources:
   - name: FAST-db-hdi-container
@@ -61,3 +63,8 @@ resources:
       service-plan: application
       service: xsuaa
     type: org.cloudfoundry.managed-service
+  - name: FAST-logging
+    type: org.cloudfoundry.managed-service
+    parameters:
+       service: application-logs
+       service-plan: lite
