@@ -637,7 +637,7 @@ module.exports = async (srv) => {
         return req.reply(result);
     };
 
-
+//EHQUT-305028-Italy-Delivery monitoring never worked
     srv.after('READ', 'PriceAgreements', async (data) => {
         const tx = db.tx();
         // Calculate DeliveredVolume 
@@ -653,7 +653,7 @@ module.exports = async (srv) => {
                     console.log(e);
                 }
             }
-            pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.ANZPK, 0);
+            pag.DeliveredVolume = deliveries.reduce((sum, delivery) => sum + delivery.LFIMG, 0);
         }
     });
 

@@ -786,7 +786,7 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
-		//let Difference_In_Days=0;
+		let Difference_In_Days=0;
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
             OfferId: offer.OFFERID,
@@ -2201,7 +2201,8 @@ module.exports = (srv) => {
 			TENDER_TYPE: tenderType[0].NAME,
 			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
-            CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
+            CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
+			CONTENT :tender.CONTENT
 		};
 		return results;
 		
