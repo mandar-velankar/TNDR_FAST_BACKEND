@@ -420,6 +420,7 @@ service CatalogService @(path : 'tender')@(requires : [
                                                                     and PriceCondition.CountryCode = $self.COUNTRY_CODE;
     };
 
+//EHQUT-390012-Spain - commercial offer template modifications
     entity OfferValidation {
             OFFERSTATUSPATH       : String(124) not null;
             TENDERID              : String(50) not null;
@@ -504,6 +505,7 @@ service CatalogService @(path : 'tender')@(requires : [
             CREATED_BY_USER_EMAIL :String(500);
             CREATED_BY_USER_ROLE  : String(100);
             CREATED_BY_USER_CONTACTNUMBER :String (20);
+            CONTENT              : String(500);
             ApproverTypes         : Association to many ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
