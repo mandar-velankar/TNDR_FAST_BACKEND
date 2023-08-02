@@ -220,6 +220,31 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             Level3Discount1 as Deductions,
             NetPrice as NetOfferPrice
     }where ConditionType = 'PriceWithFOC';
+
+    entity PriceConditionDiscountWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
+            CountryCode,
+            TenderID,
+            OfferID,
+            ProductCode,
+            RequestedVolume,
+            hasPriceCondition,
+            PriceConditionID,
+            ClassificationID,
+            Classification,
+            ConditionType,
+            Division,
+            isMain,
+            CurrentBasePrice,
+            BasePrice,
+            OfferPrice,
+            Discount,
+            Tax,
+            Currency,
+            Price3 as NetPrice,
+            Level3Discount1 as Deductions,
+            NetPrice as NetOfferPrice
+    };
+
     entity PriceConditionClassification as select from TransactionalData.PriceConditionClassification;
     entity FreeGoodsOther as select from TransactionalData.FreeGoodsOther {
         *,
