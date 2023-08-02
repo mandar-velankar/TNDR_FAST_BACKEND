@@ -1,0 +1,3 @@
+ID,CountryCode,DivisionCode,Division,Brand,ProductGroup,ProductPackID,CustomerGroup,InstituteType,InstituteID,DistributorID,Type,AbsOrPct,Value,Currency
+9edbf2fb-79d5-4395-bc81-c5293fc6cc7c,UK,8,Pharma,All,All,,Gold Customer,All,,,RegisteredPrice VS OfferPrice,PCT,0.1,GBP
+3da3748b-bb68-4d79-837a-e180f2d7426c,UK,,,,,,,,,,OfferPrice,ABS,0.1,GBP
