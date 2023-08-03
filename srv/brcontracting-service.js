@@ -420,11 +420,14 @@ module.exports = (srv) => {
         if (!body) {
             return false;
         }
+        const IV_PO_NUMBER = contract.OfferID.split("-");
+        IV_PO_NUMBER.shift();
+
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_VALID_F"]      = contract.StartDate ? contract.StartDate.split("-").join("") : contract.StartDate;
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_VALID_T"]      = contract.EndDate ? contract.EndDate.split("-").join("") : contract.EndDate;
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_DIVISION"]     = Number(divisionCode.HLEVEL1_CODE) == 8 ? "0" + divisionCode.HLEVEL1_CODE : divisionCode.HLEVEL1_CODE;
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PARTNER"]      = offerDistributor.DistributorName === 'Bayer Brazil' ? institute.CustomerID : distributor.CustomerID;
-        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PO_NUMBER"]    = offerDistributor.DistributorName === 'Bayer Brazil' ? institute.CNPJ : distributor.CNPJ;
+        body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PO_NUMBER"]    = IV_PO_NUMBER.join("-");
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PR_DATE"]      = tender.PublicationDate ? tender.PublicationDate.split("-").join("") : tender.PublicationDate;
         body["_-BAY3_-8B_SD_RFC_TBN_CONTRACTFT"]["IV_PO_DATE"]      = tender.PublicationDate ? tender.PublicationDate.split("-").join("") : tender.PublicationDate;
 
