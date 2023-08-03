@@ -1340,7 +1340,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
     end as BasePrice:Double,
     @Core.Computed: false
     ifnull(priceCondition.Price1, 0) as OfferPrice:Decimal,
-    priceCondition.Level1Discount1 as Discount,
+    @Core.Computed: false
+    ifnull(priceCondition.Level1Discount1, 0) as Discount:Double,
     @Core.Computed: false
     case   
         when priceCondition.Level2Discount1 is null
