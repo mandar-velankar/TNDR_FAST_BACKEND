@@ -43,3 +43,5 @@ ID,COUNTRYCODE,CONDITIONTYPE,CLASSIFICATION,DIVISION,PRODUCTTYPE,ISMAIN
 "c0d3eb0d-bf14-4b57-bb24-43625d47815f","GB","FOC","Tender","Radiology","All","false"
 "bc877b18-de84-4276-8d51-701cf42fbfa6","GB","PriceWithFOC","Tender","Pharma","All","true"
 "73f190c5-65c0-47ef-972e-c31b07ea1782","GB","PriceWithFOC","Tender","Radiology","All","true"
+"5c7a11fb-dea1-4edf-a835-ee0fc13599ca","GB","DiscountWithFOC","Tender","Pharma","All","true"
+"f4ae8304-106b-4bbf-af79-97b3bed55e0b","GB","DiscountWithFOC","Tender","Radiology","All","true"

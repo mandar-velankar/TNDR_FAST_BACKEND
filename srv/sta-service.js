@@ -449,7 +449,12 @@ module.exports = (srv) => {
 
 	srv.before(
 		['CREATE','UPDATE'], 
-		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		[
+			'PriceConditionPriceView',
+			'PriceConditionDiscountView',
+			'PriceConditionPriceWithFOCView',
+			'PriceConditionDiscountWithFOCView'
+		], 
 		async (req) => {
 
 			// validate form
@@ -711,7 +716,12 @@ module.exports = (srv) => {
 
 	srv.on(
 		['CREATE','UPDATE'], 
-		['PriceConditionPriceView','PriceConditionDiscountView','PriceConditionPriceWithFOCView'], 
+		[
+			'PriceConditionPriceView',
+			'PriceConditionDiscountView',
+			'PriceConditionPriceWithFOCView',
+			'PriceConditionDiscountWithFOCView'
+		], 
 		async (req) => {
 			upsertPriceCondition(req);
 			upsertProductPricing(req);
