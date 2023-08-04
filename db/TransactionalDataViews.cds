@@ -1961,6 +1961,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             CREATED_BY_USER_EMAIL :String(500);
             CREATED_BY_USER_ROLE  : String(100);
             CREATED_BY_USER_CONTACTNUMBER :String (20);
+            CONTENT               : String(500); //manual conflict solving for change of KOSAL //EHQUT-390012-Spain - commercial offer template modifications
             Submitted             : Boolean default false;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
