@@ -1340,7 +1340,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
     end as BasePrice:Double,
     @Core.Computed: false
     ifnull(priceCondition.Price1, 0) as OfferPrice:Decimal,
-    priceCondition.Level1Discount1 as Discount,
+    @Core.Computed: false
+    ifnull(priceCondition.Level1Discount1, 0) as Discount:Double,
     @Core.Computed: false
     case   
         when priceCondition.Level2Discount1 is null
@@ -1960,6 +1961,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             CREATED_BY_USER_EMAIL :String(500);
             CREATED_BY_USER_ROLE  : String(100);
             CREATED_BY_USER_CONTACTNUMBER :String (20);
+            CONTENT               : String(500); //manual conflict solving for change of KOSAL //EHQUT-390012-Spain - commercial offer template modifications
             Submitted             : Boolean default false;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;

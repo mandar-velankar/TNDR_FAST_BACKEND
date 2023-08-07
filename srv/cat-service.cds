@@ -233,9 +233,6 @@ service CatalogService @(path : 'tender')@(requires : [
     entity TenderHistorySpain @readonly                 as projection on TransactionalDataViews.TenderHistorySpain;
     entity TenderHistoryBrazil @readonly                as projection on TransactionalDataViews.TenderHistoryBrazil;
 
-   
-    
-
     //Admin Data Tables
     entity CONDITIONAL_ACCESS                           as projection on AdminData.CONDITIONAL_ACCESS;
 

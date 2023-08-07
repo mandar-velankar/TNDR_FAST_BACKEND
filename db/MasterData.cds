@@ -275,6 +275,7 @@ entity ApproverTypes: managed {
     key CountryCode         : String(2);
     Hierarchy				: Integer;
 	ValidationType			: Integer; //filled in node.js layer based upon other fields (1: Optional 2: Mandatory Notification 3: Mandatory Approval)
+	ValidationType2			: Integer; //filled in node.js layer based upon other fields (1: Optional 2: Mandatory Notification 3: Mandatory Approval)
 	Enabled                 : Boolean; //TODO Boolean not null;
     CountryApprovers        : Association to many CountryApprovers on CountryApprovers.ApproverType = ApproverType;
 }
@@ -851,4 +852,21 @@ entity StandardDivisions: cuid{
 	CountryCode		: String(2) not null;
 	DivisionCode	: String(40);
 	DivisionName    : String(40);
+}
+
+entity PricingPolicy: cuid, managed {
+	CountryCode		: String;
+	DivisionCode	: String;
+	Division		: String;
+	Brand			: String;
+	ProductGroup	: String;
+	ProductPackID	: Integer;
+	CustomerGroup 	: String;
+	InstituteType 	: String;
+	InstituteID		: Integer;
+	DistributorID	: Integer;
+	Type     		: String;
+	AbsOrPct 		: String;
+	Value			: Double;
+	Currency		: String;
 }
