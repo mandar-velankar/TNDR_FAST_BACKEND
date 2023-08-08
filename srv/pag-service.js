@@ -682,7 +682,7 @@ module.exports = async (srv) => {
         var AllMaterialNumber=[];
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if(customerPrices && customerPrices.length > 0){
-            let Countrycode=customerPrices[0].COUNTRYCODE;
+            let Countrycode=customerPrices[0].CountryCode;
             console.log(Countrycode);
             if(Countrycode ==='ES'){
 
@@ -707,7 +707,7 @@ module.exports = async (srv) => {
         }
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
-       console.log(customerPrices,"customerprices");
+       console.log(customerPrices.length);
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
        // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
