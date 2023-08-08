@@ -798,6 +798,19 @@ module.exports = (srv) => {
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
+			"DiscountWithFOC" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				Price2: req.data.NetOfferPrice,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
 		}
 
 		return mappings[req.data.ConditionType];
@@ -896,69 +909,84 @@ module.exports = (srv) => {
 				return fnCalculateFields(items);
 			}
 
-			
-
 			async function fnCalculateFields(item){
-				const offerProduct = item.ProductCode;
-				let foc = [];
-				
-				if(item.PriceConditionID){
-					foc = await SELECT.from(FreeGoodsOther).where({
-						PriceCondition_ID: item.PriceConditionID
-					});
-				}
-
-				const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
-				const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
-				const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
-
-				/**
-				 * Calculate NetOfferPrice based on rules
-				 * Case1: No FOC in the pop up
-				 * Case2: One or more FOC products which are different from Offer Product
-				 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
-				 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
-				**/
-				//Cases 1,2 and 3
-				if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) item.NetOfferPrice = item.OfferPrice;
-				// Cases 4
-				if(containsOfferProductAndIsIncluded) {
-					const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-					switch(includedFOC.FreeGoodsOther_ABS_PCT){
-						case "ABS":
-							item.NetOfferPrice = (item.RequestedVolume - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-							break;
-						case "PCT":
-							item.NetOfferPrice = item.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-							break;
-						case "STP":
-							item.NetOfferPrice = (item.RequestedVolume - item.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-							break;
-					}
-				}
-
+				item.NetOfferPrice = await calculateNetOfferPrice(item);
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
-
 			};
-
-			function hasObjectWithProductCode(arr, offerProduct) {
-				return arr.some(obj => obj.ProductPackId === offerProduct);
-			}
-
-			function hasObjectWithProductCodeAndIsAdded(arr, offerProduct) {
-				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
-			}
-
-			function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
-				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
-			}
-
-			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
-			}
+			
 		}
 	);
+
+	srv.after('READ', 'PriceConditionDiscountWithFOCView', (items, req) => {
+		if(!items) return [];
+
+		if(Array.isArray(items)){
+			return items.map(fnCalculateFields)
+		}else{
+			return fnCalculateFields(items);
+		}
+
+		async function fnCalculateFields(item){
+			item.NetOfferPrice = await calculateNetOfferPrice(item);
+			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+		};
+		
+	}
+);
+
+	async function calculateNetOfferPrice(item){
+		const offerProduct = item.ProductCode;
+		let foc = [];
+		
+		if(item.PriceConditionID){
+			foc = await SELECT.from(FreeGoodsOther).where({
+				PriceCondition_ID: item.PriceConditionID
+			});
+		}
+
+		const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
+		const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
+		const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
+
+		/**
+		 * Calculate NetOfferPrice based on rules
+		 * Case1: No FOC in the pop up
+		 * Case2: One or more FOC products which are different from Offer Product
+		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
+		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+		**/
+		//Cases 1,2 and 3
+		if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return item.OfferPrice;
+		// Cases 4
+		if(containsOfferProductAndIsIncluded) {
+			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
+			switch(includedFOC.FreeGoodsOther_ABS_PCT){
+				case "ABS":
+					return (item.RequestedVolume - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+				case "PCT":
+					return item.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+				case "STP":
+					return (item.RequestedVolume - item.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
+			}
+		}
+
+		function hasObjectWithProductCode(arr, offerProduct) {
+			return arr.some(obj => obj.ProductPackId === offerProduct);
+		}
+
+		function hasObjectWithProductCodeAndIsAdded(arr, offerProduct) {
+			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
+		}
+
+		function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
+			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		}
+
+		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		}
+	}
 	
 
 	srv.before(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
