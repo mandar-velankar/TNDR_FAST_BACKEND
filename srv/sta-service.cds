@@ -180,6 +180,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Country: redirected to Country,
         User: redirected to Users,
     };
+    entity UsersHavingOneCountry @(cds.redirection.target:false) as select from UsersPerCountry {
+        key CWID,
+        max(CountryCode) as CountryCode: String,
+        count(CountryCode) as numberOfCountries: Integer,
+        max(UserName) as UserName: String
+    }
+    group by CWID
+    having count(CountryCode) = 1;
+
     entity CountryTenderBrands @readonly as projection on TransactionalDataViews.CountryTenderBrands;
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
