@@ -680,7 +680,7 @@ module.exports = async (srv) => {
         // const tx = cds.transaction(req);
         const tx = cds.tx(req);
         var AllMaterialNumber=[];
-        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
+        let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if(customerPrices && customerPrices.length > 0){
             let Countrycode=customerPrices[0].CountryCode;
             console.log(Countrycode);
