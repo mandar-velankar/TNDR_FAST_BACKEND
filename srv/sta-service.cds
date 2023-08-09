@@ -152,7 +152,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKUCountry.CODE3 as Code3,
         SKU.ProductGenericName as ProductGenericName,
         SKUCountry.GOV_CODE as Gov_Code,
-        BudgetedProfitability.PROFITABILITY as VwBudgetedProfitability
+        PricingPolicy.Value as VwBudgetedProfitability
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
