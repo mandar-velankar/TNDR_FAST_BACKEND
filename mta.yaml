@@ -38,6 +38,7 @@ modules:
           url: ${default-url}
     requires:
       - name: FAST-db-hdi-container
+      - name: FAST-logging
       - name: uaa_FAST
   - name: FAST-API-AppRouter
     type: html5
@@ -51,6 +52,7 @@ modules:
           url: '~{url}'
           timeout: 120000
       - name: uaa_FAST
+      - name: FAST-logging
 
 resources:
   - name: FAST-db-hdi-container
@@ -65,3 +67,8 @@ resources:
       service-plan: application
       service: xsuaa
     type: org.cloudfoundry.managed-service
+  - name: FAST-logging
+    type: org.cloudfoundry.managed-service
+    parameters:
+       service: application-logs
+       service-plan: lite
