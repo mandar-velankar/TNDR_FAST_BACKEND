@@ -1276,25 +1276,31 @@ module.exports = (srv) => {
 		}
 
 		//Payment Terms need to be specified by item number if not same for all
-		let paymentTerms = "";
-		let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
-			if(d && d.PAYMENT_TERMS){
-				return d.PAYMENT_TERMS;
-			}else{
-				return 'NA';
-			}		
-		}));
-		if (paymentTermsDistinct.length === 1) {
-			paymentTerms = paymentTermsDistinct[0];
-		}
-		else {
-			let paymentTermsRow = [];
-			for (let i = 0; i < paymentTermsDistinct.length; i++) {
-				let paymentTermsItems = offerProductValidation.filter((d) => d.PAYMENT_TERMS === paymentTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				paymentTermsRow[i] = paymentTermsItems.concat(": ").concat(paymentTermsDistinct[i]);
-			}
-			paymentTerms = paymentTermsRow.join("<br>")
-		}
+		let paymentTerms = offer.PaymentTerms;
+
+		/**
+		 * In this commented fields we use offerProduct PaymentTerms field.
+		 * It is not needed to use offerProduct PaymentTerms field because offer has it's own PaymentTerm field --> Custom_String_1
+		 */
+		
+		// let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+		// 	if(d && d.PAYMENT_TERMS){
+		// 		return d.PAYMENT_TERMS;
+		// 	}else{
+		// 		return 'NA';
+		// 	}		
+		// }));
+		// if (paymentTermsDistinct.length === 1) {
+		// 	paymentTerms = paymentTermsDistinct[0];
+		// }
+		// else {
+		// 	let paymentTermsRow = [];
+		// 	for (let i = 0; i < paymentTermsDistinct.length; i++) {
+		// 		let paymentTermsItems = offerProductValidation.filter((d) => d.PAYMENT_TERMS === paymentTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+		// 		paymentTermsRow[i] = paymentTermsItems.concat(": ").concat(paymentTermsDistinct[i]);
+		// 	}
+		// 	paymentTerms = paymentTermsRow.join("<br>")
+		// }
 
 	
 		let deliveryTerms = "";

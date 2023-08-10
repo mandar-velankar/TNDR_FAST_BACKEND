@@ -56,7 +56,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         end as Weight:Double
     };
 
-    entity TenderMasterView as select from TransactionalData.PT_TMTEND as tender{
+    entity TenderMasterView as select from TransactionalData.PT_TMTEND as tender
+        inner join AdminData.PT_TMUSER as CreatedByUser on CreatedByUser.UserID = tender.createdBy 
+        inner join AdminData.PT_TMUSER as ModifyedByUser on ModifyedByUser.UserID = tender.modifiedBy {
         tender.CountryCode,
         key tender.TenderID,
         tender.Classification,
@@ -74,6 +76,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
+        CreatedByUser.UserName as createdByName,
+        ModifyedByUser.UserName as modifiedByName
     }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -90,7 +94,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.BidDueDate,
         tender.createdAt,
         tender.modifiedBy,
-        tender.modifiedAt;
+        tender.modifiedAt,
+        CreatedByUser.UserName,
+        ModifyedByUser.UserName;
 
     @cds.redirection.target
     entity InstitutesView as projection on MasterData.PT_TMINST;
@@ -152,7 +158,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKUCountry.CODE3 as Code3,
         SKU.ProductGenericName as ProductGenericName,
         SKUCountry.GOV_CODE as Gov_Code,
-        BudgetedProfitability.PROFITABILITY as VwBudgetedProfitability
+        PricingPolicy.Value as VwBudgetedProfitability
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer

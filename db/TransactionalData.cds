@@ -406,8 +406,12 @@ entity PT_TMOFPR {
                                         and LotProduct.LotID = LotID;
         BudgetedProfitability    : Association to MasterDataLatestValues.VWBUDGETEDPROFITABILITY
                                         on BudgetedProfitability.COUNTRYCODE = CountryCode
-                                        and BudgetedProfitability.PRODUCTPACKID = ProductCode
+                                        and BudgetedProfitability.PRODUCTPACKID = ProductCode;
                                         //and BudgetedProfitability.HLEVEL4_CODE = SKU.Product.HLEVEL4_CODE
+        PricingPolicy            : Association to MasterData.PricingPolicy
+                                        on PricingPolicy.CountryCode = CountryCode
+                                        and PricingPolicy.ProductPackID = ProductCode
+                                        and PricingPolicy.Type = 'BudgetedProfitability';
 }
 
 //brazil

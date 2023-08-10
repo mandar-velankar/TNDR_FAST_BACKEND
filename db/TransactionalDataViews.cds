@@ -838,7 +838,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT,
     offer.Tender.PublicationDate as PUBLICATION_DATE,
     offer.Tender.BidDueDate as BID_DUE_DATE,
-    offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY
+    offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY,
+    offer.Custom.String_1 as PaymentTerms
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -906,6 +907,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.PublicationDate,
           offer.Tender.BidDueDate,
           offer.Quotation.SubmittedBy,
+          offer.Custom.String_1,
           date_settings.NextYearDelta,
           date_settings.NextDay,
           date_settings.NextMonth;
