@@ -683,7 +683,7 @@ module.exports = async (srv) => {
         let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if(customerPrices && customerPrices.length > 0){
             let Countrycode=customerPrices[0].CountryCode;
-            
+
             if(Countrycode ==='ES'){
 
                 for(var i =0; i<customerPrices.length; i++){
@@ -691,7 +691,7 @@ module.exports = async (srv) => {
                 }
                
                 const ActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: 'ES', ActiveRecord: 'Yes' , SKUCode: {in : AllMaterialNumber}}));
-                
+
                 if(ActiveMaterial.length >0){
                     const materials= ActiveMaterial.map(item =>item.SKUCode);
                          
@@ -707,7 +707,7 @@ module.exports = async (srv) => {
         }
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
-       
+       console.log(customerPrices.length);
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
        // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
