@@ -683,15 +683,15 @@ module.exports = async (srv) => {
         let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if(customerPrices && customerPrices.length > 0){
             let Countrycode=customerPrices[0].CountryCode;
-            console.log(Countrycode);
+
             if(Countrycode ==='ES'){
 
                 for(var i =0; i<customerPrices.length; i++){
                     AllMaterialNumber.push(customerPrices[i].MaterialNumber);
                 }
-               console.log(AllMaterialNumber);
+               
                 const ActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: 'ES', ActiveRecord: 'Yes' , SKUCode: {in : AllMaterialNumber}}));
-                console.log(ActiveMaterial,"ActiveMaterial")
+
                 if(ActiveMaterial.length >0){
                     const materials= ActiveMaterial.map(item =>item.SKUCode);
                          
