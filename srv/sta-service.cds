@@ -37,6 +37,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.DirectTender,
     }; 
 
+    entity CountryRegionsTableView as projection on MasterData.CountryRegions;
+
     entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
   
     entity AwardCriteriaTableView as select from TransactionalData.PT_TMTEND as tend
