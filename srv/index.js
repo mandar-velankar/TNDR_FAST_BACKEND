@@ -2,7 +2,7 @@ const express = require("express");
 const cds = require("@sap/cds");
 const proxy = require("@sap/cds-odata-v2-adapter-proxy");
 const args = process.argv.slice(2);
-const host = "0.0.0.0";
+const host = "localhost";
 const port = process.env.PORT || 4004;
 const jobManager = require("./jobs/JobManager");
 
