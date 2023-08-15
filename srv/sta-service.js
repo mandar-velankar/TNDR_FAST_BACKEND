@@ -435,7 +435,7 @@ module.exports = (srv) => {
 		!req.data.Gov_Code && req.error({ code: 404, message: "EAN/GTIN is required.", target: "Gov_Code" });
         !req.data.Code3 && req.error({ code: 404, message: "PIP code is required.", target: "Code3" });
 		!req.data.Custom_Integer_1 && req.error({ code: 404, message: "Pack size is required.", target: "Custom_Integer_1" });
-		!req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
+		// !req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
 		
 
 		delete req.data.MoleculeName;
@@ -837,27 +837,37 @@ module.exports = (srv) => {
 		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID:  req.data.OfferID});
 
-		const mappedPTTMBDPR = {
-			TenderID              : req.data.TenderID, 
-			OfferID               : req.data.OfferID, 
-			CountryCode           : req.data.CountryCode, 
-			ProductCode           : req.data.ProductCode, 
+		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user});
+
+		if(productPricing){
+			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
+		}else{
+			await INSERT.into(PT_TMBDPR).entries(mappedPTTMBDPR);
+		}
+	}
+
+	function mapToPTTMBDPR({priceCondition, offer, user}){
+		return {
+			TenderID              : priceCondition.TenderID, 
+			OfferID               : priceCondition.OfferID, 
+			CountryCode           : priceCondition.CountryCode, 
+			ProductCode           : priceCondition.ProductCode, 
 			SubmittedOn           : new Date().toISOString(), 
-			SubmittedBy           : req.user.id, 
+			SubmittedBy           : user.id, 
 			Active                : 1, 
 			Tier                  : 1, 
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
-			RegPrice              : req.data.BasePrice, 
+			RegPrice              : priceCondition.BasePrice, 
 			FOC                   : 0, 
 			// FOCStep               : null, 
 			// FOCType               : null, 
 			Discount              : 0, 
-			OfferPrice            : req.data.OfferPrice, 
+			OfferPrice            : priceCondition.OfferPrice, 
 			Deductions            : 0, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
-			NetofferPrice         : req.data.NetOfferPrice, 
+			NetofferPrice         : priceCondition.NetOfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : 0, 
@@ -869,17 +879,11 @@ module.exports = (srv) => {
 			FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
-			NetPrice              : req.data.NetPrice, 
+			NetPrice              : priceCondition.NetPrice, 
 			NetPrice_OfPaid       : 0, 
-			PRICE_UPDATE          : offer.APPROVALS_SENT, 
+			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
 			// Deductions_ABS_PCT    : null
-		}
-
-		if(productPricing){
-			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
-		}else{
-			await INSERT.into(PT_TMBDPR).entries(mappedPTTMBDPR);
 		}
 	}
 

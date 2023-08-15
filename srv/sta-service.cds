@@ -37,6 +37,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.DirectTender,
     }; 
 
+    entity CountryRegionsTableView as projection on MasterData.CountryRegions;
+
     entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
   
     entity AwardCriteriaTableView as select from TransactionalData.PT_TMTEND as tend
@@ -113,6 +115,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity TenderOffers as projection on TransactionalDataViews.TenderOffers;
 
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
+    entity PT_TMBDPR as projection on TransactionalData.PT_TMBDPR {
+        *,
+        Product: redirected to TransactionalData.PT_TMOFPR
+    };
 
     @cds.redirection.target
     entity OfferFormView as select from TransactionalData.PT_TMOFRS{
