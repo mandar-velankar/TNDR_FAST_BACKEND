@@ -441,7 +441,7 @@ module.exports = (srv) => {
                 MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
-                ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume : el?.RequestedVolume / productPack.PACKFACTOR,
+                ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume * 1.25 : el?.RequestedVolume / productPack.PACKFACTOR,
                 MANUAL_D: (100 * Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
                 CAP: productPriceCondition?.CAP === "No" ? 0 : (100 * Number(capBrazil.CAP)).toFixed(2)
             }
