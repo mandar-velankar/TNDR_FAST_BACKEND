@@ -435,7 +435,7 @@ module.exports = (srv) => {
 		!req.data.Gov_Code && req.error({ code: 404, message: "EAN/GTIN is required.", target: "Gov_Code" });
         !req.data.Code3 && req.error({ code: 404, message: "PIP code is required.", target: "Code3" });
 		!req.data.Custom_Integer_1 && req.error({ code: 404, message: "Pack size is required.", target: "Custom_Integer_1" });
-		!req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
+		// !req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
 		
 
 		delete req.data.MoleculeName;
