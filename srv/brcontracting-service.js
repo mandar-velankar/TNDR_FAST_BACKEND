@@ -436,7 +436,7 @@ module.exports = (srv) => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
             const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
-            const itemQty = offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume * 1.25 : el?.RequestedVolume / productPack.PACKFACTOR;
+            const itemQty = offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume * 1.25 : (el?.RequestedVolume * 1.25) / productPack.PACKFACTOR;
             return {
                 ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                 MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
