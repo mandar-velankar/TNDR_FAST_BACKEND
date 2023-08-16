@@ -26,7 +26,7 @@ module.exports = (srv) => {
 
 	// Use reflection to get the csn definition
 	const {
-		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
+		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand, PricingPolicyView
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
 		PT_TMINST, 
@@ -2086,6 +2086,10 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType12(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 
+		if (offer.APPROVAL_TYPE === 14) {
+			productValidation = await buildProductValidationForType14(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue);
+		}
+
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
@@ -2119,6 +2123,60 @@ module.exports = (srv) => {
 		}
 
 		return results;
+	}
+
+	async function buildProductValidationForType14(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
+		const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		let results = {
+			IN_POLICY: false
+		}
+
+		let comparisonPrice = 0;
+
+		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'ProductPackID': product.ProductCode, 'CountryCode': offer.COUNTRYCODE, 'InstituteID': offer.INSTITUTE_ID, 'DistributorID': offer.DISTRIBUTOR_ID}));
+		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+
+		if(policy && priceCondition){
+			switch(policy.Type){
+				case 'OfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? priceCondition.OfferPrice * product.PACKSIZE : priceCondition.OfferPrice;
+				case 'NetOfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetOfferPrice * product.PACKSIZE : priceCondition.NetOfferPrice;
+				case 'NetPrice':
+					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetPrice * product.PACKSIZE : priceCondition.NetPrice;
+				case 'OfferPriceVSRegisteredPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.OfferPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) : 
+															   (priceCondition.Price0 - priceCondition.OfferPrice) / priceCondition.Price0;
+				case 'NetPriceVSRegisteredPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) :
+															   (priceCondition.Price0 - priceCondition.NetPrice) / priceCondition.Price0;
+				case 'NetOfferPriceVSRegisteredPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - priceCondition.NetOfferPrice) / (priceCondition.Price0 * product.PACKSIZE) :
+															   (priceCondition.Price0 - priceCondition.NetOfferPrice) / priceCondition.Price0;
+				case 'NetOfferPriceVSOfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetOfferPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE) : 
+																(priceCondition.OfferPrice - priceCondition.NetOfferPrice) / priceCondition.OfferPrice;
+				case 'NetPriceVSOfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE): 
+																(priceCondition.OfferPrice - priceCondition.NetPrice) / priceCondition.OfferPrice;
+				case 'NetPriceVSNetOfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetOfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.NetOfferPrice * product.PACKSIZE) : 
+																(priceCondition.NetOfferPrice - priceCondition.NetPrice) / priceCondition.NetOfferPrice;
+				case 'BudgetedProfitability':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetPrice * product.PACKSIZE) - priceCondition.cogsEurUnit) / productInfo.cogsEurUnit :
+																(priceCondition.NetPrice - priceCondition.cogsEurPack) / productInfo.cogsEurPack;
+			}
+
+			if(comparisonPrice < policy.Value){
+				aApproverTypes.map(async function (oApproverType) {
+					oApproverType.ValidationType = oApproverType.ValidationType;
+				});
+			} else {
+				aApproverTypes.map(async function (oApproverType) {
+					oApproverType.ValidationType = oApproverType.ValidationType2;
+				});
+			}
+		}
 	}
 
 	function buildCommonProductInfo(offer, product) {
