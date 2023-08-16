@@ -436,12 +436,13 @@ module.exports = (srv) => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
             const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
+            const itemQty = offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume * 1.25 : (el?.RequestedVolume * 1.25) / productPack.PACKFACTOR;
             return {
                 ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                 MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
                 UNIT_PRICE: "0",
                 EFFORT_A: "0",
-                ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedVolume : el?.RequestedVolume / productPack.PACKFACTOR,
+                ITEM_QTD: Math.ceil(itemQty),
                 MANUAL_D: (100 * Number(productPriceCondition?.AdditionalDiscount)).toFixed(2),
                 CAP: productPriceCondition?.CAP === "No" ? 0 : (100 * Number(capBrazil.CAP)).toFixed(2)
             }
@@ -556,11 +557,12 @@ module.exports = (srv) => {
             const offerProduct = offerProducts.find(pr => pr.ProductCode === el.ProductPackID);
             const skuPrdPck = skuPrdPcks.find(pr => pr.ProductPackID === el.ProductPackID);
             const productPack = productPacks.find(pr => pr.PRODUCTPACKID === el.ProductPackID);
+            const itemQty = offerProduct.UnitPerPack === "Pack" ? el?.RequestedQty : el?.RequestedQty / productPack.PACKFACTOR;
             if (offerProduct) {
                 return {
                     ITEM: addLeadingZeros(offerProduct.SORTER, 6, "Sorter"),
                     MATERIAL: addLeadingZeros(skuPrdPck.SKUCode, 18, "SKUCode"),
-                    ITEM_QTD: offerProduct.UnitPerPack === "Pack" ? el?.RequestedQty : el?.RequestedQty / productPack.PACKFACTOR,
+                    ITEM_QTD: Math.ceil(itemQty),
                 }
             }
         })
