@@ -433,9 +433,8 @@ module.exports = (srv) => {
 
 		// checks 
 		if(offerStatus.STATUS !== "Quotation Submitted" || offerStatus.STATUS !== "Results Recorded"){
-			return req.error({ code: 409, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
+			req.error({ code: 409, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
 		}
-
 
 		const offerProducts = await SELECT.from(PT_TMOFPR).where({OfferID: offerID, Active: 1});
 		const offerRevision = await SELECT.one.from(OfferRevisions).where({TENDERID: offer.TenderID, TENDEROFFERNO: offer.TenderOfferNo});
@@ -448,23 +447,35 @@ module.exports = (srv) => {
 	});
 
 	async function createRevisedOffer({offer, offerStatus, offerProducts, offerRevision, req}){
-
-		
-
+		const todaysDate = new Date().toISOString().substring(0,10);
 		const revisedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-R${offerRevision.NEXTREVISEDOFFERNO}`;
 
 		const revisedOffer = {...offer};
-		const todaysDate = new Date().toISOString().substring(0,10);
 		revisedOffer.OfferID = revisedOfferID;
 		revisedOffer.CreationDate = todaysDate;
 		revisedOffer.InternalBidDueDate = todaysDate;
 		revisedOffer.NewOfferDueDate = todaysDate;
 
+		const revisedOfferStatus = {...offerStatus};
+		revisedOfferStatus.OfferID = revisedOfferID;
+		revisedOfferStatus.STATUS = "Offer Created";
+		revisedOfferStatus.Date = todaysDate;
+
+		const revisedOfferProducts = offerProducts.map(pr => {
+			const revisedProduct = {...pr};
+			revisedProduct.OfferID = revisedOfferID;
+			return revisedProduct;
+		});
 
 		// 1. create revided offer
+		await INSERT.into(PT_TMOFRS).entries(revisedOffer);
 		// 2. creatre new status
+		await INSERT.into(PT_TMTNOFST).entries(revisedOfferStatus);
 		// 3. create products
+		await INSERT.into(PT_TMOFPR).entries(revisedOfferProducts);
 		// 4. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
+		offer.ActiveOffer = 0;
+		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID})
 
 	};
 
