@@ -2163,8 +2163,8 @@ module.exports = (srv) => {
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetOfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.NetOfferPrice * product.PACKSIZE) : 
 																(priceCondition.NetOfferPrice - priceCondition.NetPrice) / priceCondition.NetOfferPrice;
 				case 'BudgetedProfitability':
-					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetPrice * product.PACKSIZE) - priceCondition.cogsEurUnit) / productInfo.cogsEurUnit :
-																(priceCondition.NetPrice - priceCondition.cogsEurPack) / productInfo.cogsEurPack;
+					comparisonPrice = product.UOM === 'Unit' ? (priceCondition.NetPrice - (productInfo.cogsEurUnit * product.SPOT_RATE)) / (productInfo.cogsEurUnit * product.SPOT_RATE) :
+																(priceCondition.NetPrice - (productInfo.cogsEurPack * product.SPOT_RATE)) / (productInfo.cogsEurPack * product.SPOT_RATE);
 			}
 
 			if(comparisonPrice < policy.Value){
@@ -2176,7 +2176,12 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = oApproverType.ValidationType2;
 				});
 			}
+
+			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
+			results.IN_POLICY = true
 		}
+		
+		return results;
 	}
 
 	function buildCommonProductInfo(offer, product) {
@@ -2204,9 +2209,8 @@ module.exports = (srv) => {
 		let offerPricePack = offerPrice / toPackFactor;
 		let offerPriceUnitEurSpot = offerPriceUnit / product.SPOT_RATE;
 		let offerPriceUnitEurBudget = offerPriceUnit / product.BUDGET_RATE;
-		let cogsEurUnit = cogs / product.SPOT_RATE / toUnitFactor;
-		let cogsEurPack = cogs / product.SPOT_RATE / toPackFactor;
-
+		let cogsEurUnit = cogs / product.SPOT_RATE / toUnitFactor; 
+		let cogsEurPack = cogs / product.SPOT_RATE / toPackFactor; 
 		let netPriceUnit = netPrice / toUnitFactor;
 		let netPricePack = netPrice / toPackFactor;
 		let netPriceUnitEurSpot = netPriceUnit / product.SPOT_RATE;
