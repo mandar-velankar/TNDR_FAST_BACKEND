@@ -45,7 +45,7 @@ module.exports = (srv) => {
 		PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, OfferValues, OfferStatus
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, OfferValues, OfferStatus,OfferRevisions
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -421,26 +421,69 @@ module.exports = (srv) => {
 	});
 
 	srv.on('copyOffer', async (req) => {
-		!req?.data?.offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
-		!req?.data?.type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
-		switch(req.data.type){
-			case "revisedoffer": return createRevisedOffer(req);
-			case "continuedoffer": return createContinuedOffer(req);
+
+		const { data: {offerID,type} } = req;
+
+		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
+		!type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
+
+
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
+		const offerStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: offerID, Active: 1});
+
+		// checks 
+		if(offerStatus.STATUS !== "Quotation Submitted" || offerStatus.STATUS !== "Results Recorded"){
+			return req.error({ code: 409, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
+		}
+
+
+		const offerProducts = await SELECT.from(PT_TMOFPR).where({OfferID: offerID, Active: 1});
+		const offerRevision = await SELECT.one.from(OfferRevisions).where({TENDERID: offer.TenderID, TENDEROFFERNO: offer.TenderOfferNo});
+		
+
+		switch(type){
+			case "revisedoffer": return createRevisedOffer({offer, offerStatus, offerProducts, offerRevision, req});
+			case "continuedoffer": return createContinuedOffer({offer, offerStatus, offerProducts, offerRevision, req});
 		}
 	});
 
-	async function createRevisedOffer(req){
-		const { data: {offerID,type} } = req;
+	async function createRevisedOffer({offer, offerStatus, offerProducts, offerRevision, req}){
 
-		const offerFormView = await SELECT.one.from(srv.entities.OfferFormView).where({OfferID: offerID});
-		const offerProductsTableView = await SELECT.from(srv.entities.OfferProductsTableView).where({OfferID: offerID});
 		
-		// checks 
-		if(offerFormView.OfferStatus !== "Quotation Submitted" || offerFormView.OfferStatus !== "Results Recorded"){
-			req.error({ code: 409, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
-		}
 
-		debugger;
+		const revisedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-R${offerRevision.NEXTREVISEDOFFERNO}`;
+
+		const revisedOffer = {...offer};
+		const todaysDate = new Date().toISOString().substring(0,10);
+		revisedOffer.OfferID = revisedOfferID;
+		revisedOffer.CreationDate = todaysDate;
+		revisedOffer.InternalBidDueDate = todaysDate;
+		revisedOffer.NewOfferDueDate = todaysDate;
+
+
+		// 1. create revided offer
+		// 2. creatre new status
+		// 3. create products
+		// 4. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
+
+	};
+
+
+	async function createContinuedOffer({offer, offerStatus, offerProducts, offerRevision, req}){
+
+		const continuedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-C${offerRevision.NEXTCONTINUEDOFFERNO}`;
+		const continuedOffer = {...offer};
+		const todaysDate = new Date().toISOString().substring(0,10);
+		continuedOffer.OfferID = continuedOfferID;
+		continuedOffer.CreationDate = todaysDate;
+		continuedOffer.InternalBidDueDate = todaysDate;
+		continuedOffer.NewOfferDueDate = todaysDate;
+
+
+		// 1. create revided offer
+		// 2. creatre new status
+		// 3. create products
+
 
 	};
 
