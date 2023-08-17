@@ -467,11 +467,11 @@ module.exports = (srv) => {
 			return revisedProduct;
 		});
 
-		// 1. create revided offer
+		// 1. create revised offer
 		await INSERT.into(PT_TMOFRS).entries(revisedOffer);
-		// 2. creatre new status
+		// 2. create revised offer status
 		await INSERT.into(PT_TMTNOFST).entries(revisedOfferStatus);
-		// 3. create products
+		// 3. create revised products
 		await INSERT.into(PT_TMOFPR).entries(revisedOfferProducts);
 		// 4. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
 		offer.ActiveOffer = 0;
