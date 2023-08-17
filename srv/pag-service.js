@@ -674,17 +674,40 @@ module.exports = async (srv) => {
 //     }
         
 //     });
+//EHQUT-INC20428207-Incorrect resynchornization on Material Change cases
  //EHQUT- Italy - Synchronize button becomes available again when user changes expiry date
     srv.on('syncPriceAgreements', async req => {
         // const tx = cds.transaction(req);
         const tx = cds.tx(req);
-        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
+        var AllMaterialNumber=[];
+        let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
+        if(customerPrices && customerPrices.length > 0){
+            let Countrycode=customerPrices[0].CountryCode;
+
+            if(Countrycode ==='ES'){
+
+                for(var i =0; i<customerPrices.length; i++){
+                    AllMaterialNumber.push(customerPrices[i].MaterialNumber);
+                }
+               
+                const ActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: 'ES', ActiveRecord: 'Yes' , SKUCode: {in : AllMaterialNumber}}));
+
+                if(ActiveMaterial.length >0){
+                    const materials= ActiveMaterial.map(item =>item.SKUCode);
+                         
+                    customerPrices =await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } , MaterialNumber : {in : materials}}));
+                }
+                     
+              
+               
+            }
+            }
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
-       
+       console.log(customerPrices.length);
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
        // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });

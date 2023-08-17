@@ -240,7 +240,7 @@ getOutcome(code){
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ TenderResults to PT_TMTRRES ...`);
     tenderResults = tenderResults.reduce((prev, curr, idx, tenderResults) => {
-        //const parentOffer = existingOffersFAST.find(ofr => ofr.IbizWorkflowID === curr.ID_QP);
+        const parentOffer = existingOffersFAST.find(ofr => ofr.IbizWorkflowID === curr.ID_QP);
         let product = existingProductsFAST.find(prd => prd.IbizWorkflowID === curr.ID_QP && prd.WorkflowProductID === curr.ID_CC_QP);
         if(!product){return prev;}
         const institute = existingTendersFAST.find(inst => inst.TenderID === product.TenderID);
@@ -254,7 +254,7 @@ getOutcome(code){
                 ID_CC_QP          : curr.ID_CC_QP,
                 IBIZ_TECHNICAL_ID : curr.ID,
                 TenderID          : product.TenderID,
-                OfferID           : product.OfferID,
+                OfferID           : parentOffer.OfferID,
                 CountryCode       : "BR",
                 InstituteID       : instituteID,
                 ProductCode       : product.ProductCode,
