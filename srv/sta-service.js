@@ -420,6 +420,30 @@ module.exports = (srv) => {
 		delete req.data.TotalAmount;
 	});
 
+	srv.on('copyOffer', async (req) => {
+		!req?.data?.offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
+		!req?.data?.type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
+		switch(req.data.type){
+			case "revisedoffer": return createRevisedOffer(req);
+			case "continuedoffer": return createContinuedOffer(req);
+		}
+	});
+
+	async function createRevisedOffer(req){
+		const { data: {offerID,type} } = req;
+
+		const offerFormView = await SELECT.one.from(srv.entities.OfferFormView).where({OfferID: offerID});
+		const offerProductsTableView = await SELECT.from(srv.entities.OfferProductsTableView).where({OfferID: offerID});
+		
+		// checks 
+		if(offerFormView.OfferStatus !== "Quotation Submitted" || offerFormView.OfferStatus !== "Results Recorded"){
+			req.error({ code: 409, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
+		}
+
+		debugger;
+
+	};
+
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
 
 		// validate form
