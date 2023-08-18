@@ -1,3 +1,5 @@
-ID,CountryCode,DivisionCode,Division,Brand,ProductGroup,ProductPackID,CustomerGroup,InstituteType,InstituteID,DistributorID,Type,AbsOrPct,Value,Currency
-9edbf2fb-79d5-4395-bc81-c5293fc6cc7c,UK,8,Pharma,All,All,,Gold Customer,All,,,RegisteredPrice VS OfferPrice,PCT,0.1,GBP
-3da3748b-bb68-4d79-837a-e180f2d7426c,UK,,,,,,,,,,OfferPrice,ABS,0.1,GBP
+ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,DIVISIONCODE,DIVISION,BRAND,PRODUCTGROUP,PRODUCTPACKID,CUSTOMERGROUP,INSTITUTETYPE,INSTITUTEID,DISTRIBUTORID,TYPE,ABSORPCT,VALUE,CURRENCY
+"26523001-ae12-4c40-8c53-e097251dc3f8","2023-08-08","EHMHV","2023-08-08","EHMHV","GB","","","","",214677,"","All",,,"BudgetedProfitability","PCT","0.55","GBP"
+"40a9c515-5ce7-4122-828a-b7c80a725166","2023-08-08","EHMHV","2023-08-08","EHMHV","GB","","","","",206689,"","All",,,"BudgetedProfitability","PCT","0.44","GBP"
+"3b3cecd9-7382-44ae-93a8-49ebb1e5d384","2023-08-08","EHMHV","2023-08-08","EHMHV","GB","","","","",206695,"","All",,,"BudgetedProfitability","PCT","0.65","GBP"
+"9f522715-9a22-4d24-89cc-3146fa78149b","2023-08-08","EHMHV","2023-08-08","EHMHV","GB","","","","",214674,"","All",,,"BudgetedProfitability","PCT","0.35","GBP"
