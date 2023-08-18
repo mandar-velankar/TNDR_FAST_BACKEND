@@ -37,6 +37,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.DirectTender,
     }; 
 
+    entity CountryRegionsTableView as projection on MasterData.CountryRegions;
+
     entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
   
     entity AwardCriteriaTableView as select from TransactionalData.PT_TMTEND as tend
@@ -56,7 +58,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         end as Weight:Double
     };
 
-    entity TenderMasterView as select from TransactionalData.PT_TMTEND as tender{
+    entity TenderMasterView as select from TransactionalData.PT_TMTEND as tender
+        inner join AdminData.PT_TMUSER as CreatedByUser on CreatedByUser.UserID = tender.createdBy 
+        inner join AdminData.PT_TMUSER as ModifyedByUser on ModifyedByUser.UserID = tender.modifiedBy {
         tender.CountryCode,
         key tender.TenderID,
         tender.Classification,
@@ -74,6 +78,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
+        CreatedByUser.UserName as createdByName,
+        ModifyedByUser.UserName as modifiedByName
     }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -90,7 +96,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.BidDueDate,
         tender.createdAt,
         tender.modifiedBy,
-        tender.modifiedAt;
+        tender.modifiedAt,
+        CreatedByUser.UserName,
+        ModifyedByUser.UserName;
 
     @cds.redirection.target
     entity InstitutesView as projection on MasterData.PT_TMINST;
@@ -107,6 +115,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity TenderOffers as projection on TransactionalDataViews.TenderOffers;
 
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
+    entity PT_TMBDPR as projection on TransactionalData.PT_TMBDPR {
+        *,
+        Product: redirected to TransactionalData.PT_TMOFPR
+    };
 
     @cds.redirection.target
     entity OfferFormView as select from TransactionalData.PT_TMOFRS{
@@ -144,6 +156,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Offer.Currency as Currency
     }; // Form used in the Offer tab - offer products
 
+    action copyOffer(offerID:String, type: String) returns OfferFormView;
+
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
         *,
         SKU.MoleculeName as MoleculeName,
@@ -152,7 +166,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKUCountry.CODE3 as Code3,
         SKU.ProductGenericName as ProductGenericName,
         SKUCountry.GOV_CODE as Gov_Code,
-        BudgetedProfitability.PROFITABILITY as VwBudgetedProfitability
+        @Core.Computed: false
+        ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
@@ -171,6 +186,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         *,
         Country: redirected to Country,
         User: redirected to Users,
+        User.UserName
     };
 
     entity UsersPerCountry @readonly @(cds.redirection.target:false) as projection on AdminData.PT_TMUSERCTRY {
@@ -179,6 +195,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Country: redirected to Country,
         User: redirected to Users,
     };
+    entity UsersHavingOneCountry @(cds.redirection.target:false) as select from UsersPerCountry {
+        key CWID,
+        max(CountryCode) as CountryCode: String,
+        count(CountryCode) as numberOfCountries: Integer,
+        max(UserName) as UserName: String
+    }
+    group by CWID
+    having count(CountryCode) = 1;
+
     entity CountryTenderBrands @readonly as projection on TransactionalDataViews.CountryTenderBrands;
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
@@ -219,6 +244,31 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             Level3Discount1 as Deductions,
             NetPrice as NetOfferPrice
     }where ConditionType = 'PriceWithFOC';
+
+    entity PriceConditionDiscountWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
+            CountryCode,
+            TenderID,
+            OfferID,
+            ProductCode,
+            RequestedVolume,
+            hasPriceCondition,
+            PriceConditionID,
+            ClassificationID,
+            Classification,
+            ConditionType,
+            Division,
+            isMain,
+            CurrentBasePrice,
+            BasePrice,
+            OfferPrice,
+            Discount,
+            Tax,
+            Currency,
+            Price3 as NetPrice,
+            Level3Discount1 as Deductions,
+            NetPrice as NetOfferPrice
+    };
+
     entity PriceConditionClassification as select from TransactionalData.PriceConditionClassification;
     entity FreeGoodsOther as select from TransactionalData.FreeGoodsOther {
         *,
@@ -369,26 +419,47 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             mediaType  : String      @Core.IsMediaType;
     }
 
-    entity DeliveryProductTableView as select from TransactionalData.PT_TMTRRES as result
-        inner join TransactionalData.PT_TMOFPR as product 
+    entity DeliveryProductTableView as select from TransactionalData.PT_TMOFPR as product
+        inner join TransactionalData.PT_TMTRRES as result 
             on result.OfferID = product.OfferID and result.ProductCode = product.ProductCode
-        inner join TransactionalData.PT_TMDLVTR as deliveries 
-            on deliveries.OfferID = result.OfferID and deliveries.ProductCode = result.ProductCode
+        left join TransactionalData.PT_TMDLVTR as deliveries 
+            on deliveries.OfferID = product.OfferID and deliveries.ProductCode = product.ProductCode
     {
-        result.TenderID,
-        key result.OfferID,
-        key result.ProductCode,
-        result.CountryCode,
+        product.TenderID,
+        key product.OfferID,
+        key product.ProductCode,
+        product.CountryCode,
         result.AwardedProduct,
         result.AwardedQty,
-        sum(deliveries.ActualDeliveryQuantity) as SumOfDeliveredAmount:Double,
+        sum(ifnull(deliveries.ActualDeliveryQuantity,0)) as SumOfDeliveredAmount:Double,
         case 
-            when result.AwardedQty = 0 then NULL
+            when result.AwardedQty = 0 OR deliveries.ActualDeliveryQuantity is NULL then 0
             else sum(deliveries.ActualDeliveryQuantity)/ result.AwardedQty
         end as DeliveredPercentage:Double
     }
     where result.Outcome = 'Won'
-    group by result.TenderID, result.OfferID, result.ProductCode, result.CountryCode, result.AwardedProduct, result.AwardedQty;
+    group by product.TenderID, product.OfferID, product.ProductCode, product.CountryCode, result.AwardedProduct, result.AwardedQty, deliveries.ActualDeliveryQuantity;
 
-    
+    entity DeliveryTrackingDetailView as select from TransactionalData.PT_TMDLVTR
+    {
+        TenderID,
+    key OfferID,        
+        CountryCode,
+        InstituteID,
+        SKUCode,
+        SubmittedOn,
+        SubmittedBy,
+        Active,
+        RequestedDeliveryDate,
+        RequestedQuantity,
+        ActualDeliveryDate,
+        ActualDeliveryQuantity,
+    key ProductCode,
+        PaidOrFree,
+        PO,
+        InvoiceNo,
+        SNo,
+        LotID,
+        Institute.InstituteName
+    };
 }

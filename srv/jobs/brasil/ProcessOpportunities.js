@@ -48,6 +48,7 @@ module.exports = class processOpportunities extends BaseJob {
             }, []);
             const brazilMasterPrices = await this.getBrazilMasterPrices(tx, indirectIbizOpportunityCustomerID);
             const brazilCap = await this.getBrazilCAP(tx);
+            const productPacks = await this.getFASTProductPacks(tx);
 
             // Process data
             if(directIbizOpportunities.length > 0){
@@ -56,7 +57,7 @@ module.exports = class processOpportunities extends BaseJob {
             }
 
             if(indirectIbizOpportunities.length > 0){
-                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices, brazilCap);
+                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices, brazilCap, productPacks);
             }
 
             // Commit All
@@ -141,6 +142,17 @@ module.exports = class processOpportunities extends BaseJob {
             return await tx.run(SELECT.one.from(BrazilCap));
         }catch (error) {
             throw new Error(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_BRAZILCAP failed`, { cause: error });
+        }
+    }
+
+    async getFASTProductPacks (tx) {
+        console.log(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_PT_TMPRDPCK ...`);
+        const { PT_TMPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
+
+        try {
+            return await tx.run(SELECT.from(PT_TMPRDPCK));
+        }catch (error) {
+            throw new Error(`JOB (${this.jobName }): Fetching data from COM_BAYER_SXTENDER_MASTERDATA_PT_TMPRDPCK failed`, { cause: error });
         }
     }
 
@@ -687,7 +699,7 @@ module.exports = class processOpportunities extends BaseJob {
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZQPS records will be deleted.
      * @param {[Object]} opportunities 
      */
- async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices, brazilCap) {
+ async  processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices, brazilCap, productPacks) {
     console.log(`JOB (${this.jobName }): Processing Indirect ibiz Opportunities ...`);
     try {
 
@@ -696,7 +708,7 @@ module.exports = class processOpportunities extends BaseJob {
         const mappedOffers = this.mapIbizOpportunitiestoFASTOffer(indirectIbizOpportunities, existingDistributorsFAST, priceConditionClassificationFAST);
         const mappedProducts = this.mapIbizOpportunitiestoFASTProduct(indirectIbizOpportunities, indirectIbizOpportunityItems, existingDistributorsFAST, existingSKUFAST);
         const mappedPrice = this.mapIbizOpportunitiestoFASTPrices(indirectIbizOpportunityItems, existingSKUFAST);
-        const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices, brazilCap);
+        const mappedPriceCondition = this.mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices, brazilCap, productPacks);
         const mappedDocs = this.mapIbizOpportunitiesDocstoFASTDocumentsDownload(indirectIbizOpportunityDocs);
 
          // 1. Create/update entries in PT_TMTEND
@@ -998,7 +1010,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
      * @param {[Objects]} ibizOpportunities 
      * @returns {[Objects]} priceCondition
      */
- mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices, brazilCap) {
+ mapIbizOpportunitiestoFASTPriceCondition(indirectIbizOpportunityItems, existingSKUFAST, brazilMasterPrices, brazilCap, productPacks) {
 
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PriceCondition ...`);
     indirectIbizOpportunityItems = indirectIbizOpportunityItems.reduce((prev, curr, idx, indirectIbizOpportunityItems) => {
@@ -1006,17 +1018,19 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
         const productPackID = sku && sku.ProductPackID || null;
         const masterPriceZWP0 = brazilMasterPrices.find(p => p.ProductID === productPackID && p.Type === "ZWP0");
         const masterPriceIBRX = brazilMasterPrices.find(p => p.ProductID === productPackID && p.Type === "IBRX");
+        const productPack = productPacks.find(p => p.PRODUCTPACKID === productPackID);
+        const priceList = masterPriceZWP0?.Value / productPack.PACKFACTOR;
 
         const taxExemption = (curr.NU_UF_ICMS === "desonerado") ? 'Yes' : 'No';
         const cap = (!curr.NU_CAP || curr.NU_CAP === 0) ? 'No' : 'Yes';
 
-        const priceAfterTaxExemption = taxExemption === "Yes" ? (masterPriceZWP0?.Value * (1 - masterPriceIBRX?.Value)) : masterPriceZWP0?.Value;
+        const priceAfterTaxExemption = taxExemption === "Yes" ? (priceList * (1 - masterPriceIBRX?.Value)) : priceList;
         let priceAfterCap;
         
         if (taxExemption === "Yes" && cap === "Yes") {
             priceAfterCap = priceAfterTaxExemption * (1 - brazilCap.CAP);
         }else if (taxExemption === "No" && cap === "Yes") {
-            priceAfterCap = masterPriceZWP0?.Value * (1 - brazilCap.CAP);
+            priceAfterCap = priceAfterTaxExemption * (1 - brazilCap.CAP);
         }else {
             priceAfterCap = priceAfterTaxExemption;
         }
@@ -1049,7 +1063,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 AnnualValue                         : null,
                 ReferencePriceAgreement             : null, 
                 LotID                               : curr.NU_LOTE,
-                PriceList                           : masterPriceZWP0 && masterPriceZWP0.Value,
+                PriceList                           : masterPriceZWP0 && priceList,
                 ICMSTax                             : masterPriceIBRX?.Value,
                 TaxExemption                        : taxExemption,
                 PriceAfterTaxExemtion               : priceAfterTaxExemption || null,
