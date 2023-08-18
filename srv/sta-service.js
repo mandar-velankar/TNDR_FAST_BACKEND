@@ -26,7 +26,7 @@ module.exports = (srv) => {
 
 	// Use reflection to get the csn definition
 	const {
-		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
+		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand, PricingPolicyView
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
 		PT_TMINST, 
@@ -45,7 +45,7 @@ module.exports = (srv) => {
 		PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, OfferValues, OfferStatus
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, OfferValues, OfferStatus,OfferRevisions
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -419,6 +419,84 @@ module.exports = (srv) => {
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
 	});
+
+	srv.on('copyOffer', async (req) => {
+
+		const { data: {offerID,type} } = req;
+
+		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
+		!type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
+
+
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
+		const offerStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: offerID, Active: 1});
+
+		// checks 
+		if(offerStatus.STATUS !== "Quotation Submitted" || offerStatus.STATUS !== "Results Recorded"){
+			req.error({ code: 409, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
+		}
+
+		const offerProducts = await SELECT.from(PT_TMOFPR).where({OfferID: offerID, Active: 1});
+		const offerRevision = await SELECT.one.from(OfferRevisions).where({TENDERID: offer.TenderID, TENDEROFFERNO: offer.TenderOfferNo});
+		
+
+		switch(type){
+			case "revisedoffer": return createRevisedOffer({offer, offerStatus, offerProducts, offerRevision, req});
+			case "continuedoffer": return createContinuedOffer({offer, offerStatus, offerProducts, offerRevision, req});
+		}
+	});
+
+	async function createRevisedOffer({offer, offerStatus, offerProducts, offerRevision, req}){
+		const todaysDate = new Date().toISOString().substring(0,10);
+		const revisedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-R${offerRevision.NEXTREVISEDOFFERNO}`;
+
+		const revisedOffer = {...offer};
+		revisedOffer.OfferID = revisedOfferID;
+		revisedOffer.CreationDate = todaysDate;
+		revisedOffer.InternalBidDueDate = todaysDate;
+		revisedOffer.NewOfferDueDate = todaysDate;
+
+		const revisedOfferStatus = {...offerStatus};
+		revisedOfferStatus.OfferID = revisedOfferID;
+		revisedOfferStatus.STATUS = "Offer Created";
+		revisedOfferStatus.Date = todaysDate;
+
+		const revisedOfferProducts = offerProducts.map(pr => {
+			const revisedProduct = {...pr};
+			revisedProduct.OfferID = revisedOfferID;
+			return revisedProduct;
+		});
+
+		// 1. create revised offer
+		await INSERT.into(PT_TMOFRS).entries(revisedOffer);
+		// 2. create revised offer status
+		await INSERT.into(PT_TMTNOFST).entries(revisedOfferStatus);
+		// 3. create revised products
+		await INSERT.into(PT_TMOFPR).entries(revisedOfferProducts);
+		// 4. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
+		offer.ActiveOffer = 0;
+		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID})
+
+	};
+
+
+	async function createContinuedOffer({offer, offerStatus, offerProducts, offerRevision, req}){
+
+		const continuedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-C${offerRevision.NEXTCONTINUEDOFFERNO}`;
+		const continuedOffer = {...offer};
+		const todaysDate = new Date().toISOString().substring(0,10);
+		continuedOffer.OfferID = continuedOfferID;
+		continuedOffer.CreationDate = todaysDate;
+		continuedOffer.InternalBidDueDate = todaysDate;
+		continuedOffer.NewOfferDueDate = todaysDate;
+
+
+		// 1. create revided offer
+		// 2. creatre new status
+		// 3. create products
+
+
+	};
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
 
@@ -2086,6 +2164,10 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType12(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 
+		if (offer.APPROVAL_TYPE === 14) {
+			productValidation = await buildProductValidationForType14(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue);
+		}
+
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
@@ -2121,6 +2203,65 @@ module.exports = (srv) => {
 		return results;
 	}
 
+	async function buildProductValidationForType14(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
+		const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		let results = {
+			IN_POLICY: false
+		}
+
+		let comparisonPrice = 0;
+
+		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'ProductPackID': product.ProductCode, 'CountryCode': offer.COUNTRYCODE, 'InstituteID': offer.INSTITUTE_ID, 'DistributorID': offer.DISTRIBUTOR_ID}));
+		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+
+		if(policy && priceCondition){
+			switch(policy.Type){
+				case 'OfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? priceCondition.OfferPrice * product.PACKSIZE : priceCondition.OfferPrice;
+				case 'NetOfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetOfferPrice * product.PACKSIZE : priceCondition.NetOfferPrice;
+				case 'NetPrice':
+					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetPrice * product.PACKSIZE : priceCondition.NetPrice;
+				case 'OfferPriceVSRegisteredPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.OfferPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) : 
+															   (priceCondition.Price0 - priceCondition.OfferPrice) / priceCondition.Price0;
+				case 'NetPriceVSRegisteredPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) :
+															   (priceCondition.Price0 - priceCondition.NetPrice) / priceCondition.Price0;
+				case 'NetOfferPriceVSRegisteredPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - priceCondition.NetOfferPrice) / (priceCondition.Price0 * product.PACKSIZE) :
+															   (priceCondition.Price0 - priceCondition.NetOfferPrice) / priceCondition.Price0;
+				case 'NetOfferPriceVSOfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetOfferPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE) : 
+																(priceCondition.OfferPrice - priceCondition.NetOfferPrice) / priceCondition.OfferPrice;
+				case 'NetPriceVSOfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE): 
+																(priceCondition.OfferPrice - priceCondition.NetPrice) / priceCondition.OfferPrice;
+				case 'NetPriceVSNetOfferPrice':
+					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetOfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.NetOfferPrice * product.PACKSIZE) : 
+																(priceCondition.NetOfferPrice - priceCondition.NetPrice) / priceCondition.NetOfferPrice;
+				case 'BudgetedProfitability':
+					comparisonPrice = product.UOM === 'Unit' ? (priceCondition.NetPrice - (productInfo.cogsEurUnit * product.SPOT_RATE)) / (productInfo.cogsEurUnit * product.SPOT_RATE) :
+																(priceCondition.NetPrice - (productInfo.cogsEurPack * product.SPOT_RATE)) / (productInfo.cogsEurPack * product.SPOT_RATE);
+			}
+
+			if(comparisonPrice < policy.Value){
+				aApproverTypes.map(async function (oApproverType) {
+					oApproverType.ValidationType = oApproverType.ValidationType;
+				});
+			} else {
+				aApproverTypes.map(async function (oApproverType) {
+					oApproverType.ValidationType = oApproverType.ValidationType2;
+				});
+			}
+
+			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
+			results.IN_POLICY = true
+		}
+		
+		return results;
+	}
+
 	function buildCommonProductInfo(offer, product) {
 		//Get all prices, ammounts and cogs in all units
 		let toUnitFactor = (product.UNIT === "Unit") ? 1 : product.PACKSIZE;
@@ -2146,9 +2287,8 @@ module.exports = (srv) => {
 		let offerPricePack = offerPrice / toPackFactor;
 		let offerPriceUnitEurSpot = offerPriceUnit / product.SPOT_RATE;
 		let offerPriceUnitEurBudget = offerPriceUnit / product.BUDGET_RATE;
-		let cogsEurUnit = cogs / product.SPOT_RATE / toUnitFactor;
-		let cogsEurPack = cogs / product.SPOT_RATE / toPackFactor;
-
+		let cogsEurUnit = cogs / product.SPOT_RATE / toUnitFactor; 
+		let cogsEurPack = cogs / product.SPOT_RATE / toPackFactor; 
 		let netPriceUnit = netPrice / toUnitFactor;
 		let netPricePack = netPrice / toPackFactor;
 		let netPriceUnitEurSpot = netPriceUnit / product.SPOT_RATE;
