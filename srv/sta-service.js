@@ -433,10 +433,10 @@ module.exports = (srv) => {
 
 		// checks 
 		if(!offer){
-			return req.error({ code: 404, message: `Offer "${offerID}" not found or is not active`, target: "PT_TMOFRS"});
+			return req.error({ code: 409, message: `Offer "${offerID}" is not active. Only active offer can be copied.`, target: "PT_TMOFRS"});
 		}
 
-		if(offerStatus.STATUS !== "Quotation Submitted" || offerStatus.STATUS !== "Results Recorded"){
+		if(offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded"){
 			return req.error({ code: 409, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
 		}
 
@@ -482,7 +482,7 @@ module.exports = (srv) => {
 		offer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
 
-		return `Revised offer (${revisedOfferID}) successfully created`;
+		return revisedOfferID;
 	};
 
 
@@ -515,7 +515,7 @@ module.exports = (srv) => {
 		// 3. create revised products
 		await INSERT.into(PT_TMOFPR).entries(continuedOfferProducts);
 
-		return `Continued offer (${continuedOfferID}) successfully created`;
+		return continuedOfferID;
 	};
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
