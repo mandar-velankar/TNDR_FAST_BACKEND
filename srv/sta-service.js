@@ -480,6 +480,7 @@ module.exports = (srv) => {
 		await INSERT.into(PT_TMOFPR).entries(revisedOfferProducts);
 		// 4. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
 		offer.ActiveOffer = 0;
+		offer.RevisedOfferNo = offer.RevisedOfferNo + 1;
 		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
 
 		return revisedOfferID;
@@ -494,7 +495,7 @@ module.exports = (srv) => {
 		continuedOffer.OfferID = continuedOfferID;
 		continuedOffer.CreationDate = todaysDate;
 		continuedOffer.InternalBidDueDate = todaysDate;
-		continuedOffer.NewOfferDueDate = todaysDate;
+		continuedOffer.NewOfferDueDate = todaysDate;	
 		continuedOffer.ContinuationOfferNo = continuedOffer.ContinuationOfferNo + 1;
 
 
@@ -514,6 +515,9 @@ module.exports = (srv) => {
 		await INSERT.into(PT_TMTNOFST).entries(continuedOfferStatus);
 		// 3. create revised products
 		await INSERT.into(PT_TMOFPR).entries(continuedOfferProducts);
+		// 4. update first offer
+		offer.ContinuationOfferNo = offer.ContinuationOfferNo + 1;
+		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
 
 		return continuedOfferID;
 	};
