@@ -156,7 +156,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Offer.Currency as Currency
     }; // Form used in the Offer tab - offer products
 
-    action copyOffer(offerID:String, type: String) returns OfferFormView;
+    action copyOffer(offerID:String, type: String) returns String;
 
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
         *,
