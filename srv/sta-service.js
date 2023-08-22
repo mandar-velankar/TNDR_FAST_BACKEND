@@ -461,7 +461,7 @@ module.exports = (srv) => {
 		revisedOffer.CreationDate = todaysDate;
 		revisedOffer.InternalBidDueDate = todaysDate;
 		revisedOffer.NewOfferDueDate = todaysDate;
-		revisedOffer.RevisedOfferNo = revisedOffer.RevisedOfferNo + 1;
+		revisedOffer.RevisedOfferNo = parentOffer.RevisedOfferNo + 1;
 
 		const revisedOfferStatus = {...offerStatus};
 		revisedOfferStatus.OfferID = revisedOfferID;
@@ -510,7 +510,7 @@ module.exports = (srv) => {
 		continuedOffer.CreationDate = todaysDate;
 		continuedOffer.InternalBidDueDate = todaysDate;
 		continuedOffer.NewOfferDueDate = todaysDate;	
-		continuedOffer.ContinuationOfferNo = continuedOffer.ContinuationOfferNo + 1;
+		continuedOffer.ContinuationOfferNo = parentOffer.ContinuationOfferNo + 1;
 
 
 		const continuedOfferStatus = {...offerStatus};
