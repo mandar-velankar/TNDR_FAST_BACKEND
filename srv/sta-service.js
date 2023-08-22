@@ -429,6 +429,7 @@ module.exports = (srv) => {
 
 
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
+		const parentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID.split('-').slice(0,4).join("-")});
 		const offerStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: offerID, Active: 1});
 
 		// checks 
@@ -446,12 +447,12 @@ module.exports = (srv) => {
 		
 
 		switch(type){
-			case "revisedoffer": return createRevisedOffer({offer, offerStatus, offerProducts, productPricing, offerRevision, req});
-			case "continuedoffer": return createContinuedOffer({offer, offerStatus, offerProducts, productPricing, offerRevision, req});
+			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
+			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
 		}
 	});
 
-	async function createRevisedOffer({offer, offerStatus, offerProducts, productPricing, offerRevision, req}){
+	async function createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req}){
 		const todaysDate = new Date().toISOString().substring(0,10);
 		const revisedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-R${offerRevision.NEXTREVISEDOFFERNO}`;
 
@@ -490,14 +491,17 @@ module.exports = (srv) => {
 		await INSERT.into(PT_TMBDPR).entries(revisedProductsPricing);
 		// 5. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
 		offer.ActiveOffer = 0;
-		offer.RevisedOfferNo = offer.RevisedOfferNo + 1;
 		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
+
+		parentOffer.RevisedOfferNo = parentOffer.RevisedOfferNo + 1;
+		parentOffer.ActiveOffer = 0;
+		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
 
 		return revisedOfferID;
 	};
 
 
-	async function createContinuedOffer({offer, offerStatus, offerProducts, productPricing, offerRevision, req}){
+	async function createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req}){
 
 		const continuedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-C${offerRevision.NEXTCONTINUEDOFFERNO}`;
 		const continuedOffer = {...offer};
@@ -535,9 +539,9 @@ module.exports = (srv) => {
 		await INSERT.into(PT_TMOFPR).entries(continuedOfferProducts);
 		// 4. create product pricing
 		await INSERT.into(PT_TMBDPR).entries(continuedProductsPricing);
-		// 5. update first offer
-		offer.ContinuationOfferNo = offer.ContinuationOfferNo + 1;
-		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
+		// 5. update  parentOffer
+		parentOffer.ContinuationOfferNo = parentOffer.ContinuationOfferNo + 1;
+		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
 
 		return continuedOfferID;
 	};
