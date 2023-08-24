@@ -429,24 +429,30 @@ module.exports = (srv) => {
 
 
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
+		const parentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID.split('-').slice(0,4).join("-")});
 		const offerStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: offerID, Active: 1});
 
 		// checks 
-		if(offerStatus.STATUS !== "Quotation Submitted" || offerStatus.STATUS !== "Results Recorded"){
-			req.error({ code: 409, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
+		if(!offer){
+			return req.error({ code: 403, message: `Offer "${offerID}" is not active. Only active offer can be copied.`, target: "PT_TMOFRS"});
+		}
+
+		if(offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded"){
+			return req.error({ code: 403, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
 		}
 
 		const offerProducts = await SELECT.from(PT_TMOFPR).where({OfferID: offerID, Active: 1});
+		const productPricing = await SELECT.from(PT_TMBDPR).where({OfferID: offerID, Active: 1, ActiveTier: 0, LotID: 1 })
 		const offerRevision = await SELECT.one.from(OfferRevisions).where({TENDERID: offer.TenderID, TENDEROFFERNO: offer.TenderOfferNo});
 		
 
 		switch(type){
-			case "revisedoffer": return createRevisedOffer({offer, offerStatus, offerProducts, offerRevision, req});
-			case "continuedoffer": return createContinuedOffer({offer, offerStatus, offerProducts, offerRevision, req});
+			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
+			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
 		}
 	});
 
-	async function createRevisedOffer({offer, offerStatus, offerProducts, offerRevision, req}){
+	async function createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req}){
 		const todaysDate = new Date().toISOString().substring(0,10);
 		const revisedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-R${offerRevision.NEXTREVISEDOFFERNO}`;
 
@@ -455,6 +461,7 @@ module.exports = (srv) => {
 		revisedOffer.CreationDate = todaysDate;
 		revisedOffer.InternalBidDueDate = todaysDate;
 		revisedOffer.NewOfferDueDate = todaysDate;
+		revisedOffer.RevisedOfferNo = parentOffer.RevisedOfferNo + 1;
 
 		const revisedOfferStatus = {...offerStatus};
 		revisedOfferStatus.OfferID = revisedOfferID;
@@ -467,20 +474,34 @@ module.exports = (srv) => {
 			return revisedProduct;
 		});
 
+		const revisedProductsPricing = productPricing.map(pr => {
+			const revisedProductPricing = {...pr};
+			revisedProductPricing.OfferID = revisedOfferID;
+			revisedProductPricing.SubmittedOn = todaysDate;
+			return revisedProductPricing;
+		});
+
 		// 1. create revised offer
 		await INSERT.into(PT_TMOFRS).entries(revisedOffer);
 		// 2. create revised offer status
 		await INSERT.into(PT_TMTNOFST).entries(revisedOfferStatus);
 		// 3. create revised products
 		await INSERT.into(PT_TMOFPR).entries(revisedOfferProducts);
-		// 4. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
+		// 4. create product pricing
+		await INSERT.into(PT_TMBDPR).entries(revisedProductsPricing);
+		// 5. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
 		offer.ActiveOffer = 0;
-		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID})
+		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
 
+		parentOffer.RevisedOfferNo = parentOffer.RevisedOfferNo + 1;
+		parentOffer.ActiveOffer = 0;
+		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
+
+		return revisedOfferID;
 	};
 
 
-	async function createContinuedOffer({offer, offerStatus, offerProducts, offerRevision, req}){
+	async function createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req}){
 
 		const continuedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-C${offerRevision.NEXTCONTINUEDOFFERNO}`;
 		const continuedOffer = {...offer};
@@ -488,14 +509,41 @@ module.exports = (srv) => {
 		continuedOffer.OfferID = continuedOfferID;
 		continuedOffer.CreationDate = todaysDate;
 		continuedOffer.InternalBidDueDate = todaysDate;
-		continuedOffer.NewOfferDueDate = todaysDate;
+		continuedOffer.NewOfferDueDate = todaysDate;	
+		continuedOffer.ContinuationOfferNo = parentOffer.ContinuationOfferNo + 1;
 
 
-		// 1. create revided offer
-		// 2. creatre new status
-		// 3. create products
+		const continuedOfferStatus = {...offerStatus};
+		continuedOfferStatus.OfferID = continuedOfferID;
+		continuedOfferStatus.STATUS = "Offer Created";
+		continuedOfferStatus.Date = todaysDate;
 
+		const continuedOfferProducts = offerProducts.map(pr => {
+			const continuedProduct = {...pr};
+			continuedProduct.OfferID = continuedOfferID;
+			return continuedProduct;
+		});
 
+		const continuedProductsPricing = productPricing.map(pr => {
+			const cpp = {...pr};
+			cpp.OfferID = continuedOfferID;
+			cpp.SubmittedOn = todaysDate;
+			return cpp;
+		});
+
+		// 1. create revised offer
+		await INSERT.into(PT_TMOFRS).entries(continuedOffer);
+		// 2. create revised offer status
+		await INSERT.into(PT_TMTNOFST).entries(continuedOfferStatus);
+		// 3. create revised products
+		await INSERT.into(PT_TMOFPR).entries(continuedOfferProducts);
+		// 4. create product pricing
+		await INSERT.into(PT_TMBDPR).entries(continuedProductsPricing);
+		// 5. update  parentOffer
+		parentOffer.ContinuationOfferNo = parentOffer.ContinuationOfferNo + 1;
+		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
+
+		return continuedOfferID;
 	};
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
