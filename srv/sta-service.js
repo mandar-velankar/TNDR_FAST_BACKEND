@@ -429,8 +429,9 @@ module.exports = (srv) => {
 
 
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
-		const parentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID.split('-').slice(0,4).join("-")});
 		const offerStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: offerID, Active: 1});
+		const parentOfferID = offerID.split('-').slice(0,4).join("-");
+		const parentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: parentOfferID});
 
 		// checks 
 		if(!offer){
@@ -492,7 +493,9 @@ module.exports = (srv) => {
 		// 5. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
 		offer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
-
+		offerStatus.STATUS = "Inactive";
+		await UPDATE(PT_TMTNOFST).with (offerStatus).where({OfferID: offer.OfferID});
+		// 6. update the parent offer
 		parentOffer.RevisedOfferNo = parentOffer.RevisedOfferNo + 1;
 		parentOffer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
