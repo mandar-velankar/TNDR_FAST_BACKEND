@@ -432,7 +432,6 @@ module.exports = (srv) => {
 		const offerStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: offerID, Active: 1});
 		const parentOfferID = offerID.split('-').slice(0,4).join("-");
 		const parentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: parentOfferID});
-		const parentOfferStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: parentOfferID});
 
 		// checks 
 		if(!offer){
@@ -449,12 +448,12 @@ module.exports = (srv) => {
 		
 
 		switch(type){
-			case "revisedoffer": return createRevisedOffer({offer, parentOffer, parentOfferStatus, offerStatus, offerProducts, productPricing, offerRevision, req});
-			case "continuedoffer": return createContinuedOffer({offer, parentOffer, parentOfferStatus, offerStatus, offerProducts, productPricing, offerRevision, req});
+			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
+			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
 		}
 	});
 
-	async function createRevisedOffer({offer, parentOffer, parentOfferStatus, offerStatus, offerProducts, productPricing, offerRevision, req}){
+	async function createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req}){
 		const todaysDate = new Date().toISOString().substring(0,10);
 		const revisedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-R${offerRevision.NEXTREVISEDOFFERNO}`;
 
@@ -494,18 +493,18 @@ module.exports = (srv) => {
 		// 5. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
 		offer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
+		offerStatus.STATUS = "Inactive";
+		await UPDATE(PT_TMTNOFST).with (offerStatus).where({OfferID: offer.OfferID});
 		// 6. update the parent offer
 		parentOffer.RevisedOfferNo = parentOffer.RevisedOfferNo + 1;
 		parentOffer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
-		parentOfferStatus.STATUS = "Inactive";
-		await UPDATE(PT_TMTNOFST).with (parentOfferStatus).where({OfferID: parentOffer.OfferID});
 
 		return revisedOfferID;
 	};
 
 
-	async function createContinuedOffer({offer, parentOffer, parentOfferStatus, offerStatus, offerProducts, productPricing, offerRevision, req}){
+	async function createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req}){
 
 		const continuedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-C${offerRevision.NEXTCONTINUEDOFFERNO}`;
 		const continuedOffer = {...offer};
