@@ -549,6 +549,19 @@ module.exports = (srv) => {
 		return continuedOfferID;
 	};
 
+	srv.on("softDeleteOffer", async (req) => {
+		const { data: {offerID} } = req;
+
+		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
+
+		if(!offer){
+			return req.error({ code: 403, message: `Offer "${offerID}" is not active. Only active offer can be removed.`, target: "PT_TMOFRS"});
+		}
+		await UPDATE(PT_TMOFRS).with ({Active: 0}).where({OfferID: offer.OfferID});
+		return offerID;
+	})
+
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
 
 		// validate form
