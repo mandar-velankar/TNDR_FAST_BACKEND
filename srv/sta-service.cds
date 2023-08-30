@@ -157,6 +157,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String) returns String;
+    action softDeleteOffer(offerID:String) returns String;
 
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
         *,
