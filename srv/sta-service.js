@@ -377,8 +377,6 @@ module.exports = (srv) => {
 		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
 
 		//check if dates are correct
-		if(moment(req.data.PublicationDate).isBefore(today))
-			req.error({ code: 404, message: "Publication date can not be in the past.", target: "PublicationDate" });
 		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
 			req.error({ code: 404, message: "Publication date should be before the offer due date.", target: "PublicationDate" });
 
