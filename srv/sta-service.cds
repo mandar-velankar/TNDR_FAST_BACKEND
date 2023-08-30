@@ -154,7 +154,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         RequestedVolume,
         (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
         Offer.Currency as Currency
-    }; // Form used in the Offer tab - offer products
+    } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String) returns String;
 
