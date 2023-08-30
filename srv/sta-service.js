@@ -852,8 +852,8 @@ module.exports = (srv) => {
 			'PriceConditionDiscountWithFOCView'
 		], 
 		async (req) => {
-			upsertPriceCondition(req);
-			upsertProductPricing(req);
+			await upsertPriceCondition(req);
+			await upsertProductPricing(req);
 			return req.data;
 		}
 	);
