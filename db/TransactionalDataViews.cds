@@ -491,7 +491,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     key tender.TenderID as TENDER_ID,
     tender.Classification as CLASSIFICATION,
     tender.TenderName as TENDER_NAME,
-    tender.Institute.Region.ID as Region_ID,
+    tender.Institute.Region.ID as REGION_ID,
     tender.Institute.InstituteName as INSTITUTE,
     tender.Brands as BRAND,
     tender.Offer.Division as DIVISION,
