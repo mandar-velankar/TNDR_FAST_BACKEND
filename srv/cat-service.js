@@ -786,6 +786,7 @@ module.exports = (srv) => {
 		//1: Optional
 		//2: Mandatory Notification
 		//3: Mandatory Approval
+		let supply=(offer.CLASSIFICATION === 'Tender') ? 2 : 1;
 		let Difference_In_Days=0;
         const whereProductTypeProfitability = {
             CountryCode: offer.COUNTRYCODE,
@@ -821,7 +822,7 @@ module.exports = (srv) => {
         if(product.DIVISION === 'Radiology'){
             const ProductProfitability = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
             dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
-			
+//EHQUT-392059-Spain - mandatory notifications to Supply for all offers		
 // EFRCL- 360368- Spain- changes in approval workflow for Radiology(Profit, floor price)
 // EFRCL- 377753- Spain - changes in approval workflow for Pharma
             if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability >= 40){
@@ -830,6 +831,9 @@ module.exports = (srv) => {
                         case "KAMS":
                             oApproverType.ValidationType = 3;
                             break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
                     }
@@ -843,6 +847,9 @@ module.exports = (srv) => {
                         case "BU/RAM":
                             oApproverType.ValidationType = 3;
                             break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
                     }
@@ -860,6 +867,9 @@ module.exports = (srv) => {
                         case "BU/RAM":
                             oApproverType.ValidationType = 3;
                             break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
                     }
@@ -881,6 +891,9 @@ module.exports = (srv) => {
 					case "Financial Business Partner":
 						oApproverType.ValidationType = 3;
 						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
 					default:
 						oApproverType.ValidationType = oApproverType.ValidationType;
 				}
@@ -893,6 +906,9 @@ module.exports = (srv) => {
 							break;
 						case "BU/RAM 2":
 							oApproverType.ValidationType = 3;
+							break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
 							break;
 						default:
 							oApproverType.ValidationType = oApproverType.ValidationType;
@@ -916,6 +932,9 @@ module.exports = (srv) => {
                         case "Controlling":
                             oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
                             break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
                         default:
                             oApproverType.ValidationType = oApproverType.ValidationType;
                     }
