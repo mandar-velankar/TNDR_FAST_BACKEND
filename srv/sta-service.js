@@ -267,7 +267,7 @@ module.exports = (srv) => {
 				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, aProductSKUs);
 			}
 
-			searchValue = req.query.SELECT.where[16]?.xpr?.[0]?.args[1]?.val;
+			searchValue = req.query.SELECT.where[20]?.xpr?.[0]?.args[1]?.val;
 		}
 		// sort by countrycode, then brand name, then product name
 		results.sort((a,b)=> ( a.COUNTRY_CODE.localeCompare(b.COUNTRY_CODE) || a.BRAND_NAME.localeCompare(b.BRAND_NAME) || a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME)   ));
@@ -377,8 +377,6 @@ module.exports = (srv) => {
 		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
 
 		//check if dates are correct
-		if(moment(req.data.PublicationDate).isBefore(today))
-			req.error({ code: 404, message: "Publication date can not be in the past.", target: "PublicationDate" });
 		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
 			req.error({ code: 404, message: "Publication date should be before the offer due date.", target: "PublicationDate" });
 
@@ -429,8 +427,9 @@ module.exports = (srv) => {
 
 
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
-		const parentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID.split('-').slice(0,4).join("-")});
 		const offerStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: offerID, Active: 1});
+		const parentOfferID = offerID.split('-').slice(0,4).join("-");
+		const parentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: parentOfferID});
 
 		// checks 
 		if(!offer){
@@ -492,7 +491,9 @@ module.exports = (srv) => {
 		// 5. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
 		offer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
-
+		offerStatus.STATUS = "Inactive";
+		await UPDATE(PT_TMTNOFST).with (offerStatus).where({OfferID: offer.OfferID});
+		// 6. update the parent offer
 		parentOffer.RevisedOfferNo = parentOffer.RevisedOfferNo + 1;
 		parentOffer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
@@ -545,6 +546,19 @@ module.exports = (srv) => {
 
 		return continuedOfferID;
 	};
+
+	srv.on("softDeleteOffer", async (req) => {
+		const { data: {offerID} } = req;
+
+		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
+
+		if(!offer){
+			return req.error({ code: 403, message: `Offer "${offerID}" is not active. Only active offer can be removed.`, target: "PT_TMOFRS"});
+		}
+		await UPDATE(PT_TMOFRS).with ({Active: 0}).where({OfferID: offer.OfferID});
+		return offerID;
+	})
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
 
