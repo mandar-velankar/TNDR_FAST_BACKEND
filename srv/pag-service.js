@@ -365,7 +365,7 @@ module.exports = async (srv) => {
             stopTrace("MostRecentConsumerPricesView");
         }
 
-
+        //EHQUT-397963-Italy-System crashes using filter in price agreement
         let mainConditionIDs = [];
         let rappelConditionIDs = [];
         let focConditionIDs = [];
@@ -373,6 +373,7 @@ module.exports = async (srv) => {
         let priceConditionRappelAll = [];
         let discountConditionsAll = [];
         let priceConditionFOCAll = [];
+        if (countrycodes && countrycodes.length > 0 ){
         if (req.query.SELECT.one || ( countrycodes[0].CountryCode === 'ES' && ( hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0))) {
             for (const condition of priceConditionsAll) {
                 if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
@@ -409,6 +410,8 @@ module.exports = async (srv) => {
                 stopTrace("FOCPriceCondition");
             }
         }
+    }
+        
         // use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
         // 2. calculate the fields
         // Calculation is done by a worker
@@ -707,7 +710,7 @@ module.exports = async (srv) => {
         }
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
-       console.log(customerPrices.length);
+      
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
        // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
