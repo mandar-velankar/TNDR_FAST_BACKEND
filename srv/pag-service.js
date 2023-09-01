@@ -365,7 +365,7 @@ module.exports = async (srv) => {
             stopTrace("MostRecentConsumerPricesView");
         }
 
-        //EHQUT-397963-Italy-System crashes using filter in price agreement
+
         let mainConditionIDs = [];
         let rappelConditionIDs = [];
         let focConditionIDs = [];
@@ -411,7 +411,6 @@ module.exports = async (srv) => {
             }
         }
     }
-        
         // use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
         // 2. calculate the fields
         // Calculation is done by a worker
@@ -710,8 +709,9 @@ module.exports = async (srv) => {
         }
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
-<
+
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
+
        // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
         return req.reply();
