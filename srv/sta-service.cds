@@ -142,6 +142,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.SellingCompanyDetails.LegalEntityID
     };*/ // Form used in the Offer tab
 
+    entity CountryProductPackView as select from MasterData.PT_TMCTPRDPCK{
+        *
+    };
+
+    entity DistinctProductScopeView as select from CountryProductPackView {
+        COUNTRYCODE as CountryCode,
+        key ProductScope
+    } group by ProductScope, COUNTRYCODE;
+
     entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR{
         *,
         key ProductCode,
@@ -463,4 +472,5 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         LotID,
         Institute.InstituteName
     };
+
 }
