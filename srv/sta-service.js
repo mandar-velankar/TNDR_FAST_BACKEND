@@ -2303,8 +2303,8 @@ module.exports = (srv) => {
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetOfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.NetOfferPrice * product.PACKSIZE) : 
 																(priceCondition.NetOfferPrice - priceCondition.NetPrice) / priceCondition.NetOfferPrice;
 				case 'BudgetedProfitability':
-					comparisonPrice = product.UOM === 'Unit' ? (priceCondition.NetPrice - (productInfo.cogsEurUnit * product.SPOT_RATE)) / (productInfo.cogsEurUnit * product.SPOT_RATE) :
-																(priceCondition.NetPrice - (productInfo.cogsEurPack * product.SPOT_RATE)) / (productInfo.cogsEurPack * product.SPOT_RATE);
+					comparisonPrice = product.UOM === 'Unit' ? (priceCondition.NetPrice - (productInfo.cogsEurUnit * product.SPOT_RATE)) / priceCondition.NetPrice :
+																(priceCondition.NetPrice - (productInfo.cogsEurPack * product.SPOT_RATE)) / priceCondition.NetPrice;
 			}
 
 			if(comparisonPrice < policy.Value){
