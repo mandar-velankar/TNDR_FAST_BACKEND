@@ -405,6 +405,7 @@ module.exports = (srv) => {
         !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
         !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
 		
+		req.data.NewOfferDueDate = req.data.OfferDueDate;
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
 		delete req.data.InstituteID;

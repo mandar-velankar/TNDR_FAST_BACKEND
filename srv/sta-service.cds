@@ -123,6 +123,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     @cds.redirection.target
     entity OfferFormView as select from TransactionalData.PT_TMOFRS{
         *,
+        @Core.Computed: false
         ifnull(NewOfferDueDate, Tender.BidDueDate) as OfferDueDate: Date,
         Tender.InstituteID as InstituteID,
         Tender.TenderChannel as Channel,
