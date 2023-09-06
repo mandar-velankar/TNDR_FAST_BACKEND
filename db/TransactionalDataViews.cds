@@ -482,7 +482,7 @@ entity BrandsInTender as select from TransactionalData.PT_TMTEND as tender{
 where tender.Active = 1
 and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1;
-
+//EHQUT-397790-Italy-Search function is slow and system crashes
 //EHQUT-189207-Creation Date instead of BidDueDate on main page
 //EHQUT-197392-MEA - additional edit access to Tender Results and Delivery Tracking tabs
 //EFRCL-283873- Italy replace Publication date with Termination date
@@ -491,6 +491,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     key tender.TenderID as TENDER_ID,
     tender.Classification as CLASSIFICATION,
     tender.TenderName as TENDER_NAME,
+    tender.Institute.Region.ID as REGION_ID,
     tender.Institute.InstituteName as INSTITUTE,
     tender.Brands as BRAND,
     tender.Offer.Division as DIVISION,
