@@ -709,7 +709,6 @@ module.exports = async (srv) => {
         }
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
-
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
 
        // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
@@ -730,9 +729,7 @@ module.exports = async (srv) => {
 
         console.log(`Prepare requests of customer prices`);
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice));
-
-        //EHQUT-386660-Italy-Issue with FoC synchronization
-        const updateFOCConditionPromises = focPriceConditions.map((custPrice,index) => updateFOCcustPrices(custPrice,index));
+        const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice));
         const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
 
         // Synchronize
@@ -1110,8 +1107,8 @@ module.exports = async (srv) => {
     //     return req.reply(result);
 
     // });
-    //EHQUT-386660-Italy-Issue with FoC synchronization
-    async function updateFOCcustPrices(customerPrice,index) {
+
+    async function updateFOCcustPrices(customerPrice) {
         console.log(`Prepare sending update FOC customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
 
@@ -1183,7 +1180,7 @@ module.exports = async (srv) => {
             mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.FOCmaterialNumber);
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 921;
-            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1+ index;
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1;
             delete body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"];
         }
         // Spain only
