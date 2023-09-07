@@ -809,7 +809,7 @@ module.exports = (srv) => {
 					AP_ID: oApprovalData.AP_ID,
 					RestoreKey: oApprovalData.RestoreKey,
 					Statustime: sStatusTime,
-					Submittedby: "ELLTZ", //sSubmittedBy,
+					Submittedby: req.user.id, //sSubmittedBy,
 					ApproverDate: oApprovalData.ApproverDate,
 					ApproverType: oApprovalData.ApproverType,
 					FLOW_ID: oApprovalData.FLOW_ID,
