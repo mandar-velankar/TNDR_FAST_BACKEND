@@ -15,13 +15,13 @@
       "description": "f_tndr_cag_technical_user"
     },
     {
-      "name": "$XSAPPNAME.f_tndr_cag_brcontracting_user",
-      "description": "f_tndr_cag_brcontracting_user"
-    },
-    {
       "name": "$XSAPPNAME.f_tndr_cag_tnd_user",
       "description": "f_tndr_cag_tnd_user"
     },
+	{
+        "name": "$XSAPPNAME.f_tndr_cag_brcontracting_user",
+        "description": "f_tndr_cag_brcontracting_user"
+     },
     {
       "name": "$XSAPPNAME.f_tndr_cag_createopportunity_user",
       "description": "f_tndr_cag_createopportunity_user"
@@ -59,30 +59,41 @@
       "description": "f_tndr_cag_cpi_user"
     },
     {
-      "name": "$XSAPPNAME.f_tndr_cag_cogs_user",
-      "description": "f_tndr_cag_cogs_user"
-    },
-    {
-      "name": "$XSAPPNAME.f_tndr_cag_spaintenderview_user",
-      "description": "f_tndr_cag_spaintenderview_user"
-    },
-    {
-      "name": "$XSAPPNAME.f_tndr_cag_Pharmatenderview_user",
-      "description": "f_tndr_cag_Pharmatenderview_user"
-    },
-    {
-      "name": "$XSAPPNAME.f_tndr_cag_Radiologytenderview_user",
-      "description": "f_tndr_cag_Radiologytenderview_user"
-    },
-    {
-      "name": "$XSAPPNAME.f_tndr_cag_meatenderview_user",
-      "description": "f_tndr_cag_meatenderview_user"
-    },
-    {
       "name": "$XSAPPNAME.f_tndr_cag_consumerprice_user",
       "description": "f_tndr_cag_consumerprice_user"
+    },
+	{
+		"name": "$XSAPPNAME.f_tndr_cag_cogs_user",
+		"description": "f_tndr_cag_cogs_user"
+	},
+	{
+        "name": "$XSAPPNAME.f_tndr_cag_spaintenderview_user",
+        "description": "f_tndr_cag_spaintenderview_user"
+    },
+	{
+      "name": "$XSAPPNAME.f_tndr_cag_Pharmatenderview_user",
+      "description": "f_tndr_cag_Pharmatenderview_user"
+	   },
+	  {
+      "name": "$XSAPPNAME.f_tndr_cag_Radiologytenderview_user",
+      "description": "f_tndr_cag_Radiologytenderview_user"
+	  },
+    {   
+        "name": "$XSAPPNAME.f_tndr_cag_meatenderview_user",
+        "description": "f_tndr_cag_meatenderview_user"
+    },
+    {
+        "name": "$XSAPPNAME.f_tndr_cag_whcproposalcreator_user",
+        "description": "f_tndr_cag_whcproposalcreator_user"
+    },
+    {
+        "name": "$XSAPPNAME.f_tndr_cag_whcapprover_user",
+        "description": "f_tndr_cag_whcapprover_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_standardtender_user",
+      "description": "f_tndr_cag_standardtender_user"
     }
-    
   ],
   "attributes": [],
   "role-templates": [
@@ -110,15 +121,15 @@
       ],
       "attribute-references": []
     },
-    {
-      "name": "f_tndr_cag_brcontracting_user",
-      "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_brcontracting_user"
-      ],
-      "attribute-references": []
-    },
-    {
+	{
+        "name": "f_tndr_cag_brcontracting_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_brcontracting_user"
+        ],
+        "attribute-references": []
+      },
+    { 
       "name": "f_tndr_cag_tnd_user",
       "description": "generated",
       "scope-references": [
@@ -198,23 +209,23 @@
       ],
       "attribute-references": []
     },
-    {
-      "name": "f_tndr_cag_cogs_user",
-      "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_cogs_user"
-      ],
-      "attribute-references": []
+	{
+        "name": "f_tndr_cag_cogs_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_cogs_user"
+        ],
+        "attribute-references": []
     },
     {
-      "name": "f_tndr_cag_spaintenderview_user",
-      "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
-      ],
-      "attribute-references": []
+        "name": "f_tndr_cag_spaintenderview_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
+        ],
+        "attribute-references": []
     },
-    {
+	{
       "name": "f_tndr_cag_Pharmatenderview_user",
       "description": "generated",
       "scope-references": [
@@ -230,22 +241,45 @@
       ],
       "attribute-references": []
     },
+    {   
+        "name": "f_tndr_cag_meatenderview_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_meatenderview_user"
+        ],
+        "attribute-references": []
+    },
     {
-      "name": "f_tndr_cag_meatenderview_user",
-      "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_meatenderview_user"
-      ],
-      "attribute-references": []
+        "name": "f_tndr_cag_whcproposalcreator_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_whcproposalcreator_user"
+        ],
+        "attribute-references": []
+    },
+    {
+        "name": "f_tndr_cag_whcapprover_user",
+        "description": "generated",
+        "scope-references": [
+          "$XSAPPNAME.f_tndr_cag_whcapprover_user"
+        ],
+        "attribute-references": []
     },
     {
       "name": "f_tndr_cag_consumerprice_user",
-      "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_consumerprice_user"
-      ],
+      "description": "generated",							   
+      "scope-references": [				 
+        "$XSAPPNAME.f_tndr_cag_consumerprice_user"												 
+      ],  
       "attribute-references": []
-    }
-    
+    },
+    {
+      "name": "f_tndr_cag_standardtender_user",
+      "description": "generated",							   
+      "scope-references": [				 
+        "$XSAPPNAME.f_tndr_cag_standardtender_user"												 
+      ],  
+      "attribute-references": []
+    }		  
   ]
 }
