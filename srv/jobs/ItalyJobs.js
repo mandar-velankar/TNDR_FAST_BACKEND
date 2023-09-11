@@ -615,6 +615,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                 let Type = cust.E1KNA1M_KTOKD;
+                console.log(Type);
                 if(Type === '0001')
                 {
                     Type ='Ship To'
@@ -690,6 +691,16 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             const customers = await tx.run(SELECT.from(ItalyCustomerUpdateInstituteEntriesView));
 
             const promises = customers.map(cust => {
+                let UpdateType = cust.E1KNA1M_KTOKD;
+                console.log(UpdateType);
+                if(UpdateType === '0001')
+                {
+                    UpdateType ='Ship To'
+                }  
+                if(UpdateType === '0002')
+                {
+                    UpdateType ='Sold To'
+                }
                 const obj = {
                     CountryCode: cust.E1KNA1M_LAND1,
                     CustomerID: cust.E1KNA1M_KUNNR,
@@ -700,7 +711,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
                     ActiveRecord: "Yes",
-                    Comment: cust.E1KNVVM_KVGR3, // temp to keep track of code
+                    Comment: `${cust.E1KNVVM_KVGR3},${UpdateType}`, // temp to keep track of code
                     City: cust.E1KNA1M_ORT01,
                     INSTITUTE_HIERARCHY_ID: 1,
                     // State: "",
