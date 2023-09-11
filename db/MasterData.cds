@@ -336,6 +336,7 @@ entity PT_TMCTPRDPCK{
     PRAF_COMMENTS : String(255);
 	RegistrationDate : Date;
 	RegistrationValidUntil : Date; 
+	ProductScope: String(100);
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
