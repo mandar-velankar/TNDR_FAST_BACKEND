@@ -615,7 +615,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                 let Type = cust.E1KNA1M_KTOKD;
-               // console.log(cust);
+                console.log(cust,"insert");
                 if(Type === '0001')
                 {
                     Type ='Ship To'
