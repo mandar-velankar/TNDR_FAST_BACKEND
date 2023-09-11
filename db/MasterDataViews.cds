@@ -270,6 +270,7 @@ group by customer.E1KNA1M.LAND1,
 	customer.E1KNA1M.STKZN,
 	customer.E1KNVVM.KVGR3,
 	customer.E1KNA1M.ORT01,
+	customer.E1KNA1M.KTOKD,
 	province.RegionID,
 	institute.InstituteID,
 	institute.CountryCode;
