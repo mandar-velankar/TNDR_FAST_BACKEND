@@ -1,7 +1,7 @@
 type E1KNA1M : {
 	MSGFN				: String(3);			// Function
 	KUNNR				: String(10);			// Customer Number
-	ANRED				: String(15);			// Title
+	ANRED				: String(15);			//  
 	AUFSD				: String(2);			// Central order block for customer
 	BAHNE				: String(25);			// Express train station
 	BAHNS				: String(25);			// Train station
