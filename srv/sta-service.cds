@@ -39,7 +39,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity CountryRegionsTableView as projection on MasterData.CountryRegions;
 
-    entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
+    entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR;
+    entity AppConfig @readonly as projection on AdminData.AppConfig;
   
     entity AwardCriteriaTableView as select from TransactionalData.PT_TMTEND as tend
     left outer join TransactionalData.PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
