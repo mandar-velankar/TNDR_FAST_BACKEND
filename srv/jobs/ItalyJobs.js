@@ -691,15 +691,15 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
             const promises = customers.map(cust => {
                 let UpdateType = cust.E1KNA1M_KTOKD;
-               
-                if(UpdateType === '0001' && UpdateType != '')
-                {
-                    UpdateType ='Ship To'
-                }  
-                if(UpdateType === '0002' && UpdateType != '')
-                {
-                    UpdateType ='Sold To'
-                }
+               console.log(UpdateType);
+                // if(UpdateType === '0001' && UpdateType != '')
+                // {
+                //     UpdateType ='Ship To'
+                // }  
+                // if(UpdateType === '0002' && UpdateType != '')
+                // {
+                //     UpdateType ='Sold To'
+                // }
                 const obj = {
                     CountryCode: cust.E1KNA1M_LAND1,
                     CustomerID: cust.E1KNA1M_KUNNR,
@@ -710,7 +710,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
                     ActiveRecord: "Yes",
-                    Comment: `${cust.E1KNVVM_KVGR3},${UpdateType}`, // temp to keep track of code
+                    Comment: `${cust.E1KNVVM_KVGR3},${cust.E1KNA1M_KTOKD}`, // temp to keep track of code
                     City: cust.E1KNA1M_ORT01,
                     INSTITUTE_HIERARCHY_ID: 1,
                     // State: "",
