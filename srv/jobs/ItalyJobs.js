@@ -681,8 +681,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             const customers = await tx.run(SELECT.from(ItalyCustomerUpdateInstituteEntriesView));
 
             const promises = customers.map(cust => {
-                let UpdateType = cust.E1KNA1M_KTOKD;
-               console.log(UpdateType);
+               // let UpdateType = cust.E1KNA1M_KTOKD;
+            //    console.log(UpdateType);
                 // if(UpdateType === '0001' && UpdateType != '')
                 // {
                 //     UpdateType ='Ship To'
