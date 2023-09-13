@@ -614,16 +614,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
-                let Type = cust.E1KNA1M_KTOKD;
-                if(Type === '0001' && Type != '')
-                {
-                    Type ='Ship To'
-                }  
-                if(Type === '0002' && Type != '')
-                {
-                    Type ='Sold To'
-                }
-                
+                                
                 return {
                     CountryCode: cust.E1KNA1M_LAND1,
                     InstituteID: ++nextInstituteID,
@@ -637,7 +628,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
                     ActiveRecord: "Yes",
-                    Comment: `${cust.E1KNVVM_KVGR3},${Type}`, // temp to keep track of code
+                    Comment: cust.E1KNVVM_KVGR3, // temp to keep track of code
                     City: cust.E1KNA1M_ORT01,
                     INSTITUTE_HIERARCHY_ID: 1,
                     State: "",
@@ -710,7 +701,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
                     ActiveRecord: "Yes",
-                    Comment: `${cust.E1KNVVM_KVGR3},${cust.E1KNA1M_KTOKD}`, // temp to keep track of code
+                    Comment: cust.E1KNA1M_KTOKD, // temp to keep track of code
                     City: cust.E1KNA1M_ORT01,
                     INSTITUTE_HIERARCHY_ID: 1,
                     // State: "",
