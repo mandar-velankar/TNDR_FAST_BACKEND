@@ -453,7 +453,7 @@ module.exports = class processOpportunities extends BaseJob {
         
          if(!hasLot){
             lots.push({
-                LotID    : (product.LotID === null ||product.LotID === 0) ? 1 : product.LotID,
+                LotID    : product.LotID,
                 OfferID  : product.OfferID,
                 createdBy: "IBIZ",
                 modifiedBy: "IBIZ"
@@ -477,11 +477,9 @@ module.exports = class processOpportunities extends BaseJob {
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Products into FAST table (PT_TMOFPR) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFPR -> created: ${productsWithoutID.length}`);
         // Lots
-        console.log(lots.LotID,"lots");
+        
         lots && lots.length > 0 && await tx.run(INSERT(lots).into(Lots));
-        // if(lots.length > 0){
-        //     lots.LotID
-        // }
+       
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Product Lots into FAST table (Lots) successfully completed.`);
         console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
         return true;
@@ -942,7 +940,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 AnticipatedRequestedQuantity: null,
                 MaxPrice                 : null,
                 Channel                  : null,
-                LotID                    : ( curr.NU_LOTE=== null ||curr.NU_LOTE === 0) ? 1 : curr.NU_LOTE,
+                LotID                    : curr.NU_LOTE,
                 WorkflowProductID        : curr.ID_CC_QP,
                 IbizWorkflowID           : curr.ID_QP
             }
@@ -1001,7 +999,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 NetPrice              : null,
                 NetPrice_OfPaid       : 0,
                 PRICE_UPDATE          : null,
-                LotID                 : ( curr.NU_LOTE=== null ||curr.NU_LOTE === 0) ? 1 : curr.NU_LOTE
+                LotID                 : curr.NU_LOTE
             }
         );
         return prev;
@@ -1067,7 +1065,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 MonthlyRentPerUnit                  : null,
                 AnnualValue                         : null,
                 ReferencePriceAgreement             : null, 
-                LotID                               : ( curr.NU_LOTE=== null ||curr.NU_LOTE === 0) ? 1 : curr.NU_LOTE,
+                LotID                               : curr.NU_LOTE,
                 PriceList                           : masterPriceZWP0 && priceList,
                 ICMSTax                             : masterPriceIBRX?.Value,
                 TaxExemption                        : taxExemption,
