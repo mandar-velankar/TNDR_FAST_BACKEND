@@ -1001,7 +1001,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 NetPrice              : null,
                 NetPrice_OfPaid       : 0,
                 PRICE_UPDATE          : null,
-                LotID                 : curr.NU_LOTE
+                LotID                 : ( curr.NU_LOTE=== null ||curr.NU_LOTE === 0) ? 1 : curr.NU_LOTE
             }
         );
         return prev;
@@ -1067,7 +1067,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 MonthlyRentPerUnit                  : null,
                 AnnualValue                         : null,
                 ReferencePriceAgreement             : null, 
-                LotID                               : curr.NU_LOTE,
+                LotID                               : ( curr.NU_LOTE=== null ||curr.NU_LOTE === 0) ? 1 : curr.NU_LOTE,,
                 PriceList                           : masterPriceZWP0 && priceList,
                 ICMSTax                             : masterPriceIBRX?.Value,
                 TaxExemption                        : taxExemption,
