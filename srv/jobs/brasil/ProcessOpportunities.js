@@ -447,12 +447,13 @@ module.exports = class processOpportunities extends BaseJob {
         product.DistributorID = parentOffer.DistributorID;
         // add channel
         product.Channel = (parentOffer.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor';
-
+        console.log(product.LotID,"lotid");
          //add lots
          const hasLot = lots.find(l => l.LotID === product.LotID && l.OfferID === product.OfferID);
+         console.log(hasLot,"haslot");
          if(!hasLot){
             lots.push({
-                LotID    : product.LotID,
+                LotID    : (product.LotID === ''||product.LotID === 0) ? 1 : product.LotID,
                 OfferID  : product.OfferID,
                 createdBy: "IBIZ",
                 modifiedBy: "IBIZ"
