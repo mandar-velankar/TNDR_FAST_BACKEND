@@ -942,7 +942,7 @@ mapIbizOpportunitiestoFASTProduct(directIbizOpportunities, ibizOpportunityItems,
                 AnticipatedRequestedQuantity: null,
                 MaxPrice                 : null,
                 Channel                  : null,
-                LotID                    : curr.NU_LOTE,
+                LotID                    : ( curr.NU_LOTE=== null ||product.LotID === 0) ? 1 : curr.NU_LOTE,
                 WorkflowProductID        : curr.ID_CC_QP,
                 IbizWorkflowID           : curr.ID_QP
             }
