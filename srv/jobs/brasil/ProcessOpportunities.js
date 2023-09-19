@@ -447,13 +447,13 @@ module.exports = class processOpportunities extends BaseJob {
         product.DistributorID = parentOffer.DistributorID;
         // add channel
         product.Channel = (parentOffer.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor';
-        console.log(product.LotID,"lotid");
+        
          //add lots
          const hasLot = lots.find(l => l.LotID === product.LotID && l.OfferID === product.OfferID);
-         console.log(hasLot,"haslot");
+        
          if(!hasLot){
             lots.push({
-                LotID    : (product.LotID === ''||product.LotID === 0) ? 1 : product.LotID,
+                LotID    : (product.LotID === null ||product.LotID === 0) ? 1 : product.LotID,
                 OfferID  : product.OfferID,
                 createdBy: "IBIZ",
                 modifiedBy: "IBIZ"
@@ -477,7 +477,11 @@ module.exports = class processOpportunities extends BaseJob {
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Products into FAST table (PT_TMOFPR) successfully completed.`);
         console.log(`JOB (${this.jobName }): PT_TMOFPR -> created: ${productsWithoutID.length}`);
         // Lots
+        console.log(lots.LotID,"lots");
         lots && lots.length > 0 && await tx.run(INSERT(lots).into(Lots));
+        // if(lots.length > 0){
+        //     lots.LotID
+        // }
         console.log(`JOB (${this.jobName }): Upserting of IBIZ Product Lots into FAST table (Lots) successfully completed.`);
         console.log(`JOB (${this.jobName }): Lots -> created: ${lots.length}`);
         return true;
