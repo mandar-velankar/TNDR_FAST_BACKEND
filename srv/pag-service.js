@@ -729,7 +729,9 @@ module.exports = async (srv) => {
 
         console.log(`Prepare requests of customer prices`);
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice));
-        const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice));
+        //EHQUT-386660-Italy-Issue with FoC synchronization
+        // const updateFOCConditionPromises = focPriceConditions.map((custPrice,index) => updateFOCcustPrices(custPrice,index));
+        const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
         const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
 
         // Synchronize
@@ -1107,7 +1109,7 @@ module.exports = async (srv) => {
     //     return req.reply(result);
 
     // });
-
+ //EHQUT-386660-Italy-Issue with FoC synchronization
     async function updateFOCcustPrices(customerPrice) {
         console.log(`Prepare sending update FOC customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
@@ -1173,6 +1175,7 @@ module.exports = async (srv) => {
         let mikbas = "";
         let mxkbas = "";
         // Italy only
+        //EHQUT-386660-Italy-Issue with FoC synchronization
         if (customerPrice.CountryCode === 'IT') {
             let priceAgreementFOC = await tx.run(SELECT.one.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId).where(whereFOCproductpackID));
             kstbm = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? priceAgreementFOC.FreeGoods * offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && (priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' || priceAgreementFOC.FreeGoods_ABS_PCT === 'STP')) ? priceAgreementFOC.FreeGoods : 0;
