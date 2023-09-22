@@ -608,7 +608,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             let query = SELECT.from(`${ItalyCustomers.name} as customer`)
                         .join(`${CountryProvinces.name} as province`)
                         .on({'customer.E1KNA1M_REGIO' : 'province.Name'})
-                        .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT'});
+                        .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT'});
 
             const customers = await tx.run(query);
            
@@ -798,12 +798,10 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         try{
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        // CustID = CustID.replace(/^0+/, '');
-        let IDs= parseInt(id);
+         let IDs= parseInt(id);
         let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CustomerID= '${IDs}' and CountryCode ='IT'`);
 
         const Institutetype = await tx.run(query);
-        console.log(Institutetype);
         return Institutetype;
         }catch (error) {
             console.log('Updating Institutes has failed.');
