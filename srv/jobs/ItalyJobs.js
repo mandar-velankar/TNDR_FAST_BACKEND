@@ -680,7 +680,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name
             // inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
             // where customer.E1KNA1M_LAND1 = 'IT'`);
-            console.log("update");
+            
             const customers = await tx.run(SELECT.from(ItalyCustomerUpdateInstituteEntriesView));
 
             const promises = customers.map(cust => {
@@ -799,8 +799,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
         // CustID = CustID.replace(/^0+/, '');
-        const ID= parseInt(CustID);
-        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' and CustomerID=ID`);
+        let IDs= parseInt(CustID);
+        console.log(IDs);
+        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' and CustomerID= IDs`);
 
         const Institutetype = await tx.run(query);
         console.log(Institutetype);
