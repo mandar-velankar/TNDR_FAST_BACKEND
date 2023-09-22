@@ -613,8 +613,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             const customers = await tx.run(query);
            
             let nextInstituteID = await this.getLastInstituteID();
-            console.log(nextInstituteID);
-            console.log(customers,"customer");
+            
+            console.log(customers.length,"customer");
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                                 
@@ -798,7 +798,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
     
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        CustID = CustID.replace(/^0+/, '');
+        // CustID = CustID.replace(/^0+/, '');
         const ID= parseInt(CustID);
         let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' and CustomerID=ID`);
 
