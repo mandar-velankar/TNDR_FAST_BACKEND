@@ -698,7 +698,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     CountryCode: cust.E1KNA1M_LAND1,
                     CustomerID: cust.E1KNA1M_KUNNR,
                     InstituteName: cust.E1KNA1M_NAME1,
-                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3) || this.updateInstituteType(cust.E1KNVVM_KUNNR),
+                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3) || this.updateInstituteType(cust.E1KNA1M_KUNNR),
                     Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01}`,
                     ContactNo: cust.E1KNA1M_TELF1,
                     Fax: cust.E1KNA1M_TELFX,
@@ -790,11 +790,12 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
     };
      /**
      * 
-     * @param {String} id Customer group 3
+     * @param {String} typeid Customer group 3
      * @returns {String} InstituteType 
      */
     async updateInstituteType(id){
         const tx = cds.tx();
+        try{
         console.log(id);
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
@@ -802,11 +803,16 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         let IDs= parseInt(id);
         
         console.log(IDs);
-        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' and CustomerID= IDs`);
+        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CustomerID= IDs and CountryCode ='IT'`);
 
         const Institutetype = await tx.run(query);
         console.log(Institutetype);
         return Institutetype;
+        }catch (error) {
+            console.log('Updating Institutes has failed.');
+            console.log(error);
+            await tx.rollback(error);
+        }  
       };
 
     /**
