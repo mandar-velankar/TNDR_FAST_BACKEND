@@ -477,18 +477,7 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
         return num;
     };
 
-    /**
-     * Adds leading zero's to a number
-     * @param {String} num Number
-     * @param {Integer} size Length of the number
-     * @returns 
-     */
-    removeLeadingZeros (num) {
-       
-        num = num.replace(/^0+/, '');
-        console.log(num,"num");
-        return parseInt(num);
-    };
+    
 
     async updateExistingMaterials(materials){
         // TODO: not implemented
@@ -625,6 +614,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
            
             let nextInstituteID = await this.getLastInstituteID();
             console.log(nextInstituteID);
+            console.log(customers,"customer");
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                                 
@@ -808,7 +798,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
     
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        const ID= removeLeadingZeros(CustID);
+        CustID = CustID.replace(/^0+/, '');
+        const ID= parseInt(CustID);
         let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' and CustomerID=ID`);
 
         const Institutetype = await tx.run(query);
