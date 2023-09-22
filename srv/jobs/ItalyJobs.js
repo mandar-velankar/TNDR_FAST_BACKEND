@@ -790,16 +790,17 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
     };
      /**
      * 
-     * @param {String} CustID Customer group 3
+     * @param {String} id Customer group 3
      * @returns {String} InstituteType 
      */
-    async updateInstituteType(CustID){
+    async updateInstituteType(id){
         const tx = cds.tx();
-    
+        console.log(id);
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
         // CustID = CustID.replace(/^0+/, '');
-        let IDs= parseInt(CustID);
+        let IDs= parseInt(id);
+        
         console.log(IDs);
         let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' and CustomerID= IDs`);
 
