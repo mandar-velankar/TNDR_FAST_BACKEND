@@ -695,7 +695,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     CountryCode: cust.E1KNA1M_LAND1,
                     CustomerID: cust.E1KNA1M_KUNNR,
                     InstituteName: cust.E1KNA1M_NAME1,
-                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3),
+                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3) || this.updateInstituteType(cust.E1KNVVM_KUNNR),
                     Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01}`,
                     ContactNo: cust.E1KNA1M_TELF1,
                     Fax: cust.E1KNA1M_TELFX,
@@ -791,7 +791,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
-        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' AND CustomerID='CustID'`);
+        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' AND CustomerID=CustID`);
 
         const Institutetype = await tx.run(query);
         console.log(Institutetype);
