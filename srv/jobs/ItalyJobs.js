@@ -477,6 +477,19 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
         return num;
     };
 
+    /**
+     * Adds leading zero's to a number
+     * @param {String} num Number
+     * @param {Integer} size Length of the number
+     * @returns 
+     */
+    removeLeadingZeros (num) {
+       
+        num = num.replace(/^0+/, '');
+        console.log(num,"num");
+        return parseInt(num);
+    };
+
     async updateExistingMaterials(materials){
         // TODO: not implemented
     };
@@ -592,7 +605,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
             let customerNumbers =  await tx.run(cds.parse.cql (`SELECT CustomerID from ${PT_TMINST.name} WHERE CountryCode = 'IT'`));
             customerNumbers = customerNumbers.map(item => this.addLeadingZeros(item.CustomerID, 10));
-
+            console.log("insert");
             // let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
             // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name`);
 
@@ -611,7 +624,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             const customers = await tx.run(query);
            
             let nextInstituteID = await this.getLastInstituteID();
-            
+            console.log(nextInstituteID);
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                                 
@@ -677,7 +690,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name
             // inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
             // where customer.E1KNA1M_LAND1 = 'IT'`);
-
+            console.log("update");
             const customers = await tx.run(SELECT.from(ItalyCustomerUpdateInstituteEntriesView));
 
             const promises = customers.map(cust => {
@@ -785,13 +798,18 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         }
         return KVGR3[id];
     };
+     /**
+     * 
+     * @param {String} CustID Customer group 3
+     * @returns {String} InstituteType 
+     */
     async updateInstituteType(CustID){
         const tx = cds.tx();
     
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-
-        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' AND CustomerID=CustID`);
+        const ID= removeLeadingZeros(CustID);
+        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' and CustomerID=ID`);
 
         const Institutetype = await tx.run(query);
         console.log(Institutetype);
