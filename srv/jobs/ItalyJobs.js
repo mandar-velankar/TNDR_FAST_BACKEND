@@ -614,10 +614,18 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
            
             let nextInstituteID = await this.getLastInstituteID();
             
-            console.log(customers.length,"customer");
+           
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
-                                
+                let InstType = cust.E1KNA1M_KTOKD;
+                if(InstType === '0001')
+                 {
+                    InstType ='Ship To'
+                 }  
+                if(InstType === '0002')
+                 {
+                    InstType ='Sold To'
+                 }               
                 return {
                     CountryCode: cust.E1KNA1M_LAND1,
                     InstituteID: ++nextInstituteID,
@@ -631,7 +639,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
                     ActiveRecord: "Yes",
-                    Comment: cust.E1KNVVM_KVGR3, // temp to keep track of code
+                    Comment: `${cust.E1KNVVM_KVGR3}, ${InstType}`, // temp to keep track of code
                     City: cust.E1KNA1M_ORT01,
                     INSTITUTE_HIERARCHY_ID: 1,
                     State: "",
@@ -685,8 +693,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
             const promises = customers.map(cust => {
                let UpdateType = cust.E1KNA1M_KTOKD;
-               console.log(UpdateType);
-                if(UpdateType === '0001')
+               if(UpdateType === '0001')
                 {
                     UpdateType ='Ship To'
                 }  
@@ -790,7 +797,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
     };
      /**
      * 
-     * @param {String} typeid Customer group 3
+     * @param {String} id Customer group 3
      * @returns {String} InstituteType 
      */
     async updateInstituteType(id){
