@@ -156,7 +156,7 @@ entity CandidatesView as select from PriceAgreements as pa
 left outer join MasterData.Tenders_in_Regions AS tr on pa.TenderId = tr.TenderID
 inner join MasterData.PT_TMINST AS inst on pa.CountryCode = inst.CountryCode
        and tr.RegionID = inst.RegionID
-       and inst.InstituteType = 'Public Account' and inst.InstituteID not in (select InstituteID from MasterData.PT_TMINST where CountryCode = 'IT' and right(Comment)= 'Ship To')
+       and inst.InstituteType = 'Public Account' and inst.InstituteID not in (select InstituteID from MasterData.PT_TMINST where CountryCode = 'IT' and right(Comment,7)= 'Ship To')
        
 {
     pa.ID as PriceAgreementId,
