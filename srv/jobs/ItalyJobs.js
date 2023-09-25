@@ -620,11 +620,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                 let InstType = cust.E1KNA1M_KTOKD;
                 if(InstType === '0001')
                  {
-                    InstType ='Ship To'
+                    InstType ='Sold To'
                  }  
                 if(InstType === '0002')
                  {
-                    InstType ='Sold To'
+                    InstType ='Ship To'
                  }               
                 return {
                     CountryCode: cust.E1KNA1M_LAND1,
@@ -695,11 +695,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                let UpdateType = cust.E1KNA1M_KTOKD;
                if(UpdateType === '0001')
                 {
-                    UpdateType ='Ship To'
+                    UpdateType ='Sold To'
                 }  
                if(UpdateType === '0002')
                 {
-                    UpdateType ='Sold To'
+                    UpdateType ='Ship To'
                 }
                 const obj = {
                     CountryCode: cust.E1KNA1M_LAND1,
