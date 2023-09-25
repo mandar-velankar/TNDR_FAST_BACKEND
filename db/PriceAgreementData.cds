@@ -151,11 +151,13 @@ entity CustomerPrices_History: managed {
  * This view lists candidate institutes that can participate in a price agreement 
  * but don't have a CustomerPrices set yet
  */
+ //EHQUT-396133-Italy- INC20664196 - Private customers in price agreements for regional tenders
 entity CandidatesView as select from PriceAgreements as pa 
 left outer join MasterData.Tenders_in_Regions AS tr on pa.TenderId = tr.TenderID
 inner join MasterData.PT_TMINST AS inst on pa.CountryCode = inst.CountryCode
        and tr.RegionID = inst.RegionID
-       and inst.InstituteType = 'Public Account' 
+       and inst.InstituteType = 'Public Account' and inst.InstituteID not in (select InstituteID from MasterData.PT_TMINST where CountryCode = 'IT' and right(Comment)= 'Ship To')
+       
 {
     pa.ID as PriceAgreementId,
     key pa.TenderId,
