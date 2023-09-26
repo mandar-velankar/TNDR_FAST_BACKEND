@@ -13,6 +13,8 @@ using {com.bayer.SXTENDER.BankGuaranteeData} from '../db/BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {com.bayer.SXTENDER.ExternalDataViews} from '../db/ExternalDataViews';
+using {UITemplates as UITemplateSrv} from './external/UITemplates';
+
 using {
     User,
     Country,
@@ -28,6 +30,23 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     'f_tndr_cag_standardtender_user'
 ]) {
     
+    @readonly
+    entity CountryTemplate as projection on UITemplateSrv.CountryTemplate;
+    entity Template as projection on UITemplateSrv.Template;
+    entity Tab as projection on UITemplateSrv.Tab;
+    entity XMLView as projection on UITemplateSrv.XMLView;
+    entity Table as projection on UITemplateSrv.Table;
+    entity Form as projection on UITemplateSrv.Form;
+    entity FormContainer as projection on UITemplateSrv.FormContainer;
+    entity FormElement as projection on UITemplateSrv.FormElement;
+    entity Column as projection on UITemplateSrv.Column;
+    entity Layout as projection on UITemplateSrv.Layout;
+    entity Control as projection on UITemplateSrv.Control;
+    entity Properties as projection on UITemplateSrv.Properties;
+    entity ValueHelp as projection on UITemplateSrv.ValueHelp;
+    entity Filter as projection on UITemplateSrv.Filter;
+    entity StaticValue as projection on UITemplateSrv.StaticValue;
+
 
     @cds.redirection.target
     entity TenderFormView as projection on TransactionalData.PT_TMTEND {
