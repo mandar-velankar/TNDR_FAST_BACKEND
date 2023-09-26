@@ -75,6 +75,10 @@
       },
       "uaa": {
         "kind": "xsuaa"
+      },
+      "UITemplates": {
+        "kind": "odata",
+        "model": "srv/external/UITemplates"
       }
     },
     "odata": {

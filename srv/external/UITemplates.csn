@@ -1,0 +1,859 @@
+{
+ "meta": {
+  "creator": "cds-dk 7.2.0"
+ },
+ "$version": "2.0",
+ "definitions": {
+  "UITemplates.CountryTemplate": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "CountryCode": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "Application": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "Page": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "ProductScope": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "Template": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Template",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.Template": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Title": {
+     "type": "cds.LargeString"
+    },
+    "Description": {
+     "type": "cds.LargeString"
+    },
+    "Service": {
+     "type": "cds.LargeString"
+    },
+    "Type": {
+     "type": "cds.LargeString"
+    },
+    "CountryTemplate": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.CountryTemplate",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "CountryTemplate",
+        "ProductScope"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "CountryTemplate_ProductScope"
+       ]
+      }
+     ]
+    },
+    "CountryTemplate_CountryCode": {
+     "type": "cds.LargeString"
+    },
+    "CountryTemplate_Application": {
+     "type": "cds.LargeString"
+    },
+    "CountryTemplate_Page": {
+     "type": "cds.LargeString"
+    },
+    "CountryTemplate_ProductScope": {
+     "type": "cds.LargeString"
+    },
+    "Tabs": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Tab",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "Table": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Table",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "Table",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "Table_ID"
+       ]
+      }
+     ]
+    },
+    "Table_ID": {
+     "type": "cds.UUID"
+    },
+    "Form": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Form",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "Form",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "Form_ID"
+       ]
+      }
+     ]
+    },
+    "Form_ID": {
+     "type": "cds.UUID"
+    }
+   },
+   "@Capabilities.DeleteRestrictions.Deletable": false,
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.UpdateRestrictions.Updatable": false
+  },
+  "UITemplates.Tab": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Title": {
+     "type": "cds.LargeString"
+    },
+    "Description": {
+     "type": "cds.LargeString"
+    },
+    "Icon": {
+     "type": "cds.LargeString"
+    },
+    "Template": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Template",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "Template",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "Template_ID"
+       ]
+      }
+     ]
+    },
+    "Template_ID": {
+     "type": "cds.UUID"
+    },
+    "XMLView": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.XMLView",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "XMLView",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "XMLView_ID"
+       ]
+      }
+     ]
+    },
+    "XMLView_ID": {
+     "type": "cds.UUID"
+    }
+   }
+  },
+  "UITemplates.XMLView": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "ViewName": {
+     "type": "cds.LargeString"
+    },
+    "Description": {
+     "type": "cds.LargeString"
+    },
+    "Tables": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Table",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "Forms": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Form",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.Table": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Title": {
+     "type": "cds.LargeString"
+    },
+    "Description": {
+     "type": "cds.LargeString"
+    },
+    "TableID": {
+     "type": "cds.LargeString"
+    },
+    "Entity": {
+     "type": "cds.LargeString"
+    },
+    "XMLView": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.XMLView",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "XMLView",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "XMLView_ID"
+       ]
+      }
+     ]
+    },
+    "XMLView_ID": {
+     "type": "cds.UUID"
+    },
+    "Columns": {
+     "type": "cds.Composition",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Column",
+     "cardinality": {
+      "max": "*"
+     }
+    }
+   }
+  },
+  "UITemplates.Form": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Title": {
+     "type": "cds.LargeString"
+    },
+    "Description": {
+     "type": "cds.LargeString"
+    },
+    "FormID": {
+     "type": "cds.LargeString"
+    },
+    "Entity": {
+     "type": "cds.LargeString"
+    },
+    "XMLView": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.XMLView",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "XMLView",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "XMLView_ID"
+       ]
+      }
+     ]
+    },
+    "XMLView_ID": {
+     "type": "cds.UUID"
+    },
+    "FormContainers": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.FormContainer",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "Layout": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Layout",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.FormContainer": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Title": {
+     "type": "cds.LargeString"
+    },
+    "Form": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Form",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "Form",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "Form_ID"
+       ]
+      }
+     ]
+    },
+    "Form_ID": {
+     "type": "cds.UUID"
+    },
+    "FormElements": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.FormElement",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.FormElement": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Label": {
+     "type": "cds.LargeString"
+    },
+    "Visible": {
+     "type": "cds.Boolean"
+    },
+    "FormContainer": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.FormContainer",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "FormContainer",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "FormContainer_ID"
+       ]
+      }
+     ]
+    },
+    "FormContainer_ID": {
+     "type": "cds.UUID"
+    },
+    "Controls": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Control",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.Column": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Title": {
+     "type": "cds.LargeString"
+    },
+    "Description": {
+     "type": "cds.LargeString"
+    },
+    "Importance": {
+     "type": "cds.LargeString"
+    },
+    "IsValueHelpKey": {
+     "type": "cds.Boolean",
+     "default": {
+      "val": false
+     }
+    },
+    "IsValueHelpText": {
+     "type": "cds.Boolean",
+     "default": {
+      "val": false
+     }
+    },
+    "Table": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Table",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "Table",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "Table_ID"
+       ]
+      }
+     ]
+    },
+    "Table_ID": {
+     "type": "cds.UUID"
+    },
+    "Control": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Control",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.Layout": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Type": {
+     "type": "cds.LargeString"
+    },
+    "Form": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Form",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "Form",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "Form_ID"
+       ]
+      }
+     ]
+    },
+    "Form_ID": {
+     "type": "cds.UUID"
+    },
+    "Properties": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Properties",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.Control": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Type": {
+     "type": "cds.LargeString"
+    },
+    "ParentID": {
+     "type": "cds.UUID"
+    },
+    "Properties": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Properties",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "ValueHelp": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.ValueHelp",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.Properties": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Name": {
+     "type": "cds.LargeString"
+    },
+    "Value": {
+     "type": "cds.LargeString"
+    },
+    "IsBinding": {
+     "type": "cds.Boolean"
+    },
+    "ParentID": {
+     "type": "cds.UUID"
+    }
+   }
+  },
+  "UITemplates.ValueHelp": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Title": {
+     "type": "cds.LargeString"
+    },
+    "Type": {
+     "type": "cds.LargeString"
+    },
+    "ParentID": {
+     "type": "cds.UUID"
+    },
+    "Searchable": {
+     "type": "cds.Boolean"
+    },
+    "SelectedField": {
+     "items": {
+      "type": "UITemplates.com_bayer_SXTENDER_templates_SelectedField",
+      "notNull": true
+     }
+    },
+    "Table": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Table",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "Table",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "Table_ID"
+       ]
+      }
+     ]
+    },
+    "Table_ID": {
+     "type": "cds.UUID"
+    },
+    "Filters": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.Filter",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "StaticValues": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.StaticValue",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   }
+  },
+  "UITemplates.Filter": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Path": {
+     "type": "cds.LargeString"
+    },
+    "Operator": {
+     "type": "cds.LargeString"
+    },
+    "Value1": {
+     "type": "cds.LargeString"
+    },
+    "Value2": {
+     "type": "cds.LargeString"
+    },
+    "ValueHelp": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.ValueHelp",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "ValueHelp",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "ValueHelp_ID"
+       ]
+      }
+     ]
+    },
+    "ValueHelp_ID": {
+     "type": "cds.UUID"
+    }
+   }
+  },
+  "UITemplates.StaticValue": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "CountryCode": {
+     "type": "cds.String",
+     "length": 2
+    },
+    "KeyID": {
+     "type": "cds.String",
+     "length": 40
+    },
+    "ValueText": {
+     "type": "cds.String",
+     "length": 40
+    },
+    "ValueHelp": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "UITemplates.ValueHelp",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "ValueHelp",
+        "ID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "ValueHelp_ID"
+       ]
+      }
+     ]
+    },
+    "ValueHelp_ID": {
+     "type": "cds.UUID"
+    }
+   }
+  },
+  "UITemplates.com_bayer_SXTENDER_templates_SelectedField": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "ID": {
+     "type": "cds.LargeString"
+    },
+    "Name": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "UITemplates": {
+   "kind": "service",
+   "@cds.external": true
+  }
+ }
+}
