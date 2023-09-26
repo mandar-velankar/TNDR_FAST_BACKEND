@@ -30,22 +30,37 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     'f_tndr_cag_standardtender_user'
 ]) {
     
+    // UITemplate entities
     @readonly
-    entity CountryTemplate as projection on UITemplateSrv.CountryTemplate;
-    entity Template as projection on UITemplateSrv.Template;
-    entity Tab as projection on UITemplateSrv.Tab;
-    entity XMLView as projection on UITemplateSrv.XMLView;
-    entity Table as projection on UITemplateSrv.Table;
-    entity Form as projection on UITemplateSrv.Form;
-    entity FormContainer as projection on UITemplateSrv.FormContainer;
-    entity FormElement as projection on UITemplateSrv.FormElement;
-    entity Column as projection on UITemplateSrv.Column;
-    entity Layout as projection on UITemplateSrv.Layout;
-    entity Control as projection on UITemplateSrv.Control;
-    entity Properties as projection on UITemplateSrv.Properties;
-    entity ValueHelp as projection on UITemplateSrv.ValueHelp;
-    entity Filter as projection on UITemplateSrv.Filter;
-    entity StaticValue as projection on UITemplateSrv.StaticValue;
+    entity UICountryTemplate as projection on UITemplateSrv.CountryTemplate;
+    @readonly
+    entity UITemplate as projection on UITemplateSrv.Template;
+    @readonly
+    entity UITab as projection on UITemplateSrv.Tab;
+    @readonly
+    entity UIXMLView as projection on UITemplateSrv.XMLView;
+    @readonly
+    entity UITable as projection on UITemplateSrv.Table;
+    @readonly
+    entity UIForm as projection on UITemplateSrv.Form;
+    @readonly
+    entity UIFormContainer as projection on UITemplateSrv.FormContainer;
+    @readonly
+    entity UIFormElement as projection on UITemplateSrv.FormElement;
+    @readonly
+    entity UIColumn as projection on UITemplateSrv.Column;
+    @readonly
+    entity UILayout as projection on UITemplateSrv.Layout;
+    @readonly
+    entity UIControl as projection on UITemplateSrv.Control;
+    @readonly
+    entity UIProperties as projection on UITemplateSrv.Properties;
+    @readonly
+    entity UIValueHelp as projection on UITemplateSrv.ValueHelp;
+    @readonly
+    entity UIFilter as projection on UITemplateSrv.Filter;
+    @readonly
+    entity UIStaticValue as projection on UITemplateSrv.StaticValue;
 
 
     @cds.redirection.target

@@ -22,7 +22,27 @@ const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
 
-module.exports = (srv) => {
+module.exports = async (srv) => {
+
+	const UITemplatesService = await cds.connect.to('UITemplates');
+
+	const { 
+		CountryTemplate,
+		Template,
+		Tab,
+		XMLView,
+		Table,
+		Form,
+		FormContainer,
+		FormElement,
+		Column,
+		Layout,
+		Control,
+		Properties,
+		ValueHelp,
+		Filter,
+		StaticValue
+	} = this.entities;
 
 	// Use reflection to get the csn definition
 	const {
@@ -69,18 +89,18 @@ module.exports = (srv) => {
 		TransCompetitorResult
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		Template, 
-		TemplateCountry, 
-		MandatoryTableFieldsCountry, 
-		MailTemplate, 
-		PT_TMUSER, 
-		ExcelAttachment, 
-		WordAttachment, 
-		WordTemplateCountry,
-		WordTemplate,
-		ExcelTemplate,
-		SchedulerApiConfig,
-		SchedulerApiConfigOAuth
+		UITemplate, 
+		UITemplateCountry, 
+		UIMandatoryTableFieldsCountry, 
+		UIMailTemplate, 
+		UIPT_TMUSER, 
+		UIExcelAttachment, 
+		UIWordAttachment, 
+		UIWordTemplateCountry,
+		UIWordTemplate,
+		UIExcelTemplate,
+		UISchedulerApiConfig,
+		UISchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices
@@ -90,6 +110,10 @@ module.exports = (srv) => {
 		LatestApprovedBrandPolicies
 	} = cds.entities("PolicyService");
 
+
+	srv.on('READ', Properties, req => {
+		return UITemplatesService.tx(req).run(req.query);
+	});
 
 	// const arr = x => Array.from(x);
 	// const num = x => Number(x) || 0;
