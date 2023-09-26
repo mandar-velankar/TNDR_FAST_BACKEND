@@ -28,7 +28,7 @@ module.exports = async (srv) => {
 
 	const { 
 		CountryTemplate,
-		Template,
+		Template: UITemplate,
 		Tab,
 		XMLView,
 		Table,
@@ -42,7 +42,7 @@ module.exports = async (srv) => {
 		ValueHelp,
 		Filter,
 		StaticValue
-	} = this.entities;
+	} = UITemplatesService.entities;
 
 	// Use reflection to get the csn definition
 	const {
@@ -89,18 +89,18 @@ module.exports = async (srv) => {
 		TransCompetitorResult
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
-		UITemplate, 
-		UITemplateCountry, 
-		UIMandatoryTableFieldsCountry, 
-		UIMailTemplate, 
-		UIPT_TMUSER, 
-		UIExcelAttachment, 
-		UIWordAttachment, 
-		UIWordTemplateCountry,
-		UIWordTemplate,
-		UIExcelTemplate,
-		UISchedulerApiConfig,
-		UISchedulerApiConfigOAuth
+		Template, 
+		TemplateCountry, 
+		MandatoryTableFieldsCountry, 
+		MailTemplate, 
+		PT_TMUSER, 
+		ExcelAttachment, 
+		WordAttachment, 
+		WordTemplateCountry,
+		WordTemplate,
+		ExcelTemplate,
+		SchedulerApiConfig,
+		SchedulerApiConfigOAuth
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	const {
 		ProductPolicies, PolicyPrices

@@ -6,6 +6,7 @@
   "license": "ISC",
   "dependencies": {
     "@sap-cloud-sdk/core": "^1.54.2",
+    "@sap-cloud-sdk/http-client": "^3.5.0",
     "@sap/cds": "~6.3.0",
     "@sap/cds-odata-v2-adapter-proxy": "1.9.13",
     "@sap/hana-client": "2.14.22",
@@ -78,7 +79,10 @@
       },
       "UITemplates": {
         "kind": "odata",
-        "model": "srv/external/UITemplates"
+        "model": "srv/external/UITemplates",
+        "credentials": {
+          "destination": "UITemplates"
+        }
       }
     },
     "odata": {

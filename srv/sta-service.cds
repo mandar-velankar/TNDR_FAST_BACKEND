@@ -32,35 +32,35 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     
     // UITemplate entities
     @readonly
-    entity UICountryTemplate as projection on UITemplateSrv.CountryTemplate;
+    entity CountryTemplate as projection on UITemplateSrv.CountryTemplate;
     @readonly
-    entity UITemplate as projection on UITemplateSrv.Template;
+    entity Template as projection on UITemplateSrv.Template;
     @readonly
-    entity UITab as projection on UITemplateSrv.Tab;
+    entity Tab as projection on UITemplateSrv.Tab;
     @readonly
-    entity UIXMLView as projection on UITemplateSrv.XMLView;
+    entity XMLView as projection on UITemplateSrv.XMLView;
     @readonly
-    entity UITable as projection on UITemplateSrv.Table;
+    entity Table as projection on UITemplateSrv.Table;
     @readonly
-    entity UIForm as projection on UITemplateSrv.Form;
+    entity Form as projection on UITemplateSrv.Form;
     @readonly
-    entity UIFormContainer as projection on UITemplateSrv.FormContainer;
+    entity FormContainer as projection on UITemplateSrv.FormContainer;
     @readonly
-    entity UIFormElement as projection on UITemplateSrv.FormElement;
+    entity FormElement as projection on UITemplateSrv.FormElement;
     @readonly
-    entity UIColumn as projection on UITemplateSrv.Column;
+    entity Column as projection on UITemplateSrv.Column;
     @readonly
-    entity UILayout as projection on UITemplateSrv.Layout;
+    entity Layout as projection on UITemplateSrv.Layout;
     @readonly
-    entity UIControl as projection on UITemplateSrv.Control;
+    entity Control as projection on UITemplateSrv.Control;
     @readonly
-    entity UIProperties as projection on UITemplateSrv.Properties;
+    entity Properties as projection on UITemplateSrv.Properties;
     @readonly
-    entity UIValueHelp as projection on UITemplateSrv.ValueHelp;
+    entity ValueHelp as projection on UITemplateSrv.ValueHelp;
     @readonly
-    entity UIFilter as projection on UITemplateSrv.Filter;
+    entity Filter as projection on UITemplateSrv.Filter;
     @readonly
-    entity UIStaticValue as projection on UITemplateSrv.StaticValue;
+    entity StaticValue as projection on UITemplateSrv.StaticValue;
 
 
     @cds.redirection.target
