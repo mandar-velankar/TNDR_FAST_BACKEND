@@ -477,6 +477,8 @@ module.exports.ProcessMaterials = class ProcessMaterials extends BaseJob {
         return num;
     };
 
+    
+
     async updateExistingMaterials(materials){
         // TODO: not implemented
     };
@@ -592,7 +594,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
             let customerNumbers =  await tx.run(cds.parse.cql (`SELECT CustomerID from ${PT_TMINST.name} WHERE CountryCode = 'IT'`));
             customerNumbers = customerNumbers.map(item => this.addLeadingZeros(item.CustomerID, 10));
-
+            console.log("insert");
             // let query = cds.parse.cql (`SELECT * FROM ${ItalyCustomers.name} AS customer 
             // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name`);
 
@@ -606,15 +608,24 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             let query = SELECT.from(`${ItalyCustomers.name} as customer`)
                         .join(`${CountryProvinces.name} as province`)
                         .on({'customer.E1KNA1M_REGIO' : 'province.Name'})
-                        .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT'});
+                        .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT'});
 
             const customers = await tx.run(query);
            
             let nextInstituteID = await this.getLastInstituteID();
             
+           
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
-                                
+                let InstType = cust.E1KNA1M_KTOKD;
+                if(InstType === '0001')
+                 {
+                    InstType ='Sold To'
+                 }  
+                if(InstType === '0002')
+                 {
+                    InstType ='Ship To'
+                 }               
                 return {
                     CountryCode: cust.E1KNA1M_LAND1,
                     InstituteID: ++nextInstituteID,
@@ -628,7 +639,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
                     ActiveRecord: "Yes",
-                    Comment: cust.E1KNVVM_KVGR3, // temp to keep track of code
+                    Comment: `${cust.E1KNVVM_KVGR3}, ${InstType}`, // temp to keep track of code
                     City: cust.E1KNA1M_ORT01,
                     INSTITUTE_HIERARCHY_ID: 1,
                     State: "",
@@ -677,31 +688,30 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // inner join ${CountryProvinces.name} AS province ON customer.E1KNA1M_REGIO = province.Name
             // inner join ${PT_TMINST.name} institute on customer.E1KNA1M_KUNNR = institute.CustomerID
             // where customer.E1KNA1M_LAND1 = 'IT'`);
-
+            
             const customers = await tx.run(SELECT.from(ItalyCustomerUpdateInstituteEntriesView));
 
             const promises = customers.map(cust => {
-               // let UpdateType = cust.E1KNA1M_KTOKD;
-            //    console.log(UpdateType);
-                // if(UpdateType === '0001' && UpdateType != '')
-                // {
-                //     UpdateType ='Ship To'
-                // }  
-                // if(UpdateType === '0002' && UpdateType != '')
-                // {
-                //     UpdateType ='Sold To'
-                // }
+               let UpdateType = cust.E1KNA1M_KTOKD;
+               if(UpdateType === '0001')
+                {
+                    UpdateType ='Sold To'
+                }  
+               if(UpdateType === '0002')
+                {
+                    UpdateType ='Ship To'
+                }
                 const obj = {
                     CountryCode: cust.E1KNA1M_LAND1,
                     CustomerID: cust.E1KNA1M_KUNNR,
                     InstituteName: cust.E1KNA1M_NAME1,
-                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3),
+                    InstituteType: this.getInstituteType(cust.E1KNVVM_KVGR3) || this.updateInstituteType(cust.E1KNA1M_KUNNR),
                     Address: `${cust.E1KNA1M_STRAS}, ${cust.E1KNA1M_PSTLZ} ${cust.E1KNA1M_ORT01}`,
                     ContactNo: cust.E1KNA1M_TELF1,
                     Fax: cust.E1KNA1M_TELFX,
                     ContactPerson: cust.E1KNA1M_STKZN,
                     ActiveRecord: "Yes",
-                    Comment: cust.E1KNVVM_KVGR3, // temp to keep track of code
+                    Comment: `${cust.E1KNVVM_KVGR3}, ${UpdateType}`, // temp to keep track of code
                     City: cust.E1KNA1M_ORT01,
                     INSTITUTE_HIERARCHY_ID: 1,
                     // State: "",
@@ -785,17 +795,26 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         }
         return KVGR3[id];
     };
-    async updateInstituteType(CustID){
+     /**
+     * 
+     * @param {String} id Customer group 3
+     * @returns {String} InstituteType 
+     */
+    async updateInstituteType(id){
         const tx = cds.tx();
-    
+        try{
         const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
         const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
-
-        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CountryCode = 'IT' AND CustomerID='CustID'`);
+         let IDs= parseInt(id);
+        let query = cds.parse.cql (`SELECT InstituteType FROM ${PT_TMINST.name} where CustomerID= '${IDs}' and CountryCode ='IT'`);
 
         const Institutetype = await tx.run(query);
-        console.log(Institutetype);
         return Institutetype;
+        }catch (error) {
+            console.log('Updating Institutes has failed.');
+            console.log(error);
+            await tx.rollback(error);
+        }  
       };
 
     /**
