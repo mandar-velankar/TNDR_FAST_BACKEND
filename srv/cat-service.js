@@ -2128,7 +2128,7 @@ module.exports = (srv) => {
 		remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
 		remarks = remarks.concat((alternativeQuotedRemark !== "") ? alternativeQuotedRemark.concat("<br>") : "");
 		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
-        remarks=remarks.concat((InstituteRemark !== "") ? InstituteRemark.concat("<br>") : "");
+        remarks=remarks.concat((InstituteRemark !== "" && offer.COUNTRYCODE !== 'IT') ? InstituteRemark.concat("<br>") : "");
 		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
 
 		// get SUBMITTED_BY user info 
