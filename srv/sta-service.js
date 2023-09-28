@@ -111,8 +111,9 @@ module.exports = async (srv) => {
 	} = cds.entities("PolicyService");
 
 
-	srv.on('READ', Properties, req => {
-		return UITemplatesService.tx(req).run(req.query);
+	srv.on('READ', 'Properties', req => {
+		console.log('passing request to remote service ...');		
+		return UITemplatesService.run(req.query);
 	});
 
 	// const arr = x => Array.from(x);

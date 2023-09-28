@@ -40,6 +40,7 @@ modules:
       - name: FAST-db-hdi-container
       - name: FAST-logging
       - name: uaa_FAST
+      - name: FAST-dest-service
   - name: FAST-API-AppRouter
     type: html5
     path: app
@@ -72,3 +73,23 @@ resources:
     parameters:
        service: application-logs
        service-plan: lite
+  - name: FAST-dest-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          subaccount:
+            destinations:
+            - Authentication: NoAuthentication
+              Name: fast-templates-api
+              ProxyType: Internet
+              Type: HTTP
+              URL: 'https://bayer-fast-dev-fast-f-tndr-cag-fast-ui-templates-srv.cfapps.eu20.hana.ondemand.com' 
+              HTML5.DynamicDestination: true
+              HTML5.ForwardAuthToken: true
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: FAST-dest-service
+      service-plan: lite
