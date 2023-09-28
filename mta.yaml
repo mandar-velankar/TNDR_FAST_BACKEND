@@ -77,9 +77,9 @@ resources:
     type: org.cloudfoundry.managed-service
     parameters:
       config:
-        HTML5Runtime_enabled: true
+        HTML5Runtime_enabled: false
         init_data:
-          subaccount:
+          instance:
             destinations:
             - Authentication: NoAuthentication
               Name: fast-templates-api
@@ -93,3 +93,5 @@ resources:
       service: destination
       service-name: FAST-dest-service
       service-plan: lite
+    requires:
+      - name: srv_api
