@@ -40,7 +40,7 @@ modules:
       - name: FAST-db-hdi-container
       - name: FAST-logging
       - name: uaa_FAST
-      - name: FAST-dest-service
+      - name: fast-templates-api
   - name: FAST-API-AppRouter
     type: html5
     path: app
@@ -73,11 +73,11 @@ resources:
     parameters:
        service: application-logs
        service-plan: lite
-  - name: FAST-dest-service
+  - name: fast-templates-api
     type: org.cloudfoundry.managed-service
     parameters: 
-      service: destination
-      service-name: FAST-dest-service
       service-plan: lite
+    properties:
+      forwardAuthToken: true
     requires:
       - name: srv_api
