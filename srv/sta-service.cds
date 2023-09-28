@@ -102,7 +102,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         ModifyedByUser.UserName;
 
     @cds.redirection.target
-    entity InstitutesView as projection on MasterData.PT_TMINST;
+    entity InstitutesView as projection on MasterData.PT_TMINST {
+        *,
+        CustomerID as CustomerID: String
+    };
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
         classification.COUNTRY_CODE as CountryCode: String(2)
