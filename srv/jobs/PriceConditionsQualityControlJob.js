@@ -137,7 +137,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                         }
                         else{
                             console.log(item,"item");
-                            let focitem=item.filter(i => i[2] === 'YA03');
+                            let focitem=item.find(i => i[2] === 'YA03');
                             console.log(focitem,"foc");
                             if(focitem){
                                  item = item.filter(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
