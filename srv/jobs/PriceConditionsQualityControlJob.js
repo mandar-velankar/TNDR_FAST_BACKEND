@@ -137,24 +137,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                         }
                         else{
                             console.log(item,"item");
-                            let focitem=item.find(i => i[2] === 'YA03');
-                            console.log(focitem,"foc");
-                            if(focitem){
-                                 item = item.filter(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
-                                    if(item.length > 0){
-                                        for(var i =0; i<item.length; i++){
-                                            console.log(item[i].SAP_KNRMAT,"material");
-                                            qcPrice = this.mapResponseToFASTCustomerPricesQC(item[i], qcPrice);
-                                            qcPrice.Status = this.validatePriceCondition(qcPrice);
-                                        }
-                                        
-                                    }
-                                    else{
-                                        if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
-                                        else qcPrice.Status = "NotInSAP";
-                                    }
-                            }else{
-                            item = item.find(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
+                            item = item.filter(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
                             if(item){
                                 qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
                                 qcPrice.Status = this.validatePriceCondition(qcPrice);
@@ -163,7 +146,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                                 if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
                                 else qcPrice.Status = "NotInSAP";
                             }
-                        }
+                        
                         }                           
                     }else{
                         if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
