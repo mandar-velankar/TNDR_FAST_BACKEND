@@ -136,6 +136,23 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                             }
                         }
                         else{
+                            let focitem=item.find(i => i.KSCHL === 'YA03');
+                            console.log(focitem);
+                            if(focitem){
+                                 item = item.filter(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
+                                    if(item.length > 0){
+                                        for(var i =0; i<item.length; i++){
+                                            console.log(item[i].SAP_KNRMAT);
+                                            qcPrice = this.mapResponseToFASTCustomerPricesQC(item[i], qcPrice);
+                                            qcPrice.Status = this.validatePriceCondition(qcPrice);
+                                        }
+                                        
+                                    }
+                                    else{
+                                        if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
+                                        else qcPrice.Status = "NotInSAP";
+                                    }
+                            }else{
                             item = item.find(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
                             if(item){
                                 qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
@@ -145,6 +162,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                                 if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
                                 else qcPrice.Status = "NotInSAP";
                             }
+                        }
                         }                           
                     }else{
                         if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
