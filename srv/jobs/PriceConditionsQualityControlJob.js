@@ -136,13 +136,14 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                             }
                         }
                         else{
-                            let focitem=item.find(i => i.KSCHL === 'YA03');
-                            console.log(focitem);
+                            console.log(item,"item");
+                            let focitem=item.filter(i => i.KSCHL === 'YA03');
+                            console.log(focitem,"foc");
                             if(focitem){
                                  item = item.filter(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
                                     if(item.length > 0){
                                         for(var i =0; i<item.length; i++){
-                                            console.log(item[i].SAP_KNRMAT);
+                                            console.log(item[i].SAP_KNRMAT,"material");
                                             qcPrice = this.mapResponseToFASTCustomerPricesQC(item[i], qcPrice);
                                             qcPrice.Status = this.validatePriceCondition(qcPrice);
                                         }
