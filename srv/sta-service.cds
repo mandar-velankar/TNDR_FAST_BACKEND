@@ -39,7 +39,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity CountryRegionsTableView as projection on MasterData.CountryRegions;
 
-    entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR
+    entity PT_TMAWRDCR as projection on TransactionalData.PT_TMAWRDCR;
+    entity AppConfig @readonly as projection on AdminData.AppConfig;
   
     entity AwardCriteriaTableView as select from TransactionalData.PT_TMTEND as tend
     left outer join TransactionalData.PT_TMAWRDCR as cr on tend.TenderID = cr.TENDERID
@@ -101,7 +102,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         ModifyedByUser.UserName;
 
     @cds.redirection.target
-    entity InstitutesView as projection on MasterData.PT_TMINST;
+    entity InstitutesView as projection on MasterData.PT_TMINST {
+        *,
+        CustomerID as CustomerID: String
+    };
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
         classification.COUNTRY_CODE as CountryCode: String(2)
