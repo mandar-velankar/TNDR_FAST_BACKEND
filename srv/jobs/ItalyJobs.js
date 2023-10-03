@@ -791,7 +791,10 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             "I52": "Private Account",
             "I60": "Private Account",
             "AUI": "Private Account",
-            "I48": "Private Account"
+            "I48": "Private Account",
+             "DV": "Private Account",
+            "I24": "Private Account",
+            "L42": "Private Account"
         }
         return KVGR3[id];
     };
@@ -872,6 +875,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             const instituteBrandEntries = brandTerms.map(brandTerm => {
                 return {
                     InstituteBrandTermsID: ++lastInstituteBrandTermsID,
+                    PaymentTerms: "60 gg",
                     CountryCode: brandTerm.CountryCode,
                     INCOTerms: "",
                     PaymentTerms: "",
