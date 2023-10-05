@@ -139,6 +139,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                             console.log(item);
                             item = item.find(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
                             if(item){
+                                console.log(item,"IN");
                                 qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
                                 qcPrice.Status = this.validatePriceCondition(qcPrice);
                             }
