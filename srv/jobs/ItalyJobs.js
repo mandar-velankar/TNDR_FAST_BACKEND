@@ -875,10 +875,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             const instituteBrandEntries = brandTerms.map(brandTerm => {
                 return {
                     InstituteBrandTermsID: ++lastInstituteBrandTermsID,
-                    PaymentTerms: "60 gg",
                     CountryCode: brandTerm.CountryCode,
                     INCOTerms: "",
-                    PaymentTerms: "",
+                    PaymentTerms: "60 gg",
                     ActiveRecord: "Yes",
                     InstituteID: brandTerm.InstituteID,
                     HLevel4_Code: brandTerm.HLEVEL4_CODE
