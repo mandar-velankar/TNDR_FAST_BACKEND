@@ -137,7 +137,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                         }
                         else{
                             console.log(item);
-                            item = item.find(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI && i.KNRMAT === qcPrice.SAP_KNRMAT);
+                            item = item.find(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI && i.KNRMAT === qcPrice.BOMAT);
                             if(item){
                                 console.log(item,"IN");
                                 qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
