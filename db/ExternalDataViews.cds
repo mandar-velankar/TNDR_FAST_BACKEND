@@ -1122,7 +1122,7 @@ entity OfferPriceVolumeInfo as select from RawOfferPriceVolumeInfo as info
     info.OfferPricePack,
     info.NetPricePack
 };
-
+//EHQUT-Tableau Dashboard refresh issue
 entity FastReportingData as select from TransactionalData.PT_TMOFPR as offerProducts
 inner join OfferExhangeRates as xRates on offerProducts.OfferID = xRates.OfferID
 inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = price_volume_info.OfferID and offerProducts.ProductCode = price_volume_info.ProductCode
@@ -1363,7 +1363,7 @@ where
 	offerProducts.Offer.Active = 1 and
 	offerProducts.Active = 1 and
 	(offerProducts.OfferType is null or offerProducts.OfferType = 'Selling') and
-	offerProducts.Price.Active = 1;
+	offerProducts.Price.Active = 1 and year(ifnull(offerProducts.Offer.SubmissionDate,ifnull(offerProducts.Offer.Quotation.SubmittedOn,offerProducts.Offer.Tender.PublicationDate))) > 2020;
 				
 entity SpainEspartaDoc as select from PriceAgreementData.PriceAgreements as pa left outer join
 AdminData.PT_TMUSER as uM on pa.modifiedBy = uM.CWID left outer join
