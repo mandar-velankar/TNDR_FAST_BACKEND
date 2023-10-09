@@ -771,8 +771,23 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
         when 'SEWA' then ADD_DAYS(CURRENT_DATE, 60)
         else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
     end as OFFERVALIDITY,
-	ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate,
-	ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate,
+	case when offer.CountryCode NOT IN ('ES','IT')
+
+        then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
+
+        else ifnull(offer.Tender.EffectiveDate,ifnull(offer.Quotation.EffectiveDate,ADD_DAYS(CURRENT_DATE,1)))
+
+    end as EffectiveDate,
+
+    case when offer.CountryCode NOT IN ('ES','IT')
+
+        then ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1))
+
+        else ifnull(offer.Tender.ExpiryDate,
+
+             ifnull(offer.Quotation.ExpiryDate,ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)))
+
+    end as ExpiryDate,
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
@@ -857,6 +872,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Institute.CifCode,
           offer.Tender.Institute.RegionalHealthSystem,
           offer.Tender.Institute.CustomerGroup,
+          offer.Tender.EffectiveDate,
+          offer.Tender.ExpiryDate,
           offer.Tender.Institute.CustomerID,
           offer.Tender.TenderName,
           offer.OfferStatus.STATUS,

@@ -143,7 +143,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                             }
                             
                             if(item){
-                                console.log(item,"IN");
+                                
                                 qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
                                 qcPrice.Status = this.validatePriceCondition(qcPrice);
                             }

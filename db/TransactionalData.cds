@@ -616,6 +616,8 @@ entity PT_TMTEND: managed {
         ParticiationType     : String;
         ParticipationIntention : String;
         TerminationDate      : Date;
+        EffectiveDate     : Date;
+        ExpiryDate        : Date;
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID
