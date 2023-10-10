@@ -223,6 +223,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
     entity MasterDistributors @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterDistributors;
+    entity MasterInstitutes @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterInstitutes;
     entity CountryLegalEntity @readonly @(cds.redirection.target:false) as projection on MasterDataViews.CountryLegalEntity;
     @cds.redirection.target
     entity PT_TMAPPRST as projection on TransactionalData.PT_TMAPPRST{
