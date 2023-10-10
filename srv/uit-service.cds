@@ -43,4 +43,34 @@ service UITemplateService @(path : 'uit')@(requires : [
         COUNTRYCODE as CountryCode,
         key ProductScope
     } group by ProductScope, COUNTRYCODE;
+
+    entity MasterCountryOutComes as select from MasterData.MASTER_COUNTRY_OUTCOMES;
+    entity MasterOutComeReasons as select from MasterData.PT_TMOUTRS;
+    entity CountryPacks as projection on MasterData.PT_TMCTPRDPCK;
+    entity Country as projection on MasterData.PT_TMCTRY {
+        *,
+        CountryPacks: redirected to CountryPacks
+    };
+    entity Users as projection on AdminData.PT_TMUSER;
+
+    entity UsersPerCountry @readonly @(cds.redirection.target:false) as projection on AdminData.PT_TMUSERCTRY {
+        *,
+        User.UserName as UserName,
+        Country: redirected to Country,
+        User: redirected to Users
+    };
+    entity UsersHavingOneCountry @(cds.redirection.target:false) as select from UsersPerCountry {
+        key CWID,
+        max(CountryCode) as CountryCode: String,
+        count(CountryCode) as numberOfCountries: Integer,
+        max(UserName) as UserName: String
+    }
+    group by CWID
+    having count(CountryCode) = 1;
+
+    entity CountryRegionsTableView as projection on MasterData.CountryRegions;
+    entity CountryLegalEntitySignatories as projection on MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory {
+        *,
+        signatory.COUNTRY_CODE as CountryCode
+    };
 }
