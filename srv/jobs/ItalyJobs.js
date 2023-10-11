@@ -792,7 +792,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             "I60": "Private Account",
             "AUI": "Private Account",
             "I48": "Private Account",
-            "DV": "Private Account",
+             "DV": "Private Account",
             "I24": "Private Account",
             "L42": "Private Account"
         }

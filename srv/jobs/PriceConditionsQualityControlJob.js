@@ -136,8 +136,14 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                             }
                         }
                         else{
-                            item = item.find(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);
+                            if(qcPrice.KSCHL === "YA03"){
+                                item = item.find(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI && i.KNRMAT === qcPrice.BOMAT);
+                            }else{
+                                item = item.find(i => i.DATAB === qcPrice.DATAB && i.DATBI === qcPrice.DATBI);  
+                            }
+                            
                             if(item){
+                                
                                 qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
                                 qcPrice.Status = this.validatePriceCondition(qcPrice);
                             }
