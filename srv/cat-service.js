@@ -264,7 +264,6 @@ module.exports = (srv) => {
 		let netPricePack = netPrice / toPackFactor;
 		let netPriceUnitEurSpot = netPriceUnit / product.SPOT_RATE;
 		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
-
 		let grossSales = offerPrice * paidVolume;
        
 		let netSales = netPrice * totalVolume;
