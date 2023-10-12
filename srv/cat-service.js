@@ -82,6 +82,7 @@ module.exports = (srv) => {
 			'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
 		];
 
+
 		let b = [
 			'', '', 'Twenty', 'Thirty', 'Forty',
 			'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
@@ -228,6 +229,7 @@ module.exports = (srv) => {
 				});
 			}
 		});
+		
 		return results;
 	}
 	function buildCommonProductInfo(offer, product) {
