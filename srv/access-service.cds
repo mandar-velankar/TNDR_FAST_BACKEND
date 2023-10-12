@@ -13,6 +13,9 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         adminAccess:{
             ConsumerPrices:Boolean;
         };
+        standardtenderAccess: {
+			OverviewDownload: Boolean
+		};
         ppa:Boolean;
         contract:Boolean;
         epa:Boolean;

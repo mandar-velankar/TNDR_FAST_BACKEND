@@ -93,6 +93,14 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_standardtender_user",
       "description": "f_tndr_cag_standardtender_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_consumerprice_user",
+      "description": "f_tndr_cag_consumerprice_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tnndr_cag_standardtenderdownload_user",
+      "description": "f_tnndr_cag_standardtenderdownload_user"
     }
   ],
   "attributes": [],
@@ -280,6 +288,15 @@
         "$XSAPPNAME.f_tndr_cag_standardtender_user"												 
       ],  
       "attribute-references": []
-    }		  
+    },
+    {		  
+      "name": "f_tnndr_cag_standardtenderdownload_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tnndr_cag_standardtenderdownload_user"
+      ],
+      "attribute-references": []
+    }
+    
   ]
 }
