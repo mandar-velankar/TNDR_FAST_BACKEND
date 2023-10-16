@@ -54,6 +54,7 @@ modules:
           timeout: 120000
       - name: uaa_FAST
       - name: FAST-logging
+      - name: FAST-dest-service
 
 resources:
   - name: FAST-db-hdi-container
