@@ -126,7 +126,12 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                     // 4. map and validate response 
                     if(item){
                         if(!Array.isArray(item)){
-                            if(item.DATAB === qcPrice.DATAB && item.DATBI === qcPrice.DATBI){
+                            if(qcPrice.KSCHL === "YA03"){
+                                if(item.DATAB === qcPrice.DATAB && item.DATBI === qcPrice.DATBI && item.KNRMAT === qcPrice.BOMAT){
+                                    qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
+                                    qcPrice.Status = this.validatePriceCondition(qcPrice);
+                                }  
+                            }else if(item.DATAB === qcPrice.DATAB && item.DATBI === qcPrice.DATBI){
                                 qcPrice = this.mapResponseToFASTCustomerPricesQC(item, qcPrice);
                                 qcPrice.Status = this.validatePriceCondition(qcPrice);
                             }
