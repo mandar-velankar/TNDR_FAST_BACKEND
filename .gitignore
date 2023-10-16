@@ -63,3 +63,6 @@ app/default-env.json
 db/default-env.json
 default-env.json
 srv/default-env.json
+
+# added by cds
+.cdsrc-private.json
