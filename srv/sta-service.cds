@@ -512,4 +512,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteName
     };
 
+    entity PdfEmail
+    {
+        URL : String;
+        UserName: String;       
+        Sent: Boolean
+    };
+
+
 }

@@ -2644,6 +2644,13 @@ module.exports = async (srv) => {
 		return excelStreamValue;
 	});
 
+	srv.on('CREATE', 'PdfEmail', async (req) => {
+		const tx = cds.tx(req);
+		const cwid = req.user.id;
+		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({CWID: cwid}));
+		req.data.UserName = userInfo[0].UserEmail;
+	});
+
 	async function getOfferData(tx,offerId){
 		
 		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
