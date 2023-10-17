@@ -5462,3 +5462,15 @@ PRODUCTPACKID,PRODUCTPACKNAME,PRESENTATION,UOM,ACTIVERECORD,HLEVEL6_CODE,CONCENT
 "214677","ADALAT CRONO 14 CPR 60 MG GB","COMPRESSE","MG","Yes","0811B100050204OROZ","60","14","ADALAT CRONO 60 mg 14 cpr","Nifedipina GITS",,"Drug","A",,,,
 "206689","ASSY, CABLE, HEAT MAINT. TO PRC",,,"Yes","6573530R929747PART","1","1",,,,"Drug",,"DELETE",,,
 "206695","ASSY,CABLE,CPU/SERVO TO PRC (SINGLE)",,,"Yes","6573530R929747PART","1","1",,,,"Drug",,"DELETE",,,
+214678,Glucobay 100mg Tablet (3 x 10's),,,Yes,0811B300480000TACT,,30,,,,,,,,,Glucobay 100mg Tablet	
+214679,Baydal Syrup (1 x 60ml),,,Yes,0810A30031,,1,,,,,,,,,Baydal Syrup	
+214680,Gravibinan Injection (1x1ml Amp),,,Yes,0871D30A29,,1,,,,,,,,,Gravibinan Injection (1x1ml Amp)	
+214681,Primolut N 5mg Tablet (1 x 30's),,,Yes,0871D30A590100TANH,,30,,,,,,,,,Primolut N 5mg Tablet (1 x 30's)	
+214682,Eylea 40mg Solution for Inj (1's),,,Yes,0876I10I43,,1,,,,,,,,,Eylea 40mg Solution for Inj (1's)	
+214683,Nexavar 200mg Tablet (6 x 10's),,,Yes,0820F108840000TACU,,60,,,,,,,,,Nexavar 200mg Tablet (6 x 10's)	
+214684,Ultravist 300 Injection (1 x 50ml),,,Yes,6573510D35,,1,,,,,,,,,Gastrografin Oral Solution (1 x 100 ml)	
+214685,Gastrografin Oral Solution (1 x 100 ml),,,Yes,6573510D47,,1,,,,,,,,,Urografin 76% Inj. 10 x 20 ml	
+214686,Urografin 76% Inj. 10 x 20 ml,,,Yes,6573510D739780TWML,,20,,,,,,,,,Gadovist 1.0 Injection 15 ml	
+214687,Gadovist 1.0 Injection 15 ml,,,Yes,6573550D46,,1,,,,,,,,,Priorin Capsule (60's) GST Applicable	
+214689,Iberogast Solution (50ml) GST Applicable,,,Yes,162723066317220057,,1,,,,,,,,,Advantan Cream (1 x 10g)	
+214691,Canesten Extra Bifonazole Cream (15g),,,Yes,0810A10054,,1,,,,,,,,,

@@ -63,6 +63,7 @@ entity PT_TMOFRS { //Offers
         ChannelSwitched        : Boolean default false;
         DecisionSharedWithIBIZ : Boolean default false;
         isIBIZNotified         : Boolean default false; 
+        AffiliateOffer         : Boolean default false; 
         Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND

@@ -11,6 +11,8 @@ dfe745f4-a559-4085-8279-bdd8c7657a6c,ES,Distributor,false
 5f077392-4c33-4fe7-bd01-90f5077fc072,UK,Direct,true
 e2b1d6f5-d395-4d2b-8df3-505381525661,UK,Distributor,true
 8f0a9e31-4c0f-43d2-bb89-370c806e3900,UK,Distributor,false
-"71ccb1ea-c32b-4be7-b069-a2ffb7fa5506","GB","Direct","true"
-"385b3424-f085-4796-935c-799dd9e6b46d","GB","Distributor","true"
-"7f4578dc-5695-4675-a25e-75a037f983be","GB","Distributor","false"
+71ccb1ea-c32b-4be7-b069-a2ffb7fa5506,GB,Direct,true
+385b3424-f085-4796-935c-799dd9e6b46d,GB,Distributor,true
+7f4578dc-5695-4675-a25e-75a037f983be,GB,Distributor,false
+b01f5764-8662-41d7-a546-4dcfe96d3472,PK,Direct,false
+207e9f56-b6d6-4fab-ad0b-49ef845711dd,PK,Distributor,false
