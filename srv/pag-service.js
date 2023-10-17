@@ -1302,10 +1302,12 @@ module.exports = async (srv) => {
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = datbi;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOSTA = "B";
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = datab;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATBI_GR = datbi;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = kunnr;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = matnr;
+       
 
         //Transforming the Date in correct format
         const dataB = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
@@ -1405,7 +1407,7 @@ module.exports = async (srv) => {
                         "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 750,
                         "KVEWE": "A",
                         "KAPPL": "V",
-                        "BOSTA" :"B",
+                        "BOSTA": "B",
                         "_BAY0-GZ_SALESAGRITEM": [
                             {
                                 "KUNNR": 0,
