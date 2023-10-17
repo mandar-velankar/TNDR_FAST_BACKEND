@@ -487,4 +487,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
 
+    entity ChildInstitutesView as select from MasterData.PT_TMINST as inst
+        inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
+        key hier.ParentInstituteID,
+        key hier.InstituteID,
+            inst.InstituteName
+    };
 }
