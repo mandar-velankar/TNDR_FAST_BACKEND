@@ -3126,6 +3126,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'ApprovalOffers', async (req) => {
 		// const tx = cds.transaction(req);
+		console.log("Inside Approval Offers");
 		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalOffers(tx);
 		return results;
