@@ -45,7 +45,17 @@ module.exports = (srv) => {
 		PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, OfferValues, OfferStatus,OfferRevisions
+		OfferConsolidation, 
+		OfferProductConsolidation, 
+		ApprovalRequests, 
+		ProductPricingView, 
+		PriceConditionView, 
+		TenderHistorySpain, 
+		PriceConditionBrazilView, 
+		OfferValues, 
+		OfferStatus,
+		OfferRevisions,
+		TenderOffers
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -421,7 +431,7 @@ module.exports = (srv) => {
 
 	srv.on('copyOffer', async (req) => {
 
-		const { data: {offerID,type} } = req;
+		const { data: {offerID,type, instituteName} } = req;
 
 		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
 		!type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
@@ -444,11 +454,13 @@ module.exports = (srv) => {
 		const offerProducts = await SELECT.from(PT_TMOFPR).where({OfferID: offerID, Active: 1});
 		const productPricing = await SELECT.from(PT_TMBDPR).where({OfferID: offerID, Active: 1, ActiveTier: 0, LotID: 1 })
 		const offerRevision = await SELECT.one.from(OfferRevisions).where({TENDERID: offer.TenderID, TENDEROFFERNO: offer.TenderOfferNo});
+		const nextOfferID = await SELECT.one.from(TenderOffers).where({TENDERID: offer.TenderID});
 		
 
 		switch(type){
 			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
 			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
+			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, req});
 		}
 	});
 
@@ -546,6 +558,53 @@ module.exports = (srv) => {
 		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
 
 		return continuedOfferID;
+	};
+
+	async function createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, req}){
+		if(!instituteName){
+			return req.error({ code: 404, message: "Institute name was not provided", target: "InstituteName" });
+		}
+
+		const affiliateOfferID = `${nextOfferID.TENDERID}-${nextOfferID.NEXTOFFERID}`;
+		const affiliateOffer = {...offer};
+		const todaysDate = new Date().toISOString().substring(0,10);
+		affiliateOffer.OfferID = affiliateOfferID;
+		affiliateOffer.CreationDate = todaysDate;
+		affiliateOffer.InternalBidDueDate = todaysDate;
+		affiliateOffer.NewOfferDueDate = todaysDate;	
+		affiliateOffer.AffiliateOffer = true;	
+		affiliateOffer.Custom_String_1 = instituteName;	
+		affiliateOffer.TenderOfferNo = nextOfferID.NEXTOFFERID;	
+
+
+		const affiliateOfferStatus = {...offerStatus};
+		affiliateOfferStatus.OfferID = affiliateOfferID;
+		affiliateOfferStatus.STATUS = "Offer Created";
+		affiliateOfferStatus.Date = todaysDate;
+
+		const affiliateOfferProducts = offerProducts.map(pr => {
+			const affiliateProduct = {...pr};
+			affiliateProduct.OfferID = affiliateOfferID;
+			return affiliateProduct;
+		});
+
+		const affiliateProductsPricing = productPricing.map(pr => {
+			const cpp = {...pr};
+			cpp.OfferID = affiliateOfferID;
+			cpp.SubmittedOn = todaysDate;
+			return cpp;
+		});
+
+		// 1. create affiliate offer
+		await INSERT.into(PT_TMOFRS).entries(affiliateOffer);
+		// 2. create affiliate offer status
+		await INSERT.into(PT_TMTNOFST).entries(affiliateOfferStatus);
+		// 3. create affiliate products
+		await INSERT.into(PT_TMOFPR).entries(affiliateOfferProducts);
+		// 4. create product pricing
+		await INSERT.into(PT_TMBDPR).entries(affiliateProductsPricing);
+
+		return affiliateOfferID;
 	};
 
 	srv.on("softDeleteOffer", async (req) => {
