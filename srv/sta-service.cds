@@ -204,7 +204,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Offer.Currency as Currency
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
-    action copyOffer(offerID:String, type: String) returns String;
+    action copyOffer(offerID:String, type: String, instituteName: String) returns String;
     action softDeleteOffer(offerID:String) returns String;
 
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
