@@ -730,8 +730,10 @@ module.exports = async (srv) => {
         console.log(`Prepare requests of customer prices`);
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice));
         //EHQUT-386660-Italy-Issue with FoC synchronization
-        const updateFOCConditionPromises = focPriceConditions.map((custPrice,index) => updateFOCcustPrices(custPrice,index));
-        //const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
+
+        // const updateFOCConditionPromises = focPriceConditions.map((custPrice,index) => updateFOCcustPrices(custPrice,index));
+        const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
+
         const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
 
         // Synchronize
@@ -1110,7 +1112,9 @@ module.exports = async (srv) => {
 
     // });
  //EHQUT-386660-Italy-Issue with FoC synchronization
+
     async function updateFOCcustPrices(customerPrice,index) {
+
         console.log(`Prepare sending update FOC customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
 

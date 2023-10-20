@@ -767,10 +767,18 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
-	 case offer.Tender.Institute.Region.Name
-        when 'SEWA' then ADD_DAYS(CURRENT_DATE, 60)
+	 case
+
+        when offer.Tender.Institute.Region.Name = 'SEWA' then ADD_DAYS(CURRENT_DATE, 60)
+
+        when (offer.CountryCode = 'ES' and offer.Tender.Classification = 'Commercial Agreement')
+
+          then ifnull(offer.Quotation.OfferValidity,ADD_MONTHS(CURRENT_DATE,1))
+
         else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
+
     end as OFFERVALIDITY,
+
 	case when offer.CountryCode NOT IN ('ES','IT')
 
         then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
@@ -788,6 +796,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
              ifnull(offer.Quotation.ExpiryDate,ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)))
 
     end as ExpiryDate,
+
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
