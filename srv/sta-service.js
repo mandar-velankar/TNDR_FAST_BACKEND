@@ -22,7 +22,27 @@ const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
 
-module.exports = (srv) => {
+module.exports = async (srv) => {
+
+	const UITemplatesService = await cds.connect.to('UITemplates');
+
+	const { 
+		CountryTemplate,
+		Template: UITemplate,
+		Tab,
+		XMLView,
+		Table,
+		Form,
+		FormContainer,
+		FormElement,
+		Column,
+		Layout,
+		Control,
+		Properties,
+		ValueHelp,
+		Filter,
+		StaticValue
+	} = UITemplatesService.entities;
 
 	// Use reflection to get the csn definition
 	const {
@@ -100,6 +120,11 @@ module.exports = (srv) => {
 		LatestApprovedBrandPolicies
 	} = cds.entities("PolicyService");
 
+
+	srv.on('READ', 'Properties', req => {
+		console.log('passing request to remote service ...');		
+		return UITemplatesService.run(req.query);
+	});
 
 	// const arr = x => Array.from(x);
 	// const num = x => Number(x) || 0;
