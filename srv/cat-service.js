@@ -82,6 +82,7 @@ module.exports = (srv) => {
 			'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
 		];
 
+
 		let b = [
 			'', '', 'Twenty', 'Thirty', 'Forty',
 			'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
@@ -228,6 +229,7 @@ module.exports = (srv) => {
 				});
 			}
 		});
+		
 		return results;
 	}
 	function buildCommonProductInfo(offer, product) {
@@ -262,7 +264,6 @@ module.exports = (srv) => {
 		let netPricePack = netPrice / toPackFactor;
 		let netPriceUnitEurSpot = netPriceUnit / product.SPOT_RATE;
 		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
-
 		let grossSales = offerPrice * paidVolume;
        
 		let netSales = netPrice * totalVolume;
@@ -3125,6 +3126,7 @@ module.exports = (srv) => {
 
 	srv.on('READ', 'ApprovalOffers', async (req) => {
 		// const tx = cds.transaction(req);
+		console.log("Inside Approval Offers");
 		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalOffers(tx);
 		return results;
