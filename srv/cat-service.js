@@ -779,7 +779,7 @@ module.exports = (srv) => {
 		});
 		return price;
 	}
-
+//CR2
 //EFRCL- 384446- Spain - issues with the new approval process for PH
 //EFRCL- 383690- Spain - mandatory approval of Finance and Legal for commercial agreements where payment back date are above one month from the effective date
     async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
@@ -797,7 +797,7 @@ module.exports = (srv) => {
 
 		const whereoffer={
 			OfferId: offer.OFFERID,
-			PriceConditionCode : 'YAW1'
+			PriceConditionCode : ['YAW1','YAW2']
 		};
 
         const whereProduct = {
