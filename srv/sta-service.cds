@@ -526,5 +526,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key hier.ParentInstituteID,
         key hier.InstituteID,
             inst.InstituteName
-    };
+    }
+    union select from MasterData.PT_TMINST {
+        key InstituteID as ParentInstituteID,
+        key InstituteID,
+        InstituteName
+    }
 }
