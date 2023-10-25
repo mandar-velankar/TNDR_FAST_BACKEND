@@ -55,6 +55,7 @@ class PriceAgreementMailJob extends BaseJob {
 
         console.log('Processing reminder mails for Price Agreements finished.');
     }
+    //EJSDI-CR6
     async getPriceAgreementsExpiring(expiryDate) {
         console.log(`Fetching Price Agreements with expiry date: ${expiryDate}`);
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
@@ -96,7 +97,7 @@ class PriceAgreementMailJob extends BaseJob {
             }
         
             pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-            //EJSDI-CR6 
+        
             if(pa.status == 'cancelled' && pa.FormatedExpiryDate)
             {
                 pa.ShowExpiryDate = true;
