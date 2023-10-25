@@ -1423,7 +1423,7 @@ module.exports = async (srv) => {
                                 "KONWA": "%",
                                 "KPEIN": 1,
                                 "KBRUE": 0,
-                                "KSCHL": "YAW1",
+                                "KSCHL": priceconditionrappelcode,
                                 "E1KONW": []
                             }
                         ]
