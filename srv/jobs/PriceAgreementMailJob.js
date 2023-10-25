@@ -13,6 +13,7 @@ class PriceAgreementMailJob extends BaseJob {
      * Triggered when job has started
      */
     //override
+    //EJSDI-CR6
     async onTick() {
 
         console.log('Processing reminder mails for Price Agreements started ...');
@@ -25,6 +26,9 @@ class PriceAgreementMailJob extends BaseJob {
             }, {
                 expiryDate: this.getReminderDate(),
                 template: 'PriceAgreementReminderMail'
+            },{
+                expiryDate: this.getExpiredDate(),
+                template: 'PriceAgreementExpiredMail'
             }];
             //get all mail templates for price agreements
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
@@ -51,6 +55,7 @@ class PriceAgreementMailJob extends BaseJob {
 
         console.log('Processing reminder mails for Price Agreements finished.');
     }
+    //EJSDI-CR6
     async getPriceAgreementsExpiring(expiryDate) {
         console.log(`Fetching Price Agreements with expiry date: ${expiryDate}`);
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
@@ -90,7 +95,13 @@ class PriceAgreementMailJob extends BaseJob {
             if(pa.ExpiryExtensionPeriod && pa.ExpiryExtensionPeriod > 0){
                 pa.ShowExpiryExtensionPeriod = true;
             }
+        
             pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+        
+            if(pa.status == 'cancelled' && pa.FormatedExpiryDate)
+            {
+                pa.ShowExpiryDate = true;
+            }
             pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
         })
@@ -167,6 +178,11 @@ class PriceAgreementMailJob extends BaseJob {
         let date = new Date();
         date.setDate(date.getDate() + 45);//+45
         return this.formatDate(date);
+    }
+    //EJSDI-CR6
+    getExpiredDate() {
+        let date = new Date();
+        date.setDate(date.getDate());
     }
     formatDate(date) {
         let month = '' + (date.getMonth() + 1);
