@@ -1397,7 +1397,7 @@ module.exports = async (srv) => {
                         "CRETIM": 145201
                     },
                     "_BAY0-GZ_SALESAGRHEAD": {
-                        "BOART": priceconditionrappelcode,
+                        "BOART": "YAW1",
                         "VKORG": "QFHC",
                         "VTWEG": "00",
                         "SPART": "00",
