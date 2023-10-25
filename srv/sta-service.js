@@ -598,7 +598,7 @@ module.exports = async (srv) => {
 		affiliateOffer.InternalBidDueDate = todaysDate;
 		affiliateOffer.NewOfferDueDate = todaysDate;	
 		affiliateOffer.AffiliateOffer = true;	
-		affiliateOffer.Custom_String_1 = instituteName;	
+		affiliateOffer.Custom_String_2 = instituteName;	
 		affiliateOffer.TenderOfferNo = nextOfferID.NEXTOFFERID;	
 
 
