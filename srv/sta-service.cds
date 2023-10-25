@@ -103,6 +103,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.createdBy,
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
+        tender.Institute.InstituteID,
         key tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,         
@@ -123,6 +124,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.createdBy,
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
+        tender.Institute.InstituteID,
         tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,         
@@ -525,6 +527,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
         key hier.ParentInstituteID,
         key hier.InstituteID,
+        key CountryCode,
             inst.InstituteName
-    };
+    }
+    union select from MasterData.PT_TMINST {
+        key InstituteID as ParentInstituteID,
+        key InstituteID,
+        key CountryCode,
+            InstituteName
+    }
 }
