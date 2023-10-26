@@ -64,7 +64,7 @@ class PriceAgreementMailJob extends BaseJob {
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
         let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-            pa.ID,pa.CountryCode,pa.TenderId, pa.OfferId,pa.ExpiryDate,pa.ExpiryExtensionPeriod,pa.ExtendPriceAgreement,
+            pa.ID,pa.CountryCode,pa.TenderId, pa.OfferId,pa.ExpiryDate,pa.ExpiryExtensionPeriod,pa.ExtendPriceAgreement,pa.Status,
             pa.Tender.ExternalID,
             pa.Tender.User.UserName,
             pa.Tender.User.UserEmail,
@@ -84,7 +84,7 @@ class PriceAgreementMailJob extends BaseJob {
             //     'Tender.User.UserEmail',
             //     'Product.ProductPack.PRODUCTPACKNAME',
             //     'Institute.InstituteName')
-            .where({ ExpiryDate: expiryDate, CountryCode: 'ES' }));
+            .where({ ExpiryDate: expiryDate, CountryCode: 'ES', Status: 'Cancle' }));
         return pas.map(pa => {
             pa.Price = 0;
             if(pa.PriceConditions && pa.PriceConditions.length > 0){
@@ -95,10 +95,11 @@ class PriceAgreementMailJob extends BaseJob {
             if(pa.ExpiryExtensionPeriod && pa.ExpiryExtensionPeriod > 0){
                 pa.ShowExpiryExtensionPeriod = true;
             }
-            else
+            if(pa.Status == 'Cancle' && pa.FormatedExpiryDate)
             {
-            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+                pa.ShowExpiryExtensionPeriod = true;
             }
+            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
             pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
         })
