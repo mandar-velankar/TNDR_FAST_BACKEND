@@ -97,11 +97,6 @@ class PriceAgreementMailJob extends BaseJob {
             }
         
             pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-        
-            if(pa.status == 'cancelled' && pa.FormatedExpiryDate)
-            {
-                pa.ShowExpiryDate = true;
-            }
             pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
         })
