@@ -95,8 +95,10 @@ class PriceAgreementMailJob extends BaseJob {
             if(pa.ExpiryExtensionPeriod && pa.ExpiryExtensionPeriod > 0){
                 pa.ShowExpiryExtensionPeriod = true;
             }
-        
+            else
+            {
             pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+            }
             pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
         })
