@@ -96,16 +96,16 @@ class PriceAgreementMailJob extends BaseJob {
                 pa.ShowExpiryExtensionPeriod = true;
             }
             console.log("Status", pa.Status);
+            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+            console.log("Formated Expiry Date", pa.FormatedExpiryDate);
             if(pa.Status == 'Cancelled' && pa.FormatedExpiryDate)
             {
-                pa.Tender.TenderID,
-                pa.Tender.ExpiryDate,
-                pa.Tender.FormatedExpiryDate,
-                pa.Tender.Status,
+                pa.TenderId,
+                pa.ExpiryDate,
+                pa.FormatedExpiryDate,
+                console.log("Tender ID ", pa.TenderId);
+                
             }
-            
-                pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-         
             
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
