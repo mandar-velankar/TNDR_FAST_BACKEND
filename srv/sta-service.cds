@@ -209,16 +209,63 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     action copyOffer(offerID:String, type: String, instituteName: String) returns String;
     action softDeleteOffer(offerID:String) returns String;
 
-    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
-        *,
-        SKU.MoleculeName as MoleculeName,
-        SKUCountry.CODE1 as Code1,
-        SKUCountry.CODE2 as Code2,
-        SKUCountry.CODE3 as Code3,
-        SKU.ProductGenericName as ProductGenericName,
-        SKUCountry.GOV_CODE as Gov_Code,
-        @Core.Computed: false
-        ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
+    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as pr
+        inner join MasterData.PT_TMCTPRDPCK as ctprdck on ctprdck.PRODUCTPACKID = pr.ProductCode
+                                                       and ctprdck.COUNTRYCODE = pr.CountryCode
+        left join TransactionalData.PT_TMOFRS as offer on offer.OfferID = pr.OfferID
+        left join PakistanMasterDistributors as pkdist on pkdist.BU = ctprdck.BU 
+                                                       and pkdist.InstituteID = offer.QuotationInstituteID {
+            pr.TenderID,
+        key pr.OfferID,
+            pr.SubmittedOn,
+            pr.SubmittedBy,
+        key pr.Active,
+        key pr.ProductCode,
+            pr.Reference,
+            pr.AlternateOfferYN,
+            pr.RequestedVolume,
+            pr.UnitPerPack,
+            pr.SampleYN,
+            pr.SampleQuantity,
+            pr.DocumentsRequired,
+            pr.FirstShipment,
+            pr.NoofLots,
+            pr.IntervalBetweenShipments,
+            pr.NoOfTier,
+            pr.DiscOrOffer,
+            pr.PaymentTerms,
+            pr.SNo,
+            pr.ActiveProduct,
+            pr.Comment,
+            pr.INCOTerms,
+            pr.SORTER,
+            pr.DEFAULT_COMMISSION_RATE,
+            pr.SUPPLY_UPDATE,
+            pr.PAYMENT_UPDATE,
+            pr.Line,
+            pr.DeliveryConditions,
+            pr.MinInvoiceAmount,
+            pr.PricingPolicyCluster,
+            pr.OfferType,
+            pr.AnticipatedRequestedQuantity,
+            pr.MaxPrice,
+            pr.Channel,
+        key pr.LotID,
+            pr.WorkflowProductID,
+            pr.IbizWorkflowID,
+            pr.CountryCode,
+            pr.DistributorID,
+            pkdist.DistributorID as PakistanDistributorID,
+            pkdist.DistributorName as PakistanDistributorName,
+            SKU.MoleculeName as MoleculeName,
+            SKUCountry.CODE1 as Code1,
+            SKUCountry.CODE2 as Code2,
+            SKUCountry.CODE3 as Code3,
+            SKU.ProductGenericName as ProductGenericName,
+            SKUCountry.GOV_CODE as Gov_Code,
+            ctprdck.BU,
+            @Core.Computed: false
+            ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
@@ -527,12 +574,22 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key hier.ParentInstituteID,
         key hier.InstituteID,
         key CountryCode,
+            hier.InstituteID as QuotationInstituteID,
             inst.InstituteName
     }
     union select from MasterData.PT_TMINST {
         key InstituteID as ParentInstituteID,
         key InstituteID,
         key CountryCode,
+            InstituteID as QuotationInstituteID,
             InstituteName
-    }
+    };
+
+    entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
+        inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID {
+            pkdist.InstituteID,
+            pkdist.BU,
+            pkdist.DistributorID,
+            dist.DistributorName,
+    };
 }
