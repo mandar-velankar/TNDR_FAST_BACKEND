@@ -84,7 +84,7 @@ class PriceAgreementMailJob extends BaseJob {
             //     'Tender.User.UserEmail',
             //     'Product.ProductPack.PRODUCTPACKNAME',
             //     'Institute.InstituteName')
-            .where({ ExpiryDate: expiryDate, CountryCode: 'ES', Status: 'Cancle' }));
+            .where({ ExpiryDate: expiryDate, CountryCode: 'ES', Status: 'Cancelled' }));
         return pas.map(pa => {
             pa.Price = 0;
             if(pa.PriceConditions && pa.PriceConditions.length > 0){
@@ -95,7 +95,7 @@ class PriceAgreementMailJob extends BaseJob {
             if(pa.ExpiryExtensionPeriod && pa.ExpiryExtensionPeriod > 0){
                 pa.ShowExpiryExtensionPeriod = true;
             }
-            if(pa.Status == 'Cancle' && pa.FormatedExpiryDate)
+            if(pa.Status == 'Cancelled' && pa.FormatedExpiryDate)
             {
                 pa.ShowExpiryExtensionPeriod = true;
             }
