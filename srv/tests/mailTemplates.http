@@ -40,6 +40,18 @@ Content-Type: application/json
     "mediaType": "text/html"
 }
 
+POST http://localhost:4004/v2/tender/MailTemplateFiles
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "CountryCode":"ES",
+    "Status":"Cancelled",
+    "templateId":"PriceAgreementExpiredMail",
+    "title":"Reminder!! Price Agreements Expired !!",
+    "filename" : "PriceAgreementExpiredMail.html",
+    "mediaType": "text/html"
+}
 ### upload word template
 PUT http://localhost:4004/v2/tender/MailTemplateFiles(templateId='PriceAgreementReminderMail')/content
 Authorization: Basic YXJ0aW9t
