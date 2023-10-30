@@ -2,8 +2,8 @@ const cds = require('@sap/cds');
 const BaseJob = require('./BaseJob');
 const Handlebars = require("handlebars");
 const cfenv = require("cfenv");
-
-class PriceAgreementMailJob extends BaseJob {
+ //EJSDI-CR6
+class PriceAgreementExpiredMailJob extends BaseJob {
 
     constructor(jobName, jobTime) {
         super(jobName, jobTime);
@@ -16,24 +16,24 @@ class PriceAgreementMailJob extends BaseJob {
     //EJSDI-CR6
     async onTick() {
 
-        console.log('Processing Expired mails for Price Agreements started ...');
+        console.log('Processing expired mails for Price Agreements started ...');
 
         try {
             this.db = await cds.connect.to('db');
             const mailRuns = [{
                 expiryDate: this.getExpiredDate(),
                 template: 'PriceAgreementExpiredMail'
-            }];
+            },];
             //get all mail templates for price agreements
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
-            //loop over configured mailing runs: first mail expired soon + reminder mail
+            //loop over configured mailing runs: for expired mails
             for (let mailRun of mailRuns) {
-                //get price agreements based on mail reminder date
+                //get price agreements based on mail expired date
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
                 // console.dir(pas,{ depth: null });
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
-                    // console.log(mails);
+                    console.log(mails);
                     if(mails && mails.length > 0){
                         await this.addMailsToOutbox(mails, mailRun.expiryDate);
                     } else{
@@ -47,9 +47,9 @@ class PriceAgreementMailJob extends BaseJob {
             console.error(error);
         }
 
-        console.log('Processing Expired mails for Price Agreements finished.');
+        console.log('Processing expired mails for Price Agreements finished.');
     }
-
+   
     async getPriceAgreementsExpired(expiryDate) {
         console.log(`Fetching Price Agreements with expiry date: ${expiryDate}`);
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
@@ -58,13 +58,13 @@ class PriceAgreementMailJob extends BaseJob {
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
         let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-            pa.ID,pa.CountryCode,pa.TenderId, pa.OfferId,pa.ExpiryDate,pa.Status,
+            pa.ID, pa.CountryCode, pa.ExpiryDate, pa.Status,
             pa.TenderId,
             pa.OfferId,
-            pa.ExpiryDate,
             pa.Materials,
             pa.PriceAgreementID,
-        
+            pa.Product.ProductPack.PRODUCTPACKNAME,
+            pa.Institute.InstituteName//,
             //requirement changed: price not needed for now because logic is not clear 
             // pa.PriceConditions`[PriceConditionClassification.isMain='true']`(pc=>{
             //     pc.PVL
@@ -83,13 +83,12 @@ class PriceAgreementMailJob extends BaseJob {
         return pas.map(pa => {
             pa.Price = 0;
             if(pa.PriceConditions && pa.PriceConditions.length > 0){
-                pa.Price = pa.PriceConditions[0].PVL
                 console.log("Status", pa.Status);
+                console.log("FormatedExpiryDate", pa.FormatedExpiryDate)
             }
-            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate)
-            console.log("Status", pa.Status);
-            console.log("FormatedExpiryDate", pa.FormatedExpiryDate)
-            pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
+              pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+              console.log("FormatedExpiryDate", pa.FormatedExpiryDate)
+              pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
         })
     }
@@ -156,13 +155,12 @@ class PriceAgreementMailJob extends BaseJob {
             //     .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
             //     .where({ TemplateId: { in: templateIds } }));
     }
-
-
     getExpiredDate() {
         let date = new Date();
         date.setDate(date.getDate());
         return this.formatDate(date);
     }
+   
     formatDate(date) {
         let month = '' + (date.getMonth() + 1);
         let day = date.getDate();
@@ -178,4 +176,4 @@ class PriceAgreementMailJob extends BaseJob {
       }
 };
 
-module.exports = PriceAgreementExpiredMail;
+module.exports = PriceAgreementExpiredMailJob;
