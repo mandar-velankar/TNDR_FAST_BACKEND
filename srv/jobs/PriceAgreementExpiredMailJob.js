@@ -22,15 +22,14 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             this.db = await cds.connect.to('db');
             const mailRuns = [{
                 expiryDate: this.getExpiredDate(),
-                template: 'PriceAgreementExpiredMail'
+                template: 'PriceAgreementExpiredMail',
             },];
-            //get all mail templates for price agreements
+          
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
-            //loop over configured mailing runs: for expired mails
+         
             for (let mailRun of mailRuns) {
-                //get price agreements based on mail expired date
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
-                // console.dir(pas,{ depth: null });
+              
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
                     console.log(mails);
@@ -57,40 +56,22 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
-        let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-            pa.ID, pa.CountryCode, pa.ExpiryDate, pa.Status,
-            pa.TenderId,
-            pa.OfferId,
-            pa.Materials,
-            pa.PriceAgreementID,
-            pa.Product.ProductPack.PRODUCTPACKNAME,
-            pa.Institute.InstituteName//,
-            //requirement changed: price not needed for now because logic is not clear 
-            // pa.PriceConditions`[PriceConditionClassification.isMain='true']`(pc=>{
-            //     pc.PVL
-                // ,
-                // pc.PriceConditionClassification(pcc=>{
-                //     pcc.isMain
-                // })
-            // })
-        })
-            // .columns('*',
-            //     'Tender.User.UserName',
-            //     'Tender.User.UserEmail',
-            //     'Product.ProductPack.PRODUCTPACKNAME',
-            //     'Institute.InstituteName')
-            .where({ ExpiryDate: expiryDate, CountryCode: 'ES', Status: 'Cancelled' }));
-        return pas.map(pa => {
-            pa.Price = 0;
-            if(pa.PriceConditions && pa.PriceConditions.length > 0){
-                console.log("Status", pa.Status);
-                console.log("FormatedExpiryDate", pa.FormatedExpiryDate)
-            }
+      
+        return SELECT.from(PriceAgreements, pa => {
+              pa.TenderId,
+              pa.ID, pa.CountryCode, pa.ExpiryDate, pa.Status,
+              pa.TenderId,
+              pa.OfferId,
+              pa.Materials,
+              pa.PriceAgreementID,
+              pa.Product.ProductPack.PRODUCTPACKNAME,
+              pa.Institute.InstituteName//,  
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-              console.log("FormatedExpiryDate", pa.FormatedExpiryDate)
+              console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
+              console.log("Price Agreement ID", pa.PriceAgreementID);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
-        })
+        }) .where({ CountryCode: 'ES', Status: 'Cancelled' });
     }
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
         .map(pa => ({
