@@ -26,10 +26,7 @@ class PriceAgreementMailJob extends BaseJob {
             }, {
                 expiryDate: this.getReminderDate(),
                 template: 'PriceAgreementReminderMail'
-            },{
-                expiryDate: this.getExpiredDate(),
-                template: 'PriceAgreementExpiredMail'
-            }];
+            },];
             //get all mail templates for price agreements
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             //loop over configured mailing runs: first mail expired soon + reminder mail
@@ -64,7 +61,7 @@ class PriceAgreementMailJob extends BaseJob {
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
         let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-            pa.ID,pa.CountryCode,pa.TenderId, pa.OfferId,pa.ExpiryDate,pa.ExpiryExtensionPeriod,pa.ExtendPriceAgreement,pa.Status,
+            pa.ID,pa.CountryCode,pa.TenderId, pa.OfferId,pa.ExpiryDate,pa.ExpiryExtensionPeriod,pa.ExtendPriceAgreement,
             pa.Tender.ExternalID,
             pa.Tender.User.UserName,
             pa.Tender.User.UserEmail,
@@ -95,20 +92,7 @@ class PriceAgreementMailJob extends BaseJob {
             if(pa.ExpiryExtensionPeriod && pa.ExpiryExtensionPeriod > 0){
                 pa.ShowExpiryExtensionPeriod = true;
             }
-            console.log("Status", pa.Status);
-            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-            console.log("Formated Expiry Date", pa.FormatedExpiryDate);
-            if(pa.Status = 'Cancelled' && pa.FormatedExpiryDate)
-            {
-                pa.TenderId,
-                pa.ExpiryDate,
-                pa.FormatedExpiryDate,
-                console.log("Tender ID ", pa.TenderId);
-                console.log("FormatedDate", pa.FormatedExpiryDate);
-                console.log("Status", pa.Status);
-                
-            }
-            
+              pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate)
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
         })
@@ -186,12 +170,7 @@ class PriceAgreementMailJob extends BaseJob {
         date.setDate(date.getDate() + 45);//+45
         return this.formatDate(date);
     }
-    //EJSDI-CR6
-    getExpiredDate() {
-        let date = new Date();
-        date.setDate(date.getDate());
-        return this.formatDate(date);
-    }
+   
     formatDate(date) {
         let month = '' + (date.getMonth() + 1);
         let day = date.getDate();
