@@ -59,11 +59,12 @@ class PriceAgreementMailJob extends BaseJob {
         const tx = this.db.tx();
         let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
             pa.ID,pa.CountryCode,pa.TenderId, pa.OfferId,pa.ExpiryDate,pa.Status,
-            pa.Tender.ExternalID,
-            pa.Tender.User.UserName,
-            pa.Tender.User.UserEmail,
-            pa.Product.ProductPack.PRODUCTPACKNAME,
-            pa.Institute.InstituteName//,
+            pa.TenderId,
+            pa.OfferId,
+            pa.ExpiryDate,
+            pa.Materials,
+            pa.PriceAgreementID,
+        
             //requirement changed: price not needed for now because logic is not clear 
             // pa.PriceConditions`[PriceConditionClassification.isMain='true']`(pc=>{
             //     pc.PVL
@@ -83,6 +84,7 @@ class PriceAgreementMailJob extends BaseJob {
             pa.Price = 0;
             if(pa.PriceConditions && pa.PriceConditions.length > 0){
                 pa.Price = pa.PriceConditions[0].PVL
+                console.log("Status", pa.Status);
             }
             pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate)
             console.log("Status", pa.Status);
@@ -176,4 +178,4 @@ class PriceAgreementMailJob extends BaseJob {
       }
 };
 
-module.exports = PriceAgreementMailJob;
+module.exports = PriceAgreementExpiredMail;
