@@ -98,12 +98,14 @@ class PriceAgreementMailJob extends BaseJob {
             console.log("Status", pa.Status);
             pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
             console.log("Formated Expiry Date", pa.FormatedExpiryDate);
-            if(pa.Status == 'Cancelled' && pa.FormatedExpiryDate)
+            if(pa.Status = 'Cancelled' && pa.FormatedExpiryDate)
             {
                 pa.TenderId,
                 pa.ExpiryDate,
                 pa.FormatedExpiryDate,
                 console.log("Tender ID ", pa.TenderId);
+                console.log("FormatedDate", pa.FormatedExpiryDate);
+                console.log("Status", pa.Status);
                 
             }
             
