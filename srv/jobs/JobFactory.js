@@ -1,7 +1,7 @@
 const { ProcessMaterials, ProcessCustomers } = require('./ItalyJobs');
 const { ProcessMaterialsBrazil, ProcessCustomersBrazil } = require('./BrazilJobs');
 const PriceAgreementMailJob = require("./PriceAgreementMailJob");
-const PriceAgreementExpiredMail = require("./PriceAgreementExpiredMail");
+const PriceAgreementExpiredMailJob = require("./PriceAgreementExpiredMailJob.js")
 const PriceAgreementPriceConditionNotificationMailJob = require("./PriceAgreementPriceConditionNotificationMailJob");
 const PriceAgreementNotificationNetPriceAbovePVLJob = require("./PriceAgreementNotificationNetPriceAbovePVLJob");
 const PriceAgreementNotificationNetPriceBelowFloorJob = require("./PriceAgreementNotificationNetPriceBelowFloorJob");
@@ -36,8 +36,8 @@ module.exports = class JobFactory {
             case this.jobNames.PriceAgreementMailJob:
                 return new PriceAgreementMailJob(jobName,jobTime)
                 break;
-            case this.jobNames.PriceAgreementExpiredMail:
-                return new PriceAgreementExpiredMail(jobName,jobTime)
+            case this.jobNames.PriceAgreementExpiredMailJob:
+                return new PriceAgreementExpiredMailJob(jobName,jobTime)
                 break;    
             case this.jobNames.PriceAgreementPriceConditionNotificationMailJob:
                 return new PriceAgreementPriceConditionNotificationMailJob(jobName,jobTime)
@@ -95,7 +95,7 @@ module.exports = class JobFactory {
             ProcessMaterialsBrazilJob: "ProcessMaterialsBrazilJob", // TODO: are these old jobs? if yes, remove them
             ProcessCustomersBrazilJob: "ProcessCustomersBrazilJob", // TODO: are these old jobs? if yes, remove them
             PriceAgreementMailJob: "PriceAgreementMailJob",
-            PriceAgreementExpiredMail: "PriceAgreementExpiredMailJob",
+            PriceAgreementExpiredMailJob: "PriceAgreementExpiredMailJob",
             PriceAgreementPriceConditionNotificationMailJob: "PriceAgreementPriceConditionNotificationMailJob",
             PriceAgreementNotificationNetPriceAbovePVLJob: "PriceAgreementNotificationNetPriceAbovePVLJob",
             PriceAgreementNotificationNetPriceBelowFloorJob: "PriceAgreementNotificationNetPriceBelowFloorJob",
