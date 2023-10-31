@@ -64,6 +64,7 @@ entity PT_TMOFRS { //Offers
         DecisionSharedWithIBIZ : Boolean default false;
         isIBIZNotified         : Boolean default false; 
         AffiliateOffer         : Boolean default false; 
+        QuotationInstituteID   : Integer;
         Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND
