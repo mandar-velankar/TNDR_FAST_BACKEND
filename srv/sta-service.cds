@@ -210,11 +210,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     action softDeleteOffer(offerID:String) returns String;
 
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as pr
-        inner join MasterData.PT_TMCTPRDPCK as ctprdck on ctprdck.PRODUCTPACKID = pr.ProductCode
+        left join MasterData.PT_TMCTPRDPCK as ctprdck on ctprdck.PRODUCTPACKID = pr.ProductCode
                                                        and ctprdck.COUNTRYCODE = pr.CountryCode
+        left join ProductBrand as prbrand on prbrand.PRODUCTPACKID = pr.ProductCode
         left join TransactionalData.PT_TMOFRS as offer on offer.OfferID = pr.OfferID
         left join PakistanMasterDistributors as pkdist on pkdist.BU = ctprdck.BU 
-                                                       and pkdist.InstituteID = offer.QuotationInstituteID {
+                                                       and pkdist.InstituteID = offer.QuotationInstituteID 
+        left join MasterData.PT_TMINST as inst on offer.QuotationInstituteID = inst.InstituteID{
             pr.TenderID,
         key pr.OfferID,
             pr.SubmittedOn,
@@ -264,6 +266,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             SKU.ProductGenericName as ProductGenericName,
             SKUCountry.GOV_CODE as Gov_Code,
             ctprdck.BU,
+            prbrand.HLEVEL4_NAME as BrandName,
+            inst.INCOTerms as IncoTerm,
             @Core.Computed: false
             ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };
@@ -574,15 +578,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key hier.ParentInstituteID,
         key hier.InstituteID,
         key CountryCode,
-            hier.InstituteID as QuotationInstituteID,
-            inst.InstituteName
+            hier.InstituteID as QuotationInstituteID: String,
+            inst.InstituteName,
+            inst.PaymentTerms
     }
     union select from MasterData.PT_TMINST {
         key InstituteID as ParentInstituteID,
         key InstituteID,
         key CountryCode,
-            InstituteID as QuotationInstituteID,
-            InstituteName
+            InstituteID as QuotationInstituteID: String,
+            InstituteName,
+            PaymentTerms
     };
 
     entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
@@ -592,4 +598,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             pkdist.DistributorID,
             dist.DistributorName,
     };
+
+    entity ProductBrand as select from MasterData.PT_TMPRDHIER as prdhier
+        inner join MasterData.PT_TMPRDPCK as prdpck on prdpck.HLEVEL6_CODE = prdhier.HLEVEL6_CODE {
+            key prdpck.PRODUCTPACKID,
+                prdhier.HLEVEL6_CODE,
+                prdhier.HLEVEL4_NAME
+    }
 }
