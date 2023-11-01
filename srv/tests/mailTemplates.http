@@ -77,15 +77,7 @@ Content-Type: text/html
 < ../mail/PriceAgreementExpiredMail.html
 
 ### create mapping between countrycode and template (for reusability)
-POST http://localhost:4004/v2/tender/MailTemplates
-Authorization: Basic YXJ0aW9t
-Content-Type: application/json
 
-{
-    "CountryCode":"ES",
-    "Status":"Cancelled",
-    "TemplateId":"PriceAgreementExpiredMail"
-}
 ### get list of templates
 GET http://localhost:4004/v2/tender/MailTemplateFiles
 Authorization: Basic YXJ0aW9t

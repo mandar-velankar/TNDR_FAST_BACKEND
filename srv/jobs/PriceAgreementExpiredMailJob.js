@@ -16,7 +16,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
     //EJSDI-CR6
     async onTick() {
 
-        console.log('Processing expired mails for Price Agreements started ...');
+        console.log('Processing mails for Cancelled Price Agreements started ...');
 
         try {
             this.db = await cds.connect.to('db');
@@ -36,7 +36,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                     if(mails && mails.length > 0){
                         await this.addMailsToOutbox(mails, mailRun.expiryDate);
                     } else{
-                        console.log(`No mails to add to outbox for template ${mailRun.template}`);
+                        console.log(`No Mails Need to send  ${mailRun.template}`);
                     }
                 } else {
                     console.log(`No Expired mails to be send for expiry date: ${mailRun.expiryDate}`);
@@ -46,16 +46,15 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             console.error(error);
         }
 
-        console.log('Processing expired mails for Price Agreements finished.');
+        console.log('Processing mails for Cancelled Price Agreements Completed !!');
     }
    
     async getPriceAgreementsExpired(expiryDate) {
-        console.log(`Fetching Price Agreements with expiry date: ${expiryDate}`);
+        console.log(`Getting Price Agreements with expiry date: ${expiryDate}`);
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         const appEnv = cfenv.getAppEnv();
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
     
-        // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
       
         return SELECT.from(PriceAgreements, pa => {
@@ -119,7 +118,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         console.log('Get mail templates for price agreements');
         console.table(templateIds);
         const tx = cds.tx();
-        // const language = "ES";
+
 
         const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
         try{
