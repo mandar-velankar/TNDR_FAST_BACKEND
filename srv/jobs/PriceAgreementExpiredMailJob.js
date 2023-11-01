@@ -56,24 +56,30 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
+
+               let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
+                pa.TenderId,
+                pa.ID, pa.CountryCode, pa.ExpiryDate, pa.Status,
+                pa.TenderId,
+                pa.OfferId,
+                pa.Materials,
+                pa.PriceAgreementID,
+                pa.Product.ProductPack.PRODUCTPACKNAME,
+                pa.Institute.InstituteName//,  
+            
+            })
+                .where({ ExpiryDate: expiryDate, CountryCode: 'ES' }));
+            return pas.map(pa => {
+            
+                  pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate)
+                  console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
+                  console.log("Price Agreement ID", pa.PriceAgreementID);
+                  pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
+                return pa;
+            })
+        }
       
-        return SELECT.from(PriceAgreements, pa => {
-              pa.TenderId,
-              pa.ID, pa.CountryCode, pa.ExpiryDate, pa.Status,
-              pa.TenderId,
-              pa.OfferId,
-              pa.Materials,
-              pa.PriceAgreementID,
-              pa.Product.ProductPack.PRODUCTPACKNAME,
-              pa.Institute.InstituteName//,  
-              pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-              console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
-              console.log("Price Agreement ID", pa.PriceAgreementID);
-              pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
-            return pa;
-        }) .where({ CountryCode: 'ES', Status: 'Cancelled' });
-    }
-    mapPriceAgreementsToMails = (templates,mail) => pas => pas
+         mapPriceAgreementsToMails = (templates,mail) => pas => pas
         .map(pa => ({
             CountryCode: pa.CountryCode,
             TenderID: pa.TenderId,
