@@ -69,7 +69,7 @@ class PriceAgreementMailJob extends BaseJob {
             pa.Institute.InstituteName//,
             //requirement changed: price not needed for now because logic is not clear 
             // pa.PriceConditions`[PriceConditionClassification.isMain='true']`(pc=>{
-            //     pc.PVL.
+            //     pc.PVL
                 // ,
                 // pc.PriceConditionClassification(pcc=>{
                 //     pcc.isMain
