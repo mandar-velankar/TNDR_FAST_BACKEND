@@ -203,7 +203,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Price.NetPrice as NetPrice,
         RequestedVolume,
         (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
-        Offer.Currency as Currency
+        Offer.Currency as Currency,
+        SKUCountry.RegistrationValidUntil
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String, instituteName: String) returns String;
@@ -264,8 +265,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             SKUCountry.CODE2 as Code2,
             SKUCountry.CODE3 as Code3,
             SKU.ProductGenericName as ProductGenericName,
+            SKU.PRODUCTPACKNAME,
             SKUCountry.GOV_CODE as Gov_Code,
             ctprdck.BU,
+            ctprdck.RegistrationValidUntil,
             prbrand.HLEVEL4_NAME as BrandName,
             inst.INCOTerms as IncoTerm,
             @Core.Computed: false
