@@ -42,59 +42,31 @@ module.exports = class PriceAgreementExpiredMailJob extends BaseJob {
 
     getPriceAgreementsExpired() {
         console.log(`Data for cancelled Price Agreement`);
+        const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         const appEnv = cfenv.getAppEnv();
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         const tx = this.db.tx();
-                return SELECT.from(PriceAgreements, pa => {
-                pa.TenderId,
-                pa.ID, pa.CountryCode, pa.ExpiryDate, pa.Status,
-                pa.TenderId,
-                pa.OfferId,
-                pa.Materials('*'),
-                pa.PriceAgreementID,
-                pa.Product.ProductPack.PRODUCTPACKNAME,
-                pa.Institute.InstituteName//,  
-                pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-                console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
-                console.log("Price Agreement ID", pa.PriceAgreementID);
-                pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
-              return pa;
-          }) .where({ CountryCode: 'ES', Status: 'Cancelled' });
-          }
-
-   /* mapDataToMail = (template,mail,syncDate) => data => {
-
-        //get unique created by users, this can be used to filter pa/cp data per user from the data array
-        const uniqueUsers = [...new Set(data.map(item => item.Tender.User.CWID))];
-
-        for (let user of uniqueUsers) {
-            let dataFilteredByUser = data.filter(d => d.Tender.User.CWID === user && d.include === true);
-            if(dataFilteredByUser && dataFilteredByUser.length > 0){
-                outbox.push({
-                    CountryCode: dataFilteredByUser[0].CountryCode,
-                    TenderID: dataFilteredByUser[0].TenderId,
-                    OfferID: dataFilteredByUser[0].OfferId,
-                    Sender: 'FAST-Admin@bayer.com',
-                    Recipients: dataFilteredByUser[0].Tender.User.UserEmail,
-                    Subject: template.title,
-                    MailBody: this.generateMailBody(template, {
-                        data: { 
-                            SyncDate: syncDate.toDateString(), 
-                            PriceAgreements: dataFilteredByUser 
-                        }
-                    }),
-                    Sent: false
-                });
-            }
-        }
-    
-        if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
-            console.log(`No template found for Net Price Above PVL ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
-            return;
-        }
-        return outbox;
+        let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
+            pa.TenderId,
+            pa.ID, pa.CountryCode, pa.ExpiryDate, pa.Status,
+            pa.TenderId,
+            pa.OfferId,
+            pa.Materials,
+            pa.PriceAgreementID,
+            pa.Product.ProductPack.PRODUCTPACKNAME,
+            pa.Institute.InstituteName//,
+        })
+         .where({CountryCode: 'ES', Status: 'Cancelled'}));
+        return pas.map(pa => {
+            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+            console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
+            console.log("Price Agreement ID", pa.PriceAgreementID);
+              pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate)
+              pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}'
+            return pa;
+        })
     }
-    */
+}  
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
         .map(pa => ({
             CountryCode: pa.CountryCode,
@@ -116,6 +88,7 @@ module.exports = class PriceAgreementExpiredMailJob extends BaseJob {
         template.CountryCode === pa.CountryCode && 
         template.Language === pa.CountryCode && 
         template.TemplateId === templateid);
+
     async addMailsToOutbox(mail, syncDate) {
         console.log(`Adding notification mail for Cancelled Price Agreement: ${syncDate.toDateString()}`);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
