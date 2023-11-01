@@ -9,9 +9,14 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         super(jobName, jobTime);
     }
 
-       async onTick() {
+    /**
+     * Triggered when job has started
+     */
+    //override
+    //EJSDI-CR6
+    async onTick() {
 
-        console.log('Processing mails for Cancelled Price Agreements ...');
+        console.log('Processing expired mails for Price Agreements started ...');
 
         try {
             this.db = await cds.connect.to('db');
@@ -41,7 +46,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             console.error(error);
         }
 
-        console.log('Processing mails for Cancelled Price Agreement finished.');
+        console.log('Processing expired mails for Price Agreements finished.');
     }
    
     async getPriceAgreementsExpired(expiryDate) {
@@ -49,31 +54,25 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         const appEnv = cfenv.getAppEnv();
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
+    
+        // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
-        let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-            pa.ID,
-            pa.TenderId,
-            pa.CountryCode,
-            pa.ExpiryDate, 
-            pa.Status,
-            pa.OfferId,
-            pa.Materials,
-            pa.PriceAgreementID,
-            pa.Product.ProductPack.PRODUCTPACKNAME,
-            pa.Institute.InstituteName//,
-        
-        })  .where({ ExpiryDate: expiryDate, CountryCode: 'ES', Status: 'Cancelled' }));
-        return pas.map(pa => {
-            pa.Price = 0;
-            if(pa.Status == 'Cancelled' && pa.FormatedExpiryDate ){
-               console.log("Formated Expiry Date ", pa.FormatedExpiryDate);
-               console.log("Status", pa.Status);
-            }
-           
-              pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate)
+      
+        return SELECT.from(PriceAgreements, pa => {
+              pa.TenderId,
+              pa.ID, pa.CountryCode, pa.ExpiryDate, pa.Status,
+              pa.TenderId,
+              pa.OfferId,
+              pa.Materials,
+              pa.PriceAgreementID,
+              pa.Product.ProductPack.PRODUCTPACKNAME,
+              pa.Institute.InstituteName//,  
+              pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+              console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
+              console.log("Price Agreement ID", pa.PriceAgreementID);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
-        })
+        }) .where({ CountryCode: 'ES', Status: 'Cancelled' });
     }
 
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
@@ -134,7 +133,9 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             await tx.rollback();
             return [];
         }
-           
+            // return tx.run(SELECT.from(MailTemplate)
+            //     .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+            //     .where({ TemplateId: { in: templateIds } }));
     }
     getExpiredDate() {
         let date = new Date();
