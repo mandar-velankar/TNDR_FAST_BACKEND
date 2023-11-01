@@ -45,8 +45,7 @@ Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "CountryCode":"ES",
-    "Status":"Cancelled",
+    
     "templateId":"PriceAgreementExpiredMail",
     "title":"Reminder!! Price Agreements Expired !!",
     "filename" : "PriceAgreementExpiredMail.html",
