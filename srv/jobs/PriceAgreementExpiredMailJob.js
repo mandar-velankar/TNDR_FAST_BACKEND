@@ -32,7 +32,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
               
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
-                    console.log(mails);
+                   // console.log(mails);
                     if(mails && mails.length > 0){
                         await this.addMailsToOutbox(mails, mailRun.expiryDate);
                     } else{
@@ -96,7 +96,6 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         template.TemplateId === templateid);
 
     async addMailsToOutbox(mails, expiryDate) {
-        console.log(`Adding reminder mails for Price Agreements to outbox for expiry date: ${expiryDate}`);
         console.table(mails,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const tx = this.db.tx();
