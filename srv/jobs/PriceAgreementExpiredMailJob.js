@@ -63,12 +63,11 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.TenderId,
                 pa.OfferId,
                 pa.Materials,
-                pa.PriceAgreementID,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
             pa.Institute.InstituteName//,
           
         })
-            .where({ ExpiryDate : {'>=' : expiryDate}, CountryCode: 'ES' , Status: 'Cancelled' }));
+            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled' }));
         return pas.map(pa => {
            
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
