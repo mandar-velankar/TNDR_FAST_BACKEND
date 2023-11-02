@@ -68,13 +68,13 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             pa.Institute.InstituteName//,
           
         })
-            .where({ FormatedExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled' }));
+            .where({ ExpiryDate : {'>=' : expiryDate}, CountryCode: 'ES' , Status: 'Cancelled' }));
         return pas.map(pa => {
            
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-              
-              console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
-              console.log("Price Agreement ID", pa.PriceAgreementID);
+              console.log(pas ,"pas");
+            //   console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
+            //   console.log("Price Agreement ID", pa.PriceAgreementID);
               
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
@@ -146,7 +146,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
    
     getExpiredDate() {
         let date = new Date();
-        date.setDate(date.getDate()+0);
+        date.setDate(date.getDate());
         return this.formatDate(date);
     }
    
