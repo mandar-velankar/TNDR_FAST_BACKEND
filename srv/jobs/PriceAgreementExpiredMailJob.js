@@ -71,7 +71,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
               console.log("Price Agreement ID", pa.PriceAgreementID);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
-        }) .where({ CountryCode: 'ES', Status: 'Cancelled' });
+        }) .where({ ExpiryDate: expiryDate, CountryCode: 'ES', Status: 'Cancelled' });
     }
 
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
@@ -132,9 +132,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             await tx.rollback();
             return [];
         }
-            // return tx.run(SELECT.from(MailTemplate)
-            //     .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
-            //     .where({ TemplateId: { in: templateIds } }));
+           
     }
     getExpiredDate() {
         let date = new Date();
