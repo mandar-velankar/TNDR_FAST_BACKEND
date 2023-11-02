@@ -56,7 +56,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
             let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-                pa.TenderId,
+                
                 pa.ID, pa.CountryCode, 
                 pa.ExpiryDate,
                 pa.Status,
