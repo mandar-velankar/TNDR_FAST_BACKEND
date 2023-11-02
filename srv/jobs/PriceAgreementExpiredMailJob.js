@@ -58,7 +58,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
                 pa.TenderId,
                 pa.ID, pa.CountryCode, 
-                pa.ExpiryDate = new Date().toLocalDateString();
+                pa.ExpiryDate,
                 pa.Status,
                 pa.TenderId,
                 pa.OfferId,
@@ -155,7 +155,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         let day = date.getDate();
         month = month.length < 2 ? `0${month}` : month;
         day = day.length < 2 ? `0${day}` : day;
-        return `${date.getFullYear()}-${month}-${day}`;
+        return `${date.getFullYear()}-${month}-${day} 00:00:00`;
     }
     dateToDDMMYYYY(dateStr) {
         var d = dateStr.substr(0,4);
