@@ -68,17 +68,9 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             pa.Institute.InstituteName//,
           
         })
-            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled' }));
+            .where({ FormatedExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled' }));
         return pas.map(pa => {
-            pa.Price = 0;
-            if(pa.PriceConditions && pa.PriceConditions.length > 0){
-                pa.Price = pa.PriceConditions[0].PVL
-            }
-            pa.FormattedExtendPriceAgreement = pa.ExtendPriceAgreement?'Yes':'No';
-            pa.ShowExpiryExtensionPeriod = false;
-            if(pa.ExpiryExtensionPeriod && pa.ExpiryExtensionPeriod == 0){
-                pa.ShowExpiryExtensionPeriod = true;
-            }
+           
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
               
               console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
