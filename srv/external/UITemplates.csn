@@ -1,6 +1,6 @@
 {
  "meta": {
-  "creator": "cds-dk 7.2.0"
+  "creator": "cds-dk 7.3.2"
  },
  "$version": "2.0",
  "definitions": {
@@ -836,6 +836,69 @@
     },
     "ValueHelp_ID": {
      "type": "cds.UUID"
+    }
+   }
+  },
+  "UITemplates.ProductScopeView": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "FormID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "CountryCode": {
+     "type": "cds.LargeString"
+    },
+    "ProductScope": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "UITemplates.PropertiesView": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ControlID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "PropertyName": {
+     "type": "cds.LargeString"
+    },
+    "PropertyValue": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "UITemplates.MandatoryFieldsView": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Section": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true,
+     "@Core.Computed": true
+    },
+    "CountryCode": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "ProductScope": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true,
+     "@Core.Computed": true
+    },
+    "Field": {
+     "type": "cds.LargeString"
     }
    }
   },
