@@ -68,7 +68,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             pa.Institute.InstituteName//,
           
         })
-            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: False }));
+            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
              
            return pas.map(pa => {
               
