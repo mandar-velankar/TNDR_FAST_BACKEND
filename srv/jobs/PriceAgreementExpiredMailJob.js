@@ -28,7 +28,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             for (let mailRun of mailRuns) {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
-              
+                console.log("PriceAgreement ID ", pas.ID);
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
                     // console.log(mails);
@@ -83,7 +83,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
     async updatePriceAgreementsNotification(priceAgreementID){
         if(!priceAgreementID) return false;
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-        return UPDATE(PriceAgreements).with({emailNotificationSent: true}).where({ ID: priceAgreementID });
+        return UPDATE(PriceAgreements).with({EmailNotificationSent: true}).where({ ID: priceAgreementID });
     };
 
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
@@ -117,6 +117,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             const mailsResult = await tx.run(INSERT(mails).into(OutgoingMails));
             await tx.commit();
             this.updatePriceAgreementsNotification(pas.ID);
+          
             return mailsResult;
         } catch (error) {
             console.error(error);
