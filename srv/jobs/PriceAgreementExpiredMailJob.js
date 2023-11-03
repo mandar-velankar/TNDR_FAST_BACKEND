@@ -116,8 +116,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         try {
             const mailsResult = await tx.run(INSERT(mails).into(OutgoingMails));
             await tx.commit();
-            console.log("Mails Results",mailsResult);
-            updatePriceAgreementsNotification(pas.ID);
+            this.updatePriceAgreementsNotification(pas.ID);
             return mailsResult;
         } catch (error) {
             console.error(error);
