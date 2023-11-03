@@ -33,7 +33,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
                     // console.log(mails);
                     if(mails && mails.length > 0){
-                        await this.addMailsToOutbox(mails, mailRun.expiryDate);
+                        await this.addMailsToOutbox(mails, mailRun.expiryDate, pas);
                     } else{
                         console.log(`No mails Need to send ${mailRun.template}`);
                     }
@@ -69,7 +69,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
           
         })
             .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: False }));
-             updatePriceAgreementsNotification(pa.ID);
+             
            return pas.map(pa => {
               
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
@@ -108,7 +108,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         template.Language === pa.CountryCode && 
         template.TemplateId === templateid);
 
-    async addMailsToOutbox(mails, expiryDate) {
+    async addMailsToOutbox(mails, expiryDate, pas) {
         console.log(`Adding Expired mails for Price Agreements to outbox for expiry date: ${expiryDate}`);
         console.table(mails,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
@@ -117,6 +117,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             const mailsResult = await tx.run(INSERT(mails).into(OutgoingMails));
             await tx.commit();
             console.log("Mails Results",mailsResult);
+            updatePriceAgreementsNotification(pas.ID);
             return mailsResult;
         } catch (error) {
             console.error(error);
