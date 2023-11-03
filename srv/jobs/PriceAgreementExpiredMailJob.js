@@ -24,16 +24,16 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 expiryDate: this.getExpiredDate(),
                 template: 'PriceAgreementExpiredMail'
             },];
-            
+                        
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
-           for (let mailRun of mailRuns) {
+            for (let mailRun of mailRuns) {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
               
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
                     // console.log(mails);
                     if(mails && mails.length > 0){
-                        await this.addMailsToOutbox(mails, mailRun.expiryDate);
+                        await this.addMailsToOutbox(mails, mailRun.expiryDate, pas);
                     } else{
                         console.log(`No mails Need to send ${mailRun.template}`);
                     }
@@ -55,8 +55,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
-            let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-                
+            let pas = await tx.run(SELECT.from(PriceAgreements,pa => {          
                 pa.ID, pa.CountryCode, 
                 pa.ExpiryDate,
                 pa.Status,
@@ -69,15 +68,24 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             pa.Institute.InstituteName//,
           
         })
-            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled' }));
-        return pas.map(pa => {
-           
+            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: False }));
+             
+           return pas.map(pa => {
+              
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
               console.log(pa,"pa");
             return pa;
         })
+
     }
+
+    async updatePriceAgreementsNotification(priceAgreementID){
+        if(!priceAgreementID) return false;
+        const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        return UPDATE(PriceAgreements).with({emailNotificationSent: true}).where({ ID: priceAgreementID });
+    };
+
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
         .map(pa => ({
             CountryCode: pa.CountryCode,
@@ -100,7 +108,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         template.Language === pa.CountryCode && 
         template.TemplateId === templateid);
 
-    async addMailsToOutbox(mails, expiryDate) {
+    async addMailsToOutbox(mails, expiryDate, pas) {
         console.log(`Adding Expired mails for Price Agreements to outbox for expiry date: ${expiryDate}`);
         console.table(mails,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
@@ -108,6 +116,8 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         try {
             const mailsResult = await tx.run(INSERT(mails).into(OutgoingMails));
             await tx.commit();
+            console.log("Mails Results",mailsResult);
+            updatePriceAgreementsNotification(pas.ID);
             return mailsResult;
         } catch (error) {
             console.error(error);
