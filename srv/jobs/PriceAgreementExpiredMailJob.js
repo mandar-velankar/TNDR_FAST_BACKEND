@@ -24,9 +24,9 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 expiryDate: this.getExpiredDate(),
                 template: 'PriceAgreementExpiredMail'
             },];
-            
+                        
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
-           for (let mailRun of mailRuns) {
+            for (let mailRun of mailRuns) {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
               
                 if (pas && pas.length > 0) {
@@ -55,8 +55,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
-            let pas = await tx.run(SELECT.from(PriceAgreements,pa => {
-                
+            let pas = await tx.run(SELECT.from(PriceAgreements,pa => {          
                 pa.ID, pa.CountryCode, 
                 pa.ExpiryDate,
                 pa.Status,
@@ -69,15 +68,24 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             pa.Institute.InstituteName//,
           
         })
-            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled' }));
-        return pas.map(pa => {
-           
+            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: False }));
+             updatePriceAgreementsNotification(pa.ID);
+           return pas.map(pa => {
+              
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
               console.log(pa,"pa");
             return pa;
         })
+
     }
+
+    async updatePriceAgreementsNotification(priceAgreementID){
+        if(!priceAgreementID) return false;
+        const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+        return UPDATE(PriceAgreements).with({emailNotificationSent: true}).where({ ID: priceAgreementID });
+    };
+
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
         .map(pa => ({
             CountryCode: pa.CountryCode,
