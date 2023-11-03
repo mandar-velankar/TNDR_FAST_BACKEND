@@ -13,6 +13,8 @@ using {com.bayer.SXTENDER.BankGuaranteeData} from '../db/BankGuaranteeData';
 using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {com.bayer.SXTENDER.ExternalDataViews} from '../db/ExternalDataViews';
+using {UITemplates as UITemplateSrv} from './external/UITemplates';
+
 using {
     User,
     Country,
@@ -28,6 +30,38 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     'f_tndr_cag_standardtender_user'
 ]) {
     
+    // UITemplate entities
+    @readonly
+    entity CountryTemplate as projection on UITemplateSrv.CountryTemplate;
+    @readonly
+    entity Template as projection on UITemplateSrv.Template;
+    @readonly
+    entity Tab as projection on UITemplateSrv.Tab;
+    @readonly
+    entity XMLView as projection on UITemplateSrv.XMLView;
+    @readonly
+    entity Table as projection on UITemplateSrv.Table;
+    @readonly
+    entity Form as projection on UITemplateSrv.Form;
+    @readonly
+    entity FormContainer as projection on UITemplateSrv.FormContainer;
+    @readonly
+    entity FormElement as projection on UITemplateSrv.FormElement;
+    @readonly
+    entity Column as projection on UITemplateSrv.Column;
+    @readonly
+    entity Layout as projection on UITemplateSrv.Layout;
+    @readonly
+    entity Control as projection on UITemplateSrv.Control;
+    @readonly
+    entity Properties as projection on UITemplateSrv.Properties;
+    @readonly
+    entity ValueHelp as projection on UITemplateSrv.ValueHelp;
+    @readonly
+    entity Filter as projection on UITemplateSrv.Filter;
+    @readonly
+    entity StaticValue as projection on UITemplateSrv.StaticValue;
+
 
     @cds.redirection.target
     entity TenderFormView as projection on TransactionalData.PT_TMTEND {
@@ -69,6 +103,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.createdBy,
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
+        tender.Institute.InstituteID,
         key tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,         
@@ -89,6 +124,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.createdBy,
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
+        tender.Institute.InstituteID,
         tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,         
@@ -170,7 +206,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Offer.Currency as Currency
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
-    action copyOffer(offerID:String, type: String) returns String;
+    action copyOffer(offerID:String, type: String, instituteName: String) returns String;
     action softDeleteOffer(offerID:String) returns String;
 
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
@@ -478,4 +514,24 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteName
     };
 
+    entity PdfEmail: cuid{
+        URL : String;
+        UserName: String;       
+        Sent: Boolean
+    };
+
+
+    entity ChildInstitutesView as select from MasterData.PT_TMINST as inst
+        inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
+        key hier.ParentInstituteID,
+        key hier.InstituteID,
+        key CountryCode,
+            inst.InstituteName
+    }
+    union select from MasterData.PT_TMINST {
+        key InstituteID as ParentInstituteID,
+        key InstituteID,
+        key CountryCode,
+            InstituteName
+    }
 }

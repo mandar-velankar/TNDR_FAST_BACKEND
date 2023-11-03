@@ -871,3 +871,10 @@ entity PricingPolicy: cuid, managed {
 	Value			: Double;
 	Currency		: String;
 }
+
+entity DistributorAssignment: cuid, managed {
+	Comment 		: String(500);
+	InstituteID		: Integer;
+	BU				: String;
+	DistributorID	: Integer;
+}
