@@ -63,6 +63,8 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.TenderId,
                 pa.OfferId,
                 pa.Materials,
+                pa.Tender.User.UserEmail,
+                pa.Tender.User.UserName,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
             pa.Institute.InstituteName//,
           
@@ -71,11 +73,8 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         return pas.map(pa => {
            
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
-              console.log(pas ,"pas");
-            //   console.log("FormatedExpiryDate", pa.FormatedExpiryDate);
-            //   console.log("Price Agreement ID", pa.PriceAgreementID);
-              
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
+              console.log(pa,"pa");
             return pa;
         })
     }
