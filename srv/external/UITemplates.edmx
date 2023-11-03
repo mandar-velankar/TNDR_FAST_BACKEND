@@ -71,6 +71,9 @@
         <EntitySet Name="StaticValue" EntityType="CatalogService.StaticValue">
           <NavigationPropertyBinding Path="ValueHelp" Target="ValueHelp"/>
         </EntitySet>
+        <EntitySet Name="ProductScopeView" EntityType="CatalogService.ProductScopeView"/>
+        <EntitySet Name="PropertiesView" EntityType="CatalogService.PropertiesView"/>
+        <EntitySet Name="MandatoryFieldsView" EntityType="CatalogService.MandatoryFieldsView"/>
       </EntityContainer>
       <EntityType Name="CountryTemplate">
         <Key>
@@ -291,6 +294,33 @@
         </NavigationProperty>
         <Property Name="ValueHelp_ID" Type="Edm.Guid"/>
       </EntityType>
+      <EntityType Name="ProductScopeView">
+        <Key>
+          <PropertyRef Name="FormID"/>
+        </Key>
+        <Property Name="FormID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="CountryCode" Type="Edm.String"/>
+        <Property Name="ProductScope" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="PropertiesView">
+        <Key>
+          <PropertyRef Name="ControlID"/>
+        </Key>
+        <Property Name="ControlID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="PropertyName" Type="Edm.String"/>
+        <Property Name="PropertyValue" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="MandatoryFieldsView">
+        <Key>
+          <PropertyRef Name="Section"/>
+          <PropertyRef Name="CountryCode"/>
+          <PropertyRef Name="ProductScope"/>
+        </Key>
+        <Property Name="Section" Type="Edm.String" Nullable="false"/>
+        <Property Name="CountryCode" Type="Edm.String" Nullable="false"/>
+        <Property Name="ProductScope" Type="Edm.String" Nullable="false"/>
+        <Property Name="Field" Type="Edm.String"/>
+      </EntityType>
       <ComplexType Name="com_bayer_SXTENDER_templates_SelectedField">
         <Property Name="ID" Type="Edm.String"/>
         <Property Name="Name" Type="Edm.String"/>
@@ -311,6 +341,12 @@
             <PropertyValue Property="Updatable" Bool="false"/>
           </Record>
         </Annotation>
+      </Annotations>
+      <Annotations Target="CatalogService.MandatoryFieldsView/Section">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="CatalogService.MandatoryFieldsView/ProductScope">
+        <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
     </Schema>
   </edmx:DataServices>
