@@ -41,7 +41,8 @@ module.exports = async (srv) => {
 		Properties,
 		ValueHelp,
 		Filter,
-		StaticValue
+		StaticValue,
+		MandatoryFieldsView
 	} = UITemplatesService.entities;
 
 	// Use reflection to get the csn definition
@@ -401,15 +402,40 @@ module.exports = async (srv) => {
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
 		const today = new Date().toISOString().slice(0, 10);
 
-		// validate form
-		!req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
-		!req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
-		!req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
-		!req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
-		!req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
-		!req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
-		!req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
-		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
+		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
+		const fieldMapping = {
+			'ID' : 'TenderID',
+			'Offer Due Date': 'BidDueDate',
+			'Created By': 'SubmittedBy',
+			'Tender Reference':'Tender Name'
+		};
+		const mandatoryFields = mandatoryFielddata.map(item => {
+			const databaseField = item.Field;
+			const frontendField = fieldMapping[databaseField] || databaseField; // Use the mapping or the original field
+			return frontendField;
+		});
+		  
+		for (const frontendField of mandatoryFields) {
+			// Remove spaces from the field name
+  			const field = frontendField.replace(/\s/g, '');
+		  
+			if (
+			  !(field in req.data) ||
+			  req.data[field] === null ||
+			  req.data[field] === ''
+			) {
+			  req.error({ code: 404, message: `${frontendField} is required.`, target: field });
+			}
+		}
+		// // validate form
+		// !req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
+		// !req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
+		// !req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
+		// !req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
+		// !req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
+		// !req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
+		// !req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
+		// !req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
 
 		//check if dates are correct
 		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
@@ -424,6 +450,7 @@ module.exports = async (srv) => {
 				req.error({ code: 404, message: "Award date should be before the next publication date.", target: "NextPublicationDye" });
 		}	
 		
+		req.data.ExternalID = null; //for mandatory field check in sta-service
 		// remove associations data
 		delete req.data.InstituteName;
 		delete req.data.InstituteType;
@@ -432,15 +459,40 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
 
+		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Offer', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		const fieldMapping = {
+			'Payment Term' : 'Custom_String_1',
+			'Distributor Name' : 'DistributorID',
+			'Internal Due Date' : 'InternalBidDueDate'
+		};
+		const mandatoryFields = mandatoryFielddata.map(item => {
+			const databaseField = item.Field;
+			const frontendField = fieldMapping[databaseField] || databaseField; // Use the mapping or the original field
+			return frontendField;
+		});
+		  
+		for (const frontendField of mandatoryFields) {
+			// Remove spaces from the field name
+  			const field = frontendField.replace(/\s/g, '');
+		  
+			if (
+			  !(field in req.data) ||
+			  req.data[field] === null ||
+			  req.data[field] === ''
+			) {
+			  req.error({ code: 404, message: `${frontendField} is required.`, target: field });
+			}
+		}
 		// validate form
-		!req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
-		!req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
-		!req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
-		!req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
-        !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
-        !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
+		// !req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
+		// !req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
+		// !req.data.Division && req.error({ code: 404, message: "Division is required.", target: "Division" });
+		// !req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
+        // !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
+        // !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
 		
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
+		req.data.DistributorComments = null; //for mandatory field check in sta-service
 		delete req.data.OfferDueDate;
 		delete req.data.OfferStatus;
 		delete req.data.InstituteID;
@@ -647,22 +699,54 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
 
+		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'OfferProduct', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.Line}));
+		const fieldMapping = {
+			'Pharma QC updated as required' : 'Custom_String_1',
+			'UoM' : 'UnitPerPack',
+			'Decline' : 'ActiveProduct',
+			'AAH product code' : 'Code1',
+			'License number' : 'Code2',
+			'Generic Product Description' : 'ProductGenericName',
+			'Distribution' : 'Channel',
+			'EAN / GTIN - the barcode' : 'Gov_Code',
+			'PIP code' : 'Code3',
+			'Budgeted profitability' : 'VwBudgetedProfitability',
+			'Pack size required' : 'Custom_Integer_1',
+		};
+		const mandatoryFields = mandatoryFielddata.map(item => {
+			const databaseField = item.Field;
+			const frontendField = fieldMapping[databaseField] || databaseField; // Use the mapping or the original field
+			return frontendField;
+		});
+		  
+		for (const frontendField of mandatoryFields) {
+			// Remove spaces from the field name
+  			const field = frontendField.replace(/\s/g, '');
+		  
+			if (
+			  !(field in req.data) ||
+			  req.data[field] === null ||
+			  req.data[field] === ''
+			) {
+			  req.error({ code: 404, message: `${frontendField} is required.`, target: field });
+			}
+		}
 		// validate form
-		!req.data.RequestedVolume &&  req.error({ code: 404, message: "RequestedVolume is required.", target: "RequestedVolume" });
-		!req.data.UnitPerPack &&  req.error({ code: 404, message: "UoM is required.", target: "UnitPerPack" });
-		!req.data.ActiveProduct &&  req.error({ code: 404, message: "Decline is required.", target: "ActiveProduct" });
-		!req.data.MoleculeName &&  req.error({ code: 404, message: "Molecule Name is required.", target: "MoleculeName" });
-		!req.data.Code1 &&  req.error({ code: 404, message: "AAH product code is required.", target: "Code1" });
-		!req.data.Code2 &&  req.error({ code: 404, message: "License number is required.", target: "Code2" });
-		!req.data.ProductGenericName &&  req.error({ code: 404, message: "Generic Product Description is required.", target: "ProductGenericName" });
-		!req.data.Custom_String_1 &&  req.error({ code: 404, message: "Pharma QC is required.", target: "Custom_String_1" });
-		!req.data.Channel && req.error({ code: 404, message: "Distribution is required.", target: "Channel" });
-		!req.data.Gov_Code && req.error({ code: 404, message: "EAN/GTIN is required.", target: "Gov_Code" });
-        !req.data.Code3 && req.error({ code: 404, message: "PIP code is required.", target: "Code3" });
-		!req.data.Custom_Integer_1 && req.error({ code: 404, message: "Pack size is required.", target: "Custom_Integer_1" });
+		// !req.data.RequestedVolume &&  req.error({ code: 404, message: "RequestedVolume is required.", target: "RequestedVolume" });
+		// !req.data.UnitPerPack &&  req.error({ code: 404, message: "UoM is required.", target: "UnitPerPack" });
+		// !req.data.ActiveProduct &&  req.error({ code: 404, message: "Decline is required.", target: "ActiveProduct" });
+		// !req.data.MoleculeName &&  req.error({ code: 404, message: "Molecule Name is required.", target: "MoleculeName" });
+		// !req.data.Code1 &&  req.error({ code: 404, message: "AAH product code is required.", target: "Code1" });
+		// !req.data.Code2 &&  req.error({ code: 404, message: "License number is required.", target: "Code2" });
+		// !req.data.ProductGenericName &&  req.error({ code: 404, message: "Generic Product Description is required.", target: "ProductGenericName" });
+		// !req.data.Custom_String_1 &&  req.error({ code: 404, message: "Pharma QC is required.", target: "Custom_String_1" });
+		// !req.data.Channel && req.error({ code: 404, message: "Distribution is required.", target: "Channel" });
+		// !req.data.Gov_Code && req.error({ code: 404, message: "EAN/GTIN is required.", target: "Gov_Code" });
+        // !req.data.Code3 && req.error({ code: 404, message: "PIP code is required.", target: "Code3" });
+		// !req.data.Custom_Integer_1 && req.error({ code: 404, message: "Pack size is required.", target: "Custom_Integer_1" });
 		// !req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
 		
-
+		req.data.Line = null; //for mandatory field check in sta-service
 		delete req.data.MoleculeName;
         delete req.data.Code1;
         delete req.data.Code2;
