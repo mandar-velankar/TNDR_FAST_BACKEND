@@ -28,12 +28,12 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             for (let mailRun of mailRuns) {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
-                console.log("PriceAgreement ID ", pas.ID);
+                
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
                     // console.log(mails);
                     if(mails && mails.length > 0){
-                        await this.addMailsToOutbox(mails, mailRun.expiryDate, pas);
+                        await this.addMailsToOutbox(mails, mailRun.expiryDate);
                     } else{
                         console.log(`No mails Need to send ${mailRun.template}`);
                     }
@@ -74,13 +74,14 @@ class PriceAgreementExpiredMailJob extends BaseJob {
               
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
-              console.log(pa,"pa");
+              
             return pa;
         })
 
     }
 
     async updatePriceAgreementsNotification(priceAgreementID){
+        console.log("inside",priceAgreementID);
         if(!priceAgreementID) return false;
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         return UPDATE(PriceAgreements).with({EmailNotificationSent: true}).where({ ID: priceAgreementID });
@@ -98,7 +99,9 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             Sent: false
         }))
         .filter(pa =>{
-            // console.log(pa);
+            this.updatePriceAgreementsNotification(pa.ID);
+             console.log(pa.ID,"pa.ID");
+             console.log(pa,"pa");
             if(!pa.MailBody || pa.MailBody === 'undefined')console.log(`No template found for Price Agreement of tender ${pa.TenderID} with countrycode ${pa.CountryCode}`)
             return !!pa.MailBody && pa.MailBody !== 'undefined';
         });
@@ -108,7 +111,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         template.Language === pa.CountryCode && 
         template.TemplateId === templateid);
 
-    async addMailsToOutbox(mails, expiryDate, pas) {
+    async addMailsToOutbox(mails, expiryDate) {
         console.log(`Adding Expired mails for Price Agreements to outbox for expiry date: ${expiryDate}`);
         console.table(mails,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
@@ -116,9 +119,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         try {
             const mailsResult = await tx.run(INSERT(mails).into(OutgoingMails));
             await tx.commit();
-            this.updatePriceAgreementsNotification(pas.ID);
-          
-            return mailsResult;
+             return mailsResult;
         } catch (error) {
             console.error(error);
             await tx.rollback();
