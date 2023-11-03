@@ -74,7 +74,8 @@ class PriceAgreementExpiredMailJob extends BaseJob {
               
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
-              
+              this.updatePriceAgreementsNotification(pa.ID);
+              console.log(pa.ID);
             return pa;
         })
 
@@ -99,9 +100,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             Sent: false
         }))
         .filter(pa =>{
-            this.updatePriceAgreementsNotification(pa.ID);
-             console.log(pa.ID,"pa.ID");
-             console.log(pa,"pa");
+            
             if(!pa.MailBody || pa.MailBody === 'undefined')console.log(`No template found for Price Agreement of tender ${pa.TenderID} with countrycode ${pa.CountryCode}`)
             return !!pa.MailBody && pa.MailBody !== 'undefined';
         });
