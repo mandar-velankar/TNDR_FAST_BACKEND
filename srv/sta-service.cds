@@ -264,6 +264,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             pr.CountryCode,
             pr.DistributorID,
             pr.Custom.String_1 as Custom_String_1,
+            pr.Custom.Integer_1 as Custom_Integer_1,
             pkdist.DistributorID as PakistanDistributorID,
             pkdist.DistributorName as PakistanDistributorName,
             SKU.MoleculeName as MoleculeName,
