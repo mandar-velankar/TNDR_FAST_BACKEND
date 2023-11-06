@@ -404,7 +404,7 @@ module.exports = async (srv) => {
 
 		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
 
-		const regex = /path\s*:\s*'([A-Za-z]+)'/;
+		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
 		for (const item of mandatoryFielddata) {
 			let frontendField = item.Field;
@@ -457,7 +457,7 @@ module.exports = async (srv) => {
 		const fieldMapping = {
 			'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
 		};
-		const regex = /path\s*:\s*'([A-Za-z]+)'/;
+		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
 		for (const item of mandatoryFielddata) {
 			let frontendField = item.Field;
@@ -695,7 +695,7 @@ module.exports = async (srv) => {
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
 
 		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'OfferProduct', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.Line}));
-		const regex = /path\s*:\s*'([A-Za-z]+)'/;
+		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
 		for (const item of mandatoryFielddata) {
 			let frontendField = item.Field;
