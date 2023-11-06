@@ -263,6 +263,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             pr.IbizWorkflowID,
             pr.CountryCode,
             pr.DistributorID,
+            pr.Custom.String_1 as Custom_String_1,
             pkdist.DistributorID as PakistanDistributorID,
             pkdist.DistributorName as PakistanDistributorName,
             SKU.MoleculeName as MoleculeName,
