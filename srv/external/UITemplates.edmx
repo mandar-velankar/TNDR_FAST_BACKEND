@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
   <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml">
@@ -307,8 +306,8 @@
           <PropertyRef Name="ControlID"/>
         </Key>
         <Property Name="ControlID" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="PropertyName" Type="Edm.String"/>
-        <Property Name="PropertyValue" Type="Edm.String"/>
+        <Property Name="Type" Type="Edm.String"/>
+        <Property Name="FieldName" Type="Edm.String"/>
       </EntityType>
       <EntityType Name="MandatoryFieldsView">
         <Key>
@@ -319,6 +318,7 @@
         <Property Name="Section" Type="Edm.String" Nullable="false"/>
         <Property Name="CountryCode" Type="Edm.String" Nullable="false"/>
         <Property Name="ProductScope" Type="Edm.String" Nullable="false"/>
+        <Property Name="Label" Type="Edm.String"/>
         <Property Name="Field" Type="Edm.String"/>
       </EntityType>
       <ComplexType Name="com_bayer_SXTENDER_templates_SelectedField">
