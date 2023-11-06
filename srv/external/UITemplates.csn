@@ -867,10 +867,10 @@
      "type": "cds.UUID",
      "notNull": true
     },
-    "PropertyName": {
+    "Type": {
      "type": "cds.LargeString"
     },
-    "PropertyValue": {
+    "FieldName": {
      "type": "cds.LargeString"
     }
    }
@@ -896,6 +896,9 @@
      "type": "cds.LargeString",
      "notNull": true,
      "@Core.Computed": true
+    },
+    "Label": {
+     "type": "cds.LargeString"
     },
     "Field": {
      "type": "cds.LargeString"
