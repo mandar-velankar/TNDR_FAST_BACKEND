@@ -729,6 +729,7 @@ module.exports = async (srv) => {
 		
 		req.data.Line = null; //for mandatory field check in sta-service
 		delete req.data.Custom_String_1;
+		delete req.data.Custom_Integer_1;
 		delete req.data.MoleculeName;
         delete req.data.Code1;
         delete req.data.Code2;
