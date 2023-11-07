@@ -728,14 +728,16 @@ module.exports = async (srv) => {
 		// !req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
 		
 		req.data.Line = null; //for mandatory field check in sta-service
-		delete req.data.Custom_String_1;
-		delete req.data.Custom_Integer_1;
 		delete req.data.MoleculeName;
         delete req.data.Code1;
         delete req.data.Code2;
         delete req.data.Code3;
         delete req.data.ProductGenericName;
         delete req.data.Gov_Code;
+		delete req.data.BU;
+		delete req.data.PRODUCTPACKNAME,
+		delete req.data.RegistrationValidUntil;
+		delete req.data.BrandName;
 		delete req.data.VwBudgetedProfitability;
 	});
 
