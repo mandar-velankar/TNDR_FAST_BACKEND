@@ -215,7 +215,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     action copyOffer(offerID:String, type: String, instituteName: String) returns String;
     action softDeleteOffer(offerID:String) returns String;
 
-    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as pr
+   /* entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as pr
         left join MasterData.PT_TMCTPRDPCK as ctprdck on ctprdck.PRODUCTPACKID = pr.ProductCode
                                                        and ctprdck.COUNTRYCODE = pr.CountryCode
         left join ProductBrand as prbrand on prbrand.PRODUCTPACKID = pr.ProductCode
@@ -280,6 +280,22 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             inst.INCOTerms as IncoTerm,
             @Core.Computed: false
             ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
+    };*/
+
+    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
+        *,
+        SKU.MoleculeName as MoleculeName,
+        SKUCountry.CODE1 as Code1,
+        SKUCountry.CODE2 as Code2,
+        SKUCountry.CODE3 as Code3,
+        SKU.ProductGenericName as ProductGenericName,
+        SKUCountry.GOV_CODE as Gov_Code,
+        SKU.PRODUCTPACKNAME,
+        SKUCountry.BU,
+        SKUCountry.RegistrationValidUntil,
+        SKU.Product.HLEVEL4_NAME as BrandName,
+        @Core.Computed: false
+        ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
