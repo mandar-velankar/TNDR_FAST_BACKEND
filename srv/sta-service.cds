@@ -61,7 +61,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity Filter as projection on UITemplateSrv.Filter;
     @readonly
     entity StaticValue as projection on UITemplateSrv.StaticValue;
-
+    @readonly
+    entity PropertiesView as projection on UITemplateSrv.PropertiesView;
+    @readonly
+    entity ProductScopeView as projection on UITemplateSrv.ProductScopeView;
+    @readonly
+    entity MandatoryFieldsView as projection on UITemplateSrv.MandatoryFieldsView;
 
     @cds.redirection.target
     entity TenderFormView as projection on TransactionalData.PT_TMTEND {
@@ -203,11 +208,79 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Price.NetPrice as NetPrice,
         RequestedVolume,
         (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
-        Offer.Currency as Currency
+        Offer.Currency as Currency,
+        SKUCountry.RegistrationValidUntil
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String, instituteName: String) returns String;
     action softDeleteOffer(offerID:String) returns String;
+
+   /* entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as pr
+        left join MasterData.PT_TMCTPRDPCK as ctprdck on ctprdck.PRODUCTPACKID = pr.ProductCode
+                                                       and ctprdck.COUNTRYCODE = pr.CountryCode
+        left join ProductBrand as prbrand on prbrand.PRODUCTPACKID = pr.ProductCode
+        left join TransactionalData.PT_TMOFRS as offer on offer.OfferID = pr.OfferID
+        left join PakistanMasterDistributors as pkdist on pkdist.BU = ctprdck.BU 
+                                                       and pkdist.InstituteID = offer.QuotationInstituteID 
+        left join MasterData.PT_TMINST as inst on offer.QuotationInstituteID = inst.InstituteID{
+            pr.TenderID,
+        key pr.OfferID,
+            pr.SubmittedOn,
+            pr.SubmittedBy,
+        key pr.Active,
+        key pr.ProductCode,
+            pr.Reference,
+            pr.AlternateOfferYN,
+            pr.RequestedVolume,
+            pr.UnitPerPack,
+            pr.SampleYN,
+            pr.SampleQuantity,
+            pr.DocumentsRequired,
+            pr.FirstShipment,
+            pr.NoofLots,
+            pr.IntervalBetweenShipments,
+            pr.NoOfTier,
+            pr.DiscOrOffer,
+            pr.PaymentTerms,
+            pr.SNo,
+            pr.ActiveProduct,
+            pr.Comment,
+            pr.INCOTerms,
+            pr.SORTER,
+            pr.DEFAULT_COMMISSION_RATE,
+            pr.SUPPLY_UPDATE,
+            pr.PAYMENT_UPDATE,
+            pr.Line,
+            pr.DeliveryConditions,
+            pr.MinInvoiceAmount,
+            pr.PricingPolicyCluster,
+            pr.OfferType,
+            pr.AnticipatedRequestedQuantity,
+            pr.MaxPrice,
+            pr.Channel,
+        key pr.LotID,
+            pr.WorkflowProductID,
+            pr.IbizWorkflowID,
+            pr.CountryCode,
+            pr.DistributorID,
+            pr.Custom.String_1 as Custom_String_1,
+            pr.Custom.Integer_1 as Custom_Integer_1,
+            pkdist.DistributorID as PakistanDistributorID,
+            pkdist.DistributorName as PakistanDistributorName,
+            SKU.MoleculeName as MoleculeName,
+            SKUCountry.CODE1 as Code1,
+            SKUCountry.CODE2 as Code2,
+            SKUCountry.CODE3 as Code3,
+            SKU.ProductGenericName as ProductGenericName,
+            SKU.PRODUCTPACKNAME,
+            SKUCountry.GOV_CODE as Gov_Code,
+            ctprdck.BU,
+            ctprdck.RegistrationValidUntil,
+            prbrand.HLEVEL4_NAME as BrandName,
+            inst.INCOTerms as IncoTerm,
+            @Core.Computed: false
+            ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
+    };*/
 
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
         *,
@@ -217,6 +290,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKUCountry.CODE3 as Code3,
         SKU.ProductGenericName as ProductGenericName,
         SKUCountry.GOV_CODE as Gov_Code,
+        SKU.PRODUCTPACKNAME,
+        SKUCountry.BU,
+        SKUCountry.RegistrationValidUntil,
+        SKU.Product.HLEVEL4_NAME as BrandName,
         @Core.Computed: false
         ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };
@@ -259,6 +336,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
     entity MasterDistributors @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterDistributors;
+    entity MasterInstitutes @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterInstitutes;
     entity CountryLegalEntity @readonly @(cds.redirection.target:false) as projection on MasterDataViews.CountryLegalEntity;
     @cds.redirection.target
     entity PT_TMAPPRST as projection on TransactionalData.PT_TMAPPRST{
@@ -526,12 +604,31 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key hier.ParentInstituteID,
         key hier.InstituteID,
         key CountryCode,
-            inst.InstituteName
+            hier.InstituteID as QuotationInstituteID: String,
+            inst.InstituteName,
+            inst.PaymentTerms
     }
     union select from MasterData.PT_TMINST {
         key InstituteID as ParentInstituteID,
         key InstituteID,
         key CountryCode,
-            InstituteName
+            InstituteID as QuotationInstituteID: String,
+            InstituteName,
+            PaymentTerms
+    };
+
+    entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
+        inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID {
+            pkdist.InstituteID,
+            pkdist.BU,
+            pkdist.DistributorID,
+            dist.DistributorName,
+    };
+
+    entity ProductBrand as select from MasterData.PT_TMPRDHIER as prdhier
+        inner join MasterData.PT_TMPRDPCK as prdpck on prdpck.HLEVEL6_CODE = prdhier.HLEVEL6_CODE {
+            key prdpck.PRODUCTPACKID,
+                prdhier.HLEVEL6_CODE,
+                prdhier.HLEVEL4_NAME
     }
 }
