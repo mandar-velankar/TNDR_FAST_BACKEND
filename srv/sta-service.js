@@ -2776,7 +2776,8 @@ module.exports = async (srv) => {
 		const tx = cds.tx(req);
 		const cwid = req.user.id;
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({CWID: cwid}));
-		req.data.UserName = userInfo[0].UserEmail;
+		req.data.UserEmail = userInfo[0].UserEmail;
+		req.data.UserName = userInfo[0].UserName;
 	});
 
 	async function getOfferData(tx,offerId){
