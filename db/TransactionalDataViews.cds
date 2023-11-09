@@ -839,7 +839,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.PublicationDate as PUBLICATION_DATE,
     offer.Tender.BidDueDate as BID_DUE_DATE,
     offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY,
-    offer.Custom.String_1 as PaymentTerms
+    offer.Custom.String_1 as PaymentTerms,
+    offer.AffiliateOffer
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -910,7 +911,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Custom.String_1,
           date_settings.NextYearDelta,
           date_settings.NextDay,
-          date_settings.NextMonth;
+          date_settings.NextMonth,
+          offer.AffiliateOffer;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{

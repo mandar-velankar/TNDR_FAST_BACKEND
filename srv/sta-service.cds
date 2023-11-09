@@ -592,10 +592,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteName
     };
 
-    entity PdfEmail: cuid{
+    entity PdfEmail: cuid, managed {
         URL : String;
-        UserName: String;       
-        Sent: Boolean
+        TenderID: String(50);
+        OfferID: String(30);
+        TenderInstitute: Integer;
+        OfferInstitute: Integer;
+        UserEmail: String(255); 
+        UserName: String(100);      
+        Sent: Boolean;
     };
 
 

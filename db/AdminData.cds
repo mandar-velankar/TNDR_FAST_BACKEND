@@ -32,6 +32,7 @@ entity PT_TMUSER {
         UserEmail       : String(255);
         Role            : String(100);
         ContactNumber   : String(20);
+        BU              : String;
         //Associations
         Countries       : Association to many PT_TMUSERCTRY
                               on Countries.User = $self;
