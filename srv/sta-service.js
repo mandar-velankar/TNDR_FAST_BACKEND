@@ -2384,6 +2384,9 @@ module.exports = async (srv) => {
 			productValidation = await buildProductValidationForType14(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue);
 		}
 
+		if (offer.APPROVAL_TYPE === 15) {
+			productValidation = await buildProductValidationForType15(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue);
+		}
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
@@ -2478,6 +2481,47 @@ module.exports = async (srv) => {
 		return results;
 	}
 
+	async function buildProductValidationForType15 (tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
+		let results = {
+			IN_POLICY: false
+		}
+		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, "Type": "OfferPriceVSRegisteredPrice"}));
+		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+
+		if(policy && priceCondition) {
+			if (offer.AffiliateOffer) {
+
+			}else {
+				if (Number(priceCondition.Discount) < policy.Value) {
+					if (product.REQUESTED_VOLUME < product.QTY_THRESHOLD) {
+						const indexOfSCMApproverType = aApproverTypes.findIndex(el => el.ApproverType === "SCM");
+						aApproverTypes.splice(indexOfSCMApproverType, 1);
+						aApproverTypes.map(async function (oApproverType) {
+							oApproverType.ValidationType = oApproverType.ValidationType2;
+						});
+					}else {
+						aApproverTypes.map(async function (oApproverType) {
+							oApproverType.ValidationType = oApproverType.ValidationType2;
+						});
+					}
+				}else {
+					if (product.REQUESTED_VOLUME < product.QTY_THRESHOLD) {
+						const indexOfSCMApproverType = aApproverTypes.findIndex(el => el.ApproverType === "SCM");
+						aApproverTypes.splice(indexOfSCMApproverType, 1);
+						aApproverTypes.map(async function (oApproverType) {
+							oApproverType.ValidationType = oApproverType.ValidationType;
+						});
+						
+					}else {
+						aApproverTypes.map(async function (oApproverType) {
+							oApproverType.ValidationType = oApproverType.ValidationType;
+						});
+					}
+				}
+			}
+		}
+		return results;
+	}
 	function buildCommonProductInfo(offer, product) {
 		//Get all prices, ammounts and cogs in all units
 		let toUnitFactor = (product.UNIT === "Unit") ? 1 : product.PACKSIZE;

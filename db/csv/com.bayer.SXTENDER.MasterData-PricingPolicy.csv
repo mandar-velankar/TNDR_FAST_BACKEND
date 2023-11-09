@@ -3,3 +3,4 @@ ID,CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,DIVISIONCODE,DIVISION,B
 "40a9c515-5ce7-4122-828a-b7c80a725166","2023-08-08","EHMHV","2023-08-08","EHMHV","GB","","","","",206689,"","All",,,"BudgetedProfitability","PCT","0.44","GBP"
 "3b3cecd9-7382-44ae-93a8-49ebb1e5d384","2023-08-08","EHMHV","2023-08-08","EHMHV","GB","","","","",206695,"","All",,,"BudgetedProfitability","PCT","0.65","GBP"
 "9f522715-9a22-4d24-89cc-3146fa78149b","2023-08-08","EHMHV","2023-08-08","EHMHV","GB","","","","",214674,"","All",,,"BudgetedProfitability","PCT","0.35","GBP"
+"5b3a83a0-c94c-4daa-8add-05d37ef45432","2023-08-08 00:00:00.000000000","EHMHV","2023-08-08 00:00:00.000000000","EHMHV","PK",,,,,,,,,,"OfferPriceVSRegisteredPrice","PCT",0.45,"PKR"
