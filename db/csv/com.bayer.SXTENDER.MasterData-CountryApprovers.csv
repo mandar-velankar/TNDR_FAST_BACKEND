@@ -1,625 +1,639 @@
-CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,APPROVERTYPE,DIVISION,APPROVERID,APPROVERNAME,APPROVEREMAILID,ENABLED
-,,,,"AE","Supply Chain","Both","10006","Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"EG","Country Business","Pharma","10007","William Hines","william.hines@bayer.com",
-,,,,"BH","Supply Chain","Both","10006","Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"EG","Supply Chain","Both","10012","Marwa Saied","marwa.saied@bayer.com",
-,,,,"AE","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"AE","Regulatory","Both","10005","Hager Abdel Salam Hatata","hager.hatata@bayer.com",
-,,,,"MX","Country Business","Pharma","2000","Jorge Ancona","jorge.ancona@bayer.com",
-,,,,"MX","Supply Chain","Both","2001","Jose Luis Torres","jose.torres4@bayer.com",
-,,,,"SD","Supply Chain","Both","10012","Marwa Saied","marwa.saied@bayer.com",
-,,,,"BH","Country Business","Pharma","10001","William Hines","william.hines@bayer.com",
-,,,,"AE","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"BH","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"BH","Regulatory","Both","10005","Hager Abdel Salam Hatata","hager.hatata@bayer.com",
-,,,,"AE","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"AE","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"EG","Legal","Both","10008","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"EG","Regulatory","Both","10009","Eman Abdel Hamid","eman.abdelhamid@bayer.com",
-,,,,"IQ","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"BH","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"IQ","Regulatory","Both","10011","Wadiah Batarseh","wadiah.batarseh@bayer.com",
-,,,,"BH","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"BH","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"JO","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"JO","Regulatory","Both","10011","Wadiah Batarseh","wadiah.batarseh@bayer.com",
-,,,,"IQ","Supply Chain","Both","10012","Malak Mseis","malak.mseis@bayer.com",
-,,,,"KW","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"AE","Country Business","Pharma","10001","William Hines","william.hines@bayer.com",
-,,,,"EG","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"KW","Regulatory","Both","10005","Hager Abdel Salam Hatata","hager.hatata@bayer.com",
-,,,,"JO","Supply Chain","Both","10014","Malak Mseis","malak.mseis@bayer.com",
-,,,,"EG","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"EG","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"LB","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"LB","Regulatory","Both","10011","Wadiah Batarseh","wadiah.batarseh@bayer.com",
-,,,,"IQ","Country Business","Pharma","10010","William Hines","william.hines@bayer.com",
-,,,,"IQ","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"KW","Supply Chain","Both","10006","Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"LY","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"IQ","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"IQ","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"LY","Regulatory","Both","10009","Eman Abdel Hamid","eman.abdelhamid@bayer.com",
-,,,,"OM","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"OM","Regulatory","Both","10005","Hager Abdel Salam Hatata","hager.hatata@bayer.com",
-,,,,"LB","Supply Chain","Both","10014","Malak Mseis","malak.mseis@bayer.com",
-,,,,"JO","Country Business","Pharma","10013","William Hines","william.hines@bayer.com",
-,,,,"JO","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"QA","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"QA","Regulatory","Both","10005","Hager Abdel Salam Hatata","hager.hatata@bayer.com",
-,,,,"JO","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"JO","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"LY","Supply Chain","Both","10012","Malak Mseis","malak.mseis@bayer.com",
-,,,,"SA","Legal","Both","10016","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"SA","Regulatory","Both","10017","Ibrahim Mohammed Al Ashban","ibrahim.al-ashban@bayer.com",
-,,,,"OM","Supply Chain","Both","10006","Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"KW","Country Business","Pharma","10001","William Hines","william.hines@bayer.com",
-,,,,"KW","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SD","Regulatory","Both","10009","Eman Abdel Hamid","eman.abdelhamid@bayer.com",
-,,,,"SY","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"KW","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"KW","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SY","Regulatory","Both","10011","Wadiah Batarseh","wadiah.batarseh@bayer.com",
-,,,,"QA","Supply Chain","Both","10006","Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"YE","Legal","Both","10003","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"YE","Regulatory","Both","10009","Eman Abdel Hamid","eman.abdelhamid@bayer.com",
-,,,,"LB","Country Business","Pharma","10013","William Hines","william.hines@bayer.com",
-,,,,"LB","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"LY","Country Business","Pharma","10010","William Hines","william.hines@bayer.com",
-,,,,"LB","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"LB","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SY","Supply Chain","Both","10012","Malak Mseis","malak.mseis@bayer.com",
-,,,,"YE","Supply Chain","Both","10012","Malak Mseis","malak.mseis@bayer.com",
-,,,,"OM","Country Business","Pharma","10001","William Hines","william.hines@bayer.com",
-,,,,"LY","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"LY","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"LY","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"QA","Country Business","Pharma","10001","William Hines","william.hines@bayer.com",
-,,,,"OM","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"OM","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"OM","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SD","Country Business","Pharma","10010","William Hines","william.hines@bayer.com",
-,,,,"QA","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"QA","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"QA","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SA","Country Business","Pharma","10015","Hussein El Hakim","hussein.elhakim@bayer.com",
-,,,,"SA","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SY","Country Business","Pharma","10010","William Hines","william.hines@bayer.com",
-,,,,"SD","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SD","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"SD","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"YE","Country Business","Pharma","10010","William Hines","william.hines@bayer.com",
-,,,,"SY","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SY","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"SY","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"CL","MACS","Pharma","1","Karen Elizabe Ziegele Rybertt","karen.ziegele@bayer.com",
-,,,,"YE","Country Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"YE","Regional Business","Pharma","10004","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"YE","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"SA","Regional Business","Pharma","10019","Hussein El Hakim","hussein.elhakim@bayer.com",
-,,,,"SA","Regional Business","Radiology","10002","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"AE","Supply Chain","Both","10006","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"BH","Country Business","Pharma","10001","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"BH","Supply Chain","Both","10006","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"EG","Supply Chain","Both","10012","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"AE","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"AE","Regulatory","Both","10005","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"MX","Country Business","Pharma","2000","Gilberto Mata Ramos","gilberto.mata@bayer.com",
-,,,,"SA","Supply Chain","Both","10018","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"AE","Country Business","Pharma","10001","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"AE","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"BH","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"BH","Regulatory","Both","10005","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"AE","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"EG","Legal","Both","10008","Mohamed Zaghloul","mohamed.zaghloul@bayer.com",
-,,,,"EG","Regulatory","Both","10009","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"IQ","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"BH","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"IQ","Regulatory","Both","10011","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"BH","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"JO","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"JO","Regulatory","Both","10011","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"IQ","Supply Chain","Both","10012","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"KW","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"EG","Country Business","Pharma","10007","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"EG","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"KW","Regulatory","Both","10005","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"JO","Supply Chain","Both","10014","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"EG","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"LB","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"LB","Regulatory","Both","10011","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"IQ","Country Business","Pharma","10010","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"IQ","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"KW","Supply Chain","Both","10006","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"LY","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"IQ","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"LY","Regulatory","Both","10009","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"OM","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"OM","Regulatory","Both","10005","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"LB","Supply Chain","Both","10014","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"JO","Country Business","Pharma","10013","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"JO","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"QA","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"QA","Regulatory","Both","10005","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"JO","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"LY","Supply Chain","Both","10012","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"SA","Legal","Both","10016","Hamdy Hafez","hamdy.hafez@bayer.com",
-,,,,"SA","Regulatory","Both","10017","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"OM","Supply Chain","Both","10006","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"KW","Country Business","Pharma","10001","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"KW","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SD","Regulatory","Both","10009","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"SY","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"KW","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SY","Regulatory","Both","10011","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"QA","Supply Chain","Both","10006","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"YE","Legal","Both","10003","Irina Lazarescu","irina.lazarescu@bayer.com",
-,,,,"YE","Regulatory","Both","10009","Adi Mohsin","adi.mohsin@bayer.com",
-,,,,"LB","Country Business","Pharma","10013","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"LB","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SD","Supply Chain","Both","10012","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"LB","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SY","Supply Chain","Both","10012","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"YE","Supply Chain","Both","10012","Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"LY","Country Business","Pharma","10010","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"LY","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"LY","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"OM","Country Business","Pharma","10001","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"OM","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"OM","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"QA","Country Business","Pharma","10001","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"QA","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"QA","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SA","Country Business","Pharma","10015","Alaa Eldin Ali Hassan Nada","alaa.nada@bayer.com",
-,,,,"SA","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SD","Country Business","Pharma","10010","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"SD","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SD","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SY","Country Business","Pharma","10010","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"SY","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SY","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"YE","Country Business","Pharma","10010","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"YE","Country Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"YE","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"SA","Regional Business","Radiology","10002","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"MX","Country Business","Pharma","2000","Enrique Zuani","enrique.zuani@bayer.com",
-,,,,"SA","Supply Chain","Both","10018","Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"AE","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"BH","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"EG","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"GC","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"IQ","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"JO","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"KW","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"LB","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"LY","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"OM","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"QA","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"SA","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"SD","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"SY","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-,,,,"YE","Controlling","Both","10020","Wael Ghareeb","wael.mohamed@bayer.com",
-"2022-01-21 00:00:00.000000000","EUTVP","2022-01-21 00:00:00.000000000","EUTVP","TH","HBU","Pharma","1000","Chanya Leawrungruang","chanya.leawrungruang@bayer.com","true"
-"2022-01-21 00:00:00.000000000","EUTVP","2022-01-21 00:00:00.000000000","EUTVP","TH","NSM/SM/FM","Pharma","1000","Chanya Leawrungruang","chanya.leawrungruang@bayer.com","true"
-,,,,"TH","HBU","Pharma","1023","Sunee Kamalanon","sunee.kamalanon@bayer.com",
-,,,,"TH","NSM/SM/FM","Radiology","1024","Panyamon Passakornpinit","panyamon.passakornpinit@bayer.com",
-,,,,"TH","CDH","Pharma","1025","JinA Lee","jina.lee@bayer.com",
-,,,,"TH","CDH","Radiology","1026","Chavarat Temsakornpun","chavarat.temsakornpun@bayer.com",
-,,,,"TH","HBU","Radiology","2002","Kanittha Vareeswadkul","kanittha.vareeswadkul@bayer.com",
-,,,,"TH","NSM/SM/FM","Pharma","2003","Pradthana Suwan","pradthana.suwan@bayer.com",
-,,,,"TH","Supply Chain","Both","1028","Siriporn Noiwan","siriporn.noiwan@bayer.com",
-,,,,"CL","MACS","Pharma","1","Robert Henning","robert.henning@bayer.com",
-,,,,"CL","Supply","Both","1","Jonathan Hubeau","jonathan.hubeau.ext@bayer.com",
-,,,,"CL","Supply","Both","1","Fabian Deck","fabian.deck@bayer.com",
-,,,,"TH","Supply Chain","Both","1000","Prateep Thumpong","prateep.thumpong@bayer.com",
-,,,,"TH","NSM/SM/FM","Pharma","2004","Pakornwut Suntornkaew","pakornwut.suntornkaew@bayer.com",
-,,,,"TH","NSM/SM/FM","Pharma","2005","Kesuma Sinthusarn","kesuma.sinthusarn@bayer.com",
-"2022-01-21 00:00:00.000000000","EUTVP","2022-01-21 00:00:00.000000000","EUTVP","TH","NSM/SM/FM","Pharma","1000","Peyanun Ngamtaweekij","peyanun.ngamtaweekij@bayer.com","true"
-"2022-01-21 00:00:00.000000000","EUTVP","2022-01-21 00:00:00.000000000","EUTVP","TH","HBU","Pharma","1000","Peyanun Ngamtaweekij","peyanun.ngamtaweekij@bayer.com","true"
-,,,,"TH","NSM/SM/FM","Pharma","2008","Kodchaporn Buasiri","kodchaporn.buasiri@bayer.com",
-,,,,"TH","NSM/SM/FM","Pharma","1023","Sunee Kamalanon","sunee.kamalanon@bayer.com",
-,,,,"MX","Tender Management","Both","2001","Laura Luz Tecillo López","laura.tecillo@bayer.com",
-,,,,"EG","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"GC","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"IQ","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"JO","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"CL","Supply","Both","1","Karen Elizabe Ziegele Rybertt","karen.ziegele@bayer.com",
-,,,,"LB","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"LY","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"CL","Business Service","Pharma","1","Karen Elizabe Ziegele Rybertt","karen.ziegele@bayer.com",
-,,,,"GC","Supply Chain","Both",,"Vipin Mohan","vipin.mohan@bayer.com",
-,,,,"GC","Legal","Both","1","Rachel Cosgrove","rachel.cosgrove@bayer.com",
-,,,,"SD","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"SY","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"YE","Supply Chain","Both",,"Ahmed Yehya Ramadan","ahmed.yehya@bayer.com",
-,,,,"GC","Regulatory","Both","1","Ibrahim Mohammed Al Ashban","ibrahim.al-ashban@bayer.com",
-,,,,"GC","Regulatory","Both","1","Hager Abdel Salam Hatata","hager.hatata@bayer.com",
-,,,,"GC","Regional Business","Pharma","1","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"GC","Regional Business","Pharma","1","Hussein El Hakim","hussein.elhakim@bayer.com",
-,,,,"GC","Regional Business","Radiology","1","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"GC","Regional Business","Radiology","1","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"GC","Country Business","Pharma","1","Henrik Wulff","henrik.wulff@bayer.com",
-,,,,"GC","Country Business","Pharma","1","Hussein El Hakim","hussein.elhakim@bayer.com",
-,,,,"GC","Country Business","Radiology","1","Johnny Al Asmar","johnny.al-asmar@bayer.com",
-,,,,"GC","Country Business","Radiology","1","Michel Van Caekenberghe","michel.vancaekenberghe@bayer.com",
-,,,,"CL","Business Service","Pharma","1","Jonathan Hubeau","jonathan.hubeau.ext@bayer.com",
-,,,,"CL","Law and Patents","Pharma","1","Frank Schmitt","frank.schmitt1@bayer.com",
-,,,,"CL","CDH","Pharma","1","Frank Schmitt","frank.schmitt1@bayer.com",
-,,,,"CL","SBR RA ConoSur","Radiology","1","Frank Schmitt","frank.schmitt1@bayer.com",
-,,,,"CL","CDH-Chile (signature)","Radiology","1","Frank Schmitt","frank.schmitt1@bayer.com",
-,,,,"AR","MACS","Pharma","1","Guadalupe Roel","guadalupe.roel@bayer.com",
-,,,,"AR","MACS","Pharma","1","Andre Jacobs","andre.jacobs@bayer.com",
-,,,,"AR","TA","Pharma","1","TBD","jonathan.hubeau.ext@bayer.com",
-,,,,"AR","TA","Pharma","1","Robert Henning","robert.henning@bayer.com",
-,,,,"AR","LPC","Pharma","1","Thomas Henshaw","thomas.henshaw@bayer.com",
-,,,,"AR","COM/PGA","Pharma","1","Marialaura Lopez","marialaura.lopez@bayer.com",
-,,,,"AR","COM/PGA","Pharma","1","Frank Schmitt","frank.schmitt1@bayer.com",
-,,,,"AR","Supply Chain","Pharma","1","Santiago Pettigrew","santiago.pettigrew@bayer.com",
-,,,,"AR","Supply Chain","Pharma","1","Andre Jacobs","andre.jacobs@bayer.com",
-,,,,"AR","International Trade","Pharma","1","Alejandro Terzian","alejandro.terzian@bayer.com",
-,,,,"AR","International Trade","Pharma","1","Robert Henning","robert.henning@bayer.com",
-,,,,"CL","Marketing","Pharma","1","Frank Schmitt","frank.schmitt1@bayer.com",
-,,,,"CL","Law and Patents","Pharma","1","Karen Elizabe Ziegele Rybertt","karen.ziegele@bayer.com",
-,,,,"CL","CDH","Pharma","1","Karen Elizabe Ziegele Rybertt","karen.ziegele@bayer.com",
-,,,,"CL","SBR RA ConoSur","Radiology","1","Karen Elizabe Ziegele Rybertt","karen.ziegele@bayer.com",
-,,,,"CL","CDH-Chile (signature)","Radiology","1","Karen Elizabe Ziegele Rybertt","karen.ziegele@bayer.com",
-,,,,"CL","Marketing","Pharma","1","Karen Elizabe Ziegele Rybertt","karen.ziegele@bayer.com",
-,,,,"CL","MACS","Pharma","1","Cynthia S. Bernal Gonzalez","cynthia.bernal@bayer.com",
-,,,,"CL","Supply","Both","1","Cynthia S. Bernal Gonzalez","cynthia.bernal@bayer.com",
-,,,,"CL","Business Service","Pharma","1","Cynthia S. Bernal Gonzalez","cynthia.bernal@bayer.com",
-,,,,"CL","Law and Patents","Pharma","1","Cynthia S. Bernal Gonzalez","cynthia.bernal@bayer.com",
-,,,,"CL","CDH","Pharma","1","Cynthia S. Bernal Gonzalez","cynthia.bernal@bayer.com",
-,,,,"CL","SBR RA ConoSur","Radiology","1","Cynthia S. Bernal Gonzalez","cynthia.bernal@bayer.com",
-,,,,"CL","CDH-Chile (signature)","Radiology","1","Cynthia S. Bernal Gonzalez","cynthia.bernal@bayer.com",
-,,,,"CL","Marketing","Pharma","1","Cynthia S. Bernal Gonzalez","cynthia.bernal@bayer.com",
-,,,,"AR","Tender Mgr.","Pharma","1","Javier Castelli","javier.castelli@bayer.com",
-,,,,"AR","FBP","Pharma","1","Mariela Orandi","mariela.orandi@bayer.com",
-,,,,"AR","Transfer Pricing","Pharma","1","Guillermo Escosteguy","guillermo.escosteguy@bayer.com",
-,,,,"AR","CDH","Pharma","1","Pierina Rossetti","pierina.rossetti@bayer.com",
-,,,,"AR","SBR","Pharma","1","Christophe Dumont","christophe.dumont@bayer.com",
-,,,,"AR","Tender Mgr.","Pharma","1","Frank Schmitt","frank.schmitt1@bayer.com",
-,,,,"AR","FBP","Pharma","1","Fabian Deck","fabian.deck@bayer.com",
-,,,,"AR","Transfer Pricing","Pharma","1","Fabian Deck","fabian.deck@bayer.com",
-,,,,"AR","SBR","Pharma","1","Frank Schmitt","frank.schmitt1@bayer.com",
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Finance","Both","1000","Melania Zappaterra","melania.zappaterra@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Supply Chain","Both","1000","Luigi Cascini","luigi.cascini@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Contract Manager","Both","1000","Andrea Duranti","andrea.duranti@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Danilo Despirito","danilo.despirito@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Patrizia Guarraci","patrizia.guarraci@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Roberto Bergonzi","roberto.bergonzi@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Eugenia Lietta","eugenia.lietta@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Andrea Mencarelli","andrea.mencarelli@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Salvatore Vitale","salvatore.vitale@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Alberto Bocca","alberto.bocca@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Giuseppe Tropiano","giuseppe.tropiano@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Cesare Maurizio Dezuanni","cesaremaurizio.dezuanni@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Luciano Bertini","luciano.bertini@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Massimo Vergari","massimo.vergari@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Enrico Ceribelli","enrico.ceribelli@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Stefano Sacchi","stefano.sacchi@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Paolo Radere","paolo.radere@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Vanda Peaquin","vanda.peaquin@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Bianca Ferrara","bianca.ferrara@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Oliviero Parente","oliviero.parente@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Mattia Bianchini","mattia.bianchini@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Mario Francesco Indaco","mariofrancesco.indaco@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Danilo Despirito","danilo.despirito@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Patrizia Guarraci","patrizia.guarraci@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Roberto Bergonzi","roberto.bergonzi@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Eugenia Lietta","eugenia.lietta@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Andrea Mencarelli","andrea.mencarelli@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Salvatore Vitale","salvatore.vitale@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Alberto Bocca","alberto.bocca@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Giuseppe Tropiano","giuseppe.tropiano@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Cesare Maurizio Dezuanni","cesaremaurizio.dezuanni@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Luciano Bertini","luciano.bertini@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Massimo Vergari","massimo.vergari@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Enrico Ceribelli","enrico.ceribelli@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Stefano Sacchi","stefano.sacchi@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Paolo Radere","paolo.radere@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Vanda Peaquin","vanda.peaquin@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Bianca Ferrara","bianca.ferrara@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Oliviero Parente","oliviero.parente@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Mattia Bianchini","mattia.bianchini@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Mario Francesco Indaco","mariofrancesco.indaco@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Danilo Despirito","danilo.despirito@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Patrizia Guarraci","patrizia.guarraci@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Roberto Bergonzi","roberto.bergonzi@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Eugenia Lietta","eugenia.lietta@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Andrea Mencarelli","andrea.mencarelli@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Salvatore Vitale","salvatore.vitale@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Alberto Bocca","alberto.bocca@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Giuseppe Tropiano","giuseppe.tropiano@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Cesare Maurizio Dezuanni","cesaremaurizio.dezuanni@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Luciano Bertini","luciano.bertini@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Massimo Vergari","massimo.vergari@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Enrico Ceribelli","enrico.ceribelli@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Stefano Sacchi","stefano.sacchi@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Paolo Radere","paolo.radere@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Vanda Peaquin","vanda.peaquin@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Bianca Ferrara","bianca.ferrara@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Oliviero Parente","oliviero.parente@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Mattia Bianchini","mattia.bianchini@bayer.com","True"
-"2022-02-10 00:00:00","EUTVP","2022-02-10 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Mario Francesco Indaco","mariofrancesco.indaco@bayer.com","True"
-"2022-02-17 12:27:32.112000","EUTVP","2022-02-17 12:27:32.112000","EUTVP","ES","BU/RAM","Pharma","1000","BU/RAM - Pharma","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:27:32.112000","EUTVP","2022-02-17 12:27:32.112000","EUTVP","ES","KAMS","Pharma","1000","KAMS - Pharma","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:27:32.112000","EUTVP","2022-02-17 12:27:32.112000","EUTVP","ES","SM","Pharma","1000","SM - Pharma","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:27:32.112000","EUTVP","2022-02-17 12:27:32.112000","EUTVP","ES","CDH","Pharma","1000","CDH - Pharma","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:27:51.061000","EUTVP","2022-02-17 12:27:51.061000","EUTVP","ES","BU/RAM","Radiology","1000","BU/RAM - Radiology","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:27:51.061000","EUTVP","2022-02-17 12:27:51.061000","EUTVP","ES","KAMS","Radiology","1000","KAMS - Radiology","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:27:51.061000","EUTVP","2022-02-17 12:27:51.061000","EUTVP","ES","SM","Radiology","1000","SM - Radiology","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:27:51.061000","EUTVP","2022-02-17 12:27:51.061000","EUTVP","ES","CDH","Radiology","1000","CDH - Radiology","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:29:00.363000","EUTVP","2022-02-17 12:29:00.363000","EUTVP","ES","Legal","Both","1000","Legal","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:29:00.363000","EUTVP","2022-02-17 12:29:00.363000","EUTVP","ES","Financial Business Partner","Both","1000","Financial Business Partner","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:29:00.363000","EUTVP","2022-02-17 12:29:00.363000","EUTVP","ES","Controlling","Both","1000","Controlling","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 12:29:00.363000","EUTVP","2022-02-17 12:29:00.363000","EUTVP","ES","Supply Chain","Both","1000","Supply Chain","jonathan.hubeau.ext@bayer.com","True"
-"2022-02-17 15:37:04.422000","EUTVP",,"EUTVP","SA","Legal","Both","1000","Mohamed Zaghloul","mohamed.zaghloul@bayer.com","True"
-"2022-02-17 15:37:38.853000","EUTVP",,"EUTVP","SA","Country Business","Both","1000","Henrik Wulff","henrik.wulff@bayer.com","True"
-"2022-02-17 15:37:47.065000","EUTVP",,"EUTVP","SA","Regional Business","Both","1000","Henrik Wulff","henrik.wulff@bayer.com","True"
-,,,,"CL","MACS","Pharma","1","Jonathan Hubeau","jonathan.hubeau.ext@bayer.com",
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","BU/RAM","Pharma","1","Cristina Rodrigo","cristina.rodrigoallende@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Pharma","1","Cristina Rodrigo","cristina.rodrigoallende@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Pharma","1","Cristina Rodrigo","cristina.rodrigoallende@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Pharma","1","Cristina Rodrigo","cristina.rodrigoallende@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Pharma","1","Cristina Rodrigo","cristina.rodrigoallende@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Pharma","1","Cristina Rodrigo","cristina.rodrigoallende@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Pharma","1","Cristina Rodrigo","cristina.rodrigoallende@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Pharma","1","Cristina Rodrigo","cristina.rodrigoallende@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","BU/RAM","Radiology","1","David García Calleja","david.garcia@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Radiology","1","David García Calleja","david.garcia@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Radiology","1","David García Calleja","david.garcia@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Radiology","1","David García Calleja","david.garcia@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Radiology","1","David García Calleja","david.garcia@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Radiology","1","David García Calleja","david.garcia@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Radiology","1","David García Calleja","david.garcia@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Radiology","1","David García Calleja","david.garcia@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","BU/RAM","Radiology","1","Juan Carlos Rueda","juancarlos.rueda@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Radiology","1","Juan Carlos Rueda","juancarlos.rueda@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Radiology","1","Juan Carlos Rueda","juancarlos.rueda@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Radiology","1","Juan Carlos Rueda","juancarlos.rueda@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Radiology","1","Juan Carlos Rueda","juancarlos.rueda@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Radiology","1","Juan Carlos Rueda","juancarlos.rueda@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Radiology","1","Juan Carlos Rueda","juancarlos.rueda@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Radiology","1","Juan Carlos Rueda","juancarlos.rueda@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","BU/RAM","Radiology","1","David Pérez Pancho","david.perezpancho@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Radiology","1","David Pérez Pancho","david.perezpancho@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Radiology","1","David Pérez Pancho","david.perezpancho@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Radiology","1","David Pérez Pancho","david.perezpancho@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Radiology","1","David Pérez Pancho","david.perezpancho@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Radiology","1","David Pérez Pancho","david.perezpancho@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Radiology","1","David Pérez Pancho","david.perezpancho@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Radiology","1","David Pérez Pancho","david.perezpancho@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","BU/RAM","Radiology","1","Diego Benavides Largo","diego.benavideslargo.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Radiology","1","Diego Benavides Largo","diego.benavideslargo.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Radiology","1","Diego Benavides Largo","diego.benavideslargo.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Radiology","1","Diego Benavides Largo","diego.benavideslargo.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Radiology","1","Diego Benavides Largo","diego.benavideslargo.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Radiology","1","Diego Benavides Largo","diego.benavideslargo.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Radiology","1","Diego Benavides Largo","diego.benavideslargo.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Radiology","1","Diego Benavides Largo","diego.benavideslargo.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Pharma","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","CDH","Both","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Controlling","Both","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Financial Business Partner","Both","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","KAMS","Both","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Legal","Both","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","SM","Both","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","EUTVP","ES","Supply Chain","Both","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Contract Manager","Both","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Finance","Both","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Supply Chain","Both","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Contract Manager","Both","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Finance","Both","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Supply Chain","Both","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Contract Manager","Both","1000","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Finance","Both","1000","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Supply Chain","Both","1000","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 1","Pharma","1000","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 2","Pharma","1000","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 3","Pharma","1000","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 1","Radiology","1000","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 2","Radiology","1000","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-17 00:00:00","EUTVP","2022-05-17 00:00:00","EUTVP","IT","Business Level 3","Radiology","1000","Fabian Deck","fabian.deck@bayer.com","True"
-,,,"ELLUI","SA","Supply Chain","Both","1","Robert Henning","robert.henning@bayer.com","True"
-,,,"ELLUI","SA","Regional Business","Both","1","Robert Henning","robert.henning@bayer.com","True"
-,,,"ELLUI","SA","Controlling","Both","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Dolors Borras","dolors.borrasmartin@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Moises Picó","moises.pico@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Peter Hendriks","peter.hendriks.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Gurinder Singh","gurinder.singh1.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Namita Verma","namita.verma.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Juhi Hariom","juhi.hariom.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Alopa Arora","alopa.arora.ext@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Sonia Sanchez","sonia.sanchez@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Matilde Baeza","mati.baeza@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","María Jesús Redondo","mariajesus.redondo@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Frank Schmitt","frank.schmitt1@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Andre Jacobs","andre.jacobs@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Robert Henning","robert.henning@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Fabian Deck","fabian.deck@bayer.com","True"
-"2022-05-11 00:00:00","EUTVP","2022-05-11 00:00:00","UAT","ES","BU/RAM","Radiology","1","Michal Buczynski","michal.buczynski@bayer.com","True"
-"2022-07-18 00:00:00","EUTVP","2022-07-18 00:00:00","EUTVP","ES","BU/RAM","Pharma","1000","Victor Canellas Guerrero","victor.canellasguerrero@bayer.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","TA Head","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Pricing Manager","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Divisional Finance Manager or Director","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Bill to Cash coordinator","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Order to Cash","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Supply","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Legal department","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","CDH Pharma","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Commercial Operations Manager Consumer Health","Consumer Health","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Sales Department","Consumer Health","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Director or Manager of Finance BP","Consumer Health","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Legal / Antitrust Department","Consumer Health","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","CDH Consumer Health","Consumer Health","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","National Sales Manager","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Customer Service Manager","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Director or Coordinator of Finance BP","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","CDH Radiology","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Legal / Competition Department","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Credit Team","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Bill to Cash coordinator","Consumer Health","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Supply","Consumer Health","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Supply","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Credit Team","Consumer Health","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Credit Team","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","TA Head","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Pricing Manager","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Divisional Finance Manager or Director","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Bill to Cash coordinator","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Order to Cash","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Supply","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Legal department","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","CDH Pharma","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Commercial Operations Manager Consumer Health","Consumer Health","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Sales Department","Consumer Health","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Director or Manager of Finance BP","Consumer Health","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Legal / Antitrust Department","Consumer Health","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","CDH Consumer Health","Consumer Health","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","National Sales Manager","Radiology","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Customer Service Manager","Radiology","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Director or Coordinator of Finance BP","Radiology","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","CDH Radiology","Radiology","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Legal / Competition Department","Radiology","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Credit Team","Pharma","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Bill to Cash coordinator","Consumer Health","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Supply","Consumer Health","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Supply","Radiology","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Credit Team","Consumer Health","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2022-09-14 00:00:00","EUTVP","2022-09-14 00:00:00","EUTVP","BR","Credit Team","Radiology","1","Jonathan Hubeau","jh@pythia-consulting.com","True"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Supply Chain GB","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Supply Chain GB","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Legal GB","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Regulatory GB","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Country Business GB","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Regional Business GB","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Controlling GB","Pharma","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Legal GB","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Regulatory GB","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Country Business GB","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Regional Business GB","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
-"2023-05-31 00:00:00.000000000","EHMHV","2023-05-31 00:00:00.000000000","EHMHV","GB","Controlling GB","Radiology","1","Vasudevan Mariyappan","vmariyappan@pythia-consulting.com","true"
+CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,APPROVERTYPE,DIVISION,APPROVERID,APPROVERNAME,APPROVEREMAILID,ENABLED,BU
+,,,,AE,Supply Chain,Both,10006,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,EG,Country Business,Pharma,10007,William Hines,william.hines@bayer.com,,
+,,,,BH,Supply Chain,Both,10006,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,EG,Supply Chain,Both,10012,Marwa Saied,marwa.saied@bayer.com,,
+,,,,AE,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,AE,Regulatory,Both,10005,Hager Abdel Salam Hatata,hager.hatata@bayer.com,,
+,,,,MX,Country Business,Pharma,2000,Jorge Ancona,jorge.ancona@bayer.com,,
+,,,,MX,Supply Chain,Both,2001,Jose Luis Torres,jose.torres4@bayer.com,,
+,,,,SD,Supply Chain,Both,10012,Marwa Saied,marwa.saied@bayer.com,,
+,,,,BH,Country Business,Pharma,10001,William Hines,william.hines@bayer.com,,
+,,,,AE,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,BH,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,BH,Regulatory,Both,10005,Hager Abdel Salam Hatata,hager.hatata@bayer.com,,
+,,,,AE,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,AE,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,EG,Legal,Both,10008,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,EG,Regulatory,Both,10009,Eman Abdel Hamid,eman.abdelhamid@bayer.com,,
+,,,,IQ,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,BH,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,IQ,Regulatory,Both,10011,Wadiah Batarseh,wadiah.batarseh@bayer.com,,
+,,,,BH,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,BH,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,JO,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,JO,Regulatory,Both,10011,Wadiah Batarseh,wadiah.batarseh@bayer.com,,
+,,,,IQ,Supply Chain,Both,10012,Malak Mseis,malak.mseis@bayer.com,,
+,,,,KW,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,AE,Country Business,Pharma,10001,William Hines,william.hines@bayer.com,,
+,,,,EG,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,KW,Regulatory,Both,10005,Hager Abdel Salam Hatata,hager.hatata@bayer.com,,
+,,,,JO,Supply Chain,Both,10014,Malak Mseis,malak.mseis@bayer.com,,
+,,,,EG,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,EG,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,LB,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,LB,Regulatory,Both,10011,Wadiah Batarseh,wadiah.batarseh@bayer.com,,
+,,,,IQ,Country Business,Pharma,10010,William Hines,william.hines@bayer.com,,
+,,,,IQ,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,KW,Supply Chain,Both,10006,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,LY,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,IQ,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,IQ,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,LY,Regulatory,Both,10009,Eman Abdel Hamid,eman.abdelhamid@bayer.com,,
+,,,,OM,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,OM,Regulatory,Both,10005,Hager Abdel Salam Hatata,hager.hatata@bayer.com,,
+,,,,LB,Supply Chain,Both,10014,Malak Mseis,malak.mseis@bayer.com,,
+,,,,JO,Country Business,Pharma,10013,William Hines,william.hines@bayer.com,,
+,,,,JO,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,QA,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,QA,Regulatory,Both,10005,Hager Abdel Salam Hatata,hager.hatata@bayer.com,,
+,,,,JO,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,JO,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,LY,Supply Chain,Both,10012,Malak Mseis,malak.mseis@bayer.com,,
+,,,,SA,Legal,Both,10016,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,SA,Regulatory,Both,10017,Ibrahim Mohammed Al Ashban,ibrahim.al-ashban@bayer.com,,
+,,,,OM,Supply Chain,Both,10006,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,KW,Country Business,Pharma,10001,William Hines,william.hines@bayer.com,,
+,,,,KW,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SD,Regulatory,Both,10009,Eman Abdel Hamid,eman.abdelhamid@bayer.com,,
+,,,,SY,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,KW,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,KW,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SY,Regulatory,Both,10011,Wadiah Batarseh,wadiah.batarseh@bayer.com,,
+,,,,QA,Supply Chain,Both,10006,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,YE,Legal,Both,10003,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,YE,Regulatory,Both,10009,Eman Abdel Hamid,eman.abdelhamid@bayer.com,,
+,,,,LB,Country Business,Pharma,10013,William Hines,william.hines@bayer.com,,
+,,,,LB,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,LY,Country Business,Pharma,10010,William Hines,william.hines@bayer.com,,
+,,,,LB,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,LB,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SY,Supply Chain,Both,10012,Malak Mseis,malak.mseis@bayer.com,,
+,,,,YE,Supply Chain,Both,10012,Malak Mseis,malak.mseis@bayer.com,,
+,,,,OM,Country Business,Pharma,10001,William Hines,william.hines@bayer.com,,
+,,,,LY,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,LY,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,LY,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,QA,Country Business,Pharma,10001,William Hines,william.hines@bayer.com,,
+,,,,OM,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,OM,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,OM,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SD,Country Business,Pharma,10010,William Hines,william.hines@bayer.com,,
+,,,,QA,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,QA,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,QA,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SA,Country Business,Pharma,10015,Hussein El Hakim,hussein.elhakim@bayer.com,,
+,,,,SA,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SY,Country Business,Pharma,10010,William Hines,william.hines@bayer.com,,
+,,,,SD,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SD,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,SD,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,YE,Country Business,Pharma,10010,William Hines,william.hines@bayer.com,,
+,,,,SY,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SY,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,SY,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,CL,MACS,Pharma,1,Karen Elizabe Ziegele Rybertt,karen.ziegele@bayer.com,,
+,,,,YE,Country Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,YE,Regional Business,Pharma,10004,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,YE,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,SA,Regional Business,Pharma,10019,Hussein El Hakim,hussein.elhakim@bayer.com,,
+,,,,SA,Regional Business,Radiology,10002,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,AE,Supply Chain,Both,10006,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,BH,Country Business,Pharma,10001,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,BH,Supply Chain,Both,10006,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,EG,Supply Chain,Both,10012,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,AE,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,AE,Regulatory,Both,10005,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,MX,Country Business,Pharma,2000,Gilberto Mata Ramos,gilberto.mata@bayer.com,,
+,,,,SA,Supply Chain,Both,10018,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,AE,Country Business,Pharma,10001,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,AE,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,BH,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,BH,Regulatory,Both,10005,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,AE,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,EG,Legal,Both,10008,Mohamed Zaghloul,mohamed.zaghloul@bayer.com,,
+,,,,EG,Regulatory,Both,10009,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,IQ,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,BH,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,IQ,Regulatory,Both,10011,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,BH,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,JO,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,JO,Regulatory,Both,10011,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,IQ,Supply Chain,Both,10012,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,KW,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,EG,Country Business,Pharma,10007,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,EG,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,KW,Regulatory,Both,10005,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,JO,Supply Chain,Both,10014,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,EG,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,LB,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,LB,Regulatory,Both,10011,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,IQ,Country Business,Pharma,10010,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,IQ,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,KW,Supply Chain,Both,10006,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,LY,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,IQ,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,LY,Regulatory,Both,10009,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,OM,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,OM,Regulatory,Both,10005,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,LB,Supply Chain,Both,10014,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,JO,Country Business,Pharma,10013,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,JO,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,QA,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,QA,Regulatory,Both,10005,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,JO,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,LY,Supply Chain,Both,10012,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,SA,Legal,Both,10016,Hamdy Hafez,hamdy.hafez@bayer.com,,
+,,,,SA,Regulatory,Both,10017,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,OM,Supply Chain,Both,10006,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,KW,Country Business,Pharma,10001,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,KW,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SD,Regulatory,Both,10009,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,SY,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,KW,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SY,Regulatory,Both,10011,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,QA,Supply Chain,Both,10006,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,YE,Legal,Both,10003,Irina Lazarescu,irina.lazarescu@bayer.com,,
+,,,,YE,Regulatory,Both,10009,Adi Mohsin,adi.mohsin@bayer.com,,
+,,,,LB,Country Business,Pharma,10013,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,LB,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SD,Supply Chain,Both,10012,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,LB,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SY,Supply Chain,Both,10012,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,YE,Supply Chain,Both,10012,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,LY,Country Business,Pharma,10010,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,LY,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,LY,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,OM,Country Business,Pharma,10001,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,OM,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,OM,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,QA,Country Business,Pharma,10001,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,QA,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,QA,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SA,Country Business,Pharma,10015,Alaa Eldin Ali Hassan Nada,alaa.nada@bayer.com,,
+,,,,SA,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SD,Country Business,Pharma,10010,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,SD,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SD,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SY,Country Business,Pharma,10010,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,SY,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SY,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,YE,Country Business,Pharma,10010,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,YE,Country Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,YE,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,SA,Regional Business,Radiology,10002,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,MX,Country Business,Pharma,2000,Enrique Zuani,enrique.zuani@bayer.com,,
+,,,,SA,Supply Chain,Both,10018,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,AE,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,BH,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,EG,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,GC,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,IQ,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,JO,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,KW,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,LB,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,LY,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,OM,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,QA,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,SA,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,SD,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,SY,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+,,,,YE,Controlling,Both,10020,Wael Ghareeb,wael.mohamed@bayer.com,,
+2022-01-21 00:00:00.000000000,EUTVP,2022-01-21 00:00:00.000000000,EUTVP,TH,HBU,Pharma,1000,Chanya Leawrungruang,chanya.leawrungruang@bayer.com,true,
+2022-01-21 00:00:00.000000000,EUTVP,2022-01-21 00:00:00.000000000,EUTVP,TH,NSM/SM/FM,Pharma,1000,Chanya Leawrungruang,chanya.leawrungruang@bayer.com,true,
+,,,,TH,HBU,Pharma,1023,Sunee Kamalanon,sunee.kamalanon@bayer.com,,
+,,,,TH,NSM/SM/FM,Radiology,1024,Panyamon Passakornpinit,panyamon.passakornpinit@bayer.com,,
+,,,,TH,CDH,Pharma,1025,JinA Lee,jina.lee@bayer.com,,
+,,,,TH,CDH,Radiology,1026,Chavarat Temsakornpun,chavarat.temsakornpun@bayer.com,,
+,,,,TH,HBU,Radiology,2002,Kanittha Vareeswadkul,kanittha.vareeswadkul@bayer.com,,
+,,,,TH,NSM/SM/FM,Pharma,2003,Pradthana Suwan,pradthana.suwan@bayer.com,,
+,,,,TH,Supply Chain,Both,1028,Siriporn Noiwan,siriporn.noiwan@bayer.com,,
+,,,,CL,MACS,Pharma,1,Robert Henning,robert.henning@bayer.com,,
+,,,,CL,Supply,Both,1,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,,
+,,,,CL,Supply,Both,1,Fabian Deck,fabian.deck@bayer.com,,
+,,,,TH,Supply Chain,Both,1000,Prateep Thumpong,prateep.thumpong@bayer.com,,
+,,,,TH,NSM/SM/FM,Pharma,2004,Pakornwut Suntornkaew,pakornwut.suntornkaew@bayer.com,,
+,,,,TH,NSM/SM/FM,Pharma,2005,Kesuma Sinthusarn,kesuma.sinthusarn@bayer.com,,
+2022-01-21 00:00:00.000000000,EUTVP,2022-01-21 00:00:00.000000000,EUTVP,TH,NSM/SM/FM,Pharma,1000,Peyanun Ngamtaweekij,peyanun.ngamtaweekij@bayer.com,true,
+2022-01-21 00:00:00.000000000,EUTVP,2022-01-21 00:00:00.000000000,EUTVP,TH,HBU,Pharma,1000,Peyanun Ngamtaweekij,peyanun.ngamtaweekij@bayer.com,true,
+,,,,TH,NSM/SM/FM,Pharma,2008,Kodchaporn Buasiri,kodchaporn.buasiri@bayer.com,,
+,,,,TH,NSM/SM/FM,Pharma,1023,Sunee Kamalanon,sunee.kamalanon@bayer.com,,
+,,,,MX,Tender Management,Both,2001,Laura Luz Tecillo López,laura.tecillo@bayer.com,,
+,,,,EG,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,GC,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,IQ,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,JO,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,CL,Supply,Both,1,Karen Elizabe Ziegele Rybertt,karen.ziegele@bayer.com,,
+,,,,LB,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,LY,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,CL,Business Service,Pharma,1,Karen Elizabe Ziegele Rybertt,karen.ziegele@bayer.com,,
+,,,,GC,Supply Chain,Both,,Vipin Mohan,vipin.mohan@bayer.com,,
+,,,,GC,Legal,Both,1,Rachel Cosgrove,rachel.cosgrove@bayer.com,,
+,,,,SD,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,SY,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,YE,Supply Chain,Both,,Ahmed Yehya Ramadan,ahmed.yehya@bayer.com,,
+,,,,GC,Regulatory,Both,1,Ibrahim Mohammed Al Ashban,ibrahim.al-ashban@bayer.com,,
+,,,,GC,Regulatory,Both,1,Hager Abdel Salam Hatata,hager.hatata@bayer.com,,
+,,,,GC,Regional Business,Pharma,1,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,GC,Regional Business,Pharma,1,Hussein El Hakim,hussein.elhakim@bayer.com,,
+,,,,GC,Regional Business,Radiology,1,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,GC,Regional Business,Radiology,1,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,GC,Country Business,Pharma,1,Henrik Wulff,henrik.wulff@bayer.com,,
+,,,,GC,Country Business,Pharma,1,Hussein El Hakim,hussein.elhakim@bayer.com,,
+,,,,GC,Country Business,Radiology,1,Johnny Al Asmar,johnny.al-asmar@bayer.com,,
+,,,,GC,Country Business,Radiology,1,Michel Van Caekenberghe,michel.vancaekenberghe@bayer.com,,
+,,,,CL,Business Service,Pharma,1,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,,
+,,,,CL,Law and Patents,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com,,
+,,,,CL,CDH,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com,,
+,,,,CL,SBR RA ConoSur,Radiology,1,Frank Schmitt,frank.schmitt1@bayer.com,,
+,,,,CL,CDH-Chile (signature),Radiology,1,Frank Schmitt,frank.schmitt1@bayer.com,,
+,,,,AR,MACS,Pharma,1,Guadalupe Roel,guadalupe.roel@bayer.com,,
+,,,,AR,MACS,Pharma,1,Andre Jacobs,andre.jacobs@bayer.com,,
+,,,,AR,TA,Pharma,1,TBD,jonathan.hubeau.ext@bayer.com,,
+,,,,AR,TA,Pharma,1,Robert Henning,robert.henning@bayer.com,,
+,,,,AR,LPC,Pharma,1,Thomas Henshaw,thomas.henshaw@bayer.com,,
+,,,,AR,COM/PGA,Pharma,1,Marialaura Lopez,marialaura.lopez@bayer.com,,
+,,,,AR,COM/PGA,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com,,
+,,,,AR,Supply Chain,Pharma,1,Santiago Pettigrew,santiago.pettigrew@bayer.com,,
+,,,,AR,Supply Chain,Pharma,1,Andre Jacobs,andre.jacobs@bayer.com,,
+,,,,AR,International Trade,Pharma,1,Alejandro Terzian,alejandro.terzian@bayer.com,,
+,,,,AR,International Trade,Pharma,1,Robert Henning,robert.henning@bayer.com,,
+,,,,CL,Marketing,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com,,
+,,,,CL,Law and Patents,Pharma,1,Karen Elizabe Ziegele Rybertt,karen.ziegele@bayer.com,,
+,,,,CL,CDH,Pharma,1,Karen Elizabe Ziegele Rybertt,karen.ziegele@bayer.com,,
+,,,,CL,SBR RA ConoSur,Radiology,1,Karen Elizabe Ziegele Rybertt,karen.ziegele@bayer.com,,
+,,,,CL,CDH-Chile (signature),Radiology,1,Karen Elizabe Ziegele Rybertt,karen.ziegele@bayer.com,,
+,,,,CL,Marketing,Pharma,1,Karen Elizabe Ziegele Rybertt,karen.ziegele@bayer.com,,
+,,,,CL,MACS,Pharma,1,Cynthia S. Bernal Gonzalez,cynthia.bernal@bayer.com,,
+,,,,CL,Supply,Both,1,Cynthia S. Bernal Gonzalez,cynthia.bernal@bayer.com,,
+,,,,CL,Business Service,Pharma,1,Cynthia S. Bernal Gonzalez,cynthia.bernal@bayer.com,,
+,,,,CL,Law and Patents,Pharma,1,Cynthia S. Bernal Gonzalez,cynthia.bernal@bayer.com,,
+,,,,CL,CDH,Pharma,1,Cynthia S. Bernal Gonzalez,cynthia.bernal@bayer.com,,
+,,,,CL,SBR RA ConoSur,Radiology,1,Cynthia S. Bernal Gonzalez,cynthia.bernal@bayer.com,,
+,,,,CL,CDH-Chile (signature),Radiology,1,Cynthia S. Bernal Gonzalez,cynthia.bernal@bayer.com,,
+,,,,CL,Marketing,Pharma,1,Cynthia S. Bernal Gonzalez,cynthia.bernal@bayer.com,,
+,,,,AR,Tender Mgr.,Pharma,1,Javier Castelli,javier.castelli@bayer.com,,
+,,,,AR,FBP,Pharma,1,Mariela Orandi,mariela.orandi@bayer.com,,
+,,,,AR,Transfer Pricing,Pharma,1,Guillermo Escosteguy,guillermo.escosteguy@bayer.com,,
+,,,,AR,CDH,Pharma,1,Pierina Rossetti,pierina.rossetti@bayer.com,,
+,,,,AR,SBR,Pharma,1,Christophe Dumont,christophe.dumont@bayer.com,,
+,,,,AR,Tender Mgr.,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com,,
+,,,,AR,FBP,Pharma,1,Fabian Deck,fabian.deck@bayer.com,,
+,,,,AR,Transfer Pricing,Pharma,1,Fabian Deck,fabian.deck@bayer.com,,
+,,,,AR,SBR,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com,,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Finance,Both,1000,Melania Zappaterra,melania.zappaterra@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Supply Chain,Both,1000,Luigi Cascini,luigi.cascini@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Contract Manager,Both,1000,Andrea Duranti,andrea.duranti@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Danilo Despirito,danilo.despirito@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Patrizia Guarraci,patrizia.guarraci@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Roberto Bergonzi,roberto.bergonzi@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Eugenia Lietta,eugenia.lietta@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Andrea Mencarelli,andrea.mencarelli@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Salvatore Vitale,salvatore.vitale@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Alberto Bocca,alberto.bocca@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Giuseppe Tropiano,giuseppe.tropiano@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Cesare Maurizio Dezuanni,cesaremaurizio.dezuanni@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Luciano Bertini,luciano.bertini@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Massimo Vergari,massimo.vergari@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Enrico Ceribelli,enrico.ceribelli@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Stefano Sacchi,stefano.sacchi@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Paolo Radere,paolo.radere@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Vanda Peaquin,vanda.peaquin@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Bianca Ferrara,bianca.ferrara@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Oliviero Parente,oliviero.parente@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Mattia Bianchini,mattia.bianchini@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Mario Francesco Indaco,mariofrancesco.indaco@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Danilo Despirito,danilo.despirito@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Patrizia Guarraci,patrizia.guarraci@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Roberto Bergonzi,roberto.bergonzi@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Eugenia Lietta,eugenia.lietta@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Andrea Mencarelli,andrea.mencarelli@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Salvatore Vitale,salvatore.vitale@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Alberto Bocca,alberto.bocca@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Giuseppe Tropiano,giuseppe.tropiano@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Cesare Maurizio Dezuanni,cesaremaurizio.dezuanni@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Luciano Bertini,luciano.bertini@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Massimo Vergari,massimo.vergari@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Enrico Ceribelli,enrico.ceribelli@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Stefano Sacchi,stefano.sacchi@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Paolo Radere,paolo.radere@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Vanda Peaquin,vanda.peaquin@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Bianca Ferrara,bianca.ferrara@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Oliviero Parente,oliviero.parente@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Mattia Bianchini,mattia.bianchini@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Mario Francesco Indaco,mariofrancesco.indaco@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Danilo Despirito,danilo.despirito@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Patrizia Guarraci,patrizia.guarraci@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Roberto Bergonzi,roberto.bergonzi@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Eugenia Lietta,eugenia.lietta@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Andrea Mencarelli,andrea.mencarelli@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Salvatore Vitale,salvatore.vitale@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Alberto Bocca,alberto.bocca@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Giuseppe Tropiano,giuseppe.tropiano@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Cesare Maurizio Dezuanni,cesaremaurizio.dezuanni@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Luciano Bertini,luciano.bertini@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Massimo Vergari,massimo.vergari@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Enrico Ceribelli,enrico.ceribelli@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Stefano Sacchi,stefano.sacchi@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Paolo Radere,paolo.radere@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Vanda Peaquin,vanda.peaquin@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Bianca Ferrara,bianca.ferrara@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Oliviero Parente,oliviero.parente@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Mattia Bianchini,mattia.bianchini@bayer.com,True,
+2022-02-10 00:00:00,EUTVP,2022-02-10 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Mario Francesco Indaco,mariofrancesco.indaco@bayer.com,True,
+2022-02-17 12:27:32.112000,EUTVP,2022-02-17 12:27:32.112000,EUTVP,ES,BU/RAM,Pharma,1000,BU/RAM - Pharma,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:27:32.112000,EUTVP,2022-02-17 12:27:32.112000,EUTVP,ES,KAMS,Pharma,1000,KAMS - Pharma,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:27:32.112000,EUTVP,2022-02-17 12:27:32.112000,EUTVP,ES,SM,Pharma,1000,SM - Pharma,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:27:32.112000,EUTVP,2022-02-17 12:27:32.112000,EUTVP,ES,CDH,Pharma,1000,CDH - Pharma,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:27:51.061000,EUTVP,2022-02-17 12:27:51.061000,EUTVP,ES,BU/RAM,Radiology,1000,BU/RAM - Radiology,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:27:51.061000,EUTVP,2022-02-17 12:27:51.061000,EUTVP,ES,KAMS,Radiology,1000,KAMS - Radiology,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:27:51.061000,EUTVP,2022-02-17 12:27:51.061000,EUTVP,ES,SM,Radiology,1000,SM - Radiology,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:27:51.061000,EUTVP,2022-02-17 12:27:51.061000,EUTVP,ES,CDH,Radiology,1000,CDH - Radiology,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:29:00.363000,EUTVP,2022-02-17 12:29:00.363000,EUTVP,ES,Legal,Both,1000,Legal,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:29:00.363000,EUTVP,2022-02-17 12:29:00.363000,EUTVP,ES,Financial Business Partner,Both,1000,Financial Business Partner,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:29:00.363000,EUTVP,2022-02-17 12:29:00.363000,EUTVP,ES,Controlling,Both,1000,Controlling,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 12:29:00.363000,EUTVP,2022-02-17 12:29:00.363000,EUTVP,ES,Supply Chain,Both,1000,Supply Chain,jonathan.hubeau.ext@bayer.com,True,
+2022-02-17 15:37:04.422000,EUTVP,,EUTVP,SA,Legal,Both,1000,Mohamed Zaghloul,mohamed.zaghloul@bayer.com,True,
+2022-02-17 15:37:38.853000,EUTVP,,EUTVP,SA,Country Business,Both,1000,Henrik Wulff,henrik.wulff@bayer.com,True,
+2022-02-17 15:37:47.065000,EUTVP,,EUTVP,SA,Regional Business,Both,1000,Henrik Wulff,henrik.wulff@bayer.com,True,
+,,,,CL,MACS,Pharma,1,Jonathan Hubeau,jonathan.hubeau.ext@bayer.com,,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,BU/RAM,Pharma,1,Cristina Rodrigo,cristina.rodrigoallende@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Pharma,1,Cristina Rodrigo,cristina.rodrigoallende@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Pharma,1,Cristina Rodrigo,cristina.rodrigoallende@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Pharma,1,Cristina Rodrigo,cristina.rodrigoallende@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Pharma,1,Cristina Rodrigo,cristina.rodrigoallende@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Pharma,1,Cristina Rodrigo,cristina.rodrigoallende@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Pharma,1,Cristina Rodrigo,cristina.rodrigoallende@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Pharma,1,Cristina Rodrigo,cristina.rodrigoallende@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,BU/RAM,Radiology,1,David García Calleja,david.garcia@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Radiology,1,David García Calleja,david.garcia@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Radiology,1,David García Calleja,david.garcia@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Radiology,1,David García Calleja,david.garcia@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Radiology,1,David García Calleja,david.garcia@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Radiology,1,David García Calleja,david.garcia@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Radiology,1,David García Calleja,david.garcia@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Radiology,1,David García Calleja,david.garcia@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,BU/RAM,Radiology,1,Juan Carlos Rueda,juancarlos.rueda@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Radiology,1,Juan Carlos Rueda,juancarlos.rueda@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Radiology,1,Juan Carlos Rueda,juancarlos.rueda@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Radiology,1,Juan Carlos Rueda,juancarlos.rueda@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Radiology,1,Juan Carlos Rueda,juancarlos.rueda@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Radiology,1,Juan Carlos Rueda,juancarlos.rueda@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Radiology,1,Juan Carlos Rueda,juancarlos.rueda@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Radiology,1,Juan Carlos Rueda,juancarlos.rueda@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,BU/RAM,Radiology,1,David Pérez Pancho,david.perezpancho@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Radiology,1,David Pérez Pancho,david.perezpancho@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Radiology,1,David Pérez Pancho,david.perezpancho@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Radiology,1,David Pérez Pancho,david.perezpancho@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Radiology,1,David Pérez Pancho,david.perezpancho@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Radiology,1,David Pérez Pancho,david.perezpancho@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Radiology,1,David Pérez Pancho,david.perezpancho@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Radiology,1,David Pérez Pancho,david.perezpancho@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,BU/RAM,Radiology,1,Diego Benavides Largo,diego.benavideslargo.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Radiology,1,Diego Benavides Largo,diego.benavideslargo.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Radiology,1,Diego Benavides Largo,diego.benavideslargo.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Radiology,1,Diego Benavides Largo,diego.benavideslargo.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Radiology,1,Diego Benavides Largo,diego.benavideslargo.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Radiology,1,Diego Benavides Largo,diego.benavideslargo.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Radiology,1,Diego Benavides Largo,diego.benavideslargo.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Radiology,1,Diego Benavides Largo,diego.benavideslargo.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Pharma,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,CDH,Both,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Controlling,Both,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Financial Business Partner,Both,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,KAMS,Both,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Legal,Both,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,SM,Both,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,EUTVP,ES,Supply Chain,Both,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Contract Manager,Both,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Finance,Both,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Supply Chain,Both,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Contract Manager,Both,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Finance,Both,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Supply Chain,Both,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Contract Manager,Both,1000,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Finance,Both,1000,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Supply Chain,Both,1000,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 1,Pharma,1000,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 2,Pharma,1000,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 3,Pharma,1000,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 1,Radiology,1000,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 2,Radiology,1000,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-17 00:00:00,EUTVP,2022-05-17 00:00:00,EUTVP,IT,Business Level 3,Radiology,1000,Fabian Deck,fabian.deck@bayer.com,True,
+,,,ELLUI,SA,Supply Chain,Both,1,Robert Henning,robert.henning@bayer.com,True,
+,,,ELLUI,SA,Regional Business,Both,1,Robert Henning,robert.henning@bayer.com,True,
+,,,ELLUI,SA,Controlling,Both,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Dolors Borras,dolors.borrasmartin@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Moises Picó,moises.pico@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Peter Hendriks,peter.hendriks.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Gurinder Singh,gurinder.singh1.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Namita Verma,namita.verma.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Juhi Hariom,juhi.hariom.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Alopa Arora,alopa.arora.ext@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Sonia Sanchez,sonia.sanchez@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Matilde Baeza,mati.baeza@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,María Jesús Redondo,mariajesus.redondo@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Frank Schmitt,frank.schmitt1@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Andre Jacobs,andre.jacobs@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Robert Henning,robert.henning@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Fabian Deck,fabian.deck@bayer.com,True,
+2022-05-11 00:00:00,EUTVP,2022-05-11 00:00:00,UAT,ES,BU/RAM,Radiology,1,Michal Buczynski,michal.buczynski@bayer.com,True,
+2022-07-18 00:00:00,EUTVP,2022-07-18 00:00:00,EUTVP,ES,BU/RAM,Pharma,1000,Victor Canellas Guerrero,victor.canellasguerrero@bayer.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,TA Head,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Pricing Manager,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Divisional Finance Manager or Director,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Bill to Cash coordinator,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Order to Cash,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Supply,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Legal department,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,CDH Pharma,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Commercial Operations Manager Consumer Health,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Sales Department,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Director or Manager of Finance BP,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Legal / Antitrust Department,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,CDH Consumer Health,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,National Sales Manager,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Customer Service Manager,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Director or Coordinator of Finance BP,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,CDH Radiology,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Legal / Competition Department,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Credit Team,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Bill to Cash coordinator,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Supply,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Supply,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Credit Team,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Credit Team,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,TA Head,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Pricing Manager,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Divisional Finance Manager or Director,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Bill to Cash coordinator,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Order to Cash,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Supply,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Legal department,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,CDH Pharma,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Commercial Operations Manager Consumer Health,Consumer Health,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Sales Department,Consumer Health,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Director or Manager of Finance BP,Consumer Health,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Legal / Antitrust Department,Consumer Health,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,CDH Consumer Health,Consumer Health,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,National Sales Manager,Radiology,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Customer Service Manager,Radiology,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Director or Coordinator of Finance BP,Radiology,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,CDH Radiology,Radiology,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Legal / Competition Department,Radiology,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Credit Team,Pharma,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Bill to Cash coordinator,Consumer Health,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Supply,Consumer Health,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Supply,Radiology,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Credit Team,Consumer Health,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2022-09-14 00:00:00,EUTVP,2022-09-14 00:00:00,EUTVP,BR,Credit Team,Radiology,1,Jonathan Hubeau,jh@pythia-consulting.com,True,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Supply Chain GB,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Supply Chain GB,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Legal GB,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Regulatory GB,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Country Business GB,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Regional Business GB,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Controlling GB,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Legal GB,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Regulatory GB,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Country Business GB,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Regional Business GB,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,GB,Controlling GB,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Country Business Lead,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Head of Business Finance,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Head of Business Finance,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Radiology Country Head,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Brand and Sales Manager,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Sales Manager - South,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Sales Manager - North,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,National Sales Manager,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Contract to Cash (C2C),Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Contract to Cash (C2C),Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Contract to Cash (C2C),Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,SCM,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,SCM,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,SCM,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
