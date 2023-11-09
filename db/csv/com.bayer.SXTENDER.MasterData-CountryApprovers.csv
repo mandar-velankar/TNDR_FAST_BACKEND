@@ -637,3 +637,6 @@ CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,COUNTRYCODE,APPROVERTYPE,DIVISION,APPR
 2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,SCM,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
 2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,SCM,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
 2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,SCM,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Order-to-Cash-Ready,Pharma,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Order-to-Cash-Ready,Radiology,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,
+2023-05-31 00:00:00.000000000,EHMHV,2023-05-31 00:00:00.000000000,EHMHV,PK,Order-to-Cash-Ready,Consumer Health,1,Vasudevan Mariyappan,vmariyappan@pythia-consulting.com,true,

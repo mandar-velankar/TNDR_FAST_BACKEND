@@ -2060,7 +2060,14 @@ module.exports = async (srv) => {
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue);
+
+			//Get corresponding ProductPack
+			const whereProductPack = {
+				PRODUCTPACKID: offerProduct.ProductCode,
+			}
+			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
+
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack);
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
 				OfferID: offer.OFFERID,
@@ -2105,11 +2112,6 @@ module.exports = async (srv) => {
             }));
             /*end of ProductCondition information */
 
-			//Get corresponding ProductPack
-			const whereProductPack = {
-				PRODUCTPACKID: offerProduct.ProductCode,
-			}
-			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
 			const whereMaterial = {
 				CountryCode: offer.COUNTRYCODE,
@@ -2372,7 +2374,7 @@ module.exports = async (srv) => {
 		return resolvedResults;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 
@@ -2385,7 +2387,7 @@ module.exports = async (srv) => {
 		}
 
 		if (offer.APPROVAL_TYPE === 15) {
-			productValidation = await buildProductValidationForType15(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue);
+			productValidation = await buildProductValidationForType15(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack);
 		}
 		return {
 			CommnonProductInfo: commnonProductInfo,
@@ -2481,19 +2483,24 @@ module.exports = async (srv) => {
 		return results;
 	}
 
-	async function buildProductValidationForType15 (tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
+	async function buildProductValidationForType15 (tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue, productPack) {
 		let results = {
 			IN_POLICY: false
 		}
 		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, "Type": "OfferPriceVSRegisteredPrice"}));
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+		const productThreshold = product.UNIT === "Unit" ? product.REQUESTED_VOLUME / productPack[0].PACKFACTOR : product.QTY_THRESHOLD
 
 		if(policy && priceCondition) {
 			if (offer.AffiliateOffer) {
-
+				aApproverTypes.map(async function (oApproverType) {
+					if (oApproverType.ApproverType !== "Order-to-Cash-Ready") {
+						oApproverType.ValidationType = 1;
+					}
+				});
 			}else {
 				if (Number(priceCondition.Discount) < policy.Value) {
-					if (product.REQUESTED_VOLUME < product.QTY_THRESHOLD) {
+					if (product.REQUESTED_VOLUME < productThreshold) {
 						const indexOfSCMApproverType = aApproverTypes.findIndex(el => el.ApproverType === "SCM");
 						aApproverTypes.splice(indexOfSCMApproverType, 1);
 						aApproverTypes.map(async function (oApproverType) {
@@ -2505,7 +2512,7 @@ module.exports = async (srv) => {
 						});
 					}
 				}else {
-					if (product.REQUESTED_VOLUME < product.QTY_THRESHOLD) {
+					if (product.REQUESTED_VOLUME < productThreshold) {
 						const indexOfSCMApproverType = aApproverTypes.findIndex(el => el.ApproverType === "SCM");
 						aApproverTypes.splice(indexOfSCMApproverType, 1);
 						aApproverTypes.map(async function (oApproverType) {
@@ -2519,6 +2526,7 @@ module.exports = async (srv) => {
 					}
 				}
 			}
+			results.IN_POLICY = true
 		}
 		return results;
 	}
