@@ -152,3 +152,13 @@ CREATEDAT,CREATEDBY,MODIFIEDAT,MODIFIEDBY,APPROVERTYPE,COUNTRYCODE,HIERARCHY,VAL
 "2022-09-14 00:00:00","EHMHV","2022-09-14 00:00:00","EHMHV","Country Business GB","GB","2","3","true"
 "2022-09-14 00:00:00","EHMHV","2022-09-14 00:00:00","EHMHV","Regional Business GB","GB","2","3","true"
 "2022-09-14 00:00:00","EHMHV","2022-09-14 00:00:00","EHMHV","Controlling GB","GB","2","1","true"
+,EHMHV,,EHMHV,Country Business Lead,PK,1,3,true
+,EHMHV,,EHMHV,Head of Business Finance,PK,1,3,true
+,EHMHV,,EHMHV,Orde-to-Cash,PK,3,2,true
+,EHMHV,,EHMHV,Radiology Country Head,PK,1,3,true
+,EHMHV,,EHMHV,Brand and Sales Manager,PK,1,3,true
+,EHMHV,,EHMHV,Sales Manager - South,PK,1,3,true
+,EHMHV,,EHMHV,Sales Manager - North,PK,1,3,true
+,EHMHV,,EHMHV,National Sales Manager,PK,1,3,true
+,EHMHV,,EHMHV,Contract to Cash (C2C),PK,2,2,true
+,EHMHV,,EHMHV,SCM,PK,2,1,true
