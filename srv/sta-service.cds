@@ -630,7 +630,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             pkdist.DistributorID,
             dist.DistributorName,
             key dist.CountryCode
-    }group by pkdist.InstituteID,pkdist.BU,pkdist.DistributorID,dist.CountryCode;
+    }group by pkdist.InstituteID,pkdist.BU,pkdist.DistributorID,dist.DistributorName,dist.CountryCode;
 
     entity ProductBrand as select from MasterData.PT_TMPRDHIER as prdhier
         inner join MasterData.PT_TMPRDPCK as prdpck on prdpck.HLEVEL6_CODE = prdhier.HLEVEL6_CODE {
