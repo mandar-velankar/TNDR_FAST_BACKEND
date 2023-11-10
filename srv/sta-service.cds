@@ -623,11 +623,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
-        inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID {
-            pkdist.InstituteID,
-            pkdist.BU,
+        inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID{
+            key pkdist.InstituteID,
+            key pkdist.BU,
             pkdist.DistributorID,
             dist.DistributorName,
+            key dist.CountryCode
     };
 
     entity ProductBrand as select from MasterData.PT_TMPRDHIER as prdhier
