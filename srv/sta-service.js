@@ -2881,8 +2881,12 @@ module.exports = async (srv) => {
 		const tx = cds.tx(req);
 		const cwid = req.user.id;
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({CWID: cwid}));
-		req.data.UserEmail = userInfo[0].UserEmail;
-		req.data.UserName = userInfo[0].UserName;
+		const tenderInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: req.data.TenderInstitute}));
+		const offerInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: req.data.OfferInstitute}));
+		req.data.TenderInstitute = tenderInstituteInfo[0]?.InstituteName;
+		req.data.OfferInstitute = offerInstituteInfo[0]?.InstituteName;
+		req.data.UserEmail = userInfo[0]?.UserEmail;
+		req.data.UserName = userInfo[0]?.UserName;
 	});
 
 	async function getOfferData(tx,offerId){
