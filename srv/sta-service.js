@@ -63,7 +63,8 @@ module.exports = async (srv) => {
 		MasterPrices, 
 		MASTER_TENDER_TYPE,
 		PT_TMPRDHIER,
-		PT_TMCTRY
+		PT_TMCTRY,
+		PT_TMCTPRDPCK
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
@@ -2489,40 +2490,61 @@ module.exports = async (srv) => {
 		}
 		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, "Type": "OfferPriceVSRegisteredPrice"}));
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+		const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
+		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({"CountryCode": offer.COUNTRYCODE, "Division": product.DIVISION, "BU": ctryProductPack.BU}));
 		const productThreshold = product.UNIT === "Unit" ? product.REQUESTED_VOLUME / productPack[0].PACKFACTOR : product.QTY_THRESHOLD
 
 		if(policy && priceCondition) {
 			if (offer.AffiliateOffer) {
-				aApproverTypes.map(async function (oApproverType) {
+				const apprTypesToBeRemoved = [];
+				aApproverTypes.map(function (oApproverType) {
 					if (oApproverType.ApproverType !== "Order-to-Cash-Ready") {
 						oApproverType.ValidationType = 1;
 					}
+					const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+					if (currentCtryApprType === -1 ) {
+						apprTypesToBeRemoved.push(oApproverType.ApproverType)
+					}
 				});
+				const orderToCashReadyIndex = apprTypesToBeRemoved.findIndex(el => el === "Order-to-Cash-Ready");
+				apprTypesToBeRemoved.splice(orderToCashReadyIndex, 1);
+				updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
 			}else {
-				if (Number(priceCondition.Discount) < policy.Value) {
+				if (priceCondition.Level1Discount1 < policy.Value) {
 					if (product.REQUESTED_VOLUME < productThreshold) {
-						const indexOfSCMApproverType = aApproverTypes.findIndex(el => el.ApproverType === "SCM");
-						aApproverTypes.splice(indexOfSCMApproverType, 1);
-						aApproverTypes.map(async function (oApproverType) {
+						const apprTypesToBeRemoved = [];
+						aApproverTypes.map(function (oApproverType) {
 							oApproverType.ValidationType = oApproverType.ValidationType2;
+							const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+							if (currentCtryApprType === -1) apprTypesToBeRemoved.push(oApproverType.ApproverType);
 						});
+						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
 					}else {
-						aApproverTypes.map(async function (oApproverType) {
+						const apprTypesToBeRemoved = [];
+						aApproverTypes.map(function (oApproverType) {
 							oApproverType.ValidationType = oApproverType.ValidationType2;
+							const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+							if (currentCtryApprType === -1 && oApproverType.ApproverType !== "SCM") apprTypesToBeRemoved.push(oApproverType.ApproverType);
 						});
+						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
 					}
 				}else {
 					if (product.REQUESTED_VOLUME < productThreshold) {
-						const indexOfSCMApproverType = aApproverTypes.findIndex(el => el.ApproverType === "SCM");
-						aApproverTypes.splice(indexOfSCMApproverType, 1);
-						aApproverTypes.map(async function (oApproverType) {
+						const apprTypesToBeRemoved = [];
+						aApproverTypes.map(function (oApproverType) {
 							oApproverType.ValidationType = oApproverType.ValidationType;
+							const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+							if (currentCtryApprType === -1) apprTypesToBeRemoved.push(oApproverType.ApproverType);
 						});
-						
+						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
 					}else {
-						aApproverTypes.map(async function (oApproverType) {
+						const apprTypesToBeRemoved = [];
+						aApproverTypes.map(function (oApproverType) {
 							oApproverType.ValidationType = oApproverType.ValidationType;
+							const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+							if (currentCtryApprType === -1 && oApproverType.ApproverType !== "SCM") apprTypesToBeRemoved.push(oApproverType.ApproverType);
 						});
+						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
 					}
 				}
 			}
@@ -2530,6 +2552,14 @@ module.exports = async (srv) => {
 		}
 		return results;
 	}
+
+	function updateApproverTypesListForPakistan (aApproverTypes, apprTypesToBeRemoved) {
+		apprTypesToBeRemoved.forEach(apprType => {
+			const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === apprType);
+			aApproverTypes.splice(apprIndex, 1);
+		});
+	}
+
 	function buildCommonProductInfo(offer, product) {
 		//Get all prices, ammounts and cogs in all units
 		let toUnitFactor = (product.UNIT === "Unit") ? 1 : product.PACKSIZE;
