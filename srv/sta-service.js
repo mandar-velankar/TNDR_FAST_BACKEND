@@ -21,6 +21,7 @@ const axios = require('axios');
 const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = async (srv) => {
 
@@ -528,12 +529,15 @@ module.exports = async (srv) => {
 		const productPricing = await SELECT.from(PT_TMBDPR).where({OfferID: offerID, Active: 1, ActiveTier: 0, LotID: 1 })
 		const offerRevision = await SELECT.one.from(OfferRevisions).where({TENDERID: offer.TenderID, TENDEROFFERNO: offer.TenderOfferNo});
 		const nextOfferID = await SELECT.one.from(TenderOffers).where({TENDERID: offer.TenderID});
+		const priceCondtions = await SELECT.from(PriceCondition).where({OfferID: offerID});
+		const priceConditionIDs = priceCondtions.map(pc => pc.ID);
+		const freeGoodsOther = await SELECT.from(FreeGoodsOther).where({PriceCondition_ID: {in: priceConditionIDs}});
 		
 
 		switch(type){
 			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
 			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
-			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, req});
+			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, priceCondtions, freeGoodsOther, req});
 		}
 	});
 
@@ -633,7 +637,7 @@ module.exports = async (srv) => {
 		return continuedOfferID;
 	};
 
-	async function createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, req}){
+	async function createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, priceCondtions, freeGoodsOther, req}){
 		if(!instituteName){
 			return req.error({ code: 404, message: "Institute name was not provided", target: "InstituteName" });
 		}
@@ -662,10 +666,25 @@ module.exports = async (srv) => {
 		});
 
 		const affiliateProductsPricing = productPricing.map(pr => {
-			const cpp = {...pr};
-			cpp.OfferID = affiliateOfferID;
-			cpp.SubmittedOn = todaysDate;
-			return cpp;
+			const app = {...pr};
+			app.OfferID = affiliateOfferID;
+			app.SubmittedOn = todaysDate;
+			return app;
+		});
+
+		const affiliateProductsPriceCondtions = priceCondtions.map(pc => {
+			const apc = {...pc};
+			apc.OfferID = affiliateOfferID;
+			apc.ID = uuidv4();
+			return apc;
+		});
+
+		const affiliateFreeGoodsOther = freeGoodsOther.map(fg => {
+			const afg = {...fg};
+			const pricecondtion = affiliateProductsPriceCondtions.find(pc => pc.ProductCode = afg.ProductPackId);
+			afg.ID = uuidv4();
+			afg.PriceCondition_ID = pricecondtion.ID;
+			return afg;
 		});
 
 		// 1. create affiliate offer
@@ -676,6 +695,10 @@ module.exports = async (srv) => {
 		await INSERT.into(PT_TMOFPR).entries(affiliateOfferProducts);
 		// 4. create product pricing
 		await INSERT.into(PT_TMBDPR).entries(affiliateProductsPricing);
+		// 4. create price condtions
+		await INSERT.into(PriceCondition).entries(affiliateProductsPriceCondtions);
+		// 5. create free goods other
+		await INSERT.into(FreeGoodsOther).entries(affiliateFreeGoodsOther);
 
 		return affiliateOfferID;
 	};
