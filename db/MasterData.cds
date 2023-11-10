@@ -264,7 +264,7 @@ entity CountryApprovers : managed {
 	key ApproverEmailID:String(200);
 	//Hierarchy:Integer not null;
 	Enabled                 : Boolean; //TODO Boolean not null;
-	BU: String;
+	key BU: String;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode
 }
