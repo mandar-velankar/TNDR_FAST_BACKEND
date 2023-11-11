@@ -294,6 +294,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKUCountry.BU,
         SKUCountry.RegistrationValidUntil,
         SKU.Product.HLEVEL4_NAME as BrandName,
+        Offer.Tender.Institute.INCOTerms,
         @Core.Computed: false
         ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };
@@ -618,12 +619,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
-        inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID {
-            pkdist.InstituteID,
-            pkdist.BU,
+        inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID{
+            key pkdist.InstituteID,
+            key pkdist.BU,
             pkdist.DistributorID,
             dist.DistributorName,
-    };
+            key dist.CountryCode
+    }group by pkdist.InstituteID,pkdist.BU,pkdist.DistributorID,dist.DistributorName,dist.CountryCode;
 
     entity ProductBrand as select from MasterData.PT_TMPRDHIER as prdhier
         inner join MasterData.PT_TMPRDPCK as prdpck on prdpck.HLEVEL6_CODE = prdhier.HLEVEL6_CODE {
