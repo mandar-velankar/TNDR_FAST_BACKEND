@@ -792,7 +792,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             "I60": "Private Account",
             "AUI": "Private Account",
             "I48": "Private Account",
-            "DV": "Private Account",
+             "DV": "Private Account",
             "I24": "Private Account",
             "L42": "Private Account"
         }
@@ -884,6 +884,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                 }
             });
 
+            
             const result = await tx.run(INSERT(instituteBrandEntries).into(PT_TMINSBRTR));
             await tx.commit(result);
             console.log(`${instituteBrandEntries.length} Institute Brand Terms successfully created in ${PT_TMINSBRTR.name}.`);

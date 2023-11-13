@@ -620,6 +620,7 @@ entity PT_TMTEND: managed {
         EffectiveDate     : Date;
         ExpiryDate        : Date;
         OfferValidity      :Date;
+
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID
