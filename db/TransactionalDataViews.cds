@@ -770,7 +770,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
 
 	  case
         when offer.Tender.Institute.Region.Name = 'SEWA' then ADD_DAYS(CURRENT_DATE, 60)
-        when (offer.CountryCode = 'ES')
+        when (offer.CountryCode = 'ES'  and offer.Tender.Classification = 'Commercial Agreement')
           then ifnull(offer.Quotation.OfferValidity,ADD_MONTHS(CURRENT_DATE,1))
         when offer.CountryCode = 'IT'
            then ifnull(offer.Quotation.OfferValidity, ifnull(offer.Tender.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay))))
