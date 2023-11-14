@@ -52,6 +52,7 @@ entity PriceAgreements: cuid, managed {
     Status: String;
     CancellationComment: String;
     LotID: Integer default 1;
+    EmailNotificationSent: Boolean default false;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -249,7 +250,7 @@ left outer join CustomerPrices as cp
 } group by sku.CountryCode, sku.ProductPackID, sku.SKUCode,PaMainFOCView.PriceAgreementId;
 
 
-
+//CR2
 //EHQUT-INC20664196 - Private customers in price agreements for regional tenders
 entity CandidatePrices as select from PriceAgreements AS pa
 inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
@@ -261,7 +262,8 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
     and cp.InstituteId = ca.CandidateID 
     and cp.PriceCondition <> 'YA03' // Italy FOC
     and cp.PriceCondition <> 'YA01' // Spain FOC
-    and cp.PriceCondition <> 'YAW1' { // Spain Rappel
+    and cp.PriceCondition <> 'YAW1'
+    and cp.PriceCondition <> 'YAW2' { // Spain Rappel
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
