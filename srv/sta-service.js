@@ -697,8 +697,12 @@ module.exports = async (srv) => {
 		await INSERT.into(PT_TMBDPR).entries(affiliateProductsPricing);
 		// 4. create price condtions
 		await INSERT.into(PriceCondition).entries(affiliateProductsPriceCondtions);
-		// 5. create free goods other
-		await INSERT.into(FreeGoodsOther).entries(affiliateFreeGoodsOther);
+		
+		if (affiliateFreeGoodsOther.length > 0) {
+			// 5. create free goods other
+			await INSERT.into(FreeGoodsOther).entries(affiliateFreeGoodsOther);
+		}
+		
 
 		return affiliateOfferID;
 	};
