@@ -567,6 +567,7 @@ entity PT_TMQUTO {
 }
 
 //EFRCL-217931-Italy - Tender expiry date field
+//CR1
 entity PT_TMTEND: managed {
     key TenderID             : String(50) not null;
         CountryCode          : String(2) not null;
@@ -618,6 +619,8 @@ entity PT_TMTEND: managed {
         TerminationDate      : Date;
         EffectiveDate     : Date;
         ExpiryDate        : Date;
+        OfferValidity      :Date;
+
         //Associations
         Institute           : Association to MasterData.PT_TMINST
                                   on Institute.InstituteID = InstituteID
