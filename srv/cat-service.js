@@ -797,7 +797,7 @@ module.exports = (srv) => {
 
 		const whereoffer={
 			OfferId: offer.OFFERID,
-			PriceConditionCode : ['YAW1','YAW2']
+			PriceConditionCode : ['YAW1']
 		};
 
         const whereProduct = {
