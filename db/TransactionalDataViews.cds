@@ -880,6 +880,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Institute.CustomerGroup,
           offer.Tender.EffectiveDate,
           offer.Tender.ExpiryDate,
+          offer.Tender.OfferValidity,
           offer.Tender.Institute.CustomerID,
           offer.Tender.TenderName,
           offer.OfferStatus.STATUS,
