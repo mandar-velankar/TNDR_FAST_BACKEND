@@ -2888,9 +2888,11 @@ module.exports = async (srv) => {
 	srv.before('CREATE', 'PdfEmail', async (req) => {
 		const tx = cds.tx(req);
 		const cwid = req.user.id;
+		const tenderInstituteId = req.data.TenderInstitute;
+		const offerInstituteId = req.data.OfferInstitute;
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({CWID: cwid}));
-		const tenderInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: req.data.TenderInstitute}));
-		const offerInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: req.data.OfferInstitute}));
+		const tenderInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: tenderInstituteId}));
+		const offerInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: offerInstituteId}));
 		req.data.TenderInstitute = tenderInstituteInfo[0]?.InstituteName;
 		req.data.OfferInstitute = offerInstituteInfo[0]?.InstituteName;
 		req.data.UserEmail = userInfo[0]?.UserEmail;

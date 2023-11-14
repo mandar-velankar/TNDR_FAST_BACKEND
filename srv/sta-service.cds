@@ -597,8 +597,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         URL : String;
         TenderID: String(50);
         OfferID: String(30);
-        TenderInstitute: Integer;
-        OfferInstitute: Integer;
+        TenderInstitute: String(500);
+        OfferInstitute: String(500);
         UserEmail: String(255); 
         UserName: String(100);      
         Sent: Boolean;
