@@ -1446,6 +1446,10 @@ module.exports = async (srv) => {
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
+		let offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({OfferID: offerValidation.OFFERID}));
+		let offerProductPackIDs = offerProducts.map(pr => pr.ProductCode);
+		let countryProductPacks = await tx.run(SELECT.from(PT_TMCTPRDPCK).where({CountryCode: offerValidation.COUNTRYCODE, PRODUCTPACKID: offerProductPackIDs}));
+		let countryProductPackBUs = countryProductPacks.map(cp => cp.BU);
 
 		if (!offerValidation.COUNTRYCODE) return results;
 
@@ -1454,7 +1458,7 @@ module.exports = async (srv) => {
 			approverTypes = offerValidation.ApproverTypes;
 		}
 
-		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers);
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs);
 
 	}
 
@@ -1819,7 +1823,7 @@ module.exports = async (srv) => {
 		
 	}
 
-	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers) {
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs) {
 
 		let aResults = [];
 		approverTypes.forEach(function (type, index) {
@@ -1840,7 +1844,7 @@ module.exports = async (srv) => {
 			let requiredAction = "";
 			
 			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
-			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation);
+			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation, countryProductPackBUs);
 
 			if (approvalForType.length !== 0) {
 				approverName = approvalForType[0].ApproverName;
@@ -2021,13 +2025,13 @@ module.exports = async (srv) => {
 		}
 	}
 
-	function mapDefaultCountryApprovers(countryApprovers, approverType, offerValidation) {
+	function mapDefaultCountryApprovers(countryApprovers, approverType, offerValidation, countryProductPackBUs) {
 		if (!offerValidation.DIVISION || offerValidation.DIVISION === "Both") {
 			//take all approver types
 			return countryApprovers.filter((d) => d.ApproverType === approverType);
 		} else {
 			//take approver types division which maches the offervalidation Division + division = both
-			return countryApprovers.filter((d) => d.ApproverType === approverType && (d.Division === offerValidation.DIVISION || d.Division === "Both"));
+			return countryApprovers.filter((d) => d.ApproverType === approverType && (d.Division === offerValidation.DIVISION || d.Division === "Both") && (d.BU === countryProductPackBUs?.[0] || d.BU === "All"));
 		}
 	}
 
