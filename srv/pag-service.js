@@ -1412,7 +1412,7 @@ module.exports = async (srv) => {
                         "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 750,
                         "KVEWE": "A",
                         "KAPPL": "V",
-                        "BOSTA": "B",
+                        
                         "_BAY0-GZ_SALESAGRITEM": [
                             {
                                 "KUNNR": 0,
