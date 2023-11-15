@@ -57,27 +57,6 @@ Content-Type: application/json
     "Language":"ES",
     "TemplateId":"PriceAgreementReminderMail"
 }
-
-POST http://localhost:4004/v2/tender/MailTemplateFiles
-Authorization: Basic YXJ0aW9t
-Content-Type: application/json
-
-{
-    "templateId":"PriceAgreementExpiredMail",
-    "title":" Price Agreement Expired !!",
-    "filename" : "PriceAgreementExpiredMail.html",
-    "mediaType": "text/html"
-}
-
-### upload word template
-PUT http://localhost:4004/v2/tender/MailTemplateFiles(templateId='PriceAgreementExpiredMail')/content
-Authorization: Basic YXJ0aW9t
-Content-Type: text/html
-
-< ../mail/PriceAgreementExpiredMail.html
-
-### create mapping between countrycode and template (for reusability)
-
 ### get list of templates
 GET http://localhost:4004/v2/tender/MailTemplateFiles
 Authorization: Basic YXJ0aW9t
@@ -92,9 +71,6 @@ Authorization: Basic YXJ0aW9t
 
 ### download template - paste it in the browser
 GET http://localhost:4004/v2/tender/MailTemplateFiles(templateId='PriceAgreementExpiredSoonMail')/content
-Authorization: Basic YXJ0aW9t
-
-GET http://localhost:4004/v2/tender/MailTemplateFiles(templateId='PriceAgreementExpiredMail')/content
 Authorization: Basic YXJ0aW9t
 
 ### download filled template with offer data - paste it in the browser

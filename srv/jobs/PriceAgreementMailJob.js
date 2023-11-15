@@ -13,7 +13,6 @@ class PriceAgreementMailJob extends BaseJob {
      * Triggered when job has started
      */
     //override
-    //EJSDI-CR6
     async onTick() {
 
         console.log('Processing reminder mails for Price Agreements started ...');
@@ -26,7 +25,7 @@ class PriceAgreementMailJob extends BaseJob {
             }, {
                 expiryDate: this.getReminderDate(),
                 template: 'PriceAgreementReminderMail'
-            },];
+            }];
             //get all mail templates for price agreements
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             //loop over configured mailing runs: first mail expired soon + reminder mail
@@ -52,7 +51,6 @@ class PriceAgreementMailJob extends BaseJob {
 
         console.log('Processing reminder mails for Price Agreements finished.');
     }
-    //EJSDI-CR6
     async getPriceAgreementsExpiring(expiryDate) {
         console.log(`Fetching Price Agreements with expiry date: ${expiryDate}`);
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
@@ -92,8 +90,8 @@ class PriceAgreementMailJob extends BaseJob {
             if(pa.ExpiryExtensionPeriod && pa.ExpiryExtensionPeriod > 0){
                 pa.ShowExpiryExtensionPeriod = true;
             }
-              pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate)
-              pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
+            pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+            pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
             return pa;
         })
     }
@@ -170,7 +168,6 @@ class PriceAgreementMailJob extends BaseJob {
         date.setDate(date.getDate() + 45);//+45
         return this.formatDate(date);
     }
-   
     formatDate(date) {
         let month = '' + (date.getMonth() + 1);
         let day = date.getDate();
