@@ -1250,7 +1250,6 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.ID as ExistingPriceConditionID: UUID,
     priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
     tender.CountryCode,
-    priceCondition.PriceConditionCode,
     key priceConditionClassification.ConditionType,
     priceConditionClassification.Classification,
     priceConditionClassification.Division,
