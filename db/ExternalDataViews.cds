@@ -493,7 +493,7 @@ and (offerProduct.Results.Outcome = 'Won' or offerProduct.Results.Outcome = 'Los
 and year(ifnull(offerProduct.Offer.SubmissionDate, offerProduct.Offer.Tender.PublicationDate)) >= 2017
 and offerProduct.Offer.Tender.Country.Region = 'MEA';
 
-
+//EHQUT-410209-Master date refresh issue
 entity MasterApproverBrandMap as select from MasterData.CountryApprovers as MasterApproverBrandMap {
     key MasterApproverBrandMap.CountryCode,
 	key MasterApproverBrandMap.ApproverType,
@@ -501,7 +501,7 @@ entity MasterApproverBrandMap as select from MasterData.CountryApprovers as Mast
 	MasterApproverBrandMap.ApproverName,
 	key MasterApproverBrandMap.ApproverEmailID,
 	MasterApproverBrandMap.Enabled
-};
+}where MasterApproverBrandMap.Enabled = true ;
 
 entity MasterCountries as select from MasterData.PT_TMCTRY as MasterCountries {
 	key CountryID,
