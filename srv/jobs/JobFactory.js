@@ -35,6 +35,7 @@ module.exports = class JobFactory {
             case this.jobNames.PriceAgreementMailJob:
                 return new PriceAgreementMailJob(jobName,jobTime)
                 break;
+              
             case this.jobNames.PriceAgreementPriceConditionNotificationMailJob:
                 return new PriceAgreementPriceConditionNotificationMailJob(jobName,jobTime)
                 break;
