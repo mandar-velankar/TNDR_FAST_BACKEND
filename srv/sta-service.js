@@ -1492,6 +1492,12 @@ module.exports = async (srv) => {
 		let Countryregion= await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
 		let regionname=Countryregion.Region;
 		
+		const whereQuotationInstituteId = {
+			InstituteID: offer.QUOTATIONINSTITUTEID,
+			CountryCode: offer.COUNTRYCODE
+		}
+        let quotationInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereQuotationInstituteId));
+
 		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
 			//no products
@@ -1743,6 +1749,11 @@ module.exports = async (srv) => {
 			PROCUREMENT_REASON: tender.PROCUREMENT_METHOD_ID,
 			OFFERID: offer.OFFERID,
 			INSTITUTENAME: offer.INSTITUTENAME,
+			EXTERNAL_INSTITUTEID: offer.EXTERNAL_INSTITUTEID,
+			INSTITUTECITY: offer.INSTITUTECITY,
+			QUOTATIONINSTITUTENAME : quotationInstitute.InstituteName,
+            QUOTATIONINSTITUTECITY : quotationInstitute.City,
+            QUOTATIONINSTITUTECUSTOMERID : quotationInstitute.CustomerID,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
 			INSTITUTE_STATE: offer.INSTITUTE_STATE,
             INSTITUTE_REGION: offer.REGION_NAME,
@@ -2102,6 +2113,22 @@ module.exports = async (srv) => {
 			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
 			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack);
+
+			//Get corresponding Product Distributor ID
+			const whereProductId = {
+				ProductCode: offerProduct.ProductCode,
+				OfferID:offer.OFFERID,
+				Active: 1
+			}
+			const productDistributorInfo = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereProductId));
+
+			//Get corresponding Distributor Data
+			const whereDistributorId = {
+				DistributorID: productDistributorInfo.Custom_String_1,
+				CountryCode: offer.COUNTRYCODE
+			}
+			const DistributorInfo = await tx.run(SELECT.from(PT_TMDIST).where(whereDistributorId));
+
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
 				OfferID: offer.OFFERID,
@@ -2394,7 +2421,9 @@ module.exports = async (srv) => {
                 //PriceCondition: aPriceConditions,
 				LINE: offerProduct.LINE,
 				REFERENCE: offerProduct.REFERENCE,
-				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID
+				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
+				DISTRIBUTORID: productDistributorInfo.Custom_String_1,
+				Distributor: DistributorInfo
 			}
 		});
 		let resolvedResults = await Promise.all(results);
