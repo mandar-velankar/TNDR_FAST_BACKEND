@@ -1893,7 +1893,7 @@ module.exports = async (srv) => {
 
 		});
 
-		return aResults;
+		return aResults.sort((a, b) => a.ApproverTypeSection - b.ApproverTypeSection);
 	}
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
