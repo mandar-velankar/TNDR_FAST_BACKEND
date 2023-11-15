@@ -505,7 +505,7 @@ module.exports = async (srv) => {
 
 	srv.on('copyOffer', async (req) => {
 
-		const { data: {offerID,type, instituteName} } = req;
+		const { data: {offerID,type, QuotationInstituteID} } = req;
 
 		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
 		!type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
@@ -532,12 +532,13 @@ module.exports = async (srv) => {
 		const priceCondtions = await SELECT.from(PriceCondition).where({OfferID: offerID});
 		const priceConditionIDs = priceCondtions.map(pc => pc.ID);
 		const freeGoodsOther = await SELECT.from(FreeGoodsOther).where({PriceCondition_ID: {in: priceConditionIDs}});
+		const institute = await SELECT.one.from(PT_TMINST).where({CountryCode: offer.CountryCode, InstituteID: QuotationInstituteID});
 		
 
 		switch(type){
 			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
 			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
-			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, priceCondtions, freeGoodsOther, req});
+			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, institute, priceCondtions, freeGoodsOther, req});
 		}
 	});
 
@@ -637,8 +638,8 @@ module.exports = async (srv) => {
 		return continuedOfferID;
 	};
 
-	async function createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, priceCondtions, freeGoodsOther, req}){
-		if(!instituteName){
+	async function createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, institute, priceCondtions, freeGoodsOther, req}){
+		if(!institute){
 			return req.error({ code: 404, message: "Institute name was not provided", target: "InstituteName" });
 		}
 
@@ -650,7 +651,8 @@ module.exports = async (srv) => {
 		affiliateOffer.InternalBidDueDate = todaysDate;
 		affiliateOffer.NewOfferDueDate = todaysDate;	
 		affiliateOffer.AffiliateOffer = true;	
-		affiliateOffer.Custom_String_2 = instituteName;	
+		affiliateOffer.Custom_String_2 = institute.InstituteName;
+		affiliateOffer.QuotationInstituteID = institute.InstituteID;	
 		affiliateOffer.TenderOfferNo = nextOfferID.NEXTOFFERID;	
 
 
