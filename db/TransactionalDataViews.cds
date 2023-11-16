@@ -860,7 +860,9 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT,
     offer.Tender.PublicationDate as PUBLICATION_DATE,
     offer.Tender.BidDueDate as BID_DUE_DATE,
-    offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY
+    offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY,
+    offer.Custom.String_1 as PaymentTerms,
+    offer.AffiliateOffer
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -931,9 +933,11 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.PublicationDate,
           offer.Tender.BidDueDate,
           offer.Quotation.SubmittedBy,
+          offer.Custom.String_1,
           date_settings.NextYearDelta,
           date_settings.NextDay,
-          date_settings.NextMonth;
+          date_settings.NextMonth,
+          offer.AffiliateOffer;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -1312,6 +1316,81 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.ReferencePriceAgreement,
     priceCondition.Settlement.ID as Settlement_ID,
     priceCondition.IsPricingUnlocked
+}where tender.Active = 1;
+
+/**
+ * This view contains calculated fields used in the Standard Tender application financial offers page
+ * for the ConditionType 'Price
+ */
+entity StandardTenderPriceConditionView as select from TransactionalData.PT_TMTEND as tender 
+inner join TransactionalData.PT_TMOFRS as offer 
+    on offer.TenderID = tender.TenderID
+    and offer.Active = 1
+inner join TransactionalData.PT_TMOFPR as product 
+    on product.OfferID = offer.OfferID
+    and product.Active = 1 
+inner join MasterData.PT_TMPRDPCK as productPacks
+    on productPacks.PRODUCTPACKID = product.ProductCode
+    and productPacks.ACTIVERECORD = 'Yes' 
+inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+    on priceConditionClassification.CountryCode = product.CountryCode
+    and priceConditionClassification.Classification = tender.Classification
+    and priceConditionClassification.Division = offer.Division 
+    and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType) 
+left outer join TransactionalData.PriceCondition as priceCondition 
+    on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+    and product.OfferID = priceCondition.OfferID
+    and product.ProductCode = priceCondition.ProductCode
+{
+    tender.CountryCode,
+    key product.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    product.RequestedVolume,
+    case   
+        when priceCondition.ID is not null then True
+        else False
+    end as hasPriceCondition:Boolean,
+    priceCondition.ID as PriceConditionID: UUID,
+    priceConditionClassification.ID as ClassificationID: UUID,
+    priceConditionClassification.Classification,
+    key priceConditionClassification.ConditionType,
+    priceConditionClassification.Division,
+    priceConditionClassification.isMain,
+    case 
+        when product.UnitPerPack = 'Unit'
+            then product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR
+        else product.RegisteredPrice.REGISTERED_PRICE
+    end as CurrentBasePrice:Double,
+    @Core.Computed: false
+    case 
+        when product.UnitPerPack = 'Unit'
+            then  ifnull(priceCondition.Price0, (product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
+        else ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE)
+    end as BasePrice:Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Price1, 0) as OfferPrice:Decimal,
+    @Core.Computed: false
+    ifnull(priceCondition.Level1Discount1, 0) as Discount:Double,
+    @Core.Computed: false
+    case   
+        when priceCondition.Level2Discount1 is null
+            then ifnull(offer.Distributor.CommissionRate,0) / 100
+        else priceCondition.Level2Discount1
+    end as Deductions:Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Price2, 0) as NetPrice:Decimal, 
+    priceCondition.NetOfferPrice,
+    priceCondition.Tax,
+    @Core.Computed: false
+    ifnull(priceCondition.Price3, 0) as Price3:Decimal,
+    @Core.Computed: false
+    case   
+        when priceCondition.Level3Discount1 is null
+            then ifnull(offer.Distributor.CommissionRate,0) / 100
+        else priceCondition.Level3Discount1
+    end as Level3Discount1:Double,
+    offer.Currency
 }where tender.Active = 1;
 
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
@@ -1827,3 +1906,266 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.NetPrice,
     priceCondition.CapBrazil.CAP as CapValue,
     }where tender.Active = 1 and tender.CountryCode = 'BR';
+
+    entity OfferValidation {
+            OFFERSTATUSPATH       : String(124) not null;
+            TENDERID              : String(50) not null;
+            CLASSIFICATION        : String(50) not null; //Added Classification (db#1)
+            TENDER_REFERENCE      : String(753);
+            PROCUREMENT_REASON    : String;
+        key OFFERID               : String(30) not null;
+            INSTITUTENAME         : String(500);
+            INSTITUTE_TYPE        : String(50);
+            INSTITUTE_STATE       : String;
+            INSTITUTE_REGION      : String;
+            INSTITUTE_PROVINCE    : String;
+            INSTITUTE_CIFCODE     : String(50);
+            INSTITUTE_REGIONALHEALTHSYSTEM: String(50);
+            INSTITUTE_CUSTOMER_GROUP: String(50);
+            TAXCODE               : String(50);
+            VATCODE               : String(50);       
+            CUSTOMER_CODE         : Integer;
+            DIVISION              : String(100);
+            OFFERDATE             : Date;
+            OFFERVALIDITY         : Date not null;
+            EffectiveDate         : Date;
+            ExpiryDate            : Date;
+            COUNTRYCODE           : String(2) not null;
+            SELLINGCOMPANY        : String(300);
+            SELLINGCOMPANYBANK    : String(5000);
+            SELLING_COMPANY_AS1   : String(300);
+            SELLING_COMPANY_AS1_NAMEI: String(255);
+            SELLING_COMPANY_AS1_TITLEI: String(255);
+            SELLING_COMPANY_AS2_NAMEI: String(255);
+            SELLING_COMPANY_AS2_TITLEI: String(255);
+            SELLING_COMPANY_AS2   : String(300);
+            E_SIGNATURE1          : Boolean;
+            E_SIGNATURE2          : Boolean;
+            CURRENCY              : String(255);
+            AMOUNT_IN_NUMBERS     : Double;
+            AMOUNT_IN_WORDS       : String(1024);
+            AMOUNT_IN_NUMBERS_VAT : Double;
+            AMOUNT_IN_WORDS_VAT   : String(1024);
+            VAT_TOTAL             : Double;
+            LETTERHEAD            : String(5000);
+            //REGULATORY            : Integer;//MEA only
+            //LEGAL                 : Integer not null;//MEA only
+            //CONTROLLING           : Integer not null;//MEA only
+            //COUNTRY_BUSINESS      : Integer;//MEA and MX
+            //REGIONAL_BUSINESS     : Integer not null;//MEA only
+            //SUPPLY_CHAIN          : Integer not null;//All countries
+            DISTRIBUTORNAME       : String(500);
+            DISTRIBUTORADDRESS    : String(5000);
+            DISTRIBUTORPHONE      : String(500);
+            DISTRIBUTORFAX        : String(500);
+            DISTRIBUTORCONTACT    : String(500);
+            DISTRIBUTOREMAIL      : String(500); // Chile
+            PUBLICATION_DATE      : Date; // Chile
+            BID_DUE_DATE          : Date; // Chile
+            TENDER_SUBMITTED_BY   : String; // Chile
+            REMARKS               : String(5000);
+            CUSTOM_REMARKS        : String(500) not null;
+            DELIVERYTERMS         : String(5000);
+            PAYMENTTERMS          : String(5000);
+            SHIPMENTTERMS         : String(5000);
+            IS_LOWEST             : Integer not null;
+            IS_DEFAULT_TERMS      : Integer not null;
+            NEW_APPROVAL          : Integer;
+            //NSM_SM_FM             : Integer not null;//TH only
+            //HBU                   : Integer not null;//TH only
+            //CDH                   : Integer not null;//TH and AR
+            IN_POLICY             : Boolean;
+            //MACS                           : Integer not null;//AR only
+            //TA                             : Integer not null;//AR only
+            //FBP                            : Integer not null;//AR only
+            //LPC                            : Integer not null;//AR only
+            //COM_PGA                        : Integer not null;//AR only
+            //International_Trade            : Integer not null;//AR only
+            //Transfer_Pricing               : Integer not null;//AR only
+            //SBR                            : Integer not null;//AR only
+            BUDGET_RATE           : Double;
+            SPOT_RATE             : Double;
+            EXTERNAL_ID           : String;
+			SAP_ID                : String;
+            TENDER_TYPE           : String; 
+            CREATED_BY_USER_EMAIL :String(500);
+            CREATED_BY_USER_ROLE  : String(100);
+            CREATED_BY_USER_CONTACTNUMBER :String (20);
+            CONTENT               : String(500); //manual conflict solving for change of KOSAL //EHQUT-390012-Spain - commercial offer template modifications
+            Submitted             : Boolean default false;
+            ApproverTypes         : Association to many MasterData.ApproverTypes
+                                        on ApproverTypes.CountryCode = $self.COUNTRYCODE;
+    };
+
+
+     //Transactional Data Services
+    // EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
+    entity OfferProductValidation {
+            TENDER_ID                                   : String(30);
+            COUNTRY_CODE                                : String(2);
+        key OFFER_ID                                    : String(30) not null;
+            DIVISION                                    : String(100);
+            BRANDID                                     : String(50);
+            BRANDNAME                                   : String(100);
+            PRODUCT_UNIT_NAME                           : String(100); //thailand
+            SKU                                         : Integer;
+        key PRODUCTID                                   : Integer not null;
+            CODE                                        : String(255);
+            PRODUCTNAME                                 : String(102);
+            PACKSIZE                                    : Double not null;
+            DOSAGE                                      : Double;
+            UOM                                         : String(10);
+            COUNTRYOFORIGIN                             : String(120);
+            MANUFACTURER                                : String(500);
+            SHELFLIFE                                   : Integer;
+            PRESENTATION                                : String(50);
+            VAT                                         : Double; //percentage VAT (thailand)
+            VAT_IN_WORDS                                : String;
+            PRODUCT_COMMENT                             : String(784);
+            UNIT                                        : String(255);
+            PAID_VOLUME                                 : Double;
+            SORTER                                      : Integer;
+            CURRENCY                                    : String(255);
+            REQUESTED_QUANTITY                          : String(567);
+            SHIPMENT_TERMS                              : String(317);
+            PAYMENT_TERMS                               : String(255);
+            DELIVERY_TERMS                              : String(500);
+            SAMPLES                                     : Integer;
+            SAMPLES_UNIT                                : Integer; //Thailand
+            SAMPLES_PACK                                : Integer;
+            REGISTERED_PRICE                            : Double; // Consumer price per unit
+            REGISTERED_PRICE_IN_WORDS                   : String;
+            OFFER_PRICE                                 : Double;
+            FOC                                         : String(25);
+            FOC_ABS_PCT_STP                             : String;          
+            TOTAL_QUANTITY_UNITS                        : Double;
+            FOC_QUANTITY_UNITS                          : Double; // FOC Unit (thailand)
+            PAID_QUANTITY_UNITS                         : Double;
+            REQ_PRICE_UNIT_OFFER_CURRENCY               : Double; //MSP excl VAT (thailand)
+            REQ_PRICE_UNIT_OFFER_CURRENCY_VAT           : Double; //MSP incl VAT (thailand)
+            REQ_PRICE_PACK_OFFER_CURRENCY               : Double;
+            REQ_PRICE_UNIT_EUR_BUDGET                   : Double;
+            REQ_PRICE_UNIT_EUR_SPOT                     : Double;
+            NET_PRICE_UNIT_OFFER_CURRENCY               : Double; //NSP excl VAT (thailand)
+            NET_PRICE_UNIT_OFFER_CURRENCY_IN_WORDS      : String;
+            NET_PRICE_UNIT_OFFER_CURRENCY_VAT           : Double; //NSP incl VAT (thailand)
+            NET_PRICE_UNIT_OFFER_CURRENCY_VAT_IN_WORDS  : String;
+            NET_PRICE_PACK_OFFER_CURRENCY               : Double;
+            NET_PRICE_PACK_OFFER_CURRENCY_IN_WORDS      : String;
+            NET_PRICE_PACK_OFFER_CURRENCY_VAT           : Double;
+            NET_PRICE_PACK_OFFER_CURRENCY_VAT_IN_WORDS  : String;
+            NET_PRICE_UNIT_EUR_BUDGET                   : Double;
+            NET_PRICE_UNIT_EUR_SPOT                     : Double;
+            NET_OFFER_PRICE                             : Double;
+            NET_PRICE                                   : Double;
+            ADDITIONAL_DISCOUNT                         : Double;
+            ADDITIONAL_DISCOUNT_IN_WORDS                : String;
+            MAX_PRICE_NHS_PP                            : Double;
+            MAX_PRICE_NHS_PP_IN_WORDS                   : String;
+            MAX_PRICE_NHS_PU                            : Double;
+            MAX_PRICE_NHS_PU_IN_WORDS                   : String;
+            MAX_PRICE_NHS_PU_WITH_VAT                   : Double; //Italy change
+            MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS          : String; //Italy change
+            CONTRACT_START_DATE                         : String; //Italy change
+            NET_OFFER_PRICE_IN_WORDS                    : String; //Italy change
+            CUSTOMER_ID                                 : Integer; //Italy change
+            COGS                                        : Double;
+            COGS_EUR_UNIT                               : Double;
+            COGS_EUR_PACK                               : Double;
+            GROSS_SALES_OFFER_CURRENCY                  : Double; // Total amount for product
+            GROSS_SALES_OFFER_CURRENCY_IN_WORDS         : String;
+            GROSS_SALES_OFFER_CURRENCY_VAT              : Double;
+            GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS     : String;
+            VAT_TOTAL                                   : Double;
+            NET_SALES_OFFER_CURRENCY                    : Double;
+            NET_SALES_EUR_BUDGET                        : Double;
+            NET_SALES_EUR_SPOT                          : Double;
+            GROSS_MARGIN_EUR_BUDGET                     : Double;
+            GROSS_MARGIN_EUR_SPOT                       : Double;
+            GROSS_PROFIT_EUR_BUDGET                     : Double;
+            GROSS_PROFIT_EUR_SPOT                       : Double;
+            //REGULATORY                                : Integer not null;//MEA only
+            //LEGAL                                     : Integer not null;//MEA only
+            //CONTROLLING                               : Integer not null;//MEA only
+            //COUNTRY_BUSINESS                          : Integer not null;//MEA and MX
+            //REGIONAL_BUSINESS                         : Integer not null;//MEA only
+            //SUPPLY_CHAIN                              : Integer not null;//All countries
+            IS_LOWEST                                   : Integer not null;
+            IS_DEFAULT_TERMS                            : Integer not null;
+            IS_REGISTERED                               : Integer not null;
+            IS_ALTERNATIVE_QUOTED                       : Integer not null;
+            IS_ALTERNATIVE_REQUESTED                    : Integer not null;
+            NEW_APPROVAL                                : Integer;
+            BUDGETED_PROFITABILITY                      : Double;
+            //NSM_SM_FM                                 : Integer not null;//TH only
+            //HBU                                       : Integer not null;//TH only
+            //CDH                                       : Integer not null;//TH and AR
+            IN_POLICY                                   : Boolean;
+            //MACS                                      : Integer not null;//AR only
+            //TA                                        : Integer not null;//AR only
+            //FBP                                       : Integer not null;//AR only
+            //LPC                                       : Integer not null;//AR only
+            //COM_PGA                                   : Integer not null;//AR only
+            //International_Trade                       : Integer not null;//AR only
+            //Transfer_Pricing                          : Integer not null;//AR only
+            //SBR                                       : Integer not null;//AR only
+            MOLECULE_NAME                               : String; // Chile
+            FOC_STEP                                    : Double;
+            OFFER_PRICE_VAT                             : Double;
+            BUDGET_RATE                                 : Double;
+            SPOT_RATE                                   : Double;
+            BUSINESS_CASE_PRICE                         : Double;
+            WARRANTY                                    : Double;
+            AGREEMENTDURATION                           : Integer;
+            MONTHLYRENT                                 : Double;
+            MONTHLYRENT_IN_WORDS                        : String;
+            MONTHSPERINVOICE                            : Integer;  
+            CONTRACTSTARTDATE                           : Timestamp;
+            VALUEOFDEVICES                              : Double;
+            STATUSOFDEVICE                              : String;
+            MINCONTRACTUAL                              : Double;
+            MINANNPURCH                                 : Double;
+            OFFER_TYPE                                  : String;
+            //missing SKU & SKUCountry fields
+            ACTIVERECORD                                : String(10);
+            HLEVEL6_CODE                                : String(50);
+            PCI_NAME                                    : String(255);
+            ACTIVE_SUBSTANCE                            : String(50);
+            PRODUCT_TYPE                                : String(50);
+            SKUCOUNTRY_ACTIVERECORD                     : String(10);
+            PRESENTATION_2                              : String(1000);
+            GOV_CODE                                    : String(255);
+            CODE1                                       : String(255);
+            CODE2                                       : String(255);
+            CODE3                                       : String(255);
+            QTY_THRESHOLD                               : Integer;
+            ProductClass                                : String(2);
+            ProductDescription                          : String(255);
+            FINAL_DISCOUNT                              : Double;
+            FINAL_DISCOUNT_IN_WORDS                     : String(255);
+            PRODUCT_FULL_DESCRIPTION                    : String(255);
+            // PERCENTAGE                                  : Decimal; // Royal Decree Percentage
+            //end of missing SKU & SKUCountry fields
+        key LOTID                                       : Integer default 1;
+            LINE                                        : String;
+            REFERENCE                                   : String(255);
+            IBIZWORKFLOWID                              : Integer;
+            FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
+                                                            on FreeGoodsOther.ProductPackId = $self.PRODUCTID
+                                                            and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
+            ProductPricing                              : Association to TransactionalData.ProductPricing
+                                                            on ProductPricing.ProductCode = $self.PRODUCTID
+                                                            and ProductPricing.OfferID = $self.OFFER_ID;
+            ProductPack                                 : Association to many MasterData.PT_TMPRDPCK 
+                                                            on ProductPack.PRODUCTPACKID = $self.PRODUCTID;
+            Materials                                   : Association to many MasterData.PT_TMSKUPRDPCK
+                                                            on Materials.CountryCode = $self.COUNTRY_CODE
+                                                            and Materials.ProductPackID = $self.PRODUCTID
+                                                            and Materials.ActiveRecord = 'Yes';
+            ApproverTypes                               : Association to many MasterData.ApproverTypes
+                                                            on ApproverTypes.CountryCode = $self.COUNTRY_CODE;
+            PriceCondition                              : Composition of many TransactionalData.PriceCondition 
+                                                                    on PriceCondition.OfferID = $self.OFFER_ID
+                                                                    and PriceCondition.ProductCode = $self.PRODUCTID
+                                                                    and PriceCondition.CountryCode = $self.COUNTRY_CODE;
+    };

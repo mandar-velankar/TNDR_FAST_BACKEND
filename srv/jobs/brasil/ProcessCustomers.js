@@ -64,7 +64,7 @@ module.exports = class ProcessCustomers extends BaseJob {
     }
 
     /**
-     * This method will process a list of Distributors by Creating/Updating PT_TMDIST and BrazilDistributorDivision entities
+     * This method will process a list of Distributors by Creating/Updating PT_TMDIST and DistributorDivision entities
      * from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS. 
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS records will be deleted.
      * @param {*} distributors 
@@ -82,7 +82,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             const mappedDistributors = this.mapSAPDistributorsToFAST(uniqueDistributors);
             await this.upsertFASTDistributors(mappedDistributors, tx);
 
-            // 2. Divisions - BrazilDistributorDivision
+            // 2. Divisions - DistributorDivision
             const mappedDivisions = this.mapSAPDivisionsToFAST(distributors, "distributor");
             await this.upsertFASTDistributorDivision(mappedDivisions, tx);
 
@@ -96,7 +96,7 @@ module.exports = class ProcessCustomers extends BaseJob {
     }
 
      /**
-     * This method will process a list of Institutes by Creating/Updating PT_TMINST and BrazilInstituteDivision entities
+     * This method will process a list of Institutes by Creating/Updating PT_TMINST and InstituteDivision entities
      * from COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS. 
      * After successful processing, the COM_BAYER_SXTENDER_MASTERDATA_SAP_BRAZILCUSTOMERS records will be deleted.
      * @param {*} institutes 
@@ -114,7 +114,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             const mappedInstitutes = this.mapSAPInstitutesToFAST(uniqueInstitutes);
             await this.upsertFASTInstitutes(mappedInstitutes, tx);
 
-            // 2. Divisions - BrazilInstituteDivision
+            // 2. Divisions - InstituteDivision
             const mappedDivisions = this.mapSAPDivisionsToFAST(institutes, "institute");
             await this.upsertFASTInstituteDivision(mappedDivisions, tx);
 
@@ -217,7 +217,7 @@ module.exports = class ProcessCustomers extends BaseJob {
     }
 
     /**
-     * Maps Customer fields from SAP to FAST BrazilDistributorDivision or BrazilInstituteDivision 
+     * Maps Customer fields from SAP to FAST DistributorDivision or InstituteDivision 
      * based on type.
      * @param {array} divisions
      * @param {string} type - 'distributor' or 'institue'
@@ -341,7 +341,7 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @returns 
      */
      async upsertFASTDistributorDivision(divisions, tx) {
-        const { BrazilDistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const { DistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
         // 1. get a list of existing Distributors from FAST
         const distributorsExistingInFAST = await this.getFASTDistributors(divisions, tx);
@@ -362,20 +362,20 @@ module.exports = class ProcessCustomers extends BaseJob {
             }
         }
 
-        // 3. Upsert records into BrazilDistributorDivision
-        console.log(`JOB (${this.jobName }): Upserting BrazilDistributorDivisions into FAST table ...`);
+        // 3. Upsert records into DistributorDivision
+        console.log(`JOB (${this.jobName }): Upserting DistributorDivisions into FAST table ...`);
         try {
             for (const FASTDivision of FASTChangedDivisions) {
-                await tx.run(UPDATE(BrazilDistributorDivision, {DistributorID:FASTDivision.DistributorID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
+                await tx.run(UPDATE(DistributorDivision, {DistributorID:FASTDivision.DistributorID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
             }
-            FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(BrazilDistributorDivision));
-            console.log(`JOB (${this.jobName }): Upserting of BrazilDistributorDivisions into FAST table successfully completed.`);
+            FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(DistributorDivision));
+            console.log(`JOB (${this.jobName }): Upserting of DistributorDivision into FAST table successfully completed.`);
             console.log(`JOB (${this.jobName }): Deleting processed Customers from BrazilCustomers table`);
             const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             await tx.run(DELETE.from(BrazilCustomers).where ({REPRES: 'X'}));
             return true;
         } catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Upserting of BrazilDistributorDivisions into FAST table failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Upserting of DistributorDivisions into FAST table failed`);
             console.error(error);
             throw error;
         }
@@ -389,7 +389,7 @@ module.exports = class ProcessCustomers extends BaseJob {
      * @returns 
      */
      async upsertFASTInstituteDivision(divisions, tx) {
-        const { BrazilInstituteDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        const { InstituteDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
         // 1. get a list of existing Institutes from FAST
         const institutesExistingInFAST = await this.getFASTInstitutes(divisions, tx);
@@ -410,20 +410,20 @@ module.exports = class ProcessCustomers extends BaseJob {
             }
         }
 
-        // 3. Upsert records into BrazilInstituteDivision
-        console.log(`JOB (${this.jobName }): Upserting BrazilInstituteDivisions into FAST table ...`);
+        // 3. Upsert records into InstituteDivision
+        console.log(`JOB (${this.jobName }): Upserting InstituteDivisions into FAST table ...`);
         try {
             for (const FASTDivision of FASTChangedDivisions) {
-                await tx.run(UPDATE(BrazilInstituteDivision, {InstituteID:FASTDivision.InstituteID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
+                await tx.run(UPDATE(InstituteDivision, {InstituteID:FASTDivision.InstituteID, DivisionCode:FASTDivision.DivisionCode}).with(FASTDivision));
             }
-            FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(BrazilInstituteDivision));
-            console.log(`JOB (${this.jobName }): Upserting of BrazilInstituteDivisions into FAST table successfully completed.`);
+            FASTNewDivisions && FASTNewDivisions.length > 0 && await tx.run(INSERT(FASTNewDivisions).into(InstituteDivision));
+            console.log(`JOB (${this.jobName }): Upserting of InstituteDivisions into FAST table successfully completed.`);
             console.log(`JOB (${this.jobName }): Deleting processed Customers from BrazilCustomers table`);
             const { BrazilCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
             await tx.run(DELETE.from(BrazilCustomers).where ({REPRES: null}));
             return true;
         } catch (error) {
-            console.error(`JOB (${this.jobName }): ERROR - Upserting of BrazilInstituteDivisions into FAST table failed`);
+            console.error(`JOB (${this.jobName }): ERROR - Upserting of InstituteDivisions into FAST table failed`);
             console.error(error);
             throw error;
         }
@@ -516,13 +516,13 @@ module.exports = class ProcessCustomers extends BaseJob {
     }
 
     async getFASTDistributorDivisions(customerIDs, divisionCodes, tx){
-        const { BrazilDistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        return tx.run(SELECT.from(BrazilDistributorDivision).where({ CustomerID: { in: customerIDs}, DivisionCode: { in: divisionCodes} } ));
+        const { DistributorDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        return tx.run(SELECT.from(DistributorDivision).where({ CustomerID: { in: customerIDs}, DivisionCode: { in: divisionCodes} } ));
     }
 
     async getFASTInsituteDivisions(customerIDs, divisionCodes, tx){
-        const { BrazilInstituteDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
-        return tx.run(SELECT.from(BrazilInstituteDivision).where({ CustomerID: { in: customerIDs}, DivisionCode: { in: divisionCodes} } ));
+        const { InstituteDivision } = this.db.entities("com.bayer.SXTENDER.MasterData");
+        return tx.run(SELECT.from(InstituteDivision).where({ CustomerID: { in: customerIDs}, DivisionCode: { in: divisionCodes} } ));
     }
     
     /**

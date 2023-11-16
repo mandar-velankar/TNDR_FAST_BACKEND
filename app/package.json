@@ -1,12 +1,11 @@
 {
   "name": "FAST-API-AppRouter",
   "description": "",
-  "devDependencies": {},
   "scripts": {
     "start": "node node_modules/@sap/approuter/approuter.js"
   },
   "dependencies": {
-    "@sap/approuter": "^9",
+    "@sap/approuter": "^14.3.3",
     "@ui5/cli": "^2.0.2"
   }
 }

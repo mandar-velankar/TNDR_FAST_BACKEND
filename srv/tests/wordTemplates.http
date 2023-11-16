@@ -1,17 +1,17 @@
 #Create template entry (needed before you can upload)
-POST http://localhost:4004/v2/tender/WordTemplate
+POST http://localhost:4004/v2/sta_tender/WordTemplate
 Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "templateId":1,
-    "name":"SpainTemplate",
+    "templateId":2,
+    "name":"SpainTemplate2",
     "filename" : "Spain_Template_revised.docx",
     "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 }
 
 ### upload word template
-PUT http://localhost:4004/v2/tender/WordTemplate(templateId=6)/content
+PUT http://localhost:4004/v2/tender/WordTemplate(templateId=2)/content
 Authorization: Basic YXJ0aW9t
 Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
 
@@ -23,8 +23,8 @@ Authorization: Basic YXJ0aW9t
 Content-Type: application/json
 
 {
-    "countryCode":"ES",
-    "templateId":1
+    "countryCode":"GB",
+    "templateId":2
 }
 ### get list of templates
 GET http://localhost:4004/v2/tender/WordTemplate

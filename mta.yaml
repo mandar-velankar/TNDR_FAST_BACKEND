@@ -40,6 +40,7 @@ modules:
       - name: FAST-db-hdi-container
       - name: FAST-logging
       - name: uaa_FAST
+      - name: FAST-dest-service
   - name: FAST-API-AppRouter
     type: html5
     path: app
@@ -53,6 +54,7 @@ modules:
           timeout: 120000
       - name: uaa_FAST
       - name: FAST-logging
+      - name: FAST-dest-service
 
 resources:
   - name: FAST-db-hdi-container
@@ -72,3 +74,11 @@ resources:
     parameters:
        service: application-logs
        service-plan: lite
+  - name: FAST-dest-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-name: FAST-dest-service
+      service-plan: lite
+    requires:
+      - name: srv_api

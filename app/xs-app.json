@@ -5,7 +5,13 @@
     "logoutEndpoint": "/do/logout"
   },
   "routes": [
-    
+    {
+      "source": "/UITemplates/(.*)$",
+      "target": "/UITemplates/$1",
+      "authenticationType": "basic",
+      "destination": "fast-templates-api",
+      "csrfProtection": false
+    },
     {
       "source": "/v4/(.*)$",
       "target": "$1",
