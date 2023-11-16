@@ -1906,7 +1906,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             INSTITUTECITY        : String(255);
             QUOTATIONINSTITUTENAME : String(500);
             QUOTATIONINSTITUTECITY : String(255);
-            QUOTATIONINSTITUTECUSTOMERID : Integer;
+            QUOTATIONINSTITUTECUSTOMERID : String;
             TAXCODE               : String(50);
             VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
@@ -2135,7 +2135,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             LINE                                        : String;
             REFERENCE                                   : String(255);
             IBIZWORKFLOWID                              : Integer;
-            DISTRIBUTORID                               : Integer;
+            DISTRIBUTORID                               : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
