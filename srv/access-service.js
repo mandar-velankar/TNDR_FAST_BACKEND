@@ -12,6 +12,12 @@ module.exports = (srv) => {
 				MEATENDERVIEW:req.user.is('f_tndr_cag_meatenderview_user')
 				
 			},
+			adminAccess:{
+				ConsumerPrices:req.user.is('f_tndr_cag_consumerprice_user'),
+			},
+			standardtenderAccess: {
+				OverviewDownload: req.user.is('f_tnndr_cag_standardtenderdownload_user')
+			},
 			ppa: req.user.is('f_tndr_cag_ppa_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			contract: req.user.is('f_tndr_cag_ctr_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			epa: req.user.is('f_tndr_cag_epa_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
@@ -21,7 +27,9 @@ module.exports = (srv) => {
 			salesopportunity: req.user.is('f_tndr_cag_salesopportunity_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			createopportunity: req.user.is('f_tndr_cag_createopportunity_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			brazilcontracting: req.user.is('f_tndr_cag_brcontracting_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
-			cpi: req.user.is('f_tndr_cag_cpi_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user')
+			cpi: req.user.is('f_tndr_cag_cpi_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
+			standardtender: req.user.is('f_tndr_cag_standardtender_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
+			whc: req.user.is('f_tndr_cag_whc_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user') || req.user.is('f_tndr_cag_whcapprover_user') || req.user.is('f_tndr_cag_whcproposalcreator_user'),
 		};
     });
 };
