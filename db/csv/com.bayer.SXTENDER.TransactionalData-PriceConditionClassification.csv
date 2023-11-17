@@ -32,3 +32,34 @@ ID,COUNTRYCODE,CONDITIONTYPE,CLASSIFICATION,DIVISION,PRODUCTTYPE,ISMAIN
 "a625fc08-4b95-11ed-bdc3-0242ac120002","BR","Commercial Proposal","Tender","Consumer Health","All","True"
 "a625fd16-4b95-11ed-bdc3-0242ac120002","BR","Commercial Proposal","Tender","Pharma","All","True"
 "a625fe1a-4b95-11ed-bdc3-0242ac120002","BR","Commercial Proposal","Tender","Radiology","All","True"
+"b7945f52-965e-4519-966d-ed73ce21ff0e","ES","Price","Tender","Radiology","All","True"
+"6663b422-11fb-4424-93a2-fd259442fec6","ES","Price","Tender","Pharma","All","True"
+"44b5439a-6ca1-4453-ba09-7fcaa93f0936","ES","Price","Tender","Consumer Health","All","True"
+"dc1c4d38-06ee-4c45-8a06-fc0a0847d039","GB","Price","Tender","Pharma","All","true"
+"624be04c-dedb-455d-8ee0-ca13a3afc963","GB","Discount","Tender","Pharma","All","true"
+"dde1456d-1302-46f2-92ce-d975ed83650e","GB","Price","Tender","Radiology","All","true"
+"279a3df8-6b34-402b-8c8b-7b70061b254a","GB","Discount","Tender","Radiology","All","true"
+"f3ffeae6-0be4-4cc7-86d7-3478c08f6abf","GB","FOC","Tender","Pharma","All","false"
+"c0d3eb0d-bf14-4b57-bb24-43625d47815f","GB","FOC","Tender","Radiology","All","false"
+"bc877b18-de84-4276-8d51-701cf42fbfa6","GB","PriceWithFOC","Tender","Pharma","All","true"
+"73f190c5-65c0-47ef-972e-c31b07ea1782","GB","PriceWithFOC","Tender","Radiology","All","true"
+"5c7a11fb-dea1-4edf-a835-ee0fc13599ca","GB","DiscountWithFOC","Tender","Pharma","All","true"
+"f4ae8304-106b-4bbf-af79-97b3bed55e0b","GB","DiscountWithFOC","Tender","Radiology","All","true"
+"a9624405-e797-4c09-a902-d617538f3e12","PK","FOC","Tender for Fixed Rate","Pharma","All",false
+"62541256-78aa-4f21-9822-44f3c7e76799","PK","FOC","Tender for Fixed Rate","Radiology","All",false
+"b1f76a05-7582-40b0-9a53-51b6257b0a6a","PK","FOC","Tender for Fixed Rate","Consumer Health","All",false
+"43d499d0-ab2e-43ab-97c0-85d2dc46d4c3","PK","FOC","Offer of %age Discount","Pharma","All",false
+"bc6bc9f0-0c96-4cfe-b713-be8dd97524d5","PK","FOC","Offer of %age Discount","Radiology","All",false
+"4d4e5c7e-9819-4c99-9370-30b4f7b7988b","PK","FOC","Offer of %age Discount","Consumer Health","All",false
+"42eb60c1-bb03-4273-b947-c81520189d54","PK","PriceWithFOC","Tender for Fixed Rate","Pharma","All",true
+"a239d697-0ba5-49d3-b51b-b923ee9fd44f","PK","PriceWithFOC","Tender for Fixed Rate","Radiology","All",true
+"86a8c47a-1b7f-4502-b743-e57f1d607036","PK","PriceWithFOC","Tender for Fixed Rate","Consumer Health","All",true
+"8f0673c2-1281-47ba-a06e-b7840847e179","PK","PriceWithFOC","Offer of %age Discount","Pharma","All",true
+"1356b29f-f107-4531-83d0-b87bf9f8a514","PK","PriceWithFOC","Offer of %age Discount","Radiology","All",true
+"a5385f9c-f230-423b-a2ea-d95ea5e686df","PK","PriceWithFOC","Offer of %age Discount","Consumer Health","All",true
+"ef71b145-85b8-4cb2-bfb6-63602e828954","PK","DiscountWithFOC","Tender for Fixed Rate","Pharma","All",true
+"b58b5c2a-c2a5-41c6-980d-5363ae823344","PK","DiscountWithFOC","Tender for Fixed Rate","Radiology","All",true
+"a2bd721f-0272-480a-b43b-41d90ad84a09","PK","DiscountWithFOC","Tender for Fixed Rate","Consumer Health","All",true
+"c4bb8fd8-8a9c-4b9f-a0cb-ac45651df17a","PK","DiscountWithFOC","Offer of %age Discount","Pharma","All",true
+"3dc0db62-5a60-4eee-9eef-a35990e146b8","PK","DiscountWithFOC","Offer of %age Discount","Radiology","All",true
+"e1b37f48-0409-4d78-b05f-30c09ba4ba51","PK","DiscountWithFOC","Offer of %age Discount","Consumer Health","All",true
