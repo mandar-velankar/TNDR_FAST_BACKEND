@@ -151,11 +151,13 @@ entity CustomerPrices_History: managed {
  * This view lists candidate institutes that can participate in a price agreement 
  * but don't have a CustomerPrices set yet
  */
+ //EHQUT-396133-Italy- INC20664196 - Private customers in price agreements for regional tenders
 entity CandidatesView as select from PriceAgreements as pa 
 left outer join MasterData.Tenders_in_Regions AS tr on pa.TenderId = tr.TenderID
 inner join MasterData.PT_TMINST AS inst on pa.CountryCode = inst.CountryCode
        and tr.RegionID = inst.RegionID
-       and inst.InstituteType = 'Public Account' 
+       and inst.InstituteType = 'Public Account' and inst.InstituteID not in (select InstituteID from MasterData.PT_TMINST where CountryCode = 'IT' and (right(Comment,7)= 'Ship To' or right(Comment,4) in ('0003','0004','0005','0006','0007')))
+       
 {
     pa.ID as PriceAgreementId,
     key pa.TenderId,
@@ -247,19 +249,20 @@ left outer join CustomerPrices as cp
 } group by sku.CountryCode, sku.ProductPackID, sku.SKUCode,PaMainFOCView.PriceAgreementId;
 
 
-
-
+//CR2
+//EHQUT-INC20664196 - Private customers in price agreements for regional tenders
 entity CandidatePrices as select from PriceAgreements AS pa
 inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
 //inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
 inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
-inner join MasterData.PT_TMINST AS ins on pa.CountryCode = ins.CountryCode and ca.CandidateID = ins.InstituteID
+inner join MasterData.PT_TMINST AS ins on pa.CountryCode = ins.CountryCode and ca.CandidateID = ins.InstituteID and ins.ActiveRecord ='Yes'
 left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId 
     and cp.MaterialNumber = ma.SKUCode 
     and cp.InstituteId = ca.CandidateID 
     and cp.PriceCondition <> 'YA03' // Italy FOC
     and cp.PriceCondition <> 'YA01' // Spain FOC
-    and cp.PriceCondition <> 'YAW1' { // Spain Rappel
+    and cp.PriceCondition <> 'YAW1'
+    { // Spain Rappel
         key pa.ID as PriceAgreementId,
         key ca.TenderId,
         key ca.CandidateID as InstituteId,
