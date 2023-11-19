@@ -85,6 +85,7 @@ entity PT_TMINST{
 	Shortname:String;
 	KAM_Territory: String(12);
 	External_InstituteId: String(50);
+	Class: Integer;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -338,6 +339,7 @@ entity PT_TMCTPRDPCK{
 	RegistrationDate : Date;
 	RegistrationValidUntil : Date; 
 	ProductScope: String(100);
+	ProductGroup: String;
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;

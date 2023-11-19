@@ -2162,6 +2162,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
             REFERENCE                                   : String(255);
             IBIZWORKFLOWID                              : Integer;
             DISTRIBUTORID                               : String;
+            DistributorName                             : String(500);
+	        Address                                     : String(500);
+            City                                        : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2180,7 +2183,4 @@ left outer join TransactionalData.PriceCondition as priceCondition
                                                                     on PriceCondition.OfferID = $self.OFFER_ID
                                                                     and PriceCondition.ProductCode = $self.PRODUCTID
                                                                     and PriceCondition.CountryCode = $self.COUNTRY_CODE;
-            Distributor                                 : Association to MasterData.PT_TMDIST
-                                                            on Distributor.DistributorID = $self.DISTRIBUTORID
-                                                            and Distributor.CountryCode = $self.COUNTRY_CODE;
     };
