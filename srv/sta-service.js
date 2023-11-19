@@ -2127,7 +2127,7 @@ module.exports = async (srv) => {
 				DistributorID: productDistributorInfo.Custom_String_1,
 				CountryCode: offer.COUNTRYCODE
 			}
-			const DistributorInfo = await tx.run(SELECT.from(PT_TMDIST).where(whereDistributorId));
+			const DistributorInfo = await tx.run(SELECT.one.from(PT_TMDIST).where(whereDistributorId));
 
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
@@ -2423,7 +2423,9 @@ module.exports = async (srv) => {
 				REFERENCE: offerProduct.REFERENCE,
 				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
 				DISTRIBUTORID: productDistributorInfo.Custom_String_1,
-				Distributor: DistributorInfo
+				DistributorName: DistributorInfo?.DistributorName,
+				Address: DistributorInfo?.Address,
+				City: DistributorInfo?.City
 			}
 		});
 		let resolvedResults = await Promise.all(results);
