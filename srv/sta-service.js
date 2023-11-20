@@ -2123,7 +2123,7 @@ module.exports = async (srv) => {
 			}
 			const productDistributorInfo = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereProductId));
 
-			if(offer.COUNTRYCODE == 'PK'){
+			if(productDistributorInfo.Custom_String_1 && offer.COUNTRYCODE == 'PK'){
 				//Get corresponding Distributor Data
 				const whereDistributorId = {
 					DistributorID: productDistributorInfo.Custom_String_1,
@@ -2425,9 +2425,9 @@ module.exports = async (srv) => {
 				REFERENCE: offerProduct.REFERENCE,
 				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
 				DISTRIBUTORID: productDistributorInfo.Custom_String_1,
-				DistributorName: DistributorInfo?.DistributorName,
-				Address: DistributorInfo?.Address,
-				City: DistributorInfo?.City
+				DistributorName: DistributorInfo?.DistributorName ?? null,
+				Address: DistributorInfo?.Address ?? null,
+				City: DistributorInfo?.City ?? null
 			}
 		});
 		let resolvedResults = await Promise.all(results);
