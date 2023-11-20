@@ -881,3 +881,20 @@ entity DistributorAssignment: cuid, managed {
 	BU				: String;
 	DistributorID	: Integer;
 }
+
+entity SalesData {
+	key SYEAR		: String(4) not null;
+	key SMONTH		: String(2) not null;
+	key SCUSNO		: String(8) not null;
+	STERID			: Double;
+	SITNO			: String(15);
+	SQTY			: Decimal;
+	SGS				: Decimal;
+	SDIS			: Decimal;
+	SDON			: Decimal;
+	SNS				: Decimal;
+	Expr1			: String default 'ACTUAL';
+	SOTD			: Decimal;
+	SSAMP			: Decimal;
+	SYMD			: String(8);
+}
