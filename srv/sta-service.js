@@ -2076,6 +2076,7 @@ module.exports = async (srv) => {
 
 		let results = [];
         let aFreeGoodsOther = [];
+		let DistributorInfo = [];
         
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
@@ -2122,13 +2123,14 @@ module.exports = async (srv) => {
 			}
 			const productDistributorInfo = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereProductId));
 
-			//Get corresponding Distributor Data
-			const whereDistributorId = {
-				DistributorID: productDistributorInfo.Custom_String_1,
-				CountryCode: offer.COUNTRYCODE
-			}
-			const DistributorInfo = await tx.run(SELECT.one.from(PT_TMDIST).where(whereDistributorId));
-
+			if(offer.COUNTRYCODE == 'PK'){
+				//Get corresponding Distributor Data
+				const whereDistributorId = {
+					DistributorID: productDistributorInfo.Custom_String_1,
+					CountryCode: offer.COUNTRYCODE
+				}
+				DistributorInfo = await tx.run(SELECT.one.from(PT_TMDIST).where(whereDistributorId));
+			}	
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
 				OfferID: offer.OFFERID,
