@@ -505,7 +505,7 @@ module.exports = async (srv) => {
 
 	srv.on('copyOffer', async (req) => {
 
-		const { data: {offerID,type, instituteName} } = req;
+		const { data: {offerID,type, QuotationInstituteID} } = req;
 
 		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
 		!type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
