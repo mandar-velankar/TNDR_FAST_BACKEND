@@ -96,6 +96,7 @@ entity PT_TMINST{
 	Region:Association to CountryRegions on Region.ID = RegionID;
     Province: Association to CountryProvinces on Province.ID = ProvinceID;
 	InstituteDivision: Association to many InstituteDivision on InstituteDivision.InstituteID = InstituteID;
+	InstituteTerritory: Association to many InstituteTerritory on InstituteTerritory.InstituteID = InstituteID;
 }
 
 //Institute Hierarchy Level
@@ -897,4 +898,16 @@ entity SalesData {
 	SOTD			: Decimal;
 	SSAMP			: Decimal;
 	SYMD			: String(8);
+}
+
+entity InstituteTerritory {
+	InstituteID		: Integer not null;
+	Territory		: String;
+	IsKAM			: Boolean;
+}
+
+entity UserTerritory {
+	UserID			: String(50) not null;
+	Territory		: String;
+	IsKAM			: Boolean;
 }
