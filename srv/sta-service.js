@@ -51,6 +51,9 @@ module.exports = async (srv) => {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand, PricingPolicyView
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
+		CountryCogs, ExchangeRates
+	} = cds.entities("com.bayer.SXTENDER.MasterDataLatestValues");
+	const {
 		PT_TMINST, 
 		PT_TMDIST, 
 		CountryApprovers, 
@@ -505,7 +508,7 @@ module.exports = async (srv) => {
 
 	srv.on('copyOffer', async (req) => {
 
-		const { data: {offerID,type, instituteName} } = req;
+		const { data: {offerID,type, QuotationInstituteID} } = req;
 
 		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
 		!type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
@@ -1159,9 +1162,34 @@ module.exports = async (srv) => {
 		};
 
 		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
+
+		const whereConditionCogs = {
+			COUNTRY_CODE: req.data.CountryCode,
+			PRODUCT_ID: req.data.ProductCode,
+			COGS_TYPE: 'Budget'
+		}
+
+		const cogs = await SELECT.one.from(CountryCogs).where(whereConditionCogs);
+
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID:  req.data.OfferID});
 
-		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user});
+		const whereConditionSpotRate = {
+			CURRENCY_FROM: offer?.Currency,
+			CURRENCY_TO: 'EUR',
+			X_TYPE: 'Monthly Average'
+		}
+
+		const spotRate = await SELECT.one.from(ExchangeRates).where(whereConditionSpotRate);
+
+		const whereConditionBudgetRate = {
+			CURRENCY_FROM: offer?.Currency,
+			CURRENCY_TO: 'EUR',
+			X_TYPE: 'Budget'
+		}
+
+		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
+
+		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate});
 
 		if(productPricing){
 			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
@@ -1170,7 +1198,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	function mapToPTTMBDPR({priceCondition, offer, user}){
+	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate}){
 		return {
 			TenderID              : priceCondition.TenderID, 
 			OfferID               : priceCondition.OfferID, 
@@ -1194,13 +1222,13 @@ module.exports = async (srv) => {
 			NetofferPrice         : priceCondition.NetOfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
-			COGS                  : 0, 
-			SpotRate              : 0, 	
-			BudgetRate            : 0, 
+			COGS                  : cogs?.COGS || 0,
+			SpotRate              : spotRate?.X_RATE || 0,
+			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
 			// FOC_ABS_PCT           : null, 
 			FOC_Bundled_1         : 0, 
-			FOC_ABS_PCT_Bundled_1 : 0, 
+			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
 			NetPrice              : priceCondition.NetPrice, 
