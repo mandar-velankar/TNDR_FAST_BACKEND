@@ -482,7 +482,7 @@ entity BrandsInTender as select from TransactionalData.PT_TMTEND as tender{
 where tender.Active = 1
 and tender.Offer.Active = 1
 and tender.Offer.Product.Active = 1;
-
+//EHQUT-397790-Italy-Search function is slow and system crashes
 //EHQUT-189207-Creation Date instead of BidDueDate on main page
 //EHQUT-197392-MEA - additional edit access to Tender Results and Delivery Tracking tabs
 //EFRCL-283873- Italy replace Publication date with Termination date
@@ -491,6 +491,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     key tender.TenderID as TENDER_ID,
     tender.Classification as CLASSIFICATION,
     tender.TenderName as TENDER_NAME,
+    tender.Institute.Region.ID as REGION_ID,
     tender.Institute.InstituteName as INSTITUTE,
     tender.Brands as BRAND,
     tender.Offer.Division as DIVISION,
@@ -755,7 +756,10 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
+    offer.QuotationInstituteID as QUOTATIONINSTITUTEID,
     offer.Tender.Institute.InstituteName as INSTITUTENAME,
+    offer.Tender.Institute.External_InstituteId as EXTERNAL_INSTITUTEID,
+    offer.Tender.Institute.City as INSTITUTECITY,
     offer.Tender.Institute.VatCode as VATCODE,
     offer.Tender.Institute.TaxCode as TAXCODE,
     offer.Tender.Institute.Region.Name as REGION_NAME,
@@ -766,12 +770,33 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.OfferStatus.STATUS as STATUS,
     offer.Tender.Country.ApprovalType as APPROVAL_TYPE,
 	ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFERDATE,
-	 case offer.Tender.Institute.Region.Name
-        when 'SEWA' then ADD_DAYS(CURRENT_DATE, 60)
-        else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
+
+	  case
+        when offer.Tender.Institute.Region.Name = 'SEWA' then ADD_DAYS(CURRENT_DATE, 60)
+        when (offer.CountryCode = 'ES'  and offer.Tender.Classification = 'Commercial Agreement')
+          then ifnull(offer.Quotation.OfferValidity,ADD_MONTHS(CURRENT_DATE,1))
+        when offer.CountryCode = 'IT'
+           then ifnull(offer.Quotation.OfferValidity, ifnull(offer.Tender.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay))))
+       else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
     end as OFFERVALIDITY,
-	ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate,
-	ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate,
+
+	case when offer.CountryCode NOT IN ('ES')
+
+        then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
+
+        else ifnull(offer.Tender.EffectiveDate,ifnull(offer.Quotation.EffectiveDate,ADD_DAYS(CURRENT_DATE,1)))
+
+    end as EffectiveDate,
+
+	 case when offer.CountryCode NOT IN ('ES')
+
+
+        then ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1))
+
+        else ifnull(offer.Tender.ExpiryDate,ifnull(offer.Quotation.ExpiryDate,ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)))
+
+    end as ExpiryDate,
+
 	offer.CountryCode as COUNTRYCODE,
 	offer.SellingCompanyDetails.LegalEntityName as SELLINGCOMPANY,
     offer.SellingCompanyDetails.BankDetails as SELLINGCOMPANYBANK,
@@ -844,6 +869,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
+          offer.QuotationInstituteID,
           offer.Tender.TenderChannel,
           offer.Tender.InstituteID,
           offer.Tender.Institute.InstituteType,
@@ -851,6 +877,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Classification,
           offer.Tender.TenderChannel,
           offer.Tender.Institute.InstituteName,
+          offer.Tender.Institute.External_InstituteId,
+          offer.Tender.Institute.City,
           offer.Tender.Institute.VatCode,
           offer.Tender.Institute.TaxCode,
           offer.Tender.Institute.Region.Name,
@@ -858,6 +886,9 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Institute.CifCode,
           offer.Tender.Institute.RegionalHealthSystem,
           offer.Tender.Institute.CustomerGroup,
+          offer.Tender.EffectiveDate,
+          offer.Tender.ExpiryDate,
+          offer.Tender.OfferValidity,
           offer.Tender.Institute.CustomerID,
           offer.Tender.TenderName,
           offer.OfferStatus.STATUS,
@@ -1190,6 +1221,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
 /**
  * This view contains calculated fields used on the Spain financial offers page
  */
+
 entity PriceConditionView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1896,6 +1928,11 @@ left outer join TransactionalData.PriceCondition as priceCondition
             INSTITUTE_CIFCODE     : String(50);
             INSTITUTE_REGIONALHEALTHSYSTEM: String(50);
             INSTITUTE_CUSTOMER_GROUP: String(50);
+            EXTERNAL_INSTITUTEID  : String(50);
+            INSTITUTECITY        : String(255);
+            QUOTATIONINSTITUTENAME : String(500);
+            QUOTATIONINSTITUTECITY : String(255);
+            QUOTATIONINSTITUTECUSTOMERID : String;
             TAXCODE               : String(50);
             VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
@@ -2124,6 +2161,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
             LINE                                        : String;
             REFERENCE                                   : String(255);
             IBIZWORKFLOWID                              : Integer;
+            DISTRIBUTORID                               : String;
+            DistributorName                             : String(500);
+	        Address                                     : String(500);
+            City                                        : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;

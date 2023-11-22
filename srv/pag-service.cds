@@ -10,6 +10,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity PriceAgreements @(cds.redirection.target:true) as projection on PriceAgreementData.PriceAgreements;
 
     //EHQUT-383702-Spain search Division filter
+    //EHQUT-383697-Spain - visual mark to notify that the offer is canceled in FAST
     entity PriceAgreementsMasterView @(cds.redirection.target:true) as select from PriceAgreementData.PriceAgreements as pa
     inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'{
         key pa.ID,
@@ -42,7 +43,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
             pa.IgnorePVLPriceChange,
             pa.IgnoreConfPriceChange,
             pa.ExpiringSoon,
-            pa.Expired,
+            case when( (to_date(pa.ExpiryDate) < CURRENT_DATE ) and pa.isCancelled = false ) then true else false end as Expired :Boolean,
             pa.isNewPriceAgreement,
             pa.AppliedCount,
             pa.isCancelled,

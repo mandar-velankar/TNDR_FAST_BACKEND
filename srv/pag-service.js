@@ -373,6 +373,7 @@ module.exports = async (srv) => {
         let priceConditionRappelAll = [];
         let discountConditionsAll = [];
         let priceConditionFOCAll = [];
+        if (countrycodes && countrycodes.length > 0 ){
         if (req.query.SELECT.one || ( countrycodes[0].CountryCode === 'ES' && ( hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0))) {
             for (const condition of priceConditionsAll) {
                 if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
@@ -409,6 +410,7 @@ module.exports = async (srv) => {
                 stopTrace("FOCPriceCondition");
             }
         }
+    }
         // use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
         // 2. calculate the fields
         // Calculation is done by a worker
@@ -707,8 +709,8 @@ module.exports = async (srv) => {
         }
 
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
-       console.log(customerPrices.length);
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
+
        // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
         return req.reply();
@@ -727,7 +729,11 @@ module.exports = async (srv) => {
 
         console.log(`Prepare requests of customer prices`);
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice));
-        const updateFOCConditionPromises = focPriceConditions.map(custPrice => updateFOCcustPrices(custPrice));
+        //EHQUT-386660-Italy-Issue with FoC synchronization
+
+        const updateFOCConditionPromises = focPriceConditions.map((custPrice,index) => updateFOCcustPrices(custPrice,index));
+       // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
+
         const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
 
         // Synchronize
@@ -1105,8 +1111,10 @@ module.exports = async (srv) => {
     //     return req.reply(result);
 
     // });
+ //EHQUT-386660-Italy-Issue with FoC synchronization
 
-    async function updateFOCcustPrices(customerPrice) {
+    async function updateFOCcustPrices(customerPrice,index) {
+
         console.log(`Prepare sending update FOC customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
 
@@ -1171,6 +1179,7 @@ module.exports = async (srv) => {
         let mikbas = "";
         let mxkbas = "";
         // Italy only
+        //EHQUT-386660-Italy-Issue with FoC synchronization
         if (customerPrice.CountryCode === 'IT') {
             let priceAgreementFOC = await tx.run(SELECT.one.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId).where(whereFOCproductpackID));
             kstbm = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? priceAgreementFOC.FreeGoods * offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && (priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' || priceAgreementFOC.FreeGoods_ABS_PCT === 'STP')) ? priceAgreementFOC.FreeGoods : 0;
@@ -1178,7 +1187,7 @@ module.exports = async (srv) => {
             mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.FOCmaterialNumber);
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 921;
-            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1;
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1+ index;
             delete body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"];
         }
         // Spain only
@@ -1291,16 +1300,18 @@ module.exports = async (srv) => {
         const matnr = parseInt(customerPrice.MaterialNumber);
         const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-
+//CR2
         const body = getES01RequestBodyTemplate(institute);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = bonem;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = datbi;
+       // body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOSTA = "B";
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = datab;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATBI_GR = datbi;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = kunnr;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = matnr;
+       
 
         //Transforming the Date in correct format
         const dataB = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
@@ -1361,6 +1372,7 @@ module.exports = async (srv) => {
             console.log('Error', error.message);
         }
     }
+    
     function getES01RequestBodyTemplate(institute) {
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
@@ -1400,6 +1412,7 @@ module.exports = async (srv) => {
                         "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 750,
                         "KVEWE": "A",
                         "KAPPL": "V",
+                        
                         "_BAY0-GZ_SALESAGRITEM": [
                             {
                                 "KUNNR": 0,
@@ -1410,7 +1423,7 @@ module.exports = async (srv) => {
                                 "KONWA": "%",
                                 "KPEIN": 1,
                                 "KBRUE": 0,
-                                "KSCHL": "YAW1",
+                                "KSCHL":"YAW1",
                                 "E1KONW": []
                             }
                         ]
