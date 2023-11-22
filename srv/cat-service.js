@@ -822,7 +822,7 @@ module.exports = (srv) => {
 						  console.log(UOMValue,"UOM");
 						  var packfactor=product.PACKSIZE;
 						  console.log(packfactor);
-						  if(UOMValue=== 'UNIT'){
+						  if(UOMValue=== 'Unit'){
 							  dFloorPrice=dFloorPrice/packfactor;
 						  }
 console.log(dFloorPrice);
