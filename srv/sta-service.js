@@ -21,6 +21,7 @@ const axios = require('axios');
 const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = async (srv) => {
 
@@ -49,6 +50,9 @@ module.exports = async (srv) => {
 	const {
 		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand, PricingPolicyView
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
+	const {
+		CountryCogs, ExchangeRates
+	} = cds.entities("com.bayer.SXTENDER.MasterDataLatestValues");
 	const {
 		PT_TMINST, 
 		PT_TMDIST, 
@@ -504,7 +508,7 @@ module.exports = async (srv) => {
 
 	srv.on('copyOffer', async (req) => {
 
-		const { data: {offerID,type, instituteName} } = req;
+		const { data: {offerID,type, QuotationInstituteID} } = req;
 
 		!offerID && req.error({ code: 404, message: "OfferID was not provided", target: "OfferID" });
 		!type && req.error({ code: 404, message: "Type was not provided. ('revisedoffer'|'continuedoffer')", target: "Type" });
@@ -528,12 +532,16 @@ module.exports = async (srv) => {
 		const productPricing = await SELECT.from(PT_TMBDPR).where({OfferID: offerID, Active: 1, ActiveTier: 0, LotID: 1 })
 		const offerRevision = await SELECT.one.from(OfferRevisions).where({TENDERID: offer.TenderID, TENDEROFFERNO: offer.TenderOfferNo});
 		const nextOfferID = await SELECT.one.from(TenderOffers).where({TENDERID: offer.TenderID});
+		const priceCondtions = await SELECT.from(PriceCondition).where({OfferID: offerID});
+		const priceConditionIDs = priceCondtions.map(pc => pc.ID);
+		const freeGoodsOther = await SELECT.from(FreeGoodsOther).where({PriceCondition_ID: {in: priceConditionIDs}});
+		const institute = await SELECT.one.from(PT_TMINST).where({CountryCode: offer.CountryCode, InstituteID: QuotationInstituteID});
 		
 
 		switch(type){
 			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
 			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
-			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, req});
+			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, institute, priceCondtions, freeGoodsOther, req});
 		}
 	});
 
@@ -633,8 +641,8 @@ module.exports = async (srv) => {
 		return continuedOfferID;
 	};
 
-	async function createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, instituteName, req}){
-		if(!instituteName){
+	async function createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, institute, priceCondtions, freeGoodsOther, req}){
+		if(!institute){
 			return req.error({ code: 404, message: "Institute name was not provided", target: "InstituteName" });
 		}
 
@@ -646,7 +654,8 @@ module.exports = async (srv) => {
 		affiliateOffer.InternalBidDueDate = todaysDate;
 		affiliateOffer.NewOfferDueDate = todaysDate;	
 		affiliateOffer.AffiliateOffer = true;	
-		affiliateOffer.Custom_String_2 = instituteName;	
+		affiliateOffer.Custom_String_2 = institute.InstituteName;
+		affiliateOffer.QuotationInstituteID = institute.InstituteID;	
 		affiliateOffer.TenderOfferNo = nextOfferID.NEXTOFFERID;	
 
 
@@ -662,10 +671,25 @@ module.exports = async (srv) => {
 		});
 
 		const affiliateProductsPricing = productPricing.map(pr => {
-			const cpp = {...pr};
-			cpp.OfferID = affiliateOfferID;
-			cpp.SubmittedOn = todaysDate;
-			return cpp;
+			const app = {...pr};
+			app.OfferID = affiliateOfferID;
+			app.SubmittedOn = todaysDate;
+			return app;
+		});
+
+		const affiliateProductsPriceCondtions = priceCondtions.map(pc => {
+			const apc = {...pc};
+			apc.OfferID = affiliateOfferID;
+			apc.ID = uuidv4();
+			return apc;
+		});
+
+		const affiliateFreeGoodsOther = freeGoodsOther.map(fg => {
+			const afg = {...fg};
+			const pricecondtion = affiliateProductsPriceCondtions.find(pc => pc.ProductCode = afg.ProductPackId);
+			afg.ID = uuidv4();
+			afg.PriceCondition_ID = pricecondtion.ID;
+			return afg;
 		});
 
 		// 1. create affiliate offer
@@ -1138,9 +1162,34 @@ module.exports = async (srv) => {
 		};
 
 		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
+
+		const whereConditionCogs = {
+			COUNTRY_CODE: req.data.CountryCode,
+			PRODUCT_ID: req.data.ProductCode,
+			COGS_TYPE: 'Budget'
+		}
+
+		const cogs = await SELECT.one.from(CountryCogs).where(whereConditionCogs);
+
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID:  req.data.OfferID});
 
-		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user});
+		const whereConditionSpotRate = {
+			CURRENCY_FROM: offer?.Currency,
+			CURRENCY_TO: 'EUR',
+			X_TYPE: 'Monthly Average'
+		}
+
+		const spotRate = await SELECT.one.from(ExchangeRates).where(whereConditionSpotRate);
+
+		const whereConditionBudgetRate = {
+			CURRENCY_FROM: offer?.Currency,
+			CURRENCY_TO: 'EUR',
+			X_TYPE: 'Budget'
+		}
+
+		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
+
+		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate});
 
 		if(productPricing){
 			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
@@ -1149,7 +1198,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	function mapToPTTMBDPR({priceCondition, offer, user}){
+	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate}){
 		return {
 			TenderID              : priceCondition.TenderID, 
 			OfferID               : priceCondition.OfferID, 
@@ -1173,13 +1222,13 @@ module.exports = async (srv) => {
 			NetofferPrice         : priceCondition.NetOfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
-			COGS                  : 0, 
-			SpotRate              : 0, 	
-			BudgetRate            : 0, 
+			COGS                  : cogs?.COGS || 0,
+			SpotRate              : spotRate?.X_RATE || 0,
+			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
 			// FOC_ABS_PCT           : null, 
 			FOC_Bundled_1         : 0, 
-			FOC_ABS_PCT_Bundled_1 : 0, 
+			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
 			NetPrice              : priceCondition.NetPrice, 
@@ -1471,6 +1520,12 @@ module.exports = async (srv) => {
 		let Countryregion= await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
 		let regionname=Countryregion.Region;
 		
+		const whereQuotationInstituteId = {
+			InstituteID: offer.QUOTATIONINSTITUTEID,
+			CountryCode: offer.COUNTRYCODE
+		}
+        let quotationInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereQuotationInstituteId));
+
 		//if we have products for the offer the offerProductValidation
 		if (offerProductValidation.length === 0) {
 			//no products
@@ -1722,6 +1777,11 @@ module.exports = async (srv) => {
 			PROCUREMENT_REASON: tender.PROCUREMENT_METHOD_ID,
 			OFFERID: offer.OFFERID,
 			INSTITUTENAME: offer.INSTITUTENAME,
+			EXTERNAL_INSTITUTEID: offer.EXTERNAL_INSTITUTEID,
+			INSTITUTECITY: offer.INSTITUTECITY,
+			QUOTATIONINSTITUTENAME : quotationInstitute?.InstituteName,
+            QUOTATIONINSTITUTECITY : quotationInstitute?.City,
+            QUOTATIONINSTITUTECUSTOMERID : quotationInstitute?.CustomerID,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
 			INSTITUTE_STATE: offer.INSTITUTE_STATE,
             INSTITUTE_REGION: offer.REGION_NAME,
@@ -2044,6 +2104,7 @@ module.exports = async (srv) => {
 
 		let results = [];
         let aFreeGoodsOther = [];
+		let DistributorInfo = [];
         
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
@@ -2081,6 +2142,23 @@ module.exports = async (srv) => {
 			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
 			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack);
+
+			//Get corresponding Product Distributor ID
+			const whereProductId = {
+				ProductCode: offerProduct.ProductCode,
+				OfferID:offer.OFFERID,
+				Active: 1
+			}
+			const productDistributorInfo = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereProductId));
+
+			if(productDistributorInfo.Custom_String_1 && offer.COUNTRYCODE == 'PK'){
+				//Get corresponding Distributor Data
+				const whereDistributorId = {
+					DistributorID: productDistributorInfo.Custom_String_1,
+					CountryCode: offer.COUNTRYCODE
+				}
+				DistributorInfo = await tx.run(SELECT.one.from(PT_TMDIST).where(whereDistributorId));
+			}	
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
 				OfferID: offer.OFFERID,
@@ -2373,7 +2451,11 @@ module.exports = async (srv) => {
                 //PriceCondition: aPriceConditions,
 				LINE: offerProduct.LINE,
 				REFERENCE: offerProduct.REFERENCE,
-				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID
+				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
+				DISTRIBUTORID: productDistributorInfo.Custom_String_1,
+				DistributorName: DistributorInfo?.DistributorName ?? null,
+				Address: DistributorInfo?.Address ?? null,
+				City: DistributorInfo?.City ?? null
 			}
 		});
 		let resolvedResults = await Promise.all(results);
