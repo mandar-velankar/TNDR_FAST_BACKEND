@@ -815,9 +815,15 @@ module.exports = (srv) => {
 		}
         
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
-        
-        let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
+        //EHQUT-412965-ES-Bug Reported by Victor
+        var dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
 						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
+						  var UOMValue=product.UNIT;
+						  var packfactor=product.PACKSIZE;
+						  if(UOMValue=== 'Unit'){
+							  dFloorPrice=dFloorPrice/packfactor;
+						  }
+
         let dRadiologyProfitability = 0;
 
         if(product.DIVISION === 'Radiology'){
