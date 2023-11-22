@@ -637,5 +637,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             key prdpck.PRODUCTPACKID,
                 prdhier.HLEVEL6_CODE,
                 prdhier.HLEVEL4_NAME
+    };
+
+    entity InstituteInBranchView as select from MasterData.PT_TMINST as inst
+        inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
+        key hier.ParentInstituteID,
+        key hier.InstituteID,
+        key CountryCode,
+            inst.InstituteName,
+            inst.PaymentTerms
     }
 }
