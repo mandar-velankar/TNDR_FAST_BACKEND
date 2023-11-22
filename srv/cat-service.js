@@ -819,13 +819,11 @@ module.exports = (srv) => {
         var dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
 						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
 						  var UOMValue=product.UNIT;
-						  console.log(UOMValue,"UOM");
 						  var packfactor=product.PACKSIZE;
-						  console.log(packfactor);
 						  if(UOMValue=== 'Unit'){
 							  dFloorPrice=dFloorPrice/packfactor;
 						  }
-console.log(dFloorPrice);
+
         let dRadiologyProfitability = 0;
 
         if(product.DIVISION === 'Radiology'){
