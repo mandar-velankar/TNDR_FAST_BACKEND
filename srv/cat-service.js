@@ -816,14 +816,16 @@ module.exports = (srv) => {
         
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
         //EHQUT-412965-ES-Bug Reported by Victor
-        let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
+        var dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
 						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
 						  var UOMValue=product.UNIT;
+						  console.log(UOMValue,"UOM");
 						  var packfactor=product.PACKSIZE;
+						  console.log(packfactor);
 						  if(UOMValue=== 'UNIT'){
 							  dFloorPrice=dFloorPrice/packfactor;
 						  }
-
+console.log(dFloorPrice);
         let dRadiologyProfitability = 0;
 
         if(product.DIVISION === 'Radiology'){
