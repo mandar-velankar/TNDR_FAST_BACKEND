@@ -37,7 +37,9 @@ entity PT_TMUSER {
         Countries       : Association to many PT_TMUSERCTRY
                               on Countries.User = $self;
         toUserCountries : Association to many AdminDataViews.UserCountries
-                              on toUserCountries.USER_ID = UserID
+                              on toUserCountries.USER_ID = UserID;
+        UserTerritory   : Association to many MasterData.UserTerritory
+                              on UserTerritory.UserID = UserID;
 }
 
 entity PT_TMUSERCTRY {

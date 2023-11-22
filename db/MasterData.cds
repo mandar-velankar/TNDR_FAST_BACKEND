@@ -85,6 +85,7 @@ entity PT_TMINST{
 	Shortname:String;
 	KAM_Territory: String(12);
 	External_InstituteId: String(50);
+	Class: Integer;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -95,6 +96,7 @@ entity PT_TMINST{
 	Region:Association to CountryRegions on Region.ID = RegionID;
     Province: Association to CountryProvinces on Province.ID = ProvinceID;
 	InstituteDivision: Association to many InstituteDivision on InstituteDivision.InstituteID = InstituteID;
+	InstituteTerritory: Association to many InstituteTerritory on InstituteTerritory.InstituteID = InstituteID;
 }
 
 //Institute Hierarchy Level
@@ -338,6 +340,7 @@ entity PT_TMCTPRDPCK{
 	RegistrationDate : Date;
 	RegistrationValidUntil : Date; 
 	ProductScope: String(100);
+	ProductGroup: String;
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
@@ -878,4 +881,33 @@ entity DistributorAssignment: cuid, managed {
 	InstituteID		: Integer;
 	BU				: String;
 	DistributorID	: Integer;
+}
+
+entity SalesData {
+	key SYEAR		: String(4) not null;
+	key SMONTH		: String(2) not null;
+	key SCUSNO		: String(8) not null;
+	STERID			: Double;
+	SITNO			: String(15);
+	SQTY			: Decimal;
+	SGS				: Decimal;
+	SDIS			: Decimal;
+	SDON			: Decimal;
+	SNS				: Decimal;
+	Expr1			: String default 'ACTUAL';
+	SOTD			: Decimal;
+	SSAMP			: Decimal;
+	SYMD			: String(8);
+}
+
+entity InstituteTerritory {
+	InstituteID		: Integer not null;
+	Territory		: String;
+	IsKAM			: Boolean;
+}
+
+entity UserTerritory {
+	UserID			: String(50) not null;
+	Territory		: String;
+	IsKAM			: Boolean;
 }
