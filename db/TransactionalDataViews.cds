@@ -1398,7 +1398,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     end as Level3Discount1:Double,
     offer.Currency
 }where tender.Active = 1;
-
+//CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1427,7 +1427,7 @@ key offer.OfferID,
 key product.ProductCode,
 key institute.InstituteID as INSTITUTE_ID,
 case 
-    when priceCondition.PriceConditionCode = 'YAW1'
+    when priceCondition.PriceConditionCode = 'YAW1' or priceCondition.PriceConditionCode = 'YAW2'
         then 'Yes'
         else 'No'        
 end as RAPPEL:String(10)
