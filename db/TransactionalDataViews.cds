@@ -1221,7 +1221,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
 /**
  * This view contains calculated fields used on the Spain financial offers page
  */
-
+//CR2
 entity PriceConditionView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1260,6 +1260,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.ID as ExistingPriceConditionID: UUID,
     priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
     tender.CountryCode,
+    priceCondition.PriceConditionCode,
     key priceConditionClassification.ConditionType,
     priceConditionClassification.Classification,
     priceConditionClassification.Division,
