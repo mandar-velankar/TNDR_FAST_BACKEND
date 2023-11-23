@@ -756,7 +756,10 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
 	offer.Tender.TenderName as TENDER_REFERENCE:String(500),
 	key offer.OfferID as OFFERID,
+    offer.QuotationInstituteID as QUOTATIONINSTITUTEID,
     offer.Tender.Institute.InstituteName as INSTITUTENAME,
+    offer.Tender.Institute.External_InstituteId as EXTERNAL_INSTITUTEID,
+    offer.Tender.Institute.City as INSTITUTECITY,
     offer.Tender.Institute.VatCode as VATCODE,
     offer.Tender.Institute.TaxCode as TAXCODE,
     offer.Tender.Institute.Region.Name as REGION_NAME,
@@ -866,6 +869,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
+          offer.QuotationInstituteID,
           offer.Tender.TenderChannel,
           offer.Tender.InstituteID,
           offer.Tender.Institute.InstituteType,
@@ -873,6 +877,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Classification,
           offer.Tender.TenderChannel,
           offer.Tender.Institute.InstituteName,
+          offer.Tender.Institute.External_InstituteId,
+          offer.Tender.Institute.City,
           offer.Tender.Institute.VatCode,
           offer.Tender.Institute.TaxCode,
           offer.Tender.Institute.Region.Name,
@@ -1392,7 +1398,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     end as Level3Discount1:Double,
     offer.Currency
 }where tender.Active = 1;
-
+//CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1421,7 +1427,7 @@ key offer.OfferID,
 key product.ProductCode,
 key institute.InstituteID as INSTITUTE_ID,
 case 
-    when priceCondition.PriceConditionCode = 'YAW1'
+    when priceCondition.PriceConditionCode = 'YAW1' or priceCondition.PriceConditionCode = 'YAW2'
         then 'Yes'
         else 'No'        
 end as RAPPEL:String(10)
@@ -1922,6 +1928,11 @@ left outer join TransactionalData.PriceCondition as priceCondition
             INSTITUTE_CIFCODE     : String(50);
             INSTITUTE_REGIONALHEALTHSYSTEM: String(50);
             INSTITUTE_CUSTOMER_GROUP: String(50);
+            EXTERNAL_INSTITUTEID  : String(50);
+            INSTITUTECITY        : String(255);
+            QUOTATIONINSTITUTENAME : String(500);
+            QUOTATIONINSTITUTECITY : String(255);
+            QUOTATIONINSTITUTECUSTOMERID : String;
             TAXCODE               : String(50);
             VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
@@ -2150,6 +2161,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
             LINE                                        : String;
             REFERENCE                                   : String(255);
             IBIZWORKFLOWID                              : Integer;
+            DISTRIBUTORID                               : String;
+            DistributorName                             : String(500);
+	        Address                                     : String(500);
+            City                                        : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
