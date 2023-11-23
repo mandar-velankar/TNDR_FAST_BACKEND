@@ -1932,7 +1932,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             INSTITUTECITY        : String(255);
             QUOTATIONINSTITUTENAME : String(500);
             QUOTATIONINSTITUTECITY : String(255);
-            QUOTATIONINSTITUTECUSTOMERID : String;
+            QUOTATIONINSTITUTECUSTOMERID : Integer;
             TAXCODE               : String(50);
             VATCODE               : String(50);       
             CUSTOMER_CODE         : Integer;
