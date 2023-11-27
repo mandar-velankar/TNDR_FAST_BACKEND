@@ -1532,8 +1532,10 @@ module.exports = async (srv) => {
 			return results;
 		} else {
 
-			//only keep 1 approvertypes array (an array exists for each product)
-			aDistinctApproverTypes = offerProductValidation[0].ApproverTypes;
+			const allApproverTypes = [...new Set(offerProductValidation.flatMap(obj => obj.ApproverTypes.map(approverType => approverType.ApproverType)))];
+			const aDistinctApproverTypes = allApproverTypes.map(approverType => {
+				return offerProductValidation.flatMap(obj => obj.ApproverTypes).find(obj => obj.ApproverType === approverType);
+			});
 
 			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
 			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation, tender, regionname);
@@ -1969,7 +1971,7 @@ module.exports = async (srv) => {
 
 			//convert to name of property (space = _ + all CAPITALS --> e.a Supply Chain = SUPPLY_CHAIN)
 			let sApproverType = oApproverType.ApproverType;
-			let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
+			//let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
 
 			//get max ValidationType
 			offerProductValidation.map((productValidation) => {
@@ -1978,9 +1980,15 @@ module.exports = async (srv) => {
 				let iValidationType = oApproverType.ValidationType;
 
 				//check if a product is found with a higher calculated validation type for the same approverType as the current
-				if (oApproverType.ValidationType < productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType) {
-					iValidationType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType;
-				};
+				let matchingApproverType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType);
+				if (matchingApproverType && matchingApproverType.ValidationType) {
+					if (iValidationType < matchingApproverType.ValidationType) {
+						iValidationType = matchingApproverType.ValidationType;
+					}
+				}
+		// 		if (oApproverType.ValidationType < productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType) {
+		// 			iValidationType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType;
+		// 		};
 
 				oApproverType.ValidationType = iValidationType;
 
