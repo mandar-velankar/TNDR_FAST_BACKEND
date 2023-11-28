@@ -51,7 +51,6 @@ entity PriceAgreements: cuid, managed {
     ExpiryExtensionAcknowledged: Boolean default false;
     Status: String;
     CancellationComment: String;
-    OldExpiryDate:DateTime;
     LotID: Integer default 1;
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
@@ -118,7 +117,6 @@ entity CustomerPrices: cuid, managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
-    OldExpiryDate :DateTime;
     ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
 }
 
@@ -147,7 +145,7 @@ entity CustomerPrices_History: managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
-    OldExpiryDate:DateTime;
+   
 }
 
 /**
