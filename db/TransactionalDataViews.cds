@@ -1393,10 +1393,41 @@ left outer join TransactionalData.PriceCondition as priceCondition
     @Core.Computed: false
     case   
         when priceCondition.Level3Discount1 is null
-            then ifnull(offer.Distributor.CommissionRate,0) / 100
+            then 
+                case 
+                    when tender.CountryCode != 'TW' 
+                        then ifnull(offer.Distributor.CommissionRate,0) / 100
+                        else ifnull(priceCondition.Level3Discount1, 0)
+                end
         else priceCondition.Level3Discount1
     end as Level3Discount1:Double,
-    offer.Currency
+    offer.Currency,
+    priceCondition.AnticipatedYearlyVolumeMainCustomer,
+    priceCondition.AnticipatedYearlyVolumeBranch,
+    @Core.Computed: false
+    ifnull(priceCondition.Level2Discount2,0) as Level2Discount2:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.TotalDiscountNHI,0) as TotalDiscountNHI:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.TotalDiscountInvoice,0) as TotalDiscountInvoice:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.TotalYearlyValueMainCustomer,0) as TotalYearlyValueMainCustomer:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.TotalYearlyValueBranch,0) as TotalYearlyValueBranch:Double,
+     @Core.Computed: false 
+    ifnull(priceCondition.AnnualDiscountForBranch,0) as AnnualDiscountForBranch:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.NegotiationPrice,0) as NegotiationPrice:Double,
+     @Core.Computed: false 
+    ifnull(priceCondition.GeneralDiscount_Amount,0) as GeneralDiscount_Amount:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.SecondDiscount_Amount,0) as SecondDiscount_Amount:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.AnnualDiscount_Percentage,0) as AnnualDiscount_Percentage:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.FreeGoods_Amount,0) as FreeGoods_Amount:Double,
+     @Core.Computed: false
+    ifnull(priceCondition.FreeGoods_Percentage,0) as FreeGoods_Percentage:Double
 }where tender.Active = 1;
 
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
