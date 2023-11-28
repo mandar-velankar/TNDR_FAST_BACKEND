@@ -2864,6 +2864,18 @@ module.exports = async (srv) => {
                         usString = usString.replace(/\$/g,'.');   
                         return  usString;                  
 				   },
+				   numberUS2: (input) => {  
+						if(Number(input) === 0 || input === null  ){
+							return "0.00";
+						}          
+						var usString;
+						if(typeof input === 'string'){
+							usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						} else {
+							usString = input.toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+						}
+						return  usString;
+					},
 				   numberEU5: (input) => {
                     if(Number(input) === 0 || input === null  ){
                         return "0,00000";
