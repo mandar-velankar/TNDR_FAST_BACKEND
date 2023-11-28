@@ -145,6 +145,7 @@ entity CustomerPrices_History: managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
+   
 }
 
 /**
