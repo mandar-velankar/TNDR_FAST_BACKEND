@@ -145,6 +145,7 @@ entity CustomerPrices_History: managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
+   
 }
 
 /**
@@ -262,6 +263,7 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
     and cp.PriceCondition <> 'YA03' // Italy FOC
     and cp.PriceCondition <> 'YA01' // Spain FOC
     and cp.PriceCondition <> 'YAW1'
+    and cp.PriceCondition <> 'YAW2'
     { // Spain Rappel
         key pa.ID as PriceAgreementId,
         key ca.TenderId,

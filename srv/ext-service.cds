@@ -36,6 +36,7 @@ service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     @cov2ap.isoDateTimeOffset:true
     entity FastReportingData as projection on ExternalDataViews.FastReportingData;
 
+
     //Master Data Views addendum
     @cov2ap.isoTime:true
     @cov2ap.isoDate:true
