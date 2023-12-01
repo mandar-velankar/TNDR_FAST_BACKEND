@@ -143,8 +143,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         ModifyedByUser.UserName;
 
     @cds.redirection.target
-    entity InstitutesView as projection on MasterData.PT_TMINST {
+    entity InstitutesView as select from MasterData.PT_TMINST as inst
+        left join MasterData.PT_TMINSHIER as hier on hier.InstituteID = inst.InstituteID {
         *,
+        inst.InstituteID,
+        inst.ActiveRecord,
+        hier.ParentInstituteID as HieraryParentInstituteID,
+        hier.InstituteID as HierarchyInstituteID,
+        case when hier.ParentInstituteID is null
+            then inst.InstituteID
+            else hier.ParentInstituteID
+        end as ParentInstituteID: Integer,
         CustomerID as CustomerID: String
     };
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {

@@ -1375,7 +1375,17 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE)
     end as BasePrice:Double,
     @Core.Computed: false
-    ifnull(priceCondition.Price1, 0) as OfferPrice:Decimal,
+    case 
+        when priceCondition.Price1 is null or priceCondition.Price1 = 0 and tender.CountryCode = 'TW'
+            then 
+                case 
+                    when product.UnitPerPack = 'Unit'
+                        then  ifnull(priceCondition.Price0, (product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
+                        else ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE)
+                end
+        else
+            ifnull(priceCondition.Price1, 0)
+    end as OfferPrice:Decimal,
     @Core.Computed: false
     ifnull(priceCondition.Level1Discount1, 0) as Discount:Double,
     @Core.Computed: false
@@ -1402,8 +1412,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else priceCondition.Level3Discount1
     end as Level3Discount1:Double,
     offer.Currency,
-    priceCondition.AnticipatedYearlyVolumeMainCustomer,
-    priceCondition.AnticipatedYearlyVolumeBranch,
+    @Core.Computed: false
+    ifnull(priceCondition.AnticipatedYearlyVolumeMainCustomer,1) as AnticipatedYearlyVolumeMainCustomer:Integer,
+    @Core.Computed: false
+    ifnull(priceCondition.AnticipatedYearlyVolumeBranch, 1) as AnticipatedYearlyVolumeBranch:Integer,
     @Core.Computed: false
     ifnull(priceCondition.Level2Discount2,0) as Level2Discount2:Double,
      @Core.Computed: false
