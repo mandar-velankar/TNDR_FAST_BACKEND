@@ -1047,7 +1047,8 @@ module.exports = async (srv) => {
 			'PriceConditionPriceView',
 			'PriceConditionDiscountView',
 			'PriceConditionPriceWithFOCView',
-			'PriceConditionDiscountWithFOCView'
+			'PriceConditionDiscountWithFOCView',
+			'PriceConditionTaiwanPriceView'
 		], 
 		async (req) => {
 			await upsertPriceCondition(req);
@@ -1138,6 +1139,27 @@ module.exports = async (srv) => {
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
+			"TaiwanPrice": {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level2Discount1:req.data.Deductions,
+				Level2Discount2:req.data.Level2Discount2,
+				AnnualDiscountForBranch:req.data.AnnualDiscountForBranch,
+				NegotiationPrice:req.data.NegotiationPrice,
+				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
+				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
+				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
+				TotalDiscountNHI:req.data.TotalDiscountNHI,
+				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
+				Price2: req.data.NetPrice,
+				Price3: req.data.Price3,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Level3Discount1,
+				PriceConditionClassification_ID: req.data.ClassificationID
+			}
 		}
 
 		return mappings[req.data.ConditionType];
@@ -1219,7 +1241,7 @@ module.exports = async (srv) => {
 			Deductions            : 0, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
-			NetofferPrice         : priceCondition.NetOfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
@@ -1231,7 +1253,7 @@ module.exports = async (srv) => {
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
-			NetPrice              : priceCondition.NetPrice, 
+			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.NetPrice, 
 			NetPrice_OfPaid       : 0, 
 			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
@@ -1291,6 +1313,23 @@ module.exports = async (srv) => {
 	}
 );
 
+srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
+	if(!items) return [];
+
+	if(Array.isArray(items)){
+		return items.map(fnCalculateFields)
+	}else{
+		return fnCalculateFields(items);
+	}
+
+	async function fnCalculateFields(item){
+		item.NetPrice = await calculateNetOfferTaiwanPrice(item);
+		item.Level3Discount1 = item.Level3Discount1 / item.AnticipatedYearlyVolumeBranch; 
+	};
+	
+}
+);
+
 	async function calculateNetOfferPrice(item){
 		const offerProduct = item.ProductCode;
 		let foc = [];
@@ -1344,6 +1383,77 @@ module.exports = async (srv) => {
 		}
 	}
 	
+	async function calculateNetOfferTaiwanPrice(item){
+		const offerProduct = item.ProductCode;
+		let foc = [];
+		let paidVolume = 0;
+		let totalVolume = 0;
+		let focVolume = 0;
+		
+		if(item.PriceConditionID){
+			foc = await SELECT.from(FreeGoodsOther).where({
+				PriceCondition_ID: item.PriceConditionID
+			});
+		}
+
+		const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
+		const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
+		const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
+
+		/**
+		 * Calculate NetPrice based on rules
+		 * Case1: No FOC in the pop up
+		 * Case2: One or more FOC products which are different from Offer Product
+		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
+		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+		**/
+		//Cases 1,2 and 3
+		if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return item.OfferPrice;
+		// Cases 4
+		if(containsOfferProductAndIsIncluded) {
+			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
+			switch(includedFOC.FreeGoodsOther_ABS_PCT){
+				case "ABS":
+					focVolume = includedFOC.FreeGoodsOther;
+				case "PCT":
+					focVolume = includedFOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
+				case "STP":
+					focVolume = (item.AnticipatedYearlyVolumeBranch / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
+			}
+		}
+
+		if(containsOfferProductAndIsAdded){
+			paidVolume = item.AnticipatedYearlyVolumeBranch;
+			totalVolume = item.AnticipatedYearlyVolumeBranch + focVolume;
+		}
+
+		if(containsOfferProductAndIsIncluded){
+			paidVolume = item.AnticipatedYearlyVolumeBranch - focVolume;
+			totalVolume = item.AnticipatedYearlyVolumeBranch;
+		}
+
+		let revenues = item.OfferPrice * (1 - item.Deductions - item.Level2Discount2) * paidVolume;
+
+		let netOfferPrice = revenues / totalVolume;
+
+		function hasObjectWithProductCode(arr, offerProduct) {
+			return arr.some(obj => obj.ProductPackId === offerProduct);
+		}
+
+		function hasObjectWithProductCodeAndIsAdded(arr, offerProduct) {
+			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
+		}
+
+		function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
+			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		}
+
+		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		}
+
+		return netOfferPrice;
+	}
 
 	srv.before(['CREATE','UPDATE'], ['OfferValidation'], async (req) => {
 
