@@ -95,7 +95,6 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity Settlements as projection on MasterData.Settlements;
     entity SettlementDates as projection on PriceAgreementData.SettlementDates;
     entity MasterPrices as projection on MasterDataViews.MostRecentMasterPricesView;
-     entity PriceAgreement_APPRST as projection on PriceAgreementData.PriceAgreement_APPRST; 
     //Brazil
     entity LotProducts as projection on TransactionalData.LotProduct;
 
