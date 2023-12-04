@@ -232,4 +232,5 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         signatory.COUNTRY_CODE as CountryCode
     };
 
+    entity ExcelUploadView as projection on TransactionalData.ExcelUpload;
 }

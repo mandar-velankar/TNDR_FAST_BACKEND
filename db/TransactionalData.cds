@@ -873,3 +873,8 @@ entity OfferProductOfferStatus {
                                       on  ApproverTypes.CountryCode  = CountryCode
                                       and ApproverTypes.ApproverType = ApproverType;
 };
+
+entity ExcelUpload:cuid {
+    @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    content             : LargeBinary;
+};
