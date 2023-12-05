@@ -108,6 +108,9 @@ function calculateFields(priceAgreement, requiredParameters){
         if (price.PriceCondition && !price.Synchronized) {
             priceAgreement.Synchronized = false;
         }
+        if(price.Synchronized){
+            priceAgreement.Synchronized = true;
+        }
         if (price.Applied || price.Applied === null) {
             priceAgreement.isNewPriceAgreement = false;
             priceAgreement.AppliedCount++;
