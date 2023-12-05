@@ -1413,6 +1413,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
     end as Level3Discount1:Double,
     offer.Currency,
     @Core.Computed: false
+    ifnull(priceCondition.Last12MonthsVolumeMainCustomer,1) as Last12MonthsVolumeMainCustomer:Integer,
+    @Core.Computed: false
+    ifnull(priceCondition.Last12MonthsVolumeBranch, 1) as Last12MonthsVolumeBranch:Integer,
+    @Core.Computed: false
     ifnull(priceCondition.AnticipatedYearlyVolumeMainCustomer,1) as AnticipatedYearlyVolumeMainCustomer:Integer,
     @Core.Computed: false
     ifnull(priceCondition.AnticipatedYearlyVolumeBranch, 1) as AnticipatedYearlyVolumeBranch:Integer,

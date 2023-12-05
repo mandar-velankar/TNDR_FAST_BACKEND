@@ -68,7 +68,9 @@ module.exports = async (srv) => {
 		MASTER_TENDER_TYPE,
 		PT_TMPRDHIER,
 		PT_TMCTRY,
-		PT_TMCTPRDPCK
+		PT_TMCTPRDPCK,
+		SalesData,
+		PT_TMINSHIER
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
@@ -1323,6 +1325,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 	}
 
 	async function fnCalculateFields(item){
+		item.Last12MonthsVolumeMainCustomer = await calculateLast12MonthsVolumeMainCustomer(item);
+		item.Last12MonthsVolumeBranch = await calculateLast12MonthsVolumeBranch(item);
 		item.NetPrice = await calculateNetOfferTaiwanPrice(item);
 		item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
 		item.Price3 = item.NetPrice - item.Level3Discount1;
@@ -1334,6 +1338,35 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 	
 }
 );
+
+	async function calculateLast12MonthsVolumeMainCustomer (item) {
+		const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: item.TenderID});
+		const institute = await SELECT.one.from(PT_TMINST).where({InstituteID: tender?.InstituteID});
+		const skuPrdPck = await SELECT.one.from(PT_TMSKUPRDPCK).where({CountryCode: item.CountryCode, ProductPackID: item.ProductCode});
+		const salesData = await SELECT.from(SalesData).where({SCUSNO: institute?.External_InstituteId, SITNO: skuPrdPck.SKUCode});
+
+		return salesData.reduce((a, b) => a + Number(b.SQTY), 0);
+	}
+
+	async function calculateLast12MonthsVolumeBranch (item) {
+		const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: item.TenderID});
+		const childInstitute = await SELECT.one.from(PT_TMINSHIER).where({InstituteID: tender?.InstituteID});
+
+		if (childInstitute) {
+			const InstitutesInBranchHierarcy = await SELECT.one.from(PT_TMINSHIER).where({ParentInstituteID: childInstitute?.ParentInstituteID});
+			const InstitutesInBranchIds = InstitutesInBranchHierarcy?.filter(el => el.InstituteID != tender.InstituteID).map(el => el.InstituteID) || [];
+
+			const InstitutesInBranch = await SELECT.from(PT_TMINST).where({InstituteID: {in : InstitutesInBranchIds}});
+			const External_InstituteIds = InstitutesInBranch?.map(el => el.External_InstituteIds);
+
+
+			const skuPrdPck = await SELECT.one.from(PT_TMSKUPRDPCK).where({CountryCode: item.CountryCode, ProductPackID: item.ProductCode});
+			const salesData = await SELECT.from(SalesData).where({SCUSNO: {in: External_InstituteIds}, SITNO: skuPrdPck.SKUCode});
+			return salesData.reduce((a, b) => a + Number(b.SQTY), 0);
+		}
+
+		return 0;
+	}
 
 	async function calculateNetOfferPrice(item){
 		const offerProduct = item.ProductCode;
