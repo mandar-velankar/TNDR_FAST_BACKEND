@@ -521,6 +521,8 @@ entity PriceCondition: cuid, managed {
     Price3                              : Decimal;
     OfferPrice                          : Decimal;
     NetOfferPrice                       : Decimal;
+    // Last12MonthsVolumeMainCustomer      : Integer;
+    // Last12MonthsVolumeBranch            : Integer;
     AnticipatedYearlyVolumeMainCustomer : Integer;
     AnticipatedYearlyVolumeBranch       : Integer;
     TotalDiscountNHI                    : Double;
