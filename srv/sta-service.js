@@ -1324,7 +1324,12 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 	async function fnCalculateFields(item){
 		item.NetPrice = await calculateNetOfferTaiwanPrice(item);
-		item.Level3Discount1 = item.Level3Discount1 / item.AnticipatedYearlyVolumeBranch; 
+		item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
+		item.Price3 = item.NetPrice - item.Level3Discount1;
+		item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
+		item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
+		item.TotalDiscountNHI = (item.BasePrice - item.Price3) / item.BasePrice;
+		item.TotalDiscountInvoice = (item.OfferPrice - item.Price3) / item.OfferPrice;
 	};
 	
 }
@@ -1408,7 +1413,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
 		**/
 		//Cases 1,2 and 3
-		if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return item.OfferPrice;
+		if(foc.length === 0 || !containsOfferProduct) return (item.OfferPrice * (1 - item.Deductions - item.Level2Discount2)); 
 		// Cases 4
 		if(containsOfferProductAndIsIncluded) {
 			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
