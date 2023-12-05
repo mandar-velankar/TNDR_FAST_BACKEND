@@ -773,7 +773,7 @@ module.exports = async (srv) => {
         const tx = cds.tx();
         try {
             console.log(`Update SynchronizationStatus to ${status} for ${pas.join("||")}`)
-            await tx.run(UPDATE(PriceAgreements).with({ SynchronizationStatus: status }).where({ ID: { in: pas } }));
+            await tx.run(UPDATE(PriceAgreements).with({ SynchronizationStatus: status , Synchronized : true}).where({ ID: { in: pas } }));
             await tx.commit();
         } catch (error) {
             await tx.rollback(error);
