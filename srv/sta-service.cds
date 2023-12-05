@@ -146,12 +146,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity InstitutesView as select from MasterData.PT_TMINST as inst
         left join MasterData.PT_TMINSHIER as hier on hier.InstituteID = inst.InstituteID {
         *,
-        inst.InstituteID,
+        key inst.CountryCode,
+        key inst.InstituteID,
         inst.ActiveRecord,
         hier.ParentInstituteID as HieraryParentInstituteID,
         hier.InstituteID as HierarchyInstituteID,
         case when hier.ParentInstituteID is null
-            then inst.InstituteID
+            then null
             else hier.ParentInstituteID
         end as ParentInstituteID: Integer,
         CustomerID as CustomerID: String
