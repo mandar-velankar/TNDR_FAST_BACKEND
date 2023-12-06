@@ -2231,3 +2231,130 @@ left outer join TransactionalData.PriceCondition as priceCondition
                                                                     and PriceCondition.ProductCode = $self.PRODUCTID
                                                                     and PriceCondition.CountryCode = $self.COUNTRY_CODE;
     };
+
+    entity FOCInformationView as select from TransactionalData.PT_TMOFPR as product
+    inner join TransactionalData.FreeGoodsOther as foc
+        on product.ProductCode = foc.ProductPackId
+        and product.OfferID = foc.ProductPricing.OfferID
+    {
+        key product.OfferID,
+        key foc.ProductPackId,
+        COUNT(DISTINCT foc.ProductPackId) as FOCProductCount
+    }
+    group by product.OfferID, foc.ProductPackId;
+
+    /**
+ * This view contains Tender History fields for standard tender application
+ */
+    entity StandardTenderHistory as select from TransactionalData.PT_TMTEND as tender
+    inner join TransactionalData.PT_TMOFRS as offer 
+        on offer.TenderID = tender.TenderID
+        and offer.Active = 1
+    inner join TransactionalData.PT_TMOFPR as product 
+        on product.OfferID = offer.OfferID
+        and product.Active = 1
+        and product.ActiveProduct = 1 
+    inner join MasterData.PT_TMPRDPCK as productPacks
+        on productPacks.PRODUCTPACKID = product.ProductCode
+        and productPacks.ACTIVERECORD = 'Yes' 
+    inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+        on priceConditionClassification.CountryCode = product.CountryCode
+        and priceConditionClassification.Classification = tender.Classification
+        and priceConditionClassification.Division = offer.Division
+        and priceConditionClassification.isMain = 'true' 
+        and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+    inner join MasterData.PT_TMINST as institute 
+        on tender.InstituteID = institute.InstituteID
+    inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+        on product.ProductCode = masterPrices.ProductPackId
+        and product.CountryCode = masterPrices.CountryCode    
+    inner join TransactionalData.PriceCondition as priceCondition 
+        on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+        and product.OfferID = priceCondition.OfferID
+        and product.ProductCode = priceCondition.ProductCode
+    inner join TransactionalDataViews.FOCInformationView as foc
+        on product.ProductCode = foc.ProductPackId
+        and product.OfferID = foc.OfferID
+    {
+    key tender.TenderID,
+    key offer.OfferID,
+    key product.ProductCode,
+    product.Price.NetofferPrice as NetofferPriceBDPR,
+    product.Price.NetPrice as NetPriceBDPR,
+    product.UnitPerPack,
+    tender.TenderName as TENDER_NAME,
+    offer.SubmittedOn as OFFER_DATE,
+    offer.Quotation.EffectiveDate,
+    offer.Quotation.ExpiryDate,
+    key institute.InstituteID as INSTITUTE_ID,
+    institute.InstituteName as INSTITUTE_NAME,
+    product.SKU.PRODUCTPACKNAME as PRODUCT_NAME,
+    product.Price.OfferPrice as OfferPriceBDPR,
+    priceCondition.Tax,
+    priceCondition.StandardDiscount,
+    priceCondition.AdditionalDiscount,
+    priceCondition.NetPrice,                        
+    priceCondition.Price0,                            
+    priceCondition.Level1Discount1,                
+    priceCondition.Level1Discount2,                    
+    priceCondition.Level1Discount3,                  
+    priceCondition.Price1,                        
+    priceCondition.Level2Discount1,                
+    priceCondition.Level2Discount2,               
+    priceCondition.Level2Discount3,             
+    priceCondition.Price2,                            
+    priceCondition.Level3Discount1,                    
+    priceCondition.Level3Discount2,                
+    priceCondition.Level3Discount3,                     
+    priceCondition.Price3,                     
+    priceCondition.OfferPrice,                        
+    priceCondition.NetOfferPrice,
+    priceCondition.PriceConditionCode as PriceConditionCode,
+    priceConditionClassification.ConditionType as PRICE_CONDITION,
+    priceCondition.Discount as DISCOUNT, 
+    CASE 
+        WHEN foc.FOCProductCount > 1 
+            THEN 'Yes' 
+            ELSE 'No' 
+    end as FOC:String(3),
+    ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
+    }
+    where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+    group by tender.TenderID,
+        offer.OfferID,
+        product.ProductCode,
+        tender.TenderName,
+        offer.SubmittedOn,
+        institute.InstituteID,
+        institute.InstituteName,
+        product.SKU.PRODUCTPACKNAME,
+        product.Price.OfferPrice,
+        product.UnitPerPack,
+        priceConditionClassification.ConditionType,
+        priceCondition.PriceConditionCode,
+        priceCondition.Discount, 
+        product.Price.NetofferPrice,
+        product.Price.NetPrice,
+        offer.Quotation.EffectiveDate,
+        offer.Quotation.ExpiryDate,
+        priceCondition.Tax,
+        priceCondition.StandardDiscount,
+        priceCondition.AdditionalDiscount,
+        priceCondition.NetPrice,                        
+        priceCondition.Price0,                            
+        priceCondition.Level1Discount1,                
+        priceCondition.Level1Discount2,                    
+        priceCondition.Level1Discount3,                  
+        priceCondition.Price1,                        
+        priceCondition.Level2Discount1,                
+        priceCondition.Level2Discount2,               
+        priceCondition.Level2Discount3,             
+        priceCondition.Price2,                            
+        priceCondition.Level3Discount1,                    
+        priceCondition.Level3Discount2,                
+        priceCondition.Level3Discount3,                     
+        priceCondition.Price3,                     
+        priceCondition.OfferPrice,                        
+        priceCondition.NetOfferPrice,
+        product.Results.Outcome,
+        foc.FOCProductCount;
