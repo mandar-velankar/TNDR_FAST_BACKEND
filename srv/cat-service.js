@@ -3343,6 +3343,7 @@ module.exports = (srv) => {
                 Decimals2Unit: (input) => {
                     if(typeof input === 'string'){
                         return input.split(".")[1].substring(0, 2);
+						
                     } else {
                         return Number(input).toFixed(2);
                     }
