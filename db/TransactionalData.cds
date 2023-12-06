@@ -521,6 +521,8 @@ entity PriceCondition: cuid, managed {
     Price3                              : Decimal;
     OfferPrice                          : Decimal;
     NetOfferPrice                       : Decimal;
+    Last12MonthsVolumeMainCustomer      : Integer;
+    Last12MonthsVolumeBranch            : Integer;
     AnticipatedYearlyVolumeMainCustomer : Integer;
     AnticipatedYearlyVolumeBranch       : Integer;
     TotalDiscountNHI                    : Double;
@@ -885,4 +887,9 @@ entity OfferProductOfferStatus {
             ApproverTypes       : Association to many MasterData.ApproverTypes
                                       on  ApproverTypes.CountryCode  = CountryCode
                                       and ApproverTypes.ApproverType = ApproverType;
+};
+
+entity ExcelUpload:cuid {
+    @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    content             : LargeBinary;
 };
