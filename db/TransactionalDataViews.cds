@@ -2232,17 +2232,6 @@ left outer join TransactionalData.PriceCondition as priceCondition
                                                                     and PriceCondition.CountryCode = $self.COUNTRY_CODE;
     };
 
-    entity FOCInformationView as select from TransactionalData.PT_TMOFPR as product
-    inner join TransactionalData.FreeGoodsOther as foc
-        on product.ProductCode = foc.ProductPackId
-        and product.OfferID = foc.ProductPricing.OfferID
-    {
-        key product.OfferID,
-        key foc.ProductPackId,
-        COUNT(DISTINCT foc.ProductPackId) as FOCProductCount
-    }
-    group by product.OfferID, foc.ProductPackId;
-
     /**
  * This view contains Tender History fields for standard tender application
  */
@@ -2264,17 +2253,13 @@ left outer join TransactionalData.PriceCondition as priceCondition
         and priceConditionClassification.isMain = 'true' 
         and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
     inner join MasterData.PT_TMINST as institute 
-        on tender.InstituteID = institute.InstituteID
-    inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
-        on product.ProductCode = masterPrices.ProductPackId
-        and product.CountryCode = masterPrices.CountryCode    
+        on tender.InstituteID = institute.InstituteID   
     inner join TransactionalData.PriceCondition as priceCondition 
         on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
         and product.OfferID = priceCondition.OfferID
         and product.ProductCode = priceCondition.ProductCode
-    inner join TransactionalDataViews.FOCInformationView as foc
-        on product.ProductCode = foc.ProductPackId
-        and product.OfferID = foc.OfferID
+    left outer join TransactionalData.FreeGoodsOther as foc
+        on foc.PriceCondition.ID = priceCondition.ID
     {
     key tender.TenderID,
     key offer.OfferID,
@@ -2313,9 +2298,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceConditionClassification.ConditionType as PRICE_CONDITION,
     priceCondition.Discount as DISCOUNT, 
     CASE 
-        WHEN foc.FOCProductCount > 1 
-            THEN 'Yes' 
-            ELSE 'No' 
+        when (product.ProductCode = foc.ProductPackId) 
+            then 'Yes' 
+            else 'No'
     end as FOC:String(3),
     ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
     }
@@ -2357,4 +2342,4 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.OfferPrice,                        
         priceCondition.NetOfferPrice,
         product.Results.Outcome,
-        foc.FOCProductCount;
+        foc.ProductPackId;
