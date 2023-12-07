@@ -74,6 +74,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteType,
         Institute.InstituteName,
         Institute.DirectTender,
+        Institute.InstituteID as ParentInstituteID
     }; 
 
     entity CountryRegionsTableView as projection on MasterData.CountryRegions;
@@ -143,8 +144,18 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         ModifyedByUser.UserName;
 
     @cds.redirection.target
-    entity InstitutesView as projection on MasterData.PT_TMINST {
+    entity InstitutesView as select from MasterData.PT_TMINST as inst
+        left join MasterData.PT_TMINSHIER as hier on hier.InstituteID = inst.InstituteID {
         *,
+        key inst.CountryCode,
+        key inst.InstituteID,
+        inst.ActiveRecord,
+        hier.ParentInstituteID as HieraryParentInstituteID,
+        hier.InstituteID as HierarchyInstituteID,
+        case when hier.ParentInstituteID is null
+            then null
+            else hier.ParentInstituteID
+        end as ParentInstituteID: Integer,
         CustomerID as CustomerID: String
     };
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
@@ -638,5 +649,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             key prdpck.PRODUCTPACKID,
                 prdhier.HLEVEL6_CODE,
                 prdhier.HLEVEL4_NAME
+    };
+
+    entity InstituteInBranchView as select from MasterData.PT_TMINST as inst
+        inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
+        key hier.ParentInstituteID,
+        key hier.InstituteID,
+        key CountryCode,
+            inst.InstituteName,
+            inst.PaymentTerms
     }
 }
