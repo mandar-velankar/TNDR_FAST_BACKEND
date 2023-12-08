@@ -21,7 +21,8 @@ module.exports = async (srv) => {
         NewMaterialsView,
         NewFOCMaterialsView,
         PriceAgreements,
-        CustomerPricesQC
+        CustomerPricesQC,
+        PriceAgreement_APPRST //EJUVE-CR3 START
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
@@ -52,11 +53,58 @@ module.exports = async (srv) => {
     srv.on('READ', 'PriceAgreements', async (req, next) => {
         return await filterPriceAgreements(req, next);
     });
-
+//EJUVE-CR3 START
     srv.on('READ', 'PriceAgreementsMasterView', async (req, next) => {
         return await filterPriceAgreements(req, next);
     });
-    
+    srv.on('READ', 'PriceagreementOffers', async (req) => {
+        // const tx = cds.transaction(req);
+        //console.log("Inside Approval Offers");
+        const tx = cds.tx(req);
+        let results = await buildWorkflowApprovalOffers(tx);
+        return results;
+    });
+
+    async function getOffersForWorkflow(tx, approvalStatus) {
+        let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", approvalStatus);
+
+        let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereStatus));
+        let workflowOffers = workflowApprovals.map((d) => d.PriceAgreementID);
+        return R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), workflowOffers);
+    }
+    async function buildWorkflowApprovalOffersEntry(tx, Id, approvalStatus) {
+        let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
+        // let offerValidation = await buildOfferValidation(tx, whereOffer);
+        let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
+        console.log(offerValidation,"offerValidation");
+        return {
+            PriceagreementID: offerValidation.ID,
+            TenderID: offerValidation.TenderId,
+            OfferID: offerValidation.OfferId,
+            InstituteID: offerValidation.InstituteId,
+            InstituteName: offerValidation.Institute.InstituteName,
+            CustomerID: offerValidation.Institute.CustomerID,
+            ProductPackID: offerValidation.ProductPackId,
+            ProductPackNAME: offerValidation.Product.ProductPack.PRODUCTPACKNAME,
+            EffectiveDate: offerValidation.EffectiveDate,
+            ExpiryDate: offerValidation.ExpiryDate,
+            OldExpiryDate: offerValidation.OldExpiryDate
+        }
+    }
+    async function buildWorkflowApprovalOffers(tx) {
+        let results = [];
+
+        let waitingOffers = await getOffersForWorkflow(tx, "Processing");
+
+        for (let i = 0; i < waitingOffers.length; i++) {
+            let newEntry = await buildWorkflowApprovalOffersEntry(tx, waitingOffers[i], "Processing");
+            console.log(newEntry,"New Entry");
+            if (newEntry.PriceagreementID) results.push(newEntry);
+        }
+
+        return results;
+    }
+    //EJUVE-CR3 END
     async function filterPriceAgreements(req, next) {
          // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
         //     return [{ counted: 5555 }]; 
