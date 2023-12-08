@@ -2264,6 +2264,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key tender.TenderID,
     key offer.OfferID,
     key product.ProductCode,
+    key tender.CountryCode,
     product.Price.NetofferPrice as NetofferPriceBDPR,
     product.Price.NetPrice as NetPriceBDPR,
     product.UnitPerPack,
@@ -2294,9 +2295,16 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.Price3,                     
     priceCondition.OfferPrice,                        
     priceCondition.NetOfferPrice,
+    priceCondition.AnnualDiscountForBranch,
+    priceCondition.TotalYearlyValueMainCustomer,
+    priceCondition.TotalYearlyValueBranch,
+    priceCondition.TotalDiscountNHI,
+    priceCondition.TotalDiscountInvoice,
     priceCondition.PriceConditionCode as PriceConditionCode,
     priceConditionClassification.ConditionType as PRICE_CONDITION,
     priceCondition.Discount as DISCOUNT, 
+    product.Results.AwardedPrice,
+    offer.OfferStatusTable.STATUS as OfferStatus,
     CASE 
         when (product.ProductCode = foc.ProductPackId) 
             then 'Yes' 
@@ -2304,10 +2312,11 @@ left outer join TransactionalData.PriceCondition as priceCondition
     end as FOC:String(3),
     ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
     }
-    where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+    where offer.OfferStatusTable.STATUS = 'Results Recorded'
     group by tender.TenderID,
         offer.OfferID,
         product.ProductCode,
+        tender.CountryCode,
         tender.TenderName,
         offer.SubmittedOn,
         institute.InstituteID,
@@ -2318,6 +2327,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceConditionClassification.ConditionType,
         priceCondition.PriceConditionCode,
         priceCondition.Discount, 
+        product.Results.AwardedPrice,
         product.Price.NetofferPrice,
         product.Price.NetPrice,
         offer.Quotation.EffectiveDate,
@@ -2341,5 +2351,11 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.Price3,                     
         priceCondition.OfferPrice,                        
         priceCondition.NetOfferPrice,
+        priceCondition.AnnualDiscountForBranch,
+        priceCondition.TotalYearlyValueMainCustomer,
+        priceCondition.TotalYearlyValueBranch,
+        priceCondition.TotalDiscountNHI,
+        priceCondition.TotalDiscountInvoice,
+        offer.OfferStatusTable.STATUS,
         product.Results.Outcome,
         foc.ProductPackId;
