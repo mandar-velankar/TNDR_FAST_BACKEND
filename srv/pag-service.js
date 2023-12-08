@@ -77,6 +77,7 @@ console.log(Id,"ID");
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
+        offerValidation=offerValidation[0];
         console.log(offerValidation,"offer validation");
         let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
         console.log(offerValidation.InstituteId);
