@@ -76,16 +76,20 @@ module.exports = async (srv) => {
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
-        console.log(offerValidation,"offerValidation");
+        let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
+        let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
+        let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
+        
         return {
             PriceagreementID: offerValidation.ID,
             TenderID: offerValidation.TenderId,
             OfferID: offerValidation.OfferId,
             InstituteID: offerValidation.InstituteId,
-            InstituteName: offerValidation.Institute.InstituteName,
-            CustomerID: offerValidation.Institute.CustomerID,
+            InstituteName: institute.InstituteName,
+            CustomerID: institute.CustomerID,
             ProductPackID: offerValidation.ProductPackId,
-            ProductPackNAME: offerValidation.Product.ProductPack.PRODUCTPACKNAME,
+            ProductPackNAME:productDetail.PRODUCTPACKNAME,
             EffectiveDate: offerValidation.EffectiveDate,
             ExpiryDate: offerValidation.ExpiryDate,
             OldExpiryDate: offerValidation.OldExpiryDate
