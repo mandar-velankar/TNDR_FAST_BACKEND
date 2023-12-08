@@ -257,7 +257,7 @@ left outer join CustomerPrices as cp
 entity CandidatePrices as select from PriceAgreements AS pa
 inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
 //inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
-inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
+inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId 
 inner join MasterData.PT_TMINST AS ins on pa.CountryCode = ins.CountryCode and ca.CandidateID = ins.InstituteID and ins.ActiveRecord ='Yes'
 left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId 
     and cp.MaterialNumber = ma.SKUCode 
