@@ -2354,3 +2354,65 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.NetOfferPrice,
         product.Results.Outcome,
         foc.ProductPackId;
+
+
+
+entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
+        inner join MasterData.PT_TMINST as inst 
+            on inst.InstituteID = tender.InstituteID 
+        inner join MasterData.PT_TMINSHIER as hier 
+            on hier.InstituteID = tender.InstituteID 
+        inner join TransactionalData.PT_TMOFRS as offer 
+            on tender.TenderID = offer.TenderID
+        inner join TransactionalData.PT_TMOFPR as pr 
+            on pr.OfferID = offer.OfferID
+        inner join TransactionalData.PT_TMQUTO as quotation 
+            on quotation.OfferID = offer.OfferID
+        inner join TransactionalData.PriceCondition as pc 
+            on pc.OfferID = offer.OfferID 
+            and pc.ProductCode = pr.ProductCode 
+        inner join AdminData.PT_TMUSER as CreatedByUser 
+            on CreatedByUser.UserID = offer.SubmittedBy 
+        inner join MasterData.PT_TMSKUPRDPCK as sku
+             on sku.ProductPackID = pr.ProductCode 
+        inner join MasterData.PT_TMPRDPCK as pck 
+            on pck.PRODUCTPACKID = pr.ProductCode
+        inner join MasterData.PT_TMCTPRDPCK as ctpck 
+            on ctpck.COUNTRYCODE = tender.CountryCode
+            and ctpck.PRODUCTPACKID = pr.ProductCode {
+            key offer.OfferID,
+            key offer.CountryCode,
+            offer.CreationDate,
+            offer.SubmittedBy,
+            offer.SubmittedOn,
+            tender.createdAt,
+            CreatedByUser.UserName,
+            inst.InstituteName,
+            inst.InstituteType,
+            inst.External_InstituteId,
+            inst.Class,
+            inst.KAM_Territory,
+            inst.CNPJ,
+            hier.ParentInstituteID,
+            quotation.EffectiveDate,
+            pck.PRODUCTPACKNAME,
+            pck.PACKFACTOR,
+            sku.SKUCode,
+            ctpck.BU,
+            pc.Price0,
+            pc.Price1,
+            pc.Price3,
+            pc.TotalDiscountNHI,
+            pc.Level2Discount1,
+			pc.Level2Discount2,
+			pc.GeneralDiscount_Amount,
+    		pc.SecondDiscount_Amount,
+    		pc.FreeGoods_Amount,
+    		pc.FreeGoods_Percentage,
+    		pc.AnnualDiscount_Percentage,
+    		pc.AnnualDiscountForBranch,
+            case when sku.ActiveRecord = 'Yes'
+                then 'Active'
+                else 'Suspend'
+            end as Status: String
+    };

@@ -20,6 +20,7 @@
         "cron-job-manager": "^2.2.1",
         "dynamic-html-pdf": "^1.0.2",
         "easy-template-x": "^2.1.0",
+        "export-to-csv": "^1.2.1",
         "express": "^4.17.1",
         "handlebars": "^4.7.6",
         "helmet": "^4.2.0",

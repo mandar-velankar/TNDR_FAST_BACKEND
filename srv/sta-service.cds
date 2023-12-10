@@ -658,5 +658,31 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key CountryCode,
             inst.InstituteName,
             inst.PaymentTerms
+    };
+
+    entity StandardTenderHistory as projection on TransactionalDataViews.StandardTenderHistory;
+
+    entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory{
+        key TenderID,
+        key OfferID,
+        key ProductCode,
+        key INSTITUTE_ID,
+        Price0,
+        Price1,
+        Level2Discount1,                
+        Level2Discount2,
+        Price2,
+        AnnualDiscountForBranch,
+        Level3Discount1,
+        Price3,
+        AwardedPrice,
+        TotalYearlyValueMainCustomer,
+        TotalYearlyValueBranch,
+        TotalDiscountNHI,
+        TotalDiscountInvoice
+    }where OUTCOME = 'Won' and CountryCode = 'TW';
+    entity CSVAttachment {
+        key Zuellig: Boolean default false;
+        content    : LargeBinary @Core.MediaType : 'text/csv';
     }
 }

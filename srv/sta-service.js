@@ -24,6 +24,7 @@ const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = async (srv) => {
+	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
 
 	const UITemplatesService = await cds.connect.to('UITemplates');
 
@@ -83,7 +84,8 @@ module.exports = async (srv) => {
 		OfferValues, 
 		OfferStatus,
 		OfferRevisions,
-		TenderOffers
+		TenderOffers,
+		ZuelligExtractView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -3203,5 +3205,104 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			// 	return group;
 			//   }, {})
 		};
+	}
+
+	srv.on("READ", "CSVAttachment", async (req, res) => {
+
+		const zuelligExtract = await SELECT.from(ZuelligExtractView).where({CountryCode: "TW"});
+		const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+		const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
+		const zuellig = req.data.Zuellig;
+		let mappedZuelligExtract = [];
+
+		if (zuellig) {
+			mappedZuelligExtract = zuelligExtract.map(item => {
+				return {
+					"CONT_PRICE": Number(item.Price1),
+					"DONATION": 0,
+					"GROUP": item.InstituteType,
+					"CCGRCD": item.Class,
+					"PACK": item.PACKFACTOR,
+					"Modified": new Date(item.SubmittedOn).toISOString(),
+					"QoNetPrice": Number(item.Price3),
+					"QoDisCP1": item.Level2Discount1,
+					"QoDisCM1": item.GeneralDiscount_Amount,
+					"QoDisCM2": item.SecondDiscount_Amount,
+					"QoDisCM5": item.FreeGoods_Percentage,
+					"QoDisCM6": item.AnnualDiscountForBranch,
+					"cusno": item.External_InstituteId,
+					"susnm": item.InstituteName,
+					"ProdNo": item.SKUCode,
+					"ProdName": item.PRODUCTPACKNAME,
+					"Territory": item.KAM_Territory,
+					"SDSNo.": item.CNPJ,
+					"SLSNO": item.KAM_Territory,
+					"STS": item.Status
+				}
+			});
+		}else {
+			mappedZuelligExtract = zuelligExtract.map(item => {
+				const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
+				return {
+					"ApplyDate": new Date(item.CreationDate).toISOString(),
+					"ApplicantID": item.SubmittedBy,
+					"BUCode": item.BU,
+					"EffectiveDate": new Date(item.EffectiveDate).toISOString(),
+					"CurNetPrice": Number(item.Price3),
+					"pk": products.length,
+					"CONT_PRICE": Number(item.Price1),
+					"DONATION": 0,
+					"GROUP": item.InstituteType,
+					"CCGRCD": item.Class,
+					"PACK": item.PACKFACTOR,
+					"CREATE_DAT": item.createdAt,
+					"CONCS": item.ParentInstituteID,
+					"Modified": new Date(item.SubmittedOn).toISOString(),
+					"QoNetPrice": Number(item.Price3),
+					"QoTotal": item.TotalDiscountNHI,
+					"QoDisCP1": item.Level2Discount1,
+					"QoDisCM1": item.GeneralDiscount_Amount,
+					"QoDisCP2": item.Level2Discount2,
+					"QoDisCM2": item.SecondDiscount_Amount,
+					"QoDisCP3": 0,
+					"QoDisCP4": 0,
+					"QoDisCM4": 0,
+					"QoDisCP5": item.FreeGoods_Amount,
+					"QoDisCM5": item.FreeGoods_Percentage,
+					"QoDisCP6": item.AnnualDiscount_Percentage,
+					"QoDisCM6": item.AnnualDiscountForBranch,
+					"PASNumber": item.OfferID,
+					"Unmsr": item.UserName,
+					"cusno": item.External_InstituteId,
+					"susnm": item.InstituteName,
+					"ProdNo": item.SKUCode,
+					"ProdName": item.PRODUCTPACKNAME,
+					"Territory": item.KAM_Territory,
+					"BasePrice": Number(item.Price0),
+					"SDSNo.": item.CNPJ,
+					"SLSNO": item.KAM_Territory,
+					"CurrentBasePrice": Number(item.Price0),
+					"STS": item.Status
+				}
+			});
+		}
+		
+		if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found"); ;
+		// Converts your Array<Object> to a CsvOutput string based on the configs
+		const csv = generateCsv(csvConfig)(mappedZuelligExtract);
+
+		req._.res.setHeader('Content-disposition', `attachment; filename=ZuelligExtract.csv`);
+		req._.res.setHeader('Content-type', 'text/csv');
+
+		return _createStream(csv);
+	});
+
+	function _createStream (data) {        
+		const buffer = new Buffer.from(asString(data))          
+		const stream = new Readable()        
+		stream.push(buffer)        
+		stream.push(null)        
+	
+		return { value: stream }    
 	}
 }
