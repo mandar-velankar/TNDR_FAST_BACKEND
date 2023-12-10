@@ -23,6 +23,7 @@
     "cron-job-manager": "^2.2.1",
     "dynamic-html-pdf": "^1.0.2",
     "easy-template-x": "^3.2.0",
+    "export-to-csv": "^1.2.1",
     "express": "^4.17.1",
     "handlebars": "^4.7.6",
     "hdb": "^0.19.6",

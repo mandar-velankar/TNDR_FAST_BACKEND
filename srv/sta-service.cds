@@ -681,4 +681,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         TotalDiscountNHI,
         TotalDiscountInvoice
     }where OUTCOME = 'Won' and CountryCode = 'TW';
+    entity CSVAttachment {
+        key Zuellig: Boolean default false;
+        content    : LargeBinary @Core.MediaType : 'text/csv';
+    }
 }
