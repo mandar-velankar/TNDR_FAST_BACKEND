@@ -3222,7 +3222,6 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					"DONATION": 0,
 					"GROUP": item.InstituteType,
 					"CCGRCD": item.Class,
-					"PACK": item.PACKFACTOR,
 					"Modified": new Date(item.SubmittedOn).toISOString(),
 					"QoNetPrice": Number(item.Price3),
 					"QoDisCP1": item.Level2Discount1,
@@ -3237,7 +3236,14 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					"Territory": item.KAM_Territory,
 					"SDSNo.": item.CNPJ,
 					"SLSNO": item.KAM_Territory,
-					"STS": item.Status
+					"STS": item.Status,
+					"ItemNo": item.SKUCode,
+					"ItemName": item.PRODUCTPACKNAME,
+					"SBE": item.BU,
+					"BU": item.BU,
+					"BasePrice": Number(item.RegisteredPrice),
+					"Display": item.Display,
+					"Pack": item.PACKFACTOR
 				}
 			});
 		}else {

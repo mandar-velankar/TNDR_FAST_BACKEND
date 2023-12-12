@@ -2379,7 +2379,10 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             on pck.PRODUCTPACKID = pr.ProductCode
         inner join MasterData.PT_TMCTPRDPCK as ctpck 
             on ctpck.COUNTRYCODE = tender.CountryCode
-            and ctpck.PRODUCTPACKID = pr.ProductCode {
+            and ctpck.PRODUCTPACKID = pr.ProductCode
+        inner join MasterData.PT_TMREGPR as regpr 
+            on regpr.CountryCode = tender.CountryCode 
+            and regpr.ProductPackID = pr.ProductCode {
             key offer.OfferID,
             key offer.CountryCode,
             offer.CreationDate,
@@ -2398,6 +2401,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             pck.PRODUCTPACKNAME,
             pck.PACKFACTOR,
             sku.SKUCode,
+            sku.ActiveRecord as Display,
             ctpck.BU,
             pc.Price0,
             pc.Price1,
@@ -2414,5 +2418,6 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             case when sku.ActiveRecord = 'Yes'
                 then 'Active'
                 else 'Suspend'
-            end as Status: String
+            end as Status: String,
+            regpr.RegisteredPrice
     };
