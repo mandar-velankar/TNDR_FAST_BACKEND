@@ -52,6 +52,7 @@ entity PriceAgreements: cuid, managed {
     Status: String;
     CancellationComment: String;
     LotID: Integer default 1;
+    OldExpiryDate:DateTime; //EJUVE-CR3
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -118,6 +119,7 @@ entity CustomerPrices: cuid, managed {
     RefIdocNumber: String;
     Notified: Boolean default false;
     ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+    OldExpiryDate:DateTime;//EJUVE-CR3
 }
 
 entity SettlementDates: managed {
@@ -145,7 +147,7 @@ entity CustomerPrices_History: managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
-   
+   OldExpiryDate:DateTime;//EJUVE-CR3
 }
 
 /**
@@ -255,7 +257,7 @@ left outer join CustomerPrices as cp
 entity CandidatePrices as select from PriceAgreements AS pa
 inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
 //inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
-inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
+inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = (case when ma.CountryCode = 'ES' then ma.ActiveRecord else 'Yes' end)
 inner join MasterData.PT_TMINST AS ins on pa.CountryCode = ins.CountryCode and ca.CandidateID = ins.InstituteID and ins.ActiveRecord ='Yes'
 left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId 
     and cp.MaterialNumber = ma.SKUCode 
@@ -286,7 +288,7 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ins.CustomerID, //by candidate
         cp.PriceCondition
         // pa.Institute.CustomerID //by price agreement
-};
+}where (case when ma.ActiveRecord = 'No'and (cp.Synchronized is null or cp.Synchronized = false) then 0 else 1 end)= 1;
 
 //EHQUT-199066-Italy – Brand filter in Price Agreements
 //Distinct list of Products
@@ -356,3 +358,18 @@ entity CustomerPricesQC: cuid, managed {
     CustomerPrice               : Association to CustomerPrices on CustomerPrice.PriceAgreementId = CustomerPriceId;
     Institute                   : Association to MasterData.PT_TMINST on Institute.CustomerID = LTRIM(KUNNR, '0') and Institute.CountryCode = CountryCode;
 }
+//EJUVE-CR3 START
+entity PriceAgreement_APPRST : cuid, managed {
+        CountryCode      : String(2);
+    key PriceAgreementID : UUID;
+        ApprovalStatus   : String(30)  null;
+        OfferId          : String;
+        ProductPackID    : Integer  null;
+        InstituteID      : Integer  null;
+        EffectiveDate    : DateTime  null;
+        ExpiryDate       : DateTime  null;
+        PriceAgreements  : Association to PriceAgreements
+                               on PriceAgreements.ID = PriceAgreementID;
+
+}
+//EJUVE-CR3 END
