@@ -678,7 +678,9 @@ left outer join TransactionalData.ProductPricing as productPricing
     productPricing.MinContractual as MinContractual,
     productPricing.MinAnnPurch as MinAnnPurch,
     offerProduct.SKU.ProductClass as ProductClass,
-    offerProduct.SKU.ProductDescription as ProductDescription
+    offerProduct.SKU.ProductDescription as ProductDescription,
+    ifnull(offerProduct.PricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
+    case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -751,6 +753,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.InstituteID as INSTITUTE_ID,
     offer.Tender.Institute.InstituteType as INSTITUTE_TYPE,
     offer.Tender.Institute.State as INSTITUTE_STATE,
+    offer.Tender.Institute.Address as INSTITUTE_ADDRESS,
     offer.Tender.Classification as CLASSIFICATION,//Added Classification (db#1)
     offer.Tender.Institute.CustomerID as CUSTOMER_CODE,
     case when offer.Tender.TenderChannel<>'Direct' then 'Distributor' else 'Direct' end as TENDER_CHANNEL:String(500),
@@ -865,7 +868,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.BidDueDate as BID_DUE_DATE,
     offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY,
     offer.Custom.String_1 as PaymentTerms,
-    offer.AffiliateOffer
+    offer.AffiliateOffer,
+    offer.Tender.Custom.String_1 as TENDERCONTACT
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -874,6 +878,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.InstituteID,
           offer.Tender.Institute.InstituteType,
           offer.Tender.Institute.State,
+          offer.Tender.Institute.Address,
           offer.Tender.Classification,
           offer.Tender.TenderChannel,
           offer.Tender.Institute.InstituteName,
@@ -940,6 +945,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.BidDueDate,
           offer.Quotation.SubmittedBy,
           offer.Custom.String_1,
+          offer.Tender.Custom.String_1,
           date_settings.NextYearDelta,
           date_settings.NextDay,
           date_settings.NextMonth,
@@ -1968,6 +1974,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PROCUREMENT_REASON    : String;
         key OFFERID               : String(30) not null;
             INSTITUTENAME         : String(500);
+            INSTITUTE_ADDRESS     : String(500);
             INSTITUTE_TYPE        : String(50);
             INSTITUTE_STATE       : String;
             INSTITUTE_REGION      : String;
@@ -1977,6 +1984,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             INSTITUTE_CUSTOMER_GROUP: String(50);
             EXTERNAL_INSTITUTEID  : String(50);
             INSTITUTECITY        : String(255);
+            TENDERCONTACT           :String;
             QUOTATIONINSTITUTENAME : String(500);
             QUOTATIONINSTITUTECITY : String(255);
             QUOTATIONINSTITUTECUSTOMERID : Integer;
@@ -2155,6 +2163,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
             IS_ALTERNATIVE_REQUESTED                    : Integer not null;
             NEW_APPROVAL                                : Integer;
             BUDGETED_PROFITABILITY                      : Double;
+            UK_BUDGETED_PROFITABILITY                   : Double;
+            CHANNEL                                     : String;
+            ACT_PROFITABILITY                           : Double;
             //NSM_SM_FM                                 : Integer not null;//TH only
             //HBU                                       : Integer not null;//TH only
             //CDH                                       : Integer not null;//TH and AR
