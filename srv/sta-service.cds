@@ -664,10 +664,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity StandardTenderHistory as projection on TransactionalDataViews.StandardTenderHistory;
 
     entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory{
-        key TenderID,
-        key OfferID,
         key ProductCode,
         key INSTITUTE_ID,
+        Currency,
         Price0,
         Price1,
         Level2Discount1,                
