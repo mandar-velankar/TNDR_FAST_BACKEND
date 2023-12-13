@@ -1937,6 +1937,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
             QUOTATIONINSTITUTECUSTOMERID : quotationInstitute?.CustomerID,
 			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
 			INSTITUTE_STATE: offer.INSTITUTE_STATE,
+			INSTITUTE_ADDRESS:offer.INSTITUTE_ADDRESS,
+			TENDERCONTACT:offer.TENDERCONTACT,
             INSTITUTE_REGION: offer.REGION_NAME,
             INSTITUTE_PROVINCE: offer.REGION_PROVINCE,
             INSTITUTE_CIFCODE: offer.CIF_CODE,
@@ -2544,6 +2546,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				IS_ALTERNATIVE_REQUESTED: offerProduct.IS_ALTERNATIVE_REQUESTED,
 				NEW_APPROVAL: offerProduct.NEW_APPROVAL,
 				BUDGETED_PROFITABILITY: offerProduct.BUDGETED_PROFITABILITY,
+				UK_BUDGETED_PROFITABILITY: offerProduct.UK_BUDGETED_PROFITABILITY,
+				CHANNEL: offerProduct.CHANNEL,
+				ACT_PROFITABILITY: (offerProduct.NET_PRICE - offerProduct.COGS) / offerProduct.NET_PRICE,
 				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT),
 				GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT)),
 				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * offerProduct.VAT,
@@ -3217,7 +3222,6 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					"DONATION": 0,
 					"GROUP": item.InstituteType,
 					"CCGRCD": item.Class,
-					"PACK": item.PACKFACTOR,
 					"Modified": new Date(item.SubmittedOn).toISOString(),
 					"QoNetPrice": Number(item.Price3),
 					"QoDisCP1": item.Level2Discount1,
@@ -3232,7 +3236,14 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					"Territory": item.KAM_Territory,
 					"SDSNo.": item.CNPJ,
 					"SLSNO": item.KAM_Territory,
-					"STS": item.Status
+					"STS": item.Status,
+					"ItemNo": item.SKUCode,
+					"ItemName": item.PRODUCTPACKNAME,
+					"SBE": item.BU,
+					"BU": item.BU,
+					"BasePrice": Number(item.RegisteredPrice),
+					"Display": item.Display,
+					"Pack": item.PACKFACTOR
 				}
 			});
 		}else {
