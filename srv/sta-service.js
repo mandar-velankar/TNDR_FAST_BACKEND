@@ -1354,7 +1354,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		const childInstitute = await SELECT.one.from(PT_TMINSHIER).where({InstituteID: tender?.InstituteID});
 
 		if (childInstitute) {
-			const InstitutesInBranchHierarcy = await SELECT.one.from(PT_TMINSHIER).where({ParentInstituteID: childInstitute?.ParentInstituteID});
+			const InstitutesInBranchHierarcy = await SELECT.from(PT_TMINSHIER).where({ParentInstituteID: childInstitute?.ParentInstituteID});
 			const InstitutesInBranchIds = InstitutesInBranchHierarcy?.filter(el => el.InstituteID != tender.InstituteID).map(el => el.InstituteID) || [];
 
 			const InstitutesInBranch = await SELECT.from(PT_TMINST).where({InstituteID: {in : InstitutesInBranchIds}});
