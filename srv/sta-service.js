@@ -2670,9 +2670,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				});
 			}
 			
-			if(ServiceHelper.isDoubleEqual(priceCondition.Price1, priceCondition.Price0) || ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price0, priceCondition.Price1)){
+			if(ServiceHelper.isDoubleEqual(priceCondition.Price1, priceCondition.Price0) || ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
 				aApproverTypes.map(async function (oApproverType) {
-					oApproverType.ValidationType = oApproverType.ValidationType;
+					oApproverType.ValidationType = oApproverType.ValidationType2;
 				});
 			}
 		
