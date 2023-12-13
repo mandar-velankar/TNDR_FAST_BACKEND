@@ -458,6 +458,7 @@ module.exports = async (srv) => {
 		delete req.data.InstituteName;
 		delete req.data.InstituteType;
 		delete req.data.DirectTender;
+		delete req.data.State;
 		delete req.data.ParentInstituteID;
 	});
 

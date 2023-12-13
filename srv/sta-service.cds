@@ -74,6 +74,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteType,
         Institute.InstituteName,
         Institute.DirectTender,
+        Institute.State,
         Institute.InstituteID as ParentInstituteID
     }; 
 
