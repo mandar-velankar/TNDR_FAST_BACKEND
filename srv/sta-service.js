@@ -3314,10 +3314,16 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 	srv.on("READ", "CSVAttachment", async (req, res) => {
 		try{
-			const zuelligExtract = await SELECT.from(ZuelligExtractView).where({CountryCode: "TW"});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView).where({CountryCode: "TW"});
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
 			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
 			const zuellig = req.data.Zuellig;
+
+			zuelligExtract = zuelligExtract.sort((a, b) => { 
+				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
+			});
+			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+
 			let mappedZuelligExtract = [];
 
 			if (zuellig) {
@@ -3398,7 +3404,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				});
 			}
 			
-			if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found"); ;
+			if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found");
 			// Converts your Array<Object> to a CsvOutput string based on the configs
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
 
@@ -3411,6 +3417,21 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			console.error(error.code, error.message);
 		}
 	});
+	
+	function getUniqueFilterItems (filterItems) {
+		let uniqueItems = filterItems.reduce(function (a, b) {
+			let instituteID = b.InstituteID;
+			let productCode = b.ProductCode;
+			let currentValueIndex = a.findIndex(function (item) {
+				return item.InstituteID === instituteID && item.ProductCode === productCode;
+			});
+			if (currentValueIndex < 0) {
+				a.push(b);
+			}
+			return a;
+		}, []);
+		return uniqueItems;
+	}
 
 	function _createStream (data) {        
 		const buffer = new Buffer.from(asString(data))          
