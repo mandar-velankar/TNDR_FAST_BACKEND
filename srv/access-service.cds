@@ -14,7 +14,8 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             ConsumerPrices:Boolean;
         };
         standardtenderAccess: {
-			OverviewDownload: Boolean
+			OverviewDownload: Boolean;
+            ZuelligExtract: Boolean;
 		};
         ppa:Boolean;
         contract:Boolean;
