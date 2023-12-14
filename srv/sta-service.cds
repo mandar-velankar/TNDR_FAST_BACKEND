@@ -75,7 +75,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteName,
         Institute.DirectTender,
         Institute.State,
-        Institute.InstituteID as ParentInstituteID
+        Institute.InstituteID as ParentInstituteID,
+        Institute.External_InstituteId,
+        Institute.Address
     }; 
 
     entity CountryRegionsTableView as projection on MasterData.CountryRegions;

@@ -475,6 +475,8 @@ module.exports = async (srv) => {
 		delete req.data.DirectTender;
 		delete req.data.State;
 		delete req.data.ParentInstituteID;
+		delete req.data.External_InstituteId;
+		delete req.data.Address;
 	});
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
