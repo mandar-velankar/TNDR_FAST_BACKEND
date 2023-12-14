@@ -221,179 +221,194 @@ module.exports = async (srv) => {
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
 		// const tx = cds.transaction(req)
 		const tx = cds.tx(req);
-		let results = [];
-		let searchValue = null;
-		if (req.query.SELECT.where) {
-			//Get non-filter information
-			let channel = ServiceHelper.getWhereValue(req, "CHANNEL");
-			// let instituteId = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
-			let instituteIds = ServiceHelper.getWhereValues(req, "INSTITUTE_ID");
-			//Get filters
-			let whereCountry = ServiceHelper.buildWhere(req, "COUNTRY_CODE");
-			let whereCountrySKU = ServiceHelper.buildFullWhere("CountryCode", "=", whereCountry[2].val);
-			//  let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
-			let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID", "or", instituteIds);
-			let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
-			let whereProduct = ServiceHelper.buildWhere(req, "PRODUCT_ID");
+		try{
+			let results = [];
+			let searchValue = null;
+			if (req.query.SELECT.where) {
+				//Get non-filter information
+				let channel = ServiceHelper.getWhereValue(req, "CHANNEL");
+				// let instituteId = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
+				let instituteIds = ServiceHelper.getWhereValues(req, "INSTITUTE_ID");
+				//Get filters
+				let whereCountry = ServiceHelper.buildWhere(req, "COUNTRY_CODE");
+				let whereCountrySKU = ServiceHelper.buildFullWhere("CountryCode", "=", whereCountry[2].val);
+				//  let whereInstitute = ServiceHelper.buildWhere(req, "INSTITUTE_ID");
+				let whereInstitute = ServiceHelper.buildWhereExpression("INSTITUTE_ID", "or", instituteIds);
+				let whereDistributor = ServiceHelper.buildWhere(req, "DISTRIBUTOR_ID");
+				let whereProduct = ServiceHelper.buildWhere(req, "PRODUCT_ID");
 
-			//let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
-			let brandIds = ServiceHelper.getWhereValues(req, "BRAND_ID");
-			let whereBrand = [];
-			if(brandIds.length > 0){
-				for (let i = 0; i < brandIds.length; i++) {
-					brandIds[i] = "\'" + brandIds[i] + "\'";
-				  }
-			whereBrand = ServiceHelper.buildWhereExpression("BRAND_ID", "or", brandIds);
-			}
-			let whereLegalEntity = ServiceHelper.buildWhere(req, "LEGAL_ENTITY_CODE");
-			let whereOrigin = ServiceHelper.buildWhere(req, "COUNTRY_OF_ORIGIN");
+				//let whereBrand = ServiceHelper.buildWhere(req, "BRAND_ID");
+				let brandIds = ServiceHelper.getWhereValues(req, "BRAND_ID");
+				let whereBrand = [];
+				if(brandIds.length > 0){
+					for (let i = 0; i < brandIds.length; i++) {
+						brandIds[i] = "\'" + brandIds[i] + "\'";
+					}
+				whereBrand = ServiceHelper.buildWhereExpression("BRAND_ID", "or", brandIds);
+				}
+				let whereLegalEntity = ServiceHelper.buildWhere(req, "LEGAL_ENTITY_CODE");
+				let whereOrigin = ServiceHelper.buildWhere(req, "COUNTRY_OF_ORIGIN");
 
-			let sDivision = ServiceHelper.getWhereId(req, "DIVISION");
-			if (sDivision && sDivision !== ""){
-				var whereDivision = ServiceHelper.buildWhere(req, "DIVISION");
-			}
+				let sDivision = ServiceHelper.getWhereId(req, "DIVISION");
+				if (sDivision && sDivision !== ""){
+					var whereDivision = ServiceHelper.buildWhere(req, "DIVISION");
+				}
 
-			//Get available brands in legal entity
-			let entityBrands = [];
-			if (whereLegalEntity.length !== 0 && whereBrand.length !== 0) {
-				entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereLegalEntity).where(whereBrand));
-			}
-			else if (whereLegalEntity.length !== 0) {
-				entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereLegalEntity));
-			}
-			else if (whereBrand.length !== 0) {
-				entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereBrand));
-			}
-			else {
-				entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry));
-			}
-			//Get available products in country
-			let countryProducts = [];
-			if (whereProduct.length !== 0 && whereOrigin.length !== 0) {
-				if(whereDivision && whereDivision.length > 0){
-					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin).where(whereDivision));
-				} else {
-					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin));
+				//Get available brands in legal entity
+				let entityBrands = [];
+				if (whereLegalEntity.length !== 0 && whereBrand.length !== 0) {
+					entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereLegalEntity).where(whereBrand));
 				}
-			}
-			else if (whereOrigin.length !== 0) {
-				if(whereDivision && whereDivision.length > 0){
-					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin).where(whereDivision));
-				} else {
-					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin));
+				else if (whereLegalEntity.length !== 0) {
+					entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereLegalEntity));
 				}
-			}
-			else if (whereProduct.length !== 0) {
-				if(whereDivision && whereDivision.length > 0){
-					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereDivision));
-				} else {
-					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct));
+				else if (whereBrand.length !== 0) {
+					entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry).where(whereBrand));
 				}
-			}
-			else {
-				if(whereDivision && whereDivision.length > 0){
-					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereDivision));
-				} else {
-					countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
+				else {
+					entityBrands = await tx.run(SELECT.from(LegalEntityBrand).where(whereCountry));
 				}
-			}
-             //EHQUT-SCTASK13413732-Filter Active SKU Code
-			//get SKU code for products
-			//Get filters
-			let aProductSKUs = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereCountrySKU).where({ActiveRecord : 'Yes'}));
-             //EHQUT-SCTASK13413732-Filter Active SKU Code
-			//Get products available to institute either Direct or through Distributor
-			if (channel === "Direct") {
-				var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
-				results = buildDirectProducts(entityBrands, directBrands, countryProducts, aProductSKUs);
-			}
-			else if (channel === "Distributor") {
-				var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
-				results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, aProductSKUs);
-			}
+				//Get available products in country
+				let countryProducts = [];
+				if (whereProduct.length !== 0 && whereOrigin.length !== 0) {
+					if(whereDivision && whereDivision.length > 0){
+						countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin).where(whereDivision));
+					} else {
+						countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereOrigin));
+					}
+				}
+				else if (whereOrigin.length !== 0) {
+					if(whereDivision && whereDivision.length > 0){
+						countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin).where(whereDivision));
+					} else {
+						countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereOrigin));
+					}
+				}
+				else if (whereProduct.length !== 0) {
+					if(whereDivision && whereDivision.length > 0){
+						countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct).where(whereDivision));
+					} else {
+						countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereProduct));
+					}
+				}
+				else {
+					if(whereDivision && whereDivision.length > 0){
+						countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry).where(whereDivision));
+					} else {
+						countryProducts = await tx.run(SELECT.from(CountryBrandProducts).where(whereCountry));
+					}
+				}
+				//EHQUT-SCTASK13413732-Filter Active SKU Code
+				//get SKU code for products
+				//Get filters
+				let aProductSKUs = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereCountrySKU).where({ActiveRecord : 'Yes'}));
+				//EHQUT-SCTASK13413732-Filter Active SKU Code
+				//Get products available to institute either Direct or through Distributor
+				if (channel === "Direct") {
+					var directBrands = await tx.run(SELECT.from(DirectBrand).where(whereCountry).where(whereInstitute).where(whereDistributor));
+					results = buildDirectProducts(entityBrands, directBrands, countryProducts, aProductSKUs);
+				}
+				else if (channel === "Distributor") {
+					var distributorBrands = await tx.run(SELECT.from(DistributorBrand).where(whereCountry).where(whereDistributor));
+					results = buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, aProductSKUs);
+				}
 
-			searchValue = req.query.SELECT.where[20]?.xpr?.[0]?.args[1]?.val;
+				searchValue = req.query.SELECT.where[20]?.xpr?.[0]?.args[1]?.val;
+			}
+			// sort by countrycode, then brand name, then product name
+			results.sort((a,b)=> ( a.COUNTRY_CODE.localeCompare(b.COUNTRY_CODE) || a.BRAND_NAME.localeCompare(b.BRAND_NAME) || a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME)   ));
+
+			// TODO: this filtering should be improved
+			if(searchValue){
+				results = results.filter(
+					i=>i.PRODUCT_NAME.toLowerCase().includes(searchValue.toLowerCase()) || 
+					i.SKUS.toLowerCase().includes(searchValue.toLowerCase())
+				);
+			}
+		
+
+			return results;
 		}
-		// sort by countrycode, then brand name, then product name
-		results.sort((a,b)=> ( a.COUNTRY_CODE.localeCompare(b.COUNTRY_CODE) || a.BRAND_NAME.localeCompare(b.BRAND_NAME) || a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME)   ));
-
-		// TODO: this filtering should be improved
-		if(searchValue){
-			results = results.filter(
-				i=>i.PRODUCT_NAME.toLowerCase().includes(searchValue.toLowerCase()) || 
-				i.SKUS.toLowerCase().includes(searchValue.toLowerCase())
-			);
+		catch(error){
+			console.error(error.code, error.message);
 		}
-	
-
-		return results;
 	});
 	
 	function buildDirectProducts(entityBrands, directBrands, countryProducts, productSKUs) {
-		let results = [];
-		entityBrands.forEach(entityBrand => {
-			directBrand = directBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
-			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
-			if (directBrand && countryProductsList.length !== 0) {
-				countryProductsList.forEach((countryProduct) => {
-					results.push({
-						COUNTRY_CODE: entityBrand.COUNTRY_CODE,
-						INSTITUTE_ID: directBrand.INSTITUTE_ID,
-						INSTITUTE_NAME: directBrand.INSTITUTE_NAME,
-						DISTRIBUTOR_ID: directBrand.DISTRIBUTOR_ID,
-						DISTRIBUTOR_NAME: directBrand.DISTRIBUTOR_NAME,
-						BRAND_ID: entityBrand.BRAND_ID,
-						BRAND_NAME: countryProduct.BRAND_NAME,
-						PRODUCT_ID: countryProduct.PRODUCT_ID,
-						PRODUCT_NAME: countryProduct.PRODUCT_NAME,
-						INCO_TERMS: directBrand.INCO_TERMS,
-						PAYMENT_TERMS: directBrand.PAYMENT_TERMS,
-						COMMISSION_RATE: directBrand.COMMISSION_RATE,
-						LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
-						CHANNEL: 'Direct',
-						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
-                        DIVISION: countryProduct.DIVISION,
-                        PACKFACTOR: countryProduct.PACK_SIZE,                        
-						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
-					});
-				});
-			}
-		});
-		return results;
-	}
-	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, productSKUs) {
-		let results = [];
-		entityBrands.forEach(entityBrand => {
-			distributorBrand = distributorBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
-			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
-			if (distributorBrand && countryProductsList.length !== 0) {
-				countryProductsList.forEach((countryProduct) => {
-					instituteIds.forEach(instituteId => {
+		try{
+			let results = [];
+			entityBrands.forEach(entityBrand => {
+				directBrand = directBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
+				countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
+				if (directBrand && countryProductsList.length !== 0) {
+					countryProductsList.forEach((countryProduct) => {
 						results.push({
 							COUNTRY_CODE: entityBrand.COUNTRY_CODE,
-							INSTITUTE_ID: instituteId,
-							INSTITUTE_NAME: 'NA',
-							DISTRIBUTOR_ID: distributorBrand.DISTRIBUTOR_ID,
-							DISTRIBUTOR_NAME: distributorBrand.DISTRIBUTOR_NAME,
+							INSTITUTE_ID: directBrand.INSTITUTE_ID,
+							INSTITUTE_NAME: directBrand.INSTITUTE_NAME,
+							DISTRIBUTOR_ID: directBrand.DISTRIBUTOR_ID,
+							DISTRIBUTOR_NAME: directBrand.DISTRIBUTOR_NAME,
 							BRAND_ID: entityBrand.BRAND_ID,
 							BRAND_NAME: countryProduct.BRAND_NAME,
 							PRODUCT_ID: countryProduct.PRODUCT_ID,
 							PRODUCT_NAME: countryProduct.PRODUCT_NAME,
-							INCO_TERMS: distributorBrand.INCO_TERMS,
-							PAYMENT_TERMS: distributorBrand.PAYMENT_TERMS,
-							COMMISSION_RATE: distributorBrand.COMMISSION_RATE,
+							INCO_TERMS: directBrand.INCO_TERMS,
+							PAYMENT_TERMS: directBrand.PAYMENT_TERMS,
+							COMMISSION_RATE: directBrand.COMMISSION_RATE,
 							LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
-							CHANNEL: 'Distributor',
+							CHANNEL: 'Direct',
 							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
-							COGS: countryProduct.COGS,
-							PACKFACTOR: countryProduct.PACK_SIZE,
+							DIVISION: countryProduct.DIVISION,
+							PACKFACTOR: countryProduct.PACK_SIZE,                        
 							SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
 						});
 					});
-				});
-			}
-		});
-		return results;
+				}
+			});
+			return results;
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
+	}
+	function buildDistributorProducts(entityBrands, distributorBrands, countryProducts, instituteIds, productSKUs) {
+		try{
+			let results = [];
+			entityBrands.forEach(entityBrand => {
+				distributorBrand = distributorBrands.find(x => x.BRAND_ID === entityBrand.BRAND_ID);
+				countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
+				if (distributorBrand && countryProductsList.length !== 0) {
+					countryProductsList.forEach((countryProduct) => {
+						instituteIds.forEach(instituteId => {
+							results.push({
+								COUNTRY_CODE: entityBrand.COUNTRY_CODE,
+								INSTITUTE_ID: instituteId,
+								INSTITUTE_NAME: 'NA',
+								DISTRIBUTOR_ID: distributorBrand.DISTRIBUTOR_ID,
+								DISTRIBUTOR_NAME: distributorBrand.DISTRIBUTOR_NAME,
+								BRAND_ID: entityBrand.BRAND_ID,
+								BRAND_NAME: countryProduct.BRAND_NAME,
+								PRODUCT_ID: countryProduct.PRODUCT_ID,
+								PRODUCT_NAME: countryProduct.PRODUCT_NAME,
+								INCO_TERMS: distributorBrand.INCO_TERMS,
+								PAYMENT_TERMS: distributorBrand.PAYMENT_TERMS,
+								COMMISSION_RATE: distributorBrand.COMMISSION_RATE,
+								LEGAL_ENTITY_CODE: entityBrand.LEGAL_ENTITY_CODE,
+								CHANNEL: 'Distributor',
+								COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
+								COGS: countryProduct.COGS,
+								PACKFACTOR: countryProduct.PACK_SIZE,
+								SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
+							});
+						});
+					});
+				}
+			});
+			return results;
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}	// srv.on(['CREATE','UPDATE','DELETE'], 'AwardCriteriaTableView', async (req, next) => { 
 			
 	// 	debugger;	
@@ -1271,6 +1286,7 @@ module.exports = async (srv) => {
 		'READ', 
 		['PriceConditionPriceView','PriceConditionDiscountView'], 
 		(items, req) => {
+		try{
 			if(!items) return [];
 			const fnCalculateFields = async item => {
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
@@ -1282,9 +1298,14 @@ module.exports = async (srv) => {
 				return fnCalculateFields(items);
 			}
 		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
+		}
 	);
 
 	srv.after('READ', 'PriceConditionPriceWithFOCView', (items, req) => {
+		try{
 			if(!items) return [];
 
 			if(Array.isArray(items)){
@@ -1298,11 +1319,38 @@ module.exports = async (srv) => {
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 			};
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
 			
 		}
 	);
 
 	srv.after('READ', 'PriceConditionDiscountWithFOCView', (items, req) => {
+		try{
+			if(!items) return [];
+
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
+
+			async function fnCalculateFields(item){
+				item.NetOfferPrice = await calculateNetOfferPrice(item);
+				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+			};
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
+		
+	}
+);
+
+srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
+	try{
 		if(!items) return [];
 
 		if(Array.isArray(items)){
@@ -1312,34 +1360,20 @@ module.exports = async (srv) => {
 		}
 
 		async function fnCalculateFields(item){
-			item.NetOfferPrice = await calculateNetOfferPrice(item);
-			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+			item.Last12MonthsVolumeMainCustomer = await calculateLast12MonthsVolumeMainCustomer(item);
+			item.Last12MonthsVolumeBranch = await calculateLast12MonthsVolumeBranch(item);
+			item.NetPrice = await calculateNetOfferTaiwanPrice(item);
+			item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
+			item.Price3 = item.NetPrice - item.Level3Discount1;
+			item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
+			item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
+			item.TotalDiscountNHI = (item.BasePrice - item.Price3) / item.BasePrice;
+			item.TotalDiscountInvoice = (item.OfferPrice - item.Price3) / item.OfferPrice;
 		};
-		
 	}
-);
-
-srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
-	if(!items) return [];
-
-	if(Array.isArray(items)){
-		return items.map(fnCalculateFields)
-	}else{
-		return fnCalculateFields(items);
+	catch(error){
+		console.error(error.code, error.message);
 	}
-
-	async function fnCalculateFields(item){
-		item.Last12MonthsVolumeMainCustomer = await calculateLast12MonthsVolumeMainCustomer(item);
-		item.Last12MonthsVolumeBranch = await calculateLast12MonthsVolumeBranch(item);
-		item.NetPrice = await calculateNetOfferTaiwanPrice(item);
-		item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
-		item.Price3 = item.NetPrice - item.Level3Discount1;
-		item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
-		item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
-		item.TotalDiscountNHI = (item.BasePrice - item.Price3) / item.BasePrice;
-		item.TotalDiscountInvoice = (item.OfferPrice - item.Price3) / item.OfferPrice;
-	};
-	
 }
 );
 
@@ -1558,24 +1592,34 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 	srv.on('READ', 'OfferValidation', async (req) => {
 		const tx = cds.tx(req);
-		let results = [];
-		if (req.query.SELECT.where) {
-			//Get filters
-			let whereOffer = ServiceHelper.buildWhere(req, "OFFERID");
-			results = await buildOfferValidation(tx, whereOffer);
+		try{
+			let results = [];
+			if (req.query.SELECT.where) {
+				//Get filters
+				let whereOffer = ServiceHelper.buildWhere(req, "OFFERID");
+				results = await buildOfferValidation(tx, whereOffer);
+			}
+			return results;
 		}
-		return results;
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	});
 
 	srv.on('READ', 'OfferProductValidation', async (req) => {
 		const tx = cds.tx(req);
-		let results = [];
-		if (req.query.SELECT.where) {
-			//Get filters
-			let whereOffer = ServiceHelper.buildWhere(req, "OFFER_ID");
-			results = await buildOfferProductValidation(tx, whereOffer);
+		try{
+			let results = [];
+			if (req.query.SELECT.where) {
+				//Get filters
+				let whereOffer = ServiceHelper.buildWhere(req, "OFFER_ID");
+				results = await buildOfferProductValidation(tx, whereOffer);
+			}
+			return results;
 		}
-		return results;
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	});
 
 	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
@@ -1616,590 +1660,607 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 
 	async function buildOfferApproval(tx, whereOffer) {
-		let results = [];
-		let approverTypes = [];
-		let latestApproval = await tx.run(SELECT.from(ApprovalRequests).where(whereOffer));
+		try{
+			let results = [];
+			let approverTypes = [];
+			let latestApproval = await tx.run(SELECT.from(ApprovalRequests).where(whereOffer));
 
-		whereOffer[0].ref[0] = 'OFFERID'
-		let offerValidation = await buildOfferValidation(tx, whereOffer);
+			whereOffer[0].ref[0] = 'OFFERID'
+			let offerValidation = await buildOfferValidation(tx, whereOffer);
 
-		let whereCountry = whereOffer;
-		whereCountry[0].ref[0] = 'CountryCode';
-		whereCountry[2].val = offerValidation.COUNTRYCODE;
+			let whereCountry = whereOffer;
+			whereCountry[0].ref[0] = 'CountryCode';
+			whereCountry[2].val = offerValidation.COUNTRYCODE;
 
-		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
-		let offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({OfferID: offerValidation.OFFERID}));
-		let offerProductPackIDs = offerProducts.map(pr => pr.ProductCode);
-		let countryProductPacks = await tx.run(SELECT.from(PT_TMCTPRDPCK).where({CountryCode: offerValidation.COUNTRYCODE, PRODUCTPACKID: offerProductPackIDs}));
-		let countryProductPackBUs = countryProductPacks.map(cp => cp.BU);
+			let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
+			let offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({OfferID: offerValidation.OFFERID}));
+			let offerProductPackIDs = offerProducts.map(pr => pr.ProductCode);
+			let countryProductPacks = await tx.run(SELECT.from(PT_TMCTPRDPCK).where({CountryCode: offerValidation.COUNTRYCODE, PRODUCTPACKID: offerProductPackIDs}));
+			let countryProductPackBUs = countryProductPacks.map(cp => cp.BU);
 
-		if (!offerValidation.COUNTRYCODE) return results;
+			if (!offerValidation.COUNTRYCODE) return results;
 
-		//get ApproverTypes
-		if (offerValidation) {
-			approverTypes = offerValidation.ApproverTypes;
+			//get ApproverTypes
+			if (offerValidation) {
+				approverTypes = offerValidation.ApproverTypes;
+			}
+
+			return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs);
 		}
-
-		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs);
-
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}
 
 	async function buildOfferValidation(tx, whereOffer) {
-		let results = {};
+		try{
+			let results = {};
 
-		//get offer info
-		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
-		if (offer.length !== 1) {
-			return results;
-		}
-		offer = offer[0];
-
-
-		//get tender info
-		const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
-		let tender = await tx.run(SELECT.from(PT_TMTEND).where(whereTender));
-		tender = tender[0];
-		const tenderType = await tx.run(SELECT.from(MASTER_TENDER_TYPE).where({ID: tender.TENDER_TYPE_ID}));
-		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
-		let aApproverTypes = [];
-        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
-        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
-        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
-        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
-         //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
-
-		 //EHQUT-197468-MEA – Nucleus heads notifications flow
-		let Countryregion= await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
-		let regionname=Countryregion.Region;
-		
-		const whereQuotationInstituteId = {
-			InstituteID: offer.QUOTATIONINSTITUTEID,
-			CountryCode: offer.COUNTRYCODE
-		}
-        let quotationInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereQuotationInstituteId));
-
-		//if we have products for the offer the offerProductValidation
-		if (offerProductValidation.length === 0) {
-			//no products
-			return results;
-		} else {
-
-			const allApproverTypes = [...new Set(offerProductValidation.flatMap(obj => obj.ApproverTypes.map(approverType => approverType.ApproverType)))];
-			const aDistinctApproverTypes = allApproverTypes.map(approverType => {
-				return offerProductValidation.flatMap(obj => obj.ApproverTypes).find(obj => obj.ApproverType === approverType);
-			});
-
-			//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
-			aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation, tender, regionname);
-
-		}
-
-		//convert IN_POLICY to true or false
-		let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IN_POLICY ? 1 : 0 })) === 1 ? true : false;
-		let isLowest = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_LOWEST }));
-		let isDefaultTerms = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_DEFAULT_TERMS }));
-		let isNewApproval = Math.max.apply(Math, offerProductValidation.map((d) => { return d.NEW_APPROVAL }));
-		let isRegistered = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_REGISTERED }));
+			//get offer info
+			let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
+			if (offer.length !== 1) {
+				return results;
+			}
+			offer = offer[0];
 
 
-		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
-		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
+			//get tender info
+			const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
+			let tender = await tx.run(SELECT.from(PT_TMTEND).where(whereTender));
+			tender = tender[0];
+			const tenderType = await tx.run(SELECT.from(MASTER_TENDER_TYPE).where({ID: tender.TENDER_TYPE_ID}));
+			let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
+			let aApproverTypes = [];
+			//EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+			const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
+			const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
+			let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+			//EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
-		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
-		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
+			//EHQUT-197468-MEA – Nucleus heads notifications flow
+			let Countryregion= await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
+			let regionname=Countryregion.Region;
+			
+			const whereQuotationInstituteId = {
+				InstituteID: offer.QUOTATIONINSTITUTEID,
+				CountryCode: offer.COUNTRYCODE
+			}
+			let quotationInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereQuotationInstituteId));
 
-		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
-		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat)} ${offer.CURRENCY} only`;
-		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
+			//if we have products for the offer the offerProductValidation
+			if (offerProductValidation.length === 0) {
+				//no products
+				return results;
+			} else {
 
-		//Division can be Pharma or Radiology, this determines division for country approvers
-		//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
-		let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION }));
-		let division = (divisions.length === 1) ? divisions[0] : "Both";
+				const allApproverTypes = [...new Set(offerProductValidation.flatMap(obj => obj.ApproverTypes.map(approverType => approverType.ApproverType)))];
+				const aDistinctApproverTypes = allApproverTypes.map(approverType => {
+					return offerProductValidation.flatMap(obj => obj.ApproverTypes).find(obj => obj.ApproverType === approverType);
+				});
 
-		//In case we have any FOC (on main products) in the offer, a comment should be in remarks
-		let maxFOC = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FOC }));
-		let focRemark = "";
-		if (maxFOC !== 0) {
-			if (offer.FOC_TYPE === "FOC 1") {
-				focRemark = "Free-of-Charge goods will be included in the ordered quantity, as specified in the quantity column above."
+				//based upon the offerProductValidations aggregate the validation types of the different approverTypes for the country
+				aApproverTypes = getAggregatedValidationTypes(aDistinctApproverTypes, offerProductValidation, tender, regionname);
+
+			}
+
+			//convert IN_POLICY to true or false
+			let inPolicy = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IN_POLICY ? 1 : 0 })) === 1 ? true : false;
+			let isLowest = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_LOWEST }));
+			let isDefaultTerms = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_DEFAULT_TERMS }));
+			let isNewApproval = Math.max.apply(Math, offerProductValidation.map((d) => { return d.NEW_APPROVAL }));
+			let isRegistered = Math.min.apply(Math, offerProductValidation.map((d) => { return d.IS_REGISTERED }));
+
+
+			let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
+			let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
+
+			let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
+			let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
+
+			let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
+			let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat)} ${offer.CURRENCY} only`;
+			let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
+
+			//Division can be Pharma or Radiology, this determines division for country approvers
+			//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
+			let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION }));
+			let division = (divisions.length === 1) ? divisions[0] : "Both";
+
+			//In case we have any FOC (on main products) in the offer, a comment should be in remarks
+			let maxFOC = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FOC }));
+			let focRemark = "";
+			if (maxFOC !== 0) {
+				if (offer.FOC_TYPE === "FOC 1") {
+					focRemark = "Free-of-Charge goods will be included in the ordered quantity, as specified in the quantity column above."
+				}
+				else {
+					focRemark = "Free-of-Charge goods will be provided as an additional quantity to the ordered goods, as specified in the quantity column above.";
+				}
+			}
+
+			//In case we have samples, comment should be in remarks specifying item numbers for which samples are provided
+			
+			// if (samplesNotZero.length === offerProductValidation.length) {
+			// 	samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
+			// }
+			// else if (samplesNotZero.length !== 0) {
+			// 	let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
+			// 	samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
+			// 	samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
+			// }
+			//EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
+			let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
+			let samplesRemark = "";
+			let samplesItemsToUnique = samplesNotZero.map((d) => { return d.SAMPLES });
+			let uniqueSample = Array.from(new Set(samplesItemsToUnique));
+
+			if (samplesNotZero.length === offerProductValidation.length && uniqueSample.length == 1) {
+
+				samplesRemark = uniqueSample[0].toString().concat(" samples will be delivered for all products as per the tender terms and conditions.");
+			}
+			else if (uniqueSample.length >= 1) {
+
+				for (i = 0; i < uniqueSample.length; i++) {
+
+					let samplesItems = Array.from(samplesNotZero.filter((sample) => sample.SAMPLES === uniqueSample[i]).map((sample) => { return sample.SORTER })).join(", ");
+				//EHQUT--INC0170966/INC15506491-Number of Samples not reflected in the Quotation(correction)
+					if (samplesItems.length !== 1) {
+
+						let lastValue= samplesItems.split(",").pop();
+						let lastComma=samplesItems.lastIndexOf(",");
+						samplesItems = samplesItems.substring(0, lastComma).concat(" and ").concat(lastValue);
+						// samplesItems = samplesItems.substring(0, samplesItems.length - 3).concat(" and ").concat(samplesItems[samplesItems.length - 1]);
+					}
+					//EHQUT--INC0170966/INC15506491-Number of Samples not reflected in the Quotation(correction)
+					samplesRemark = samplesRemark.concat(uniqueSample[i].toString().concat(" samples will be delivered for Items ").concat(samplesItems));
+					if (i !== uniqueSample.length - 1) {
+						samplesRemark = samplesRemark.concat("; ");
+					}
+				}
+
+				samplesRemark = samplesRemark.concat(" as per the tender terms and conditions.");
+
+			}
+	//EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
+
+			//Shipment Terms need to be specified by item number if not same for all
+			let shipmentTerms = "";
+			let shipmentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
+				if(d && d.SHIPMENT_TERMS){
+					return d.SHIPMENT_TERMS;
+				}else{
+					return 'NA';
+				}	
+			}));
+			if (shipmentTermsDistinct.length === 1) {
+				shipmentTerms = shipmentTermsDistinct[0];
 			}
 			else {
-				focRemark = "Free-of-Charge goods will be provided as an additional quantity to the ordered goods, as specified in the quantity column above.";
+				let shipmentTermsRow = [];
+				for (let i = 0; i < shipmentTermsDistinct.length; i++) {
+					let shipmentTermsItems = offerProductValidation.filter((d) => d.SHIPMENT_TERMS === shipmentTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+					shipmentTermsRow[i] = shipmentTermsItems.concat(": ").concat(shipmentTermsDistinct[i]);
+				}
+				shipmentTerms = shipmentTermsRow.join("<br>")
 			}
-		}
 
-		//In case we have samples, comment should be in remarks specifying item numbers for which samples are provided
-		
-		// if (samplesNotZero.length === offerProductValidation.length) {
-		// 	samplesRemark = "Samples will be delivered for all products as per the tender terms and conditions.";
-		// }
-		// else if (samplesNotZero.length !== 0) {
-		// 	let samplesItems = samplesNotZero.map((d) => { return d.SORTER }).join(",");
-		// 	samplesRemark = "Samples will be delivered for the quoted products with S.N. {";
-		// 	samplesRemark = samplesRemark.concat(samplesItems).concat("} as per the tender terms and conditions.")
-		// }
-        //EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
-        let samplesNotZero = offerProductValidation.filter((d) => d.SAMPLES !== 0);
-        let samplesRemark = "";
-        let samplesItemsToUnique = samplesNotZero.map((d) => { return d.SAMPLES });
-        let uniqueSample = Array.from(new Set(samplesItemsToUnique));
+			//Payment Terms need to be specified by item number if not same for all
+			let paymentTerms = offer.PaymentTerms;
 
-        if (samplesNotZero.length === offerProductValidation.length && uniqueSample.length == 1) {
-
-            samplesRemark = uniqueSample[0].toString().concat(" samples will be delivered for all products as per the tender terms and conditions.");
-        }
-        else if (uniqueSample.length >= 1) {
-
-            for (i = 0; i < uniqueSample.length; i++) {
-
-                let samplesItems = Array.from(samplesNotZero.filter((sample) => sample.SAMPLES === uniqueSample[i]).map((sample) => { return sample.SORTER })).join(", ");
-               //EHQUT--INC0170966/INC15506491-Number of Samples not reflected in the Quotation(correction)
-                if (samplesItems.length !== 1) {
-
-                    let lastValue= samplesItems.split(",").pop();
-                    let lastComma=samplesItems.lastIndexOf(",");
-                    samplesItems = samplesItems.substring(0, lastComma).concat(" and ").concat(lastValue);
-                     // samplesItems = samplesItems.substring(0, samplesItems.length - 3).concat(" and ").concat(samplesItems[samplesItems.length - 1]);
-                }
-                //EHQUT--INC0170966/INC15506491-Number of Samples not reflected in the Quotation(correction)
-                samplesRemark = samplesRemark.concat(uniqueSample[i].toString().concat(" samples will be delivered for Items ").concat(samplesItems));
-                if (i !== uniqueSample.length - 1) {
-                    samplesRemark = samplesRemark.concat("; ");
-                }
-            }
-
-            samplesRemark = samplesRemark.concat(" as per the tender terms and conditions.");
-
-        }
-//EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
-
-		//Shipment Terms need to be specified by item number if not same for all
-		let shipmentTerms = "";
-		let shipmentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
-			if(d && d.SHIPMENT_TERMS){
-				return d.SHIPMENT_TERMS;
-			}else{
-				return 'NA';
-			}	
-		}));
-		if (shipmentTermsDistinct.length === 1) {
-			shipmentTerms = shipmentTermsDistinct[0];
-		}
-		else {
-			let shipmentTermsRow = [];
-			for (let i = 0; i < shipmentTermsDistinct.length; i++) {
-				let shipmentTermsItems = offerProductValidation.filter((d) => d.SHIPMENT_TERMS === shipmentTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				shipmentTermsRow[i] = shipmentTermsItems.concat(": ").concat(shipmentTermsDistinct[i]);
-			}
-			shipmentTerms = shipmentTermsRow.join("<br>")
-		}
-
-		//Payment Terms need to be specified by item number if not same for all
-		let paymentTerms = offer.PaymentTerms;
-
-		/**
-		 * In this commented fields we use offerProduct PaymentTerms field.
-		 * It is not needed to use offerProduct PaymentTerms field because offer has it's own PaymentTerm field --> Custom_String_1
-		 */
-		
-		// let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
-		// 	if(d && d.PAYMENT_TERMS){
-		// 		return d.PAYMENT_TERMS;
-		// 	}else{
-		// 		return 'NA';
-		// 	}		
-		// }));
-		// if (paymentTermsDistinct.length === 1) {
-		// 	paymentTerms = paymentTermsDistinct[0];
-		// }
-		// else {
-		// 	let paymentTermsRow = [];
-		// 	for (let i = 0; i < paymentTermsDistinct.length; i++) {
-		// 		let paymentTermsItems = offerProductValidation.filter((d) => d.PAYMENT_TERMS === paymentTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
-		// 		paymentTermsRow[i] = paymentTermsItems.concat(": ").concat(paymentTermsDistinct[i]);
-		// 	}
-		// 	paymentTerms = paymentTermsRow.join("<br>")
-		// }
-
-	
-		let deliveryTerms = "";
-		let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
-			if(d && d.DELIVERY_TERMS){
-				return d.DELIVERY_TERMS;
-			}else{
-				return 'NA';
-			}	
-		}));
-		if (deliveryTermsDistinct.length === 1) {
-			deliveryTerms = deliveryTermsDistinct[0];
-		}
-		else {
-			let deliveryTermsRow = [];
-			for (let i = 0; i < deliveryTermsDistinct.length; i++) {
-				let deliveryTermsItems = offerProductValidation.filter((d) => d.DELIVERY_TERMS === deliveryTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
-				deliveryTermsRow[i] = deliveryTermsItems.concat(": ").concat(deliveryTermsDistinct[i]);
-			}
-			deliveryTerms = deliveryTermsRow.join("<br>")
-		}
+			/**
+			 * In this commented fields we use offerProduct PaymentTerms field.
+			 * It is not needed to use offerProduct PaymentTerms field because offer has it's own PaymentTerm field --> Custom_String_1
+			 */
+			
+			// let paymentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+			// 	if(d && d.PAYMENT_TERMS){
+			// 		return d.PAYMENT_TERMS;
+			// 	}else{
+			// 		return 'NA';
+			// 	}		
+			// }));
+			// if (paymentTermsDistinct.length === 1) {
+			// 	paymentTerms = paymentTermsDistinct[0];
+			// }
+			// else {
+			// 	let paymentTermsRow = [];
+			// 	for (let i = 0; i < paymentTermsDistinct.length; i++) {
+			// 		let paymentTermsItems = offerProductValidation.filter((d) => d.PAYMENT_TERMS === paymentTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+			// 		paymentTermsRow[i] = paymentTermsItems.concat(": ").concat(paymentTermsDistinct[i]);
+			// 	}
+			// 	paymentTerms = paymentTermsRow.join("<br>")
+			// }
 
 		
-//EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
-	//Product comment shows in remarks, if any
-		// let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
-	let producRemark = "";
-		let productRemarkDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
-			if(d && d.PRODUCT_COMMENT){
-				return d.PRODUCT_COMMENT;
+			let deliveryTerms = "";
+			let deliveryTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { 
+				if(d && d.DELIVERY_TERMS){
+					return d.DELIVERY_TERMS;
+				}else{
+					return 'NA';
+				}	
+			}));
+			if (deliveryTermsDistinct.length === 1) {
+				deliveryTerms = deliveryTermsDistinct[0];
 			}
-            else{
-           		return ' ';// EHQUT-introduce the space
-			}	
-            }));        
-        //EUTVP: fix wrong condition                            
-       // if (typeof (productRemarkDistinct[0])!=="undefined")
-       // {
-	//EFRCL- 331661- SCTASK14558875 MEA Remarks issue in quotation tab
-	if (productRemarkDistinct.length === 1) {
-		producRemark  = productRemarkDistinct[0];
-	}
-	else{
-		if(regionname === 'MEA'){
-			let emptyindex = productRemarkDistinct.findIndex(x => x === ' ');
-		if(emptyindex !== -1){
-				productRemarkDistinct.splice(emptyindex,1);
+			else {
+				let deliveryTermsRow = [];
+				for (let i = 0; i < deliveryTermsDistinct.length; i++) {
+					let deliveryTermsItems = offerProductValidation.filter((d) => d.DELIVERY_TERMS === deliveryTermsDistinct[i]).map((d) => { return d.SORTER }).join(",");
+					deliveryTermsRow[i] = deliveryTermsItems.concat(": ").concat(deliveryTermsDistinct[i]);
+				}
+				deliveryTerms = deliveryTermsRow.join("<br>")
 			}
+
+			
+	//EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
+		//Product comment shows in remarks, if any
+			// let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
+		let producRemark = "";
+			let productRemarkDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
+				if(d && d.PRODUCT_COMMENT){
+					return d.PRODUCT_COMMENT;
+				}
+				else{
+					return ' ';// EHQUT-introduce the space
+				}	
+				}));        
+			//EUTVP: fix wrong condition                            
+		// if (typeof (productRemarkDistinct[0])!=="undefined")
+		// {
+		//EFRCL- 331661- SCTASK14558875 MEA Remarks issue in quotation tab
+		if (productRemarkDistinct.length === 1) {
+			producRemark  = productRemarkDistinct[0];
 		}
+		else{
+			if(regionname === 'MEA'){
+				let emptyindex = productRemarkDistinct.findIndex(x => x === ' ');
+			if(emptyindex !== -1){
+					productRemarkDistinct.splice(emptyindex,1);
+				}
+			}
 
-		let productTermsRow = [];
-		for (let i = 0; i < productRemarkDistinct.length; i++) {
-			let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
-			productTermsRow[i] = productTermsItems.concat(" ").concat(productRemarkDistinct[i]);//removed the colon
+			let productTermsRow = [];
+			for (let i = 0; i < productRemarkDistinct.length; i++) {
+				let productTermsItems = offerProductValidation.filter((d) => d.PRODUCT_COMMENT === productRemarkDistinct[i]).map((d) => { return d.SORTER }).join(",");
+				productTermsRow[i] = productTermsItems.concat(" ").concat(productRemarkDistinct[i]);//removed the colon
+			}
+			producRemark = productTermsRow.join("<br>")
 		}
-		producRemark = productTermsRow.join("<br>")
-	}
-    //}
-//EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
-		//Comment shows in remarks if any product is not registered in country
-		let registeredRemark = "";
-		if (isRegistered === 0) {
-			registeredRemark = "Product(s) not registered in the country. Import Permit is to be arranged by ";
-			registeredRemark = registeredRemark.concat(offer.DISTRIBUTORNAME)
+		//}
+	//EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
+			//Comment shows in remarks if any product is not registered in country
+			let registeredRemark = "";
+			if (isRegistered === 0) {
+				registeredRemark = "Product(s) not registered in the country. Import Permit is to be arranged by ";
+				registeredRemark = registeredRemark.concat(offer.DISTRIBUTORNAME)
+			}
+			//EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+			let InstituteRemark = institute.Comment ? institute.Comment : ""; //solution for TCS (otherwise line concat will not work if its null)
+			//EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
+
+			//Comment if any product is alternative to quoted
+			let isAlternativeToQuoted = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_QUOTED }));
+			let alternativeQuotedRemark = (isAlternativeToQuoted !== 0)
+				? "** marked products are alternative to quoted products"
+				: "";
+
+			//Comment if any product is alternative to requested
+			let isAlternativeToRequested = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_REQUESTED }));
+			let alternativeRequestedRemark = (isAlternativeToRequested !== 0)
+				? "* marked products are alternative to requested products"
+				: "";
+				//EHQUT-INC17933752-FAST SEWA - Workflow issue
+			//In case of distributor sales, we have a specific note to distributor
+			let remarks = (offer.TENDER_CHANNEL === "Distributor" && offer.REGION_NAME !== "SEWA")
+				? "With reference to the above tender, you must not on-sell the above mentioned products at a price higher than those listed above. However, you are always free to price lower, at your discretion.<br>"
+				: "";
+			//Building full remarks text
+			remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/\\+/g, "<br>").concat("<br>") : "");
+			remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/\\+/g, "<br>").concat("<br>") : "");
+			remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.COUNTRY_COMMENT.concat("<br>") : "");
+			remarks = remarks.concat((registeredRemark !== "") ? registeredRemark.concat("<br>") : "");
+			remarks = remarks.concat((samplesRemark !== "") ? samplesRemark.concat("<br>") : "");
+			remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
+			remarks = remarks.concat((alternativeQuotedRemark !== "") ? alternativeQuotedRemark.concat("<br>") : "");
+			remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
+			remarks=remarks.concat((InstituteRemark !== "") ? InstituteRemark.concat("<br>") : "");
+			remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
+
+			// get SUBMITTED_BY user info 
+			const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
+			
+			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+			//EHQUT- Spain - correct mistakes on Commercial agreement templates
+			results = {
+				OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
+				TENDERID: offer.TENDERID,
+				CLASSIFICATION: offer.CLASSIFICATION,//Added Classification (db#1)
+				TENDER_REFERENCE: offer.TENDER_REFERENCE,
+				PROCUREMENT_REASON: tender.PROCUREMENT_METHOD_ID,
+				OFFERID: offer.OFFERID,
+				INSTITUTENAME: offer.INSTITUTENAME,
+				EXTERNAL_INSTITUTEID: offer.EXTERNAL_INSTITUTEID,
+				INSTITUTECITY: offer.INSTITUTECITY,
+				QUOTATIONINSTITUTENAME : quotationInstitute?.InstituteName,
+				QUOTATIONINSTITUTECITY : quotationInstitute?.City,
+				QUOTATIONINSTITUTECUSTOMERID : quotationInstitute?.CustomerID,
+				INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
+				INSTITUTE_STATE: offer.INSTITUTE_STATE,
+				INSTITUTE_ADDRESS:offer.INSTITUTE_ADDRESS,
+				TENDERCONTACT:offer.TENDERCONTACT,
+				INSTITUTE_REGION: offer.REGION_NAME,
+				INSTITUTE_PROVINCE: offer.REGION_PROVINCE,
+				INSTITUTE_CIFCODE: offer.CIF_CODE,
+				INSTITUTE_REGIONALHEALTHSYSTEM: offer.REGIONAL_HEALTH_SYSTEM,
+				INSTITUTE_CUSTOMER_GROUP: offer.CUSTOMER_GROUP,
+				VATCODE: offer.VATCODE,
+				TAXCODE: offer.TAXCODE,
+				CUSTOMER_CODE: offer.CUSTOMER_CODE,
+				DIVISION: division,//not correct, should be consolidated from product information
+				OFFERDATE: offer.OFFERDATE,
+				OFFERVALIDITY: offer.OFFERVALIDITY,
+				EffectiveDate: offer.EffectiveDate,
+				ExpiryDate: offer.ExpiryDate,
+				COUNTRYCODE: offer.COUNTRYCODE,
+				SELLINGCOMPANY: offer.SELLINGCOMPANY,
+				SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
+				SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
+				SELLING_COMPANY_AS1_NAMEI: offer.SELLING_COMPANY_AS1_NAMEI,
+				SELLING_COMPANY_AS1_TITLEI: offer.SELLING_COMPANY_AS1_TITLEI,
+				SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
+				SELLING_COMPANY_AS2_NAMEI: offer.SELLING_COMPANY_AS2_NAMEI,
+				SELLING_COMPANY_AS2_TITLEI: offer.SELLING_COMPANY_AS2_TITLEI,
+				E_SIGNATURE1: offer.E_SIGNATURE1,
+				E_SIGNATURE2: offer.E_SIGNATURE2,
+				CURRENCY: offer.CURRENCY,
+				AMOUNT_IN_NUMBERS: totalAmount,
+				AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
+				LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
+				//REGULATORY: regulatory,
+				//LEGAL: legal,
+				//CONTROLLING: controlling,
+				//COUNTRY_BUSINESS: countryBusiness,
+				//REGIONAL_BUSINESS: regionalBusiness,
+				//SUPPLY_CHAIN: supply,
+				DISTRIBUTORNAME: offer.DISTRIBUTORNAME,
+				DISTRIBUTORADDRESS: offer && offer.DISTRIBUTORADDRESS ? offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>") : '',
+				DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
+				DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
+				DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
+				DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
+				REMARKS: remarks,
+				CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
+				DELIVERYTERMS: deliveryTerms,
+				PAYMENTTERMS: paymentTerms,
+				SHIPMENTTERMS: shipmentTerms,
+				IS_LOWEST: isLowest,
+				IS_DEFAULT_TERMS: isDefaultTerms,
+				NEW_APPROVAL: isNewApproval,
+				AMOUNT_IN_NUMBERS_VAT: totalAmountVat,
+				AMOUNT_IN_WORDS_VAT: totalAmountVatInWords,
+				VAT_TOTAL: vatTotal,
+				//NSM_SM_FM: nsmLevel,
+				//HBU: hbuLevel,
+				//CDH: cdhLevel,
+				IN_POLICY: inPolicy,
+				//MACS: macsLevel,
+				//TA: taLevel,
+				//FBP: fbpLevel,
+				//LPC: lpcLevel,
+				//COM_PGA: comPgaLevel,
+				//International_Trade: internationTradeLevel,
+				//Transfer_Pricing: transferPricingLevel,
+				//SBR: sbrLevel,
+				PUBLICATION_DATE: offer.PUBLICATION_DATE,
+				BID_DUE_DATE: offer.BID_DUE_DATE,
+				TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
+				ApproverTypes: aApproverTypes,
+				BUDGET_RATE: budgetRate,
+				SPOT_RATE: spotRate,
+				EXTERNAL_ID: tender.ExternalID,
+				SAP_ID: tender.SAPID,
+				// TENDER_TYPE: tenderType[0].NAME,
+				CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
+				CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
+				CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
+			};
+			return results;
 		}
-        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
-        let InstituteRemark = institute.Comment ? institute.Comment : ""; //solution for TCS (otherwise line concat will not work if its null)
-        //EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
-
-		//Comment if any product is alternative to quoted
-		let isAlternativeToQuoted = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_QUOTED }));
-		let alternativeQuotedRemark = (isAlternativeToQuoted !== 0)
-			? "** marked products are alternative to quoted products"
-			: "";
-
-		//Comment if any product is alternative to requested
-		let isAlternativeToRequested = Math.max.apply(Math, offerProductValidation.map((d) => { return d.IS_ALTERNATIVE_REQUESTED }));
-		let alternativeRequestedRemark = (isAlternativeToRequested !== 0)
-			? "* marked products are alternative to requested products"
-			: "";
-			//EHQUT-INC17933752-FAST SEWA - Workflow issue
-		//In case of distributor sales, we have a specific note to distributor
-		let remarks = (offer.TENDER_CHANNEL === "Distributor" && offer.REGION_NAME !== "SEWA")
-			? "With reference to the above tender, you must not on-sell the above mentioned products at a price higher than those listed above. However, you are always free to price lower, at your discretion.<br>"
-			: "";
-		//Building full remarks text
-		remarks = remarks.concat((offer.SELLING_COMPANY_REMARKS !== "") ? offer.SELLING_COMPANY_REMARKS.replace(/\\+/g, "<br>").concat("<br>") : "");
-		remarks = remarks.concat((offer.SELLING_COMPANY_FOOTER !== "") ? offer.SELLING_COMPANY_FOOTER.replace(/\\+/g, "<br>").concat("<br>") : "");
-		remarks = remarks.concat((offer.COUNTRY_COMMENT !== "") ? offer.COUNTRY_COMMENT.concat("<br>") : "");
-		remarks = remarks.concat((registeredRemark !== "") ? registeredRemark.concat("<br>") : "");
-		remarks = remarks.concat((samplesRemark !== "") ? samplesRemark.concat("<br>") : "");
-		remarks = remarks.concat((focRemark !== "") ? focRemark.concat("<br>") : "");
-		remarks = remarks.concat((alternativeQuotedRemark !== "") ? alternativeQuotedRemark.concat("<br>") : "");
-		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
-        remarks=remarks.concat((InstituteRemark !== "") ? InstituteRemark.concat("<br>") : "");
-		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
-
-		// get SUBMITTED_BY user info 
-		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
-		
-		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
-		//EHQUT- Spain - correct mistakes on Commercial agreement templates
-		results = {
-			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
-			TENDERID: offer.TENDERID,
-			CLASSIFICATION: offer.CLASSIFICATION,//Added Classification (db#1)
-			TENDER_REFERENCE: offer.TENDER_REFERENCE,
-			PROCUREMENT_REASON: tender.PROCUREMENT_METHOD_ID,
-			OFFERID: offer.OFFERID,
-			INSTITUTENAME: offer.INSTITUTENAME,
-			EXTERNAL_INSTITUTEID: offer.EXTERNAL_INSTITUTEID,
-			INSTITUTECITY: offer.INSTITUTECITY,
-			QUOTATIONINSTITUTENAME : quotationInstitute?.InstituteName,
-            QUOTATIONINSTITUTECITY : quotationInstitute?.City,
-            QUOTATIONINSTITUTECUSTOMERID : quotationInstitute?.CustomerID,
-			INSTITUTE_TYPE: offer.INSTITUTE_TYPE,
-			INSTITUTE_STATE: offer.INSTITUTE_STATE,
-			INSTITUTE_ADDRESS:offer.INSTITUTE_ADDRESS,
-			TENDERCONTACT:offer.TENDERCONTACT,
-            INSTITUTE_REGION: offer.REGION_NAME,
-            INSTITUTE_PROVINCE: offer.REGION_PROVINCE,
-            INSTITUTE_CIFCODE: offer.CIF_CODE,
-            INSTITUTE_REGIONALHEALTHSYSTEM: offer.REGIONAL_HEALTH_SYSTEM,
-            INSTITUTE_CUSTOMER_GROUP: offer.CUSTOMER_GROUP,
-			VATCODE: offer.VATCODE,
-			TAXCODE: offer.TAXCODE,
-			CUSTOMER_CODE: offer.CUSTOMER_CODE,
-			DIVISION: division,//not correct, should be consolidated from product information
-			OFFERDATE: offer.OFFERDATE,
-			OFFERVALIDITY: offer.OFFERVALIDITY,
-			EffectiveDate: offer.EffectiveDate,
-			ExpiryDate: offer.ExpiryDate,
-			COUNTRYCODE: offer.COUNTRYCODE,
-			SELLINGCOMPANY: offer.SELLINGCOMPANY,
-			SELLINGCOMPANYBANK: offer && offer.SELLINGCOMPANYBANK ? offer.SELLINGCOMPANYBANK.replace(/\\+/g, "<br>") : '',
-			SELLING_COMPANY_AS1: offer.SELLING_COMPANY_AS1,
-			SELLING_COMPANY_AS1_NAMEI: offer.SELLING_COMPANY_AS1_NAMEI,
-			SELLING_COMPANY_AS1_TITLEI: offer.SELLING_COMPANY_AS1_TITLEI,
-			SELLING_COMPANY_AS2: offer.SELLING_COMPANY_AS2,
-			SELLING_COMPANY_AS2_NAMEI: offer.SELLING_COMPANY_AS2_NAMEI,
-			SELLING_COMPANY_AS2_TITLEI: offer.SELLING_COMPANY_AS2_TITLEI,
-			E_SIGNATURE1: offer.E_SIGNATURE1,
-			E_SIGNATURE2: offer.E_SIGNATURE2,
-			CURRENCY: offer.CURRENCY,
-			AMOUNT_IN_NUMBERS: totalAmount,
-			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
-			LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
-			//REGULATORY: regulatory,
-			//LEGAL: legal,
-			//CONTROLLING: controlling,
-			//COUNTRY_BUSINESS: countryBusiness,
-			//REGIONAL_BUSINESS: regionalBusiness,
-			//SUPPLY_CHAIN: supply,
-			DISTRIBUTORNAME: offer.DISTRIBUTORNAME,
-			DISTRIBUTORADDRESS: offer && offer.DISTRIBUTORADDRESS ? offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>") : '',
-			DISTRIBUTORPHONE: offer.DISTRIBUTORPHONE,
-			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
-			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
-			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
-			REMARKS: remarks,
-			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
-			DELIVERYTERMS: deliveryTerms,
-			PAYMENTTERMS: paymentTerms,
-			SHIPMENTTERMS: shipmentTerms,
-			IS_LOWEST: isLowest,
-			IS_DEFAULT_TERMS: isDefaultTerms,
-			NEW_APPROVAL: isNewApproval,
-			AMOUNT_IN_NUMBERS_VAT: totalAmountVat,
-			AMOUNT_IN_WORDS_VAT: totalAmountVatInWords,
-			VAT_TOTAL: vatTotal,
-			//NSM_SM_FM: nsmLevel,
-			//HBU: hbuLevel,
-			//CDH: cdhLevel,
-			IN_POLICY: inPolicy,
-			//MACS: macsLevel,
-			//TA: taLevel,
-			//FBP: fbpLevel,
-			//LPC: lpcLevel,
-			//COM_PGA: comPgaLevel,
-			//International_Trade: internationTradeLevel,
-			//Transfer_Pricing: transferPricingLevel,
-			//SBR: sbrLevel,
-			PUBLICATION_DATE: offer.PUBLICATION_DATE,
-			BID_DUE_DATE: offer.BID_DUE_DATE,
-			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
-			ApproverTypes: aApproverTypes,
-			BUDGET_RATE: budgetRate,
-			SPOT_RATE: spotRate,
-			EXTERNAL_ID: tender.ExternalID,
-			SAP_ID: tender.SAPID,
-			// TENDER_TYPE: tenderType[0].NAME,
-			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
-			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
-            CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
-		};
-		return results;
-		
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}
 
 	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs) {
+		try{
+			let aResults = [];
+			approverTypes.forEach(function (type, index) {
 
-		let aResults = [];
-		approverTypes.forEach(function (type, index) {
+				let approverName = "";
+				let approverEmailID = "";
+				let senderComment = "";
+				let approverComment = "";
+				let statusTime = null;
+				let submittedBy = null;
+				let approverDate = null;
+				let flowId = null;
+				let approverType = "";
+				let division = "";
+				let countryName = "";
+				let userName = "";
+				let userEmail = "";
+				let requiredAction = "";
+				
+				let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
+				let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation, countryProductPackBUs);
 
-			let approverName = "";
-			let approverEmailID = "";
-			let senderComment = "";
-			let approverComment = "";
-			let statusTime = null;
-			let submittedBy = null;
-			let approverDate = null;
-			let flowId = null;
-			let approverType = "";
-			let division = "";
-			let countryName = "";
-			let userName = "";
-			let userEmail = "";
-			let requiredAction = "";
-			
-			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
-			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation, countryProductPackBUs);
+				if (approvalForType.length !== 0) {
+					approverName = approvalForType[0].ApproverName;
+					approverEmailID = approvalForType[0].ApproverEmailID;
+					statusTime = approvalForType[0].Statustime;
+					submittedBy = approvalForType[0].Submittedby;
+					approverDate = approvalForType[0].ApproverDate;
+					flowId = approvalForType[0].FLOW_ID;
+					countryName = approvalForType[0].CountryName;
+					userName = approvalForType[0].UserName;
+					userEmail = approvalForType[0].UserEmail;
+					senderComment = approvalForType[0].SenderComment;
+					approverComment = approvalForType[0].ApproverComment;
+					//			hierarchy 		= approvalForType[0].Hierarchy;
+					requiredAction = type.ValidationType;
+					approverType = defaultForType.length !== 0 ? defaultForType[0].ApproverType : "";
+					division = defaultForType.length !== 0 ? defaultForType[0].Division : "";
+				}
+				else if (defaultForType.length !== 0) {
+					approverName = defaultForType[0].ApproverName;
+					approverEmailID = defaultForType[0].ApproverEmailID;
+					approverType = defaultForType[0].ApproverType;
+					division = defaultForType[0].Division;
+					requiredAction = approverTypes.filter((d) => d.ApproverType === defaultForType[0].ApproverType)[0].ValidationType
+					approverType = defaultForType[0].ApproverType;
+					division = defaultForType[0].Division;
+				}
+				else {
+					return null;
+				}
 
-			if (approvalForType.length !== 0) {
-				approverName = approvalForType[0].ApproverName;
-				approverEmailID = approvalForType[0].ApproverEmailID;
-				statusTime = approvalForType[0].Statustime;
-				submittedBy = approvalForType[0].Submittedby;
-				approverDate = approvalForType[0].ApproverDate;
-				flowId = approvalForType[0].FLOW_ID;
-				countryName = approvalForType[0].CountryName;
-				userName = approvalForType[0].UserName;
-				userEmail = approvalForType[0].UserEmail;
-				senderComment = approvalForType[0].SenderComment;
-				approverComment = approvalForType[0].ApproverComment;
-				//			hierarchy 		= approvalForType[0].Hierarchy;
-				requiredAction = type.ValidationType;
-				approverType = defaultForType.length !== 0 ? defaultForType[0].ApproverType : "";
-				division = defaultForType.length !== 0 ? defaultForType[0].Division : "";
-			}
-			else if (defaultForType.length !== 0) {
-				approverName = defaultForType[0].ApproverName;
-				approverEmailID = defaultForType[0].ApproverEmailID;
-				approverType = defaultForType[0].ApproverType;
-				division = defaultForType[0].Division;
-				requiredAction = approverTypes.filter((d) => d.ApproverType === defaultForType[0].ApproverType)[0].ValidationType
-				approverType = defaultForType[0].ApproverType;
-				division = defaultForType[0].Division;
-			}
-			else {
-				return null;
-			}
+				let aApproval = approvalForType.filter((a) => a.ApproverType === approverType);
+				let aApproverType = approverTypes.filter((d) => d.ApproverType === approverType);
+				if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
+					aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
+				}
 
-			let aApproval = approvalForType.filter((a) => a.ApproverType === approverType);
-			let aApproverType = approverTypes.filter((d) => d.ApproverType === approverType);
-			if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
-				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
-			}
+				aResults.push({
+					TenderID: offerValidation.TENDERID,
+					OfferId: offerValidation.OFFERID,
+					CountryCode: offerValidation.COUNTRYCODE,
+					ApprovalContent: getApprovalContent(approverType),
+					ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
+					REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
+					ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
+					ApproverName: approverName,
+					ApproverEmailID: approverEmailID,
+					SenderComment: senderComment,
+					ApproverComment: approverComment,
+					Active: 1,
+					AP_ID: null,
+					RestoreKey: null,
+					Statustime: statusTime,
+					Submittedby: submittedBy,
+					ApproverDate: approverDate,
+					ApproverType: approverType,
+					Division: division,
+					FLOW_ID: flowId,
+					ApproverList: defaultForType,
+					ApproverTypes: aApproverType,
+					CountryName: countryName,
+					UserName: userName,
+					UserEmail: userEmail
+				});
 
-			aResults.push({
-				TenderID: offerValidation.TENDERID,
-				OfferId: offerValidation.OFFERID,
-				CountryCode: offerValidation.COUNTRYCODE,
-				ApprovalContent: getApprovalContent(approverType),
-				ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
-				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
-				ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
-				ApproverName: approverName,
-				ApproverEmailID: approverEmailID,
-				SenderComment: senderComment,
-				ApproverComment: approverComment,
-				Active: 1,
-				AP_ID: null,
-				RestoreKey: null,
-				Statustime: statusTime,
-				Submittedby: submittedBy,
-				ApproverDate: approverDate,
-				ApproverType: approverType,
-				Division: division,
-				FLOW_ID: flowId,
-				ApproverList: defaultForType,
-				ApproverTypes: aApproverType,
-				CountryName: countryName,
-				UserName: userName,
-				UserEmail: userEmail
 			});
 
-		});
-
-		return aResults.sort((a, b) => a.ApproverTypeSection - b.ApproverTypeSection);
+			return aResults.sort((a, b) => a.ApproverTypeSection - b.ApproverTypeSection);
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}
 
 	//get aggregated validation types for offerValidation, based upon the productValidations that are underneath the offerValidation
 	//EHQUT-197468-MEA – Nucleus heads notifications flow
 	function getAggregatedValidationTypes(aApproverTypes, offerProductValidation, tender, regionname) {
-		let tenderid = offerProductValidation[0].TENDER_ID;
-		let Countrycode=offerProductValidation[0].COUNTRY_CODE;
+		try{
+			let tenderid = offerProductValidation[0].TENDER_ID;
+			let Countrycode=offerProductValidation[0].COUNTRY_CODE;
 
-		let tenderyear = tenderid.split("-")[1].substring(0, 2);
-		
-		//Calculate max validation type for each type in each product
-		aApproverTypes.map(async function (oApproverType) {
+			let tenderyear = tenderid.split("-")[1].substring(0, 2);
+			
+			//Calculate max validation type for each type in each product
+			aApproverTypes.map(async function (oApproverType) {
 
-			//convert to name of property (space = _ + all CAPITALS --> e.a Supply Chain = SUPPLY_CHAIN)
-			let sApproverType = oApproverType.ApproverType;
-			//let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
+				//convert to name of property (space = _ + all CAPITALS --> e.a Supply Chain = SUPPLY_CHAIN)
+				let sApproverType = oApproverType.ApproverType;
+				//let sApproverTypeAttrName = oApproverType.ApproverType.replace(/\s/g, '_').toUpperCase();
 
-			//get max ValidationType
-			offerProductValidation.map((productValidation) => {
+				//get max ValidationType
+				offerProductValidation.map((productValidation) => {
 
-				//keep current validation type
-				let iValidationType = oApproverType.ValidationType;
+					//keep current validation type
+					let iValidationType = oApproverType.ValidationType;
 
-				//check if a product is found with a higher calculated validation type for the same approverType as the current
-				let matchingApproverType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType);
-				if (matchingApproverType && matchingApproverType.ValidationType) {
-					if (iValidationType < matchingApproverType.ValidationType) {
-						iValidationType = matchingApproverType.ValidationType;
+					//check if a product is found with a higher calculated validation type for the same approverType as the current
+					let matchingApproverType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType);
+					if (matchingApproverType && matchingApproverType.ValidationType) {
+						if (iValidationType < matchingApproverType.ValidationType) {
+							iValidationType = matchingApproverType.ValidationType;
+						}
 					}
-				}
-		// 		if (oApproverType.ValidationType < productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType) {
-		// 			iValidationType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType;
-		// 		};
+			// 		if (oApproverType.ValidationType < productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType) {
+			// 			iValidationType = productValidation.ApproverTypes.find(approverType => approverType.ApproverType === sApproverType).ValidationType;
+			// 		};
 
-				oApproverType.ValidationType = iValidationType;
+					oApproverType.ValidationType = iValidationType;
+
+				});
 
 			});
 
-		});
+			//For MEA specific
+			//No need for country business approval if regional business approval is required
+			let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
+			let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
+			if (oCountryBusiness && oRegionalBusiness) {
+				oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
+			}
+			// if(tenderid > '22'){
+			// 	aApproverTypes.splice(oCountryBusiness,1);
+			// }
+			
+			let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
+			if(tenderyear> '22' && regionname === 'MEA'){
+				aApproverTypes.splice(CountryBusinessindex,1);
+							
+			}
+			
+			//For Thailand specific
+			//EHQUT-197882-Thailand - Additional approver for Nalador
+			let index = aApproverTypes.findIndex(x => x.ApproverType === 'Additional Approver' );
+			let total=offerProductValidation.length;
+			let BrandName=[];
 
-		//For MEA specific
-		//No need for country business approval if regional business approval is required
-		let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
-		let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
-		if (oCountryBusiness && oRegionalBusiness) {
-			oCountryBusiness.ValidationType = (oRegionalBusiness.ValidationType !== 1) ? 1 : oCountryBusiness.ValidationType;
+			for(var i=0;i<total;i++){
+				BrandName.push(offerProductValidation[i].BRANDNAME);	
+				}
+
+				if(!(BrandName.includes('Nalador')) && Countrycode === 'TH'){
+					aApproverTypes.splice(index,1);
+					
+				}
+
+			//EHQUT-197882-Thailand - Additional approver for Nalador
+			let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
+			let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
+			let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
+			if (oCDH && oNSM && oHBU) {
+				//If CDH approval is mandatory, lower levels do not need to approve
+				if (oCDH.ValidationType === 3) {
+					oNSM.ValidationType = 1;
+					oHBU.ValidationType = 1;
+				}
+				//If HBU approval is mandatory, lower levels do not need to approve
+				else if (oHBU.ValidationType === 3) {
+					oNSM.ValidationType = 1;
+				}
+			}
+
+			//return the unique approvertypes for the offer & there re-calculated validation type
+			return aApproverTypes;
 		}
-		// if(tenderid > '22'){
-		// 	aApproverTypes.splice(oCountryBusiness,1);
-		// }
-		
-		let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
-		if(tenderyear> '22' && regionname === 'MEA'){
-			aApproverTypes.splice(CountryBusinessindex,1);
-						
+		catch(error){
+			console.error(error.code, error.message);
 		}
-		
-		//For Thailand specific
-		//EHQUT-197882-Thailand - Additional approver for Nalador
-		let index = aApproverTypes.findIndex(x => x.ApproverType === 'Additional Approver' );
-		let total=offerProductValidation.length;
-		let BrandName=[];
-
-		for(var i=0;i<total;i++){
-			BrandName.push(offerProductValidation[i].BRANDNAME);	
-			}
-
-			if(!(BrandName.includes('Nalador')) && Countrycode === 'TH'){
-				aApproverTypes.splice(index,1);
-				
-			}
-
-		//EHQUT-197882-Thailand - Additional approver for Nalador
-		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
-		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
-		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
-		if (oCDH && oNSM && oHBU) {
-			//If CDH approval is mandatory, lower levels do not need to approve
-			if (oCDH.ValidationType === 3) {
-				oNSM.ValidationType = 1;
-				oHBU.ValidationType = 1;
-			}
-			//If HBU approval is mandatory, lower levels do not need to approve
-			else if (oHBU.ValidationType === 3) {
-				oNSM.ValidationType = 1;
-			}
-		}
-
-		//return the unique approvertypes for the offer & there re-calculated validation type
-		return aApproverTypes;
 
 	}
     //EHQUT-197468-MEA – Nucleus heads notifications flow
@@ -2263,375 +2324,379 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 	}
 
 	async function buildOfferProductValidation(tx, whereOffer) {
-
-		let results = [];
-        let aFreeGoodsOther = [];
-		let DistributorInfo = [];
-        
-		whereOffer[0].ref[0] = 'OFFERID'
-		let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
-		if (offer.length !== 1) {
-			return results;
-		}
-
-		offer = offer[0];
-		let aOfferProduct = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
-		if (aOfferProduct.length === 0) {
-			return results;
-		}
-
-		const offerProductsTotalValue = aOfferProduct.reduce((acc, currentProduct) => acc + (currentProduct.REQUESTED_VOLUME * currentProduct.OFFER_PRICE), 0);
-
-		const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
-        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
-        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
-
-		//where statement
-		let whereApproverType = {
-			CountryCode: offer.COUNTRYCODE
-		}
-
-		//Get corresponding approvertypes
-		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
-
-		results = aOfferProduct.map(async function (offerProduct) {
-			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-
-			//Get corresponding ProductPack
-			const whereProductPack = {
-				PRODUCTPACKID: offerProduct.ProductCode,
+		try{
+			let results = [];
+			let aFreeGoodsOther = [];
+			let DistributorInfo = [];
+			
+			whereOffer[0].ref[0] = 'OFFERID'
+			let offer = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
+			if (offer.length !== 1) {
+				return results;
 			}
-			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack);
-
-			//Get corresponding Product Distributor ID
-			const whereProductId = {
-				ProductCode: offerProduct.ProductCode,
-				OfferID:offer.OFFERID,
-				Active: 1
+			offer = offer[0];
+			let aOfferProduct = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+			if (aOfferProduct.length === 0) {
+				return results;
 			}
-			const productDistributorInfo = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereProductId));
 
-			if(productDistributorInfo.Custom_String_1 && offer.COUNTRYCODE == 'PK'){
-				//Get corresponding Distributor Data
-				const whereDistributorId = {
-					DistributorID: productDistributorInfo.Custom_String_1,
+			const offerProductsTotalValue = aOfferProduct.reduce((acc, currentProduct) => acc + (currentProduct.REQUESTED_VOLUME * currentProduct.OFFER_PRICE), 0);
+
+			const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
+			const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
+			let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+
+			//where statement
+			let whereApproverType = {
+				CountryCode: offer.COUNTRYCODE
+			}
+
+			//Get corresponding approvertypes
+			let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+
+			results = aOfferProduct.map(async function (offerProduct) {
+				let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
+
+				//Get corresponding ProductPack
+				const whereProductPack = {
+					PRODUCTPACKID: offerProduct.ProductCode,
+				}
+				const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
+
+				let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack);
+
+				//Get corresponding Product Distributor ID
+				const whereProductId = {
+					ProductCode: offerProduct.ProductCode,
+					OfferID:offer.OFFERID,
+					Active: 1
+				}
+				const productDistributorInfo = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereProductId));
+
+				if(productDistributorInfo.Custom_String_1 && offer.COUNTRYCODE == 'PK'){
+					//Get corresponding Distributor Data
+					const whereDistributorId = {
+						DistributorID: productDistributorInfo.Custom_String_1,
+						CountryCode: offer.COUNTRYCODE
+					}
+					DistributorInfo = await tx.run(SELECT.one.from(PT_TMDIST).where(whereDistributorId));
+				}	
+				//Get corresponding ProductPricing
+				const whereProductPricing = {
+					OfferID: offer.OFFERID,
+					ProductCode: offerProduct.ProductCode,
 					CountryCode: offer.COUNTRYCODE
 				}
-				DistributorInfo = await tx.run(SELECT.one.from(PT_TMDIST).where(whereDistributorId));
-			}	
-			//Get corresponding ProductPricing
-			const whereProductPricing = {
-				OfferID: offer.OFFERID,
-				ProductCode: offerProduct.ProductCode,
-				CountryCode: offer.COUNTRYCODE
+
+				const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
+				const productPricingTable = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricing));
+				//let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
+							
+				let finalDiscount;            
+				if (productPricing.UOM === "Unit") {
+					finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPU ))*100).toFixed(2));
+				} else {
+					finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPP ))*100).toFixed(2));
+				}
+				
+				let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
+				// EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
+				// let whereRoyalDecree = {
+				// 	ProductPackID: offerProduct.ProductCode,
+				// 	ValidTo : '9999-12-31'
+				// }
+				// let RoyalDecreePercentageValue = await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree));
+
+				/*Get corresponding ProductConditions*/
+				const whereProductConditions = {
+					OfferID: offer.OFFERID,
+					ProductCode: offerProduct.ProductCode,
+					CountryCode: offer.COUNTRYCODE
+				}
+				const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
+				const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
+					productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
+					productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
+					productCondition.FreeGoodsOther.forEach(async foc => {
+						foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
+					});
+					productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
+					return productCondition;
+				}));
+				/*end of ProductCondition information */
+
+
+				const whereMaterial = {
+					CountryCode: offer.COUNTRYCODE,
+					ProductPackId: offerProduct.ProductCode
+				}
+				const materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterial));
+
+				//Get all prices, ammounts and cogs in all units
+				let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
+				let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
+
+				//let aFreeGoodsOtherTemp = [];
+				const whereProductPackId = {
+					ProductPricing_ProductCode: offerProduct.PRODUCTID,
+					ProductPricing_OfferID: offer.OFFERID
+				}
+				const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
+
+				const wherePriceconditions = {
+					OfferID: offer.OFFERID,
+					ProductCode: offerProduct.PRODUCTID,
+					CountryCode: offer.COUNTRYCODE
+				}
+
+				//const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
+
+				//loop over freegoodsother and retrieve productpricing, material and productpack data
+				aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
+					let whereMaterialFOC = {
+						CountryCode: offer.COUNTRYCODE,
+						ProductPackId: tmpFreeGoodOther.ProductPackId
+					}
+					
+					tmpFreeGoodOther.Materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterialFOC));
+
+					let whereProductPricingFOC = {
+						OfferID: offer.OFFERID,
+						ProductCode: tmpFreeGoodOther.ProductPricing_ProductCode,
+						CountryCode: offer.COUNTRYCODE
+					}
+		
+					tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
+
+					const whereProductPackFOC = {
+						PRODUCTPACKID: tmpFreeGoodOther.ProductPackId,
+					}
+					tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
+
+					//Get corresponding ProductConditions
+					const whereFocProductConditions = {
+						OfferID: offer.OFFERID,
+						ProductCode: tmpFreeGoodOther.ProductPackId,
+						CountryCode: offer.COUNTRYCODE
+					}
+					let productConditionFOCtmp = await tx.run(SELECT.from(PriceCondition).where(whereFocProductConditions));
+
+					let productFOCConditions = await Promise.all(productConditionFOCtmp.map( async (productFOCCondition) => {
+						let whereFOCDiscountCondition = {
+							ID: productFOCCondition.ID
+						}
+						productFOCCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereFOCDiscountCondition));
+
+						/*let whereFOCRoyalDecree = {
+							ProductPackID: PriceCondition.ProductCode
+						}
+						productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));*/
+
+						let wherePriceConditionClassification = {
+							ID: productFOCCondition.PriceConditionClassification_ID
+						}
+						productFOCCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where(wherePriceConditionClassification));
+
+						return productFOCCondition;
+
+					}));
+
+					tmpFreeGoodOther.priceCondition = productFOCConditions;
+
+					return tmpFreeGoodOther;
+				}));
+
+				// if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
+				// this should only be done for Italy & only for vatInWords
+				let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
+				if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
+					vatInWords += ",00";   
+				}; 
+
+				return {
+					TENDER_ID: offer.TENDERID,
+					COUNTRY_CODE: offer.COUNTRYCODE,
+					OFFER_ID: offer.OFFERID,
+					DIVISION: offerProduct.DIVISION,
+					BRANDID: offerProduct.BRANDID,
+					BRANDNAME: offerProduct.BRANDNAME,
+					PRODUCT_UNIT_NAME: offerProduct.PRODUCT_UNIT_NAME, //thailand
+					SKU: offerProduct.SKU, //thailand
+					PRODUCTID: offerProduct.PRODUCTID,
+					CODE: offerProduct.CODE,
+					PRODUCTNAME: offerProduct.PRODUCTNAME,
+					PACKSIZE: offerProduct.PACKSIZE,
+					DOSAGE: offerProduct.DOSAGE,
+					UOM: offerProduct.UOM,
+					COUNTRYOFORIGIN: offerProduct.COUNTRYOFORIGIN,
+					MANUFACTURER: offerProduct.MANUFACTURER,
+					SHELFLIFE: offerProduct.SHELFLIFE,
+					PRESENTATION: offerProduct.PRESENTATION,
+					VAT: dVat,
+					VAT_IN_WORDS: vatInWords,
+					PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
+					UNIT: offerProduct.UNIT,
+					PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
+					SORTER: offerProduct.SORTER,
+					CURRENCY: offer.CURRENCY,
+					REQUESTED_QUANTITY: parseInt(productInfo.CommnonProductInfo.RequestedQuantityString),
+					DELIVERY_TERMS: productInfo.CommnonProductInfo.DeliveryTerms,
+					PAYMENT_TERMS: offerProduct.PAYMENT_TERMS,
+					SHIPMENT_TERMS: offerProduct.INCO_TERMS,
+					SAMPLES: offerProduct.SAMPLES,
+					SAMPLES_UNIT: offerProduct.SAMPLES * toUnitFactor,
+					SAMPLES_PACK: offerProduct.SAMPLES * toPackFactor,
+					REGISTERED_PRICE: offerProduct.REGISTERED_PRICE,
+					REGISTERED_PRICE_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.REGISTERED_PRICE),
+					OFFER_PRICE: offerProduct.OFFER_PRICE,
+					FOC: productInfo.CommnonProductInfo.FocString,
+					FOC_ABS_PCT_STP:    offerProduct.FOC_ABS_PCT,         
+					TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit, //Total Volume(units) (thailand - new column missing in the screenshot)
+					FOC_QUANTITY_UNITS: productInfo.CommnonProductInfo.FocAmountUnit,
+					PAID_QUANTITY_UNITS: productInfo.CommnonProductInfo.PaidVolumeUnit,
+					REQ_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPriceUnit,
+					REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + offerProduct.VAT),   //MSP incl VAT (thailand)
+					REQ_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPricePack,
+					REQ_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.OfferPriceUnitEurBudget,
+					REQ_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.OfferPriceUnitEurSpot,
+					NET_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPriceUnit,
+					NET_PRICE_UNIT_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPriceUnit),
+					NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT),   //NSP incl VAT (thailand)
+					NET_PRICE_UNIT_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT)),
+					NET_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPricePack,
+					NET_PRICE_PACK_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPricePack),
+					NET_PRICE_PACK_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPricePack * (1 + offerProduct.VAT),
+					NET_PRICE_PACK_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPricePack * (1 + offerProduct.VAT)),
+					NET_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.NetPriceUnitEurBudget,
+					NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
+					NET_OFFER_PRICE: offerProduct.NET_OFFER_PRICE,
+					NET_PRICE: offerProduct.NET_PRICE,
+					ADDITIONAL_DISCOUNT: offerProduct.ADDITIONAL_DISCOUNT,
+					ADDITIONAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.ADDITIONAL_DISCOUNT),
+					MAX_PRICE_NHS_PP: productPricing.MaxPriceNhsPP,
+					MAX_PRICE_NHS_PP_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPP),
+					MAX_PRICE_NHS_PU: productPricing.MaxPriceNhsPU,
+					MAX_PRICE_NHS_PU_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPU),
+					MAX_PRICE_NHS_PU_WITH_VAT: productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT),
+					MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT))),
+					CONTRACT_START_DATE: productPricing.ContractStartDate,
+					NET_OFFER_PRICE_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.NET_OFFER_PRICE),
+					CUSTOMER_ID: institute.CustomerID,
+					COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
+					COGS_EUR_UNIT: productInfo.CommnonProductInfo.CogsEurUnit,
+					COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
+					GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
+					GROSS_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales),
+					NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
+					NET_SALES_EUR_BUDGET: productInfo.CommnonProductInfo.NetSalesEurBudget,
+					NET_SALES_EUR_SPOT: productInfo.CommnonProductInfo.NetSalesEurSpot,
+					GROSS_MARGIN_EUR_BUDGET: productInfo.CommnonProductInfo.GrossMarginEurBudget,
+					GROSS_MARGIN_EUR_SPOT: productInfo.CommnonProductInfo.GrossMarginEurSpot,
+					GROSS_PROFIT_EUR_BUDGET: productInfo.CommnonProductInfo.GrossProfitEurBudget,
+					GROSS_PROFIT_EUR_SPOT: productInfo.CommnonProductInfo.GrossProfitEurSpot,
+					//REGULATORY: productInfo.ProductValidation.REGULATORY,
+					//LEGAL: productInfo.ProductValidation.LEGAL,
+					//CONTROLLING: productInfo.ProductValidation.CONTROLLING,
+					//COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
+					//REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
+					//SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
+					IS_LOWEST: (productInfo.CommnonProductInfo.IsMinPrice) ? 1 : 0,
+					IS_DEFAULT_TERMS: offerProduct.IS_DEFAULT_TERMS,
+					IS_REGISTERED: offerProduct.IS_REGISTERED,
+					IS_ALTERNATIVE_QUOTED: offerProduct.IS_ALTERNATIVE_QUOTED,
+					IS_ALTERNATIVE_REQUESTED: offerProduct.IS_ALTERNATIVE_REQUESTED,
+					NEW_APPROVAL: offerProduct.NEW_APPROVAL,
+					BUDGETED_PROFITABILITY: offerProduct.BUDGETED_PROFITABILITY,
+					UK_BUDGETED_PROFITABILITY: offerProduct.UK_BUDGETED_PROFITABILITY,
+					CHANNEL: offerProduct.CHANNEL,
+					ACT_PROFITABILITY: (offerProduct.NET_PRICE - offerProduct.COGS) / offerProduct.NET_PRICE,
+					GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT),
+					GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT)),
+					VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * offerProduct.VAT,
+					//NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
+					//HBU: productInfo.ProductValidation.HBU,
+					//CDH: productInfo.ProductValidation.CDH,
+					IN_POLICY: productInfo.ProductValidation.IN_POLICY,
+					//MACS: productInfo.ProductValidation.MACS,
+					//TA: productInfo.ProductValidation.TA,
+					//FBP: productInfo.ProductValidation.FBP,
+					//LPC: productInfo.ProductValidation.LPC,
+					//COM_PGA: productInfo.ProductValidation.COM_PGA,
+					//International_Trade: productInfo.ProductValidation.International_Trade,
+					//Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
+					//SBR: productInfo.ProductValidation.SBR,
+					MOLECULE_NAME: offerProduct.MOLECULE_NAME,
+					OFFER_PRICE_VAT: offerProduct.OFFER_PRICE * (1 + offerProduct.VAT),
+					ApproverTypes: aTempApproverTypes,
+					BUDGET_RATE: offerProduct.BUDGET_RATE,
+					SPOT_RATE: offerProduct.SPOT_RATE,
+					BUSINESS_CASE_PRICE: offerProduct.BUSINESS_CASE_PRICE,
+
+					WARRANTY: offerProduct.Warranty,
+					AGREEMENTDURATION: offerProduct.AgreementDuration,
+					MONTHLYRENT: offerProduct.MonthlyRent,
+					MONTHLYRENT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.MonthlyRent),
+					MONTHSPERINVOICE: offerProduct.MonthsPerInvoice,
+					CONTRACTSTARTDATE: offerProduct.ContractStartDate,
+					VALUEOFDEVICES: offerProduct.ValueOfDevices,
+					STATUSOFDEVICE: offerProduct.StatusOfDevice,
+					MINCONTRACTUAL: offerProduct.MinContractual,
+					MINANNPURCH: offerProduct.MinAnnPurch,
+					FOC_STEP: offerProduct.FOC_STEP,
+					OFFER_TYPE: offerProduct.OfferType,
+					FreeGoodsOther: aFreeGoodsOtherTemp,
+					PriceCondition: productConditions,
+
+					//missing SKU & SKUCountry fields
+					MOLECULE_NAME: offerProduct.MOLECULE_NAME,
+					ACTIVERECORD: offerProduct.ACTIVERECORD,
+					HLEVEL6_CODE: offerProduct.HLEVEL6_CODE,
+					PCI_NAME: offerProduct.PCI_NAME,
+					ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
+					PRODUCT_TYPE: offerProduct.PRODUCT_TYPE,
+
+					SKUCOUNTRY_ACTIVERECORD: offerProduct.SKUCOUNTRY_ACTIVERECORD,
+					PRESENTATION_2: offerProduct.PRESENTATION_2,
+					PRODUCT_COMMENT: offerProduct.PRODUCT_COMMENT,
+					GOV_CODE: offerProduct.GOV_CODE,
+					CODE1: offerProduct.CODE1,
+					CODE2: offerProduct.CODE2,
+					CODE3: offerProduct.CODE3,                
+					QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
+					ProductClass: offerProduct.ProductClass,
+					ProductDescription: offerProduct.ProductDescription,
+					FINAL_DISCOUNT: finalDiscount,
+					FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
+					PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
+					LOTID: offerProduct.LOTID,
+					// PERCENTAGE: RoyalDecreePercentageValue.Percentage,
+					ProductPricing: productPricingTable,
+					ProductPack: productPack,
+					Materials: materials,
+					//PriceCondition: aPriceConditions,
+					LINE: offerProduct.LINE,
+					REFERENCE: offerProduct.REFERENCE,
+					IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
+					DISTRIBUTORID: productDistributorInfo.Custom_String_1,
+					DistributorName: DistributorInfo?.DistributorName ?? null,
+					Address: DistributorInfo?.Address ?? null,
+					City: DistributorInfo?.City ?? null
+				}
+			});
+			let resolvedResults = await Promise.all(results);
+			resolvedResults.sort((a, b) => (a.SORTER > b.SORTER) ? 1 : -1);
+			let sorter = 0;
+			for (let i = 0; i < resolvedResults.length; i++) {
+				sorter = sorter + 1;
+				resolvedResults[i].SORTER = sorter;
 			}
 
-			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
-			const productPricingTable = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricing));
-			//let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
-                        
-            let finalDiscount;            
-            if (productPricing.UOM === "Unit") {
-                finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPU ))*100).toFixed(2));
-            } else {
-                finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPP ))*100).toFixed(2));
-            }
-            
-			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
-			// EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
-			// let whereRoyalDecree = {
-			// 	ProductPackID: offerProduct.ProductCode,
-			// 	ValidTo : '9999-12-31'
-			// }
-			// let RoyalDecreePercentageValue = await tx.run(SELECT.one.from(RoyalDecree).where(whereRoyalDecree));
-
-            /*Get corresponding ProductConditions*/
-			const whereProductConditions = {
-				OfferID: offer.OFFERID,
-				ProductCode: offerProduct.ProductCode,
-				CountryCode: offer.COUNTRYCODE
-			}
-			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
-            const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
-                productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
-				productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
-				productCondition.FreeGoodsOther.forEach(async foc => {
-					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
-				});
-                productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-                return productCondition;
-            }));
-            /*end of ProductCondition information */
-
-
-			const whereMaterial = {
-				CountryCode: offer.COUNTRYCODE,
-				ProductPackId: offerProduct.ProductCode
-			}
-			const materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterial));
-
-			//Get all prices, ammounts and cogs in all units
-			let toUnitFactor = (offerProduct.UNIT === "Unit") ? 1 : offerProduct.PACKSIZE;
-			let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
-
-			//let aFreeGoodsOtherTemp = [];
-            const whereProductPackId = {
-                ProductPricing_ProductCode: offerProduct.PRODUCTID,
-                ProductPricing_OfferID: offer.OFFERID
-            }
-			const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
-
-            const wherePriceconditions = {
-                OfferID: offer.OFFERID,
-                ProductCode: offerProduct.PRODUCTID,
-                CountryCode: offer.COUNTRYCODE
-            }
-
-            //const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
-
-            //loop over freegoodsother and retrieve productpricing, material and productpack data
-            aFreeGoodsOther = await Promise.all(aFreeGoodsOtherTemp.map( async (tmpFreeGoodOther) => { 
-                let whereMaterialFOC = {
-                    CountryCode: offer.COUNTRYCODE,
-                    ProductPackId: tmpFreeGoodOther.ProductPackId
-                }
-                
-                tmpFreeGoodOther.Materials = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where(whereMaterialFOC));
-
-                let whereProductPricingFOC = {
-                    OfferID: offer.OFFERID,
-                    ProductCode: tmpFreeGoodOther.ProductPricing_ProductCode,
-                    CountryCode: offer.COUNTRYCODE
-                }
-    
-                tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
-
-                const whereProductPackFOC = {
-                    PRODUCTPACKID: tmpFreeGoodOther.ProductPackId,
-                }
-                tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
-
-                //Get corresponding ProductConditions
-                const whereFocProductConditions = {
-                    OfferID: offer.OFFERID,
-                    ProductCode: tmpFreeGoodOther.ProductPackId,
-                    CountryCode: offer.COUNTRYCODE
-                }
-                let productConditionFOCtmp = await tx.run(SELECT.from(PriceCondition).where(whereFocProductConditions));
-
-                let productFOCConditions = await Promise.all(productConditionFOCtmp.map( async (productFOCCondition) => {
-                    let whereFOCDiscountCondition = {
-                        ID: productFOCCondition.ID
-                    }
-                    productFOCCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where(whereFOCDiscountCondition));
-
-                    /*let whereFOCRoyalDecree = {
-                        ProductPackID: PriceCondition.ProductCode
-                    }
-                    productFOCCondition.RoyalDecree = await tx.run(SELECT.from(RoyalDecree).where(whereFOCRoyalDecree));*/
-
-                    let wherePriceConditionClassification = {
-                        ID: productFOCCondition.PriceConditionClassification_ID
-                    }
-                    productFOCCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where(wherePriceConditionClassification));
-
-                    return productFOCCondition;
-
-                }));
-
-                tmpFreeGoodOther.priceCondition = productFOCConditions;
-
-                return tmpFreeGoodOther;
-            }));
-
-            // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
-			// this should only be done for Italy & only for vatInWords
-            let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
-            if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
-                vatInWords += ",00";   
-            }; 
-
-			return {
-				TENDER_ID: offer.TENDERID,
-				COUNTRY_CODE: offer.COUNTRYCODE,
-				OFFER_ID: offer.OFFERID,
-				DIVISION: offerProduct.DIVISION,
-				BRANDID: offerProduct.BRANDID,
-				BRANDNAME: offerProduct.BRANDNAME,
-				PRODUCT_UNIT_NAME: offerProduct.PRODUCT_UNIT_NAME, //thailand
-				SKU: offerProduct.SKU, //thailand
-				PRODUCTID: offerProduct.PRODUCTID,
-				CODE: offerProduct.CODE,
-				PRODUCTNAME: offerProduct.PRODUCTNAME,
-				PACKSIZE: offerProduct.PACKSIZE,
-				DOSAGE: offerProduct.DOSAGE,
-				UOM: offerProduct.UOM,
-				COUNTRYOFORIGIN: offerProduct.COUNTRYOFORIGIN,
-				MANUFACTURER: offerProduct.MANUFACTURER,
-				SHELFLIFE: offerProduct.SHELFLIFE,
-				PRESENTATION: offerProduct.PRESENTATION,
-				VAT: dVat,
-				VAT_IN_WORDS: vatInWords,
-				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
-				UNIT: offerProduct.UNIT,
-				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
-				SORTER: offerProduct.SORTER,
-				CURRENCY: offer.CURRENCY,
-				REQUESTED_QUANTITY: parseInt(productInfo.CommnonProductInfo.RequestedQuantityString),
-				DELIVERY_TERMS: productInfo.CommnonProductInfo.DeliveryTerms,
-				PAYMENT_TERMS: offerProduct.PAYMENT_TERMS,
-				SHIPMENT_TERMS: offerProduct.INCO_TERMS,
-				SAMPLES: offerProduct.SAMPLES,
-				SAMPLES_UNIT: offerProduct.SAMPLES * toUnitFactor,
-				SAMPLES_PACK: offerProduct.SAMPLES * toPackFactor,
-				REGISTERED_PRICE: offerProduct.REGISTERED_PRICE,
-				REGISTERED_PRICE_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.REGISTERED_PRICE),
-				OFFER_PRICE: offerProduct.OFFER_PRICE,
-				FOC: productInfo.CommnonProductInfo.FocString,
-                FOC_ABS_PCT_STP:    offerProduct.FOC_ABS_PCT,         
-				TOTAL_QUANTITY_UNITS: productInfo.CommnonProductInfo.TotalVolumeUnit, //Total Volume(units) (thailand - new column missing in the screenshot)
-				FOC_QUANTITY_UNITS: productInfo.CommnonProductInfo.FocAmountUnit,
-				PAID_QUANTITY_UNITS: productInfo.CommnonProductInfo.PaidVolumeUnit,
-				REQ_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPriceUnit,
-				REQ_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.OfferPriceUnit * (1 + offerProduct.VAT),   //MSP incl VAT (thailand)
-				REQ_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.OfferPricePack,
-				REQ_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.OfferPriceUnitEurBudget,
-				REQ_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.OfferPriceUnitEurSpot,
-				NET_PRICE_UNIT_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPriceUnit,
-				NET_PRICE_UNIT_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPriceUnit),
-				NET_PRICE_UNIT_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT),   //NSP incl VAT (thailand)
-				NET_PRICE_UNIT_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPriceUnit * (1 + offerProduct.VAT)),
-				NET_PRICE_PACK_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetPricePack,
-				NET_PRICE_PACK_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPricePack),
-				NET_PRICE_PACK_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.NetPricePack * (1 + offerProduct.VAT),
-				NET_PRICE_PACK_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetPricePack * (1 + offerProduct.VAT)),
-				NET_PRICE_UNIT_EUR_BUDGET: productInfo.CommnonProductInfo.NetPriceUnitEurBudget,
-				NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
-				NET_OFFER_PRICE: offerProduct.NET_OFFER_PRICE,
-				NET_PRICE: offerProduct.NET_PRICE,
-				ADDITIONAL_DISCOUNT: offerProduct.ADDITIONAL_DISCOUNT,
-				ADDITIONAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.ADDITIONAL_DISCOUNT),
-				MAX_PRICE_NHS_PP: productPricing.MaxPriceNhsPP,
-				MAX_PRICE_NHS_PP_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPP),
-				MAX_PRICE_NHS_PU: productPricing.MaxPriceNhsPU,
-				MAX_PRICE_NHS_PU_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPU),
-				MAX_PRICE_NHS_PU_WITH_VAT: productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT),
-				MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT))),
-				CONTRACT_START_DATE: productPricing.ContractStartDate,
-				NET_OFFER_PRICE_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.NET_OFFER_PRICE),
-				CUSTOMER_ID: institute.CustomerID,
-				COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
-				COGS_EUR_UNIT: productInfo.CommnonProductInfo.CogsEurUnit,
-				COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
-				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
-				GROSS_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales),
-				NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
-				NET_SALES_EUR_BUDGET: productInfo.CommnonProductInfo.NetSalesEurBudget,
-				NET_SALES_EUR_SPOT: productInfo.CommnonProductInfo.NetSalesEurSpot,
-				GROSS_MARGIN_EUR_BUDGET: productInfo.CommnonProductInfo.GrossMarginEurBudget,
-				GROSS_MARGIN_EUR_SPOT: productInfo.CommnonProductInfo.GrossMarginEurSpot,
-				GROSS_PROFIT_EUR_BUDGET: productInfo.CommnonProductInfo.GrossProfitEurBudget,
-				GROSS_PROFIT_EUR_SPOT: productInfo.CommnonProductInfo.GrossProfitEurSpot,
-				//REGULATORY: productInfo.ProductValidation.REGULATORY,
-				//LEGAL: productInfo.ProductValidation.LEGAL,
-				//CONTROLLING: productInfo.ProductValidation.CONTROLLING,
-				//COUNTRY_BUSINESS: productInfo.ProductValidation.COUNTRY_BUSINESS,
-				//REGIONAL_BUSINESS: productInfo.ProductValidation.REGIONAL_BUSINESS,
-				//SUPPLY_CHAIN: productInfo.ProductValidation.SUPPLY_CHAIN,
-				IS_LOWEST: (productInfo.CommnonProductInfo.IsMinPrice) ? 1 : 0,
-				IS_DEFAULT_TERMS: offerProduct.IS_DEFAULT_TERMS,
-				IS_REGISTERED: offerProduct.IS_REGISTERED,
-				IS_ALTERNATIVE_QUOTED: offerProduct.IS_ALTERNATIVE_QUOTED,
-				IS_ALTERNATIVE_REQUESTED: offerProduct.IS_ALTERNATIVE_REQUESTED,
-				NEW_APPROVAL: offerProduct.NEW_APPROVAL,
-				BUDGETED_PROFITABILITY: offerProduct.BUDGETED_PROFITABILITY,
-				UK_BUDGETED_PROFITABILITY: offerProduct.UK_BUDGETED_PROFITABILITY,
-				CHANNEL: offerProduct.CHANNEL,
-				ACT_PROFITABILITY: (offerProduct.NET_PRICE - offerProduct.COGS) / offerProduct.NET_PRICE,
-				GROSS_SALES_OFFER_CURRENCY_VAT: productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT),
-				GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales * (1 + offerProduct.VAT)),
-				VAT_TOTAL: productInfo.CommnonProductInfo.GrossSales * offerProduct.VAT,
-				//NSM_SM_FM: productInfo.ProductValidation.NSM_SM_FM,
-				//HBU: productInfo.ProductValidation.HBU,
-				//CDH: productInfo.ProductValidation.CDH,
-				IN_POLICY: productInfo.ProductValidation.IN_POLICY,
-				//MACS: productInfo.ProductValidation.MACS,
-				//TA: productInfo.ProductValidation.TA,
-				//FBP: productInfo.ProductValidation.FBP,
-				//LPC: productInfo.ProductValidation.LPC,
-				//COM_PGA: productInfo.ProductValidation.COM_PGA,
-				//International_Trade: productInfo.ProductValidation.International_Trade,
-				//Transfer_Pricing: productInfo.ProductValidation.Transfer_Pricing,
-				//SBR: productInfo.ProductValidation.SBR,
-				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
-				OFFER_PRICE_VAT: offerProduct.OFFER_PRICE * (1 + offerProduct.VAT),
-				ApproverTypes: aTempApproverTypes,
-				BUDGET_RATE: offerProduct.BUDGET_RATE,
-				SPOT_RATE: offerProduct.SPOT_RATE,
-				BUSINESS_CASE_PRICE: offerProduct.BUSINESS_CASE_PRICE,
-
-				WARRANTY: offerProduct.Warranty,
-				AGREEMENTDURATION: offerProduct.AgreementDuration,
-				MONTHLYRENT: offerProduct.MonthlyRent,
-                MONTHLYRENT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE,offerProduct.MonthlyRent),
-				MONTHSPERINVOICE: offerProduct.MonthsPerInvoice,
-				CONTRACTSTARTDATE: offerProduct.ContractStartDate,
-				VALUEOFDEVICES: offerProduct.ValueOfDevices,
-				STATUSOFDEVICE: offerProduct.StatusOfDevice,
-				MINCONTRACTUAL: offerProduct.MinContractual,
-				MINANNPURCH: offerProduct.MinAnnPurch,
-				FOC_STEP: offerProduct.FOC_STEP,
-				OFFER_TYPE: offerProduct.OfferType,
-				FreeGoodsOther: aFreeGoodsOtherTemp,
-                PriceCondition: productConditions,
-
-				//missing SKU & SKUCountry fields
-				MOLECULE_NAME: offerProduct.MOLECULE_NAME,
-				ACTIVERECORD: offerProduct.ACTIVERECORD,
-				HLEVEL6_CODE: offerProduct.HLEVEL6_CODE,
-				PCI_NAME: offerProduct.PCI_NAME,
-				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
-				PRODUCT_TYPE: offerProduct.PRODUCT_TYPE,
-
-				SKUCOUNTRY_ACTIVERECORD: offerProduct.SKUCOUNTRY_ACTIVERECORD,
-				PRESENTATION_2: offerProduct.PRESENTATION_2,
-				PRODUCT_COMMENT: offerProduct.PRODUCT_COMMENT,
-				GOV_CODE: offerProduct.GOV_CODE,
-				CODE1: offerProduct.CODE1,
-				CODE2: offerProduct.CODE2,
-                CODE3: offerProduct.CODE3,                
-				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
-				ProductClass: offerProduct.ProductClass,
-				ProductDescription: offerProduct.ProductDescription,
-				FINAL_DISCOUNT: finalDiscount,
-				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
-				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
-                LOTID: offerProduct.LOTID,
-				// PERCENTAGE: RoyalDecreePercentageValue.Percentage,
-				ProductPricing: productPricingTable,
-				ProductPack: productPack,
-				Materials: materials,
-                //PriceCondition: aPriceConditions,
-				LINE: offerProduct.LINE,
-				REFERENCE: offerProduct.REFERENCE,
-				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
-				DISTRIBUTORID: productDistributorInfo.Custom_String_1,
-				DistributorName: DistributorInfo?.DistributorName ?? null,
-				Address: DistributorInfo?.Address ?? null,
-				City: DistributorInfo?.City ?? null
-			}
-		});
-		let resolvedResults = await Promise.all(results);
-		resolvedResults.sort((a, b) => (a.SORTER > b.SORTER) ? 1 : -1);
-		let sorter = 0;
-		for (let i = 0; i < resolvedResults.length; i++) {
-			sorter = sorter + 1;
-			resolvedResults[i].SORTER = sorter;
+			return resolvedResults;
 		}
-
-		return resolvedResults;
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}
 
 	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack) {
@@ -2656,160 +2721,175 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 	}
 
 	async function buildProductValidationForType12(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
-		const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
-		let results = {
-			IN_POLICY: false
-		}
-
-		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
-
-		if(priceCondition){
-			if(ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
-				aApproverTypes.map(async function (oApproverType) {
-					oApproverType.ValidationType = 3;
-				});
+		try{
+			const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
+			let results = {
+				IN_POLICY: false
 			}
-			
-			if(ServiceHelper.isDoubleEqual(priceCondition.Price1, priceCondition.Price0) || ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
-				aApproverTypes.map(async function (oApproverType) {
-					oApproverType.ValidationType = oApproverType.ValidationType2;
-				});
-			}
-		
-			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
-			results.IN_POLICY = true
-			
-		}
 
-		return results;
+			const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
+
+			if(priceCondition){
+				if(ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
+					aApproverTypes.map(async function (oApproverType) {
+						oApproverType.ValidationType = 3;
+					});
+				}
+				
+				if(ServiceHelper.isDoubleEqual(priceCondition.Price1, priceCondition.Price0) || ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
+					aApproverTypes.map(async function (oApproverType) {
+						oApproverType.ValidationType = oApproverType.ValidationType2;
+					});
+				}
+			
+				//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
+				results.IN_POLICY = true
+				
+			}
+
+			return results;
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}	
 	}
 
 	async function buildProductValidationForType14(tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue) {
-		const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
-		let results = {
-			IN_POLICY: false
-		}
-
-		let comparisonPrice = 0;
-
-		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'ProductPackID': product.ProductCode, 'CountryCode': offer.COUNTRYCODE, 'InstituteID': offer.INSTITUTE_ID, 'DistributorID': offer.DISTRIBUTOR_ID}));
-		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
-
-		if(policy && priceCondition){
-			switch(policy.Type){
-				case 'OfferPrice':
-					comparisonPrice = product.UOM === 'Unit' ? priceCondition.OfferPrice * product.PACKSIZE : priceCondition.OfferPrice;
-				case 'NetOfferPrice':
-					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetOfferPrice * product.PACKSIZE : priceCondition.NetOfferPrice;
-				case 'NetPrice':
-					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetPrice * product.PACKSIZE : priceCondition.NetPrice;
-				case 'OfferPriceVSRegisteredPrice':
-					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.OfferPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) : 
-															   (priceCondition.Price0 - priceCondition.OfferPrice) / priceCondition.Price0;
-				case 'NetPriceVSRegisteredPrice':
-					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) :
-															   (priceCondition.Price0 - priceCondition.NetPrice) / priceCondition.Price0;
-				case 'NetOfferPriceVSRegisteredPrice':
-					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - priceCondition.NetOfferPrice) / (priceCondition.Price0 * product.PACKSIZE) :
-															   (priceCondition.Price0 - priceCondition.NetOfferPrice) / priceCondition.Price0;
-				case 'NetOfferPriceVSOfferPrice':
-					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetOfferPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE) : 
-																(priceCondition.OfferPrice - priceCondition.NetOfferPrice) / priceCondition.OfferPrice;
-				case 'NetPriceVSOfferPrice':
-					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE): 
-																(priceCondition.OfferPrice - priceCondition.NetPrice) / priceCondition.OfferPrice;
-				case 'NetPriceVSNetOfferPrice':
-					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetOfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.NetOfferPrice * product.PACKSIZE) : 
-																(priceCondition.NetOfferPrice - priceCondition.NetPrice) / priceCondition.NetOfferPrice;
-				case 'BudgetedProfitability':
-					comparisonPrice = product.UOM === 'Unit' ? (priceCondition.NetPrice - productInfo.cogsEurUnit) / priceCondition.NetPrice :
-																(priceCondition.NetPrice - productInfo.cogsEurPack) / priceCondition.NetPrice;
+		try{
+			const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
+			let results = {
+				IN_POLICY: false
 			}
 
-			if(comparisonPrice < policy.Value){
-				aApproverTypes.map(async function (oApproverType) {
-					oApproverType.ValidationType = oApproverType.ValidationType;
-				});
-			} else {
-				aApproverTypes.map(async function (oApproverType) {
-					oApproverType.ValidationType = oApproverType.ValidationType2;
-				});
-			}
+			let comparisonPrice = 0;
 
-			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
-			results.IN_POLICY = true
+			const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'ProductPackID': product.ProductCode, 'CountryCode': offer.COUNTRYCODE, 'InstituteID': offer.INSTITUTE_ID, 'DistributorID': offer.DISTRIBUTOR_ID}));
+			const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+
+			if(policy && priceCondition){
+				switch(policy.Type){
+					case 'OfferPrice':
+						comparisonPrice = product.UOM === 'Unit' ? priceCondition.OfferPrice * product.PACKSIZE : priceCondition.OfferPrice;
+					case 'NetOfferPrice':
+						comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetOfferPrice * product.PACKSIZE : priceCondition.NetOfferPrice;
+					case 'NetPrice':
+						comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetPrice * product.PACKSIZE : priceCondition.NetPrice;
+					case 'OfferPriceVSRegisteredPrice':
+						comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.OfferPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) : 
+																(priceCondition.Price0 - priceCondition.OfferPrice) / priceCondition.Price0;
+					case 'NetPriceVSRegisteredPrice':
+						comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) :
+																(priceCondition.Price0 - priceCondition.NetPrice) / priceCondition.Price0;
+					case 'NetOfferPriceVSRegisteredPrice':
+						comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - priceCondition.NetOfferPrice) / (priceCondition.Price0 * product.PACKSIZE) :
+																(priceCondition.Price0 - priceCondition.NetOfferPrice) / priceCondition.Price0;
+					case 'NetOfferPriceVSOfferPrice':
+						comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetOfferPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE) : 
+																	(priceCondition.OfferPrice - priceCondition.NetOfferPrice) / priceCondition.OfferPrice;
+					case 'NetPriceVSOfferPrice':
+						comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE): 
+																	(priceCondition.OfferPrice - priceCondition.NetPrice) / priceCondition.OfferPrice;
+					case 'NetPriceVSNetOfferPrice':
+						comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetOfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.NetOfferPrice * product.PACKSIZE) : 
+																	(priceCondition.NetOfferPrice - priceCondition.NetPrice) / priceCondition.NetOfferPrice;
+					case 'BudgetedProfitability':
+						comparisonPrice = product.UOM === 'Unit' ? (priceCondition.NetPrice - productInfo.cogsEurUnit) / priceCondition.NetPrice :
+																	(priceCondition.NetPrice - productInfo.cogsEurPack) / priceCondition.NetPrice;
+				}
+
+				if(comparisonPrice < policy.Value){
+					aApproverTypes.map(async function (oApproverType) {
+						oApproverType.ValidationType = oApproverType.ValidationType;
+					});
+				} else {
+					aApproverTypes.map(async function (oApproverType) {
+						oApproverType.ValidationType = oApproverType.ValidationType2;
+					});
+				}
+
+				//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
+				results.IN_POLICY = true
+			}
+			
+			return results;
 		}
-		
-		return results;
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}
 
 	async function buildProductValidationForType15 (tx, offer, product, productInfo, aApproverTypes, offerProductsTotalValue, productPack) {
-		let results = {
-			IN_POLICY: false
-		}
-		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, "Type": "OfferPriceVSRegisteredPrice"}));
-		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
-		const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
-		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({"CountryCode": offer.COUNTRYCODE, "Division": product.DIVISION, "BU": ctryProductPack.BU}));
-		const productThreshold = product.UNIT === "Unit" ? product.REQUESTED_VOLUME / productPack[0].PACKFACTOR : product.QTY_THRESHOLD
+		try{
+			let results = {
+				IN_POLICY: false
+			}
+			const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, "Type": "OfferPriceVSRegisteredPrice"}));
+			const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+			const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
+			const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({"CountryCode": offer.COUNTRYCODE, "Division": product.DIVISION, "BU": ctryProductPack.BU}));
+			const productThreshold = product.UNIT === "Unit" ? product.REQUESTED_VOLUME / productPack[0].PACKFACTOR : product.QTY_THRESHOLD
 
-		if(policy && priceCondition) {
-			if (offer.AffiliateOffer) {
-				const apprTypesToBeRemoved = [];
-				aApproverTypes.map(function (oApproverType) {
-					if (oApproverType.ApproverType !== "Order-to-Cash-Ready") {
-						oApproverType.ValidationType = 1;
-					}
-					const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
-					if (currentCtryApprType === -1 ) {
-						apprTypesToBeRemoved.push(oApproverType.ApproverType)
-					}
-				});
-				const orderToCashReadyIndex = apprTypesToBeRemoved.findIndex(el => el === "Order-to-Cash-Ready");
-				apprTypesToBeRemoved.splice(orderToCashReadyIndex, 1);
-				updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
-			}else {
-				if (priceCondition.Level1Discount1 < policy.Value) {
-					if (product.REQUESTED_VOLUME < productThreshold) {
-						const apprTypesToBeRemoved = [];
-						aApproverTypes.map(function (oApproverType) {
-							oApproverType.ValidationType = oApproverType.ValidationType2;
-							const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
-							if (currentCtryApprType === -1) apprTypesToBeRemoved.push(oApproverType.ApproverType);
-						});
-						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
-					}else {
-						const apprTypesToBeRemoved = [];
-						aApproverTypes.map(function (oApproverType) {
-							oApproverType.ValidationType = oApproverType.ValidationType2;
-							const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
-							if (currentCtryApprType === -1 && oApproverType.ApproverType !== "SCM") apprTypesToBeRemoved.push(oApproverType.ApproverType);
-						});
-						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
-					}
+			if(policy && priceCondition) {
+				if (offer.AffiliateOffer) {
+					const apprTypesToBeRemoved = [];
+					aApproverTypes.map(function (oApproverType) {
+						if (oApproverType.ApproverType !== "Order-to-Cash-Ready") {
+							oApproverType.ValidationType = 1;
+						}
+						const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+						if (currentCtryApprType === -1 ) {
+							apprTypesToBeRemoved.push(oApproverType.ApproverType)
+						}
+					});
+					const orderToCashReadyIndex = apprTypesToBeRemoved.findIndex(el => el === "Order-to-Cash-Ready");
+					apprTypesToBeRemoved.splice(orderToCashReadyIndex, 1);
+					updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
 				}else {
-					if (product.REQUESTED_VOLUME < productThreshold) {
-						const apprTypesToBeRemoved = [];
-						aApproverTypes.map(function (oApproverType) {
-							oApproverType.ValidationType = oApproverType.ValidationType;
-							const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
-							if (currentCtryApprType === -1) apprTypesToBeRemoved.push(oApproverType.ApproverType);
-						});
-						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
+					if (priceCondition.Level1Discount1 < policy.Value) {
+						if (product.REQUESTED_VOLUME < productThreshold) {
+							const apprTypesToBeRemoved = [];
+							aApproverTypes.map(function (oApproverType) {
+								oApproverType.ValidationType = oApproverType.ValidationType2;
+								const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+								if (currentCtryApprType === -1) apprTypesToBeRemoved.push(oApproverType.ApproverType);
+							});
+							updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
+						}else {
+							const apprTypesToBeRemoved = [];
+							aApproverTypes.map(function (oApproverType) {
+								oApproverType.ValidationType = oApproverType.ValidationType2;
+								const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+								if (currentCtryApprType === -1 && oApproverType.ApproverType !== "SCM") apprTypesToBeRemoved.push(oApproverType.ApproverType);
+							});
+							updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
+						}
 					}else {
-						const apprTypesToBeRemoved = [];
-						aApproverTypes.map(function (oApproverType) {
-							oApproverType.ValidationType = oApproverType.ValidationType;
-							const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
-							if (currentCtryApprType === -1 && oApproverType.ApproverType !== "SCM") apprTypesToBeRemoved.push(oApproverType.ApproverType);
-						});
-						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
+						if (product.REQUESTED_VOLUME < productThreshold) {
+							const apprTypesToBeRemoved = [];
+							aApproverTypes.map(function (oApproverType) {
+								oApproverType.ValidationType = oApproverType.ValidationType;
+								const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+								if (currentCtryApprType === -1) apprTypesToBeRemoved.push(oApproverType.ApproverType);
+							});
+							updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
+						}else {
+							const apprTypesToBeRemoved = [];
+							aApproverTypes.map(function (oApproverType) {
+								oApproverType.ValidationType = oApproverType.ValidationType;
+								const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+								if (currentCtryApprType === -1 && oApproverType.ApproverType !== "SCM") apprTypesToBeRemoved.push(oApproverType.ApproverType);
+							});
+							updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
+						}
 					}
 				}
+				results.IN_POLICY = true
 			}
-			results.IN_POLICY = true
+			return results;
 		}
-		return results;
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}
 
 	function updateApproverTypesListForPakistan (aApproverTypes, apprTypesToBeRemoved) {
@@ -2820,488 +2900,516 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 	}
 
 	function buildCommonProductInfo(offer, product) {
-		//Get all prices, ammounts and cogs in all units
-		let toUnitFactor = (product.UNIT === "Unit") ? 1 : product.PACKSIZE;
-		let toPackFactor = (product.UNIT === "Unit") ? 1 / product.PACKSIZE : 1;
+		try{
+			//Get all prices, ammounts and cogs in all units
+			let toUnitFactor = (product.UNIT === "Unit") ? 1 : product.PACKSIZE;
+			let toPackFactor = (product.UNIT === "Unit") ? 1 / product.PACKSIZE : 1;
 
-		let requestedVolume = product.REQUESTED_VOLUME;
-		//let requestedUnit = toUnitFactor * requestedVolume;
+			let requestedVolume = product.REQUESTED_VOLUME;
+			//let requestedUnit = toUnitFactor * requestedVolume;
 
-		let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
-		let focAmountUnit = toUnitFactor * focAmount;
-		let totalVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume : requestedVolume + focAmount;
-		let totalVolumeUnit = toUnitFactor * totalVolume;
-		let paidVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume - focAmount : requestedVolume;
-		let paidVolumeUnit = toUnitFactor * paidVolume;
+			let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+			let focAmountUnit = toUnitFactor * focAmount;
+			let totalVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume : requestedVolume + focAmount;
+			let totalVolumeUnit = toUnitFactor * totalVolume;
+			let paidVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume - focAmount : requestedVolume;
+			let paidVolumeUnit = toUnitFactor * paidVolume;
 
-		//let registeredPrice = product.REGISTERED_PRICE;
-		let offerPrice = product.OFFER_PRICE;
-		let netOfferPrice = product.NET_OFFER_PRICE;
-		let netPrice = product.NET_PRICE;
-		let cogs = product.COGS;
+			//let registeredPrice = product.REGISTERED_PRICE;
+			let offerPrice = product.OFFER_PRICE;
+			let netOfferPrice = product.NET_OFFER_PRICE;
+			let netPrice = product.NET_PRICE;
+			let cogs = product.COGS;
 
-		let offerPriceUnit = offerPrice / toUnitFactor;
-		let offerPricePack = offerPrice / toPackFactor;
-		let offerPriceUnitEurSpot = offerPriceUnit / product.SPOT_RATE;
-		let offerPriceUnitEurBudget = offerPriceUnit / product.BUDGET_RATE;
-		let cogsEurUnit = cogs / product.SPOT_RATE / toUnitFactor; 
-		let cogsEurPack = cogs / product.SPOT_RATE / toPackFactor; 
-		let netPriceUnit = netPrice / toUnitFactor;
-		let netPricePack = netPrice / toPackFactor;
-		let netPriceUnitEurSpot = netPriceUnit / product.SPOT_RATE;
-		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
+			let offerPriceUnit = offerPrice / toUnitFactor;
+			let offerPricePack = offerPrice / toPackFactor;
+			let offerPriceUnitEurSpot = offerPriceUnit / product.SPOT_RATE;
+			let offerPriceUnitEurBudget = offerPriceUnit / product.BUDGET_RATE;
+			let cogsEurUnit = cogs / product.SPOT_RATE / toUnitFactor; 
+			let cogsEurPack = cogs / product.SPOT_RATE / toPackFactor; 
+			let netPriceUnit = netPrice / toUnitFactor;
+			let netPricePack = netPrice / toPackFactor;
+			let netPriceUnitEurSpot = netPriceUnit / product.SPOT_RATE;
+			let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
 
-		let grossSales = offerPrice * paidVolume;
-       
-		let netSales = netPrice * totalVolume;
-		let netSalesEurSpot = netSales / product.SPOT_RATE;
-		let netSalesEurBudget = netSales / product.BUDGET_RATE;
+			let grossSales = offerPrice * paidVolume;
+		
+			let netSales = netPrice * totalVolume;
+			let netSalesEurSpot = netSales / product.SPOT_RATE;
+			let netSalesEurBudget = netSales / product.BUDGET_RATE;
 
-		let totalCostEur = totalVolume * cogs / product.SPOT_RATE;
-		if (product.FOC_BUNDLED_1 !== 0) {
-			if (product.FOC_BUNDLED_1_ABS_PCT === "PCT") {
-				totalCostEur = totalCostEur + Math.round(product.FOC_BUNDLED_1 * requestedVolume) * product.FOC_BUNDLED_1_COGS / product.SPOT_RATE;
+			let totalCostEur = totalVolume * cogs / product.SPOT_RATE;
+			if (product.FOC_BUNDLED_1 !== 0) {
+				if (product.FOC_BUNDLED_1_ABS_PCT === "PCT") {
+					totalCostEur = totalCostEur + Math.round(product.FOC_BUNDLED_1 * requestedVolume) * product.FOC_BUNDLED_1_COGS / product.SPOT_RATE;
+				}
+				else {
+					totalCostEur = totalCostEur + Math.round(product.FOC_BUNDLED_1) * product.FOC_BUNDLED_1_COGS / product.SPOT_RATE;
+				}
 			}
-			else {
-				totalCostEur = totalCostEur + Math.round(product.FOC_BUNDLED_1) * product.FOC_BUNDLED_1_COGS / product.SPOT_RATE;
-			}
-		}
 
-		let grossProfitEurSpot = netSalesEurSpot - totalCostEur;
-		let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
-        
-        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
-           let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
-           let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
-    
-        //EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
-		let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
-
-		//Product Comment: master data product comment + info on additional brand FOC, if any
-		let productComment = product.PRODUCT_COMMENT;
-		if (product.FOC_BUNDLED_1 !== 0) {
-			if (product.PRODUCT_COMMENT !== "") productComment = productComment.concat("<br>");
-			if (product.FOC_BUNDLED_1_ABS_PCT === "PCT") {
-				productComment = productComment.concat(Math.round(100 * product.FOC_BUNDLED_1).toString().concat("%"));
-			}
-			else {
-				productComment = productComment.concat(Math.round(product.FOC_BUNDLED_1).toString().concat(" ").concat(product.UNIT));
-			}
-			productComment = productComment
-				.concat(" of ")
-				.concat(product.FOC_BUNDLED_1_PRODUCT_NAME)
-				.concat(" will be provided with the ")
-				.concat(product.PRODUCTNAME)
-		}
-		//Delivery terms
-		let deliveryTerms = "";
-		//EHQUT-RITM12706398-SEWA Change Request
-		if(offer.REGION_NAME === "SEWA"){
-			deliveryTerms = product.FIRST_SHIPMENT;
-		}else{
-		if (product.NUMBER_LOTS === 0 && product.INTERVAL_SHIPMENTS === 0) {
-			deliveryTerms = "Multiple deliveries from local stocks with first ";
-			deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
-		}
-		else if (product.NUMBER_LOTS === 1 && product.INTERVAL_SHIPMENTS === 0) {
-			deliveryTerms = "Single delivery ";
-			deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
-		}
-		else {
-			deliveryTerms = product.NUMBER_LOTS.toString()
-				.concat(" lots at interval of ")
-				.concat(product.INTERVAL_SHIPMENTS.toString())
-				.concat(" months with first ")
+			let grossProfitEurSpot = netSalesEurSpot - totalCostEur;
+			let grossProfitEurBudget = netSalesEurBudget - totalCostEur;
 			
-				.concat(product.FIRST_SHIPMENT);
-		}
-	}
-	
-		//Requested Quantity & FOC string
-		let focString = "";
-		let requestedQuantityString = requestedVolume.toString().concat(" ").concat(product.UNIT);
-		if (product.FOC !== 0) {
-			if (product.FOC_ABS_PCT === "PCT") {
-				focString = Math.round(100 * product.FOC).toString().concat("%");
-				requestedQuantityString = requestedQuantityString.concat("<br> (FOC: ").concat(focString);
+			//EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
+			let grossMarginEurSpot = grossProfitEurSpot / netSalesEurSpot;
+			let grossMarginEurBudget = grossProfitEurBudget / netSalesEurBudget;
+		
+			//EHQUT-202296-MEA-change the formula for the calculation of the GP% to be divided by the Gross sales in Euros
+			let isMinPrice = !ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) ? ServiceHelper.isDoubleXBelowY(offerPrice, product.MIN_PRICE) : 1;
+
+			//Product Comment: master data product comment + info on additional brand FOC, if any
+			let productComment = product.PRODUCT_COMMENT;
+			if (product.FOC_BUNDLED_1 !== 0) {
+				if (product.PRODUCT_COMMENT !== "") productComment = productComment.concat("<br>");
+				if (product.FOC_BUNDLED_1_ABS_PCT === "PCT") {
+					productComment = productComment.concat(Math.round(100 * product.FOC_BUNDLED_1).toString().concat("%"));
+				}
+				else {
+					productComment = productComment.concat(Math.round(product.FOC_BUNDLED_1).toString().concat(" ").concat(product.UNIT));
+				}
+				productComment = productComment
+					.concat(" of ")
+					.concat(product.FOC_BUNDLED_1_PRODUCT_NAME)
+					.concat(" will be provided with the ")
+					.concat(product.PRODUCTNAME)
+			}
+			//Delivery terms
+			let deliveryTerms = "";
+			//EHQUT-RITM12706398-SEWA Change Request
+			if(offer.REGION_NAME === "SEWA"){
+				deliveryTerms = product.FIRST_SHIPMENT;
+			}else{
+			if (product.NUMBER_LOTS === 0 && product.INTERVAL_SHIPMENTS === 0) {
+				deliveryTerms = "Multiple deliveries from local stocks with first ";
+				deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
+			}
+			else if (product.NUMBER_LOTS === 1 && product.INTERVAL_SHIPMENTS === 0) {
+				deliveryTerms = "Single delivery ";
+				deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
 			}
 			else {
-				focString = Math.round(product.FOC).toString();
-				requestedQuantityString = requestedQuantityString.concat("<br> (FOC: ")
-					.concat(focString)
-					.concat(" ")
-					.concat(product.UNIT);
+				deliveryTerms = product.NUMBER_LOTS.toString()
+					.concat(" lots at interval of ")
+					.concat(product.INTERVAL_SHIPMENTS.toString())
+					.concat(" months with first ")
+				
+					.concat(product.FIRST_SHIPMENT);
 			}
-			requestedQuantityString = requestedQuantityString
-				.concat((product.FOC_TYPE === "FOC 1") ? " included)" : " added)");
 		}
-		//Build results object
-		let results = {
-			ProductComment: productComment,
+		
+			//Requested Quantity & FOC string
+			let focString = "";
+			let requestedQuantityString = requestedVolume.toString().concat(" ").concat(product.UNIT);
+			if (product.FOC !== 0) {
+				if (product.FOC_ABS_PCT === "PCT") {
+					focString = Math.round(100 * product.FOC).toString().concat("%");
+					requestedQuantityString = requestedQuantityString.concat("<br> (FOC: ").concat(focString);
+				}
+				else {
+					focString = Math.round(product.FOC).toString();
+					requestedQuantityString = requestedQuantityString.concat("<br> (FOC: ")
+						.concat(focString)
+						.concat(" ")
+						.concat(product.UNIT);
+				}
+				requestedQuantityString = requestedQuantityString
+					.concat((product.FOC_TYPE === "FOC 1") ? " included)" : " added)");
+			}
+			//Build results object
+			let results = {
+				ProductComment: productComment,
 
-			DeliveryTerms: deliveryTerms,
+				DeliveryTerms: deliveryTerms,
 
-			FocString: focString,
-			RequestedQuantityString: requestedQuantityString,
+				FocString: focString,
+				RequestedQuantityString: requestedQuantityString,
 
-			TotalVolumeUnit: totalVolumeUnit,
-			PaidVolume: paidVolume,
-			PaidVolumeUnit: paidVolumeUnit,
-			FocAmountUnit: focAmountUnit,
+				TotalVolumeUnit: totalVolumeUnit,
+				PaidVolume: paidVolume,
+				PaidVolumeUnit: paidVolumeUnit,
+				FocAmountUnit: focAmountUnit,
 
-			OfferPriceUnit: offerPriceUnit,
-			OfferPricePack: offerPricePack,
-			OfferPriceUnitEurBudget: offerPriceUnitEurBudget,
-			OfferPriceUnitEurSpot: offerPriceUnitEurSpot,
+				OfferPriceUnit: offerPriceUnit,
+				OfferPricePack: offerPricePack,
+				OfferPriceUnitEurBudget: offerPriceUnitEurBudget,
+				OfferPriceUnitEurSpot: offerPriceUnitEurSpot,
 
-			NetPriceUnit: netPriceUnit,
-			NetPricePack: netPricePack,
-			NetPriceUnitEurBudget: netPriceUnitEurBudget,
-			NetPriceUnitEurSpot: netPriceUnitEurSpot,
+				NetPriceUnit: netPriceUnit,
+				NetPricePack: netPricePack,
+				NetPriceUnitEurBudget: netPriceUnitEurBudget,
+				NetPriceUnitEurSpot: netPriceUnitEurSpot,
 
-			CogsEurUnit: cogsEurUnit,
-			CogsEurPack: cogsEurPack,
+				CogsEurUnit: cogsEurUnit,
+				CogsEurPack: cogsEurPack,
 
-			GrossSales: grossSales,
-			NetSales: netSales,
-			NetSalesEurBudget: netSalesEurBudget,
-			NetSalesEurSpot: netSalesEurSpot,
+				GrossSales: grossSales,
+				NetSales: netSales,
+				NetSalesEurBudget: netSalesEurBudget,
+				NetSalesEurSpot: netSalesEurSpot,
 
-			GrossProfitEurSpot: grossProfitEurSpot,
-			GrossProfitEurBudget: grossProfitEurBudget,
-			GrossMarginEurSpot: grossMarginEurSpot,
-			GrossMarginEurBudget: grossMarginEurBudget,
+				GrossProfitEurSpot: grossProfitEurSpot,
+				GrossProfitEurBudget: grossProfitEurBudget,
+				GrossMarginEurSpot: grossMarginEurSpot,
+				GrossMarginEurBudget: grossMarginEurBudget,
 
-			IsMinPrice: isMinPrice
-		};
-		return results;
+				IsMinPrice: isMinPrice
+			};
+			return results;
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}
 
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'WordAttachments', async (req, next) => {
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
-		const offerId = req.data.offerId;
-		const templateId = req.data.templateId;
-		if (!offerId) {
-			return next();
-		}
-
-		const templates = await tx.run(SELECT.from(WordTemplate).where({ templateId: templateId }));
-		if (templates.length === 0) {
-			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
-		}
-		const templateContent = templates[0].content;
-		let wordData = {};
-		//Get offer data
-		if (offerId) {
-			try {
-				wordData = await getOfferData(tx,offerId);
-			} catch (error) {
-				return req.reject(404, 'No offer found');
+		try{
+			const offerId = req.data.offerId;
+			const templateId = req.data.templateId;
+			if (!offerId) {
+				return next();
 			}
-		}
-		const handler = new wordTemplate.TemplateHandler({
-			scopeDataResolver: createResolver({
-				angularFilters: {
-					upper: (input) => (input || "").toUpperCase(),
-					lower: (input) => (input || "").toLowerCase(),
-					numberEU2: (input) => {  
-                        if(Number(input) === 0 || input === null  ){
-                            return "0,00";
-                        }          
-                        var usString;
-						if(typeof input === 'string'){
-                            usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
-						} else {
-                            usString = input.toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
-						}
-                        usString = usString.replace(/\,/g,'$');
-                        usString = usString.replace(/\./g,',');  
-                        usString = usString.replace(/\$/g,'.');   
-                        return  usString;                  
-				   },
-				   numberUS2: (input) => {  
+
+			const templates = await tx.run(SELECT.from(WordTemplate).where({ templateId: templateId }));
+			if (templates.length === 0) {
+				return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
+			}
+			const templateContent = templates[0].content;
+			let wordData = {};
+			//Get offer data
+			if (offerId) {
+				try {
+					wordData = await getOfferData(tx,offerId);
+				} catch (error) {
+					return req.reject(404, 'No offer found');
+				}
+			}
+			const handler = new wordTemplate.TemplateHandler({
+				scopeDataResolver: createResolver({
+					angularFilters: {
+						upper: (input) => (input || "").toUpperCase(),
+						lower: (input) => (input || "").toLowerCase(),
+						numberEU2: (input) => {  
+							if(Number(input) === 0 || input === null  ){
+								return "0,00";
+							}          
+							var usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							} else {
+								usString = input.toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							}
+							usString = usString.replace(/\,/g,'$');
+							usString = usString.replace(/\./g,',');  
+							usString = usString.replace(/\$/g,'.');   
+							return  usString;                  
+					},
+					numberUS2: (input) => {  
+							if(Number(input) === 0 || input === null  ){
+								return "0.00";
+							}          
+							var usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							} else {
+								usString = input.toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							}
+							return  usString;
+						},
+						dateFormatUK: (input) => {
+							return input.split("-").reverse().join("-").replaceAll("-","/");
+						},
+						currentdatePK: (input) => {
+							const curr_date = new Date();
+							return curr_date.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
+						
+						},
+						currentdateUK: (input) => {
+							const c_date = new Date();
+							let day = c_date.getDate();
+							let year = c_date.getFullYear();
+							let Month = c_date.getMonth()+1;
+							let current_date = `${day}/${Month}/${year}`;
+							return current_date;
+						},				   
+						numberEU5: (input) => {
 						if(Number(input) === 0 || input === null  ){
-							return "0.00";
-						}          
+							return "0,00000";
+						} 
 						var usString;
 						if(typeof input === 'string'){
-							usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
 						} else {
-							usString = input.toLocaleString('en-US',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
 						}
-						return  usString;
+						usString = usString.replace(/\,/g,'$');
+						usString = usString.replace(/\./g,',');  
+						usString = usString.replace('$','.');   
+						return  usString; 
 					},
-					dateFormatUK: (input) => {
-						return input.split("-").reverse().join("-").replaceAll("-","/");
+					dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+					dateYear: (input) => input.substring(0,4),
+					extract2Decimals: (input) => {
+						if(typeof input === 'string'){
+							return input.split(".")[1].substring(0, 2);
+						} else {
+							return Number(input).toFixed(2).split(".")[1];
+						}
 					},
-					currentdatePK: (input) => {
-						const curr_date = new Date();
-						return curr_date.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
-					
+					extract5Decimals: (input) => {
+						if(typeof input === 'string'){
+							return input.split(".")[1].substring(0, 5);
+						} else {
+							return Number(input).toFixed(5).split(".")[1];
+						}
 					},
-					currentdateUK: (input) => {
-						const c_date = new Date();
-						let day = c_date.getDate();
-						let year = c_date.getFullYear();
-						let Month = c_date.getMonth()+1;
-						let current_date = `${day}/${Month}/${year}`;
-						return current_date;
-					},				   
-					numberEU5: (input) => {
-                    if(Number(input) === 0 || input === null  ){
-                        return "0,00000";
-                    } 
-                    var usString;
-                    if(typeof input === 'string'){
-                        usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-                    } else {
-                        usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-                    }
-                    usString = usString.replace(/\,/g,'$');
-                    usString = usString.replace(/\./g,',');  
-                    usString = usString.replace('$','.');   
-                    return  usString; 
-			   	},
-				dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-				dateYear: (input) => input.substring(0,4),
-                extract2Decimals: (input) => {
-                    if(typeof input === 'string'){
-                        return input.split(".")[1].substring(0, 2);
-                    } else {
-                        return Number(input).toFixed(2).split(".")[1];
-                    }
-                },
-                   extract5Decimals: (input) => {
-                    if(typeof input === 'string'){
-                        return input.split(".")[1].substring(0, 5);
-                    } else {
-                        return Number(input).toFixed(5).split(".")[1];
-                    }
-                },
-                //EHQUT-167492-Quotation Adjustment in word file
-                Decimals2Unit: (input) => {
-                    if(typeof input === 'string'){
-                        return input.split(".")[1].substring(0, 2);
-                    } else {
-                        return Number(input).toFixed(2);
-                    }
-                    
-                }
-                //EHQUT-167492-Quotation Adjustment in word file
+					//EHQUT-167492-Quotation Adjustment in word file
+					Decimals2Unit: (input) => {
+						if(typeof input === 'string'){
+							return input.split(".")[1].substring(0, 2);
+						} else {
+							return Number(input).toFixed(2);
+						}
+						
+					}
+					//EHQUT-167492-Quotation Adjustment in word file
 
 
+					}
+				})
+			});
+			const doc = await handler.process(templateContent, wordData);
+			const readableInstanceStream = new Readable({
+				read() {
+					this.push(doc);
+					this.push(null);
 				}
-			})
-		});
-		const doc = await handler.process(templateContent, wordData);
-		const readableInstanceStream = new Readable({
-			read() {
-				this.push(doc);
-				this.push(null);
-			}
-		});
-		const filename = offerId+'.docx';
-		req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-		return {
-			value: readableInstanceStream
-		};
+			});
+			const filename = offerId+'.docx';
+			req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+			return {
+				value: readableInstanceStream
+			};
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	});
 
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'ExcelAttachments', async (req, next) => {
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
-		const offerId = req.data.offerId;
-		const templateId = req.data.templateId;
-		if (!offerId) {
-			return next();
-		}
-
-		const templates = await tx.run(SELECT.from(ExcelTemplate).where({ templateId: templateId }));
-		if (templates.length === 0) {
-			return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
-		}
-		const templateContent = templates[0].content;
-		let excelData = {};
-		//Get offer data
-		if (offerId) {
-			try {
-				excelData = await getOfferData(tx,offerId);
-			} catch (error) {
-				return req.reject(404, 'No offer found');
+		try{
+			const offerId = req.data.offerId;
+			const templateId = req.data.templateId;
+			if (!offerId) {
+				return next();
 			}
+
+			const templates = await tx.run(SELECT.from(ExcelTemplate).where({ templateId: templateId }));
+			if (templates.length === 0) {
+				return req.reject(404, 'No template found for offer:' + offerId + ' and templateid:' + templateId);
+			}
+			const templateContent = templates[0].content;
+			let excelData = {};
+			//Get offer data
+			if (offerId) {
+				try {
+					excelData = await getOfferData(tx,offerId);
+				} catch (error) {
+					return req.reject(404, 'No offer found');
+				}
+			}
+			//generate XLSX
+			let excelStreamValue = XLSXHelper.generateXLSX(`${templates[0]?.filename}`,excelData);
+			req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
+			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			return excelStreamValue;
 		}
-		//generate XLSX
-		let excelStreamValue = XLSXHelper.generateXLSX(`${templates[0]?.filename}`,excelData);
-		req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
-		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	});
 
 	srv.before('CREATE', 'PdfEmail', async (req) => {
-		const tx = cds.tx(req);
-		const cwid = req.user.id;
-		const tenderInstituteId = req.data.TenderInstitute;
-		const offerInstituteId = req.data.OfferInstitute;
-		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({CWID: cwid}));
-		const tenderInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: tenderInstituteId}));
-		const offerInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: offerInstituteId}));
-		req.data.TenderInstitute = tenderInstituteInfo[0]?.InstituteName;
-		req.data.OfferInstitute = offerInstituteInfo[0]?.InstituteName;
-		req.data.UserEmail = userInfo[0]?.UserEmail;
-		req.data.UserName = userInfo[0]?.UserName;
+		try{
+			const tx = cds.tx(req);
+			const cwid = req.user.id;
+			const tenderInstituteId = req.data.TenderInstitute;
+			const offerInstituteId = req.data.OfferInstitute;
+			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({CWID: cwid}));
+			const tenderInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: tenderInstituteId}));
+			const offerInstituteInfo = await tx.run(SELECT.from(PT_TMINST).where({InstituteID: offerInstituteId}));
+			req.data.TenderInstitute = tenderInstituteInfo[0]?.InstituteName;
+			req.data.OfferInstitute = offerInstituteInfo[0]?.InstituteName;
+			req.data.UserEmail = userInfo[0]?.UserEmail;
+			req.data.UserName = userInfo[0]?.UserName;
+		}
+		catch{
+			console.error(error.code, error.message);
+		}
 	});
 
 	async function getOfferData(tx,offerId){
-		
-		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
-		let offerValidation = await buildOfferValidation(tx, whereOffer);
-		if (!offerValidation) {
-			throw 'No offer found';
-		}
-
-		//Get product data
-		let productValidation = await buildOfferProductValidation(tx, whereOffer);
-
-		//format prices
-		productValidation.forEach(prd => {
-			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
-			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
-			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
-			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
-			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
-		});
-
-		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
-		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
-		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
-		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
-		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
-			const { ConditionType } = product.PriceConditionClassification;
-			const foundGroup = groups.find(group=>group[ConditionType.replace(/\s/g, '')]);
-			if(!foundGroup){
-			  let test = {};
-			  test[ConditionType.replace(/\s/g, '')]=[{items:[product]}];
-			  groups.push(test);
-			}else{
-			  foundGroup[ConditionType.replace(/\s/g, '')][0].items.push(product);
+		try{
+			let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
+			let offerValidation = await buildOfferValidation(tx, whereOffer);
+			if (!offerValidation) {
+				throw 'No offer found';
 			}
-			return groups;
-		  }, []);
-		return {
-			offerValidation: offerValidation,
-			offerProductValidation: productValidation,
-			groupedOfferProductValidation: groupedOfferProductValidation
-			// flatOfferProductValidation.reduce((group, product) => {
-			// 	const { PriceConditionClassification } = product;
-			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
-			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')].items.push(product);
-			// 	return group;
-			//   }, {})
-		};
+
+			//Get product data
+			let productValidation = await buildOfferProductValidation(tx, whereOffer);
+
+			//format prices
+			productValidation.forEach(prd => {
+				prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
+				prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
+				prd.OFFER_PRICE = ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+				prd.OFFER_PRICE_VAT = ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
+				prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+				prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+				prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
+				prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
+				prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+			});
+
+			offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
+			offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
+			offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+			const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
+			const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
+				const { ConditionType } = product.PriceConditionClassification;
+				const foundGroup = groups.find(group=>group[ConditionType.replace(/\s/g, '')]);
+				if(!foundGroup){
+				let test = {};
+				test[ConditionType.replace(/\s/g, '')]=[{items:[product]}];
+				groups.push(test);
+				}else{
+				foundGroup[ConditionType.replace(/\s/g, '')][0].items.push(product);
+				}
+				return groups;
+			}, []);
+			return {
+				offerValidation: offerValidation,
+				offerProductValidation: productValidation,
+				groupedOfferProductValidation: groupedOfferProductValidation
+				// flatOfferProductValidation.reduce((group, product) => {
+				// 	const { PriceConditionClassification } = product;
+				// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
+				// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')].items.push(product);
+				// 	return group;
+				//   }, {})
+			};
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	}
 
 	srv.on("READ", "CSVAttachment", async (req, res) => {
+		try{
+			const zuelligExtract = await SELECT.from(ZuelligExtractView).where({CountryCode: "TW"});
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
+			const zuellig = req.data.Zuellig;
+			let mappedZuelligExtract = [];
 
-		const zuelligExtract = await SELECT.from(ZuelligExtractView).where({CountryCode: "TW"});
-		const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
-		const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
-		const zuellig = req.data.Zuellig;
-		let mappedZuelligExtract = [];
+			if (zuellig) {
+				mappedZuelligExtract = zuelligExtract.map(item => {
+					return {
+						"CONT_PRICE": Number(item.Price1),
+						"DONATION": 0,
+						"GROUP": item.InstituteType,
+						"CCGRCD": item.Class || "",
+						"PACK": item.PACKFACTOR,
+						"Modified": new Date(item.SubmittedOn).toISOString(),
+						"QoNetPrice": Number(item.Price3),
+						"QoDisCP1": (item.Level2Discount1 * 100).toFixed(2),
+						"QoDisCM1": item.GeneralDiscount_Amount,
+						"QoDisCM2": item.SecondDiscount_Amount,
+						"QoDisCM5": item.FreeGoods_Percentage,
+						"QoDisCM6": item.AnnualDiscountForBranch,
+						"cusno": item.External_InstituteId,
+						"susnm": item.InstituteName,
+						"ProdNo": item.SKUCode || "",
+						"ProdName": item.PRODUCTPACKNAME,
+						"Territory": item.KAM_Territory,
+						"SDSNo.": item.CNPJ,
+						"SLSNO": item.KAM_Territory,
+						"STS": item.Status,
+						"BasePrice": Number(item.RegisteredPrice)
+					}
+				});
+			}else {
+				mappedZuelligExtract = zuelligExtract.map(item => {
+					const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
+					return {
+						"ApplyDate": new Date(item.CreationDate).toISOString(),
+						"ApplicantID": item.SubmittedBy,
+						"BUCode": item.BU,
+						"EffectiveDate": new Date(item.EffectiveDate).toISOString() || "",
+						"CurNetPrice": Number(item.Price3),
+						"pk": products.length,
+						"CONT_PRICE": Number(item.Price1),
+						"DONATION": 0,
+						"GROUP": item.InstituteType,
+						"CCGRCD": item.Class || "",
+						"CREATE_DAT": item.createdAt,
+						"CONCS": item.ParentInstituteID || "",
+						"Modified": new Date(item.SubmittedOn).toISOString(),
+						"QoNetPrice": Number(item.Price3),
+						"QoTotal": item.TotalDiscountNHI,
+						"QoDisCP1": (item.Level2Discount1 * 100).toFixed(2),
+						"QoDisCM1": item.GeneralDiscount_Amount,
+						"QoDisCP2": (item.Level2Discount2 * 100).toFixed(2),
+						"QoDisCM2": item.SecondDiscount_Amount,
+						"QoDisCP3": 0,
+						"QoDisCP4": 0,
+						"QoDisCM4": 0,
+						"QoDisCP5": item.FreeGoods_Amount,
+						"QoDisCM5": item.FreeGoods_Percentage,
+						"QoDisCP6": item.AnnualDiscount_Percentage,
+						"QoDisCM6": item.AnnualDiscountForBranch,
+						"PASNumber": item.OfferID,
+						"Unmsr": item.UserName,
+						"cusno": item.External_InstituteId,
+						"susnm": item.InstituteName,
+						"ProdNo": item.SKUCode || "",
+						"ProdName": item.PRODUCTPACKNAME,
+						"Territory": item.KAM_Territory,
+						"BasePrice": Number(item.Price0),
+						"SDSNo.": item.CNPJ,
+						"SLSNO": item.KAM_Territory,
+						"CurrentBasePrice": Number(item.Price0),
+						"STS": item.Status,
+						"ItemNo": item.SKUCode || "",
+						"ItemName": item.PRODUCTPACKNAME,
+						"SBE": item.BU,
+						"BU": item.BU,
+						"Display": item.Display,
+						"Pack": item.PACKFACTOR || ""
+					}
+				});
+			}
+			
+			if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found"); ;
+			// Converts your Array<Object> to a CsvOutput string based on the configs
+			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
 
-		if (zuellig) {
-			mappedZuelligExtract = zuelligExtract.map(item => {
-				return {
-					"CONT_PRICE": Number(item.Price1),
-					"DONATION": 0,
-					"GROUP": item.InstituteType,
-					"CCGRCD": item.Class || "",
-					"PACK": item.PACKFACTOR,
-					"Modified": new Date(item.SubmittedOn).toISOString(),
-					"QoNetPrice": Number(item.Price3),
-					"QoDisCP1": (item.Level2Discount1 * 100).toFixed(2),
-					"QoDisCM1": item.GeneralDiscount_Amount,
-					"QoDisCM2": item.SecondDiscount_Amount,
-					"QoDisCM5": item.FreeGoods_Percentage,
-					"QoDisCM6": item.AnnualDiscountForBranch,
-					"cusno": item.External_InstituteId,
-					"susnm": item.InstituteName,
-					"ProdNo": item.SKUCode || "",
-					"ProdName": item.PRODUCTPACKNAME,
-					"Territory": item.KAM_Territory,
-					"SDSNo.": item.CNPJ,
-					"SLSNO": item.KAM_Territory,
-					"STS": item.Status,
-					"BasePrice": Number(item.RegisteredPrice)
-				}
-			});
-		}else {
-			mappedZuelligExtract = zuelligExtract.map(item => {
-				const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
-				return {
-					"ApplyDate": new Date(item.CreationDate).toISOString(),
-					"ApplicantID": item.SubmittedBy,
-					"BUCode": item.BU,
-					"EffectiveDate": new Date(item.EffectiveDate).toISOString() || "",
-					"CurNetPrice": Number(item.Price3),
-					"pk": products.length,
-					"CONT_PRICE": Number(item.Price1),
-					"DONATION": 0,
-					"GROUP": item.InstituteType,
-					"CCGRCD": item.Class || "",
-					"CREATE_DAT": item.createdAt,
-					"CONCS": item.ParentInstituteID || "",
-					"Modified": new Date(item.SubmittedOn).toISOString(),
-					"QoNetPrice": Number(item.Price3),
-					"QoTotal": item.TotalDiscountNHI,
-					"QoDisCP1": (item.Level2Discount1 * 100).toFixed(2),
-					"QoDisCM1": item.GeneralDiscount_Amount,
-					"QoDisCP2": (item.Level2Discount2 * 100).toFixed(2),
-					"QoDisCM2": item.SecondDiscount_Amount,
-					"QoDisCP3": 0,
-					"QoDisCP4": 0,
-					"QoDisCM4": 0,
-					"QoDisCP5": item.FreeGoods_Amount,
-					"QoDisCM5": item.FreeGoods_Percentage,
-					"QoDisCP6": item.AnnualDiscount_Percentage,
-					"QoDisCM6": item.AnnualDiscountForBranch,
-					"PASNumber": item.OfferID,
-					"Unmsr": item.UserName,
-					"cusno": item.External_InstituteId,
-					"susnm": item.InstituteName,
-					"ProdNo": item.SKUCode || "",
-					"ProdName": item.PRODUCTPACKNAME,
-					"Territory": item.KAM_Territory,
-					"BasePrice": Number(item.Price0),
-					"SDSNo.": item.CNPJ,
-					"SLSNO": item.KAM_Territory,
-					"CurrentBasePrice": Number(item.Price0),
-					"STS": item.Status,
-					"ItemNo": item.SKUCode || "",
-					"ItemName": item.PRODUCTPACKNAME,
-					"SBE": item.BU,
-					"BU": item.BU,
-					"Display": item.Display,
-					"Pack": item.PACKFACTOR || ""
-				}
-			});
+			req._.res.setHeader('Content-disposition', `attachment; filename=ZuelligExtract.csv`);
+			req._.res.setHeader('Content-type', 'text/csv');
+
+			return _createStream(csv);
 		}
-		
-		if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found"); ;
-		// Converts your Array<Object> to a CsvOutput string based on the configs
-		const csv = generateCsv(csvConfig)(mappedZuelligExtract);
-
-		req._.res.setHeader('Content-disposition', `attachment; filename=ZuelligExtract.csv`);
-		req._.res.setHeader('Content-type', 'text/csv');
-
-		return _createStream(csv);
+		catch(error){
+			console.error(error.code, error.message);
+		}
 	});
 
 	function _createStream (data) {        
