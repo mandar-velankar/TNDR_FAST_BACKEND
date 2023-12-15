@@ -16,7 +16,8 @@ module.exports = (srv) => {
 				ConsumerPrices:req.user.is('f_tndr_cag_consumerprice_user'),
 			},
 			standardtenderAccess: {
-				OverviewDownload: req.user.is('f_tnndr_cag_standardtenderdownload_user')
+				OverviewDownload: req.user.is('f_tnndr_cag_standardtenderdownload_user'),
+				ZuelligExtract: req.user.is('f_tnndr_cag_standardtenderzuelligextract_user')
 			},
 			ppa: req.user.is('f_tndr_cag_ppa_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			contract: req.user.is('f_tndr_cag_ctr_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
