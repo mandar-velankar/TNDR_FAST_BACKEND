@@ -2378,7 +2378,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
-        inner join MasterData.PT_TMINSHIER as hier 
+        left join MasterData.PT_TMINSHIER as hier 
             on hier.InstituteID = tender.InstituteID 
         inner join TransactionalData.PT_TMOFRS as offer 
             on tender.TenderID = offer.TenderID
@@ -2408,8 +2408,10 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             offer.SubmittedOn,
             tender.createdAt,
             CreatedByUser.UserName,
+            pr.ProductCode,
             inst.InstituteName,
             inst.InstituteType,
+            inst.InstituteID,
             ifnull(inst.External_InstituteId, '') as External_InstituteId,
             inst.Class,
             ifnull(inst.KAM_Territory, '') as KAM_Territory,
@@ -2438,4 +2440,5 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 else 'Suspend'
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
-    };
+    }
+    where offer.OfferStatusTable.STATUS = 'Results Recorded';
