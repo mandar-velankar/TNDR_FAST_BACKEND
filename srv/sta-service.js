@@ -1029,7 +1029,7 @@ module.exports = async (srv) => {
 			}
 		});
 
-		if(existingApprovals?.length > 0 && existingApprovals.findIndex(approval => approval.ApproverType === oApprovalData.ApproverType)){
+		if(existingApprovals?.length > 0){
 			//remove old entries before inserting
 			await DELETE.from(PT_TMAPPRST)
 				.where({
@@ -2109,7 +2109,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					userEmail = approvalForType[0].UserEmail;
 					senderComment = approvalForType[0].SenderComment;
 					approverComment = approvalForType[0].ApproverComment;
-					//			hierarchy 		= approvalForType[0].Hierarchy;
+					hierarchy = approvalForType[0].Hierarchy;
 					requiredAction = type.ValidationType;
 					approverType = defaultForType.length !== 0 ? defaultForType[0].ApproverType : "";
 					division = defaultForType.length !== 0 ? defaultForType[0].Division : "";
@@ -2158,7 +2158,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					ApproverTypes: aApproverType,
 					CountryName: countryName,
 					UserName: userName,
-					UserEmail: userEmail
+					UserEmail: userEmail,
+					Hierarchy: hierarchy
 				});
 
 			});
