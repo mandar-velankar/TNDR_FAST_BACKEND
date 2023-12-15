@@ -578,6 +578,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
     sku.SKU,
     offerProduct.Reference as CODE,
+    offerProduct.SKU.ProductGenericName as PRODUCTGENERICNAME,
 	offerProduct.SKU.PACKFACTOR as PACKSIZE,
 	offerProduct.SKU.CONCENTRATION as DOSAGE,
 	offerProduct.SKU.UOM as UOM,
@@ -2070,6 +2071,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NET_PRICE_UNIT_EUR_SPOT                     : Double;
             NET_OFFER_PRICE                             : Double;
             NET_PRICE                                   : Double;
+            NET_PRICE_VAT                               : Double;
             ADDITIONAL_DISCOUNT                         : Double;
             ADDITIONAL_DISCOUNT_IN_WORDS                : String;
             MAX_PRICE_NHS_PP                            : Double;
@@ -2144,6 +2146,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PCI_NAME                                    : String(255);
             ACTIVE_SUBSTANCE                            : String(50);
             PRODUCT_TYPE                                : String(50);
+            PRODUCTGENERICNAME                          : String(500);
             SKUCOUNTRY_ACTIVERECORD                     : String(10);
             PRESENTATION_2                              : String(1000);
             GOV_CODE                                    : String(255);
