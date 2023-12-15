@@ -102,7 +102,7 @@ function calculateFields(priceAgreement, requiredParameters){
     // we are filtering out the PVL conditions first as we don't sync PVL with SAP
     //only one loop instead of two (filter + every)
 
-   // priceAgreement.Synchronized = true;
+   //priceAgreement.Synchronized = true;
 
     priceAgreement.isNewPriceAgreement = true;
     priceAgreement.AppliedCount = 0;

@@ -2876,7 +2876,23 @@ module.exports = async (srv) => {
 						}
 						return  usString;
 					},
-				   numberEU5: (input) => {
+					dateFormatUK: (input) => {
+						return input.split("-").reverse().join("-").replaceAll("-","/");
+					},
+					currentdatePK: (input) => {
+						const curr_date = new Date();
+						return curr_date.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
+					
+					},
+					currentdateUK: (input) => {
+						const c_date = new Date();
+						let day = c_date.getDate();
+						let year = c_date.getFullYear();
+						let Month = c_date.getMonth()+1;
+						let current_date = `${day}/${Month}/${year}`;
+						return current_date;
+					},				   
+					numberEU5: (input) => {
                     if(Number(input) === 0 || input === null  ){
                         return "0,00000";
                     } 
