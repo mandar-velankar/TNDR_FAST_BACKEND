@@ -1029,7 +1029,7 @@ module.exports = async (srv) => {
 			}
 		});
 
-		if(existingApprovals?.length > 0 && existingApprovals.findIndex(approval => approval.ApproverType === oApprovalData.ApproverType)){
+		if(existingApprovals?.length > 0){
 			//remove old entries before inserting
 			await DELETE.from(PT_TMAPPRST)
 				.where({
@@ -1660,6 +1660,17 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		})
 	});
 
+	srv.after('READ', 'StandardDivisions', data => {
+		if (data && Array.isArray(data) && data.length > 0) {
+			const countryCode = data[0]?.CountryCode;
+            data.unshift({
+				ID: "99999999-9999-9999-9999-999999999999", 
+				CountryCode: countryCode, 
+				DivisionCode: "", 
+				DivisionName: ""
+			});
+        }
+	});
 
 	async function buildOfferApproval(tx, whereOffer) {
 		try{
@@ -2109,7 +2120,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					userEmail = approvalForType[0].UserEmail;
 					senderComment = approvalForType[0].SenderComment;
 					approverComment = approvalForType[0].ApproverComment;
-					//			hierarchy 		= approvalForType[0].Hierarchy;
+					hierarchy = approvalForType[0].Hierarchy;
 					requiredAction = type.ValidationType;
 					approverType = defaultForType.length !== 0 ? defaultForType[0].ApproverType : "";
 					division = defaultForType.length !== 0 ? defaultForType[0].Division : "";
@@ -2158,7 +2169,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					ApproverTypes: aApproverType,
 					CountryName: countryName,
 					UserName: userName,
-					UserEmail: userEmail
+					UserEmail: userEmail,
+					Hierarchy: hierarchy
 				});
 
 			});

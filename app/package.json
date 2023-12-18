@@ -5,7 +5,7 @@
     "start": "node node_modules/@sap/approuter/approuter.js"
   },
   "dependencies": {
-    "@sap/approuter": "^14.3.3",
+    "@sap/approuter": "^14.4.3",
     "@ui5/cli": "^2.0.2"
   }
 }

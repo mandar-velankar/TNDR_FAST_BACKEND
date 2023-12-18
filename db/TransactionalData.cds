@@ -866,7 +866,7 @@ entity OfferProductOfferStatus {
             SenderComment       : String(500);
             ApproverComment     : String(500);
             Active              : Integer not null;
-            //Hierarchy           : Integer;
+            Hierarchy           : Integer;
             AP_ID               : String(10);
             RestoreKey          : String(100);
             Statustime          : DateTime;
