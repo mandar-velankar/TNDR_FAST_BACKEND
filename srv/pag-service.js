@@ -77,6 +77,8 @@ module.exports = async (srv) => {
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST));
+        workflowApprovals=workflowApprovals[0];
+        console.log(workflowApprovals,"workflow");
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
         offerValidation=offerValidation[0];
@@ -88,7 +90,7 @@ module.exports = async (srv) => {
         console.log(offerValidation.ProductPackId);
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
         let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
-        console.log(productDetail,"productDetail");
+        
         
         return {
             PriceagreementID: offerValidation.ID,
