@@ -73,8 +73,10 @@ module.exports = async (srv) => {
         return R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), workflowOffers);
     }
     async function buildWorkflowApprovalOffersEntry(tx, Id, approvalStatus) {
-console.log(Id,"ID");
+
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
+        let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
+        let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST));
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
         offerValidation=offerValidation[0];
@@ -97,6 +99,8 @@ console.log(Id,"ID");
             CustomerID: institute.CustomerID,
             ProductPackID: offerValidation.ProductPackId,
             ProductPackNAME:productDetail.PRODUCTPACKNAME,
+            Status:workflowApprovals.ApprovalStatus,
+            ID:workflowApprovals.ID,
             EffectiveDate: offerValidation.EffectiveDate,
             ExpiryDate: offerValidation.ExpiryDate,
             OldExpiryDate: offerValidation.OldExpiryDate
