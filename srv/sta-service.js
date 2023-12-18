@@ -1660,6 +1660,17 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		})
 	});
 
+	srv.after('READ', 'StandardDivisions', data => {
+		if (data && Array.isArray(data) && data.length > 0) {
+			const countryCode = data[0]?.CountryCode;
+            data.unshift({
+				ID: "99999999-9999-9999-9999-999999999999", 
+				CountryCode: countryCode, 
+				DivisionCode: "", 
+				DivisionName: ""
+			});
+        }
+	});
 
 	async function buildOfferApproval(tx, whereOffer) {
 		try{
