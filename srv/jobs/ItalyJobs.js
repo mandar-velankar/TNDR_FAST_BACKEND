@@ -608,7 +608,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             let query = SELECT.from(`${ItalyCustomers.name} as customer`)
                         .join(`${CountryProvinces.name} as province`)
                         .on({'customer.E1KNA1M_REGIO' : 'province.Name'})
-                        .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT'});
+                        .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT','customer.E1KNA1M_KTOKD' : { "<>": '0002'}});
 
             const customers = await tx.run(query);
            
