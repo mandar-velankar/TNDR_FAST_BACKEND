@@ -10,7 +10,7 @@
         "@sap/hana-client": "2.14.22",
         "@sap/logging": "^6.1.1",
         "@sap/xsenv": "^3.4.0",
-        "@sap/xssec": "^3.2.14",
+        "@sap/xssec": "^3.6.0",
         "angular-expressions": "^1.1.4",
         "axios": "^0.21.1",
         "cfenv": "^1.2.4",
