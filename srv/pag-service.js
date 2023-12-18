@@ -73,7 +73,7 @@ module.exports = async (srv) => {
         return R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), workflowOffers);
     }
     async function buildWorkflowApprovalOffersEntry(tx, Id, approvalStatus) {
-
+        console.log(Id,"ID");
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST));
