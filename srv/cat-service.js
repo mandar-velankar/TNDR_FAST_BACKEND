@@ -1623,6 +1623,7 @@ module.exports = (srv) => {
                     CountryCode: offer.COUNTRYCODE
                 }
     
+				
                 tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
 
                 const whereProductPackFOC = {
