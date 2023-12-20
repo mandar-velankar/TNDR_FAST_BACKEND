@@ -267,7 +267,7 @@ inner join MasterData.PT_TMINST as institute
 	province.RegionID,
 	institute.InstituteID,
 	institute.CountryCode,
-}where customer.E1KNA1M.LAND1 = 'IT'
+}where customer.E1KNA1M.LAND1 = 'IT' and customer.E1KNA1M.KTOKD<> '0002'
 group by customer.E1KNA1M.LAND1,
 	customer.E1KNA1M.KUNNR,
 	customer.E1KNA1M.NAME1,
