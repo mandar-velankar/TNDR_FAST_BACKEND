@@ -52,7 +52,7 @@ entity PriceAgreements: cuid, managed {
     Status: String;
     CancellationComment: String;
     LotID: Integer default 1;
-    OldExpiryDate:DateTime; //EJUVE-CR3
+    // OldExpiryDate:DateTime; //EJUVE-CR3
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -119,7 +119,7 @@ entity CustomerPrices: cuid, managed {
     RefIdocNumber: String;
     Notified: Boolean default false;
     ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
-    OldExpiryDate:DateTime;//EJUVE-CR3
+    // OldExpiryDate:DateTime;//EJUVE-CR3
 }
 
 entity SettlementDates: managed {
@@ -147,7 +147,7 @@ entity CustomerPrices_History: managed {
     Applied: Boolean; 
     RefIdocNumber: String;
     Notified: Boolean default false;
-   OldExpiryDate:DateTime;//EJUVE-CR3
+//    OldExpiryDate:DateTime;//EJUVE-CR3
 }
 
 /**
@@ -359,17 +359,17 @@ entity CustomerPricesQC: cuid, managed {
     Institute                   : Association to MasterData.PT_TMINST on Institute.CustomerID = LTRIM(KUNNR, '0') and Institute.CountryCode = CountryCode;
 }
 //EJUVE-CR3 START
-entity PriceAgreement_APPRST : cuid, managed {
-        CountryCode      : String(2);
-    key PriceAgreementID : UUID;
-        ApprovalStatus   : String(30)  null;
-        OfferId          : String;
-        ProductPackID    : Integer  null;
-        InstituteID      : Integer  null;
-        EffectiveDate    : DateTime  null;
-        ExpiryDate       : DateTime  null;
-        PriceAgreements  : Association to PriceAgreements
-                               on PriceAgreements.ID = PriceAgreementID;
+// entity PriceAgreement_APPRST : cuid, managed {
+//         CountryCode      : String(2);
+//     key PriceAgreementID : UUID;
+//         ApprovalStatus   : String(30)  null;
+//         OfferId          : String;
+//         ProductPackID    : Integer  null;
+//         InstituteID      : Integer  null;
+//         EffectiveDate    : DateTime  null;
+//         ExpiryDate       : DateTime  null;
+//         PriceAgreements  : Association to PriceAgreements
+//                                on PriceAgreements.ID = PriceAgreementID;
 
-}
+// }
 //EJUVE-CR3 END
