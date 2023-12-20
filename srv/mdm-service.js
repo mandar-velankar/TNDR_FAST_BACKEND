@@ -12,7 +12,8 @@ module.exports = (srv) => {
     PT_TMLE,
     PT_TMCTLE,
 	PT_TMSKUPRDPCK,
-	PT_TMREGPR
+	PT_TMREGPR,
+	SalesData
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
 	const {
@@ -237,6 +238,55 @@ module.exports = (srv) => {
 		});
 		await DELETE.from(ExcelUpload).where({ID: req.ID});
 		return req;
+	});
+
+	srv.after("UPDATE", "SalesDataUpload", async (req, res) => {
+		/**
+		 * @param {Object} file - This is uploaded excel file
+		 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
+		 */
+		try {
+			const file = await SELECT.one.from(ExcelUpload).where({ID: req.ID});
+			const expectedHeaders = ["SYEAR", "SMONTH", "SCUSNO", "STERID", "SITNO", "SQTY", "SGS", "SDIS", "SDON", "SNS", "Expr1", "SOTD", "SSAMP", "SYMD"]; 
+			const arrayBuffer = bufferToArrayBuffer(file?.content);
+			const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+			// Assuming the Excel file has only one sheet, you can get the data from it
+			const sheetName = workbook.SheetNames[0];
+			let salesData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+			let isValid = false;
+
+			for (let header in expectedHeaders) {
+				salesData.forEach((item, index) => {
+				if (!Object.hasOwn(item, expectedHeaders[header])) {
+					isValid = false;
+				}else {
+					isValid = true;
+				}
+				});
+			}
+
+			if (!isValid) {
+				return res.reject(400, "Invalid Excel data format");
+			}
+			salesData = salesData.map(sd => {
+				sd.SYEAR = `${sd.SYEAR}`;
+				sd.SMONTH = `${sd.SMONTH}`;
+				sd.SCUSNO = `${sd.SCUSNO}`;
+				sd.SITNO = `${sd.SITNO}`;
+				sd.SITNO = `${sd.SITNO}`;
+				sd.SYMD = `${sd.SYMD}`;
+				return sd
+			});
+
+			await INSERT.into(SalesData).entries(salesData);
+			await DELETE.from(ExcelUpload).where({ID: req.ID});
+		} catch (error) {
+			console.log(error);
+		}
+		
+		return res.reply("Sales Data uploaded successfully");
 	});
 
 	async function upsertRegisteredPrices (price, index) {
