@@ -71,7 +71,8 @@ module.exports = async (srv) => {
 		PT_TMCTRY,
 		PT_TMCTPRDPCK,
 		SalesData,
-		PT_TMINSHIER
+		PT_TMINSHIER,
+		UserTerritory
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
@@ -422,6 +423,85 @@ module.exports = async (srv) => {
 	// 	return result;
 		
 	// });
+
+	srv.on('READ', 'InstitutesView', async (req, next) => {
+
+		const result = await next(); // Allow the original query to run
+		// Check if the result contains $count
+    	const isCountQuery = result.some(item => '$count' in item);
+    
+		if (isCountQuery) {
+		// If $count is present, return the original result
+		return result;
+		}
+		
+		const cwid = req.user.id;
+		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+	  
+		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
+		  // If no user territories found, return all items
+		  return result;
+		}
+	  
+		const territoryMatches = result.filter(item => {
+			return userTerritories.some(userTerritory => {
+				return item.Territory === userTerritory.Territory;
+			});
+		  });
+		  
+		const finalFilteredResults = territoryMatches.filter(item => {
+			return userTerritories.some(userTerritory => {
+				return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+			});
+		});
+			
+		if (finalFilteredResults.length > 0) {
+			// Return the final filtered results
+			return finalFilteredResults;
+		}else{
+			// If no territory matches, return an empty array
+			return territoryMatches;
+		}
+	});
+
+	srv.on('READ', 'TenderMasterView', async (req, next) => {
+		const result = await next(); // Allow the original query to run
+		// Check if the result contains $count
+    	const isCountQuery = result.some(item => '$count' in item);
+    
+		if (isCountQuery) {
+		// If $count is present, return the original result
+		return result;
+		}
+		
+		const cwid = req.user.id;
+		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+	  
+		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
+		  // If no user territories found, return all items
+		  return result;
+		}
+	  
+		const territoryMatches = result.filter(item => {
+			return userTerritories.some(userTerritory => {
+			  return item.Territory === userTerritory.Territory;
+			});
+		  });
+		  
+		const finalFilteredResults = territoryMatches.filter(item => {
+			return userTerritories.some(userTerritory => {
+			return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+			});
+		});
+			
+		if (finalFilteredResults.length > 0) {
+			// Return the final filtered results
+			return finalFilteredResults;
+		}else{
+			// If no territory matches, return an empty array
+			return territoryMatches;
+		}
+	  });
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
 		const today = new Date().toISOString().slice(0, 10);
