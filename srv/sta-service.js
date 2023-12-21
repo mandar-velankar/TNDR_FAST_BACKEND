@@ -2172,7 +2172,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					CountryName: countryName,
 					UserName: userName,
 					UserEmail: userEmail,
-					Hierarchy: hierarchy,
+					Hierarchy: hierarchy || type.Hierarchy,
 					send: approvalTypeSection === 1 || approvalTypeStatus !== 'Not Sent' ? 'Yes' : 'No'
 				});
 
