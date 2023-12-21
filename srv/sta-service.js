@@ -2104,6 +2104,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				let userName = "";
 				let userEmail = "";
 				let requiredAction = "";
+				let hierarchy = null;
 				
 				let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
 				let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation, countryProductPackBUs);
@@ -2143,15 +2144,16 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
 					aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 				}
-
+				let approvalTypeSection = (requiredAction === 1) ? 2 : 1;
+				let approvalTypeStatus = (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus
 				aResults.push({
 					TenderID: offerValidation.TENDERID,
 					OfferId: offerValidation.OFFERID,
 					CountryCode: offerValidation.COUNTRYCODE,
 					ApprovalContent: getApprovalContent(approverType),
-					ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
+					ApproverTypeSection: approvalTypeSection,
 					REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
-					ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
+					ApprovalStatus: approvalTypeStatus,
 					ApproverName: approverName,
 					ApproverEmailID: approverEmailID,
 					SenderComment: senderComment,
@@ -2170,7 +2172,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					CountryName: countryName,
 					UserName: userName,
 					UserEmail: userEmail,
-					Hierarchy: hierarchy
+					Hierarchy: hierarchy || type.Hierarchy,
+					send: approvalTypeSection === 1 || approvalTypeStatus !== 'Not Sent' ? 'Yes' : 'No'
 				});
 
 			});
