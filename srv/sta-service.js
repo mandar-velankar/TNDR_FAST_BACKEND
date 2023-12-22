@@ -1029,7 +1029,7 @@ module.exports = async (srv) => {
 			}
 		});
 
-		if(existingApprovals?.length > 0 && existingApprovals.findIndex(approval => approval.ApproverType === oApprovalData.ApproverType)){
+		if(existingApprovals?.length > 0){
 			//remove old entries before inserting
 			await DELETE.from(PT_TMAPPRST)
 				.where({
@@ -1660,6 +1660,17 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		})
 	});
 
+	srv.after('READ', 'StandardDivisions', data => {
+		if (data && Array.isArray(data) && data.length > 0) {
+			const countryCode = data[0]?.CountryCode;
+            data.unshift({
+				ID: "99999999-9999-9999-9999-999999999999", 
+				CountryCode: countryCode, 
+				DivisionCode: "", 
+				DivisionName: ""
+			});
+        }
+	});
 
 	async function buildOfferApproval(tx, whereOffer) {
 		try{
@@ -2093,6 +2104,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				let userName = "";
 				let userEmail = "";
 				let requiredAction = "";
+				let hierarchy = null;
 				
 				let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
 				let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation, countryProductPackBUs);
@@ -2109,7 +2121,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					userEmail = approvalForType[0].UserEmail;
 					senderComment = approvalForType[0].SenderComment;
 					approverComment = approvalForType[0].ApproverComment;
-					//			hierarchy 		= approvalForType[0].Hierarchy;
+					hierarchy = approvalForType[0].Hierarchy;
 					requiredAction = type.ValidationType;
 					approverType = defaultForType.length !== 0 ? defaultForType[0].ApproverType : "";
 					division = defaultForType.length !== 0 ? defaultForType[0].Division : "";
@@ -2132,15 +2144,16 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
 					aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 				}
-
+				let approvalTypeSection = (requiredAction === 1) ? 2 : 1;
+				let approvalTypeStatus = (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus
 				aResults.push({
 					TenderID: offerValidation.TENDERID,
 					OfferId: offerValidation.OFFERID,
 					CountryCode: offerValidation.COUNTRYCODE,
 					ApprovalContent: getApprovalContent(approverType),
-					ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
+					ApproverTypeSection: approvalTypeSection,
 					REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
-					ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
+					ApprovalStatus: approvalTypeStatus,
 					ApproverName: approverName,
 					ApproverEmailID: approverEmailID,
 					SenderComment: senderComment,
@@ -2158,7 +2171,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					ApproverTypes: aApproverType,
 					CountryName: countryName,
 					UserName: userName,
-					UserEmail: userEmail
+					UserEmail: userEmail,
+					Hierarchy: hierarchy || type.Hierarchy,
+					send: approvalTypeSection === 1 || approvalTypeStatus !== 'Not Sent' ? 'Yes' : 'No'
 				});
 
 			});
