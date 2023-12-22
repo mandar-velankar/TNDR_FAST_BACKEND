@@ -428,7 +428,7 @@ module.exports = async (srv) => {
 
 		const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
-    	const isCountQuery = result.some(item => '$count' in item);
+    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
 		if (isCountQuery) {
 		// If $count is present, return the original result
@@ -442,8 +442,10 @@ module.exports = async (srv) => {
 		  // If no user territories found, return all items
 		  return result;
 		}
+
+		const resultsArray = Array.isArray(result) ? result : [result];
 	  
-		const territoryMatches = result.filter(item => {
+		const territoryMatches = resultsArray.filter(item => {
 			return userTerritories.some(userTerritory => {
 				return item.Territory === userTerritory.Territory;
 			});
@@ -467,7 +469,7 @@ module.exports = async (srv) => {
 	srv.on('READ', 'TenderMasterView', async (req, next) => {
 		const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
-    	const isCountQuery = result.some(item => '$count' in item);
+    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
 		if (isCountQuery) {
 		// If $count is present, return the original result
@@ -481,8 +483,10 @@ module.exports = async (srv) => {
 		  // If no user territories found, return all items
 		  return result;
 		}
+
+		const resultsArray = Array.isArray(result) ? result : [result];
 	  
-		const territoryMatches = result.filter(item => {
+		const territoryMatches = resultsArray.filter(item => {
 			return userTerritories.some(userTerritory => {
 			  return item.Territory === userTerritory.Territory;
 			});
