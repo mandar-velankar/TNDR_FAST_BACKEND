@@ -426,7 +426,18 @@ module.exports = async (srv) => {
 
 	srv.on('READ', 'InstitutesView', async (req, next) => {
 
-		const result = await next(); // Allow the original query to run
+		//const result = await next(); // Allow the original query to run
+		const tx = cds.tx(req);
+		let result = [];
+        let ivQuery = SELECT.from(req.query.SELECT.from);
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
+            ivQuery.columns(req.query.SELECT.columns);
+        }
+        req.query.SELECT.where && (ivQuery.where(req.query.SELECT.where));
+        req.query.SELECT.orderBy && (ivQuery.orderBy(req.query.SELECT.orderBy));
+
+        result = await tx.run(ivQuery);
+
 		// Check if the result contains $count
     	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
@@ -467,8 +478,20 @@ module.exports = async (srv) => {
 	});
 
 	srv.on('READ', 'TenderMasterView', async (req, next) => {
-		const result = await next(); // Allow the original query to run
+		//const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
+		const tx = cds.tx(req);
+		
+		let result = [];
+        let tmvQuery = SELECT.from(req.query.SELECT.from);
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
+            tmvQuery.columns(req.query.SELECT.columns);
+        }
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+
+        result = await tx.run(tmvQuery);
+
     	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
 		if (isCountQuery) {
@@ -3333,7 +3356,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return excelStreamValue;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in ExcelAttachments READ:', error);
+  			return req.reject(500, 'Internal Server Error');
 		}
 	});
 
