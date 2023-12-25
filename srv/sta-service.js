@@ -72,7 +72,11 @@ module.exports = async (srv) => {
 		PT_TMCTPRDPCK,
 		SalesData,
 		PT_TMINSHIER,
+<<<<<<< Updated upstream
 		UserTerritory
+=======
+		InstituteTerritory
+>>>>>>> Stashed changes
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
@@ -86,7 +90,8 @@ module.exports = async (srv) => {
 		OfferStatus,
 		OfferRevisions,
 		TenderOffers,
-		ZuelligExtractView
+		ZuelligExtractView,
+		StandardTenderHistory
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -2470,6 +2475,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
 			const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
 			let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+			let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
 
 			//where statement
 			let whereApproverType = {
@@ -2488,7 +2494,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				}
 				const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
-				let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack);
+				let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory);
 
 				//Get corresponding Product Distributor ID
 				const whereProductId = {
@@ -2823,7 +2829,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		}
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 
@@ -2838,6 +2844,11 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		if (offer.APPROVAL_TYPE === 15) {
 			productValidation = await buildProductValidationForType15(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack);
 		}
+
+		if (offer.APPROVAL_TYPE === 16) {
+			productValidation = await buildProductValidationForType16(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack, instituteTerritory);
+		}
+
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
@@ -3013,6 +3024,80 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		}
 		catch(error){
 			console.error(error.code, error.message);
+		}
+	}
+
+	async function buildProductValidationForType16 (tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack, instituteTerritory) {
+		try{
+			let results = {
+				IN_POLICY: false
+			}
+			const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, 'ProductPackID': product.ProductCode}));
+			const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+			const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
+			const offerHistory = await tx.run(SELECT.from(StandardTenderHistory).where({'INSTITUTE_ID': instituteTerritory.InstituteID, 'ProductCode': product.ProductCode}));
+			const lastHistoryPriceCondition = offerHistory[offerHistory.length-1];
+			const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({'OfferID': lastHistoryPriceCondition?.OfferID, 'ProductCode': lastHistoryPriceCondition?.ProductCode}));
+			let currentDiscount = null;
+
+			if (lastHistoryPriceCondition) {
+				currentDiscount = (lastHistoryPriceCondition.Price0 - awardedProduct.AwardedPrice) / lastHistoryPriceCondition.Price0;
+			}
+			
+
+			if (!policy && !priceCondition && !instituteTerritory) return results;
+
+			if(instituteTerritory.IsKAM) {
+				mappedApproverTypesForKAMTerritory(aApproverTypes, priceCondition, policy);
+				results.IN_POLICY = true
+			}else {
+				mappedApproverTypesForNonKAMTerritory(aApproverTypes, priceCondition, policy, ctryProductPack, currentDiscount);
+				results.IN_POLICY = true
+			}
+			return results;
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
+	}
+
+	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
+		if (priceCondition.Price3 <= policy.Value) {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'PH Finance & LE Controlling' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
+		}else {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'Head of Key Account Management' || 
+				oApproverType.ApproverType === 'Head of MAS' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
+		}
+	}
+
+	function mappedApproverTypesForNonKAMTerritory (aApproverTypes, priceCondition, policy, ctryProductPack, currentDiscount) {
+		if (ctryProductPack.BU === "RAD" || ctryProductPack.BU === "CH") {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'Sr. National Sales Manager' || 
+				oApproverType.ApproverType === 'General Medicine BU Director' || 
+				oApproverType.ApproverType === 'Specialty Medicine BU Director' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
+		}else if (ctryProductPack.BU === "PH") {
+			if (priceCondition.Price3 >= policy.Value && priceCondition.TotalDiscountNHI <= currentDiscount) {
+				aApproverTypes.map(function (oApproverType) {
+					oApproverType.ApproverType === 'Sales Manager' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+				});
+			}else {
+				if (priceCondition.Price3 >= policy.Value) {
+					aApproverTypes.map(function (oApproverType) {
+						oApproverType.ApproverType === 'Squad Lead' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+					});
+				}else {
+					aApproverTypes.map(function (oApproverType) {
+						oApproverType.ApproverType === 'Squad Lead' || 
+						oApproverType.ApproverType === 'PH Finance & LE Controlling' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+					});
+				}
+			}
 		}
 	}
 
