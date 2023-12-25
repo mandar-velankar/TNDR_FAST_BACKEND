@@ -72,11 +72,8 @@ module.exports = async (srv) => {
 		PT_TMCTPRDPCK,
 		SalesData,
 		PT_TMINSHIER,
-<<<<<<< Updated upstream
-		UserTerritory
-=======
+		UserTerritory,
 		InstituteTerritory
->>>>>>> Stashed changes
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
