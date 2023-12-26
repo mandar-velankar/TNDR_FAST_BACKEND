@@ -3432,7 +3432,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				}
 			}
 			//generate XLSX
-			let excelStreamValue = XLSXHelper.generateXLSX(`${templates[0]?.filename}`,excelData);
+			let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,excelData,1);
 			req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 			return excelStreamValue;
