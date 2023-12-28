@@ -270,17 +270,12 @@ module.exports = (srv) => {
 			if (!isValid) {
 				return res.reject(400, "Invalid Excel data format");
 			}
-			salesData = salesData.map(sd => {
-				sd.SYEAR = `${sd.SYEAR}`;
-				sd.SMONTH = `${sd.SMONTH}`;
-				sd.SCUSNO = `${sd.SCUSNO}`;
-				sd.SITNO = `${sd.SITNO}`;
-				sd.SITNO = `${sd.SITNO}`;
-				sd.SYMD = `${sd.SYMD}`;
-				return sd
+
+			
+			salesData.forEach(async (sd) => {
+				await upsertSalesData(sd);
 			});
 
-			await INSERT.into(SalesData).entries(salesData);
 			await DELETE.from(ExcelUpload).where({ID: req.ID});
 		} catch (error) {
 			console.log(error);
@@ -288,6 +283,23 @@ module.exports = (srv) => {
 		
 		return res.reply("Sales Data uploaded successfully");
 	});
+
+	async function upsertSalesData (sd) {
+		sd.SYEAR = `${sd.SYEAR}`;
+		sd.SMONTH = `${sd.SMONTH}`;
+		sd.SCUSNO = `${sd.SCUSNO}`;
+		sd.SITNO = `${sd.SITNO}`;
+		sd.SITNO = `${sd.SITNO}`;
+		sd.SYMD = `${sd.SYMD}`;
+
+		const salesData = await SELECT.one.from(SalesData).where({SYEAR: sd.SYEAR, SMONTH: sd.SMONTH, SCUSNO: sd.SCUSNO, SITNO: sd.SITNO});
+
+		if (salesData) {
+			await UPDATE(SalesData).with(sd).where({SYEAR: sd.SYEAR, SMONTH: sd.SMONTH, SCUSNO: sd.SCUSNO, SITNO: sd.SITNO});
+		}else {
+			await INSERT.into(SalesData).entries(sd);
+		}
+	}
 
 	async function upsertRegisteredPrices (price, index) {
 		const skuPrdPck = await SELECT.one.from(PT_TMSKUPRDPCK).where({CountryCode: price.CountryCode, SKUCode: price.MaterialNumber});
