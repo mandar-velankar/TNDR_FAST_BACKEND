@@ -12,7 +12,8 @@ module.exports = (srv) => {
     PT_TMLE,
     PT_TMCTLE,
 	PT_TMSKUPRDPCK,
-	PT_TMREGPR
+	PT_TMREGPR,
+	SalesData
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
 	const {
@@ -238,6 +239,67 @@ module.exports = (srv) => {
 		await DELETE.from(ExcelUpload).where({ID: req.ID});
 		return req;
 	});
+
+	srv.after("UPDATE", "SalesDataUpload", async (req, res) => {
+		/**
+		 * @param {Object} file - This is uploaded excel file
+		 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
+		 */
+		try {
+			const file = await SELECT.one.from(ExcelUpload).where({ID: req.ID});
+			const expectedHeaders = ["SYEAR", "SMONTH", "SCUSNO", "STERID", "SITNO", "SQTY", "SGS", "SDIS", "SDON", "SNS", "Expr1", "SOTD", "SSAMP", "SYMD"]; 
+			const arrayBuffer = bufferToArrayBuffer(file?.content);
+			const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+			// Assuming the Excel file has only one sheet, you can get the data from it
+			const sheetName = workbook.SheetNames[0];
+			let salesData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+			let isValid = false;
+
+			for (let header in expectedHeaders) {
+				salesData.forEach((item, index) => {
+				if (!Object.hasOwn(item, expectedHeaders[header])) {
+					isValid = false;
+				}else {
+					isValid = true;
+				}
+				});
+			}
+
+			if (!isValid) {
+				return res.reject(400, "Invalid Excel data format");
+			}
+
+			
+			salesData.forEach(async (sd) => {
+				await upsertSalesData(sd);
+			});
+
+			await DELETE.from(ExcelUpload).where({ID: req.ID});
+		} catch (error) {
+			console.log(error);
+		}
+		
+		return res.reply("Sales Data uploaded successfully");
+	});
+
+	async function upsertSalesData (sd) {
+		sd.SYEAR = `${sd.SYEAR}`;
+		sd.SMONTH = `${sd.SMONTH}`;
+		sd.SCUSNO = `${sd.SCUSNO}`;
+		sd.SITNO = `${sd.SITNO}`;
+		sd.SITNO = `${sd.SITNO}`;
+		sd.SYMD = `${sd.SYMD}`;
+
+		const salesData = await SELECT.one.from(SalesData).where({SYEAR: sd.SYEAR, SMONTH: sd.SMONTH, SCUSNO: sd.SCUSNO, SITNO: sd.SITNO});
+
+		if (salesData) {
+			await UPDATE(SalesData).with(sd).where({SYEAR: sd.SYEAR, SMONTH: sd.SMONTH, SCUSNO: sd.SCUSNO, SITNO: sd.SITNO});
+		}else {
+			await INSERT.into(SalesData).entries(sd);
+		}
+	}
 
 	async function upsertRegisteredPrices (price, index) {
 		const skuPrdPck = await SELECT.one.from(PT_TMSKUPRDPCK).where({CountryCode: price.CountryCode, SKUCode: price.MaterialNumber});

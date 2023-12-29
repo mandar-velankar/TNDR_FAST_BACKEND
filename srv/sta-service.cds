@@ -113,6 +113,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
+        tender.Institute.InstituteTerritory.Territory,
+        tender.Institute.InstituteTerritory.IsKAM,
         key tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,         
@@ -134,6 +136,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
+        tender.Institute.InstituteTerritory.Territory,
+        tender.Institute.InstituteTerritory.IsKAM,
         tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,         
@@ -159,7 +163,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             then null
             else hier.ParentInstituteID
         end as ParentInstituteID: Integer,
-        CustomerID as CustomerID: String
+        CustomerID as CustomerID: String,
+        inst.InstituteTerritory.Territory,
+        inst.InstituteTerritory.IsKAM
     };
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
@@ -527,7 +533,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
     
 
-    entity CountryBrands @readonly as projection on MasterDataViews.CountryBrands;
+    entity CountryBrands as select from CountryBrandProducts as Product{
+        key Product.COUNTRY_CODE,
+        key Product.BRAND_ID,
+        min(Product.BRAND_NAME) as BRAND_NAME:String(500),
+        min(Product.DIVISION) as DIVISION:String(500),
+        Product.BU
+    }where Product.BRAND_ID is not null
+    group by Product.COUNTRY_CODE, Product.BRAND_ID, Product.BU;
+
     entity CountryBrandProducts @readonly as projection on MasterDataViews.CountryBrandProducts;
 
     entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult;
