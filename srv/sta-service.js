@@ -71,7 +71,9 @@ module.exports = async (srv) => {
 		PT_TMCTRY,
 		PT_TMCTPRDPCK,
 		SalesData,
-		PT_TMINSHIER
+		PT_TMINSHIER,
+		UserTerritory,
+		InstituteTerritory
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
@@ -85,7 +87,8 @@ module.exports = async (srv) => {
 		OfferStatus,
 		OfferRevisions,
 		TenderOffers,
-		ZuelligExtractView
+		ZuelligExtractView,
+		StandardTenderHistory
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -422,6 +425,112 @@ module.exports = async (srv) => {
 	// 	return result;
 		
 	// });
+
+	srv.on('READ', 'InstitutesView', async (req, next) => {
+
+		//const result = await next(); // Allow the original query to run
+		const tx = cds.tx(req);
+		let result = [];
+        let ivQuery = SELECT.from(req.query.SELECT.from);
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
+            ivQuery.columns(req.query.SELECT.columns);
+        }
+        req.query.SELECT.where && (ivQuery.where(req.query.SELECT.where));
+        req.query.SELECT.orderBy && (ivQuery.orderBy(req.query.SELECT.orderBy));
+
+        result = await tx.run(ivQuery);
+
+		// Check if the result contains $count
+    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+    
+		if (isCountQuery) {
+		// If $count is present, return the original result
+		return result;
+		}
+		
+		const cwid = req.user.id;
+		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+	  
+		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
+		  // If no user territories found, return all items
+		  return result;
+		}
+
+		const resultsArray = Array.isArray(result) ? result : [result];
+	  
+		const territoryMatches = resultsArray.filter(item => {
+			return userTerritories.some(userTerritory => {
+				return item.Territory === userTerritory.Territory;
+			});
+		  });
+		  
+		const finalFilteredResults = territoryMatches.filter(item => {
+			return userTerritories.some(userTerritory => {
+				return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+			});
+		});
+			
+		if (finalFilteredResults.length > 0) {
+			// Return the final filtered results
+			return finalFilteredResults;
+		}else{
+			// If no territory matches, return an empty array
+			return territoryMatches;
+		}
+	});
+
+	srv.on('READ', 'TenderMasterView', async (req, next) => {
+		//const result = await next(); // Allow the original query to run
+		// Check if the result contains $count
+		const tx = cds.tx(req);
+		
+		let result = [];
+        let tmvQuery = SELECT.from(req.query.SELECT.from);
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
+            tmvQuery.columns(req.query.SELECT.columns);
+        }
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+
+        result = await tx.run(tmvQuery);
+
+    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+    
+		if (isCountQuery) {
+		// If $count is present, return the original result
+		return result;
+		}
+		
+		const cwid = req.user.id;
+		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+	  
+		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
+		  // If no user territories found, return all items
+		  return result;
+		}
+
+		const resultsArray = Array.isArray(result) ? result : [result];
+	  
+		const territoryMatches = resultsArray.filter(item => {
+			return userTerritories.some(userTerritory => {
+			  return item.Territory === userTerritory.Territory;
+			});
+		  });
+		  
+		const finalFilteredResults = territoryMatches.filter(item => {
+			return userTerritories.some(userTerritory => {
+			return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+			});
+		});
+			
+		if (finalFilteredResults.length > 0) {
+			// Return the final filtered results
+			return finalFilteredResults;
+		}else{
+			// If no territory matches, return an empty array
+			return territoryMatches;
+		}
+	  });
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
 		const today = new Date().toISOString().slice(0, 10);
@@ -2363,6 +2472,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
 			const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
 			let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+			let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
 
 			//where statement
 			let whereApproverType = {
@@ -2381,7 +2491,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				}
 				const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
-				let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack);
+				let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory);
 
 				//Get corresponding Product Distributor ID
 				const whereProductId = {
@@ -2716,7 +2826,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		}
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 
@@ -2731,6 +2841,11 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		if (offer.APPROVAL_TYPE === 15) {
 			productValidation = await buildProductValidationForType15(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack);
 		}
+
+		if (offer.APPROVAL_TYPE === 16) {
+			productValidation = await buildProductValidationForType16(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack, instituteTerritory);
+		}
+
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
@@ -2906,6 +3021,84 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		}
 		catch(error){
 			console.error(error.code, error.message);
+		}
+	}
+
+	async function buildProductValidationForType16 (tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack, instituteTerritory) {
+		try{
+			let results = {
+				IN_POLICY: false
+			}
+			const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, 'ProductPackID': product.ProductCode}));
+			const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
+			const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
+			const offerHistory = await tx.run(SELECT.from(StandardTenderHistory).where({'INSTITUTE_ID': instituteTerritory.InstituteID, 'ProductCode': product.ProductCode}));
+			const lastHistoryPriceCondition = offerHistory[offerHistory.length-1];
+			const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({'OfferID': lastHistoryPriceCondition?.OfferID, 'ProductCode': lastHistoryPriceCondition?.ProductCode}));
+			let currentDiscount = null;
+
+			if (lastHistoryPriceCondition) {
+				currentDiscount = (lastHistoryPriceCondition.Price0 - awardedProduct.AwardedPrice) / lastHistoryPriceCondition.Price0;
+			}
+			
+
+			if (!policy && !priceCondition && !instituteTerritory) return results;
+
+			if(instituteTerritory.IsKAM) {
+				mappedApproverTypesForKAMTerritory(aApproverTypes, priceCondition, policy);
+				results.IN_POLICY = true
+			}else {
+				mappedApproverTypesForNonKAMTerritory(aApproverTypes, priceCondition, policy, ctryProductPack, currentDiscount);
+				results.IN_POLICY = true
+			}
+			return results;
+		}
+		catch(error){
+			console.error(error.code, error.message);
+		}
+	}
+
+	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
+		const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === 'Squad Lead');
+		aApproverTypes.splice(apprIndex, 1);
+
+		if (priceCondition.Price3 <= policy.Value) {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'PH Finance & LE Controlling' ||
+				oApproverType.ApproverType === 'Head of Key Account Management' || 
+				oApproverType.ApproverType === 'Head of MAS' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
+		}else {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'Head of Key Account Management' || 
+				oApproverType.ApproverType === 'Head of MAS' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
+		}
+	}
+
+	function mappedApproverTypesForNonKAMTerritory (aApproverTypes, priceCondition, policy, ctryProductPack, currentDiscount) {
+		if (ctryProductPack.BU === "GM" || ctryProductPack.BU === "SM") {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'Sales Manager' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
+			if (!(priceCondition.Price3 >= policy.Value && priceCondition.TotalDiscountNHI <= currentDiscount)) {
+				if (priceCondition.Price3 >= policy.Value) {
+					aApproverTypes.map(function (oApproverType) {
+						oApproverType.ApproverType === 'Squad Lead' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+					});
+				}else {
+					aApproverTypes.map(function (oApproverType) {
+						oApproverType.ApproverType === 'Squad Lead' || 
+						oApproverType.ApproverType === 'PH Finance & LE Controlling' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+					});
+				}
+			}
+		}else {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'Sr. National Sales Manager' || 
+				oApproverType.ApproverType === 'General Medicine BU Director' || 
+				oApproverType.ApproverType === 'Specialty Medicine BU Director' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
 		}
 	}
 
@@ -3243,13 +3436,14 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				}
 			}
 			//generate XLSX
-			let excelStreamValue = XLSXHelper.generateXLSX(`${templates[0]?.filename}`,excelData);
+			let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,excelData,1);
 			req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 			return excelStreamValue;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in ExcelAttachments READ:', error);
+  			return req.reject(500, 'Internal Server Error');
 		}
 	});
 

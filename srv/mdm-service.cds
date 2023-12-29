@@ -233,4 +233,5 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     };
 
     entity ExcelUploadView as projection on TransactionalData.ExcelUpload;
+    entity SalesDataUpload as projection on TransactionalData.ExcelUpload;
 }
