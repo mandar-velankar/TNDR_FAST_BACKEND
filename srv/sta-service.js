@@ -3064,7 +3064,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 		if (priceCondition.Price3 <= policy.Value) {
 			aApproverTypes.map(function (oApproverType) {
-				oApproverType.ApproverType === 'PH Finance & LE Controlling' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+				oApproverType.ApproverType === 'PH Finance & LE Controlling' ||
+				oApproverType.ApproverType === 'Head of Key Account Management' || 
+				oApproverType.ApproverType === 'Head of MAS' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
 			});
 		}else {
 			aApproverTypes.map(function (oApproverType) {
