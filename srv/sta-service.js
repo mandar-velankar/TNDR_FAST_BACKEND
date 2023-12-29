@@ -3059,6 +3059,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 	}
 
 	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
+		const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === 'Squad Lead');
+		aApproverTypes.splice(apprIndex, 1);
+
 		if (priceCondition.Price3 <= policy.Value) {
 			aApproverTypes.map(function (oApproverType) {
 				oApproverType.ApproverType === 'PH Finance & LE Controlling' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
@@ -3072,18 +3075,11 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 	}
 
 	function mappedApproverTypesForNonKAMTerritory (aApproverTypes, priceCondition, policy, ctryProductPack, currentDiscount) {
-		if (ctryProductPack.BU === "RAD" || ctryProductPack.BU === "CH") {
+		if (ctryProductPack.BU === "GM" || ctryProductPack.BU === "SM") {
 			aApproverTypes.map(function (oApproverType) {
-				oApproverType.ApproverType === 'Sr. National Sales Manager' || 
-				oApproverType.ApproverType === 'General Medicine BU Director' || 
-				oApproverType.ApproverType === 'Specialty Medicine BU Director' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+				oApproverType.ApproverType === 'Sales Manager' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
 			});
-		}else if (ctryProductPack.BU === "PH") {
-			if (priceCondition.Price3 >= policy.Value && priceCondition.TotalDiscountNHI <= currentDiscount) {
-				aApproverTypes.map(function (oApproverType) {
-					oApproverType.ApproverType === 'Sales Manager' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
-				});
-			}else {
+			if (!(priceCondition.Price3 >= policy.Value && priceCondition.TotalDiscountNHI <= currentDiscount)) {
 				if (priceCondition.Price3 >= policy.Value) {
 					aApproverTypes.map(function (oApproverType) {
 						oApproverType.ApproverType === 'Squad Lead' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
@@ -3095,6 +3091,12 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					});
 				}
 			}
+		}else {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'Sr. National Sales Manager' || 
+				oApproverType.ApproverType === 'General Medicine BU Director' || 
+				oApproverType.ApproverType === 'Specialty Medicine BU Director' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
 		}
 	}
 
