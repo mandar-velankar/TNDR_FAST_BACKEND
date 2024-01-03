@@ -2071,7 +2071,6 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NET_PRICE_UNIT_EUR_SPOT                     : Double;
             NET_OFFER_PRICE                             : Double;
             NET_PRICE                                   : Double;
-            NET_PRICE_VAT                               : Double;
             ADDITIONAL_DISCOUNT                         : Double;
             ADDITIONAL_DISCOUNT_IN_WORDS                : String;
             MAX_PRICE_NHS_PP                            : Double;

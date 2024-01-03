@@ -257,7 +257,7 @@ left outer join CustomerPrices as cp
 entity CandidatePrices as select from PriceAgreements AS pa
 inner join CandidatesView AS ca on ca.PriceAgreementId = pa.ID 
 //inner join MaterialsView ma on ma.ProductPackId = pa.ProductPackId and pa.CountryCode = ma.CountryCode 
-inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = (case when ma.CountryCode = 'ES' then ma.ActiveRecord else 'Yes' end)
+inner join MasterData.PT_TMSKUPRDPCK AS ma on pa.CountryCode = ma.CountryCode and ma.ProductPackID = pa.ProductPackId and ma.ActiveRecord = 'Yes'
 inner join MasterData.PT_TMINST AS ins on pa.CountryCode = ins.CountryCode and ca.CandidateID = ins.InstituteID and ins.ActiveRecord ='Yes'
 left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId 
     and cp.MaterialNumber = ma.SKUCode 
@@ -288,7 +288,7 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ins.CustomerID, //by candidate
         cp.PriceCondition
         // pa.Institute.CustomerID //by price agreement
-}where (case when ma.ActiveRecord = 'No'and (cp.Synchronized is null or cp.Synchronized = false) then 0 else 1 end)= 1;
+}
 
 //EHQUT-199066-Italy – Brand filter in Price Agreements
 //Distinct list of Products

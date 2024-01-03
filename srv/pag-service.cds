@@ -118,18 +118,18 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     action syncPriceAgreements(ids : array of String);
     // action syncFocCustPrices(ids : array of String);
     //EJUVE-CR3 START
-      entity PriceagreementOffers {
-          PriceagreementID: UUID;
-		  TenderID: String;
-		  OfferID: String;
-		  InstituteID: Integer;
-		  InstituteName: String;
-		  CustomerID: Integer;
-		  ProductPackID: Integer;
-		  ProductPackNAME: String;
-		  EffectiveDate: DateTime;
-		  ExpiryDate: DateTime;
-		  OldExpiryDate: DateTime;		  
-} 
+//       entity PriceagreementOffers {
+//           PriceagreementID: UUID;
+// 		  TenderID: String;
+// 		  OfferID: String;
+// 		  InstituteID: Integer;
+// 		  InstituteName: String;
+// 		  CustomerID: Integer;
+// 		  ProductPackID: Integer;
+// 		  ProductPackNAME: String;
+// 		  EffectiveDate: DateTime;
+// 		  ExpiryDate: DateTime;
+// 		  OldExpiryDate: DateTime;		  
+// } 
 //EJUVE-CR3 END
 }

@@ -1729,7 +1729,6 @@ module.exports = (srv) => {
 				NET_PRICE_UNIT_EUR_SPOT: productInfo.CommnonProductInfo.NetPriceUnitEurSpot,
 				NET_OFFER_PRICE: offerProduct.NET_OFFER_PRICE,
 				NET_PRICE: offerProduct.NET_PRICE,
-				NET_PRICE_VAT : offerProduct.NET_PRICE * (1 + offerProduct.VAT),
 				ADDITIONAL_DISCOUNT: offerProduct.ADDITIONAL_DISCOUNT,
 				ADDITIONAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.ADDITIONAL_DISCOUNT),
 				MAX_PRICE_NHS_PP: productPricing.MaxPriceNhsPP,
