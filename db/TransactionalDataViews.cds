@@ -578,6 +578,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
     sku.SKU,
     offerProduct.Reference as CODE,
+    offerProduct.SKU.ProductGenericName as PRODUCTGENERICNAME,
 	offerProduct.SKU.PACKFACTOR as PACKSIZE,
 	offerProduct.SKU.CONCENTRATION as DOSAGE,
 	offerProduct.SKU.UOM as UOM,
@@ -2024,6 +2025,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         key PRODUCTID                                   : Integer not null;
             CODE                                        : String(255);
             PRODUCTNAME                                 : String(102);
+            PRODUCTGENERICNAME                          : String(500);
             PACKSIZE                                    : Double not null;
             DOSAGE                                      : Double;
             UOM                                         : String(10);

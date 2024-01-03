@@ -1683,6 +1683,7 @@ module.exports = (srv) => {
 				PRODUCTID: offerProduct.PRODUCTID,
 				CODE: offerProduct.CODE,
 				PRODUCTNAME: offerProduct.PRODUCTNAME,
+				PRODUCTGENERICNAME: offerProduct.PRODUCTGENERICNAME,
 				PACKSIZE: offerProduct.PACKSIZE,
 				DOSAGE: offerProduct.DOSAGE,
 				UOM: offerProduct.UOM,
