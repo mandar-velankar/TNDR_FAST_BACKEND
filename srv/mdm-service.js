@@ -89,6 +89,12 @@ module.exports = (srv) => {
 		return req;
 	});
 
+	srv.before('CREATE', 'PT_TMCTPRDPCK', async (req) => {
+		const nextProductID = await getNextValue(PT_TMCTPRDPCK, "PRODUCTPACKID");
+		req.data.PRODUCTPACKID = nextProductID;
+		return req;
+	});
+
 
 	srv.on('CREATE', 'CountryBrandProducts', async (req) => {
 
