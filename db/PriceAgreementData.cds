@@ -288,7 +288,7 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ins.CustomerID, //by candidate
         cp.PriceCondition
         // pa.Institute.CustomerID //by price agreement
-}
+};
 
 //EHQUT-199066-Italy – Brand filter in Price Agreements
 //Distinct list of Products
