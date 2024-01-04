@@ -233,4 +233,12 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     };
 
     entity ExcelUploadView as projection on TransactionalData.ExcelUpload;
+    entity SalesDataUpload as projection on TransactionalData.ExcelUpload;
+
+    entity DistributorAssignment as projection on MasterData.DistributorAssignment;
+    entity DistinctProductBUs as select from PT_TMCTPRDPCK {
+        COUNTRYCODE,
+        key BU
+    }where COUNTRYCODE = 'PK'
+    group by COUNTRYCODE, BU;
 }
