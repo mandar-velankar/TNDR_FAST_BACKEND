@@ -567,7 +567,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // Until we have merged Master Data App branch
             // we must further ensure that master data constraints are 
             // correctly set so as to show all brands for each new institute.
-            await this.createInstituteBrands();
+            //await this.createInstituteBrands();
 
             // 3. Delete ItalyCustomers table
             await this.clearItalyCustomersTable();
@@ -590,7 +590,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
 
             const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const { CountryProvinces, PT_TMINST, PaymentTerms} = this.db.entities("com.bayer.SXTENDER.MasterData");
 
             let customerNumbers =  await tx.run(cds.parse.cql (`SELECT CustomerID from ${PT_TMINST.name} WHERE CountryCode = 'IT'`));
             customerNumbers = customerNumbers.map(item => this.addLeadingZeros(item.CustomerID, 10));
@@ -606,9 +606,12 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             // query.SELECT.where = xpr;
 
             let query = SELECT.from(`${ItalyCustomers.name} as customer`)
-                        .join(`${CountryProvinces.name} as province`)
-                        .on({'customer.E1KNA1M_REGIO' : 'province.Name'})
-                        .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT','customer.E1KNA1M_KTOKD' : { "<>": '0002'}});
+            .join(`${CountryProvinces.name} as province`)
+            .on({'customer.E1KNA1M_REGIO' : 'province.Name'})
+            .join(`${PaymentTerms.name} as paymentterms`)
+            .on({'customer.E1KNVVM_ZTERM' : 'paymentterrms.E1KNVVM_ZTERM'})
+            .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT',
+            'customer.E1KNA1M_KTOKD' : { "<>": '0002'}});
 
             const customers = await tx.run(query);
            
@@ -618,6 +621,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                 let InstType = cust.E1KNA1M_KTOKD;
+                console.log(cust.Description);
                 if(InstType === '0001')
                  {
                     InstType ='Sold To'
@@ -646,7 +650,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     MercadoPublicoIssuer: "",
                     RegionID: cust.RegionID,
                     VatCode:cust.E1KNA1M_STCEG,
-                    TaxCode:cust.E1KNA1M_STCD1 //Fiscal Code
+                    TaxCode:cust.E1KNA1M_STCD1,//Fiscal Code
+                    INCOTerms: "",
+                    PaymentTerms: cust.Description,
+                    ForAllBrands: "TRUE",
+                    DirectTender: "TRUE" 
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
                     // --"E1KNVVM_ZTERM",--PaymentTerms
@@ -718,7 +726,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     // MercadoPublicoIssuer: "",
                     RegionID: cust.RegionID,
                     VatCode:cust.E1KNA1M_STCEG,
-                    TaxCode:cust.E1KNA1M_STCD1 //Fiscal Code
+                    TaxCode:cust.E1KNA1M_STCD1 , //Fiscal Code
+                    INCOTerms: "",
+                    PaymentTerms: cust.PaymentTerms,
+                    ForAllBrands: "TRUE",
+                    DirectTender: "TRUE"
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
                     // --"E1KNVVM_ZTERM",--PaymentTerms
