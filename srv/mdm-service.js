@@ -346,4 +346,24 @@ module.exports = (srv) => {
 		}
 		return arrayBuffer;
 	  }
+
+	srv.after('READ', 'MasterDistributors', data => {
+		data.unshift({
+			DistributorID: null,
+			CountryCode: null,
+			DistributorName: null,
+			Address: null,
+			ContactNo: null,
+			Fax: null,
+			CONTACT_EMAIL: null,
+			ContactPerson: null
+		})
+	});
+
+	srv.after('READ', 'DistinctProductBUs', data => {
+		data.unshift({
+			COUNTRYCODE: "PK",
+			BU: null
+		})
+	});
 };
