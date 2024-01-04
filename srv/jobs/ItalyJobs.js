@@ -614,14 +614,14 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             'customer.E1KNA1M_KTOKD' : { "<>": '0002'}});
 
             const customers = await tx.run(query);
-           
+           console.log(customers,"Customers");
             let nextInstituteID = await this.getLastInstituteID();
             
            
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                 let InstType = cust.E1KNA1M_KTOKD;
-                console.log(cust.Description);
+                console.log(cust.Description,"description");
                 if(InstType === '0001')
                  {
                     InstType ='Sold To'
