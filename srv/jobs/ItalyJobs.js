@@ -609,7 +609,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             .join(`${CountryProvinces.name} as province`)
             .on({'customer.E1KNA1M_REGIO' : 'province.Name'})
             .join(`${PaymentTerms.name} as paymentterms`)
-            .on({'customer.E1KNVVM_ZTERM' : 'paymentterrms.E1KNVVM_ZTERM'})
+            .on({'customer.E1KNVVM_ZTERM' : 'paymentterms.E1KNVVM_ZTERM'})
             .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT',
             'customer.E1KNA1M_KTOKD' : { "<>": '0002'}});
 
