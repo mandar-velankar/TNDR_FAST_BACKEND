@@ -2025,6 +2025,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         key PRODUCTID                                   : Integer not null;
             CODE                                        : String(255);
             PRODUCTNAME                                 : String(102);
+            PRODUCTGENERICNAME                          : String(500);
             PACKSIZE                                    : Double not null;
             DOSAGE                                      : Double;
             UOM                                         : String(10);
