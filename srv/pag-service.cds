@@ -129,9 +129,9 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
 		  ProductPackNAME: String;
           Status : String;
           ID : UUID;
-		  EffectiveDate: DateTime;
-		  ExpiryDate: DateTime;
-		  OldExpiryDate: DateTime;		  
+		  EffectiveDate: Date;
+		  ExpiryDate: Date;
+		  OldExpiryDate: Date;		  
 } 
 //EJUVE-CR3 END
 }
