@@ -613,7 +613,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT',
             'customer.E1KNA1M_KTOKD' : { "<>": '0002'}});
 
-            const customers = await tx.run(query);
+            const customers = await tx.run(cds.parse.cql(query));
            console.log(customers,"Customers");
             let nextInstituteID = await this.getLastInstituteID();
             
