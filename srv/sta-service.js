@@ -671,13 +671,13 @@ module.exports = async (srv) => {
 		
 
 		switch(type){
-			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
-			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req});
+			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, priceCondtions, freeGoodsOther, req});
+			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, priceCondtions, freeGoodsOther, req});
 			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, institute, priceCondtions, freeGoodsOther, req});
 		}
 	});
 
-	async function createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req}){
+	async function createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, priceCondtions, freeGoodsOther, req}){
 		const todaysDate = new Date().toISOString().substring(0,10);
 		const revisedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-R${offerRevision.NEXTREVISEDOFFERNO}`;
 
@@ -706,6 +706,21 @@ module.exports = async (srv) => {
 			return revisedProductPricing;
 		});
 
+		const revisedProductsPriceCondtions = priceCondtions.map(pc => {
+			const rpc = {...pc};
+			rpc.OfferID = revisedOfferID;
+			rpc.ID = uuidv4();
+			return rpc;
+		});
+
+		const revisedFreeGoodsOther = freeGoodsOther.map(fg => {
+			const rfg = {...fg};
+			const pricecondtion = revisedProductsPriceCondtions.find(pc => pc.ProductCode = rfg.ProductPackId);
+			rfg.ID = uuidv4();
+			rfg.PriceCondition_ID = pricecondtion.ID;
+			return rfg;
+		});
+
 		// 1. create revised offer
 		await INSERT.into(PT_TMOFRS).entries(revisedOffer);
 		// 2. create revised offer status
@@ -714,12 +729,18 @@ module.exports = async (srv) => {
 		await INSERT.into(PT_TMOFPR).entries(revisedOfferProducts);
 		// 4. create product pricing
 		await INSERT.into(PT_TMBDPR).entries(revisedProductsPricing);
-		// 5. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
+		// 5. create price condtions
+		await INSERT.into(PriceCondition).entries(revisedProductsPriceCondtions);
+		if (revisedFreeGoodsOther.length > 0) {
+			// 6. create free goods other
+			await INSERT.into(FreeGoodsOther).entries(revisedFreeGoodsOther);
+		}
+		// 7. deactivate old offer by setting ActiveOffer = 0 only for Revised offer (not needed for Continued offer)
 		offer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (offer).where({OfferID: offer.OfferID});
 		offerStatus.STATUS = "Inactive";
 		await UPDATE(PT_TMTNOFST).with (offerStatus).where({OfferID: offer.OfferID});
-		// 6. update the parent offer
+		// 8. update the parent offer
 		parentOffer.RevisedOfferNo = parentOffer.RevisedOfferNo + 1;
 		parentOffer.ActiveOffer = 0;
 		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
@@ -728,7 +749,7 @@ module.exports = async (srv) => {
 	};
 
 
-	async function createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, req}){
+	async function createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, priceCondtions, freeGoodsOther, req}){
 
 		const continuedOfferID = `${offerRevision.TENDERID}-${offerRevision.TENDEROFFERNO}-C${offerRevision.NEXTCONTINUEDOFFERNO}`;
 		const continuedOffer = {...offer};
@@ -758,6 +779,21 @@ module.exports = async (srv) => {
 			return cpp;
 		});
 
+		const continuedProductsPriceCondtions = priceCondtions.map(pc => {
+			const cpc = {...pc};
+			cpc.OfferID = continuedOfferID;
+			cpc.ID = uuidv4();
+			return cpc;
+		});
+
+		const continuedFreeGoodsOther = freeGoodsOther.map(fg => {
+			const cfg = {...fg};
+			const pricecondtion = continuedProductsPriceCondtions.find(pc => pc.ProductCode = cfg.ProductPackId);
+			cfg.ID = uuidv4();
+			cfg.PriceCondition_ID = pricecondtion.ID;
+			return cfg;
+		});
+
 		// 1. create revised offer
 		await INSERT.into(PT_TMOFRS).entries(continuedOffer);
 		// 2. create revised offer status
@@ -766,7 +802,13 @@ module.exports = async (srv) => {
 		await INSERT.into(PT_TMOFPR).entries(continuedOfferProducts);
 		// 4. create product pricing
 		await INSERT.into(PT_TMBDPR).entries(continuedProductsPricing);
-		// 5. update  parentOffer
+		// 5. create price condtions
+		await INSERT.into(PriceCondition).entries(continuedProductsPriceCondtions);
+		if (continuedFreeGoodsOther.length > 0) {
+			// 5. create free goods other
+			await INSERT.into(FreeGoodsOther).entries(continuedFreeGoodsOther);
+		}
+		// 6. update  parentOffer
 		parentOffer.ContinuationOfferNo = parentOffer.ContinuationOfferNo + 1;
 		await UPDATE(PT_TMOFRS).with (parentOffer).where({OfferID: parentOffer.OfferID});
 
