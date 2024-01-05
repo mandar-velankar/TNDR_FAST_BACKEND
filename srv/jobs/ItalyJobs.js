@@ -650,8 +650,8 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     TaxCode:cust.E1KNA1M_STCD1,//Fiscal Code
                     INCOTerms: "",
                     PaymentTerms: this.getPaymentTerms(cust.E1KNVVM_ZTERM)||"",
-                    ForAllBrands: TRUE,
-                    DirectTender: TRUE 
+                    ForAllBrands: "TRUE",
+                    DirectTender: "TRUE"
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
                     // --"E1KNVVM_ZTERM",--PaymentTerms
