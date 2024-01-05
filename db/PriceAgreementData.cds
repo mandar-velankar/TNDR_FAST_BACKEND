@@ -366,8 +366,8 @@ entity PriceAgreement_APPRST : cuid, managed {
         OfferId          : String;
         ProductPackID    : Integer  null;
         InstituteID      : Integer  null;
-        EffectiveDate    : DateTime  null;
-        ExpiryDate       : DateTime  null;
+        EffectiveDate    : Date  null;
+        ExpiryDate       : Date  null;
         PriceAgreements  : Association to PriceAgreements
                                on PriceAgreements.ID = PriceAgreementID;
 
