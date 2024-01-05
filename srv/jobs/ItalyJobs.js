@@ -608,13 +608,10 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             let query = SELECT.from(`${ItalyCustomers.name} as customer`)
             .join(`${CountryProvinces.name} as province`)
             .on({'customer.E1KNA1M_REGIO' : 'province.Name'})
-            .join(`${PaymentTerms.name} as paymentterms`)
-            .on({'customer.E1KNVVM_ZTERM' : 'paymentterms.E1KNVVM_ZTERM'})
             .where({'customer.E1KNA1M_KUNNR' : { "not in": customerNumbers}, 'customer.E1KNA1M_LAND1' : 'IT', 'province.countrycode' : 'IT',
             'customer.E1KNA1M_KTOKD' : { "<>": '0002'}});
 
-            const customers = await tx.run(cds.parse.cql(query));
-           console.log(customers,"Customers");
+            const customers = await tx.run(query);
             let nextInstituteID = await this.getLastInstituteID();
             
            
@@ -652,9 +649,9 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     VatCode:cust.E1KNA1M_STCEG,
                     TaxCode:cust.E1KNA1M_STCD1,//Fiscal Code
                     INCOTerms: "",
-                    PaymentTerms: cust.Description,
-                    ForAllBrands: "TRUE",
-                    DirectTender: "TRUE" 
+                    PaymentTerms: this.getPaymentTerms(cust.E1KNVVM_ZTERM)||"",
+                    ForAllBrands: TRUE,
+                    DirectTender: TRUE 
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
                     // --"E1KNVVM_ZTERM",--PaymentTerms
@@ -759,7 +756,18 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         }   
 
     };
-
+/**
+     *
+     * @param {String} ZTERM ZTERM
+     * @returns {String} paymentterm
+     */
+async getPaymentTerms(ZTERM){
+    const { PaymentTerms} = this.db.entities("com.bayer.SXTENDER.MasterData");
+    let paymentterm =  await tx.run(cds.parse.cql (`SELECT Description from ${PaymentTerms.name}
+    WHERE E1KNVVM_ZTERM = '${ZTERM}'`));
+console.log(paymentterm);
+    return paymentterm;
+}
 
     /**
      * 
