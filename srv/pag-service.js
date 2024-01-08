@@ -115,7 +115,7 @@ module.exports = async (srv) => {
             EffectiveDate: offerValidation.EffectiveDate.split('T')[0],
             ExpiryDate: offerValidation.ExpiryDate.split('T')[0],
             OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0],
-            UserEmail:UserDetails.UserEmail
+            UserEmail:UserDetails[0].UserEmail
         }
     }
     async function buildWorkflowApprovalOffers(tx) {
