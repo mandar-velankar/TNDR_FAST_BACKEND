@@ -84,12 +84,13 @@ module.exports = async (srv) => {
         
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST));
         workflowApprovals=workflowApprovals[0];
-        let createdby =ServiceHelper.buildFullWhere("createdBy", "=",workflowApprovals.createdBy);
+        let createdby =ServiceHelper.buildFullWhere("CWID", "=",workflowApprovals.createdBy);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
         offerValidation=offerValidation[0];
 
         let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
+        console.log(UserDetails,"detail");
                 
         let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
         
