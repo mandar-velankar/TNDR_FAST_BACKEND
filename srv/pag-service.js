@@ -62,6 +62,7 @@ module.exports = async (srv) => {
         //console.log("Inside Approval Offers");
         const tx = cds.tx(req);
         let results = await buildWorkflowApprovalOffers(tx);
+        console.log(results,"results");
         return results;
     });
 
@@ -78,17 +79,17 @@ module.exports = async (srv) => {
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST));
         workflowApprovals=workflowApprovals[0];
-        console.log(workflowApprovals,"workflow");
+       
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
         offerValidation=offerValidation[0];
-        console.log(offerValidation,"offer validation");
+        
         let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
-        console.log(offerValidation.InstituteId);
+        
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
-        console.log(institute,"institute");
-        console.log(offerValidation.ProductPackId);
+        
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
+
         let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
         
         
@@ -103,9 +104,9 @@ module.exports = async (srv) => {
             ProductPackNAME:productDetail.PRODUCTPACKNAME,
             Status:workflowApprovals.ApprovalStatus,
             ID:workflowApprovals.ID,
-            EffectiveDate: offerValidation.EffectiveDate,
-            ExpiryDate: offerValidation.ExpiryDate,
-            OldExpiryDate: offerValidation.OldExpiryDate
+            EffectiveDate: offerValidation.EffectiveDate.split('T')[0],
+            ExpiryDate: offerValidation.ExpiryDate.split('T')[0],
+            OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0]
         }
     }
     async function buildWorkflowApprovalOffers(tx) {
