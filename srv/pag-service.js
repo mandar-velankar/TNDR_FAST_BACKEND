@@ -39,6 +39,10 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
+        PT_TMUSER
+     } = cds.entities("com.bayer.SXTENDER.AdminData");
+
+    const {
         PT_TMTEND, PT_TMOFPR, PT_TMOFRS, PriceCondition, FreeGoodsOther, DiscountCondition, SpainRappelData
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
@@ -77,13 +81,16 @@ module.exports = async (srv) => {
         console.log(Id,"ID");
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
+        
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST));
         workflowApprovals=workflowApprovals[0];
-       
+        let createdby =ServiceHelper.buildFullWhere("createdBy", "=",workflowApprovals.createdBy);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
         offerValidation=offerValidation[0];
-        
+
+        let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
+                
         let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
         
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
@@ -106,7 +113,8 @@ module.exports = async (srv) => {
             ID:workflowApprovals.ID,
             EffectiveDate: offerValidation.EffectiveDate.split('T')[0],
             ExpiryDate: offerValidation.ExpiryDate.split('T')[0],
-            OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0]
+            OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0],
+            UserEmail:UserDetails.UserEmail
         }
     }
     async function buildWorkflowApprovalOffers(tx) {

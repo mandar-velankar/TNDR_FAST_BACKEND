@@ -131,7 +131,8 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
           ID : UUID;
 		  EffectiveDate: Date;
 		  ExpiryDate: Date;
-		  OldExpiryDate: Date;		  
+		  OldExpiryDate: Date;
+          UserEmail : String;	  
 } 
 //EJUVE-CR3 END
 }
