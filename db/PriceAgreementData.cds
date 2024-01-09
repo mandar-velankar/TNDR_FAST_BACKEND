@@ -288,7 +288,7 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ins.CustomerID, //by candidate
         cp.PriceCondition
         // pa.Institute.CustomerID //by price agreement
-}where (case when ma.ActiveRecord = 'No'and (cp.Synchronized is null or cp.Synchronized = false) then 0 else 1 end)= 1;
+}where (case when ma.ActiveRecord = 'No' and (cp.Synchronized is null or cp.Synchronized = false) then 0 else 1 end)= 1;
 
 //EHQUT-199066-Italy – Brand filter in Price Agreements
 //Distinct list of Products

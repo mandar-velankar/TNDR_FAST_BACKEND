@@ -1316,7 +1316,10 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MIKBAS = mikbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MXKBAS = mxkbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KUNNR = parseInt(institute.CustomerID);
-
+        if(customerPrice.PriceCondition == 'YA01'){
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.PRSCH = 2;
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KZNEP = "B"; 
+            }
         //Transforming the Date in correct format
         const datab = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
         const datbi = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
@@ -1327,7 +1330,7 @@ module.exports = async (srv) => {
         // 5. Insert PriceCondition QC
         mappedfocCustomerPricesQC && await tx.run(INSERT(mappedfocCustomerPricesQC).into(CustomerPricesQC));
         
-
+        console.log(body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP,"IDOC");
         await tx.commit();//to release db connection
         console.log(`Start sending update FOC customer price: ${customerPrice.ID}`);
         try {
