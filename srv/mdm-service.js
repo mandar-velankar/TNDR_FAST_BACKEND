@@ -253,7 +253,7 @@ module.exports = (srv) => {
 		 */
 		try {
 			const file = await SELECT.one.from(ExcelUpload).where({ID: req.ID});
-			const expectedHeaders = ["SYEAR", "SMONTH", "SCUSNO", "STERID", "SITNO", "SQTY", "SGS", "SDIS", "SDON", "SNS", "Expr1", "SOTD", "SSAMP", "SYMD"]; 
+			
 			const arrayBuffer = bufferToArrayBuffer(file?.content);
 			const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
@@ -261,26 +261,12 @@ module.exports = (srv) => {
 			const sheetName = workbook.SheetNames[0];
 			let salesData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-			let isValid = false;
 
-			for (let header in expectedHeaders) {
-				salesData.forEach((item, index) => {
-				if (!Object.hasOwn(item, expectedHeaders[header])) {
-					isValid = false;
-				}else {
-					isValid = true;
-				}
+			for (let sd of salesData) {
+				await cds.tx(async () => {
+					await upsertSalesData(sd);
 				});
 			}
-
-			if (!isValid) {
-				return res.reject(400, "Invalid Excel data format");
-			}
-
-			
-			salesData.forEach(async (sd) => {
-				await upsertSalesData(sd);
-			});
 
 			await DELETE.from(ExcelUpload).where({ID: req.ID});
 		} catch (error) {
@@ -295,15 +281,14 @@ module.exports = (srv) => {
 		sd.SMONTH = `${sd.SMONTH}`;
 		sd.SCUSNO = `${sd.SCUSNO}`;
 		sd.SITNO = `${sd.SITNO}`;
-		sd.SITNO = `${sd.SITNO}`;
 		sd.SYMD = `${sd.SYMD}`;
 
-		const salesData = await SELECT.one.from(SalesData).where({SYEAR: sd.SYEAR, SMONTH: sd.SMONTH, SCUSNO: sd.SCUSNO, SITNO: sd.SITNO});
+		const existingSalesData = await SELECT.one.from(SalesData).where({SYEAR: sd.SYEAR, SMONTH: sd.SMONTH, SCUSNO: sd.SCUSNO, SITNO: sd.SITNO});
 
-		if (salesData) {
-			await UPDATE(SalesData).with(sd).where({SYEAR: sd.SYEAR, SMONTH: sd.SMONTH, SCUSNO: sd.SCUSNO, SITNO: sd.SITNO});
+		if (existingSalesData) {
+			return UPDATE(SalesData).with(sd).where({SYEAR: sd.SYEAR, SMONTH: sd.SMONTH, SCUSNO: sd.SCUSNO, SITNO: sd.SITNO});
 		}else {
-			await INSERT.into(SalesData).entries(sd);
+			return INSERT.into(SalesData).entries(sd);
 		}
 	}
 
