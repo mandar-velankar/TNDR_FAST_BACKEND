@@ -89,6 +89,12 @@ module.exports = (srv) => {
 		return req;
 	});
 
+	srv.before('CREATE', 'PT_TMCTPRDPCK', async (req) => {
+		const nextProductID = await getNextValue(PT_TMCTPRDPCK, "PRODUCTPACKID");
+		req.data.PRODUCTPACKID = nextProductID;
+		return req;
+	});
+
 
 	srv.on('CREATE', 'CountryBrandProducts', async (req) => {
 
@@ -340,4 +346,24 @@ module.exports = (srv) => {
 		}
 		return arrayBuffer;
 	  }
+
+	srv.after('READ', 'MasterDistributors', data => {
+		data.unshift({
+			DistributorID: null,
+			CountryCode: null,
+			DistributorName: null,
+			Address: null,
+			ContactNo: null,
+			Fax: null,
+			CONTACT_EMAIL: null,
+			ContactPerson: null
+		})
+	});
+
+	srv.after('READ', 'DistinctProductBUs', data => {
+		data.unshift({
+			COUNTRYCODE: "PK",
+			BU: null
+		})
+	});
 };
