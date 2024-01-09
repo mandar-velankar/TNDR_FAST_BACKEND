@@ -227,6 +227,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         UnitPerPack as UoM,
         Price.NetPrice as NetPrice,
         RequestedVolume,
+        PriceCondition.AnticipatedYearlyVolumeBranch,
         (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
         Offer.Currency as Currency,
         SKUCountry.RegistrationValidUntil
