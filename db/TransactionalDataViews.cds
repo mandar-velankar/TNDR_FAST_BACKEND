@@ -2146,7 +2146,6 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PCI_NAME                                    : String(255);
             ACTIVE_SUBSTANCE                            : String(50);
             PRODUCT_TYPE                                : String(50);
-            PRODUCTGENERICNAME                          : String(500);
             SKUCOUNTRY_ACTIVERECORD                     : String(10);
             PRESENTATION_2                              : String(1000);
             GOV_CODE                                    : String(255);
