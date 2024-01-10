@@ -133,6 +133,9 @@ module.exports = async (srv) => {
 		LatestApprovedBrandPolicies
 	} = cds.entities("PolicyService");
 
+	const {
+		PriceConditionCurrentSectionTaiwanView
+	} = cds.entities("StandardAppService");
 
 	srv.on('READ', 'Properties', req => {
 		console.log('passing request to remote service ...');		
@@ -2232,7 +2235,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in OfferValidation READ:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -2591,6 +2595,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 						foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
 					});
 					productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
+					productCondition.PriceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 					return productCondition;
 				}));
 				/*end of ProductCondition information */
@@ -2850,7 +2855,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					DISTRIBUTORID: productDistributorInfo.Custom_String_1,
 					DistributorName: DistributorInfo?.DistributorName ?? null,
 					Address: DistributorInfo?.Address ?? null,
-					City: DistributorInfo?.City ?? null
+					City: DistributorInfo?.City ?? null,
+					AwardedPrice: offerProduct.AwardedPrice
 				}
 			});
 			let resolvedResults = await Promise.all(results);
@@ -2864,7 +2870,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return resolvedResults;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in OfferProductValidation READ:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
