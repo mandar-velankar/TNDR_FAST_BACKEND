@@ -680,7 +680,8 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.ProductClass as ProductClass,
     offerProduct.SKU.ProductDescription as ProductDescription,
     ifnull(offerProduct.PricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
-    case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String
+    case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
+    offerProduct.Results.AwardedPrice
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -2223,6 +2224,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             DistributorName                             : String(500);
 	        Address                                     : String(500);
             City                                        : String;
+            AwardedPrice                                : Double;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
