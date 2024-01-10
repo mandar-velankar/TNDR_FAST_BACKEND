@@ -1810,7 +1810,7 @@ module.exports = (srv) => {
 				PCI_NAME: offerProduct.PCI_NAME,
 				ACTIVE_SUBSTANCE: offerProduct.ACTIVE_SUBSTANCE,
 				PRODUCT_TYPE: offerProduct.PRODUCT_TYPE,
-				PRODUCTGENERICNAME: offerProduct.PRODUCTGENERICNAME,
+
 				SKUCOUNTRY_ACTIVERECORD: offerProduct.SKUCOUNTRY_ACTIVERECORD,
 				PRESENTATION_2: offerProduct.PRESENTATION_2,
 				PRODUCT_COMMENT: offerProduct.PRODUCT_COMMENT,
@@ -3345,7 +3345,6 @@ module.exports = (srv) => {
                 Decimals2Unit: (input) => {
                     if(typeof input === 'string'){
                         return input.split(".")[1].substring(0, 2);
-						
                     } else {
                         return Number(input).toFixed(2);
                     }
