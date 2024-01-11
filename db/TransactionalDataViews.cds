@@ -2225,9 +2225,13 @@ left outer join TransactionalData.PriceCondition as priceCondition
 	        Address                                     : String(500);
             City                                        : String;
             AwardedPrice                                : Double;
+            InstituteID                                 : Integer not null;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
+            PriceConditionCurrentSectionTaiwan          : Association to many TransactionalDataViews.PriceConditionCurrentSectionTaiwanView
+                                                            on PriceConditionCurrentSectionTaiwan.ProductCode = $self.PRODUCTID
+                                                            and PriceConditionCurrentSectionTaiwan.INSTITUTE_ID = $self.InstituteID;
             ProductPricing                              : Association to TransactionalData.ProductPricing
                                                             on ProductPricing.ProductCode = $self.PRODUCTID
                                                             and ProductPricing.OfferID = $self.OFFER_ID;
@@ -2375,7 +2379,24 @@ left outer join TransactionalData.PriceCondition as priceCondition
         product.Results.Outcome,
         foc.ProductPackId;
 
-
+entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory{
+        key ProductCode,
+        key INSTITUTE_ID,
+        Currency,
+        Price0,
+        Price1,
+        Level2Discount1,                
+        Level2Discount2,
+        Price2,
+        AnnualDiscountForBranch,
+        Level3Discount1,
+        Price3,
+        AwardedPrice,
+        TotalYearlyValueMainCustomer,
+        TotalYearlyValueBranch,
+        TotalDiscountNHI,
+        TotalDiscountInvoice
+}where OUTCOME = 'Won' and CountryCode = 'TW';
 
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 

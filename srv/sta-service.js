@@ -88,7 +88,8 @@ module.exports = async (srv) => {
 		OfferRevisions,
 		TenderOffers,
 		ZuelligExtractView,
-		StandardTenderHistory
+		StandardTenderHistory,
+		PriceConditionCurrentSectionTaiwanView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -133,9 +134,6 @@ module.exports = async (srv) => {
 		LatestApprovedBrandPolicies
 	} = cds.entities("PolicyService");
 
-	const {
-		PriceConditionCurrentSectionTaiwanView
-	} = cds.entities("StandardAppService");
 
 	srv.on('READ', 'Properties', req => {
 		console.log('passing request to remote service ...');		
@@ -336,7 +334,8 @@ module.exports = async (srv) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in InstituteDistributorBrandProduct READ:', error);
+			return req.reject(error.code, error.message);
 		}
 	});
 	
@@ -1455,7 +1454,8 @@ module.exports = async (srv) => {
 			}
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in PriceConditionPriceView, PriceConditionDiscountView READ:', error);
+			return req.reject(error.code, error.message);
 		}
 		}
 	);
@@ -1477,7 +1477,8 @@ module.exports = async (srv) => {
 			};
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in PriceConditionPriceWithFOCView READ:', error);
+			return req.reject(error.code, error.message);
 		}
 			
 		}
@@ -1499,7 +1500,8 @@ module.exports = async (srv) => {
 			};
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in PriceConditionDiscountWithFOCView READ:', error);
+			return req.reject(error.code, error.message);
 		}
 		
 	}
@@ -1528,7 +1530,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		};
 	}
 	catch(error){
-		console.error(error.code, error.message);
+		console.error('Error in PriceConditionTaiwanPriceView READ:', error);
+		return req.reject(error.code, error.message);
 	}
 }
 );
@@ -2595,7 +2598,6 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 						foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
 					});
 					productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-					productCondition.PriceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 					return productCondition;
 				}));
 				/*end of ProductCondition information */
@@ -2686,7 +2688,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
 				if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
 					vatInWords += ",00";   
-				}; 
+				};
+				
+				const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 
 				return {
 					TENDER_ID: offer.TENDERID,
@@ -2856,7 +2860,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					DistributorName: DistributorInfo?.DistributorName ?? null,
 					Address: DistributorInfo?.Address ?? null,
 					City: DistributorInfo?.City ?? null,
-					AwardedPrice: offerProduct.AwardedPrice
+					AwardedPrice: offerProduct.AwardedPrice,
+					InstituteID: offer.INSTITUTE_ID,
+					PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan
 				}
 			});
 			let resolvedResults = await Promise.all(results);
@@ -2931,7 +2937,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in buildProductValidationForType12:', error);
+			return req.reject(error.code, error.message);
 		}	
 	}
 
@@ -2995,7 +3002,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in buildProductValidationForType14:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -3069,7 +3077,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in buildProductValidationForType15:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -3103,7 +3112,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in buildProductValidationForType16:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -3317,7 +3327,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in OfferProductValidation READ:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
