@@ -81,8 +81,11 @@ module.exports = async (srv) => {
         console.log(Id,"ID");
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
-        let workflowApprovals =  await tx.run(SELECT.from(PriceAgreement_APPRST).where({whereAPPRST, 'PriceAgreement_APPRST.ApprovalStatus' : 'Processing'}));
+        let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", 'Processing');
+        
+        let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST).where(whereStatus));
         workflowApprovals=workflowApprovals[0];
+        console.log(workflowApprovals);
         let createdby =ServiceHelper.buildFullWhere("CWID", "=",workflowApprovals.createdBy);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
