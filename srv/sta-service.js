@@ -3091,7 +3091,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			}
 			
 
-			if (!policy && !priceCondition && !instituteTerritory) return results;
+			if (!policy || !priceCondition || !instituteTerritory) return results;
 
 			if(instituteTerritory.IsKAM) {
 				mappedApproverTypesForKAMTerritory(aApproverTypes, priceCondition, policy);
