@@ -112,8 +112,8 @@ module.exports = async (srv) => {
             ProductPackNAME:productDetail.PRODUCTPACKNAME,
             Status:workflowApprovals.ApprovalStatus,
             ID:workflowApprovals.ID,
-            EffectiveDate: offerValidation.EffectiveDate.split('T')[0],
-            ExpiryDate: offerValidation.ExpiryDate.split('T')[0],
+            EffectiveDate: workflowApprovals.EffectiveDate.split('T')[0],
+            ExpiryDate: workflowApprovals.ExpiryDate.split('T')[0],
             OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0],
             UserEmail:UserDetails[0].UserEmail
         }
