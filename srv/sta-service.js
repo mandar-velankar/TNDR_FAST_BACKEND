@@ -2619,17 +2619,17 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
 
 				//let aFreeGoodsOtherTemp = [];
-				const whereProductPackId = {
-					ProductPricing_ProductCode: offerProduct.PRODUCTID,
-					ProductPricing_OfferID: offer.OFFERID
-				}
-				const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
+				// const whereProductPackId = {
+				// 	ProductPricing_ProductCode: offerProduct.PRODUCTID,
+				// 	ProductPricing_OfferID: offer.OFFERID
+				// }
+				const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where({ProductPackId: offerProduct.PRODUCTID}));
 
-				const wherePriceconditions = {
-					OfferID: offer.OFFERID,
-					ProductCode: offerProduct.PRODUCTID,
-					CountryCode: offer.COUNTRYCODE
-				}
+				// const wherePriceconditions = {
+				// 	OfferID: offer.OFFERID,
+				// 	ProductCode: offerProduct.PRODUCTID,
+				// 	CountryCode: offer.COUNTRYCODE
+				// }
 
 				//const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
 
@@ -2650,10 +2650,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		
 					tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
 
-					const whereProductPackFOC = {
-						PRODUCTPACKID: tmpFreeGoodOther.ProductPackId,
-					}
-					tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
+					tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: tmpFreeGoodOther.ProductPackId}));
 
 					//Get corresponding ProductConditions
 					const whereFocProductConditions = {
