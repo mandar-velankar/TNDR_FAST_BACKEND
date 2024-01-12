@@ -948,6 +948,8 @@ module.exports = async (srv) => {
 		delete req.data.RegistrationValidUntil;
 		delete req.data.BrandName;
 		delete req.data.VwBudgetedProfitability;
+		delete req.data.PACKFACTOR;
+		delete req.data.INCOTerms;
 	});
 
 	srv.before(
