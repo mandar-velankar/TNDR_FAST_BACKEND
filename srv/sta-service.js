@@ -88,7 +88,8 @@ module.exports = async (srv) => {
 		OfferRevisions,
 		TenderOffers,
 		ZuelligExtractView,
-		StandardTenderHistory
+		StandardTenderHistory,
+		PriceConditionCurrentSectionTaiwanView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -333,7 +334,8 @@ module.exports = async (srv) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in InstituteDistributorBrandProduct READ:', error);
+			return req.reject(error.code, error.message);
 		}
 	});
 	
@@ -1185,6 +1187,10 @@ module.exports = async (srv) => {
 		async (req) => {
 			await upsertPriceCondition(req);
 			await upsertProductPricing(req);
+			// Check if CountryCode is TW (Taiwan)
+			if (req.data.CountryCode === 'TW') {
+				await updateProductRequestedVolume(req);
+			}
 			return req.data;
 		}
 	);
@@ -1393,6 +1399,31 @@ module.exports = async (srv) => {
 		}
 	}
 
+	/**
+	 * Update a PT_TMOFPR Requested Volume based on the provided request data.
+	 * If `product` exists, updates the existing PT_TMOFPR.
+	 *
+	 * @param {Object} req - The request object containing the data for the price condition.
+	 * @returns {Promise<void>} A promise that resolves when the update operation is complete.
+	 */
+	const updateProductRequestedVolume = async function(req){
+
+		const whereCondition = {
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Active: 1,
+			LotID: 1
+		};
+
+		const product = await SELECT.one.from(PT_TMOFPR).where(whereCondition);
+
+		if(product){
+			await UPDATE(PT_TMOFPR)
+				.with ({RequestedVolume: req.data.AnticipatedYearlyVolumeBranch})
+				.where(whereCondition)
+		}
+	}
+
 	srv.after(
 		'READ', 
 		['PriceConditionPriceView','PriceConditionDiscountView'], 
@@ -1410,7 +1441,8 @@ module.exports = async (srv) => {
 			}
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in PriceConditionPriceView, PriceConditionDiscountView READ:', error);
+			return req.reject(error.code, error.message);
 		}
 		}
 	);
@@ -1432,7 +1464,8 @@ module.exports = async (srv) => {
 			};
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in PriceConditionPriceWithFOCView READ:', error);
+			return req.reject(error.code, error.message);
 		}
 			
 		}
@@ -1454,7 +1487,8 @@ module.exports = async (srv) => {
 			};
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in PriceConditionDiscountWithFOCView READ:', error);
+			return req.reject(error.code, error.message);
 		}
 		
 	}
@@ -1483,7 +1517,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		};
 	}
 	catch(error){
-		console.error(error.code, error.message);
+		console.error('Error in PriceConditionTaiwanPriceView READ:', error);
+		return req.reject(error.code, error.message);
 	}
 }
 );
@@ -2185,12 +2220,18 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				// TENDER_TYPE: tenderType[0].NAME,
 				CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 				CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
-				CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
+				CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
+				TenderChannel: offer.TenderChannel,
+            	ContractLength: offer.ContractLength,
+            	ContractExtenseion: offer.ContractExtenseion,
+            	NumberOfExtension: offer.NumberOfExtension,
+            	ClientComment: offer.ClientComment
 			};
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in OfferValidation READ:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -2545,9 +2586,12 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
 					productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
 					productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
-					productCondition.FreeGoodsOther.forEach(async foc => {
-						foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
-					});
+					// productCondition.FreeGoodsOther.forEach(async foc => {
+					// 	foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
+					// });
+					for (const foc of productCondition.FreeGoodsOther) {
+						foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }));
+					}
 					productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
 					return productCondition;
 				}));
@@ -2565,17 +2609,17 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				let toPackFactor = (offerProduct.UNIT === "Unit") ? 1 / offerProduct.PACKSIZE : 1;
 
 				//let aFreeGoodsOtherTemp = [];
-				const whereProductPackId = {
-					ProductPricing_ProductCode: offerProduct.PRODUCTID,
-					ProductPricing_OfferID: offer.OFFERID
-				}
-				const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where(whereProductPackId));
+				// const whereProductPackId = {
+				// 	ProductPricing_ProductCode: offerProduct.PRODUCTID,
+				// 	ProductPricing_OfferID: offer.OFFERID
+				// }
+				const aFreeGoodsOtherTemp = await tx.run(SELECT.from(FreeGoodsOther).where({ProductPackId: offerProduct.PRODUCTID}));
 
-				const wherePriceconditions = {
-					OfferID: offer.OFFERID,
-					ProductCode: offerProduct.PRODUCTID,
-					CountryCode: offer.COUNTRYCODE
-				}
+				// const wherePriceconditions = {
+				// 	OfferID: offer.OFFERID,
+				// 	ProductCode: offerProduct.PRODUCTID,
+				// 	CountryCode: offer.COUNTRYCODE
+				// }
 
 				//const aPriceConditions = await tx.run(SELECT.from(PriceConditionView).where(wherePriceconditions));
 
@@ -2596,10 +2640,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		
 					tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
 
-					const whereProductPackFOC = {
-						PRODUCTPACKID: tmpFreeGoodOther.ProductPackId,
-					}
-					tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPackFOC));
+					tmpFreeGoodOther.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: tmpFreeGoodOther.ProductPackId}));
 
 					//Get corresponding ProductConditions
 					const whereFocProductConditions = {
@@ -2639,7 +2680,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
 				if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
 					vatInWords += ",00";   
-				}; 
+				};
+				
+				const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 
 				return {
 					TENDER_ID: offer.TENDERID,
@@ -2808,7 +2851,20 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					DISTRIBUTORID: productDistributorInfo.Custom_String_1,
 					DistributorName: DistributorInfo?.DistributorName ?? null,
 					Address: DistributorInfo?.Address ?? null,
-					City: DistributorInfo?.City ?? null
+					City: DistributorInfo?.City ?? null,
+					AwardedPrice: offerProduct.AwardedPrice,
+					InstituteID: offer.INSTITUTE_ID,
+					EARLIEST_DATE: offerProduct.EARLIEST_DATE,
+					Comment: offerProduct.Comment,
+					PackSizeRequired: offerProduct.PackSizeRequired,
+					Price0: offerProduct.Price0,
+					Price1: offerProduct.Price1,
+					Price3: offerProduct.Price3,
+					Level2Discount1: offerProduct.Level2Discount1,
+					Level2Discount2: offerProduct.Level2Discount2,
+					AnnualDiscount_Percentage: offerProduct.AnnualDiscount_Percentage,
+					NegotiationPrice: offerProduct.NegotiationPrice,
+					PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan
 				}
 			});
 			let resolvedResults = await Promise.all(results);
@@ -2822,7 +2878,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return resolvedResults;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in OfferProductValidation READ:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -2882,7 +2939,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in buildProductValidationForType12:', error);
+			return req.reject(error.code, error.message);
 		}	
 	}
 
@@ -2946,7 +3004,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in buildProductValidationForType14:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -3020,7 +3079,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in buildProductValidationForType15:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -3042,7 +3102,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			}
 			
 
-			if (!policy && !priceCondition && !instituteTerritory) return results;
+			if (!policy || !priceCondition || !instituteTerritory) return results;
 
 			if(instituteTerritory.IsKAM) {
 				mappedApproverTypesForKAMTerritory(aApproverTypes, priceCondition, policy);
@@ -3054,7 +3114,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in buildProductValidationForType16:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 
@@ -3268,7 +3329,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			return results;
 		}
 		catch(error){
-			console.error(error.code, error.message);
+			console.error('Error in OfferProductValidation READ:', error);
+			return req.reject(error.code, error.message);
 		}
 	}
 

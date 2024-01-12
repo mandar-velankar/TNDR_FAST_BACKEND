@@ -227,6 +227,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         UnitPerPack as UoM,
         Price.NetPrice as NetPrice,
         RequestedVolume,
+        PriceCondition.AnticipatedYearlyVolumeBranch,
         (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
         Offer.Currency as Currency,
         SKUCountry.RegistrationValidUntil
@@ -314,6 +315,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKUCountry.BU,
         SKUCountry.RegistrationValidUntil,
         SKU.Product.HLEVEL4_NAME as BrandName,
+        SKU.PACKFACTOR,
         Offer.Tender.Institute.INCOTerms,
         @Core.Computed: false
         ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
@@ -679,24 +681,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity StandardTenderHistory as projection on TransactionalDataViews.StandardTenderHistory;
 
-    entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory{
-        key ProductCode,
-        key INSTITUTE_ID,
-        Currency,
-        Price0,
-        Price1,
-        Level2Discount1,                
-        Level2Discount2,
-        Price2,
-        AnnualDiscountForBranch,
-        Level3Discount1,
-        Price3,
-        AwardedPrice,
-        TotalYearlyValueMainCustomer,
-        TotalYearlyValueBranch,
-        TotalDiscountNHI,
-        TotalDiscountInvoice
-    }where OUTCOME = 'Won' and CountryCode = 'TW';
+    entity PriceConditionCurrentSectionTaiwanView as projection on TransactionalDataViews.PriceConditionCurrentSectionTaiwanView;
+    
     entity CSVAttachment {
         key Zuellig: Boolean default false;
         content    : LargeBinary @Core.MediaType : 'text/csv';

@@ -680,7 +680,18 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.ProductClass as ProductClass,
     offerProduct.SKU.ProductDescription as ProductDescription,
     ifnull(offerProduct.PricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
-    case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String
+    case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
+    offerProduct.Results.AwardedPrice,
+    offerProduct.Custom.Integer_1 as PackSizeRequired,
+    offerProduct.Custom.Date_1 as EARLIEST_DATE,
+    offerProduct.Comment,
+    offerProduct.PriceCondition.Price0,
+    offerProduct.PriceCondition.Price1,
+    offerProduct.PriceCondition.Price3,
+    offerProduct.PriceCondition.Level2Discount1,
+    offerProduct.PriceCondition.Level2Discount2,
+    offerProduct.PriceCondition.AnnualDiscount_Percentage,
+    offerProduct.PriceCondition.NegotiationPrice
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -869,7 +880,12 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY,
     offer.Custom.String_1 as PaymentTerms,
     offer.AffiliateOffer,
-    offer.Tender.Custom.String_1 as TENDERCONTACT
+    offer.Tender.Custom.String_1 as TENDERCONTACT,
+    offer.Tender.TenderChannel,
+    offer.Tender.ContractLength,
+    offer.Tender.ContractExtenseion,
+    offer.Tender.Custom.Integer_1 as NumberOfExtension,
+    offer.Comment as ClientComment
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -949,7 +965,11 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           date_settings.NextYearDelta,
           date_settings.NextDay,
           date_settings.NextMonth,
-          offer.AffiliateOffer;
+          offer.AffiliateOffer,
+          offer.Tender.ContractLength,
+          offer.Tender.ContractExtenseion,
+          offer.Tender.Custom.Integer_1,
+          offer.Comment;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -2059,6 +2079,12 @@ left outer join TransactionalData.PriceCondition as priceCondition
             CREATED_BY_USER_CONTACTNUMBER :String (20);
             CONTENT               : String(500); //manual conflict solving for change of KOSAL //EHQUT-390012-Spain - commercial offer template modifications
             Submitted             : Boolean default false;
+            TenderChannel          : String(255);
+            ContractLength         : Integer;
+            ContractExtenseion     : Integer;
+            NumberOfExtension      : Integer;  //PT_TMTEND/CUSTOM_INTEGER_1
+            ClientComment          : String(500);
+            Comment                : String(500);
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2223,9 +2249,24 @@ left outer join TransactionalData.PriceCondition as priceCondition
             DistributorName                             : String(500);
 	        Address                                     : String(500);
             City                                        : String;
+            AwardedPrice                                : Double;
+            InstituteID                                 : Integer not null;
+            EARLIEST_DATE                               : Date;
+            Comment                                     : String;
+            PackSizeRequired                            : Integer;
+            Price0                                      : Decimal;
+            Price1                                      : Decimal;
+            Price3                                      : Decimal;
+            Level2Discount1                             : Double;
+            Level2Discount2                             : Double;
+            AnnualDiscount_Percentage                   : Double;
+            NegotiationPrice                            : Double;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
+            PriceConditionCurrentSectionTaiwan          : Association to many TransactionalDataViews.PriceConditionCurrentSectionTaiwanView
+                                                            on PriceConditionCurrentSectionTaiwan.ProductCode = $self.PRODUCTID
+                                                            and PriceConditionCurrentSectionTaiwan.INSTITUTE_ID = $self.InstituteID;
             ProductPricing                              : Association to TransactionalData.ProductPricing
                                                             on ProductPricing.ProductCode = $self.PRODUCTID
                                                             and ProductPricing.OfferID = $self.OFFER_ID;
@@ -2373,7 +2414,24 @@ left outer join TransactionalData.PriceCondition as priceCondition
         product.Results.Outcome,
         foc.ProductPackId;
 
-
+entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory{
+        key ProductCode,
+        key INSTITUTE_ID,
+        Currency,
+        Price0,
+        Price1,
+        Level2Discount1,                
+        Level2Discount2,
+        Price2,
+        AnnualDiscountForBranch,
+        Level3Discount1,
+        Price3,
+        AwardedPrice,
+        TotalYearlyValueMainCustomer,
+        TotalYearlyValueBranch,
+        TotalDiscountNHI,
+        TotalDiscountInvoice
+}where OUTCOME = 'Won' and CountryCode = 'TW';
 
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
