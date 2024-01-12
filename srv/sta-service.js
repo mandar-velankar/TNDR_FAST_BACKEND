@@ -2191,7 +2191,12 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				// TENDER_TYPE: tenderType[0].NAME,
 				CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 				CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
-				CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber
+				CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
+				TenderChannel: offer.TenderChannel,
+            	ContractLength: offer.ContractLength,
+            	ContractExtenseion: offer.ContractExtenseion,
+            	NumberOfExtension: offer.NumberOfExtension,
+            	ClientComment: offer.ClientComment
 			};
 			return results;
 		}
@@ -2553,7 +2558,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
 					productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
 					productCondition.FreeGoodsOther.forEach(async foc => {
-						foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
+						foc.ProductPack = await tx.run(SELECT.one.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
 					});
 					productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
 					return productCondition;
@@ -2820,6 +2825,16 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					City: DistributorInfo?.City ?? null,
 					AwardedPrice: offerProduct.AwardedPrice,
 					InstituteID: offer.INSTITUTE_ID,
+					EARLIEST_DATE: offerProduct.EARLIEST_DATE,
+					Comment: offerProduct.Comment,
+					PackSizeRequired: offerProduct.PackSizeRequired,
+					Price0: offerProduct.Price0,
+					Price1: offerProduct.Price1,
+					Price3: offerProduct.Price3,
+					Level2Discount1: offerProduct.Level2Discount1,
+					Level2Discount2: offerProduct.Level2Discount2,
+					AnnualDiscount_Percentage: offerProduct.AnnualDiscount_Percentage,
+					NegotiationPrice: offerProduct.NegotiationPrice,
 					PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan
 				}
 			});
