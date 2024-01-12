@@ -315,6 +315,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKUCountry.BU,
         SKUCountry.RegistrationValidUntil,
         SKU.Product.HLEVEL4_NAME as BrandName,
+        SKU.PACKFACTOR,
         Offer.Tender.Institute.INCOTerms,
         @Core.Computed: false
         ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
