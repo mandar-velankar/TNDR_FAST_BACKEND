@@ -85,7 +85,9 @@ module.exports = async (srv) => {
         
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST).where(whereStatus));
         workflowApprovals=workflowApprovals[0];
-        console.log(workflowApprovals);
+        
+        let CustomerDetails = await tx.run(SELECT .from(CustomerPrices).where(whereAPPRST));
+        console.log(CustomerDetails,"Customer Details");
         let createdby =ServiceHelper.buildFullWhere("CWID", "=",workflowApprovals.createdBy);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
