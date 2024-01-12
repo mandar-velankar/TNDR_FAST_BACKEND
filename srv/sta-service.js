@@ -1187,6 +1187,10 @@ module.exports = async (srv) => {
 		async (req) => {
 			await upsertPriceCondition(req);
 			await upsertProductPricing(req);
+			// Check if CountryCode is TW (Taiwan)
+			if (req.data.CountryCode === 'TW') {
+				await updateProductRequestedVolume(req);
+			}
 			return req.data;
 		}
 	);
@@ -1392,6 +1396,31 @@ module.exports = async (srv) => {
 			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
 			// Deductions_ABS_PCT    : null
+		}
+	}
+
+	/**
+	 * Update a PT_TMOFPR Requested Volume based on the provided request data.
+	 * If `product` exists, updates the existing PT_TMOFPR.
+	 *
+	 * @param {Object} req - The request object containing the data for the price condition.
+	 * @returns {Promise<void>} A promise that resolves when the update operation is complete.
+	 */
+	const updateProductRequestedVolume = async function(req){
+
+		const whereCondition = {
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Active: 1,
+			LotID: 1
+		};
+
+		const product = await SELECT.one.from(PT_TMOFPR).where(whereCondition);
+
+		if(product){
+			await UPDATE(PT_TMOFPR)
+				.with ({RequestedVolume: req.data.AnticipatedYearlyVolumeBranch})
+				.where(whereCondition)
 		}
 	}
 
