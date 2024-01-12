@@ -78,7 +78,7 @@ module.exports = async (srv) => {
         return R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), workflowOffers);
     }
     async function buildWorkflowApprovalOffersEntry(tx, Id, approvalStatus) {
-        console.log(Id,"ID");
+       
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
         let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", 'Processing');
@@ -87,15 +87,18 @@ module.exports = async (srv) => {
         workflowApprovals=workflowApprovals[0];
         
         let CustomerDetails = await tx.run(SELECT .from(CustomerPrices).where(whereAPPRST));
-        console.log(CustomerDetails,"Customer Details");
+        let instituteID;
+        for(var i =0; i<CustomerDetails.length; i++){
+            instituteID.push(CustomerDetails[i].InstituteId);
+        }
+        console.log(instituteID,"Customer Details");
         let createdby =ServiceHelper.buildFullWhere("CWID", "=",workflowApprovals.createdBy);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
         offerValidation=offerValidation[0];
 
         let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
-        console.log(UserDetails,"detail");
-                
+                       
         let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
         
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
@@ -129,8 +132,7 @@ module.exports = async (srv) => {
 
         for (let i = 0; i < waitingOffers.length; i++) {
             let newEntry = await buildWorkflowApprovalOffersEntry(tx, waitingOffers[i], "Processing");
-            console.log(newEntry,"New Entry");
-            if (newEntry.PriceagreementID) results.push(newEntry);
+             if (newEntry.PriceagreementID) results.push(newEntry);
         }
 
         return results;
