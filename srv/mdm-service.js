@@ -92,6 +92,8 @@ module.exports = (srv) => {
 	srv.before('CREATE', 'PT_TMCTPRDPCK', async (req) => {
 		const nextProductID = await getNextValue(PT_TMCTPRDPCK, "PRODUCTPACKID");
 		req.data.PRODUCTPACKID = nextProductID;
+		req.data.COUNTRYPRODUCTPACKID = nextProductID;
+		req.data.ProductScope = 'All';
 		return req;
 	});
 
