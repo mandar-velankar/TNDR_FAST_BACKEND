@@ -82,16 +82,11 @@ module.exports = async (srv) => {
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
         let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", 'Processing');
-        var whereInstituteId,institute;
+        
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST).where(whereStatus));
         workflowApprovals=workflowApprovals[0];
         
-        var CustomerDetails = await tx.run(SELECT .from(CustomerPrices).where(whereAPPRST));
-        var instituteID=[];
-        for(var i =0; i<CustomerDetails.length; i++){
-            instituteID.push(CustomerDetails[i].InstituteId);
-        }
-        
+                
         let createdby =ServiceHelper.buildFullWhere("CWID", "=",workflowApprovals.createdBy);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
@@ -99,28 +94,23 @@ module.exports = async (srv) => {
 
         let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
 
-        if(instituteID.length === 1){
-             whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
-            institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
-        }else{
-            console.log("in");
-            institute = await tx.run(SELECT .from(PT_TMINST).where({'InstituteID' :{ "in": instituteID}})); 
-            console.log(institute.length,"total");
-         }
+       
+           let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+           let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
+       
          
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
 
         let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
        
-    return institute.map((d) => {
-     console.log(d.InstituteID);
+    
       return{
             PriceagreementID: offerValidation.ID,
             TenderID: offerValidation.TenderId,
             OfferID: offerValidation.OfferId,
-            InstituteID: d.InstituteID,
-            InstituteName: d.InstituteName,
-            CustomerID: d.CustomerID,
+            InstituteID: institute.InstituteID,
+            InstituteName: institute.InstituteName,
+            CustomerID: institute.CustomerID,
             ProductPackID: offerValidation.ProductPackId,
             ProductPackNAME:productDetail.PRODUCTPACKNAME,
             Status:workflowApprovals.ApprovalStatus,
@@ -132,7 +122,7 @@ module.exports = async (srv) => {
         
       }
     
-    });
+    
     }
     async function buildWorkflowApprovalOffers(tx) {
         let results = [];
@@ -141,8 +131,7 @@ module.exports = async (srv) => {
 
         for (let i = 0; i < waitingOffers.length; i++) {
             let newEntry = await buildWorkflowApprovalOffersEntry(tx, waitingOffers[i], "Processing");
-            console.log(newEntry,"new");
-             if (newEntry.PriceagreementID) results.push(newEntry);
+            if (newEntry.PriceagreementID) results.push(newEntry);
         }
 
         return results;
