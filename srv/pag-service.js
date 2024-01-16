@@ -99,17 +99,15 @@ module.exports = async (srv) => {
         let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
 
         if(instituteID.length === 1){
-            whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+            // whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
             institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
         }else{
             console.log("in");
-            whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "in", instituteID);
-              institute = await tx.run(SELECT .from(PT_TMINST).where(whereInstituteId)); 
+             institute = await tx.run(SELECT .from(PT_TMINST).where({'InstituteID' :{ "in": instituteID}})); 
             console.log(institute,"institute");
+            
         }
-                       
-       
-        
+         
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
 
         let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
