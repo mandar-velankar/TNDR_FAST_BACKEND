@@ -114,12 +114,12 @@ module.exports = async (srv) => {
         
         
        return institute.map((d) => {
-        console.log(d,offerValidation,"re");
+      console.log(d.InstituteID);
         return{
             PriceagreementID: offerValidation.ID,
             TenderID: offerValidation.TenderId,
             OfferID: offerValidation.OfferId,
-            InstituteID: d.InstituteId,
+            InstituteID: d.InstituteID,
             InstituteName: d.InstituteName,
             CustomerID: d.CustomerID,
             ProductPackID: offerValidation.ProductPackId,
