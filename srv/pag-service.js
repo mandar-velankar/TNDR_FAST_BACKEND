@@ -104,8 +104,7 @@ module.exports = async (srv) => {
         }else{
             console.log("in");
             whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "in", instituteID);
-        
-            institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId)); 
+              institute = await tx.run(SELECT .from(PT_TMINST).where(whereInstituteId)); 
             console.log(institute,"institute");
         }
                        
