@@ -111,11 +111,10 @@ module.exports = async (srv) => {
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
 
         let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
-        
-        
-       return institute.map((d) => {
+       
+      institute.map((d) => {
       console.log(d.InstituteID);
-        return{
+      return{
             PriceagreementID: offerValidation.ID,
             TenderID: offerValidation.TenderId,
             OfferID: offerValidation.OfferId,
@@ -130,10 +129,10 @@ module.exports = async (srv) => {
             ExpiryDate: workflowApprovals.ExpiryDate.split('T')[0],
             OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0],
             UserEmail:UserDetails[0].UserEmail
-        }
-       
+        
+      }
     
-     });
+    });
     }
     async function buildWorkflowApprovalOffers(tx) {
         let results = [];
