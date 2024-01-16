@@ -3635,6 +3635,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
 			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
 			const zuellig = req.data.Zuellig;
+			const fileName = zuellig ? 'Zuellig Extract' : 'Single View';
 
 			zuelligExtract = zuelligExtract.sort((a, b) => { 
 				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
@@ -3686,6 +3687,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 						"CREATE_DAT": item.createdAt,
 						"CONCS": item.ParentInstituteID || "",
 						"Modified": new Date(item.SubmittedOn).toISOString(),
+						"QoInvPrice": Number(item.Price1),
 						"QoNetPrice": Number(item.Price3),
 						"QoTotal": item.TotalDiscountNHI,
 						"QoDisCP1": (item.Level2Discount1 * 100).toFixed(2),
@@ -3725,7 +3727,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			// Converts your Array<Object> to a CsvOutput string based on the configs
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
 
-			req._.res.setHeader('Content-disposition', `attachment; filename=ZuelligExtract.csv`);
+			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
 			req._.res.setHeader('Content-type', 'text/csv');
 
 			return _createStream(csv);
