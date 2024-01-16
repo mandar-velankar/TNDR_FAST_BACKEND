@@ -86,8 +86,8 @@ module.exports = async (srv) => {
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST).where(whereStatus));
         workflowApprovals=workflowApprovals[0];
         
-        let CustomerDetails = await tx.run(SELECT .from(CustomerPrices).where(whereAPPRST));
-        let instituteID;
+        var CustomerDetails = await tx.run(SELECT .from(CustomerPrices).where(whereAPPRST));
+        var instituteID=[];
         for(var i =0; i<CustomerDetails.length; i++){
             instituteID.push(CustomerDetails[i].InstituteId);
         }
