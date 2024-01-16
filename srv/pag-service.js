@@ -112,8 +112,8 @@ module.exports = async (srv) => {
 
         let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
        
-      institute.map((d) => {
-      console.log(d.InstituteID);
+    return institute.map((d) => {
+     console.log(d.InstituteID);
       return{
             PriceagreementID: offerValidation.ID,
             TenderID: offerValidation.TenderId,
@@ -141,6 +141,7 @@ module.exports = async (srv) => {
 
         for (let i = 0; i < waitingOffers.length; i++) {
             let newEntry = await buildWorkflowApprovalOffersEntry(tx, waitingOffers[i], "Processing");
+            console.log(newEntry,"new");
              if (newEntry.PriceagreementID) results.push(newEntry);
         }
 

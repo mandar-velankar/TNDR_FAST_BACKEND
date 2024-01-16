@@ -132,7 +132,8 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
 		  EffectiveDate: Date;
 		  ExpiryDate: Date;
 		  OldExpiryDate: Date;
-          UserEmail : String;	  
+          UserEmail : String;
+          Institute : Association to many PT_TMINST on Institute.InstituteID = $self;	  
 } 
 //EJUVE-CR3 END
 }
