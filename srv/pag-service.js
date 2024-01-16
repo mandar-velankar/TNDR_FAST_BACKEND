@@ -66,6 +66,7 @@ module.exports = async (srv) => {
         //console.log("Inside Approval Offers");
         const tx = cds.tx(req);
         let results = await buildWorkflowApprovalOffers(tx);
+        console.log(results,"results");
          return results;
     });
 
@@ -99,11 +100,12 @@ module.exports = async (srv) => {
         let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
 
         if(instituteID.length === 1){
-            // whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+             whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
             institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
         }else{
             console.log("in");
             institute = await tx.run(SELECT .from(PT_TMINST).where({'InstituteID' :{ "in": instituteID}})); 
+            console.log(institute.length,"total");
          }
          
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
@@ -112,6 +114,7 @@ module.exports = async (srv) => {
         
         
        return institute.map((d) => {
+        console.log(d,offerValidation,"re");
         return{
             PriceagreementID: offerValidation.ID,
             TenderID: offerValidation.TenderId,
@@ -128,6 +131,7 @@ module.exports = async (srv) => {
             OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0],
             UserEmail:UserDetails[0].UserEmail
         }
+       
     
      });
     }
