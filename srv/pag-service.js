@@ -66,8 +66,7 @@ module.exports = async (srv) => {
         //console.log("Inside Approval Offers");
         const tx = cds.tx(req);
         let results = await buildWorkflowApprovalOffers(tx);
-        console.log(results,"results");
-        return results;
+         return results;
     });
 
     async function getOffersForWorkflow(tx, approvalStatus) {
@@ -82,7 +81,7 @@ module.exports = async (srv) => {
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
         let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", 'Processing');
-        
+        var whereInstituteId,institute;
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST).where(whereStatus));
         workflowApprovals=workflowApprovals[0];
         
@@ -91,17 +90,26 @@ module.exports = async (srv) => {
         for(var i =0; i<CustomerDetails.length; i++){
             instituteID.push(CustomerDetails[i].InstituteId);
         }
-        console.log(instituteID,"Customer Details");
+        
         let createdby =ServiceHelper.buildFullWhere("CWID", "=",workflowApprovals.createdBy);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
         offerValidation=offerValidation[0];
 
         let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
-                       
-        let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+
+        if(instituteID.length === 1){
+            whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+            institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
+        }else{
+            console.log("in");
+            whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "in", instituteID);
         
-        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
+            institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId)); 
+            console.log(institute,"institute");
+        }
+                       
+       
         
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
 
