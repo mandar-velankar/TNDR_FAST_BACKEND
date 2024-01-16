@@ -103,23 +103,22 @@ module.exports = async (srv) => {
             institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
         }else{
             console.log("in");
-             institute = await tx.run(SELECT .from(PT_TMINST).where({'InstituteID' :{ "in": instituteID}})); 
-            console.log(institute,"institute");
-            
-        }
+            institute = await tx.run(SELECT .from(PT_TMINST).where({'InstituteID' :{ "in": instituteID}})); 
+         }
          
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
 
         let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
         
         
-        return {
+       return institute.map((d) => {
+        return{
             PriceagreementID: offerValidation.ID,
             TenderID: offerValidation.TenderId,
             OfferID: offerValidation.OfferId,
-            InstituteID: offerValidation.InstituteId,
-            InstituteName: institute.InstituteName,
-            CustomerID: institute.CustomerID,
+            InstituteID: d.InstituteId,
+            InstituteName: d.InstituteName,
+            CustomerID: d.CustomerID,
             ProductPackID: offerValidation.ProductPackId,
             ProductPackNAME:productDetail.PRODUCTPACKNAME,
             Status:workflowApprovals.ApprovalStatus,
@@ -129,6 +128,8 @@ module.exports = async (srv) => {
             OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0],
             UserEmail:UserDetails[0].UserEmail
         }
+    
+     });
     }
     async function buildWorkflowApprovalOffers(tx) {
         let results = [];
