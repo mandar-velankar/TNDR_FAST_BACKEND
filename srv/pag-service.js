@@ -95,8 +95,8 @@ module.exports = async (srv) => {
         let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
 
        
-           let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
-           let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
+         let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
        
          
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
