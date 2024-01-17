@@ -465,6 +465,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join TransactionalData.PT_TMOFPR as product on result.OfferID = product.OfferID
                                                           and result.ProductCode = product.ProductCode
                                                           and result.LotID = product.LotID
+        left join TransactionalData.FreeGoodsOther as freegoods 
+                            on freegoods.ProductPackId = result.ProductCode
     {
         result.TenderID,
         key result.OfferID,
@@ -484,6 +486,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.Comment,
         product.Active,
         key result.LotID,
+        freegoods.FreeGoodsOther,
+        freegoods.FreeGoodsOther_ABS_PCT,
+        freegoods.FreeGoodsOther_Step,
+        freegoods.ADD_INCLUDE,
+        case 
+            when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
+                then freegoods.FreeGoodsOther_Step
+            else freegoods.FreeGoodsOther 
+        end as FOC:Double,
         product.RequestedVolume as RequestedVolume: Integer,
         result.Custom.String_1 as Custom_String_1,
         result.Custom.String_2 as Custom_String_2,

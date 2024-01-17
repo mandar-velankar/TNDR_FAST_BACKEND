@@ -973,6 +973,13 @@ module.exports = async (srv) => {
 		return req.data;
 	});
 
+	srv.before(['CREATE','UPDATE','DELETE'], ['AwardedProductFormView', 'AwardedProducts'], async (req) => {
+		delete req.data.FreeGoodsOther;
+		delete req.data.FreeGoodsOther_ABS_PCT;
+		delete req.data.FreeGoodsOther_Step;
+		delete req.data.ADD_INCLUDE;
+	});
+
 	const upsertAwardedProduct = async function(req){
 
 		const offerProduct = await SELECT.one.from(PT_TMOFPR).where({
