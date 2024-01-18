@@ -885,7 +885,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.ContractLength,
     offer.Tender.ContractExtenseion,
     offer.Tender.Custom.Integer_1 as NumberOfExtension,
-    offer.Comment as ClientComment
+    offer.Comment as ClientComment,
+    offer.Tender.Custom.String_2 as Regions,
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -969,7 +970,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.ContractLength,
           offer.Tender.ContractExtenseion,
           offer.Tender.Custom.Integer_1,
-          offer.Comment;
+          offer.Comment,
+          offer.Tender.Custom.String_2;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -2085,6 +2087,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NumberOfExtension      : Integer;  //PT_TMTEND/CUSTOM_INTEGER_1
             ClientComment          : String(500);
             Comment                : String(500);
+            Regions                : String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };

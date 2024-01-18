@@ -2227,7 +2227,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
             	ContractLength: offer.ContractLength,
             	ContractExtenseion: offer.ContractExtenseion,
             	NumberOfExtension: offer.NumberOfExtension,
-            	ClientComment: offer.ClientComment
+            	ClientComment: offer.ClientComment,
+				Regions: offer.Regions
 			};
 			return results;
 		}
