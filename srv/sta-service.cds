@@ -534,6 +534,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     
     entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
     
+    entity ProductPack as projection on MasterData.PT_TMPRDPCK;
+
+    entity PriceCondition as projection on TransactionalData.PriceCondition;
 
     entity CountryBrands as select from CountryBrandProducts as Product{
         key Product.COUNTRY_CODE,
