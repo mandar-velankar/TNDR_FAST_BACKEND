@@ -578,6 +578,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.Product.HLEVEL6_NAME as PRODUCT_UNIT_NAME, // (thailand) add to cat-service
     sku.SKU,
     offerProduct.Reference as CODE,
+    offerProduct.SKU.ProductGenericName as PRODUCTGENERICNAME,
 	offerProduct.SKU.PACKFACTOR as PACKSIZE,
 	offerProduct.SKU.CONCENTRATION as DOSAGE,
 	offerProduct.SKU.UOM as UOM,
@@ -1249,7 +1250,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
 /**
  * This view contains calculated fields used on the Spain financial offers page
  */
-
+//CR2
 entity PriceConditionView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1288,6 +1289,7 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
     priceCondition.ID as ExistingPriceConditionID: UUID,
     priceCondition.PriceConditionClassification.ID as PriceConditionClassificationID:UUID,
     tender.CountryCode,
+    priceCondition.PriceConditionCode,
     key priceConditionClassification.ConditionType,
     priceConditionClassification.Classification,
     priceConditionClassification.Division,
@@ -1473,7 +1475,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
      @Core.Computed: false
     ifnull(priceCondition.FreeGoods_Percentage,0) as FreeGoods_Percentage:Double
 }where tender.Active = 1;
-
+//CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
 inner join TransactionalData.PT_TMOFRS as offer 
     on offer.TenderID = tender.TenderID
@@ -1502,7 +1504,7 @@ key offer.OfferID,
 key product.ProductCode,
 key institute.InstituteID as INSTITUTE_ID,
 case 
-    when priceCondition.PriceConditionCode = 'YAW1'
+    when priceCondition.PriceConditionCode = 'YAW1' or priceCondition.PriceConditionCode = 'YAW2'
         then 'Yes'
         else 'No'        
 end as RAPPEL:String(10)
@@ -2107,6 +2109,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         key PRODUCTID                                   : Integer not null;
             CODE                                        : String(255);
             PRODUCTNAME                                 : String(102);
+            PRODUCTGENERICNAME                          : String(500);
             PACKSIZE                                    : Double not null;
             DOSAGE                                      : Double;
             UOM                                         : String(10);
@@ -2503,3 +2506,4 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
     where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate < CURRENT_DATE;
+

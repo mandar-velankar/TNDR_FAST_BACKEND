@@ -797,7 +797,7 @@ module.exports = (srv) => {
 
 		const whereoffer={
 			OfferId: offer.OFFERID,
-			PriceConditionCode : ['YAW1']
+			PriceConditionCode : ['YAW1','YAW2']
 		};
 
         const whereProduct = {
@@ -815,9 +815,15 @@ module.exports = (srv) => {
 		}
         
         const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
-        
-        let dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
+        //EHQUT-412965-ES-Bug Reported by Victor
+        var dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
 						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
+						  var UOMValue=product.UNIT;
+						  var packfactor=product.PACKSIZE;
+						  if(UOMValue=== 'Unit'){
+							  dFloorPrice=dFloorPrice/packfactor;
+						  }
+
         let dRadiologyProfitability = 0;
 
         if(product.DIVISION === 'Radiology'){
@@ -1617,6 +1623,7 @@ module.exports = (srv) => {
                     CountryCode: offer.COUNTRYCODE
                 }
     
+				
                 tmpFreeGoodOther.ProductPricing = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricingFOC));
 
                 const whereProductPackFOC = {
@@ -1676,6 +1683,7 @@ module.exports = (srv) => {
 				PRODUCTID: offerProduct.PRODUCTID,
 				CODE: offerProduct.CODE,
 				PRODUCTNAME: offerProduct.PRODUCTNAME,
+				PRODUCTGENERICNAME: offerProduct.PRODUCTGENERICNAME,
 				PACKSIZE: offerProduct.PACKSIZE,
 				DOSAGE: offerProduct.DOSAGE,
 				UOM: offerProduct.UOM,
