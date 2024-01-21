@@ -115,53 +115,35 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
 
    
 
-    entity CountryRegisteredPrice as SELECT from MasterData.PT_TMREGPR as RegisteredPrice
-
-    INNER JOIN MasterDataLatestValues.MostRecentRegisteredPrice as l 
-    on RegisteredPrice.CountryCode=l.CountryCode 
-    and RegisteredPrice.ProductPackID=l.ProductPackID 
-    and RegisteredPrice.EffDate=l.MaxEffectiveDate
-
-    inner join MasterData.PT_TMPRDPCK as ProductPack 
-            on  RegisteredPrice.ProductPackID = ProductPack.PRODUCTPACKID 
-
+    entity CountryRegisteredPrice as SELECT from MasterData.PT_TMPRDPCK as ProductPack
+    inner join MasterData.PT_TMCTPRDPCK AS CountryProductPack
+    ON CountryProductPack.PRODUCTPACKID = ProductPack.PRODUCTPACKID and ProductPack.ACTIVERECORD = 'Yes'
+    left join MasterDataLatestValues.CountryRegisteredPrice as l
+    on CountryProductPack.COUNTRYCODE=l.COUNTRY_CODE and ProductPack.PRODUCTPACKID =l.PRODUCT_ID
     left join MasterDataLatestValues.CountryCogs as Cogs
-    on  RegisteredPrice.CountryCode=Cogs.COUNTRY_CODE
-    and RegisteredPrice.ProductPackID=Cogs.PRODUCT_ID
-
-
-
+    on  CountryProductPack.COUNTRYCODE = Cogs.COUNTRY_CODE
+    and ProductPack.PRODUCTPACKID =Cogs.PRODUCT_ID
     {
-
-        key RegisteredPrice.CountryCode ,
-        key RegisteredPrice.ProductPackID,
-        RegisteredPrice.UOM,
-        key RegisteredPrice.EffDate as PriceEffDate ,
-        key RegisteredPrice.Currency as PriceCurrency ,
-        RegisteredPrice.RegisteredPrice,
-        RegisteredPrice.ActiveRecord as PriceActiveRecord,
-        RegisteredPrice.EndDate as PriceEndDate,
-        RegisteredPrice.RegisteredPriceSource,
-        RegisteredPrice.RegisteredPriceID,
-
-
-        Cogs.COGSID,
+        key CountryProductPack.COUNTRYCODE as CountryCode,
+        key ProductPack.PRODUCTPACKID as ProductPackID,
+        ifnull(l.UOM, '') as UOM: String,
+        ifnull(l.CURRENCY,'')  as PriceCurrency: String(3),
+        ifnull(l.REGISTERED_PRICE,0) as RegisteredPrice: Double,
+        l.EffDate as PriceEffDate,
+        l.EndDate as PriceEndDate,
+        l.RegisteredPriceSource,
+        l.RegisteredPriceID,
+        l.ActiveRecord as PriceActiveRecord, 
+		Cogs.COGSID,
         ifnull(Cogs.COGS, 0) as CogsPrice: Double,
-        ifnull(Cogs.CURRENCY, RegisteredPrice.Currency)  as CogsCurrency: String(3),
+        ifnull(Cogs.CURRENCY, l.CURRENCY)  as CogsCurrency: String(3),
         //Cogs.UOM as CogsUom,
         Cogs.EffectiveDate as CogsEffDate,
         Cogs.EndDate as CogsEndDate,
         Cogs.COGSType,
         Cogs.ActiveRecord as CogsActiveRecord,
-
-
-        
-        
-        
-        
-        ProductPack.PRODUCTPACKNAME as ProductPackName,
-
-    }where RegisteredPrice.ActiveRecord = 'Yes';
+        ProductPack.PRODUCTPACKNAME as ProductPackName
+    }where ProductPack.ACTIVERECORD = 'Yes';
 
    
 
