@@ -911,3 +911,9 @@ entity UserTerritory {
 	Territory		: String;
 	IsKAM			: Boolean;
 }
+
+
+entity PaymentTerms {
+    E1KNVVM_ZTERM : String(6) not null;
+    Description : String;
+}
