@@ -3256,11 +3256,15 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 					});
 				}
 			}
-		}else {
+		}else if (ctryProductPack.BU === "CC") {
 			aApproverTypes.map(function (oApproverType) {
 				oApproverType.ApproverType === 'Sr. National Sales Manager' || 
-				oApproverType.ApproverType === 'General Medicine BU Director' || 
-				oApproverType.ApproverType === 'Specialty Medicine BU Director' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+				oApproverType.ApproverType === 'CH CDH, TW&HK' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
+			});
+		}else if (ctryProductPack.BU === "RAI") {
+			aApproverTypes.map(function (oApproverType) {
+				oApproverType.ApproverType === 'Country Group Head, Radiology North Asia' || 
+				oApproverType.ApproverType === 'Sr. National Sales Manager' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
 			});
 		}
 	}
