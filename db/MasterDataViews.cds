@@ -249,7 +249,9 @@ inner join MasterData.CountryProvinces as province
     on customer.E1KNA1M.REGIO = province.Name
 	and province.CountryCode = 'IT'
 inner join MasterData.PT_TMINST as institute 
-    on customer.E1KNA1M.KUNNR = institute.CustomerID {
+    on customer.E1KNA1M.KUNNR = institute.CustomerID 
+	left outer join MasterData.PaymentTerms as PaymentTerms
+   on PaymentTerms.E1KNVVM_ZTERM = customer.E1KNVVM.ZTERM{
 	customer.E1KNA1M.LAND1 as E1KNA1M_LAND1,
 	customer.E1KNA1M.KUNNR as E1KNA1M_KUNNR,
 	customer.E1KNA1M.NAME1 as E1KNA1M_NAME1,
@@ -264,10 +266,11 @@ inner join MasterData.PT_TMINST as institute
 	customer.E1KNVVM.KVGR3 as E1KNVVM_KVGR3,
 	customer.E1KNA1M.ORT01 as E1KNA1M_ORT01,
 	customer.E1KNA1M.KTOKD as E1KNA1M_KTOKD,
+	PaymentTerms.Description as PaymentTerms,
 	province.RegionID,
 	institute.InstituteID,
 	institute.CountryCode,
-}where customer.E1KNA1M.LAND1 = 'IT'
+}where customer.E1KNA1M.LAND1 = 'IT' and customer.E1KNA1M.KTOKD<> '0002'
 group by customer.E1KNA1M.LAND1,
 	customer.E1KNA1M.KUNNR,
 	customer.E1KNA1M.NAME1,
@@ -282,6 +285,7 @@ group by customer.E1KNA1M.LAND1,
 	customer.E1KNVVM.KVGR3,
 	customer.E1KNA1M.ORT01,
 	customer.E1KNA1M.KTOKD,
+	PaymentTerms.Description,
 	province.RegionID,
 	institute.InstituteID,
 	institute.CountryCode;

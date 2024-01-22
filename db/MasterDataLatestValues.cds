@@ -18,7 +18,12 @@ INNER JOIN MostRecentRegisteredPrice as l on RegisteredPrice.CountryCode=l.Count
     key RegisteredPrice.ProductPackID as PRODUCT_ID,
     RegisteredPrice.UOM,
     key RegisteredPrice.Currency as CURRENCY,
-    RegisteredPrice.RegisteredPrice as REGISTERED_PRICE
+    RegisteredPrice.RegisteredPrice as REGISTERED_PRICE,
+    RegisteredPrice.EffDate,
+    RegisteredPrice.ActiveRecord,
+    RegisteredPrice.EndDate,
+    RegisteredPrice.RegisteredPriceSource,
+    RegisteredPrice.RegisteredPriceID
 }where RegisteredPrice.ActiveRecord = 'Yes';
 
 entity MostRecentCogs as SELECT from MasterData.PT_TMCOGS as Cogs
