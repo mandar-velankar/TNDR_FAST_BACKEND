@@ -1439,6 +1439,11 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				Price1: req.data.OfferPrice, 
 				Level3Discount1: req.data.Level3Discount1,
+				GeneralDiscount_Amount: (req.data.OfferPrice * req.data.Deductions),
+    			SecondDiscount_Amount: (req.data.OfferPrice * req.data.Level2Discount2),
+    			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
+    			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
+    			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
 				PriceConditionClassification_ID: req.data.ClassificationID
 			}
 		}
