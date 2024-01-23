@@ -3809,7 +3809,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
-			req._.res.setHeader('Content-type', 'text/csv');
+			req._.res.setHeader('Content-type', 'application/json');
 
 			return _createStream(csv);
 		}
