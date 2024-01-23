@@ -73,7 +73,8 @@ module.exports = async (srv) => {
 		SalesData,
 		PT_TMINSHIER,
 		UserTerritory,
-		InstituteTerritory
+		InstituteTerritory,
+		PricingPolicy
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
@@ -2827,8 +2828,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
 				vatInWords += ",00";   
 			};
-			
+
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
+			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
 
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -3010,6 +3012,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				Level2Discount2: offerProduct.Level2Discount2,
 				AnnualDiscount_Percentage: offerProduct.AnnualDiscount_Percentage,
 				NegotiationPrice: offerProduct.NegotiationPrice,
+				PricingPolicyValue: pricingPolicy?.Value,
 				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan
 			}
 		});
