@@ -2264,6 +2264,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Level2Discount2                             : Double;
             AnnualDiscount_Percentage                   : Double;
             NegotiationPrice                            : Double;
+            PricingPolicyValue                          : Double;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
