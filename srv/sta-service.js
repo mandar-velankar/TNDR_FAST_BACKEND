@@ -1439,6 +1439,11 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				Price1: req.data.OfferPrice, 
 				Level3Discount1: req.data.Level3Discount1,
+				GeneralDiscount_Amount: (req.data.OfferPrice * req.data.Deductions),
+    			SecondDiscount_Amount: (req.data.OfferPrice * req.data.Level2Discount2),
+    			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
+    			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
+    			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
 				PriceConditionClassification_ID: req.data.ClassificationID
 			}
 		}
@@ -3809,7 +3814,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
-			req._.res.setHeader('Content-type', 'text/csv');
+			req._.res.setHeader('Content-type', 'application/json');
 
 			return _createStream(csv);
 		}
