@@ -2876,8 +2876,7 @@ module.exports = (srv) => {
 				await addTenderExternalIDs(req.data);
 			}
 		} catch (error) {
-			console.error('Error in PT_TMTEND CREATE');
-			return req.reject(403, error?.message||"Error in PT_TMTEND CREATE");
+			return req.reject(400, error.message);
 		}
 		
 	});
@@ -2895,19 +2894,12 @@ module.exports = (srv) => {
 	};
 
 	srv.on('getCurrentUser', (req) => {
-		try{
 		return {
 			name: req.user.id,
 			email: req.user.attr.email,
 		};
-		}
-		catch(error){
-			console.error('Error in getCurrentUser');
-			return req.reject(403, error?.message||"Error in getCurrentUser");
-		}
 	})
 	srv.on('READ', 'InstituteDistributor', async (req) => {
-		try{
 		// const tx = cds.transaction(req)
 		const tx = cds.tx(req);
 		let results = [];
@@ -2961,15 +2953,10 @@ module.exports = (srv) => {
 			}
 		}
 		return results;
-		}
-		catch(error){
-			console.error('Error in InstituteDistributor READ');
-            return req.reject(403, error?.message||"Error in InstituteDistributor");
-		}
 	});
     //EHQUT-167489-Auto Approval in Thailand
     srv.on('READ', 'AccountPreApprovedPrices', async (req) => {
-        try{
+        
         const tx = cds.tx(req);
       var instituteIds = ServiceHelper.getWhereValue(req, "INSTITUTE_ID");
       var whereCountry = ServiceHelper.getWhereValue(req, "COUNTRY_CODE");
@@ -2984,15 +2971,9 @@ module.exports = (srv) => {
         
        
         return results;
-		}
-		catch(error){
-			console.error('Error in AccountPreApprovedPrices READ');
-            return req.reject(403, error?.message||"Error in AccountPreApprovedPrices");
-		}
     });
 
 	srv.on('READ', 'InstituteDistributorBrandProduct', async (req) => {
-		try{
 		// const tx = cds.transaction(req)
 		const tx = cds.tx(req);
 		let results = [];
@@ -3092,15 +3073,9 @@ module.exports = (srv) => {
 
 
 		return results;
-		}
-		catch(error){
-			console.error('Error in InstituteDistributorBrandProduct READ');
-			return req.reject(403, error?.message||"Error in InstituteDistributorBrandProduct");
-		}
 	});
 
 	srv.on('READ', 'OfferProductValidation', async (req) => {
-		try{
 		// const tx = cds.transaction(req)
 		const tx = cds.tx(req);
 		let results = [];
@@ -3110,16 +3085,9 @@ module.exports = (srv) => {
 			results = await buildOfferProductValidation(tx, whereOffer);
 		}
 		return results;
-		}
-		catch(error){
-			console.error('Error in OfferProductValidation READ');
-			return req.reject(403, error?.message||"Error in OfferProductValidation");
-		}
-
 	});
 
 	srv.on('READ', 'OfferValidation', async (req) => {
-		try{
 		// const tx = cds.transaction(req)
 		const tx = cds.tx(req);
 		let results = [];
@@ -3129,15 +3097,9 @@ module.exports = (srv) => {
 			results = await buildOfferValidation(tx, whereOffer);
 		}
 		return results;
-		}
-		catch(error){
-			console.error('Error in OfferValidation READ');
-			return req.reject(403, error?.message||"Error in OfferValidation");
-		}
 	});
 
 	srv.on('READ', 'OfferProductOfferStatus', async (req) => {
-		try{
 		// const tx = cds.transaction(req)
 		const tx = cds.tx(req);
 		let results = [];
@@ -3147,11 +3109,6 @@ module.exports = (srv) => {
 			results = await buildOfferApproval(tx, whereOffer);
 		}
 		return results;
-		}
-		catch(error){
-			console.error('Error in OfferProductOfferStatus READ');
-			return req.reject(403, error?.message||"Error in OfferProductOfferStatus");
-		}
 	});
 	const getNextValue = async (table, fieldname) => {
 		let results = await cds.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
@@ -3163,72 +3120,41 @@ module.exports = (srv) => {
 	}
 	// srv.before('CREATE', 'PT_TMDLVTR', async (req) => {
 	srv.on('CREATE', 'PT_TMDLVTR', async (req,next) => {
-		try{
         // const tx = cds.transaction(req);
 		const tx = cds.tx(req);
 		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");
         const delivery = await next();   
         await tx.commit();     
         return delivery; 
-		}
-		catch(error){
-            console.error('Error in PT_TMDLVTR CREATE');
-            return req.reject(403, error?.message||"Error in PT_TMDLVTR CREATE");
-        }
 	});
 	srv.before('CREATE', 'PT_TMUDLTRS', async (req) => {
-		try{
 		req.data.SNO = await getNextValue(PT_TMUDLTRS, "SNO")
 		return req;
-		}
-		catch(error){
-			console.error('Error in PT_TMUDLTRS CREATE');
-            return req.reject(403, error?.message||"Error in PT_TMUDLTRS CREATE");
-		}
 	});
 
 	srv.on('READ', 'ApprovalOffers', async (req) => {
-		try{
 		// const tx = cds.transaction(req);
 		//console.log("Inside Approval Offers");
 		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalOffers(tx);
 		return results;
-		}
-		catch(error){
-			console.error('Error in ApprovalOffers READ');
-            return req.reject(403, error?.message||"Error in ApprovalOffers");
-		}
 	});
 
 	srv.on('READ', 'ApprovalProducts', async (req) => {
-		try{
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalProducts(tx);
 		return results;
-		}
-		catch(error){
-			console.error('Error in ApprovalProducts READ');
-            return req.reject(403, error?.message||"Error in ApprovalProducts");
-		}
 	});
 
 	srv.on('READ', 'ApprovalApprovers', async (req) => {
-		try{
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
-		}
-		catch(error){
-			console.error('Error in ApprovalApprovers READ');
-            return req.reject(403, error?.message||"Error in ApprovalApprovers");
-		}
 	});
 	//http://localhost:4004/v2/tender/Attachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'Attachment', async (req, next) => {
-		try{
 		//OfferID => get CountryCode => get Template by Country => get template
 		//Offer Information => OfferId => ApprovalOrders + ApprovalProducts
 		// const tx = cds.transaction(req);
@@ -3316,16 +3242,10 @@ module.exports = (srv) => {
 		// 	.catch(error => {
 		// 		console.error(error)
 		// 	});
-		}
-		catch(error){
-			console.error('Error in Attachment READ');
-            return req.reject(403, error?.message||"Error in Attachment");
-		}
 	});
 	http://localhost:4004/v2/tender/ExcelAttachment('AE-16-100-1049-BPH-11')/content
 	// srv.after('READ', 'ExcelAttachment', async function(data, req) {
 	srv.on('READ', 'ExcelAttachment', async (req, next) => {
-		try{
 		// const data = await next(); 
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
@@ -3345,15 +3265,9 @@ module.exports = (srv) => {
 		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		return excelStreamValue;
-		}
-		catch(error){
-			console.error('Error in ExcelAttachment READ');
-            return req.reject(403, error?.message||"Error in ExcelAttachment");
-		}
 	});
 	//http://localhost:4004/v2/tender/WordAttachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'WordAttachments', async (req, next) => {
-		try{
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
 		const offerId = req.data.offerId;
@@ -3455,15 +3369,9 @@ module.exports = (srv) => {
 		return {
 			value: readableInstanceStream
 		};
-		}
-		catch(error){
-			console.error('Error in WordAttachments READ');
-			return req.reject(403, error?.message||"Error in WordAttachments");
-		}
 	});
 	//http://localhost:4004/v2/tender/DeliveryExcel('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'DeliveryExcel', async (req, next) => {
-		try{
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
 		var offerId = req.data.OfferId;
@@ -3520,15 +3428,9 @@ module.exports = (srv) => {
 		req._.res.setHeader('Content-disposition', 'attachment; filename=' + offerId + '.xlsx');
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		return excelStreamValue;
-		}
-		catch(error){
-			console.error('Error in DeliveryExcel READ');
-			return req.reject(403, error?.message||"Error in DeliveryExcel");
-		}
 	});
 	//srv.on('sendMail', (req, sRecipient, sBody) => {
 	srv.on('sendMail', async (req) => {
-		try{
 		let sSubject = req.data.sSubject;
 		let sRecipient = 'joris.vd.bogaert@gmail.com';
 
@@ -3542,15 +3444,9 @@ module.exports = (srv) => {
 		});
 
 		return true;
-		}
-		catch(error){
-			console.error('Error in sendMail');
-			return req.reject(403, error?.message||"Error in sendMail");
-		}
 	});
 
 	srv.on('getMailTemplate', async (req) => {
-		try{
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
 		const sLanguage = req.data.language ? req.data.language : "ES";
@@ -3606,29 +3502,18 @@ module.exports = (srv) => {
 		const htmlTemplate = Handlebars.compile((htmlMail || ""));
 
 		return htmlTemplate(document.context);
-		}
-		catch(error){
-			console.error('Error in getMailTemplate');
-			return req.reject(403, error?.message||"Error in getMailTemplate");
-		}
 	});
 
     srv.on('READ', 'PT_TMINST', async (req,next) => {
-		try{
         delete req.query.SELECT.limit;
         const data = await next(); 
         return data;
-		}
-		catch(error){
-			console.error('Error in PT_TMINST READ');
-			return req.reject(403, error?.message||"Error in PT_TMINST READ");
-		}
     });
 
 
 
 	srv.on('notifyIbiz', async (req) => {
-		try{
+
 		const id_qp = req.data.ibizWorkflowID;
 		const nu_direto_indireto = req.data.directIndirect; //  (0 = direct; 1 = indirect)
 		const ccs_qps = req.data.lineNumbers; 
@@ -3654,11 +3539,6 @@ module.exports = (srv) => {
 			console.error(`ERROR: Ibiz channel switch notification failed. WorkflowID: ${id_qp}`);
 			return req.reject(500, error.message);
         }
-		}
-		catch(error){
-			console.error('Error in notifyIbiz');
-			return req.reject(403, error?.message||"Error in notifyIbiz");
-		}
 
 	});
 
@@ -3705,7 +3585,7 @@ module.exports = (srv) => {
 
 
 	srv.on('sendApprovalToIbiz', async (req) => {
-		try{
+
 		const id_qp = req.data.ibizWorkflowID;
 		const is_ok = req.data.offerStatus; //  (0 = not approved; 1 = approved)
 		const nm_motivo = req.data.comment; 
@@ -3730,11 +3610,6 @@ module.exports = (srv) => {
 			console.error(`ERROR: Ibiz Offer approval failed. WorkflowID: ${id_qp}`);
 			return req.reject(500, error.message);
         }
-		}
-		catch(error){
-			console.error('Error in sendApprovalToIbiz');
-			return req.reject(403, error?.message||"Error in sendApprovalToIbiz");
-		}
 
 	});
 

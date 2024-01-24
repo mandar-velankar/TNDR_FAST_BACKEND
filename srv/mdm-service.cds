@@ -125,7 +125,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     inner join MasterData.PT_TMPRDPCK as ProductPack 
             on  RegisteredPrice.ProductPackID = ProductPack.PRODUCTPACKID 
 
-    left join MasterDataLatestValues.CountryCogs as Cogs
+    inner join MasterDataLatestValues.CountryCogs as Cogs
     on  RegisteredPrice.CountryCode=Cogs.COUNTRY_CODE
     and RegisteredPrice.ProductPackID=Cogs.PRODUCT_ID
 
@@ -146,8 +146,8 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
 
 
         Cogs.COGSID,
-        ifnull(Cogs.COGS, 0) as CogsPrice: Double,
-        ifnull(Cogs.CURRENCY, RegisteredPrice.Currency)  as CogsCurrency: String(3),
+        Cogs.COGS as CogsPrice,
+        Cogs.CURRENCY as CogsCurrency,
         //Cogs.UOM as CogsUom,
         Cogs.EffectiveDate as CogsEffDate,
         Cogs.EndDate as CogsEndDate,
@@ -232,13 +232,4 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         signatory.COUNTRY_CODE as CountryCode
     };
 
-    entity ExcelUploadView as projection on TransactionalData.ExcelUpload;
-    entity SalesDataUpload as projection on TransactionalData.ExcelUpload;
-
-    entity DistributorAssignment as projection on MasterData.DistributorAssignment;
-    entity DistinctProductBUs as select from PT_TMCTPRDPCK {
-        COUNTRYCODE,
-        key BU
-    }where COUNTRYCODE = 'PK'
-    group by COUNTRYCODE, BU;
 }
