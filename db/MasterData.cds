@@ -883,10 +883,10 @@ entity DistributorAssignment: cuid, managed {
 	DistributorID	: Integer;
 }
 
-entity SalesData {
-	key SYEAR		: String(4) not null;
-	key SMONTH		: String(2) not null;
-	key SCUSNO		: String(8) not null;
+entity SalesData: cuid, managed {
+	SYEAR			: String(4);
+	SMONTH			: String(2);
+	SCUSNO			: String(8);
 	STERID			: Double;
 	SITNO			: String(15);
 	SQTY			: Decimal;
