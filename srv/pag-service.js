@@ -21,7 +21,8 @@ module.exports = async (srv) => {
         NewMaterialsView,
         NewFOCMaterialsView,
         PriceAgreements,
-        CustomerPricesQC
+        CustomerPricesQC,
+        PriceAgreement_APPRST //EJUVE-CR3 START
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementData");
 
     const {
@@ -56,7 +57,80 @@ module.exports = async (srv) => {
     srv.on('READ', 'PriceAgreementsMasterView', async (req, next) => {
         return await filterPriceAgreements(req, next);
     });
+    //EJUVE-CR3
+    srv.on('READ', 'PriceagreementOffers', async (req) => {
+         const tx = cds.tx(req);
+        let results = await buildWorkflowApprovalOffers(tx);
+        return results;
+    });
+
+    async function getOffersForWorkflow(tx, approvalStatus) {
+        let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", approvalStatus);
+
+        let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereStatus));
+        let workflowOffers = workflowApprovals.map((d) => d.PriceAgreementID);
+        return R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), workflowOffers);
+    }
+    async function buildWorkflowApprovalOffersEntry(tx, Id, approvalStatus) {
+       
+        let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
+        let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
+        let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", 'Processing');
+        
+        let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST).where(whereStatus));
+        workflowApprovals=workflowApprovals[0];
+        
+                
+        let createdby =ServiceHelper.buildFullWhere("CWID", "=",workflowApprovals.createdBy);
+        // let offerValidation = await buildOfferValidation(tx, whereOffer);
+        let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
+        offerValidation=offerValidation[0];
+
+        let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
+
+       
+         let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
+       
+         
+        let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
+
+        let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
+       
     
+      return{
+            PriceagreementID: offerValidation.ID,
+            TenderID: offerValidation.TenderId,
+            OfferID: offerValidation.OfferId,
+            InstituteID: institute.InstituteID,
+            InstituteName: institute.InstituteName,
+            CustomerID: institute.CustomerID,
+            ProductPackID: offerValidation.ProductPackId,
+            ProductPackNAME:productDetail.PRODUCTPACKNAME,
+            Status:workflowApprovals.ApprovalStatus,
+            ID:workflowApprovals.ID,
+            EffectiveDate: workflowApprovals.EffectiveDate.split('T')[0],
+            ExpiryDate: workflowApprovals.ExpiryDate.split('T')[0],
+            OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0],
+            UserEmail:UserDetails[0].UserEmail
+        
+      }
+    
+    
+    }
+    async function buildWorkflowApprovalOffers(tx) {
+        let results = [];
+
+        let waitingOffers = await getOffersForWorkflow(tx, "Processing");
+
+        for (let i = 0; i < waitingOffers.length; i++) {
+            let newEntry = await buildWorkflowApprovalOffersEntry(tx, waitingOffers[i], "Processing");
+            if (newEntry.PriceagreementID) results.push(newEntry);
+        }
+
+        return results;
+    }
+    //EJUVE-CR3 END
     async function filterPriceAgreements(req, next) {
          // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
         //     return [{ counted: 5555 }]; 
