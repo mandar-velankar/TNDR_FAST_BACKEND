@@ -73,7 +73,8 @@ module.exports = async (srv) => {
 		SalesData,
 		PT_TMINSHIER,
 		UserTerritory,
-		InstituteTerritory
+		InstituteTerritory,
+		PricingPolicy
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
@@ -951,6 +952,7 @@ module.exports = async (srv) => {
 				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
 			}
 		}	
+		await updateApprovalsSent(req.data.OfferID);
 		// validate form
 		// !req.data.RequestedVolume &&  req.error({ code: 404, message: "RequestedVolume is required.", target: "RequestedVolume" });
 		// !req.data.UnitPerPack &&  req.error({ code: 404, message: "UoM is required.", target: "UnitPerPack" });
@@ -1300,6 +1302,7 @@ module.exports = async (srv) => {
 		], 
 		async (req) => {
 			try{
+			await updateApprovalsSent(req.data.OfferID);
 			await upsertPriceCondition(req);
 			await upsertProductPricing(req);
 			// Check if CountryCode is TW (Taiwan)
@@ -1323,6 +1326,27 @@ module.exports = async (srv) => {
 	 * @param {Object} req - The request object containing the data for the price condition.
 	 * @returns {Promise<void>} A promise that resolves when the upsert operation is complete.
 	 */
+
+	const updateApprovalsSent = async function (OfferID) {
+		const existingApprovals = await SELECT.from(PT_TMAPPRST).where({OfferID: OfferID});
+
+		await UPDATE(PT_TMOFRS)
+			.with({APPROVALS_SENT: 0})
+			.where({
+				OfferID: OfferID
+			});
+
+		// After setting back offer status to Offer Created we must make sure that previous approvals are removed 
+		// otherwise if you open Approvals in overview page you will approvals which status is approved however your offer status is Offer Created
+		if (existingApprovals.length > 0) {
+			await DELETE(PT_TMAPPRST)
+				.where({
+					OfferID: OfferID
+				});
+		}
+		
+	}
+
 	const upsertPriceCondition = async function(req){
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
@@ -1811,6 +1835,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			delete req.data.Submitted;
 		}
 		await upsertQuotation(req);
+		await updateApprovalsSent(req.data.OFFERID);
 		return req.data;
 		}
 		catch(error){
@@ -2803,8 +2828,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
 				vatInWords += ",00";   
 			};
-			
+
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
+			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
 
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -2986,6 +3012,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				Level2Discount2: offerProduct.Level2Discount2,
 				AnnualDiscount_Percentage: offerProduct.AnnualDiscount_Percentage,
 				NegotiationPrice: offerProduct.NegotiationPrice,
+				PricingPolicyValue: pricingPolicy?.Value,
 				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan
 			}
 		});
