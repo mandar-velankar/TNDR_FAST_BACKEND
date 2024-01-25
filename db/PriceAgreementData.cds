@@ -120,10 +120,7 @@ entity CustomerPrices: cuid, managed {
     RefIdocNumber: String;
     Notified: Boolean default false;
     ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
-<<<<<<< HEAD
-    
-=======
->>>>>>> main
+
 }
 
 entity SettlementDates: managed {
