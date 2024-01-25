@@ -1675,12 +1675,12 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			item.Last12MonthsVolumeMainCustomer = await calculateLast12MonthsVolumeMainCustomer(item);
 			item.Last12MonthsVolumeBranch = await calculateLast12MonthsVolumeBranch(item);
 			item.NetPrice = await calculateNetOfferTaiwanPrice(item);
-			item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
-			item.Price3 = item.NetPrice - item.Level3Discount1;
-			item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
-			item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
-			item.TotalDiscountNHI = (item.BasePrice - item.Price3) / item.BasePrice;
-			item.TotalDiscountInvoice = (item.OfferPrice - item.Price3) / item.OfferPrice;
+			// item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
+			// item.Price3 = item.NetPrice - item.Level3Discount1;
+			// item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
+			// item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
+			item.TotalDiscountNHI = (item.TotalDiscountNHI * 100).toFixed(2) / 100;
+			item.TotalDiscountInvoice = (item.TotalDiscountInvoice * 100).toFixed(2) / 100;
 		};
 	}
 	catch(error){
