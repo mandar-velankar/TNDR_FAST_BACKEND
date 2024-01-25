@@ -1291,6 +1291,24 @@ module.exports = async (srv) => {
 			})
 	}
 
+	srv.before(
+		['CREATE','UPDATE'], 
+		[
+			'PriceConditionTaiwanPriceView'
+		], 
+		async (req) => {
+			try{
+			// validate form
+			!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
+			!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+			}
+			catch(error){
+				console.error('Error in validation of PriceCondition Taiwan View before CREATE');
+				return req.reject(403, error?.message||"Error in validation of PriceCondition Taiwan View before CREATE");
+			}
+		}
+	);
+
 	srv.on(
 		['CREATE','UPDATE'], 
 		[
@@ -1524,7 +1542,7 @@ module.exports = async (srv) => {
 			// FOCStep               : null, 
 			// FOCType               : null, 
 			Discount              : 0, 
-			OfferPrice            : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.OfferPrice, 
+			OfferPrice            : priceCondition.OfferPrice, 
 			Deductions            : 0, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
@@ -1657,12 +1675,12 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			item.Last12MonthsVolumeMainCustomer = await calculateLast12MonthsVolumeMainCustomer(item);
 			item.Last12MonthsVolumeBranch = await calculateLast12MonthsVolumeBranch(item);
 			item.NetPrice = await calculateNetOfferTaiwanPrice(item);
-			item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
-			item.Price3 = item.NetPrice - item.Level3Discount1;
-			item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
-			item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
-			item.TotalDiscountNHI = (item.BasePrice - item.Price3) / item.BasePrice;
-			item.TotalDiscountInvoice = (item.OfferPrice - item.Price3) / item.OfferPrice;
+			// item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
+			// item.Price3 = item.NetPrice - item.Level3Discount1;
+			// item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
+			// item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
+			item.TotalDiscountNHI = (item.TotalDiscountNHI * 100).toFixed(2) / 100;
+			item.TotalDiscountInvoice = (item.TotalDiscountInvoice * 100).toFixed(2) / 100;
 		};
 	}
 	catch(error){
@@ -3741,7 +3759,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 						"Institute Type": item.InstituteType,
 						"Class": item.Class || "",
 						"PackFactor": item.PACKFACTOR,
-						"ModifiedAt": new Date(item.SubmittedOn).toISOString(),
+						"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
 						"NetPrice": Number(item.Price3),
 						"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(2),
 						"GeneralDiscount_Amount": item.GeneralDiscount_Amount,
@@ -3763,10 +3781,10 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				mappedZuelligExtract = zuelligExtract.map(item => {
 					const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
 					return {
-						"CreationDate": new Date(item.CreationDate).toISOString(),
+						"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
 						"CWID": item.SubmittedBy,
 						"BU": item.BU,
-						"EffectiveDate": new Date(item.EffectiveDate).toISOString() || "",
+						"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
 						"PreviousNetPrice": Number(item.Price3),
 						"CountProducts": products.length,
 						"Invoice Price": Number(item.Price1),
@@ -3774,12 +3792,12 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 						"Institute Type": item.InstituteType,
 						"Class": item.Class || "",
 						"PackFactor": item.PACKFACTOR || "",
-						"CreatedAt/CreationDate": item.createdAt,
+						"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
 						"Branch": item.ParentInstituteID || "",
-						"ModifiedAt": new Date(item.SubmittedOn).toISOString(),
+						"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
 						"InvoicePrice": Number(item.Price1),
 						"NetPrice": Number(item.Price3),
-						"TotalDiscount": item.TotalDiscountNHI,
+						"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(2),
 						"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(2),
 						"GeneralDiscount_Amount": item.GeneralDiscount_Amount,
 						"SecondDiscount_Percentage": (item.Level2Discount2 * 100).toFixed(2),
