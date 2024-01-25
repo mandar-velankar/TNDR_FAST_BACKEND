@@ -1291,6 +1291,24 @@ module.exports = async (srv) => {
 			})
 	}
 
+	srv.before(
+		['CREATE','UPDATE'], 
+		[
+			'PriceConditionTaiwanPriceView'
+		], 
+		async (req) => {
+			try{
+			// validate form
+			!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
+			!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+			}
+			catch(error){
+				console.error('Error in validation of PriceCondition Taiwan View before CREATE');
+				return req.reject(403, error?.message||"Error in validation of PriceCondition Taiwan View before CREATE");
+			}
+		}
+	);
+
 	srv.on(
 		['CREATE','UPDATE'], 
 		[
@@ -3774,7 +3792,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 						"Institute Type": item.InstituteType,
 						"Class": item.Class || "",
 						"PackFactor": item.PACKFACTOR || "",
-						"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD').toString(),
+						"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
 						"Branch": item.ParentInstituteID || "",
 						"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
 						"InvoicePrice": Number(item.Price1),
