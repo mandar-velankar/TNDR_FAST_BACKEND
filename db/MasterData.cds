@@ -912,10 +912,7 @@ entity UserTerritory {
 	IsKAM			: Boolean;
 }
 
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 entity PaymentTerms {
     E1KNVVM_ZTERM : String(6) not null;
     Description : String;
