@@ -74,6 +74,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteType,
         Institute.InstituteName,
         Institute.DirectTender,
+        Institute.State,
+        Institute.InstituteID as ParentInstituteID,
+        Institute.External_InstituteId,
+        Institute.Address
     }; 
 
     entity CountryRegionsTableView as projection on MasterData.CountryRegions;
@@ -109,6 +113,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
+        tender.Institute.InstituteTerritory.Territory,
+        tender.Institute.InstituteTerritory.IsKAM,
         key tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,         
@@ -130,6 +136,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
+        tender.Institute.InstituteTerritory.Territory,
+        tender.Institute.InstituteTerritory.IsKAM,
         tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,         
@@ -143,9 +151,21 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         ModifyedByUser.UserName;
 
     @cds.redirection.target
-    entity InstitutesView as projection on MasterData.PT_TMINST {
+    entity InstitutesView as select from MasterData.PT_TMINST as inst
+        left join MasterData.PT_TMINSHIER as hier on hier.InstituteID = inst.InstituteID {
         *,
-        CustomerID as CustomerID: String
+        key inst.CountryCode,
+        key inst.InstituteID,
+        inst.ActiveRecord,
+        hier.ParentInstituteID as HieraryParentInstituteID,
+        hier.InstituteID as HierarchyInstituteID,
+        case when hier.ParentInstituteID is null
+            then null
+            else hier.ParentInstituteID
+        end as ParentInstituteID: Integer,
+        CustomerID as CustomerID: String,
+        inst.InstituteTerritory.Territory,
+        inst.InstituteTerritory.IsKAM
     };
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
@@ -207,6 +227,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         UnitPerPack as UoM,
         Price.NetPrice as NetPrice,
         RequestedVolume,
+        PriceCondition.AnticipatedYearlyVolumeBranch,
         (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
         Offer.Currency as Currency,
         SKUCountry.RegistrationValidUntil
@@ -294,6 +315,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKUCountry.BU,
         SKUCountry.RegistrationValidUntil,
         SKU.Product.HLEVEL4_NAME as BrandName,
+        SKU.PACKFACTOR,
         Offer.Tender.Institute.INCOTerms,
         @Core.Computed: false
         ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
@@ -351,6 +373,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity StandardTenderPriceConditionView as select from TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionTaiwanPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
             CountryCode,
             TenderID,
@@ -442,6 +465,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join TransactionalData.PT_TMOFPR as product on result.OfferID = product.OfferID
                                                           and result.ProductCode = product.ProductCode
                                                           and result.LotID = product.LotID
+        left join TransactionalData.FreeGoodsOther as freegoods 
+                            on freegoods.ProductPackId = result.ProductCode
     {
         result.TenderID,
         key result.OfferID,
@@ -461,6 +486,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.Comment,
         product.Active,
         key result.LotID,
+        freegoods.FreeGoodsOther,
+        freegoods.FreeGoodsOther_ABS_PCT,
+        freegoods.FreeGoodsOther_Step,
+        freegoods.ADD_INCLUDE,
+        case 
+            when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
+                then freegoods.FreeGoodsOther_Step
+            else freegoods.FreeGoodsOther 
+        end as FOC:Double,
         product.RequestedVolume as RequestedVolume: Integer,
         result.Custom.String_1 as Custom_String_1,
         result.Custom.String_2 as Custom_String_2,
@@ -511,8 +545,19 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     
     entity OfferStatus as projection on TransactionalDataViews.OfferStatus;
     
+    entity ProductPack as projection on MasterData.PT_TMPRDPCK;
 
-    entity CountryBrands @readonly as projection on MasterDataViews.CountryBrands;
+    entity PriceCondition as projection on TransactionalData.PriceCondition;
+
+    entity CountryBrands as select from CountryBrandProducts as Product{
+        key Product.COUNTRY_CODE,
+        key Product.BRAND_ID,
+        min(Product.BRAND_NAME) as BRAND_NAME:String(500),
+        min(Product.DIVISION) as DIVISION:String(500),
+        Product.BU
+    }where Product.BRAND_ID is not null
+    group by Product.COUNTRY_CODE, Product.BRAND_ID, Product.BU;
+
     entity CountryBrandProducts @readonly as projection on MasterDataViews.CountryBrandProducts;
 
     entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult;
@@ -637,5 +682,23 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             key prdpck.PRODUCTPACKID,
                 prdhier.HLEVEL6_CODE,
                 prdhier.HLEVEL4_NAME
+    };
+
+    entity InstituteInBranchView as select from MasterData.PT_TMINST as inst
+        inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
+        key hier.ParentInstituteID,
+        key hier.InstituteID,
+        key CountryCode,
+            inst.InstituteName,
+            inst.PaymentTerms
+    };
+
+    entity StandardTenderHistory as projection on TransactionalDataViews.StandardTenderHistory;
+
+    entity PriceConditionCurrentSectionTaiwanView as projection on TransactionalDataViews.PriceConditionCurrentSectionTaiwanView;
+    
+    entity CSVAttachment {
+        key Zuellig: Boolean default false;
+        content    : LargeBinary @Core.MediaType : 'text/csv';
     }
 }

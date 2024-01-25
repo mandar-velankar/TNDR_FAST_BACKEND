@@ -57,14 +57,13 @@ module.exports = async (srv) => {
     srv.on('READ', 'PriceAgreements', async (req, next) => {
         return await filterPriceAgreements(req, next);
     });
-//EJUVE-CR3 START
+
     srv.on('READ', 'PriceAgreementsMasterView', async (req, next) => {
         return await filterPriceAgreements(req, next);
     });
+    //EJUVE-CR3
     srv.on('READ', 'PriceagreementOffers', async (req) => {
-        // const tx = cds.transaction(req);
-        //console.log("Inside Approval Offers");
-        const tx = cds.tx(req);
+         const tx = cds.tx(req);
         let results = await buildWorkflowApprovalOffers(tx);
         console.log(results,"results");
          return results;
@@ -78,7 +77,7 @@ module.exports = async (srv) => {
         return R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), workflowOffers);
     }
     async function buildWorkflowApprovalOffersEntry(tx, Id, approvalStatus) {
-       
+
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
         let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", 'Processing');
@@ -853,9 +852,7 @@ module.exports = async (srv) => {
         const tx = cds.tx();
         try {
             console.log(`Update SynchronizationStatus to ${status} for ${pas.join("||")}`)
-
             await tx.run(UPDATE(PriceAgreements).with({ SynchronizationStatus: status , Synchronized : true}).where({ ID: { in: pas } }));
-
             await tx.commit();
         } catch (error) {
             await tx.rollback(error);
@@ -1321,10 +1318,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MIKBAS = mikbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MXKBAS = mxkbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KUNNR = parseInt(institute.CustomerID);
-        if(customerPrice.PriceCondition == 'YA01'){
-            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.PRSCH = 2;
-            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KZNEP = "E"; 
-            }
+
         //Transforming the Date in correct format
         const datab = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
         const datbi = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];

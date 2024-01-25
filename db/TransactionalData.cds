@@ -521,6 +521,21 @@ entity PriceCondition: cuid, managed {
     Price3                              : Decimal;
     OfferPrice                          : Decimal;
     NetOfferPrice                       : Decimal;
+    Last12MonthsVolumeMainCustomer      : Integer;
+    Last12MonthsVolumeBranch            : Integer;
+    AnticipatedYearlyVolumeMainCustomer : Integer;
+    AnticipatedYearlyVolumeBranch       : Integer;
+    TotalDiscountNHI                    : Double;
+    TotalDiscountInvoice                : Double;
+    TotalYearlyValueMainCustomer        : Double;
+    TotalYearlyValueBranch              : Double;
+    AnnualDiscountForBranch             : Double;
+    NegotiationPrice                    : Double;
+    GeneralDiscount_Amount              : Double;
+    SecondDiscount_Amount               : Double;
+    AnnualDiscount_Percentage           : Double;
+    FreeGoods_Amount                    : Double;
+    FreeGoods_Percentage                : Double;
     DiscountCondition                   : Composition of many DiscountCondition on DiscountCondition.PriceCondition = $self;
     PriceConditionClassification        : Association to PriceConditionClassification;
     FreeGoodsOther                      : Composition of many FreeGoodsOther on FreeGoodsOther.PriceCondition = $self;
@@ -851,7 +866,7 @@ entity OfferProductOfferStatus {
             SenderComment       : String(500);
             ApproverComment     : String(500);
             Active              : Integer not null;
-            //Hierarchy           : Integer;
+            Hierarchy           : Integer;
             AP_ID               : String(10);
             RestoreKey          : String(100);
             Statustime          : DateTime;
@@ -872,4 +887,9 @@ entity OfferProductOfferStatus {
             ApproverTypes       : Association to many MasterData.ApproverTypes
                                       on  ApproverTypes.CountryCode  = CountryCode
                                       and ApproverTypes.ApproverType = ApproverType;
+};
+
+entity ExcelUpload:cuid {
+    @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    content             : LargeBinary;
 };
