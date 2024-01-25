@@ -37,7 +37,7 @@ module.exports = class processSpainRappelData extends BaseJob {
             console.error(`JOB (${this.jobName }): ERROR - Processing of Spain RappelData failed.`);
             console.error(error);
             await tx.rollback();
-            throw error;
+           // throw error;
         }
     }
 

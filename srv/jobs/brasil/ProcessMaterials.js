@@ -35,7 +35,7 @@ module.exports = class ProcessMaterials extends BaseJob {
             console.error(`JOB (${this.jobName }): ERROR - Processing of Brazil materials failed.`);
             console.error(error);
             await tx.rollback();
-            throw error;
+            //throw error;
         }
     }
 
