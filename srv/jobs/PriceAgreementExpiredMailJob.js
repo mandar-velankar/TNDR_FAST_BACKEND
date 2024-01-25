@@ -28,10 +28,10 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             for (let mailRun of mailRuns) {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
-                console.log("PriceAgreement ID ", pas.ID);
+                console.log("PriceAgreement ID ", pas);
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
-                    // console.log(mails);
+                    console.log(mails);
                     if(mails && mails.length > 0){
                         await this.addMailsToOutbox(mails, mailRun.expiryDate, pas);
                     } else{
@@ -56,7 +56,8 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         // const { PT_TMUSER,PT_TMTEND } = this.db.entities("com.bayer.SXTENDER.AdminData");
         const tx = this.db.tx();
             let pas = await tx.run(SELECT.from(PriceAgreements,pa => {          
-                pa.ID, pa.CountryCode, 
+                pa.ID, 
+                pa.CountryCode, 
                 pa.ExpiryDate,
                 pa.Status,
                 pa.TenderId,
