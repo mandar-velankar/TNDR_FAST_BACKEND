@@ -46,7 +46,7 @@ module.exports = class processEmpenho extends BaseJob {
             console.error(`JOB (${this.jobName }): ERROR - Processing of Ibiz Empenhos failed.`);
             console.error(error);
             await tx.rollback();
-            throw error;
+            //throw error;
         }
     }
 
