@@ -1542,7 +1542,7 @@ module.exports = async (srv) => {
 			// FOCStep               : null, 
 			// FOCType               : null, 
 			Discount              : 0, 
-			OfferPrice            : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.OfferPrice, 
+			OfferPrice            : priceCondition.OfferPrice, 
 			Deductions            : 0, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
