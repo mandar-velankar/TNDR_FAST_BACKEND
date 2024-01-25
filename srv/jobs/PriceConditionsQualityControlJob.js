@@ -39,7 +39,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
 
         } catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Processing failed. \n\nCause: ${error}`);
-            throw error;
+            //throw error;
         }
     }
 

@@ -40,7 +40,7 @@ module.exports = class ProcessCustomers extends BaseJob {
             console.error(error);
             // Rollback All
             await tx.rollback();
-            throw error;
+            //throw error;
         }
     }
 
