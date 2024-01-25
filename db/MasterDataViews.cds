@@ -251,11 +251,9 @@ inner join MasterData.CountryProvinces as province
 inner join MasterData.PT_TMINST as institute 
     on customer.E1KNA1M.KUNNR = institute.CustomerID 
 	left outer join MasterData.PaymentTerms as PaymentTerms
-<<<<<<< HEAD
+
    on PaymentTerms.E1KNVVM_ZTERM = customer.E1KNVVM.ZTERM {
-=======
-   on PaymentTerms.E1KNVVM_ZTERM = customer.E1KNVVM.ZTERM{
->>>>>>> main
+
 	customer.E1KNA1M.LAND1 as E1KNA1M_LAND1,
 	customer.E1KNA1M.KUNNR as E1KNA1M_KUNNR,
 	customer.E1KNA1M.NAME1 as E1KNA1M_NAME1,
