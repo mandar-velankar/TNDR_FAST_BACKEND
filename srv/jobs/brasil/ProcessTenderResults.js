@@ -49,7 +49,7 @@ module.exports = class processTenderResults extends BaseJob {
             console.error(`JOB (${this.jobName }): ERROR - Processing of Ibiz TenderResults failed.`);
             console.error(error);
             await tx.rollback();
-            throw error;
+           // throw error;
         }
     }
 

@@ -43,7 +43,7 @@ module.exports = class PriceConditionsQualityControlNotificationMail extends Bas
 
         } catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Processing failed. \n\nCause: ${error}`);
-            throw error;
+            //throw error;
         }
     }
 
