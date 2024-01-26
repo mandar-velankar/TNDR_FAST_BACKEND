@@ -2854,6 +2854,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
+			const productFreeGoodsOther = productConditions[0].FreeGoodsOther.find(fg => fg.ProductPackId === offerProduct.ProductCode);
 
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -3036,7 +3037,14 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				AnnualDiscount_Percentage: offerProduct.AnnualDiscount_Percentage,
 				NegotiationPrice: offerProduct.NegotiationPrice,
 				PricingPolicyValue: pricingPolicy?.Value,
-				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan
+				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan,
+				FreeGoodsQuantity: productFreeGoodsOther?.FreeGoodsOther,
+				FreeGoodsOther_Step: productFreeGoodsOther?.FreeGoodsOther_Step,
+				FreeGoodsOther_ABS_PCT: productFreeGoodsOther?.FreeGoodsOther_ABS_PCT,
+				FOC_PRODUCTPACKNAME: productFreeGoodsOther && offerProduct.PRODUCTNAME,
+				ADD_INCLUDE: productFreeGoodsOther?.ADD_INCLUDE,
+				Level3Discount1: offerProduct.Level3Discount1,
+				Level1Discount1: offerProduct.Level1Discount1,
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -3651,7 +3659,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				}
 			}
 			//generate XLSX
-			let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,excelData,1);
+			// let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,excelData,1);
 			req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 			return excelStreamValue;

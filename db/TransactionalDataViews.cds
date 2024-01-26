@@ -691,7 +691,9 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PriceCondition.Level2Discount1,
     offerProduct.PriceCondition.Level2Discount2,
     offerProduct.PriceCondition.AnnualDiscount_Percentage,
-    offerProduct.PriceCondition.NegotiationPrice
+    offerProduct.PriceCondition.NegotiationPrice,
+    offerProduct.PriceCondition.Level3Discount1,
+    offerProduct.PriceCondition.Level1Discount1
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -2265,6 +2267,13 @@ left outer join TransactionalData.PriceCondition as priceCondition
             AnnualDiscount_Percentage                   : Double;
             NegotiationPrice                            : Double;
             PricingPolicyValue                          : Double;
+            FreeGoodsQuantity                           : Double;
+            FreeGoodsOther_Step                         : Double;
+            FreeGoodsOther_ABS_PCT                      : String(4);
+            FOC_PRODUCTPACKNAME                         : String;
+            ADD_INCLUDE                                 : String;
+            Level3Discount1                             : Double;
+            Level1Discount1                             : Double;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
