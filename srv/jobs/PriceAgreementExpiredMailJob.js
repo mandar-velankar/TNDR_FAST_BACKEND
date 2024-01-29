@@ -28,10 +28,12 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             for (let mailRun of mailRuns) {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
-                
+                const recipients = new Set();
+                recipients.add("kosal.kirthiga.ext@bayer.com");
+                recipients.add("pranavasree.pavana.ext@bayer.com");
                 if (pas && pas.length > 0) {
-                    let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
-                    console.log(mails);
+                    let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template,recipients)(pas);
+                    
                     if(mails && mails.length > 0){
                         await this.addMailsToOutbox(mails, mailRun.expiryDate);
                     } else{
@@ -76,26 +78,27 @@ class PriceAgreementExpiredMailJob extends BaseJob {
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
               this.updatePriceAgreementsNotification(pa.ID);
-              console.log(pa.ID);
-            return pa;
+               return pa;
         })
 
     }
 
     async updatePriceAgreementsNotification(priceAgreementID){
-        console.log("inside",priceAgreementID);
+        
         if(!priceAgreementID) return false;
         const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         return UPDATE(PriceAgreements).with({EmailNotificationSent: true}).where({ ID: priceAgreementID });
     };
 
-    mapPriceAgreementsToMails = (templates,mail) => pas => pas
+    mapPriceAgreementsToMails = (templates,mail,recipients) => pas => pas
+    
         .map(pa => ({
+           
             CountryCode: pa.CountryCode,
             TenderID: pa.TenderId,
             OfferID: pa.OfferId,
             Sender: 'FAST-Admin@bayer.com',
-            Recipients: pa.UserEmail,
+            Recipients: Array.from(recipients).join(";"),
             Subject: this.findTemplate(templates,mail,pa).title,
             MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), pa),
             Sent: false
