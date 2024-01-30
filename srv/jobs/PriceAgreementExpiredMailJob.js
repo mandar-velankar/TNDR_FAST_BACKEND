@@ -30,7 +30,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
                 
                 if (pas && pas.length > 0) {
-                    let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template,recipients)(pas);
+                    let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
                     
                     if(mails && mails.length > 0){
                         await this.addMailsToOutbox(mails, mailRun.expiryDate);
