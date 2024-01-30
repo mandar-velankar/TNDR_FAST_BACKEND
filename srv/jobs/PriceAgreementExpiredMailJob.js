@@ -66,7 +66,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.Tender.User.UserEmail,
                 pa.Tender.User.UserName,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
-                pa.CustomerPrices.PriceCondition,
+                pa.PriceConditions.PriceConditionCode,
             pa.Institute.InstituteName//,
           
         })
@@ -89,7 +89,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         return UPDATE(PriceAgreements).with({EmailNotificationSent: true}).where({ ID: priceAgreementID });
     };
 
-    mapPriceAgreementsToMails = (templates,mail,recipients) => pas => pas
+    mapPriceAgreementsToMails = (templates,mail) => pas => pas
     
         .map(pa => ({
            
