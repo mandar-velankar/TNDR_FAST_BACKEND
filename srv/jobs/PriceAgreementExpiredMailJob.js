@@ -28,9 +28,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             for (let mailRun of mailRuns) {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
-                const recipients = new Set();
-                recipients.add("kosal.kirthiga.ext@bayer.com");
-                recipients.add("pranavasree.pavana.ext@bayer.com");
+                
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template,recipients)(pas);
                     
@@ -47,7 +45,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             console.error(error);
         }
 
-        console.log('Processing Expired mails for Price Agreements Completed');
+        console.log('Processing cancelled mails for Price Agreements Completed');
     }
 
     async getPriceAgreementsExpired(expiryDate) {
@@ -68,6 +66,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.Tender.User.UserEmail,
                 pa.Tender.User.UserName,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
+                pa.CustomerPrices.PriceCondition,
             pa.Institute.InstituteName//,
           
         })
@@ -98,7 +97,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             TenderID: pa.TenderId,
             OfferID: pa.OfferId,
             Sender: 'FAST-Admin@bayer.com',
-            Recipients: Array.from(recipients).join(";"),
+            Recipients: 'kosal.kirthiga.ext@bayer.com',
             Subject: this.findTemplate(templates,mail,pa).title,
             MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), pa),
             Sent: false
@@ -115,7 +114,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         template.TemplateId === templateid);
 
     async addMailsToOutbox(mails, expiryDate) {
-        console.log(`Adding Expired mails for Price Agreements to outbox for expiry date: ${expiryDate}`);
+        console.log(`Adding Cancelled mails for Price Agreements to outbox for expiry date: ${expiryDate}`);
         console.table(mails,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         const tx = this.db.tx();
