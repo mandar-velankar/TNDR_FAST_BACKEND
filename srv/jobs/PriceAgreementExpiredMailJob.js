@@ -66,11 +66,10 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.Tender.User.UserEmail,
                 pa.Tender.User.UserName,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
-                pa.CustomerPrices.PriceCondition,
-            pa.Institute.InstituteName//,
+                pa.PriceConditions.PriceConditionType
+                pa.Institute.InstituteName//,
           
-        })
-            .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
+        }).where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
              
            return pas.map(pa => {
               console.log(pa,"pa");
@@ -91,7 +90,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
 
     mapPriceAgreementsToMails = (templates,mail) => pas => pas
     
-        .map(pa => ({
+        .map(pa => pa.ID({
            
             CountryCode: pa.CountryCode,
             TenderID: pa.TenderId,
