@@ -2831,6 +2831,13 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
+			//const productFreeGoodsOther = productConditions[0].FreeGoodsOther.find(fg => fg.ProductPackId === offerProduct.ProductCode);
+			const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({
+				OfferID: offer.OFFERID,
+				ProductCode: offerProduct.ProductCode,
+				LotID: offerProduct.LOTID
+			}));
+
 
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -3000,18 +3007,18 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				DistributorName: DistributorInfo?.DistributorName ?? null,
 				Address: DistributorInfo?.Address ?? null,
 				City: DistributorInfo?.City ?? null,
-				AwardedPrice: offerProduct.AwardedPrice,
+				AwardedPrice: awardedProduct?.AwardedPrice,
 				InstituteID: offer.INSTITUTE_ID,
 				EARLIEST_DATE: offerProduct.EARLIEST_DATE,
 				Comment: offerProduct.Comment,
 				PackSizeRequired: offerProduct.PackSizeRequired,
-				Price0: offerProduct.Price0,
-				Price1: offerProduct.Price1,
-				Price3: offerProduct.Price3,
-				Level2Discount1: offerProduct.Level2Discount1,
-				Level2Discount2: offerProduct.Level2Discount2,
-				AnnualDiscount_Percentage: offerProduct.AnnualDiscount_Percentage,
-				NegotiationPrice: offerProduct.NegotiationPrice,
+				Price0: productConditionstmp[0] && productConditionstmp[0].Price0,
+				Price1: productConditionstmp[0] && productConditionstmp[0].Price1,
+				Price3: productConditionstmp[0] && productConditionstmp[0].Price3,
+				Level2Discount1: productConditionstmp[0] && productConditionstmp[0].Level2Discount1,
+				Level2Discount2: productConditionstmp[0] && productConditionstmp[0].Level2Discount2,
+				AnnualDiscount_Percentage: productConditionstmp[0] && productConditionstmp[0].AnnualDiscount_Percentage,
+				NegotiationPrice: productConditionstmp[0] && productConditionstmp[0].NegotiationPrice,
 				PricingPolicyValue: pricingPolicy?.Value,
 				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan
 			}
