@@ -91,7 +91,6 @@ class PriceAgreementExpiredMailJob extends BaseJob {
     mapPriceAgreementsToMails = (templates,mail) => pas => {
 
         let outbox = [];
-        //let uniqueID =pas.filter(pa=>pa.ID);
         const uniqueUsers = [...new Set(pas.map(item => item.ID))];
         // uniqueID=Array.from(new Set(uniqueID));
          console.log(uniqueUsers,"ID");
@@ -106,7 +105,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients: 'kosal.kirthiga.ext@bayer.com',
                     Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
-                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), dataFilteredByUser), 
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pas), dataFilteredByUser), 
                       Sent: false
                 });
             }
