@@ -1294,7 +1294,8 @@ module.exports = async (srv) => {
 	srv.before(
 		['CREATE','UPDATE'], 
 		[
-			'PriceConditionTaiwanPriceView'
+			'PriceConditionTaiwanPriceView',
+			'PriceConditionTaiwanDiscountView'
 		], 
 		async (req) => {
 			try{
@@ -1316,7 +1317,8 @@ module.exports = async (srv) => {
 			'PriceConditionDiscountView',
 			'PriceConditionPriceWithFOCView',
 			'PriceConditionDiscountWithFOCView',
-			'PriceConditionTaiwanPriceView'
+			'PriceConditionTaiwanPriceView',
+			'PriceConditionTaiwanDiscountView',
 		], 
 		async (req) => {
 			try{
@@ -1440,6 +1442,32 @@ module.exports = async (srv) => {
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"TaiwanPrice": {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level2Discount1:req.data.Deductions,
+				Level2Discount2:req.data.Level2Discount2,
+				AnnualDiscountForBranch:req.data.AnnualDiscountForBranch,
+				NegotiationPrice:req.data.NegotiationPrice,
+				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
+				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
+				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
+				TotalDiscountNHI:req.data.TotalDiscountNHI,
+				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
+				Price2: req.data.NetPrice,
+				Price3: req.data.Price3,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Level3Discount1,
+				GeneralDiscount_Amount: (req.data.OfferPrice * req.data.Deductions),
+    			SecondDiscount_Amount: (req.data.OfferPrice * req.data.Level2Discount2),
+    			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
+    			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
+    			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
+				PriceConditionClassification_ID: req.data.ClassificationID
+			},
+			"TaiwanDiscount": {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level2Discount1:req.data.Deductions,
@@ -1661,7 +1689,7 @@ module.exports = async (srv) => {
 	}
 );
 
-srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
+srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscountView'], (items, req) => {
 	try{
 		if(!items) return [];
 
@@ -1856,6 +1884,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		if(req.data.Submitted === true){
 			await upsertOfferStatus(req.data.OFFERID, req.data.TENDERID, 'Quotation Submitted');
 			delete req.data.Submitted;
+		}else {
+			await updateApprovalsSent(req.data.OFFERID);
 		}
 		await upsertQuotation(req);
 		await updateApprovalsSent(req.data.OFFERID);
@@ -2854,7 +2884,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
-			const productFreeGoodsOther = productConditions[0].FreeGoodsOther.find(fg => fg.ProductPackId === offerProduct.ProductCode);
+			const productFreeGoodsOther = productConditions[0]?.FreeGoodsOther?.find(fg => fg.ProductPackId === offerProduct.ProductCode);
 			const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({
 				OfferID: offer.OFFERID,
 				ProductCode: offerProduct.ProductCode,
@@ -3262,7 +3292,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, 'ProductPackID': product.ProductCode}));
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
 		const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
-		const offerHistory = await tx.run(SELECT.from(StandardTenderHistory).where({'INSTITUTE_ID': instituteTerritory.InstituteID, 'ProductCode': product.ProductCode}));
+		const offerHistory = await tx.run(SELECT.from(StandardTenderHistory).where({'INSTITUTE_ID': offer.INSTITUTE_ID, 'ProductCode': product.ProductCode}));
 		const lastHistoryPriceCondition = offerHistory[offerHistory.length-1];
 		const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({'OfferID': lastHistoryPriceCondition?.OfferID, 'ProductCode': lastHistoryPriceCondition?.ProductCode}));
 		let currentDiscount = null;
@@ -3778,7 +3808,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 						"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(2),
 						"GeneralDiscount_Amount": item.GeneralDiscount_Amount,
 						"SecondDiscount_Amount": item.SecondDiscount_Amount,
-						"FreeGoods_Amount": item.FreeGoods_Percentage,
+						"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
 						"AnnualDiscount_Amount": item.AnnualDiscountForBranch,
 						"CustomerID": item.External_InstituteId,
 						"InstituteName": item.InstituteName,
@@ -3819,8 +3849,8 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 						"HandlingCharge_Percentage": 0,
 						"CashDiscount_Percentage": 0,
 						"CashDiscount_Amount": 0,
-						"FreeGoods_Percentage": item.FreeGoods_Amount,
-						"FreeGoods_Amount": item.FreeGoods_Percentage,
+						"FreeGoods_Percentage": (item.FreeGoods_Percentage * 100).toFixed(4),
+						"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
 						"AnnualDiscount_Percentage": item.AnnualDiscount_Percentage,
 						"AnnualDiscount_Amount": item.AnnualDiscountForBranch,
 						"OfferID": item.OfferID,
@@ -3844,7 +3874,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
-			req._.res.setHeader('Content-type', 'text/csv');
+			req._.res.setHeader('Content-type', 'application/json');
 
 			return _createStream(csv);
 		}
