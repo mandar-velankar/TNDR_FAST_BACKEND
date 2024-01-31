@@ -66,14 +66,14 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.Tender.User.UserEmail,
                 pa.Tender.User.UserName,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
-                pa.PriceConditions.PriceConditionCode,
+                pa.CustomerPrices.PriceCondition,
             pa.Institute.InstituteName//,
           
         })
             .where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
              
            return pas.map(pa => {
-              
+              console.log(pa,"pa");
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
               this.updatePriceAgreementsNotification(pa.ID);
