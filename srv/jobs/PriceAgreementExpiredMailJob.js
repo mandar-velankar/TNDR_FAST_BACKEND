@@ -105,7 +105,8 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                     Recipients: 'kosal.kirthiga.ext@bayer.com',
                     Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
                     MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), {
-                        data: { 
+                        data: {
+                            FormatedExpiryDate :this.dateToDDMMYYYY(dataFilteredByUser[0].ExpiryDate),
                             PriceAgreements: dataFilteredByUser 
                         }
                     }),
@@ -119,22 +120,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             return;
         }
         return outbox;
-        // .map(pa => ({
-           
-        //     CountryCode: pa.CountryCode,
-        //     TenderID: pa.TenderId,
-        //     OfferID: pa.OfferId,
-        //     Sender: 'FAST-Admin@bayer.com',
-        //     Recipients: 'kosal.kirthiga.ext@bayer.com',
-        //     Subject: this.findTemplate(templates,mail,pa).title,
-        //     MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), pa),
-        //     Sent: false
-        // }))
-        // .filter(pa =>{
-            
-        //     if(!pa.MailBody || pa.MailBody === 'undefined')console.log(`No template found for Price Agreement of tender ${pa.TenderID} with countrycode ${pa.CountryCode}`)
-        //     return !!pa.MailBody && pa.MailBody !== 'undefined';
-        // });
+      
     }
 
     findTemplate = (templates,templateid,pa) => templates.find(template => 
