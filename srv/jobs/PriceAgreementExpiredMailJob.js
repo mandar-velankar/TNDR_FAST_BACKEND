@@ -105,7 +105,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients: 'kosal.kirthiga.ext@bayer.com',
                     Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
-                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pas), dataFilteredByUser), 
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser), dataFilteredByUser), 
                       Sent: false
                 });
             }
