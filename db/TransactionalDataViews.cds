@@ -2441,7 +2441,7 @@ entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataVi
         GeneralDiscount_Amount,
         SecondDiscount_Amount
 
-}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate < CURRENT_DATE;
+}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE;
 
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
@@ -2509,4 +2509,4 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
-    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate < CURRENT_DATE;
+    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE;
