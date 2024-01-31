@@ -28,7 +28,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             for (let mailRun of mailRuns) {
                 let pas = await this.getPriceAgreementsExpired(mailRun.expiryDate);
-                
+                               
                 if (pas && pas.length > 0) {
                     let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(pas);
                     
@@ -72,7 +72,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         }).where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
              
            return pas.map(pa => {
-              console.log(pa,"pa");
+              
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
               pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
               this.updatePriceAgreementsNotification(pa.ID);
@@ -88,24 +88,54 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         return UPDATE(PriceAgreements).with({EmailNotificationSent: true}).where({ ID: priceAgreementID });
     };
 
-    mapPriceAgreementsToMails = (templates,mail) => pas => pas
-    
-        .map(pa => pa.ID({
+    mapPriceAgreementsToMails = (templates,mail) => pas => {
+
+        let outbox = [];
+        let uniqueID =pas.filter(pa=>pa.ID);
+        uniqueID=Array.from(new Set(uniqueID));
+         console.log(uniqueID,"ID");
+         for (let user of uniqueID) {
+            let dataFilteredByUser = pas.filter(d => d.ID === user);
+            console.log(dataFilteredByUser,"data");
+            if(dataFilteredByUser && dataFilteredByUser.length > 0){
+                outbox.push({
+                    CountryCode: dataFilteredByUser[0].CountryCode,
+                    TenderID: dataFilteredByUser[0].TenderId,
+                    OfferID: dataFilteredByUser[0].OfferId,
+                    Sender: 'FAST-Admin@bayer.com',
+                    Recipients: 'kosal.kirthiga.ext@bayer.com',
+                    Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), {
+                        data: { 
+                            PriceAgreements: dataFilteredByUser 
+                        }
+                    }),
+                    Sent: false
+                });
+            }
+        }
+        if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
+            console.log(`No template found for Cancelled Price Agreement ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
+            return;
+        }
+        return outbox;
+        // .map(pa => ({
            
-            CountryCode: pa.CountryCode,
-            TenderID: pa.TenderId,
-            OfferID: pa.OfferId,
-            Sender: 'FAST-Admin@bayer.com',
-            Recipients: 'kosal.kirthiga.ext@bayer.com',
-            Subject: this.findTemplate(templates,mail,pa).title,
-            MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), pa),
-            Sent: false
-        }))
-        .filter(pa =>{
+        //     CountryCode: pa.CountryCode,
+        //     TenderID: pa.TenderId,
+        //     OfferID: pa.OfferId,
+        //     Sender: 'FAST-Admin@bayer.com',
+        //     Recipients: 'kosal.kirthiga.ext@bayer.com',
+        //     Subject: this.findTemplate(templates,mail,pa).title,
+        //     MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), pa),
+        //     Sent: false
+        // }))
+        // .filter(pa =>{
             
-            if(!pa.MailBody || pa.MailBody === 'undefined')console.log(`No template found for Price Agreement of tender ${pa.TenderID} with countrycode ${pa.CountryCode}`)
-            return !!pa.MailBody && pa.MailBody !== 'undefined';
-        });
+        //     if(!pa.MailBody || pa.MailBody === 'undefined')console.log(`No template found for Price Agreement of tender ${pa.TenderID} with countrycode ${pa.CountryCode}`)
+        //     return !!pa.MailBody && pa.MailBody !== 'undefined';
+        // });
+    }
 
     findTemplate = (templates,templateid,pa) => templates.find(template => 
         template.CountryCode === pa.CountryCode && 
