@@ -1884,9 +1884,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if(req.data.Submitted === true){
 			await upsertOfferStatus(req.data.OFFERID, req.data.TENDERID, 'Quotation Submitted');
 			delete req.data.Submitted;
+		}else {
+			await updateApprovalsSent(req.data.OFFERID);
 		}
 		await upsertQuotation(req);
-		await updateApprovalsSent(req.data.OFFERID);
 		return req.data;
 		}
 		catch(error){
