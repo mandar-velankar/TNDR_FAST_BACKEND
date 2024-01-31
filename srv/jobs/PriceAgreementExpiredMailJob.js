@@ -66,7 +66,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.Tender.User.UserEmail,
                 pa.Tender.User.UserName,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
-                pa.PriceConditions.PriceConditionType
+                pa.PriceConditions.PriceConditionCode,
                 pa.Institute.InstituteName//,
           
         }).where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
