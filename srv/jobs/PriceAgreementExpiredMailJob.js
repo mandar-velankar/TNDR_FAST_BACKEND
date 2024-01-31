@@ -105,9 +105,10 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients: 'kosal.kirthiga.ext@bayer.com',
                     Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
-                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser), dataFilteredByUser), 
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), dataFilteredByUser), 
                       Sent: false
                 });
+                console.log()
             }
         }
         if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
@@ -134,8 +135,8 @@ class PriceAgreementExpiredMailJob extends BaseJob {
     }
 
     findTemplate = (templates,templateid,pa) => templates.find(template => 
-        template.CountryCode === pa.CountryCode && 
-        template.Language === pa.CountryCode && 
+        template.CountryCode === 'ES' && 
+        template.Language === 'ES' && 
         template.TemplateId === templateid);
 
     async addMailsToOutbox(mails, expiryDate) {
