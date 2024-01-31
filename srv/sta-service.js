@@ -2883,7 +2883,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
-			const productFreeGoodsOther = productConditions[0].FreeGoodsOther.find(fg => fg.ProductPackId === offerProduct.ProductCode);
+			const productFreeGoodsOther = productConditions[0]?.FreeGoodsOther?.find(fg => fg.ProductPackId === offerProduct.ProductCode);
 			const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({
 				OfferID: offer.OFFERID,
 				ProductCode: offerProduct.ProductCode,
