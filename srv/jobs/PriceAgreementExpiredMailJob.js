@@ -88,14 +88,13 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         return UPDATE(PriceAgreements).with({EmailNotificationSent: true}).where({ ID: priceAgreementID });
     };
 
-    mapPriceAgreementsToMails = (templates,mail) => pas => {
+    mapPriceAgreementsToMails = (templates,mail) => data => {
 
         let outbox = [];
-        const uniqueUsers = [...new Set(pas.map(item => item.ID))];
-        // uniqueID=Array.from(new Set(uniqueID));
-         console.log(uniqueUsers,"ID");
+        const uniqueUsers = [...new Set(data.map(item => item.ID))];
+        
          for (let user of uniqueUsers) {
-            let dataFilteredByUser = pas.filter(d => d.ID === user);
+            let dataFilteredByUser = data.filter(d => d.ID === user);
             console.log(dataFilteredByUser,"data");
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
@@ -105,10 +104,14 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients: 'kosal.kirthiga.ext@bayer.com',
                     Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
-                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), dataFilteredByUser), 
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), {
+                        data: { 
+                            PriceAgreements: dataFilteredByUser 
+                        }
+                    }),
                       Sent: false
                 });
-                console.log()
+                
             }
         }
         if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
