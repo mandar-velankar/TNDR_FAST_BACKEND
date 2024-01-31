@@ -39,6 +39,10 @@ module.exports = async (srv) => {
     } = cds.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
 
     const {
+        PT_TMUSER
+     } = cds.entities("com.bayer.SXTENDER.AdminData");
+
+    const {
         PT_TMTEND, PT_TMOFPR, PT_TMOFRS, PriceCondition, FreeGoodsOther, DiscountCondition, SpainRappelData
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
