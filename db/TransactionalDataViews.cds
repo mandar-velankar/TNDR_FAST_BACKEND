@@ -682,19 +682,9 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.ProductDescription as ProductDescription,
     ifnull(offerProduct.PricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
     case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
-    offerProduct.Results.AwardedPrice,
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
-    offerProduct.Comment,
-    offerProduct.PriceCondition.Price0,
-    offerProduct.PriceCondition.Price1,
-    offerProduct.PriceCondition.Price3,
-    offerProduct.PriceCondition.Level2Discount1,
-    offerProduct.PriceCondition.Level2Discount2,
-    offerProduct.PriceCondition.AnnualDiscount_Percentage,
-    offerProduct.PriceCondition.NegotiationPrice,
-    offerProduct.PriceCondition.Level3Discount1,
-    offerProduct.PriceCondition.Level1Discount1
+    offerProduct.Comment
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
