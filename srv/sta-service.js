@@ -3873,9 +3873,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
-			req._.res.setHeader('Content-type', 'application/json');
-
-			return _createStream(csv);
+			req._.res.setHeader('Content-type', 'application/csv');
+			return _createStream(csv, mappedZuelligExtract)
 		}
 		catch(error){
             console.error('Error in CSVAttachment READ');
@@ -3898,12 +3897,12 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		return uniqueItems;
 	}
 
-	function _createStream (data) {        
+	function _createStream (data, mappedZuelligExtract) {        
 		const buffer = new Buffer.from(asString(data))          
 		const stream = new Readable()        
 		stream.push(buffer)        
 		stream.push(null)        
 	
-		return { value: stream }    
+		return { value: stream, body: JSON.stringify(mappedZuelligExtract) }    
 	}
 }
