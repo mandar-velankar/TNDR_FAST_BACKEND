@@ -3781,7 +3781,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 	srv.on("READ", "CSVAttachment", async (req, res) => {
 		try{
-			let zuelligExtract = await SELECT.from(ZuelligExtractView).where({CountryCode: "TW"});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
 			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
 			const zuellig = req.data.Zuellig;
@@ -3795,77 +3795,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			let mappedZuelligExtract = [];
 
 			if (zuellig) {
-				mappedZuelligExtract = zuelligExtract.map(item => {
-					return {
-						"Invoice Price": Number(item.Price1),
-						"HandlingCharge_Amount": 0,
-						"Institute Type": item.InstituteType,
-						"Class": item.Class || "",
-						"PackFactor": item.PACKFACTOR,
-						"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-						"NetPrice": Number(item.Price3),
-						"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(2),
-						"GeneralDiscount_Amount": item.GeneralDiscount_Amount,
-						"SecondDiscount_Amount": item.SecondDiscount_Amount,
-						"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-						"AnnualDiscount_Amount": item.AnnualDiscountForBranch,
-						"CustomerID": item.External_InstituteId,
-						"InstituteName": item.InstituteName,
-						"SKUCode": item.SKUCode || "",
-						"ProductPackName": item.PRODUCTPACKNAME,
-						"KAM_Territory": item.KAM_Territory,
-						"ZuelligCustomerNumber.": item.CNPJ,
-						"Territory No.": item.KAM_Territory,
-						"Status": item.Status,
-						// "NHI_Price": Number(item.RegisteredPrice)
-					}
-				});
+				mappedZuelligExtract = mappedZuelligExtractView(zuelligExtract);
 			}else {
-				mappedZuelligExtract = zuelligExtract.map(item => {
-					const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
-					return {
-						"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
-						"CWID": item.SubmittedBy,
-						"BU": item.BU,
-						"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
-						"PreviousNetPrice": Number(item.Price3),
-						"CountProducts": products.length,
-						"Invoice Price": Number(item.Price1),
-						"HandlingCharge_Amount": 0,
-						"Institute Type": item.InstituteType,
-						"Class": item.Class || "",
-						"PackFactor": item.PACKFACTOR || "",
-						"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
-						"Branch": item.ParentInstituteID || "",
-						"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-						"InvoicePrice": Number(item.Price1),
-						"NetPrice": Number(item.Price3),
-						"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(2),
-						"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(2),
-						"GeneralDiscount_Amount": item.GeneralDiscount_Amount,
-						"SecondDiscount_Percentage": (item.Level2Discount2 * 100).toFixed(2),
-						"SecondDiscount_Amount": item.SecondDiscount_Amount,
-						"HandlingCharge_Percentage": 0,
-						"CashDiscount_Percentage": 0,
-						"CashDiscount_Amount": 0,
-						"FreeGoods_Percentage": (item.FreeGoods_Percentage * 100).toFixed(4),
-						"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-						"AnnualDiscount_Percentage": item.AnnualDiscount_Percentage,
-						"AnnualDiscount_Amount": item.AnnualDiscountForBranch,
-						"OfferID": item.OfferID,
-						"UserName": item.UserName,
-						"CustomerID": item.External_InstituteId,
-						"InstituteName": item.InstituteName,
-						"SKUCode": item.SKUCode || "",
-						"ProductPackName": item.PRODUCTPACKNAME,
-						"KAM_Territory": item.KAM_Territory,
-						"NHI_Price": Number(item.Price0),
-						"ZuelligCustomerNumber": item.CNPJ,
-						"Territory No.": item.KAM_Territory,
-						"Current_NHI_Price": Number(item.Price0),
-						"Status": item.Status
-					}
-				});
+				mappedZuelligExtract = mappedSingleView(zuelligExtract, offerProducts);
 			}
 			
 			if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found");
@@ -3873,14 +3805,114 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
-			req._.res.setHeader('Content-type', 'application/csv');
-			return _createStream(csv, mappedZuelligExtract)
+			req._.res.setHeader('Content-type', 'text/csv');
+			return _createStream(csv)
 		}
 		catch(error){
             console.error('Error in CSVAttachment READ');
             return req.reject(403, error?.message||"Error in CSVAttachment");
         }
 	});
+
+	srv.on("READ", "TaiwanFASTData", async (req, res) => {
+		try{
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+		
+			zuelligExtract = zuelligExtract.sort((a, b) => { 
+				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
+			});
+			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+
+			let mappedTaiwanFASTData = mappedSingleView(zuelligExtract, offerProducts);
+			
+			if (mappedTaiwanFASTData.length === 0) return req.reject(404, "No Zuellig Extracts were found");
+			
+			req._.res.json({
+				data: mappedTaiwanFASTData
+			});
+		}
+		catch(error){
+            console.error('Error in TaiwanFASTData READ');
+            return req.reject(403, error?.message||"Error in TaiwanFASTData");
+        }
+	});
+
+	function mappedZuelligExtractView (zuelligExtract) {
+		return zuelligExtract.map(item => {
+			return {
+				"Invoice Price": Number(item.Price1),
+				"HandlingCharge_Amount": 0,
+				"Institute Type": item.InstituteType,
+				"Class": item.Class || "",
+				"PackFactor": item.PACKFACTOR,
+				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
+				"NetPrice": Number(item.Price3),
+				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(2),
+				"GeneralDiscount_Amount": item.GeneralDiscount_Amount,
+				"SecondDiscount_Amount": item.SecondDiscount_Amount,
+				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+				"AnnualDiscount_Amount": item.AnnualDiscountForBranch,
+				"CustomerID": item.External_InstituteId,
+				"InstituteName": item.InstituteName,
+				"SKUCode": item.SKUCode || "",
+				"ProductPackName": item.PRODUCTPACKNAME,
+				"KAM_Territory": item.KAM_Territory,
+				"ZuelligCustomerNumber.": item.CNPJ,
+				"Territory No.": item.KAM_Territory,
+				"Status": item.Status,
+				// "NHI_Price": Number(item.RegisteredPrice)
+			}
+		});
+	}
+
+	function mappedSingleView (zuelligExtract, offerProducts) { // TaiwanFASTData
+		return zuelligExtract.map(item => {
+			const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
+			return {
+				"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
+				"CWID": item.SubmittedBy,
+				"BU": item.BU,
+				"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
+				"PreviousNetPrice": Number(item.Price3),
+				"CountProducts": products.length,
+				"Invoice Price": Number(item.Price1),
+				"HandlingCharge_Amount": 0,
+				"Institute Type": item.InstituteType,
+				"Class": item.Class || "",
+				"PackFactor": item.PACKFACTOR || "",
+				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
+				"Branch": item.ParentInstituteID || "",
+				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
+				"InvoicePrice": Number(item.Price1),
+				"NetPrice": Number(item.Price3),
+				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(2),
+				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(2),
+				"GeneralDiscount_Amount": item.GeneralDiscount_Amount,
+				"SecondDiscount_Percentage": (item.Level2Discount2 * 100).toFixed(2),
+				"SecondDiscount_Amount": item.SecondDiscount_Amount,
+				"HandlingCharge_Percentage": 0,
+				"CashDiscount_Percentage": 0,
+				"CashDiscount_Amount": 0,
+				"FreeGoods_Percentage": (item.FreeGoods_Percentage * 100).toFixed(4),
+				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+				"AnnualDiscount_Percentage": item.AnnualDiscount_Percentage,
+				"AnnualDiscount_Amount": item.AnnualDiscountForBranch,
+				"OfferID": item.OfferID,
+				"UserName": item.UserName,
+				"CustomerID": item.External_InstituteId,
+				"InstituteName": item.InstituteName,
+				"SKUCode": item.SKUCode || "",
+				"ProductPackName": item.PRODUCTPACKNAME,
+				"KAM_Territory": item.KAM_Territory,
+				"NHI_Price": Number(item.Price0),
+				"ZuelligCustomerNumber": item.CNPJ,
+				"Territory No.": item.KAM_Territory,
+				"Current_NHI_Price": Number(item.Price0),
+				"Status": item.Status
+			}
+		});
+	}
 	
 	function getUniqueFilterItems (filterItems) {
 		let uniqueItems = filterItems.reduce(function (a, b) {
@@ -3897,12 +3929,12 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		return uniqueItems;
 	}
 
-	function _createStream (data, mappedZuelligExtract) {        
+	function _createStream (data) {        
 		const buffer = new Buffer.from(asString(data))          
 		const stream = new Readable()        
 		stream.push(buffer)        
 		stream.push(null)        
 	
-		return { value: stream, body: JSON.stringify(mappedZuelligExtract) }    
+		return { value: stream }    
 	}
 }

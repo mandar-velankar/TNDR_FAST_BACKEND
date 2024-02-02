@@ -2509,4 +2509,4 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
-    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE;
+    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW';
