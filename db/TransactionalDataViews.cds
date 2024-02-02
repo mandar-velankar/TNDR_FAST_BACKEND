@@ -2260,6 +2260,13 @@ left outer join TransactionalData.PriceCondition as priceCondition
             AnnualDiscount_Percentage                   : Double;
             NegotiationPrice                            : Double;
             PricingPolicyValue                          : Double;
+            FreeGoodsQuantity                           : Double;
+            FreeGoodsOther_Step                         : Double;
+            FreeGoodsOther_ABS_PCT                      : String(4);
+            FOC_PRODUCTPACKNAME                         : String;
+            ADD_INCLUDE                                 : String;
+            Level3Discount1                             : Double;
+            Level1Discount1                             : Double;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2354,7 +2361,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.TotalDiscountInvoice,
     priceCondition.PriceConditionCode as PriceConditionCode,
     priceConditionClassification.ConditionType as PRICE_CONDITION,
-    priceCondition.Discount as DISCOUNT, 
+    priceCondition.Discount as DISCOUNT,
+    priceCondition.GeneralDiscount_Amount, 
+    priceCondition.SecondDiscount_Amount,
     product.Results.AwardedPrice,
     offer.OfferStatusTable.STATUS as OfferStatus,
     CASE 
@@ -2409,6 +2418,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.TotalYearlyValueBranch,
         priceCondition.TotalDiscountNHI,
         priceCondition.TotalDiscountInvoice,
+        priceCondition.GeneralDiscount_Amount, 
+        priceCondition.SecondDiscount_Amount,
         offer.OfferStatusTable.STATUS,
         product.Results.Outcome,
         foc.ProductPackId;
@@ -2429,8 +2440,11 @@ entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataVi
         TotalYearlyValueMainCustomer,
         TotalYearlyValueBranch,
         TotalDiscountNHI,
-        TotalDiscountInvoice
-}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate < CURRENT_DATE;
+        TotalDiscountInvoice,
+        GeneralDiscount_Amount,
+        SecondDiscount_Amount
+
+}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE;
 
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
@@ -2498,5 +2512,4 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
-    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate < CURRENT_DATE;
-
+    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW';

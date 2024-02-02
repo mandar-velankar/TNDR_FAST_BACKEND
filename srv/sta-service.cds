@@ -374,6 +374,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionTaiwanPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionTaiwanDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
             CountryCode,
             TenderID,
@@ -465,8 +466,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join TransactionalData.PT_TMOFPR as product on result.OfferID = product.OfferID
                                                           and result.ProductCode = product.ProductCode
                                                           and result.LotID = product.LotID
-        left join TransactionalData.FreeGoodsOther as freegoods 
-                            on freegoods.ProductPackId = result.ProductCode
+        inner join TransactionalData.PriceCondition as priceCondition on result.ProductCode = priceCondition.ProductCode
+                                                        and result.OfferID = priceCondition.OfferID
+                                                        and result.LotID = priceCondition.LotID 
+        left join TransactionalData.FreeGoodsOther as freegoods
+                            on freegoods.PriceCondition.ID = priceCondition.ID
     {
         result.TenderID,
         key result.OfferID,
@@ -701,4 +705,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key Zuellig: Boolean default false;
         content    : LargeBinary @Core.MediaType : 'text/csv';
     }
+
+    entity TaiwanFASTData {
+       content    : LargeBinary @Core.MediaType : 'application/json';
+    };
 }
