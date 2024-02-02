@@ -705,4 +705,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key Zuellig: Boolean default false;
         content    : LargeBinary @Core.MediaType : 'text/csv';
     }
+
+    entity TaiwanFASTData {
+       content    : LargeBinary @Core.MediaType : 'application/json';
+    };
 }
