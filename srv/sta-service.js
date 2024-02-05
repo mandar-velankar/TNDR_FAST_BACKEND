@@ -1888,7 +1888,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			await updateApprovalsSent(req.data.OFFERID);
 		}
 		await upsertQuotation(req);
-		await updateApprovalsSent(req.data.OFFERID);
 		return req.data;
 		}
 		catch(error){
