@@ -318,7 +318,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKU.PACKFACTOR,
         Offer.Tender.Institute.INCOTerms,
         @Core.Computed: false
-        ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
+        case when PricingPolicy.Type = 'BudgetedProfitability'
+            then PricingPolicy.Value 
+            else 0
+        end as VwBudgetedProfitability:Double
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer

@@ -412,8 +412,7 @@ entity PT_TMOFPR {
                                         //and BudgetedProfitability.HLEVEL4_CODE = SKU.Product.HLEVEL4_CODE
         PricingPolicy            : Association to MasterData.PricingPolicy
                                         on PricingPolicy.CountryCode = CountryCode
-                                        and PricingPolicy.ProductPackID = ProductCode
-                                        and PricingPolicy.Type = 'BudgetedProfitability';
+                                        and PricingPolicy.ProductPackID = ProductCode;
 }
 
 //brazil

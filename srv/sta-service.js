@@ -2756,18 +2756,18 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				CountryCode: offer.COUNTRYCODE
 			}
 
-			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
+			//const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
 			const productPricingTable = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricing));
 			//let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
 						
-			let finalDiscount;            
-			if (productPricing.UOM === "Unit") {
-				finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPU ))*100).toFixed(2));
-			} else {
-				finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPP ))*100).toFixed(2));
-			}
+			// let finalDiscount;            
+			// if (productPricing.UOM === "Unit") {
+			// 	finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPU ))*100).toFixed(2));
+			// } else {
+			// 	finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPP ))*100).toFixed(2));
+			// }
 			
-			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
+			//let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 			// EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
 			// let whereRoyalDecree = {
 			// 	ProductPackID: offerProduct.ProductCode,
@@ -2874,15 +2874,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				return tmpFreeGoodOther;
 			}));
 
-			// if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
-			// this should only be done for Italy & only for vatInWords
-			let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
-			if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
-				vatInWords += ",00";   
-			};
+			// // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
+			// // this should only be done for Italy & only for vatInWords
+			// let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
+			// if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
+			// 	vatInWords += ",00";   
+			// };
 
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
-			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
+			//const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
 			const productFreeGoodsOther = productConditions[0]?.FreeGoodsOther?.find(fg => fg.ProductPackId === offerProduct.ProductCode);
 			const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({
 				OfferID: offer.OFFERID,
@@ -2910,8 +2910,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				MANUFACTURER: offerProduct.MANUFACTURER,
 				SHELFLIFE: offerProduct.SHELFLIFE,
 				PRESENTATION: offerProduct.PRESENTATION,
-				VAT: dVat,
-				VAT_IN_WORDS: vatInWords,
+				VAT: 0,
+				VAT_IN_WORDS: '',
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
@@ -2951,13 +2951,13 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				NET_PRICE: offerProduct.NET_PRICE,
 				ADDITIONAL_DISCOUNT: offerProduct.ADDITIONAL_DISCOUNT,
 				ADDITIONAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.ADDITIONAL_DISCOUNT),
-				MAX_PRICE_NHS_PP: productPricing.MaxPriceNhsPP,
-				MAX_PRICE_NHS_PP_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPP),
-				MAX_PRICE_NHS_PU: productPricing.MaxPriceNhsPU,
-				MAX_PRICE_NHS_PU_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPU),
-				MAX_PRICE_NHS_PU_WITH_VAT: productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT),
-				MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT))),
-				CONTRACT_START_DATE: productPricing.ContractStartDate,
+				MAX_PRICE_NHS_PP: 0,
+				MAX_PRICE_NHS_PP_IN_WORDS: '',
+				MAX_PRICE_NHS_PU: 0,
+				MAX_PRICE_NHS_PU_IN_WORDS: '',
+				MAX_PRICE_NHS_PU_WITH_VAT: 0,
+				MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS: '',
+				CONTRACT_START_DATE: '',
 				NET_OFFER_PRICE_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.NET_OFFER_PRICE),
 				CUSTOMER_ID: institute.CustomerID,
 				COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
@@ -3043,8 +3043,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
 				ProductClass: offerProduct.ProductClass,
 				ProductDescription: offerProduct.ProductDescription,
-				FINAL_DISCOUNT: finalDiscount,
-				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
+				FINAL_DISCOUNT: 0,
+				FINAL_DISCOUNT_IN_WORDS: '',
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
 				LOTID: offerProduct.LOTID,
 				// PERCENTAGE: RoyalDecreePercentageValue.Percentage,
@@ -3071,7 +3071,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				Level2Discount2: productConditionstmp[0] && productConditionstmp[0].Level2Discount2,
 				AnnualDiscount_Percentage: productConditionstmp[0] && productConditionstmp[0].AnnualDiscount_Percentage,
 				NegotiationPrice: productConditionstmp[0] && productConditionstmp[0].NegotiationPrice,
-				PricingPolicyValue: pricingPolicy?.Value,
+				PricingPolicyValue: offerProduct.UK_BUDGETED_PROFITABILITY,
 				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan,
 				FreeGoodsQuantity: productFreeGoodsOther?.FreeGoodsOther,
 				FreeGoodsOther_Step: productFreeGoodsOther?.FreeGoodsOther_Step,
