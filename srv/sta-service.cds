@@ -318,7 +318,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKU.PACKFACTOR,
         Offer.Tender.Institute.INCOTerms,
         @Core.Computed: false
-        ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
+        case when PricingPolicy.Type = 'BudgetedProfitability'
+            then PricingPolicy.Value 
+            else 0
+        end as VwBudgetedProfitability:Double
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
@@ -498,9 +501,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
                 then freegoods.FreeGoodsOther_Step
             when freegoods.FreeGoodsOther_ABS_PCT = 'PCT'
-                then round(100 * freegoods.FreeGoodsOther) || '%'
+                then round(100 * freegoods.FreeGoodsOther, 2)
             else freegoods.FreeGoodsOther 
-        end as FOC:String,
+        end as FOC:Double,
         product.RequestedVolume as RequestedVolume: Integer,
         result.Custom.String_1 as Custom_String_1,
         result.Custom.String_2 as Custom_String_2,
