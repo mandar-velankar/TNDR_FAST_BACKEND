@@ -3333,7 +3333,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	}
 
 	function mappedApproverTypesForNonKAMTerritory (aApproverTypes, priceCondition, policy, ctryProductPack, currentDiscount) {
-		if (ctryProductPack.BU === "GM" || ctryProductPack.BU === "SM") {
+		if (ctryProductPack.BU === "PH") {
 			aApproverTypes.map(function (oApproverType) {
 				oApproverType.ApproverType === 'Sales Manager' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
 			});
