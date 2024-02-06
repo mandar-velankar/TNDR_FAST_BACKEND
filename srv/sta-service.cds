@@ -498,9 +498,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
                 then freegoods.FreeGoodsOther_Step
             when freegoods.FreeGoodsOther_ABS_PCT = 'PCT'
-                then round(100 * freegoods.FreeGoodsOther) || '%'
+                then round(100 * freegoods.FreeGoodsOther, 2)
             else freegoods.FreeGoodsOther 
-        end as FOC:String,
+        end as FOC:Double,
         product.RequestedVolume as RequestedVolume: Integer,
         result.Custom.String_1 as Custom_String_1,
         result.Custom.String_2 as Custom_String_2,
