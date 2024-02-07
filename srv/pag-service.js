@@ -1488,7 +1488,7 @@ module.exports = async (srv) => {
                         "ZTERM": "D496",
                         "ZLSCH": "M",
                         "ABREX": "TEST AGMNT",
-                        "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 876,
+                        "KOTABNR": institute.InstituteType === 'Ship-To' ? 750 : 582,
                         "KVEWE": "A",
                         "KAPPL": "V",
                         
