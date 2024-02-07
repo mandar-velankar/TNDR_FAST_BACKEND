@@ -673,7 +673,7 @@ module.exports = class processOpportunities extends BaseJob {
     console.log(`JOB (${this.jobName }): Start fetching Brazil SKUs from FAST table`);
     // get a list of distributors entities for given list of CustomerIDs
     const { PT_TMSKUPRDPCK } = this.db.entities("com.bayer.SXTENDER.MasterData");
-    const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'BR', ActiveRecord: 'Yes' } ));
+    const result = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'BR' } ));
     console.log(`JOB (${this.jobName }): End fetching Brazil SKUs from FAST table`);
     return result;
 }
