@@ -682,17 +682,9 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.SKU.ProductDescription as ProductDescription,
     ifnull(offerProduct.PricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
     case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
-    offerProduct.Results.AwardedPrice,
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
     offerProduct.Comment
-    // offerProduct.PriceCondition.Price0,
-    // offerProduct.PriceCondition.Price1,
-    // offerProduct.PriceCondition.Price3,
-    // offerProduct.PriceCondition.Level2Discount1,
-    // offerProduct.PriceCondition.Level2Discount2,
-    // offerProduct.PriceCondition.AnnualDiscount_Percentage,
-    // offerProduct.PriceCondition.NegotiationPrice
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -2268,6 +2260,13 @@ left outer join TransactionalData.PriceCondition as priceCondition
             AnnualDiscount_Percentage                   : Double;
             NegotiationPrice                            : Double;
             PricingPolicyValue                          : Double;
+            FreeGoodsQuantity                           : Double;
+            FreeGoodsOther_Step                         : Double;
+            FreeGoodsOther_ABS_PCT                      : String(4);
+            FOC_PRODUCTPACKNAME                         : String;
+            ADD_INCLUDE                                 : String;
+            Level3Discount1                             : Double;
+            Level1Discount1                             : Double;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2362,7 +2361,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.TotalDiscountInvoice,
     priceCondition.PriceConditionCode as PriceConditionCode,
     priceConditionClassification.ConditionType as PRICE_CONDITION,
-    priceCondition.Discount as DISCOUNT, 
+    priceCondition.Discount as DISCOUNT,
+    priceCondition.GeneralDiscount_Amount, 
+    priceCondition.SecondDiscount_Amount,
     product.Results.AwardedPrice,
     offer.OfferStatusTable.STATUS as OfferStatus,
     CASE 
@@ -2417,6 +2418,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.TotalYearlyValueBranch,
         priceCondition.TotalDiscountNHI,
         priceCondition.TotalDiscountInvoice,
+        priceCondition.GeneralDiscount_Amount, 
+        priceCondition.SecondDiscount_Amount,
         offer.OfferStatusTable.STATUS,
         product.Results.Outcome,
         foc.ProductPackId;
@@ -2437,8 +2440,11 @@ entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataVi
         TotalYearlyValueMainCustomer,
         TotalYearlyValueBranch,
         TotalDiscountNHI,
-        TotalDiscountInvoice
-}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate < CURRENT_DATE;
+        TotalDiscountInvoice,
+        GeneralDiscount_Amount,
+        SecondDiscount_Amount
+
+}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE;
 
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
@@ -2506,5 +2512,4 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
-    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate < CURRENT_DATE;
-
+    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW';

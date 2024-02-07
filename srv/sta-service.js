@@ -1291,6 +1291,25 @@ module.exports = async (srv) => {
 			})
 	}
 
+	srv.before(
+		['CREATE','UPDATE'], 
+		[
+			'PriceConditionTaiwanPriceView',
+			'PriceConditionTaiwanDiscountView'
+		], 
+		async (req) => {
+			try{
+			// validate form
+			!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
+			!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+			}
+			catch(error){
+				console.error('Error in validation of PriceCondition Taiwan View before CREATE');
+				return req.reject(403, error?.message||"Error in validation of PriceCondition Taiwan View before CREATE");
+			}
+		}
+	);
+
 	srv.on(
 		['CREATE','UPDATE'], 
 		[
@@ -1298,7 +1317,8 @@ module.exports = async (srv) => {
 			'PriceConditionDiscountView',
 			'PriceConditionPriceWithFOCView',
 			'PriceConditionDiscountWithFOCView',
-			'PriceConditionTaiwanPriceView'
+			'PriceConditionTaiwanPriceView',
+			'PriceConditionTaiwanDiscountView',
 		], 
 		async (req) => {
 			try{
@@ -1440,6 +1460,37 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				Price1: req.data.OfferPrice, 
 				Level3Discount1: req.data.Level3Discount1,
+				GeneralDiscount_Amount: (req.data.OfferPrice * req.data.Deductions),
+    			SecondDiscount_Amount: (req.data.OfferPrice * req.data.Level2Discount2),
+    			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
+    			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
+    			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
+				PriceConditionClassification_ID: req.data.ClassificationID
+			},
+			"TaiwanDiscount": {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level2Discount1:req.data.Deductions,
+				Level2Discount2:req.data.Level2Discount2,
+				AnnualDiscountForBranch:req.data.AnnualDiscountForBranch,
+				NegotiationPrice:req.data.NegotiationPrice,
+				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
+				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
+				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
+				TotalDiscountNHI:req.data.TotalDiscountNHI,
+				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
+				Price2: req.data.NetPrice,
+				Price3: req.data.Price3,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Level3Discount1,
+				GeneralDiscount_Amount: (req.data.OfferPrice * req.data.Deductions),
+    			SecondDiscount_Amount: (req.data.OfferPrice * req.data.Level2Discount2),
+    			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
+    			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
+    			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
 				PriceConditionClassification_ID: req.data.ClassificationID
 			}
 		}
@@ -1519,7 +1570,7 @@ module.exports = async (srv) => {
 			// FOCStep               : null, 
 			// FOCType               : null, 
 			Discount              : 0, 
-			OfferPrice            : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.OfferPrice, 
+			OfferPrice            : priceCondition.OfferPrice, 
 			Deductions            : 0, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
@@ -1638,7 +1689,7 @@ module.exports = async (srv) => {
 	}
 );
 
-srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
+srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscountView'], (items, req) => {
 	try{
 		if(!items) return [];
 
@@ -1652,12 +1703,12 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			item.Last12MonthsVolumeMainCustomer = await calculateLast12MonthsVolumeMainCustomer(item);
 			item.Last12MonthsVolumeBranch = await calculateLast12MonthsVolumeBranch(item);
 			item.NetPrice = await calculateNetOfferTaiwanPrice(item);
-			item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
-			item.Price3 = item.NetPrice - item.Level3Discount1;
-			item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
-			item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
-			item.TotalDiscountNHI = (item.BasePrice - item.Price3) / item.BasePrice;
-			item.TotalDiscountInvoice = (item.OfferPrice - item.Price3) / item.OfferPrice;
+			// item.Level3Discount1 = item.AnnualDiscountForBranch / item.AnticipatedYearlyVolumeBranch;
+			// item.Price3 = item.NetPrice - item.Level3Discount1;
+			// item.TotalYearlyValueMainCustomer = item.Price3 * item.AnticipatedYearlyVolumeMainCustomer;
+			// item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
+			item.TotalDiscountNHI = (item.TotalDiscountNHI * 100).toFixed(2) / 100;
+			item.TotalDiscountInvoice = (item.TotalDiscountInvoice * 100).toFixed(2) / 100;
 		};
 	}
 	catch(error){
@@ -1833,9 +1884,10 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		if(req.data.Submitted === true){
 			await upsertOfferStatus(req.data.OFFERID, req.data.TENDERID, 'Quotation Submitted');
 			delete req.data.Submitted;
+		}else {
+			await updateApprovalsSent(req.data.OFFERID);
 		}
 		await upsertQuotation(req);
-		await updateApprovalsSent(req.data.OFFERID);
 		return req.data;
 		}
 		catch(error){
@@ -2831,6 +2883,13 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
 			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
+			const productFreeGoodsOther = productConditions[0]?.FreeGoodsOther?.find(fg => fg.ProductPackId === offerProduct.ProductCode);
+			const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({
+				OfferID: offer.OFFERID,
+				ProductCode: offerProduct.ProductCode,
+				LotID: offerProduct.LOTID
+			}));
+
 
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -3000,20 +3059,27 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 				DistributorName: DistributorInfo?.DistributorName ?? null,
 				Address: DistributorInfo?.Address ?? null,
 				City: DistributorInfo?.City ?? null,
-				AwardedPrice: offerProduct.AwardedPrice,
+				AwardedPrice: awardedProduct?.AwardedPrice,
 				InstituteID: offer.INSTITUTE_ID,
 				EARLIEST_DATE: offerProduct.EARLIEST_DATE,
 				Comment: offerProduct.Comment,
 				PackSizeRequired: offerProduct.PackSizeRequired,
-				Price0: offerProduct.Price0,
-				Price1: offerProduct.Price1,
-				Price3: offerProduct.Price3,
-				Level2Discount1: offerProduct.Level2Discount1,
-				Level2Discount2: offerProduct.Level2Discount2,
-				AnnualDiscount_Percentage: offerProduct.AnnualDiscount_Percentage,
-				NegotiationPrice: offerProduct.NegotiationPrice,
+				Price0: productConditionstmp[0] && productConditionstmp[0].Price0,
+				Price1: productConditionstmp[0] && productConditionstmp[0].Price1,
+				Price3: productConditionstmp[0] && productConditionstmp[0].Price3,
+				Level2Discount1: productConditionstmp[0] && productConditionstmp[0].Level2Discount1,
+				Level2Discount2: productConditionstmp[0] && productConditionstmp[0].Level2Discount2,
+				AnnualDiscount_Percentage: productConditionstmp[0] && productConditionstmp[0].AnnualDiscount_Percentage,
+				NegotiationPrice: productConditionstmp[0] && productConditionstmp[0].NegotiationPrice,
 				PricingPolicyValue: pricingPolicy?.Value,
-				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan
+				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan,
+				FreeGoodsQuantity: productFreeGoodsOther?.FreeGoodsOther,
+				FreeGoodsOther_Step: productFreeGoodsOther?.FreeGoodsOther_Step,
+				FreeGoodsOther_ABS_PCT: productFreeGoodsOther?.FreeGoodsOther_ABS_PCT,
+				FOC_PRODUCTPACKNAME: productFreeGoodsOther && offerProduct.PRODUCTNAME,
+				ADD_INCLUDE: productFreeGoodsOther?.ADD_INCLUDE,
+				Level3Discount1: productConditionstmp[0] && productConditionstmp[0].Level3Discount1,
+				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -3225,7 +3291,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 		const policy = await tx.run(SELECT.one.from(PricingPolicyView).where({'CountryCode': offer.COUNTRYCODE, 'ProductPackID': product.ProductCode}));
 		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, 'ProductCode': product.ProductCode}));
 		const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
-		const offerHistory = await tx.run(SELECT.from(StandardTenderHistory).where({'INSTITUTE_ID': instituteTerritory.InstituteID, 'ProductCode': product.ProductCode}));
+		const offerHistory = await tx.run(SELECT.from(StandardTenderHistory).where({'INSTITUTE_ID': offer.INSTITUTE_ID, 'ProductCode': product.ProductCode}));
 		const lastHistoryPriceCondition = offerHistory[offerHistory.length-1];
 		const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({'OfferID': lastHistoryPriceCondition?.OfferID, 'ProductCode': lastHistoryPriceCondition?.ProductCode}));
 		let currentDiscount = null;
@@ -3715,7 +3781,7 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 	srv.on("READ", "CSVAttachment", async (req, res) => {
 		try{
-			let zuelligExtract = await SELECT.from(ZuelligExtractView).where({CountryCode: "TW"});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
 			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
 			const zuellig = req.data.Zuellig;
@@ -3729,82 +3795,9 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 			let mappedZuelligExtract = [];
 
 			if (zuellig) {
-				mappedZuelligExtract = zuelligExtract.map(item => {
-					return {
-						"CONT_PRICE": Number(item.Price1),
-						"DONATION": 0,
-						"GROUP": item.InstituteType,
-						"CCGRCD": item.Class || "",
-						"PACK": item.PACKFACTOR,
-						"Modified": new Date(item.SubmittedOn).toISOString(),
-						"QoNetPrice": Number(item.Price3),
-						"QoDisCP1": (item.Level2Discount1 * 100).toFixed(2),
-						"QoDisCM1": item.GeneralDiscount_Amount,
-						"QoDisCM2": item.SecondDiscount_Amount,
-						"QoDisCM5": item.FreeGoods_Percentage,
-						"QoDisCM6": item.AnnualDiscountForBranch,
-						"cusno": item.External_InstituteId,
-						"susnm": item.InstituteName,
-						"ProdNo": item.SKUCode || "",
-						"ProdName": item.PRODUCTPACKNAME,
-						"Territory": item.KAM_Territory,
-						"SDSNo.": item.CNPJ,
-						"SLSNO": item.KAM_Territory,
-						"STS": item.Status,
-						"BasePrice": Number(item.RegisteredPrice)
-					}
-				});
+				mappedZuelligExtract = mappedZuelligExtractView(zuelligExtract);
 			}else {
-				mappedZuelligExtract = zuelligExtract.map(item => {
-					const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
-					return {
-						"ApplyDate": new Date(item.CreationDate).toISOString(),
-						"ApplicantID": item.SubmittedBy,
-						"BUCode": item.BU,
-						"EffectiveDate": new Date(item.EffectiveDate).toISOString() || "",
-						"CurNetPrice": Number(item.Price3),
-						"pk": products.length,
-						"CONT_PRICE": Number(item.Price1),
-						"DONATION": 0,
-						"GROUP": item.InstituteType,
-						"CCGRCD": item.Class || "",
-						"CREATE_DAT": item.createdAt,
-						"CONCS": item.ParentInstituteID || "",
-						"Modified": new Date(item.SubmittedOn).toISOString(),
-						"QoInvPrice": Number(item.Price1),
-						"QoNetPrice": Number(item.Price3),
-						"QoTotal": item.TotalDiscountNHI,
-						"QoDisCP1": (item.Level2Discount1 * 100).toFixed(2),
-						"QoDisCM1": item.GeneralDiscount_Amount,
-						"QoDisCP2": (item.Level2Discount2 * 100).toFixed(2),
-						"QoDisCM2": item.SecondDiscount_Amount,
-						"QoDisCP3": 0,
-						"QoDisCP4": 0,
-						"QoDisCM4": 0,
-						"QoDisCP5": item.FreeGoods_Amount,
-						"QoDisCM5": item.FreeGoods_Percentage,
-						"QoDisCP6": item.AnnualDiscount_Percentage,
-						"QoDisCM6": item.AnnualDiscountForBranch,
-						"PASNumber": item.OfferID,
-						"Unmsr": item.UserName,
-						"cusno": item.External_InstituteId,
-						"susnm": item.InstituteName,
-						"ProdNo": item.SKUCode || "",
-						"ProdName": item.PRODUCTPACKNAME,
-						"Territory": item.KAM_Territory,
-						"BasePrice": Number(item.Price0),
-						"SDSNo.": item.CNPJ,
-						"SLSNO": item.KAM_Territory,
-						"CurrentBasePrice": Number(item.Price0),
-						"STS": item.Status,
-						"ItemNo": item.SKUCode || "",
-						"ItemName": item.PRODUCTPACKNAME,
-						"SBE": item.BU,
-						"BU": item.BU,
-						"Display": item.Display,
-						"Pack": item.PACKFACTOR || ""
-					}
-				});
+				mappedZuelligExtract = mappedSingleView(zuelligExtract, offerProducts);
 			}
 			
 			if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found");
@@ -3813,14 +3806,113 @@ srv.after('READ', 'PriceConditionTaiwanPriceView', (items, req) => {
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
 			req._.res.setHeader('Content-type', 'text/csv');
-
-			return _createStream(csv);
+			return _createStream(csv)
 		}
 		catch(error){
             console.error('Error in CSVAttachment READ');
             return req.reject(403, error?.message||"Error in CSVAttachment");
         }
 	});
+
+	srv.on("READ", "TaiwanFASTData", async (req, res) => {
+		try{
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+		
+			zuelligExtract = zuelligExtract.sort((a, b) => { 
+				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
+			});
+			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+
+			let mappedTaiwanFASTData = mappedSingleView(zuelligExtract, offerProducts);
+			
+			if (mappedTaiwanFASTData.length === 0) return req.reject(404, "No Zuellig Extracts were found");
+			
+			req._.res.json({
+				data: mappedTaiwanFASTData
+			});
+		}
+		catch(error){
+            console.error('Error in TaiwanFASTData READ');
+            return req.reject(403, error?.message||"Error in TaiwanFASTData");
+        }
+	});
+
+	function mappedZuelligExtractView (zuelligExtract) {
+		return zuelligExtract.map(item => {
+			return {
+				"Invoice Price": Number(item.Price1).toFixed(4),
+				"HandlingCharge_Amount": 0,
+				"Institute Type": item.InstituteType,
+				"Class": item.Class || "",
+				"PackFactor": item.PACKFACTOR,
+				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
+				"NetPrice": Number(item.Price3).toFixed(4),
+				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
+				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
+				"SecondDiscount_Amount": item.SecondDiscount_Amount.toFixed(4),
+				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
+				"CustomerID": item.External_InstituteId,
+				"InstituteName": item.InstituteName,
+				"SKUCode": item.SKUCode || "",
+				"ProductPackName": item.PRODUCTPACKNAME,
+				"KAM_Territory": item.KAM_Territory,
+				"ZuelligCustomerNumber.": item.CNPJ,
+				"Territory No.": item.KAM_Territory,
+				"Status": item.Status,
+				// "NHI_Price": Number(item.RegisteredPrice)
+			}
+		});
+	}
+
+	function mappedSingleView (zuelligExtract, offerProducts) { // TaiwanFASTData
+		return zuelligExtract.map(item => {
+			const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
+			return {
+				"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
+				"CWID": item.SubmittedBy,
+				"BU": item.BU,
+				"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
+				"PreviousNetPrice": Number(item.Price3).toFixed(4),
+				"CountProducts": products.length,
+				"Invoice Price": Number(item.Price1).toFixed(4),
+				"HandlingCharge_Amount": 0,
+				"Institute Type": item.InstituteType,
+				"Class": item.Class || "",
+				"PackFactor": item.PACKFACTOR || "",
+				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
+				"Branch": item.ParentInstituteID || "",
+				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
+				"InvoicePrice": Number(item.Price1).toFixed(4),
+				"NetPrice": Number(item.Price3).toFixed(4),
+				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(4),
+				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
+				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
+				"SecondDiscount_Percentage": (item.Level2Discount2 * 100).toFixed(4),
+				"SecondDiscount_Amount": item.SecondDiscount_Amount.toFixed(4),
+				"HandlingCharge_Percentage": 0,
+				"CashDiscount_Percentage": 0,
+				"CashDiscount_Amount": 0,
+				"FreeGoods_Percentage": (item.FreeGoods_Percentage * 100).toFixed(4),
+				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+				"AnnualDiscount_Percentage": (item.AnnualDiscount_Percentage * 100).toFixed(4),
+				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
+				"OfferID": item.OfferID,
+				"UserName": item.UserName,
+				"CustomerID": item.External_InstituteId,
+				"InstituteName": item.InstituteName,
+				"SKUCode": item.SKUCode || "",
+				"ProductPackName": item.PRODUCTPACKNAME,
+				"KAM_Territory": item.KAM_Territory,
+				"NHI_Price": Number(item.Price0).toFixed(4),
+				"ZuelligCustomerNumber": item.CNPJ,
+				"Territory No.": item.KAM_Territory,
+				"Current_NHI_Price": Number(item.Price0).toFixed(4),
+				"Status": item.Status
+			}
+		});
+	}
 	
 	function getUniqueFilterItems (filterItems) {
 		let uniqueItems = filterItems.reduce(function (a, b) {
