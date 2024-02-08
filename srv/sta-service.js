@@ -2028,6 +2028,37 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         }
 	});
 
+	srv.before(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (req) => {
+
+		try{
+			const existingDelivery = await SELECT.one.from(PT_TMDLVTR).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				SNo: req.data.SNo,
+				LotID: 1
+			});
+
+			if (!existingDelivery) {
+				const sku = await SELECT.one.from(PT_TMSKUPRDPCK).where({
+					CountryCode: req.data.CountryCode,
+					ProductPackID: req.data.ProductCode,
+					ActiveRecord: 'Yes'
+				})
+				req.data.SKUCode = sku.SKUCode;
+				req.data.SubmittedOn = new Date().toISOString();
+				req.data.SubmittedBy = req.user.id;     
+				req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");   
+				req.data.Active = 1;
+				req.data.LotID = 1; 
+			}
+			delete req.data.InstituteName;			           
+		}
+		catch(error){
+			console.error('Error in DeliveryTrackingDetailView CREATE');
+			return req.reject(403, error?.message||"Error in DeliveryTrackingDetailView CREATE");
+		}
+		
+	});
 	async function buildOfferApproval(tx, whereOffer) {
 
 		let results = [];
@@ -3936,5 +3967,14 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		stream.push(null)        
 	
 		return { value: stream }    
+	}
+
+	const getNextValue = async (table, fieldname) => {
+		let results = await cds.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
+		let nextValue = 1;
+		if (results[0].max) {
+			nextValue = results[0].max + 1
+		}
+		return nextValue
 	}
 }
