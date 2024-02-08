@@ -617,12 +617,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.AwardedQty,
         sum(ifnull(deliveries.ActualDeliveryQuantity,0)) as SumOfDeliveredAmount:Double,
         case 
-            when result.AwardedQty = 0 OR deliveries.ActualDeliveryQuantity is NULL then 0
+            when result.AwardedQty = 0 OR sum(deliveries.ActualDeliveryQuantity) is NULL then 0
             else sum(deliveries.ActualDeliveryQuantity)/ result.AwardedQty
         end as DeliveredPercentage:Double
     }
     where result.Outcome = 'Won'
-    group by product.TenderID, product.OfferID, product.ProductCode, product.CountryCode, result.AwardedProduct, result.AwardedQty, deliveries.ActualDeliveryQuantity;
+    group by product.TenderID, product.OfferID, product.ProductCode, product.CountryCode, result.AwardedProduct, result.AwardedQty;
 
     entity DeliveryTrackingDetailView as select from TransactionalData.PT_TMDLVTR
     {
@@ -642,7 +642,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         PaidOrFree,
         PO,
         InvoiceNo,
-        SNo,
+    key SNo,
         LotID,
         Institute.InstituteName
     };

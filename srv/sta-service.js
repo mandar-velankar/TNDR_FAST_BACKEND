@@ -2028,6 +2028,37 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         }
 	});
 
+	srv.before(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (req) => {
+
+		try{
+			const existingDelivery = await SELECT.one.from(PT_TMDLVTR).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				SNo: req.data.SNo,
+				LotID: 1
+			});
+
+			if (!existingDelivery) {
+				const sku = await SELECT.one.from(PT_TMSKUPRDPCK).where({
+					CountryCode: req.data.CountryCode,
+					ProductPackID: req.data.ProductCode,
+					ActiveRecord: 'Yes'
+				})
+				req.data.SKUCode = sku.SKUCode;
+				req.data.SubmittedOn = new Date().toISOString();
+				req.data.SubmittedBy = req.user.id;     
+				req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");   
+				req.data.Active = 1;
+				req.data.LotID = 1; 
+			}
+			delete req.data.InstituteName;			           
+		}
+		catch(error){
+			console.error('Error in DeliveryTrackingDetailView CREATE');
+			return req.reject(403, error?.message||"Error in DeliveryTrackingDetailView CREATE");
+		}
+		
+	});
 	async function buildOfferApproval(tx, whereOffer) {
 
 		let results = [];
@@ -3746,7 +3777,17 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
+			prd.NET_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
+			prd.NegotiationPrice = ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
+			prd.Price0 = prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
+			prd.Price1 = prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
+			prd.Price3 = prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
+			prd.Level1Discount1 = ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
+			prd.Level2Discount1 = ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
+			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
+			prd.Level3Discount1 = ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
+			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
@@ -3936,5 +3977,14 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		stream.push(null)        
 	
 		return { value: stream }    
+	}
+
+	const getNextValue = async (table, fieldname) => {
+		let results = await cds.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
+		let nextValue = 1;
+		if (results[0].max) {
+			nextValue = results[0].max + 1
+		}
+		return nextValue
 	}
 }
