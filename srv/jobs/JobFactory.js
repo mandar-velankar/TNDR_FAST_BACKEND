@@ -53,24 +53,25 @@ module.exports = class JobFactory {
                 return new ProcessMasterDataPrices(jobName,jobTime)
                 break;
             case this.jobNames.ProcessBrazilCustomers:
-                return new ProcessBrazilCustomers(jobName,jobTime);
+                return new ProcessBrazilCustomers(jobName,jobTime)
                 break;
             case this.jobNames.ProcessBrazilMaterials:
-                return new ProcessBrazilMaterials(jobName,jobTime);
+                return new ProcessBrazilMaterials(jobName,jobTime)
                 break;
             case this.jobNames.ProcessBrazilOpportunities:
-                return new ProcessBrazilOpportunities(jobName,jobTime);
+                return new ProcessBrazilOpportunities(jobName,jobTime)
                 break;
             case this.jobNames.ProcessEmpenho:
-                return new ProcessEmpenho(jobName,jobTime);
+                return new ProcessEmpenho(jobName,jobTime)
                 break;
             case this.jobNames.ProcessBrazilIbizContracts:
-                return new ProcessBrazilIbizContracts(jobName,jobTime);
+                return new ProcessBrazilIbizContracts(jobName,jobTime)
                 break;
             case this.jobNames.NewIBIZTenderNotifications:
-                return new NewIBIZTenderNotifications(jobName, jobTime);
+                return new NewIBIZTenderNotifications(jobName, jobTime)
+                break;
             case this.jobNames.ProcessTenderResults:
-                return new ProcessTenderResults(jobName,jobTime);
+                return new ProcessTenderResults(jobName,jobTime)
                 break;
             case this.jobNames.ProcessSpainRappelData:
                 return new ProcessSpainRappelData(jobName,jobTime)
