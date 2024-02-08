@@ -804,7 +804,7 @@ module.exports = async (srv) => {
         let SoldToInstituteType=[];
         let ShipToInstitute=[];
         let CombinationValue;
-        if(instituteID){
+        if(instituteID.length>0){
             const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
             let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } })); 
             SoldToInstituteType=institute.filter(item=>item.InstituteType === "Private Account" ||item.InstituteType === "Public Account");
