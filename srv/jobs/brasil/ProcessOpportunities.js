@@ -394,7 +394,7 @@ module.exports = class processOpportunities extends BaseJob {
             OfferID     : offer.OfferID,
             CountryCode : "BR",
             Active      : 1,
-            STATUS      : "Offer Created",
+            STATUS      : offer.OfferDeclined ? "Offer Declined" : "Offer Created",
             Date        : new Date().toISOString().slice(0,10)
         });
     }
@@ -403,6 +403,7 @@ module.exports = class processOpportunities extends BaseJob {
     const offersWithoutID = mappedOffers.map(ofr => { 
         const copy = {...ofr}; 
         delete copy.IBIZ_TECHNICAL_ID; 
+        delete copy.OfferDeclined;
         delete copy.NU_DIRETO_INDIRETO;
         delete copy.PriceConditionClassificationID;
         return copy;
@@ -842,6 +843,7 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST, pri
                 IBIZ_TECHNICAL_ID     : curr.ID, // this ID will be used to create relationship with the items and will be deleted afterwards
                 PriceConditionClassificationID : priceConditionClassificationId, //this ID will be used to create relationship with the PriceCondition items and will be deleted afterwards
                 NU_DIRETO_INDIRETO    : curr.NU_DIRETO_INDIRETO,
+                OfferDeclined         : (curr.DT_FINALIZADO == null || curr.NM_MOTIVO_FINALIZADO == null) ? false : true,
                 TenderID              : "", 
                 OfferID               : "", 
                 CountryCode           : "BR",
