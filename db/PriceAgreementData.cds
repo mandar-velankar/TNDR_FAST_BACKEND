@@ -14,7 +14,7 @@ using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
 using {com.bayer.SXTENDER.PriceAgreementDataViews} from './PriceAgreementDataViews';
 
 
-
+//EHQUT-CR6
 entity PriceAgreements: cuid, managed {
     ExpiryDate:  DateTime;
     EffectiveDate: DateTime;
@@ -53,7 +53,9 @@ entity PriceAgreements: cuid, managed {
     CancellationComment: String;
     LotID: Integer default 1;
     OldExpiryDate:DateTime; //EJUVE-CR3
+
     EmailNotificationSent: Boolean default false;//EHQUT-CR6
+
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId
@@ -120,6 +122,7 @@ entity CustomerPrices: cuid, managed {
     RefIdocNumber: String;
     Notified: Boolean default false;
     ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+
 }
 
 entity SettlementDates: managed {

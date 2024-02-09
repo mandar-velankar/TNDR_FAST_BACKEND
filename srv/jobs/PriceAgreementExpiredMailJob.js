@@ -9,7 +9,9 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         super(jobName, jobTime);
     }
 
+
         //EHQUT-CR6
+
     async onTick() {
 
         console.log('Processing mails for Cancelled Price Agreements started ...');
@@ -63,7 +65,9 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.Tender.User.UserName,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
                 pa.PriceConditions.PriceConditionCode,
+
                 pa.Institute.InstituteName
+
           
         }).where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
              
@@ -91,14 +95,16 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         
          for (let user of uniqueUsers) {
             let dataFilteredByUser = data.filter(d => d.ID === user);
-            
+
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
                     CountryCode: dataFilteredByUser[0].CountryCode,
                     TenderID: dataFilteredByUser[0].TenderId,
                     OfferID: dataFilteredByUser[0].OfferId,
                     Sender: 'FAST-Admin@bayer.com',
-                    Recipients:'COMMERCIALAGREEMENTS.ES@BAYER.COM',
+
+                    Recipients: 'kosal.kirthiga.ext@bayer.com',
+
                     Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
                     MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), {
                         data: {
