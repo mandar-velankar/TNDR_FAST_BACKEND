@@ -83,8 +83,10 @@ module.exports = class JobFactory {
                 return new PriceConditionsQualityControlNotificationMail(jobName,jobTime)
                 break;
             case this.jobNames.PriceAgreementExpiredMailJob:
+
                 return new PriceAgreementExpiredMailJob(jobName,jobTime)
                 break;
+
             default:
                 throw new Error('Job type not supported');
                 break;
@@ -112,6 +114,7 @@ module.exports = class JobFactory {
             ProcessTenderResults:"ProcessTenderResults",
             ProcessSpainRappelData: "ProcessSpainRappelData",
             PriceConditionQualityControl: "PriceConditionQualityControl",
+            PriceAgreementExpiredMailJob :"PriceAgreementExpiredMailJob",
             PriceConditionsQualityControlNotificationMail: "PriceConditionsQualityControlNotificationMail"
         };
     }

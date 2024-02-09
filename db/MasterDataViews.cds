@@ -212,6 +212,7 @@ entity Divisions as select from MasterData.PT_TMPRDHIER as ProductHierarchy{
 entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeRates;
 
 //italy
+//CR8
 entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
 	key CountryCode,
 	key ProductPackId,
@@ -229,7 +230,8 @@ entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
 	ConfidentialDiscount2,
 	TotalDiscount,
 	MaxPriceNhsPP,
-	MaxPriceNhsPU
+	MaxPriceNhsPU,
+	FloorPrice
 }where ValidTo = '9999-12-31 00:00:00.000000000';
 
 entity MostRecentMasterPricesView as projection on MasterData.MasterPrices 
