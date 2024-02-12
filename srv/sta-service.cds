@@ -714,4 +714,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity TaiwanFASTData {
        content    : LargeBinary @Core.MediaType : 'application/json';
     };
+
+    entity TenderChannelPaymentTermView as select from TransactionalData.PT_TMTEND as tender{
+        key CountryCode,
+        key TenderID,
+        TenderChannel,
+        case 
+            when TenderChannel = 'Direct'
+                then tender.Institute.PaymentTerms
+                else tender.Offer.Distributor.PaymentTerms
+        end as PaymentTerms: String 
+    };
 }
