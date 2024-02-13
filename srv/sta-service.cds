@@ -166,15 +166,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         CustomerID as CustomerID: String,
         inst.InstituteTerritory.Territory,
         inst.InstituteTerritory.IsKAM
-    };
+    }order by CountryCode, InstituteName;
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
         classification.COUNTRY_CODE as CountryCode: String(2)
-    };
+    }order by CLASSIFICATION;
     entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS as instType {
         *,
         instType.ChannelCountry as CountryCode: String(2)
-    };
+    }order by ChannelName;
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
 
     entity TenderOffers as projection on TransactionalDataViews.TenderOffers;
@@ -677,7 +677,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             InstituteID as QuotationInstituteID: String,
             InstituteName,
             PaymentTerms
-    };
+    }order by InstituteName;
 
     entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
         inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID{
