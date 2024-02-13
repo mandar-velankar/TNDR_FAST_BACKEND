@@ -727,4 +727,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 else tender.Offer.Distributor.PaymentTerms
         end as PaymentTerms: String 
     };
+
+    entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
 }
