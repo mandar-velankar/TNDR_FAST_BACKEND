@@ -677,7 +677,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             InstituteID as QuotationInstituteID: String,
             InstituteName,
             PaymentTerms
-    }order by InstituteName;
+    }
+    order by CountryCode, ParentInstituteID, InstituteName;
 
     entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
         inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID{
