@@ -624,28 +624,30 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     where result.Outcome = 'Won'
     group by product.TenderID, product.OfferID, product.ProductCode, product.CountryCode, result.AwardedProduct, result.AwardedQty;
 
-    entity DeliveryTrackingDetailView as select from TransactionalData.PT_TMDLVTR
-    {
-        TenderID,
-    key OfferID,        
-        CountryCode,
-        InstituteID,
-        SKUCode,
-        SubmittedOn,
-        SubmittedBy,
-        Active,
-        RequestedDeliveryDate,
-        RequestedQuantity,
-        ActualDeliveryDate,
-        ActualDeliveryQuantity,
-    key ProductCode,
-        PaidOrFree,
-        PO,
-        InvoiceNo,
-    key SNo,
-        LotID,
-        Institute.InstituteName
-    };
+    // entity DeliveryTrackingDetailView as select from TransactionalData.PT_TMDLVTR
+    // {
+    //     TenderID,
+    // key OfferID,        
+    //     CountryCode,
+    //     InstituteID,
+    //     SKUCode,
+    //     SubmittedOn,
+    //     SubmittedBy,
+    //     Active,
+    //     RequestedDeliveryDate,
+    //     RequestedQuantity,
+    //     ActualDeliveryDate,
+    //     ActualDeliveryQuantity,
+    // key ProductCode,
+    //     PaidOrFree,
+    //     PO,
+    //     InvoiceNo,
+    // key SNo,
+    //     LotID,
+    //     Institute.InstituteName
+    // };
+
+    entity DeliveryTrackingDetailView as projection on TransactionalData.PT_TMDLVTR;
 
     entity PdfEmail: cuid, managed {
         URL : String;
