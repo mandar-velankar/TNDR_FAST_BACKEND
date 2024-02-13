@@ -2243,7 +2243,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		//Payment Terms need to be specified by item number if not same for all
 		let paymentTerms = offer.PaymentTerms;
-
+		shipmentTerms = offer.ShipmentTerms;
 		/**
 		 * In this commented fields we use offerProduct PaymentTerms field.
 		 * It is not needed to use offerProduct PaymentTerms field because offer has it's own PaymentTerm field --> Custom_String_1
@@ -2288,6 +2288,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			}
 			deliveryTerms = deliveryTermsRow.join("<br>")
 		}
+		deliveryTerms = offer.DeliveryTerms;
 
 		
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
