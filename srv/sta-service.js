@@ -2643,7 +2643,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		});
 
-		//For MEA specific
+		/*//For MEA specific
 		//No need for country business approval if regional business approval is required
 		let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
 		let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
@@ -2658,7 +2658,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if(tenderyear> '22' && regionname === 'MEA'){
 			aApproverTypes.splice(CountryBusinessindex,1);
 						
-		}
+		}*/
 		
 		//For Thailand specific
 		//EHQUT-197882-Thailand - Additional approver for Nalador
