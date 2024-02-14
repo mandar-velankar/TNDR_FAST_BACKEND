@@ -1768,8 +1768,22 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
 		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
 		**/
-		//Cases 1,2 and 3
-		if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return item.OfferPrice;
+		//Cases 1 and 2
+		if(foc.length === 0 || !containsOfferProduct) return item.OfferPrice;
+
+		// Cases 3
+		if(containsOfferProductAndIsAdded) {
+			const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
+			switch(addedFOC.FreeGoodsOther_ABS_PCT){
+				case "ABS":
+					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume + addedFOC.FreeGoodsOther);
+				case "PCT":
+					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume * (1 + addedFOC.FreeGoodsOther));
+				case "STP":
+					return item.RequestedVolume * item.OfferPrice / ((item.RequestedVolume + item.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
+			}
+		}
+
 		// Cases 4
 		if(containsOfferProductAndIsIncluded) {
 			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
@@ -1797,6 +1811,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
 			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		}
+
+		function getAddedFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
 		}
 	}
 	
@@ -1827,15 +1845,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		//Cases 1,2 and 3
 		if(foc.length === 0 || !containsOfferProduct) return (item.OfferPrice * (1 - item.Deductions - item.Level2Discount2)); 
 		// Cases 4
-		if(containsOfferProductAndIsIncluded) {
-			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-			switch(includedFOC.FreeGoodsOther_ABS_PCT){
+		if(containsOfferProductAndIsIncluded || containsOfferProductAndIsAdded) {
+			const FOC = getFOCWitSameProductCode(foc, offerProduct);
+			switch(FOC.FreeGoodsOther_ABS_PCT){
 				case "ABS":
-					focVolume = includedFOC.FreeGoodsOther;
+					focVolume = FOC.FreeGoodsOther;
 				case "PCT":
-					focVolume = includedFOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
+					focVolume = FOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
 				case "STP":
-					focVolume = (item.AnticipatedYearlyVolumeBranch / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
+					focVolume = (item.AnticipatedYearlyVolumeBranch / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
 			}
 		}
 
@@ -1865,8 +1883,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 		}
 
-		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		function getFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct);
 		}
 
 		return netOfferPrice;
@@ -2625,7 +2643,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		});
 
-		//For MEA specific
+		/*//For MEA specific
 		//No need for country business approval if regional business approval is required
 		let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
 		let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
@@ -2640,7 +2658,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if(tenderyear> '22' && regionname === 'MEA'){
 			aApproverTypes.splice(CountryBusinessindex,1);
 						
-		}
+		}*/
 		
 		//For Thailand specific
 		//EHQUT-197882-Thailand - Additional approver for Nalador
@@ -3899,27 +3917,23 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	function mappedZuelligExtractView (zuelligExtract) {
 		return zuelligExtract.map(item => {
 			return {
-				"Invoice Price": Number(item.Price1).toFixed(4),
-				"HandlingCharge_Amount": 0,
-				"Institute Type": item.InstituteType,
-				"Class": item.Class || "",
-				"PackFactor": item.PACKFACTOR,
-				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-				"NetPrice": Number(item.Price3).toFixed(4),
-				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
-				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
-				"SecondDiscount_Amount": item.SecondDiscount_Amount.toFixed(4),
-				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
-				"CustomerID": item.External_InstituteId,
+				"KAM_Territory": item.KAM_Territory,
+				"ZuelligCustomerNumber.": item.CNPJ,
 				"InstituteName": item.InstituteName,
 				"SKUCode": item.SKUCode || "",
 				"ProductPackName": item.PRODUCTPACKNAME,
-				"KAM_Territory": item.KAM_Territory,
-				"ZuelligCustomerNumber.": item.CNPJ,
-				"Territory No.": item.KAM_Territory,
-				"Status": item.Status,
-				// "NHI_Price": Number(item.RegisteredPrice)
+				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4),
+				"Invoice Price": Number(item.Price1).toFixed(4),
+				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
+				"HandlingCharge_Amount": 0,
+				"HandlingCharge_Amount2": 0,
+				"CashDiscount_Amount": 0,
+				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
+				"FGBuy": 0,
+				"FGGift": 0,
+				"NetPrice": Number(item.Price3).toFixed(4),
+				"BT": "BT"
 			}
 		});
 	}
@@ -3942,7 +3956,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
 				"Branch": item.ParentInstituteID || "",
 				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-				"InvoicePrice": Number(item.Price1).toFixed(4),
 				"NetPrice": Number(item.Price3).toFixed(4),
 				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(4),
 				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
@@ -3967,7 +3980,16 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"ZuelligCustomerNumber": item.CNPJ,
 				"Territory No.": item.KAM_Territory,
 				"Current_NHI_Price": Number(item.Price0).toFixed(4),
-				"Status": item.Status
+				"Status": item.Status,
+				"NetOfferPrice": Number(item.Price2).toFixed(4),
+				"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
+				"BranchNumber": item.ParentInst_External_InstituteId || '',
+				"PriceRequestFrameworkID": item.TenderID,
+				"HandlingCharge_Amount2": 0,
+				"FGBuy": 0,
+				"FGGift": 0,
+				"BT": "BT",
+				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4)
 			}
 		});
 	}

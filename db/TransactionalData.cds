@@ -288,7 +288,7 @@ entity PT_TMDLVTR {
         PO                     : String(255);
         InvoiceNo              : String(255);
     key SNo                    : Integer not null;
-        Contract               : String(10);
+        Contract               : String;
         PoDate                 : Date;
         //EHEEX-OTT - 105262-Adding new 3 fields for delivery tracking tab
         ActualDeliveredProduct :String(100);

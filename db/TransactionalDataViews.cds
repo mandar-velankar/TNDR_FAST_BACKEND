@@ -2453,8 +2453,10 @@ entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataVi
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
+            and inst.CountryCode = tender.CountryCode
         left join MasterData.PT_TMINSHIER as hier 
             on hier.InstituteID = tender.InstituteID 
+            or hier.ParentInstituteID = tender.InstituteID
         inner join TransactionalData.PT_TMOFRS as offer 
             on tender.TenderID = offer.TenderID
         inner join TransactionalData.PT_TMOFPR as pr 
@@ -2475,7 +2477,10 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             and ctpck.PRODUCTPACKID = pr.ProductCode
         inner join MasterData.PT_TMREGPR as regpr 
             on regpr.CountryCode = tender.CountryCode 
-            and regpr.ProductPackID = pr.ProductCode {
+            and regpr.ProductPackID = pr.ProductCode
+        left join MasterData.PT_TMINST as parentInst 
+            on parentInst.InstituteID = hier.ParentInstituteID 
+            and parentInst.CountryCode = tender.CountryCode {
             key tender.TenderID,
             tender.createdAt,
             key offer.OfferID,
@@ -2489,6 +2494,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             inst.InstituteType,
             inst.InstituteID,
             ifnull(inst.External_InstituteId, '') as External_InstituteId,
+            ifnull(parentInst.External_InstituteId, '') as ParentInst_External_InstituteId,
             inst.Class,
             ifnull(inst.KAM_Territory, '') as KAM_Territory,
             ifnull(inst.CNPJ, '') as CNPJ,
@@ -2517,12 +2523,14 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 else 'Suspend'
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
-    }
+    }where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW'
     union select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
+            and inst.CountryCode = tender.CountryCode
         left join MasterData.PT_TMINSHIER as hier 
             on hier.InstituteID = tender.InstituteID 
+            or hier.ParentInstituteID = tender.InstituteID
         inner join TransactionalData.PT_TMOFRS as offer 
             on tender.TenderID = offer.TenderID
         inner join TransactionalData.PT_TMOFPR as pr 
@@ -2544,9 +2552,12 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
         inner join MasterData.PT_TMREGPR as regpr 
             on regpr.CountryCode = tender.CountryCode 
             and regpr.ProductPackID = pr.ProductCode
-        left join TaiwanInstituteInBranchView as branch
+        inner join TaiwanInstituteInBranchView as branch
 	        on hier.ParentInstituteID = branch.ParentInstituteID
-	        and tender.InstituteID <> branch.InstituteID {
+	        and tender.InstituteID <> branch.InstituteID
+        left join MasterData.PT_TMINST as parentInst 
+            on parentInst.InstituteID = hier.ParentInstituteID 
+            and parentInst.CountryCode = tender.CountryCode {
             key tender.TenderID,
             tender.createdAt,
             key offer.OfferID,
@@ -2560,6 +2571,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             branch.InstituteType,
             branch.InstituteID,
             ifnull(branch.External_InstituteId, '') as External_InstituteId,
+            ifnull(parentInst.External_InstituteId, '') as ParentInst_External_InstituteId,
             branch.Class,
             ifnull(branch.KAM_Territory, '') as KAM_Territory,
             ifnull(branch.CNPJ, '') as CNPJ,
