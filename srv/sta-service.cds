@@ -166,15 +166,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         CustomerID as CustomerID: String,
         inst.InstituteTerritory.Territory,
         inst.InstituteTerritory.IsKAM
-    };
+    }order by CountryCode, InstituteName;
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
         classification.COUNTRY_CODE as CountryCode: String(2)
-    };
+    }order by CLASSIFICATION;
     entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS as instType {
         *,
         instType.ChannelCountry as CountryCode: String(2)
-    };
+    }order by ChannelName;
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
 
     entity TenderOffers as projection on TransactionalDataViews.TenderOffers;
@@ -500,6 +500,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         case 
             when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
                 then freegoods.FreeGoodsOther_Step
+            when freegoods.FreeGoodsOther_ABS_PCT = 'PCT'
+                then round(100 * freegoods.FreeGoodsOther, 2)
             else freegoods.FreeGoodsOther 
         end as FOC:Double,
         product.RequestedVolume as RequestedVolume: Integer,
@@ -615,35 +617,37 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.AwardedQty,
         sum(ifnull(deliveries.ActualDeliveryQuantity,0)) as SumOfDeliveredAmount:Double,
         case 
-            when result.AwardedQty = 0 OR deliveries.ActualDeliveryQuantity is NULL then 0
+            when result.AwardedQty = 0 OR sum(deliveries.ActualDeliveryQuantity) is NULL then 0
             else sum(deliveries.ActualDeliveryQuantity)/ result.AwardedQty
         end as DeliveredPercentage:Double
     }
     where result.Outcome = 'Won'
-    group by product.TenderID, product.OfferID, product.ProductCode, product.CountryCode, result.AwardedProduct, result.AwardedQty, deliveries.ActualDeliveryQuantity;
+    group by product.TenderID, product.OfferID, product.ProductCode, product.CountryCode, result.AwardedProduct, result.AwardedQty;
 
-    entity DeliveryTrackingDetailView as select from TransactionalData.PT_TMDLVTR
-    {
-        TenderID,
-    key OfferID,        
-        CountryCode,
-        InstituteID,
-        SKUCode,
-        SubmittedOn,
-        SubmittedBy,
-        Active,
-        RequestedDeliveryDate,
-        RequestedQuantity,
-        ActualDeliveryDate,
-        ActualDeliveryQuantity,
-    key ProductCode,
-        PaidOrFree,
-        PO,
-        InvoiceNo,
-        SNo,
-        LotID,
-        Institute.InstituteName
-    };
+    // entity DeliveryTrackingDetailView as select from TransactionalData.PT_TMDLVTR
+    // {
+    //     TenderID,
+    // key OfferID,        
+    //     CountryCode,
+    //     InstituteID,
+    //     SKUCode,
+    //     SubmittedOn,
+    //     SubmittedBy,
+    //     Active,
+    //     RequestedDeliveryDate,
+    //     RequestedQuantity,
+    //     ActualDeliveryDate,
+    //     ActualDeliveryQuantity,
+    // key ProductCode,
+    //     PaidOrFree,
+    //     PO,
+    //     InvoiceNo,
+    // key SNo,
+    //     LotID,
+    //     Institute.InstituteName
+    // };
+
+    entity DeliveryTrackingDetailView as projection on TransactionalData.PT_TMDLVTR;
 
     entity PdfEmail: cuid, managed {
         URL : String;
@@ -657,7 +661,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
 
-    entity ChildInstitutesView as select from MasterData.PT_TMINST as inst
+    entity ChildInstitutes as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
         key hier.ParentInstituteID,
         key hier.InstituteID,
@@ -674,6 +678,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             InstituteName,
             PaymentTerms
     };
+
+    entity ChildInstitutesView as select from ChildInstitutes{
+        *,
+    }order by InstituteName;
 
     entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
         inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID{
@@ -712,4 +720,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity TaiwanFASTData {
        content    : LargeBinary @Core.MediaType : 'application/json';
     };
+
+    entity TenderChannelPaymentTermView as select from TransactionalData.PT_TMTEND as tender{
+        key CountryCode,
+        key TenderID,
+        TenderChannel,
+        case 
+            when TenderChannel = 'Direct'
+                then tender.Institute.PaymentTerms
+                else tender.Offer.Distributor.PaymentTerms
+        end as PaymentTerms: String 
+    };
+
+    entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
 }

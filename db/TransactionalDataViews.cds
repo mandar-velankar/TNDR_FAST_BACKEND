@@ -872,6 +872,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.BidDueDate as BID_DUE_DATE,
     offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY,
     offer.Custom.String_1 as PaymentTerms,
+    offer.Custom.String_2 as DeliveryTerms,
+    offer.Custom.String_3 as ShipmentTerms,
     offer.AffiliateOffer,
     offer.Tender.Custom.String_1 as TENDERCONTACT,
     offer.Tender.TenderChannel,
@@ -955,6 +957,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.BidDueDate,
           offer.Quotation.SubmittedBy,
           offer.Custom.String_1,
+          offer.Custom.String_2,
+          offer.Custom.String_3,
           offer.Tender.Custom.String_1,
           date_settings.NextYearDelta,
           date_settings.NextDay,
@@ -2449,8 +2453,10 @@ entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataVi
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
+            and inst.CountryCode = tender.CountryCode
         left join MasterData.PT_TMINSHIER as hier 
             on hier.InstituteID = tender.InstituteID 
+            or hier.ParentInstituteID = tender.InstituteID
         inner join TransactionalData.PT_TMOFRS as offer 
             on tender.TenderID = offer.TenderID
         inner join TransactionalData.PT_TMOFPR as pr 
@@ -2471,19 +2477,24 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             and ctpck.PRODUCTPACKID = pr.ProductCode
         inner join MasterData.PT_TMREGPR as regpr 
             on regpr.CountryCode = tender.CountryCode 
-            and regpr.ProductPackID = pr.ProductCode {
+            and regpr.ProductPackID = pr.ProductCode
+        left join MasterData.PT_TMINST as parentInst 
+            on parentInst.InstituteID = hier.ParentInstituteID 
+            and parentInst.CountryCode = tender.CountryCode {
+            key tender.TenderID,
+            tender.createdAt,
             key offer.OfferID,
             key offer.CountryCode,
             offer.CreationDate,
             offer.SubmittedBy,
             offer.SubmittedOn,
-            tender.createdAt,
             CreatedByUser.UserName,
             pr.ProductCode,
             inst.InstituteName,
             inst.InstituteType,
             inst.InstituteID,
             ifnull(inst.External_InstituteId, '') as External_InstituteId,
+            ifnull(parentInst.External_InstituteId, '') as ParentInst_External_InstituteId,
             inst.Class,
             ifnull(inst.KAM_Territory, '') as KAM_Territory,
             ifnull(inst.CNPJ, '') as CNPJ,
@@ -2496,6 +2507,84 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             ifnull(ctpck.BU, '') as BU,
             ifnull(pc.Price0, 0) as Price0,
             ifnull(pc.Price1, 0) as Price1,
+            ifnull(pc.Price2, 0) as Price2,
+            ifnull(pc.Price3, 0) as Price3,
+            ifnull(pc.TotalDiscountNHI, 0) as TotalDiscountNHI,
+            ifnull(pc.Level2Discount1, 0) as Level2Discount1,
+			ifnull(pc.Level2Discount2, 0) as Level2Discount2,
+			ifnull(pc.GeneralDiscount_Amount, 0) as GeneralDiscount_Amount,
+    		ifnull(pc.SecondDiscount_Amount, 0) as SecondDiscount_Amount,
+    		ifnull(pc.FreeGoods_Amount, 0) as FreeGoods_Amount,
+    		ifnull(pc.FreeGoods_Percentage, 0) as FreeGoods_Percentage,
+    		ifnull(pc.AnnualDiscount_Percentage, 0) as AnnualDiscount_Percentage,
+    		ifnull(pc.AnnualDiscountForBranch, 0) as AnnualDiscountForBranch,
+            case when sku.ActiveRecord = 'Yes'
+                then 'Active'
+                else 'Suspend'
+            end as Status: String,
+            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
+    }where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW'
+    union select from TransactionalData.PT_TMTEND as tender  
+        inner join MasterData.PT_TMINST as inst 
+            on inst.InstituteID = tender.InstituteID 
+            and inst.CountryCode = tender.CountryCode
+        left join MasterData.PT_TMINSHIER as hier 
+            on hier.InstituteID = tender.InstituteID 
+            or hier.ParentInstituteID = tender.InstituteID
+        inner join TransactionalData.PT_TMOFRS as offer 
+            on tender.TenderID = offer.TenderID
+        inner join TransactionalData.PT_TMOFPR as pr 
+            on pr.OfferID = offer.OfferID
+        inner join TransactionalData.PT_TMQUTO as quotation 
+            on quotation.OfferID = offer.OfferID
+        inner join TransactionalData.PriceCondition as pc 
+            on pc.OfferID = offer.OfferID 
+            and pc.ProductCode = pr.ProductCode 
+        inner join AdminData.PT_TMUSER as CreatedByUser 
+            on CreatedByUser.UserID = offer.SubmittedBy 
+        inner join MasterData.PT_TMSKUPRDPCK as sku
+             on sku.ProductPackID = pr.ProductCode 
+        inner join MasterData.PT_TMPRDPCK as pck 
+            on pck.PRODUCTPACKID = pr.ProductCode
+        inner join MasterData.PT_TMCTPRDPCK as ctpck 
+            on ctpck.COUNTRYCODE = tender.CountryCode
+            and ctpck.PRODUCTPACKID = pr.ProductCode
+        inner join MasterData.PT_TMREGPR as regpr 
+            on regpr.CountryCode = tender.CountryCode 
+            and regpr.ProductPackID = pr.ProductCode
+        inner join TaiwanInstituteInBranchView as branch
+	        on hier.ParentInstituteID = branch.ParentInstituteID
+	        and tender.InstituteID <> branch.InstituteID
+        left join MasterData.PT_TMINST as parentInst 
+            on parentInst.InstituteID = hier.ParentInstituteID 
+            and parentInst.CountryCode = tender.CountryCode {
+            key tender.TenderID,
+            tender.createdAt,
+            key offer.OfferID,
+            key offer.CountryCode,
+            offer.CreationDate,
+            offer.SubmittedBy,
+            offer.SubmittedOn,
+            CreatedByUser.UserName,
+            pr.ProductCode,
+            branch.InstituteName,
+            branch.InstituteType,
+            branch.InstituteID,
+            ifnull(branch.External_InstituteId, '') as External_InstituteId,
+            ifnull(parentInst.External_InstituteId, '') as ParentInst_External_InstituteId,
+            branch.Class,
+            ifnull(branch.KAM_Territory, '') as KAM_Territory,
+            ifnull(branch.CNPJ, '') as CNPJ,
+            hier.ParentInstituteID,
+            quotation.EffectiveDate,
+            ifnull(pck.PRODUCTPACKNAME, '') as PRODUCTPACKNAME,
+            pck.PACKFACTOR,
+            sku.SKUCode,
+            ifnull(sku.ActiveRecord , '')as Display,
+            ifnull(ctpck.BU, '') as BU,
+            ifnull(pc.Price0, 0) as Price0,
+            ifnull(pc.Price1, 0) as Price1,
+            ifnull(pc.Price2, 0) as Price2,
             ifnull(pc.Price3, 0) as Price3,
             ifnull(pc.TotalDiscountNHI, 0) as TotalDiscountNHI,
             ifnull(pc.Level2Discount1, 0) as Level2Discount1,
@@ -2513,3 +2602,19 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
     where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW';
+
+
+    entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
+        inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
+        key hier.ParentInstituteID,
+        key hier.InstituteID,
+        key CountryCode,
+            inst.InstituteName,
+            inst.PaymentTerms,
+            inst.CNPJ,
+            inst.KAM_Territory,
+            inst.External_InstituteId,
+            inst.Class,
+            inst.InstituteType
+    }
+    where CountryCode = 'TW';

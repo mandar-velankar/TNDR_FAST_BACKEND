@@ -95,6 +95,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     entity Settlements as projection on MasterData.Settlements;
     entity SettlementDates as projection on PriceAgreementData.SettlementDates;
     entity MasterPrices as projection on MasterDataViews.MostRecentMasterPricesView;
+    entity PriceAgreement_APPRST as projection on PriceAgreementData.PriceAgreement_APPRST; //EJUVE-CR3
     //Brazil
     entity LotProducts as projection on TransactionalData.LotProduct;
 
@@ -116,4 +117,23 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
 
     action syncPriceAgreements(ids : array of String);
     // action syncFocCustPrices(ids : array of String);
+     //EJUVE-CR3 START
+      entity PriceagreementOffers {
+          PriceagreementID: UUID;
+		  TenderID: String;
+		  OfferID: String;
+		  InstituteID: Integer;
+		  InstituteName: String;
+		  CustomerID: Integer;
+		  ProductPackID: Integer;
+		  ProductPackNAME: String;
+          Status : String;
+          ID : UUID;
+		  EffectiveDate: Date;
+		  ExpiryDate: Date;
+		  OldExpiryDate: Date;
+          UserEmail : String;
+          
+} 
+//EJUVE-CR3 END
 }
