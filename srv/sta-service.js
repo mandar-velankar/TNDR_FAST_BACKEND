@@ -1768,8 +1768,22 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
 		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
 		**/
-		//Cases 1,2 and 3
-		if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return item.OfferPrice;
+		//Cases 1 and 2
+		if(foc.length === 0 || !containsOfferProduct) return item.OfferPrice;
+
+		// Cases 3
+		if(containsOfferProductAndIsAdded) {
+			const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
+			switch(addedFOC.FreeGoodsOther_ABS_PCT){
+				case "ABS":
+					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume + addedFOC.FreeGoodsOther);
+				case "PCT":
+					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume * (1 + addedFOC.FreeGoodsOther));
+				case "STP":
+					return item.RequestedVolume * item.OfferPrice / ((item.RequestedVolume + item.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
+			}
+		}
+
 		// Cases 4
 		if(containsOfferProductAndIsIncluded) {
 			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
@@ -1797,6 +1811,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
 			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		}
+
+		function getAddedFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
 		}
 	}
 	
@@ -1827,15 +1845,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		//Cases 1,2 and 3
 		if(foc.length === 0 || !containsOfferProduct) return (item.OfferPrice * (1 - item.Deductions - item.Level2Discount2)); 
 		// Cases 4
-		if(containsOfferProductAndIsIncluded) {
-			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-			switch(includedFOC.FreeGoodsOther_ABS_PCT){
+		if(containsOfferProductAndIsIncluded || containsOfferProductAndIsAdded) {
+			const FOC = getFOCWitSameProductCode(foc, offerProduct);
+			switch(FOC.FreeGoodsOther_ABS_PCT){
 				case "ABS":
-					focVolume = includedFOC.FreeGoodsOther;
+					focVolume = FOC.FreeGoodsOther;
 				case "PCT":
-					focVolume = includedFOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
+					focVolume = FOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
 				case "STP":
-					focVolume = (item.AnticipatedYearlyVolumeBranch / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
+					focVolume = (item.AnticipatedYearlyVolumeBranch / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
 			}
 		}
 
@@ -1865,8 +1883,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 		}
 
-		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		function getFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct);
 		}
 
 		return netOfferPrice;
@@ -2028,6 +2046,53 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         }
 	});
 
+	srv.before(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (req) => {
+
+		try{
+			const today = new Date().toISOString().slice(0, 10);
+
+			const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'DeliveryDetails', CountryCode: req?.data?.CountryCode, ProductScope: "All"}));
+
+			const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+			
+			for (const item of mandatoryFielddata) {
+				let frontendField = item.Field;
+				if (frontendField.includes("path")) {
+					const match = regex.exec(frontendField);
+					frontendField = match ? match[1] : frontendField;
+				}
+			
+				if (
+					!(frontendField in req.data) ||
+					req.data[frontendField] === null ||
+					req.data[frontendField] === ''
+				) {
+					req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+				}
+			}	
+
+			const existingDelivery = await SELECT.one.from(PT_TMDLVTR).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				SNo: req.data.SNo,
+				LotID: 1
+			});
+
+			if (!existingDelivery) {
+				req.data.SubmittedOn = new Date().toISOString();
+				req.data.SubmittedBy = req.user.id;     
+				req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");   
+				req.data.Active = 1;
+				req.data.LotID = 1; 
+			}
+			delete req.data.InstituteName;			           
+		}
+		catch(error){
+			console.error('Error in DeliveryTrackingDetailView CREATE');
+			return req.reject(403, error?.message||"Error in DeliveryTrackingDetailView CREATE");
+		}
+		
+	});
 	async function buildOfferApproval(tx, whereOffer) {
 
 		let results = [];
@@ -2212,7 +2277,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		//Payment Terms need to be specified by item number if not same for all
 		let paymentTerms = offer.PaymentTerms;
-
+		shipmentTerms = offer.ShipmentTerms;
 		/**
 		 * In this commented fields we use offerProduct PaymentTerms field.
 		 * It is not needed to use offerProduct PaymentTerms field because offer has it's own PaymentTerm field --> Custom_String_1
@@ -2257,6 +2322,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			}
 			deliveryTerms = deliveryTermsRow.join("<br>")
 		}
+		deliveryTerms = offer.DeliveryTerms;
 
 		
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
@@ -2577,7 +2643,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		});
 
-		//For MEA specific
+		/*//For MEA specific
 		//No need for country business approval if regional business approval is required
 		let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
 		let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
@@ -2592,7 +2658,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if(tenderyear> '22' && regionname === 'MEA'){
 			aApproverTypes.splice(CountryBusinessindex,1);
 						
-		}
+		}*/
 		
 		//For Thailand specific
 		//EHQUT-197882-Thailand - Additional approver for Nalador
@@ -3333,7 +3399,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	}
 
 	function mappedApproverTypesForNonKAMTerritory (aApproverTypes, priceCondition, policy, ctryProductPack, currentDiscount) {
-		if (ctryProductPack.BU === "GM" || ctryProductPack.BU === "SM") {
+		if (ctryProductPack.BU === "PH") {
 			aApproverTypes.map(function (oApproverType) {
 				oApproverType.ApproverType === 'Sales Manager' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
 			});
@@ -3746,7 +3812,17 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
+			prd.NET_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
+			prd.NegotiationPrice = ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
+			prd.Price0 = prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
+			prd.Price1 = prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
+			prd.Price3 = prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
+			prd.Level1Discount1 = ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
+			prd.Level2Discount1 = ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
+			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
+			prd.Level3Discount1 = ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
+			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
@@ -3841,27 +3917,23 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	function mappedZuelligExtractView (zuelligExtract) {
 		return zuelligExtract.map(item => {
 			return {
-				"Invoice Price": Number(item.Price1).toFixed(4),
-				"HandlingCharge_Amount": 0,
-				"Institute Type": item.InstituteType,
-				"Class": item.Class || "",
-				"PackFactor": item.PACKFACTOR,
-				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-				"NetPrice": Number(item.Price3).toFixed(4),
-				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
-				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
-				"SecondDiscount_Amount": item.SecondDiscount_Amount.toFixed(4),
-				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
-				"CustomerID": item.External_InstituteId,
+				"KAM_Territory": item.KAM_Territory,
+				"ZuelligCustomerNumber.": item.CNPJ,
 				"InstituteName": item.InstituteName,
 				"SKUCode": item.SKUCode || "",
 				"ProductPackName": item.PRODUCTPACKNAME,
-				"KAM_Territory": item.KAM_Territory,
-				"ZuelligCustomerNumber.": item.CNPJ,
-				"Territory No.": item.KAM_Territory,
-				"Status": item.Status,
-				// "NHI_Price": Number(item.RegisteredPrice)
+				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4),
+				"Invoice Price": Number(item.Price1).toFixed(4),
+				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
+				"HandlingCharge_Amount": 0,
+				"HandlingCharge_Amount2": 0,
+				"CashDiscount_Amount": 0,
+				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
+				"FGBuy": 0,
+				"FGGift": 0,
+				"NetPrice": Number(item.Price3).toFixed(4),
+				"BT": "BT"
 			}
 		});
 	}
@@ -3884,7 +3956,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
 				"Branch": item.ParentInstituteID || "",
 				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-				"InvoicePrice": Number(item.Price1).toFixed(4),
 				"NetPrice": Number(item.Price3).toFixed(4),
 				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(4),
 				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
@@ -3909,7 +3980,16 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"ZuelligCustomerNumber": item.CNPJ,
 				"Territory No.": item.KAM_Territory,
 				"Current_NHI_Price": Number(item.Price0).toFixed(4),
-				"Status": item.Status
+				"Status": item.Status,
+				"NetOfferPrice": Number(item.Price2).toFixed(4),
+				"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
+				"BranchNumber": item.ParentInst_External_InstituteId || '',
+				"PriceRequestFrameworkID": item.TenderID,
+				"HandlingCharge_Amount2": 0,
+				"FGBuy": 0,
+				"FGGift": 0,
+				"BT": "BT",
+				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4)
 			}
 		});
 	}
@@ -3936,5 +4016,14 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		stream.push(null)        
 	
 		return { value: stream }    
+	}
+
+	const getNextValue = async (table, fieldname) => {
+		let results = await cds.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
+		let nextValue = 1;
+		if (results[0].max) {
+			nextValue = results[0].max + 1
+		}
+		return nextValue
 	}
 }
