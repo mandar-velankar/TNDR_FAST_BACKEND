@@ -3851,27 +3851,23 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	function mappedZuelligExtractView (zuelligExtract) {
 		return zuelligExtract.map(item => {
 			return {
-				"Invoice Price": Number(item.Price1).toFixed(4),
-				"HandlingCharge_Amount": 0,
-				"Institute Type": item.InstituteType,
-				"Class": item.Class || "",
-				"PackFactor": item.PACKFACTOR,
-				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-				"NetPrice": Number(item.Price3).toFixed(4),
-				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
-				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
-				"SecondDiscount_Amount": item.SecondDiscount_Amount.toFixed(4),
-				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
-				"CustomerID": item.External_InstituteId,
+				"KAM_Territory": item.KAM_Territory,
+				"ZuelligCustomerNumber.": item.CNPJ,
 				"InstituteName": item.InstituteName,
 				"SKUCode": item.SKUCode || "",
 				"ProductPackName": item.PRODUCTPACKNAME,
-				"KAM_Territory": item.KAM_Territory,
-				"ZuelligCustomerNumber.": item.CNPJ,
-				"Territory No.": item.KAM_Territory,
-				"Status": item.Status,
-				// "NHI_Price": Number(item.RegisteredPrice)
+				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4),
+				"Invoice Price": Number(item.Price1).toFixed(4),
+				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
+				"HandlingCharge_Amount": 0,
+				"HandlingCharge_Amount2": 0,
+				"CashDiscount_Amount": 0,
+				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
+				"FGBuy": 0,
+				"FGGift": 0,
+				"NetPrice": Number(item.Price3).toFixed(4),
+				"BT": "BT"
 			}
 		});
 	}
@@ -3894,7 +3890,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
 				"Branch": item.ParentInstituteID || "",
 				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-				"InvoicePrice": Number(item.Price1).toFixed(4),
 				"NetPrice": Number(item.Price3).toFixed(4),
 				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(4),
 				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
@@ -3919,7 +3914,16 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"ZuelligCustomerNumber": item.CNPJ,
 				"Territory No.": item.KAM_Territory,
 				"Current_NHI_Price": Number(item.Price0).toFixed(4),
-				"Status": item.Status
+				"Status": item.Status,
+				"NetOfferPrice": Number(item.Price2).toFixed(4),
+				"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
+				"BranchNumber": item.ParentInst_External_InstituteId || '',
+				"PriceRequestFrameworkID": item.TenderID,
+				"HandlingCharge_Amount2": 0,
+				"FGBuy": 0,
+				"FGGift": 0,
+				"BT": "BT",
+				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4)
 			}
 		});
 	}
