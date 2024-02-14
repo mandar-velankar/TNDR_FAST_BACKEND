@@ -988,7 +988,7 @@ entity PreApprovedPrices as select from PricingAppData.InstituteGroupPriceLatest
     case when price.UoM = 'Unit' then price.MSP else price.MSP / price.ProductPack.PACKFACTOR end as PriceUnit:Double,
     case when price.UoM = 'Unit' then price.MSP * price.ProductPack.PACKFACTOR else price.MSP end as PricePack:Double
 };
-
+//EHQUT-CR8
 entity ProductPricingView as select from TransactionalData.PT_TMOFRS as offer 
 inner join TransactionalData.PT_TMOFPR as product on product.OfferID = offer.OfferID
 left outer join TransactionalData.ProductPricing as productPricing 
@@ -1056,6 +1056,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
 	consumerPrices.TotalDiscount,
 	consumerPrices.MaxPriceNhsPP,
 	consumerPrices.MaxPriceNhsPU,
+    consumerPrices.FloorPrice,
     priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
