@@ -110,7 +110,7 @@ module.exports = (srv) => {
 		const tx = cds.tx(req);
         // const queryOptions = req._.odataReq.getQueryOptions();
 
-        contracts.map(async contract => {
+        Array.isArray(contracts) && contracts.map(async contract => {
 
 /*
             // TODO: when Products is not expanded this code breaks. Eg: ctr/Contracts?$expand=Institute%2CDistributor
