@@ -444,10 +444,11 @@ module.exports = class processOpportunities extends BaseJob {
         let parentOffer = mappedOffers.find(ofr => ofr.IBIZ_TECHNICAL_ID === product.parent_ID);
         product.TenderID = parentOffer.TenderID;
         product.OfferID = parentOffer.OfferID;
+        product.ActiveProduct = parentOffer.OfferDeclined ? 0 : 1;
         // add distributor id
         product.DistributorID = parentOffer.DistributorID;
         // add channel
-        product.Channel = (parentOffer.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor';
+        product.Channel = parentOffer.OfferDeclined ? 'Decline' : ((parentOffer.NU_DIRETO_INDIRETO === 0) ? 'Bayer' : 'Distributor');
         
          //add lots
          const hasLot = lots.find(l => l.LotID === product.LotID && l.OfferID === product.OfferID);
