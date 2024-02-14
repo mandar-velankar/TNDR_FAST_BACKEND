@@ -1768,8 +1768,22 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
 		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
 		**/
-		//Cases 1,2 and 3
-		if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return item.OfferPrice;
+		//Cases 1 and 2
+		if(foc.length === 0 || !containsOfferProduct) return item.OfferPrice;
+
+		// Cases 3
+		if(containsOfferProductAndIsAdded) {
+			const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
+			switch(addedFOC.FreeGoodsOther_ABS_PCT){
+				case "ABS":
+					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume + addedFOC.FreeGoodsOther);
+				case "PCT":
+					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume * (1 + addedFOC.FreeGoodsOther));
+				case "STP":
+					return item.RequestedVolume * item.OfferPrice / ((item.RequestedVolume + item.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
+			}
+		}
+
 		// Cases 4
 		if(containsOfferProductAndIsIncluded) {
 			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
@@ -1797,6 +1811,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
 			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		}
+
+		function getAddedFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
 		}
 	}
 	
@@ -1827,15 +1845,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		//Cases 1,2 and 3
 		if(foc.length === 0 || !containsOfferProduct) return (item.OfferPrice * (1 - item.Deductions - item.Level2Discount2)); 
 		// Cases 4
-		if(containsOfferProductAndIsIncluded) {
-			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-			switch(includedFOC.FreeGoodsOther_ABS_PCT){
+		if(containsOfferProductAndIsIncluded || containsOfferProductAndIsAdded) {
+			const FOC = getFOCWitSameProductCode(foc, offerProduct);
+			switch(FOC.FreeGoodsOther_ABS_PCT){
 				case "ABS":
-					focVolume = includedFOC.FreeGoodsOther;
+					focVolume = FOC.FreeGoodsOther;
 				case "PCT":
-					focVolume = includedFOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
+					focVolume = FOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
 				case "STP":
-					focVolume = (item.AnticipatedYearlyVolumeBranch / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
+					focVolume = (item.AnticipatedYearlyVolumeBranch / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
 			}
 		}
 
@@ -1865,8 +1883,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 		}
 
-		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		function getFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct);
 		}
 
 		return netOfferPrice;
