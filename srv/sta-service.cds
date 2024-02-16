@@ -733,4 +733,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
+
+    entity MailTemplates                                as projection on AdminData.MailTemplate;
+    entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
+    entity Outbox                                       as projection on TransactionalData.OutgoingMails;
 }
