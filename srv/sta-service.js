@@ -111,7 +111,8 @@ module.exports = async (srv) => {
 		ProductTypeProfitability,
 		CountrySpecificTenderInfo,
 		PT_TMTNOFST,
-		TransCompetitorResult
+		TransCompetitorResult,
+		OutgoingMails
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -1130,12 +1131,59 @@ module.exports = async (srv) => {
 		});
 
 		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+		const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
 
 		if (awardedProductsHaveOutcome) {
 			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
 		}
+
+		if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
+			await addOutgoingMail(req);
+		}
 	}
 
+	const addOutgoingMail = async function (req) {
+		const templateName = "TaiwanResultsRecordedNotification"
+		const mailTemplate = await getMailTemplate(templateName);
+		const mappedData = mapDataToMail(mailTemplate, req.data);
+
+		await INSERT(mappedData).into(OutgoingMails);
+
+	}
+
+	const mapDataToMail = function (template, data) {
+        return {
+            CountryCode: data.CountryCode,
+            TenderID: data.TenderID,
+            OfferID: data.OfferID,
+            Sender: 'FAST-Admin@bayer.com',
+            Recipients: 'amanda.kuo@bayer.com',
+            Subject: `Results recorded for Price Request ID:${data.OfferID}`,
+            MailBody: generateMailBody(template, {
+                data: { 
+                    Offer: data,
+					ReceipientName: 'Amanda'
+                }
+            }),
+            Sent: false
+        };
+    }
+
+    const generateMailBody = function (mail, data) {
+        return Handlebars.compile("" + mail.content)(data);
+    }
+
+    const getMailTemplate = async function (templateId) {
+        try{
+            const result = await SELECT.one.from(MailTemplate)
+			.columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+			.where({ TemplateId: templateId });
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            return;
+        }
+    }
 
 	srv.on(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
 		try{
