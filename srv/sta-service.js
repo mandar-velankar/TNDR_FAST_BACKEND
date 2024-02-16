@@ -1856,10 +1856,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			switch(FOC.FreeGoodsOther_ABS_PCT){
 				case "ABS":
 					focVolume = FOC.FreeGoodsOther;
+					break;
 				case "PCT":
 					focVolume = FOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
+					break;
 				case "STP":
 					focVolume = (item.AnticipatedYearlyVolumeBranch / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+					break;
+				default:
+					break;
 			}
 		}
 
