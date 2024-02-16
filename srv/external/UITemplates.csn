@@ -1,6 +1,6 @@
 {
  "meta": {
-  "creator": "cds-dk 7.3.2"
+  "creator": "cds-dk 7.5.1"
  },
  "$version": "2.0",
  "definitions": {
@@ -173,6 +173,9 @@
     "Title": {
      "type": "cds.LargeString"
     },
+    "TitleLocale": {
+     "type": "cds.LargeString"
+    },
     "Description": {
      "type": "cds.LargeString"
     },
@@ -337,6 +340,9 @@
     "Title": {
      "type": "cds.LargeString"
     },
+    "TitleLocale": {
+     "type": "cds.LargeString"
+    },
     "Description": {
      "type": "cds.LargeString"
     },
@@ -404,6 +410,9 @@
     "Title": {
      "type": "cds.LargeString"
     },
+    "TitleLocale": {
+     "type": "cds.LargeString"
+    },
     "Form": {
      "type": "cds.Association",
      "@cds.ambiguous": "missing on condition?",
@@ -451,6 +460,9 @@
      "notNull": true
     },
     "Label": {
+     "type": "cds.LargeString"
+    },
+    "LabelLocale": {
      "type": "cds.LargeString"
     },
     "Visible": {
@@ -503,6 +515,9 @@
      "notNull": true
     },
     "Title": {
+     "type": "cds.LargeString"
+    },
+    "TitleLocale": {
      "type": "cds.LargeString"
     },
     "Description": {

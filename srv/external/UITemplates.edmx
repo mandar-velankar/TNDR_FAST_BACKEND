@@ -122,6 +122,7 @@
         </Key>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="Title" Type="Edm.String"/>
+        <Property Name="TitleLocale" Type="Edm.String"/>
         <Property Name="Description" Type="Edm.String"/>
         <Property Name="Icon" Type="Edm.String"/>
         <NavigationProperty Name="Template" Type="CatalogService.Template" Partner="Tabs">
@@ -166,6 +167,7 @@
         </Key>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="Title" Type="Edm.String"/>
+        <Property Name="TitleLocale" Type="Edm.String"/>
         <Property Name="Description" Type="Edm.String"/>
         <Property Name="FormID" Type="Edm.String"/>
         <Property Name="Entity" Type="Edm.String"/>
@@ -182,6 +184,7 @@
         </Key>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="Title" Type="Edm.String"/>
+        <Property Name="TitleLocale" Type="Edm.String"/>
         <NavigationProperty Name="Form" Type="CatalogService.Form" Partner="FormContainers">
           <ReferentialConstraint Property="Form_ID" ReferencedProperty="ID"/>
         </NavigationProperty>
@@ -194,6 +197,7 @@
         </Key>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="Label" Type="Edm.String"/>
+        <Property Name="LabelLocale" Type="Edm.String"/>
         <Property Name="Visible" Type="Edm.Boolean"/>
         <NavigationProperty Name="FormContainer" Type="CatalogService.FormContainer" Partner="FormElements">
           <ReferentialConstraint Property="FormContainer_ID" ReferencedProperty="ID"/>
@@ -207,6 +211,7 @@
         </Key>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="Title" Type="Edm.String"/>
+        <Property Name="TitleLocale" Type="Edm.String"/>
         <Property Name="Description" Type="Edm.String"/>
         <Property Name="Importance" Type="Edm.String"/>
         <Property Name="IsValueHelpKey" Type="Edm.Boolean" DefaultValue="false"/>
