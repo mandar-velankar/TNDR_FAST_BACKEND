@@ -742,7 +742,7 @@ module.exports = async (srv) => {
 
 		const revisedFreeGoodsOther = freeGoodsOther.map(fg => {
 			const rfg = {...fg};
-			const pricecondtion = revisedProductsPriceCondtions.find(pc => pc.ProductCode = rfg.ProductPackId);
+			const pricecondtion = revisedProductsPriceCondtions.find(pc => pc.ProductCode === rfg.ProductPackId);
 			rfg.ID = uuidv4();
 			rfg.PriceCondition_ID = pricecondtion.ID;
 			return rfg;
@@ -815,7 +815,7 @@ module.exports = async (srv) => {
 
 		const continuedFreeGoodsOther = freeGoodsOther.map(fg => {
 			const cfg = {...fg};
-			const pricecondtion = continuedProductsPriceCondtions.find(pc => pc.ProductCode = cfg.ProductPackId);
+			const pricecondtion = continuedProductsPriceCondtions.find(pc => pc.ProductCode === cfg.ProductPackId);
 			cfg.ID = uuidv4();
 			cfg.PriceCondition_ID = pricecondtion.ID;
 			return cfg;
@@ -887,7 +887,7 @@ module.exports = async (srv) => {
 
 		const affiliateFreeGoodsOther = freeGoodsOther.map(fg => {
 			const afg = {...fg};
-			const pricecondtion = affiliateProductsPriceCondtions.find(pc => pc.ProductCode = afg.ProductPackId);
+			const pricecondtion = affiliateProductsPriceCondtions.find(pc => pc.ProductCode === afg.ProductPackId);
 			afg.ID = uuidv4();
 			afg.PriceCondition_ID = pricecondtion.ID;
 			return afg;
