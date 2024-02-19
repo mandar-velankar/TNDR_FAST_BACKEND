@@ -111,7 +111,8 @@ module.exports = async (srv) => {
 		ProductTypeProfitability,
 		CountrySpecificTenderInfo,
 		PT_TMTNOFST,
-		TransCompetitorResult
+		TransCompetitorResult,
+		OutgoingMails
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -741,7 +742,7 @@ module.exports = async (srv) => {
 
 		const revisedFreeGoodsOther = freeGoodsOther.map(fg => {
 			const rfg = {...fg};
-			const pricecondtion = revisedProductsPriceCondtions.find(pc => pc.ProductCode = rfg.ProductPackId);
+			const pricecondtion = revisedProductsPriceCondtions.find(pc => pc.ProductCode === rfg.ProductPackId);
 			rfg.ID = uuidv4();
 			rfg.PriceCondition_ID = pricecondtion.ID;
 			return rfg;
@@ -814,7 +815,7 @@ module.exports = async (srv) => {
 
 		const continuedFreeGoodsOther = freeGoodsOther.map(fg => {
 			const cfg = {...fg};
-			const pricecondtion = continuedProductsPriceCondtions.find(pc => pc.ProductCode = cfg.ProductPackId);
+			const pricecondtion = continuedProductsPriceCondtions.find(pc => pc.ProductCode === cfg.ProductPackId);
 			cfg.ID = uuidv4();
 			cfg.PriceCondition_ID = pricecondtion.ID;
 			return cfg;
@@ -886,7 +887,7 @@ module.exports = async (srv) => {
 
 		const affiliateFreeGoodsOther = freeGoodsOther.map(fg => {
 			const afg = {...fg};
-			const pricecondtion = affiliateProductsPriceCondtions.find(pc => pc.ProductCode = afg.ProductPackId);
+			const pricecondtion = affiliateProductsPriceCondtions.find(pc => pc.ProductCode === afg.ProductPackId);
 			afg.ID = uuidv4();
 			afg.PriceCondition_ID = pricecondtion.ID;
 			return afg;
@@ -1130,12 +1131,59 @@ module.exports = async (srv) => {
 		});
 
 		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+		const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
 
 		if (awardedProductsHaveOutcome) {
 			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
 		}
+
+		if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
+			await addOutgoingMail(req);
+		}
 	}
 
+	const addOutgoingMail = async function (req) {
+		const templateName = "TaiwanResultsRecordedNotification"
+		const mailTemplate = await getMailTemplate(templateName);
+		const mappedData = mapDataToMail(mailTemplate, req.data);
+
+		await INSERT(mappedData).into(OutgoingMails);
+
+	}
+
+	const mapDataToMail = function (template, data) {
+        return {
+            CountryCode: data.CountryCode,
+            TenderID: data.TenderID,
+            OfferID: data.OfferID,
+            Sender: 'FAST-Admin@bayer.com',
+            Recipients: 'amanda.kuo@bayer.com',
+            Subject: `Results recorded for Price Request ID:${data.OfferID}`,
+            MailBody: generateMailBody(template, {
+                data: { 
+                    Offer: data,
+					ReceipientName: 'Amanda'
+                }
+            }),
+            Sent: false
+        };
+    }
+
+    const generateMailBody = function (mail, data) {
+        return Handlebars.compile("" + mail.content)(data);
+    }
+
+    const getMailTemplate = async function (templateId) {
+        try{
+            const result = await SELECT.one.from(MailTemplate)
+			.columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+			.where({ TemplateId: templateId });
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            return;
+        }
+    }
 
 	srv.on(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
 		try{
@@ -1459,6 +1507,9 @@ module.exports = async (srv) => {
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.Price3,
+				NetOfferPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
 				Level3Discount1: req.data.Level3Discount1,
 				GeneralDiscount_Amount: (req.data.OfferPrice * req.data.Deductions),
     			SecondDiscount_Amount: (req.data.OfferPrice * req.data.Level2Discount2),
@@ -1485,6 +1536,9 @@ module.exports = async (srv) => {
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.Price3,
+				NetOfferPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
 				Level3Discount1: req.data.Level3Discount1,
 				GeneralDiscount_Amount: (req.data.OfferPrice * req.data.Deductions),
     			SecondDiscount_Amount: (req.data.OfferPrice * req.data.Level2Discount2),
@@ -1768,8 +1822,22 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
 		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
 		**/
-		//Cases 1,2 and 3
-		if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return item.OfferPrice;
+		//Cases 1 and 2
+		if(foc.length === 0 || !containsOfferProduct) return item.OfferPrice;
+
+		// Cases 3
+		if(containsOfferProductAndIsAdded) {
+			const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
+			switch(addedFOC.FreeGoodsOther_ABS_PCT){
+				case "ABS":
+					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume + addedFOC.FreeGoodsOther);
+				case "PCT":
+					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume * (1 + addedFOC.FreeGoodsOther));
+				case "STP":
+					return item.RequestedVolume * item.OfferPrice / ((item.RequestedVolume + item.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
+			}
+		}
+
 		// Cases 4
 		if(containsOfferProductAndIsIncluded) {
 			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
@@ -1797,6 +1865,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
 			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		}
+
+		function getAddedFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
 		}
 	}
 	
@@ -1827,15 +1899,20 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		//Cases 1,2 and 3
 		if(foc.length === 0 || !containsOfferProduct) return (item.OfferPrice * (1 - item.Deductions - item.Level2Discount2)); 
 		// Cases 4
-		if(containsOfferProductAndIsIncluded) {
-			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-			switch(includedFOC.FreeGoodsOther_ABS_PCT){
+		if(containsOfferProductAndIsIncluded || containsOfferProductAndIsAdded) {
+			const FOC = getFOCWitSameProductCode(foc, offerProduct);
+			switch(FOC.FreeGoodsOther_ABS_PCT){
 				case "ABS":
-					focVolume = includedFOC.FreeGoodsOther;
+					focVolume = FOC.FreeGoodsOther;
+					break;
 				case "PCT":
-					focVolume = includedFOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
+					focVolume = FOC.FreeGoodsOther * item.AnticipatedYearlyVolumeBranch;
+					break;
 				case "STP":
-					focVolume = (item.AnticipatedYearlyVolumeBranch / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
+					focVolume = (item.AnticipatedYearlyVolumeBranch / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -1865,8 +1942,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 		}
 
-		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		function getFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct);
 		}
 
 		return netOfferPrice;
@@ -3333,7 +3410,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	}
 
 	function mappedApproverTypesForNonKAMTerritory (aApproverTypes, priceCondition, policy, ctryProductPack, currentDiscount) {
-		if (ctryProductPack.BU === "GM" || ctryProductPack.BU === "SM") {
+		if (ctryProductPack.BU === "PH") {
 			aApproverTypes.map(function (oApproverType) {
 				oApproverType.ApproverType === 'Sales Manager' ? oApproverType.ValidationType = oApproverType.ValidationType2 : oApproverType.ValidationType = oApproverType.ValidationType;
 			});
@@ -3746,7 +3823,17 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
+			prd.NET_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
+			prd.NegotiationPrice = ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
+			prd.Price0 = prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
+			prd.Price1 = prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
+			prd.Price3 = prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
+			prd.Level1Discount1 = ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
+			prd.Level2Discount1 = ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
+			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
+			prd.Level3Discount1 = ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
+			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
@@ -3841,27 +3928,23 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	function mappedZuelligExtractView (zuelligExtract) {
 		return zuelligExtract.map(item => {
 			return {
-				"Invoice Price": Number(item.Price1).toFixed(4),
-				"HandlingCharge_Amount": 0,
-				"Institute Type": item.InstituteType,
-				"Class": item.Class || "",
-				"PackFactor": item.PACKFACTOR,
-				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
-				"NetPrice": Number(item.Price3).toFixed(4),
-				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
-				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
-				"SecondDiscount_Amount": item.SecondDiscount_Amount.toFixed(4),
-				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
-				"CustomerID": item.External_InstituteId,
+				"KAM_Territory": item.KAM_Territory,
+				"ZuelligCustomerNumber.": item.CNPJ,
 				"InstituteName": item.InstituteName,
 				"SKUCode": item.SKUCode || "",
 				"ProductPackName": item.PRODUCTPACKNAME,
-				"KAM_Territory": item.KAM_Territory,
-				"ZuelligCustomerNumber.": item.CNPJ,
-				"Territory No.": item.KAM_Territory,
-				"Status": item.Status,
-				// "NHI_Price": Number(item.RegisteredPrice)
+				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4),
+				"Invoice Price": Number(item.Price1).toFixed(4),
+				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
+				"HandlingCharge_Amount": 0,
+				"HandlingCharge_Amount2": 0,
+				"CashDiscount_Amount": 0,
+				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
+				"FGBuy": 0,
+				"FGGift": 0,
+				"NetPrice": Number(item.Price3).toFixed(4),
+				"BT": "BT"
 			}
 		});
 	}
@@ -3908,8 +3991,16 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"NHI_Price": Number(item.Price0).toFixed(4),
 				"ZuelligCustomerNumber": item.CNPJ,
 				"Territory No.": item.KAM_Territory,
-				"Current_NHI_Price": Number(item.Price0).toFixed(4),
-				"Status": item.Status
+				"Status: A-Active, S-Suspend": item.Status,
+				"NetOfferPrice": Number(item.Price2).toFixed(4),
+				"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
+				"BranchNumber": item.ParentInst_External_InstituteId || '',
+				"PriceRequestFrameworkID": item.TenderID,
+				"HandlingCharge_Amount2": 0,
+				"FGBuy": 0,
+				"FGGift": 0,
+				"BT": "BT",
+				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4)
 			}
 		});
 	}

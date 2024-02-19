@@ -2281,8 +2281,9 @@ module.exports = (srv) => {
 		
 		let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
 		if(tenderyear> '22' && regionname === 'MEA'){
-			aApproverTypes.splice(CountryBusinessindex,1);
-						
+			if (CountryBusinessindex !== -1) {
+				aApproverTypes.splice(CountryBusinessindex, 1);
+			}				
 		}
 		
 		//For Thailand specific

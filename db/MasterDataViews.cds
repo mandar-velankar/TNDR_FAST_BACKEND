@@ -210,7 +210,7 @@ entity Divisions as select from MasterData.PT_TMPRDHIER as ProductHierarchy{
 
 //DONE
 entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeRates;
-
+//EHQUT-CR8
 //italy
 //CR8
 entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
