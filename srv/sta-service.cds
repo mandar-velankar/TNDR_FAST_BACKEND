@@ -380,6 +380,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionTaiwanDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
             CountryCode,
+            Region,
             TenderID,
             OfferID,
             ProductCode,
@@ -404,6 +405,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity PriceConditionDiscountWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
             CountryCode,
+            Region,
             TenderID,
             OfferID,
             ProductCode,
