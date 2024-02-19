@@ -4015,6 +4015,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
 				"Branch": item.ParentInstituteID || "",
 				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
+				"InvoicePrice": Number(item.Price1).toFixed(4),
 				"NetPrice": Number(item.Price3).toFixed(4),
 				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(4),
 				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
