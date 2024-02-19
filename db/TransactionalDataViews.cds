@@ -1375,6 +1375,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     and product.ProductCode = priceCondition.ProductCode
 {
     tender.CountryCode,
+    tender.Country.Region,
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
