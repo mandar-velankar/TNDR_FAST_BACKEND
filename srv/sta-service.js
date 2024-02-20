@@ -653,6 +653,7 @@ module.exports = async (srv) => {
 		delete req.data.ProductPackName;
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
+		delete req.data.Region;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');
@@ -3205,6 +3206,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				ADD_INCLUDE: productFreeGoodsOther?.ADD_INCLUDE,
 				Level3Discount1: productConditionstmp[0] && productConditionstmp[0].Level3Discount1,
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
+				Region: offer.Region
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -3865,22 +3867,22 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
-			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+			prd.OFFER_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
-			prd.NET_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
-			prd.NegotiationPrice = ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
-			prd.Price0 = prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
-			prd.Price1 = prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
-			prd.Price3 = prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
+			prd.NET_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
+			prd.NET_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
+			prd.NegotiationPrice = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NegotiationPrice, 3, 3) : ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
+			prd.Price0 = prd.Region === 'MEA' ? prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 3, 3) : prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
+			prd.Price1 = prd.Region === 'MEA' ? prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 3, 3) : prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
+			prd.Price3 = prd.Region === 'MEA' ? prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 3, 3) : prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
 			prd.Level1Discount1 = ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
 			prd.Level2Discount1 = ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
 			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
-			prd.Level3Discount1 = ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
+			prd.Level3Discount1 = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.Level3Discount1, 3, 3) : ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
 			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
 		});
 
