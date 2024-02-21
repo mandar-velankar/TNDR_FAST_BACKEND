@@ -505,12 +505,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         freegoods.FreeGoodsOther_Step,
         freegoods.ADD_INCLUDE,
         case 
-            when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
-                then freegoods.FreeGoodsOther_Step
             when freegoods.FreeGoodsOther_ABS_PCT = 'PCT'
-                then round(100 * freegoods.FreeGoodsOther, 2)
-            else freegoods.FreeGoodsOther 
-        end as FOC:Double,
+                then round(100 * freegoods.FreeGoodsOther, 2) || '% (' || freegoods.ADD_INCLUDE || ')'
+            when freegoods.FreeGoodsOther_ABS_PCT = 'ABS'
+                then freegoods.FreeGoodsOther || ' '  || result.UoM || ' (' || freegoods.ADD_INCLUDE || ')'
+            when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
+                then freegoods.FreeGoodsOther || ' '  || result.UoM || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || ' purchased (' || freegoods.ADD_INCLUDE || ')'
+        end as FOC:String,
         product.RequestedVolume as RequestedVolume: Integer,
         result.Custom.String_1 as Custom_String_1,
         result.Custom.String_2 as Custom_String_2,
