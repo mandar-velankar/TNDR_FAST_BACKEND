@@ -882,6 +882,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Custom.Integer_1 as NumberOfExtension,
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
+    offer.Tender.Country.Region
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -968,7 +969,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.ContractExtenseion,
           offer.Tender.Custom.Integer_1,
           offer.Comment,
-          offer.Tender.Custom.String_2;
+          offer.Tender.Custom.String_2,
+          offer.Tender.Country.Region;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -1375,6 +1377,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     and product.ProductCode = priceCondition.ProductCode
 {
     tender.CountryCode,
+    tender.Country.Region,
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
@@ -2271,6 +2274,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             ADD_INCLUDE                                 : String;
             Level3Discount1                             : Double;
             Level1Discount1                             : Double;
+            Region                                      : String(50);
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;

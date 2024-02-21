@@ -126,7 +126,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedBy,
         tender.modifiedAt, 
         CreatedByUser.UserName as createdByName,
-        ModifyedByUser.UserName as modifiedByName
+        ModifyedByUser.UserName as modifiedByName,
+        tender.Country.Region
     }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -148,7 +149,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedBy,
         tender.modifiedAt,
         CreatedByUser.UserName,
-        ModifyedByUser.UserName;
+        ModifyedByUser.UserName,
+        tender.Country.Region;
 
     @cds.redirection.target
     entity InstitutesView as select from MasterData.PT_TMINST as inst
@@ -230,6 +232,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         PriceCondition.AnticipatedYearlyVolumeBranch,
         (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
         Offer.Currency as Currency,
+        Offer.Tender.Country.Region,
         SKUCountry.RegistrationValidUntil
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
@@ -328,9 +331,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join OfferProductsTableView as product on product.OfferID = offer.OfferID {
         key offer.OfferID,
         sum(product.TotalAmount) as OfferTotal:Double,
-        offer.Currency as Currency:String(3)
+        offer.Currency as Currency:String(3),
+        offer.Tender.Country.Region
     } group by offer.OfferID,
-               offer.Currency;
+               offer.Currency,
+               offer.Tender.Country.Region;
 
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
@@ -380,6 +385,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionTaiwanDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
             CountryCode,
+            Region,
             TenderID,
             OfferID,
             ProductCode,
@@ -404,6 +410,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity PriceConditionDiscountWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
             CountryCode,
+            Region,
             TenderID,
             OfferID,
             ProductCode,
