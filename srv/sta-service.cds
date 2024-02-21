@@ -729,16 +729,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
        content    : LargeBinary @Core.MediaType : 'application/json';
     };
 
-    entity TenderChannelPaymentTermView as select from TransactionalData.PT_TMTEND as tender{
+    entity TenderChannelPaymentTermView as select from TransactionalData.PT_TMTEND {
         key CountryCode,
         key TenderID,
         TenderChannel,
+        Country.Region,
         case 
             when TenderChannel = 'Direct'
-                then tender.Institute.PaymentTerms
-                else tender.Offer.Distributor.PaymentTerms
+                then Institute.PaymentTerms
+                else Offer.Distributor.PaymentTerms
         end as PaymentTerms: String 
-    }group by CountryCode,TenderID,TenderChannel,tender.Institute.PaymentTerms,tender.Offer.Distributor.PaymentTerms;
+    }group by CountryCode,TenderID,TenderChannel,Country.Region,Institute.PaymentTerms,Offer.Distributor.PaymentTerms;
 
     entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
 
