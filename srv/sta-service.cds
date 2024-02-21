@@ -331,9 +331,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join OfferProductsTableView as product on product.OfferID = offer.OfferID {
         key offer.OfferID,
         sum(product.TotalAmount) as OfferTotal:Double,
-        offer.Currency as Currency:String(3)
+        offer.Currency as Currency:String(3),
+        offer.Tender.Country.Region
     } group by offer.OfferID,
-               offer.Currency;
+               offer.Currency,
+               offer.Tender.Country.Region;
 
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
