@@ -65,6 +65,7 @@ entity PT_TMOFRS { //Offers
         isIBIZNotified         : Boolean default false; 
         AffiliateOffer         : Boolean default false; 
         QuotationInstituteID   : Integer;
+        DifferentAwardPriceParentOfferID : String(30); // Is applicable for Taiwan Different award price Copying option
         Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND
