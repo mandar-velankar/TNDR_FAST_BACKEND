@@ -175,7 +175,7 @@ entity PT_TMLE{
 	LegalEntityName:String(300);
 	BankDetails:String(300);
 	Letterhead:String(700);
-	Remarks:String(300);
+	Remarks:LargeString;
 	AuthorizedSignatory1:String(300);//delete
 	AuthorizedSignatory2:String(300);//delete
 	AuthorizedSignatory3:String(300);//delete
