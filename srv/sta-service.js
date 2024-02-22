@@ -1440,7 +1440,7 @@ module.exports = async (srv) => {
 
 				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
 				const parentOfferProdPriceCondition = await SELECT.one.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID, ProductCode: req.data.ProductCode});
-				if (!parentOfferID || !parentOfferProdPriceCondition) return;
+				if (!currentOffer.DifferentAwardPriceParentOfferID || !parentOfferProdPriceCondition) return;
 				if (Number(parentOfferProdPriceCondition.Price2) > Number(req.data.Price3)) {
 					req.error({ code: 404, message: "NetPrice can not be less then NetPrice of parent offer"});
 				}else {
