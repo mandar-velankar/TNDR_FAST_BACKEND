@@ -2131,6 +2131,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				}
 			}	
 
+			!req.data.ActualDeliveryDate && req.error({ code: 404, message: `Actual Delivery Date is required.`, target: 'ActualDeliveryDate' });
+			!req.data.ActualDeliveryQuantity && req.error({ code: 404, message: `Actual Delivery Quantity is required.`, target: 'ActualDeliveryQuantity' });
+
 			const existingDelivery = await SELECT.one.from(PT_TMDLVTR).where({
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
