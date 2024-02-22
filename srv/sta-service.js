@@ -1442,9 +1442,7 @@ module.exports = async (srv) => {
 				const parentOfferProdPriceCondition = await SELECT.one.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID, ProductCode: req.data.ProductCode});
 				if (!currentOffer.DifferentAwardPriceParentOfferID || !parentOfferProdPriceCondition) return;
 				if (Number(parentOfferProdPriceCondition.Price2) > Number(req.data.Price3)) {
-					req.error({ code: 404, message: "NetPrice can not be less then NetPrice of parent offer"});
-				}else {
-					await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Quotation Submitted');
+					req.error({ code: 404, message: "NetPrice can not be less than NetPrice of parent offer"});
 				}
 			}
 			catch(error){
@@ -1474,6 +1472,57 @@ module.exports = async (srv) => {
 				await updateProductRequestedVolume(req);
 			}
 			return req.data;
+			}
+			catch(error){
+				console.error('Error in PriceCondition View CREATE');
+				return req.reject(403, error?.message||"Error in PriceCondition View CREATE");
+			}
+		}
+	);
+
+	srv.after(
+		['CREATE','UPDATE'], 
+		[
+			'PriceConditionTaiwanPriceView',
+			'PriceConditionTaiwanDiscountView',
+		], 
+		async (data, req) => {
+			try{
+				const tx = cds.tx(req);
+				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: data.OfferID});
+				const whereOffer = ServiceHelper.buildFullWhere("OFFER_ID", "=", data.OfferID);
+				const currentOffeProductsValidation = await buildOfferProductValidation(tx, whereOffer);
+				const currentOfferPriceConditions = await SELECT.from(PriceCondition).where({OfferID: data.OfferID});
+				const parentOfferProdPriceConditions = await SELECT.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID});
+				if (!currentOffer.DifferentAwardPriceParentOfferID || parentOfferProdPriceConditions.length === 0 || currentOffeProductsValidation.length === 0) return;
+
+				const checkNetPrices = currentOfferPriceConditions.every(pc => {
+					const parentOfferPriceCondition = parentOfferProdPriceConditions.find(ppc => ppc.ProductCode === pc.ProductCode);
+					const parentOffersNetPrice = parentOfferPriceCondition?.Price2 || 0;
+					return Number(pc.Price2) > Number(parentOffersNetPrice);
+				});
+				
+				if (checkNetPrices) {
+					const mappedAwardedProducts = currentOffeProductsValidation.map(product => {
+						return {
+							TenderID: product.TENDER_ID,
+							OfferID: product.OFFER_ID,
+							CountryCode: product.COUNTRY_CODE,
+							LotID: product.LOTID,
+							ProductCode: product.PRODUCTID,
+							AwardedProduct: product.PRODUCTNAME,
+							AwardedCompany: "Bayer",
+							UoM: product.UNIT,
+							AwardedPrice: product.NET_PRICE,
+							AwardedQty: product.REQUESTED_QUANTITY,
+							ErrorInSubmission: "No",
+						}
+					});
+
+
+					await INSERT.into(PT_TMTRRES).entries(mappedAwardedProducts);
+					await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Quotation Submitted');
+				}
 			}
 			catch(error){
 				console.error('Error in PriceCondition View CREATE');
