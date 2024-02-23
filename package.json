@@ -98,6 +98,11 @@
         "default": 5000,
         "max": 5000
       }
+    },
+    "env": {
+      "features": {
+        "assert_integrity": false
+      }
     }
   },
   "files": [
