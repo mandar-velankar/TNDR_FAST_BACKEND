@@ -154,7 +154,7 @@ entity PT_TMPRDPCK{
 	ACTIVE_SUBSTANCE:String(50);
 	ProductType:String(50);
 	ProductClass: String(10);
-	ProductDescription: LargeString;
+	ProductDescription: String(5000);
 	ProductFullDescription: LargeString;
     Nucleus: String(100);
     ProductGenericName: String(500);
