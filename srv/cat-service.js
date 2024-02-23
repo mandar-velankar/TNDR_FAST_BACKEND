@@ -2226,7 +2226,7 @@ module.exports = (srv) => {
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
-			TENDER_TYPE: tenderType[0].NAME,
+			TENDER_TYPE: '',
 			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
             CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
@@ -2837,7 +2837,7 @@ module.exports = (srv) => {
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
