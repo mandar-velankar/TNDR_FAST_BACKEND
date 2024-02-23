@@ -154,7 +154,7 @@ entity PT_TMPRDPCK{
 	ACTIVE_SUBSTANCE:String(50);
 	ProductType:String(50);
 	ProductClass: String(10);
-	ProductDescription: String(5000);
+	ProductDescription: LargeString;
 	ProductFullDescription: LargeString;
     Nucleus: String(100);
     ProductGenericName: String(500);
@@ -175,7 +175,7 @@ entity PT_TMLE{
 	LegalEntityName:String(300);
 	BankDetails:String(300);
 	Letterhead:String(700);
-	Remarks:LargeString;
+	Remarks:String(5000);
 	AuthorizedSignatory1:String(300);//delete
 	AuthorizedSignatory2:String(300);//delete
 	AuthorizedSignatory3:String(300);//delete
