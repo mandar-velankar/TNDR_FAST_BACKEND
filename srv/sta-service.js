@@ -690,12 +690,14 @@ module.exports = async (srv) => {
 		const priceConditionIDs = priceCondtions.map(pc => pc.ID);
 		const freeGoodsOther = await SELECT.from(FreeGoodsOther).where({PriceCondition_ID: {in: priceConditionIDs}});
 		const institute = await SELECT.one.from(PT_TMINST).where({CountryCode: offer.CountryCode, InstituteID: QuotationInstituteID});
+		const awardedProducts = await SELECT.from(PT_TMTRRES).where({OfferID: offerID});
 		
 
 		switch(type){
 			case "revisedoffer": return createRevisedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, priceCondtions, freeGoodsOther, req});
 			case "continuedoffer": return createContinuedOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, offerRevision, priceCondtions, freeGoodsOther, req});
 			case "affiliateoffer": return createAffiliateOffer({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, institute, priceCondtions, freeGoodsOther, req});
+			case "differentawardprice": return createDifferentAwardPrice({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, institute, priceCondtions, freeGoodsOther, awardedProducts, req});
 		}
 		}
 		catch(error){
@@ -911,6 +913,90 @@ module.exports = async (srv) => {
 		
 
 		return affiliateOfferID;
+	};
+
+	async function createDifferentAwardPrice({offer, parentOffer, offerStatus, offerProducts, productPricing, nextOfferID, institute, priceCondtions, freeGoodsOther, awardedProducts, req}){
+		const differentAwardPriceOfferID = `${nextOfferID.TENDERID}-${nextOfferID.NEXTOFFERID}`;
+		const differentAwardPriceOffer = {...offer};
+		const todaysDate = new Date().toISOString().substring(0,10);
+		differentAwardPriceOffer.OfferID = differentAwardPriceOfferID;
+		differentAwardPriceOffer.CreationDate = todaysDate;
+		differentAwardPriceOffer.InternalBidDueDate = todaysDate;
+		differentAwardPriceOffer.NewOfferDueDate = todaysDate;	
+		differentAwardPriceOffer.TenderOfferNo = nextOfferID.NEXTOFFERID;
+		differentAwardPriceOffer.DifferentAwardPriceParentOfferID = parentOffer.OfferID;
+
+
+		const differentAwardPriceOfferStatus = {...offerStatus};
+		differentAwardPriceOfferStatus.OfferID = differentAwardPriceOfferID;
+		differentAwardPriceOfferStatus.STATUS = "Offer Created";
+		differentAwardPriceOfferStatus.Date = todaysDate;
+
+		const filteredAwardedProducts = awardedProducts.filter(pr => pr.Outcome === 'Won' || pr.Outcome === 'Award Price Update');
+
+		offerProducts = offerProducts.filter(ofpr => {
+			const isProducIncluded = filteredAwardedProducts.findIndex(ap => ap.ProductCode === ofpr.ProductCode);
+			if (isProducIncluded > -1) return ofpr;
+		});
+
+		productPricing = productPricing.filter(price => {
+			const isPriceIncluded = filteredAwardedProducts.findIndex(ap => ap.ProductCode === price.ProductCode);
+			if (isPriceIncluded > -1) return price;
+		});
+
+		priceCondtions = priceCondtions.filter(pc => {
+			const isPriceConditionIncluded = filteredAwardedProducts.findIndex(ap => ap.ProductCode === pc.ProductCode);
+			if (isPriceConditionIncluded > -1) return pc;
+		});
+
+		freeGoodsOther = freeGoodsOther.filter(fg => {
+			const isFreeGoodsOtherIncluded = filteredAwardedProducts.findIndex(ap => ap.ProductCode === fg.ProductPackId);
+			if (isFreeGoodsOtherIncluded > -1) return fg;
+		});
+
+		const dapOfferProducts = offerProducts.map(pr => {
+			const affiliateProduct = {...pr};
+			affiliateProduct.OfferID = differentAwardPriceOfferID;
+			return affiliateProduct;
+		});
+
+		const dapProductsPricing = productPricing.map(pr => {
+			const app = {...pr};
+			app.OfferID = differentAwardPriceOfferID;
+			app.SubmittedOn = todaysDate;
+			return app;
+		});
+
+		const dapPriceCondtions = priceCondtions.map(pc => {
+			const apc = {...pc};
+			apc.OfferID = differentAwardPriceOfferID;
+			apc.ID = uuidv4();
+			return apc;
+		});
+
+		const dapFreeGoodsOther = freeGoodsOther.map(fg => {
+			const afg = {...fg};
+			const pricecondtion = dapPriceCondtions.find(pc => pc.ProductCode === afg.ProductPackId);
+			afg.ID = uuidv4();
+			afg.PriceCondition_ID = pricecondtion.ID;
+			return afg;
+		});
+
+		// 1. create affiliate offer
+		await INSERT.into(PT_TMOFRS).entries(differentAwardPriceOffer);
+		// 2. create affiliate offer status
+		await INSERT.into(PT_TMTNOFST).entries(differentAwardPriceOfferStatus);
+		// 3. create affiliate products
+		dapOfferProducts.length > 0 && await INSERT.into(PT_TMOFPR).entries(dapOfferProducts);
+		// 4. create product pricing
+		dapProductsPricing.length > 0 && await INSERT.into(PT_TMBDPR).entries(dapProductsPricing);
+		// 4. create price condtions
+		dapPriceCondtions.length > 0 && await INSERT.into(PriceCondition).entries(dapPriceCondtions);
+		// 5. create free goods other
+		dapFreeGoodsOther.length > 0 && await INSERT.into(FreeGoodsOther).entries(dapFreeGoodsOther);
+		
+
+		return differentAwardPriceOfferID;
 	};
 
 	srv.on("softDeleteOffer", async (req) => {
@@ -1347,9 +1433,16 @@ module.exports = async (srv) => {
 		], 
 		async (req) => {
 			try{
-			// validate form
-			!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
-			!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+				// validate form
+				!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
+				!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+
+				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
+				const parentOfferProdPriceCondition = await SELECT.one.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID, ProductCode: req.data.ProductCode});
+				if (!currentOffer.DifferentAwardPriceParentOfferID || !parentOfferProdPriceCondition) return;
+				if (Number(parentOfferProdPriceCondition.Price2) > Number(req.data.Price3)) {
+					req.error({ code: 404, message: "NetPrice can not be less than NetPrice of parent offer"});
+				}
 			}
 			catch(error){
 				console.error('Error in validation of PriceCondition Taiwan View before CREATE');
@@ -1378,6 +1471,57 @@ module.exports = async (srv) => {
 				await updateProductRequestedVolume(req);
 			}
 			return req.data;
+			}
+			catch(error){
+				console.error('Error in PriceCondition View CREATE');
+				return req.reject(403, error?.message||"Error in PriceCondition View CREATE");
+			}
+		}
+	);
+
+	srv.after(
+		['CREATE','UPDATE'], 
+		[
+			'PriceConditionTaiwanPriceView',
+			'PriceConditionTaiwanDiscountView',
+		], 
+		async (data, req) => {
+			try{
+				const tx = cds.tx(req);
+				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: data.OfferID});
+				const whereOffer = ServiceHelper.buildFullWhere("OFFER_ID", "=", data.OfferID);
+				const currentOffeProductsValidation = await buildOfferProductValidation(tx, whereOffer);
+				const currentOfferPriceConditions = await SELECT.from(PriceCondition).where({OfferID: data.OfferID});
+				const parentOfferProdPriceConditions = await SELECT.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID});
+				if (!currentOffer.DifferentAwardPriceParentOfferID || parentOfferProdPriceConditions.length === 0 || currentOffeProductsValidation.length === 0) return;
+
+				const checkNetPrices = currentOfferPriceConditions.every(pc => {
+					const parentOfferPriceCondition = parentOfferProdPriceConditions.find(ppc => ppc.ProductCode === pc.ProductCode);
+					const parentOffersNetPrice = parentOfferPriceCondition?.Price2 || 0;
+					return Number(pc.Price2) > Number(parentOffersNetPrice);
+				});
+				
+				if (checkNetPrices) {
+					const mappedAwardedProducts = currentOffeProductsValidation.map(product => {
+						return {
+							TenderID: product.TENDER_ID,
+							OfferID: product.OFFER_ID,
+							CountryCode: product.COUNTRY_CODE,
+							LotID: product.LOTID,
+							ProductCode: product.PRODUCTID,
+							AwardedProduct: product.PRODUCTNAME,
+							AwardedCompany: "Bayer",
+							UoM: product.UNIT,
+							AwardedPrice: product.NET_PRICE,
+							AwardedQty: product.REQUESTED_QUANTITY,
+							ErrorInSubmission: "No",
+						}
+					});
+
+
+					await INSERT.into(PT_TMTRRES).entries(mappedAwardedProducts);
+					await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Quotation Submitted');
+				}
 			}
 			catch(error){
 				console.error('Error in PriceCondition View CREATE');
