@@ -2075,13 +2075,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		data.unshift({AUTHORIZED_SIGNATORY: null, NAME: null})
 	});
 
-	srv.after('READ', 'MasterCompetitors', data => {
-		data.unshift({
-			CompetitorProduct: "Other",
-			CompetitorCompany: "Other"
-		})
-	});
-
 	srv.after('READ', 'MasterCountryOutComes', data => {
 		data.unshift({
 			Outcome: ""
