@@ -87,10 +87,10 @@ class PriceAgreementExpiredMailJob extends BaseJob {
     mapPriceAgreementsToMails = (templates,mail) => data => {
 
         let outbox = [];
-        const uniqueUsers = [...new Set(data.map(item => item.ID))];
+        const uniqueUsers = [...new Set(data.map(item => item.OfferId))];
         
          for (let user of uniqueUsers) {
-            let dataFilteredByUser = data.filter(d => d.ID === user);
+            let dataFilteredByUser = data.filter(d => d.OfferId === user);
             
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
