@@ -77,7 +77,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.State,
         Institute.InstituteID as ParentInstituteID,
         Institute.External_InstituteId,
-        Institute.Address
+        Institute.Address,
+        Country.Region
     }; 
 
     entity CountryRegionsTableView as projection on MasterData.CountryRegions;
@@ -730,18 +731,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity TaiwanFASTData {
        content    : LargeBinary @Core.MediaType : 'application/json';
     };
-
-    entity TenderChannelPaymentTermView as select from TransactionalData.PT_TMTEND {
-        key CountryCode,
-        key TenderID,
-        TenderChannel,
-        Country.Region,
-        case 
-            when TenderChannel = 'Direct'
-                then Institute.PaymentTerms
-                else Offer.Distributor.PaymentTerms
-        end as PaymentTerms: String 
-    }group by CountryCode,TenderID,TenderChannel,Country.Region,Institute.PaymentTerms,Offer.Distributor.PaymentTerms;
 
     entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
 
