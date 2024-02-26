@@ -3879,7 +3879,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
 			prd.OFFER_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
 			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
@@ -3894,11 +3894,16 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
 			prd.Level3Discount1 = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.Level3Discount1, 3, 3) : ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
 			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
+			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
+			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
+
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERDATE;
+		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERVALIDITY;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
