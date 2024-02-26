@@ -583,6 +583,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult;
 
     entity MasterCompetitors as select from MasterData.MasterCompetitors;
+    entity MasterCompetitorProducts as select from MasterData.MasterCompetitors;
 
     entity WordTemplate as projection on AdminData.WordTemplate;
     entity WordTemplateCountry as projection on AdminData.WordTemplateCountry{
