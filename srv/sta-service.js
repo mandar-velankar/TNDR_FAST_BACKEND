@@ -2100,6 +2100,19 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         }
 	});
 
+	srv.on('READ', 'MasterCompetitors', async (req, next) => {
+		const res = await next();
+		const result = res.reduce(function (a, b) {
+			let company = b.CompetitorCompany;
+			let currentValueIndex = a.findIndex(item => item.CompetitorCompany === company);
+			if (currentValueIndex == -1) {
+				a.push(b);
+			}
+			return a;
+		}, []);
+		return result;
+	});
+
 	srv.before(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (req) => {
 
 		try{
