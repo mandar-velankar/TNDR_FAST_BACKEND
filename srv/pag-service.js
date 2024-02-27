@@ -1505,7 +1505,7 @@ if(SoldToInstituteType.length > 0 && ShipToInstitute.length >0){
                         "ZTERM": "D496",
                         "ZLSCH": "M",
                         "ABREX": "TEST AGMNT",
-                        "KOTABNR": (CombinationValue === true ||institute.InstituteType === 'Ship-To') ? 582 : 750,
+                        "KOTABNR": institute.InstituteType === 'Ship-To' ? 750 : 582,
                         "KVEWE": "A",
                         "KAPPL": "V",
                         
