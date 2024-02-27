@@ -484,6 +484,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                                                         and result.LotID = priceCondition.LotID 
         left join TransactionalData.FreeGoodsOther as freegoods
                             on freegoods.PriceCondition.ID = priceCondition.ID
+                            and freegoods.ProductPackId = priceCondition.ProductCode
     {
         result.TenderID,
         key result.OfferID,
@@ -508,6 +509,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         freegoods.FreeGoodsOther_Step,
         freegoods.ADD_INCLUDE,
         case 
+            when freegoods.FreeGoodsOther is null
+                then 'NA'
             when freegoods.FreeGoodsOther_ABS_PCT = 'PCT'
                 then round(100 * freegoods.FreeGoodsOther, 2) || '% (' || freegoods.ADD_INCLUDE || ')'
             when freegoods.FreeGoodsOther_ABS_PCT = 'ABS'
