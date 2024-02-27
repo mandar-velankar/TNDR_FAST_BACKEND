@@ -4012,17 +4012,48 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 	srv.on("READ", "CSVAttachment", async (req, res) => {
 		try{
+			let startTime, endTime;
+
+			console.log("Checking cds.env.features.assert_integrity parameter:");
+			console.log(cds?.env?.features?.assert_integrity);
+
+			console.log("Fetching data from ZuelligExtractView...");
+        	startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			let zuelligExtract = await SELECT.from(ZuelligExtractView);
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	console.log(`Number of ZuelligExtractView data fetched: ${zuelligExtract.length}`);
+
+			console.log("Fetching offerProducts...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
+
 			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
 			const zuellig = req.data.Zuellig;
 			const fileName = zuellig ? 'Zuellig Extract' : 'Single View';
 
+			console.log("Sorting and filtering data...");
+			startTime = moment(); 
+			console.log("Start Time: ", startTime.format());
 			zuelligExtract = zuelligExtract.sort((a, b) => { 
 				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
 			});
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+			console.log(`Number of unique data fetched: ${zuelligExtract.length}`);
 
+			console.log("Mapping data...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			let mappedZuelligExtract = [];
 
 			if (zuellig) {
@@ -4030,10 +4061,20 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			}else {
 				mappedZuelligExtract = mappedSingleView(zuelligExtract, offerProducts);
 			}
-			
+			endTime = moment(); 
+			console.log("End Time: ", endTime.format());
+			console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+				
 			if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found");
+
+			console.log("Generating CSV...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			// Converts your Array<Object> to a CsvOutput string based on the configs
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
+			endTime = moment(); 
+			console.log("End Time: ", endTime.format());
+			console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
 			req._.res.setHeader('Content-type', 'text/csv');
@@ -4047,15 +4088,45 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 	srv.on("READ", "TaiwanFASTData", async (req, res) => {
 		try{
+			let startTime, endTime;
+
+			console.log("Fetching data from ZuelligExtractView...");
+        	startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			let zuelligExtract = await SELECT.from(ZuelligExtractView);
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	console.log(`Number of ZuelligExtractView data fetched: ${zuelligExtract.length}`);
+
+			console.log("Fetching offerProducts...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
-		
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
+
+			console.log("Sorting and filtering data...");
+			startTime = moment(); 
+			console.log("Start Time: ", startTime.format());
 			zuelligExtract = zuelligExtract.sort((a, b) => { 
 				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
 			});
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+			console.log(`Number of unique data fetched: ${zuelligExtract.length}`);
 
+			console.log("Mapping data...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			let mappedTaiwanFASTData = mappedSingleView(zuelligExtract, offerProducts);
+			endTime = moment(); 
+			console.log("End Time: ", endTime.format());
+			console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
 			
 			if (mappedTaiwanFASTData.length === 0) return req.reject(404, "No Zuellig Extracts were found");
 			
