@@ -2553,6 +2553,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
         inner join TaiwanInstituteInBranchView as branch
 	        on hier.ParentInstituteID = branch.ParentInstituteID
 	        and tender.InstituteID <> branch.InstituteID
+            and tender.Custom.String_3 LIKE '%' || branch.InstituteName || '%'
         left join MasterData.PT_TMINST as parentInst 
             on parentInst.InstituteID = hier.ParentInstituteID 
             and parentInst.CountryCode = tender.CountryCode {
