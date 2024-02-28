@@ -1421,7 +1421,8 @@ module.exports = async (srv) => {
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode
+			ProductCode: req.data.ProductCode,
+			ID: req.data.PriceConditionID
 		});
 
 		const mappedPriceCondition = mapPriceCondition(req);
@@ -2571,7 +2572,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			ContractExtenseion: offer.ContractExtenseion,
 			NumberOfExtension: offer.NumberOfExtension,
 			ClientComment: offer.ClientComment,
-			Regions: offer.Regions
+			Regions: offer.Regions,
+			InternalDueDate: tender.BidDueDate,
+        	ExpectedAwardDate: tender.AwardDate
 		};
 		return results;
 	
@@ -3216,7 +3219,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				ADD_INCLUDE: productFreeGoodsOther?.ADD_INCLUDE,
 				Level3Discount1: productConditionstmp[0] && productConditionstmp[0].Level3Discount1,
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
-				Region: offer.Region
+				Region: offer.Region,
+				AlternateOfferYN: offerProduct.AlternateOfferYN
 			}
 		});
 		let resolvedResults = await Promise.all(results);
