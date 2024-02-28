@@ -1421,7 +1421,8 @@ module.exports = async (srv) => {
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode
+			ProductCode: req.data.ProductCode,
+			ID: req.data.PriceConditionID
 		});
 
 		const mappedPriceCondition = mapPriceCondition(req);
