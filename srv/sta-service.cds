@@ -77,7 +77,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.State,
         Institute.InstituteID as ParentInstituteID,
         Institute.External_InstituteId,
-        Institute.Address
+        Institute.Address,
+        Country.Region
     }; 
 
     entity CountryRegionsTableView as projection on MasterData.CountryRegions;
@@ -182,6 +183,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity TenderOffers as projection on TransactionalDataViews.TenderOffers;
 
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
+    entity PT_TMINST   as projection on MasterData.PT_TMINST;
+    entity PT_TMDIST as projection on MasterData.PT_TMDIST;
     entity PT_TMBDPR as projection on TransactionalData.PT_TMBDPR {
         *,
         Product: redirected to TransactionalData.PT_TMOFPR
@@ -481,6 +484,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                                                         and result.LotID = priceCondition.LotID 
         left join TransactionalData.FreeGoodsOther as freegoods
                             on freegoods.PriceCondition.ID = priceCondition.ID
+                            and freegoods.ProductPackId = priceCondition.ProductCode
     {
         result.TenderID,
         key result.OfferID,
@@ -505,6 +509,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         freegoods.FreeGoodsOther_Step,
         freegoods.ADD_INCLUDE,
         case 
+            when freegoods.FreeGoodsOther is null
+                then 'NA'
             when freegoods.FreeGoodsOther_ABS_PCT = 'PCT'
                 then round(100 * freegoods.FreeGoodsOther, 2) || '% (' || freegoods.ADD_INCLUDE || ')'
             when freegoods.FreeGoodsOther_ABS_PCT = 'ABS'
@@ -580,6 +586,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity CompetitorResultsTableView as select from TransactionalData.TransCompetitorResult;
 
     entity MasterCompetitors as select from MasterData.MasterCompetitors;
+    entity MasterCompetitorProducts as select from MasterData.MasterCompetitors;
 
     entity WordTemplate as projection on AdminData.WordTemplate;
     entity WordTemplateCountry as projection on AdminData.WordTemplateCountry{
@@ -728,18 +735,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity TaiwanFASTData {
        content    : LargeBinary @Core.MediaType : 'application/json';
     };
-
-    entity TenderChannelPaymentTermView as select from TransactionalData.PT_TMTEND {
-        key CountryCode,
-        key TenderID,
-        TenderChannel,
-        Country.Region,
-        case 
-            when TenderChannel = 'Direct'
-                then Institute.PaymentTerms
-                else Offer.Distributor.PaymentTerms
-        end as PaymentTerms: String 
-    }group by CountryCode,TenderID,TenderChannel,Country.Region,Institute.PaymentTerms,Offer.Distributor.PaymentTerms;
 
     entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
 
