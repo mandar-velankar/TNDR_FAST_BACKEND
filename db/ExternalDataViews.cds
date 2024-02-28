@@ -1363,7 +1363,7 @@ where
 	offerProducts.Offer.Active = 1 and
 	offerProducts.Active = 1 and
 	(offerProducts.OfferType is null or offerProducts.OfferType = 'Selling') and
-	offerProducts.Price.Active = 1 and year(ifnull(offerProducts.Offer.SubmissionDate,ifnull(offerProducts.Offer.Quotation.SubmittedOn,offerProducts.Offer.Tender.PublicationDate))) > 2020;
+	offerProducts.Price.Active = 1;
 
 				
 entity SpainEspartaDoc as select from PriceAgreementData.PriceAgreements as pa left outer join
