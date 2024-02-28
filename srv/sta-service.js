@@ -592,6 +592,7 @@ module.exports = async (srv) => {
 		delete req.data.ParentInstituteID;
 		delete req.data.External_InstituteId;
 		delete req.data.Address;
+		delete req.data.Region;
 		}
 		catch(error){
             console.error('Error in TenderFormView CREATE');
@@ -2219,13 +2220,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		data.unshift({AUTHORIZED_SIGNATORY: null, NAME: null})
 	});
 
-	srv.after('READ', 'MasterCompetitors', data => {
-		data.unshift({
-			CompetitorProduct: "Other",
-			CompetitorCompany: "Other"
-		})
-	});
-
 	srv.after('READ', 'MasterCountryOutComes', data => {
 		data.unshift({
 			Outcome: ""
@@ -2248,6 +2242,19 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				DivisionName: ""
 			});
         }
+	});
+
+	srv.on('READ', 'MasterCompetitors', async (req, next) => {
+		const res = await next();
+		const result = res.reduce(function (a, b) {
+			let company = b.CompetitorCompany;
+			let currentValueIndex = a.findIndex(item => item.CompetitorCompany === company);
+			if (currentValueIndex == -1) {
+				a.push(b);
+			}
+			return a;
+		}, []);
+		return result;
 	});
 
 	srv.before(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (req) => {
@@ -4016,7 +4023,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
 			prd.OFFER_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
 			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
@@ -4031,11 +4038,16 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
 			prd.Level3Discount1 = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.Level3Discount1, 3, 3) : ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
 			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
+			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
+			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
+
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERDATE;
+		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERVALIDITY;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
