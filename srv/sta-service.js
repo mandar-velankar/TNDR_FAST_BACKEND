@@ -1683,8 +1683,14 @@ module.exports = async (srv) => {
 		try{
 			if(!items) return [];
 			const fnCalculateFields = async item => {
-				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-				item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+				if(item.ConditionType === 'Discount'){
+					item.OfferPrice = item.BasePrice * (1 - item.Discount);
+					item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+				}
+				else{
+					item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+					item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+				}
 			};
 			if(Array.isArray(items)){
 				return items.map(fnCalculateFields)
