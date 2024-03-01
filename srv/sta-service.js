@@ -57,7 +57,8 @@ module.exports = async (srv) => {
 	const {
 		PT_TMINST, 
 		PT_TMDIST, 
-		CountryApprovers, 
+		CountryApprovers,
+		MasterCompetitors, 
 		ApproverTypes, 
 		MASTER_COUNTRY_CHANNELS, 
 		PT_TMPRDPCK, 
@@ -1276,6 +1277,7 @@ module.exports = async (srv) => {
 	srv.on(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
 		try{
 		await upsertCompetitorResults(req);
+		await upsertMasterCompetitors(req);
 		return req.data;
 		}
 		catch(error){
@@ -1321,6 +1323,31 @@ module.exports = async (srv) => {
 				})
 		}else{
 			await INSERT.into(TransCompetitorResult).entries(mappedCompetitorResults);
+		}
+	}
+
+	const upsertMasterCompetitors = async function(req){
+
+		const masterCompetitors = await SELECT.one.from(MasterCompetitors).where({
+			ID: req.data.Custom_String_1,
+			CountryCode: req.data.Custom_String_2,
+			ProductCode: req.data.PRODUCTCODE
+		});
+		const mappedMasterCompetitors = {
+			CountryCode			: req.data.Custom_String_2,
+			ProductCode			: req.data.PRODUCTCODE,
+			CompetitorProduct	: req.data.AWARDEDPRODUCT, 
+			CompetitorCompany	: req.data.AWARDEDCOMPANY
+		}
+
+		if(masterCompetitors){
+			await UPDATE(MasterCompetitors)
+				.with (mappedMasterCompetitors)
+				.where({
+					ID: masterCompetitors.ID
+				})
+		}else{
+			await INSERT.into(MasterCompetitors).entries(mappedMasterCompetitors);
 		}
 	}
 
