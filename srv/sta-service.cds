@@ -105,7 +105,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity TenderMasterView as select from TransactionalData.PT_TMTEND as tender
         inner join AdminData.PT_TMUSER as CreatedByUser on CreatedByUser.UserID = tender.createdBy 
-        inner join AdminData.PT_TMUSER as ModifyedByUser on ModifyedByUser.UserID = tender.modifiedBy {
+        inner join AdminData.PT_TMUSER as ModifyedByUser on ModifyedByUser.UserID = tender.modifiedBy
+        left join TransactionalData.PT_TMOFRS as offer on offer.TenderID = tender.TenderID
+        left join TransactionalDataViews.BrandsInTender as brands on brands.OFFERID = offer.OfferID {
         tender.CountryCode,
         key tender.TenderID,
         tender.Classification,
@@ -122,7 +124,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.PublicationDate,
         tender.Offer.InternalBidDueDate,
         tender.BidDueDate,
-        max(tender.Brands.BRANDID) as BrandID:String,
+        max(brands.BRANDID) as BrandID:String,
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
