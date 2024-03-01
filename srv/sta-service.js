@@ -932,7 +932,7 @@ module.exports = async (srv) => {
 		differentAwardPriceOfferStatus.STATUS = "Offer Created";
 		differentAwardPriceOfferStatus.Date = todaysDate;
 
-		const filteredAwardedProducts = awardedProducts.filter(pr => pr.Outcome === 'Won' || pr.Outcome === 'Award Price Update');
+		const filteredAwardedProducts = awardedProducts.filter(pr => pr.Outcome === 'Award Price Update');
 
 		offerProducts = offerProducts.filter(ofpr => {
 			const isProducIncluded = filteredAwardedProducts.findIndex(ap => ap.ProductCode === ofpr.ProductCode);
