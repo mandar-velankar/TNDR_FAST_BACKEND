@@ -684,7 +684,8 @@ left outer join TransactionalData.ProductPricing as productPricing
     case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
-    offerProduct.Comment
+    offerProduct.Comment,
+    offerProduct.AlternateOfferYN
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -2089,6 +2090,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             ClientComment          : String(500);
             Comment                : String(500);
             Regions                : String;
+            InternalDueDate        : Date;
+            ExpectedAwardDate      : Date;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2275,6 +2278,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Level3Discount1                             : Double;
             Level1Discount1                             : Double;
             Region                                      : String(50);
+            AlternateOfferYN                            : String(255);
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
