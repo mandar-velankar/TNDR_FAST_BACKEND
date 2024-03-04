@@ -1592,19 +1592,43 @@ module.exports = async (srv) => {
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			ID: req.data.PriceConditionID
+			ProductCode: req.data.ProductCode
 		});
 
 		const mappedPriceCondition = mapPriceCondition(req);
 
 		if(priceCondition){
+			foc = await SELECT.from(FreeGoodsOther).where({
+				PriceCondition_ID: priceCondition.ID
+			});
+			const priceConditionClassification = await SELECT.one.from(PriceConditionClassification).where({
+				ID: priceCondition.PriceConditionClassification_ID
+			});
+			if (foc.length === 0 || priceConditionClassification.ConditionType === req.data.ConditionType) {
+				await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);
+			} else {
+				if (foc.length > 0) {
+					await DELETE(FreeGoodsOther)
+						.where({
+							PriceCondition_ID: priceCondition.ID
+						});
+				}
+				await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);
+			}	
+		}
+		else{
+			await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);		
+		}
+	}
+
+	async function handlePriceConditionUpsert(priceCondition, mappedPriceCondition){
+		if (priceCondition) {
 			await UPDATE(PriceCondition)
-				.with (mappedPriceCondition)
+				.with(mappedPriceCondition)
 				.where({
 					ID: priceCondition.ID
-				})
-		}else{
+				});
+		} else {
 			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
 		}
 	}
