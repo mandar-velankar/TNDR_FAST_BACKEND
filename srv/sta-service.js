@@ -91,7 +91,8 @@ module.exports = async (srv) => {
 		TenderOffers,
 		ZuelligExtractView,
 		StandardTenderHistory,
-		PriceConditionCurrentSectionTaiwanView
+		PriceConditionCurrentSectionTaiwanView,
+		BrandsInTender
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -487,10 +488,29 @@ module.exports = async (srv) => {
 		
 		let result = [];
         let tmvQuery = SELECT.from(req.query.SELECT.from);
+		let offerIDfullWhere = [];
+		const brandID = ServiceHelper.getWhereValue(req, "BrandID");
+		const countryCode = ServiceHelper.getWhereValue(req, "CountryCode");
+		
+		// Building full where for BrandID to include all BrandIDs of the Offers
+		if (brandID) {
+			const brandsInTender = await SELECT.from(BrandsInTender).where({'CountryCode': countryCode, 'BRANDID': brandID});
+			const tenderBrandOfferIds = brandsInTender.map(el => el.OFFERID);
+
+			tenderBrandOfferIds.forEach((el, index) => {
+				offerIDfullWhere.push(ServiceHelper.buildFullWhere("OfferID", "=", el));
+				if (index !== tenderBrandOfferIds.length-1) {
+					offerIDfullWhere.push('or');
+				}
+			});
+			offerIDfullWhere = offerIDfullWhere.flat();
+			ServiceHelper.deleteFilter(req, "BrandID");
+		}
+
         if (req.query.SELECT.columns?.[0]?.func !== "count") {
             tmvQuery.columns(req.query.SELECT.columns);
         }
-        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(offerIDfullWhere));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
 
         result = await tx.run(tmvQuery);
