@@ -359,7 +359,7 @@ entity CustomerPricesQC: cuid, managed {
 }
 //EJUVE-CR3 START
 entity PriceAgreement_APPRST : cuid, managed {
-        CountryCode      : String(2);
+        CountryCode      : String;
     key PriceAgreementID : UUID;
         ApprovalStatus   : String(30)  null;
         OfferId          : String;

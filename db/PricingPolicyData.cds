@@ -33,7 +33,7 @@ order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.
 entity BrandPolicies: cuid, managed {
     ValidFrom       : Timestamp; //EffectiveDate
     ValidTo         : Timestamp;
-    CountryCode     : String(2);
+    CountryCode     : String;
     Division        : String(200);
     BrandId         : String(50);
     Status          : String(100);
@@ -86,7 +86,7 @@ entity BrandProducts as select from CountryBrandProducts as Product {
 entity ActiveProductPolicies as select from ProductPolicies where BrandPolicy.ValidTo = '9999-12-31 00:00:00.000000000'; //only the lastest effective date will be visible
 
 entity ProductPolicies: cuid, managed {
-    CountryCode  : String(2);
+    CountryCode  : String;
     Division : String(200);
     BrandId : String(50);
     ProductPackId : Integer;
@@ -109,7 +109,7 @@ entity PolicyPrices: cuid, managed {
 entity Channels as projection on MasterData.MASTER_COUNTRY_CHANNELS; //as select from MasterData.MASTER_COUNTRY_CHANNELS;
 
 entity Approvals: cuid, managed {
-        CountryCode         : String(2);
+        CountryCode         : String;
         BrandId             : String(50);
         Division            : String(200);
         ApprovalStatus      : String(100);
@@ -131,7 +131,7 @@ entity OverallApprovalStatus as select from Approvals {
 };
 @cds.autoexpose
 entity CountryApprovers: cuid, managed{
-	    CountryCode         : String(2);
+	    CountryCode         : String;
 	    Division            : String(200);
         ApproverEmailId     : String(200);
 	    ApproverName        : String(200);
@@ -141,7 +141,7 @@ entity CountryApprovers: cuid, managed{
 @cds.autoexpose
 entity ApproverTypes: cuid, managed {
     ApproverType            : String(200);
-    CountryCode             : String(2);
+    CountryCode             : String;
     Mandatory               : Boolean;
     CountryApprovers        : Association to many CountryApprovers on CountryApprovers.ApproverType = $self;
 }

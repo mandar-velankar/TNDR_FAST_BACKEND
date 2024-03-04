@@ -57,14 +57,14 @@ service EpaService @(path: 'epa') @(requires:['f_tndr_cag_admin','f_tndr_cag_epa
 	// }
 	
 	entity ChannelsForCountry{
-		key CountryCode:String(2);
+		key CountryCode:String;
 		key Channel:String(50);
 		//Associations
 		InstituteGroups:Association[*] to InstituteGroup on InstituteGroups.Channel = Channel;
 	}
 	
 	entity DivisionsForCountry{
-		key CountryCode:String(2);
+		key CountryCode:String;
 		key Division:String(200);
 		//Associations
 		Brands:Association[*] to BrandsForDivision on Brands.Division = Division; 
