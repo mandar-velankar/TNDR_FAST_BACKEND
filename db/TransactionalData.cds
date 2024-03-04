@@ -22,7 +22,7 @@ entity CandidatePrices as projection on PriceAgreementData.CandidatePrices;
 entity PT_TMOFRS { //Offers
         TenderID              : String(50) not null;
     key OfferID               : String(30) not null;
-        CountryCode           : String(2) not null;
+        CountryCode           : String not null;
         TenderOfferNo         : Integer;
         RevisedOfferNo        : Integer;
         ActiveOffer           : Integer;
@@ -110,7 +110,7 @@ entity PT_OFGRPUR {
         TenderID      : String(50);
     key OfferID       : String(30) not null;
         RegionCode    : String(2);
-        CountryCode   : String(2);
+        CountryCode   : String;
         SubmittedOn   : Date;
         SubmittedBy   : String(255);
     key Active        : Integer not null;
@@ -127,7 +127,7 @@ entity PT_OFGRPUR {
 entity PT_SCENARIOPLAN {
         TenderID              : String(50);
     key OfferID               : String(30) not null;
-        CountryCode           : String(2);
+        CountryCode           : String;
     key ProductCode           : Integer not null;
         SubmittedOn           : Date;
         SubmitedBy            : String(255);
@@ -148,7 +148,7 @@ entity PT_SCENARIOPLAN {
 entity PT_TENDGRPPUR {
         TenderID      : String(50);
     key OfferID       : String(30);
-        CountryCode   : String(2);
+        CountryCode   : String;
     key ProductCode   : Integer;
     key InstituteID   : Integer;
         SubmittedOn   : Date;
@@ -161,7 +161,7 @@ entity PT_TENDGRPPUR {
 entity PT_TMAPPRST {
         TenderID            : String(50);
     key OfferId             : String(30) not null;
-        CountryCode         : String(2);
+        CountryCode         : String;
     key productcode         : Integer not null;
         ApprovalContent     : String(100);
         ApproverTypeSection : Integer;
@@ -191,7 +191,7 @@ entity PT_TMAPPRST {
 
 entity PT_TMAWRDCR {
     key TENDERID      : String(50) not null;
-        COUNTRYCODE   : String(2);
+        COUNTRYCODE   : String;
         SUBMITTEDON   : Date;
         Submittedby   : String(100);
     key Active        : Integer not null;
@@ -204,7 +204,7 @@ entity PT_TMAWRDCR {
 
 entity Specifications : cuid, managed {
     key TenderID    : String(50) not null;
-        CountryCode	: String(2);   
+        CountryCode	: String;   
         Name		: String(50);
         Tender      : Association to PT_TMTEND on Tender.TenderID = TenderID;
 }
@@ -213,7 +213,7 @@ entity Specifications : cuid, managed {
 entity PT_TMBDPR {
         TenderID              : String(50) not null;
     key OfferID               : String(30) not null;
-        CountryCode           : String(2) not null;
+        CountryCode           : String not null;
     key ProductCode           : Integer not null;
         SubmittedOn           : Date;
         SubmittedBy           : String(255);
@@ -264,7 +264,7 @@ entity PT_TMBDPR {
 entity PT_TMDLVTR {
         TenderID               : String(50);
     key OfferID                : String(30) not null;
-        CountryCode            : String(2);
+        CountryCode            : String;
         InstituteID            : Integer;
         SKUCode                : Integer;
         SubmittedOn            : Date;
@@ -305,7 +305,7 @@ entity PT_TMDLVTR {
 entity PT_TMOFPR {
         TenderID                 : String(50) not null;
     key OfferID                  : String(30) not null;
-        CountryCode              : String(2);
+        CountryCode              : String;
         SubmittedOn              : Date;
         SubmittedBy              : String(255);
     key Active                   : Integer not null;
@@ -585,7 +585,7 @@ entity PT_TMPFIOM {
 entity PT_TMQUTO {
         TenderID          : String(50);
     key OfferID           : String(30) not null;
-        CountryCode       : String(2);
+        CountryCode       : String;
         DistributorID     : Integer;
         SubmittedOn       : Date;
         SubmittedBy       : String(255);
@@ -617,7 +617,7 @@ entity PT_TMQUTO {
 //CR1
 entity PT_TMTEND: managed {
     key TenderID             : String(50) not null;
-        CountryCode          : String(2) not null;
+        CountryCode          : String not null;
         ToolID               : Integer;
         TenderNo             : Integer;
         CloneTenderID        : String(50);
@@ -718,7 +718,7 @@ entity PT_TMTEND: managed {
 entity PT_TMTNOFST {
     key TenderID    : String(50) not null;
     key OfferID     : String(30) not null;
-        CountryCode : String(2);
+        CountryCode : String;
     key Active      : Integer not null;
         STATUS      : String(255);
         Date        : Date;
@@ -727,7 +727,7 @@ entity PT_TMTNOFST {
 entity PT_TMTRRES {
         TenderID          : String(50);
     key OfferID           : String(30) not null;
-        CountryCode       : String(2);
+        CountryCode       : String;
         InstituteID       : Integer;
     key ProductCode       : Integer not null;
         ContractNo        : String(50);
@@ -769,7 +769,7 @@ entity PT_TMTRRES {
 entity PT_TMUDLTRS {
         TENDERID          : String(50);
     key OFFERID           : String(30) not null;
-        COUNTRYCODE       : String(2);
+        COUNTRYCODE       : String;
         INSTITUTEID       : Integer;
     key SKUCODE           : Integer not null;
         SUBMITTEDON       : Date;
@@ -810,7 +810,7 @@ entity TransCompetitorResult {
 }
 
 entity OutgoingMails : managed, cuid {
-    CountryCode: String(2);
+    CountryCode: String;
     TenderID: String(50);
     OfferID: String(30);
     Sender: LargeString;
@@ -822,7 +822,7 @@ entity OutgoingMails : managed, cuid {
 
 entity CountrySpecificTenderInfo: managed {
     key TenderID             : String(50);
-    key CountryCode          : String(2);
+    key CountryCode          : String;
         Institute            : String(255);
         TenderReference      : String(255); 
         PublicationDate      : Date;
@@ -834,7 +834,7 @@ entity DocumentsDownload: cuid, managed {
     DocID 				: Integer; // id_doc
     DocCreatedAt        : String;  // created_at
     NameTag             : String;  // nm_tag
-    CountryCode         : String(2);
+    CountryCode         : String;
     TenderID            : String(50) not null;
     OfferID             : String(30) not null;
     IbizAPIName         : String; // to store from which API the DOC are receiving, like from CONTRATOS,RESULTADOS or from QPS
@@ -855,7 +855,7 @@ entity SpainRappelData: cuid, managed {
 entity OfferProductOfferStatus {
             TenderID            : String(50) not null;
         key OfferId             : String(30) not null;
-            CountryCode         : String(2) not null;
+            CountryCode         : String not null;
             ApprovalContent     : String(13);
             ApproverTypeSection : Integer;
             REQUIRED_ACTION     : String(12);

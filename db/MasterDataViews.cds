@@ -343,7 +343,7 @@ ORDER BY i.InstituteID,h.HLEVEL4_CODE, d.DistributorID;
 
 
 entity InstituteDistributorBrandProduct {
-        key COUNTRY_CODE      : String(2) not null;
+        key COUNTRY_CODE      : String not null;
         key INSTITUTE_ID      : Integer not null;
             INSTITUTE_NAME    : String(500);
         key DISTRIBUTOR_ID    : Integer not null;

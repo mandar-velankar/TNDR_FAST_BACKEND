@@ -174,11 +174,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }order by CountryCode, InstituteName;
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
-        classification.COUNTRY_CODE as CountryCode: String(2)
+        classification.COUNTRY_CODE as CountryCode: String
     }order by CLASSIFICATION;
     entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS as instType {
         *,
-        instType.ChannelCountry as CountryCode: String(2)
+        instType.ChannelCountry as CountryCode: String
     }order by ChannelName;
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
 

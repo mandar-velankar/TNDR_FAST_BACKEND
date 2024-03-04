@@ -2020,7 +2020,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             OFFERVALIDITY         : Date not null;
             EffectiveDate         : Date;
             ExpiryDate            : Date;
-            COUNTRYCODE           : String(2) not null;
+            COUNTRYCODE           : String not null;
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
@@ -2101,7 +2101,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     // EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
     entity OfferProductValidation {
             TENDER_ID                                   : String(30);
-            COUNTRY_CODE                                : String(2);
+            COUNTRY_CODE                                : String;
         key OFFER_ID                                    : String(30) not null;
             DIVISION                                    : String(100);
             BRANDID                                     : String(50);
