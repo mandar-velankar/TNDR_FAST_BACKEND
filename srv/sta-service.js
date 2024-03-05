@@ -2241,6 +2241,12 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		}
 		
 	});
+
+	srv.after(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (data) => {
+		await upsertOfferStatus(data.OfferID, data.TenderID, 'Delivery Ongoing');
+		return data;
+	});
+
 	async function buildOfferApproval(tx, whereOffer) {
 
 		let results = [];
