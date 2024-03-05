@@ -2196,25 +2196,25 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		try{
 			const today = new Date().toISOString().slice(0, 10);
 
-			const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'DeliveryDetails', CountryCode: req?.data?.CountryCode, ProductScope: "All"}));
+			// const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'DeliveryDetails', CountryCode: req?.data?.CountryCode, ProductScope: "All"}));
 
-			const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+			// const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 			
-			for (const item of mandatoryFielddata) {
-				let frontendField = item.Field;
-				if (frontendField.includes("path")) {
-					const match = regex.exec(frontendField);
-					frontendField = match ? match[1] : frontendField;
-				}
+			// for (const item of mandatoryFielddata) {
+			// 	let frontendField = item.Field;
+			// 	if (frontendField.includes("path")) {
+			// 		const match = regex.exec(frontendField);
+			// 		frontendField = match ? match[1] : frontendField;
+			// 	}
 			
-				if (
-					!(frontendField in req.data) ||
-					req.data[frontendField] === null ||
-					req.data[frontendField] === ''
-				) {
-					req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
-				}
-			}	
+			// 	if (
+			// 		!(frontendField in req.data) ||
+			// 		req.data[frontendField] === null ||
+			// 		req.data[frontendField] === ''
+			// 	) {
+			// 		req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+			// 	}
+			// }	
 
 			!req.data.ActualDeliveryDate && req.error({ code: 404, message: `Actual Delivery Date is required.`, target: 'ActualDeliveryDate' });
 			!req.data.ActualDeliveryQuantity && req.error({ code: 404, message: `Actual Delivery Quantity is required.`, target: 'ActualDeliveryQuantity' });
@@ -2241,6 +2241,12 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		}
 		
 	});
+
+	srv.after(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (data) => {
+		await upsertOfferStatus(data.OfferID, data.TenderID, 'Delivery Ongoing');
+		return data;
+	});
+
 	async function buildOfferApproval(tx, whereOffer) {
 
 		let results = [];
