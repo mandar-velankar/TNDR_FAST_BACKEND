@@ -1508,6 +1508,7 @@ if(SoldToInstituteType.length > 0 && ShipToInstitute.length >0){
                         "KOTABNR": institute.InstituteType === 'Ship-To' ? 750 : 582,
                         "KVEWE": "A",
                         "KAPPL": "V",
+                        "BOSTA": "B",
                         
                         "_BAY0-GZ_SALESAGRITEM": [
                             {
