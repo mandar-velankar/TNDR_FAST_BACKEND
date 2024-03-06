@@ -1133,6 +1133,8 @@ module.exports = async (srv) => {
 			LotID: req.data.LotID
 		});
 
+
+
 		const mappedAwardedProduct = {
 			TenderID: req.data.TenderID,
 			OfferID: req.data.OfferID,
@@ -1212,6 +1214,8 @@ module.exports = async (srv) => {
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
 		}
+
+
 		const existingAwardedProducts = await SELECT.from(PT_TMTRRES).where({
 			OfferID: req.data.OfferID
 		});
