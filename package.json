@@ -69,6 +69,9 @@
     "hana": {
       "deploy-format": "hdbtable"
     },
+    "features": {
+      "assert_integrity": false
+    },
     "requires": {
       "db": {
         "kind": "hana",

@@ -728,7 +728,7 @@ entity Tenders_in_Regions {
 	Tender				: Association to TenderRegions on Tender.TenderID = TenderID;
 	Region				: Association to CountryRegions on Region.ID = RegionID;
 }
-
+//EHQUT-CR8
 //italy
 entity ConsumerPrices: cuid, managed {
 	CountryCode: String;
@@ -748,6 +748,7 @@ entity ConsumerPrices: cuid, managed {
 	TotalDiscount: Double;
 	MaxPriceNhsPP: Double;
 	MaxPriceNhsPU: Double;
+	FloorPrice : Double;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;

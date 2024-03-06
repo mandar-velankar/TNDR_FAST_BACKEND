@@ -995,7 +995,7 @@ entity PreApprovedPrices as select from PricingAppData.InstituteGroupPriceLatest
     case when price.UoM = 'Unit' then price.MSP else price.MSP / price.ProductPack.PACKFACTOR end as PriceUnit:Double,
     case when price.UoM = 'Unit' then price.MSP * price.ProductPack.PACKFACTOR else price.MSP end as PricePack:Double
 };
-
+//EHQUT-CR8
 entity ProductPricingView as select from TransactionalData.PT_TMOFRS as offer 
 inner join TransactionalData.PT_TMOFPR as product on product.OfferID = offer.OfferID
 left outer join TransactionalData.ProductPricing as productPricing 
@@ -1063,6 +1063,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
 	consumerPrices.TotalDiscount,
 	consumerPrices.MaxPriceNhsPP,
 	consumerPrices.MaxPriceNhsPU,
+    consumerPrices.FloorPrice,
     priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
@@ -2520,6 +2521,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             ifnull(pc.TotalDiscountNHI, 0) as TotalDiscountNHI,
             ifnull(pc.Level2Discount1, 0) as Level2Discount1,
 			ifnull(pc.Level2Discount2, 0) as Level2Discount2,
+            ifnull(pc.Level3Discount1, 0) as Level3Discount1,
 			ifnull(pc.GeneralDiscount_Amount, 0) as GeneralDiscount_Amount,
     		ifnull(pc.SecondDiscount_Amount, 0) as SecondDiscount_Amount,
     		ifnull(pc.FreeGoods_Amount, 0) as FreeGoods_Amount,
@@ -2563,6 +2565,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
         inner join TaiwanInstituteInBranchView as branch
 	        on hier.ParentInstituteID = branch.ParentInstituteID
 	        and tender.InstituteID <> branch.InstituteID
+            and tender.Custom.String_3 LIKE '%' || branch.InstituteName || '%'
         left join MasterData.PT_TMINST as parentInst 
             on parentInst.InstituteID = hier.ParentInstituteID 
             and parentInst.CountryCode = tender.CountryCode {
@@ -2597,6 +2600,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             ifnull(pc.TotalDiscountNHI, 0) as TotalDiscountNHI,
             ifnull(pc.Level2Discount1, 0) as Level2Discount1,
 			ifnull(pc.Level2Discount2, 0) as Level2Discount2,
+			ifnull(pc.Level3Discount1, 0) as Level3Discount1,
 			ifnull(pc.GeneralDiscount_Amount, 0) as GeneralDiscount_Amount,
     		ifnull(pc.SecondDiscount_Amount, 0) as SecondDiscount_Amount,
     		ifnull(pc.FreeGoods_Amount, 0) as FreeGoods_Amount,
