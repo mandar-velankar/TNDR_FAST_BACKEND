@@ -4020,7 +4020,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView);
+			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4039,12 +4039,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			const zuellig = req.data.Zuellig;
 			const fileName = zuellig ? 'Zuellig Extract' : 'Single View';
 
-			console.log("Sorting and filtering data...");
+			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = zuelligExtract.sort((a, b) => { 
-				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
-			});
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
@@ -4093,7 +4090,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView);
+			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4108,12 +4105,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
         	console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
 
-			console.log("Sorting and filtering data...");
+			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = zuelligExtract.sort((a, b) => { 
-				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
-			});
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
