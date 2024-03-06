@@ -1156,10 +1156,6 @@ module.exports = async (srv) => {
 			LotID: req.data.LotID
 		});
 
-		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
-			OfferID: req.data.OfferID,
-			Active: 1
-		});
 
 
 		const mappedAwardedProduct = {
@@ -1242,9 +1238,6 @@ module.exports = async (srv) => {
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
 		}
 
-		if (!submittedQoutation) {
-			await upsertQuotationAfterSubmitting(req);
-		}
 
 		const existingAwardedProducts = await SELECT.from(PT_TMTRRES).where({
 			OfferID: req.data.OfferID
@@ -1260,15 +1253,6 @@ module.exports = async (srv) => {
 		if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
 			await addOutgoingMail(req);
 		}
-	}
-
-	const upsertQuotationAfterSubmitting = async function(req){
-		const tx = cds.tx(req);
-		const whereOffer = ServiceHelper.buildFullWhere("OFFER_ID", "=", req.data.OfferID);
-		const offerValidation = await buildOfferProductValidation(tx, whereOffer);
-		const mappedPTTMQUTO = mappedQuotation(req.user, offerValidation);
-
-		await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
 	}
 
 	const addOutgoingMail = async function (req) {
