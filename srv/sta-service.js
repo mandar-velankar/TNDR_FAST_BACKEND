@@ -1156,6 +1156,12 @@ module.exports = async (srv) => {
 			LotID: req.data.LotID
 		});
 
+		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+			OfferID: req.data.OfferID,
+			Active: 1
+		});
+
+
 		const mappedAwardedProduct = {
 			TenderID: req.data.TenderID,
 			OfferID: req.data.OfferID,
@@ -1235,6 +1241,11 @@ module.exports = async (srv) => {
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
 		}
+
+		if (!submittedQoutation) {
+			await upsertQuotationAfterSubmitting(req);
+		}
+
 		const existingAwardedProducts = await SELECT.from(PT_TMTRRES).where({
 			OfferID: req.data.OfferID
 		});
@@ -1249,6 +1260,15 @@ module.exports = async (srv) => {
 		if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
 			await addOutgoingMail(req);
 		}
+	}
+
+	const upsertQuotationAfterSubmitting = async function(req){
+		const tx = cds.tx(req);
+		const whereOffer = ServiceHelper.buildFullWhere("OFFER_ID", "=", req.data.OfferID);
+		const offerValidation = await buildOfferProductValidation(tx, whereOffer);
+		const mappedPTTMQUTO = mappedQuotation(req.user, offerValidation);
+
+		await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
 	}
 
 	const addOutgoingMail = async function (req) {
@@ -2198,28 +2218,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	});
 
 	const upsertQuotation = async function(req){
-		const mappedPTTMQUTO = {
-			TenderID          : req.data.TENDERID,
-			OfferID           : req.data.OFFERID,
-			CountryCode       : req.data.COUNTRYCODE,
-			DistributorID     : req.data.DISTRIBUTORID, // TODO: this field needs to be added to OfferValidation entity
-			SubmittedOn       : new Date().toISOString(),
-			SubmittedBy       : req.user.id,
-			Active            : 1, 
-			OfferValidity     : req.data.OFFERVALIDITY,
-			DelayInSubmission : null,
-			AS1               : req.data.SELLING_COMPANY_AS1,
-			AS2               : req.data.SELLING_COMPANY_AS2,
-			OfferDate         : req.data.OFFERDATE,
-			DeliveryTerms     : req.data.DELIVERYTERMS,
-			I_Q_1             : null,
-			I_Q_2             : null,
-			I_Q_3             : null,
-			Comment           : req.data.CUSTOM_REMARKS,
-			UPDATED           : 1,
-			EffectiveDate     : req.data.EffectiveDate,
-			ExpiryDate        : req.data.ExpiryDate
-		}
+		const mappedPTTMQUTO = mappedQuotation(req.user, req.data);
 
 		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
 			OfferID: req.data.OFFERID,
@@ -2236,6 +2235,31 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			})
 		}else{
 			await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
+		}
+	}
+
+	const mappedQuotation = (user, data) => {
+		return {
+			TenderID          : data.TENDERID,
+			OfferID           : data.OFFERID,
+			CountryCode       : data.COUNTRYCODE,
+			DistributorID     : data.DISTRIBUTORID, // TODO: this field needs to be added to OfferValidation entity
+			SubmittedOn       : new Date().toISOString(),
+			SubmittedBy       : user.id,
+			Active            : 1, 
+			OfferValidity     : data.OFFERVALIDITY,
+			DelayInSubmission : null,
+			AS1               : data.SELLING_COMPANY_AS1,
+			AS2               : data.SELLING_COMPANY_AS2,
+			OfferDate         : data.OFFERDATE,
+			DeliveryTerms     : data.DELIVERYTERMS,
+			I_Q_1             : null,
+			I_Q_2             : null,
+			I_Q_3             : null,
+			Comment           : data.CUSTOM_REMARKS,
+			UPDATED           : 1,
+			EffectiveDate     : data.EffectiveDate,
+			ExpiryDate        : data.ExpiryDate
 		}
 	}
 
@@ -4158,8 +4182,29 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 	srv.on("READ", "CSVAttachment", async (req, res) => {
 		try{
-			let zuelligExtract = await SELECT.from(ZuelligExtractView);
-			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+			let startTime, endTime;
+
+			console.log("Checking cds.env.features.assert_integrity parameter:");
+			console.log(cds?.env?.features?.assert_integrity);
+
+			console.log("Fetching data from ZuelligExtractView...");
+        	startTime = moment();
+			console.log("Start Time: ", startTime.format());
+			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	console.log(`Number of ZuelligExtractView data fetched: ${zuelligExtract.length}`);
+
+			// console.log("Fetching offerProducts...");
+			// startTime = moment();
+			// console.log("Start Time: ", startTime.format());
+			// const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+			// endTime = moment();
+			// console.log("End Time: ", endTime.format());
+        	// console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	// console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
+
 			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
 			const zuellig = req.data.Zuellig;
 			const fileName = zuellig ? 'Zuellig Extract' : 'Single View';
@@ -4193,12 +4238,29 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 	srv.on("READ", "TaiwanFASTData", async (req, res) => {
 		try{
-			let zuelligExtract = await SELECT.from(ZuelligExtractView);
-			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
-		
-			zuelligExtract = zuelligExtract.sort((a, b) => { 
-				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
-			});
+			let startTime, endTime;
+
+			console.log("Fetching data from ZuelligExtractView...");
+        	startTime = moment();
+			console.log("Start Time: ", startTime.format());
+			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	console.log(`Number of ZuelligExtractView data fetched: ${zuelligExtract.length}`);
+
+			// console.log("Fetching offerProducts...");
+			// startTime = moment();
+			// console.log("Start Time: ", startTime.format());
+			// const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+			// endTime = moment();
+			// console.log("End Time: ", endTime.format());
+        	// console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	// console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
+
+			console.log("Filtering data...");
+			startTime = moment(); 
+			console.log("Start Time: ", startTime.format());
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
 
 			let mappedTaiwanFASTData = mappedSingleView(zuelligExtract, offerProducts);
@@ -4241,14 +4303,13 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 	function mappedSingleView (zuelligExtract, offerProducts) { // TaiwanFASTData
 		return zuelligExtract.map(item => {
-			const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
 			return {
 				"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
 				"CWID": item.SubmittedBy,
 				"BU": item.BU,
 				"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
 				"PreviousNetPrice": Number(item.Price3).toFixed(4),
-				"CountProducts": products.length,
+				"CountProducts": item.CountProducts,
 				"Invoice Price": Number(item.Price1).toFixed(4),
 				"HandlingCharge_Amount": 0,
 				"Institute Type": item.InstituteType,
