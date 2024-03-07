@@ -1504,7 +1504,7 @@ module.exports = async (srv) => {
 			try{
 				// validate form
 				!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
-				!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+				//!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
 
 				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
 				const parentOfferProdPriceCondition = await SELECT.one.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID, ProductCode: req.data.ProductCode});
