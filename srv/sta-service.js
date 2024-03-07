@@ -1504,7 +1504,7 @@ module.exports = async (srv) => {
 			try{
 				// validate form
 				!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
-				!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+				//!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
 
 				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
 				const parentOfferProdPriceCondition = await SELECT.one.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID, ProductCode: req.data.ProductCode});
@@ -4196,14 +4196,14 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
         	console.log(`Number of ZuelligExtractView data fetched: ${zuelligExtract.length}`);
 
-			// console.log("Fetching offerProducts...");
-			// startTime = moment();
-			// console.log("Start Time: ", startTime.format());
-			// const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
-			// endTime = moment();
-			// console.log("End Time: ", endTime.format());
-        	// console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
-        	// console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
+			console.log("Fetching offerProducts...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
 
 			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
 			const zuellig = req.data.Zuellig;
@@ -4249,14 +4249,14 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
         	console.log(`Number of ZuelligExtractView data fetched: ${zuelligExtract.length}`);
 
-			// console.log("Fetching offerProducts...");
-			// startTime = moment();
-			// console.log("Start Time: ", startTime.format());
-			// const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
-			// endTime = moment();
-			// console.log("End Time: ", endTime.format());
-        	// console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
-        	// console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
+			console.log("Fetching offerProducts...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+        	console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
 
 			console.log("Filtering data...");
 			startTime = moment(); 
@@ -4303,13 +4303,14 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 	function mappedSingleView (zuelligExtract, offerProducts) { // TaiwanFASTData
 		return zuelligExtract.map(item => {
+			const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
 			return {
 				"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
 				"CWID": item.SubmittedBy,
 				"BU": item.BU,
 				"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
 				"PreviousNetPrice": Number(item.Price3).toFixed(4),
-				"CountProducts": item.CountProducts,
+				"CountProducts": products.length,
 				"Invoice Price": Number(item.Price1).toFixed(4),
 				"HandlingCharge_Amount": 0,
 				"Institute Type": item.InstituteType,
