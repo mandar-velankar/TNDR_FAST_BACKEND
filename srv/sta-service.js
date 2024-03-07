@@ -1646,7 +1646,7 @@ module.exports = async (srv) => {
 				NegotiationPrice:req.data.NegotiationPrice,
 				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
 				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
-				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				AnticipatedYearlyVolumeBranch:(!req.data.AnticipatedYearlyVolumeBranch) ? req.data.AnticipatedYearlyVolumeMainCustomer : req.data.AnticipatedYearlyVolumeBranch,
 				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
 				TotalDiscountNHI:req.data.TotalDiscountNHI,
 				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
@@ -1675,7 +1675,7 @@ module.exports = async (srv) => {
 				NegotiationPrice:req.data.NegotiationPrice,
 				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
 				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
-				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				AnticipatedYearlyVolumeBranch:(!req.data.AnticipatedYearlyVolumeBranch) ? req.data.AnticipatedYearlyVolumeMainCustomer : req.data.AnticipatedYearlyVolumeBranch,
 				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
 				TotalDiscountNHI:req.data.TotalDiscountNHI,
 				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
@@ -1813,10 +1813,11 @@ module.exports = async (srv) => {
 		};
 
 		const product = await SELECT.one.from(PT_TMOFPR).where(whereCondition);
+		let AnticipatedYearlyVolumeBranch = (!req.data.AnticipatedYearlyVolumeBranch) ? req.data.AnticipatedYearlyVolumeMainCustomer : req.data.AnticipatedYearlyVolumeBranch;
 
 		if(product){
 			await UPDATE(PT_TMOFPR)
-				.with ({RequestedVolume: req.data.AnticipatedYearlyVolumeBranch})
+				.with ({RequestedVolume: AnticipatedYearlyVolumeBranch})
 				.where(whereCondition)
 		}
 	}
