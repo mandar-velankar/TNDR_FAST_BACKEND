@@ -1683,9 +1683,19 @@ module.exports = async (srv) => {
 			X_TYPE: 'Budget'
 		}
 
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		const foc = await SELECT.one.from(FreeGoodsOther).where({
+				PriceCondition_ID: priceCondition?.ID,
+				ProductPackId: req.data.ProductCode
+		});
+
 		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
 
-		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate});
+		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate, foc});
 
 		if(productPricing){
 			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
@@ -1694,7 +1704,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate}){
+	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate, foc}){
 		return {
 			TenderID              : priceCondition.TenderID, 
 			OfferID               : priceCondition.OfferID, 
@@ -1707,9 +1717,9 @@ module.exports = async (srv) => {
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
 			RegPrice              : priceCondition.BasePrice, 
-			FOC                   : 0, 
-			// FOCStep               : null, 
-			// FOCType               : null, 
+			FOC                   : foc.FreeGoodsOther || 0, 
+			FOCStep               : foc.FreeGoodsOther_Step || 0, 
+			FOCType               : foc.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
 			Deductions            : 0, 
@@ -1722,7 +1732,7 @@ module.exports = async (srv) => {
 			SpotRate              : spotRate?.X_RATE || 0,
 			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
-			// FOC_ABS_PCT           : null, 
+			FOC_ABS_PCT           : foc.FreeGoodsOther_ABS_PCT, 
 			FOC_Bundled_1         : 0, 
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
