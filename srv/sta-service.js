@@ -489,8 +489,8 @@ module.exports = async (srv) => {
 		let result = [];
         let tmvQuery = SELECT.from(req.query.SELECT.from);
 		let offerIDfullWhere = [];
-		const brandID = ServiceHelper.getWhereValue(req, "BrandID");
-		const countryCode = ServiceHelper.getWhereValue(req, "CountryCode");
+		const brandID = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "BrandID");
+		const countryCode = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "CountryCode");
 		
 		// Building full where for BrandID to include all BrandIDs of the Offers
 		if (brandID) {
@@ -1659,8 +1659,11 @@ module.exports = async (srv) => {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
-				NetOfferPrice: req.data.NetOfferPrice,
+				NetOfferPrice: req.data.OfferPrice,
 				Price2: req.data.NetPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Tax: req.data.Tax,
@@ -1672,7 +1675,10 @@ module.exports = async (srv) => {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
-				NetOfferPrice: req.data.NetOfferPrice,
+				NetOfferPrice: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price2: req.data.NetPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
@@ -1686,6 +1692,9 @@ module.exports = async (srv) => {
 				CountryCode: req.data.CountryCode,
 				Price2: req.data.Discount,
 				NetOfferPrice: req.data.NetOfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price3: req.data.NetPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
@@ -1698,6 +1707,10 @@ module.exports = async (srv) => {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price2: req.data.NetOfferPrice,
 				Price3: req.data.NetPrice,
 				OfferID: req.data.OfferID,
@@ -1841,7 +1854,7 @@ module.exports = async (srv) => {
 			FOC                   : 0, 
 			// FOCStep               : null, 
 			// FOCType               : null, 
-			Discount              : 0, 
+			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
 			Deductions            : 0, 
 			StandardDiscount      : 0, 
