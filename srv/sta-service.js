@@ -1722,7 +1722,7 @@ module.exports = async (srv) => {
 			FOCType               : foc.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
-			Deductions            : 0, 
+			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
 			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice, 
