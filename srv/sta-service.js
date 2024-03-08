@@ -489,8 +489,8 @@ module.exports = async (srv) => {
 		let result = [];
         let tmvQuery = SELECT.from(req.query.SELECT.from);
 		let offerIDfullWhere = [];
-		const brandID = ServiceHelper.getWhereValue(req, "BrandID");
-		const countryCode = ServiceHelper.getWhereValue(req, "CountryCode");
+		const brandID = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "BrandID");
+		const countryCode = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "CountryCode");
 		
 		// Building full where for BrandID to include all BrandIDs of the Offers
 		if (brandID) {
