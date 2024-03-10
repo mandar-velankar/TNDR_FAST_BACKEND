@@ -432,11 +432,13 @@ entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.OfferStatusTable.STATUS,
 
     sum(
-        offer.Product.Price.OfferPrice *
+        offer.Product.Price.OfferPrice * (1 - ifnull(offer.Product.Price.Deductions, 0)) *
         case when offer.Product.Price.FOCType = 'FOC 1'
             then
                 case when offer.Product.Price.FOC_ABS_PCT = 'PCT'
-                    then offer.Product.RequestedVolume * (1 - offer.Product.Price.FOC)
+                    then round(offer.Product.RequestedVolume * (1 - offer.Product.Price.FOC))
+                        when offer.Product.Price.FOC_ABS_PCT = 'STP'
+                            then floor(offer.Product.RequestedVolume / offer.Product.Price.FOCStep) * offer.Product.Price.FOC
                     else offer.Product.RequestedVolume - offer.Product.Price.FOC
                 end
             else offer.Product.RequestedVolume
@@ -2035,6 +2037,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
             CURRENCY              : String(255);
             AMOUNT_IN_NUMBERS     : Double;
             AMOUNT_IN_WORDS       : String(1024);
+            NET_AMOUNT_IN_NUMBERS : Double;
+			NET_AMOUNT_IN_WORDS   : String(1024);
+			NET_OFFER_AMOUNT_IN_NUMBERS: Double;
+			NET_OFFER_AMOUNT_IN_WORDS  : String(1024);
             AMOUNT_IN_NUMBERS_VAT : Double;
             AMOUNT_IN_WORDS_VAT   : String(1024);
             VAT_TOTAL             : Double;
@@ -2125,6 +2131,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PRODUCT_COMMENT                             : String(784);
             UNIT                                        : String(255);
             PAID_VOLUME                                 : Double;
+            TOTAL_VOLUME                                : Double;
             SORTER                                      : Integer;
             CURRENCY                                    : String(255);
             REQUESTED_QUANTITY                          : String(567);
@@ -2179,6 +2186,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS     : String;
             VAT_TOTAL                                   : Double;
             NET_SALES_OFFER_CURRENCY                    : Double;
+            NET_SALES_OFFER_CURRENCY_IN_WORDS           : String;
             NET_SALES_EUR_BUDGET                        : Double;
             NET_SALES_EUR_SPOT                          : Double;
             GROSS_MARGIN_EUR_BUDGET                     : Double;
@@ -2280,6 +2288,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Level1Discount1                             : Double;
             Region                                      : String(50);
             AlternateOfferYN                            : String(255);
+            NET_OFFER_SALES_OFFER_CURRENCY              : Double;
+            NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;

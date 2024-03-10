@@ -1827,9 +1827,19 @@ module.exports = async (srv) => {
 			X_TYPE: 'Budget'
 		}
 
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		const foc = await SELECT.one.from(FreeGoodsOther).where({
+				PriceCondition_ID: priceCondition?.ID,
+				ProductPackId: req.data.ProductCode
+		});
+
 		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
 
-		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate});
+		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate, foc});
 
 		if(productPricing){
 			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
@@ -1838,7 +1848,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate}){
+	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate, foc}){
 		return {
 			TenderID              : priceCondition.TenderID, 
 			OfferID               : priceCondition.OfferID, 
@@ -1851,12 +1861,12 @@ module.exports = async (srv) => {
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
 			RegPrice              : priceCondition.BasePrice, 
-			FOC                   : 0, 
-			// FOCStep               : null, 
-			// FOCType               : null, 
+			FOC                   : foc.FreeGoodsOther || 0, 
+			FOCStep               : foc.FreeGoodsOther_Step || 0, 
+			FOCType               : foc.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
-			Deductions            : 0, 
+			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
 			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice, 
@@ -1866,7 +1876,7 @@ module.exports = async (srv) => {
 			SpotRate              : spotRate?.X_RATE || 0,
 			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
-			// FOC_ABS_PCT           : null, 
+			FOC_ABS_PCT           : foc.FreeGoodsOther_ABS_PCT, 
 			FOC_Bundled_1         : 0, 
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
@@ -2494,7 +2504,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
+		let totalNetAmount = offerProductValidation.reduce((a, b) => a + b.NET_SALES_OFFER_CURRENCY, 0);
+		let totalNetOfferAmount = offerProductValidation.reduce((a, b) => a + b.NET_OFFER_SALES_OFFER_CURRENCY, 0);
 		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
+		let totalNetAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalNetAmount)} ${offer.CURRENCY} only`;
+		let totalNetOfferAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalNetOfferAmount)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
@@ -2758,7 +2772,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			E_SIGNATURE2: offer.E_SIGNATURE2,
 			CURRENCY: offer.CURRENCY,
 			AMOUNT_IN_NUMBERS: totalAmount,
-			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
+			AMOUNT_IN_WORDS: totalAmountInWords,
+			NET_AMOUNT_IN_NUMBERS: totalNetAmount,
+			NET_AMOUNT_IN_WORDS: totalNetAmountInWords,
+			NET_OFFER_AMOUNT_IN_NUMBERS: totalNetOfferAmount,
+			NET_OFFER_AMOUNT_IN_WORDS: totalNetOfferAmountInWords, 
 			LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
 			//REGULATORY: regulatory,
 			//LEGAL: legal,
@@ -3293,6 +3311,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				VAT_IN_WORDS: '',
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
+				TOTAL_VOLUME: productInfo.CommnonProductInfo.TotalVolume,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
 				SORTER: offerProduct.SORTER,
 				CURRENCY: offer.CURRENCY,
@@ -3345,6 +3364,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
 				GROSS_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales),
 				NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
+				NET_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetSales),
+				NET_OFFER_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetOfferSales,
+				NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetOfferSales),
 				NET_SALES_EUR_BUDGET: productInfo.CommnonProductInfo.NetSalesEurBudget,
 				NET_SALES_EUR_SPOT: productInfo.CommnonProductInfo.NetSalesEurSpot,
 				GROSS_MARGIN_EUR_BUDGET: productInfo.CommnonProductInfo.GrossMarginEurBudget,
@@ -3759,7 +3781,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		let requestedVolume = product.REQUESTED_VOLUME;
 		//let requestedUnit = toUnitFactor * requestedVolume;
 
-		let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+		//let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+		let focAmount = 0;
+		switch (product.FOC_ABS_PCT)
+		{
+				case "PCT": focAmount = Math.round(product.FOC * requestedVolume); break;
+				case "ABS": focAmount = Math.round(product.FOC); break;
+				case "STP": focAmount = Math.floor(requestedVolume / product.FOC_STEP) * product.FOC; break;
+				default: break;
+		};
 		let focAmountUnit = toUnitFactor * focAmount;
 		let totalVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume : requestedVolume + focAmount;
 		let totalVolumeUnit = toUnitFactor * totalVolume;
@@ -3784,7 +3814,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
 
 		let grossSales = offerPrice * paidVolume;
-	
+		let netOfferSales = netOfferPrice * totalVolume;
 		let netSales = netPrice * totalVolume;
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
@@ -3876,6 +3906,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			FocString: focString,
 			RequestedQuantityString: requestedQuantityString,
 
+			TotalVolume: totalVolume,
 			TotalVolumeUnit: totalVolumeUnit,
 			PaidVolume: paidVolume,
 			PaidVolumeUnit: paidVolumeUnit,
@@ -3895,6 +3926,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			CogsEurPack: cogsEurPack,
 
 			GrossSales: grossSales,
+			NetOfferSales: netOfferSales,
 			NetSales: netSales,
 			NetSalesEurBudget: netSalesEurBudget,
 			NetSalesEurSpot: netSalesEurSpot,
