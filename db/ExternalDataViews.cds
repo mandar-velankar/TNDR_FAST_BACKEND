@@ -739,7 +739,7 @@ left outer join MasterDataLatestValues.VWBUDGETEDPROFITABILITY as MasterBudgeted
 	'Pack' as COGS_UOM:String,
 	cogs.COGS,
 	'' as NEW_COGS:String,
-    MasterBudgetedProfitability.PROFITABILITY,
+    max(MasterBudgetedProfitability.PROFITABILITY) as PROFITABILITY:Double,
 	sku.SKUCode as MaterialNumbers:Integer,
 	CP.QTY_THRESHOLD,
 	P.ACTIVERECORD as ACTIVE_PRODUCT,
