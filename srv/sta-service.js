@@ -1872,7 +1872,7 @@ module.exports = async (srv) => {
 			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
