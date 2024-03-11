@@ -1688,10 +1688,13 @@ module.exports = async (srv) => {
 			ProductCode: req.data.ProductCode
 		});
 
-		const foc = await SELECT.one.from(FreeGoodsOther).where({
-				PriceCondition_ID: priceCondition?.ID,
-				ProductPackId: req.data.ProductCode
-		});
+		let foc = null;
+		if(priceCondition){
+			foc = await SELECT.one.from(FreeGoodsOther).where({
+					PriceCondition_ID: priceCondition?.ID,
+					ProductPackId: req.data.ProductCode
+			});
+		}
 
 		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
 
@@ -1717,9 +1720,9 @@ module.exports = async (srv) => {
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
 			RegPrice              : priceCondition.BasePrice, 
-			FOC                   : foc.FreeGoodsOther || 0, 
-			FOCStep               : foc.FreeGoodsOther_Step || 0, 
-			FOCType               : foc.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			FOC                   : foc?.FreeGoodsOther || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
 			Deductions            : priceCondition.Deductions, 
@@ -1732,7 +1735,7 @@ module.exports = async (srv) => {
 			SpotRate              : spotRate?.X_RATE || 0,
 			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
-			FOC_ABS_PCT           : foc.FreeGoodsOther_ABS_PCT, 
+			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT, 
 			FOC_Bundled_1         : 0, 
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
