@@ -4236,4 +4236,138 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		}
 		return nextValue
 	}
+
+	srv.on(
+		['CREATE','UPDATE'], 'PT_TMBDPR', 
+		async (req) => {
+			try{
+			await updateProductPricing(req);
+			await updatePriceCondition(req);
+
+			return req.data;
+			}
+			catch(error){
+				console.error('Error in Price UPDATE after FOC');
+				return req.reject(403, error?.message||"Error in Price UPDATE after FOC");
+			}
+		}
+	);
+
+	const updatePriceCondition = async function(req){
+
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		const priceConditionClassification = await SELECT.one.from(PriceConditionClassification).where({
+			ID: priceCondition.PriceConditionClassification_ID
+		});
+
+		const mappedPriceCondition = mappingPriceCondition(req, priceConditionClassification.ConditionType);
+
+		if (priceCondition) {
+			await UPDATE(PriceCondition)
+				.with(mappedPriceCondition)
+				.where({
+					ID: priceCondition.ID
+				});
+		}
+	}
+
+	const mappingPriceCondition = function(req, ConditionType){
+		const mappings = {
+			"Discount" : {
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price1: req.data.OfferPrice
+			},
+			"Price" : {
+				NetOfferPrice: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetPrice,
+				Price1: req.data.OfferPrice
+			},
+			"PriceWithFOC" : {
+				NetOfferPrice: req.data.NetofferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice
+			},
+			"DiscountWithFOC" : {
+				NetOfferPrice: req.data.NetofferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice
+			},
+			"TaiwanPrice": {
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"TaiwanDiscount": {
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			}
+		}
+
+		return mappings[ConditionType];
+	}
+
+	const updateProductPricing = async function(req){
+
+		const whereCondition = {
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Active: 1,
+			ActiveTier: 0,
+			LotID: 1
+		};
+
+		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
+
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		let foc = null;
+		if(priceCondition){
+			foc = await SELECT.one.from(FreeGoodsOther).where({
+					PriceCondition_ID: priceCondition?.ID,
+					ProductPackId: req.data.ProductCode
+			});
+		}
+
+		const mappedPTTMBDPR = mapPTTMBDPR({priceCondition:req.data, foc});
+
+		if(productPricing){
+			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
+		}
+	}
+
+	function mapPTTMBDPR({priceCondition, foc}){
+		return {
+			FOC                   : foc?.FreeGoodsOther || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			OfferPrice            : priceCondition.OfferPrice,
+			NetofferPrice         : priceCondition.NetofferPrice,
+			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT,
+			NetPrice              : priceCondition.NetPrice
+		}
+	}
+	
 }
