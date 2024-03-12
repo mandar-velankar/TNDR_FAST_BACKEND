@@ -117,6 +117,10 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_distributormanagement_user",
       "description": "f_tndr_cag_distributormanagement_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_distributormanagementexclusiveaccess_user",
+      "description": "f_tndr_cag_distributormanagementexclusiveaccess_user"
     }
   ],
   "attributes": [],
@@ -334,6 +338,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_distributormanagement_user"
+      ],
+      "attribute-references": []
+    },
+    {		  
+      "name": "f_tndr_cag_distributormanagementexclusiveaccess_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_distributormanagementexclusiveaccess_user"
       ],
       "attribute-references": []
     }

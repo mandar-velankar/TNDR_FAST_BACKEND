@@ -13,6 +13,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         adminAccess:{
             ConsumerPrices:Boolean;
             DistributorManagememt:Boolean;
+            DistributorManagementExclusiveAccess:Boolean;
         };
         standardtenderAccess: {
 			OverviewDownload: Boolean;
