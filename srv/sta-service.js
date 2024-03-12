@@ -1910,6 +1910,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	async function calculateNetOfferPrice(item){
 		const offerProduct = item.ProductCode;
 		let foc = [];
+		let focVolume = 0;
+
 		
 		if(item.PriceConditionID){
 			foc = await SELECT.from(FreeGoodsOther).where({
@@ -1932,30 +1934,26 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if(foc.length === 0 || !containsOfferProduct) return item.OfferPrice;
 
 		// Cases 3
-		if(containsOfferProductAndIsAdded) {
-			const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
-			switch(addedFOC.FreeGoodsOther_ABS_PCT){
+		if(containsOfferProductAndIsAdded || containsOfferProductAndIsIncluded) {
+			const FOC = getFOCWitSameProductCode(foc, offerProduct);
+			switch(FOC.FreeGoodsOther_ABS_PCT){
 				case "ABS":
-					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume + addedFOC.FreeGoodsOther);
+					focVolume = FOC.FreeGoodsOther;
+					break;
 				case "PCT":
-					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume * (1 + addedFOC.FreeGoodsOther));
+					focVolume = Math.round(item.RequestedVolume * FOC.FreeGoodsOther);
+					break;
 				case "STP":
-					return item.RequestedVolume * item.OfferPrice / ((item.RequestedVolume + item.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
-			}
+					focVolume = Math.floor(item.RequestedVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+					break;
+				default:
+					break;
+			}		
 		}
 
-		// Cases 4
-		if(containsOfferProductAndIsIncluded) {
-			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-			switch(includedFOC.FreeGoodsOther_ABS_PCT){
-				case "ABS":
-					return (item.RequestedVolume - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-				case "PCT":
-					return item.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-				case "STP":
-					return (item.RequestedVolume - item.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-			}
-		}
+		let paidVolume = containsOfferProductAndIsAdded ? item.RequestedVolume : item.RequestedVolume - focVolume;
+		let totalVolume = containsOfferProductAndIsAdded ? item.RequestedVolume + focVolume : item.RequestedVolume;
+		let netOfferPrice = item.OfferPrice * paidVolume / totalVolume;
 
 		function hasObjectWithProductCode(arr, offerProduct) {
 			return arr.some(obj => obj.ProductPackId === offerProduct);
@@ -1969,13 +1967,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 		}
 
-		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		function getFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct);
 		}
 
-		function getAddedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
-		}
+		return netOfferPrice;
 	}
 	
 	async function calculateNetOfferTaiwanPrice(item){
