@@ -4153,7 +4153,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"HandlingCharge_Amount2": 0,
 				"CashDiscount_Amount": 0,
 				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
+				"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
 				"FGBuy": 0,
 				"FGGift": 0,
 				"NetPrice": Number(item.Price3).toFixed(4),
