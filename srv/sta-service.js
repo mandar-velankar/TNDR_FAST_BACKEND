@@ -494,8 +494,8 @@ module.exports = async (srv) => {
 		let result = [];
         let tmvQuery = SELECT.from(req.query.SELECT.from);
 		let offerIDfullWhere = [];
-		const brandID = ServiceHelper.getWhereValue(req, "BrandID");
-		const countryCode = ServiceHelper.getWhereValue(req, "CountryCode");
+		const brandID = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "BrandID");
+		const countryCode = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "CountryCode");
 		
 		// Building full where for BrandID to include all BrandIDs of the Offers
 		if (brandID) {
@@ -1676,8 +1676,11 @@ module.exports = async (srv) => {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
-				NetOfferPrice: req.data.NetOfferPrice,
+				NetOfferPrice: req.data.OfferPrice,
 				Price2: req.data.NetPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Tax: req.data.Tax,
@@ -1689,7 +1692,10 @@ module.exports = async (srv) => {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
-				NetOfferPrice: req.data.NetOfferPrice,
+				NetOfferPrice: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price2: req.data.NetPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
@@ -1703,6 +1709,9 @@ module.exports = async (srv) => {
 				CountryCode: req.data.CountryCode,
 				Price2: req.data.Discount,
 				NetOfferPrice: req.data.NetOfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price3: req.data.NetPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
@@ -1715,6 +1724,10 @@ module.exports = async (srv) => {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price2: req.data.NetOfferPrice,
 				Price3: req.data.NetPrice,
 				OfferID: req.data.OfferID,
@@ -1831,9 +1844,22 @@ module.exports = async (srv) => {
 			X_TYPE: 'Budget'
 		}
 
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		let foc = null;
+		if(priceCondition){
+			foc = await SELECT.one.from(FreeGoodsOther).where({
+					PriceCondition_ID: priceCondition?.ID,
+					ProductPackId: req.data.ProductCode
+			});
+		}
+
 		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
 
-		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate});
+		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate, foc});
 
 		if(productPricing){
 			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
@@ -1842,7 +1868,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate}){
+	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate, foc}){
 		return {
 			TenderID              : priceCondition.TenderID, 
 			OfferID               : priceCondition.OfferID, 
@@ -1855,22 +1881,22 @@ module.exports = async (srv) => {
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
 			RegPrice              : priceCondition.BasePrice, 
-			FOC                   : 0, 
-			// FOCStep               : null, 
-			// FOCType               : null, 
-			Discount              : 0, 
+			FOC                   : foc?.FreeGoodsOther || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
-			Deductions            : 0, 
+			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
 			SpotRate              : spotRate?.X_RATE || 0,
 			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
-			// FOC_ABS_PCT           : null, 
+			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT, 
 			FOC_Bundled_1         : 0, 
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
@@ -2056,6 +2082,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	async function calculateNetOfferPrice(item){
 		const offerProduct = item.ProductCode;
 		let foc = [];
+		let focVolume = 0;
+
 		
 		if(item.PriceConditionID){
 			foc = await SELECT.from(FreeGoodsOther).where({
@@ -2078,30 +2106,26 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if(foc.length === 0 || !containsOfferProduct) return item.OfferPrice;
 
 		// Cases 3
-		if(containsOfferProductAndIsAdded) {
-			const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
-			switch(addedFOC.FreeGoodsOther_ABS_PCT){
+		if(containsOfferProductAndIsAdded || containsOfferProductAndIsIncluded) {
+			const FOC = getFOCWitSameProductCode(foc, offerProduct);
+			switch(FOC.FreeGoodsOther_ABS_PCT){
 				case "ABS":
-					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume + addedFOC.FreeGoodsOther);
+					focVolume = FOC.FreeGoodsOther;
+					break;
 				case "PCT":
-					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume * (1 + addedFOC.FreeGoodsOther));
+					focVolume = Math.round(item.RequestedVolume * FOC.FreeGoodsOther);
+					break;
 				case "STP":
-					return item.RequestedVolume * item.OfferPrice / ((item.RequestedVolume + item.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
-			}
+					focVolume = Math.floor(item.RequestedVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+					break;
+				default:
+					break;
+			}		
 		}
 
-		// Cases 4
-		if(containsOfferProductAndIsIncluded) {
-			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-			switch(includedFOC.FreeGoodsOther_ABS_PCT){
-				case "ABS":
-					return (item.RequestedVolume - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-				case "PCT":
-					return item.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-				case "STP":
-					return (item.RequestedVolume - item.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-			}
-		}
+		let paidVolume = containsOfferProductAndIsAdded ? item.RequestedVolume : item.RequestedVolume - focVolume;
+		let totalVolume = containsOfferProductAndIsAdded ? item.RequestedVolume + focVolume : item.RequestedVolume;
+		let netOfferPrice = item.OfferPrice * paidVolume / totalVolume;
 
 		function hasObjectWithProductCode(arr, offerProduct) {
 			return arr.some(obj => obj.ProductPackId === offerProduct);
@@ -2115,13 +2139,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 		}
 
-		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		function getFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct);
 		}
 
-		function getAddedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
-		}
+		return netOfferPrice;
 	}
 	
 	async function calculateNetOfferTaiwanPrice(item){
@@ -2417,6 +2439,12 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		}
 		
 	});
+
+	srv.after(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (data) => {
+		await upsertOfferStatus(data.OfferID, data.TenderID, 'Delivery Ongoing');
+		return data;
+	});
+
 	async function buildOfferApproval(tx, whereOffer) {
 
 		let results = [];
@@ -2507,7 +2535,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
+		let totalNetAmount = offerProductValidation.reduce((a, b) => a + b.NET_SALES_OFFER_CURRENCY, 0);
+		let totalNetOfferAmount = offerProductValidation.reduce((a, b) => a + b.NET_OFFER_SALES_OFFER_CURRENCY, 0);
 		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
+		let totalNetAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalNetAmount)} ${offer.CURRENCY} only`;
+		let totalNetOfferAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalNetOfferAmount)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
@@ -2771,7 +2803,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			E_SIGNATURE2: offer.E_SIGNATURE2,
 			CURRENCY: offer.CURRENCY,
 			AMOUNT_IN_NUMBERS: totalAmount,
-			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
+			AMOUNT_IN_WORDS: totalAmountInWords,
+			NET_AMOUNT_IN_NUMBERS: totalNetAmount,
+			NET_AMOUNT_IN_WORDS: totalNetAmountInWords,
+			NET_OFFER_AMOUNT_IN_NUMBERS: totalNetOfferAmount,
+			NET_OFFER_AMOUNT_IN_WORDS: totalNetOfferAmountInWords, 
 			LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
 			//REGULATORY: regulatory,
 			//LEGAL: legal,
@@ -3306,6 +3342,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				VAT_IN_WORDS: '',
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
+				TOTAL_VOLUME: productInfo.CommnonProductInfo.TotalVolume,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
 				SORTER: offerProduct.SORTER,
 				CURRENCY: offer.CURRENCY,
@@ -3358,6 +3395,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
 				GROSS_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales),
 				NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
+				NET_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetSales),
+				NET_OFFER_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetOfferSales,
+				NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetOfferSales),
 				NET_SALES_EUR_BUDGET: productInfo.CommnonProductInfo.NetSalesEurBudget,
 				NET_SALES_EUR_SPOT: productInfo.CommnonProductInfo.NetSalesEurSpot,
 				GROSS_MARGIN_EUR_BUDGET: productInfo.CommnonProductInfo.GrossMarginEurBudget,
@@ -3772,7 +3812,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		let requestedVolume = product.REQUESTED_VOLUME;
 		//let requestedUnit = toUnitFactor * requestedVolume;
 
-		let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+		//let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+		let focAmount = 0;
+		switch (product.FOC_ABS_PCT)
+		{
+				case "PCT": focAmount = Math.round(product.FOC * requestedVolume); break;
+				case "ABS": focAmount = Math.round(product.FOC); break;
+				case "STP": focAmount = Math.floor(requestedVolume / product.FOC_STEP) * product.FOC; break;
+				default: break;
+		};
 		let focAmountUnit = toUnitFactor * focAmount;
 		let totalVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume : requestedVolume + focAmount;
 		let totalVolumeUnit = toUnitFactor * totalVolume;
@@ -3797,7 +3845,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
 
 		let grossSales = offerPrice * paidVolume;
-	
+		let netOfferSales = netOfferPrice * totalVolume;
 		let netSales = netPrice * totalVolume;
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
@@ -3889,6 +3937,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			FocString: focString,
 			RequestedQuantityString: requestedQuantityString,
 
+			TotalVolume: totalVolume,
 			TotalVolumeUnit: totalVolumeUnit,
 			PaidVolume: paidVolume,
 			PaidVolumeUnit: paidVolumeUnit,
@@ -3908,6 +3957,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			CogsEurPack: cogsEurPack,
 
 			GrossSales: grossSales,
+			NetOfferSales: netOfferSales,
 			NetSales: netSales,
 			NetSalesEurBudget: netSalesEurBudget,
 			NetSalesEurSpot: netSalesEurSpot,
@@ -4217,11 +4267,18 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			const zuellig = req.data.Zuellig;
 			const fileName = zuellig ? 'Zuellig Extract' : 'Single View';
 
-			zuelligExtract = zuelligExtract.sort((a, b) => { 
-				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
-			});
+			console.log("Filtering data...");
+			startTime = moment(); 
+			console.log("Start Time: ", startTime.format());
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+			console.log(`Number of unique data fetched: ${zuelligExtract.length}`);
 
+			console.log("Mapping data...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			let mappedZuelligExtract = [];
 
 			if (zuellig) {
@@ -4229,10 +4286,20 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			}else {
 				mappedZuelligExtract = mappedSingleView(zuelligExtract, offerProducts);
 			}
-			
+			endTime = moment(); 
+			console.log("End Time: ", endTime.format());
+			console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+				
 			if (mappedZuelligExtract.length === 0) return req.reject(404, "No Zuellig Extracts were found");
+
+			console.log("Generating CSV...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			// Converts your Array<Object> to a CsvOutput string based on the configs
 			const csv = generateCsv(csvConfig)(mappedZuelligExtract);
+			endTime = moment(); 
+			console.log("End Time: ", endTime.format());
+			console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${fileName}.csv`);
 			req._.res.setHeader('Content-type', 'text/csv');
@@ -4270,8 +4337,18 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			endTime = moment();
+			console.log("End Time: ", endTime.format());
+        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+			console.log(`Number of unique data fetched: ${zuelligExtract.length}`);
 
+			console.log("Mapping data...");
+			startTime = moment();
+			console.log("Start Time: ", startTime.format());
 			let mappedTaiwanFASTData = mappedSingleView(zuelligExtract, offerProducts);
+			endTime = moment(); 
+			console.log("End Time: ", endTime.format());
+			console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
 			
 			if (mappedTaiwanFASTData.length === 0) return req.reject(404, "No Zuellig Extracts were found");
 			
@@ -4397,4 +4474,138 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		}
 		return nextValue
 	}
+
+	srv.on(
+		['CREATE','UPDATE'], 'PT_TMBDPR', 
+		async (req) => {
+			try{
+			await updateProductPricing(req);
+			await updatePriceCondition(req);
+
+			return req.data;
+			}
+			catch(error){
+				console.error('Error in Price UPDATE after FOC');
+				return req.reject(403, error?.message||"Error in Price UPDATE after FOC");
+			}
+		}
+	);
+
+	const updatePriceCondition = async function(req){
+
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		const priceConditionClassification = await SELECT.one.from(PriceConditionClassification).where({
+			ID: priceCondition.PriceConditionClassification_ID
+		});
+
+		const mappedPriceCondition = mappingPriceCondition(req, priceConditionClassification.ConditionType);
+
+		if (priceCondition) {
+			await UPDATE(PriceCondition)
+				.with(mappedPriceCondition)
+				.where({
+					ID: priceCondition.ID
+				});
+		}
+	}
+
+	const mappingPriceCondition = function(req, ConditionType){
+		const mappings = {
+			"Discount" : {
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price1: req.data.OfferPrice
+			},
+			"Price" : {
+				NetOfferPrice: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetPrice,
+				Price1: req.data.OfferPrice
+			},
+			"PriceWithFOC" : {
+				NetOfferPrice: req.data.NetofferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice
+			},
+			"DiscountWithFOC" : {
+				NetOfferPrice: req.data.NetofferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice
+			},
+			"TaiwanPrice": {
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"TaiwanDiscount": {
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			}
+		}
+
+		return mappings[ConditionType];
+	}
+
+	const updateProductPricing = async function(req){
+
+		const whereCondition = {
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Active: 1,
+			ActiveTier: 0,
+			LotID: 1
+		};
+
+		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
+
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		let foc = null;
+		if(priceCondition){
+			foc = await SELECT.one.from(FreeGoodsOther).where({
+					PriceCondition_ID: priceCondition?.ID,
+					ProductPackId: req.data.ProductCode
+			});
+		}
+
+		const mappedPTTMBDPR = mapPTTMBDPR({priceCondition:req.data, foc});
+
+		if(productPricing){
+			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
+		}
+	}
+
+	function mapPTTMBDPR({priceCondition, foc}){
+		return {
+			FOC                   : foc?.FreeGoodsOther || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			OfferPrice            : priceCondition.OfferPrice,
+			NetofferPrice         : priceCondition.NetofferPrice,
+			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT,
+			NetPrice              : priceCondition.NetPrice
+		}
+	}
+	
 }

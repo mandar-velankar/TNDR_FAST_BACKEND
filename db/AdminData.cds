@@ -44,7 +44,7 @@ entity PT_TMUSER {
 
 entity PT_TMUSERCTRY {
     key CWID         : String(5);
-    key CountryCode  : String(255);
+    key CountryCode  : String;
         ActiveRecord : String(3);
         //Associations
         User         : Association to PT_TMUSER
@@ -54,14 +54,14 @@ entity PT_TMUSERCTRY {
 }
 
 entity PT_TMUSERCTRYN {
-    key CountryCode : String(2);
+    key CountryCode : String;
         CWIDs       : String(500);
 }
 
 //PDF templates
 //-------------
 entity TemplateCountry {
-    key CountryCode    : String(2);
+    key CountryCode    : String;
     key Classification : String(50); //Added Classification (db#2)
         TemplateId     : Integer;
 }
@@ -86,7 +86,7 @@ entity Template {
 }*/
 
 entity MailTemplate {
-    key CountryCode    : String(2);
+    key CountryCode    : String;
     key Language       : String(2);
     key TemplateId     : String(100);
         MailTemplateFile      : Association to MailTemplateFile
@@ -115,7 +115,7 @@ entity MailTemplateFile {
 
 //Customizing for: tables (sap.m.Table...)
 entity CountryTablesCustomization {
-    key CountryCode : String(2);
+    key CountryCode : String;
     key TableID     : String(100);
     key Column      : String(100);
         BindingPath : String(255);
@@ -126,21 +126,21 @@ entity CountryTablesCustomization {
 
 //Customizing for: tabs
 entity CountryTabsCustomization {
-    key CountryCode : String(2);
+    key CountryCode : String;
     key TabID       : String(100);
         Visible     : Boolean;
 }
 
 //Customizing for: fragments
 entity CountryFragmentsCustomization {
-    key CountryCode   : String(2);
+    key CountryCode   : String;
     key FragmentID    : String(100);
     key FragmentName  : String(100);
 }
 
 //config for application urls
 entity AppConfig: cuid {
-    CountryCode         : String(2);
+    CountryCode         : String;
     Environment         : String(10);
     ApplicationName     : String(40);
     Control             : String(100);
@@ -217,13 +217,13 @@ entity NextDateSettings {
 // entity WordAttachment {
 //     key template : String(100);
 //     key OfferId : String(50);
-//     key CountryCode    : String(2);
+//     key CountryCode    : String;
 //     content   : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 //     mediaType:String @Core.IsMediaType;
 // }
 
 entity WordTemplateCountry {
-    key countryCode    : String(2);
+    key countryCode    : String;
     key templateId     : Integer;
         WordTemplates      : Association to WordTemplate
                             on WordTemplates.templateId = templateId; //This can be found in OData
@@ -238,7 +238,7 @@ entity WordTemplate {
 }
 
 entity ExcelTemplateCountry {
-    key countryCode    : String(2);
+    key countryCode    : String;
     key templateId     : Integer;
         ExcelTemplates      : Association to ExcelTemplate
                             on ExcelTemplates.templateId = templateId; //This can be found in OData

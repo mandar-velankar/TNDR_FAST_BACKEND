@@ -8,7 +8,7 @@ using { com.bayer.SXTENDER.AdminData } from './AdminData';
 //Country
 //EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity PT_TMCTRY{
-	key CountryCode:String(2) not null;
+	key CountryCode:String not null;
 	CountryName:String(50);
 	ApprovalType:Integer;
 	LocalCurrency:hana.NCHAR(3);//String(3);
@@ -44,7 +44,7 @@ entity PT_TMCTRY{
 
 //Country Currency
 entity CountryCurrency : managed {
-	key CountryCode:String(2) not null;
+	key CountryCode:String not null;
 	key Currency:String(3) not null;
 	Sorter:Integer;
 	//Associations
@@ -53,7 +53,7 @@ entity CountryCurrency : managed {
 
 //Institute
 entity PT_TMINST{
-	key CountryCode:String(2) not null;//remove from key
+	key CountryCode:String not null;//remove from key
 	key InstituteID:Integer not null;
 	CustomerID:Integer; // Codigo
 	InstituteName:String(500);
@@ -109,7 +109,7 @@ entity MASTER_INSTITUTE_HIERARCHY {
 
 //Distributor
 entity PT_TMDIST{
-	key CountryCode:String(2) not null;//remove from key
+	key CountryCode:String not null;//remove from key
 	key DistributorID:Integer not null;
 	DistributorName:String(500);
 	Address:String(500);
@@ -192,7 +192,7 @@ entity PT_TMLE{
 //Legal Entity Signatories
 entity COUNTRY_LEGAL_ENTITY_SIGNATORIES {
 	key LEGAL_ENTITY_CODE:String(3) not null;
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key AUTHORIZED_SIGNATORY:String(5000) not null;
 	NAME:String(5000);
 	TITLE:String(5000);
@@ -207,7 +207,7 @@ entity COUNTRY_LEGAL_ENTITY_SIGNATORIES {
 //Registered Prices
 entity PT_TMREGPR{
 	RegisteredPriceID:Integer;//TODO: check if needed?
-	key CountryCode:String(2) not null;
+	key CountryCode:String not null;
 	key ProductPackID:Integer not null;
 	key EffDate:Date not null;
 	EndDate:Date;
@@ -225,7 +225,7 @@ entity PT_TMREGPR{
 //COGS
 entity PT_TMCOGS{
 	key COGSID:Integer not null;//delete and change key
-	CountryCode:String(2) not null;
+	CountryCode:String not null;
 	ProductPackID:Integer not null;
 	EffectiveDate:Date not null;
 	EndDate:Date;
@@ -250,7 +250,7 @@ entity PT_TMFXRTS{
     ExchangeRate:Double;
 	key ActiveRecord:String(10);
 	FXKey:String(6);//delete
-    CountryCode:String(2);
+    CountryCode:String;
 	//Associations
 	RegisteredPrices:Association to many PT_TMREGPR on RegisteredPrices.CurrencyRate = $self;
 }
@@ -258,7 +258,7 @@ entity PT_TMFXRTS{
 //@cds.autoexpose
 //Country Approvers
 entity CountryApprovers : managed {
-	key CountryCode:String(2) not null;
+	key CountryCode:String not null;
 	key ApproverType:String(200) not null;
 	key Division:String(200) not null;
 	ApproverID:String(100);//remove TODO
@@ -275,7 +275,7 @@ entity CountryApprovers : managed {
 //ApproverTypes (type of approvers & there corresponding values)
 entity ApproverTypes: managed {
     key ApproverType        : String(200);
-    key CountryCode         : String(2);
+    key CountryCode         : String;
     Hierarchy				: Integer;
 	ValidationType			: Integer; //filled in node.js layer based upon other fields (1: Optional 2: Mandatory Notification 3: Mandatory Approval)
 	ValidationType2			: Integer; //filled in node.js layer based upon other fields (1: Optional 2: Mandatory Notification 3: Mandatory Approval)
@@ -287,7 +287,7 @@ entity ApproverTypes: managed {
 //Country legal entity
 entity PT_TMCTLE{
 	CountryLegalEntityID:Integer;//TODO: discuss with Jonathan
-	key CountryCode:String(2)  not null;
+	key CountryCode:String  not null;
 	ForAllBrands:Boolean;
 	key LegalEntityID:Integer not null;
 	//Associations
@@ -301,7 +301,7 @@ entity PT_TMCTLE{
 //Country Legal Entity Brand
 entity PT_TMCTLEBR{
 	CountryLegalEntityBrandID:Integer; //TODO: discuss with Jonathan
-	key CountryCode:String(2) not null;
+	key CountryCode:String not null;
 	key LegalEntityID:Integer not null;
 	key HLevel4_Code:String(50) not null;
 	ActiveRecord:String(10);
@@ -315,7 +315,7 @@ entity PT_TMCTLEBR{
 //EHQUT-198144-MEA - Master data template file to be updated 
 entity PT_TMCTPRDPCK{
 	COUNTRYPRODUCTPACKID:Integer;//TODO: discuss with Jonathan
-	key COUNTRYCODE:String(2) not null;
+	key COUNTRYCODE:String not null;
 	COUNTRYOFORIGIN:String(120);
 	SHELFLIFE:Integer;
 	REGISTERED:Integer;//rename
@@ -374,7 +374,7 @@ entity PT_TMPRDHIER{
 //Distributor Brand
 entity PT_TMDISBRD{
 	DistributorBrandID:Integer;//TODO: to be discussed if still needed
-	key CountryCode:String(2) not null;
+	key CountryCode:String not null;
 	CommissionRate:Double;
 	INCOTerms:String(500);
 	PaymentTerms:String(500);
@@ -390,7 +390,7 @@ entity PT_TMDISBRD{
 //InstituteDistributorBrand
 entity PT_TMINDSBR{
 	InstituteDistBrandRelationID:Integer;//TODO: discuss if still needed
-    key CountryCode:String(2) not null;
+    key CountryCode:String not null;
     Commissionrate:Double;
 	key ActiveRecord:String(10) not null;
     key InstituteID:Integer not null;
@@ -406,7 +406,7 @@ entity PT_TMINDSBR{
 //Institute Brand Terms
 entity PT_TMINSBRTR{
 	InstituteBrandTermsID:Integer;//TODO: discuss if needed
-    key CountryCode:String(2) not null;
+    key CountryCode:String not null;
     INCOTerms:String(500);
 	PaymentTerms:String(500);
 	key ActiveRecord:String(10) not null;
@@ -432,7 +432,7 @@ entity PT_TMINSHIER{
 //Product Pack SKU
 entity PT_TMSKUPRDPCK{
     CountrySKUID:Integer;//TODO: check if needed?
-    key CountryCode:String(2) not null;
+    key CountryCode:String not null;
     key ActiveRecord:String(10) not null;
     key ProductPackID:Integer not null;
     key SKUCode:Integer not null;
@@ -445,7 +445,7 @@ entity PT_TMSKUPRDPCK{
 
 //Approved prices
 entity MASTER_APPROVED_PRICE{
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key PRODUCT_ID:Integer not null;
 	key EFFECTIVE_DATE:Date not null;
 	key CURRENCY:String(3) not null;
@@ -457,7 +457,7 @@ entity MASTER_APPROVED_PRICE{
 }
 
 entity MASTER_COMMERCIAL_AGREEMENT{
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key TENDER_TYPE_ID:Integer not null;
 	key COUNTRY_OF_ORIGIN:String(50) not null;
 	//Associations
@@ -473,7 +473,7 @@ entity MASTER_CONTRACT_TYPE{
 }
 
 entity MASTER_COUNTRY_CONTRACT_TYPE{
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key CONTRACT_TYPE_ID:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
@@ -481,7 +481,7 @@ entity MASTER_COUNTRY_CONTRACT_TYPE{
 }
 
 entity MASTER_COUNTRY_PROCUREMENT_METHOD{
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key PROCUREMENT_METHOD_ID:String not null;
 	SORTER:Integer;
 	//Associations
@@ -489,7 +489,7 @@ entity MASTER_COUNTRY_PROCUREMENT_METHOD{
 }
 
 entity MASTER_COUNTRY_SALES_TYPE{
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key SALES_TYPE_ID:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
@@ -497,7 +497,7 @@ entity MASTER_COUNTRY_SALES_TYPE{
 }
 
 entity MASTER_COUNTRY_TENDER_ORIGIN{
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key TENDER_ORIGIN_ID:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
@@ -505,7 +505,7 @@ entity MASTER_COUNTRY_TENDER_ORIGIN{
 }
 
 entity MASTER_COUNTRY_TENDER_TYPE{
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key TENDER_TYPE_ID:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
@@ -513,7 +513,7 @@ entity MASTER_COUNTRY_TENDER_TYPE{
 }
 
 entity MASTER_COUNTRY_TENDER_TYPE2{
-	key COUNTRY_CODE:String(2) not null;
+	key COUNTRY_CODE:String not null;
 	key TENDER_TYPE_ID:Integer not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
@@ -545,14 +545,14 @@ entity MASTER_TENDER_TYPE{
 }
 
 entity MASTER_COUNTRY_STATUS{
-	key CountryCode:String(2);
+	key CountryCode:String;
 	key Status:String(60);
 	Sorter:Integer;
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 }
 
 entity MASTER_COUNTRY_OUTCOMES {
-	key CountryCode:String(2);
+	key CountryCode:String;
 	key Outcome:String(60);
 	Sorter:Integer;
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
@@ -568,7 +568,7 @@ entity PT_TMPNLTYRS{
 }
 
 entity PT_TMRCM{
-	key CountryCode:String(2) not null;
+	key CountryCode:String not null;
 	SubRegion:String(50) not null;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
@@ -578,7 +578,7 @@ entity PT_TMREGIONSTRUC{
 	Region:String(50);
 	key RegionCode:String(2);
 	Country:String(100);
-	key CountryCode:String(2);
+	key CountryCode:String;
 	//Associations
 	CountryLink:Association to PT_TMCTRY on CountryLink.CountryCode = CountryCode;
 }
@@ -593,7 +593,7 @@ entity PT_TMTABRMP{
 }
 //EITOG-215125-MEA - budgeted profitability for 2023 to be maintained at the product pack level
 entity BUDGETEDPROFITABILITY{
-	key COUNTRYCODE:String(2);
+	key COUNTRYCODE:String;
 	key HLEVEL4_CODE:String(255);
 	key PRODUCTPACKID: Integer;
 	PRODUCTPACKNAME : String(100);
@@ -605,7 +605,7 @@ entity BUDGETEDPROFITABILITY{
 }
 
 entity MASTER_COUNTRY_CLASSIFICATION : cuid {
-	COUNTRY_CODE:String(2) not null;
+	COUNTRY_CODE:String not null;
 	CLASSIFICATION:String(50);
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRY_CODE;
 }
@@ -617,7 +617,7 @@ entity MASTER_COUNTRY_CHANNELS: cuid, managed {
 }
 
 entity MasterCountryBiddingTypeLevel1: cuid, managed {
-	CountryCode			: String(2);
+	CountryCode			: String;
 	ClassificationID	: UUID not null;
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
@@ -625,7 +625,7 @@ entity MasterCountryBiddingTypeLevel1: cuid, managed {
 }
 
 entity MasterCountryBiddingTypeLevel2: cuid, managed {
-	CountryCode			: String(2);
+	CountryCode			: String;
 	BiddingTypeLevel1ID	: UUID not null;
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
@@ -634,7 +634,7 @@ entity MasterCountryBiddingTypeLevel2: cuid, managed {
 }
 
 entity MasterCountryBiddingTypeLevel3: cuid, managed {
-	CountryCode			: String(2);
+	CountryCode			: String;
 	BiddingTypeLevel2ID	: UUID not null;
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
@@ -642,14 +642,14 @@ entity MasterCountryBiddingTypeLevel3: cuid, managed {
 }
 
 entity MasterCountrySpecifications: cuid, managed {
-	CountryCode			: String(2);
+	CountryCode			: String;
 	ClassificationID	: UUID not null;
 	Name				: String(50);
 	Country				: Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 }
 
 entity AccountPreApprovedPrices: cuid, managed {
-	COUNTRY_CODE		: String(2);
+	COUNTRY_CODE		: String;
 	INSTITUTE_ID		: Integer;
 	PRODUCT_ID			: Integer;
 	CURRENCY			: String(3);
@@ -660,7 +660,7 @@ entity AccountPreApprovedPrices: cuid, managed {
 }
 
 entity CountryPreApprovedPrices: cuid, managed {
-	COUNTRY_CODE		: String(2);
+	COUNTRY_CODE		: String;
 	PRODUCT_ID			: Integer;
 	CURRENCY			: String(3);
 	MIN_PACK_PRICE		: Double;
@@ -668,7 +668,7 @@ entity CountryPreApprovedPrices: cuid, managed {
 }
 
 entity MasterCompetitors: cuid, managed {
-	CountryCode			: String(2); //Bayer
+	CountryCode			: String; //Bayer
 	ProductCode			: Integer;  //Bayer
 	CompetitorProduct	: String(300); 
 	CompetitorCompany	: String(300);
@@ -678,7 +678,7 @@ entity MasterCompetitors: cuid, managed {
 entity BrandPolicies: cuid, managed {
     ValidFrom       	: Timestamp; //temphttps://cap.cloud.sap/docs/guides/temporal-data#serving-temporal-data
     ValidTo         	: Timestamp;
-    CountryCode     	: String(2);
+    CountryCode     	: String;
     BrandId         	: String(50);
 	StandardDiscount 	: Double;
 }; 
@@ -687,7 +687,7 @@ entity BrandPolicies: cuid, managed {
 entity DistributorBrandPolicies: cuid, managed {
 	ValidFrom       	: Timestamp; //temphttps://cap.cloud.sap/docs/guides/temporal-data#serving-temporal-data
     ValidTo         	: Timestamp;
-    CountryCode     	: String(2);
+    CountryCode     	: String;
     BrandId         	: String(50);
 	DistributorId   	: Integer not null;
 	StandardDiscount 	: Double;
@@ -697,7 +697,7 @@ entity DistributorBrandPolicies: cuid, managed {
 entity ChannelProductPolicies: cuid, managed {
 	ValidFrom       	: Timestamp; //temphttps://cap.cloud.sap/docs/guides/temporal-data#serving-temporal-data
     ValidTo         	: Timestamp;
-    CountryCode     	: String(2);
+    CountryCode     	: String;
     ChannelName 		: String(30);
 	ProductPackID		:Integer not null;
 	StandardDiscount 	: Double;	
@@ -705,13 +705,13 @@ entity ChannelProductPolicies: cuid, managed {
 
 
 entity CountryProvinces: cuid {
-	CountryCode     	: String(2);
+	CountryCode     	: String;
 	RegionID            : UUID;
 	Name				: String;
 }
 
 entity CountryRegions: cuid {
-	CountryCode     	: String(2);
+	CountryCode     	: String;
 	Name				: String;
 	Tenders				: Composition of many Tenders_in_Regions on Tenders.Region = $self;
 }
@@ -728,7 +728,7 @@ entity Tenders_in_Regions {
 	Tender				: Association to TenderRegions on Tender.TenderID = TenderID;
 	Region				: Association to CountryRegions on Region.ID = RegionID;
 }
-
+//EHQUT-CR8
 //italy
 entity ConsumerPrices: cuid, managed {
 	CountryCode: String;
@@ -748,6 +748,7 @@ entity ConsumerPrices: cuid, managed {
 	TotalDiscount: Double;
 	MaxPriceNhsPP: Double;
 	MaxPriceNhsPU: Double;
+	FloorPrice : Double;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
@@ -836,7 +837,7 @@ entity BrazilPricingPolicy: cuid, managed {
 }
 
 entity AwardCriteriaValueHelp: cuid, managed {
-	CountryCode		: String(2) not null;
+	CountryCode		: String not null;
 	Criteria		: String;
 }
 
@@ -848,13 +849,13 @@ entity NucleusHeads : managed {
 }
 
 entity TenderChannel: cuid {
-	CountryCode		: String(2) not null;
+	CountryCode		: String not null;
 	ChannelName		: String;
 	DirectTender	: Boolean;
 }
 
 entity StandardDivisions: cuid{
-	CountryCode		: String(2) not null;
+	CountryCode		: String not null;
 	DivisionCode	: String(40);
 	DivisionName    : String(40);
 }
