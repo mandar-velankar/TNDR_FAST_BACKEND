@@ -787,12 +787,12 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
        else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
     end as OFFERVALIDITY,
 
-	case when offer.CountryCode NOT IN ('ES')
-
-        then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
-
+	case 
+        when offer.CountryCode = 'TW'
+            then ifnull(offer.Quotation.EffectiveDate, offer.Tender.PublicationDate)
+        when offer.CountryCode NOT IN ('ES')
+            then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
         else ifnull(offer.Tender.EffectiveDate,ifnull(offer.Quotation.EffectiveDate,ADD_DAYS(CURRENT_DATE,1)))
-
     end as EffectiveDate,
 
 	 case when offer.CountryCode NOT IN ('ES')
