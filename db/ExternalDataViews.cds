@@ -699,7 +699,9 @@ inner join MasterData.PT_TMPRDPCK as P on CP.PRODUCTPACKID = P.PRODUCTPACKID
 inner join MasterData.PT_TMPRDHIER as H on P.HLEVEL6_CODE = H.HLEVEL6_CODE
 left outer join MasterData.PT_TMSKUPRDPCK as sku on CP.COUNTRYCODE = sku.CountryCode and CP.PRODUCTPACKID = sku.ProductPackID 
 left outer join MasterDataLatestValues.CountryRegisteredPrice as reg on CP.COUNTRYCODE=reg.COUNTRY_CODE and CP.PRODUCTPACKID =reg.PRODUCT_ID
-left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cogs.COUNTRY_CODE and CP.PRODUCTPACKID=cogs.PRODUCT_ID {
+left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cogs.COUNTRY_CODE and CP.PRODUCTPACKID=cogs.PRODUCT_ID
+left outer join MasterDataLatestValues.VWBUDGETEDPROFITABILITY as MasterBudgetedProfitability on
+    CP.COUNTRYCODE=MasterBudgetedProfitability.COUNTRYCODE and CP.PRODUCTPACKID=MasterBudgetedProfitability.PRODUCTPACKID {
 	key P.PRODUCTPACKID,
 	key CP.COUNTRYCODE,
 	min(H.HLEVEL1_NAME) as HLEVEL1_NAME:String,
@@ -737,6 +739,7 @@ left outer join MasterDataLatestValues.CountryCogs as cogs on CP.COUNTRYCODE=cog
 	'Pack' as COGS_UOM:String,
 	cogs.COGS,
 	'' as NEW_COGS:String,
+    max(MasterBudgetedProfitability.PROFITABILITY) as PROFITABILITY:Double,
 	sku.SKUCode as MaterialNumbers:Integer,
 	CP.QTY_THRESHOLD,
 	P.ACTIVERECORD as ACTIVE_PRODUCT,
@@ -782,11 +785,13 @@ entity MasterTABrandMap as select from MasterData.PT_TMTABRMP as MasterTABrandMa
 	MasterTABrandMap.HLevel4_Code,
 	MasterTABrandMap.TA,
 	MasterTABrandMap.TAShort,
-	min(MasterTABrandMap.Product.HLEVEL4_NAME) as HLEVEL4_NAME:String
+	min(MasterTABrandMap.Product.HLEVEL4_NAME) as HLEVEL4_NAME:String,
+    MasterTABrandMap.Product.ProductPacks.CountryPacks.COUNTRYCODE
 } group by  MasterTABrandMap.TABrandID,
 			MasterTABrandMap.HLevel4_Code,
 			MasterTABrandMap.TA,
-			MasterTABrandMap.TAShort
+			MasterTABrandMap.TAShort,
+            MasterTABrandMap.Product.ProductPacks.CountryPacks.COUNTRYCODE
 order by MasterTABrandMap.TA,
 		 min(MasterTABrandMap.Product.HLEVEL4_NAME);
 
@@ -1083,9 +1088,17 @@ entity RawOfferPriceVolumeInfo as select from TransactionalData.PT_TMOFPR as off
 {
     key offerProducts.OfferID,
     key offerProducts.ProductCode,
-    case when offerProducts.Price.FOC_ABS_PCT='ABS'
-        then ifnull(offerProducts.Price.FOC, 0)
-        else ifnull(offerProducts.Price.FOC, 0) * offerProducts.RequestedVolume
+    case
+        when offerProducts.Price.FOC is null then 0
+        when offerProducts.Price.FOC_ABS_PCT='ABS' then offerProducts.Price.FOC
+        when offerProducts.Price.FOC_ABS_PCT='STP' then
+            offerProducts.Price.FOC
+            * floor(
+               offerProducts.RequestedVolume
+               /
+               case when ifnull(offerProducts.Price.FOCStep,0)<>0 then offerProducts.Price.FOCStep else 1 end
+               )
+        else round(offerProducts.Price.FOC * offerProducts.RequestedVolume, 0)
     end
     /
     case when offerProducts.UnitPerPack='Unit' and offerProducts.SKU.PACKFACTOR<>0 then offerProducts.SKU.PACKFACTOR else 1 end
@@ -1188,6 +1201,7 @@ inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = 
 
 	case
         when offerProducts.PriceAgreement.EffectiveDate is not null then offerProducts.PriceAgreement.EffectiveDate
+        when offerProducts.Offer.Quotation.EffectiveDate is not null then offerProducts.Offer.Quotation.EffectiveDate
         else
             case
                 when offerProducts.Offer.SubmissionDate = '' or offerProducts.Offer.SubmissionDate is null then
@@ -1202,6 +1216,7 @@ inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = 
 
 	case
         when offerProducts.PriceAgreement.ExpiryDate is not null then offerProducts.PriceAgreement.ExpiryDate
+        when offerProducts.Offer.Quotation.ExpiryDate is not null then offerProducts.Offer.Quotation.ExpiryDate
         else
             ADD_MONTHS(
                 case
@@ -1363,7 +1378,7 @@ where
 	offerProducts.Offer.Active = 1 and
 	offerProducts.Active = 1 and
 	(offerProducts.OfferType is null or offerProducts.OfferType = 'Selling') and
-	offerProducts.Price.Active = 1 and year(ifnull(offerProducts.Offer.SubmissionDate,ifnull(offerProducts.Offer.Quotation.SubmittedOn,offerProducts.Offer.Tender.PublicationDate))) > 2020;
+	offerProducts.Price.Active = 1;
 
 				
 entity SpainEspartaDoc as select from PriceAgreementData.PriceAgreements as pa left outer join

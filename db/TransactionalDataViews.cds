@@ -432,11 +432,13 @@ entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.OfferStatusTable.STATUS,
 
     sum(
-        offer.Product.Price.OfferPrice *
+        offer.Product.Price.OfferPrice * (1 - ifnull(offer.Product.Price.Deductions, 0)) *
         case when offer.Product.Price.FOCType = 'FOC 1'
             then
                 case when offer.Product.Price.FOC_ABS_PCT = 'PCT'
-                    then offer.Product.RequestedVolume * (1 - offer.Product.Price.FOC)
+                    then round(offer.Product.RequestedVolume * (1 - offer.Product.Price.FOC))
+                        when offer.Product.Price.FOC_ABS_PCT = 'STP'
+                            then floor(offer.Product.RequestedVolume / offer.Product.Price.FOCStep) * offer.Product.Price.FOC
                     else offer.Product.RequestedVolume - offer.Product.Price.FOC
                 end
             else offer.Product.RequestedVolume
@@ -995,7 +997,7 @@ entity PreApprovedPrices as select from PricingAppData.InstituteGroupPriceLatest
     case when price.UoM = 'Unit' then price.MSP else price.MSP / price.ProductPack.PACKFACTOR end as PriceUnit:Double,
     case when price.UoM = 'Unit' then price.MSP * price.ProductPack.PACKFACTOR else price.MSP end as PricePack:Double
 };
-
+//EHQUT-CR8
 entity ProductPricingView as select from TransactionalData.PT_TMOFRS as offer 
 inner join TransactionalData.PT_TMOFPR as product on product.OfferID = offer.OfferID
 left outer join TransactionalData.ProductPricing as productPricing 
@@ -1063,6 +1065,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
 	consumerPrices.TotalDiscount,
 	consumerPrices.MaxPriceNhsPP,
 	consumerPrices.MaxPriceNhsPU,
+    consumerPrices.FloorPrice,
     priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
         when consumerPrices.ConsumerPriceExclPP is not null
@@ -2020,7 +2023,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             OFFERVALIDITY         : Date not null;
             EffectiveDate         : Date;
             ExpiryDate            : Date;
-            COUNTRYCODE           : String(2) not null;
+            COUNTRYCODE           : String not null;
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
@@ -2034,6 +2037,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
             CURRENCY              : String(255);
             AMOUNT_IN_NUMBERS     : Double;
             AMOUNT_IN_WORDS       : String(1024);
+            NET_AMOUNT_IN_NUMBERS : Double;
+			NET_AMOUNT_IN_WORDS   : String(1024);
+			NET_OFFER_AMOUNT_IN_NUMBERS: Double;
+			NET_OFFER_AMOUNT_IN_WORDS  : String(1024);
             AMOUNT_IN_NUMBERS_VAT : Double;
             AMOUNT_IN_WORDS_VAT   : String(1024);
             VAT_TOTAL             : Double;
@@ -2101,7 +2108,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     // EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
     entity OfferProductValidation {
             TENDER_ID                                   : String(30);
-            COUNTRY_CODE                                : String(2);
+            COUNTRY_CODE                                : String;
         key OFFER_ID                                    : String(30) not null;
             DIVISION                                    : String(100);
             BRANDID                                     : String(50);
@@ -2124,6 +2131,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PRODUCT_COMMENT                             : String(784);
             UNIT                                        : String(255);
             PAID_VOLUME                                 : Double;
+            TOTAL_VOLUME                                : Double;
             SORTER                                      : Integer;
             CURRENCY                                    : String(255);
             REQUESTED_QUANTITY                          : String(567);
@@ -2178,6 +2186,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS     : String;
             VAT_TOTAL                                   : Double;
             NET_SALES_OFFER_CURRENCY                    : Double;
+            NET_SALES_OFFER_CURRENCY_IN_WORDS           : String;
             NET_SALES_EUR_BUDGET                        : Double;
             NET_SALES_EUR_SPOT                          : Double;
             GROSS_MARGIN_EUR_BUDGET                     : Double;
@@ -2279,6 +2288,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Level1Discount1                             : Double;
             Region                                      : String(50);
             AlternateOfferYN                            : String(255);
+            NET_OFFER_SALES_OFFER_CURRENCY              : Double;
+            NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2564,6 +2575,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
         inner join TaiwanInstituteInBranchView as branch
 	        on hier.ParentInstituteID = branch.ParentInstituteID
 	        and tender.InstituteID <> branch.InstituteID
+            and tender.Custom.String_3 LIKE '%' || branch.InstituteName || '%'
         left join MasterData.PT_TMINST as parentInst 
             on parentInst.InstituteID = hier.ParentInstituteID 
             and parentInst.CountryCode = tender.CountryCode {

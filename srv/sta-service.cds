@@ -174,11 +174,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }order by CountryCode, InstituteName;
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
-        classification.COUNTRY_CODE as CountryCode: String(2)
+        classification.COUNTRY_CODE as CountryCode: String
     }order by CLASSIFICATION;
     entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS as instType {
         *,
-        instType.ChannelCountry as CountryCode: String(2)
+        instType.ChannelCountry as CountryCode: String
     }order by ChannelName;
     entity CountryTenderNo as projection on TransactionalDataViews.CountryTenderNo;
 
@@ -187,6 +187,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     entity PT_TMINST   as projection on MasterData.PT_TMINST;
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
+    entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
     entity PT_TMBDPR as projection on TransactionalData.PT_TMBDPR {
         *,
         Product: redirected to TransactionalData.PT_TMOFPR
@@ -235,117 +236,23 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Price.NetPrice as NetPrice,
         RequestedVolume,
         PriceCondition.AnticipatedYearlyVolumeBranch,
-        (RequestedVolume * Price.NetPrice) as TotalAmount:Double,
+        Price.NetPrice *
+        case 
+        when Price.FOCType = 'FOC 1'
+            then RequestedVolume
+            else 
+                case 
+                    when Price.FOC_ABS_PCT = 'PCT'
+                        then RequestedVolume + round(RequestedVolume * Price.FOC)
+                            when Price.FOC_ABS_PCT = 'STP'
+                            then RequestedVolume + floor(RequestedVolume / Price.FOCStep) * Price.FOC
+                        else RequestedVolume + Price.FOC
+                end
+        end as TotalAmount:Double,
         Offer.Currency as Currency,
         Offer.Tender.Country.Region,
         SKUCountry.RegistrationValidUntil
-    } group by TenderID,
-    OfferID,
-    CountryCode,
-    SubmittedOn,
-    SubmittedBy,
-    Active,
-    ProductCode,
-    Reference,
-    AlternateOfferYN,
-    RequestedVolume,
-    UnitPerPack,
-    SampleYN,
-    SampleQuantity,
-    DocumentsRequired,
-    FirstShipment,
-    NoofLots,
-    IntervalBetweenShipments,
-    NoOfTier,
-    DiscOrOffer,
-    PaymentTerms,
-    DistributorID,
-    SNo,
-    ActiveProduct,
-    Comment,
-    INCOTerms,
-    SORTER,
-    DEFAULT_COMMISSION_RATE,
-    SUPPLY_UPDATE,
-    PAYMENT_UPDATE,
-    Line,
-    DeliveryConditions,
-    MinInvoiceAmount,
-    PricingPolicyCluster,
-    OfferType,
-    AnticipatedRequestedQuantity,
-    MaxPrice,
-    Channel,
-    LotID,
-    WorkflowProductID,
-    IbizWorkflowID,
-    Custom.String_1,
-    Custom.String_2,
-    Custom.String_3,
-    Custom.String_4,
-    Custom.String_5,
-    Custom.String_6,
-    Custom.String_7,
-    Custom.String_8,
-    Custom.String_9,
-    Custom.String_10,
-    Custom.Integer_1,
-    Custom.Integer_2,
-    Custom.Integer_3,
-    Custom.Integer_4,
-    Custom.Integer_5,
-    Custom.Integer_6,
-    Custom.Integer_7,
-    Custom.Integer_8,
-    Custom.Integer_9,
-    Custom.Integer_10,
-    Custom.Double_1,
-    Custom.Double_2,
-    Custom.Double_3,
-    Custom.Double_4,
-    Custom.Double_5,
-    Custom.Double_6,
-    Custom.Double_7,
-    Custom.Double_8,
-    Custom.Double_9,
-    Custom.Double_10,
-    Custom.Date_1,
-    Custom.Date_2,
-    Custom.Date_3,
-    Custom.Date_4,
-    Custom.Date_5,
-    Custom.Date_6,
-    Custom.Date_7,
-    Custom.Date_8,
-    Custom.Date_9,
-    Custom.Date_10,
-    Custom.Boolean_1,
-    Custom.Boolean_2,
-    Custom.Boolean_3,
-    Custom.Boolean_4,
-    Custom.Boolean_5,
-    Custom.Boolean_6,
-    Custom.Boolean_7,
-    Custom.Boolean_8,
-    Custom.Boolean_9,
-    Custom.Boolean_10,
-    Custom.Datetime_1,
-    Custom.Datetime_2,
-    Custom.Datetime_3,
-    Custom.Datetime_4,
-    Custom.Datetime_5,
-    Custom.Datetime_6,
-    Custom.Datetime_7,
-    Custom.Datetime_8,
-    Custom.Datetime_9,
-    Custom.Datetime_10,
-    SKU.PRODUCTPACKNAME,
-    Price.NetPrice,
-    PriceCondition.AnticipatedYearlyVolumeBranch,
-    Offer.Currency,
-    Offer.Tender.Country.Region,
-    SKUCountry.RegistrationValidUntil
-    order by SORTER asc; // Form used in the Offer tab - offer products
+    } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
     action softDeleteOffer(offerID:String) returns String;

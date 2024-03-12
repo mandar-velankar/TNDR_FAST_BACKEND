@@ -165,11 +165,11 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     };
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
-        classification.COUNTRY_CODE as CountryCode: String(2)
+        classification.COUNTRY_CODE as CountryCode: String
     };
     entity CountryInstituteTypeView as projection on MasterData.MASTER_COUNTRY_CHANNELS as instType {
         *,
-        instType.ChannelCountry as CountryCode: String(2)
+        instType.ChannelCountry as CountryCode: String
     };
     entity TenderChannel as projection on MasterData.TenderChannel;
     entity StandardDivisions as projection on MasterData.StandardDivisions {
