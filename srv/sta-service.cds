@@ -756,4 +756,5 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MailTemplates                                as projection on AdminData.MailTemplate;
     entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
+    entity StandardTenderFOCInformation                 as projection on TransactionalDataViews.StandardTenderFOCInformation;
 }
