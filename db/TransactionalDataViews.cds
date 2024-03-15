@@ -787,12 +787,12 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
        else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
     end as OFFERVALIDITY,
 
-	case when offer.CountryCode NOT IN ('ES')
-
-        then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
-
+	case 
+        when offer.CountryCode = 'TW'
+            then ifnull(offer.Quotation.EffectiveDate, offer.Tender.PublicationDate)
+        when offer.CountryCode NOT IN ('ES')
+            then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
         else ifnull(offer.Tender.EffectiveDate,ifnull(offer.Quotation.EffectiveDate,ADD_DAYS(CURRENT_DATE,1)))
-
     end as EffectiveDate,
 
 	 case when offer.CountryCode NOT IN ('ES')
@@ -2521,7 +2521,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 else 'Suspend'
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
-    }where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW'
+    }where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW' and tender.Active = 1 and offer.Active = 1
     union select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
@@ -2601,9 +2601,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
-    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW';
-
-
+    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW' and tender.Active = 1 and offer.Active = 1;
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
         key hier.ParentInstituteID,

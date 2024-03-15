@@ -104,7 +104,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                     TenderID: dataFilteredByUser[0].TenderId,
                     OfferID: dataFilteredByUser[0].OfferId,
                     Sender: 'FAST-Admin@bayer.com',
-                    Recipients: dataFilteredByUser[0].UserEmail,
+                    Recipients:dataFilteredByUser[0].UserEmail,
                     Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
                     MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), {
                         data: {

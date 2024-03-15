@@ -932,7 +932,7 @@ module.exports = async (srv) => {
 		differentAwardPriceOfferStatus.STATUS = "Offer Created";
 		differentAwardPriceOfferStatus.Date = todaysDate;
 
-		const filteredAwardedProducts = awardedProducts.filter(pr => pr.Outcome === 'Won' || pr.Outcome === 'Award Price Update');
+		const filteredAwardedProducts = awardedProducts.filter(pr => pr.Outcome === 'Award Price Update');
 
 		offerProducts = offerProducts.filter(ofpr => {
 			const isProducIncluded = filteredAwardedProducts.findIndex(ap => ap.ProductCode === ofpr.ProductCode);
@@ -1133,6 +1133,8 @@ module.exports = async (srv) => {
 			LotID: req.data.LotID
 		});
 
+
+
 		const mappedAwardedProduct = {
 			TenderID: req.data.TenderID,
 			OfferID: req.data.OfferID,
@@ -1212,6 +1214,8 @@ module.exports = async (srv) => {
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
 		}
+
+
 		const existingAwardedProducts = await SELECT.from(PT_TMTRRES).where({
 			OfferID: req.data.OfferID
 		});
@@ -4020,7 +4024,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView);
+			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4039,12 +4043,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			const zuellig = req.data.Zuellig;
 			const fileName = zuellig ? 'Zuellig Extract' : 'Single View';
 
-			console.log("Sorting and filtering data...");
+			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = zuelligExtract.sort((a, b) => { 
-				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
-			});
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
@@ -4093,7 +4094,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView);
+			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4108,12 +4109,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
         	console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
 
-			console.log("Sorting and filtering data...");
+			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = zuelligExtract.sort((a, b) => { 
-				return (a.OfferID < b.OfferID ? 1 : (a.OfferID === b.OfferID ? 0 : -1));
-			});
 			zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
@@ -4155,7 +4153,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"HandlingCharge_Amount2": 0,
 				"CashDiscount_Amount": 0,
 				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-				"AnnualDiscount_Amount": item.AnnualDiscountForBranch.toFixed(4),
+				"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
 				"FGBuy": 0,
 				"FGGift": 0,
 				"NetPrice": Number(item.Price3).toFixed(4),
