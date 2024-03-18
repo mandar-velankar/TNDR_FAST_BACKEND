@@ -959,12 +959,13 @@ module.exports = async (srv) => {
             let KBETR,KBRUE;
            
             items.push({
+                "KUNNR" : kunnr,
                 "DATAB_GR": datab,
                 "DATBI_GR" :datbi,
-                "KUNNR" : kunnr,
                 "MATNR" : matnr,
-                "KNUMA_BO" : KNUMAValue,
                 "KBETR" : lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || "", // KBETR from the minimum(KSTBW)
+                "KONWA" :"%",
+                "KPEIN" :1,
                 "KBRUE" : highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || "" ,
                 "E1KONW" :E1KONW
                
@@ -1654,22 +1655,21 @@ module.exports = async (srv) => {
                         "KOTABNR": 582,
                         "KVEWE": "A",
                         "KAPPL": "V",
-
                         "BOSTA": "B",
 
                         "_BAY0-GZ_SALESAGRITEM": [
-                            {
-                                "KUNNR": 0,
-                                "DATAB_GR": 0,
-                                "DATBI_GR": 0,
-                                "MATNR": 0,
-                                "KBETR": "0-",
-                                "KONWA": "%",
-                                "KPEIN": 1,
-                                "KBRUE": 0,
-                                "KSCHL": "YAW1",
-                                "E1KONW": []
-                            }
+                            // {
+                            //     "KUNNR": 0,
+                            //     "DATAB_GR": 0,
+                            //     "DATBI_GR": 0,
+                            //     "MATNR": 0,
+                            //     "KBETR": "0-",
+                            //     "KONWA": "%",
+                            //     "KPEIN": 1,
+                            //     "KBRUE": 0,
+                            //     "KSCHL": "YAW1",
+                            //     "E1KONW": []
+                            // }
                         ]
                     }
                 }
