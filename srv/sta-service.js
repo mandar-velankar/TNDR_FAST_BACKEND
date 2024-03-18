@@ -1298,6 +1298,17 @@ module.exports = async (srv) => {
         }
     }
 
+	srv.before(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
+		try{
+			!req.data.AWARDEDCOMPANY && req.error({ code: 404, message: "Awarded Company is required.", target: "AWARDEDCOMPANY" });
+			!req.data.AWARDEDPRODUCT && req.error({ code: 404, message: "Awarded Product is required.", target: "AWARDEDPRODUCT" });
+		}
+		catch(error){
+			console.error('Error in before CompetitorResultsTableView CREATE or UPDATE');
+			return req.reject(403, error?.message||"Error in before CompetitorResultsTableView CREATE or UPDATE");
+		}
+	});
+
 	srv.on(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
 		try{
 		await upsertCompetitorResults(req);
@@ -1323,8 +1334,8 @@ module.exports = async (srv) => {
 			OFFERID: req.data.OFFERID,
 			PRODUCTCODE: req.data.PRODUCTCODE,
 			OUTCOME: req.data.OUTCOME,
-			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY || '',
-			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT || '',
+			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY,
+			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT,
 			AWARDEDPRICE: req.data.AWARDEDPRICE,
 			CURRENCY: req.data.CURRENCY,
 			AWARDEDQTY: req.data.AWARDEDQTY,
