@@ -40,7 +40,7 @@ module.exports = async (srv) => {
 
     const {
         PT_TMUSER
-     } = cds.entities("com.bayer.SXTENDER.AdminData");
+    } = cds.entities("com.bayer.SXTENDER.AdminData");
 
     const {
         PT_TMTEND, PT_TMOFPR, PT_TMOFRS, PriceCondition, FreeGoodsOther, DiscountCondition, SpainRappelData
@@ -63,7 +63,7 @@ module.exports = async (srv) => {
     });
     //EJUVE-CR3
     srv.on('READ', 'PriceagreementOffers', async (req) => {
-         const tx = cds.tx(req);
+        const tx = cds.tx(req);
         let results = await buildWorkflowApprovalOffers(tx);
         return results;
     });
@@ -76,33 +76,33 @@ module.exports = async (srv) => {
         return R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), workflowOffers);
     }
     async function buildWorkflowApprovalOffersEntry(tx, Id, approvalStatus) {
-       
+
         let whereOffer = ServiceHelper.buildFullWhere("ID", "=", Id);
         let whereAPPRST = ServiceHelper.buildFullWhere("PriceAgreementID", "=", Id);
         let whereStatus = ServiceHelper.buildFullWhere("ApprovalStatus", "=", 'Processing');
-        
+
         let workflowApprovals = await tx.run(SELECT.from(PriceAgreement_APPRST).where(whereAPPRST).where(whereStatus));
-        workflowApprovals=workflowApprovals[0];
-        
-                
-        let createdby =ServiceHelper.buildFullWhere("CWID", "=",workflowApprovals.createdBy);
+        workflowApprovals = workflowApprovals[0];
+
+
+        let createdby = ServiceHelper.buildFullWhere("CWID", "=", workflowApprovals.createdBy);
         // let offerValidation = await buildOfferValidation(tx, whereOffer);
         let offerValidation = await tx.run(SELECT.from(PriceAgreements).where(whereOffer));
-        offerValidation=offerValidation[0];
+        offerValidation = offerValidation[0];
 
         let UserDetails = await tx.run(SELECT.from(PT_TMUSER).where(createdby));
 
-       
-         let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
-         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
-       
-         
+
+        let whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offerValidation.InstituteId);
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereInstituteId));
+
+
         let whereproductId = ServiceHelper.buildFullWhere("PRODUCTPACKID", "=", offerValidation.ProductPackId);
 
         let productDetail = await tx.run(SELECT.one.from(PT_TMPRDPCK).where(whereproductId));
-       
-    
-      return{
+
+
+        return {
             PriceagreementID: offerValidation.ID,
             TenderID: offerValidation.TenderId,
             OfferID: offerValidation.OfferId,
@@ -110,17 +110,17 @@ module.exports = async (srv) => {
             InstituteName: institute.InstituteName,
             CustomerID: institute.CustomerID,
             ProductPackID: offerValidation.ProductPackId,
-            ProductPackNAME:productDetail.PRODUCTPACKNAME,
-            Status:workflowApprovals.ApprovalStatus,
-            ID:workflowApprovals.ID,
+            ProductPackNAME: productDetail.PRODUCTPACKNAME,
+            Status: workflowApprovals.ApprovalStatus,
+            ID: workflowApprovals.ID,
             EffectiveDate: workflowApprovals.EffectiveDate.split('T')[0],
             ExpiryDate: workflowApprovals.ExpiryDate.split('T')[0],
             OldExpiryDate: offerValidation.OldExpiryDate.split('T')[0],
-            UserEmail:UserDetails[0].UserEmail
-        
-      }
-    
-    
+            UserEmail: UserDetails[0].UserEmail
+
+        }
+
+
     }
     async function buildWorkflowApprovalOffers(tx) {
         let results = [];
@@ -136,7 +136,7 @@ module.exports = async (srv) => {
     }
     //EJUVE-CR3 END
     async function filterPriceAgreements(req, next) {
-         // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
+        // if (req._.odataReq._url.path.includes('$count') || req.query.SELECT.columns[0].func === 'count') {
         //     return [{ counted: 5555 }]; 
         // } 
 
@@ -308,7 +308,7 @@ module.exports = async (srv) => {
         data = await tx.run(paQuery);
         // if the query returns only one value, that value is an object and not an array
         // we need to convert it to array because the code below expects an array
-        if(!Array.isArray(data)){
+        if (!Array.isArray(data)) {
             data = [data];
         }
         stopTrace("PriceAgreements");
@@ -331,18 +331,18 @@ module.exports = async (srv) => {
         const chunks = splitToChunks(data, 1000);
         // Run operation on the chunks parallely
         let pkWorkerResults = [];
-        try{
+        try {
             // Create a new thread pool
             // resourceLimits.maxOldGenerationSizeMb This is a very important parameter and this defines the max memory used by the worker thread. 
             // By default, it depends on the system how much max memory a worker thread can use but it is always good to set the max limit otherwise 
             // the worker thread will get terminated on reaching the limit
-            const pkPool = new Piscina({ 
+            const pkPool = new Piscina({
                 filename: path.resolve(__dirname, 'workers/PrepareKeysWorker')
             });
             const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
             pkWorkerResults = await Promise.all(pkWorkerPromises);
             pkPool.destroy();
-        }catch(err){
+        } catch (err) {
             console.error("PrepareKeysWorker stopped");
             console.error(err);
             throw err;
@@ -355,7 +355,7 @@ module.exports = async (srv) => {
         let productpacks = [];
         let productpacksstr = [];
 
-        for(const workerResult of pkWorkerResults){
+        for (const workerResult of pkWorkerResults) {
             ids = ids.concat(workerResult.ids);
             offers = offers.concat(workerResult.offers);
             institutes = institutes.concat(workerResult.institutes);
@@ -364,7 +364,7 @@ module.exports = async (srv) => {
             productpacksstr = productpacksstr.concat(workerResult.productpacksstr);
         }
         stopTrace("PrepareKeysForOtherQueries");
-        
+
         let customerPricesAll = [];
         let customerPricesInPA = true;
         let priceConditionsAll = [];
@@ -395,7 +395,7 @@ module.exports = async (srv) => {
             }
         }
 
-        if(institutes && institutes.length > 0) {
+        if (institutes && institutes.length > 0) {
             startTrace("Institutes");
             institutesAll = await tx.run(SELECT.from(PT_TMINST).where({ InstituteId: { in: institutes } }));
             stopTrace("Institutes");
@@ -409,9 +409,9 @@ module.exports = async (srv) => {
                         CountryCode: { in: countrycodes },
                         and: {
                             ProductCode: { in: productpacks }
-                        /*  and: {
-                                OfferID: { in: offers }
-                            }*/
+                            /*  and: {
+                                    OfferID: { in: offers }
+                                }*/
                         }
                     })
                 );
@@ -451,44 +451,44 @@ module.exports = async (srv) => {
         let priceConditionRappelAll = [];
         let discountConditionsAll = [];
         let priceConditionFOCAll = [];
-        if (countrycodes && countrycodes.length > 0 ){
-        if (req.query.SELECT.one || ( countrycodes[0].CountryCode === 'ES' && ( hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0))) {
-            for (const condition of priceConditionsAll) {
-                if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
-                    mainConditionIDs.push(condition.ExistingPriceConditionID);
+        if (countrycodes && countrycodes.length > 0) {
+            if (req.query.SELECT.one || (countrycodes[0].CountryCode === 'ES' && (hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0))) {
+                for (const condition of priceConditionsAll) {
+                    if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
+                        mainConditionIDs.push(condition.ExistingPriceConditionID);
+                    }
+                    if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
+                        rappelConditionIDs.push(condition.ExistingPriceConditionID);
+                    }
+                    if (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) {
+                        focConditionIDs.push(condition.ExistingPriceConditionID);
+                    }
                 }
-                if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
-                    rappelConditionIDs.push(condition.ExistingPriceConditionID);
+                if (mainConditionIDs && mainConditionIDs.length > 0) {
+                    startTrace("PriceCondition");
+                    priceConditionAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: mainConditionIDs } }));
+                    stopTrace("PriceCondition");
                 }
-                if (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) {
-                    focConditionIDs.push(condition.ExistingPriceConditionID);
+
+                if (rappelConditionIDs && rappelConditionIDs.length > 0) {
+                    startTrace("RappelPriceCondition");
+                    priceConditionRappelAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: rappelConditionIDs } }));
+                    stopTrace("RappelPriceCondition");
                 }
-            }
-            if (mainConditionIDs && mainConditionIDs.length > 0) {
-                startTrace("PriceCondition");
-                priceConditionAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: mainConditionIDs } }));
-                stopTrace("PriceCondition");
-            }
 
-            if (rappelConditionIDs && rappelConditionIDs.length > 0) {
-                startTrace("RappelPriceCondition");
-                priceConditionRappelAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: rappelConditionIDs } }));
-                stopTrace("RappelPriceCondition");
-            }
+                if (rappelConditionIDs && rappelConditionIDs.length > 0) {
+                    startTrace("DiscountCondition");
+                    discountConditionsAll = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: { in: rappelConditionIDs } }));
+                    stopTrace("DiscountCondition");
+                }
 
-            if (rappelConditionIDs && rappelConditionIDs.length > 0) {
-                startTrace("DiscountCondition");
-                discountConditionsAll = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: { in: rappelConditionIDs } }));
-                stopTrace("DiscountCondition");
-            }
-
-            if (focConditionIDs && focConditionIDs.length > 0) {
-                startTrace("FOCPriceCondition");
-                priceConditionFOCAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: focConditionIDs } }));
-                stopTrace("FOCPriceCondition");
+                if (focConditionIDs && focConditionIDs.length > 0) {
+                    startTrace("FOCPriceCondition");
+                    priceConditionFOCAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: focConditionIDs } }));
+                    stopTrace("FOCPriceCondition");
+                }
             }
         }
-    }
         // use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
         // 2. calculate the fields
         // Calculation is done by a worker
@@ -516,16 +516,16 @@ module.exports = async (srv) => {
         };
 
         // Create a new thread pool
-        const cfPool = new Piscina({ 
+        const cfPool = new Piscina({
             filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker')
         });
         // Run operation on the chunks parallely
-        const cfWorkerPromises = chunks.map(chunk => cfPool.run({chunk, requiredParameters}));
+        const cfWorkerPromises = chunks.map(chunk => cfPool.run({ chunk, requiredParameters }));
         const cfWorkerResults = await Promise.all(cfWorkerPromises);
         cfPool.destroy();
 
         let result = [];
-        for(const workerResult of cfWorkerResults){
+        for (const workerResult of cfWorkerResults) {
             result = result.concat(workerResult);
         }
 
@@ -541,8 +541,8 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]){
+            for (const priceAgreement of result) {
+                if (priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -553,8 +553,8 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]){
+            for (const priceAgreement of result) {
+                if (priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -565,8 +565,8 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.ExpiringSoon){
+            for (const priceAgreement of result) {
+                if (priceAgreement.ExpiringSoon) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -577,8 +577,8 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.Expired === hasExpiredFilterValues[0]);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.Expired === hasExpiredFilterValues[0]){
+            for (const priceAgreement of result) {
+                if (priceAgreement.Expired === hasExpiredFilterValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -589,8 +589,8 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]){
+            for (const priceAgreement of result) {
+                if (priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -601,8 +601,8 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.isCancelled === isCancelledFilterValues[0]);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.isCancelled === isCancelledFilterValues[0]){
+            for (const priceAgreement of result) {
+                if (priceAgreement.isCancelled === isCancelledFilterValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -613,8 +613,8 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.Synchronized === isSynchronizedFilterValues[0]){
+            for (const priceAgreement of result) {
+                if (priceAgreement.Synchronized === isSynchronizedFilterValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -625,8 +625,8 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.AppliedCount >= appliedCountFilterValues[0]){
+            for (const priceAgreement of result) {
+                if (priceAgreement.AppliedCount >= appliedCountFilterValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -639,8 +639,8 @@ module.exports = async (srv) => {
                 // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
                 // after performance
                 let filteredResult2 = [];
-                for(const priceAgreement of result){
-                    if(priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]){
+                for (const priceAgreement of result) {
+                    if (priceAgreement.hasNewYLLP === hasNewYLLPValues[0] || priceAgreement.hasNewYLAP === hasNewYLAPValues[0]) {
                         filteredResult2.push(priceAgreement);
                     }
                 }
@@ -649,8 +649,8 @@ module.exports = async (srv) => {
                 // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLAP === hasNewYLAPValues[0]);
                 // after performance
                 let filteredResult2 = [];
-                for(const priceAgreement of result){
-                    if(priceAgreement.hasNewYLAP === hasNewYLAPValues[0]){
+                for (const priceAgreement of result) {
+                    if (priceAgreement.hasNewYLAP === hasNewYLAPValues[0]) {
                         filteredResult2.push(priceAgreement);
                     }
                 }
@@ -659,8 +659,8 @@ module.exports = async (srv) => {
                 // filteredResult = result.filter(priceAgreement => priceAgreement.hasNewYLLP === hasNewYLLPValues[0]);
                 // after performance
                 let filteredResult2 = [];
-                for(const priceAgreement of result){
-                    if(priceAgreement.hasNewYLLP === hasNewYLLPValues[0]){
+                for (const priceAgreement of result) {
+                    if (priceAgreement.hasNewYLLP === hasNewYLLPValues[0]) {
                         filteredResult2.push(priceAgreement);
                     }
                 }
@@ -673,14 +673,14 @@ module.exports = async (srv) => {
             // const filteredResult = result.filter(priceAgreement => priceAgreement.ProductPackId === hasProductPackIdValues[0]);
             // after performance
             let filteredResult = [];
-            for(const priceAgreement of result){
-                if(priceAgreement.ProductPackId === hasProductPackIdValues[0]){
+            for (const priceAgreement of result) {
+                if (priceAgreement.ProductPackId === hasProductPackIdValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
             result = filteredResult;
         }
-//EFRCL- 358586- Italy- Price agreements - search function shows limited results
+        //EFRCL- 358586- Italy- Price agreements - search function shows limited results
         stopTrace("apply filters");
         //startTrace("Commit");
         //await tx.commit();
@@ -710,14 +710,14 @@ module.exports = async (srv) => {
         console.log(`Total time trace fetching Price Agreements: ${totalTime}`);
         //otherwise keep as is
         req.query.count = true;
-        if(req.query.cqn){
+        if (req.query.cqn) {
             req.query.cqn.count = true;
         }
         // result.$count = result.length;
         return req.reply(result);
     };
 
-//EHQUT-305028-Italy-Delivery monitoring never worked
+    //EHQUT-305028-Italy-Delivery monitoring never worked
     srv.after('READ', 'PriceAgreements', async (data) => {
         const tx = db.tx();
         // Calculate DeliveredVolume 
@@ -737,51 +737,51 @@ module.exports = async (srv) => {
         }
     });
 
-  //EHQUT-Italy - Synchronize button becomes available again when user changes expiry date
-//     srv.after('READ', 'CustomerPrices', async (req) => {
-         
-//         const tx = cds.tx(req);
-//        if(req && req.length > 0){
-        
-//         let whereCountry =req[0].ID ;
-//         if(whereCountry){
-//             const customerPrices = await tx.run(UPDATE(CustomerPrices).with({ Synchronized:false }).where({ ID: whereCountry }));
-//             await tx.commit();
-//             return customerPrices;
-//         }else{
-//             return "";
-//         }
-//     }
-        
-//     });
-//EHQUT-INC20428207-Incorrect resynchornization on Material Change cases
- //EHQUT- Italy - Synchronize button becomes available again when user changes expiry date
+    //EHQUT-Italy - Synchronize button becomes available again when user changes expiry date
+    //     srv.after('READ', 'CustomerPrices', async (req) => {
+
+    //         const tx = cds.tx(req);
+    //        if(req && req.length > 0){
+
+    //         let whereCountry =req[0].ID ;
+    //         if(whereCountry){
+    //             const customerPrices = await tx.run(UPDATE(CustomerPrices).with({ Synchronized:false }).where({ ID: whereCountry }));
+    //             await tx.commit();
+    //             return customerPrices;
+    //         }else{
+    //             return "";
+    //         }
+    //     }
+
+    //     });
+    //EHQUT-INC20428207-Incorrect resynchornization on Material Change cases
+    //EHQUT- Italy - Synchronize button becomes available again when user changes expiry date
     srv.on('syncPriceAgreements', async req => {
         // const tx = cds.transaction(req);
         const tx = cds.tx(req);
-        var AllMaterialNumber=[];
+        var AllMaterialNumber = [];
         let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
-        if(customerPrices && customerPrices.length > 0){
-            let Countrycode=customerPrices[0].CountryCode;
+        if (customerPrices && customerPrices.length > 0) {
+            let Countrycode = customerPrices[0].CountryCode;
 
-            if(Countrycode ==='ES'){
+            if (Countrycode === 'ES') {
 
-                for(var i =0; i<customerPrices.length; i++){
+                for (var i = 0; i < customerPrices.length; i++) {
                     AllMaterialNumber.push(customerPrices[i].MaterialNumber);
                 }
-               
-                const ActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: 'ES', ActiveRecord: 'Yes' , SKUCode: {in : AllMaterialNumber}}));
 
-                if(ActiveMaterial.length >0){
-                    const materials= ActiveMaterial.map(item =>item.SKUCode);
-                         
-                    customerPrices =await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } , MaterialNumber : {in : materials}}));
+                const ActiveMaterial = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: 'ES', ActiveRecord: 'Yes', SKUCode: { in: AllMaterialNumber } }));
+
+                if (ActiveMaterial.length > 0) {
+                    const materials = ActiveMaterial.map(item => item.SKUCode);
+
+                    customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids }, MaterialNumber: { in: materials } }));
                 }
-                     
-              
-               
+
+
+
             }
-            }
+        }
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
@@ -789,7 +789,7 @@ module.exports = async (srv) => {
         // cds.spawn({},async (tx) => { //TODO: would be better to run via spawn
         syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
 
-       // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
+        // await syncPriceAgreements(req.data.ids, customerPrices);//run without waiting
         // });
         return req.reply();
     });
@@ -798,6 +798,19 @@ module.exports = async (srv) => {
 
         console.log(`Prepare categories of customer prices`);
         const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
+        //CR2-New
+        let instituteID = mainPriceConditions.map(item => item.InstituteId);
+        let SoldToInstituteType = [];
+        let ShipToInstitute = [];
+        let CombinationValue;
+        if (instituteID.length > 0) {
+
+            let institute = await cds.run(SELECT.from(PT_TMINST).where({ InstituteID: { in: instituteID } }));
+            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
+            ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
+
+        }
+
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1" || item.PriceCondition === "YAW2");
         const allCustomerPrices = mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions);
@@ -809,16 +822,22 @@ module.exports = async (srv) => {
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice));
         //EHQUT-386660-Italy-Issue with FoC synchronization
 
-        const updateFOCConditionPromises = focPriceConditions.map((custPrice,index) => updateFOCcustPrices(custPrice,index));
-       // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
-
-        const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
+        const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
+        // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
+        //CR2-New
+        let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
+        effectiveDatearray = Array.from(new Set(effectiveDatearray));
+        let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+        let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
+        let arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
+        //const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
+        const updateRappelConditionPromises = updateRappelcustPrices(arrayresult);
 
         // Synchronize
         console.log(`Process requests of customer prices`);
         let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
         result = result.filter(res => res !== undefined);
-
+        console.log(result,"result");
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
 
@@ -843,6 +862,134 @@ module.exports = async (srv) => {
             await setStatusPriceAgreement(allCustomerPrices.map(cp => cp.PriceAgreementId), 'ERROR');//error for all
         }
     };
+
+    //CR2-New
+    async function updatearray(effectiveDatearray,ShipToTypeCustomer,SoldToType,customerPrices) {
+        const tx = cds.tx();
+        var finalarray=[],ShipToType;
+        const header=[];
+        
+        for(let i=0; i<effectiveDatearray.length; i++){
+            let effectivedate=effectiveDatearray[i];
+            let SoldToCustomer= SoldToType.filter(d=>d.EffectiveDate === effectiveDatearray[i]);
+            let SoldTOCustomerPrice=customerPrices.filter(d=>d.ID===SoldToCustomer[0].ID);
+            SoldTOCustomerPrice=SoldTOCustomerPrice[0];
+            ShipToType=ShipToTypeCustomer.filter(d=>d.EffectiveDate === effectiveDatearray[i]);
+            let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID:  SoldTOCustomerPrice.PriceAgreementId }));
+        if (!priceAgreement) {
+             console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.PriceAgreementId}`);
+            console.error(`No priceAgreement was found for PriceAgreementID: ${SoldTOCustomerPrice.PriceAgreementId}`);
+            return { status: false, customerPrice:  SoldTOCustomerPrice };
+        }
+        let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({ PriceAgreement_ID:  SoldTOCustomerPrice.PriceAgreementId }).where({ PriceConditionCode:  SoldTOCustomerPrice.PriceCondition }));
+        if (!priceCondition) {
+            return req.reject(404, `No priceCondition was found for "${SoldTOCustomerPrice.PriceCondition}" with PriceAgreementID "${SoldTOCustomerPrice.PriceAgreementId}"`);
+            //return { status: false, customerPrice: customerPrice };
+            //console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.ID}`);
+            // console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+            
+        }
+
+        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
+
+            
+        const effectiveDate = new Date(SoldTOCustomerPrice.EffectiveDate);  
+        const expiryDate = new Date(SoldTOCustomerPrice.ExpiryDate);
+        const Country = ServiceHelper.buildFullWhere("CountryCode", "=", SoldTOCustomerPrice.CountryCode);
+        let priceAgreementInstitutehead = await tx.run(SELECT.one.from(PT_TMINST).where(Country).where({InstituteID: priceAgreement.InstituteId}));
+       
+        const bonem = parseInt(priceAgreementInstitutehead.CustomerID);
+        console.log(effectiveDate,"itemeffectivedare");
+        const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
+        const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
+        
+        header.push({
+            "BONEM" : bonem,
+             "BOTEX" : tender.SAPID,
+             "DATAB" : datab,
+             "DATBI" : datbi,
+             "BOSTA" : "B",
+             "Items":[]
+
+        });
+       
+        for(let a=0;a<ShipToType.length;a++){
+            let items=[];
+            let ShipToType1=ShipToType[a];
+            const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", ShipToType1.CountryCode);
+            const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", ShipToType1.InstituteId);
+            let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+            
+            let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID:  ShipToType1.PriceAgreementId }));
+                    let priceAgreementInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where({InstituteID: priceAgreement.InstituteId}));
+                   
+                    
+            const kunnr = parseInt(institute.CustomerID);
+            const matnr = parseInt(ShipToType1.MaterialNumber);
+            let KNUMA_BO,KNUMAValue;
+            //Transforming the Date in correct format
+            const dataBSpain = new Date(ShipToType1.EffectiveDate).toISOString().split('T')[0];
+            const datbISpain = new Date(ShipToType1.ExpiryDate).toISOString().split('T')[0];
+            const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: dataBSpain, DATBI: datbISpain}));
+            if(spainRappelData){
+                KNUMAValue= spainRappelData.KNUMA;
+            }
+    
+            let E1KONW=[];
+            // DiscountConditions
+            let highestDiscountCondition = null;
+            let lowestDiscountCondition = null;
+            const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: priceCondition.ID }));
+            if (discountConditions?.length > 0) {
+                highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount > current.Discount) ? prev : current);
+                lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount < current.Discount) ? prev : current);
+                
+                discountConditions.forEach(dc => {
+                    E1KONW.push({
+                        "KSTBW": dc.Volume,
+                        "KBETR": dc.Discount.toFixed(3) + "-"
+                    });
+                });
+            }
+            let KBETR,KBRUE;
+           
+            items.push({
+                "DATAB_GR": datab,
+                "DATBI_GR" :datbi,
+                "KUNNR" : kunnr,
+                "MATNR" : matnr,
+                "KNUMA_BO" : KNUMAValue,
+                "KBETR" : lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || "", // KBETR from the minimum(KSTBW)
+                "KBRUE" : highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || "" ,
+                "E1KONW" :E1KONW
+               
+            });
+            header[i].Items.push(items);
+        }
+     
+        }
+       finalarray.push(header);
+       return finalarray;
+        
+
+        
+    };
+    async function updateRappelcustPrices(finalarray) {
+        const tx = cds.tx();
+        finalarray=finalarray[0];
+        finalarray.map(d=>{
+        const body = getES01RequestBodyTemplate();
+        
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = d.BONEM;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = d.BOTEX;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = d.datab;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = d.datbi;
+        
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(d.Items);
+          });
+          await tx.commit();//to release db connection
+
+    };
     async function setStatusPriceAgreement(pas, status) {
         if (!pas || pas?.length === 0) {
             return false;
@@ -851,7 +998,7 @@ module.exports = async (srv) => {
         const tx = cds.tx();
         try {
             console.log(`Update SynchronizationStatus to ${status} for ${pas.join("||")}`)
-            await tx.run(UPDATE(PriceAgreements).with({ SynchronizationStatus: status , Synchronized : true}).where({ ID: { in: pas } }));
+            await tx.run(UPDATE(PriceAgreements).with({ SynchronizationStatus: status, Synchronized: true }).where({ ID: { in: pas } }));
             await tx.commit();
         } catch (error) {
             await tx.rollback(error);
@@ -890,7 +1037,7 @@ module.exports = async (srv) => {
     };
 
     //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
-    async function updateCustomerPrice(customerPrice)   {
+    async function updateCustomerPrice(customerPrice) {
         console.log(`Prepare sending update customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
 
@@ -901,7 +1048,7 @@ module.exports = async (srv) => {
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
         const body = getPriceAgreementRequestBodyTemplate(institute);
-      
+
         if (!institute) {
             console.error(`Error customer price: ${customerPrice.ID}`);
             console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
@@ -946,7 +1093,7 @@ module.exports = async (srv) => {
             const wherePriceAgreement_ID = ServiceHelper.buildFullWhere("PriceAgreement_ID", "=", customerPrice.PriceAgreementId);
             const wherePriceConditionCode = ServiceHelper.buildFullWhere("PriceConditionCode", "=", customerPrice.PriceCondition);
             let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where(wherePriceAgreement_ID).where(wherePriceConditionCode));
-            
+
             if (!priceCondition) {
                 // return req.reject(404, `No priceCondition was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
             }
@@ -997,7 +1144,7 @@ module.exports = async (srv) => {
         const datab = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
         const datbi = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
 
-        customerPricesQC.push({CustomerPriceId: customerPrice.PriceAgreementId, CountryCode: customerPrice.CountryCode, KSCHL: customerPrice.PriceCondition, KUNNR: institute.CustomerID, MATNR: customerPrice.MaterialNumber,KBETR: kbetr, REFVAL: tender.SAPID, DATAB: datab, DATBI: datbi});
+        customerPricesQC.push({ CustomerPriceId: customerPrice.PriceAgreementId, CountryCode: customerPrice.CountryCode, KSCHL: customerPrice.PriceCondition, KUNNR: institute.CustomerID, MATNR: customerPrice.MaterialNumber, KBETR: kbetr, REFVAL: tender.SAPID, DATAB: datab, DATBI: datbi });
         const mappedcustomerPricesQC = mappedcustomerPrices(customerPricesQC);
 
         // 5. Insert PriceCondition QC
@@ -1019,7 +1166,7 @@ module.exports = async (srv) => {
         }
     }
 
-//EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
+    //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
     function getPriceAgreementRequestBodyTemplate(institute) {
         return {
             "_-BAY0_-GZ_SDCOND_A04": {
@@ -1052,7 +1199,7 @@ module.exports = async (srv) => {
                     "E1KOMG": {
                         "SEGMENT": 1,
                         "KVEWE": "A",
-                        "KOTABNR":institute.InstituteType === 'Region(s)' ? 879 : 878,
+                        "KOTABNR": institute.InstituteType === 'Region(s)' ? 879 : 878,
                         "KAPPL": "V",
                         "KSCHL": "YLTP",
                         "VKORG": "ITHC",
@@ -1088,24 +1235,24 @@ module.exports = async (srv) => {
         customerPrices = customerPrices.reduce((prev, curr, idx, customerPrices) => {
             prev.push(
                 {
-                    CustomerPriceId             : curr.CustomerPriceId || null,
-                    CountryCode                 : curr.CountryCode || null,
-                    VKORG                       : curr.CountryCode == 'ES' ? "QFHC" : "ITHC" || null,   // Sales Organisation
-                    KSCHL                       : curr.KSCHL || null,   // Condition Type
-                    KUNNR                       : curr.KUNNR && addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
-                    MATNR                       : curr.MATNR && addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
-                    YCIG                        : curr.REFVAL || null,   // Contract Reference
-                    KBETR                       : curr.KBETR || null,   // Condition Value
-                    KPEIN                       : curr.CountryCode == 'IT' ? 1 : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null || null,   // Unit for price
-                    DATAB                       : curr.DATAB || null,   // Effective Date
-                    DATBI                       : curr.DATBI || null,   // Expiry Date
-                    KRECH                       : (curr.KSCHL == 'YL60' || curr.KSCHL == 'YDC0') ? "A" : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? "C" : null || null,   // 
-                    KONMS                       : curr.KONMS || null,   // 
-                    MEINS                       : curr.MEINS || null,   // 
-                    BOMAT                       : curr.BOMAT && addLeadingZeros(curr.BOMAT, 18) || null,   // 
-                    KSTBM                       : curr.KSTBM || null,   // 
-                    MIKBAS                      : curr.MIKBAS || null,   // 
-                    MXBAS                       : curr.MXBAS || null   //
+                    CustomerPriceId: curr.CustomerPriceId || null,
+                    CountryCode: curr.CountryCode || null,
+                    VKORG: curr.CountryCode == 'ES' ? "QFHC" : "ITHC" || null,   // Sales Organisation
+                    KSCHL: curr.KSCHL || null,   // Condition Type
+                    KUNNR: curr.KUNNR && addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
+                    MATNR: curr.MATNR && addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
+                    YCIG: curr.REFVAL || null,   // Contract Reference
+                    KBETR: curr.KBETR || null,   // Condition Value
+                    KPEIN: curr.CountryCode == 'IT' ? 1 : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? 10000 : null || null,   // Unit for price
+                    DATAB: curr.DATAB || null,   // Effective Date
+                    DATBI: curr.DATBI || null,   // Expiry Date
+                    KRECH: (curr.KSCHL == 'YL60' || curr.KSCHL == 'YDC0') ? "A" : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? "C" : null || null,   // 
+                    KONMS: curr.KONMS || null,   // 
+                    MEINS: curr.MEINS || null,   // 
+                    BOMAT: curr.BOMAT && addLeadingZeros(curr.BOMAT, 18) || null,   // 
+                    KSTBM: curr.KSTBM || null,   // 
+                    MIKBAS: curr.MIKBAS || null,   // 
+                    MXBAS: curr.MXBAS || null   //
                 }
             );
             return prev;
@@ -1142,7 +1289,7 @@ module.exports = async (srv) => {
                 'Content-Type': 'application/json'
             },
             data: JSON.stringify(body)
-            
+
         });
 
     };
@@ -1189,9 +1336,9 @@ module.exports = async (srv) => {
     //     return req.reply(result);
 
     // });
- //EHQUT-386660-Italy-Issue with FoC synchronization
+    //EHQUT-386660-Italy-Issue with FoC synchronization
 
-    async function updateFOCcustPrices(customerPrice,index) {
+    async function updateFOCcustPrices(customerPrice, index) {
 
         console.log(`Prepare sending update FOC customer price: ${customerPrice.ID}`);
         const tx = cds.tx();
@@ -1239,7 +1386,7 @@ module.exports = async (srv) => {
         const expiryDate = new Date(customerPrice.ExpiryDate);
         //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
         const body = getPriceAgreementRequestBodyTemplate(institute);
-        
+
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KUNNR = parseInt(institute.CustomerID);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.MATNR = parseInt(customerPrice.MaterialNumber);
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.DATAB = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
@@ -1249,7 +1396,7 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KVEWE = 'N';
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KONMS = "PCE";
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MEINS = "PCE";
-    
+
 
         tender && (body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"].REFVAL = tender.SAPID);
 
@@ -1265,7 +1412,7 @@ module.exports = async (srv) => {
             mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.FOCmaterialNumber);
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 921;
-            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1+ index;
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1 + index;
             delete body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG["_-BAY0_-GZ_SDREFINFO01"];
         }
         // Spain only
@@ -1298,7 +1445,7 @@ module.exports = async (srv) => {
 
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 902;
 
-            
+
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(focMaterial.SKUCode);
         }
         //EHQUT-OTT-138426-Italy - different offer values on SAP
@@ -1318,21 +1465,21 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MXKBAS = mxkbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KUNNR = parseInt(institute.CustomerID);
         //EHQUT-CR7
-        if(customerPrice.PriceCondition == 'YA01'){
+        if (customerPrice.PriceCondition == 'YA01') {
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.PRSCH = 2;
-            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KZNEP = "E"; 
-            }
+            body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KZNEP = "E";
+        }
         //EHQUT-CR7
         //Transforming the Date in correct format
         const datab = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
         const datbi = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
         const bomaT = (customerPrice.PriceCondition == 'YA03' || customerPrice.PriceCondition == 'YA01') ? (customerPrice.CountryCode == 'ES' ? focMaterial.SKUCode : customerPrice.FOCmaterialNumber) : null;
-        focCustomerPricesQC.push({CustomerPriceId: customerPrice.PriceAgreementId, CountryCode: customerPrice.CountryCode, KSCHL: customerPrice.PriceCondition, KUNNR: institute.CustomerID, MATNR: customerPrice.MaterialNumber, KONMS: "PCE", MEINS: "PCE", DATAB: datab, DATBI: datbi, BOMAT: bomaT, KSTBM: kstbm, MIKBAS: mikbas, MXBAS: mxkbas});
+        focCustomerPricesQC.push({ CustomerPriceId: customerPrice.PriceAgreementId, CountryCode: customerPrice.CountryCode, KSCHL: customerPrice.PriceCondition, KUNNR: institute.CustomerID, MATNR: customerPrice.MaterialNumber, KONMS: "PCE", MEINS: "PCE", DATAB: datab, DATBI: datbi, BOMAT: bomaT, KSTBM: kstbm, MIKBAS: mikbas, MXBAS: mxkbas });
         const mappedfocCustomerPricesQC = mappedcustomerPrices(focCustomerPricesQC);
 
         // 5. Insert PriceCondition QC
         mappedfocCustomerPricesQC && await tx.run(INSERT(mappedfocCustomerPricesQC).into(CustomerPricesQC));
-        
+
 
         await tx.commit();//to release db connection
         console.log(`Start sending update FOC customer price: ${customerPrice.ID}`);
@@ -1349,97 +1496,97 @@ module.exports = async (srv) => {
     };
 
 
-    async function updateRappelcustPrices(customerPrice) {
-        console.log(`Prepare sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId}`);
-        const tx = cds.tx();
-        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: customerPrice.PriceAgreementId }));
-        if (!priceAgreement) {
-            // return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
-            console.error(`Error Rappel customer price: ${customerPrice.ID}`);
-            console.error(`No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
-            return { status: false, customerPrice: customerPrice };
-        }
-        let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({ PriceAgreement_ID: customerPrice.PriceAgreementId }).where({ PriceConditionCode: customerPrice.PriceCondition }));
-        if (!priceCondition) {
-            // return req.reject(404, `No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
-            console.error(`Error Rappel customer price: ${customerPrice.ID}`);
-            console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
-            return { status: false, customerPrice: customerPrice };
-        }
+    //     async function updateRappelcustPrices(customerPrice) {
+    //         console.log(`Prepare sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId}`);
+    //         const tx = cds.tx();
+    //         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: customerPrice.PriceAgreementId }));
+    //         if (!priceAgreement) {
+    //             // return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+    //             console.error(`Error Rappel customer price: ${customerPrice.ID}`);
+    //             console.error(`No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+    //             return { status: false, customerPrice: customerPrice };
+    //         }
+    //         let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({ PriceAgreement_ID: customerPrice.PriceAgreementId }).where({ PriceConditionCode: customerPrice.PriceCondition }));
+    //         if (!priceCondition) {
+    //             // return req.reject(404, `No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+    //             console.error(`Error Rappel customer price: ${customerPrice.ID}`);
+    //             console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+    //             return { status: false, customerPrice: customerPrice };
+    //         }
 
-        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
+    //         const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
 
-        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
-        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
-        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+    //         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
+    //         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
+    //         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 
-        let priceAgreementInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where({InstituteID: priceAgreement.InstituteId}));
+    //         let priceAgreementInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where({InstituteID: priceAgreement.InstituteId}));
 
-        const effectiveDate = new Date(customerPrice.EffectiveDate);
-        const expiryDate = new Date(customerPrice.ExpiryDate);
+    //         const effectiveDate = new Date(customerPrice.EffectiveDate);
+    //         const expiryDate = new Date(customerPrice.ExpiryDate);
 
-        const bonem = parseInt(priceAgreementInstitute.CustomerID);
-        const kunnr = parseInt(institute.CustomerID);
-        const matnr = parseInt(customerPrice.MaterialNumber);
-        const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
-        const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-//CR2
-        const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode);
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = bonem;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = datbi;
-       // body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOSTA = "B";
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = datab;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATBI_GR = datbi;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = kunnr;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = matnr;
-       
-
-        //Transforming the Date in correct format
-        const dataB = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
-        const datbI = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
-        
-        // Specify existing SAP rappel reference when exists for customer/material
-        // when KNUMA_BO is specified then it is an update in the SAP backend else, it is a create
-        const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: dataB, DATBI: datbI}));
-        if(spainRappelData){
-            body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].KNUMA_BO = spainRappelData.KNUMA;
-        }
+    //         const bonem = parseInt(priceAgreementInstitute.CustomerID);
+    //         const kunnr = parseInt(institute.CustomerID);
+    //         const matnr = parseInt(customerPrice.MaterialNumber);
+    //         const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
+    //         const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
+    // //CR2
+    //         const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode);
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = bonem;
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = datbi;
+    //        // body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOSTA = "B";
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = datab;
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATBI_GR = datbi;
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = kunnr;
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = matnr;
 
 
-        // DiscountConditions
-        let highestDiscountCondition = null;
-        let lowestDiscountCondition = null;
-        const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: priceCondition.ID }));
-        if (discountConditions?.length > 0) {
-            highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount > current.Discount) ? prev : current);
-            lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount < current.Discount) ? prev : current);
-            discountConditions.forEach(dc => {
-                body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].E1KONW.push({
-                    "KSTBW": dc.Volume,
-                    "KBETR": dc.Discount.toFixed(3) + "-"
-                });
-            });
-        }
+    //         //Transforming the Date in correct format
+    //         const dataB = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
+    //         const datbI = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
 
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || ""; // KBETR from the minimum(KSTBW)
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || ""; // minimum(KSTBW) value from the DiscountConditions array
+    //         // Specify existing SAP rappel reference when exists for customer/material
+    //         // when KNUMA_BO is specified then it is an update in the SAP backend else, it is a create
+    //         const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: dataB, DATBI: datbI}));
+    //         if(spainRappelData){
+    //             body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].KNUMA_BO = spainRappelData.KNUMA;
+    //         }
 
-        await tx.commit();//to release db connection
 
-        console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
-        try {
-            const result = await updatePriceConditions(customerPrice.CountryCode, "PriceConditionRappel", body);
-            console.log(`Finished sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
-            return { status: true, result: result, customerPrice: customerPrice };
-        } catch (error) {
-            console.error(`ERROR: sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
-            logRequestError(error);
-            return { status: false, customerPrice: customerPrice };
-            // throw error;//do not throw error to continue with other requests
-        }
-    };
+    //         // DiscountConditions
+    //         let highestDiscountCondition = null;
+    //         let lowestDiscountCondition = null;
+    //         const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: priceCondition.ID }));
+    //         if (discountConditions?.length > 0) {
+    //             highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount > current.Discount) ? prev : current);
+    //             lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount < current.Discount) ? prev : current);
+    //             discountConditions.forEach(dc => {
+    //                 body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].E1KONW.push({
+    //                     "KSTBW": dc.Volume,
+    //                     "KBETR": dc.Discount.toFixed(3) + "-"
+    //                 });
+    //             });
+    //         }
+
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || ""; // KBETR from the minimum(KSTBW)
+    //         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || ""; // minimum(KSTBW) value from the DiscountConditions array
+
+    //         await tx.commit();//to release db connection
+
+    //         console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+    //         try {
+    //             const result = await updatePriceConditions(customerPrice.CountryCode, "PriceConditionRappel", body);
+    //             console.log(`Finished sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+    //             return { status: true, result: result, customerPrice: customerPrice };
+    //         } catch (error) {
+    //             console.error(`ERROR: sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+    //             logRequestError(error);
+    //             return { status: false, customerPrice: customerPrice };
+    //             // throw error;//do not throw error to continue with other requests
+    //         }
+    //     };
 
     function logRequestError(error) {
         if (error.response) {
@@ -1456,7 +1603,7 @@ module.exports = async (srv) => {
         }
     }
     //CR2
-    function getES01RequestBodyTemplate(institute,priceconditionrappelcode) {
+    function getES01RequestBodyTemplate(institute, priceconditionrappelcode) {
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
                 "IDOC": {
@@ -1495,7 +1642,7 @@ module.exports = async (srv) => {
                         "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 750,
                         "KVEWE": "A",
                         "KAPPL": "V",
-                        
+
                         "_BAY0-GZ_SALESAGRITEM": [
                             {
                                 "KUNNR": 0,
@@ -1523,7 +1670,7 @@ module.exports = async (srv) => {
      * @param {Array} chunkSize 
      * @returns 
      */
-    function splitToChunks(array, chunkSize){
+    function splitToChunks(array, chunkSize) {
         const chunks = [];
         for (let i = 0; i < array.length; i += chunkSize) {
             chunks.push(array.slice(i, i + chunkSize));
@@ -1531,11 +1678,11 @@ module.exports = async (srv) => {
         return chunks;
     };
 
-    function addLeadingZeros (num, size) {
+    function addLeadingZeros(num, size) {
         if (num === null) {
             throw new Error(`${num} doesn't exist`);
         }
-        
+
         num = num.toString();
         while (num.length < size) num = "0" + num;
         return num;
