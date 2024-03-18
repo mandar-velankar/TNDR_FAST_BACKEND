@@ -65,7 +65,8 @@ module.exports = async (srv) => {
     srv.on('READ', 'PriceagreementOffers', async (req) => {
         const tx = cds.tx(req);
         let results = await buildWorkflowApprovalOffers(tx);
-        return results;
+        console.log(results,"results");
+         return results;
     });
 
     async function getOffersForWorkflow(tx, approvalStatus) {
@@ -798,17 +799,18 @@ module.exports = async (srv) => {
 
         console.log(`Prepare categories of customer prices`);
         const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        //CR2-New
-        let instituteID = mainPriceConditions.map(item => item.InstituteId);
-        let SoldToInstituteType = [];
-        let ShipToInstitute = [];
+
+        //EHQUT-CR2-New
+        let instituteID =mainPriceConditions.map(item=>item.InstituteId);
+        let SoldToInstituteType=[];
+        let ShipToInstitute=[];
         let CombinationValue;
-        if (instituteID.length > 0) {
-
-            let institute = await cds.run(SELECT.from(PT_TMINST).where({ InstituteID: { in: instituteID } }));
-            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
-            ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-
+        if(instituteID.length>0){
+            const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
+            let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } })); 
+            SoldToInstituteType=institute.filter(item=>item.InstituteType === "Private Account" ||item.InstituteType === "Public Account");
+            ShipToInstitute=institute.filter(item=>item.InstituteType === "Ship-To");
+            
         }
 
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
@@ -822,6 +824,7 @@ module.exports = async (srv) => {
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice));
         //EHQUT-386660-Italy-Issue with FoC synchronization
 
+
         const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
         //CR2-New
@@ -832,6 +835,7 @@ module.exports = async (srv) => {
         let arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
         //const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
         const updateRappelConditionPromises = updateRappelcustPrices(arrayresult);
+
 
         // Synchronize
         console.log(`Process requests of customer prices`);
@@ -1464,12 +1468,14 @@ module.exports = async (srv) => {
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MIKBAS = mikbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.MXKBAS = mxkbas;
         body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KUNNR = parseInt(institute.CustomerID);
+
         //EHQUT-CR7
         if (customerPrice.PriceCondition == 'YA01') {
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.PRSCH = 2;
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.KZNEP = "E";
         }
         //EHQUT-CR7
+
         //Transforming the Date in correct format
         const datab = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
         const datbi = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
@@ -1479,7 +1485,8 @@ module.exports = async (srv) => {
 
         // 5. Insert PriceCondition QC
         mappedfocCustomerPricesQC && await tx.run(INSERT(mappedfocCustomerPricesQC).into(CustomerPricesQC));
-
+        
+        console.log(body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP,"IDOC");
 
         await tx.commit();//to release db connection
         console.log(`Start sending update FOC customer price: ${customerPrice.ID}`);
@@ -1494,6 +1501,7 @@ module.exports = async (srv) => {
             return { status: false, customerPrice: customerPrice };
         }
     };
+
 
 
     //     async function updateRappelcustPrices(customerPrice) {
@@ -1588,6 +1596,7 @@ module.exports = async (srv) => {
     //         }
     //     };
 
+
     function logRequestError(error) {
         if (error.response) {
             // Request made and server responded
@@ -1603,7 +1612,9 @@ module.exports = async (srv) => {
         }
     }
     //CR2
-    function getES01RequestBodyTemplate(institute, priceconditionrappelcode) {
+
+    function getES01RequestBodyTemplate(institute,priceconditionrappelcode,CombinationValue) {
+
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
                 "IDOC": {
@@ -1639,9 +1650,11 @@ module.exports = async (srv) => {
                         "ZTERM": "D496",
                         "ZLSCH": "M",
                         "ABREX": "TEST AGMNT",
-                        "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 750,
+                        "KOTABNR": institute.InstituteType === 'Ship-To' ? 750 : 582,
                         "KVEWE": "A",
                         "KAPPL": "V",
+
+                        "BOSTA": "B",
 
                         "_BAY0-GZ_SALESAGRITEM": [
                             {

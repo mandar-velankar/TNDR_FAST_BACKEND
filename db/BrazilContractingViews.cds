@@ -30,6 +30,7 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.StartDate,
         Contracts.EndDate,
         Contracts.Status.Status,
+        max(Contracts.SalesOrders.Status.Status) as SalesOrderStatus:String,
         sum(Contracts.ContractProducts.OfferProduct.PriceCondition.CommercialProposal * Contracts.ContractProducts.OfferProduct.RequestedVolume) as TotalValue:Decimal,
         Contracts.modifiedBy,
         Contracts.modifiedAt,

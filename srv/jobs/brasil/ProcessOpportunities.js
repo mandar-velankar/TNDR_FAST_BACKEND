@@ -833,8 +833,10 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST, pri
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFRS ...`);
     ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
         const cnpj = curr.COD_DONO_QP && curr.COD_DONO_QP.replace(/\D/g,'');
+        console.log(cnpj,"cnpj");
         const distributor = (curr.NU_DIRETO_INDIRETO === 0) ? existingDistributorsFAST.find(dist => dist.DistributorName === "Bayer Brazil") : existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
         const distributorID = distributor && distributor.DistributorID || null;
+        console.log(distributorID,"distributorID");
         const priceConditionClassification = priceConditionClassificationFAST.find(p => p.Division === curr.NM_BU_ABREV);
         const priceConditionClassificationId = priceConditionClassification && priceConditionClassification.ID || null;
         prev.push(
