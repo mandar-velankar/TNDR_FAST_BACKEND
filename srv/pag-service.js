@@ -834,9 +834,9 @@ module.exports = async (srv) => {
         let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
         //const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
-        console.log(arrayresult,"array");
+        
         const updateRappelConditionPromises = updateRappelcustPrices(arrayresult);
-
+        console.log(updateRappelConditionPromises,"array");
 
         // Synchronize
         console.log(`Process requests of customer prices`);
@@ -1614,7 +1614,7 @@ module.exports = async (srv) => {
     }
     //CR2
 
-    function getES01RequestBodyTemplate(institute,priceconditionrappelcode,CombinationValue) {
+    function getES01RequestBodyTemplate() {
 
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
@@ -1651,7 +1651,7 @@ module.exports = async (srv) => {
                         "ZTERM": "D496",
                         "ZLSCH": "M",
                         "ABREX": "TEST AGMNT",
-                        "KOTABNR": institute.InstituteType === 'Ship-To' ? 750 : 582,
+                        "KOTABNR": 582,
                         "KVEWE": "A",
                         "KAPPL": "V",
 
@@ -1667,7 +1667,7 @@ module.exports = async (srv) => {
                                 "KONWA": "%",
                                 "KPEIN": 1,
                                 "KBRUE": 0,
-                                "KSCHL": priceconditionrappelcode,
+                                "KSCHL": "YAW1",
                                 "E1KONW": []
                             }
                         ]
