@@ -846,11 +846,11 @@ module.exports = async (srv) => {
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
 
-        const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrice.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
+        const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.mainPriceConditions[0].PriceAgreementId); //in case one of the promises returns false -> it means there was an error
         await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
 
         let paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status); //in case one of the promises returns false -> it means there was an error
-        paWithoutErrorsIds = paWithoutErrorsIds.filter(paWE => paWithErrorsIds.findIndex(paE => paE === paWE.customerPrice.PriceAgreementId) === -1);//do not keep the ones that are already in error
+        // paWithoutErrorsIds = paWithoutErrorsIds.filter(paWE => paWithErrorsIds.findIndex(paE => paE === paWE.customerPrice.PriceAgreementId) === -1);//do not keep the ones that are already in error
 
         // Set 'Synchronized' to true and add IDOC number from the response
         try {
@@ -994,7 +994,7 @@ module.exports = async (srv) => {
         
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(d.Items[0]);
           });
-          //await tx.commit();//to release db connection
+          await tx.commit();//to release db connection
       
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
         try {
@@ -1308,6 +1308,7 @@ module.exports = async (srv) => {
                 'Content-Type': 'application/json'
             },
             data: JSON.stringify(body)
+            
 
         });
 
