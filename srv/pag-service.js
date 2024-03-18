@@ -836,17 +836,17 @@ module.exports = async (srv) => {
         //const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
         
         const updateRappelConditionPromises = updateRappelcustPrices(arrayresult);
-        console.log(updateRappelConditionPromises,"array");
+       
 
         // Synchronize
         console.log(`Process requests of customer prices`);
         let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
         result = result.filter(res => res !== undefined);
-        console.log(result,"result");
+        
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
-
-        const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.mainPriceConditions[0].PriceAgreementId); //in case one of the promises returns false -> it means there was an error
+       console.log(mappedCustomerPrices,"mapped");
+        const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrices.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
         await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
 
         let paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status); //in case one of the promises returns false -> it means there was an error
