@@ -834,6 +834,7 @@ module.exports = async (srv) => {
         let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
         //const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
+        console.log(arrayresult,"array");
         const updateRappelConditionPromises = updateRappelcustPrices(arrayresult);
 
 
@@ -1059,8 +1060,8 @@ module.exports = async (srv) => {
             return { status: false, customerPrice: customerPrice };
             // return req.reject(404, `No institute was found for InstituteID: ${customerPrice.InstituteId}`);
         }
-
-        if (customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
+//CR2-New
+        // if (customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
 
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
