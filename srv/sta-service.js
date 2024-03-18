@@ -1137,10 +1137,31 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], ['AwardedProductFormView', 'AwardedProducts'], async (req) => {
 		try{
-		delete req.data.FreeGoodsOther;
-		delete req.data.FreeGoodsOther_ABS_PCT;
-		delete req.data.FreeGoodsOther_Step;
-		delete req.data.ADD_INCLUDE;
+			if(req?.path === 'StandardAppService.AwardedProductFormView'){
+				const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Award', CountryCode: req?.data?.CountryCode, ProductScope: 'All'}));
+
+				const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+				
+				for (const item of mandatoryFielddata) {
+					let frontendField = item.Field;
+					if (frontendField.includes("path")) {
+						const match = regex.exec(frontendField);
+						frontendField = match ? match[1] : frontendField;
+					}
+				
+					if (
+						!(frontendField in req.data) ||
+						req.data[frontendField] === null ||
+						req.data[frontendField] === ''
+					) {
+						req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+					}
+				}	
+			}
+			delete req.data.FreeGoodsOther;
+			delete req.data.FreeGoodsOther_ABS_PCT;
+			delete req.data.FreeGoodsOther_Step;
+			delete req.data.ADD_INCLUDE;
 		}
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
@@ -1305,6 +1326,26 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
 		try{
+			const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'CompetitorResults', CountryCode: req?.data?.Custom_String_2, ProductScope: 'All'}));
+
+			const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+			
+			for (const item of mandatoryFielddata) {
+				let frontendField = item.Field;
+				if (frontendField.includes("path")) {
+					const match = regex.exec(frontendField);
+					frontendField = match ? match[1] : frontendField;
+				}
+			
+				if (
+					!(frontendField in req.data) ||
+					req.data[frontendField] === null ||
+					req.data[frontendField] === ''
+				) {
+					req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+				}
+			}	
+
 			!req.data.AWARDEDCOMPANY && req.error({ code: 404, message: "Awarded Company is required.", target: "AWARDEDCOMPANY" });
 			!req.data.AWARDEDPRODUCT && req.error({ code: 404, message: "Awarded Product is required.", target: "AWARDEDPRODUCT" });
 		}
