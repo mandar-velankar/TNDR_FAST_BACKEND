@@ -44,6 +44,8 @@ modules:
   - name: FAST-API-AppRouter
     type: html5
     path: app
+    properties:
+      INCOMING_CONNECTION_TIMEOUT: 480000
     requires:
       - name: srv_api
         group: destinations
@@ -51,7 +53,7 @@ modules:
           forwardAuthToken: true
           name: srv_api
           url: '~{url}'
-          timeout: 120000
+          timeout: 480000
       - name: uaa_FAST
       - name: FAST-logging
       - name: FAST-dest-service
