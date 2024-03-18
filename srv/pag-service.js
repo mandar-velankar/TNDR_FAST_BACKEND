@@ -982,18 +982,31 @@ module.exports = async (srv) => {
     };
     async function updateRappelcustPrices(finalarray) {
         const tx = cds.tx();
+        let body;
         finalarray=finalarray[0];
         finalarray.map(d=>{
-        const body = getES01RequestBodyTemplate();
+         body = getES01RequestBodyTemplate();
         
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = d.BONEM;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = d.BOTEX;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = d.datab;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = d.datbi;
         
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(d.Items);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(d.Items[0]);
           });
-          await tx.commit();//to release db connection
+          //await tx.commit();//to release db connection
+      
+        //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+        try {
+            const result = await updatePriceConditions("ES", "PriceConditionRappel", body);
+            // console.log(`Finished sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+            return { status: true, result: result};
+        } catch (error) {
+            // console.error(`ERROR: sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+            // logRequestError(error);
+            return { status: false };
+            // throw error;//do not throw error to continue with other requests
+        }
 
     };
     async function setStatusPriceAgreement(pas, status) {
@@ -1268,7 +1281,7 @@ module.exports = async (srv) => {
     };
 
 
-    async function updatePriceConditions(countryCode, resource, body) {
+    async function updatePriceConditions(countryCode,resource, body) {
 
         if (!body) {
             console.error("The body of the request is missing.");
