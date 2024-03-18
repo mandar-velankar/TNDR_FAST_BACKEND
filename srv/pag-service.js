@@ -846,7 +846,7 @@ module.exports = async (srv) => {
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
        console.log(mappedCustomerPrices,"mapped");
-        const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrices.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
+        const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrice.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
         await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
 
         let paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status); //in case one of the promises returns false -> it means there was an error
