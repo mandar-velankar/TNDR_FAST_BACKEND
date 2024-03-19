@@ -706,7 +706,7 @@ module.exports = async (srv) => {
 			return req.error({ code: 403, message: `Offer "${offerID}" is not active. Only active offer can be copied.`, target: "PT_TMOFRS"});
 		}
 
-		if(offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded"){
+		if(offerStatus.STATUS !== "Delivery Ongoing" && offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded"){
 			return req.error({ code: 403, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
 		}
 
