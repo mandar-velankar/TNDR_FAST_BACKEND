@@ -1289,14 +1289,14 @@ module.exports = async (srv) => {
 
 
     async function updatePriceConditions(countryCode,resource, body) {
-        const tx = cds.tx();
+       // const tx = cds.tx();
         if (!body) {
             console.error("The body of the request is missing.");
             return false;
         }
 
         console.log(`Get api config ...`);
-        const apiConfig = await tx.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'PriceAgreement', CountryCode: countryCode, Resource: resource }));
+        const apiConfig = await cds.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'PriceAgreement', CountryCode: countryCode, Resource: resource }));
         console.log(`API config:`);
         console.log(apiConfig);
         const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
