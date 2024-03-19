@@ -1000,7 +1000,7 @@ module.exports = async (srv) => {
       
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
         try {
-            const result = await updatePriceConditions("ES", "PriceConditionRappel", body);
+            const result = await updatePriceConditions(d.customerPrice.CountryCode, "PriceConditionRappel", body);
             console.log(result,"res1");
             console.log(`Finished sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId} `);
             return { status: true, result: result,customerPrice: d.customerPrice};
@@ -1183,6 +1183,7 @@ module.exports = async (srv) => {
             return { status: true, result: result, customerPrice: customerPrice };
         } catch (error) {
             console.error(`Error customer price: ${customerPrice.ID}`);
+            console.log(error,"error");
             console.error(`ERROR: sending update customer prices for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
             logRequestError(error);
             return { status: false, customerPrice: customerPrice };
@@ -1304,7 +1305,7 @@ module.exports = async (srv) => {
         console.log(`Synchronizing Price Conditions ...`);
         console.log(`Calling endpoint ${url}`);
 
-
+        console.log(JSON.stringify(body));
         return axios({
             method: 'post',
             url: url,
@@ -1312,7 +1313,7 @@ module.exports = async (srv) => {
                 'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
                 'Content-Type': 'application/json'
             },
-            data: JSON.stringify(body)
+             data: JSON.stringify(body)
             
 
         });
