@@ -1006,7 +1006,8 @@ module.exports = async (srv) => {
             return { status: true, result: result,customerPrice: d.customerPrice};
         } catch (error) {
              console.error(`ERROR: sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId}`);
-            // logRequestError(error);
+             console.error(error,"error");
+              logRequestError(error);
             return { status: false ,customerPrice: d.customerPrice};
             // throw error;//do not throw error to continue with other requests
         }
@@ -1183,7 +1184,7 @@ module.exports = async (srv) => {
             return { status: true, result: result, customerPrice: customerPrice };
         } catch (error) {
             console.error(`Error customer price: ${customerPrice.ID}`);
-            console.log(error,"error");
+            console.error(error,"error");
             console.error(`ERROR: sending update customer prices for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
             logRequestError(error);
             return { status: false, customerPrice: customerPrice };
@@ -1288,7 +1289,7 @@ module.exports = async (srv) => {
 
 
     async function updatePriceConditions(countryCode,resource, body) {
-
+       // const tx = cds.tx();
         if (!body) {
             console.error("The body of the request is missing.");
             return false;
