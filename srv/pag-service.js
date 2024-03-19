@@ -919,9 +919,9 @@ module.exports = async (srv) => {
              "Items":[]
 
         });
+        let items=[];
        
         for(let a=0;a<ShipToType.length;a++){
-            let items=[];
             let ShipToType1=ShipToType[a];
             const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", ShipToType1.CountryCode);
             const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", ShipToType1.InstituteId);
@@ -972,9 +972,9 @@ module.exports = async (srv) => {
                 "E1KONW" :E1KONW
                
             });
-            header[i].Items.push(items);
+            
         }
-     
+        header[i].Items=items;
         }
        finalarray.push(header);
        return finalarray;
@@ -993,8 +993,9 @@ module.exports = async (srv) => {
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = d.BOTEX;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = d.datab;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = d.datbi;
-        let items=d.Items[0][0];
+        let items=d.Items[0];
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(items);
+
         await tx.commit();//to release db connection
       
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
