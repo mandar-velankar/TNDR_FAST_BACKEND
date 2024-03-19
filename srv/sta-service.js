@@ -701,7 +701,7 @@ module.exports = async (srv) => {
 			return req.error({ code: 403, message: `Offer "${offerID}" is not active. Only active offer can be copied.`, target: "PT_TMOFRS"});
 		}
 
-		if(offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded"){
+		if(offerStatus.STATUS !== "Delivery Ongoing" && offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded"){
 			return req.error({ code: 403, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
 		}
 
@@ -1132,10 +1132,31 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], ['AwardedProductFormView', 'AwardedProducts'], async (req) => {
 		try{
-		delete req.data.FreeGoodsOther;
-		delete req.data.FreeGoodsOther_ABS_PCT;
-		delete req.data.FreeGoodsOther_Step;
-		delete req.data.ADD_INCLUDE;
+			if(req?.path === 'StandardAppService.AwardedProductFormView'){
+				const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Award', CountryCode: req?.data?.CountryCode, ProductScope: 'All'}));
+
+				const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+				
+				for (const item of mandatoryFielddata) {
+					let frontendField = item.Field;
+					if (frontendField.includes("path")) {
+						const match = regex.exec(frontendField);
+						frontendField = match ? match[1] : frontendField;
+					}
+				
+					if (
+						!(frontendField in req.data) ||
+						req.data[frontendField] === null ||
+						req.data[frontendField] === ''
+					) {
+						req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+					}
+				}	
+			}
+			delete req.data.FreeGoodsOther;
+			delete req.data.FreeGoodsOther_ABS_PCT;
+			delete req.data.FreeGoodsOther_Step;
+			delete req.data.ADD_INCLUDE;
 		}
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
@@ -1300,6 +1321,26 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
 		try{
+			const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'CompetitorResults', CountryCode: req?.data?.Custom_String_2, ProductScope: 'All'}));
+
+			const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+			
+			for (const item of mandatoryFielddata) {
+				let frontendField = item.Field;
+				if (frontendField.includes("path")) {
+					const match = regex.exec(frontendField);
+					frontendField = match ? match[1] : frontendField;
+				}
+			
+				if (
+					!(frontendField in req.data) ||
+					req.data[frontendField] === null ||
+					req.data[frontendField] === ''
+				) {
+					req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+				}
+			}	
+
 			!req.data.AWARDEDCOMPANY && req.error({ code: 404, message: "Awarded Company is required.", target: "AWARDEDCOMPANY" });
 			!req.data.AWARDEDPRODUCT && req.error({ code: 404, message: "Awarded Product is required.", target: "AWARDEDPRODUCT" });
 		}
@@ -2535,7 +2576,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
 		let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION }));
 		let division = (divisions.length === 1) ? divisions[0] : "Both";
-
+/*
 		//In case we have any FOC (on main products) in the offer, a comment should be in remarks
 		let maxFOC = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FOC }));
 		let focRemark = "";
@@ -2592,7 +2633,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		}
 //EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
-
+*/
 		//Shipment Terms need to be specified by item number if not same for all
 		let shipmentTerms = "";
 		let shipmentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
@@ -2663,7 +2704,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		}
 		deliveryTerms = offer.DeliveryTerms;
 
-		
+/*		
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 	//Product comment shows in remarks, if any
 		// let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
@@ -2737,7 +2778,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
 		remarks=remarks.concat((InstituteRemark !== "") ? InstituteRemark.concat("<br>") : "");
 		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
-
+*/
 		// get SUBMITTED_BY user info 
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
 		
@@ -2804,7 +2845,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
 			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
-			REMARKS: remarks,
+			REMARKS: offer.SELLING_COMPANY_REMARKS,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
 			DELIVERYTERMS: deliveryTerms,
 			PAYMENTTERMS: paymentTerms,
