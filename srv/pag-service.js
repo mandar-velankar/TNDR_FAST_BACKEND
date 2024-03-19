@@ -842,12 +842,12 @@ module.exports = async (srv) => {
         console.log(`Process requests of customer prices`);
         let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
         result = result.filter(res => res !== undefined);
-        
+        console.log(result,"mapped");
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
-       console.log(mappedCustomerPrices,"mapped");
+       
         const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrice.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
-        console.log(paWithErrorsIds,"mapped");
+        
         await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
 
         let paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status); //in case one of the promises returns false -> it means there was an error
@@ -986,7 +986,7 @@ module.exports = async (srv) => {
         const tx = cds.tx();
         let body;
         finalarray=finalarray[0];
-        finalarray.map(d=>{
+        finalarray.map(async d=>{
          body = getES01RequestBodyTemplate();
         
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = d.BONEM;
@@ -995,12 +995,12 @@ module.exports = async (srv) => {
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = d.datbi;
         let items=d.Items[0][0];
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(items);
-          });
-          await tx.commit();//to release db connection
+        await tx.commit();//to release db connection
       
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
         try {
             const result = await updatePriceConditions("ES", "PriceConditionRappel", body);
+            console.log(result,"res1");
             console.log(`Finished sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId} `);
             return { status: true, result: result,customerPrice: d.customerPrice};
         } catch (error) {
@@ -1010,6 +1010,8 @@ module.exports = async (srv) => {
             // throw error;//do not throw error to continue with other requests
         }
 
+         });
+        
     };
     async function setStatusPriceAgreement(pas, status) {
         if (!pas || pas?.length === 0) {
