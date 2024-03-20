@@ -1452,7 +1452,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     @Core.Computed: false
     ifnull(priceCondition.AnticipatedYearlyVolumeMainCustomer,1) as AnticipatedYearlyVolumeMainCustomer:Integer,
     @Core.Computed: false
-    ifnull(priceCondition.AnticipatedYearlyVolumeBranch, 1) as AnticipatedYearlyVolumeBranch:Integer,
+    priceCondition.AnticipatedYearlyVolumeBranch,
     @Core.Computed: false
     ifnull(priceCondition.Level2Discount2,0) as Level2Discount2:Double,
      @Core.Computed: false
