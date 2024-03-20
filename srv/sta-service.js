@@ -133,8 +133,13 @@ module.exports = async (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.PricingPolicyData");
 
 	const {
-		LatestApprovedBrandPolicies
-	} = cds.entities("PolicyService");
+		InstitutesView,
+		InstituteInBranchView
+	} = cds.entities("StandardAppService");
+
+	const {
+
+	} = cds.entities()
 
 
 	srv.on('READ', 'Properties', req => {
@@ -1439,7 +1444,10 @@ module.exports = async (srv) => {
 			try{
 				// validate form
 				!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
-				!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+				const individualCustomer = await validateIndividualCustomerTaiwan(req);
+				if(individualCustomer){
+					!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+				}
 
 				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
 				const parentOfferProdPriceCondition = await SELECT.one.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID, ProductCode: req.data.ProductCode});
@@ -1570,7 +1578,12 @@ module.exports = async (srv) => {
 			ProductCode: req.data.ProductCode
 		});
 
-		const mappedPriceCondition = mapPriceCondition(req);
+		let individualCustomer = true;
+		if(req.data.CountryCode === 'TW'){
+			individualCustomer = await validateIndividualCustomerTaiwan(req);
+		}
+
+		const mappedPriceCondition = mapPriceCondition(req, individualCustomer);
 
 		if(priceCondition){
 			await UPDATE(PriceCondition)
@@ -1583,7 +1596,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	const mapPriceCondition = function(req){
+	const mapPriceCondition = function(req, individualCustomer){
 		const mappings = {
 			"Discount" : {
 				Price0: req.data.BasePrice,
@@ -1646,7 +1659,7 @@ module.exports = async (srv) => {
 				NegotiationPrice:req.data.NegotiationPrice,
 				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
 				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
-				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				AnticipatedYearlyVolumeBranch: individualCustomer ? req.data.AnticipatedYearlyVolumeBranch : req.data.AnticipatedYearlyVolumeMainCustomer,
 				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
 				TotalDiscountNHI:req.data.TotalDiscountNHI,
 				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
@@ -1675,7 +1688,7 @@ module.exports = async (srv) => {
 				NegotiationPrice:req.data.NegotiationPrice,
 				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
 				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
-				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				AnticipatedYearlyVolumeBranch: individualCustomer ? req.data.AnticipatedYearlyVolumeBranch : req.data.AnticipatedYearlyVolumeMainCustomer,
 				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
 				TotalDiscountNHI:req.data.TotalDiscountNHI,
 				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
@@ -1813,12 +1826,23 @@ module.exports = async (srv) => {
 		};
 
 		const product = await SELECT.one.from(PT_TMOFPR).where(whereCondition);
+		const individualCustomer = await validateIndividualCustomerTaiwan(req);
+		let AnticipatedYearlyVolumeBranch = individualCustomer ? req.data.AnticipatedYearlyVolumeBranch : req.data.AnticipatedYearlyVolumeMainCustomer;
 
 		if(product){
 			await UPDATE(PT_TMOFPR)
-				.with ({RequestedVolume: req.data.AnticipatedYearlyVolumeBranch})
+				.with ({RequestedVolume: AnticipatedYearlyVolumeBranch})
 				.where(whereCondition)
 		}
+	}
+
+	const validateIndividualCustomerTaiwan = async function(req){
+
+		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
+		const parentInstitute = await SELECT.one.from(InstitutesView).where({InstituteID:selectedTender?.InstituteID, CountryCode:req.data.CountryCode});
+		const instituteInBranch = await SELECT.from(InstituteInBranchView).where({ParentInstituteID:parentInstitute?.ParentInstituteID, InstituteID: {"!=": parentInstitute?.InstituteID}, CountryCode:req.data.CountryCode});
+
+		return (instituteInBranch.length > 0);
 	}
 
 	srv.after(

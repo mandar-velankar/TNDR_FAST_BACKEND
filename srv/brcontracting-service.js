@@ -243,7 +243,44 @@ module.exports = (srv) => {
         }
     });
 
-    srv.after("READ", "ContractStatus", async (req) => {
+    srv.on("READ", "ContractsView", async (req) => {
+        try {
+            const tx = cds.tx(req);
+            let tmvQuery = SELECT.from(req.query.SELECT.from);
+            let contractIDFullWhere = [];
+            let contractTypeWhere = [];
+            const salesOrderStatusID = req.query.SELECT.where && ServiceHelper._getWhereId(req, "SalesOrderStatus") !== -1 && ServiceHelper.getWhereValue(req, "SalesOrderStatus");
+            const contractType = req.query.SELECT.where && ServiceHelper._getWhereId(req, "SalesOrderStatus") !== -1 && ServiceHelper.getWhereValue(req, "ContractType");
+
+            if (contractType) {
+                contractTypeWhere = ServiceHelper.buildWhere(req, "ContractType");
+                ServiceHelper.deleteFilter(req, "ContractType");
+            }
+
+            if (salesOrderStatusID) {
+                const salesOrders = await SELECT.from(SalesOrders).where({"StatusID": salesOrderStatusID});
+                const contractIDs = salesOrders.map(so => so.Contract_ID);
+
+                contractIDs.forEach((el, index) => {
+                    contractIDFullWhere.push(ServiceHelper.buildFullWhere("ID", "=", el));
+                    if (index !== contractIDs.length-1) {
+                        contractIDFullWhere.push('or');
+                    }
+                });
+                contractIDFullWhere = contractIDFullWhere.flat();
+                contractIDFullWhere.length > 1 && ServiceHelper.deleteFilter(req, "SalesOrderStatus");
+            }
+
+            req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(contractIDFullWhere)).where(contractTypeWhere);
+            req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+            return await tx.run(tmvQuery);
+        } catch (error) {
+            console.error('Error in ContractsView READ');
+            return req.reject(403, error?.message||"Error in ContractsView");
+        }
+    });
+
+    srv.after("READ", ["ContractStatus", "SalesOrderStatus"], async (req) => {
         // Add an empty line 
         if (req && Array.isArray(req) && req.length > 0) {
             req.unshift({ID: "99999999-9999-9999-9999-999999999999", Status: ""});
