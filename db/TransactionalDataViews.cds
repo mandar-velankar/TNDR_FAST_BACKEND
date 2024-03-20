@@ -2673,7 +2673,14 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
         offer.Currency,
         product.SKU.PRODUCTPACKNAME as MainProductName,
         productPacks.PRODUCTPACKNAME as FOCProductName,
-        foc.FreeGoodsOther as Bonus,
+        case
+            when foc.FreeGoodsOther_ABS_PCT = 'PCT'
+                then round(100 * foc.FreeGoodsOther, 2) || '%'
+            when foc.FreeGoodsOther_ABS_PCT = 'ABS'
+                then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+            when foc.FreeGoodsOther_ABS_PCT = 'STP'
+                then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+        end as Bonus:String,
         foc.FreeGoodsOther_Step as MinOrderQty,
         foc.FreeGoodsOther_ABS_PCT as Type,
         foc.ADD_INCLUDE
@@ -2682,6 +2689,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
         offer.OfferID,
         tender.CountryCode,
         product.ProductCode,
+        product.UnitPerPack,
         foc.ProductPackId,
         offer.Currency,
         productPacks.PRODUCTPACKNAME,
