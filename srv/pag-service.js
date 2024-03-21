@@ -880,7 +880,7 @@ module.exports = async (srv) => {
             let SoldToCustomer= SoldToType.filter(d=>d.EffectiveDate === effectiveDatearray[i]);
             let SoldTOCustomerPrice=customerPrices.filter(d=>d.ID===SoldToCustomer[0].ID);
             SoldTOCustomerPrice=SoldTOCustomerPrice[0];
-            ShipToType=ShipToTypeCustomer.filter(d=>d.EffectiveDate === effectiveDatearray[i]);
+            ShipToType=customerPrices.filter(d=>d.EffectiveDate === effectiveDatearray[i] && (d.PriceCondition === "YAW1" || d.PriceCondition === "YAW2"));
             let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID:  SoldTOCustomerPrice.PriceAgreementId }));
         if (!priceAgreement) {
              console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.PriceAgreementId}`);
