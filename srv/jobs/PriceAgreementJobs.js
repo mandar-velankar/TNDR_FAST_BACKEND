@@ -6,7 +6,7 @@ const ServiceHelper = require('../utils/ServiceHelper');
 const axios = require('axios');
 const qs = require("qs");
 const cfenv = require("cfenv");
-
+const Handlebars = require("handlebars");
 
 module.exports = class ExtendPriceAgreements extends BaseJob {
 
