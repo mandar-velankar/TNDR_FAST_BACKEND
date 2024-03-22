@@ -840,7 +840,8 @@ module.exports = async (srv) => {
 
         // Synchronize
         console.log(`Process requests of customer prices`);
-        let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
+        // let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
+        let result = await Promise.all(updateRappelConditionPromises);
         console.log(result,"mapped");
         result = result.filter(res => res !== undefined);
         console.log(result,"aftermap");
@@ -1005,7 +1006,7 @@ module.exports = async (srv) => {
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
         try {
             const result = await updatePriceConditions(d.customerPrice.CountryCode, "PriceConditionRappel", body);
-        
+        console.log(result, "RER");
             console.log(`Finished sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId} `);
             return { status: true, result: result,customerPrice: d.customerPrice};
         } catch (error) {
