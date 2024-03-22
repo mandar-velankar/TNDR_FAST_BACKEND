@@ -530,23 +530,27 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
         if(data && data.length>0) {
          for (let pas of data) {
-                console.log(data,"data");
-                        
-                console.log(pas.CountryCode,"pascountry");
-                
+            let dataFilteredByUser = data.filter(d => d.Classification === "Commercial Agreement");
+            if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
-                    CountryCode: pas.CountryCode,
-                    TenderID: pas.TenderId,
-                    OfferID: pas.OfferId,
+                    CountryCode: dataFilteredByUser[0].CountryCode,
+                    TenderID: dataFilteredByUser[0].TenderId,
+                    OfferID: dataFilteredByUser[0].OfferId,
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients:'kosal.kirthiga.ext@bayer.com',
-                    Subject: this.findTemplate(templates,mail,pas).title,
-                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pas), pas),
+                    Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), {
+                        data: {
+                            FormatedExpiryDate :this.dateToDDMMYYYY(dataFilteredByUser[0].ExpiryDate),
+                            PriceAgreements: dataFilteredByUser 
+                        }
+                    }),
                       Sent: false
                 });
                
             }
-            console.log(outbox,"outbox");
+        }
+            
         }
         if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
             console.log(`No template found for Cancelled Price Agreement ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
