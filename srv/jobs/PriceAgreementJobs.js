@@ -7,6 +7,7 @@ const axios = require('axios');
 const qs = require("qs");
 const cfenv = require("cfenv");
 
+
 module.exports = class ExtendPriceAgreements extends BaseJob {
 
     constructor(jobName,jobTime) {
@@ -526,11 +527,11 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
     mapPriceAgreementsToMails = (templates,mail) => data => {
  
         let outbox = [];
-           
+
+        if(data && data.length>0) {
          for (let pas of data) {
-            console.log(pas.length,"length");
-                       
-            if(pas && pas.length > 0){
+                console.log(pas,"pas");
+                        
                 console.log(pas[0].CountryCode,"pascountry");
                 
                 outbox.push({
