@@ -24,6 +24,33 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             this.db = await cds.connect.to('db'); 
             let aUpdatedPriceAgreements = await this.updatePriceAgreementExpiration();
             await this.syncPriceAgreements(aUpdatedPriceAgreements);
+            //CR-12
+            console.log('Processing mails for Extend Expiry Price Agreements started ...');
+ 
+            const mailRuns = [{
+                template: 'PriceAgreementExtendExpiryMail'
+            },];
+            let extendedPriceAgreements = await this.getPriceAgreementsExtended(aUpdatedPriceAgreements);                 
+            console.log(extendedPriceAgreements);
+            const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
+            for (let mailRun of mailRuns) {
+                                               
+                if (extendedPriceAgreements && extendedPriceAgreements.length > 0) {
+                    let mails = this.mapPriceAgreementsToMails(mailTemplates,mailRun.template)(extendedPriceAgreements);
+                   
+                    if(mails && mails.length > 0){
+                        await this.addMailsToOutbox(mails, mailRun.expiryDate);
+                    } else{
+                        console.log(`No mails Need to send ${mailRun.template}`);
+                    }
+                } else {
+                    console.log(`No expired mails to be send for expiry date: ${mailRun.expiryDate}`);
+                }
+            }
+       
+ 
+        console.log('Processing Extend Expiry mails for Price Agreements Completed');
+        //CR-12
         } catch (error) {
             console.log(error);
         }
@@ -429,4 +456,107 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         while (num.length < size) num = "0" + num;
         return num;
     };
+    async getMailTemplates(templateIds) {
+        console.log('Get mail templates for Extend price agreements');
+        console.table(templateIds);
+        const tx = cds.tx();
+       
+        const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
+        try{
+            const result = await tx.run(SELECT.from(MailTemplate)
+                .columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+                .where({ TemplateId: { in: templateIds } }));
+            await tx.commit();
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            await tx.rollback();
+            return [];
+        }
+           
+    };
+    async addMailsToOutbox(mails) {
+        console.log(`Adding Extend Expiry mails for Price Agreements to outbox`);
+        console.table(mails,['CountryCode','TenderID','OfferID','Sender','Recipients','Subject','Sent']);
+        const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
+        const tx = this.db.tx();
+        try {
+            const mailsResult = await tx.run(INSERT(mails).into(OutgoingMails));
+            await tx.commit();
+             return mailsResult;
+        } catch (error) {
+            console.error(error);
+            await tx.rollback();
+            throw error;
+        }
+    };
+ 
+    async getPriceAgreementsExtended(PriceAgreementid) {
+            console.log(`Fetching Extended Price Agreement Details`);
+            const { PriceAgreements } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
+            const appEnv = cfenv.getAppEnv();
+            const fastUIAppHost = appEnv.url.replace('fast-srv','fastui-app');
+            const tx = this.db.tx();
+                let pas = await tx.run(SELECT.from(PriceAgreements,pa => {          
+                    pa.ID, pa.CountryCode,
+                    pa.ExpiryDate,
+                    pa.TenderId,
+                    pa.OfferId,
+                    pa.Materials.SKUCode,
+                    pa.Institute.CustomerID,
+                    pa.Tender.User.UserEmail,
+                    pa.Tender.User.UserName,
+                    pa.Tender.Classification,
+                    pa.Product.ProductPack.PRODUCTPACKNAME,
+                    pa.PriceConditions.PriceConditionCode,
+                    pa.Institute.InstituteName
+             
+            }).where({ CountryCode: 'ES' , ID: {in: PriceAgreementid} }));
+                 
+               return pas.map(pa => {
+                 
+                  pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);
+                  pa.URL = `${fastUIAppHost}/app/index.html#/priceagreements&/pa/PriceAgreements/${pa.ID}`
+                  return pa;
+            })
+   
+    };
+ 
+    mapPriceAgreementsToMails = (templates,mail) => data => {
+ 
+        let outbox = [];
+           
+         for (let pas of data) {
+                       
+            if(pas && pas.length > 0){
+                outbox.push({
+                    CountryCode: pas[0].CountryCode,
+                    TenderID: pas[0].TenderId,
+                    OfferID: pas[0].OfferId,
+                    Sender: 'FAST-Admin@bayer.com',
+                    Recipients:'kosal.kirthiga.ext@bayer.com',
+                    Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pas[0]), pas[0]),
+                      Sent: false
+                });
+               
+            }
+        }
+        if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
+            console.log(`No template found for Cancelled Price Agreement ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
+            return;
+        }
+        return outbox;
+     
+    };
+ 
+    generateMailBody(mail, data) {
+       
+        return Handlebars.compile("" + mail.content)(data);
+    };
+ 
+    findTemplate = (templates,templateid,pa) => templates.find(template =>
+        template.CountryCode === 'ES' &&
+        template.Language === 'ES' &&
+        template.TemplateId === templateid);
 };
