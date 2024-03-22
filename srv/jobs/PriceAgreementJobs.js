@@ -555,6 +555,13 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
        
         return Handlebars.compile("" + mail.content)(data);
     };
+
+    dateToDDMMYYYY(dateStr) {
+        var d = dateStr.substr(0,4);
+        var m = dateStr.substr(5,2);
+        var y = dateStr.substr(8,2);
+        return `${d}-${m}-${y}`;
+      }
  
     findTemplate = (templates,templateid,pa) => templates.find(template =>
         template.CountryCode === 'ES' &&
