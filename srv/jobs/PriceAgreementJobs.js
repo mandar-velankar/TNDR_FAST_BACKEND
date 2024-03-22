@@ -530,18 +530,18 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
         if(data && data.length>0) {
          for (let pas of data) {
-                console.log(pas,"pas");
+                console.log(data,"data");
                         
                 console.log(pas.CountryCode,"pascountry");
                 
                 outbox.push({
-                    CountryCode: pas[0].CountryCode,
-                    TenderID: pas[0].TenderId,
-                    OfferID: pas[0].OfferId,
+                    CountryCode: pas.CountryCode,
+                    TenderID: pas.TenderId,
+                    OfferID: pas.OfferId,
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients:'kosal.kirthiga.ext@bayer.com',
-                    Subject: this.findTemplate(templates,mail,pas[0]).title,
-                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pas[0]), pas[0]),
+                    Subject: this.findTemplate(templates,mail,pas).title,
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pas), pas),
                       Sent: false
                 });
                
