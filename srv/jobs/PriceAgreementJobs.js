@@ -528,9 +528,11 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         let outbox = [];
            
          for (let pas of data) {
-            console.log(pas,"pas");
+            console.log(pas.length,"length");
                        
             if(pas && pas.length > 0){
+                console.log(pas[0].CountryCode,"pascountry");
+                
                 outbox.push({
                     CountryCode: pas[0].CountryCode,
                     TenderID: pas[0].TenderId,
