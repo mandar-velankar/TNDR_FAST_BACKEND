@@ -65,8 +65,8 @@ module.exports = async (srv) => {
     srv.on('READ', 'PriceagreementOffers', async (req) => {
         const tx = cds.tx(req);
         let results = await buildWorkflowApprovalOffers(tx);
-        console.log(results,"results");
-         return results;
+        console.log(results, "results");
+        return results;
     });
 
     async function getOffersForWorkflow(tx, approvalStatus) {
@@ -801,16 +801,16 @@ module.exports = async (srv) => {
         const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
 
         //EHQUT-CR2-New
-        let instituteID =mainPriceConditions.map(item=>item.InstituteId);
-        let SoldToInstituteType=[];
-        let ShipToInstitute=[];
+        let instituteID = mainPriceConditions.map(item => item.InstituteId);
+        let SoldToInstituteType = [];
+        let ShipToInstitute = [];
         let CombinationValue;
-        if(instituteID.length>0){
+        if (instituteID.length > 0) {
             const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
-            let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } })); 
-            SoldToInstituteType=institute.filter(item=>item.InstituteType === "Private Account" ||item.InstituteType === "Public Account");
-            ShipToInstitute=institute.filter(item=>item.InstituteType === "Ship-To");
-            
+            let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
+            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
+            ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
+
         }
 
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
@@ -834,22 +834,21 @@ module.exports = async (srv) => {
         let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
         //const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
-        
-        const updateRappelConditionPromises = updateRappelcustPrices(arrayresult);
-       
+
+        const updateRappelConditionPromises = arrayresult.map(custPrice => updateRappelcustPrices(arrayresult));
 
         // Synchronize
         console.log(`Process requests of customer prices`);
-        // let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
-        let result = await Promise.all(updateRappelConditionPromises);
-        console.log(result,"mapped");
+        let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
+       // let result = await Promise.all(updateRappelConditionPromises);
+        console.log(result, "mapped");
         result = result.filter(res => res !== undefined);
-        console.log(result,"aftermap");
+        console.log(result, "aftermap");
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
-       
+
         const paWithErrorsIds = mappedCustomerPrices.filter(req => !req.status).map(req => req.customerPrice.PriceAgreementId); //in case one of the promises returns false -> it means there was an error
-        
+
         await setStatusPriceAgreement(paWithErrorsIds, 'ERROR');
 
         let paWithoutErrorsIds = mappedCustomerPrices.filter(req => req.status); //in case one of the promises returns false -> it means there was an error
@@ -872,153 +871,153 @@ module.exports = async (srv) => {
     };
 
     //CR2-New
-    async function updatearray(effectiveDatearray,ShipToTypeCustomer,SoldToType,customerPrices) {
+    async function updatearray(effectiveDatearray, ShipToTypeCustomer, SoldToType, customerPrices) {
         const tx = cds.tx();
-        var finalarray=[],ShipToType;
-        const header=[];
-        
-        for(let i=0; i<effectiveDatearray.length; i++){
-            let effectivedate=effectiveDatearray[i];
-            let SoldToCustomer= SoldToType.filter(d=>d.EffectiveDate === effectiveDatearray[i]);
-            let SoldTOCustomerPrice=customerPrices.filter(d=>d.ID===SoldToCustomer[0].ID);
-            SoldTOCustomerPrice=SoldTOCustomerPrice[0];
-            ShipToType=customerPrices.filter(d=>d.EffectiveDate === effectiveDatearray[i] && (d.PriceCondition === "YAW1" || d.PriceCondition === "YAW2"));
-            let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID:  SoldTOCustomerPrice.PriceAgreementId }));
-        if (!priceAgreement) {
-             console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.PriceAgreementId}`);
-            console.error(`No priceAgreement was found for PriceAgreementID: ${SoldTOCustomerPrice.PriceAgreementId}`);
-            return { status: false, customerPrice:  SoldTOCustomerPrice };
-        }
-        let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({ PriceAgreement_ID:  SoldTOCustomerPrice.PriceAgreementId }).where({ PriceConditionCode:  SoldTOCustomerPrice.PriceCondition }));
-        if (!priceCondition) {
-            return req.reject(404, `No priceCondition was found for "${SoldTOCustomerPrice.PriceCondition}" with PriceAgreementID "${SoldTOCustomerPrice.PriceAgreementId}"`);
-            //return { status: false, customerPrice: customerPrice };
-            //console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.ID}`);
-            // console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
-            
-        }
+        var finalarray = [], ShipToType;
+        const header = [];
 
-        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
-
-            
-        const effectiveDate = new Date(SoldTOCustomerPrice.EffectiveDate);  
-        const expiryDate = new Date(SoldTOCustomerPrice.ExpiryDate);
-        const Country = ServiceHelper.buildFullWhere("CountryCode", "=", SoldTOCustomerPrice.CountryCode);
-        let priceAgreementInstitutehead = await tx.run(SELECT.one.from(PT_TMINST).where(Country).where({InstituteID: priceAgreement.InstituteId}));
-       
-        const bonem = parseInt(priceAgreementInstitutehead.CustomerID);
-        console.log(effectiveDate,"itemeffectivedare");
-        const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
-        const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
-        
-        header.push({
-            "customerPrice":SoldTOCustomerPrice,
-            "BONEM" : bonem,
-             "BOTEX" : tender.SAPID,
-             "DATAB" : datab,
-             "DATBI" : datbi,
-             "BOSTA" : "B",
-             "Items":[]
-
-        });
-        let items=[];
-       
-        for(let a=0;a<ShipToType.length;a++){
-            let ShipToType1=ShipToType[a];
-            const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", ShipToType1.CountryCode);
-            const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", ShipToType1.InstituteId);
-            let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
-            
-            let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID:  ShipToType1.PriceAgreementId }));
-                    let priceAgreementInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where({InstituteID: priceAgreement.InstituteId}));
-                   
-                    
-            const kunnr = parseInt(institute.CustomerID);
-            const matnr = parseInt(ShipToType1.MaterialNumber);
-            let KNUMA_BO,KNUMAValue;
-            //Transforming the Date in correct format
-            const dataBSpain = new Date(ShipToType1.EffectiveDate).toISOString().split('T')[0];
-            const datbISpain = new Date(ShipToType1.ExpiryDate).toISOString().split('T')[0];
-            const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: dataBSpain, DATBI: datbISpain}));
-            if(spainRappelData){
-                KNUMAValue= spainRappelData.KNUMA;
+        for (let i = 0; i < effectiveDatearray.length; i++) {
+            let effectivedate = effectiveDatearray[i];
+            let SoldToCustomer = SoldToType.filter(d => d.EffectiveDate === effectiveDatearray[i]);
+            let SoldTOCustomerPrice = customerPrices.filter(d => d.ID === SoldToCustomer[0].ID);
+            SoldTOCustomerPrice = SoldTOCustomerPrice[0];
+            ShipToType = ShipToTypeCustomer.filter(d => d.EffectiveDate === effectiveDatearray[i]);
+            let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: SoldTOCustomerPrice.PriceAgreementId }));
+            if (!priceAgreement) {
+                console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.PriceAgreementId}`);
+                console.error(`No priceAgreement was found for PriceAgreementID: ${SoldTOCustomerPrice.PriceAgreementId}`);
+                return { status: false, customerPrice: SoldTOCustomerPrice };
             }
-    
-            let E1KONW=[];
-            // DiscountConditions
-            let highestDiscountCondition = null;
-            let lowestDiscountCondition = null;
-            const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: priceCondition.ID }));
-            if (discountConditions?.length > 0) {
-                highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount > current.Discount) ? prev : current);
-                lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount < current.Discount) ? prev : current);
-                
-                discountConditions.forEach(dc => {
-                    E1KONW.push({
-                        "KSTBW": dc.Volume,
-                        "KBETR": dc.Discount.toFixed(3) + "-"
-                    });
-                });
+            let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({ PriceAgreement_ID: SoldTOCustomerPrice.PriceAgreementId }).where({ PriceConditionCode: SoldTOCustomerPrice.PriceCondition }));
+            if (!priceCondition) {
+                return req.reject(404, `No priceCondition was found for "${SoldTOCustomerPrice.PriceCondition}" with PriceAgreementID "${SoldTOCustomerPrice.PriceAgreementId}"`);
+                //return { status: false, customerPrice: customerPrice };
+                //console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.ID}`);
+                // console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+
             }
-            let KBETR,KBRUE;
-           
-            items.push({
-                "KUNNR" : kunnr,
-                "DATAB_GR": datab,
-                "DATBI_GR" :datbi,
-                "MATNR" : matnr,
-                "KBETR" : lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || "", // KBETR from the minimum(KSTBW)
-                "KONWA" :"%",
-                "KPEIN" :1,
-                "KBRUE" : highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || "" ,
-                "KSCHL": "YAW1",
-                "E1KONW" :E1KONW
-               
+
+            const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
+
+
+            const effectiveDate = new Date(SoldTOCustomerPrice.EffectiveDate);
+            const expiryDate = new Date(SoldTOCustomerPrice.ExpiryDate);
+            const Country = ServiceHelper.buildFullWhere("CountryCode", "=", SoldTOCustomerPrice.CountryCode);
+            let priceAgreementInstitutehead = await tx.run(SELECT.one.from(PT_TMINST).where(Country).where({ InstituteID: priceAgreement.InstituteId }));
+
+            const bonem = parseInt(priceAgreementInstitutehead.CustomerID);
+            console.log(effectiveDate, "itemeffectivedare");
+            const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
+            const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
+
+            header.push({
+                "customerPrice": SoldTOCustomerPrice,
+                "BONEM": bonem,
+                "BOTEX": tender.SAPID,
+                "DATAB": datab,
+                "DATBI": datbi,
+                "BOSTA": "B",
+                "Items": []
+
             });
-            
-        }
-        header[i].Items=items;
-        }
-       finalarray.push(header);
-       return finalarray;
-        
+            let items = [];
 
-        
+            for (let a = 0; a < ShipToType.length; a++) {
+                let ShipToType1 = ShipToType[a];
+                const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", ShipToType1.CountryCode);
+                const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", ShipToType1.InstituteId);
+                let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+
+                let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: ShipToType1.PriceAgreementId }));
+                let priceAgreementInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where({ InstituteID: priceAgreement.InstituteId }));
+
+
+                const kunnr = parseInt(institute.CustomerID);
+                const matnr = parseInt(ShipToType1.MaterialNumber);
+                let KNUMA_BO, KNUMAValue;
+                //Transforming the Date in correct format
+                const dataBSpain = new Date(ShipToType1.EffectiveDate).toISOString().split('T')[0];
+                const datbISpain = new Date(ShipToType1.ExpiryDate).toISOString().split('T')[0];
+                const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: dataBSpain, DATBI: datbISpain }));
+                if (spainRappelData) {
+                    KNUMAValue = spainRappelData.KNUMA;
+                }
+
+                let E1KONW = [];
+                // DiscountConditions
+                let highestDiscountCondition = null;
+                let lowestDiscountCondition = null;
+                const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: priceCondition.ID }));
+                if (discountConditions?.length > 0) {
+                    highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount > current.Discount) ? prev : current);
+                    lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount < current.Discount) ? prev : current);
+
+                    discountConditions.forEach(dc => {
+                        E1KONW.push({
+                            "KSTBW": dc.Volume,
+                            "KBETR": dc.Discount.toFixed(3) + "-"
+                        });
+                    });
+                }
+                let KBETR, KBRUE;
+
+                items.push({
+                    "KUNNR": kunnr,
+                    "DATAB_GR": datab,
+                    "DATBI_GR": datbi,
+                    "MATNR": matnr,
+                    "KBETR": lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || "", // KBETR from the minimum(KSTBW)
+                    "KONWA": "%",
+                    "KPEIN": 1,
+                    "KBRUE": highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || "",
+                    "KSCHL": "YAW1",
+                    "E1KONW": E1KONW
+
+                });
+
+            }
+            header[i].Items = items;
+        }
+        finalarray.push(header);
+        return finalarray;
+
+
+
     };
     async function updateRappelcustPrices(finalarray) {
         const tx = cds.tx();
         let body;
-        finalarray=finalarray[0];
-        finalarray.map(async d=>{
-         body = getES01RequestBodyTemplate();
-        
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = d.BONEM;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = d.BOTEX;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = d.DATAB;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = d.DATBI;
-        let items=d.Items;
-        items.map(d=>{
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(d);
+        finalarray = finalarray[0];
+
+        body = getES01RequestBodyTemplate();
+
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = finalarray[0].BONEM;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = finalarray[0].BOTEX;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = finalarray[0].DATAB;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = finalarray[0].DATBI;
+        let items = finalarray[0].Items;
+        items.map(d => {
+            body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(d);
         });
 
         await tx.commit();//to release db connection
-      
+
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
         try {
             const result = await updatePriceConditions(d.customerPrice.CountryCode, "PriceConditionRappel", body);
-        console.log(result, "RER");
+            console.log(result, "RER");
             console.log(`Finished sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId} `);
-            return { status: true, result: result,customerPrice: d.customerPrice};
+            return { status: true, result: result, customerPrice: d.customerPrice };
         } catch (error) {
-             console.error(`ERROR: sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId}`);
-             
-              logRequestError(error);
-            return { status: false ,customerPrice: d.customerPrice};
+            console.error(`ERROR: sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId}`);
+
+            logRequestError(error);
+            return { status: false, customerPrice: d.customerPrice };
             // throw error;//do not throw error to continue with other requests
         }
 
-         });
-        
+
+
     };
     async function setStatusPriceAgreement(pas, status) {
         if (!pas || pas?.length === 0) {
@@ -1085,7 +1084,7 @@ module.exports = async (srv) => {
             return { status: false, customerPrice: customerPrice };
             // return req.reject(404, `No institute was found for InstituteID: ${customerPrice.InstituteId}`);
         }
-//CR2-New
+        //CR2-New
         // if (customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve();
 
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
@@ -1189,7 +1188,7 @@ module.exports = async (srv) => {
             return { status: true, result: result, customerPrice: customerPrice };
         } catch (error) {
             console.error(`Error customer price: ${customerPrice.ID}`);
-            console.error(error,"error");
+            console.error(error, "error");
             console.error(`ERROR: sending update customer prices for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
             logRequestError(error);
             return { status: false, customerPrice: customerPrice };
@@ -1293,8 +1292,8 @@ module.exports = async (srv) => {
     };
 
 
-    async function updatePriceConditions(countryCode,resource, body) {
-       // const tx = cds.tx();
+    async function updatePriceConditions(countryCode, resource, body) {
+        // const tx = cds.tx();
         if (!body) {
             console.error("The body of the request is missing.");
             return false;
@@ -1311,7 +1310,7 @@ module.exports = async (srv) => {
         console.log(`Synchronizing Price Conditions ...`);
         console.log(`Calling endpoint ${url}`);
 
-        console.log(JSON.stringify(body));
+
         return axios({
             method: 'post',
             url: url,
@@ -1319,8 +1318,8 @@ module.exports = async (srv) => {
                 'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
                 'Content-Type': 'application/json'
             },
-             data: JSON.stringify(body)
-            
+            data: JSON.stringify(body)
+
 
         });
 
@@ -1513,8 +1512,8 @@ module.exports = async (srv) => {
 
         // 5. Insert PriceCondition QC
         mappedfocCustomerPricesQC && await tx.run(INSERT(mappedfocCustomerPricesQC).into(CustomerPricesQC));
-        
-        console.log(body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP,"IDOC");
+
+        console.log(body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP, "IDOC");
 
         await tx.commit();//to release db connection
         console.log(`Start sending update FOC customer price: ${customerPrice.ID}`);

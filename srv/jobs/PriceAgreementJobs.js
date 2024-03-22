@@ -527,6 +527,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         let outbox = [];
            
          for (let pas of data) {
+            console.log(pas,"pas");
                        
             if(pas && pas.length > 0){
                 outbox.push({
@@ -535,12 +536,13 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                     OfferID: pas[0].OfferId,
                     Sender: 'FAST-Admin@bayer.com',
                     Recipients:'kosal.kirthiga.ext@bayer.com',
-                    Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
+                    Subject: this.findTemplate(templates,mail,pas[0]).title,
                     MailBody: this.generateMailBody(this.findTemplate(templates,mail,pas[0]), pas[0]),
                       Sent: false
                 });
                
             }
+            console.log(outbox,"outbox");
         }
         if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
             console.log(`No template found for Cancelled Price Agreement ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
