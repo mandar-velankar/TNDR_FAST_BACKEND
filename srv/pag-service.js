@@ -798,7 +798,7 @@ module.exports = async (srv) => {
         console.log(`Start synchronisation of PriceAgreements`);
 
         console.log(`Prepare categories of customer prices`);
-        const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
+        let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
 
         //EHQUT-CR2-New
         let instituteID = mainPriceConditions.map(item => item.InstituteId);
@@ -810,8 +810,14 @@ module.exports = async (srv) => {
             let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
             SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
             ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-
-        }
+            let array=mainPriceConditions.filter(item=>item.InstituteId === SoldToInstituteType.InstituteID);
+            console.log(array);
+            mainPriceConditions = mainPriceConditions.filter(function(obj) {
+                return !ShipToInstitute.some(function(obj2) {
+                    return obj.InstituteId == obj2.InstituteID;
+                });
+            });
+          }
 
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1" || item.PriceCondition === "YAW2");
@@ -832,18 +838,20 @@ module.exports = async (srv) => {
         effectiveDatearray = Array.from(new Set(effectiveDatearray));
         let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
         let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
-        let arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
+        let arrayresult ,updateRappelConditionPromises;
+        if(rappelPriceConditions.length>0)
+     {
+         arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
         //const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
 
-        const updateRappelConditionPromises = arrayresult.map(custPrice => updateRappelcustPrices(arrayresult));
-
+        updateRappelConditionPromises = arrayresult.map(custPrice => updateRappelcustPrices(arrayresult));
+     }
         // Synchronize
         console.log(`Process requests of customer prices`);
         let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
-       // let result = await Promise.all(updateRappelConditionPromises);
-        console.log(result, "mapped");
+             
         result = result.filter(res => res !== undefined);
-        console.log(result, "aftermap");
+       
         console.log(`Process responses of customer prices`);
         const mappedCustomerPrices = result.map((res, idx) => res?.headers?.sapidocdbid ? allCustomerPrices[index] : res);//get customerprice for related response
 
