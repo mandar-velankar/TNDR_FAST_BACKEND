@@ -759,29 +759,21 @@ module.exports = async (srv) => {
     srv.on('syncPriceAgreements', async req => {
         // const tx = cds.transaction(req);
         const tx = cds.tx(req);
-        var AllMaterialNumber=[];
         let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } }));
         if(customerPrices && customerPrices.length > 0){
             let Countrycode=customerPrices[0].CountryCode;
 
-            if(Countrycode ==='ES'){
-
-                for(var i =0; i<customerPrices.length; i++){
-                    AllMaterialNumber.push(customerPrices[i].MaterialNumber);
-                }
+                const allMaterialNumber = customerPrices.map(cp => cp.MaterialNumber);
                
-                const ActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: 'ES', ActiveRecord: 'Yes' , SKUCode: {in : AllMaterialNumber}}));
+                const ActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : allMaterialNumber}}));
 
                 if(ActiveMaterial.length >0){
                     const materials= ActiveMaterial.map(item =>item.SKUCode);
                          
                     customerPrices =await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } , MaterialNumber : {in : materials}}));
                 }
+        }
                      
-              
-               
-            }
-            }
         if (customerPrices && customerPrices.length <= 0) {
             return req.reject(404, `No customer prices were found for the following PriceAgreement: ${req.data.ids}`);
         }
