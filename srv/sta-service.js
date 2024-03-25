@@ -2300,28 +2300,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	});
 
 	const upsertQuotation = async function(req){
-		const mappedPTTMQUTO = {
-			TenderID          : req.data.TENDERID,
-			OfferID           : req.data.OFFERID,
-			CountryCode       : req.data.COUNTRYCODE,
-			DistributorID     : req.data.DISTRIBUTORID, // TODO: this field needs to be added to OfferValidation entity
-			SubmittedOn       : new Date().toISOString(),
-			SubmittedBy       : req.user.id,
-			Active            : 1, 
-			OfferValidity     : req.data.OFFERVALIDITY,
-			DelayInSubmission : null,
-			AS1               : req.data.SELLING_COMPANY_AS1,
-			AS2               : req.data.SELLING_COMPANY_AS2,
-			OfferDate         : req.data.OFFERDATE,
-			DeliveryTerms     : req.data.DELIVERYTERMS,
-			I_Q_1             : null,
-			I_Q_2             : null,
-			I_Q_3             : null,
-			Comment           : req.data.CUSTOM_REMARKS,
-			UPDATED           : 1,
-			EffectiveDate     : req.data.EffectiveDate,
-			ExpiryDate        : req.data.ExpiryDate
-		}
+		const mappedPTTMQUTO = mappedQuotation(req.user, req.data);
 
 		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
 			OfferID: req.data.OFFERID,
@@ -2338,6 +2317,31 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			})
 		}else{
 			await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
+		}
+	}
+
+	const mappedQuotation = (user, data) => {
+		return {
+			TenderID          : data.TENDERID,
+			OfferID           : data.OFFERID,
+			CountryCode       : data.COUNTRYCODE,
+			DistributorID     : data.DISTRIBUTORID, // TODO: this field needs to be added to OfferValidation entity
+			SubmittedOn       : new Date().toISOString(),
+			SubmittedBy       : user.id,
+			Active            : 1, 
+			OfferValidity     : data.OFFERVALIDITY,
+			DelayInSubmission : null,
+			AS1               : data.SELLING_COMPANY_AS1,
+			AS2               : data.SELLING_COMPANY_AS2,
+			OfferDate         : data.OFFERDATE,
+			DeliveryTerms     : data.DELIVERYTERMS,
+			I_Q_1             : null,
+			I_Q_2             : null,
+			I_Q_3             : null,
+			Comment           : data.CUSTOM_REMARKS,
+			UPDATED           : 1,
+			EffectiveDate     : data.EffectiveDate,
+			ExpiryDate        : data.ExpiryDate
 		}
 	}
 
@@ -4452,6 +4456,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
 				"Branch": item.ParentInstituteID || "",
 				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
+				"InvoicePrice": Number(item.Price1).toFixed(4),
 				"NetPrice": Number(item.Price3).toFixed(4),
 				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(4),
 				"GeneralDiscount_Percentage": (item.Level2Discount1 * 100).toFixed(4),
