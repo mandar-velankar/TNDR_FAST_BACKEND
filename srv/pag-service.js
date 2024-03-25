@@ -1004,12 +1004,12 @@ module.exports = async (srv) => {
 
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
         try {
-            const result = await updatePriceConditions(d.customerPrice.CountryCode, "PriceConditionRappel", body);
+            const result = await updatePriceConditions(finalarray[0].customerPrice.CountryCode, "PriceConditionRappel", body);
             console.log(result, "RER");
-            console.log(`Finished sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId} `);
-            return { status: true, result: result, customerPrice: d.customerPrice };
+            console.log(`Finished sending update Rappel customer price: ${finalarray[0].customerPrice.ID} for PriceAgreementID: ${finalarray[0].customerPrice.PriceAgreementId} & InstituteID: ${finalarray[0].customerPrice.InstituteId} `);
+            return { status: true, result: result, customerPrice: finalarray[0].customerPrice };
         } catch (error) {
-            console.error(`ERROR: sending update Rappel customer price: ${d.customerPrice.ID} for PriceAgreementID: ${d.customerPrice.PriceAgreementId} & InstituteID: ${d.customerPrice.InstituteId}`);
+            console.error(`ERROR: sending update Rappel customer price: ${finalarray[0].customerPrice.ID} for PriceAgreementID: ${finalarray[0].customerPrice.PriceAgreementId} & InstituteID: ${finalarray[0].customerPrice.InstituteId}`);
 
             logRequestError(error);
             return { status: false, customerPrice: d.customerPrice };
