@@ -841,7 +841,7 @@ module.exports = async (srv) => {
          arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
        
 
-        updateRappelConditionPromises = arrayresult.map(custPrice => updateRappelcustomerPrices(arrayresult));
+         updateRappelConditionPromises = arrayresult[0].map(custPrice => updateRappelcustomerPrices(custPrice));
      }else if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === false){
           updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
      }
@@ -942,6 +942,7 @@ module.exports = async (srv) => {
 
                 const kunnr = parseInt(institute.CustomerID);
                 const matnr = parseInt(ShipToType1.MaterialNumber);
+                const priceconditioncode= ShipToType1.PriceCondition;
                 let KNUMA_BO, KNUMAValue;
                 //Transforming the Date in correct format
                 const dataBSpain = new Date(ShipToType1.EffectiveDate).toISOString().split('T')[0];
@@ -978,7 +979,7 @@ module.exports = async (srv) => {
                     "KONWA": "%",
                     "KPEIN": 1,
                     "KBRUE": highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || "",
-                    "KSCHL": "YAW1",
+                    "KSCHL": priceconditioncode,
                     "E1KONW": E1KONW
 
                 });
@@ -1145,15 +1146,15 @@ module.exports = async (srv) => {
     async function updateRappelcustomerPrices(finalarray) {
         const tx = cds.tx();
         let body;
-        finalarray = finalarray[0];
+        
 
         body = getES01RequestBodyTemplateRappel();
 
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = finalarray[0].BONEM;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = finalarray[0].BOTEX;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = finalarray[0].DATAB;
-        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = finalarray[0].DATBI;
-        let items = finalarray[0].Items;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = finalarray.BONEM;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = finalarray.BOTEX;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = finalarray.DATAB;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = finalarray.DATBI;
+        let items = finalarray.Items;
         items.map(d => {
             body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(d);
         });
@@ -1162,12 +1163,12 @@ module.exports = async (srv) => {
 
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
         try {
-            const result = await updatePriceConditions(finalarray[0].customerPrice.CountryCode, "PriceConditionRappel", body);
+            const result = await updatePriceConditions(finalarray.customerPrice.CountryCode, "PriceConditionRappel", body);
             
-            console.log(`Finished sending update Rappel customer price: ${finalarray[0].customerPrice.ID} for PriceAgreementID: ${finalarray[0].customerPrice.PriceAgreementId} & InstituteID: ${finalarray[0].customerPrice.InstituteId} `);
-            return { status: true, result: result, customerPrice: finalarray[0].customerPrice };
+            console.log(`Finished sending update Rappel customer price: ${finalarray.customerPrice.ID} for PriceAgreementID: ${finalarray.customerPrice.PriceAgreementId} & InstituteID: ${finalarray.customerPrice.InstituteId} `);
+            return { status: true, result: result, customerPrice: finalarray.customerPrice };
         } catch (error) {
-            console.error(`ERROR: sending update Rappel customer price: ${finalarray[0].customerPrice.ID} for PriceAgreementID: ${finalarray[0].customerPrice.PriceAgreementId} & InstituteID: ${finalarray[0].customerPrice.InstituteId}`);
+            console.error(`ERROR: sending update Rappel customer price: ${finalarray.customerPrice.ID} for PriceAgreementID: ${finalarray.customerPrice.PriceAgreementId} & InstituteID: ${finalarray.customerPrice.InstituteId}`);
 
             logRequestError(error);
             return { status: false, customerPrice: d.customerPrice };
