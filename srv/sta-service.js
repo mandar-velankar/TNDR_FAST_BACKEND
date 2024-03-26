@@ -3644,8 +3644,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		let offerPricePack = offerPrice / toPackFactor;
 		let offerPriceUnitEurSpot = offerPriceUnit / product.SPOT_RATE;
 		let offerPriceUnitEurBudget = offerPriceUnit / product.BUDGET_RATE;
-		let cogsEurUnit = cogs / product.SPOT_RATE / toUnitFactor; 
-		let cogsEurPack = cogs / product.SPOT_RATE / toPackFactor; 
+		let cogsEurUnit = cogs / product.BUDGET_RATE / toUnitFactor; 
+		let cogsEurPack = cogs / product.BUDGET_RATE / toPackFactor; 
 		let netPriceUnit = netPrice / toUnitFactor;
 		let netPricePack = netPrice / toPackFactor;
 		let netPriceUnitEurSpot = netPriceUnit / product.SPOT_RATE;

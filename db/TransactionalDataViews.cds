@@ -635,7 +635,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Price.FOC as FOC,
     offerProduct.Price.FOCType as FOC_TYPE,
 	offerProduct.Price.FOC_ABS_PCT as FOC_ABS_PCT,
-	offerProduct.Price.COGS * offerProduct.Price.SpotRate / (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as COGS:Double,
+	offerProduct.Price.COGS * offerProduct.Price.BudgetRate / (case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end) as COGS:Double,
 	offerProduct.Price.BudgetRate as BUDGET_RATE,
     offerProduct.Price.SpotRate as SPOT_RATE,
     offerProduct.Price.BusinessCasePrice as BUSINESS_CASE_PRICE,
