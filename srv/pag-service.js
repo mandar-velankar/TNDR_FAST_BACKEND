@@ -795,9 +795,11 @@ module.exports = async (srv) => {
         return req.reply();
     });
     async function syncPriceAgreements(pas, customerPrices) {
+        const tx = cds.tx();
         console.log(`Start synchronisation of PriceAgreements`);
-
         console.log(`Prepare categories of customer prices`);
+        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
+        
         let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
 
         //EHQUT-CR2-New
@@ -810,15 +812,18 @@ module.exports = async (srv) => {
             let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
             SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
             ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-            let array=mainPriceConditions.filter(item=>item.InstituteId === SoldToInstituteType.InstituteID);
-            console.log(array);
-            mainPriceConditions = mainPriceConditions.filter(function(obj) {
-                return !ShipToInstitute.some(function(obj2) {
-                    return obj.InstituteId == obj2.InstituteID;
+          
+            mainPriceConditions = mainPriceConditions.filter(function(mainobj) {
+                return !ShipToInstitute.some(function(shiptoobj) {
+                    return mainobj.InstituteId == shiptoobj.InstituteID;
                 });
             });
           }
-
+          if(SoldToInstituteType.length > 0 && ShipToInstitute.length >0){
+            CombinationValue = true;
+        }else{
+            CombinationValue = false;
+        }
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1" || item.PriceCondition === "YAW2");
         const allCustomerPrices = mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions);
@@ -839,13 +844,16 @@ module.exports = async (srv) => {
         let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
         let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult ,updateRappelConditionPromises;
-        if(rappelPriceConditions.length>0)
+        if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === true && CombinationValue === true) 
      {
          arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
-        //const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
+       
 
-        updateRappelConditionPromises = arrayresult.map(custPrice => updateRappelcustPrices(arrayresult));
+        updateRappelConditionPromises = arrayresult.map(custPrice => updateRappelcustomerPrices(arrayresult));
+     }else if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === false){
+          updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
      }
+
         // Synchronize
         console.log(`Process requests of customer prices`);
         let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
@@ -992,12 +1000,162 @@ module.exports = async (srv) => {
 
 
     };
-    async function updateRappelcustPrices(finalarray) {
+    async function updateRappelcustPrices(customerPrice,CombinationValue) {
+        console.log(`Prepare sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId}`);
+        const tx = cds.tx();
+        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: customerPrice.PriceAgreementId }));
+        if (!priceAgreement) {
+            // return req.reject(404, `No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+            console.error(`Error Rappel customer price: ${customerPrice.ID}`);
+            console.error(`No priceAgreement was found for PriceAgreementID: ${customerPrice.PriceAgreementId}`);
+            return { status: false, customerPrice: customerPrice };
+        }
+        let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({ PriceAgreement_ID: customerPrice.PriceAgreementId }).where({ PriceConditionCode: customerPrice.PriceCondition }));
+        if (!priceCondition) {
+            // return req.reject(404, `No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+            console.error(`Error Rappel customer price: ${customerPrice.ID}`);
+            console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+            return { status: false, customerPrice: customerPrice };
+        }
+
+        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
+
+        const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
+        const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+
+        let priceAgreementInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where({InstituteID: priceAgreement.InstituteId}));
+
+        const effectiveDate = new Date(customerPrice.EffectiveDate);
+        const expiryDate = new Date(customerPrice.ExpiryDate);
+
+        const bonem = parseInt(priceAgreementInstitute.CustomerID);
+        const kunnr = parseInt(institute.CustomerID);
+        const matnr = parseInt(customerPrice.MaterialNumber);
+        const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
+        const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
+//CR2
+        const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode,CombinationValue);
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = bonem;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = datbi;
+       // body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOSTA = "B";
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = datab;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATBI_GR = datbi;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = kunnr;
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].MATNR = matnr;
+       
+
+        //Transforming the Date in correct format
+        const dataB = new Date(customerPrice.EffectiveDate).toISOString().split('T')[0];
+        const datbI = new Date(customerPrice.ExpiryDate).toISOString().split('T')[0];
+        
+        // Specify existing SAP rappel reference when exists for customer/material
+        // when KNUMA_BO is specified then it is an update in the SAP backend else, it is a create
+        const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: dataB, DATBI: datbI}));
+        if(spainRappelData){
+            body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].KNUMA_BO = spainRappelData.KNUMA;
+        }
+
+
+        // DiscountConditions
+        let highestDiscountCondition = null;
+        let lowestDiscountCondition = null;
+        const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: priceCondition.ID }));
+        if (discountConditions?.length > 0) {
+            highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount > current.Discount) ? prev : current);
+            lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount < current.Discount) ? prev : current);
+            discountConditions.forEach(dc => {
+                body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].E1KONW.push({
+                    "KSTBW": dc.Volume,
+                    "KBETR": dc.Discount.toFixed(3) + "-"
+                });
+            });
+        }
+
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBETR = lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || ""; // KBETR from the minimum(KSTBW)
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KBRUE = highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || ""; // minimum(KSTBW) value from the DiscountConditions array
+
+        await tx.commit();//to release db connection
+
+        console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+        try {
+            const result = await updatePriceConditions(customerPrice.CountryCode, "PriceConditionRappel", body);
+            console.log(`Finished sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+            return { status: true, result: result, customerPrice: customerPrice };
+        } catch (error) {
+            console.error(`ERROR: sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+            logRequestError(error);
+            return { status: false, customerPrice: customerPrice };
+            // throw error;//do not throw error to continue with other requests
+        }
+    };
+    function getES01RequestBodyTemplate(institute,priceconditionrappelcode,CombinationValue) {
+        return {
+            "_BAY0-GZ_SALESAGR_ES01": {
+                "IDOC": {
+                    "EDI_DC40": {
+                        "TABNAM": "EDI_DC40",
+                        "MANDT": 508,
+                        "DOCNUM": 36256484,
+                        "DOCREL": 740,
+                        "STATUS": 53,
+                        "DIRECT": 2,
+                        "OUTMOD": "",
+                        "IDOCTYP": "/BAY0/GZ_SALESAGR_ES01",
+                        "MESTYP": "/BAY0/GZ_SALESAGR_ES",
+                        "SNDPOR": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
+                        "SNDPRT": "LS",
+                        "SNDPRN": "FAST_ES",
+                        "RCVPOR": "", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
+                        "RCVPRT": "LS",
+                        "RCVPRN": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | | the value is added per environment in the CPI configuration
+                        "CREDAT": 20220404,
+                        "CRETIM": 145201
+                    },
+                    "_BAY0-GZ_SALESAGRHEAD": {
+                        "BOART": "YAW1",
+                        "VKORG": "QFHC",
+                        "VTWEG": "00",
+                        "SPART": "00",
+                        "BONEM": 0,
+                        "BOTEX": "RCT COM. W. ACCRUALS",
+                        "DATAB": 0,
+                        "DATBI": 0,
+                        "CURCY": "EUR",
+                        "ZTERM": "D496",
+                        "ZLSCH": "M",
+                        "ABREX": "TEST AGMNT",
+                        "KOTABNR": (CombinationValue === true ||institute.InstituteType === 'Ship-To') ? 582 : 750,
+                        "KVEWE": "A",
+                        "KAPPL": "V",
+                        
+                        "_BAY0-GZ_SALESAGRITEM": [
+                            {
+                                "KUNNR": 0,
+                                "DATAB_GR": 0,
+                                "DATBI_GR": 0,
+                                "MATNR": 0,
+                                "KBETR": "0-",
+                                "KONWA": "%",
+                                "KPEIN": 1,
+                                "KBRUE": 0,
+                                "KSCHL": priceconditionrappelcode,
+                                "E1KONW": []
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    };
+    async function updateRappelcustomerPrices(finalarray) {
         const tx = cds.tx();
         let body;
         finalarray = finalarray[0];
 
-        body = getES01RequestBodyTemplate();
+        body = getES01RequestBodyTemplateRappel();
 
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = finalarray[0].BONEM;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = finalarray[0].BOTEX;
@@ -1013,7 +1171,7 @@ module.exports = async (srv) => {
         //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
         try {
             const result = await updatePriceConditions(finalarray[0].customerPrice.CountryCode, "PriceConditionRappel", body);
-            console.log(result, "RER");
+            
             console.log(`Finished sending update Rappel customer price: ${finalarray[0].customerPrice.ID} for PriceAgreementID: ${finalarray[0].customerPrice.PriceAgreementId} & InstituteID: ${finalarray[0].customerPrice.InstituteId} `);
             return { status: true, result: result, customerPrice: finalarray[0].customerPrice };
         } catch (error) {
@@ -1648,7 +1806,7 @@ module.exports = async (srv) => {
     }
     //CR2
 
-    function getES01RequestBodyTemplate() {
+    function getES01RequestBodyTemplateRappel() {
 
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
@@ -1691,18 +1849,7 @@ module.exports = async (srv) => {
                         "BOSTA": "B",
 
                         "_BAY0-GZ_SALESAGRITEM": [
-                            // {
-                            //     "KUNNR": 0,
-                            //     "DATAB_GR": 0,
-                            //     "DATBI_GR": 0,
-                            //     "MATNR": 0,
-                            //     "KBETR": "0-",
-                            //     "KONWA": "%",
-                            //     "KPEIN": 1,
-                            //     "KBRUE": 0,
-                            //     "KSCHL": "YAW1",
-                            //     "E1KONW": []
-                            // }
+                            
                         ]
                     }
                 }
