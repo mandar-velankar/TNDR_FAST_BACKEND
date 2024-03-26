@@ -81,9 +81,9 @@
 
                         <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;">
                         <p><span style="font-family: Roboto, Tahoma, sans-serif; font-size: 12px;">
-							Dear Team,
+							Dear {UserName},
 							<br><br>
-							This is to inform you that the below Price agreement/s are extending on {{data.FormatedExpiryDate}}:<br><br>
+							This is to inform you that the below Price agreement/s are extending on {UserName}:<br><br>
 							<table border="1" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;font-family: Roboto, Tahoma, sans-serif; font-size: 12px;" width="100%">
 								<tr align="left">
 									<th>Customer</th>
@@ -95,9 +95,9 @@
 									<th>URL</th>
 								</tr>
 								  <tbody>
-									{{#each data.PriceAgreements}}
+									
 										<tr>
-											<td style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:1.5;color:#000000;">{{CustomerID}}</td>		
+											<td style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:1.5;color:#000000;">{{CustomerID}}</td>
 											<td style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:1.5;color:#000000;">{{TenderId}}</td>
 											<td style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:1.5;color:#000000;">{{OfferId}}</td>	
 											<td style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:1.5;color:#000000;">{{ExpiryDate}}</td>
@@ -107,7 +107,7 @@
 											<a href="{{URL}}">Click here to view the details of the Price Agreements Extending Today</a>
 											</td>
 										</tr>
-										{{/each}}
+										
 								  </tbody>
 							</table>
 							<br><br>

@@ -33,7 +33,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                 template: 'PriceAgreementExtendExpiryMail'
             },];
             let extendedPriceAgreements = await this.getPriceAgreementsExtended(aUpdatedPriceAgreements);                 
-            console.log(extendedPriceAgreements);
+         
             const mailTemplates = await this.getMailTemplates(mailRuns.map(mailRun=>mailRun.template));
             for (let mailRun of mailRuns) {
                                                
@@ -524,42 +524,22 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
    
     };
  
-    mapPriceAgreementsToMails = (templates,mail) => data => {
- 
-        let outbox = [];
-        data = data.filter(d => d.Classification === "Commercial Agreement");
-        console.log(data,"data");
-        if(data && data.length>0) {
-         for (let pas of data) {
-            console.log(pas,"pas");
-               outbox.push({
-                    CountryCode: pas.CountryCode,
-                    TenderID: pas.TenderId,
-                    OfferID: pas.OfferId,
-                    Sender: 'FAST-Admin@bayer.com',
-                    Recipients:'kosal.kirthiga.ext@bayer.com',
-                    Subject: this.findTemplate(templates,mail,pas).title,
-                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,pas), {
-                        data: {
-                            FormatedExpiryDate :this.dateToDDMMYYYY(pas.ExpiryDate),
-                            PriceAgreements: pas 
-                        }
-                       
-                    }),
-                      Sent: false
-                });
-               
-            }
-        }
-        console.log(outbox[0].MailBody,"Mailbody");    
-        
-        if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
-            console.log(`No template found for Cancelled Price Agreement ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
-            return;
-        }
-        return outbox;
-     
-    };
+    mapPriceAgreementsToMails = (templates,mail) => pas => pas
+        .map(pa => ({
+            CountryCode: pa.CountryCode,
+            TenderID: pa.TenderId,
+            OfferID: pa.OfferId,
+            Sender: 'FAST-Admin@bayer.com',
+            Recipients: pa.UserEmail,
+            Subject: this.findTemplate(templates,mail,pa).title,
+            MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), pa),
+            Sent: false
+        }))
+        .filter(pa =>{
+            // console.log(pa);
+            if(!pa.MailBody || pa.MailBody === 'undefined')console.log(`No template found for Price Agreement of tender ${pa.TenderID} with countrycode ${pa.CountryCode}`)
+            return !!pa.MailBody && pa.MailBody !== 'undefined';
+        });
  
     generateMailBody(mail, data) {
        
