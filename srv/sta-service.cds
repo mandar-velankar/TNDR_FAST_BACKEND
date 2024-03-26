@@ -401,6 +401,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionTaiwanPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionTaiwanDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionNLPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionNLDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
             CountryCode,
             Region,
