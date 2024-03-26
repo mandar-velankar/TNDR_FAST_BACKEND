@@ -1,4 +1,5 @@
 const cds = require('@sap/cds');
+const moment = require('moment');
 // const NumberFormat = require('./sap/ui/core/format/NumberFormat'); TODO how to include a javascript lib in node.js?
 
 module.exports = {
@@ -135,6 +136,10 @@ module.exports = {
             num = 0;
         }
         return num.toLocaleString('en-US', { minimumFractionDigits: minDigits, maximumFractionDigits: maxDigits });
+    },
+
+    formatDate(dateString, inputFormat, outputFormat) {
+        return moment(dateString, inputFormat).format(outputFormat);
     }
 
 

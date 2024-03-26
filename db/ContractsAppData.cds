@@ -36,7 +36,7 @@ entity Channels : cuid {
 }
 //EHQUT-215577-Thailand - I can't create a new record in "Contract Management" application
 entity Contracts : managed, cuid {
-        CountryCode             : String(2) not null;
+        CountryCode             : String not null;
         ContractName            : String(1000);
         ContractNumber          : String(1000);
         ChannelId               : UUID;
@@ -65,7 +65,7 @@ entity Contracts : managed, cuid {
 }
 
 entity ContractInstitutes {
-        key CountryCode         : String(2);
+        key CountryCode         : String;
 	key InstituteID         : Integer;    
         key Contract_ID         : UUID;  
         InstituteName           : String;
@@ -79,7 +79,7 @@ entity ContractInstitutes {
 entity Products : managed, cuid {
         ProductPackId           : Integer;
         //ProductName             : String(255); assoc to product
-        CountryCode             : String(2);
+        CountryCode             : String;
         Unit                    : String(255);
         Quantity                : Integer;
         //SmallestUnit            : String(255); assoc to product

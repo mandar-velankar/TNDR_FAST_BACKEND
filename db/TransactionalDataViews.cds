@@ -432,11 +432,13 @@ entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.OfferStatusTable.STATUS,
 
     sum(
-        offer.Product.Price.OfferPrice *
+        offer.Product.Price.OfferPrice * (1 - ifnull(offer.Product.Price.Deductions, 0)) *
         case when offer.Product.Price.FOCType = 'FOC 1'
             then
                 case when offer.Product.Price.FOC_ABS_PCT = 'PCT'
-                    then offer.Product.RequestedVolume * (1 - offer.Product.Price.FOC)
+                    then round(offer.Product.RequestedVolume * (1 - offer.Product.Price.FOC))
+                        when offer.Product.Price.FOC_ABS_PCT = 'STP'
+                            then floor(offer.Product.RequestedVolume / offer.Product.Price.FOCStep) * offer.Product.Price.FOC
                     else offer.Product.RequestedVolume - offer.Product.Price.FOC
                 end
             else offer.Product.RequestedVolume
@@ -684,7 +686,8 @@ left outer join TransactionalData.ProductPricing as productPricing
     case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
-    offerProduct.Comment
+    offerProduct.Comment,
+    offerProduct.AlternateOfferYN
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -872,6 +875,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.BidDueDate as BID_DUE_DATE,
     offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY,
     offer.Custom.String_1 as PaymentTerms,
+    offer.Custom.String_2 as DeliveryTerms,
+    offer.Custom.String_3 as ShipmentTerms,
     offer.AffiliateOffer,
     offer.Tender.Custom.String_1 as TENDERCONTACT,
     offer.Tender.TenderChannel,
@@ -880,6 +885,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Custom.Integer_1 as NumberOfExtension,
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
+    offer.Tender.Country.Region
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -955,6 +961,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.BidDueDate,
           offer.Quotation.SubmittedBy,
           offer.Custom.String_1,
+          offer.Custom.String_2,
+          offer.Custom.String_3,
           offer.Tender.Custom.String_1,
           date_settings.NextYearDelta,
           date_settings.NextDay,
@@ -964,7 +972,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.ContractExtenseion,
           offer.Tender.Custom.Integer_1,
           offer.Comment,
-          offer.Tender.Custom.String_2;
+          offer.Tender.Custom.String_2,
+          offer.Tender.Country.Region;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -1372,6 +1381,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     and product.ProductCode = priceCondition.ProductCode
 {
     tender.CountryCode,
+    tender.Country.Region,
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
@@ -1442,7 +1452,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     @Core.Computed: false
     ifnull(priceCondition.AnticipatedYearlyVolumeMainCustomer,1) as AnticipatedYearlyVolumeMainCustomer:Integer,
     @Core.Computed: false
-    ifnull(priceCondition.AnticipatedYearlyVolumeBranch, 1) as AnticipatedYearlyVolumeBranch:Integer,
+    priceCondition.AnticipatedYearlyVolumeBranch,
     @Core.Computed: false
     ifnull(priceCondition.Level2Discount2,0) as Level2Discount2:Double,
      @Core.Computed: false
@@ -2013,7 +2023,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             OFFERVALIDITY         : Date not null;
             EffectiveDate         : Date;
             ExpiryDate            : Date;
-            COUNTRYCODE           : String(2) not null;
+            COUNTRYCODE           : String not null;
             SELLINGCOMPANY        : String(300);
             SELLINGCOMPANYBANK    : String(5000);
             SELLING_COMPANY_AS1   : String(300);
@@ -2027,6 +2037,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
             CURRENCY              : String(255);
             AMOUNT_IN_NUMBERS     : Double;
             AMOUNT_IN_WORDS       : String(1024);
+            NET_AMOUNT_IN_NUMBERS : Double;
+			NET_AMOUNT_IN_WORDS   : String(1024);
+			NET_OFFER_AMOUNT_IN_NUMBERS: Double;
+			NET_OFFER_AMOUNT_IN_WORDS  : String(1024);
             AMOUNT_IN_NUMBERS_VAT : Double;
             AMOUNT_IN_WORDS_VAT   : String(1024);
             VAT_TOTAL             : Double;
@@ -2083,6 +2097,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             ClientComment          : String(500);
             Comment                : String(500);
             Regions                : String;
+            InternalDueDate        : Date;
+            ExpectedAwardDate      : Date;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2092,7 +2108,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     // EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
     entity OfferProductValidation {
             TENDER_ID                                   : String(30);
-            COUNTRY_CODE                                : String(2);
+            COUNTRY_CODE                                : String;
         key OFFER_ID                                    : String(30) not null;
             DIVISION                                    : String(100);
             BRANDID                                     : String(50);
@@ -2115,6 +2131,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PRODUCT_COMMENT                             : String(784);
             UNIT                                        : String(255);
             PAID_VOLUME                                 : Double;
+            TOTAL_VOLUME                                : Double;
             SORTER                                      : Integer;
             CURRENCY                                    : String(255);
             REQUESTED_QUANTITY                          : String(567);
@@ -2169,6 +2186,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             GROSS_SALES_OFFER_CURRENCY_VAT_IN_WORDS     : String;
             VAT_TOTAL                                   : Double;
             NET_SALES_OFFER_CURRENCY                    : Double;
+            NET_SALES_OFFER_CURRENCY_IN_WORDS           : String;
             NET_SALES_EUR_BUDGET                        : Double;
             NET_SALES_EUR_SPOT                          : Double;
             GROSS_MARGIN_EUR_BUDGET                     : Double;
@@ -2268,6 +2286,10 @@ left outer join TransactionalData.PriceCondition as priceCondition
             ADD_INCLUDE                                 : String;
             Level3Discount1                             : Double;
             Level1Discount1                             : Double;
+            Region                                      : String(50);
+            AlternateOfferYN                            : String(255);
+            NET_OFFER_SALES_OFFER_CURRENCY              : Double;
+            NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;

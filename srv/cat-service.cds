@@ -149,7 +149,7 @@ service CatalogService @(path : 'tender')@(requires : [
     //Master Data Services
     entity InstituteDistributor {
         key COUNTRY_INSTITUTE_DISTRIBUTOR_ID : String(500);
-            COUNTRY_CODE                     : String(2) not null;
+            COUNTRY_CODE                     : String not null;
             INSTITUTE_ID                     : Integer not null;
             INSTITUTE_NAME                   : String(500);
             DISTRIBUTOR_ID                   : Integer not null;
@@ -269,7 +269,7 @@ service CatalogService @(path : 'tender')@(requires : [
     //Office365 PowerAutomate Approval Workflow Service
     entity ApprovalOffers {
             OFFERSTATUSPATH       : String(500);
-            COUNTRYCODE           : String(2);
+            COUNTRYCODE           : String;
             TENDERID              : String(50);
         key OFFERID               : String(50);
             INSTITUTENAME         : String(500);
@@ -309,7 +309,7 @@ service CatalogService @(path : 'tender')@(requires : [
     entity ApprovalProducts {
             TENDERID                      : String(50);
         key OFFERID                       : String(50);
-            COUNTRYCODE                   : String(2);
+            COUNTRYCODE                   : String;
         key PRODUCTCODE                   : String(500);
             PRODUCT_UNIT_NAME             : String(500);
             SORTER                        : Integer;
@@ -394,7 +394,7 @@ service CatalogService @(path : 'tender')@(requires : [
             STATUSPATH         : String(5000);
             TENDERID           : String(50);
         key OFFERID            : String(50);
-            COUNTRYCODE        : String(2);
+            COUNTRYCODE        : String;
             SUBMITTED_BY       : String(500);
             SUBMITTED_BY_NAME  : String(500);
             SUBMITTED_BY_EMAIL : String(500);

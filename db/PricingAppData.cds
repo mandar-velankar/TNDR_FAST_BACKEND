@@ -6,7 +6,7 @@ using { com.bayer.SXTENDER.MasterData } from './MasterData';
 //Master Data (institutes groups tables)
 entity InstituteGroup{
 	key Id:Integer;
-    CountryCode:String(2);
+    CountryCode:String;
     Channel:String(50);
 	Name:String(50);
 	//Associations
@@ -38,7 +38,7 @@ entity InstituteGroupPrice{
 }
 
 entity ApprovalStatus {
-    key CountryCode         : String(2);
+    key CountryCode         : String;
     key InstituteGroupId    : Integer;
     key ProductPackId       : Integer;
     key ApproverEmailId     : String(100);
@@ -62,7 +62,7 @@ entity ApprovalStatus {
 }
 
 entity CountryApprovers{
-	key CountryCode         : String(2);
+	key CountryCode         : String;
 	key ApproverType        : String(200);
 	key Division            : String(200);
     key ApproverEmailId     : String(200);

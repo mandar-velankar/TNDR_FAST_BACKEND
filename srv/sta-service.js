@@ -57,7 +57,8 @@ module.exports = async (srv) => {
 	const {
 		PT_TMINST, 
 		PT_TMDIST, 
-		CountryApprovers, 
+		CountryApprovers,
+		MasterCompetitors, 
 		ApproverTypes, 
 		MASTER_COUNTRY_CHANNELS, 
 		PT_TMPRDPCK, 
@@ -90,7 +91,8 @@ module.exports = async (srv) => {
 		TenderOffers,
 		ZuelligExtractView,
 		StandardTenderHistory,
-		PriceConditionCurrentSectionTaiwanView
+		PriceConditionCurrentSectionTaiwanView,
+		BrandsInTender
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -133,8 +135,13 @@ module.exports = async (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.PricingPolicyData");
 
 	const {
-		LatestApprovedBrandPolicies
-	} = cds.entities("PolicyService");
+		InstitutesView,
+		InstituteInBranchView
+	} = cds.entities("StandardAppService");
+
+	const {
+
+	} = cds.entities()
 
 
 	srv.on('READ', 'Properties', req => {
@@ -486,10 +493,29 @@ module.exports = async (srv) => {
 		
 		let result = [];
         let tmvQuery = SELECT.from(req.query.SELECT.from);
+		let offerIDfullWhere = [];
+		const brandID = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "BrandID");
+		const countryCode = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "CountryCode");
+		
+		// Building full where for BrandID to include all BrandIDs of the Offers
+		if (brandID) {
+			const brandsInTender = await SELECT.from(BrandsInTender).where({'CountryCode': countryCode, 'BRANDID': brandID});
+			const tenderBrandOfferIds = brandsInTender.map(el => el.OFFERID);
+
+			tenderBrandOfferIds.forEach((el, index) => {
+				offerIDfullWhere.push(ServiceHelper.buildFullWhere("OfferID", "=", el));
+				if (index !== tenderBrandOfferIds.length-1) {
+					offerIDfullWhere.push('or');
+				}
+			});
+			offerIDfullWhere = offerIDfullWhere.flat();
+			ServiceHelper.deleteFilter(req, "BrandID");
+		}
+
         if (req.query.SELECT.columns?.[0]?.func !== "count") {
             tmvQuery.columns(req.query.SELECT.columns);
         }
-        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(offerIDfullWhere));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
 
         result = await tx.run(tmvQuery);
@@ -592,6 +618,7 @@ module.exports = async (srv) => {
 		delete req.data.ParentInstituteID;
 		delete req.data.External_InstituteId;
 		delete req.data.Address;
+		delete req.data.Region;
 		}
 		catch(error){
             console.error('Error in TenderFormView CREATE');
@@ -653,6 +680,7 @@ module.exports = async (srv) => {
 		delete req.data.ProductPackName;
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
+		delete req.data.Region;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');
@@ -678,7 +706,7 @@ module.exports = async (srv) => {
 			return req.error({ code: 403, message: `Offer "${offerID}" is not active. Only active offer can be copied.`, target: "PT_TMOFRS"});
 		}
 
-		if(offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded"){
+		if(offerStatus.STATUS !== "Delivery Ongoing" && offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded"){
 			return req.error({ code: 403, message: "Only 'Quotation Submitted' or 'Results Recorded' offers can be copied", target: "OfferStatus" });
 		}
 
@@ -1109,10 +1137,31 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], ['AwardedProductFormView', 'AwardedProducts'], async (req) => {
 		try{
-		delete req.data.FreeGoodsOther;
-		delete req.data.FreeGoodsOther_ABS_PCT;
-		delete req.data.FreeGoodsOther_Step;
-		delete req.data.ADD_INCLUDE;
+			if(req?.path === 'StandardAppService.AwardedProductFormView'){
+				const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Award', CountryCode: req?.data?.CountryCode, ProductScope: 'All'}));
+
+				const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+				
+				for (const item of mandatoryFielddata) {
+					let frontendField = item.Field;
+					if (frontendField.includes("path")) {
+						const match = regex.exec(frontendField);
+						frontendField = match ? match[1] : frontendField;
+					}
+				
+					if (
+						!(frontendField in req.data) ||
+						req.data[frontendField] === null ||
+						req.data[frontendField] === ''
+					) {
+						req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+					}
+				}	
+			}
+			delete req.data.FreeGoodsOther;
+			delete req.data.FreeGoodsOther_ABS_PCT;
+			delete req.data.FreeGoodsOther_Step;
+			delete req.data.ADD_INCLUDE;
 		}
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
@@ -1275,9 +1324,41 @@ module.exports = async (srv) => {
         }
     }
 
+	srv.before(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
+		try{
+			const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'CompetitorResults', CountryCode: req?.data?.Custom_String_2, ProductScope: 'All'}));
+
+			const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+			
+			for (const item of mandatoryFielddata) {
+				let frontendField = item.Field;
+				if (frontendField.includes("path")) {
+					const match = regex.exec(frontendField);
+					frontendField = match ? match[1] : frontendField;
+				}
+			
+				if (
+					!(frontendField in req.data) ||
+					req.data[frontendField] === null ||
+					req.data[frontendField] === ''
+				) {
+					req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+				}
+			}	
+
+			!req.data.AWARDEDCOMPANY && req.error({ code: 404, message: "Awarded Company is required.", target: "AWARDEDCOMPANY" });
+			!req.data.AWARDEDPRODUCT && req.error({ code: 404, message: "Awarded Product is required.", target: "AWARDEDPRODUCT" });
+		}
+		catch(error){
+			console.error('Error in before CompetitorResultsTableView CREATE or UPDATE');
+			return req.reject(403, error?.message||"Error in before CompetitorResultsTableView CREATE or UPDATE");
+		}
+	});
+
 	srv.on(['CREATE','UPDATE'], 'CompetitorResultsTableView', async (req) => {
 		try{
 		await upsertCompetitorResults(req);
+		await upsertMasterCompetitors(req);
 		return req.data;
 		}
 		catch(error){
@@ -1299,8 +1380,8 @@ module.exports = async (srv) => {
 			OFFERID: req.data.OFFERID,
 			PRODUCTCODE: req.data.PRODUCTCODE,
 			OUTCOME: req.data.OUTCOME,
-			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY || '',
-			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT || '',
+			AWARDEDCOMPANY: req.data.AWARDEDCOMPANY,
+			AWARDEDPRODUCT: req.data.AWARDEDPRODUCT,
 			AWARDEDPRICE: req.data.AWARDEDPRICE,
 			CURRENCY: req.data.CURRENCY,
 			AWARDEDQTY: req.data.AWARDEDQTY,
@@ -1323,6 +1404,31 @@ module.exports = async (srv) => {
 				})
 		}else{
 			await INSERT.into(TransCompetitorResult).entries(mappedCompetitorResults);
+		}
+	}
+
+	const upsertMasterCompetitors = async function(req){
+
+		const masterCompetitors = await SELECT.one.from(MasterCompetitors).where({
+			ID: req.data.Custom_String_1,
+			CountryCode: req.data.Custom_String_2,
+			ProductCode: req.data.PRODUCTCODE
+		});
+		const mappedMasterCompetitors = {
+			CountryCode			: req.data.Custom_String_2,
+			ProductCode			: req.data.PRODUCTCODE,
+			CompetitorProduct	: req.data.AWARDEDPRODUCT, 
+			CompetitorCompany	: req.data.AWARDEDCOMPANY
+		}
+
+		if(masterCompetitors){
+			await UPDATE(MasterCompetitors)
+				.with (mappedMasterCompetitors)
+				.where({
+					ID: masterCompetitors.ID
+				})
+		}else{
+			await INSERT.into(MasterCompetitors).entries(mappedMasterCompetitors);
 		}
 	}
 
@@ -1439,7 +1545,10 @@ module.exports = async (srv) => {
 			try{
 				// validate form
 				!req.data.AnticipatedYearlyVolumeMainCustomer && req.error({ code: 404, message: "Anticipated Yearly Volume MainCustomer is required.", target: "AnticipatedYearlyVolumeMainCustomer" });
-				!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+				const individualCustomer = await validateIndividualCustomerTaiwan(req);
+				if(individualCustomer){
+					!req.data.AnticipatedYearlyVolumeBranch && req.error({ code: 404, message: "Anticipated Yearly Volume Branch is required.", target: "AnticipatedYearlyVolumeBranch" });
+				}
 
 				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
 				const parentOfferProdPriceCondition = await SELECT.one.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID, ProductCode: req.data.ProductCode});
@@ -1570,27 +1679,60 @@ module.exports = async (srv) => {
 			ProductCode: req.data.ProductCode
 		});
 
-		const mappedPriceCondition = mapPriceCondition(req);
+		let individualCustomer = true;
+		if(req.data.CountryCode === 'TW'){
+			individualCustomer = await validateIndividualCustomerTaiwan(req);
+		}
+
+		const mappedPriceCondition = mapPriceCondition(req, individualCustomer);
 
 		if(priceCondition){
+			foc = await SELECT.from(FreeGoodsOther).where({
+				PriceCondition_ID: priceCondition.ID
+			});
+			const priceConditionClassification = await SELECT.one.from(PriceConditionClassification).where({
+				ID: priceCondition.PriceConditionClassification_ID
+			});
+			if (foc.length === 0 || priceConditionClassification.ConditionType === req.data.ConditionType) {
+				await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);
+			} else {
+				if (foc.length > 0) {
+					await DELETE(FreeGoodsOther)
+						.where({
+							PriceCondition_ID: priceCondition.ID
+						});
+				}
+				await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);
+			}	
+		}
+		else{
+			await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);		
+		}
+	}
+
+	async function handlePriceConditionUpsert(priceCondition, mappedPriceCondition){
+		if (priceCondition) {
 			await UPDATE(PriceCondition)
-				.with (mappedPriceCondition)
+				.with(mappedPriceCondition)
 				.where({
 					ID: priceCondition.ID
-				})
-		}else{
+				});
+		} else {
 			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
 		}
 	}
 
-	const mapPriceCondition = function(req){
+	const mapPriceCondition = function(req, individualCustomer){
 		const mappings = {
 			"Discount" : {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
-				NetOfferPrice: req.data.NetOfferPrice,
+				NetOfferPrice: req.data.OfferPrice,
 				Price2: req.data.NetPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Tax: req.data.Tax,
@@ -1602,7 +1744,10 @@ module.exports = async (srv) => {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
-				NetOfferPrice: req.data.NetOfferPrice,
+				NetOfferPrice: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price2: req.data.NetPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
@@ -1616,6 +1761,9 @@ module.exports = async (srv) => {
 				CountryCode: req.data.CountryCode,
 				Price2: req.data.Discount,
 				NetOfferPrice: req.data.NetOfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price3: req.data.NetPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
@@ -1628,6 +1776,10 @@ module.exports = async (srv) => {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.NetOfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
 				Price2: req.data.NetOfferPrice,
 				Price3: req.data.NetPrice,
 				OfferID: req.data.OfferID,
@@ -1646,7 +1798,7 @@ module.exports = async (srv) => {
 				NegotiationPrice:req.data.NegotiationPrice,
 				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
 				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
-				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				AnticipatedYearlyVolumeBranch: individualCustomer ? req.data.AnticipatedYearlyVolumeBranch : req.data.AnticipatedYearlyVolumeMainCustomer,
 				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
 				TotalDiscountNHI:req.data.TotalDiscountNHI,
 				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
@@ -1675,7 +1827,7 @@ module.exports = async (srv) => {
 				NegotiationPrice:req.data.NegotiationPrice,
 				TotalYearlyValueMainCustomer:req.data.TotalYearlyValueMainCustomer,
 				AnticipatedYearlyVolumeMainCustomer:req.data.AnticipatedYearlyVolumeMainCustomer,
-				AnticipatedYearlyVolumeBranch:req.data.AnticipatedYearlyVolumeBranch,
+				AnticipatedYearlyVolumeBranch: individualCustomer ? req.data.AnticipatedYearlyVolumeBranch : req.data.AnticipatedYearlyVolumeMainCustomer,
 				TotalYearlyValueBranch:req.data.TotalYearlyValueBranch,
 				TotalDiscountNHI:req.data.TotalDiscountNHI,
 				TotalDiscountInvoice:req.data.TotalDiscountInvoice,
@@ -1744,9 +1896,22 @@ module.exports = async (srv) => {
 			X_TYPE: 'Budget'
 		}
 
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		let foc = null;
+		if(priceCondition){
+			foc = await SELECT.one.from(FreeGoodsOther).where({
+					PriceCondition_ID: priceCondition?.ID,
+					ProductPackId: req.data.ProductCode
+			});
+		}
+
 		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
 
-		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate});
+		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate, foc});
 
 		if(productPricing){
 			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
@@ -1755,7 +1920,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate}){
+	function mapToPTTMBDPR({priceCondition, offer, user, cogs, spotRate, budgetRate, foc}){
 		return {
 			TenderID              : priceCondition.TenderID, 
 			OfferID               : priceCondition.OfferID, 
@@ -1768,22 +1933,22 @@ module.exports = async (srv) => {
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
 			RegPrice              : priceCondition.BasePrice, 
-			FOC                   : 0, 
-			// FOCStep               : null, 
-			// FOCType               : null, 
-			Discount              : 0, 
+			FOC                   : foc?.FreeGoodsOther || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
-			Deductions            : 0, 
+			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
 			SpotRate              : spotRate?.X_RATE || 0,
 			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
-			// FOC_ABS_PCT           : null, 
+			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT, 
 			FOC_Bundled_1         : 0, 
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
@@ -1813,12 +1978,23 @@ module.exports = async (srv) => {
 		};
 
 		const product = await SELECT.one.from(PT_TMOFPR).where(whereCondition);
+		const individualCustomer = await validateIndividualCustomerTaiwan(req);
+		let AnticipatedYearlyVolumeBranch = individualCustomer ? req.data.AnticipatedYearlyVolumeBranch : req.data.AnticipatedYearlyVolumeMainCustomer;
 
 		if(product){
 			await UPDATE(PT_TMOFPR)
-				.with ({RequestedVolume: req.data.AnticipatedYearlyVolumeBranch})
+				.with ({RequestedVolume: AnticipatedYearlyVolumeBranch})
 				.where(whereCondition)
 		}
+	}
+
+	const validateIndividualCustomerTaiwan = async function(req){
+
+		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
+		const parentInstitute = await SELECT.one.from(InstitutesView).where({InstituteID:selectedTender?.InstituteID, CountryCode:req.data.CountryCode});
+		const instituteInBranch = await SELECT.from(InstituteInBranchView).where({ParentInstituteID:parentInstitute?.ParentInstituteID, InstituteID: {"!=": parentInstitute?.InstituteID}, CountryCode:req.data.CountryCode});
+
+		return (instituteInBranch.length > 0);
 	}
 
 	srv.after(
@@ -1828,8 +2004,14 @@ module.exports = async (srv) => {
 		try{
 			if(!items) return [];
 			const fnCalculateFields = async item => {
-				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-				item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+				if(item.ConditionType === 'Discount'){
+					item.OfferPrice = item.BasePrice * (1 - item.Discount);
+					item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+				}
+				else{
+					item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+					item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+				}
 			};
 			if(Array.isArray(items)){
 				return items.map(fnCalculateFields)
@@ -1952,6 +2134,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	async function calculateNetOfferPrice(item){
 		const offerProduct = item.ProductCode;
 		let foc = [];
+		let focVolume = 0;
+
 		
 		if(item.PriceConditionID){
 			foc = await SELECT.from(FreeGoodsOther).where({
@@ -1974,30 +2158,26 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if(foc.length === 0 || !containsOfferProduct) return item.OfferPrice;
 
 		// Cases 3
-		if(containsOfferProductAndIsAdded) {
-			const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
-			switch(addedFOC.FreeGoodsOther_ABS_PCT){
+		if(containsOfferProductAndIsAdded || containsOfferProductAndIsIncluded) {
+			const FOC = getFOCWitSameProductCode(foc, offerProduct);
+			switch(FOC.FreeGoodsOther_ABS_PCT){
 				case "ABS":
-					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume + addedFOC.FreeGoodsOther);
+					focVolume = FOC.FreeGoodsOther;
+					break;
 				case "PCT":
-					return item.RequestedVolume * item.OfferPrice / (item.RequestedVolume * (1 + addedFOC.FreeGoodsOther));
+					focVolume = Math.round(item.RequestedVolume * FOC.FreeGoodsOther);
+					break;
 				case "STP":
-					return item.RequestedVolume * item.OfferPrice / ((item.RequestedVolume + item.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
-			}
+					focVolume = Math.floor(item.RequestedVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+					break;
+				default:
+					break;
+			}		
 		}
 
-		// Cases 4
-		if(containsOfferProductAndIsIncluded) {
-			const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-			switch(includedFOC.FreeGoodsOther_ABS_PCT){
-				case "ABS":
-					return (item.RequestedVolume - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-				case "PCT":
-					return item.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-				case "STP":
-					return (item.RequestedVolume - item.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * item.OfferPrice / item.RequestedVolume;
-			}
-		}
+		let paidVolume = containsOfferProductAndIsAdded ? item.RequestedVolume : item.RequestedVolume - focVolume;
+		let totalVolume = containsOfferProductAndIsAdded ? item.RequestedVolume + focVolume : item.RequestedVolume;
+		let netOfferPrice = item.OfferPrice * paidVolume / totalVolume;
 
 		function hasObjectWithProductCode(arr, offerProduct) {
 			return arr.some(obj => obj.ProductPackId === offerProduct);
@@ -2011,13 +2191,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 		}
 
-		function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+		function getFOCWitSameProductCode(arr, offerProduct) {
+			return arr.find(obj => obj.ProductPackId === offerProduct);
 		}
 
-		function getAddedFOCWitSameProductCode(arr, offerProduct) {
-			return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
-		}
+		return netOfferPrice;
 	}
 	
 	async function calculateNetOfferTaiwanPrice(item){
@@ -2122,28 +2300,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	});
 
 	const upsertQuotation = async function(req){
-		const mappedPTTMQUTO = {
-			TenderID          : req.data.TENDERID,
-			OfferID           : req.data.OFFERID,
-			CountryCode       : req.data.COUNTRYCODE,
-			DistributorID     : req.data.DISTRIBUTORID, // TODO: this field needs to be added to OfferValidation entity
-			SubmittedOn       : new Date().toISOString(),
-			SubmittedBy       : req.user.id,
-			Active            : 1, 
-			OfferValidity     : req.data.OFFERVALIDITY,
-			DelayInSubmission : null,
-			AS1               : req.data.SELLING_COMPANY_AS1,
-			AS2               : req.data.SELLING_COMPANY_AS2,
-			OfferDate         : req.data.OFFERDATE,
-			DeliveryTerms     : req.data.DELIVERYTERMS,
-			I_Q_1             : null,
-			I_Q_2             : null,
-			I_Q_3             : null,
-			Comment           : req.data.CUSTOM_REMARKS,
-			UPDATED           : 1,
-			EffectiveDate     : req.data.EffectiveDate,
-			ExpiryDate        : req.data.ExpiryDate
-		}
+		const mappedPTTMQUTO = mappedQuotation(req.user, req.data);
 
 		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
 			OfferID: req.data.OFFERID,
@@ -2160,6 +2317,31 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			})
 		}else{
 			await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
+		}
+	}
+
+	const mappedQuotation = (user, data) => {
+		return {
+			TenderID          : data.TENDERID,
+			OfferID           : data.OFFERID,
+			CountryCode       : data.COUNTRYCODE,
+			DistributorID     : data.DISTRIBUTORID, // TODO: this field needs to be added to OfferValidation entity
+			SubmittedOn       : new Date().toISOString(),
+			SubmittedBy       : user.id,
+			Active            : 1, 
+			OfferValidity     : data.OFFERVALIDITY,
+			DelayInSubmission : null,
+			AS1               : data.SELLING_COMPANY_AS1,
+			AS2               : data.SELLING_COMPANY_AS2,
+			OfferDate         : data.OFFERDATE,
+			DeliveryTerms     : data.DELIVERYTERMS,
+			I_Q_1             : null,
+			I_Q_2             : null,
+			I_Q_3             : null,
+			Comment           : data.CUSTOM_REMARKS,
+			UPDATED           : 1,
+			EffectiveDate     : data.EffectiveDate,
+			ExpiryDate        : data.ExpiryDate
 		}
 	}
 
@@ -2222,13 +2404,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		data.unshift({AUTHORIZED_SIGNATORY: null, NAME: null})
 	});
 
-	srv.after('READ', 'MasterCompetitors', data => {
-		data.unshift({
-			CompetitorProduct: "Other",
-			CompetitorCompany: "Other"
-		})
-	});
-
 	srv.after('READ', 'MasterCountryOutComes', data => {
 		data.unshift({
 			Outcome: ""
@@ -2251,6 +2426,75 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				DivisionName: ""
 			});
         }
+	});
+
+	srv.on('READ', 'MasterCompetitors', async (req, next) => {
+		const res = await next();
+		const result = res.reduce(function (a, b) {
+			let company = b.CompetitorCompany;
+			let currentValueIndex = a.findIndex(item => item.CompetitorCompany === company);
+			if (currentValueIndex == -1) {
+				a.push(b);
+			}
+			return a;
+		}, []);
+		return result;
+	});
+
+	srv.before(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (req) => {
+
+		try{
+			const today = new Date().toISOString().slice(0, 10);
+
+			const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'DeliveryDetails', CountryCode: req?.data?.CountryCode, ProductScope: "All"}));
+
+			const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+			
+			for (const item of mandatoryFielddata) {
+				let frontendField = item.Field;
+				if (frontendField.includes("path")) {
+					const match = regex.exec(frontendField);
+					frontendField = match ? match[1] : frontendField;
+				}
+			
+				if (
+					!(frontendField in req.data) ||
+					req.data[frontendField] === null ||
+					req.data[frontendField] === ''
+				) {
+					req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+				}
+			}	
+
+			!req.data.ActualDeliveryDate && req.error({ code: 404, message: `Actual Delivery Date is required.`, target: 'ActualDeliveryDate' });
+			!req.data.ActualDeliveryQuantity && req.error({ code: 404, message: `Actual Delivery Quantity is required.`, target: 'ActualDeliveryQuantity' });
+
+			const existingDelivery = await SELECT.one.from(PT_TMDLVTR).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				SNo: req.data.SNo,
+				LotID: 1
+			});
+
+			if (!existingDelivery) {
+				req.data.SubmittedOn = new Date().toISOString();
+				req.data.SubmittedBy = req.user.id;     
+				req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");   
+				req.data.Active = 1;
+				req.data.LotID = 1; 
+			}
+			delete req.data.InstituteName;			           
+		}
+		catch(error){
+			console.error('Error in DeliveryTrackingDetailView CREATE');
+			return req.reject(403, error?.message||"Error in DeliveryTrackingDetailView CREATE");
+		}
+		
+	});
+
+	srv.after(['CREATE','UPDATE'], ['DeliveryTrackingDetailView'], async (data) => {
+		await upsertOfferStatus(data.OfferID, data.TenderID, 'Delivery Ongoing');
+		return data;
 	});
 
 	async function buildOfferApproval(tx, whereOffer) {
@@ -2343,7 +2587,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
+		let totalNetAmount = offerProductValidation.reduce((a, b) => a + b.NET_SALES_OFFER_CURRENCY, 0);
+		let totalNetOfferAmount = offerProductValidation.reduce((a, b) => a + b.NET_OFFER_SALES_OFFER_CURRENCY, 0);
 		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
+		let totalNetAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalNetAmount)} ${offer.CURRENCY} only`;
+		let totalNetOfferAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalNetOfferAmount)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
@@ -2356,7 +2604,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
 		let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION }));
 		let division = (divisions.length === 1) ? divisions[0] : "Both";
-
+/*
 		//In case we have any FOC (on main products) in the offer, a comment should be in remarks
 		let maxFOC = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FOC }));
 		let focRemark = "";
@@ -2413,7 +2661,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		}
 //EHQUT-INC0170966/INC15506491-Number of Samples not reflected in the Quotation
-
+*/
 		//Shipment Terms need to be specified by item number if not same for all
 		let shipmentTerms = "";
 		let shipmentTermsDistinct = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => {   
@@ -2437,7 +2685,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		//Payment Terms need to be specified by item number if not same for all
 		let paymentTerms = offer.PaymentTerms;
-
+		shipmentTerms = offer.ShipmentTerms;
 		/**
 		 * In this commented fields we use offerProduct PaymentTerms field.
 		 * It is not needed to use offerProduct PaymentTerms field because offer has it's own PaymentTerm field --> Custom_String_1
@@ -2482,8 +2730,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			}
 			deliveryTerms = deliveryTermsRow.join("<br>")
 		}
+		deliveryTerms = offer.DeliveryTerms;
 
-		
+/*		
 //EHQUT modified the producRemark to fix MOQ Comment-populating of same comment multiple times in remarks
 	//Product comment shows in remarks, if any
 		// let producRemark = offerProductValidation.filter((d) => d.PRODUCT_COMMENT !== "").map((d) => { return d.PRODUCT_COMMENT }).join("<br>");
@@ -2557,7 +2806,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		remarks = remarks.concat((alternativeRequestedRemark !== "") ? alternativeRequestedRemark.concat("<br>") : "");
 		remarks=remarks.concat((InstituteRemark !== "") ? InstituteRemark.concat("<br>") : "");
 		remarks = remarks.concat((producRemark !== "") ? producRemark.concat("<br>") : "");
-
+*/
 		// get SUBMITTED_BY user info 
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
 		
@@ -2606,7 +2855,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			E_SIGNATURE2: offer.E_SIGNATURE2,
 			CURRENCY: offer.CURRENCY,
 			AMOUNT_IN_NUMBERS: totalAmount,
-			AMOUNT_IN_WORDS: totalAmountInWords,//Not ok
+			AMOUNT_IN_WORDS: totalAmountInWords,
+			NET_AMOUNT_IN_NUMBERS: totalNetAmount,
+			NET_AMOUNT_IN_WORDS: totalNetAmountInWords,
+			NET_OFFER_AMOUNT_IN_NUMBERS: totalNetOfferAmount,
+			NET_OFFER_AMOUNT_IN_WORDS: totalNetOfferAmountInWords, 
 			LETTERHEAD: offer && offer.LETTERHEAD ? offer.LETTERHEAD.replace(/\\+/g, "<br>") : '',
 			//REGULATORY: regulatory,
 			//LEGAL: legal,
@@ -2620,7 +2873,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			DISTRIBUTORFAX: offer.DISTRIBUTORFAX,
 			DISTRIBUTORCONTACT: offer.DISTRIBUTORCONTACT,
 			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
-			REMARKS: remarks,
+			REMARKS: offer.SELLING_COMPANY_REMARKS,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
 			DELIVERYTERMS: deliveryTerms,
 			PAYMENTTERMS: paymentTerms,
@@ -2660,7 +2913,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			ContractExtenseion: offer.ContractExtenseion,
 			NumberOfExtension: offer.NumberOfExtension,
 			ClientComment: offer.ClientComment,
-			Regions: offer.Regions
+			Regions: offer.Regions,
+			InternalDueDate: tender.BidDueDate,
+        	ExpectedAwardDate: tender.AwardDate
 		};
 		return results;
 	
@@ -2802,7 +3057,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		});
 
-		//For MEA specific
+		/*//For MEA specific
 		//No need for country business approval if regional business approval is required
 		let oRegionalBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Regional Business');
 		let oCountryBusiness = aApproverTypes.find(approverType => approverType.ApproverType === 'Country Business');
@@ -2817,7 +3072,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if(tenderyear> '22' && regionname === 'MEA'){
 			aApproverTypes.splice(CountryBusinessindex,1);
 						
-		}
+		}*/
 		
 		//For Thailand specific
 		//EHQUT-197882-Thailand - Additional approver for Nalador
@@ -2981,18 +3236,18 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				CountryCode: offer.COUNTRYCODE
 			}
 
-			const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
+			//const productPricing = await tx.run(SELECT.one.from(ProductPricingView).where(whereProductPricing));
 			const productPricingTable = await tx.run(SELECT.one.from(ProductPricing).where(whereProductPricing));
 			//let finalDiscount = productPricing.FinalDiscount ? Number(Number(productPricing.FinalDiscount*100).toFixed(2)) : null;
 						
-			let finalDiscount;            
-			if (productPricing.UOM === "Unit") {
-				finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPU ))*100).toFixed(2));
-			} else {
-				finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPP ))*100).toFixed(2));
-			}
+			// let finalDiscount;            
+			// if (productPricing.UOM === "Unit") {
+			// 	finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPU ))*100).toFixed(2));
+			// } else {
+			// 	finalDiscount = Number(((1 -( productPricing.NetofferPrice / productPricing.ConsumerPriceExclPP ))*100).toFixed(2));
+			// }
 			
-			let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
+			//let dVat = offerProduct.VAT ? Number(Number(offerProduct.VAT*100).toFixed(2)) : null;
 			// EFRCL- 268955-Spain - correct mistakes on Commercial agreement templates
 			// let whereRoyalDecree = {
 			// 	ProductPackID: offerProduct.ProductCode,
@@ -3099,15 +3354,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				return tmpFreeGoodOther;
 			}));
 
-			// if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
-			// this should only be done for Italy & only for vatInWords
-			let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
-			if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
-				vatInWords += ",00";   
-			};
+			// // if no decimals on tax rate, add ',00' manually (n2words doesn't support integers like 10 or 21)
+			// // this should only be done for Italy & only for vatInWords
+			// let vatInWords = NumberHelper.formatNumberToText(offer.COUNTRYCODE,dVat);
+			// if(Number.isInteger(dVat) && offer.COUNTRYCODE === 'IT'){
+			// 	vatInWords += ",00";   
+			// };
 
 			const priceConditionCurrentSectionTaiwan = await tx.run(SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({ ProductCode: offerProduct.ProductCode, INSTITUTE_ID: offer.INSTITUTE_ID }));
-			const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
+			//const pricingPolicy = await tx.run(SELECT.one.from(PricingPolicy).where({ ProductPackID: offerProduct.ProductCode, CountryCode: offer.COUNTRYCODE }));
 			const productFreeGoodsOther = productConditions[0]?.FreeGoodsOther?.find(fg => fg.ProductPackId === offerProduct.ProductCode);
 			const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({
 				OfferID: offer.OFFERID,
@@ -3135,10 +3390,11 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				MANUFACTURER: offerProduct.MANUFACTURER,
 				SHELFLIFE: offerProduct.SHELFLIFE,
 				PRESENTATION: offerProduct.PRESENTATION,
-				VAT: dVat,
-				VAT_IN_WORDS: vatInWords,
+				VAT: 0,
+				VAT_IN_WORDS: '',
 				PRODUCT_COMMENT: productInfo.CommnonProductInfo.ProductComment,
 				UNIT: offerProduct.UNIT,
+				TOTAL_VOLUME: productInfo.CommnonProductInfo.TotalVolume,
 				PAID_VOLUME: productInfo.CommnonProductInfo.PaidVolume,
 				SORTER: offerProduct.SORTER,
 				CURRENCY: offer.CURRENCY,
@@ -3176,13 +3432,13 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				NET_PRICE: offerProduct.NET_PRICE,
 				ADDITIONAL_DISCOUNT: offerProduct.ADDITIONAL_DISCOUNT,
 				ADDITIONAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.ADDITIONAL_DISCOUNT),
-				MAX_PRICE_NHS_PP: productPricing.MaxPriceNhsPP,
-				MAX_PRICE_NHS_PP_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPP),
-				MAX_PRICE_NHS_PU: productPricing.MaxPriceNhsPU,
-				MAX_PRICE_NHS_PU_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productPricing.MaxPriceNhsPU),
-				MAX_PRICE_NHS_PU_WITH_VAT: productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT),
-				MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, (productPricing.MaxPriceNhsPU + (productPricing.MaxPriceNhsPU * offerProduct.VAT))),
-				CONTRACT_START_DATE: productPricing.ContractStartDate,
+				MAX_PRICE_NHS_PP: 0,
+				MAX_PRICE_NHS_PP_IN_WORDS: '',
+				MAX_PRICE_NHS_PU: 0,
+				MAX_PRICE_NHS_PU_IN_WORDS: '',
+				MAX_PRICE_NHS_PU_WITH_VAT: 0,
+				MAX_PRICE_NHS_PU_WITH_VAT_IN_WORDS: '',
+				CONTRACT_START_DATE: '',
 				NET_OFFER_PRICE_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, offerProduct.NET_OFFER_PRICE),
 				CUSTOMER_ID: institute.CustomerID,
 				COGS: offerProduct.COGS,//This is now in offer currency (used to be EUR)
@@ -3191,6 +3447,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
 				GROSS_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales),
 				NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
+				NET_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetSales),
+				NET_OFFER_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetOfferSales,
+				NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetOfferSales),
 				NET_SALES_EUR_BUDGET: productInfo.CommnonProductInfo.NetSalesEurBudget,
 				NET_SALES_EUR_SPOT: productInfo.CommnonProductInfo.NetSalesEurSpot,
 				GROSS_MARGIN_EUR_BUDGET: productInfo.CommnonProductInfo.GrossMarginEurBudget,
@@ -3268,8 +3527,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				QTY_THRESHOLD: offerProduct.QTY_THRESHOLD,
 				ProductClass: offerProduct.ProductClass,
 				ProductDescription: offerProduct.ProductDescription,
-				FINAL_DISCOUNT: finalDiscount,
-				FINAL_DISCOUNT_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, finalDiscount),
+				FINAL_DISCOUNT: 0,
+				FINAL_DISCOUNT_IN_WORDS: '',
 				PRODUCT_FULL_DESCRIPTION: offerProduct.PRODUCT_FULL_DESCRIPTION,
 				LOTID: offerProduct.LOTID,
 				// PERCENTAGE: RoyalDecreePercentageValue.Percentage,
@@ -3296,7 +3555,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				Level2Discount2: productConditionstmp[0] && productConditionstmp[0].Level2Discount2,
 				AnnualDiscount_Percentage: productConditionstmp[0] && productConditionstmp[0].AnnualDiscount_Percentage,
 				NegotiationPrice: productConditionstmp[0] && productConditionstmp[0].NegotiationPrice,
-				PricingPolicyValue: pricingPolicy?.Value,
+				PricingPolicyValue: offerProduct.UK_BUDGETED_PROFITABILITY,
 				PriceConditionCurrentSectionTaiwan: priceConditionCurrentSectionTaiwan,
 				FreeGoodsQuantity: productFreeGoodsOther?.FreeGoodsOther,
 				FreeGoodsOther_Step: productFreeGoodsOther?.FreeGoodsOther_Step,
@@ -3305,6 +3564,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				ADD_INCLUDE: productFreeGoodsOther?.ADD_INCLUDE,
 				Level3Discount1: productConditionstmp[0] && productConditionstmp[0].Level3Discount1,
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
+				Region: offer.Region,
+				AlternateOfferYN: offerProduct.AlternateOfferYN
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -3603,7 +3864,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		let requestedVolume = product.REQUESTED_VOLUME;
 		//let requestedUnit = toUnitFactor * requestedVolume;
 
-		let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+		//let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+		let focAmount = 0;
+		switch (product.FOC_ABS_PCT)
+		{
+				case "PCT": focAmount = Math.round(product.FOC * requestedVolume); break;
+				case "ABS": focAmount = Math.round(product.FOC); break;
+				case "STP": focAmount = Math.floor(requestedVolume / product.FOC_STEP) * product.FOC; break;
+				default: break;
+		};
 		let focAmountUnit = toUnitFactor * focAmount;
 		let totalVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume : requestedVolume + focAmount;
 		let totalVolumeUnit = toUnitFactor * totalVolume;
@@ -3628,7 +3897,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		let netPriceUnitEurBudget = netPriceUnit / product.BUDGET_RATE;
 
 		let grossSales = offerPrice * paidVolume;
-	
+		let netOfferSales = netOfferPrice * totalVolume;
 		let netSales = netPrice * totalVolume;
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
@@ -3720,6 +3989,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			FocString: focString,
 			RequestedQuantityString: requestedQuantityString,
 
+			TotalVolume: totalVolume,
 			TotalVolumeUnit: totalVolumeUnit,
 			PaidVolume: paidVolume,
 			PaidVolumeUnit: paidVolumeUnit,
@@ -3739,6 +4009,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			CogsEurPack: cogsEurPack,
 
 			GrossSales: grossSales,
+			NetOfferSales: netOfferSales,
 			NetSales: netSales,
 			NetSalesEurBudget: netSalesEurBudget,
 			NetSalesEurSpot: netSalesEurSpot,
@@ -3965,28 +4236,33 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
-			prd.OFFER_PRICE_VAT = ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
+			prd.OFFER_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
-			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
+			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
-			prd.NET_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
-			prd.NegotiationPrice = ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
-			prd.Price0 = prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
-			prd.Price1 = prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
-			prd.Price3 = prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
+			prd.NET_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
+			prd.NET_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
+			prd.NegotiationPrice = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NegotiationPrice, 3, 3) : ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
+			prd.Price0 = prd.Region === 'MEA' ? prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 3, 3) : prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
+			prd.Price1 = prd.Region === 'MEA' ? prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 3, 3) : prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
+			prd.Price3 = prd.Region === 'MEA' ? prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 3, 3) : prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
 			prd.Level1Discount1 = ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
 			prd.Level2Discount1 = ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
 			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
-			prd.Level3Discount1 = ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
+			prd.Level3Discount1 = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.Level3Discount1, 3, 3) : ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
 			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
+			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
+			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
+
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERDATE;
+		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERVALIDITY;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
@@ -4241,4 +4517,147 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	
 		return { value: stream }    
 	}
+
+	const getNextValue = async (table, fieldname) => {
+		let results = await cds.run(SELECT.from(table, ['Max(' + fieldname + ') as max']));
+		let nextValue = 1;
+		if (results[0].max) {
+			nextValue = results[0].max + 1
+		}
+		return nextValue
+	}
+
+	srv.on(
+		['CREATE','UPDATE'], 'PT_TMBDPR', 
+		async (req) => {
+			try{
+			await updateProductPricing(req);
+			await updatePriceCondition(req);
+
+			return req.data;
+			}
+			catch(error){
+				console.error('Error in Price UPDATE after FOC');
+				return req.reject(403, error?.message||"Error in Price UPDATE after FOC");
+			}
+		}
+	);
+
+	const updatePriceCondition = async function(req){
+
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		const priceConditionClassification = await SELECT.one.from(PriceConditionClassification).where({
+			ID: priceCondition.PriceConditionClassification_ID
+		});
+
+		const mappedPriceCondition = mappingPriceCondition(req, priceConditionClassification.ConditionType);
+
+		if (priceCondition) {
+			await UPDATE(PriceCondition)
+				.with(mappedPriceCondition)
+				.where({
+					ID: priceCondition.ID
+				});
+		}
+	}
+
+	const mappingPriceCondition = function(req, ConditionType){
+		const mappings = {
+			"Discount" : {
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price1: req.data.OfferPrice
+			},
+			"Price" : {
+				NetOfferPrice: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetPrice,
+				Price1: req.data.OfferPrice
+			},
+			"PriceWithFOC" : {
+				NetOfferPrice: req.data.NetofferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice
+			},
+			"DiscountWithFOC" : {
+				NetOfferPrice: req.data.NetofferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice
+			},
+			"TaiwanPrice": {
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"TaiwanDiscount": {
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			}
+		}
+
+		return mappings[ConditionType];
+	}
+
+	const updateProductPricing = async function(req){
+
+		const whereCondition = {
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode,
+			Active: 1,
+			ActiveTier: 0,
+			LotID: 1
+		};
+
+		const productPricing = await SELECT.one.from(PT_TMBDPR).where(whereCondition);
+
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+
+		let foc = null;
+		if(priceCondition){
+			foc = await SELECT.one.from(FreeGoodsOther).where({
+					PriceCondition_ID: priceCondition?.ID,
+					ProductPackId: req.data.ProductCode
+			});
+		}
+
+		const mappedPTTMBDPR = mapPTTMBDPR({priceCondition:req.data, foc});
+
+		if(productPricing){
+			await UPDATE(PT_TMBDPR).with (mappedPTTMBDPR).where(whereCondition)
+		}
+	}
+
+	function mapPTTMBDPR({priceCondition, foc}){
+		return {
+			FOC                   : foc?.FreeGoodsOther || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			OfferPrice            : priceCondition.OfferPrice,
+			NetofferPrice         : priceCondition.NetofferPrice,
+			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT,
+			NetPrice              : priceCondition.NetPrice
+		}
+	}
+	
 }
