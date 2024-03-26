@@ -88,58 +88,43 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         return UPDATE(PriceAgreements).with({EmailNotificationSent: true}).where({ ID: priceAgreementID });
     };
 
-    // mapPriceAgreementsToMails = (templates,mail) => data => {
+    mapPriceAgreementsToMails = (templates,mail) => data => {
 
-    //     let outbox = [];
-    //     const uniqueUsers = [...new Set(data.map(item => item.OfferId))];
+        let outbox = [];
+        const uniqueUsers = [...new Set(data.map(item => item.OfferId))];
         
-    //      for (let user of uniqueUsers) {
+         for (let user of uniqueUsers) {
 
-    //         let dataFilteredByUser = data.filter(d => d.OfferId === user);
+            let dataFilteredByUser = data.filter(d => d.OfferId === user);
             
 
-    //         if(dataFilteredByUser && dataFilteredByUser.length > 0){
-    //             outbox.push({
-    //                 CountryCode: dataFilteredByUser[0].CountryCode,
-    //                 TenderID: dataFilteredByUser[0].TenderId,
-    //                 OfferID: dataFilteredByUser[0].OfferId,
-    //                 Sender: 'FAST-Admin@bayer.com',
-    //                 Recipients:dataFilteredByUser[0].UserEmail,
-    //                 Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
-    //                 MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), {
-    //                     data: {
-    //                         FormatedExpiryDate :this.dateToDDMMYYYY(dataFilteredByUser[0].ExpiryDate),
-    //                         PriceAgreements: dataFilteredByUser 
-    //                     }
-    //                 }),
-    //                   Sent: false
-    //             });
+            if(dataFilteredByUser && dataFilteredByUser.length > 0){
+                outbox.push({
+                    CountryCode: dataFilteredByUser[0].CountryCode,
+                    TenderID: dataFilteredByUser[0].TenderId,
+                    OfferID: dataFilteredByUser[0].OfferId,
+                    Sender: 'FAST-Admin@bayer.com',
+                    Recipients:dataFilteredByUser[0].UserEmail,
+                    Subject: this.findTemplate(templates,mail,dataFilteredByUser[0]).title,
+                    MailBody: this.generateMailBody(this.findTemplate(templates,mail,dataFilteredByUser[0]), {
+                        data: {
+                            FormatedExpiryDate :this.dateToDDMMYYYY(dataFilteredByUser[0].ExpiryDate),
+                            PriceAgreements: dataFilteredByUser 
+                        }
+                    }),
+                      Sent: false
+                });
                 
-    //         }
-    //     }
-    //     if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
-    //         console.log(`No template found for Cancelled Price Agreement ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
-    //         return;
-    //     }
-    //     return outbox;
+            }
+        }
+        if(!outbox || (!outbox[0].MailBody || outbox[0].MailBody === 'undefined')) {
+            console.log(`No template found for Cancelled Price Agreement ${outbox[0].TenderID} with countrycode ${outbox[0].CountryCode}`);
+            return;
+        }
+        return outbox;
       
-    // }
-    mapPriceAgreementsToMails = (templates,mail) => pas => pas
-    .map(pa => ({
-        CountryCode: pa.CountryCode,
-        TenderID: pa.TenderId,
-        OfferID: pa.OfferId,
-        Sender: 'FAST-Admin@bayer.com',
-        Recipients: pa.UserEmail,
-        Subject: this.findTemplate(templates,mail,pa).title,
-        MailBody: this.generateMailBody(this.findTemplate(templates,mail,pa), pa),
-        Sent: false
-    }))
-    .filter(pa =>{
-        // console.log(pa);
-        if(!pa.MailBody || pa.MailBody === 'undefined')console.log(`No template found for Price Agreement of tender ${pa.TenderID} with countrycode ${pa.CountryCode}`)
-        return !!pa.MailBody && pa.MailBody !== 'undefined';
-    });
+    }
+ 
 
     findTemplate = (templates,templateid,pa) => templates.find(template => 
         template.CountryCode === 'ES' && 
