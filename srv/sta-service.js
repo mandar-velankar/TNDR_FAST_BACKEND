@@ -1764,15 +1764,16 @@ module.exports = async (srv) => {
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
 				NetOfferPrice: req.data.OfferPrice,
-				Price2: req.data.NetPrice,
+				Price2: req.data.OfferPrice,
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
 				Discount: req.data.Discount,
+				Price3: req.data.NetPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Tax: req.data.Tax,
 				Price1: req.data.OfferPrice, 
-				Level2Discount1: req.data.Deductions,
+				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"Price" : {
@@ -1783,18 +1784,20 @@ module.exports = async (srv) => {
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
 				Discount: req.data.Discount,
-				Price2: req.data.NetPrice,
+				Price3: req.data.NetPrice,
+				Price2: req.data.OfferPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Tax: req.data.Tax,
 				Price1: req.data.OfferPrice, 
-				Level2Discount1: req.data.Deductions,
+				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"PriceWithFOC" : {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
-				Price2: req.data.Discount,
+				Level1Discount1: req.data.Discount,
+				Price2: req.data.NetOfferPrice,
 				NetOfferPrice: req.data.NetOfferPrice,
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
@@ -4701,7 +4704,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		const mappings = {
 			"Discount" : {
 				NetOfferPrice: req.data.OfferPrice,
-				Price2: req.data.NetPrice,
+				Price2: req.data.OfferPrice,
+				Price3: req.data.NetPrice,
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
 				Price1: req.data.OfferPrice
@@ -4709,14 +4713,16 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			"Price" : {
 				NetOfferPrice: req.data.OfferPrice,
 				NetPrice: req.data.NetPrice,
+				Price3: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
-				Price2: req.data.NetPrice,
+				Price2: req.data.OfferPrice,
 				Price1: req.data.OfferPrice
 			},
 			"PriceWithFOC" : {
 				NetOfferPrice: req.data.NetofferPrice,
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetofferPrice,
 				Price3: req.data.NetPrice,
 				Price1: req.data.OfferPrice
 			},
@@ -4725,7 +4731,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
 				Price2: req.data.NetofferPrice,
-				Price3: req.data.NetPrice
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice
 			},
 			"TaiwanPrice": {
 				Price2: req.data.NetofferPrice,
