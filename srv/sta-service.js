@@ -4054,15 +4054,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
         	console.log(`Number of ZuelligExtractView data fetched: ${zuelligExtract.length}`);
 
-			console.log("Fetching offerProducts...");
-			startTime = moment();
-			console.log("Start Time: ", startTime.format());
-			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
-			endTime = moment();
-			console.log("End Time: ", endTime.format());
-        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
-        	console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
-
 			const csvConfig = mkConfig({ useKeysAsHeaders: true, useTextFile: true });
 			const zuellig = req.data.Zuellig;
 			const fileName = zuellig ? 'Zuellig Extract' : 'Single View';
@@ -4084,7 +4075,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			if (zuellig) {
 				mappedZuelligExtract = mappedZuelligExtractView(zuelligExtract);
 			}else {
-				mappedZuelligExtract = mappedSingleView(zuelligExtract, offerProducts);
+				mappedZuelligExtract = mappedSingleView(zuelligExtract);
 			}
 			endTime = moment(); 
 			console.log("End Time: ", endTime.format());
@@ -4124,15 +4115,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
         	console.log(`Number of ZuelligExtractView data fetched: ${zuelligExtract.length}`);
 
-			console.log("Fetching offerProducts...");
-			startTime = moment();
-			console.log("Start Time: ", startTime.format());
-			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: "TW"});
-			endTime = moment();
-			console.log("End Time: ", endTime.format());
-        	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
-        	console.log(`Number of offerProducts data fetched: ${offerProducts.length}`);
-
 			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
@@ -4145,7 +4127,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Mapping data...");
 			startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let mappedTaiwanFASTData = mappedSingleView(zuelligExtract, offerProducts);
+			let mappedTaiwanFASTData = mappedSingleView(zuelligExtract);
 			endTime = moment(); 
 			console.log("End Time: ", endTime.format());
 			console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4186,16 +4168,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		});
 	}
 
-	function mappedSingleView (zuelligExtract, offerProducts) { // TaiwanFASTData
+	function mappedSingleView (zuelligExtract) { // TaiwanFASTData
 		return zuelligExtract.map(item => {
-			const products = offerProducts.filter(pr => pr.OfferID === item.OfferID);
 			return {
 				"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
 				"CWID": item.SubmittedBy,
 				"BU": item.BU,
 				"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
 				"PreviousNetPrice": Number(item.Price3).toFixed(4),
-				"CountProducts": products.length,
+				"CountProducts": item.CountProducts,
 				"Invoice Price": Number(item.Price1).toFixed(4),
 				"HandlingCharge_Amount": 0,
 				"Institute Type": item.InstituteType,
