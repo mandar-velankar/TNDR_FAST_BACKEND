@@ -758,6 +758,8 @@ entity PT_TMTRRES {
         Appeal            : String;
         InfoNeeded        : String;
         TotalAwardedValue : Double;
+        ContractStartDate : Date;
+        ContractEndDate   : Date;
         Custom            : Custom; // Custom attributes for templates usage
     key LotID             : Integer default 1;
         //Associations
