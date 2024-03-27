@@ -341,6 +341,7 @@ entity PT_TMCTPRDPCK{
 	RegistrationValidUntil : Date; 
 	ProductScope: String(100);
 	ProductGroup: String;
+	OutSourcedStatus: String;
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
