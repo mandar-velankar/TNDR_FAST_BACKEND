@@ -613,7 +613,7 @@ entity MASTER_COUNTRY_CLASSIFICATION : cuid {
 
 entity MASTER_COUNTRY_CHANNELS: cuid, managed {
     ChannelName : String(30);
-    ChannelCountry : String(2);
+    ChannelCountry : String;
 	Country:Association to PT_TMCTRY on Country.CountryCode = ChannelCountry;
 }
 
