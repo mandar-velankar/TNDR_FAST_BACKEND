@@ -489,7 +489,30 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }where product.Offer.OfferStatus.STATUS = 'Offer Created' and product.ActiveProduct = 1
     group by product.OfferID, product.Active, product.Offer.OfferStatus.STATUS, product.ActiveProduct;
 
-    entity AwardedProducts as projection on TransactionalData.PT_TMTRRES;
+    entity AwardedProducts as select from TransactionalData.PT_TMTRRES as result
+        inner join OfferProducts as product on result.OfferID = product.OfferID
+                                                          and result.ProductCode = product.ProductCode
+                                                          and result.LotID = product.LotID
+    {
+        *,
+        result.TenderID,        
+    key result.OfferID,        
+        result.CountryCode,       
+    key result.ProductCode, 
+        result.Active,
+        result.LotID,
+        product.SORTER
+    };
+
+    entity OfferProducts as projection on TransactionalData.PT_TMOFPR {
+        TenderID,        
+    key OfferID,        
+        CountryCode,       
+    key ProductCode,
+    key LotID,
+    key Active,
+        SORTER
+    };
     entity AwardedProductFormView as select from TransactionalData.PT_TMTRRES as result
         inner join TransactionalData.PT_TMOFPR as product on result.OfferID = product.OfferID
                                                           and result.ProductCode = product.ProductCode
@@ -756,4 +779,5 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MailTemplates                                as projection on AdminData.MailTemplate;
     entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
+    entity StandardTenderFOCInformation                 as projection on TransactionalDataViews.StandardTenderFOCInformation;
 }

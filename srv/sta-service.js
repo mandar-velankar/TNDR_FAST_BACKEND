@@ -1410,7 +1410,8 @@ module.exports = async (srv) => {
 	const upsertMasterCompetitors = async function(req){
 
 		const masterCompetitors = await SELECT.one.from(MasterCompetitors).where({
-			ID: req.data.Custom_String_1,
+			CompetitorProduct	: req.data.AWARDEDPRODUCT, 
+			CompetitorCompany	: req.data.AWARDEDCOMPANY,
 			CountryCode: req.data.Custom_String_2,
 			ProductCode: req.data.PRODUCTCODE
 		});
@@ -2433,6 +2434,18 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		const result = res.reduce(function (a, b) {
 			let company = b.CompetitorCompany;
 			let currentValueIndex = a.findIndex(item => item.CompetitorCompany === company);
+			if (currentValueIndex == -1) {
+				a.push(b);
+			}
+			return a;
+		}, []);
+		return result;
+	});
+
+	srv.on('READ', 'MasterCompetitorProducts', async (req, next) => {
+		const res = await next();
+		const result = res.reduce(function (a, b) {
+			let currentValueIndex = a.findIndex(item => item.CompetitorProduct === b.CompetitorProduct);
 			if (currentValueIndex == -1) {
 				a.push(b);
 			}

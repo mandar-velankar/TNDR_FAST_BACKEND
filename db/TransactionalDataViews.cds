@@ -2640,3 +2640,63 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             inst.InstituteType
     }
     where CountryCode = 'TW';
+
+    entity StandardTenderFOCInformation as select from TransactionalData.PT_TMTEND as tender
+    inner join TransactionalData.PT_TMOFRS as offer 
+        on offer.TenderID = tender.TenderID
+        and offer.Active = 1
+    inner join TransactionalData.PT_TMOFPR as product 
+        on product.OfferID = offer.OfferID
+        and product.Active = 1
+        and product.ActiveProduct = 1
+    inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+        on priceConditionClassification.CountryCode = product.CountryCode
+        and priceConditionClassification.Classification = tender.Classification
+        and priceConditionClassification.Division = offer.Division
+        and priceConditionClassification.isMain = 'true' 
+        and priceConditionClassification.ProductType = 'All'
+    inner join MasterData.PT_TMINST as institute 
+        on tender.InstituteID = institute.InstituteID   
+    inner join TransactionalData.PriceCondition as priceCondition 
+        on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+        and product.OfferID = priceCondition.OfferID
+        and product.ProductCode = priceCondition.ProductCode
+    left outer join TransactionalData.FreeGoodsOther as foc
+        on foc.PriceCondition.ID = priceCondition.ID
+    inner join MasterData.PT_TMPRDPCK as productPacks
+        on productPacks.PRODUCTPACKID = foc.ProductPackId
+        and productPacks.ACTIVERECORD = 'Yes' 
+    {
+        tender.TenderID,
+        key offer.OfferID,
+        key tender.CountryCode,
+        product.ProductCode,
+        foc.ProductPackId,
+        offer.Currency,
+        product.SKU.PRODUCTPACKNAME as MainProductName,
+        productPacks.PRODUCTPACKNAME as FOCProductName,
+        case
+            when foc.FreeGoodsOther_ABS_PCT = 'PCT'
+                then round(100 * foc.FreeGoodsOther, 2) || '%'
+            when foc.FreeGoodsOther_ABS_PCT = 'ABS'
+                then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+            when foc.FreeGoodsOther_ABS_PCT = 'STP'
+                then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+        end as Bonus:String,
+        foc.FreeGoodsOther_Step as MinOrderQty,
+        foc.FreeGoodsOther_ABS_PCT as Type,
+        foc.ADD_INCLUDE
+    }
+    group by tender.TenderID,
+        offer.OfferID,
+        tender.CountryCode,
+        product.ProductCode,
+        product.UnitPerPack,
+        foc.ProductPackId,
+        offer.Currency,
+        productPacks.PRODUCTPACKNAME,
+        product.SKU.PRODUCTPACKNAME,
+        foc.FreeGoodsOther,
+        foc.FreeGoodsOther_Step,
+        foc.FreeGoodsOther_ABS_PCT,
+        foc.ADD_INCLUDE;
