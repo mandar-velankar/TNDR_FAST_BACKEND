@@ -402,7 +402,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             //first, calculate todays date - 1 day, as such that we can use this as a filter in our select
 
 
-            const whereExpr = `ExtendPriceAgreement = true` //and expiry date is today - 1 
+            const whereExpr = `ExtendPriceAgreement = true and isCancelled = false and (Status != 'Cancelled' or Status is null)` //and expiry date is today - 1 
             const priceAgreements = await tx.run(SELECT.from(PriceAgreements).where(whereExpr));
 
             let aPriceAgreementsUpdated = [];
