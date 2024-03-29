@@ -18,11 +18,30 @@ module.exports = {
 
     getWhereValues: function(req, fieldName) {
         let results = [];
-        req.query.SELECT.where.forEach((item, index, arr) => {
-            if(item.ref && item.ref[0] === fieldName) { 
-                results.push(arr[index + 2].val);
+
+        function traverse(arr) {
+            for (let i = 0; i < arr.length; i++) {
+                const item = arr[i];
+                if (Array.isArray(item)) {
+                    traverse(item);
+                } else if (item.ref && item.ref[0] === fieldName) {
+                    // Check if the next item is a '=' operator
+                    const nextItem = arr[i + 1];
+                    if (nextItem === '=') {
+                        // The InstituteId should be two positions ahead
+                        const idItem = arr[i + 2];
+                        if (idItem && idItem.val !== undefined) {
+                            results.push(idItem.val);
+                        }
+                    }
+                } else if (item.xpr) {
+                    // If it's an expression, recursively traverse it
+                    traverse(item.xpr);
+                }
             }
-        })
+        }
+
+        traverse(req.query.SELECT.where);
         return results;
     },
 
