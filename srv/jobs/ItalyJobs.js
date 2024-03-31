@@ -647,7 +647,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     MercadoPublicoIssuer: "",
                     RegionID: cust.RegionID,
                     VatCode:cust.E1KNA1M_STCEG,
-                    TaxCode:cust.E1KNA1M_STCD1 //Fiscal Code
+                    TaxCode:cust.E1KNA1M_STCD1, //Fiscal Code
+                    INCOTerms: "",
+                    PaymentTerms: this.getPaymentTerms(cust.E1KNVVM_ZTERM, tx)||"",
+                    ForAllBrands: true,
+                    DirectTender: true
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
                     // --"E1KNVVM_ZTERM",--PaymentTerms
@@ -719,7 +723,11 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
                     // MercadoPublicoIssuer: "",
                     RegionID: cust.RegionID,
                     VatCode:cust.E1KNA1M_STCEG,
-                    TaxCode:cust.E1KNA1M_STCD1 //Fiscal Code
+                    TaxCode:cust.E1KNA1M_STCD1 ,//Fiscal Code
+                    INCOTerms: "",
+                    PaymentTerms: cust.PaymentTerms,
+                    ForAllBrands: true,
+                    DirectTender: true
                     // --"E1KNVVM_INCO1",--INCO1
                     // --"E1KNVVM_INCO2",--INCO2
                     // --"E1KNVVM_ZTERM",--PaymentTerms
@@ -748,6 +756,15 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
         }   
 
     };
+/**
+     *
+     * @param {String} ZTERM ZTERM
+     * @returns {String} paymentterm
+     */
+async getPaymentTerms(ZTERM, tx){
+    const { PaymentTerms} = this.db.entities("com.bayer.SXTENDER.MasterData");
+    let paymentterm =  await tx.run(cds.parse.cql (`SELECT Description from ${PaymentTerms.name}
+    WHERE E1KNVVM_ZTERM = '${ZTERM}'`));
 
 
     /**
