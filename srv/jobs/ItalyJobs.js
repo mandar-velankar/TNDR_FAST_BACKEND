@@ -767,7 +767,7 @@ async getPaymentTerms(ZTERM, tx){
     WHERE E1KNVVM_ZTERM = '${ZTERM}'`));
 
     return paymentterm;
-}
+};
 
     /**
      * 
