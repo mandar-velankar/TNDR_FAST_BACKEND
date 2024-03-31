@@ -766,6 +766,8 @@ async getPaymentTerms(ZTERM, tx){
     let paymentterm =  await tx.run(cds.parse.cql (`SELECT Description from ${PaymentTerms.name}
     WHERE E1KNVVM_ZTERM = '${ZTERM}'`));
 
+    return paymentterm;
+};
 
     /**
      * 
