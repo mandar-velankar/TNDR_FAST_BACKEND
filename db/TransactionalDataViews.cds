@@ -2347,6 +2347,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key product.ProductCode,
     key tender.CountryCode,
     offer.Currency,
+    offer.CreationDate,
     product.Price.NetofferPrice as NetofferPriceBDPR,
     product.Price.NetPrice as NetPriceBDPR,
     product.UnitPerPack,
@@ -2403,6 +2404,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         tender.CountryCode,
         tender.TenderName,
         offer.Currency,
+        offer.CreationDate,
         offer.SubmittedOn,
         institute.InstituteID,
         institute.InstituteName,
@@ -2447,27 +2449,64 @@ left outer join TransactionalData.PriceCondition as priceCondition
         product.Results.Outcome,
         foc.ProductPackId;
 
-entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory{
-        key ProductCode,
-        key INSTITUTE_ID,
-        Currency,
-        Price0,
-        Price1,
-        Level2Discount1,                
-        Level2Discount2,
-        Price2,
-        AnnualDiscountForBranch,
-        Level3Discount1,
-        Price3,
-        AwardedPrice,
-        TotalYearlyValueMainCustomer,
-        TotalYearlyValueBranch,
-        TotalDiscountNHI,
-        TotalDiscountInvoice,
-        GeneralDiscount_Amount,
-        SecondDiscount_Amount
+entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
+inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
+                                                and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
+                                                and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate 
+{
+    key standardTenderHistory.ProductCode,
+    key standardTenderHistory.INSTITUTE_ID,
+    standardTenderHistory.Currency,
+    standardTenderHistory.Price0,
+    standardTenderHistory.Price1,
+    standardTenderHistory.Level2Discount1,                
+    standardTenderHistory.Level2Discount2,
+    standardTenderHistory.Price2,
+    standardTenderHistory.AnnualDiscountForBranch,
+    standardTenderHistory.Level3Discount1,
+    standardTenderHistory.Price3,
+    standardTenderHistory.AwardedPrice,
+    standardTenderHistory.TotalYearlyValueMainCustomer,
+    standardTenderHistory.TotalYearlyValueBranch,
+    standardTenderHistory.TotalDiscountNHI,
+    standardTenderHistory.TotalDiscountInvoice,
+    standardTenderHistory.GeneralDiscount_Amount,
+    standardTenderHistory.SecondDiscount_Amount
+}
+union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
+inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
+                                                and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
+                                                and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate
+inner join MasterData.PT_TMINSHIER as hier1 on standardTenderHistory.INSTITUTE_ID = hier1.InstituteID
+inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.ParentInstituteID
+{
+    key standardTenderHistory.ProductCode,
+    key hier2.ParentInstituteID as INSTITUTE_ID: Integer,
+    standardTenderHistory.Currency,
+    standardTenderHistory.Price0,
+    standardTenderHistory.Price1,
+    standardTenderHistory.Level2Discount1,                
+    standardTenderHistory.Level2Discount2,
+    standardTenderHistory.Price2,
+    standardTenderHistory.AnnualDiscountForBranch,
+    standardTenderHistory.Level3Discount1,
+    standardTenderHistory.Price3,
+    standardTenderHistory.AwardedPrice,
+    standardTenderHistory.TotalYearlyValueMainCustomer,
+    standardTenderHistory.TotalYearlyValueBranch,
+    standardTenderHistory.TotalDiscountNHI,
+    standardTenderHistory.TotalDiscountInvoice,
+    standardTenderHistory.GeneralDiscount_Amount,
+    standardTenderHistory.SecondDiscount_Amount
+};
 
-}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE;
+entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHistory
+{
+    key ProductCode,
+    key INSTITUTE_ID,
+    Max(CreationDate) as MaxCreationDate: Date
+} where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE
+group by ProductCode, INSTITUTE_ID;
 
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
