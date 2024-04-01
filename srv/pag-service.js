@@ -789,7 +789,31 @@ module.exports = async (srv) => {
         console.log(`Start synchronisation of PriceAgreements`);
 
         console.log(`Prepare categories of customer prices`);
-        const mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
+        const tx = cds.tx();
+        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
+        let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
+         //EHQUT-CR2-New
+         let instituteID = mainPriceConditions.map(item => item.InstituteId);
+         let SoldToInstituteType = [];
+         let ShipToInstitute = [];
+         let CombinationValue;
+        if (instituteID.length > 0) {
+            const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
+            let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
+            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
+            ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
+
+            mainPriceConditions = mainPriceConditions.filter(function (mainobj) {
+                return !ShipToInstitute.some(function (shiptoobj) {
+                    return mainobj.InstituteId == shiptoobj.InstituteID;
+                });
+            });
+        }
+        if (SoldToInstituteType.length > 0 && ShipToInstitute.length > 0) {
+            CombinationValue = true;
+        } else {
+            CombinationValue = false;
+        }
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1" || item.PriceCondition === "YAW2");
         const allCustomerPrices = mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions);
@@ -804,7 +828,18 @@ module.exports = async (srv) => {
         const updateFOCConditionPromises = focPriceConditions.map((custPrice,index) => updateFOCcustPrices(custPrice,index));
        // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
 
-        const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
+         //CR2-New
+        let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
+        effectiveDatearray = Array.from(new Set(effectiveDatearray));
+        let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+        let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
+        let rappelArray, updateRappelConditionPromises;
+        if (rappelPriceConditions.length > 0 && priceAgreement.ApplyAll === true && CombinationValue === true) {
+            rappelArray = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
+            updateRappelConditionPromises = rappelArray[0].map(custPrice => updateRappelcustomerPrices(custPrice));
+        } else if (rappelPriceConditions.length > 0 && priceAgreement.ApplyAll === false) {
+            updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice, CombinationValue));
+        }
 
         // Synchronize
         console.log(`Process requests of customer prices`);
@@ -880,7 +915,208 @@ module.exports = async (srv) => {
         }
         // }
     };
+  //CR2-New
+  async function updatearray(effectiveDatearray, ShipToTypeCustomer, SoldToType, customerPrices) {
+    const tx = cds.tx();
+    var finalarray = [], ShipToType;
+    const header = [];
 
+      for (let i = 0; i < effectiveDatearray.length; i++) {
+          let effectivedate = effectiveDatearray[i];
+          let SoldToCustomer = SoldToType.filter(d => d.EffectiveDate === effectiveDatearray[i]);
+          let SoldTOCustomerPrice = customerPrices.filter(d => d.ID === SoldToCustomer[0].ID);
+          SoldTOCustomerPrice = SoldTOCustomerPrice[0];
+          ShipToType = ShipToTypeCustomer.filter(d => d.EffectiveDate === effectiveDatearray[i]);
+          let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: SoldTOCustomerPrice.PriceAgreementId }));
+          if (!priceAgreement) {
+              console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.PriceAgreementId}`);
+              console.error(`No priceAgreement was found for PriceAgreementID: ${SoldTOCustomerPrice.PriceAgreementId}`);
+              return { status: false, customerPrice: SoldTOCustomerPrice };
+          }
+          let priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({ PriceAgreement_ID: SoldTOCustomerPrice.PriceAgreementId }).where({ PriceConditionCode: SoldTOCustomerPrice.PriceCondition }));
+        if (!priceCondition) {
+            return req.reject(404, `No priceCondition was found for "${SoldTOCustomerPrice.PriceCondition}" with PriceAgreementID "${SoldTOCustomerPrice.PriceAgreementId}"`);
+            //return { status: false, customerPrice: customerPrice };
+            //console.error(`Error Rappel customer price: ${SoldTOCustomerPrice.ID}`);
+            // console.error(`No priceCondition was found for "${customerPrice.PriceCondition}" with PriceAgreementID "${customerPrice.PriceAgreementId}"`);
+
+        }
+
+        const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: priceAgreement.TenderId }));
+
+
+        const effectiveDate = new Date(SoldTOCustomerPrice.EffectiveDate);
+        const expiryDate = new Date(SoldTOCustomerPrice.ExpiryDate);
+        const Country = ServiceHelper.buildFullWhere("CountryCode", "=", SoldTOCustomerPrice.CountryCode);
+        let priceAgreementInstitutehead = await tx.run(SELECT.one.from(PT_TMINST).where(Country).where({ InstituteID: priceAgreement.InstituteId }));
+
+        const bonem = parseInt(priceAgreementInstitutehead.CustomerID);
+        console.log(effectiveDate, "itemeffectivedare");
+        const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
+        const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
+
+        header.push({
+            "customerPrice": SoldTOCustomerPrice,
+            "BONEM": bonem,
+            "BOTEX": tender.SAPID,
+            "DATAB": datab,
+            "DATBI": datbi,
+            "BOSTA": "B",
+            "Items": []
+
+        });
+        let items = [];
+
+          for (let a = 0; a < ShipToType.length; a++) {
+              let ShipToType1 = ShipToType[a];
+              const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", ShipToType1.CountryCode);
+              const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", ShipToType1.InstituteId);
+              let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+
+              let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: ShipToType1.PriceAgreementId }));
+              let priceAgreementInstitute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where({ InstituteID: priceAgreement.InstituteId }));
+
+
+              const kunnr = parseInt(institute.CustomerID);
+              const matnr = parseInt(ShipToType1.MaterialNumber);
+              const priceconditioncode = ShipToType1.PriceCondition;
+              let KNUMA_BO, KNUMAValue;
+              //Transforming the Date in correct format
+              const dataBSpain = new Date(ShipToType1.EffectiveDate).toISOString().split('T')[0];
+              const datbISpain = new Date(ShipToType1.ExpiryDate).toISOString().split('T')[0];
+              const spainRappelData = await tx.run(SELECT.one.from(SpainRappelData).where({ BONEM: bonem, KUNNR: kunnr, MATNR: matnr, DATAB: dataBSpain, DATBI: datbISpain }));
+              if (spainRappelData) {
+                  KNUMAValue = spainRappelData.KNUMA;
+              }
+
+              let E1KONW = [];
+              // DiscountConditions
+              let highestDiscountCondition = null;
+              let lowestDiscountCondition = null;
+              const discountConditions = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: priceCondition.ID }));
+              if (discountConditions?.length > 0) {
+                  highestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount > current.Discount) ? prev : current);
+                  lowestDiscountCondition = discountConditions.reduce((prev, current) => (prev.Discount < current.Discount) ? prev : current);
+
+                  discountConditions.forEach(dc => {
+                      E1KONW.push({
+                          "KSTBW": dc.Volume,
+                          "KBETR": dc.Discount.toFixed(3) + "-"
+                      });
+                  });
+              }
+              let KBETR, KBRUE;
+
+              items.push({
+                  "KUNNR": kunnr,
+                  "DATAB_GR": datab,
+                  "DATBI_GR": datbi,
+                  "MATNR": matnr,
+                  "KBETR": lowestDiscountCondition && lowestDiscountCondition.Discount && lowestDiscountCondition.Discount.toFixed(3).concat("-") || "", // KBETR from the minimum(KSTBW)
+                  "KONWA": "%",
+                  "KPEIN": 1,
+                  "KBRUE": highestDiscountCondition && highestDiscountCondition.Discount && highestDiscountCondition.Discount.toFixed(3).concat("-") || "",
+                  "KSCHL": priceconditioncode,
+                  "E1KONW": E1KONW
+
+              });
+
+          }
+          header[i].Items = items;
+      }
+      finalarray.push(header);
+      return finalarray;
+
+
+
+};
+async function updateRappelcustomerPrices(finalarray) {
+    const tx = cds.tx();
+    let body;
+    
+
+    body = getES01RequestBodyTemplateRappel();
+
+    body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = finalarray.BONEM;
+    body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = finalarray.BOTEX;
+    body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = finalarray.DATAB;
+    body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = finalarray.DATBI;
+    let items = finalarray.Items;
+    items.map(d => {
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"].push(d);
+    });
+
+    await tx.commit();//to release db connection
+
+    //   console.log(`Start sending update Rappel customer price: ${customerPrice.ID}  for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId} & OfferID: ${priceAgreement.OfferId}`);
+    try {
+        const result = await updatePriceConditions(finalarray.customerPrice.CountryCode, "PriceConditionRappel", body);
+        
+        console.log(`Finished sending update Rappel customer price: ${finalarray.customerPrice.ID} for PriceAgreementID: ${finalarray.customerPrice.PriceAgreementId} & InstituteID: ${finalarray.customerPrice.InstituteId} `);
+        return { status: true, result: result, customerPrice: finalarray.customerPrice };
+    } catch (error) {
+        console.error(`ERROR: sending update Rappel customer price: ${finalarray.customerPrice.ID} for PriceAgreementID: ${finalarray.customerPrice.PriceAgreementId} & InstituteID: ${finalarray.customerPrice.InstituteId}`);
+
+        logRequestError(error);
+        return { status: false, customerPrice: d.customerPrice };
+        // throw error;//do not throw error to continue with other requests
+    }
+
+
+
+};
+  //CR2
+
+  function getES01RequestBodyTemplateRappel() {
+
+    return {
+        "_BAY0-GZ_SALESAGR_ES01": {
+            "IDOC": {
+                "EDI_DC40": {
+                    "TABNAM": "EDI_DC40",
+                    "MANDT": 508,
+                    "DOCNUM": 36256484,
+                    "DOCREL": 740,
+                    "STATUS": 53,
+                    "DIRECT": 2,
+                    "OUTMOD": "",
+                    "IDOCTYP": "/BAY0/GZ_SALESAGR_ES01",
+                    "MESTYP": "/BAY0/GZ_SALESAGR_ES",
+                    "SNDPOR": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | the value is added per environment in the CPI configuration
+                    "SNDPRT": "LS",
+                    "SNDPRN": "FAST_ES",
+                    "RCVPOR": "", //this is different for DEV (SAPD2R) /QA (SAPQ2R)/PROD (SAPP2R) | the value is added per environment in the CPI configuration
+                    "RCVPRT": "LS",
+                    "RCVPRN": "", //this is different for DEV (D2RM508) /QA (Q2RM508)/PROD (P2RM508) | | the value is added per environment in the CPI configuration
+                    "CREDAT": 20220404,
+                    "CRETIM": 145201
+                },
+                "_BAY0-GZ_SALESAGRHEAD": {
+                    "BOART": "YAW1",
+                    "VKORG": "QFHC",
+                    "VTWEG": "00",
+                    "SPART": "00",
+                    "BONEM": 0,
+                    "BOTEX": "RCT COM. W. ACCRUALS",
+                    "DATAB": 0,
+                    "DATBI": 0,
+                    "CURCY": "EUR",
+                    "ZTERM": "D496",
+                    "ZLSCH": "M",
+                    "ABREX": "TEST AGMNT",
+                    "KOTABNR": 582,
+                    "KVEWE": "A",
+                    "KAPPL": "V",
+                    "BOSTA": "B",
+
+                    "_BAY0-GZ_SALESAGRITEM": [
+                        
+                    ]
+                }
+            }
+        }
+    }
+};
     //EHQUT-219174-Spain issue with the synchronization of price agreements only on regions
     async function updateCustomerPrice(customerPrice)   {
         console.log(`Prepare sending update customer price: ${customerPrice.ID}`);
@@ -1381,7 +1617,7 @@ module.exports = async (srv) => {
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATBI = datbi;
-       // body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOSTA = "B";
+        body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOSTA = "B";
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATAB_GR = datab;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].DATBI_GR = datbi;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"]["_BAY0-GZ_SALESAGRITEM"][0].KUNNR = kunnr;
