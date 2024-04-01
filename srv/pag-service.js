@@ -789,6 +789,7 @@ module.exports = async (srv) => {
     async function syncPriceAgreements(pas, customerPrices) {
         const tx = cds.tx();
         console.log(`Start synchronisation of PriceAgreements`);
+
         console.log(`Prepare categories of customer prices`);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
@@ -816,6 +817,7 @@ module.exports = async (srv) => {
         }else{
             CombinationValue = false;
         }
+
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1" || item.PriceCondition === "YAW2");
         const allCustomerPrices = mainPriceConditions.concat(focPriceConditions).concat(rappelPriceConditions);
@@ -826,6 +828,7 @@ module.exports = async (srv) => {
         console.log(`Prepare requests of customer prices`);
         const updateMainConditionPromises = mainPriceConditions.map(custPrice => updateCustomerPrice(custPrice));
         //EHQUT-386660-Italy-Issue with FoC synchronization
+
 
 
         const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
@@ -845,6 +848,7 @@ module.exports = async (srv) => {
      }else if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === false){
           updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
      }
+
 
         // Synchronize
         console.log(`Process requests of customer prices`);
@@ -878,8 +882,10 @@ module.exports = async (srv) => {
         }
     };
 
+
     //CR2-New
     async function updatearray(effectiveDatearray, ShipToTypeCustomer, SoldToType, customerPrices) {
+
         const tx = cds.tx();
         var finalarray = [], ShipToType;
         const header = [];
@@ -914,7 +920,7 @@ module.exports = async (srv) => {
             let priceAgreementInstitutehead = await tx.run(SELECT.one.from(PT_TMINST).where(Country).where({ InstituteID: priceAgreement.InstituteId }));
 
             const bonem = parseInt(priceAgreementInstitutehead.CustomerID);
-            console.log(effectiveDate, "itemeffectivedare");
+
             const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
             const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
 
@@ -993,6 +999,7 @@ module.exports = async (srv) => {
 
 
     };
+
     async function updateRappelcustPrices(customerPrice,CombinationValue) {
         console.log(`Prepare sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId}`);
         const tx = cds.tx();
@@ -1085,6 +1092,7 @@ module.exports = async (srv) => {
         }
     };
     function getES01RequestBodyTemplate(institute,priceconditionrappelcode,CombinationValue) {
+
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
                 "IDOC": {
@@ -1120,6 +1128,7 @@ module.exports = async (srv) => {
                         "ZTERM": "D496",
                         "ZLSCH": "M",
                         "ABREX": "TEST AGMNT",
+
                         "KOTABNR": institute.InstituteType === 'Ship-To' ? 582 : 750,
                         "KVEWE": "A",
                         "KAPPL": "V",
@@ -1143,6 +1152,7 @@ module.exports = async (srv) => {
             }
         }
     };
+
     async function updateRappelcustomerPrices(finalarray) {
         const tx = cds.tx();
         let body;
