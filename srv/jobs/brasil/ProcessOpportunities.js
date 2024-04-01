@@ -31,12 +31,14 @@ module.exports = class processOpportunities extends BaseJob {
             const directIbizOpportunities = opportunities.filter(direct => direct.NU_DIRETO_INDIRETO === 0);
             const directIbizOpportunityParentIDs = directIbizOpportunities.map(dop => dop.ID);
             const directIbizOpportunityItems = await this.getOpportunitiesItems(tx, directIbizOpportunityParentIDs);
+            const filteredDirectIbizOpportunityItems = this.filterOpportunityItemsWithSameLot(directIbizOpportunityItems);
             const directIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, directIbizOpportunityParentIDs); 
 
             const indirectIbizOpportunities = opportunities.filter(indirect => indirect.NU_DIRETO_INDIRETO === 1);
             const indirectIbizOpportunityParentIDs = indirectIbizOpportunities.map(dop => dop.ID);
             const indirectIbizOpportunityCNPJs = indirectIbizOpportunities.map(el => el.COD_DONO_QP && el.COD_DONO_QP.replace(/\D/g,''));
             const indirectIbizOpportunityItems = await this.getOpportunitiesItems(tx, indirectIbizOpportunityParentIDs);
+            const filteredIndirectIbizOpportunityItems = this.filterOpportunityItemsWithSameLot(indirectIbizOpportunityItems);
             const indirectIbizOpportunityDocs = await this.getOpportunitiesDocs(tx, indirectIbizOpportunityParentIDs); 
 
             //find the CustomerIDs based on the cnpj from indirectIbizOpportunities
@@ -52,12 +54,12 @@ module.exports = class processOpportunities extends BaseJob {
 
             // Process data
             if(directIbizOpportunities.length > 0){
-                await this.processDirectIbizOpportunities(tx, directIbizOpportunities, directIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
+                await this.processDirectIbizOpportunities(tx, directIbizOpportunities, filteredDirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, directIbizOpportunityDocs, priceConditionClassificationFAST);
 
             }
 
             if(indirectIbizOpportunities.length > 0){
-                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, indirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices, brazilCap, productPacks);
+                await this.processIndirectIbizOpportunities(tx, indirectIbizOpportunities, filteredIndirectIbizOpportunityItems, existingInstitutesInFAST, existingTenderTypesFAST, existingDistributorsFAST, existingSKUFAST, indirectIbizOpportunityDocs, priceConditionClassificationFAST, brazilMasterPrices, brazilCap, productPacks);
             }
 
             // Commit All
@@ -833,8 +835,10 @@ mapIbizOpportunitiestoFASTOffer(ibizOpportunities, existingDistributorsFAST, pri
     console.log(`JOB (${this.jobName }): Mapping IBIZ Opportunities to PT_TMOFRS ...`);
     ibizOpportunities = ibizOpportunities.reduce((prev, curr, idx, ibizOpportunities) => {
         const cnpj = curr.COD_DONO_QP && curr.COD_DONO_QP.replace(/\D/g,'');
+        console.log(cnpj,"cnpj");
         const distributor = (curr.NU_DIRETO_INDIRETO === 0) ? existingDistributorsFAST.find(dist => dist.DistributorName === "Bayer Brazil") : existingDistributorsFAST.find(dist => dist.CNPJ === cnpj);
         const distributorID = distributor && distributor.DistributorID || null;
+        console.log(distributorID,"distributorID");
         const priceConditionClassification = priceConditionClassificationFAST.find(p => p.Division === curr.NM_BU_ABREV);
         const priceConditionClassificationId = priceConditionClassification && priceConditionClassification.ID || null;
         prev.push(
@@ -1143,6 +1147,44 @@ mapIbizOpportunitiesDocstoFASTDocumentsDownload(ibizOpportunityDocs){
         console.error(error);
         throw error;
     }
+}
+
+filterOpportunityItemsWithSameLot (opportunityItems){
+     // Check if opportunityItems is null or empty
+     if (!opportunityItems || opportunityItems.length === 0) {
+        return [];
+    }
+
+    const dict = {};
+
+    // Group opportunity items by ID_QP and COD_REFERENCIA
+    opportunityItems.forEach(opportunityItem => {
+        const key = `${opportunityItem.ID_QP}_${opportunityItem.COD_REFERENCIA}`;
+        if (!dict[key]) {
+            dict[key] = {
+                count: 0,
+                lots: {}
+            };
+        }
+        dict[key].count++;
+
+        // Assign unique lot numbers if all lot numbers are 1
+        const count = dict[key].count;
+        if (opportunityItem.NU_LOTE === 1) {
+            dict[key].lots[opportunityItem.ID] = count;
+        }
+    });
+
+    // Update lot numbers based on assigned unique lot numbers
+    opportunityItems.forEach(opportunityItem => {
+        const key = `${opportunityItem.ID_QP}_${opportunityItem.COD_REFERENCIA}`;
+        const lot = dict[key].lots[opportunityItem.ID];
+        if (lot && opportunityItem.NU_LOTE === 1) {
+            opportunityItem.NU_LOTE = lot === 1 ? 1 : 100 - lot;
+        }
+    });
+
+    return opportunityItems;
 }
 
 };
