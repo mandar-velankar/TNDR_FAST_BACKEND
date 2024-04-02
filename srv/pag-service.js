@@ -848,6 +848,7 @@ module.exports = async (srv) => {
             ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
             SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
             ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
+            CombinationValue = true;
         }
         //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
         console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
