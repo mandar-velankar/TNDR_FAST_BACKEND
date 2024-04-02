@@ -803,7 +803,7 @@ module.exports = async (srv) => {
         if (instituteID.length > 0) {
             const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
             let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
-            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
+            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
             ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
            console.log(SoldToInstituteType, "SoldToInstituteType");
             mainPriceConditions = mainPriceConditions.filter(function(mainobj) {
@@ -844,8 +844,7 @@ module.exports = async (srv) => {
             let instituteID = rappelPriceConditions.map(item => item.InstituteId);
             const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
             let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
-            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
-            console.log(SoldToInstituteType,"soldto");
+            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
             ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
             SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
             ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
