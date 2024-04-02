@@ -805,7 +805,7 @@ module.exports = async (srv) => {
             let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
             SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
             ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-          
+           CONSOLE.LOG(SoldToInstituteType, "SoldToInstituteType");
             mainPriceConditions = mainPriceConditions.filter(function(mainobj) {
                 return !ShipToInstitute.some(function(shiptoobj) {
                     return mainobj.InstituteId == shiptoobj.InstituteID;
@@ -837,6 +837,7 @@ module.exports = async (srv) => {
         let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
         effectiveDatearray = Array.from(new Set(effectiveDatearray));
         let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+        console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
         let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult ,updateRappelConditionPromises;
         if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === true && CombinationValue === true) 
