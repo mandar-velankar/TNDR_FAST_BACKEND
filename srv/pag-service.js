@@ -837,18 +837,18 @@ module.exports = async (srv) => {
         let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
         effectiveDatearray = Array.from(new Set(effectiveDatearray));
         let SoldToType,ShipToType;
-        if(soldToInstituteType.length>0){
-         SoldToType = rappelPriceConditions.filter(d => d.InstituteId === soldToInstituteType[0].InstituteID);
-         ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== soldToInstituteType[0].InstituteID);
+        if(SoldToInstituteType.length>0){
+         SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+         ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         }else{
             let instituteID = rappelPriceConditions.map(item => item.InstituteId);
             const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
             let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
-            soldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
-            console.log(soldToInstituteType,"soldto");
+            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
+            console.log(SoldToInstituteType,"soldto");
             ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-            SoldToType = rappelPriceConditions.filter(d => d.InstituteId === soldToInstituteType[0].InstituteID);
-            ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== soldToInstituteType[0].InstituteID);
+            SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+            ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         }
         //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
         console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
