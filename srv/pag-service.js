@@ -805,7 +805,7 @@ module.exports = async (srv) => {
             let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
             SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account");
             ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-           CONSOLE.LOG(SoldToInstituteType, "SoldToInstituteType");
+           console.log(SoldToInstituteType, "SoldToInstituteType");
             mainPriceConditions = mainPriceConditions.filter(function(mainobj) {
                 return !ShipToInstitute.some(function(shiptoobj) {
                     return mainobj.InstituteId == shiptoobj.InstituteID;
