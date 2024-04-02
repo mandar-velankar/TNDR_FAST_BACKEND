@@ -2094,8 +2094,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             ContractLength         : Integer;
             ContractExtenseion     : Integer;
             NumberOfExtension      : Integer;  //PT_TMTEND/CUSTOM_INTEGER_1
-            ClientComment          : String(500);
-            Comment                : String(500);
+            ClientComment          : String;
+            Comment                : String;
             Regions                : String;
             InternalDueDate        : Date;
             ExpectedAwardDate      : Date;
