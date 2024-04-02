@@ -73,6 +73,19 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
 
         const tx = cds.tx();
         const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+        if(customerPrices && customerPrices.length > 0){
+            let Countrycode = customerPrices[0].CountryCode;
+
+            const materialNumbers = customerPrices.map(cp => cp.MaterialNumber);
+               
+            const activeMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : materialNumbers}}));
+
+            if(activeMaterial.length >0){
+                const materials= activeMaterial.map(item =>item.SKUCode);
+                        
+                customerPrices =await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } , MaterialNumber : {in : materials}}));
+            }
+        }
         if (customerPrices && customerPrices.length <= 0) {
             throw `No customer prices were found for the following PriceAgreement: ${ids}`;
         }
