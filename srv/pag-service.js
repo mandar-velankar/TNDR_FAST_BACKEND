@@ -764,15 +764,27 @@ module.exports = async (srv) => {
         if (customerPrices && customerPrices.length > 0) {
             let Countrycode = customerPrices[0].CountryCode;
 
-            const allMaterialNumber = customerPrices.map(cp => cp.MaterialNumber);
-            
-            const ActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : allMaterialNumber}}));
+                const materialNumbers = customerPrices.map(cp => cp.MaterialNumber);
+                const focMaterialNumbers = customerPrices.map(cp => cp.FOCmaterialNumber);
+               
+                const activeMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : materialNumbers}}));
+                const focActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : focMaterialNumbers}}));
 
-            if (ActiveMaterial.length > 0) {
-                const materials = ActiveMaterial.map(item => item.SKUCode);
+                if(activeMaterial.length >0){
+                    const materials= activeMaterial.map(item =>item.SKUCode);
+                         
+                    customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } , MaterialNumber : {in : materials}}));
+                    if(focActiveMaterial.length > 0){
+                        let materials = focActiveMaterial.map(item =>item.SKUCode);
+                        materials = materials.map(item => item.toString());
+                        customerPrices = customerPrices.filter(price => {
+                            return (
+                              (price.FOCmaterialNumber === null || materials.includes(price.FOCmaterialNumber))
+                            );
+                        });
+                    }
 
-                customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids }, MaterialNumber: { in: materials } }));
-            }
+                }
         }
                      
         if (customerPrices && customerPrices.length <= 0) {
