@@ -2583,7 +2583,12 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 else 'Suspend'
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
-    }where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW' and tender.Active = 1 and offer.Active = 1
+    }where offer.OfferStatusTable.STATUS = 'Results Recorded'
+     and quotation.EffectiveDate <= CURRENT_DATE
+     and tender.CountryCode = 'TW'
+     and tender.Active = 1
+     and offer.Active = 1
+     and pr.Results.Outcome = 'Won'
     union select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
@@ -2664,7 +2669,12 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
-    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW' and tender.Active = 1 and offer.Active = 1;
+    where offer.OfferStatusTable.STATUS = 'Results Recorded'
+    and quotation.EffectiveDate <= CURRENT_DATE
+    and tender.CountryCode = 'TW'
+    and tender.Active = 1
+    and offer.Active = 1
+    and pr.Results.Outcome = 'Won';
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
         key hier.ParentInstituteID,
