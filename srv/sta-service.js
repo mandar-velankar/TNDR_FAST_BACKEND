@@ -4418,7 +4418,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"KAM_Territory": item.KAM_Territory,
 				"ZuelligCustomerNumber.": item.CNPJ,
 				"InstituteName": item.InstituteName,
-				"SKUCode": item.SKUCode || "",
+				"SKUCode": addLeadingZeros(item.SKUCode, 8) || "",
 				"ProductPackName": item.PRODUCTPACKNAME,
 				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4),
 				"Invoice Price": Number(item.Price1).toFixed(4),
@@ -4471,7 +4471,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"UserName": item.UserName,
 				"CustomerID": item.External_InstituteId,
 				"InstituteName": item.InstituteName,
-				"SKUCode": item.SKUCode || "",
+				"SKUCode": addLeadingZeros(item.SKUCode, 8) || "",
 				"ProductPackName": item.PRODUCTPACKNAME,
 				"KAM_Territory": item.KAM_Territory,
 				"NHI_Price": Number(item.Price0).toFixed(4),
@@ -4661,4 +4661,12 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		}
 	}
 	
+	function addLeadingZeros (num, size) {
+        if (num === null) {
+            throw new Error(`${text} doesn't exist`);
+        }
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
+    };
 }
