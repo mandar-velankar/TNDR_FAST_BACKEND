@@ -54,8 +54,7 @@ entity PriceAgreements: cuid, managed {
     LotID: Integer default 1;
     OldExpiryDate:DateTime; //EJUVE-CR3
     EmailNotificationSent: Boolean default false;//EHQUT-CR6
-    ApplyAll : Boolean default false;
-
+     ApplyAll : Boolean default false; //EHQUT-CR14
     Institute: Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteId and Institute.CountryCode = CountryCode;
     Tender: Association to TransactionalData.PT_TMTEND on Tender.TenderID = TenderId;
     Product: Association to MasterData.PT_TMCTPRDPCK on Product.PRODUCTPACKID = ProductPackId

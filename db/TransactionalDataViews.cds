@@ -97,7 +97,7 @@ select from MasterData.PT_TMCTRY as country{
 };
 
 entity CountryTenderNo as select from MasterData.PT_TMCTRY as country
-left outer join TransactionalData.PT_TMTEND as tender on country.CountryCode = tender.CountryCode and substr(tender.TenderID, 4, 2) = substr(CURRENT_DATE, 3, 2){
+left outer join TransactionalData.PT_TMTEND as tender on country.CountryCode = tender.CountryCode and (SUBSTRING(tender.TenderID, INSTR(tender.TenderID, '-', -1, 2) + 1, 2) = SUBSTRING(CURRENT_DATE, 3, 2)){
     key country.CountryCode as COUNTRY_CODE,
     ifnull(max(tender.TenderNo), 1000) + 1 as NEXT_TENDER_NO:Integer
 }where country.CountryCode is not null
