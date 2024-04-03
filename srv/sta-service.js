@@ -661,7 +661,10 @@ module.exports = async (srv) => {
 		// !req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
         // !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
         // !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
-		
+		if (req.data.CountryCode === 'NL') {
+			const masterDistributor =  await SELECT.one.from('StandardAppService.MasterDistributors').where({CountryCode: "NL", DistributorName: 'Defined At Results Level'})
+			req.data.DistributorID = masterDistributor.DistributorID
+		}
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
 		req.data.DistributorComments = null; //for mandatory field check in sta-service
 		delete req.data.OfferDueDate;
@@ -698,7 +701,9 @@ module.exports = async (srv) => {
 
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: offerID, ActiveOffer: 1});
 		const offerStatus = await SELECT.one.from(PT_TMTNOFST).where({OfferID: offerID, Active: 1});
-		const parentOfferID = offerID.split('-').slice(0,4).join("-");
+		//const parentOfferID = offerID.split('-').slice(0,4).join("-");
+		let parentOfferID = offerID.match(/[A-Za-z0-9-]+-\d+/);
+		parentOfferID = parentOfferID ? parentOfferID[0] : offerID;
 		const parentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: parentOfferID});
 
 		// checks 
@@ -3886,7 +3891,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		{
 				case "PCT": focAmount = Math.round(product.FOC * requestedVolume); break;
 				case "ABS": focAmount = Math.round(product.FOC); break;
-				case "STP": focAmount = Math.floor(requestedVolume / product.FOC_STEP) * product.FOC; break;
+				case "STP": focAmount = (product.FOC_STEP === null || product.FOC_STEP === 0) ? 0 : Math.floor(requestedVolume / product.FOC_STEP) * product.FOC; break;
 				default: break;
 		};
 		let focAmountUnit = toUnitFactor * focAmount;
