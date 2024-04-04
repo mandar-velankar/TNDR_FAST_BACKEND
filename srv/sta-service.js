@@ -1605,8 +1605,10 @@ module.exports = async (srv) => {
 			try{
 				const tx = cds.tx(req);
 				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: data.OfferID});
-				const whereOffer = ServiceHelper.buildFullWhere("OFFER_ID", "=", data.OfferID);
-				const currentOffeProductsValidation = await buildOfferProductValidation(tx, whereOffer);
+				const whereOfferPrValidation = ServiceHelper.buildFullWhere("OFFER_ID", "=", data.OfferID);
+				const whereOfferValidation = ServiceHelper.buildFullWhere("OFFERID", "=", data.OfferID);
+				const currentOfferValidation = await buildOfferValidation(tx, whereOfferValidation);
+				const currentOffeProductsValidation = await buildOfferProductValidation(tx, whereOfferPrValidation);
 				const currentOfferPriceConditions = await SELECT.from(PriceCondition).where({OfferID: data.OfferID});
 				const parentOfferProdPriceConditions = await SELECT.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID});
 				if (!currentOffer.DifferentAwardPriceParentOfferID || parentOfferProdPriceConditions.length === 0 || currentOffeProductsValidation.length === 0) return;
@@ -1637,6 +1639,25 @@ module.exports = async (srv) => {
 
 					await INSERT.into(PT_TMTRRES).entries(mappedAwardedProducts);
 					await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Quotation Submitted');
+
+					const mappedPTTMQUTO = mappedQuotation(req.user, currentOfferValidation);
+
+					const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+						OfferID: currentOfferValidation.OFFERID,
+						Active: 1,
+						OfferDate: currentOfferValidation.OFFERDATE
+					});
+
+					// save/update PT_TMQUTO
+					if(submittedQoutation){
+						await UPDATE(PT_TMQUTO).with (mappedPTTMQUTO).where({
+							OfferID: currentOfferValidation.OFFERID,
+							Active: 1,
+							OfferDate: currentOfferValidation.OFFERDATE
+						})
+					}else{
+						await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
+					}
 				}
 			}
 			catch(error){
