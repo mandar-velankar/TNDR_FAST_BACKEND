@@ -1367,6 +1367,10 @@ inner join TransactionalData.PT_TMOFRS as offer
 inner join TransactionalData.PT_TMOFPR as product 
     on product.OfferID = offer.OfferID
     and product.Active = 1 
+left outer join MasterDataLatestValues.CountryRegisteredPrice as RegisteredPrice
+    on  RegisteredPrice.COUNTRY_CODE = product.CountryCode
+    and RegisteredPrice.PRODUCT_ID   = product.ProductCode
+    and RegisteredPrice.CURRENCY =  offer.Currency
 inner join MasterData.PT_TMPRDPCK as productPacks
     on productPacks.PRODUCTPACKID = product.ProductCode
     and productPacks.ACTIVERECORD = 'Yes' 
@@ -1398,14 +1402,14 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceConditionClassification.isMain,
     case 
         when product.UnitPerPack = 'Unit'
-            then product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR
-        else product.RegisteredPrice.REGISTERED_PRICE
+            then RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR
+        else RegisteredPrice.REGISTERED_PRICE
     end as CurrentBasePrice:Double,
     @Core.Computed: false
     case 
         when product.UnitPerPack = 'Unit'
-            then  ifnull(priceCondition.Price0, (product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
-        else ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE)
+            then  ifnull(priceCondition.Price0, (RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
+        else ifnull(priceCondition.Price0, RegisteredPrice.REGISTERED_PRICE)
     end as BasePrice:Double,
     @Core.Computed: false
     case 
@@ -1413,8 +1417,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             then 
                 case 
                     when product.UnitPerPack = 'Unit'
-                        then  ifnull(priceCondition.Price0, (product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
-                        else ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE)
+                        then  ifnull(priceCondition.Price0, (RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
+                        else ifnull(priceCondition.Price0, RegisteredPrice.REGISTERED_PRICE)
                 end
         else
             ifnull(priceCondition.Price1, 0)
