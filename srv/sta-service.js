@@ -1578,6 +1578,8 @@ module.exports = async (srv) => {
 			'PriceConditionDiscountWithFOCView',
 			'PriceConditionTaiwanPriceView',
 			'PriceConditionTaiwanDiscountView',
+			"PriceConditionNLPriceView", 
+			"PriceConditionNLDiscountView"
 		], 
 		async (req) => {
 			try{
@@ -1854,7 +1856,41 @@ module.exports = async (srv) => {
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
 				PriceConditionClassification_ID: req.data.ClassificationID
-			}
+			},
+			"NLDiscount" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"NLPrice" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
 		}
 
 		return mappings[req.data.ConditionType];
