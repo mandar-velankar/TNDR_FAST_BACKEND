@@ -847,7 +847,6 @@ module.exports = async (srv) => {
 
         const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
-        let updateRappelConditionPromises = null;
         if(customerPrices[0].CountryCode === 'ES'){
             //CR2-New
             let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
@@ -868,18 +867,17 @@ module.exports = async (srv) => {
             }
             //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
             console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
+        }
             //let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
-            let arrayresult;
-            if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === true && CombinationValue === true) 
+        let arrayresult, updateRappelConditionPromises;
+        if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === true && CombinationValue === true) 
         {
             arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
-        
-
             updateRappelConditionPromises = arrayresult[0].map(custPrice => updateRappelcustomerPrices(custPrice));
-        }else if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === false){
+        }else{
             updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
         }
-        }
+        
         // Synchronize
         console.log(`Process requests of customer prices`);
         let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));
