@@ -804,6 +804,7 @@ module.exports = async (srv) => {
         let SoldToInstituteType = [];
         let ShipToInstitute = [];
         let effectiveDatearray;
+        let SoldToType,ShipToType;
         let CombinationValue;
         console.log(`Prepare categories of customer prices`);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
@@ -853,7 +854,7 @@ module.exports = async (srv) => {
             //CR2-New
             effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
-            let SoldToType,ShipToType;
+            
             if(SoldToInstituteType.length>0){
             SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
             ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
