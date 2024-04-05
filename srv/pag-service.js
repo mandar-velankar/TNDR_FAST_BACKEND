@@ -803,9 +803,9 @@ module.exports = async (srv) => {
         console.log(`Start synchronisation of PriceAgreements`);
         let SoldToInstituteType = [];
         let ShipToInstitute = [];
-        let effectiveDatearray;
-        let SoldToType,ShipToType;
-        let CombinationValue;
+       
+        let SoldToType,ShipToType,effectiveDatearray,CombinationValue;
+        
         console.log(`Prepare categories of customer prices`);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
