@@ -73,7 +73,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         }
 
         const tx = cds.tx();
-        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+        let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
         if(customerPrices && customerPrices.length > 0){
             let Countrycode = customerPrices[0].CountryCode;
 
