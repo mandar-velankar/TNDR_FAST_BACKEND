@@ -801,7 +801,9 @@ module.exports = async (srv) => {
     async function syncPriceAgreements(pas, customerPrices) {
         const tx = cds.tx();
         console.log(`Start synchronisation of PriceAgreements`);
-
+        let SoldToInstituteType = [];
+        let ShipToInstitute = [];
+        let CombinationValue;
         console.log(`Prepare categories of customer prices`);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
@@ -810,9 +812,8 @@ module.exports = async (srv) => {
         if(customerPrices[0].CountryCode === 'ES'){
             //EHQUT-CR2-New
             let instituteID = mainPriceConditions.map(item => item.InstituteId);
-            let SoldToInstituteType = [];
-            let ShipToInstitute = [];
-            let CombinationValue;
+           
+            
             if (instituteID.length > 0) {
                 const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
                 let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
