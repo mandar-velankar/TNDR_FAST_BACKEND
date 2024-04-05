@@ -141,7 +141,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             return;
         }
 
-        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve(); //Customer prices should not be synchronized for ship to parties
+        //if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve(); //Customer prices should not be synchronized for ship to parties
 
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));
