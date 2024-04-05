@@ -134,7 +134,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
 
-        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where( {"InstituteType" : { "<>": 'Ship-To'} , "InstituteID" : {"in": customerPrice.InstituteId}} ));
         const body = await this.getPriceAgreementRequestBodyTemplate(institute); 
         if (!institute) {
             console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
