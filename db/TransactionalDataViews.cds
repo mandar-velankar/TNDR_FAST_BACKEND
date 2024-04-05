@@ -1382,6 +1382,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
 {
     tender.CountryCode,
     tender.Country.Region,
+    tender.Custom.Integer_1 as Custom_Integer_1,
+    tender.Custom.Integer_2 as Custom_Integer_2,
+    tender.Custom.Integer_3 as Custom_Integer_3,
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,

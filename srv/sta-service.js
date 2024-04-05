@@ -565,27 +565,27 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
 		try{
-		const today = new Date().toISOString().slice(0, 10);
+		// const today = new Date().toISOString().slice(0, 10);
 
-		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
+		// const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
 
-		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		// const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
-		for (const item of mandatoryFielddata) {
-			let frontendField = item.Field;
-			if (frontendField.includes("path")) {
-				const match = regex.exec(frontendField);
-				frontendField = match ? match[1] : frontendField;
-			}
+		// for (const item of mandatoryFielddata) {
+		// 	let frontendField = item.Field;
+		// 	if (frontendField.includes("path")) {
+		// 		const match = regex.exec(frontendField);
+		// 		frontendField = match ? match[1] : frontendField;
+		// 	}
 		
-			if (
-				!(frontendField in req.data) ||
-				req.data[frontendField] === null ||
-				req.data[frontendField] === ''
-			) {
-				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
-			}
-		}		
+		// 	if (
+		// 		!(frontendField in req.data) ||
+		// 		req.data[frontendField] === null ||
+		// 		req.data[frontendField] === ''
+		// 	) {
+		// 		req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+		// 	}
+		// }		
 		// // validate form
 		// !req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
 		// !req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
@@ -629,31 +629,31 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
 		try{
-		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Offer', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
-		const fieldMapping = {
-			'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
-		};
-		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		// const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Offer', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		// const fieldMapping = {
+		// 	'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
+		// };
+		// const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
-		for (const item of mandatoryFielddata) {
-			let frontendField = item.Field;
-			if (frontendField.includes("path")) {
-				const match = regex.exec(frontendField);
-				frontendField = match ? match[1] : frontendField;
-			}
-			// Check if there's a mapping, and if so, replace it
-			if (fieldMapping[frontendField]) {
-				frontendField = fieldMapping[frontendField];
-			}
+		// for (const item of mandatoryFielddata) {
+		// 	let frontendField = item.Field;
+		// 	if (frontendField.includes("path")) {
+		// 		const match = regex.exec(frontendField);
+		// 		frontendField = match ? match[1] : frontendField;
+		// 	}
+		// 	// Check if there's a mapping, and if so, replace it
+		// 	if (fieldMapping[frontendField]) {
+		// 		frontendField = fieldMapping[frontendField];
+		// 	}
 		
-			if (
-				!(frontendField in req.data) ||
-				req.data[frontendField] === null ||
-				req.data[frontendField] === ''
-			) {
-				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
-			}
-		}	
+		// 	if (
+		// 		!(frontendField in req.data) ||
+		// 		req.data[frontendField] === null ||
+		// 		req.data[frontendField] === ''
+		// 	) {
+		// 		req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+		// 	}
+		// }	
 		// validate form
 		// !req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
 		// !req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
