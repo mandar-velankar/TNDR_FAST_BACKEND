@@ -66,13 +66,14 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
     //this code is copied from pag-service file - make sure that these ones are in sync -- add comment to pag-service.js so we don't forget to do this in both places
     async syncPriceAgreements(ids){
         const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-
+        const { PT_TMSKUPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
+        
         if(ids.length === 0){
             throw `No price agreements found for synchronization`;
         }
 
         const tx = cds.tx();
-        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+        let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
         if(customerPrices && customerPrices.length > 0){
             let Countrycode = customerPrices[0].CountryCode;
 

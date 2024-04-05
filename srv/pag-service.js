@@ -801,7 +801,10 @@ module.exports = async (srv) => {
     async function syncPriceAgreements(pas, customerPrices) {
         const tx = cds.tx();
         console.log(`Start synchronisation of PriceAgreements`);
-
+        let SoldToInstituteType = [];
+        let ShipToInstitute = [];
+        
+        let SoldToType,ShipToType,effectiveDatearray,CombinationValue;
         console.log(`Prepare categories of customer prices`);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
@@ -810,15 +813,13 @@ module.exports = async (srv) => {
         if(customerPrices[0].CountryCode === 'ES'){
             //EHQUT-CR2-New
             let instituteID = mainPriceConditions.map(item => item.InstituteId);
-            let SoldToInstituteType = [];
-            let ShipToInstitute = [];
-            let CombinationValue;
+            
             if (instituteID.length > 0) {
                 const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
                 let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
                 SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
                 ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-            console.log(SoldToInstituteType, "SoldToInstituteType");
+            
                 mainPriceConditions = mainPriceConditions.filter(function(mainobj) {
                     return !ShipToInstitute.some(function(shiptoobj) {
                         return mainobj.InstituteId == shiptoobj.InstituteID;
@@ -849,9 +850,9 @@ module.exports = async (srv) => {
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
         if(customerPrices[0].CountryCode === 'ES'){
             //CR2-New
-            let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
+            effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
-            let SoldToType,ShipToType;
+            
             if(SoldToInstituteType.length>0){
             SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
             ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
@@ -866,7 +867,7 @@ module.exports = async (srv) => {
                 CombinationValue = true;
             }
             //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-            console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
+            
         }
             //let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult, updateRappelConditionPromises;
