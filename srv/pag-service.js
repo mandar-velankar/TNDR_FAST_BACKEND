@@ -803,6 +803,7 @@ module.exports = async (srv) => {
         console.log(`Start synchronisation of PriceAgreements`);
         let SoldToInstituteType = [];
         let ShipToInstitute = [];
+        let effectiveDatearray;
         let CombinationValue;
         console.log(`Prepare categories of customer prices`);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
@@ -850,7 +851,7 @@ module.exports = async (srv) => {
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
         if(customerPrices[0].CountryCode === 'ES'){
             //CR2-New
-            let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
+            effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
             let SoldToType,ShipToType;
             if(SoldToInstituteType.length>0){
