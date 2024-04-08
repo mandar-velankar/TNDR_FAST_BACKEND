@@ -136,7 +136,8 @@ module.exports = async (srv) => {
 
 	const {
 		InstitutesView,
-		InstituteInBranchView
+		InstituteInBranchView,
+		TenderMasterView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -4671,5 +4672,41 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			NetPrice              : priceCondition.NetPrice
 		}
 	}
-	
+	srv.on('notificationMail', async (req) => {
+		try{
+			const { data: {offerID,type, QuotationInstituteID} } = req;
+		}catch{
+			console.error('Error in notificationMail');
+            return req.reject(403, error?.message||"Error in notificationMail");
+		}
+	})
+	srv.on('getNotificationMailTemplate', async (req) => {
+		try{
+			const { data: {offerID,templateId,url} } = req;
+			const tx = cds.tx(req);
+			const offerInformation = await SELECT.one.from(TenderMasterView).where({OfferID: offerID})
+			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
+			const offerValidation = await buildOfferValidation(tx, whereOffer);
+			const mailTemplate = await getMailTemplate(templateId);
+			const mappedData = mapNotificationData(mailTemplate, offerInformation,offerValidation,url);
+			return mappedData
+		}catch(error){
+			console.error('Error in getNotificationMailTemplate');
+            return req.reject(403, error?.message||"Error in getNotificationMailTemplate");
+		}
+	})
+	const mapNotificationData = function (template, offerInformation,offerValidation,url) {
+		
+		const data = {
+			OfferID : offerInformation.OfferID,
+			InstituteName : offerInformation.InstituteName,
+			TenderReference : offerInformation.TenderName,
+			ContractStartDate : offerValidation.EffectiveDate,
+			ContractEndDate : offerValidation.ExpiryDate,
+			DirectURLToOffer : url
+		}
+        return  generateMailBody(template, {
+				data
+            })
+    }
 }
