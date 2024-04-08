@@ -22,6 +22,7 @@ const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
+const mammoth = require("mammoth");
 
 module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
@@ -4705,8 +4706,19 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			ContractEndDate : offerValidation.ExpiryDate,
 			DirectURLToOffer : url
 		}
-        return  generateMailBody(template, {
-				data
-            })
+        return convertWordToHTML(template);
+		
+		// generateMailBody(template, {
+		// 		data
+        //     })
     }
+
+	const convertWordToHTML = function (template) {
+		mammoth.convertToHtml({buffer: template.content})
+		.then(function(result){
+			const html = result.value; // The generated HTML
+			const messages = result.messages; // Any messages, such as warnings during conversion
+		})
+		.done();
+	}
 }
