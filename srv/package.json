@@ -53,7 +53,7 @@
                 "model": "gen/srv/csn.json",
                 "pool": {
                     "max": 2800,
-                    "min": 0,
+                    "min": 100,
                     "acquireTimeoutMillis": 5000
                 }
             },

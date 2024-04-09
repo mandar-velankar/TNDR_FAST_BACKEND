@@ -806,28 +806,29 @@ module.exports = async (srv) => {
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
         let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-
-        //EHQUT-CR2-New
-        let instituteID = mainPriceConditions.map(item => item.InstituteId);
-        let SoldToInstituteType = [];
-        let ShipToInstitute = [];
         let CombinationValue;
-        if (instituteID.length > 0) {
-            const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
-            let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
-            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
-            ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-           console.log(SoldToInstituteType, "SoldToInstituteType");
-            mainPriceConditions = mainPriceConditions.filter(function(mainobj) {
-                return !ShipToInstitute.some(function(shiptoobj) {
-                    return mainobj.InstituteId == shiptoobj.InstituteID;
+        if(customerPrices[0].CountryCode === 'ES'){
+            //EHQUT-CR2-New
+            let instituteID = mainPriceConditions.map(item => item.InstituteId);
+            let SoldToInstituteType = [];
+            let ShipToInstitute = [];
+            if (instituteID.length > 0) {
+                const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
+                let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
+                SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
+                ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
+                console.log(SoldToInstituteType, "SoldToInstituteType");
+                mainPriceConditions = mainPriceConditions.filter(function(mainobj) {
+                    return !ShipToInstitute.some(function(shiptoobj) {
+                        return mainobj.InstituteId == shiptoobj.InstituteID;
+                    });
                 });
-            });
-          }
-          if(SoldToInstituteType.length > 0 && ShipToInstitute.length >0){
-            CombinationValue = true;
-        }else{
-            CombinationValue = false;
+            }
+            if(SoldToInstituteType.length > 0 && ShipToInstitute.length >0){
+                CombinationValue = true;
+            }else{
+                CombinationValue = false;
+            }
         }
 
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
@@ -845,38 +846,40 @@ module.exports = async (srv) => {
 
         const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
-        //CR2-New
-        let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
-        effectiveDatearray = Array.from(new Set(effectiveDatearray));
-        let SoldToType,ShipToType;
-        if(SoldToInstituteType.length>0){
-         SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-         ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
-        }else{
-            let instituteID = rappelPriceConditions.map(item => item.InstituteId);
-            const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
-            let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
-            SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
-            ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-            SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-            ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
-            CombinationValue = true;
+        if(customerPrices[0].CountryCode === 'ES'){
+            //CR2-New
+            let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
+            effectiveDatearray = Array.from(new Set(effectiveDatearray));
+            let SoldToType,ShipToType;
+            if(SoldToInstituteType.length>0){
+                SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+                ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
+            }
+            else{
+                let instituteID = rappelPriceConditions.map(item => item.InstituteId);
+                if (instituteID.length > 0) {
+                    const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
+                    let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
+                    SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
+                    ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
+                    SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+                    ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
+                    CombinationValue = true;
+                }
+            }
+            //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+            console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
         }
-        //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-        console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
-        //let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
-        let arrayresult ,updateRappelConditionPromises;
+            //let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
+        let arrayresult, updateRappelConditionPromises;
         if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === true && CombinationValue === true) 
-     {
-         arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
-       
-
-         updateRappelConditionPromises = arrayresult[0].map(custPrice => updateRappelcustomerPrices(custPrice));
-     }else if(rappelPriceConditions.length>0 && priceAgreement.ApplyAll === false){
-          updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
-     }
-
-
+        {
+            arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
+            updateRappelConditionPromises = arrayresult[0].map(custPrice => updateRappelcustomerPrices(custPrice));
+        }else{
+            updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
+        }
+        
         // Synchronize
         console.log(`Process requests of customer prices`);
         let result = await Promise.all(updateMainConditionPromises.concat(updateFOCConditionPromises).concat(updateRappelConditionPromises));

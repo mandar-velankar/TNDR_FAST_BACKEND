@@ -136,7 +136,8 @@ module.exports = async (srv) => {
 
 	const {
 		InstitutesView,
-		InstituteInBranchView
+		InstituteInBranchView,
+		AwardedProductFormView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -2956,7 +2957,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			NumberOfExtension: offer.NumberOfExtension,
 			ClientComment: offer.ClientComment,
 			Regions: offer.Regions,
-			InternalDueDate: tender.BidDueDate,
+			InternalDueDate: offer.InternalBidDueDate,
         	ExpectedAwardDate: tender.AwardDate
 		};
 		return results;
@@ -3412,6 +3413,12 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				LotID: offerProduct.LOTID
 			}));
 
+			const awardProductFormView = await tx.run(SELECT.one.from(AwardedProductFormView).where({
+				OfferID: offer.OFFERID,
+				ProductCode: offerProduct.ProductCode,
+				LotID: offerProduct.LOTID
+			}));
+
 
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -3607,7 +3614,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				Level3Discount1: productConditionstmp[0] && productConditionstmp[0].Level3Discount1,
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
-				AlternateOfferYN: offerProduct.AlternateOfferYN
+				AlternateOfferYN: offerProduct.AlternateOfferYN,
+				FOCInfoText: awardProductFormView?.FOC
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -4303,8 +4311,14 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
-		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERDATE;
-		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERVALIDITY;
+		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERDATE);
+		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERVALIDITY);
+		offerValidation.PUBLICATION_DATE = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
+		offerValidation.InternalDueDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
+		offerValidation.BID_DUE_DATE = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
+		offerValidation.ExpectedAwardDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
+		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
+		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpiryDate;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
