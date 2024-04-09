@@ -809,17 +809,17 @@ module.exports = async (srv) => {
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
         let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-
         if(customerPrices[0].CountryCode === 'ES'){
             //EHQUT-CR2-New
             let instituteID = mainPriceConditions.map(item => item.InstituteId);
-            
+            let SoldToInstituteType = [];
+            let ShipToInstitute = [];
             if (instituteID.length > 0) {
                 const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
                 let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
                 SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
                 ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
-            
+                console.log(SoldToInstituteType, "SoldToInstituteType");
                 mainPriceConditions = mainPriceConditions.filter(function(mainobj) {
                     return !ShipToInstitute.some(function(shiptoobj) {
                         return mainobj.InstituteId == shiptoobj.InstituteID;
@@ -854,17 +854,20 @@ module.exports = async (srv) => {
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
             
             if(SoldToInstituteType.length>0){
-            SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-            ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
-            }else{
-                let instituteID = rappelPriceConditions.map(item => item.InstituteId);
-                const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
-                let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
-                SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
-                ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
                 SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
                 ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
-                CombinationValue = true;
+            }
+            else{
+                let instituteID = rappelPriceConditions.map(item => item.InstituteId);
+                if (instituteID.length > 0) {
+                    const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
+                    let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
+                    SoldToInstituteType = institute.filter(item => item.InstituteType === "Private Account" || item.InstituteType === "Public Account" || item.InstituteType === "Region(s)");
+                    ShipToInstitute = institute.filter(item => item.InstituteType === "Ship-To");
+                    SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
+                    ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
+                    CombinationValue = true;
+                }
             }
             //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
             
