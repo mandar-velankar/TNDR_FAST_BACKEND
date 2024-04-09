@@ -1206,6 +1206,8 @@ module.exports = async (srv) => {
 			Comment: req.data.Comment,
 			Active: req.data.Active,
 			LotID: req.data.LotID,
+			SubmittedOn: new Date().toISOString(),
+        	SubmittedBy: req.user.id,
 			Custom_String_1: req.data.Custom_String_1,
 			Custom_String_2: req.data.Custom_String_2,
 			Custom_String_3: req.data.Custom_String_3,
