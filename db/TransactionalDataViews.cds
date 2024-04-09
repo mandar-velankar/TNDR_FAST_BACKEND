@@ -2479,7 +2479,7 @@ inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCo
     standardTenderHistory.TotalDiscountInvoice,
     standardTenderHistory.GeneralDiscount_Amount,
     standardTenderHistory.SecondDiscount_Amount
-}
+}where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW'
 union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
                                                 and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
@@ -2505,7 +2505,7 @@ inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.P
     standardTenderHistory.TotalDiscountInvoice,
     standardTenderHistory.GeneralDiscount_Amount,
     standardTenderHistory.SecondDiscount_Amount
-};
+}where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW';
 
 entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHistory
 {
