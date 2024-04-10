@@ -885,7 +885,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Custom.Integer_1 as NumberOfExtension,
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
-    offer.Tender.Country.Region
+    offer.Tender.Country.Region,
+    offer.InternalBidDueDate
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -973,7 +974,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Custom.Integer_1,
           offer.Comment,
           offer.Tender.Custom.String_2,
-          offer.Tender.Country.Region;
+          offer.Tender.Country.Region,
+          offer.InternalBidDueDate;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -1367,6 +1369,10 @@ inner join TransactionalData.PT_TMOFRS as offer
 inner join TransactionalData.PT_TMOFPR as product 
     on product.OfferID = offer.OfferID
     and product.Active = 1 
+left outer join MasterDataLatestValues.CountryRegisteredPrice as RegisteredPrice
+    on  RegisteredPrice.COUNTRY_CODE = product.CountryCode
+    and RegisteredPrice.PRODUCT_ID   = product.ProductCode
+    and RegisteredPrice.CURRENCY =  offer.Currency
 inner join MasterData.PT_TMPRDPCK as productPacks
     on productPacks.PRODUCTPACKID = product.ProductCode
     and productPacks.ACTIVERECORD = 'Yes' 
@@ -1398,14 +1404,14 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceConditionClassification.isMain,
     case 
         when product.UnitPerPack = 'Unit'
-            then product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR
-        else product.RegisteredPrice.REGISTERED_PRICE
+            then RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR
+        else RegisteredPrice.REGISTERED_PRICE
     end as CurrentBasePrice:Double,
     @Core.Computed: false
     case 
         when product.UnitPerPack = 'Unit'
-            then  ifnull(priceCondition.Price0, (product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
-        else ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE)
+            then  ifnull(priceCondition.Price0, (RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
+        else ifnull(priceCondition.Price0, RegisteredPrice.REGISTERED_PRICE)
     end as BasePrice:Double,
     @Core.Computed: false
     case 
@@ -1413,8 +1419,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             then 
                 case 
                     when product.UnitPerPack = 'Unit'
-                        then  ifnull(priceCondition.Price0, (product.RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
-                        else ifnull(priceCondition.Price0, product.RegisteredPrice.REGISTERED_PRICE)
+                        then  ifnull(priceCondition.Price0, (RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
+                        else ifnull(priceCondition.Price0, RegisteredPrice.REGISTERED_PRICE)
                 end
         else
             ifnull(priceCondition.Price1, 0)
@@ -2290,6 +2296,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             AlternateOfferYN                            : String(255);
             NET_OFFER_SALES_OFFER_CURRENCY              : Double;
             NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
+            FOCInfoText                                 : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2347,6 +2354,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key product.ProductCode,
     key tender.CountryCode,
     offer.Currency,
+    offer.CreationDate,
     product.Price.NetofferPrice as NetofferPriceBDPR,
     product.Price.NetPrice as NetPriceBDPR,
     product.UnitPerPack,
@@ -2403,6 +2411,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         tender.CountryCode,
         tender.TenderName,
         offer.Currency,
+        offer.CreationDate,
         offer.SubmittedOn,
         institute.InstituteID,
         institute.InstituteName,
@@ -2447,27 +2456,64 @@ left outer join TransactionalData.PriceCondition as priceCondition
         product.Results.Outcome,
         foc.ProductPackId;
 
-entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory{
-        key ProductCode,
-        key INSTITUTE_ID,
-        Currency,
-        Price0,
-        Price1,
-        Level2Discount1,                
-        Level2Discount2,
-        Price2,
-        AnnualDiscountForBranch,
-        Level3Discount1,
-        Price3,
-        AwardedPrice,
-        TotalYearlyValueMainCustomer,
-        TotalYearlyValueBranch,
-        TotalDiscountNHI,
-        TotalDiscountInvoice,
-        GeneralDiscount_Amount,
-        SecondDiscount_Amount
+entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
+inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
+                                                and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
+                                                and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate 
+{
+    key standardTenderHistory.ProductCode,
+    key standardTenderHistory.INSTITUTE_ID,
+    standardTenderHistory.Currency,
+    standardTenderHistory.Price0,
+    standardTenderHistory.Price1,
+    standardTenderHistory.Level2Discount1,                
+    standardTenderHistory.Level2Discount2,
+    standardTenderHistory.Price2,
+    standardTenderHistory.AnnualDiscountForBranch,
+    standardTenderHistory.Level3Discount1,
+    standardTenderHistory.Price3,
+    standardTenderHistory.AwardedPrice,
+    standardTenderHistory.TotalYearlyValueMainCustomer,
+    standardTenderHistory.TotalYearlyValueBranch,
+    standardTenderHistory.TotalDiscountNHI,
+    standardTenderHistory.TotalDiscountInvoice,
+    standardTenderHistory.GeneralDiscount_Amount,
+    standardTenderHistory.SecondDiscount_Amount
+}where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW'
+union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
+inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
+                                                and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
+                                                and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate
+inner join MasterData.PT_TMINSHIER as hier1 on standardTenderHistory.INSTITUTE_ID = hier1.InstituteID
+inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.ParentInstituteID
+{
+    key standardTenderHistory.ProductCode,
+    key hier2.ParentInstituteID as INSTITUTE_ID: Integer,
+    standardTenderHistory.Currency,
+    standardTenderHistory.Price0,
+    standardTenderHistory.Price1,
+    standardTenderHistory.Level2Discount1,                
+    standardTenderHistory.Level2Discount2,
+    standardTenderHistory.Price2,
+    standardTenderHistory.AnnualDiscountForBranch,
+    standardTenderHistory.Level3Discount1,
+    standardTenderHistory.Price3,
+    standardTenderHistory.AwardedPrice,
+    standardTenderHistory.TotalYearlyValueMainCustomer,
+    standardTenderHistory.TotalYearlyValueBranch,
+    standardTenderHistory.TotalDiscountNHI,
+    standardTenderHistory.TotalDiscountInvoice,
+    standardTenderHistory.GeneralDiscount_Amount,
+    standardTenderHistory.SecondDiscount_Amount
+}where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW';
 
-}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE;
+entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHistory
+{
+    key ProductCode,
+    key INSTITUTE_ID,
+    Max(CreationDate) as MaxCreationDate: Date
+} where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE
+group by ProductCode, INSTITUTE_ID;
 
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
@@ -2506,7 +2552,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             key offer.CountryCode,
             offer.CreationDate,
             offer.SubmittedBy,
-            offer.SubmittedOn,
+            pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
             (pr.SORTER + 1) as CountProducts,
@@ -2591,7 +2637,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             key offer.CountryCode,
             offer.CreationDate,
             offer.SubmittedBy,
-            offer.SubmittedOn,
+            pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
             (pr.SORTER + 1) as CountProducts,

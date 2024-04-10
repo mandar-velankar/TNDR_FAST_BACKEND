@@ -764,27 +764,27 @@ module.exports = async (srv) => {
         if (customerPrices && customerPrices.length > 0) {
             let Countrycode = customerPrices[0].CountryCode;
 
-                const materialNumbers = customerPrices.map(cp => cp.MaterialNumber);
-                const focMaterialNumbers = customerPrices.map(cp => cp.FOCmaterialNumber);
-               
-                const activeMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : materialNumbers}}));
-                const focActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : focMaterialNumbers}}));
+            const materialNumbers = customerPrices.map(cp => cp.MaterialNumber);
+            const focMaterialNumbers = customerPrices.map(cp => cp.FOCmaterialNumber);
+            
+            const activeMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : materialNumbers}}));
+            const focInActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'No' , SKUCode: {in : focMaterialNumbers}}));
 
-                if(activeMaterial.length >0){
-                    const materials= activeMaterial.map(item =>item.SKUCode);
-                         
-                    customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } , MaterialNumber : {in : materials}}));
-                    if(focActiveMaterial.length > 0){
-                        let materials = focActiveMaterial.map(item =>item.SKUCode);
-                        materials = materials.map(item => item.toString());
-                        customerPrices = customerPrices.filter(price => {
-                            return (
-                              (price.FOCmaterialNumber === null || materials.includes(price.FOCmaterialNumber))
-                            );
-                        });
-                    }
-
+            if(activeMaterial.length >0){
+                const materials= activeMaterial.map(item =>item.SKUCode);
+                        
+                customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } , MaterialNumber : {in : materials}}));
+                if(focInActiveMaterial.length > 0){
+                    let materials = focInActiveMaterial.map(item =>item.SKUCode);
+                    materials = materials.map(item => item.toString());
+                    customerPrices = customerPrices.filter(price => {
+                        return (
+                            (price.FOCmaterialNumber === null || !materials.includes(price.FOCmaterialNumber))
+                        );
+                    });
                 }
+
+            }
         }
                      
         if (customerPrices && customerPrices.length <= 0) {
@@ -850,9 +850,9 @@ module.exports = async (srv) => {
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
         if(customerPrices[0].CountryCode === 'ES'){
             //CR2-New
-            effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
+            let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
-            
+            let SoldToType,ShipToType;
             if(SoldToInstituteType.length>0){
                 SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
                 ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
@@ -870,7 +870,7 @@ module.exports = async (srv) => {
                 }
             }
             //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-            
+            console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
         }
             //let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult, updateRappelConditionPromises;
