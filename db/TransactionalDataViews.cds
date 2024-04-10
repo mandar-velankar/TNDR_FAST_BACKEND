@@ -885,7 +885,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Custom.Integer_1 as NumberOfExtension,
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
-    offer.Tender.Country.Region
+    offer.Tender.Country.Region,
+    offer.InternalBidDueDate
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -973,7 +974,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Custom.Integer_1,
           offer.Comment,
           offer.Tender.Custom.String_2,
-          offer.Tender.Country.Region;
+          offer.Tender.Country.Region,
+          offer.InternalBidDueDate;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -2294,6 +2296,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             AlternateOfferYN                            : String(255);
             NET_OFFER_SALES_OFFER_CURRENCY              : Double;
             NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
+            FOCInfoText                                 : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2476,7 +2479,7 @@ inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCo
     standardTenderHistory.TotalDiscountInvoice,
     standardTenderHistory.GeneralDiscount_Amount,
     standardTenderHistory.SecondDiscount_Amount
-}
+}where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW'
 union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
                                                 and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
@@ -2502,7 +2505,7 @@ inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.P
     standardTenderHistory.TotalDiscountInvoice,
     standardTenderHistory.GeneralDiscount_Amount,
     standardTenderHistory.SecondDiscount_Amount
-};
+}where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW';
 
 entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHistory
 {
@@ -2549,7 +2552,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             key offer.CountryCode,
             offer.CreationDate,
             offer.SubmittedBy,
-            offer.SubmittedOn,
+            pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
             (pr.SORTER + 1) as CountProducts,
@@ -2634,7 +2637,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             key offer.CountryCode,
             offer.CreationDate,
             offer.SubmittedBy,
-            offer.SubmittedOn,
+            pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
             (pr.SORTER + 1) as CountProducts,
