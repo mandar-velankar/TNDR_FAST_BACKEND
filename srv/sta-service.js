@@ -114,7 +114,8 @@ module.exports = async (srv) => {
 		CountrySpecificTenderInfo,
 		PT_TMTNOFST,
 		TransCompetitorResult,
-		OutgoingMails
+		OutgoingMails,
+		NLPriceConditions
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -136,7 +137,8 @@ module.exports = async (srv) => {
 
 	const {
 		InstitutesView,
-		InstituteInBranchView
+		InstituteInBranchView,
+		TenderMasterView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -586,15 +588,15 @@ module.exports = async (srv) => {
 				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
 			}
 		}		
-		// // validate form
-		// !req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
-		// !req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
-		// !req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
-		// !req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
-		// !req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
-		// !req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
-		// !req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
-		// !req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
+		// validate form
+		!req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
+		!req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
+		!req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
+		!req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
+		!req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
+		!req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
+		!req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
+		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
 
 		//check if dates are correct
 		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
@@ -1115,7 +1117,9 @@ module.exports = async (srv) => {
 			'PriceConditionPriceView',
 			'PriceConditionDiscountView',
 			'PriceConditionPriceWithFOCView',
-			'PriceConditionDiscountWithFOCView'
+			'PriceConditionDiscountWithFOCView',
+			"PriceConditionNLPriceView", 
+			"PriceConditionNLDiscountView"
 		], 
 		async (req) => {
 			try{
@@ -1579,6 +1583,8 @@ module.exports = async (srv) => {
 			'PriceConditionDiscountWithFOCView',
 			'PriceConditionTaiwanPriceView',
 			'PriceConditionTaiwanDiscountView',
+			"PriceConditionNLPriceView", 
+			"PriceConditionNLDiscountView"
 		], 
 		async (req) => {
 			try{
@@ -1714,6 +1720,35 @@ module.exports = async (srv) => {
 		else{
 			await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);		
 		}
+
+		if(req.data.CountryCode === 'NL'){
+			await handleNetherlandsPriceConditions(req);
+		}
+	}
+
+	async function handleNetherlandsPriceConditions(req) {
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+		const existingNLPriceConditions = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: priceCondition.ID});
+
+		if (existingNLPriceConditions.length > 0) {
+			await Promise.all(req.data.NLPriceConditionType.map(pc => {
+				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
+				return UPDATE(NLPriceConditions)
+				.with(mappedNLPriceCondition)
+				.where({
+					ContractDuration: pc.ContractDuration,
+					PriceCondition_ID: priceCondition.ID
+				});
+			}))
+		}else {
+			await Promise.all(req.data.NLPriceConditionType.map(pc => {
+				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
+				return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+			}))
+		}
 	}
 
 	async function handlePriceConditionUpsert(priceCondition, mappedPriceCondition){
@@ -1725,6 +1760,16 @@ module.exports = async (srv) => {
 				});
 		} else {
 			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
+		}
+	}
+
+	const mappedNLPriceConditions = function(pc, PriceconditionID) {
+		return {
+			ContractDuration: pc.ContractDuration,
+			OfferPrice: pc.OfferPrice,
+			Discount: pc.Discount,
+			NetPrice: pc.NetPrice,
+			PriceCondition_ID: PriceconditionID
 		}
 	}
 
@@ -1855,7 +1900,41 @@ module.exports = async (srv) => {
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
 				PriceConditionClassification_ID: req.data.ClassificationID
-			}
+			},
+			"NLDiscount" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"NLPrice" : {
+				Price0: req.data.BasePrice,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
 		}
 
 		return mappings[req.data.ConditionType];
@@ -2102,6 +2181,40 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			// item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
 			item.TotalDiscountNHI = (item.TotalDiscountNHI * 100).toFixed(2) / 100;
 			item.TotalDiscountInvoice = (item.TotalDiscountInvoice * 100).toFixed(2) / 100;
+		};
+	}
+	catch(error){
+		console.error('Error in PriceConditionTaiwanPriceView READ');
+		return req.reject(403, error?.message||"Error in PriceConditionTaiwanPriceView READ");
+	}
+}
+);
+
+srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'], (items, req) => {
+	try{
+		if(!items) return [];
+		if(Array.isArray(items)){
+			return items.map(fnMapNlConditions)
+		}else{
+			return fnMapNlConditions(items);
+		}
+
+		async function fnMapNlConditions(item){
+			if (item.PriceConditionID) {
+				item.NLPriceConditionType = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: item.PriceConditionID});
+			}else {
+				item.NLPriceConditionType = [];
+				for(let i = 1; i <= 3; i++) {
+					item.NLPriceConditionType.push({
+						ContractDuration: item[`Custom_Integer_${i}`],
+						OfferPrice: item.OfferPrice,
+						Discount: 0,
+						NetPrice: 0,
+					})
+				}
+			}
+			item.NetOfferPrice = await calculateNetOfferPrice(item);
+			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 		};
 	}
 	catch(error){
@@ -4665,5 +4778,42 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			NetPrice              : priceCondition.NetPrice
 		}
 	}
-	
+	srv.on('getNotificationMailTemplate', async (req) => {
+		try{
+			const { data: {offerID,templateId,url} } = req;
+			const tx = cds.tx(req);
+			const offerInformation = await SELECT.one.from(TenderMasterView).where({OfferID: offerID})
+			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
+			const offerValidation = await buildOfferValidation(tx, whereOffer);
+			const mailTemplate = await getMailTemplate(templateId);
+			const mappedData = mapNotificationData(mailTemplate, offerInformation,offerValidation,url);
+			return mappedData
+		}catch(error){
+			console.error('Error in getNotificationMailTemplate');
+            return req.reject(403, error?.message||"Error in getNotificationMailTemplate");
+		}
+	})
+	const mapNotificationData = function (template, offerInformation,offerValidation,url) {
+		
+		const data = {
+			OfferID : offerInformation.OfferID,
+			InstituteName : offerInformation.InstituteName,
+			TenderReference : offerInformation.TenderName,
+			ContractStartDate : offerValidation.EffectiveDate,
+			ContractEndDate : offerValidation.ExpiryDate,
+			DirectURLToOffer : url
+		}
+		
+        return generateMailBody(template, {
+			data
+		})	
+    }
+	srv.before(['CREATE','UPDATE'], ['Outbox'], async (req) => {
+
+		!req.data.Sender && req.error({ code: 404, message: "Sender is required", target: "Sender" });
+		!req.data.Recipients && req.error({ code: 404, message: "Recipients is required", target: "Recipients" });
+		!req.data.Subject && req.error({ code: 404, message: "Subject is required", target: "subject" });
+		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
+		
+	});
 }

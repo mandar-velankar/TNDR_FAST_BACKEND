@@ -542,9 +542,11 @@ entity PriceCondition: cuid, managed {
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
     IsPricingUnlocked                   : Boolean default false;
+    NLPriceConditionType                : Array of NLConditions;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
+    NLPriceConditions                   : Association to many NLPriceConditions on NLPriceConditions.PriceCondition = $self;
 }
 
 //EHQUT-INC18178128-FAST - Error decimals discounts
@@ -894,4 +896,19 @@ entity OfferProductOfferStatus {
 entity ExcelUpload:cuid {
     @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     content             : LargeBinary;
+};
+
+entity NLPriceConditions: cuid {
+    ContractDuration: Double;
+    OfferPrice: Double;
+    Discount: Double;
+    NetPrice: Double;
+    PriceCondition: Association to PriceCondition;
+}
+
+type NLConditions {
+    ContractDuration: Double;
+    OfferPrice: Double;
+    Discount: Double;
+    NetPrice: Double;
 };
