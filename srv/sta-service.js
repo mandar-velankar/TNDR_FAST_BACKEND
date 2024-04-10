@@ -114,7 +114,8 @@ module.exports = async (srv) => {
 		CountrySpecificTenderInfo,
 		PT_TMTNOFST,
 		TransCompetitorResult,
-		OutgoingMails
+		OutgoingMails,
+		NLPriceConditions
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -565,36 +566,36 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
 		try{
-		// const today = new Date().toISOString().slice(0, 10);
+		const today = new Date().toISOString().slice(0, 10);
 
-		// const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
+		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
 
-		// const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
-		// for (const item of mandatoryFielddata) {
-		// 	let frontendField = item.Field;
-		// 	if (frontendField.includes("path")) {
-		// 		const match = regex.exec(frontendField);
-		// 		frontendField = match ? match[1] : frontendField;
-		// 	}
+		for (const item of mandatoryFielddata) {
+			let frontendField = item.Field;
+			if (frontendField.includes("path")) {
+				const match = regex.exec(frontendField);
+				frontendField = match ? match[1] : frontendField;
+			}
 		
-		// 	if (
-		// 		!(frontendField in req.data) ||
-		// 		req.data[frontendField] === null ||
-		// 		req.data[frontendField] === ''
-		// 	) {
-		// 		req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
-		// 	}
-		// }		
-		// // validate form
-		// !req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
-		// !req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
-		// !req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
-		// !req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
-		// !req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
-		// !req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
-		// !req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
-		// !req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
+			if (
+				!(frontendField in req.data) ||
+				req.data[frontendField] === null ||
+				req.data[frontendField] === ''
+			) {
+				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+			}
+		}		
+		// validate form
+		!req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
+		!req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
+		!req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
+		!req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
+		!req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
+		!req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
+		!req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
+		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
 
 		//check if dates are correct
 		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
@@ -629,31 +630,31 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
 		try{
-		// const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Offer', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
-		// const fieldMapping = {
-		// 	'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
-		// };
-		// const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Offer', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		const fieldMapping = {
+			'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
+		};
+		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
-		// for (const item of mandatoryFielddata) {
-		// 	let frontendField = item.Field;
-		// 	if (frontendField.includes("path")) {
-		// 		const match = regex.exec(frontendField);
-		// 		frontendField = match ? match[1] : frontendField;
-		// 	}
-		// 	// Check if there's a mapping, and if so, replace it
-		// 	if (fieldMapping[frontendField]) {
-		// 		frontendField = fieldMapping[frontendField];
-		// 	}
+		for (const item of mandatoryFielddata) {
+			let frontendField = item.Field;
+			if (frontendField.includes("path")) {
+				const match = regex.exec(frontendField);
+				frontendField = match ? match[1] : frontendField;
+			}
+			// Check if there's a mapping, and if so, replace it
+			if (fieldMapping[frontendField]) {
+				frontendField = fieldMapping[frontendField];
+			}
 		
-		// 	if (
-		// 		!(frontendField in req.data) ||
-		// 		req.data[frontendField] === null ||
-		// 		req.data[frontendField] === ''
-		// 	) {
-		// 		req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
-		// 	}
-		// }	
+			if (
+				!(frontendField in req.data) ||
+				req.data[frontendField] === null ||
+				req.data[frontendField] === ''
+			) {
+				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+			}
+		}	
 		// validate form
 		// !req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
 		// !req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
@@ -1115,7 +1116,9 @@ module.exports = async (srv) => {
 			'PriceConditionPriceView',
 			'PriceConditionDiscountView',
 			'PriceConditionPriceWithFOCView',
-			'PriceConditionDiscountWithFOCView'
+			'PriceConditionDiscountWithFOCView',
+			"PriceConditionNLPriceView", 
+			"PriceConditionNLDiscountView"
 		], 
 		async (req) => {
 			try{
@@ -1715,6 +1718,35 @@ module.exports = async (srv) => {
 		else{
 			await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);		
 		}
+
+		if(req.data.CountryCode === 'NL'){
+			await handleNetherlandsPriceConditions(req);
+		}
+	}
+
+	async function handleNetherlandsPriceConditions(req) {
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+		const existingNLPriceConditions = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: priceCondition.ID});
+
+		if (existingNLPriceConditions.length > 0) {
+			await Promise.all(req.data.NLPriceConditionType.map(pc => {
+				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
+				return UPDATE(NLPriceConditions)
+				.with(mappedNLPriceCondition)
+				.where({
+					ContractDuration: pc.ContractDuration,
+					PriceCondition_ID: priceCondition.ID
+				});
+			}))
+		}else {
+			await Promise.all(req.data.NLPriceConditionType.map(pc => {
+				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
+				return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+			}))
+		}
 	}
 
 	async function handlePriceConditionUpsert(priceCondition, mappedPriceCondition){
@@ -1726,6 +1758,16 @@ module.exports = async (srv) => {
 				});
 		} else {
 			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
+		}
+	}
+
+	const mappedNLPriceConditions = function(pc, PriceconditionID) {
+		return {
+			ContractDuration: pc.ContractDuration,
+			OfferPrice: pc.OfferPrice,
+			Discount: pc.Discount,
+			NetPrice: pc.NetPrice,
+			PriceCondition_ID: PriceconditionID
 		}
 	}
 
@@ -2137,6 +2179,40 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			// item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
 			item.TotalDiscountNHI = (item.TotalDiscountNHI * 100).toFixed(2) / 100;
 			item.TotalDiscountInvoice = (item.TotalDiscountInvoice * 100).toFixed(2) / 100;
+		};
+	}
+	catch(error){
+		console.error('Error in PriceConditionTaiwanPriceView READ');
+		return req.reject(403, error?.message||"Error in PriceConditionTaiwanPriceView READ");
+	}
+}
+);
+
+srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'], (items, req) => {
+	try{
+		if(!items) return [];
+		if(Array.isArray(items)){
+			return items.map(fnMapNlConditions)
+		}else{
+			return fnMapNlConditions(items);
+		}
+
+		async function fnMapNlConditions(item){
+			if (item.PriceConditionID) {
+				item.NLPriceConditionType = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: item.PriceConditionID});
+			}else {
+				item.NLPriceConditionType = [];
+				for(let i = 1; i <= 3; i++) {
+					item.NLPriceConditionType.push({
+						ContractDuration: item[`Custom_Integer_${i}`],
+						OfferPrice: item.OfferPrice,
+						Discount: 0,
+						NetPrice: 0,
+					})
+				}
+			}
+			item.NetOfferPrice = await calculateNetOfferPrice(item);
+			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 		};
 	}
 	catch(error){

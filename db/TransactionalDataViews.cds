@@ -1479,7 +1479,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
      @Core.Computed: false
     ifnull(priceCondition.FreeGoods_Amount,0) as FreeGoods_Amount:Double,
      @Core.Computed: false
-    ifnull(priceCondition.FreeGoods_Percentage,0) as FreeGoods_Percentage:Double
+    ifnull(priceCondition.FreeGoods_Percentage,0) as FreeGoods_Percentage:Double,
+    priceCondition.NLPriceConditionType
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
