@@ -256,7 +256,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
     action softDeleteOffer(offerID:String) returns String;
-    action notificationMail(offerID:String, From: String, To: String, Subject: String, Content: String) returns String;
     function getNotificationMailTemplate(offerID:String, templateId: String, url: String) returns String;
 
    /* entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as pr
@@ -366,7 +365,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Country: redirected to Country,
         User: redirected to Users,
         User.UserName,
-        // User.UserEmail
+        User.UserEmail
     };
 
     entity UsersPerCountry @readonly @(cds.redirection.target:false) as projection on AdminData.PT_TMUSERCTRY {

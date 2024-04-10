@@ -22,7 +22,6 @@ const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
-const mammoth = require("mammoth");
 
 module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
@@ -4673,14 +4672,6 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			NetPrice              : priceCondition.NetPrice
 		}
 	}
-	srv.on('notificationMail', async (req) => {
-		try{
-			const { data: {offerID,type, QuotationInstituteID} } = req;
-		}catch{
-			console.error('Error in notificationMail');
-            return req.reject(403, error?.message||"Error in notificationMail");
-		}
-	})
 	srv.on('getNotificationMailTemplate', async (req) => {
 		try{
 			const { data: {offerID,templateId,url} } = req;
@@ -4706,19 +4697,17 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			ContractEndDate : offerValidation.ExpiryDate,
 			DirectURLToOffer : url
 		}
-        return convertWordToHTML(template);
 		
-		// generateMailBody(template, {
-		// 		data
-        //     })
+        return generateMailBody(template, {
+			data
+		})	
     }
+	srv.before(['CREATE','UPDATE'], ['Outbox'], async (req) => {
 
-	const convertWordToHTML = function (template) {
-		mammoth.convertToHtml({buffer: template.content})
-		.then(function(result){
-			const html = result.value; // The generated HTML
-			const messages = result.messages; // Any messages, such as warnings during conversion
-		})
-		.done();
-	}
+		!req.data.Sender && req.error({ code: 404, message: "Sender is required", target: "Sender" });
+		!req.data.Recipients && req.error({ code: 404, message: "Recipients is required", target: "Recipients" });
+		!req.data.Subject && req.error({ code: 404, message: "Subject is required", target: "subject" });
+		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
+		
+	});
 }
