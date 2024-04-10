@@ -137,7 +137,8 @@ module.exports = async (srv) => {
 
 	const {
 		InstitutesView,
-		InstituteInBranchView
+		InstituteInBranchView,
+		TenderMasterView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -4783,5 +4784,42 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			NetPrice              : priceCondition.NetPrice
 		}
 	}
-	
+	srv.on('getNotificationMailTemplate', async (req) => {
+		try{
+			const { data: {offerID,templateId,url} } = req;
+			const tx = cds.tx(req);
+			const offerInformation = await SELECT.one.from(TenderMasterView).where({OfferID: offerID})
+			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
+			const offerValidation = await buildOfferValidation(tx, whereOffer);
+			const mailTemplate = await getMailTemplate(templateId);
+			const mappedData = mapNotificationData(mailTemplate, offerInformation,offerValidation,url);
+			return mappedData
+		}catch(error){
+			console.error('Error in getNotificationMailTemplate');
+            return req.reject(403, error?.message||"Error in getNotificationMailTemplate");
+		}
+	})
+	const mapNotificationData = function (template, offerInformation,offerValidation,url) {
+		
+		const data = {
+			OfferID : offerInformation.OfferID,
+			InstituteName : offerInformation.InstituteName,
+			TenderReference : offerInformation.TenderName,
+			ContractStartDate : offerValidation.EffectiveDate,
+			ContractEndDate : offerValidation.ExpiryDate,
+			DirectURLToOffer : url
+		}
+		
+        return generateMailBody(template, {
+			data
+		})	
+    }
+	srv.before(['CREATE','UPDATE'], ['Outbox'], async (req) => {
+
+		!req.data.Sender && req.error({ code: 404, message: "Sender is required", target: "Sender" });
+		!req.data.Recipients && req.error({ code: 404, message: "Recipients is required", target: "Recipients" });
+		!req.data.Subject && req.error({ code: 404, message: "Subject is required", target: "subject" });
+		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
+		
+	});
 }

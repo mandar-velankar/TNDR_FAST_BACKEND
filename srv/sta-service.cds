@@ -256,6 +256,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
     action softDeleteOffer(offerID:String) returns String;
+    function getNotificationMailTemplate(offerID:String, templateId: String, url: String) returns String;
 
    /* entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as pr
         left join MasterData.PT_TMCTPRDPCK as ctprdck on ctprdck.PRODUCTPACKID = pr.ProductCode
@@ -363,7 +364,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         *,
         Country: redirected to Country,
         User: redirected to Users,
-        User.UserName
+        User.UserName,
+        User.UserEmail
     };
 
     entity UsersPerCountry @readonly @(cds.redirection.target:false) as projection on AdminData.PT_TMUSERCTRY {
@@ -827,5 +829,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MailTemplates                                as projection on AdminData.MailTemplate;
     entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
-    entity StandardTenderFOCInformation                 as projection on TransactionalDataViews.StandardTenderFOCInformation;
+    entity StandardTenderFOCInformation                 as projection on TransactionalDataViews.StandardTenderFOCInformation;   
+    @cds.redirection.target
+    entity NotificationUserList as select from AdminData.PT_TMUSERCTRY{
+        *,
+        Key CountryCode,
+        CWID,
+        User: redirected to Users,
+        User.Role,
+        User.UserName,
+        User.UserEmail,
+    }where CountryCode = 'NL' and User.Role = 'Hospital Manager';
 }
