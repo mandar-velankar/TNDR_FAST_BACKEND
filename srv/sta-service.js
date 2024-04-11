@@ -2019,7 +2019,7 @@ module.exports = async (srv) => {
 
 		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const parentInstitute = await SELECT.one.from(InstitutesView).where({InstituteID:selectedTender?.InstituteID, CountryCode:req.data.CountryCode});
-		const instituteInBranch = await SELECT.from(InstituteInBranchView).where({ParentInstituteID:parentInstitute?.ParentInstituteID, InstituteID: {"!=": parentInstitute?.InstituteID}, CountryCode:req.data.CountryCode});
+		const instituteInBranch = await SELECT.from(InstituteInBranchView).where({InstituteID:parentInstitute?.InstituteID, InstituteName: {"!=": parentInstitute?.InstituteName}});
 
 		return (instituteInBranch.length > 0);
 	}
