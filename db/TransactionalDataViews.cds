@@ -885,7 +885,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Custom.Integer_1 as NumberOfExtension,
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
-    offer.Tender.Country.Region
+    offer.Tender.Country.Region,
+    offer.InternalBidDueDate
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -973,7 +974,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Custom.Integer_1,
           offer.Comment,
           offer.Tender.Custom.String_2,
-          offer.Tender.Country.Region;
+          offer.Tender.Country.Region,
+          offer.InternalBidDueDate;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -2069,7 +2071,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             BID_DUE_DATE          : Date; // Chile
             TENDER_SUBMITTED_BY   : String; // Chile
             REMARKS               : String(5000);
-            CUSTOM_REMARKS        : String(500) not null;
+            CUSTOM_REMARKS        : String not null;
             DELIVERYTERMS         : String(5000);
             PAYMENTTERMS          : String(5000);
             SHIPMENTTERMS         : String(5000);
@@ -2102,8 +2104,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             ContractLength         : Integer;
             ContractExtenseion     : Integer;
             NumberOfExtension      : Integer;  //PT_TMTEND/CUSTOM_INTEGER_1
-            ClientComment          : String(500);
-            Comment                : String(500);
+            ClientComment          : String;
+            Comment                : String;
             Regions                : String;
             InternalDueDate        : Date;
             ExpectedAwardDate      : Date;
@@ -2298,6 +2300,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             AlternateOfferYN                            : String(255);
             NET_OFFER_SALES_OFFER_CURRENCY              : Double;
             NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
+            FOCInfoText                                 : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2355,6 +2358,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key product.ProductCode,
     key tender.CountryCode,
     offer.Currency,
+    offer.CreationDate,
     product.Price.NetofferPrice as NetofferPriceBDPR,
     product.Price.NetPrice as NetPriceBDPR,
     product.UnitPerPack,
@@ -2411,6 +2415,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         tender.CountryCode,
         tender.TenderName,
         offer.Currency,
+        offer.CreationDate,
         offer.SubmittedOn,
         institute.InstituteID,
         institute.InstituteName,
@@ -2455,27 +2460,64 @@ left outer join TransactionalData.PriceCondition as priceCondition
         product.Results.Outcome,
         foc.ProductPackId;
 
-entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory{
-        key ProductCode,
-        key INSTITUTE_ID,
-        Currency,
-        Price0,
-        Price1,
-        Level2Discount1,                
-        Level2Discount2,
-        Price2,
-        AnnualDiscountForBranch,
-        Level3Discount1,
-        Price3,
-        AwardedPrice,
-        TotalYearlyValueMainCustomer,
-        TotalYearlyValueBranch,
-        TotalDiscountNHI,
-        TotalDiscountInvoice,
-        GeneralDiscount_Amount,
-        SecondDiscount_Amount
+entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
+inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
+                                                and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
+                                                and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate 
+{
+    key standardTenderHistory.ProductCode,
+    key standardTenderHistory.INSTITUTE_ID,
+    standardTenderHistory.Currency,
+    standardTenderHistory.Price0,
+    standardTenderHistory.Price1,
+    standardTenderHistory.Level2Discount1,                
+    standardTenderHistory.Level2Discount2,
+    standardTenderHistory.Price2,
+    standardTenderHistory.AnnualDiscountForBranch,
+    standardTenderHistory.Level3Discount1,
+    standardTenderHistory.Price3,
+    standardTenderHistory.AwardedPrice,
+    standardTenderHistory.TotalYearlyValueMainCustomer,
+    standardTenderHistory.TotalYearlyValueBranch,
+    standardTenderHistory.TotalDiscountNHI,
+    standardTenderHistory.TotalDiscountInvoice,
+    standardTenderHistory.GeneralDiscount_Amount,
+    standardTenderHistory.SecondDiscount_Amount
+}where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW'
+union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
+inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
+                                                and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
+                                                and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate
+inner join MasterData.PT_TMINSHIER as hier1 on standardTenderHistory.INSTITUTE_ID = hier1.InstituteID
+inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.ParentInstituteID
+{
+    key standardTenderHistory.ProductCode,
+    key hier2.ParentInstituteID as INSTITUTE_ID: Integer,
+    standardTenderHistory.Currency,
+    standardTenderHistory.Price0,
+    standardTenderHistory.Price1,
+    standardTenderHistory.Level2Discount1,                
+    standardTenderHistory.Level2Discount2,
+    standardTenderHistory.Price2,
+    standardTenderHistory.AnnualDiscountForBranch,
+    standardTenderHistory.Level3Discount1,
+    standardTenderHistory.Price3,
+    standardTenderHistory.AwardedPrice,
+    standardTenderHistory.TotalYearlyValueMainCustomer,
+    standardTenderHistory.TotalYearlyValueBranch,
+    standardTenderHistory.TotalDiscountNHI,
+    standardTenderHistory.TotalDiscountInvoice,
+    standardTenderHistory.GeneralDiscount_Amount,
+    standardTenderHistory.SecondDiscount_Amount
+}where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW';
 
-}where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE;
+entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHistory
+{
+    key ProductCode,
+    key INSTITUTE_ID,
+    Max(CreationDate) as MaxCreationDate: Date
+} where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE
+group by ProductCode, INSTITUTE_ID;
 
 entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
@@ -2514,7 +2556,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             key offer.CountryCode,
             offer.CreationDate,
             offer.SubmittedBy,
-            offer.SubmittedOn,
+            pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
             (pr.SORTER + 1) as CountProducts,
@@ -2552,7 +2594,12 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 else 'Suspend'
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
-    }where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW' and tender.Active = 1 and offer.Active = 1
+    }where offer.OfferStatusTable.STATUS = 'Results Recorded'
+     and quotation.EffectiveDate <= CURRENT_DATE
+     and tender.CountryCode = 'TW'
+     and tender.Active = 1
+     and offer.Active = 1
+     and pr.Results.Outcome = 'Won'
     union select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
@@ -2594,7 +2641,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             key offer.CountryCode,
             offer.CreationDate,
             offer.SubmittedBy,
-            offer.SubmittedOn,
+            pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
             (pr.SORTER + 1) as CountProducts,
@@ -2633,7 +2680,12 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             end as Status: String,
             ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
     }
-    where offer.OfferStatusTable.STATUS = 'Results Recorded' and quotation.EffectiveDate <= CURRENT_DATE and tender.CountryCode = 'TW' and tender.Active = 1 and offer.Active = 1;
+    where offer.OfferStatusTable.STATUS = 'Results Recorded'
+    and quotation.EffectiveDate <= CURRENT_DATE
+    and tender.CountryCode = 'TW'
+    and tender.Active = 1
+    and offer.Active = 1
+    and pr.Results.Outcome = 'Won';
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
         key hier.ParentInstituteID,

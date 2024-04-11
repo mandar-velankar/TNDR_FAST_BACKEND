@@ -138,7 +138,8 @@ module.exports = async (srv) => {
 	const {
 		InstitutesView,
 		InstituteInBranchView,
-		TenderMasterView
+		TenderMasterView,
+		AwardedProductFormView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -1212,6 +1213,8 @@ module.exports = async (srv) => {
 			Comment: req.data.Comment,
 			Active: req.data.Active,
 			LotID: req.data.LotID,
+			SubmittedOn: new Date().toISOString(),
+        	SubmittedBy: req.user.id,
 			Custom_String_1: req.data.Custom_String_1,
 			Custom_String_2: req.data.Custom_String_2,
 			Custom_String_3: req.data.Custom_String_3,
@@ -1614,8 +1617,10 @@ module.exports = async (srv) => {
 			try{
 				const tx = cds.tx(req);
 				const currentOffer = await SELECT.one.from(PT_TMOFRS).where({OfferID: data.OfferID});
-				const whereOffer = ServiceHelper.buildFullWhere("OFFER_ID", "=", data.OfferID);
-				const currentOffeProductsValidation = await buildOfferProductValidation(tx, whereOffer);
+				const whereOfferPrValidation = ServiceHelper.buildFullWhere("OFFER_ID", "=", data.OfferID);
+				const whereOfferValidation = ServiceHelper.buildFullWhere("OFFERID", "=", data.OfferID);
+				const currentOfferValidation = await buildOfferValidation(tx, whereOfferValidation);
+				const currentOffeProductsValidation = await buildOfferProductValidation(tx, whereOfferPrValidation);
 				const currentOfferPriceConditions = await SELECT.from(PriceCondition).where({OfferID: data.OfferID});
 				const parentOfferProdPriceConditions = await SELECT.from(PriceCondition).where({OfferID: currentOffer.DifferentAwardPriceParentOfferID});
 				if (!currentOffer.DifferentAwardPriceParentOfferID || parentOfferProdPriceConditions.length === 0 || currentOffeProductsValidation.length === 0) return;
@@ -1646,6 +1651,25 @@ module.exports = async (srv) => {
 
 					await INSERT.into(PT_TMTRRES).entries(mappedAwardedProducts);
 					await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Quotation Submitted');
+
+					const mappedPTTMQUTO = mappedQuotation(req.user, currentOfferValidation);
+
+					const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+						OfferID: currentOfferValidation.OFFERID,
+						Active: 1,
+						OfferDate: currentOfferValidation.OFFERDATE
+					});
+
+					// save/update PT_TMQUTO
+					if(submittedQoutation){
+						await UPDATE(PT_TMQUTO).with (mappedPTTMQUTO).where({
+							OfferID: currentOfferValidation.OFFERID,
+							Active: 1,
+							OfferDate: currentOfferValidation.OFFERDATE
+						})
+					}else{
+						await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
+					}
 				}
 			}
 			catch(error){
@@ -2080,7 +2104,7 @@ module.exports = async (srv) => {
 
 		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const parentInstitute = await SELECT.one.from(InstitutesView).where({InstituteID:selectedTender?.InstituteID, CountryCode:req.data.CountryCode});
-		const instituteInBranch = await SELECT.from(InstituteInBranchView).where({ParentInstituteID:parentInstitute?.ParentInstituteID, InstituteID: {"!=": parentInstitute?.InstituteID}, CountryCode:req.data.CountryCode});
+		const instituteInBranch = await SELECT.from(InstituteInBranchView).where({InstituteID:parentInstitute?.InstituteID, InstituteName: {"!=": parentInstitute?.InstituteName}});
 
 		return (instituteInBranch.length > 0);
 	}
@@ -3048,7 +3072,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			NumberOfExtension: offer.NumberOfExtension,
 			ClientComment: offer.ClientComment,
 			Regions: offer.Regions,
-			InternalDueDate: tender.BidDueDate,
+			InternalDueDate: offer.InternalBidDueDate,
         	ExpectedAwardDate: tender.AwardDate
 		};
 		return results;
@@ -3504,6 +3528,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				LotID: offerProduct.LOTID
 			}));
 
+			const awardProductFormView = await tx.run(SELECT.one.from(AwardedProductFormView).where({
+				OfferID: offer.OFFERID,
+				ProductCode: offerProduct.ProductCode,
+				LotID: offerProduct.LOTID
+			}));
+
 
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -3699,7 +3729,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Level3Discount1: productConditionstmp[0] && productConditionstmp[0].Level3Discount1,
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
-				AlternateOfferYN: offerProduct.AlternateOfferYN
+				AlternateOfferYN: offerProduct.AlternateOfferYN,
+				FOCInfoText: awardProductFormView?.FOC
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -4395,8 +4426,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
-		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERDATE;
-		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERVALIDITY;
+		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERDATE);
+		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERVALIDITY);
+		offerValidation.PUBLICATION_DATE = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
+		offerValidation.InternalDueDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
+		offerValidation.BID_DUE_DATE = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
+		offerValidation.ExpectedAwardDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
+		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
+		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpiryDate;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
@@ -4536,7 +4573,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				"KAM_Territory": item.KAM_Territory,
 				"ZuelligCustomerNumber.": item.CNPJ,
 				"InstituteName": item.InstituteName,
-				"SKUCode": item.SKUCode || "",
+				"SKUCode":`'${addLeadingZeros(item.SKUCode, 8) }'` || "",
 				"ProductPackName": item.PRODUCTPACKNAME,
 				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4),
 				"Invoice Price": Number(item.Price1).toFixed(4),
@@ -4589,7 +4626,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				"UserName": item.UserName,
 				"CustomerID": item.External_InstituteId,
 				"InstituteName": item.InstituteName,
-				"SKUCode": item.SKUCode || "",
+				"SKUCode": `'${addLeadingZeros(item.SKUCode, 8) }'` || "",
 				"ProductPackName": item.PRODUCTPACKNAME,
 				"KAM_Territory": item.KAM_Territory,
 				"NHI_Price": Number(item.Price0).toFixed(4),
@@ -4816,4 +4853,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
 		
 	});
+	
+	function addLeadingZeros (num, size) {
+        if (num === null) {
+            throw new Error(`${text} doesn't exist`);
+        }
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
+    };
 }

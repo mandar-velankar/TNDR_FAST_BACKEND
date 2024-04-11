@@ -66,13 +66,27 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
     //this code is copied from pag-service file - make sure that these ones are in sync -- add comment to pag-service.js so we don't forget to do this in both places
     async syncPriceAgreements(ids){
         const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
-
+        const { PT_TMSKUPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
+        
         if(ids.length === 0){
             throw `No price agreements found for synchronization`;
         }
 
         const tx = cds.tx();
-        const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+        let customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+        if(customerPrices && customerPrices.length > 0){
+            let Countrycode = customerPrices[0].CountryCode;
+
+            const materialNumbers = customerPrices.map(cp => cp.MaterialNumber);
+               
+            const activeMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : materialNumbers}}));
+
+            if(activeMaterial.length >0){
+                const materials= activeMaterial.map(item =>item.SKUCode);
+                        
+                customerPrices =await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } , MaterialNumber : {in : materials}}));
+            }
+        }
         if (customerPrices && customerPrices.length <= 0) {
             throw `No customer prices were found for the following PriceAgreement: ${ids}`;
         }
@@ -402,7 +416,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
             //first, calculate todays date - 1 day, as such that we can use this as a filter in our select
 
 
-            const whereExpr = `ExtendPriceAgreement = true` //and expiry date is today - 1 
+            const whereExpr = `ExtendPriceAgreement = true and isCancelled = false and (Status != 'Cancelled' or Status is null)` //and expiry date is today - 1 
             const priceAgreements = await tx.run(SELECT.from(PriceAgreements).where(whereExpr));
 
             let aPriceAgreementsUpdated = [];

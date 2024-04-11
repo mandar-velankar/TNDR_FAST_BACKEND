@@ -602,7 +602,7 @@ entity PT_TMQUTO {
         I_Q_1             : String(255);
         I_Q_2             : String(255);
         I_Q_3             : String(255);
-        Comment           : String(500);
+        Comment           : String;
         UPDATED           : Integer;
         EffectiveDate     : Date;
         ExpiryDate        : Date;
