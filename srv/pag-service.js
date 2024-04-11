@@ -870,7 +870,7 @@ module.exports = async (srv) => {
                 }
             }
             //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-            console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
+            //console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
         }
             //let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult, updateRappelConditionPromises;
