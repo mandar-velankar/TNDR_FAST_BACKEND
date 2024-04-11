@@ -768,18 +768,18 @@ module.exports = async (srv) => {
             const focMaterialNumbers = customerPrices.map(cp => cp.FOCmaterialNumber);
             
             const activeMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : materialNumbers}}));
-            const focActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'Yes' , SKUCode: {in : focMaterialNumbers}}));
+            const focInActiveMaterial = await tx.run(SELECT .from(PT_TMSKUPRDPCK).where({ CountryCode: Countrycode, ActiveRecord: 'No' , SKUCode: {in : focMaterialNumbers}}));
 
             if(activeMaterial.length >0){
                 const materials= activeMaterial.map(item =>item.SKUCode);
                         
                 customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: req.data.ids } , MaterialNumber : {in : materials}}));
-                if(focActiveMaterial.length > 0){
-                    let materials = focActiveMaterial.map(item =>item.SKUCode);
+                if(focInActiveMaterial.length > 0){
+                    let materials = focInActiveMaterial.map(item =>item.SKUCode);
                     materials = materials.map(item => item.toString());
                     customerPrices = customerPrices.filter(price => {
                         return (
-                            (price.FOCmaterialNumber === null || materials.includes(price.FOCmaterialNumber))
+                            (price.FOCmaterialNumber === null || !materials.includes(price.FOCmaterialNumber))
                         );
                     });
                 }
@@ -801,12 +801,14 @@ module.exports = async (srv) => {
     async function syncPriceAgreements(pas, customerPrices) {
         const tx = cds.tx();
         console.log(`Start synchronisation of PriceAgreements`);
-
+        let SoldToInstituteType = [];
+        let ShipToInstitute = [];
+        
+        let SoldToType,ShipToType,effectiveDatearray,CombinationValue;
         console.log(`Prepare categories of customer prices`);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
         let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        let CombinationValue;
         if(customerPrices[0].CountryCode === 'ES'){
             //EHQUT-CR2-New
             let instituteID = mainPriceConditions.map(item => item.InstituteId);
@@ -868,7 +870,7 @@ module.exports = async (srv) => {
                 }
             }
             //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-            console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
+            //console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
         }
             //let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult, updateRappelConditionPromises;
