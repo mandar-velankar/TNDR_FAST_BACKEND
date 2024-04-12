@@ -229,7 +229,7 @@ module.exports = (srv) => {
             const body = updateSalesOrderApprovalTemplate(salesOrderStatus);
             const sComment = `${contract.State} - ${contract.InstituteName} - Edital: ${contract.TenderName} - Empenho: ${salesOrder.EmpenhoNumber}`;
             await shareSalesOrderApprovalToIBIZ(req, body, salesOrder, offerProducts[0]);
-            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.Status}).where({ID: req.data.salesOrderID}));
+            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.ID}).where({ID: req.data.salesOrderID}));
             await tx.run(UPDATE(SalesOrderProducts).with({Comment: sComment}).where({SalesOrder_ID: req.data.salesOrderID}));
             // await tx.commit();
             return req.reply("Correct")
