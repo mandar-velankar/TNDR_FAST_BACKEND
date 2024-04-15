@@ -803,9 +803,8 @@ module.exports = async (srv) => {
         console.log(`Start synchronisation of PriceAgreements`);
         let SoldToInstituteType = [];
         let ShipToInstitute = [];
-       
-        let SoldToType,ShipToType,effectiveDatearray,CombinationValue;
         
+        let SoldToType,ShipToType,effectiveDatearray,CombinationValue;
         console.log(`Prepare categories of customer prices`);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
@@ -870,7 +869,7 @@ module.exports = async (srv) => {
                 }
             }
             //let SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
-            console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
+            //console.log(SoldToInstituteType[0].InstituteID, "SoldToInstituteType[0].InstituteID");
         }
             //let ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);
         let arrayresult, updateRappelConditionPromises;

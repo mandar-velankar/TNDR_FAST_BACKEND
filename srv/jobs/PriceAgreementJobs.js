@@ -67,7 +67,6 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
     async syncPriceAgreements(ids){
         const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         const { PT_TMSKUPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
-
         if(ids.length === 0){
             throw `No price agreements found for synchronization`;
         }

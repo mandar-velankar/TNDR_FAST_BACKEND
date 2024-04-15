@@ -2019,7 +2019,7 @@ module.exports = async (srv) => {
 
 		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const parentInstitute = await SELECT.one.from(InstitutesView).where({InstituteID:selectedTender?.InstituteID, CountryCode:req.data.CountryCode});
-		const instituteInBranch = await SELECT.from(InstituteInBranchView).where({ParentInstituteID:parentInstitute?.ParentInstituteID, InstituteID: {"!=": parentInstitute?.InstituteID}, CountryCode:req.data.CountryCode});
+		const instituteInBranch = await SELECT.from(InstituteInBranchView).where({InstituteID:parentInstitute?.InstituteID, InstituteName: {"!=": parentInstitute?.InstituteName}});
 
 		return (instituteInBranch.length > 0);
 	}
@@ -4301,7 +4301,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
 			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
 			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
-
+			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
