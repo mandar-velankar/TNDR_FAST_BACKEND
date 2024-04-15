@@ -868,6 +868,12 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
         when 'Direct' then '' // TODO: check this with Jonathan -> what field to use in case of Direct tender
         else offer.Distributor.CONTACT_EMAIL
     end as DISTRIBUTOREMAIL:String(500),
+    offer.Distributor.DistributorName,
+    offer.Distributor.Address,
+    offer.Distributor.ContactNo,
+    offer.Distributor.Fax,
+    offer.Distributor.ContactPerson,
+    offer.Distributor.CONTACT_EMAIL,
 	ifnull(offer.Quotation.Comment, '') as CUSTOM_REMARKS:String(500),
     offer.FOCType as FOC_TYPE,
     ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT,
