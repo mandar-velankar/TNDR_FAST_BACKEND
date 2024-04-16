@@ -2408,7 +2408,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     end as FOC:String(3),
     ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
     }
-    where offer.OfferStatusTable.STATUS = 'Results Recorded'
+    where (offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
     group by tender.TenderID,
         offer.OfferID,
         product.ProductCode,
