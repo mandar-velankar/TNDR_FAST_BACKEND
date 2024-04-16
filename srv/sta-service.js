@@ -2850,6 +2850,15 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
 		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+
+		let distributor = null;
+		if(offer.TENDER_CHANNEL === "Direct"){
+			distributor = await tx.run(SELECT.one.from(PT_TMDIST).where({
+				CountryCode: offer.COUNTRYCODE,
+				DistributorID: offer.DISTRIBUTOR_ID
+			}));
+		}
+
 		//EHQUT- Spain - correct mistakes on Commercial agreement templates
 		results = {
 			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
@@ -2906,12 +2915,12 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			//COUNTRY_BUSINESS: countryBusiness,
 			//REGIONAL_BUSINESS: regionalBusiness,
 			//SUPPLY_CHAIN: supply,
-			DISTRIBUTORNAME: offer.DistributorName,
-			DISTRIBUTORADDRESS: offer && offer.Address ? offer.Address.replace(/\\+/g, "<br>") : '',
-			DISTRIBUTORPHONE: offer.ContactNo,
-			DISTRIBUTORFAX: offer.Fax,
-			DISTRIBUTORCONTACT: offer.ContactPerson,
-			DISTRIBUTOREMAIL: offer.CONTACT_EMAIL,
+			DISTRIBUTORNAME: offer.TENDER_CHANNEL === "Direct" ? distributor?.DistributorName : offer.DISTRIBUTORNAME,
+			DISTRIBUTORADDRESS: offer.TENDER_CHANNEL === "Direct" ? (distributor && distributor.Address ?  distributor.Address.replace(/\\+/g, "<br>") : '') : (offer && offer.DISTRIBUTORADDRESS ? offer.DISTRIBUTORADDRESS.replace(/\\+/g, "<br>") : ''),
+			DISTRIBUTORPHONE: offer.TENDER_CHANNEL === "Direct" ? distributor?.ContactNo : offer.DISTRIBUTORPHONE,
+			DISTRIBUTORFAX: offer.TENDER_CHANNEL === "Direct" ? distributor?.Fax : offer.DISTRIBUTORFAX,
+			DISTRIBUTORCONTACT: offer.TENDER_CHANNEL === "Direct" ? distributor?.ContactPerson : offer.DISTRIBUTORCONTACT,
+			DISTRIBUTOREMAIL: offer.TENDER_CHANNEL === "Direct" ? distributor?.CONTACT_EMAIL : offer.DISTRIBUTOREMAIL,
 			REMARKS: offer.SELLING_COMPANY_REMARKS,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
 			DELIVERYTERMS: deliveryTerms,
