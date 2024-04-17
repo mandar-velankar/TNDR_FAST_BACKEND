@@ -529,6 +529,8 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
              
             }).where({ CountryCode: 'ES' , ID: {in: PriceAgreementid} }));
                  
+            await tx.commit();
+            
                return pas.map(pa => {
                  
                   pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);

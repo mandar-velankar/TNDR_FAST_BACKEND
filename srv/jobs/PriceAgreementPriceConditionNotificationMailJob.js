@@ -58,12 +58,15 @@ module.exports = class PriceAgreementPriceConditionNotificationMailJob extends B
         console.log(`Fetching Customer Prices synchronized on ${date.toDateString()}`);
         const {PriceAgreementPriceConditionNotificationMailJobView} = this.db.entities("com.bayer.SXTENDER.PriceAgreementDataViews");
         const tx = this.db.tx();
-        return await tx.run(
+        let pas = await tx.run(
             SELECT.from(PriceAgreementPriceConditionNotificationMailJobView)
             .where({ 
                      ModifiedAt: { '>=': date.toJSON().substring(0,10)}  // only consider records synced on the day this job runs        
             })
         );    
+
+        await tx.commit();
+        return pas;
     }
 
     mapDataToMail = (template,mail,syncDate) => data => {
