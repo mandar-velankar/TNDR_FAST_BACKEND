@@ -886,7 +886,14 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
     offer.Tender.Country.Region,
-    offer.InternalBidDueDate
+    offer.InternalBidDueDate,
+    offer.Quotation.Custom.String_1 as Unitofvalidityperiod,
+    offer.Quotation.Custom.Integer_1 as DeliveryDue,
+    offer.Quotation.Custom.String_2 as Unitofdeliverydue,
+    offer.Quotation.Custom.String_3 as QuotationDeliverymethod,
+    offer.Quotation.Custom.String_4 as QuotationRecipientname,
+    offer.Quotation.Custom.String_5 as QuotationRecipientcontact,
+    offer.Quotation.Custom.Date_1 as Expectdatetoreceivethedocument
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -975,7 +982,14 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Comment,
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region,
-          offer.InternalBidDueDate;
+          offer.InternalBidDueDate,
+          offer.Quotation.Custom.String_1,
+          offer.Quotation.Custom.Integer_1,
+          offer.Quotation.Custom.String_2,
+          offer.Quotation.Custom.String_3,
+          offer.Quotation.Custom.String_4,
+          offer.Quotation.Custom.String_5,
+          offer.Quotation.Custom.Date_1;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -2105,6 +2119,13 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Regions                : String;
             InternalDueDate        : Date;
             ExpectedAwardDate      : Date;
+            Unitofvalidityperiod   : String;
+			DeliveryDue            : Integer;
+			Unitofdeliverydue      : String;
+			QuotationDeliverymethod : String;
+			QuotationRecipientname  : String;
+			QuotationRecipientcontact : String;
+			Expectdatetoreceivethedocument: Date;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };

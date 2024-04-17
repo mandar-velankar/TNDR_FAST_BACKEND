@@ -2242,7 +2242,14 @@ module.exports = (srv) => {
 			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
             CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
-			CONTENT :tender.CONTENT
+			CONTENT :tender.CONTENT,
+			Unitofvalidityperiod: offer.Unitofvalidityperiod,
+			DeliveryDue: offer.DeliveryDue,
+			Unitofdeliverydue: offer.Unitofdeliverydue,
+			QuotationDeliverymethod: offer.QuotationDeliverymethod?.split(','),
+			QuotationRecipientname: offer.QuotationRecipientname,
+			QuotationRecipientcontact: offer.QuotationRecipientcontact,
+			Expectdatetoreceivethedocument: offer.Expectdatetoreceivethedocument,
 		};
 		return results;
 		
