@@ -728,9 +728,9 @@ module.exports = async (srv) => {
             if (!deliveries) {
                 try {
                     deliveries = await tx.run(SELECT.from(Deliveries).where({ PriceAgreementId: pag.ID }));
-                    // await tx.commit();
+                    await tx.commit();
                 } catch (e) {
-                    // await tx.rollback(e)
+                    await tx.rollback(e)
                     console.log(e);
                 }
             }
@@ -799,17 +799,17 @@ module.exports = async (srv) => {
         return req.reply();
     });
     async function syncPriceAgreements(pas, customerPrices) {
-        const tx = cds.tx();
+        //const tx = cds.tx();
         console.log(`Start synchronisation of PriceAgreements`);
-        let SoldToInstituteType = [];
+        /*let SoldToInstituteType = [];
         let ShipToInstitute = [];
         
-        let SoldToType,ShipToType,effectiveDatearray,CombinationValue;
+        let SoldToType,ShipToType,effectiveDatearray,CombinationValue; */
         console.log(`Prepare categories of customer prices`);
-        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
+        //let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
         let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        if(customerPrices[0].CountryCode === 'ES'){
+        /*if(customerPrices[0].CountryCode === 'ES'){
             //EHQUT-CR2-New
             let instituteID = mainPriceConditions.map(item => item.InstituteId);
             let SoldToInstituteType = [];
@@ -831,7 +831,7 @@ module.exports = async (srv) => {
             }else{
                 CombinationValue = false;
             }
-        }
+        }*/
 
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1" || item.PriceCondition === "YAW2");
@@ -848,7 +848,7 @@ module.exports = async (srv) => {
 
         const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
-        if(customerPrices[0].CountryCode === 'ES'){
+        /*if(customerPrices[0].CountryCode === 'ES'){
             //CR2-New
             let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
@@ -878,9 +878,9 @@ module.exports = async (srv) => {
         {
             arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
             updateRappelConditionPromises = arrayresult[0].map(custPrice => updateRappelcustomerPrices(custPrice));
-        }else{
-            updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
-        }
+        }else{*/
+        const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
+       // }
         
         // Synchronize
         console.log(`Process requests of customer prices`);
@@ -915,7 +915,7 @@ module.exports = async (srv) => {
     };
 
 
-    //CR2-New
+   /* //CR2-New
     async function updatearray(effectiveDatearray, ShipToTypeCustomer, SoldToType, customerPrices) {
 
         const tx = cds.tx();
@@ -1030,9 +1030,9 @@ module.exports = async (srv) => {
 
 
 
-    };
+    };*/
 
-    async function updateRappelcustPrices(customerPrice,CombinationValue) {
+    async function updateRappelcustPrices(customerPrice) {
         console.log(`Prepare sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId}`);
         const tx = cds.tx();
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: customerPrice.PriceAgreementId }));
@@ -1067,7 +1067,7 @@ module.exports = async (srv) => {
         const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
 //CR2
-        const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode,CombinationValue);
+        const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = bonem;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
@@ -1123,7 +1123,7 @@ module.exports = async (srv) => {
             // throw error;//do not throw error to continue with other requests
         }
     };
-    function getES01RequestBodyTemplate(institute,priceconditionrappelcode,CombinationValue) {
+    function getES01RequestBodyTemplate(institute,priceconditionrappelcode) {
 
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
@@ -1185,7 +1185,7 @@ module.exports = async (srv) => {
         }
     };
 
-    async function updateRappelcustomerPrices(finalarray) {
+   /* async function updateRappelcustomerPrices(finalarray) {
         const tx = cds.tx();
         let body;
         
@@ -1219,7 +1219,7 @@ module.exports = async (srv) => {
 
 
 
-    };
+    };*/
     async function setStatusPriceAgreement(pas, status) {
         if (!pas || pas?.length === 0) {
             return false;
@@ -1839,7 +1839,7 @@ module.exports = async (srv) => {
             console.log('Error', error.message);
         }
     }
-    //CR2
+ /*  //CR2
 
     function getES01RequestBodyTemplateRappel() {
 
@@ -1891,7 +1891,7 @@ module.exports = async (srv) => {
             }
         }
     };
-
+*/
 
     /**
      * Splits a given array into chunks
