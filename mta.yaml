@@ -31,6 +31,8 @@ modules:
       memory: 8192M
       disk-quota: 8192M
       health-check-timeout: 120
+    properties:
+      OPTIMIZE_MEMORY: true
     provides:
       - name: srv_api
         public: true
