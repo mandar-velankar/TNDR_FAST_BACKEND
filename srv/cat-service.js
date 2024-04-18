@@ -1280,6 +1280,8 @@ module.exports = (srv) => {
 		let preApprovedAccountOfferPrice = product.ACCOUNT_OFFER_PRICE;
 		let preApprovedAccountNetOfferPrice = product.ACCOUNT_NET_OFFER_PRICE;
 
+		const FOCValue = calculateFOCVolume(product) * product.NET_PRICE;
+
 		let requiredApprovalLevel = 0;//0: No business approval required; 1:NSM/SM/FM; 2: HBU; 3: CDH; 4: Approval not allowed
 		if (//This means it's first offer for account or offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountOfferPrice, 0) ||
@@ -1315,6 +1317,16 @@ module.exports = (srv) => {
 			else {
 				requiredApprovalLevel = 4;
 			};
+		}
+
+		if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 300000)) {
+			requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+		}else if (ServiceHelper.isDoubleXBelowY(300000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 1500000)) {
+			requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+		}else if (ServiceHelper.isDoubleXBelowY(1500000, FOCValue)) {
+			requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+		}else {
+			requiredApprovalLevel = 4;
 		}
 
 		switch (requiredApprovalLevel) {
@@ -2230,7 +2242,14 @@ module.exports = (srv) => {
 			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
             CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
-			CONTENT :tender.CONTENT
+			CONTENT :tender.CONTENT,
+			Unitofvalidityperiod: offer.Unitofvalidityperiod,
+			DeliveryDue: offer.DeliveryDue,
+			Unitofdeliverydue: offer.Unitofdeliverydue,
+			QuotationDeliverymethod: offer.QuotationDeliverymethod?.split(','),
+			QuotationRecipientname: offer.QuotationRecipientname,
+			QuotationRecipientcontact: offer.QuotationRecipientcontact,
+			Expectdatetoreceivethedocument: offer.Expectdatetoreceivethedocument,
 		};
 		return results;
 		
@@ -3957,5 +3976,20 @@ module.exports = (srv) => {
         while (num.length < size) num = "0" + num;
         return num;
     };
+
+	function calculateFOCVolume (product) {
+		if(!product.FOC) return 0;
+
+		switch(product.FOC_ABS_PCT){
+			case "ABS":
+				return focVolume = product.FOC;
+			case "PCT":
+				return focVolume = Math.round(product.REQUESTED_VOLUME * product.FOC);
+			case "STP":
+				return focVolume = Math.floor(product.REQUESTED_VOLUME / product.FOC_STEP) * product.FOC;
+			default:
+				break;
+		}		
+	}
 
 }
