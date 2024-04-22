@@ -32,9 +32,9 @@ function calculateFields(priceAgreement, requiredParameters){
     let calculatedFutureDate = new Date();
     calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
 
-    let customerPrices = priceAgreement.CustomerPrices || [];
-    let mostRecentMasterPrice;
-    let consumerPrice = priceAgreement.ConsumerPrice;
+    let customerPrices = [];
+    let mostRecentMasterPrice = undefined;
+    let consumerPrice = undefined;
 
 
     let priceConditions = priceAgreement.PriceConditions || [];
@@ -43,7 +43,9 @@ function calculateFields(priceAgreement, requiredParameters){
         for(const inst of institutesAll){
             if(inst.InstituteID === priceAgreement.InstituteId){
                 institute = inst;
+                break;
             }
+            priceAgreement.Institute = institute;
         }
     }
 
@@ -54,6 +56,7 @@ function calculateFields(priceAgreement, requiredParameters){
                 customerPrices.push(cp);
             }
         }
+        priceAgreement.CustomerPrices = customerPrices;
     }
     // }
 
@@ -69,6 +72,7 @@ function calculateFields(priceAgreement, requiredParameters){
         for(const mp of mostRecentMasterPricesAll){
             if(mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId){
                 mostRecentMasterPrice = mp;
+                break;
             }
         }
     }
@@ -94,6 +98,7 @@ function calculateFields(priceAgreement, requiredParameters){
         for(const cp of consumerPricesAll){
             if(cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId){
                 consumerPrice = cp;
+                break;
             }
         }
     }

@@ -294,19 +294,60 @@ module.exports = async (srv) => {
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
         let paQuery = SELECT.from(req.query.SELECT.from);
-        if (req.query.SELECT.columns?.[0]?.func !== "count") {
+        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one) {
             paQuery.columns(req.query.SELECT.columns);
+        }
+        else{
+            paQuery.columns(['*',
+            {ref:['Product'],expand:['*',{ref:['ProductPack'],expand:['*']}]},
+            {ref:['Tender'],expand:['*',{ref:['User'],expand:['*']}]},
+            {ref:['PriceConditions'],expand:['*',{ref:['PriceConditionClassification'],expand:['*']}]},
+            {ref:['OfferProduct'],expand:['*',{ref:['Offer'],expand:['*']}]}
+            ]).orderBy([{ref:['ID'], sort:'asc'}]);
         }
         if (!hasFilter) {
             console.log("Fetch using limit Priceagreements - no filters");
             req.query.SELECT.limit && (paQuery.limit(req.query.SELECT.limit));
             // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
         }
-        req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
-        req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
-
         startTrace("PriceAgreements");
-        data = await tx.run(paQuery);
+        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one){
+            req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
+            req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
+            data = await tx.run(paQuery);
+        }
+        else{
+            if(!this.dataCache || this.dataCache.length === 0){
+                this.dataCache = await tx.run(paQuery); 
+                if(!this.jobStarted){
+                    this.jobStarted = true;
+                    //cds.spawn({ every: 60000 }, async (tx) => {
+                    cds.spawn({ every: 300000 }, async () => {
+                        const spawntx = cds.tx();
+                        startTrace("Begin Job PriceAgreementsMasterView")                        
+                        const spawnData = await spawntx.run(SELECT.from({ref:['PriceAgreementService.PriceAgreementsMasterView']}).columns(['*',
+                        {ref:['Product'],expand:['*',{ref:['ProductPack'],expand:['*']}]},
+                        {ref:['Tender'],expand:['*',{ref:['User'],expand:['*']}]},
+                        {ref:['PriceConditions'],expand:['*',{ref:['PriceConditionClassification'],expand:['*']}]},
+                        {ref:['OfferProduct'],expand:['*',{ref:['Offer'],expand:['*']}]}
+                        ]).orderBy([{ref:['ID'], sort:'asc'}]));
+                        // for(const sp of spawnData){
+                        //     sp.Price = 50;
+                        // }
+                       // myCache.set( "pa", spawnData);
+                        this.dataCache = spawnData;
+                        spawntx.commit();
+                        stopTrace("End Job PriceAgreementsMasterView")
+                    })
+                }
+            }
+            let countryCode = ServiceHelper.getWhereValues(req, 'CountryCode');
+            data = this.dataCache.filter(dc => dc.CountryCode === countryCode[0]);
+        }
+
+
+        
+        //data = await tx.run(paQuery);
         // if the query returns only one value, that value is an object and not an array
         // we need to convert it to array because the code below expects an array
         if (!Array.isArray(data)) {
@@ -331,7 +372,7 @@ module.exports = async (srv) => {
         // Divide the data into chunks
         const chunks = splitToChunks(data, 1000);
         // Run operation on the chunks parallely
-        let pkWorkerResults = [];
+        /*let pkWorkerResults = [];
         try {
             // Create a new thread pool
             // resourceLimits.maxOldGenerationSizeMb This is a very important parameter and this defines the max memory used by the worker thread. 
@@ -347,7 +388,7 @@ module.exports = async (srv) => {
             console.error("PrepareKeysWorker stopped");
             console.error(err);
             throw err;
-        }
+        }*/
 
         let ids = [];
         let offers = [];
@@ -356,13 +397,23 @@ module.exports = async (srv) => {
         let productpacks = [];
         let productpacksstr = [];
 
-        for (const workerResult of pkWorkerResults) {
+        /*for (const workerResult of pkWorkerResults) {
             ids = ids.concat(workerResult.ids);
             offers = offers.concat(workerResult.offers);
             institutes = institutes.concat(workerResult.institutes);
             countrycodes = countrycodes.concat(workerResult.countrycodes);
             productpacks = productpacks.concat(workerResult.productpacks);
             productpacksstr = productpacksstr.concat(workerResult.productpacksstr);
+        }*/
+        for (const pa of data) {
+            if (ids.indexOf(pa.ID) === -1) ids.push(pa.ID);
+            if (institutes.indexOf(pa.InstituteId) === -1) institutes.push(pa.InstituteId);
+            if (offers.indexOf(pa.OfferId) === -1) offers.push(pa.OfferId);
+            if (countrycodes.indexOf(pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
+            if (productpacks.indexOf(pa.ProductPackId) === -1) {
+                productpacks.push(pa.ProductPackId);
+                productpacksstr.push(pa.ProductPackId.toString());
+            }
         }
         stopTrace("PrepareKeysForOtherQueries");
 
