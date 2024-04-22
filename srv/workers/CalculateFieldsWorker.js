@@ -32,9 +32,9 @@ function calculateFields(priceAgreement, requiredParameters){
     let calculatedFutureDate = new Date();
     calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
 
-    let customerPrices = [];
+    let customerPrices = priceAgreement.CustomerPrices || [];
     let mostRecentMasterPrice = undefined;
-    let consumerPrice = undefined;
+    let consumerPrice = priceAgreement.ConsumerPrice;
 
 
     let priceConditions = priceAgreement.PriceConditions || [];
@@ -45,7 +45,6 @@ function calculateFields(priceAgreement, requiredParameters){
                 institute = inst;
                 break;
             }
-            priceAgreement.Institute = institute;
         }
     }
 
@@ -56,7 +55,6 @@ function calculateFields(priceAgreement, requiredParameters){
                 customerPrices.push(cp);
             }
         }
-        priceAgreement.CustomerPrices = customerPrices;
     }
     // }
 
