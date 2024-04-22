@@ -687,7 +687,17 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
     offerProduct.Comment,
-    offerProduct.AlternateOfferYN
+    offerProduct.AlternateOfferYN,
+    case 
+        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther is null
+            then 'NA'
+        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'PCT'
+            then round(100 * offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther, 2) || '% (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
+        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'ABS'
+            then offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther || ' '  || offerProduct.UnitPerPack || ' (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
+        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'STP'
+            then offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther || ' '  || offerProduct.UnitPerPack || ' for each ' || offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_Step || ' ' || offerProduct.UnitPerPack || ' purchased (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
+    end as FOCInfoText:String
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -2109,6 +2119,21 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Regions                : String;
             InternalDueDate        : Date;
             ExpectedAwardDate      : Date;
+            Unitofvalidityperiod   : String;
+			DeliveryDue            : Integer;
+			Unitofdeliverydue      : String;
+			QuotationDeliverymethod : String;
+			QuotationRecipientname  : String;
+			QuotationRecipientcontact : String;
+			Expectdatetoreceivethedocument: Date;
+            RequestorPphoneNnumber: Integer;
+            BayerRepresentativeName: String;
+            BayerRepresentativePhoneNumber: Integer;
+            PeriodOfBankGauranteeStart: Date;
+            PeriodOfBankGauranteeEnd: Date;
+            BGValueBaht: Date;
+            TenderAnnouncementReference: String;
+            ItemNumber: Integer;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };

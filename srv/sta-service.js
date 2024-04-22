@@ -3739,7 +3739,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
 				AlternateOfferYN: offerProduct.AlternateOfferYN,
-				FOCInfoText: awardProductFormView?.FOC
+				FOCInfoText: offerProduct?.FOCInfoText
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -4425,24 +4425,24 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.Level1Discount1 = ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
 			prd.Level2Discount1 = ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
 			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
-			prd.Level3Discount1 = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.Level3Discount1, 3, 3) : ServiceHelper.formatNumber(prd.Level3Discount1, 2, 2);
+			prd.Level3Discount1 = prd.Region === 'MEA' ? ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 3, 3) : ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 2, 2);
 			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
 			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
 			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
-			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
+			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? prd.EARLIEST_DATE && ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
-		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERDATE);
-		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERVALIDITY);
-		offerValidation.PUBLICATION_DATE = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
-		offerValidation.InternalDueDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
-		offerValidation.BID_DUE_DATE = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
-		offerValidation.ExpectedAwardDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
-		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
-		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpiryDate;
+		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERDATE && ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? offerValidation.OFFERDATE && ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERDATE);
+		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERVALIDITY);
+		offerValidation.PUBLICATION_DATE = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
+		offerValidation.InternalDueDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.InternalDueDate && ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
+		offerValidation.BID_DUE_DATE = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
+		offerValidation.ExpectedAwardDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
+		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
+		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpiryDate;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
