@@ -294,30 +294,23 @@ module.exports = async (srv) => {
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
         let paQuery = SELECT.from(req.query.SELECT.from);
-        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one) {
-            paQuery.columns(req.query.SELECT.columns);
-        }
-        else{
-            paQuery.columns(['*',
-            {ref:['Product'],expand:['*',{ref:['ProductPack'],expand:['*']}]},
-            {ref:['Tender'],expand:['*',{ref:['User'],expand:['*']}]},
-            {ref:['PriceConditions'],expand:['*',{ref:['PriceConditionClassification'],expand:['*']}]},
-            {ref:['OfferProduct'],expand:['*',{ref:['Offer'],expand:['*']}]}
-            ]).orderBy([{ref:['ID'], sort:'asc'}]);
-        }
+        let xprSearch = req.query.SELECT.where.some(condition => typeof condition === 'object' && 'xpr' in condition);
         if (!hasFilter) {
             console.log("Fetch using limit Priceagreements - no filters");
             req.query.SELECT.limit && (paQuery.limit(req.query.SELECT.limit));
             // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
         }
         startTrace("PriceAgreements");
-        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one){
+        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one || xprSearch){
+            paQuery.columns(req.query.SELECT.columns);
             req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
             req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
             data = await tx.run(paQuery);
         }
         else{
             if(!this.dataCache || this.dataCache.length === 0){
+                paQuery.columns(req.query.SELECT.columns);
+                req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
                 this.dataCache = await tx.run(paQuery); 
                 if(!this.jobStarted){
                     this.jobStarted = true;
@@ -327,7 +320,12 @@ module.exports = async (srv) => {
                         startTrace("Begin Job PriceAgreementsMasterView")                        
                         const spawnData = await spawntx.run(SELECT.from({ref:['PriceAgreementService.PriceAgreementsMasterView']}).columns(['*',
                         {ref:['Product'],expand:['*',{ref:['ProductPack'],expand:['*']}]},
+                        {ref:['Institute'],expand:['*']},
                         {ref:['Tender'],expand:['*',{ref:['User'],expand:['*']}]},
+                        {ref:['Materials'],expand:['*']},
+                        {ref:['FOC'],expand:['*']},
+                        {ref:['ConsumerPrice'],expand:['*']}, 
+                        {ref:['CustomerPrices'],expand:['*']},
                         {ref:['PriceConditions'],expand:['*',{ref:['PriceConditionClassification'],expand:['*']}]},
                         {ref:['OfferProduct'],expand:['*',{ref:['Offer'],expand:['*']}]}
                         ]).orderBy([{ref:['ID'], sort:'asc'}]));
