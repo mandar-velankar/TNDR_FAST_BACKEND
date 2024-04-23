@@ -294,7 +294,7 @@ module.exports = async (srv) => {
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
         let paQuery = SELECT.from(req.query.SELECT.from);
-        let xprSearch = req.query.SELECT.where.some(condition => typeof condition === 'object' && 'xpr' in condition);
+        let xprSearch = req.query.SELECT.where && req.query.SELECT.where?.some(condition => typeof condition === 'object' && 'xpr' in condition);
         if (!hasFilter) {
             console.log("Fetch using limit Priceagreements - no filters");
             req.query.SELECT.limit && (paQuery.limit(req.query.SELECT.limit));
