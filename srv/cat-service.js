@@ -39,6 +39,7 @@ module.exports = (srv) => {
 		PT_TMAPPRST, 
 		PT_TMOFPR,
 		PT_TMOFRS,
+		PT_TMQUTO,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -1872,6 +1873,12 @@ module.exports = (srv) => {
 		const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
 		let tender = await tx.run(SELECT.from(PT_TMTEND).where(whereTender));
 		tender = tender[0];
+
+		const whereSelectedOffer = ServiceHelper.buildFullWhere("OfferID", "=", offer.OFFERID);
+		let selectedOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereSelectedOffer));
+
+		let quotation = await tx.run(SELECT.one.from(PT_TMQUTO).where({"OfferID": offer.OFFERID, "Active": 1}));
+
 		const tenderType = await tx.run(SELECT.from(MASTER_TENDER_TYPE).where({ID: tender.TENDER_TYPE_ID}));
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		let aApproverTypes = [];
@@ -2238,18 +2245,26 @@ module.exports = (srv) => {
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
-			TENDER_TYPE: '',
+			TENDER_TYPE: tenderType[0]?.NAME,
 			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
             CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
 			CONTENT :tender.CONTENT,
-			Unitofvalidityperiod: offer.Unitofvalidityperiod,
-			DeliveryDue: offer.DeliveryDue,
-			Unitofdeliverydue: offer.Unitofdeliverydue,
-			QuotationDeliverymethod: offer.QuotationDeliverymethod?.split(','),
-			QuotationRecipientname: offer.QuotationRecipientname,
-			QuotationRecipientcontact: offer.QuotationRecipientcontact,
-			Expectdatetoreceivethedocument: offer.Expectdatetoreceivethedocument,
+			Unitofvalidityperiod: quotation?.Custom_String_1,
+			DeliveryDue: quotation?.Custom_Integer_1,
+			Unitofdeliverydue: quotation?.Custom_String_2,
+			QuotationDeliverymethod: quotation?.Custom_String_3,
+			QuotationRecipientname: quotation?.Custom_String_4,
+			QuotationRecipientcontact: quotation?.Custom_String_5,
+			Expectdatetoreceivethedocument: quotation?.Custom_Date_1,
+			RequestorPphoneNnumber: tender.Custom_Integer_1,
+            BayerRepresentativeName: tender.Custom_String_1,
+            BayerRepresentativePhoneNumber: tender.Custom_Integer_2,
+            PeriodOfBankGauranteeStart: tender.Custom_Date_1,
+            PeriodOfBankGauranteeEnd: tender.Custom_Date_2,
+            BGValueBaht: tender.Custom_Date_3,
+			TenderAnnouncementReference: selectedOffer?.Custom_String_1,
+            ItemNumber: selectedOffer?.Custom_Integer_1,
 		};
 		return results;
 		
