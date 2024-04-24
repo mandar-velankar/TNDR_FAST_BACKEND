@@ -161,3 +161,15 @@ left join MasterData.PT_TMPRDPCK as PRD
   and CP.RefIdocNumber is not null 
   and CP.RefIdocNumber <> ''
   and TND.Classification = 'Commercial Agreement';
+
+entity PriceAgreementNewMaterialsView as Select from PriceAgreementData.PriceAgreements as pa 
+left outer join PriceAgreementData.NewMaterialsView as nmv on pa.ID = nmv.PriceAgreementId and nmv.isNew = true
+left outer join PriceAgreementData.NewFOCMaterialsView as nfocmv on pa.ID = nfocmv.PriceAgreementId and nfocmv.isNew = true
+left outer join PriceAgreementData.CustomerPrices as cp on cp.PriceAgreementId = pa.ID{
+pa.ID,
+pa.CountryCode,
+case when (count(nmv.MaterialNumber)=0 and count(nfocmv.FOCMaterialNumber)=0) or count(cp.ID) = 0
+then false
+else true
+end as hasNewMaterials: Boolean
+}group by pa.ID, pa.CountryCode;
