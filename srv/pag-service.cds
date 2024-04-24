@@ -12,7 +12,8 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     //EHQUT-383702-Spain search Division filter
     //EHQUT-383697-Spain - visual mark to notify that the offer is canceled in FAST
     entity PriceAgreementsMasterView @(cds.redirection.target:true) as select from PriceAgreementData.PriceAgreements as pa
-    inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'{
+    inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'
+    left outer join PriceAgreementDataViews.PriceAgreementNewMaterialsView as panm on panm.ID = pa.ID{
         key pa.ID,
             pa.createdAt,
             pa.createdBy,
@@ -35,7 +36,7 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
             pa.ProductPackId,
             pa.Synchronized,
             pa.SynchronizationStatus,
-            pa.hasNewMaterials,
+            ifnull(panm.hasNewMaterials, false) as hasNewMaterials: Boolean,
             pa.hasNewPrice,
             pa.hasNewYLLP,
             pa.hasNewYLAP,

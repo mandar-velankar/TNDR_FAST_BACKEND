@@ -75,6 +75,7 @@ function calculateFields(priceAgreement, requiredParameters){
         }
     }
 
+    /*
     // Get NewMaterials if needed
     let newMaterials = [];
     for(const material of newMaterialsAll){
@@ -90,6 +91,7 @@ function calculateFields(priceAgreement, requiredParameters){
             newFOCMaterials.push(FOCmaterial);
         }
     }
+    */
 
     // Get ConsumerPrices if needed
     if (!consumerPricesInPA) {
@@ -120,6 +122,7 @@ function calculateFields(priceAgreement, requiredParameters){
         }
     }
 
+    /*
     // calculate hasNewMaterials
     if (req_query_SELECT_one || hasNewMaterialsFilterIndex >= 0) {
         // If we don't have applied prices then hasnewmaterials is always FALSE. (so EVEN if we have new materials added)
@@ -134,6 +137,7 @@ function calculateFields(priceAgreement, requiredParameters){
             }
         }
     }
+    */
 
     // calculate hasNewPrice
     if (consumerPrice) {
