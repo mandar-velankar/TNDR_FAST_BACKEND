@@ -270,7 +270,7 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
                 "E1KOMG": {
                   "SEGMENT": 1,
                   "KVEWE": "A",
-                  "KOTABNR": institute.InstituteType === 'Region(s)' ? 879 : 878,
+                  "KOTABNR": institute.Comment === 'Sales Partner' ? 879 : 878,
                   "KAPPL": "V",
                   "KSCHL": "YLTP",
                   "VKORG": "ITHC",
