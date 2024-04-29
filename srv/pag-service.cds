@@ -13,7 +13,10 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     //EHQUT-383697-Spain - visual mark to notify that the offer is canceled in FAST
     entity PriceAgreementsMasterView @(cds.redirection.target:true) as select from PriceAgreementData.PriceAgreements as pa
     inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'
-    left outer join PriceAgreementDataViews.PriceAgreementNewMaterialsView as panm on panm.ID = pa.ID{
+    left outer join PriceAgreementDataViews.PriceAgreementNewMaterialsView as panm on panm.ID = pa.ID
+    left outer join PriceAgreementDataViews.PriceAgreementNewAgreements as pana on pana.ID = pa.ID
+    left outer join PriceAgreementDataViews.PriceAgreementActiveAgreements as paaa on paaa.ID = pa.ID
+    left outer join PriceAgreementDataViews.PriceAgreementUpdatedRetailPrice as paurp on paurp.ID = pa.ID{
         key pa.ID,
             pa.createdAt,
             pa.createdBy,
@@ -34,20 +37,27 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
             pa.InstituteId,
             pa.TenderId,
             pa.ProductPackId,
-            pa.Synchronized,
+            ifnull(paaa.Synchronized, false) as Synchronized: Boolean,
             pa.SynchronizationStatus,
             ifnull(panm.hasNewMaterials, false) as hasNewMaterials: Boolean,
-            pa.hasNewPrice,
+            case when (paurp.ListPriceEqual = 0 or paurp.RetailPriceEqual = 0) then true else false end as hasNewPrice: Boolean,
             pa.hasNewYLLP,
             pa.hasNewYLAP,
             pa.hasProductPackId,
             pa.IgnorePVLPriceChange,
             pa.IgnoreConfPriceChange,
-            pa.ExpiringSoon,
-            case when( (to_date(pa.ExpiryDate) < CURRENT_DATE ) and pa.isCancelled = false ) then true else false end as Expired :Boolean,
-            pa.isNewPriceAgreement,
-            pa.AppliedCount,
-            pa.isCancelled,
+            Case when pa.ExpiryDate IS NOT NULL 
+                then 
+                    CASE when (DATS_ADD_MONTHS(REPLACE(CURRENT_DATE, '-', ''), 3) >= to_date(pa.ExpiryDate) and to_date(pa.ExpiryDate) >= CURRENT_DATE)
+                    then true 
+                    else false 
+                    end 
+                else false 
+            end AS ExpiringSoon: Boolean,
+            case when( (to_date(pa.ExpiryDate) < CURRENT_DATE ) and pa.isCancelled = false ) then true else false end as Expired: Boolean,
+            ifnull(pana.isNewPriceAgreement, false) as isNewPriceAgreement: Boolean,
+            case when pana.isNewPriceAgreement = false then 1 else 0 end as AppliedCount: Integer,
+            case when pa.Status = 'Cancelled' then true else false end as isCancelled: Boolean,
             pa.OfferId,
             pa.ExtendPriceAgreement,
             pa.ExpiryExtensionPeriod,

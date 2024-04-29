@@ -49,13 +49,13 @@ function calculateFields(priceAgreement, requiredParameters){
     }
 
     // Get CustomerPrices if needed
-    if (!customerPricesInPA) {
+ /*   if (!customerPricesInPA) {
             for(const cp of customerPricesAll){
             if(cp.PriceAgreementId == priceAgreement.ID){
                 customerPrices.push(cp);
             }
         }
-    }
+    }*/
     // }
 
     /*if (!priceConditionsInPa) {
@@ -92,7 +92,7 @@ function calculateFields(priceAgreement, requiredParameters){
         }
     }
     */
-
+/*
     // Get ConsumerPrices if needed
     if (!consumerPricesInPA) {
         for(const cp of consumerPricesAll){
@@ -101,13 +101,13 @@ function calculateFields(priceAgreement, requiredParameters){
                 break;
             }
         }
-    }
+    }*/
 
     // calculate Synchronized
     // we are filtering out the PVL conditions first as we don't sync PVL with SAP
     //only one loop instead of two (filter + every)
    //priceAgreement.Synchronized = true;
-    priceAgreement.isNewPriceAgreement = true;
+    /*priceAgreement.isNewPriceAgreement = true;
     priceAgreement.AppliedCount = 0;
     for (let price of customerPrices) {
         if (price.PriceCondition && !price.Synchronized) {
@@ -120,7 +120,7 @@ function calculateFields(priceAgreement, requiredParameters){
             priceAgreement.isNewPriceAgreement = false;
             priceAgreement.AppliedCount++;
         }
-    }
+    } */
 
     /*
     // calculate hasNewMaterials
@@ -139,7 +139,7 @@ function calculateFields(priceAgreement, requiredParameters){
     }
     */
 
-    // calculate hasNewPrice
+ /*   // calculate hasNewPrice
     if (consumerPrice) {
 
         let consumerListPrice = "";
@@ -157,16 +157,16 @@ function calculateFields(priceAgreement, requiredParameters){
             priceAgreement.hasNewPrice = true;
         }
 
-    }
+    }*/
 
 
-    if (priceAgreement.ExpiryDate) {
+ /*   if (priceAgreement.ExpiryDate) {
         let dExpiryDate = new Date(priceAgreement.ExpiryDate);
         priceAgreement.ExpiringSoon = calculatedFutureDate >= dExpiryDate && dExpiryDate >= todaysDate ? true : false;
         priceAgreement.Expired = dExpiryDate < todaysDate && priceAgreement.Status !== 'Cancelled' ? true : false;
     }
 
-    priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
+    priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false; */
 
     if (req_query_SELECT_one || (priceAgreement.CountryCode === 'ES' && ( hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0 ))) {
         if (priceConditions && institute && !priceAgreement.IgnoreConfPriceChange && !priceAgreement.IgnorePVLPriceChange) {
