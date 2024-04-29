@@ -293,29 +293,35 @@ module.exports = async (srv) => {
         //run default query on db
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
+        let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode'); 
         let paQuery = SELECT.from(req.query.SELECT.from);
         let xprSearch = req.query.SELECT.where && req.query.SELECT.where?.some(condition => typeof condition === 'object' && 'xpr' in condition);
-        if (!hasFilter) {
+        if (!hasFilter || countryCode[0] === 'IT') {
             console.log("Fetch using limit Priceagreements - no filters");
-            req.query.SELECT.limit && (paQuery.limit(req.query.SELECT.limit));
+            if(req.query.SELECT.limit)
+            {
+                req.query.SELECT.limit.rows.val = 500
+                paQuery.limit(req.query.SELECT.limit);
+            }
             // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
         }
         startTrace("PriceAgreements");
-        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one || xprSearch){
+        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one || xprSearch || countryCode[0] === 'IT'){
             paQuery.columns(req.query.SELECT.columns);
             req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
             req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
             data = await tx.run(paQuery);
         }
         else{
-            if(!this.dataCache || this.dataCache.length === 0){
+            if(countryCode[0] === 'ES' && (!this.dataCache || this.dataCache.length === 0)){
                 paQuery.columns(req.query.SELECT.columns);
+                req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
                 req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
                 this.dataCache = await tx.run(paQuery); 
                 if(!this.jobStarted){
                     this.jobStarted = true;
                     //cds.spawn({ every: 60000 }, async (tx) => {
-                    cds.spawn({ every: 300000 }, async () => {
+                    cds.spawn({ every: 900000 }, async () => {
                         const spawntx = cds.tx();
                         startTrace("Begin Job PriceAgreementsMasterView")                        
                         const spawnData = await spawntx.run(SELECT.from({ref:['PriceAgreementService.PriceAgreementsMasterView']}).columns(['*',
@@ -328,7 +334,7 @@ module.exports = async (srv) => {
                         {ref:['CustomerPrices'],expand:['*']},
                         {ref:['PriceConditions'],expand:['*',{ref:['PriceConditionClassification'],expand:['*']}]},
                         {ref:['OfferProduct'],expand:['*',{ref:['Offer'],expand:['*']}]}
-                        ]).orderBy([{ref:['ID'], sort:'asc'}]));
+                        ]).where([{ref:['CountryCode']}, '=',{val:'ES'}]).orderBy([{ref:['ID'], sort:'asc'}]));
                         // for(const sp of spawnData){
                         //     sp.Price = 50;
                         // }
@@ -339,13 +345,10 @@ module.exports = async (srv) => {
                     })
                 }
             }
-            let countryCode = ServiceHelper.getWhereValues(req, 'CountryCode');
-            data = this.dataCache.filter(dc => dc.CountryCode === countryCode[0]);
+           /* let countryCode =  ServiceHelper.getWhereValues(req, 'CountryCode'); 
+            data = this.dataCache.filter(dc=> dc.CountryCode === countryCode[0]);*/
+            data = this.dataCache;
         }
-
-
-        
-        //data = await tx.run(paQuery);
         // if the query returns only one value, that value is an object and not an array
         // we need to convert it to array because the code below expects an array
         if (!Array.isArray(data)) {
@@ -367,7 +370,10 @@ module.exports = async (srv) => {
         // //use only one loop instead of multiple map functionslet ids = [];
         //use only one loop instead of multiple map functions
         let result = [];
-        if ((req.query.SELECT.one && (hasNewMaterialsFilterIndex >= 0 || hasExpiredFilterIndex >= 0)) || (xprSearch && (hasExpiredFilterIndex >= 0 || hasNewMaterialsFilterIndex >= 0)) || hasNewMaterialsFilterIndex >= 0 || hasExpiredFilterIndex >= 0){
+        if ((req.query.SELECT.one && ((hasNewMaterialsFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiringSoonFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isNewPriceAgreementFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (appliedCountFilterIndex >= 0 && isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || isCancelledFilterIndex >= 0))
+            || (xprSearch && ((hasNewMaterialsFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiringSoonFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isNewPriceAgreementFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (appliedCountFilterIndex >= 0 && isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || isCancelledFilterIndex >= 0))
+            || (hasNewMaterialsFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiringSoonFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isNewPriceAgreementFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (appliedCountFilterIndex >= 0 && isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || isCancelledFilterIndex >= 0){
+            
             result = data;
         }
         else{
@@ -408,7 +414,7 @@ module.exports = async (srv) => {
                 productpacksstr = productpacksstr.concat(workerResult.productpacksstr);
             }*/
             for (const pa of data) {
-                if (ids.indexOf(pa.ID) === -1) ids.push(pa.ID);
+                //if (ids.indexOf(pa.ID) === -1) ids.push(pa.ID);
                 if (institutes.indexOf(pa.InstituteId) === -1) institutes.push(pa.InstituteId);
                 if (offers.indexOf(pa.OfferId) === -1) offers.push(pa.OfferId);
                 if (countrycodes.indexOf(pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
@@ -431,13 +437,13 @@ module.exports = async (srv) => {
             let OfferProductsAll = [];
             let institutesAll = [];
 
-            if (ids && ids.length > 0) {
+           /* if (ids && ids.length > 0) {
                 startTrace("CustomerPrices");
                 if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
                     customerPricesInPA = false;
                     customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
                 }
-                /*stopTrace("CustomerPrices");
+                stopTrace("CustomerPrices");
                 if (req.query.SELECT.one || hasNewMaterialsFilterIndex >= 0) {
                     startTrace("NewMaterialsView");
                     newMaterialsAll = await tx.run(SELECT.from(NewMaterialsView).where({ PriceAgreementId: { in: ids } }));
@@ -446,8 +452,8 @@ module.exports = async (srv) => {
                     startTrace("NewFOCMaterialsView");
                     newFOCMaterialsAll = await tx.run(SELECT.from(NewFOCMaterialsView).where({ PriceAgreementId: { in: ids } }));
                     stopTrace("NewFOCMaterialsView");
-                }*/
-            }
+                }
+            }*/
 
             if (institutes && institutes.length > 0) {
                 startTrace("Institutes");
@@ -482,7 +488,7 @@ module.exports = async (srv) => {
                 );
                 stopTrace("MostRecentMasterPricesView");
 
-                startTrace("MostRecentConsumerPricesView");
+                /*startTrace("MostRecentConsumerPricesView");
                 if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
                     consumerPricesInPA = false;
                     consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
@@ -494,7 +500,7 @@ module.exports = async (srv) => {
                         })
                     );
                 }
-                stopTrace("MostRecentConsumerPricesView");
+                stopTrace("MostRecentConsumerPricesView");*/
             }
 
 
