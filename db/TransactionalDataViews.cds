@@ -1080,7 +1080,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     consumerPrices.FloorPrice,
     priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
-        when consumerPrices.ConsumerPriceExclPP is not null
+        when consumerPrices.ConsumerPriceExclPP is not null and consumerPrices.ConsumerPriceExclPP <> 0
             then
                 (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - (PT_TMBDPR.AdditionalDiscount/100))) / consumerPrices.ConsumerPriceExclPP
         else null
@@ -1113,7 +1113,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else product.RequestedVolume 
     end as totalVolume:Double,
     case   
-        when PT_TMBDPR.NetofferPrice is not null
+        when (PT_TMBDPR.NetofferPrice is not null and PT_TMBDPR.NetofferPrice <> 0) 
+        and( product.RequestedVolume is not null and product.RequestedVolume <> 0) 
+        and (product.RequestedVolume <> PT_TMBDPR.FOC)
             then 
                 round(PT_TMBDPR.NetofferPrice * ( 
                     (
@@ -1216,7 +1218,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else null
     end as GrossProfit:Double,
     case   
-        when PT_TMBDPR.NetofferPrice is not null
+        when (PT_TMBDPR.NetofferPrice is not null and PT_TMBDPR.NetofferPrice <> 0) 
+        and ( product.RequestedVolume is not null and product.RequestedVolume <> 0) 
+        and (product.RequestedVolume <> PT_TMBDPR.FOC)
             then 
                 round(1 - ((
                     (
