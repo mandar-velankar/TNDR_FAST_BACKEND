@@ -503,7 +503,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     ifnull(tender.Offer.OfferStatus.STATUS, 'Offer Created') as STATUS:String(255),
     tender.PublicationDate as PUBLICATION_DATE,
     tender.TerminationDate as TERMINATION_DATE,
-    tender.SubmittedOn as CREATION_DATE, 
+    case when tender.CountryCode = 'IT' then tender.createdAt else tender.SubmittedOn end as CREATION_DATE:Date, 
     tender.Offer.InternalBidDueDate as INTERNAL_BID_DUE_DATE,
     case when tender.Offer.RevisedOfferNo = 0 and tender.Offer.ContinuationOfferNo = 0 then tender.BidDueDate else tender.Offer.NewOfferDueDate end as CLOSING_DATE:Date,
     ifnull(tender.Offer.ActiveOffer, 1) as ACTIVE_OFFER:Integer,
