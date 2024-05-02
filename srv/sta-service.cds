@@ -120,7 +120,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Institute.InstituteTerritory.IsKAM,
         key tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
-        tender.Offer.OfferStatus.STATUS,         
+        case 
+            when tender.Offer.OfferStatus.STATUS = 'Results Recorded' and tender.Offer.OfferStatusTable.TableStatus <> ''
+                then tender.Offer.OfferStatusTable.TableStatus
+            else tender.Offer.OfferStatus.STATUS
+        end as STATUS:String(255),
+        ifnull(tender.Offer.OfferStatusTable.TableStatus, tender.Offer.OfferStatus.STATUS) as TableStatus:String(255),                 
         tender.PublicationDate,
         tender.Offer.InternalBidDueDate,
         tender.BidDueDate,
@@ -144,7 +149,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Institute.InstituteTerritory.IsKAM,
         tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
-        tender.Offer.OfferStatus.STATUS,         
+        tender.Offer.OfferStatus.STATUS,     
+        tender.Offer.OfferStatusTable.TableStatus,    
         tender.PublicationDate,
         tender.Offer.InternalBidDueDate,
         tender.BidDueDate,
