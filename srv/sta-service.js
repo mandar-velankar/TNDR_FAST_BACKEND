@@ -756,6 +756,7 @@ module.exports = async (srv) => {
 		const revisedOfferStatus = {...offerStatus};
 		revisedOfferStatus.OfferID = revisedOfferID;
 		revisedOfferStatus.STATUS = "Offer Created";
+		revisedOfferStatus.TableStatus = null;
 		revisedOfferStatus.Date = todaysDate;
 
 		const revisedOfferProducts = offerProducts.map(pr => {
@@ -829,6 +830,7 @@ module.exports = async (srv) => {
 		const continuedOfferStatus = {...offerStatus};
 		continuedOfferStatus.OfferID = continuedOfferID;
 		continuedOfferStatus.STATUS = "Offer Created";
+		continuedOfferStatus.TableStatus = null;
 		continuedOfferStatus.Date = todaysDate;
 
 		const continuedOfferProducts = offerProducts.map(pr => {
@@ -901,6 +903,7 @@ module.exports = async (srv) => {
 		const affiliateOfferStatus = {...offerStatus};
 		affiliateOfferStatus.OfferID = affiliateOfferID;
 		affiliateOfferStatus.STATUS = "Offer Created";
+		affiliateOfferStatus.TableStatus = null;
 		affiliateOfferStatus.Date = todaysDate;
 
 		const affiliateOfferProducts = offerProducts.map(pr => {
@@ -966,6 +969,7 @@ module.exports = async (srv) => {
 		const differentAwardPriceOfferStatus = {...offerStatus};
 		differentAwardPriceOfferStatus.OfferID = differentAwardPriceOfferID;
 		differentAwardPriceOfferStatus.STATUS = "Offer Created";
+		differentAwardPriceOfferStatus.TableStatus = null;
 		differentAwardPriceOfferStatus.Date = todaysDate;
 
 		const filteredAwardedProducts = awardedProducts.filter(pr => pr.Outcome === 'Award Price Update');
@@ -1281,15 +1285,38 @@ module.exports = async (srv) => {
 			OfferID: req.data.OfferID
 		});
 
-		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
-		const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
-
-		if (awardedProductsHaveOutcome) {
-			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
+		if (req.data.CountryCode === "NL") {
+			await updateNLOfferStatuses(req, existingAwardedProducts);
+		}else {
+			const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+			const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
+	
+			awardedProductsHaveOutcome && await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
+	
+			if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
+				await addOutgoingMail(req);
+			}
 		}
+		
+	}
 
-		if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
-			await addOutgoingMail(req);
+	const updateNLOfferStatuses = async function (req, existingAwardedProducts) {
+		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+		if (!awardedProductsHaveOutcome) return;
+
+		const isEveryOutcomeWon = existingAwardedProducts.every(pr => pr.Outcome === 'Won');
+		const isEveryOutcomeLost = existingAwardedProducts.every(pr => pr.Outcome === 'Lost');
+
+		if (isEveryOutcomeWon) {
+			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Accepted');
+		}else if (isEveryOutcomeLost) {
+			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Rejected');
+		}else {
+			const outcomes = existingAwardedProducts.map(pr => pr.Outcome);
+			const isOfferPartialyAccepted = outcomes.includes('Won') && outcomes.includes('Lost') && !existingAwardedProducts.some(pr => pr.Outcome !== 'Won' && pr.Outcome !== 'Lost');
+			isOfferPartialyAccepted 
+				? await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
+				: await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', '');
 		}
 	}
 
@@ -1526,9 +1553,9 @@ module.exports = async (srv) => {
 		return req.data;
 	};
 
-	const upsertOfferStatus = async function(offerId, tenderId, sStatus){
+	const upsertOfferStatus = async function(offerId, tenderId, sStatus, tableStatus){
 		await UPDATE(PT_TMTNOFST)
-			.with({STATUS: sStatus})
+			.with({STATUS: sStatus, TableStatus: tableStatus})
 			.where({
 				OfferID: offerId,
 				TenderID: tenderId,
