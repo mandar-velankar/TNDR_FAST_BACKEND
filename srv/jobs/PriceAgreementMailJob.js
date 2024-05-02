@@ -80,6 +80,9 @@ class PriceAgreementMailJob extends BaseJob {
             //     'Product.ProductPack.PRODUCTPACKNAME',
             //     'Institute.InstituteName')
             .where({ ExpiryDate: expiryDate, CountryCode: 'ES' }));
+        
+        await tx.commit();
+        
         return pas.map(pa => {
             pa.Price = 0;
             if(pa.PriceConditions && pa.PriceConditions.length > 0){

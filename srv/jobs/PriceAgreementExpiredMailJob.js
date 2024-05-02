@@ -71,6 +71,8 @@ class PriceAgreementExpiredMailJob extends BaseJob {
           
         }).where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
              
+        await tx.commit();
+        
            return pas.map(pa => {
               
               pa.FormatedExpiryDate = this.dateToDDMMYYYY(pa.ExpiryDate);

@@ -503,7 +503,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     ifnull(tender.Offer.OfferStatus.STATUS, 'Offer Created') as STATUS:String(255),
     tender.PublicationDate as PUBLICATION_DATE,
     tender.TerminationDate as TERMINATION_DATE,
-    tender.SubmittedOn as CREATION_DATE, 
+    case when tender.CountryCode = 'IT' then tender.createdAt else tender.SubmittedOn end as CREATION_DATE:Date, 
     tender.Offer.InternalBidDueDate as INTERNAL_BID_DUE_DATE,
     case when tender.Offer.RevisedOfferNo = 0 and tender.Offer.ContinuationOfferNo = 0 then tender.BidDueDate else tender.Offer.NewOfferDueDate end as CLOSING_DATE:Date,
     ifnull(tender.Offer.ActiveOffer, 1) as ACTIVE_OFFER:Integer,
@@ -1080,7 +1080,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     consumerPrices.FloorPrice,
     priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
-        when consumerPrices.ConsumerPriceExclPP is not null
+        when consumerPrices.ConsumerPriceExclPP is not null and consumerPrices.ConsumerPriceExclPP <> 0
             then
                 (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - (PT_TMBDPR.AdditionalDiscount/100))) / consumerPrices.ConsumerPriceExclPP
         else null
@@ -1113,7 +1113,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else product.RequestedVolume 
     end as totalVolume:Double,
     case   
-        when PT_TMBDPR.NetofferPrice is not null
+        when (PT_TMBDPR.NetofferPrice is not null and PT_TMBDPR.NetofferPrice <> 0) 
+        and( product.RequestedVolume is not null and product.RequestedVolume <> 0) 
+        and (product.RequestedVolume <> PT_TMBDPR.FOC)
             then 
                 round(PT_TMBDPR.NetofferPrice * ( 
                     (
@@ -1216,7 +1218,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else null
     end as GrossProfit:Double,
     case   
-        when PT_TMBDPR.NetofferPrice is not null
+        when (PT_TMBDPR.NetofferPrice is not null and PT_TMBDPR.NetofferPrice <> 0) 
+        and ( product.RequestedVolume is not null and product.RequestedVolume <> 0) 
+        and (product.RequestedVolume <> PT_TMBDPR.FOC)
             then 
                 round(1 - ((
                     (
