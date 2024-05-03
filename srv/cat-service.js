@@ -39,6 +39,7 @@ module.exports = (srv) => {
 		PT_TMAPPRST, 
 		PT_TMOFPR,
 		PT_TMOFRS,
+		PT_TMQUTO,
 		FreeGoodsOther, 
 		CandidatePrices, 
 		ProductPricing, 
@@ -1280,6 +1281,8 @@ module.exports = (srv) => {
 		let preApprovedAccountOfferPrice = product.ACCOUNT_OFFER_PRICE;
 		let preApprovedAccountNetOfferPrice = product.ACCOUNT_NET_OFFER_PRICE;
 
+		const FOCValue = calculateFOCVolume(product) * product.OFFER_PRICE;
+
 		let requiredApprovalLevel = 0;//0: No business approval required; 1:NSM/SM/FM; 2: HBU; 3: CDH; 4: Approval not allowed
 		if (//This means it's first offer for account or offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountOfferPrice, 0) ||
@@ -1315,6 +1318,16 @@ module.exports = (srv) => {
 			else {
 				requiredApprovalLevel = 4;
 			};
+		}
+
+		if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 300000)) {
+			requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+		}else if (ServiceHelper.isDoubleXBelowY(300000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 1500000)) {
+			requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+		}else if (ServiceHelper.isDoubleXBelowY(1500000, FOCValue)) {
+			requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+		}else {
+			requiredApprovalLevel = 4;
 		}
 
 		switch (requiredApprovalLevel) {
@@ -1832,7 +1845,8 @@ module.exports = (srv) => {
                 //PriceCondition: aPriceConditions,
 				LINE: offerProduct.LINE,
 				REFERENCE: offerProduct.REFERENCE,
-				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID
+				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
+				ItemNumber: offerProduct.ItemNumber
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -1860,6 +1874,12 @@ module.exports = (srv) => {
 		const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
 		let tender = await tx.run(SELECT.from(PT_TMTEND).where(whereTender));
 		tender = tender[0];
+
+		const whereSelectedOffer = ServiceHelper.buildFullWhere("OfferID", "=", offer.OFFERID);
+		let selectedOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where(whereSelectedOffer));
+
+		let quotation = await tx.run(SELECT.one.from(PT_TMQUTO).where({"OfferID": offer.OFFERID, "Active": 1}));
+
 		const tenderType = await tx.run(SELECT.from(MASTER_TENDER_TYPE).where({ID: tender.TENDER_TYPE_ID}));
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 		let aApproverTypes = [];
@@ -2226,11 +2246,25 @@ module.exports = (srv) => {
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
-			TENDER_TYPE: tenderType[0].NAME,
+			TENDER_TYPE: tenderType[0]?.NAME,
 			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
 			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
             CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
-			CONTENT :tender.CONTENT
+			CONTENT :tender.CONTENT,
+			Unitofvalidityperiod: quotation?.Custom_String_1,
+			DeliveryDue: quotation?.Custom_Integer_1,
+			Unitofdeliverydue: quotation?.Custom_String_2,
+			QuotationDeliverymethod: quotation?.Custom_String_3,
+			QuotationRecipientname: quotation?.Custom_String_4,
+			QuotationRecipientcontact: quotation?.Custom_String_5,
+			Expectdatetoreceivethedocument: quotation?.Custom_Date_1,
+			RequestorPphoneNnumber: tender.Custom_Integer_1,
+            BayerRepresentativeName: tender.Custom_String_1,
+            BayerRepresentativePhoneNumber: tender.Custom_Integer_2,
+            PeriodOfBankGauranteeStart: tender.Custom_Date_1,
+            PeriodOfBankGauranteeEnd: tender.Custom_Date_2,
+            BGValueBaht: tender.Custom_Date_3,
+			TenderAnnouncementReference: selectedOffer?.Custom_String_1
 		};
 		return results;
 		
@@ -2843,6 +2877,8 @@ module.exports = (srv) => {
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		offerValidation.PeriodOfBankGauranteeStart = offerValidation.COUNTRYCODE === 'TH' ? offerValidation.PeriodOfBankGauranteeStart && ServiceHelper.formatDate(offerValidation.PeriodOfBankGauranteeStart, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.PeriodOfBankGauranteeStart;
+		offerValidation.PeriodOfBankGauranteeEnd = offerValidation.COUNTRYCODE === 'TH' ? offerValidation.PeriodOfBankGauranteeEnd && ServiceHelper.formatDate(offerValidation.PeriodOfBankGauranteeEnd, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.PeriodOfBankGauranteeEnd;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
@@ -3957,5 +3993,20 @@ module.exports = (srv) => {
         while (num.length < size) num = "0" + num;
         return num;
     };
+
+	function calculateFOCVolume (product) {
+		if(!product.FOC) return 0;
+
+		switch(product.FOC_ABS_PCT){
+			case "ABS":
+				return focVolume = product.FOC;
+			case "PCT":
+				return focVolume = Math.round(product.REQUESTED_VOLUME * product.FOC);
+			case "STP":
+				return focVolume = Math.floor(product.REQUESTED_VOLUME / product.FOC_STEP) * product.FOC;
+			default:
+				break;
+		}		
+	}
 
 }

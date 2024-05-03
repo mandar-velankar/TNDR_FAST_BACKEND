@@ -503,7 +503,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     ifnull(tender.Offer.OfferStatus.STATUS, 'Offer Created') as STATUS:String(255),
     tender.PublicationDate as PUBLICATION_DATE,
     tender.TerminationDate as TERMINATION_DATE,
-    tender.SubmittedOn as CREATION_DATE, 
+    case when tender.CountryCode = 'IT' then tender.createdAt else tender.SubmittedOn end as CREATION_DATE:Date, 
     tender.Offer.InternalBidDueDate as INTERNAL_BID_DUE_DATE,
     case when tender.Offer.RevisedOfferNo = 0 and tender.Offer.ContinuationOfferNo = 0 then tender.BidDueDate else tender.Offer.NewOfferDueDate end as CLOSING_DATE:Date,
     ifnull(tender.Offer.ActiveOffer, 1) as ACTIVE_OFFER:Integer,
@@ -687,7 +687,18 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
     offerProduct.Comment,
-    offerProduct.AlternateOfferYN
+    offerProduct.AlternateOfferYN,
+    case 
+        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther is null
+            then 'NA'
+        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'PCT'
+            then round(100 * offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther, 2) || '% (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
+        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'ABS'
+            then offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther || ' '  || offerProduct.UnitPerPack || ' (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
+        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'STP'
+            then offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther || ' '  || offerProduct.UnitPerPack || ' for each ' || offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_Step || ' ' || offerProduct.UnitPerPack || ' purchased (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
+    end as FOCInfoText:String,
+    offerProduct.Custom.Integer_1 as ItemNumber,
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -1070,7 +1081,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     consumerPrices.FloorPrice,
     priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
-        when consumerPrices.ConsumerPriceExclPP is not null
+        when consumerPrices.ConsumerPriceExclPP is not null and consumerPrices.ConsumerPriceExclPP <> 0
             then
                 (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - (PT_TMBDPR.AdditionalDiscount/100))) / consumerPrices.ConsumerPriceExclPP
         else null
@@ -1103,7 +1114,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else product.RequestedVolume 
     end as totalVolume:Double,
     case   
-        when PT_TMBDPR.NetofferPrice is not null
+        when (PT_TMBDPR.NetofferPrice is not null and PT_TMBDPR.NetofferPrice <> 0) 
+        and( product.RequestedVolume is not null and product.RequestedVolume <> 0) 
+        and (product.RequestedVolume <> PT_TMBDPR.FOC)
             then 
                 round(PT_TMBDPR.NetofferPrice * ( 
                     (
@@ -1206,7 +1219,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else null
     end as GrossProfit:Double,
     case   
-        when PT_TMBDPR.NetofferPrice is not null
+        when (PT_TMBDPR.NetofferPrice is not null and PT_TMBDPR.NetofferPrice <> 0) 
+        and ( product.RequestedVolume is not null and product.RequestedVolume <> 0) 
+        and (product.RequestedVolume <> PT_TMBDPR.FOC)
             then 
                 round(1 - ((
                     (
@@ -2105,6 +2120,20 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Regions                : String;
             InternalDueDate        : Date;
             ExpectedAwardDate      : Date;
+            Unitofvalidityperiod   : String;
+			DeliveryDue            : Integer;
+			Unitofdeliverydue      : String;
+			QuotationDeliverymethod : String;
+			QuotationRecipientname  : String;
+			QuotationRecipientcontact : String;
+			Expectdatetoreceivethedocument: Date;
+            RequestorPphoneNnumber: Integer;
+            BayerRepresentativeName: String;
+            BayerRepresentativePhoneNumber: Integer;
+            PeriodOfBankGauranteeStart: Date;
+            PeriodOfBankGauranteeEnd: Date;
+            BGValueBaht: Double;
+            TenderAnnouncementReference: String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2297,6 +2326,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NET_OFFER_SALES_OFFER_CURRENCY              : Double;
             NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
             FOCInfoText                                 : String;
+            ItemNumber                                  : Integer;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;

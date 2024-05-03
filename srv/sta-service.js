@@ -3620,7 +3620,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
 				AlternateOfferYN: offerProduct.AlternateOfferYN,
-				FOCInfoText: awardProductFormView?.FOC
+				FOCInfoText: offerProduct?.FOCInfoText
 			}
 		});
 		let resolvedResults = await Promise.all(results);
