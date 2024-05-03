@@ -1845,7 +1845,8 @@ module.exports = (srv) => {
                 //PriceCondition: aPriceConditions,
 				LINE: offerProduct.LINE,
 				REFERENCE: offerProduct.REFERENCE,
-				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID
+				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
+				ItemNumber: offerProduct.ItemNumber
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -2263,8 +2264,7 @@ module.exports = (srv) => {
             PeriodOfBankGauranteeStart: tender.Custom_Date_1,
             PeriodOfBankGauranteeEnd: tender.Custom_Date_2,
             BGValueBaht: tender.Custom_Date_3,
-			TenderAnnouncementReference: selectedOffer?.Custom_String_1,
-            ItemNumber: selectedOffer?.Custom_Integer_1,
+			TenderAnnouncementReference: selectedOffer?.Custom_String_1
 		};
 		return results;
 		

@@ -697,7 +697,8 @@ left outer join TransactionalData.ProductPricing as productPricing
             then offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther || ' '  || offerProduct.UnitPerPack || ' (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
         when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'STP'
             then offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther || ' '  || offerProduct.UnitPerPack || ' for each ' || offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_Step || ' ' || offerProduct.UnitPerPack || ' purchased (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
-    end as FOCInfoText:String
+    end as FOCInfoText:String,
+    offerProduct.Custom.Integer_1 as ItemNumber,
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -2131,9 +2132,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             BayerRepresentativePhoneNumber: Integer;
             PeriodOfBankGauranteeStart: Date;
             PeriodOfBankGauranteeEnd: Date;
-            BGValueBaht: Date;
+            BGValueBaht: Double;
             TenderAnnouncementReference: String;
-            ItemNumber: Integer;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2326,6 +2326,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NET_OFFER_SALES_OFFER_CURRENCY              : Double;
             NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
             FOCInfoText                                 : String;
+            ItemNumber                                  : Integer;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
