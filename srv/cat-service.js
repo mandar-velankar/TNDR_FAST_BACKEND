@@ -1845,7 +1845,8 @@ module.exports = (srv) => {
                 //PriceCondition: aPriceConditions,
 				LINE: offerProduct.LINE,
 				REFERENCE: offerProduct.REFERENCE,
-				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID
+				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
+				ItemNumber: offerProduct.ItemNumber
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -2263,8 +2264,7 @@ module.exports = (srv) => {
             PeriodOfBankGauranteeStart: tender.Custom_Date_1,
             PeriodOfBankGauranteeEnd: tender.Custom_Date_2,
             BGValueBaht: tender.Custom_Date_3,
-			TenderAnnouncementReference: selectedOffer?.Custom_String_1,
-            ItemNumber: selectedOffer?.Custom_Integer_1,
+			TenderAnnouncementReference: selectedOffer?.Custom_String_1
 		};
 		return results;
 		
@@ -2877,6 +2877,8 @@ module.exports = (srv) => {
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
+		offerValidation.PeriodOfBankGauranteeStart = offerValidation.COUNTRYCODE === 'TH' ? offerValidation.PeriodOfBankGauranteeStart && ServiceHelper.formatDate(offerValidation.PeriodOfBankGauranteeStart, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.PeriodOfBankGauranteeStart;
+		offerValidation.PeriodOfBankGauranteeEnd = offerValidation.COUNTRYCODE === 'TH' ? offerValidation.PeriodOfBankGauranteeEnd && ServiceHelper.formatDate(offerValidation.PeriodOfBankGauranteeEnd, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.PeriodOfBankGauranteeEnd;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
