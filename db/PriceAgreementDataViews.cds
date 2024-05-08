@@ -5,6 +5,7 @@ using {com.bayer.SXTENDER.TransactionalData} from './TransactionalData';
 using { com.bayer.SXTENDER.MasterData.SAP } from '../db/SAP';
 using {com.bayer.SXTENDER.MasterData} from './MasterData';
 using {com.bayer.SXTENDER.AdminData} from './AdminData';
+using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
 
 
 
@@ -161,3 +162,64 @@ left join MasterData.PT_TMPRDPCK as PRD
   and CP.RefIdocNumber is not null 
   and CP.RefIdocNumber <> ''
   and TND.Classification = 'Commercial Agreement';
+
+entity PriceAgreementNewMaterialsView as Select from PriceAgreementData.PriceAgreements as pa 
+left outer join PriceAgreementData.NewMaterialsView as nmv on pa.ID = nmv.PriceAgreementId and nmv.isNew = true
+left outer join PriceAgreementData.NewFOCMaterialsView as nfocmv on pa.ID = nfocmv.PriceAgreementId and nfocmv.isNew = true
+left outer join PriceAgreementData.CustomerPrices as cp on cp.PriceAgreementId = pa.ID{
+pa.ID,
+pa.CountryCode,
+case when (count(nmv.MaterialNumber)=0 and count(nfocmv.FOCMaterialNumber)=0) or count(cp.ID) = 0
+then false
+else true
+end as hasNewMaterials: Boolean
+}group by pa.ID, pa.CountryCode;
+
+entity PriceAgreementNewAgreements as Select from PriceAgreementData.PriceAgreements as pa
+left outer join PriceAgreementData.CustomerPrices as cp on cp.PriceAgreementId = pa.ID{
+pa.ID,
+pa.CountryCode,
+CASE when count(cp.ID) = 0 then true else false end AS isNewPriceAgreement: Boolean
+}group by pa.ID, pa.CountryCode;
+
+entity PriceAgreementActiveAgreements as Select from PriceAgreementData.PriceAgreements as pa
+left outer join PriceAgreementData.CustomerPrices as cp on cp.PriceAgreementId = pa.ID{
+pa.ID,
+pa.CountryCode,
+  CASE
+      when cp.Synchronized = true
+      then true
+      else false
+    end AS Synchronized: Boolean
+}group by pa.ID, pa.CountryCode, cp.Synchronized;
+
+entity PriceAgreementUpdatedRetailPrice as Select from PriceAgreementData.PriceAgreements as pa
+left outer join MasterDataViews.MostRecentConsumerPricesView as cp on cp.CountryCode = pa.CountryCode and cp.ProductPackId = pa.ProductPackId {
+    pa.ID,
+    pa.CountryCode,
+      CASE
+        WHEN pa.UoM = 'Pack' THEN
+            CASE
+                WHEN ABS(pa.ListPrice - cp.ConsumerPriceExclPP) < 0.0001 THEN 1
+                ELSE 0
+            END
+        ELSE
+            CASE
+                WHEN ABS(pa.ListPrice - cp.ConsumerPriceExclPU) < 0.0001 THEN 1
+                ELSE 0
+            END
+    END AS ListPriceEqual: Integer,
+    CASE
+        WHEN pa.UoM = 'Pack' THEN
+            CASE
+                WHEN ABS(pa.RetailPrice - cp.MaxPriceNhsPP) < 0.0001 THEN 1
+                ELSE 0
+            END
+        ELSE
+            CASE
+                WHEN ABS(pa.RetailPrice - cp.MaxPriceNhsPU) < 0.0001 THEN 1
+                ELSE 0
+            END
+    END AS RetailPriceEqual: Integer
+};
+

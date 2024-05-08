@@ -33,7 +33,7 @@ function calculateFields(priceAgreement, requiredParameters){
     calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
 
     let customerPrices = priceAgreement.CustomerPrices || [];
-    let mostRecentMasterPrice;
+    let mostRecentMasterPrice = undefined;
     let consumerPrice = priceAgreement.ConsumerPrice;
 
 
@@ -43,18 +43,19 @@ function calculateFields(priceAgreement, requiredParameters){
         for(const inst of institutesAll){
             if(inst.InstituteID === priceAgreement.InstituteId){
                 institute = inst;
+                break;
             }
         }
     }
 
     // Get CustomerPrices if needed
-    if (!customerPricesInPA) {
+ /*   if (!customerPricesInPA) {
             for(const cp of customerPricesAll){
             if(cp.PriceAgreementId == priceAgreement.ID){
                 customerPrices.push(cp);
             }
         }
-    }
+    }*/
     // }
 
     /*if (!priceConditionsInPa) {
@@ -69,10 +70,12 @@ function calculateFields(priceAgreement, requiredParameters){
         for(const mp of mostRecentMasterPricesAll){
             if(mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId){
                 mostRecentMasterPrice = mp;
+                break;
             }
         }
     }
 
+    /*
     // Get NewMaterials if needed
     let newMaterials = [];
     for(const material of newMaterialsAll){
@@ -88,21 +91,23 @@ function calculateFields(priceAgreement, requiredParameters){
             newFOCMaterials.push(FOCmaterial);
         }
     }
-
+    */
+/*
     // Get ConsumerPrices if needed
     if (!consumerPricesInPA) {
         for(const cp of consumerPricesAll){
             if(cp.CountryCode == priceAgreement.CountryCode && cp.ProductPackId == priceAgreement.ProductPackId){
                 consumerPrice = cp;
+                break;
             }
         }
-    }
+    }*/
 
     // calculate Synchronized
     // we are filtering out the PVL conditions first as we don't sync PVL with SAP
     //only one loop instead of two (filter + every)
    //priceAgreement.Synchronized = true;
-    priceAgreement.isNewPriceAgreement = true;
+    /*priceAgreement.isNewPriceAgreement = true;
     priceAgreement.AppliedCount = 0;
     for (let price of customerPrices) {
         if (price.PriceCondition && !price.Synchronized) {
@@ -115,8 +120,9 @@ function calculateFields(priceAgreement, requiredParameters){
             priceAgreement.isNewPriceAgreement = false;
             priceAgreement.AppliedCount++;
         }
-    }
+    } */
 
+    /*
     // calculate hasNewMaterials
     if (req_query_SELECT_one || hasNewMaterialsFilterIndex >= 0) {
         // If we don't have applied prices then hasnewmaterials is always FALSE. (so EVEN if we have new materials added)
@@ -131,8 +137,9 @@ function calculateFields(priceAgreement, requiredParameters){
             }
         }
     }
+    */
 
-    // calculate hasNewPrice
+ /*   // calculate hasNewPrice
     if (consumerPrice) {
 
         let consumerListPrice = "";
@@ -150,16 +157,16 @@ function calculateFields(priceAgreement, requiredParameters){
             priceAgreement.hasNewPrice = true;
         }
 
-    }
+    }*/
 
 
-    if (priceAgreement.ExpiryDate) {
+ /*   if (priceAgreement.ExpiryDate) {
         let dExpiryDate = new Date(priceAgreement.ExpiryDate);
         priceAgreement.ExpiringSoon = calculatedFutureDate >= dExpiryDate && dExpiryDate >= todaysDate ? true : false;
         priceAgreement.Expired = dExpiryDate < todaysDate && priceAgreement.Status !== 'Cancelled' ? true : false;
     }
 
-    priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false;
+    priceAgreement.isCancelled = priceAgreement.Status && priceAgreement.Status === 'Cancelled' ? true : false; */
 
     if (req_query_SELECT_one || (priceAgreement.CountryCode === 'ES' && ( hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0 ))) {
         if (priceConditions && institute && !priceAgreement.IgnoreConfPriceChange && !priceAgreement.IgnorePVLPriceChange) {

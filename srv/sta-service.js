@@ -4603,30 +4603,38 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         }
 	});
 
-	function mappedZuelligExtractView (zuelligExtract) {
-		return zuelligExtract.map(item => {
-			return {
-				"KAM_Territory": item.KAM_Territory,
-				"ZuelligCustomerNumber.": item.CNPJ,
-				"InstituteName": item.InstituteName,
-				"SKUCode":`'${addLeadingZeros(item.SKUCode, 8) }'` || "",
-				"ProductPackName": item.PRODUCTPACKNAME,
-				"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4),
-				"Invoice Price": Number(item.Price1).toFixed(4),
-				"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
-				"HandlingCharge_Amount": 0,
-				"HandlingCharge_Amount2": 0,
-				"CashDiscount_Amount": 0,
-				"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
-				"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
-				"FGBuy": 0,
-				"FGGift": 0,
-				"NetPrice": Number(item.Price3).toFixed(4),
-				"BT": "BT"
+	function mappedZuelligExtractView(zuelligExtract) {
+		return zuelligExtract.flatMap(item => {
+			let ZuelligCustomerNumbers = item.CNPJ.split(','); 
+			if (ZuelligCustomerNumbers.length > 1) {
+				return ZuelligCustomerNumbers.map(ZuelligCustomerNumber => ZuelligExtractObject(item, ZuelligCustomerNumber));
+			}else{
+				return ZuelligExtractObject(item, item.CNPJ)
 			}
+			
 		});
 	}
-
+	function ZuelligExtractObject(item,ZuelligCustomerNumber) {
+		return {
+			"KAM_Territory": item.KAM_Territory,
+			"ZuelligCustomerNumber.": ZuelligCustomerNumber,
+			"InstituteName": item.InstituteName,
+			"SKUCode":`'${addLeadingZeros(item.SKUCode, 8) }'` || "",
+			"ProductPackName": item.PRODUCTPACKNAME,
+			"Current_NHI_Price": Number(item.RegisteredPrice).toFixed(4),
+			"Invoice Price": Number(item.Price1).toFixed(4),
+			"GeneralDiscount_Amount": item.GeneralDiscount_Amount.toFixed(4),
+			"HandlingCharge_Amount": 0,
+			"HandlingCharge_Amount2": 0,
+			"CashDiscount_Amount": 0,
+			"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+			"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
+			"FGBuy": 0,
+			"FGGift": 0,
+			"NetPrice": Number(item.Price3).toFixed(4),
+			"BT": "BT"
+		}
+	}
 	function mappedSingleView (zuelligExtract) { // TaiwanFASTData
 		return zuelligExtract.map(item => {
 			return {

@@ -293,20 +293,62 @@ module.exports = async (srv) => {
         //run default query on db
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
+        let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode'); 
         let paQuery = SELECT.from(req.query.SELECT.from);
-        if (req.query.SELECT.columns?.[0]?.func !== "count") {
-            paQuery.columns(req.query.SELECT.columns);
-        }
-        if (!hasFilter) {
+        let xprSearch = req.query.SELECT.where && req.query.SELECT.where?.some(condition => typeof condition === 'object' && 'xpr' in condition);
+        if (!hasFilter || countryCode[0] === 'IT') {
             console.log("Fetch using limit Priceagreements - no filters");
-            req.query.SELECT.limit && (paQuery.limit(req.query.SELECT.limit));
+            if(req.query.SELECT.limit)
+            {
+                req.query.SELECT.limit.rows.val = 500
+                paQuery.limit(req.query.SELECT.limit);
+            }
             // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
         }
-        req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
-        req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
-
         startTrace("PriceAgreements");
-        data = await tx.run(paQuery);
+        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one || xprSearch || countryCode[0] === 'IT'){
+            paQuery.columns(req.query.SELECT.columns);
+            req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
+            req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
+            data = await tx.run(paQuery);
+        }
+        else{
+            if(countryCode[0] === 'ES' && (!this.dataCache || this.dataCache.length === 0)){
+                paQuery.columns(req.query.SELECT.columns);
+                req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
+                req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
+                this.dataCache = await tx.run(paQuery); 
+                if(!this.jobStarted){
+                    this.jobStarted = true;
+                    //cds.spawn({ every: 60000 }, async (tx) => {
+                    cds.spawn({ every: 900000 }, async () => {
+                        const spawntx = cds.tx();
+                        startTrace("Begin Job PriceAgreementsMasterView")                        
+                        const spawnData = await spawntx.run(SELECT.from({ref:['PriceAgreementService.PriceAgreementsMasterView']}).columns(['*',
+                        {ref:['Product'],expand:['*',{ref:['ProductPack'],expand:['*']}]},
+                        {ref:['Institute'],expand:['*']},
+                        {ref:['Tender'],expand:['*',{ref:['User'],expand:['*']}]},
+                        {ref:['Materials'],expand:['*']},
+                        {ref:['FOC'],expand:['*']},
+                        {ref:['ConsumerPrice'],expand:['*']}, 
+                        {ref:['CustomerPrices'],expand:['*']},
+                        {ref:['PriceConditions'],expand:['*',{ref:['PriceConditionClassification'],expand:['*']}]},
+                        {ref:['OfferProduct'],expand:['*',{ref:['Offer'],expand:['*']}]}
+                        ]).where([{ref:['CountryCode']}, '=',{val:'ES'}]).orderBy([{ref:['ID'], sort:'asc'}]));
+                        // for(const sp of spawnData){
+                        //     sp.Price = 50;
+                        // }
+                       // myCache.set( "pa", spawnData);
+                        this.dataCache = spawnData;
+                        spawntx.commit();
+                        stopTrace("End Job PriceAgreementsMasterView")
+                    })
+                }
+            }
+           /* let countryCode =  ServiceHelper.getWhereValues(req, 'CountryCode'); 
+            data = this.dataCache.filter(dc=> dc.CountryCode === countryCode[0]);*/
+            data = this.dataCache;
+        }
         // if the query returns only one value, that value is an object and not an array
         // we need to convert it to array because the code below expects an array
         if (!Array.isArray(data)) {
@@ -327,112 +369,116 @@ module.exports = async (srv) => {
         // let ids = [];
         // //use only one loop instead of multiple map functionslet ids = [];
         //use only one loop instead of multiple map functions
-        startTrace("PrepareKeysForOtherQueries");
-        // Divide the data into chunks
-        const chunks = splitToChunks(data, 1000);
-        // Run operation on the chunks parallely
-        let pkWorkerResults = [];
-        try {
-            // Create a new thread pool
-            // resourceLimits.maxOldGenerationSizeMb This is a very important parameter and this defines the max memory used by the worker thread. 
-            // By default, it depends on the system how much max memory a worker thread can use but it is always good to set the max limit otherwise 
-            // the worker thread will get terminated on reaching the limit
-            const pkPool = new Piscina({
-                filename: path.resolve(__dirname, 'workers/PrepareKeysWorker')
-            });
-            const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
-            pkWorkerResults = await Promise.all(pkWorkerPromises);
-            pkPool.destroy();
-        } catch (err) {
-            console.error("PrepareKeysWorker stopped");
-            console.error(err);
-            throw err;
+        let result = [];
+        if ((req.query.SELECT.one && ((hasNewMaterialsFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiringSoonFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isNewPriceAgreementFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (appliedCountFilterIndex >= 0 && isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || isCancelledFilterIndex >= 0))
+            || (xprSearch && ((hasNewMaterialsFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiringSoonFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isNewPriceAgreementFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (appliedCountFilterIndex >= 0 && isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || isCancelledFilterIndex >= 0))
+            || (hasNewMaterialsFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiringSoonFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isNewPriceAgreementFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || (appliedCountFilterIndex >= 0 && isSynchronizedFilterIndex >= 0 && hasExpiredFilterIndex >= 0 && isCancelledFilterIndex >= 0) || isCancelledFilterIndex >= 0){
+            
+            result = data;
         }
+        else{
+            startTrace("PrepareKeysForOtherQueries");
+            // Divide the data into chunks
+            // Run operation on the chunks parallely
+            /*let pkWorkerResults = [];
+            try {
+                // Create a new thread pool
+                // resourceLimits.maxOldGenerationSizeMb This is a very important parameter and this defines the max memory used by the worker thread. 
+                // By default, it depends on the system how much max memory a worker thread can use but it is always good to set the max limit otherwise 
+                // the worker thread will get terminated on reaching the limit
+                const pkPool = new Piscina({
+                    filename: path.resolve(__dirname, 'workers/PrepareKeysWorker')
+                });
+                const pkWorkerPromises = chunks.map(chunk => pkPool.run(chunk));
+                pkWorkerResults = await Promise.all(pkWorkerPromises);
+                pkPool.destroy();
+            } catch (err) {
+                console.error("PrepareKeysWorker stopped");
+                console.error(err);
+                throw err;
+            }*/
 
-        let ids = [];
-        let offers = [];
-        let institutes = [];
-        let countrycodes = [];
-        let productpacks = [];
-        let productpacksstr = [];
+            let ids = [];
+            let offers = [];
+            let institutes = [];
+            let countrycodes = [];
+            let productpacks = [];
+            let productpacksstr = [];
 
-        for (const workerResult of pkWorkerResults) {
-            ids = ids.concat(workerResult.ids);
-            offers = offers.concat(workerResult.offers);
-            institutes = institutes.concat(workerResult.institutes);
-            countrycodes = countrycodes.concat(workerResult.countrycodes);
-            productpacks = productpacks.concat(workerResult.productpacks);
-            productpacksstr = productpacksstr.concat(workerResult.productpacksstr);
-        }
-        stopTrace("PrepareKeysForOtherQueries");
-
-        let customerPricesAll = [];
-        let customerPricesInPA = true;
-        let priceConditionsAll = [];
-        //let priceConditionsInPa = true;
-        let mostRecentMasterPricesAll = [];
-        let consumerPricesAll = [];
-        let consumerPricesInPA = true;
-        let newMaterialsAll = [];
-        let newFOCMaterialsAll = [];
-        let OfferProductsAll = [];
-        let institutesAll = [];
-
-        if (ids && ids.length > 0) {
-            startTrace("CustomerPrices");
-            if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
-                customerPricesInPA = false;
-                customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+            /*for (const workerResult of pkWorkerResults) {
+                ids = ids.concat(workerResult.ids);
+                offers = offers.concat(workerResult.offers);
+                institutes = institutes.concat(workerResult.institutes);
+                countrycodes = countrycodes.concat(workerResult.countrycodes);
+                productpacks = productpacks.concat(workerResult.productpacks);
+                productpacksstr = productpacksstr.concat(workerResult.productpacksstr);
+            }*/
+            for (const pa of data) {
+                //if (ids.indexOf(pa.ID) === -1) ids.push(pa.ID);
+                if (institutes.indexOf(pa.InstituteId) === -1) institutes.push(pa.InstituteId);
+                if (offers.indexOf(pa.OfferId) === -1) offers.push(pa.OfferId);
+                if (countrycodes.indexOf(pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
+                if (productpacks.indexOf(pa.ProductPackId) === -1) {
+                    productpacks.push(pa.ProductPackId);
+                    productpacksstr.push(pa.ProductPackId.toString());
+                }
             }
-            stopTrace("CustomerPrices");
-            if (req.query.SELECT.one || hasNewMaterialsFilterIndex >= 0) {
-                startTrace("NewMaterialsView");
-                newMaterialsAll = await tx.run(SELECT.from(NewMaterialsView).where({ PriceAgreementId: { in: ids } }));
-                stopTrace("NewMaterialsView");
+            stopTrace("PrepareKeysForOtherQueries");
 
-                startTrace("NewFOCMaterialsView");
-                newFOCMaterialsAll = await tx.run(SELECT.from(NewFOCMaterialsView).where({ PriceAgreementId: { in: ids } }));
-                stopTrace("NewFOCMaterialsView");
+            let customerPricesAll = [];
+            let customerPricesInPA = true;
+            let priceConditionsAll = [];
+            //let priceConditionsInPa = true;
+            let mostRecentMasterPricesAll = [];
+            let consumerPricesAll = [];
+            let consumerPricesInPA = true;
+            let newMaterialsAll = [];
+            let newFOCMaterialsAll = [];
+            let OfferProductsAll = [];
+            let institutesAll = [];
+
+           /* if (ids && ids.length > 0) {
+                startTrace("CustomerPrices");
+                if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
+                    customerPricesInPA = false;
+                    customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
+                }
+                stopTrace("CustomerPrices");
+                if (req.query.SELECT.one || hasNewMaterialsFilterIndex >= 0) {
+                    startTrace("NewMaterialsView");
+                    newMaterialsAll = await tx.run(SELECT.from(NewMaterialsView).where({ PriceAgreementId: { in: ids } }));
+                    stopTrace("NewMaterialsView");
+
+                    startTrace("NewFOCMaterialsView");
+                    newFOCMaterialsAll = await tx.run(SELECT.from(NewFOCMaterialsView).where({ PriceAgreementId: { in: ids } }));
+                    stopTrace("NewFOCMaterialsView");
+                }
+            }*/
+
+            if (institutes && institutes.length > 0) {
+                startTrace("Institutes");
+                institutesAll = await tx.run(SELECT.from(PT_TMINST).where({ InstituteId: { in: institutes } }));
+                stopTrace("Institutes");
             }
-        }
 
-        if (institutes && institutes.length > 0) {
-            startTrace("Institutes");
-            institutesAll = await tx.run(SELECT.from(PT_TMINST).where({ InstituteId: { in: institutes } }));
-            stopTrace("Institutes");
-        }
-
-        if (countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0) {
-            if (offers && offers.length > 0) {
-                startTrace("OfferProducts");
-                OfferProductsAll = await tx.run(SELECT.from(PT_TMOFPR)
-                    .where({
-                        CountryCode: { in: countrycodes },
-                        and: {
-                            ProductCode: { in: productpacks }
-                            /*  and: {
-                                    OfferID: { in: offers }
-                                }*/
-                        }
-                    })
-                );
-                stopTrace("OfferProducts");
-            }
-            startTrace("MostRecentMasterPricesView");
-            mostRecentMasterPricesAll = await tx.run(SELECT.from(MostRecentMasterPricesView)
-                .where({
-                    CountryCode: { in: countrycodes },
-                    and: {
-                        ProductPackId: { in: productpacksstr }
-                    }
-                })
-            );
-            stopTrace("MostRecentMasterPricesView");
-
-            startTrace("MostRecentConsumerPricesView");
-            if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
-                consumerPricesInPA = false;
-                consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
+            if (countrycodes && countrycodes.length > 0 && productpacks && productpacks.length > 0) {
+                if (offers && offers.length > 0) {
+                    startTrace("OfferProducts");
+                    OfferProductsAll = await tx.run(SELECT.from(PT_TMOFPR)
+                        .where({
+                            CountryCode: { in: countrycodes },
+                            and: {
+                                ProductCode: { in: productpacks }
+                                /*  and: {
+                                        OfferID: { in: offers }
+                                    }*/
+                            }
+                        })
+                    );
+                    stopTrace("OfferProducts");
+                }
+                startTrace("MostRecentMasterPricesView");
+                mostRecentMasterPricesAll = await tx.run(SELECT.from(MostRecentMasterPricesView)
                     .where({
                         CountryCode: { in: countrycodes },
                         and: {
@@ -440,101 +486,115 @@ module.exports = async (srv) => {
                         }
                     })
                 );
+                stopTrace("MostRecentMasterPricesView");
+
+                /*startTrace("MostRecentConsumerPricesView");
+                if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
+                    consumerPricesInPA = false;
+                    consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
+                        .where({
+                            CountryCode: { in: countrycodes },
+                            and: {
+                                ProductPackId: { in: productpacksstr }
+                            }
+                        })
+                    );
+                }
+                stopTrace("MostRecentConsumerPricesView");*/
             }
-            stopTrace("MostRecentConsumerPricesView");
-        }
 
 
-        let mainConditionIDs = [];
-        let rappelConditionIDs = [];
-        let focConditionIDs = [];
-        let priceConditionAll = [];
-        let priceConditionRappelAll = [];
-        let discountConditionsAll = [];
-        let priceConditionFOCAll = [];
-        if (countrycodes && countrycodes.length > 0) {
-            if (req.query.SELECT.one || (countrycodes[0].CountryCode === 'ES' && (hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0))) {
-                for (const condition of priceConditionsAll) {
-                    if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
-                        mainConditionIDs.push(condition.ExistingPriceConditionID);
+            let mainConditionIDs = [];
+            let rappelConditionIDs = [];
+            let focConditionIDs = [];
+            let priceConditionAll = [];
+            let priceConditionRappelAll = [];
+            let discountConditionsAll = [];
+            let priceConditionFOCAll = [];
+            if (countrycodes && countrycodes.length > 0) {
+                if (req.query.SELECT.one || (countrycodes[0].CountryCode === 'ES' && (hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0))) {
+                    for (const condition of priceConditionsAll) {
+                        if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
+                            mainConditionIDs.push(condition.ExistingPriceConditionID);
+                        }
+                        if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
+                            rappelConditionIDs.push(condition.ExistingPriceConditionID);
+                        }
+                        if (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) {
+                            focConditionIDs.push(condition.ExistingPriceConditionID);
+                        }
                     }
-                    if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
-                        rappelConditionIDs.push(condition.ExistingPriceConditionID);
+                    if (mainConditionIDs && mainConditionIDs.length > 0) {
+                        startTrace("PriceCondition");
+                        priceConditionAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: mainConditionIDs } }));
+                        stopTrace("PriceCondition");
                     }
-                    if (condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) {
-                        focConditionIDs.push(condition.ExistingPriceConditionID);
+
+                    if (rappelConditionIDs && rappelConditionIDs.length > 0) {
+                        startTrace("RappelPriceCondition");
+                        priceConditionRappelAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: rappelConditionIDs } }));
+                        stopTrace("RappelPriceCondition");
                     }
-                }
-                if (mainConditionIDs && mainConditionIDs.length > 0) {
-                    startTrace("PriceCondition");
-                    priceConditionAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: mainConditionIDs } }));
-                    stopTrace("PriceCondition");
-                }
 
-                if (rappelConditionIDs && rappelConditionIDs.length > 0) {
-                    startTrace("RappelPriceCondition");
-                    priceConditionRappelAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: rappelConditionIDs } }));
-                    stopTrace("RappelPriceCondition");
-                }
+                    if (rappelConditionIDs && rappelConditionIDs.length > 0) {
+                        startTrace("DiscountCondition");
+                        discountConditionsAll = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: { in: rappelConditionIDs } }));
+                        stopTrace("DiscountCondition");
+                    }
 
-                if (rappelConditionIDs && rappelConditionIDs.length > 0) {
-                    startTrace("DiscountCondition");
-                    discountConditionsAll = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: { in: rappelConditionIDs } }));
-                    stopTrace("DiscountCondition");
-                }
-
-                if (focConditionIDs && focConditionIDs.length > 0) {
-                    startTrace("FOCPriceCondition");
-                    priceConditionFOCAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: focConditionIDs } }));
-                    stopTrace("FOCPriceCondition");
+                    if (focConditionIDs && focConditionIDs.length > 0) {
+                        startTrace("FOCPriceCondition");
+                        priceConditionFOCAll = await tx.run(SELECT.from(PriceCondition).where({ ID: { in: focConditionIDs } }));
+                        stopTrace("FOCPriceCondition");
+                    }
                 }
             }
-        }
-        // use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
-        // 2. calculate the fields
-        // Calculation is done by a worker
-        startTrace("CalculateFields");
+            // use == instead of === in filters and finds because type of productpackid is different between two tables || maybe this is also the case for others
+            // 2. calculate the fields
+            // Calculation is done by a worker
+            startTrace("CalculateFields");
+            const chunks = splitToChunks(data, 1000);
 
-        const requiredParameters = {
-            //priceConditionsInPa,
-            institutesAll,
-            customerPricesInPA,
-            customerPricesAll,
-            mostRecentMasterPricesAll,
-            newMaterialsAll,
-            newFOCMaterialsAll,
-            consumerPricesInPA,
-            consumerPricesAll,
-            hasNewMaterialsFilterIndex,
-            req_query_SELECT_one: req.query.SELECT.one || false,
-            hasNewYLLPValues,
-            hasNewYLAPValues,
-            priceConditionsAll,
-            OfferProductsAll,
-            priceConditionRappelAll,
-            discountConditionsAll,
-            priceConditionFOCAll
-        };
+            const requiredParameters = {
+                //priceConditionsInPa,
+                institutesAll,
+                customerPricesInPA,
+                customerPricesAll,
+                mostRecentMasterPricesAll,
+                newMaterialsAll,
+                newFOCMaterialsAll,
+                consumerPricesInPA,
+                consumerPricesAll,
+                hasNewMaterialsFilterIndex,
+                req_query_SELECT_one: req.query.SELECT.one || false,
+                hasNewYLLPValues,
+                hasNewYLAPValues,
+                priceConditionsAll,
+                OfferProductsAll,
+                priceConditionRappelAll,
+                discountConditionsAll,
+                priceConditionFOCAll
+            };
 
-        // Create a new thread pool
-        const cfPool = new Piscina({
-            filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker')
-        });
-        // Run operation on the chunks parallely
-        const cfWorkerPromises = chunks.map(chunk => cfPool.run({ chunk, requiredParameters }));
-        const cfWorkerResults = await Promise.all(cfWorkerPromises);
-        cfPool.destroy();
+            // Create a new thread pool
+            const cfPool = new Piscina({
+                filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker')
+            });
+            // Run operation on the chunks parallely
+            const cfWorkerPromises = chunks.map(chunk => cfPool.run({ chunk, requiredParameters }));
+            const cfWorkerResults = await Promise.all(cfWorkerPromises);
+            cfPool.destroy();
 
-        let result = [];
-        for (const workerResult of cfWorkerResults) {
-            result = result.concat(workerResult);
-        }
+            for (const workerResult of cfWorkerResults) {
+                result = result.concat(workerResult);
+            }
+            
 
-        stopTrace("CalculateFields");
+            stopTrace("CalculateFields");
         // const promises = Array.isArray(data) ? data.map(calculateFields) : [calculateFields(data)];
 
         // let result = await Promise.all(promises);
-
+        }
         startTrace("apply filters");
         //3. return the filtered results if calculated filter is used
         if (hasNewMaterialsFilterValues && hasNewMaterialsFilterValues.length > 0) {
@@ -543,7 +603,7 @@ module.exports = async (srv) => {
             // after performance
             let filteredResult = [];
             for (const priceAgreement of result) {
-                if (priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]) {
+                if (priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]) {
                     filteredResult.push(priceAgreement);
                 }
             }
@@ -728,9 +788,9 @@ module.exports = async (srv) => {
             if (!deliveries) {
                 try {
                     deliveries = await tx.run(SELECT.from(Deliveries).where({ PriceAgreementId: pag.ID }));
-                    // await tx.commit();
+                    //await tx.commit();
                 } catch (e) {
-                    // await tx.rollback(e)
+                    //await tx.rollback(e)
                     console.log(e);
                 }
             }
@@ -799,17 +859,17 @@ module.exports = async (srv) => {
         return req.reply();
     });
     async function syncPriceAgreements(pas, customerPrices) {
-        const tx = cds.tx();
+        //const tx = cds.tx();
         console.log(`Start synchronisation of PriceAgreements`);
-        let SoldToInstituteType = [];
+        /*let SoldToInstituteType = [];
         let ShipToInstitute = [];
         
-        let SoldToType,ShipToType,effectiveDatearray,CombinationValue;
+        let SoldToType,ShipToType,effectiveDatearray,CombinationValue; */
         console.log(`Prepare categories of customer prices`);
-        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
+        //let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
         let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        if(customerPrices[0].CountryCode === 'ES'){
+        /*if(customerPrices[0].CountryCode === 'ES'){
             //EHQUT-CR2-New
             let instituteID = mainPriceConditions.map(item => item.InstituteId);
             let SoldToInstituteType = [];
@@ -831,7 +891,7 @@ module.exports = async (srv) => {
             }else{
                 CombinationValue = false;
             }
-        }
+        }*/
 
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1" || item.PriceCondition === "YAW2");
@@ -848,7 +908,7 @@ module.exports = async (srv) => {
 
         const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
-        if(customerPrices[0].CountryCode === 'ES'){
+        /*if(customerPrices[0].CountryCode === 'ES'){
             //CR2-New
             let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
@@ -878,9 +938,9 @@ module.exports = async (srv) => {
         {
             arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
             updateRappelConditionPromises = arrayresult[0].map(custPrice => updateRappelcustomerPrices(custPrice));
-        }else{
-            updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
-        }
+        }else{*/
+        const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
+       // }
         
         // Synchronize
         console.log(`Process requests of customer prices`);
@@ -915,7 +975,7 @@ module.exports = async (srv) => {
     };
 
 
-    //CR2-New
+   /* //CR2-New
     async function updatearray(effectiveDatearray, ShipToTypeCustomer, SoldToType, customerPrices) {
 
         const tx = cds.tx();
@@ -1030,9 +1090,9 @@ module.exports = async (srv) => {
 
 
 
-    };
+    };*/
 
-    async function updateRappelcustPrices(customerPrice,CombinationValue) {
+    async function updateRappelcustPrices(customerPrice) {
         console.log(`Prepare sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId}`);
         const tx = cds.tx();
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: customerPrice.PriceAgreementId }));
@@ -1067,7 +1127,7 @@ module.exports = async (srv) => {
         const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
 //CR2
-        const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode,CombinationValue);
+        const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = bonem;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
@@ -1123,7 +1183,7 @@ module.exports = async (srv) => {
             // throw error;//do not throw error to continue with other requests
         }
     };
-    function getES01RequestBodyTemplate(institute,priceconditionrappelcode,CombinationValue) {
+    function getES01RequestBodyTemplate(institute,priceconditionrappelcode) {
 
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
@@ -1185,7 +1245,7 @@ module.exports = async (srv) => {
         }
     };
 
-    async function updateRappelcustomerPrices(finalarray) {
+   /* async function updateRappelcustomerPrices(finalarray) {
         const tx = cds.tx();
         let body;
         
@@ -1219,7 +1279,7 @@ module.exports = async (srv) => {
 
 
 
-    };
+    };*/
     async function setStatusPriceAgreement(pas, status) {
         if (!pas || pas?.length === 0) {
             return false;
@@ -1430,7 +1490,7 @@ module.exports = async (srv) => {
                     "E1KOMG": {
                         "SEGMENT": 1,
                         "KVEWE": "A",
-                        "KOTABNR": institute.InstituteType === 'Region(s)' ? 879 : 878,
+                        "KOTABNR": institute.Comment === 'Sales Partner' ? 879 : 878,
                         "KAPPL": "V",
                         "KSCHL": "YLTP",
                         "VKORG": "ITHC",
@@ -1839,7 +1899,7 @@ module.exports = async (srv) => {
             console.log('Error', error.message);
         }
     }
-    //CR2
+ /*  //CR2
 
     function getES01RequestBodyTemplateRappel() {
 
@@ -1891,7 +1951,7 @@ module.exports = async (srv) => {
             }
         }
     };
-
+*/
 
     /**
      * Splits a given array into chunks
