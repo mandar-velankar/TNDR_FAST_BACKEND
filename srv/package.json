@@ -52,7 +52,7 @@
                 "kind": "hana",
                 "model": "gen/srv/csn.json",
                 "pool": {
-                    "max": 2800,
+                    "max": 1400,
                     "min": 100,
                     "acquireTimeoutMillis": 5000
                 }
