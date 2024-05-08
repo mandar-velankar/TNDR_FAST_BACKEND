@@ -3791,7 +3791,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		if (offer.APPROVAL_TYPE === 16) {
 			productValidation = await buildProductValidationForType16(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack, instituteTerritory);
 		}
-
+		if (offer.APPROVAL_TYPE === 17) {
+			productValidation = await buildProductValidationForType17(tx, offer, product, aApproverTypes);
+		}
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
@@ -3991,7 +3993,30 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return results;
 		
 	}
+	async function buildProductValidationForType17(tx, offer, product, aApproverTypes) {
 
+		let results = {
+			IN_POLICY: false
+		}
+
+		const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
+
+		aApproverTypes.map(async function (oApproverType) {
+			oApproverType.ApproverType === 'Chapter Head Esthablished Products BeNeLux' ||
+			oApproverType.ApproverType === 'Hospital Management Lead BeNeLux' ? oApproverType.ValidationType = 3 : oApproverType.ValidationType = 1;
+		});
+		if(ctryProductPack.BU === 'RAD'){
+			aApproverTypes.map(async function (oApproverType) {
+				if (oApproverType.ApproverType === 'Country Head Radiology BeNeLux') {
+					oApproverType.ValidationType = 3;
+				}
+			});
+			
+		}
+		results.IN_POLICY = true
+		return results;
+			
+	}
 	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
 		const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === 'Squad Lead');
 		aApproverTypes.splice(apprIndex, 1);
