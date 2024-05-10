@@ -3424,7 +3424,25 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				LotID: offerProduct.LOTID
 			}));
 
-
+			let FOCInfoText = ''
+			if (productFreeGoodsOther?.FreeGoodsOther) {
+				switch (productFreeGoodsOther.FreeGoodsOther_ABS_PCT) {
+					case 'PCT':
+						FOCInfoText = `${Math.round(productFreeGoodsOther.FreeGoodsOther * 10000) / 100}% (${productFreeGoodsOther.ADD_INCLUDE})`
+						break;
+					case 'ABS':
+						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT} (${productFreeGoodsOther.ADD_INCLUDE})`
+						break;
+					case 'STP':
+						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT} for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT} purchased (${productFreeGoodsOther.ADD_INCLUDE})`
+						break;
+					default:
+						break;
+				}
+			}else {
+				FOCInfoText = 'NA';
+			}
+			
 			return {
 				TENDER_ID: offer.TENDERID,
 				COUNTRY_CODE: offer.COUNTRYCODE,
@@ -3620,7 +3638,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
 				AlternateOfferYN: offerProduct.AlternateOfferYN,
-				FOCInfoText: offerProduct?.FOCInfoText
+				FOCInfoText: FOCInfoText
 			}
 		});
 		let resolvedResults = await Promise.all(results);
