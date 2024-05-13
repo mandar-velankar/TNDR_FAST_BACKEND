@@ -688,17 +688,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
     offerProduct.Comment,
     offerProduct.AlternateOfferYN,
-    case 
-        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther is null
-            then 'NA'
-        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'PCT'
-            then round(100 * offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther, 2) || '% (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
-        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'ABS'
-            then offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther || ' '  || offerProduct.UnitPerPack || ' (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
-        when offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_ABS_PCT = 'STP'
-            then offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther || ' '  || offerProduct.UnitPerPack || ' for each ' || offerProduct.PriceCondition.FreeGoodsOther.FreeGoodsOther_Step || ' ' || offerProduct.UnitPerPack || ' purchased (' || offerProduct.PriceCondition.FreeGoodsOther.ADD_INCLUDE || ')'
-    end as FOCInfoText:String,
-    offerProduct.Custom.Integer_1 as ItemNumber,
+    offerProduct.Custom.Integer_1 as ItemNumber
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -2545,7 +2535,7 @@ entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHisto
 } where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE
 group by ProductCode, INSTITUTE_ID;
 
-entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
+entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
             and inst.CountryCode = tender.CountryCode
@@ -2585,7 +2575,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
-            (pr.SORTER + 1) as CountProducts,
+            pr.SORTER,
             inst.InstituteName,
             inst.InstituteType,
             inst.InstituteID,
@@ -2619,7 +2609,8 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 then 'Active'
                 else 'Suspend'
             end as Status: String,
-            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
+            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice,
+            tender.Custom.String_3 as BranchInstitute
     }where offer.OfferStatusTable.STATUS = 'Results Recorded'
      and quotation.EffectiveDate <= CURRENT_DATE
      and tender.CountryCode = 'TW'
@@ -2670,7 +2661,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
-            (pr.SORTER + 1) as CountProducts,
+            pr.SORTER,
             branch.InstituteName,
             branch.InstituteType,
             branch.InstituteID,
@@ -2704,7 +2695,8 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 then 'Active'
                 else 'Suspend'
             end as Status: String,
-            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
+            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice,
+            tender.Custom.String_3 as BranchInstitute
     }
     where offer.OfferStatusTable.STATUS = 'Results Recorded'
     and quotation.EffectiveDate <= CURRENT_DATE
@@ -2712,6 +2704,53 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
     and tender.Active = 1
     and offer.Active = 1
     and pr.Results.Outcome = 'Won';
+
+    entity  ZuelligExtractView as projection on zuelligExtract{
+        TenderID,
+        createdAt,
+        OfferID,
+        CountryCode,
+        CreationDate,
+        SubmittedBy,
+        SubmittedOn,
+        UserName,   
+        ProductCode,
+        case 
+            when BranchInstitute <> ''
+                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY ProductCode) 
+            else SORTER + 1
+		end	as CountProducts: Integer,
+        InstituteName,
+        InstituteType,
+        InstituteID,
+        External_InstituteId,
+        ParentInst_External_InstituteId,
+        Class,
+        KAM_Territory,
+        CNPJ,
+        ParentInstituteID,
+        EffectiveDate,
+        PRODUCTPACKNAME,
+        PACKFACTOR,
+        SKUCode,
+        Display,
+        BU,
+        Price0,
+        Price1,
+        Price2,
+        Price3,
+        TotalDiscountNHI,
+        Level2Discount1,
+        Level2Discount2,
+        Level3Discount1,
+        GeneralDiscount_Amount,
+        SecondDiscount_Amount,
+        FreeGoods_Amount,
+        FreeGoods_Percentage,
+        AnnualDiscount_Percentage,
+        AnnualDiscountForBranch,
+        RegisteredPrice
+    };
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
         key hier.ParentInstituteID,
