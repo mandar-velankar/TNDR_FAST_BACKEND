@@ -37,7 +37,8 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.createdBy,
         ModifiedByUser.UserName as modifiedByName,
         CreatedByUser.UserName as createdByName,
-        Contracts.Tender.TenderName
+        Contracts.Tender.TenderName,
+        Contracts.Offer.IbizWorkflowID
 }group by Contracts.ID,
         Contracts.TenderID,
         Contracts.OfferID,
@@ -62,7 +63,8 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.createdBy,
         ModifiedByUser.UserName,
         CreatedByUser.UserName,
-        Contracts.Tender.TenderName;
+        Contracts.Tender.TenderName,
+        Contracts.Offer.IbizWorkflowID;
 
 entity ContractProductsView as select from BrazilContractingData.ContractProducts as ContractProducts
 left outer join BrazilContractingViews.AdhesionContractCompositionView as AdhesionContract 
