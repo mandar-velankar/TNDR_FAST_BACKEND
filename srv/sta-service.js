@@ -588,15 +588,15 @@ module.exports = async (srv) => {
 				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
 			}
 		}		
-		// validate form
-		!req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
-		!req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
-		!req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
-		!req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
-		!req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
-		!req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
-		!req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
-		!req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
+		// // validate form
+		// !req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
+		// !req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
+		// !req.data.InstituteID && req.error({ code: 404, message: "Institute Name is required.", target: "InstituteName" });
+		// !req.data.InstituteType && req.error({ code: 404, message: "Institute Type is required.", target: "InstituteType" });
+		// !req.data.TenderChannel && req.error({ code: 404, message: "Tender Channel is required.", target: "TenderChannel" });
+		// !req.data.PublicationDate && req.error({ code: 404, message: "Publication Date is required.", target: "PublicationDate" });
+		// !req.data.BidDueDate && req.error({ code: 404, message: "Offer Due Date is required.", target: "BidDueDate" });
+		// !req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
 
 		//check if dates are correct
 		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
