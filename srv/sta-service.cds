@@ -863,4 +863,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         User.UserName,
         User.UserEmail,
     }where CountryCode = 'NL' and User.Role = 'Hospital Manager';
+    
+    entity InstitutesInGroup as select from PT_TMINST as inst
+    inner join MasterData.PT_TMINSHIER as hier 
+        on hier.InstituteID = inst.InstituteID {
+        inst.CountryCode,
+        inst.InstituteType,
+        inst.InstituteName,
+	    hier.ParentInstituteID,
+	    key hier.InstituteID,
+    }where inst.CountryCode = 'NL'
 }
