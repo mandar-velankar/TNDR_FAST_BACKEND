@@ -198,7 +198,8 @@ left outer join SAP.BrazilDeliveriesItems as BrazilDeliveriesItems
         // SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveredProductQty as ActualDeliveredProductQty,  
         // SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveryDate as ActualDeliveryDate,  
         SalesOrderProducts.OfferProduct.UnitPerPack as UoM,
-        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal as Price
+        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal as Price,
+        SalesOrderProducts.SalesOrder.Status.Status as SalesOrderStatus
 }group by SalesOrderProducts.ID,
         SalesOrderProducts.SalesOrder.ID,
         SalesOrderProducts.SalesOrder.Contract.ID,
@@ -213,4 +214,5 @@ left outer join SAP.BrazilDeliveriesItems as BrazilDeliveriesItems
         SalesOrderProducts.Comment,
         SalesOrderProducts.OfferProduct.SKU.PRODUCTPACKNAME,
         SalesOrderProducts.OfferProduct.UnitPerPack,
-        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal;
+        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal,
+        SalesOrderProducts.SalesOrder.Status.Status;
