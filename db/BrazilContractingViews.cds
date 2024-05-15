@@ -37,7 +37,8 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.createdBy,
         ModifiedByUser.UserName as modifiedByName,
         CreatedByUser.UserName as createdByName,
-        Contracts.Tender.TenderName
+        Contracts.Tender.TenderName,
+        Contracts.Offer.IbizWorkflowID
 }group by Contracts.ID,
         Contracts.TenderID,
         Contracts.OfferID,
@@ -62,7 +63,8 @@ entity ContractsView as select from BrazilContractingData.Contracts as Contracts
         Contracts.createdBy,
         ModifiedByUser.UserName,
         CreatedByUser.UserName,
-        Contracts.Tender.TenderName;
+        Contracts.Tender.TenderName,
+        Contracts.Offer.IbizWorkflowID;
 
 entity ContractProductsView as select from BrazilContractingData.ContractProducts as ContractProducts
 left outer join BrazilContractingViews.AdhesionContractCompositionView as AdhesionContract 
@@ -196,7 +198,8 @@ left outer join SAP.BrazilDeliveriesItems as BrazilDeliveriesItems
         // SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveredProductQty as ActualDeliveredProductQty,  
         // SalesOrderProducts.OfferProduct.Deliveries.ActualDeliveryDate as ActualDeliveryDate,  
         SalesOrderProducts.OfferProduct.UnitPerPack as UoM,
-        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal as Price
+        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal as Price,
+        SalesOrderProducts.SalesOrder.Status.Status as SalesOrderStatus
 }group by SalesOrderProducts.ID,
         SalesOrderProducts.SalesOrder.ID,
         SalesOrderProducts.SalesOrder.Contract.ID,
@@ -211,4 +214,5 @@ left outer join SAP.BrazilDeliveriesItems as BrazilDeliveriesItems
         SalesOrderProducts.Comment,
         SalesOrderProducts.OfferProduct.SKU.PRODUCTPACKNAME,
         SalesOrderProducts.OfferProduct.UnitPerPack,
-        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal;
+        SalesOrderProducts.OfferProduct.PriceCondition.CommercialProposal,
+        SalesOrderProducts.SalesOrder.Status.Status;
