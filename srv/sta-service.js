@@ -3420,7 +3420,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }));
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-				return productCondition;
+				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID}));
+				return productCondition;		
 			}));
 			/*end of ProductCondition information */
 
@@ -3713,7 +3714,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Level3Discount1: productConditionstmp[0] && productConditionstmp[0].Level3Discount1,
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
-				AlternateOfferYN: offerProduct.AlternateOfferYN
+				AlternateOfferYN: offerProduct.AlternateOfferYN,
+				ContractDuration_1: productConditions[0].NLPriceConditions?.[0]?.ContractDuration,
+				ContractDuration_2: productConditions[0].NLPriceConditions?.[1]?.ContractDuration,
+				ContractDuration_3: productConditions[0].NLPriceConditions?.[2]?.ContractDuration,
+				OfferPrice_1: productConditions[0].NLPriceConditions?.[0]?.OfferPrice,
+				OfferPrice_2: productConditions[0].NLPriceConditions?.[1]?.OfferPrice,
+				OfferPrice_3: productConditions[0].NLPriceConditions?.[2]?.OfferPrice,
+				Discount_1: productConditions[0].NLPriceConditions?.[0]?.Discount,
+				Discount_2: productConditions[0].NLPriceConditions?.[1]?.Discount,
+				Discount_3: productConditions[0].NLPriceConditions?.[2]?.Discount
 			}
 		});
 		let resolvedResults = await Promise.all(results);
