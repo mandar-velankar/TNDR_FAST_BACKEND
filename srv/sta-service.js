@@ -532,6 +532,7 @@ module.exports = async (srv) => {
 		
 		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+		const instituteTerritory = await SELECT.from(InstituteTerritory);
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
@@ -541,14 +542,20 @@ module.exports = async (srv) => {
 		const resultsArray = Array.isArray(result) ? result : [result];
 	  
 		const territoryMatches = resultsArray.filter(item => {
+			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
+			
 			return userTerritories.some(userTerritory => {
-			  return item.Territory === userTerritory.Territory;
+				const territoryIndex = filteredInstituteTerritory.findIndex(el => el.Territory === userTerritory.Territory);
+			  	return territoryIndex !== -1;
 			});
 		  });
 		  
 		const finalFilteredResults = territoryMatches.filter(item => {
+			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
+			
 			return userTerritories.some(userTerritory => {
-			return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+				const territoryIndex = filteredInstituteTerritory.findIndex(el => el.Territory === userTerritory.Territory && el.IsKAM === userTerritory.IsKAM);
+			  	return territoryIndex !== -1;
 			});
 		});
 			
@@ -3457,7 +3464,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }));
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-				return productCondition;
+				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID}));
+				return productCondition;		
 			}));
 			/*end of ProductCondition information */
 
@@ -3757,7 +3765,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
 				AlternateOfferYN: offerProduct.AlternateOfferYN,
-				FOCInfoText: awardProductFormView?.FOC
+				FOCInfoText: awardProductFormView?.FOC,
+				ContractDuration_1: productConditions[0].NLPriceConditions?.[0]?.ContractDuration,
+				ContractDuration_2: productConditions[0].NLPriceConditions?.[1]?.ContractDuration,
+				ContractDuration_3: productConditions[0].NLPriceConditions?.[2]?.ContractDuration,
+				OfferPrice_1: productConditions[0].NLPriceConditions?.[0]?.OfferPrice,
+				OfferPrice_2: productConditions[0].NLPriceConditions?.[1]?.OfferPrice,
+				OfferPrice_3: productConditions[0].NLPriceConditions?.[2]?.OfferPrice,
+				Discount_1: productConditions[0].NLPriceConditions?.[0]?.Discount,
+				Discount_2: productConditions[0].NLPriceConditions?.[1]?.Discount,
+				Discount_3: productConditions[0].NLPriceConditions?.[2]?.Discount
 			}
 		});
 		let resolvedResults = await Promise.all(results);
