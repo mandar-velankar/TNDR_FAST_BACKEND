@@ -531,6 +531,7 @@ module.exports = async (srv) => {
 		
 		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+		const instituteTerritory = await SELECT.from(InstituteTerritory);
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
@@ -540,14 +541,20 @@ module.exports = async (srv) => {
 		const resultsArray = Array.isArray(result) ? result : [result];
 	  
 		const territoryMatches = resultsArray.filter(item => {
+			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
+			
 			return userTerritories.some(userTerritory => {
-			  return item.Territory === userTerritory.Territory;
+				const territoryIndex = filteredInstituteTerritory.findIndex(el => el.Territory === userTerritory.Territory);
+			  	return territoryIndex !== -1;
 			});
 		  });
 		  
 		const finalFilteredResults = territoryMatches.filter(item => {
+			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
+			
 			return userTerritories.some(userTerritory => {
-			return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+				const territoryIndex = filteredInstituteTerritory.findIndex(el => el.Territory === userTerritory.Territory && el.IsKAM === userTerritory.IsKAM);
+			  	return territoryIndex !== -1;
 			});
 		});
 			

@@ -116,8 +116,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
-        tender.Institute.InstituteTerritory.Territory,
-        tender.Institute.InstituteTerritory.IsKAM,
         key tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         case 
@@ -145,8 +143,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
-        tender.Institute.InstituteTerritory.Territory,
-        tender.Institute.InstituteTerritory.IsKAM,
         tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,     
