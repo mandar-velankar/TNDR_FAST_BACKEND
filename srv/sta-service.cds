@@ -133,7 +133,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedAt, 
         CreatedByUser.UserName as createdByName,
         ModifyedByUser.UserName as modifiedByName,
-        tender.Country.Region
+        tender.Country.Region,
+        tender.Custom.Integer_1 as Custom_Integer_1,
+        tender.Custom.Integer_2 as Custom_Integer_2,
+        tender.Custom.Integer_3 as Custom_Integer_3
     }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -155,7 +158,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedAt,
         CreatedByUser.UserName,
         ModifyedByUser.UserName,
-        tender.Country.Region;
+        tender.Country.Region,
+        tender.Custom.Integer_1,
+        tender.Custom.Integer_2,
+        tender.Custom.Integer_3;
 
     @cds.redirection.target
     entity InstitutesView as select from MasterData.PT_TMINST as inst
