@@ -22,6 +22,7 @@ const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
+const XLSX = require("xlsx");
 
 module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
@@ -138,7 +139,8 @@ module.exports = async (srv) => {
 	const {
 		InstitutesView,
 		InstituteInBranchView,
-		TenderMasterView
+		TenderMasterView,
+		ZagisUploadFile
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -574,27 +576,27 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'TenderFormView', async (req) => {
 		try{
-		const today = new Date().toISOString().slice(0, 10);
+		// const today = new Date().toISOString().slice(0, 10);
 
-		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
+		// const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
 
-		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		// const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
-		for (const item of mandatoryFielddata) {
-			let frontendField = item.Field;
-			if (frontendField.includes("path")) {
-				const match = regex.exec(frontendField);
-				frontendField = match ? match[1] : frontendField;
-			}
+		// for (const item of mandatoryFielddata) {
+		// 	let frontendField = item.Field;
+		// 	if (frontendField.includes("path")) {
+		// 		const match = regex.exec(frontendField);
+		// 		frontendField = match ? match[1] : frontendField;
+		// 	}
 		
-			if (
-				!(frontendField in req.data) ||
-				req.data[frontendField] === null ||
-				req.data[frontendField] === ''
-			) {
-				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
-			}
-		}		
+		// 	if (
+		// 		!(frontendField in req.data) ||
+		// 		req.data[frontendField] === null ||
+		// 		req.data[frontendField] === ''
+		// 	) {
+		// 		req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+		// 	}
+		// }		
 		// // validate form
 		// !req.data.TenderName && req.error({ code: 404, message: "Tender Reference is required.", target: "TenderName" });
 		// !req.data.Classification && req.error({ code: 404, message: "Classification is required.", target: "Classification" });
@@ -638,31 +640,31 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
 		try{
-		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Offer', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
-		const fieldMapping = {
-			'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
-		};
-		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		// const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Offer', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		// const fieldMapping = {
+		// 	'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
+		// };
+		// const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
-		for (const item of mandatoryFielddata) {
-			let frontendField = item.Field;
-			if (frontendField.includes("path")) {
-				const match = regex.exec(frontendField);
-				frontendField = match ? match[1] : frontendField;
-			}
-			// Check if there's a mapping, and if so, replace it
-			if (fieldMapping[frontendField]) {
-				frontendField = fieldMapping[frontendField];
-			}
+		// for (const item of mandatoryFielddata) {
+		// 	let frontendField = item.Field;
+		// 	if (frontendField.includes("path")) {
+		// 		const match = regex.exec(frontendField);
+		// 		frontendField = match ? match[1] : frontendField;
+		// 	}
+		// 	// Check if there's a mapping, and if so, replace it
+		// 	if (fieldMapping[frontendField]) {
+		// 		frontendField = fieldMapping[frontendField];
+		// 	}
 		
-			if (
-				!(frontendField in req.data) ||
-				req.data[frontendField] === null ||
-				req.data[frontendField] === ''
-			) {
-				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
-			}
-		}	
+		// 	if (
+		// 		!(frontendField in req.data) ||
+		// 		req.data[frontendField] === null ||
+		// 		req.data[frontendField] === ''
+		// 	) {
+		// 		req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+		// 	}
+		// }	
 		// validate form
 		// !req.data.DistributorID &&  req.error({ code: 404, message: "DistributorName is required.", target: "DistributorID" });
 		// !req.data.SellingCompany && req.error({ code: 404, message: "SellingCompany is required.", target: "SellingCompany" });
@@ -1067,24 +1069,24 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsDetailView', async (req) => {
 		try{
-		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'OfferProduct', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.Line}));
-		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		// const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'OfferProduct', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.Line}));
+		// const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
-		for (const item of mandatoryFielddata) {
-			let frontendField = item.Field;
-			if (frontendField.includes("path")) {
-				const match = regex.exec(frontendField);
-				frontendField = match ? match[1] : frontendField;
-			}
+		// for (const item of mandatoryFielddata) {
+		// 	let frontendField = item.Field;
+		// 	if (frontendField.includes("path")) {
+		// 		const match = regex.exec(frontendField);
+		// 		frontendField = match ? match[1] : frontendField;
+		// 	}
 		
-			if (
-				!(frontendField in req.data) ||
-				req.data[frontendField] === null ||
-				req.data[frontendField] === ''
-			) {
-				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
-			}
-		}	
+		// 	if (
+		// 		!(frontendField in req.data) ||
+		// 		req.data[frontendField] === null ||
+		// 		req.data[frontendField] === ''
+		// 	) {
+		// 		req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+		// 	}
+		// }	
 		await updateApprovalsSent(req.data.OfferID);
 		// validate form
 		// !req.data.RequestedVolume &&  req.error({ code: 404, message: "RequestedVolume is required.", target: "RequestedVolume" });
@@ -4891,4 +4893,78 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
 		
 	});
+
+	srv.after("UPDATE", "ZagisUploadFile", async (req, res) => {
+		try {
+			const {OfferID} = req;
+			const offer = await SELECT.one.from(PT_TMOFRS).where({CountryCode: 'NL', OfferID: OfferID});
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: 'NL', OfferID: OfferID});
+			const zagisFile = await SELECT.one.from(ZagisUploadFile).where({"OfferID": OfferID});
+			/**
+			 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
+			 */
+			const arrayBuffer = bufferToArrayBuffer(zagisFile.content);
+			const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+			// Assuming the Excel file has only one sheet, you can get the data from it
+			const sheetName = workbook.SheetNames[0];
+			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+			products.shift();
+			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+			const promises = products.map(product => {
+				return upsertOfferProduct(res.req, product, offer, offerProducts, sorter);
+			});
+
+			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
+			await Promise.all(promises);
+			return req;
+		} catch (error) {
+			console.error('Error in ZagisUploadFile');
+		}
+	});
+
+	async function upsertOfferProduct (req, product, offer, offerProducts, sorter) {
+		const productIndex = offerProducts.findIndex(pr => pr.ProductCode === product["ZI-Nr."]);
+		const mappedProduct = {
+			TenderID: offer.TenderID,
+			OfferID: offer.OfferID,
+			CountryCode: offer.CountryCode,
+			SubmittedOn: new Date().toISOString(),
+			SubmittedBy: req.user.id,
+			Active: 1,
+			ProductCode: product["ZI-Nr."],
+			RequestedVolume: product["Aantal stuks in verpakking"],
+			UnitPerPack: "Pack",
+			DistributorID: offer.DistributorID,
+			ActiveProduct: 1,
+			SORTER: sorter,
+			SUPPLY_UPDATE: 0,
+			PAYMENT_UPDATE: 0,
+			Line: "1",
+			LotID: 1,
+		}
+	
+		if (productIndex > -1) {
+			// deleting SORTER to avoid incrementing already created products SORTER
+			delete mappedProduct.SORTER;
+			return await UPDATE(PT_TMOFPR).with(mappedProduct).where({
+				OfferID: offer.OfferID,
+				ProductCode: product["ZI-Nr."]
+			})
+		}else {
+			const promise = await INSERT(mappedProduct).into(PT_TMOFPR);
+			sorter+=1;
+			return promise;
+		}
+	}
+
+	function bufferToArrayBuffer(buffer) {
+		const arrayBuffer = new ArrayBuffer(buffer.length);
+		const view = new Uint8Array(arrayBuffer);
+		for (let i = 0; i < buffer.length; ++i) {
+		  view[i] = buffer[i];
+		}
+		return arrayBuffer;
+	}
 }
