@@ -857,5 +857,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inst.InstituteName,
 	    hier.ParentInstituteID,
 	    key hier.InstituteID,
-    }where inst.CountryCode = 'NL'
+    }where inst.CountryCode = 'NL';
+
+    entity ZagisUploadFile {
+        key OfferID   : String(50) default '';
+        @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        content    : LargeBinary;
+    }
 }
