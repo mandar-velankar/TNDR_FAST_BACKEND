@@ -2753,7 +2753,8 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         FreeGoods_Percentage,
         AnnualDiscount_Percentage,
         AnnualDiscountForBranch,
-        RegisteredPrice
+        RegisteredPrice,
+        Status
     };
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {

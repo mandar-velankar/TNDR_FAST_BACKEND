@@ -2879,6 +2879,8 @@ module.exports = (srv) => {
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
 		offerValidation.PeriodOfBankGauranteeStart = offerValidation.COUNTRYCODE === 'TH' ? offerValidation.PeriodOfBankGauranteeStart && ServiceHelper.formatDate(offerValidation.PeriodOfBankGauranteeStart, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.PeriodOfBankGauranteeStart;
 		offerValidation.PeriodOfBankGauranteeEnd = offerValidation.COUNTRYCODE === 'TH' ? offerValidation.PeriodOfBankGauranteeEnd && ServiceHelper.formatDate(offerValidation.PeriodOfBankGauranteeEnd, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.PeriodOfBankGauranteeEnd;
+		offerValidation.OFFERDATE = offerValidation.COUNTRYCODE === 'TH' ? offerValidation.OFFERDATE && ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERDATE;
+		offerValidation.OFFERVALIDITY = offerValidation.COUNTRYCODE === 'TH' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : offerValidation.OFFERVALIDITY;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
