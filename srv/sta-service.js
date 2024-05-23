@@ -22,6 +22,7 @@ const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
+const XLSX = require("xlsx");
 
 module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
@@ -139,7 +140,8 @@ module.exports = async (srv) => {
 		InstitutesView,
 		InstituteInBranchView,
 		TenderMasterView,
-		AwardedProductFormView
+		AwardedProductFormView,
+		ZagisUploadFile
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -4931,4 +4933,80 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         while (num.length < size) num = "0" + num;
         return num;
     };
+
+	srv.after("UPDATE", "ZagisUploadFile", async (req, res) => {
+		try {
+			const {OfferID} = req;
+			const offer = await SELECT.one.from(PT_TMOFRS).where({CountryCode: 'NL', OfferID: OfferID});
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: 'NL', OfferID: OfferID});
+			const zagisFile = await SELECT.one.from(ZagisUploadFile).where({"OfferID": OfferID});
+			/**
+			 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
+			 */
+			const arrayBuffer = bufferToArrayBuffer(zagisFile.content);
+			const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+			// Assuming the Excel file has only one sheet, you can get the data from it
+			const sheetName = workbook.SheetNames[0];
+			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+			products.shift();
+			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+			const promises = products.map(product => {
+				const productIndex = offerProducts.findIndex(pr => pr.ProductCode === product["ZI-Nr."]);
+				const promise = upsertOfferProduct(res.req, product, offer, productIndex, sorter);
+				if (productIndex === -1) {
+					sorter++; // Increment sorter only for new products
+				}
+				return promise;
+			});
+
+			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
+			await Promise.all(promises);
+			return req;
+		} catch (error) {
+			console.error('Error in ZagisUploadFile');
+		}
+	});
+
+	async function upsertOfferProduct (req, product, offer, productIndex, sorter) {	
+		const mappedProduct = {
+			TenderID: offer.TenderID,
+			OfferID: offer.OfferID,
+			CountryCode: offer.CountryCode,
+			SubmittedOn: new Date().toISOString(),
+			SubmittedBy: req.user.id,
+			Active: 1,
+			ProductCode: product["ZI-Nr."],
+			RequestedVolume: product["Aantal stuks in verpakking"],
+			UnitPerPack: "Pack",
+			DistributorID: offer.DistributorID,
+			ActiveProduct: 1,
+			SORTER: sorter,
+			SUPPLY_UPDATE: 0,
+			PAYMENT_UPDATE: 0,
+			Line: "1",
+			LotID: 1,
+		}
+	
+		if (productIndex > -1) {
+			// deleting SORTER to avoid incrementing already created products SORTER
+			delete mappedProduct.SORTER;
+			return await UPDATE(PT_TMOFPR).with(mappedProduct).where({
+				OfferID: offer.OfferID,
+				ProductCode: product["ZI-Nr."]
+			})
+		}else {
+			return await INSERT(mappedProduct).into(PT_TMOFPR);
+		}
+	}
+
+	function bufferToArrayBuffer(buffer) {
+		const arrayBuffer = new ArrayBuffer(buffer.length);
+		const view = new Uint8Array(arrayBuffer);
+		for (let i = 0; i < buffer.length; ++i) {
+		  view[i] = buffer[i];
+		}
+		return arrayBuffer;
+	}
 }
