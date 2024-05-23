@@ -67,7 +67,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity ProductScopeView as projection on UITemplateSrv.ProductScopeView;
     @readonly
     entity MandatoryFieldsView as projection on UITemplateSrv.MandatoryFieldsView;
-
+    @readonly 
+    entity BrandsInTender  as projection on TransactionalDataViews.BrandsInTender;
     @cds.redirection.target
     entity TenderFormView as projection on TransactionalData.PT_TMTEND {
         *,
