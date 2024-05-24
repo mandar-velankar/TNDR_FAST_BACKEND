@@ -2005,11 +2005,15 @@ module.exports = async (srv) => {
 			const fnCalculateFields = async item => {
 				if(item.ConditionType === 'Discount'){
 					item.OfferPrice = item.BasePrice * (1 - item.Discount);
+					item.OfferPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.OfferPrice,4) : roundToDecimalPlaces(item.OfferPrice,2);
 					item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+					item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
 				}
 				else{
 					item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+					item.Discount = (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : roundToDecimalPlaces(item.Discount,2);
 					item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+					item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
 				}
 			};
 			if(Array.isArray(items)){
@@ -2037,8 +2041,11 @@ module.exports = async (srv) => {
 
 			async function fnCalculateFields(item){
 				item.NetOfferPrice = await calculateNetOfferPrice(item);
+				item.NetOfferPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : roundToDecimalPlaces(item.NetOfferPrice,2);
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.Discount = item.Region === 'MEA' ? roundToDecimalPlaces(item.Discount,3) : (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : roundToDecimalPlaces(item.Discount,2);
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+				item.NetPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
 			};
 		}
 		catch(error){
@@ -2061,7 +2068,9 @@ module.exports = async (srv) => {
 
 			async function fnCalculateFields(item){
 				item.NetOfferPrice = await calculateNetOfferPrice(item);
+				item.NetOfferPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : roundToDecimalPlaces(item.NetOfferPrice,2);
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+				item.NetPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
 			};
 		}
 		catch(error){
@@ -4708,4 +4717,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         while (num.length < size) num = "0" + num;
         return num;
     };
+
+	function roundToDecimalPlaces(number, decimalPlaces) {
+		const factor = Math.pow(10, decimalPlaces);
+		return Math.round(number * factor) / factor;
+	};
 }
