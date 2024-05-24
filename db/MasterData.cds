@@ -780,6 +780,7 @@ entity MasterPrices: cuid, managed {
 	ValidTo: Timestamp;  
     TaxES: Double;
     TaxE1: Double;
+	TaxE2: Double;
 
 }
 

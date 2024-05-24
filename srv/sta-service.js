@@ -486,57 +486,27 @@ module.exports = async (srv) => {
         }
 	});
 
-	srv.on('READ', 'TenderMasterView', async (req, next) => {
+	srv.after('READ', 'TenderMasterView', async (req, res, next) => {
 		try{
 		//const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
-		const tx = cds.tx(req);
 		
-		let result = [];
-        let tmvQuery = SELECT.from(req.query.SELECT.from);
-		let offerIDfullWhere = [];
-		const brandID = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "BrandID");
-		const countryCode = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "CountryCode");
-		
-		// Building full where for BrandID to include all BrandIDs of the Offers
-		if (brandID) {
-			const brandsInTender = await SELECT.from(BrandsInTender).where({'CountryCode': countryCode, 'BRANDID': brandID});
-			const tenderBrandOfferIds = brandsInTender.map(el => el.OFFERID);
-
-			tenderBrandOfferIds.forEach((el, index) => {
-				offerIDfullWhere.push(ServiceHelper.buildFullWhere("OfferID", "=", el));
-				if (index !== tenderBrandOfferIds.length-1) {
-					offerIDfullWhere.push('or');
-				}
-			});
-			offerIDfullWhere = offerIDfullWhere.flat();
-			ServiceHelper.deleteFilter(req, "BrandID");
-		}
-
-        if (req.query.SELECT.columns?.[0]?.func !== "count") {
-            tmvQuery.columns(req.query.SELECT.columns);
-        }
-        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(offerIDfullWhere));
-        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
-
-        result = await tx.run(tmvQuery);
-
-    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+    	const isCountQuery = Array.isArray(req) && req.some(item => '$count' in item);
     
 		if (isCountQuery) {
 		// If $count is present, return the original result
-		return result;
+		return req;
 		}
-		
-		const cwid = req.user.id;
+
+		const cwid = res.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return result;
+		  return req;
 		}
 
-		const resultsArray = Array.isArray(result) ? result : [result];
+		const resultsArray = Array.isArray(req) ? req : [req];
 	  
 		const territoryMatches = resultsArray.filter(item => {
 			return userTerritories.some(userTerritory => {
@@ -552,15 +522,17 @@ module.exports = async (srv) => {
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
-			return finalFilteredResults;
+			req = finalFilteredResults
+			return req;
 		}else{
 			// If no territory matches, return an empty array
-			return territoryMatches;
+			req = territoryMatches
+			return req;
 		}
 		}
 		catch(error){
             console.error('Error in TenderMasterView READ');
-            return req.reject(403, error?.message||"Error in TenderMasterView");
+            return res.reject(403, error?.message||"Error in TenderMasterView");
         }
 	  });
 
@@ -4499,7 +4471,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			"HandlingCharge_Amount": 0,
 			"HandlingCharge_Amount2": 0,
 			"CashDiscount_Amount": 0,
-			"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+			"SecondDiscount_Amount": item.SecondDiscount_Amount.toFixed(4),
 			"AnnualDiscount_Pack": (item.Level3Discount1 * 100).toFixed(4),
 			"FGBuy": 0,
 			"FGGift": 0,

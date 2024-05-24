@@ -1350,6 +1350,8 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
                 case
                     when institute.ApplicableTaxRate = 'E1'
                         then masterPrices.TaxE1
+                    when institute.ApplicableTaxRate = 'E2'
+                        then masterPrices.TaxE2
                     else 
                         masterPrices.TaxES
                 end
@@ -2749,7 +2751,8 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         FreeGoods_Percentage,
         AnnualDiscount_Percentage,
         AnnualDiscountForBranch,
-        RegisteredPrice
+        RegisteredPrice,
+        Status
     };
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
