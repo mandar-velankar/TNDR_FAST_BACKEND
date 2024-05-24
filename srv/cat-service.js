@@ -1281,7 +1281,7 @@ module.exports = (srv) => {
 		let preApprovedAccountOfferPrice = product.ACCOUNT_OFFER_PRICE;
 		let preApprovedAccountNetOfferPrice = product.ACCOUNT_NET_OFFER_PRICE;
 
-		const FOCValue = calculateFOCVolume(product) * product.OFFER_PRICE;
+		const FOCValue = calculateFOCVolume(product) * product.REGISTERED_PRICE;
 
 		let requiredApprovalLevel = 0;//0: No business approval required; 1:NSM/SM/FM; 2: HBU; 3: CDH; 4: Approval not allowed
 		if (//This means it's first offer for account or offer price is new lowest for account
