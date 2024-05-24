@@ -2263,7 +2263,7 @@ module.exports = (srv) => {
             BayerRepresentativePhoneNumber: tender.Custom_Integer_2,
             PeriodOfBankGauranteeStart: tender.Custom_Date_1,
             PeriodOfBankGauranteeEnd: tender.Custom_Date_2,
-            BGValueBaht: tender.Custom_Date_3,
+            BGValueBaht: tender.Custom_Double_1,
 			TenderAnnouncementReference: selectedOffer?.Custom_String_1
 		};
 		return results;
