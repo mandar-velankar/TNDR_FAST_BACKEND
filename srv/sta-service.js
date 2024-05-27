@@ -488,57 +488,27 @@ module.exports = async (srv) => {
         }
 	});
 
-	srv.on('READ', 'TenderMasterView', async (req, next) => {
+	srv.after('READ', 'TenderMasterView', async (req, res, next) => {
 		try{
 		//const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
-		const tx = cds.tx(req);
 		
-		let result = [];
-        let tmvQuery = SELECT.from(req.query.SELECT.from);
-		let offerIDfullWhere = [];
-		const brandID = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "BrandID");
-		const countryCode = req.query.SELECT.where && ServiceHelper.getWhereValue(req, "CountryCode");
-		
-		// Building full where for BrandID to include all BrandIDs of the Offers
-		if (brandID) {
-			const brandsInTender = await SELECT.from(BrandsInTender).where({'CountryCode': countryCode, 'BRANDID': brandID});
-			const tenderBrandOfferIds = brandsInTender.map(el => el.OFFERID);
-
-			tenderBrandOfferIds.forEach((el, index) => {
-				offerIDfullWhere.push(ServiceHelper.buildFullWhere("OfferID", "=", el));
-				if (index !== tenderBrandOfferIds.length-1) {
-					offerIDfullWhere.push('or');
-				}
-			});
-			offerIDfullWhere = offerIDfullWhere.flat();
-			ServiceHelper.deleteFilter(req, "BrandID");
-		}
-
-        if (req.query.SELECT.columns?.[0]?.func !== "count") {
-            tmvQuery.columns(req.query.SELECT.columns);
-        }
-        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(offerIDfullWhere));
-        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
-
-        result = await tx.run(tmvQuery);
-
-    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+    	const isCountQuery = Array.isArray(req) && req.some(item => '$count' in item);
     
 		if (isCountQuery) {
 		// If $count is present, return the original result
-		return result;
+		return req;
 		}
-		
-		const cwid = req.user.id;
+
+		const cwid = res.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return result;
+		  return req;
 		}
 
-		const resultsArray = Array.isArray(result) ? result : [result];
+		const resultsArray = Array.isArray(req) ? req : [req];
 	  
 		const territoryMatches = resultsArray.filter(item => {
 			return userTerritories.some(userTerritory => {
@@ -554,15 +524,17 @@ module.exports = async (srv) => {
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
-			return finalFilteredResults;
+			req = finalFilteredResults
+			return req;
 		}else{
 			// If no territory matches, return an empty array
-			return territoryMatches;
+			req = territoryMatches
+			return req;
 		}
 		}
 		catch(error){
             console.error('Error in TenderMasterView READ');
-            return req.reject(403, error?.message||"Error in TenderMasterView");
+            return res.reject(403, error?.message||"Error in TenderMasterView");
         }
 	  });
 
@@ -2145,11 +2117,15 @@ module.exports = async (srv) => {
 			const fnCalculateFields = async item => {
 				if(item.ConditionType === 'Discount'){
 					item.OfferPrice = item.BasePrice * (1 - item.Discount);
+					item.OfferPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.OfferPrice,4) : roundToDecimalPlaces(item.OfferPrice,2);
 					item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+					item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
 				}
 				else{
 					item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+					item.Discount = (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : roundToDecimalPlaces(item.Discount,2);
 					item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+					item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
 				}
 			};
 			if(Array.isArray(items)){
@@ -2177,8 +2153,11 @@ module.exports = async (srv) => {
 
 			async function fnCalculateFields(item){
 				item.NetOfferPrice = await calculateNetOfferPrice(item);
+				item.NetOfferPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : roundToDecimalPlaces(item.NetOfferPrice,2);
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+				item.Discount = item.Region === 'MEA' ? roundToDecimalPlaces(item.Discount,3) : (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : roundToDecimalPlaces(item.Discount,2);
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+				item.NetPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
 			};
 		}
 		catch(error){
@@ -2201,7 +2180,9 @@ module.exports = async (srv) => {
 
 			async function fnCalculateFields(item){
 				item.NetOfferPrice = await calculateNetOfferPrice(item);
+				item.NetOfferPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : roundToDecimalPlaces(item.NetOfferPrice,2);
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
+				item.NetPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
 			};
 		}
 		catch(error){
@@ -4949,4 +4930,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         while (num.length < size) num = "0" + num;
         return num;
     };
+
+	function roundToDecimalPlaces(number, decimalPlaces) {
+		const factor = Math.pow(10, decimalPlaces);
+		return Math.round(number * factor) / factor;
+	};
 }

@@ -1350,6 +1350,8 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
                 case
                     when institute.ApplicableTaxRate = 'E1'
                         then masterPrices.TaxE1
+                    when institute.ApplicableTaxRate = 'E2'
+                        then masterPrices.TaxE2
                     else 
                         masterPrices.TaxES
                 end
