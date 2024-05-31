@@ -1281,7 +1281,7 @@ module.exports = (srv) => {
 		let preApprovedAccountOfferPrice = product.ACCOUNT_OFFER_PRICE;
 		let preApprovedAccountNetOfferPrice = product.ACCOUNT_NET_OFFER_PRICE;
 
-		const FOCValue = calculateFOCVolume(product) * product.OFFER_PRICE;
+		const FOCValue = calculateFOCVolume(product) * product.REGISTERED_PRICE;
 
 		let requiredApprovalLevel = 0;//0: No business approval required; 1:NSM/SM/FM; 2: HBU; 3: CDH; 4: Approval not allowed
 		if (//This means it's first offer for account or offer price is new lowest for account
@@ -1320,11 +1320,11 @@ module.exports = (srv) => {
 			};
 		}
 
-		if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 300000)) {
+		if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 30000)) {
 			requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
-		}else if (ServiceHelper.isDoubleXBelowY(300000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 1500000)) {
+		}else if (ServiceHelper.isDoubleXBelowY(30000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 200000)) {
 			requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
-		}else if (ServiceHelper.isDoubleXBelowY(1500000, FOCValue)) {
+		}else if (ServiceHelper.isDoubleXBelowY(200000, FOCValue)) {
 			requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
 		}else {
 			requiredApprovalLevel = 4;
@@ -2263,7 +2263,7 @@ module.exports = (srv) => {
             BayerRepresentativePhoneNumber: tender.Custom_Integer_2,
             PeriodOfBankGauranteeStart: tender.Custom_Date_1,
             PeriodOfBankGauranteeEnd: tender.Custom_Date_2,
-            BGValueBaht: tender.Custom_Date_3,
+            BGValueBaht: tender.Custom_Double_1,
 			TenderAnnouncementReference: selectedOffer?.Custom_String_1
 		};
 		return results;
