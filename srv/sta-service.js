@@ -4940,6 +4940,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const offer = await SELECT.one.from(PT_TMOFRS).where({CountryCode: 'NL', OfferID: OfferID});
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: 'NL', OfferID: OfferID});
 			const zagisFile = await SELECT.one.from(ZagisUploadFile).where({"OfferID": OfferID});
+			const ctryProductPack = await SELECT.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": 'NL'});
 			/**
 			 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
 			 */
@@ -4953,8 +4954,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
 			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
 			const promises = products.map(product => {
-				const productIndex = offerProducts.findIndex(pr => pr.ProductCode === product["ZI-Nr."]);
-				const promise = upsertOfferProduct(res.req, product, offer, productIndex, sorter);
+				const productPack = ctryProductPack.find(pck => pck.GOV_CODE == product["ZI-Nr."]);
+				const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
+				const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
 				if (productIndex === -1) {
 					sorter++; // Increment sorter only for new products
 				}
@@ -4969,7 +4971,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 	});
 
-	async function upsertOfferProduct (req, product, offer, productIndex, sorter) {	
+	async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
 		const mappedProduct = {
 			TenderID: offer.TenderID,
 			OfferID: offer.OfferID,
@@ -4977,7 +4979,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			SubmittedOn: new Date().toISOString(),
 			SubmittedBy: req.user.id,
 			Active: 1,
-			ProductCode: product["ZI-Nr."],
+			ProductCode: productPack.PRODUCTPACKID,
 			RequestedVolume: product["Aantal stuks in verpakking"],
 			UnitPerPack: "Pack",
 			DistributorID: offer.DistributorID,
@@ -4987,6 +4989,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			PAYMENT_UPDATE: 0,
 			Line: "1",
 			LotID: 1,
+			SampleQuantity: 0,
+			NoofLots: 0,
+			IntervalBetweenShipments: 0,
+			NoOfTier: 0,
+			DEFAULT_COMMISSION_RATE: 0,
+			MinInvoiceAmount: 0,
 		}
 	
 		if (productIndex > -1) {
@@ -4994,7 +5002,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			delete mappedProduct.SORTER;
 			return await UPDATE(PT_TMOFPR).with(mappedProduct).where({
 				OfferID: offer.OfferID,
-				ProductCode: product["ZI-Nr."]
+				ProductCode: productPack.PRODUCTPACKID
 			})
 		}else {
 			return await INSERT(mappedProduct).into(PT_TMOFPR);
