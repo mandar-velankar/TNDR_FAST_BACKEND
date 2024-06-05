@@ -3499,7 +3499,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
 				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
 				GROSS_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales),
-				NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
+				NET_SALES_OFFER_CURRENCY: offer.Region === 'MEA' ? productInfo.CommnonProductInfo.GrossSales * (1 - productConditions[0].Level3Discount1) : productInfo.CommnonProductInfo.NetSales,
 				NET_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetSales),
 				NET_OFFER_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetOfferSales,
 				NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetOfferSales),
