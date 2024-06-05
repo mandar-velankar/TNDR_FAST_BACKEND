@@ -22,6 +22,7 @@ const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
+const XLSX = require("xlsx");
 
 module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
@@ -139,7 +140,8 @@ module.exports = async (srv) => {
 		InstitutesView,
 		InstituteInBranchView,
 		TenderMasterView,
-		AwardedProductFormView
+		AwardedProductFormView,
+		ZagisUploadFile
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -502,6 +504,7 @@ module.exports = async (srv) => {
 
 		const cwid = res.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+		const instituteTerritory = await SELECT.from(InstituteTerritory);
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
@@ -511,14 +514,20 @@ module.exports = async (srv) => {
 		const resultsArray = Array.isArray(req) ? req : [req];
 	  
 		const territoryMatches = resultsArray.filter(item => {
+			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
+			
 			return userTerritories.some(userTerritory => {
-			  return item.Territory === userTerritory.Territory;
+				const territoryIndex = filteredInstituteTerritory.findIndex(el => el.Territory === userTerritory.Territory);
+			  	return territoryIndex !== -1;
 			});
 		  });
 		  
 		const finalFilteredResults = territoryMatches.filter(item => {
+			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
+			
 			return userTerritories.some(userTerritory => {
-			return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+				const territoryIndex = filteredInstituteTerritory.findIndex(el => el.Territory === userTerritory.Territory && el.IsKAM === userTerritory.IsKAM);
+			  	return territoryIndex !== -1;
 			});
 		});
 			
@@ -3447,7 +3456,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }));
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-				return productCondition;
+				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID}));
+				return productCondition;		
 			}));
 			/*end of ProductCondition information */
 
@@ -3765,7 +3775,17 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
 				AlternateOfferYN: offerProduct.AlternateOfferYN,
-				FOCInfoText: FOCInfoText
+				FOCInfoText: FOCInfoText,
+				FOCInfoText: awardProductFormView?.FOC,
+				ContractDuration_1: productConditions[0].NLPriceConditions?.[0]?.ContractDuration,
+				ContractDuration_2: productConditions[0].NLPriceConditions?.[1]?.ContractDuration,
+				ContractDuration_3: productConditions[0].NLPriceConditions?.[2]?.ContractDuration,
+				OfferPrice_1: productConditions[0].NLPriceConditions?.[0]?.OfferPrice,
+				OfferPrice_2: productConditions[0].NLPriceConditions?.[1]?.OfferPrice,
+				OfferPrice_3: productConditions[0].NLPriceConditions?.[2]?.OfferPrice,
+				Discount_1: productConditions[0].NLPriceConditions?.[0]?.Discount,
+				Discount_2: productConditions[0].NLPriceConditions?.[1]?.Discount,
+				Discount_3: productConditions[0].NLPriceConditions?.[2]?.Discount
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -4935,4 +4955,87 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const factor = Math.pow(10, decimalPlaces);
 		return Math.round(number * factor) / factor;
 	};
+	srv.after("UPDATE", "ZagisUploadFile", async (req, res) => {
+		try {
+			const {OfferID} = req;
+			const offer = await SELECT.one.from(PT_TMOFRS).where({CountryCode: 'NL', OfferID: OfferID});
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: 'NL', OfferID: OfferID});
+			const zagisFile = await SELECT.one.from(ZagisUploadFile).where({"OfferID": OfferID});
+			const ctryProductPack = await SELECT.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": 'NL'});
+			/**
+			 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
+			 */
+			const arrayBuffer = bufferToArrayBuffer(zagisFile.content);
+			const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+			// Assuming the Excel file has only one sheet, you can get the data from it
+			const sheetName = workbook.SheetNames[0];
+			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+			products.shift();
+			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+			const promises = products.map(product => {
+				const productPack = ctryProductPack.find(pck => pck.GOV_CODE == product["ZI-Nr."]);
+				const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
+				const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
+				if (productIndex === -1) {
+					sorter++; // Increment sorter only for new products
+				}
+				return promise;
+			});
+
+			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
+			await Promise.all(promises);
+			return req;
+		} catch (error) {
+			console.error('Error in ZagisUploadFile');
+		}
+	});
+
+	async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
+		const mappedProduct = {
+			TenderID: offer.TenderID,
+			OfferID: offer.OfferID,
+			CountryCode: offer.CountryCode,
+			SubmittedOn: new Date().toISOString(),
+			SubmittedBy: req.user.id,
+			Active: 1,
+			ProductCode: productPack.PRODUCTPACKID,
+			RequestedVolume: product["Aantal stuks in verpakking"],
+			UnitPerPack: "Pack",
+			DistributorID: offer.DistributorID,
+			ActiveProduct: 1,
+			SORTER: sorter,
+			SUPPLY_UPDATE: 0,
+			PAYMENT_UPDATE: 0,
+			Line: "1",
+			LotID: 1,
+			SampleQuantity: 0,
+			NoofLots: 0,
+			IntervalBetweenShipments: 0,
+			NoOfTier: 0,
+			DEFAULT_COMMISSION_RATE: 0,
+			MinInvoiceAmount: 0,
+		}
+	
+		if (productIndex > -1) {
+			// deleting SORTER to avoid incrementing already created products SORTER
+			delete mappedProduct.SORTER;
+			return await UPDATE(PT_TMOFPR).with(mappedProduct).where({
+				OfferID: offer.OfferID,
+				ProductCode: productPack.PRODUCTPACKID
+			})
+		}else {
+			return await INSERT(mappedProduct).into(PT_TMOFPR);
+		}
+	}
+
+	function bufferToArrayBuffer(buffer) {
+		const arrayBuffer = new ArrayBuffer(buffer.length);
+		const view = new Uint8Array(arrayBuffer);
+		for (let i = 0; i < buffer.length; ++i) {
+		  view[i] = buffer[i];
+		}
+		return arrayBuffer;
+	}
 }
