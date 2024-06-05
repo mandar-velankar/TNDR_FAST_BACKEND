@@ -12,7 +12,12 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
     //EHQUT-383702-Spain search Division filter
     //EHQUT-383697-Spain - visual mark to notify that the offer is canceled in FAST
     entity PriceAgreementsMasterView @(cds.redirection.target:true) as select from PriceAgreementData.PriceAgreements as pa
-    inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'{
+    inner join MaterialsConcatList as list on list.CountryCode = pa.CountryCode and list.ProductPackID = pa.ProductPackId and list.ActiveRecord = 'Yes'
+    left outer join PriceAgreementDataViews.PriceAgreementNewMaterialsView as panm on panm.ID = pa.ID
+    left outer join PriceAgreementDataViews.PriceAgreementNewAgreements as pana on pana.ID = pa.ID
+    left outer join PriceAgreementDataViews.PriceAgreementActiveAgreements as paaa on paaa.ID = pa.ID
+    left outer join PriceAgreementDataViews.PriceAgreementUpdatedRetailPrice as paurp on paurp.ID = pa.ID
+    left outer join PriceAgreementDataViews.PriceAgreementNewYLLPorYLAP as panmpr on panmpr.ID = pa.ID{
         key pa.ID,
             pa.createdAt,
             pa.createdBy,
@@ -33,20 +38,28 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
             pa.InstituteId,
             pa.TenderId,
             pa.ProductPackId,
-            pa.Synchronized,
+            ifnull(paaa.Synchronized, false) as Synchronized: Boolean,
             pa.SynchronizationStatus,
-            pa.hasNewMaterials,
-            pa.hasNewPrice,
+            ifnull(panm.hasNewMaterials, false) as hasNewMaterials: Boolean,
+            case when (panmpr.YLLP = 0 or panmpr.YLAP = 0) then 0 else 1 end as hasEitherNewYLLPorYLAP: Integer,
+            case when (paurp.ListPriceEqual = 0 or paurp.RetailPriceEqual = 0) then true else false end as hasNewPrice: Boolean,
             pa.hasNewYLLP,
             pa.hasNewYLAP,
             pa.hasProductPackId,
             pa.IgnorePVLPriceChange,
             pa.IgnoreConfPriceChange,
-            pa.ExpiringSoon,
-            case when( (to_date(pa.ExpiryDate) < CURRENT_DATE ) and pa.isCancelled = false ) then true else false end as Expired :Boolean,
-            pa.isNewPriceAgreement,
-            pa.AppliedCount,
-            pa.isCancelled,
+            Case when pa.ExpiryDate IS NOT NULL 
+                then 
+                    CASE when (DATS_ADD_MONTHS(REPLACE(CURRENT_DATE, '-', ''), 3) >= to_date(pa.ExpiryDate) and to_date(pa.ExpiryDate) >= CURRENT_DATE)
+                    then true 
+                    else false 
+                    end 
+                else false 
+            end AS ExpiringSoon: Boolean,
+            case when( (to_date(pa.ExpiryDate) < CURRENT_DATE ) and pa.isCancelled = false ) then true else false end as Expired: Boolean,
+            ifnull(pana.isNewPriceAgreement, false) as isNewPriceAgreement: Boolean,
+            case when pana.isNewPriceAgreement = false then 1 else 0 end as AppliedCount: Integer,
+            case when pa.Status = 'Cancelled' then true else false end as isCancelled: Boolean,
             pa.OfferId,
             pa.ExtendPriceAgreement,
             pa.ExpiryExtensionPeriod,
@@ -136,4 +149,39 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
           
 } 
 //EJUVE-CR3 END
+entity PriceAgreementNewYLLPorYLAP as Select from PriceAgreementService.PriceAgreementsMasterView as pa
+inner join TransactionalData.PriceCondition as pc on pa.OfferId=pc.OfferID and pa.ProductPackId=pc.ProductCode
+inner join TransactionalData.PriceConditionClassification as pcc on pc.PriceConditionClassification.ID=pcc.ID and pcc.isMain=true
+inner join MasterDataViews.MostRecentMasterPricesView as mp on pa.ProductPackId=mp.ProductPackId and pa.CountryCode=mp.CountryCode
+inner join MasterData.PT_TMINST as i on pa.InstituteId=i.InstituteID
+inner join MasterData.PT_TMPRDPCK as p on p.PRODUCTPACKID=pa.ProductPackId{
+    pa.ID,
+    pa.CountryCode,
+    CASE
+        when pa.UoM = 'Pack' and i.InstituteType ='Private Account'
+          then 
+              CASE
+                WHEN ABS(mp.YLLP - pc.PVL) < 0.0001 THEN 1
+                ELSE 0
+              END  
+          else 
+            CASE
+                WHEN ABS(mp.YLLP - (pc.PVL * p.PACKFACTOR)) < 0.0001 THEN 1
+                ELSE 0
+            END
+    END AS YLLP: Integer,
+    CASE
+        when pa.UoM = 'Pack' and i.InstituteType <> 'Private Account'
+          then 
+              CASE
+                WHEN ABS(mp.YLAP - pc.ConfidentialPrice) < 0.0001 THEN 1
+                ELSE 0
+              END  
+          else 
+            CASE
+                WHEN ABS(mp.YLLP - (pc.ConfidentialPrice * p.PACKFACTOR)) < 0.0001 THEN 1
+                ELSE 0
+            END
+    END AS YLAP: Integer
+}where pa.CountryCode = 'ES' and pa.Expired=false and pa.isCancelled=false and pa.Synchronized=true and pa.IgnorePVLPriceChange<>true and pa.IgnoreConfPriceChange<>true;
 }

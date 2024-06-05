@@ -503,7 +503,7 @@ entity TenderOfferMaster as select from TransactionalData.PT_TMTEND as tender{
     ifnull(tender.Offer.OfferStatus.STATUS, 'Offer Created') as STATUS:String(255),
     tender.PublicationDate as PUBLICATION_DATE,
     tender.TerminationDate as TERMINATION_DATE,
-    tender.SubmittedOn as CREATION_DATE, 
+    case when tender.CountryCode = 'IT' then tender.createdAt else tender.SubmittedOn end as CREATION_DATE:Date, 
     tender.Offer.InternalBidDueDate as INTERNAL_BID_DUE_DATE,
     case when tender.Offer.RevisedOfferNo = 0 and tender.Offer.ContinuationOfferNo = 0 then tender.BidDueDate else tender.Offer.NewOfferDueDate end as CLOSING_DATE:Date,
     ifnull(tender.Offer.ActiveOffer, 1) as ACTIVE_OFFER:Integer,
@@ -687,7 +687,8 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
     offerProduct.Comment,
-    offerProduct.AlternateOfferYN
+    offerProduct.AlternateOfferYN,
+    offerProduct.Custom.Integer_1 as ItemNumber
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -1070,7 +1071,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     consumerPrices.FloorPrice,
     priceCondition.PriceConditionClassification.ConditionType as ConditionType,
     case 
-        when consumerPrices.ConsumerPriceExclPP is not null
+        when consumerPrices.ConsumerPriceExclPP is not null and consumerPrices.ConsumerPriceExclPP <> 0
             then
                 (consumerPrices.ConsumerPriceExclPP - consumerPrices.MaxPriceNhsPP * (1 - (PT_TMBDPR.AdditionalDiscount/100))) / consumerPrices.ConsumerPriceExclPP
         else null
@@ -1103,7 +1104,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else product.RequestedVolume 
     end as totalVolume:Double,
     case   
-        when PT_TMBDPR.NetofferPrice is not null
+        when (PT_TMBDPR.NetofferPrice is not null and PT_TMBDPR.NetofferPrice <> 0) 
+        and( product.RequestedVolume is not null and product.RequestedVolume <> 0) 
+        and (product.RequestedVolume <> PT_TMBDPR.FOC)
             then 
                 round(PT_TMBDPR.NetofferPrice * ( 
                     (
@@ -1206,7 +1209,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         else null
     end as GrossProfit:Double,
     case   
-        when PT_TMBDPR.NetofferPrice is not null
+        when (PT_TMBDPR.NetofferPrice is not null and PT_TMBDPR.NetofferPrice <> 0) 
+        and ( product.RequestedVolume is not null and product.RequestedVolume <> 0) 
+        and (product.RequestedVolume <> PT_TMBDPR.FOC)
             then 
                 round(1 - ((
                     (
@@ -1345,6 +1350,8 @@ left outer join MasterDataLatestValues.ActiveChannelProductPolicies as channelpr
                 case
                     when institute.ApplicableTaxRate = 'E1'
                         then masterPrices.TaxE1
+                    when institute.ApplicableTaxRate = 'E2'
+                        then masterPrices.TaxE2
                     else 
                         masterPrices.TaxES
                 end
@@ -2109,6 +2116,20 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Regions                : String;
             InternalDueDate        : Date;
             ExpectedAwardDate      : Date;
+            Unitofvalidityperiod   : String;
+			DeliveryDue            : Integer;
+			Unitofdeliverydue      : String;
+			QuotationDeliverymethod : String;
+			QuotationRecipientname  : String;
+			QuotationRecipientcontact : String;
+			Expectdatetoreceivethedocument: Date;
+            RequestorPphoneNnumber: Integer;
+            BayerRepresentativeName: String;
+            BayerRepresentativePhoneNumber: Integer;
+            PeriodOfBankGauranteeStart: Date;
+            PeriodOfBankGauranteeEnd: Date;
+            BGValueBaht: Double;
+            TenderAnnouncementReference: String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2310,6 +2331,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Discount_1                                  : Double;
             Discount_2                                  : Double;
             Discount_3                                  : Double;
+            ItemNumber                                  : Integer;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2528,7 +2550,7 @@ entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHisto
 } where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE
 group by ProductCode, INSTITUTE_ID;
 
-entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender  
+entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
             and inst.CountryCode = tender.CountryCode
@@ -2568,7 +2590,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
-            (pr.SORTER + 1) as CountProducts,
+            pr.SORTER,
             inst.InstituteName,
             inst.InstituteType,
             inst.InstituteID,
@@ -2602,7 +2624,8 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 then 'Active'
                 else 'Suspend'
             end as Status: String,
-            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
+            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice,
+            tender.Custom.String_3 as BranchInstitute
     }where offer.OfferStatusTable.STATUS = 'Results Recorded'
      and quotation.EffectiveDate <= CURRENT_DATE
      and tender.CountryCode = 'TW'
@@ -2653,7 +2676,7 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             pr.Results.SubmittedOn,
             CreatedByUser.UserName,
             pr.ProductCode,
-            (pr.SORTER + 1) as CountProducts,
+            pr.SORTER,
             branch.InstituteName,
             branch.InstituteType,
             branch.InstituteID,
@@ -2687,7 +2710,8 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
                 then 'Active'
                 else 'Suspend'
             end as Status: String,
-            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice
+            ifnull(regpr.RegisteredPrice, 0) as RegisteredPrice,
+            tender.Custom.String_3 as BranchInstitute
     }
     where offer.OfferStatusTable.STATUS = 'Results Recorded'
     and quotation.EffectiveDate <= CURRENT_DATE
@@ -2695,6 +2719,54 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
     and tender.Active = 1
     and offer.Active = 1
     and pr.Results.Outcome = 'Won';
+
+    entity  ZuelligExtractView as projection on zuelligExtract{
+        TenderID,
+        createdAt,
+        OfferID,
+        CountryCode,
+        CreationDate,
+        SubmittedBy,
+        SubmittedOn,
+        UserName,   
+        ProductCode,
+        case 
+            when BranchInstitute <> ''
+                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY ProductCode) 
+            else SORTER + 1
+		end	as CountProducts: Integer,
+        InstituteName,
+        InstituteType,
+        InstituteID,
+        External_InstituteId,
+        ParentInst_External_InstituteId,
+        Class,
+        KAM_Territory,
+        CNPJ,
+        ParentInstituteID,
+        EffectiveDate,
+        PRODUCTPACKNAME,
+        PACKFACTOR,
+        SKUCode,
+        Display,
+        BU,
+        Price0,
+        Price1,
+        Price2,
+        Price3,
+        TotalDiscountNHI,
+        Level2Discount1,
+        Level2Discount2,
+        Level3Discount1,
+        GeneralDiscount_Amount,
+        SecondDiscount_Amount,
+        FreeGoods_Amount,
+        FreeGoods_Percentage,
+        AnnualDiscount_Percentage,
+        AnnualDiscountForBranch,
+        RegisteredPrice,
+        Status
+    };
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
         key hier.ParentInstituteID,

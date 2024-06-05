@@ -171,112 +171,22 @@ module.exports = async (srv) => {
          * The filter for virtual/calculated elements must be implemented in the NodeJS layer. 
          * For each calculated filter element, we first remove the filter, get the data and filter the results in the Nodejs layer.
          */
-
-
-        // 1. remove the hasNewMaterials filter from the request if it exists 
-        let hasNewMaterialsFilterIndex = null;
-        let hasNewMaterialsFilterValues = null;
-        let hasNewPriceFilterIndex = null;
-        let hasNewPriceFilterValues = null;
-        let hasExpiringSoonFilterIndex = null;
-        let hasExpiringSoonFilterValues = null;
-        let isNewPriceAgreementFilterIndex = null;
+        /** All Italy filters are calculated directly at cds layer
+         * Except the ones listed below all remaining Spain filters are too calculated at cds layer
+         */
         let hasNewYLLPIndex = null;
         let hasNewYLAPIndex = null;
-        let isNewPriceAgreementFilterValues = null;
-        let hasExpiredFilterIndex = null;
-        let hasExpiredFilterValues = null;
-        let isCancelledFilterIndex = null;
-        let isCancelledFilterValues = null;
-        let isSynchronizedFilterIndex = null;
-        let isSynchronizedFilterValues = null;
-        let appliedCountFilterIndex = null;
-        let appliedCountFilterValues = null;
         let hasNewYLLPValues = null;
         let hasNewYLAPValues = null;
         let hasFilter = false;
-        let hasProductPackIdIndex = null;
-        let hasProductPackIdValues = null;
 
         if (req.query.SELECT.where) {
-
-            hasNewMaterialsFilterIndex = ServiceHelper.getWhereId(req, 'hasNewMaterials');
-            hasNewMaterialsFilterValues = ServiceHelper.getWhereValues(req, 'hasNewMaterials');
-
-            hasNewPriceFilterIndex = ServiceHelper.getWhereId(req, 'hasNewPrice');
-            hasNewPriceFilterValues = ServiceHelper.getWhereValues(req, 'hasNewPrice');
-
-            hasExpiringSoonFilterIndex = ServiceHelper.getWhereId(req, 'ExpiringSoon');
-            hasExpiringSoonFilterValues = ServiceHelper.getWhereValues(req, 'ExpiringSoon');
-
-            hasExpiredFilterIndex = ServiceHelper.getWhereId(req, 'Expired');
-            hasExpiredFilterValues = ServiceHelper.getWhereValues(req, 'Expired');
-
-            isCancelledFilterIndex = ServiceHelper.getWhereId(req, 'isCancelled');
-            isCancelledFilterValues = ServiceHelper.getWhereValues(req, 'isCancelled');
-
-            isNewPriceAgreementFilterIndex = ServiceHelper.getWhereId(req, 'isNewPriceAgreement');
-            isNewPriceAgreementFilterValues = ServiceHelper.getWhereValues(req, 'isNewPriceAgreement');
-
-            isSynchronizedFilterIndex = ServiceHelper.getWhereId(req, 'Synchronized');
-            isSynchronizedFilterValues = ServiceHelper.getWhereValues(req, 'Synchronized');
-
-            appliedCountFilterIndex = ServiceHelper.getWhereId(req, 'AppliedCount');
-            appliedCountFilterValues = ServiceHelper.getWhereValues(req, 'AppliedCount');
 
             hasNewYLLPIndex = ServiceHelper.getWhereId(req, 'hasNewYLLP');
             hasNewYLLPValues = ServiceHelper.getWhereValues(req, 'hasNewYLLP');
 
             hasNewYLAPIndex = ServiceHelper.getWhereId(req, 'hasNewYLAP');
             hasNewYLAPValues = ServiceHelper.getWhereValues(req, 'hasNewYLAP');
-
-            hasProductPackIdIndex = ServiceHelper.getWhereId(req, 'hasProductPackId');
-            hasProductPackIdValues = ServiceHelper.getWhereValues(req, 'hasProductPackId');
-
-            if (hasProductPackIdIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'hasProductPackId');
-                hasFilter = true;
-            }
-
-            if (hasNewMaterialsFilterIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'hasNewMaterials');
-                hasFilter = true;
-            }
-
-            if (hasNewPriceFilterIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'hasNewPrice');
-                hasFilter = true;
-            }
-
-            if (hasExpiringSoonFilterIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'ExpiringSoon');
-                hasFilter = true;
-            }
-
-            if (hasExpiredFilterIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'Expired');
-                hasFilter = true;
-            }
-
-            if (isCancelledFilterIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'isCancelled');
-                hasFilter = true;
-            }
-
-            if (isNewPriceAgreementFilterIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'isNewPriceAgreement');
-                hasFilter = true;
-            }
-
-            if (isSynchronizedFilterIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'Synchronized');
-                hasFilter = true;
-            }
-
-            if (appliedCountFilterIndex >= 0) {
-                ServiceHelper.deleteFilter(req, 'AppliedCount');
-                hasFilter = true;
-            }
 
             if (hasNewYLLPIndex >= 0) {
                 ServiceHelper.deleteFilter(req, 'hasNewYLLP');
@@ -293,20 +203,62 @@ module.exports = async (srv) => {
         //run default query on db
         // const data = await next();// do not use because it does not behaves as expected in case of count
         let data = [];
+        //let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode'); 
         let paQuery = SELECT.from(req.query.SELECT.from);
-        if (req.query.SELECT.columns?.[0]?.func !== "count") {
-            paQuery.columns(req.query.SELECT.columns);
-        }
+        let xprSearch = req.query.SELECT.where && req.query.SELECT.where?.some(condition => typeof condition === 'object' && 'xpr' in condition);
         if (!hasFilter) {
             console.log("Fetch using limit Priceagreements - no filters");
-            req.query.SELECT.limit && (paQuery.limit(req.query.SELECT.limit));
+            if(req.query.SELECT.limit)
+            {
+                req.query.SELECT.limit.rows.val = 250
+                paQuery.limit(req.query.SELECT.limit);
+            }
             // data = await tx.run(SELECT.from(PriceAgreements).columns(req.query.SELECT.columns).where(req.query.SELECT.where).orderBy(req.query.SELECT.orderBy));
         }
-        req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
-        req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
-
         startTrace("PriceAgreements");
-        data = await tx.run(paQuery);
+        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one || xprSearch){
+            paQuery.columns(req.query.SELECT.columns);
+            req.query.SELECT.where && (paQuery.where(req.query.SELECT.where));
+            req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
+            data = await tx.run(paQuery);
+        }
+        else{
+            if(hasFilter){
+                paQuery.columns(req.query.SELECT.columns);
+                req.query.SELECT.where && (paQuery.where([{ref:['CountryCode']}, '=',{val:'ES'}, 'and',{ref:['hasEitherNewYLLPorYLAP']}, '=',{val:'0'}]));
+                req.query.SELECT.orderBy && (paQuery.orderBy(req.query.SELECT.orderBy));
+                data = await tx.run(paQuery); 
+                /*if(!this.jobStarted){
+                    this.jobStarted = true;
+                    //cds.spawn({ every: 60000 }, async (tx) => {
+                    cds.spawn({ every: 900000 }, async () => {
+                        const spawntx = cds.tx();
+                        startTrace("Begin Job PriceAgreementsMasterView")                        
+                        const spawnData = await spawntx.run(SELECT.from({ref:['PriceAgreementService.PriceAgreementsMasterView']}).columns(['*',
+                        {ref:['Product'],expand:['*',{ref:['ProductPack'],expand:['*']}]},
+                        {ref:['Institute'],expand:['*']},
+                        {ref:['Tender'],expand:['*',{ref:['User'],expand:['*']}]},
+                        {ref:['Materials'],expand:['*']},
+                        {ref:['FOC'],expand:['*']},
+                        {ref:['ConsumerPrice'],expand:['*']}, 
+                        {ref:['CustomerPrices'],expand:['*']},
+                        {ref:['PriceConditions'],expand:['*',{ref:['PriceConditionClassification'],expand:['*']}]},
+                        {ref:['OfferProduct'],expand:['*',{ref:['Offer'],expand:['*']}]}
+                        ]).where([{ref:['CountryCode']}, '=',{val:'ES'}]).orderBy([{ref:['ID'], sort:'asc'}]));
+                        // for(const sp of spawnData){
+                        //     sp.Price = 50;
+                        // }
+                       // myCache.set( "pa", spawnData);
+                        this.dataCache = spawnData;
+                        spawntx.commit();
+                        stopTrace("End Job PriceAgreementsMasterView")
+                    })
+                }*/
+            }
+           /* let countryCode =  ServiceHelper.getWhereValues(req, 'CountryCode'); 
+            data = this.dataCache.filter(dc=> dc.CountryCode === countryCode[0]);*/
+            //data = this.dataCache;
+        }
         // if the query returns only one value, that value is an object and not an array
         // we need to convert it to array because the code below expects an array
         if (!Array.isArray(data)) {
@@ -320,18 +272,18 @@ module.exports = async (srv) => {
             return [{ counted: data.length }];
         }
         //return directly without filters and not for only one (selection by keys)
-        if (!req.query.SELECT.one && !hasFilter) {
+        if ((!req.query.SELECT.one && !hasFilter) || req.query.SELECT.one || xprSearch) {
             return data;
         }
         // const customerPrices = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
         // let ids = [];
         // //use only one loop instead of multiple map functionslet ids = [];
         //use only one loop instead of multiple map functions
+        let result = [];
         startTrace("PrepareKeysForOtherQueries");
         // Divide the data into chunks
-        const chunks = splitToChunks(data, 1000);
         // Run operation on the chunks parallely
-        let pkWorkerResults = [];
+        /*let pkWorkerResults = [];
         try {
             // Create a new thread pool
             // resourceLimits.maxOldGenerationSizeMb This is a very important parameter and this defines the max memory used by the worker thread. 
@@ -347,7 +299,7 @@ module.exports = async (srv) => {
             console.error("PrepareKeysWorker stopped");
             console.error(err);
             throw err;
-        }
+        }*/
 
         let ids = [];
         let offers = [];
@@ -356,20 +308,29 @@ module.exports = async (srv) => {
         let productpacks = [];
         let productpacksstr = [];
 
-        for (const workerResult of pkWorkerResults) {
+        /*for (const workerResult of pkWorkerResults) {
             ids = ids.concat(workerResult.ids);
             offers = offers.concat(workerResult.offers);
             institutes = institutes.concat(workerResult.institutes);
             countrycodes = countrycodes.concat(workerResult.countrycodes);
             productpacks = productpacks.concat(workerResult.productpacks);
             productpacksstr = productpacksstr.concat(workerResult.productpacksstr);
+        }*/
+        for (const pa of data) {
+            //if (ids.indexOf(pa.ID) === -1) ids.push(pa.ID);
+            if (institutes.indexOf(pa.InstituteId) === -1) institutes.push(pa.InstituteId);
+            if (offers.indexOf(pa.OfferId) === -1) offers.push(pa.OfferId);
+            if (countrycodes.indexOf(pa.CountryCode) === -1) countrycodes.push(pa.CountryCode);
+            if (productpacks.indexOf(pa.ProductPackId) === -1) {
+                productpacks.push(pa.ProductPackId);
+                productpacksstr.push(pa.ProductPackId.toString());
+            }
         }
         stopTrace("PrepareKeysForOtherQueries");
 
         let customerPricesAll = [];
         let customerPricesInPA = true;
         let priceConditionsAll = [];
-        //let priceConditionsInPa = true;
         let mostRecentMasterPricesAll = [];
         let consumerPricesAll = [];
         let consumerPricesInPA = true;
@@ -377,24 +338,6 @@ module.exports = async (srv) => {
         let newFOCMaterialsAll = [];
         let OfferProductsAll = [];
         let institutesAll = [];
-
-        if (ids && ids.length > 0) {
-            startTrace("CustomerPrices");
-            if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'CustomerPrices') === -1) {
-                customerPricesInPA = false;
-                customerPricesAll = await tx.run(SELECT.from(CustomerPrices).where({ PriceAgreementId: { in: ids } }));
-            }
-            stopTrace("CustomerPrices");
-            if (req.query.SELECT.one || hasNewMaterialsFilterIndex >= 0) {
-                startTrace("NewMaterialsView");
-                newMaterialsAll = await tx.run(SELECT.from(NewMaterialsView).where({ PriceAgreementId: { in: ids } }));
-                stopTrace("NewMaterialsView");
-
-                startTrace("NewFOCMaterialsView");
-                newFOCMaterialsAll = await tx.run(SELECT.from(NewFOCMaterialsView).where({ PriceAgreementId: { in: ids } }));
-                stopTrace("NewFOCMaterialsView");
-            }
-        }
 
         if (institutes && institutes.length > 0) {
             startTrace("Institutes");
@@ -428,20 +371,6 @@ module.exports = async (srv) => {
                 })
             );
             stopTrace("MostRecentMasterPricesView");
-
-            startTrace("MostRecentConsumerPricesView");
-            if (req.query.SELECT.columns?.[0].func === 'count' || req.query.SELECT.columns.findIndex(col => col?.ref?.length > 0 && col?.ref[0] === 'ConsumerPrice') === -1) {
-                consumerPricesInPA = false;
-                consumerPricesAll = await tx.run(SELECT.from(MostRecentConsumerPricesView)
-                    .where({
-                        CountryCode: { in: countrycodes },
-                        and: {
-                            ProductPackId: { in: productpacksstr }
-                        }
-                    })
-                );
-            }
-            stopTrace("MostRecentConsumerPricesView");
         }
 
 
@@ -494,18 +423,11 @@ module.exports = async (srv) => {
         // 2. calculate the fields
         // Calculation is done by a worker
         startTrace("CalculateFields");
+        //const chunks = splitToChunks(data, 1000);
 
         const requiredParameters = {
-            //priceConditionsInPa,
             institutesAll,
-            customerPricesInPA,
-            customerPricesAll,
             mostRecentMasterPricesAll,
-            newMaterialsAll,
-            newFOCMaterialsAll,
-            consumerPricesInPA,
-            consumerPricesAll,
-            hasNewMaterialsFilterIndex,
             req_query_SELECT_one: req.query.SELECT.one || false,
             hasNewYLLPValues,
             hasNewYLAPValues,
@@ -517,7 +439,7 @@ module.exports = async (srv) => {
         };
 
         // Create a new thread pool
-        const cfPool = new Piscina({
+        /*const cfPool = new Piscina({
             filename: path.resolve(__dirname, 'workers/CalculateFieldsWorker')
         });
         // Run operation on the chunks parallely
@@ -525,114 +447,21 @@ module.exports = async (srv) => {
         const cfWorkerResults = await Promise.all(cfWorkerPromises);
         cfPool.destroy();
 
-        let result = [];
         for (const workerResult of cfWorkerResults) {
             result = result.concat(workerResult);
-        }
+        }*/
+        
 
         stopTrace("CalculateFields");
-        // const promises = Array.isArray(data) ? data.map(calculateFields) : [calculateFields(data)];
-
+            
+        //result = Array.isArray(data) ? data.map(calculateFields) : [calculateFields(data)];
+        result = calculateFields(data, requiredParameters);
+        if (!Array.isArray(result)) {
+            result = [result];
+        }
         // let result = await Promise.all(promises);
-
+        // }
         startTrace("apply filters");
-        //3. return the filtered results if calculated filter is used
-        if (hasNewMaterialsFilterValues && hasNewMaterialsFilterValues.length > 0) {
-            // before performance
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.hasNewMaterials && priceAgreement.hasNewMaterials === hasNewMaterialsFilterValues[0]) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
-
-        if (hasNewPriceFilterValues && hasNewPriceFilterValues.length > 0) {
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.hasNewPrice && priceAgreement.hasNewPrice === hasNewPriceFilterValues[0]) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
-
-        if (hasExpiringSoonFilterValues && hasExpiringSoonFilterValues.length > 0) {
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.ExpiringSoon);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.ExpiringSoon) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
-
-        if (hasExpiredFilterValues && hasExpiredFilterValues.length > 0) {
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.Expired === hasExpiredFilterValues[0]);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.Expired === hasExpiredFilterValues[0]) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
-
-        if (isNewPriceAgreementFilterValues && isNewPriceAgreementFilterValues.length > 0) {
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.isNewPriceAgreement === isNewPriceAgreementFilterValues[0]) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
-
-        if (isCancelledFilterValues && isCancelledFilterValues.length > 0) {
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.isCancelled === isCancelledFilterValues[0]);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.isCancelled === isCancelledFilterValues[0]) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
-
-        if (isSynchronizedFilterValues && isSynchronizedFilterValues.length > 0) {
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.Synchronized === isSynchronizedFilterValues[0]);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.Synchronized === isSynchronizedFilterValues[0]) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
-
-        if (appliedCountFilterValues && appliedCountFilterValues.length > 0) {
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.AppliedCount >= appliedCountFilterValues[0]);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.AppliedCount >= appliedCountFilterValues[0]) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
 
         if (hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0) {
             let filteredResult;
@@ -670,18 +499,7 @@ module.exports = async (srv) => {
             result = filteredResult;
         }
 
-        if (hasProductPackIdIndex && hasProductPackIdValues.length > 0) {
-            // const filteredResult = result.filter(priceAgreement => priceAgreement.ProductPackId === hasProductPackIdValues[0]);
-            // after performance
-            let filteredResult = [];
-            for (const priceAgreement of result) {
-                if (priceAgreement.ProductPackId === hasProductPackIdValues[0]) {
-                    filteredResult.push(priceAgreement);
-                }
-            }
-            result = filteredResult;
-        }
-        //EFRCL- 358586- Italy- Price agreements - search function shows limited results
+        // EFRCL- 358586- Italy- Price agreements - search function shows limited results
         stopTrace("apply filters");
         //startTrace("Commit");
         //await tx.commit();
@@ -718,6 +536,249 @@ module.exports = async (srv) => {
         return req.reply(result);
     };
 
+    function calculateFields(priceAgreements, requiredParameters){
+
+        const {
+            institutesAll,
+            mostRecentMasterPricesAll,
+            req_query_SELECT_one,
+            hasNewYLLPValues,
+            hasNewYLAPValues,
+            priceConditionsAll,
+            OfferProductsAll,
+            priceConditionRappelAll,
+            discountConditionsAll,
+            priceConditionFOCAll
+        } = requiredParameters;
+    
+        const todaysDate = new Date();
+    
+        let calculatedFutureDate = new Date();
+        calculatedFutureDate.setMonth(calculatedFutureDate.getMonth() + 3);
+        for(let priceAgreement of priceAgreements){
+
+            let mostRecentMasterPrice = undefined;       
+        
+            let priceConditions = priceAgreement.PriceConditions || [];
+            let institute = priceAgreement.Institute;
+            if(!institute){
+                for(const inst of institutesAll){
+                    if(inst.InstituteID === priceAgreement.InstituteId){
+                        institute = inst;
+                        break;
+                    }
+                }
+            }
+        
+        
+            if (!mostRecentMasterPrice) {
+                for(const mp of mostRecentMasterPricesAll){
+                    if(mp.CountryCode == priceAgreement.CountryCode && mp.ProductPackId == priceAgreement.ProductPackId){
+                        mostRecentMasterPrice = mp;
+                        break;
+                    }
+                }
+            }
+
+        
+            if (req_query_SELECT_one || (priceAgreement.CountryCode === 'ES' && ( hasNewYLLPValues && hasNewYLLPValues.length > 0 || hasNewYLAPValues && hasNewYLAPValues.length > 0 ))) {
+                if (priceConditions && institute && !priceAgreement.IgnoreConfPriceChange && !priceAgreement.IgnorePVLPriceChange) {
+        
+                    let mainCondition = undefined;
+                    let rappelCondition = undefined;
+                    let focCondition = undefined;
+                    for (let condition of priceConditions) {
+                        if (condition.isMain === true || (condition.PriceConditionClassification && condition.PriceConditionClassification.isMain === true)) {
+                            mainCondition = condition;
+                        }
+                        if (condition.ConditionType === 'Rappel' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'Rappel')) {
+                            rappelCondition = condition;
+                        }
+                        if ((condition.ConditionType === 'FOC' || (condition.PriceConditionClassification && condition.PriceConditionClassification.ConditionType === 'FOC')) && (mainCondition && condition.ProductCode === mainCondition.ProductCode)) {
+                            focCondition = condition;
+                        }
+                        if (mainCondition && rappelCondition && focCondition) {
+                            break;
+                        }
+                    }
+                    // If no mainCondition was found, we don't evaluate further
+                    if (!mainCondition || !mostRecentMasterPrice) {
+                        break;
+                    }
+        
+                    let offerProduct;
+                    for(const product of OfferProductsAll){
+                        if(product.OfferID === mainCondition.OfferID && product.ProductCode === mainCondition.ProductCode){
+                            offerProduct = product;
+                        }
+                    }
+                    let mostRecentYLLP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLLP : (mostRecentMasterPrice.YLLP / priceAgreement.Product.ProductPack.PACKFACTOR);
+                    let mostRecentYLAP = offerProduct.UnitPerPack === 'Pack' ? mostRecentMasterPrice.YLAP : (mostRecentMasterPrice.YLAP / priceAgreement.Product.ProductPack.PACKFACTOR);
+        
+                    //calculate mostRecentPraf
+                    let mostRecentPRAF = 0;
+                    if(offerProduct.UnitPerPack === 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
+                        mostRecentPRAF = mostRecentMasterPrice.PRAF_Private; 
+                    } else if(offerProduct.UnitPerPack !== 'Pack' && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ){
+                        mostRecentPRAF = (mostRecentMasterPrice.PRAF_Private / priceAgreement.Product.ProductPack.PACKFACTOR);
+                    } else if(offerProduct.UnitPerPack === 'Pack' && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ){
+                        mostRecentPRAF = mostRecentMasterPrice.PRAF_Public; 
+                    } else if(offerProduct.UnitPerPack !== 'Pack' && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ){
+                        mostRecentPRAF = (mostRecentMasterPrice.PRAF_Public / priceAgreement.Product.ProductPack.PACKFACTOR);
+                    }
+        
+                    if (mainCondition) {
+                        /* we are using the maincondition which is coming from the PriceConditionView
+                        however, the PVL value in this view, is a reference to the masterprices table, and NOT to the pricecondition table
+                        therefore, we're retrieving the condition again from the pricecondition table, based on the existingpriceconditionID */
+                        let priceCondition = null;
+                        if (priceAgreement.PriceConditions && priceAgreement.PriceConditions.length > 0) {
+                            priceCondition = mainCondition;
+                        } else {
+                            for(const pc of priceConditionsAll){
+                                if(pc.ExistingPriceConditionID == mainCondition.ExistingPriceConditionID){
+                                    priceCondition = pc;
+                                }
+                            }
+                        }
+        
+                        if (priceCondition) {
+                            if (mainCondition.ConditionType === 'Precio Neto' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Precio Neto')) {
+                                if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
+                                    if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceCondition.PVL)) {
+                                        if (ServiceHelper.isDoubleXBelowY(mostRecentYLLP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
+                                            priceAgreement.hasNewYLLP = 3;
+                                        } else {
+                                            priceAgreement.hasNewYLLP = 2;
+                                        }
+                                    } else priceAgreement.hasNewYLLP = 0;
+                                }
+        
+                                if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
+                                    if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceCondition.ConfidentialPrice)) {
+                                        if (ServiceHelper.isDoubleXBelowY(mostRecentYLAP, mainCondition.NetPriceWithoutTaxAfterDeductionRD)) {
+                                            priceAgreement.hasNewYLAP = 3;
+                                        } else {
+                                            priceAgreement.hasNewYLAP = 2;
+                                        }
+                                    } else priceAgreement.hasNewYLAP = 0;
+                                }
+                            } else if (mainCondition.ConditionType === 'Descuento Comercial' || (mainCondition.PriceConditionClassification && mainCondition.PriceConditionClassification.ConditionType === 'Descuento Comercial')) {
+                                if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
+                                    if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceCondition.PVL)) {
+                                        if (mostRecentYLLP * (1 - mainCondition.Discount) < mostRecentPRAF) {
+                                            priceAgreement.hasNewYLLP = 4;
+                                        } else {
+                                            priceAgreement.hasNewYLLP = 1;
+                                        }
+                                    } else priceAgreement.hasNewYLLP = 0;
+                                }
+        
+                                if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
+                                    if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceCondition.ConfidentialPrice)) {
+                                        if (mostRecentYLAP * (1 - mainCondition.Discount) < mostRecentPRAF) { //add royal decree to this calculation (new card)
+                                            priceAgreement.hasNewYLAP = 4;
+                                        } else {
+                                            priceAgreement.hasNewYLAP = 1;
+                                        }
+                                    } else priceAgreement.hasNewYLAP = 0;
+                                }
+                            }
+                        }
+                    }
+        
+                    if (rappelCondition) {
+                        /* we are using the rappelcondition which is coming from the PriceConditionView
+                        however, the PVL value in this view, is a reference to the masterprices table, and NOT to the pricecondition table
+                        therefore, we're retrieving the condition again from the pricecondition table, based on the existingpriceconditionID */
+                        let priceConditionRappel = null;
+                        if (priceAgreement.PriceConditions && priceAgreement.PriceConditions.length > 0) {
+                            priceConditionRappel = rappelCondition;
+                        } else {
+                            for(const pcr of priceConditionRappelAll){
+                                if(pcr.ExistingPriceConditionID == rappelCondition.ExistingPriceConditionID){
+                                    priceConditionRappel = pcr;
+                                }
+                            }
+        
+                            //we'll need the discount conditions also, as these will not be filled based on this select
+                            let discountConditions;
+                            for(const dc of discountConditionsAll){
+                                if(dc.PriceCondition_ID == rappelCondition.ExistingPriceConditionID){
+                                    discountConditions = dc;
+                                }
+                            }
+                            if (discountConditions) {
+                                priceConditionRappel.DiscountCondition = discountConditions;
+                            }
+                        }
+        
+                        if (priceConditionRappel) {
+                            if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
+                                if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceConditionRappel.PVL)) {
+                                    if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentYLLP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount / 100)))) < mostRecentPRAF)) { //Discount is a separate entity and should thus be handled as taking the max(DiscountCondition) value as a discount
+                                        priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP === 3 ? priceAgreement.hasNewYLLP : 4;
+                                    } else {
+                                        priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
+                                    }
+                                }
+                            }
+        
+                            if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
+                                if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceConditionRappel.ConfidentialPrice)) {
+                                    if (priceConditionRappel.DiscountCondition && priceConditionRappel.DiscountCondition.length > 0 && (mostRecentYLAP * (1 - Math.max.apply(Math, priceConditionRappel.DiscountCondition.map(discountCondition => (discountCondition.Discount / 100)))) < mostRecentPRAF)) { //add royal decree to this calculation (new card)
+                                        priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP === 3 ? priceAgreement.hasNewYLAP : 4;
+                                    } else {
+                                        priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+        
+                    if (focCondition) {
+                        let priceConditionFOC = null;
+                        if (priceAgreement.PriceConditions && priceAgreement.PriceConditions.length > 0) {
+                            priceConditionFOC = focCondition;
+                        } else {
+                            for(const pcf of priceConditionFOCAll){
+                                if(pcf.ExistingPriceConditionID == focCondition.ExistingPriceConditionID){
+                                    priceConditionFOC = pcf;
+                                }
+                            }
+                        }
+        
+                        if (priceConditionFOC) {
+                            if (institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster') {
+                                if (!ServiceHelper.isDoubleEqual(mostRecentYLLP, priceConditionFOC.PVL)) {
+                                    priceAgreement.hasNewYLLP = priceAgreement.hasNewYLLP >= 3 ? priceAgreement.hasNewYLLP : 1;
+                                } else {
+                                    priceAgreement.hasNewYLLP = priceAgreement.hasNewYLAP !== 0 && priceAgreement.hasNewYLAP !== 2 ? priceAgreement.hasNewYLAP : 0;
+                                }
+                            }
+        
+                            if (institute.InstituteType === 'Public Account' || institute.InstituteType === 'Government Account' || institute.InstituteType === 'National' || institute.InstituteType === 'Region(s)') {
+                                if (!ServiceHelper.isDoubleEqual(mostRecentYLAP, priceConditionFOC.ConfidentialPrice)) {
+                                    priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP >= 3 ? priceAgreement.hasNewYLAP : 1;
+                                } else {
+                                    priceAgreement.hasNewYLAP = priceAgreement.hasNewYLAP !== 0 && priceAgreement.hasNewYLAP !== 2 ? priceAgreement.hasNewYLAP : 0;
+                                }
+                            }
+                        }
+                    }
+                } else if (priceAgreement.IgnorePVLPriceChange) {
+                    priceAgreement.hasNewYLLP = 2;
+                } else if (priceAgreement.IgnoreConfPriceChange) {
+                    priceAgreement.hasNewYLAP = 2;
+                }
+            }
+
+        }
+    
+        
+        return priceAgreements;
+    };
+
     //EHQUT-305028-Italy-Delivery monitoring never worked
     srv.after('READ', 'PriceAgreements', async (data) => {
         const tx = db.tx();
@@ -728,9 +789,9 @@ module.exports = async (srv) => {
             if (!deliveries) {
                 try {
                     deliveries = await tx.run(SELECT.from(Deliveries).where({ PriceAgreementId: pag.ID }));
-                    // await tx.commit();
+                    //await tx.commit();
                 } catch (e) {
-                    // await tx.rollback(e)
+                    //await tx.rollback(e)
                     console.log(e);
                 }
             }
@@ -799,17 +860,17 @@ module.exports = async (srv) => {
         return req.reply();
     });
     async function syncPriceAgreements(pas, customerPrices) {
-        const tx = cds.tx();
+        //const tx = cds.tx();
         console.log(`Start synchronisation of PriceAgreements`);
-        let SoldToInstituteType = [];
+        /*let SoldToInstituteType = [];
         let ShipToInstitute = [];
         
-        let SoldToType,ShipToType,effectiveDatearray,CombinationValue;
+        let SoldToType,ShipToType,effectiveDatearray,CombinationValue; */
         console.log(`Prepare categories of customer prices`);
-        let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
+        //let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: pas }));
         
         let mainPriceConditions = customerPrices.filter(item => item.PriceCondition === "YLTP" || item.PriceCondition === "YLTF" || item.PriceCondition === "YL60" || item.PriceCondition === "YDC0");
-        if(customerPrices[0].CountryCode === 'ES'){
+        /*if(customerPrices[0].CountryCode === 'ES'){
             //EHQUT-CR2-New
             let instituteID = mainPriceConditions.map(item => item.InstituteId);
             let SoldToInstituteType = [];
@@ -831,7 +892,7 @@ module.exports = async (srv) => {
             }else{
                 CombinationValue = false;
             }
-        }
+        }*/
 
         const focPriceConditions = customerPrices.filter(item => item.PriceCondition === "YA03" || item.PriceCondition === "YA01");
         const rappelPriceConditions = customerPrices.filter(item => item.PriceCondition === "YAW1" || item.PriceCondition === "YAW2");
@@ -848,7 +909,7 @@ module.exports = async (srv) => {
 
         const updateFOCConditionPromises = focPriceConditions.map((custPrice, index) => updateFOCcustPrices(custPrice, index));
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
-        if(customerPrices[0].CountryCode === 'ES'){
+        /*if(customerPrices[0].CountryCode === 'ES'){
             //CR2-New
             let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
@@ -878,9 +939,9 @@ module.exports = async (srv) => {
         {
             arrayresult = await updatearray(effectiveDatearray, ShipToType, SoldToType, customerPrices);
             updateRappelConditionPromises = arrayresult[0].map(custPrice => updateRappelcustomerPrices(custPrice));
-        }else{
-            updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice,CombinationValue));
-        }
+        }else{*/
+        const updateRappelConditionPromises = rappelPriceConditions.map(custPrice => updateRappelcustPrices(custPrice));
+       // }
         
         // Synchronize
         console.log(`Process requests of customer prices`);
@@ -915,7 +976,7 @@ module.exports = async (srv) => {
     };
 
 
-    //CR2-New
+   /* //CR2-New
     async function updatearray(effectiveDatearray, ShipToTypeCustomer, SoldToType, customerPrices) {
 
         const tx = cds.tx();
@@ -1030,9 +1091,9 @@ module.exports = async (srv) => {
 
 
 
-    };
+    };*/
 
-    async function updateRappelcustPrices(customerPrice,CombinationValue) {
+    async function updateRappelcustPrices(customerPrice) {
         console.log(`Prepare sending update Rappel customer price: ${customerPrice.ID} for PriceAgreementID: ${customerPrice.PriceAgreementId} & InstituteID: ${customerPrice.InstituteId}`);
         const tx = cds.tx();
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where({ ID: customerPrice.PriceAgreementId }));
@@ -1067,7 +1128,7 @@ module.exports = async (srv) => {
         const datab = parseInt(`${effectiveDate.getFullYear()}${("0" + (effectiveDate.getMonth() + 1)).slice(-2)}${("0" + effectiveDate.getDate()).slice(-2)}`);
         const datbi = parseInt(`${expiryDate.getFullYear()}${("0" + (expiryDate.getMonth() + 1)).slice(-2)}${("0" + expiryDate.getDate()).slice(-2)}`);
 //CR2
-        const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode,CombinationValue);
+        const body = getES01RequestBodyTemplate(institute,priceCondition.PriceConditionCode);
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BONEM = bonem;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].BOTEX = tender.SAPID;
         body["_BAY0-GZ_SALESAGR_ES01"].IDOC["_BAY0-GZ_SALESAGRHEAD"].DATAB = datab;
@@ -1123,7 +1184,7 @@ module.exports = async (srv) => {
             // throw error;//do not throw error to continue with other requests
         }
     };
-    function getES01RequestBodyTemplate(institute,priceconditionrappelcode,CombinationValue) {
+    function getES01RequestBodyTemplate(institute,priceconditionrappelcode) {
 
         return {
             "_BAY0-GZ_SALESAGR_ES01": {
@@ -1185,7 +1246,7 @@ module.exports = async (srv) => {
         }
     };
 
-    async function updateRappelcustomerPrices(finalarray) {
+   /* async function updateRappelcustomerPrices(finalarray) {
         const tx = cds.tx();
         let body;
         
@@ -1219,7 +1280,7 @@ module.exports = async (srv) => {
 
 
 
-    };
+    };*/
     async function setStatusPriceAgreement(pas, status) {
         if (!pas || pas?.length === 0) {
             return false;
@@ -1430,7 +1491,7 @@ module.exports = async (srv) => {
                     "E1KOMG": {
                         "SEGMENT": 1,
                         "KVEWE": "A",
-                        "KOTABNR": institute.InstituteType === 'Region(s)' ? 879 : 878,
+                        "KOTABNR": institute.Comment === 'Sales Partner' ? 879 : 878,
                         "KAPPL": "V",
                         "KSCHL": "YLTP",
                         "VKORG": "ITHC",
@@ -1639,9 +1700,16 @@ module.exports = async (srv) => {
         //EHQUT-386660-Italy-Issue with FoC synchronization
         if (customerPrice.CountryCode === 'IT') {
             let priceAgreementFOC = await tx.run(SELECT.one.from(PriceAgreementFOC).where(whereCountry).where(whereProductCode).where(whereOfferId).where(whereFOCproductpackID));
-            kstbm = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? priceAgreementFOC.FreeGoods * offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && (priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' || priceAgreementFOC.FreeGoods_ABS_PCT === 'STP')) ? priceAgreementFOC.FreeGoods : 0;
-            mikbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? 1 : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
-            mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
+            if(priceAgreementFOC){
+                kstbm = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' ? priceAgreementFOC.FreeGoods * offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && (priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' || priceAgreementFOC.FreeGoods_ABS_PCT === 'STP')) ? priceAgreementFOC.FreeGoods : 0;
+                mikbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? 1 : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
+                mxkbas = priceAgreementFOC.FreeGoods_ABS_PCT === 'PCT' || priceAgreementFOC.FreeGoods_ABS_PCT === 'ABS' ? offerProduct.RequestedVolume : (customerPrice.FOCproductPackID && priceAgreementFOC.FreeGoods_ABS_PCT === 'STP') ? priceAgreementFOC.FreeGoods_Step : 0;
+            }
+            else{
+                kstbm = 0;
+                mikbas = 0;
+                mxkbas = 0;
+            }
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.E1KONH.E1KONP.BOMAT = parseInt(customerPrice.FOCmaterialNumber);
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.KOTABNR = 921;
             body["_-BAY0_-GZ_SDCOND_A04"].IDOC.E1KOMG.PSTYP = 1 + index;
@@ -1839,7 +1907,7 @@ module.exports = async (srv) => {
             console.log('Error', error.message);
         }
     }
-    //CR2
+ /*  //CR2
 
     function getES01RequestBodyTemplateRappel() {
 
@@ -1891,7 +1959,7 @@ module.exports = async (srv) => {
             }
         }
     };
-
+*/
 
     /**
      * Splits a given array into chunks

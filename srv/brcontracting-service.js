@@ -208,7 +208,9 @@ module.exports = (srv) => {
         const tx = cds.tx(req);
         try {
             const salesOrder = await tx.run(SELECT.one.from(SalesOrders).where({ID: req.data.salesOrderID}));
-            const contract = await tx.run(SELECT.one.from(Contracts).where({ID: salesOrder.Contract_ID}));
+            const contract = await tx.run(SELECT.one.from(Contracts)
+                .columns('*', 'Institute.State', 'Institute.InstituteName', 'Tender.TenderName')
+                .where({ID: salesOrder.Contract_ID}));
             const salesOrderStatus = await tx.run(SELECT.one.from(SalesOrderStatus).where({Status: req.data.sSalesOrderStatus}));
             if (!contract) {
                 return req.reject(404, `Contract not found`);
@@ -225,8 +227,10 @@ module.exports = (srv) => {
                 return req.reject(404, `No offer products were found for the following contract: ${contract.ID}`);
             }
             const body = updateSalesOrderApprovalTemplate(salesOrderStatus);
+            const sComment = `${contract.State} - ${contract.InstituteName} - Edital: ${contract.TenderName} - Empenho: ${salesOrder.EmpenhoNumber}`;
             await shareSalesOrderApprovalToIBIZ(req, body, salesOrder, offerProducts[0]);
-            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.Status}).where({ID: req.data.salesOrderID}));
+            await tx.run(UPDATE(SalesOrders).with({StatusID: salesOrderStatus.ID}).where({ID: req.data.salesOrderID}));
+            await tx.run(UPDATE(SalesOrderProducts).with({Comment: sComment}).where({SalesOrder_ID: req.data.salesOrderID}));
             // await tx.commit();
             return req.reply("Correct")
         } catch (error) {
