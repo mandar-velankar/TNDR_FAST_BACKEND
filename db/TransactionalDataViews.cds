@@ -2322,7 +2322,6 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NET_OFFER_SALES_OFFER_CURRENCY              : Double;
             NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
             FOCInfoText                                 : String;
-            ItemNumber                                  : Integer;
             ContractDuration_1                          : Double;
             ContractDuration_2                          : Double;
             ContractDuration_3                          : Double;
@@ -2332,6 +2331,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Discount_1                                  : Double;
             Discount_2                                  : Double;
             Discount_3                                  : Double;
+            ItemNumber                                  : Integer;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
