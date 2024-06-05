@@ -3775,8 +3775,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
 				AlternateOfferYN: offerProduct.AlternateOfferYN,
-				FOCInfoText: FOCInfoText,
-				FOCInfoText: awardProductFormView?.FOC,
 				ContractDuration_1: productConditions[0].NLPriceConditions?.[0]?.ContractDuration,
 				ContractDuration_2: productConditions[0].NLPriceConditions?.[1]?.ContractDuration,
 				ContractDuration_3: productConditions[0].NLPriceConditions?.[2]?.ContractDuration,
@@ -3785,7 +3783,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				OfferPrice_3: productConditions[0].NLPriceConditions?.[2]?.OfferPrice,
 				Discount_1: productConditions[0].NLPriceConditions?.[0]?.Discount,
 				Discount_2: productConditions[0].NLPriceConditions?.[1]?.Discount,
-				Discount_3: productConditions[0].NLPriceConditions?.[2]?.Discount
+				Discount_3: productConditions[0].NLPriceConditions?.[2]?.Discount,
+				FOCInfoText: FOCInfoText
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -4951,10 +4950,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         return num;
     };
 
-	function roundToDecimalPlaces(number, decimalPlaces) {
-		const factor = Math.pow(10, decimalPlaces);
-		return Math.round(number * factor) / factor;
-	};
 	srv.after("UPDATE", "ZagisUploadFile", async (req, res) => {
 		try {
 			const {OfferID} = req;
@@ -5038,4 +5033,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 		return arrayBuffer;
 	}
+	function roundToDecimalPlaces(number, decimalPlaces) {
+		const factor = Math.pow(10, decimalPlaces);
+		return Math.round(number * factor) / factor;
+	};
 }
