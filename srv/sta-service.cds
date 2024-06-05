@@ -117,8 +117,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
-        tender.Institute.InstituteTerritory.Territory,
-        tender.Institute.InstituteTerritory.IsKAM,
         key tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         case 
@@ -136,7 +134,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedAt, 
         CreatedByUser.UserName as createdByName,
         ModifyedByUser.UserName as modifiedByName,
-        tender.Country.Region
+        tender.Country.Region,
+        tender.Custom.Integer_1 as Custom_Integer_1,
+        tender.Custom.Integer_2 as Custom_Integer_2,
+        tender.Custom.Integer_3 as Custom_Integer_3
     }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -146,8 +147,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
-        tender.Institute.InstituteTerritory.Territory,
-        tender.Institute.InstituteTerritory.IsKAM,
         tender.Offer.OfferID,
         tender.Offer.OfferValue.VALUE,
         tender.Offer.OfferStatus.STATUS,     
@@ -160,7 +159,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedAt,
         CreatedByUser.UserName,
         ModifyedByUser.UserName,
-        tender.Country.Region;
+        tender.Country.Region,
+        tender.Custom.Integer_1,
+        tender.Custom.Integer_2,
+        tender.Custom.Integer_3;
 
     @cds.redirection.target
     entity InstitutesView as select from MasterData.PT_TMINST as inst
@@ -874,5 +876,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inst.InstituteName,
 	    hier.ParentInstituteID,
 	    key hier.InstituteID,
-    }where inst.CountryCode = 'NL'
+    }where inst.CountryCode = 'NL';
+
+    entity ZagisUploadFile {
+        key OfferID   : String(50) default '';
+        @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        content    : LargeBinary;
+    }
 }
