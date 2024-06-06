@@ -108,7 +108,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join AdminData.PT_TMUSER as CreatedByUser on CreatedByUser.UserID = tender.createdBy 
         inner join AdminData.PT_TMUSER as ModifyedByUser on ModifyedByUser.UserID = tender.modifiedBy
         left join TransactionalData.PT_TMOFRS as offer on offer.TenderID = tender.TenderID
-        left join TransactionalDataViews.BrandsInTender as brands on brands.OFFERID = offer.OfferID {
+        left join TransactionalDataViews.BrandsInTender as brands on brands.OFFERID = offer.OfferID 
+        left join TransactionalData.PT_TMQUTO as quotation on quotation.OfferID = offer.OfferID and quotation.Active = 1 {
         tender.CountryCode,
         key tender.TenderID,
         tender.Classification,
@@ -131,7 +132,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedAt, 
         CreatedByUser.UserName as createdByName,
         ModifyedByUser.UserName as modifiedByName,
-        tender.Country.Region
+        tender.Country.Region,
+        quotation.EffectiveDate,
+        quotation.ExpiryDate
     }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -154,7 +157,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.modifiedAt,
         CreatedByUser.UserName,
         ModifyedByUser.UserName,
-        tender.Country.Region;
+        tender.Country.Region,
+        quotation.EffectiveDate,
+        quotation.ExpiryDate;
 
     @cds.redirection.target
     entity InstitutesView as select from MasterData.PT_TMINST as inst
