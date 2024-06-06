@@ -4485,16 +4485,21 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			"FGBuy": 0,
 			"FGGift": 0,
 			"NetPrice": Number(item.Price3).toFixed(4),
-			"BT": "BT"
+			"BT": "BT",
+			"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+			"ModifiedAt": item.SubmittedOn? moment(item.SubmittedOn).format('YYYY-MM-DD') : "",
+			"OfferID": item.OfferID,
+			"BranchNumber": item.ParentInst_External_InstituteId || ''
+			
 		}
 	}
 	function mappedSingleView (zuelligExtract) { // TaiwanFASTData
 		return zuelligExtract.map(item => {
 			return {
-				"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
+				"CreationDate":item.CreationDate? moment(item.CreationDate).format('YYYY-MM-DD'): "",
 				"CWID": item.SubmittedBy,
 				"BU": item.BU,
-				"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
+				"EffectiveDate":item.EffectiveDate? moment(item.EffectiveDate).format('YYYY-MM-DD'): "",
 				"PreviousNetPrice": Number(item.Price3).toFixed(4),
 				"CountProducts": item.CountProducts,
 				"Invoice Price": Number(item.Price1).toFixed(4),
@@ -4502,9 +4507,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				"Institute Type": item.InstituteType,
 				"Class": item.Class || "",
 				"PackFactor": item.PACKFACTOR || "",
-				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
+				"CreatedAt/CreationDate":item.createdAt? moment(item.createdAt).format('YYYY-MM-DD'): "",
 				"Branch": item.ParentInstituteID || "",
-				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
+				"ModifiedAt":item.SubmittedOn? moment(item.SubmittedOn).format('YYYY-MM-DD'): "",
 				"InvoicePrice": Number(item.Price1).toFixed(4),
 				"NetPrice": Number(item.Price3).toFixed(4),
 				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(4),
