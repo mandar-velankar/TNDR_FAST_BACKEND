@@ -133,8 +133,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         CreatedByUser.UserName as createdByName,
         ModifyedByUser.UserName as modifiedByName,
         tender.Country.Region,
-        quotation.EffectiveDate,
-        quotation.ExpiryDate
+        ifnull(quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate,
+        ifnull(quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate,
     }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
