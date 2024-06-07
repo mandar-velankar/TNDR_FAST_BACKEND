@@ -157,6 +157,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         CreatedByUser.UserName,
         ModifyedByUser.UserName,
         tender.Country.Region,
+        tender.Custom.Integer_1,
+        tender.Custom.Integer_2,
+        tender.Custom.Integer_3,
         quotation.EffectiveDate,
         quotation.ExpiryDate;
 
