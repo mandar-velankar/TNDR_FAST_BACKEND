@@ -1110,7 +1110,9 @@ module.exports = async (srv) => {
 		async (req) => {
 			try{
 			// validate form
-			req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+				if(req.data.CountryCode !== "AU"){
+					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+				}
 			}
 			catch(error){
 				console.error('Error in validation of PriceCondition View before CREATE');
