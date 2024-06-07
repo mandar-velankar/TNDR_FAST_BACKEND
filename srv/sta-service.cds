@@ -133,8 +133,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         CreatedByUser.UserName as createdByName,
         ModifyedByUser.UserName as modifiedByName,
         tender.Country.Region,
-        ifnull(quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate,
-        ifnull(quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate,
+        tender.Custom.Integer_1 as Custom_Integer_1,
+        tender.Custom.Integer_2 as Custom_Integer_2,
+        tender.Custom.Integer_3 as Custom_Integer_3,
+        ifnull(quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate:Date,
+        ifnull(quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate:Date
     }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -242,7 +245,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Price.NetPrice as NetPrice,
         RequestedVolume,
         PriceCondition.AnticipatedYearlyVolumeBranch,
-        Price.OfferPrice * 
+        Price.OfferPrice * (1 - Price.Deductions) *
         case 
         when Price.FOCType = 'FOC 1'
             then 
@@ -254,7 +257,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                         else RequestedVolume - Price.FOC
                 end
             else RequestedVolume        
-        end * (1 - Price.Deductions) as TotalAmount:Double,
+        end as TotalAmount:Double,
         Offer.Currency as Currency,
         Offer.Tender.Country.Region,
         SKUCountry.RegistrationValidUntil
