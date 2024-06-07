@@ -242,19 +242,19 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Price.NetPrice as NetPrice,
         RequestedVolume,
         PriceCondition.AnticipatedYearlyVolumeBranch,
-        Price.NetPrice *
+        Price.OfferPrice * 
         case 
         when Price.FOCType = 'FOC 1'
-            then RequestedVolume
-            else 
+            then 
                 case 
                     when Price.FOC_ABS_PCT = 'PCT'
-                        then RequestedVolume + round(RequestedVolume * Price.FOC)
+                        then RequestedVolume - round(RequestedVolume * Price.FOC)
                             when Price.FOC_ABS_PCT = 'STP'
-                            then RequestedVolume + floor(RequestedVolume / Price.FOCStep) * Price.FOC
-                        else RequestedVolume + Price.FOC
+                            then RequestedVolume - floor(RequestedVolume / Price.FOCStep) * Price.FOC
+                        else RequestedVolume - Price.FOC
                 end
-        end as TotalAmount:Double,
+            else RequestedVolume        
+        end * (1 - Price.Deductions) as TotalAmount:Double,
         Offer.Currency as Currency,
         Offer.Tender.Country.Region,
         SKUCountry.RegistrationValidUntil
