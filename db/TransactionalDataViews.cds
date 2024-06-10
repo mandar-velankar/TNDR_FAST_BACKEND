@@ -642,6 +642,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Price.SpotRate as SPOT_RATE,
     offerProduct.Price.BusinessCasePrice as BUSINESS_CASE_PRICE,
     offerProduct.Price.Discount as DISCOUNT,
+    offerProduct.Price.Deductions,
     offerProduct.Price.AdditionalDiscount as ADDITIONAL_DISCOUNT,
     offerProduct.Price.StandardDiscount as STANDARD_DISCOUNT,
     offerProduct.Price.FOCStep  as FOC_STEP,
