@@ -722,6 +722,7 @@ entity PT_TMTNOFST {
         CountryCode : String;
     key Active      : Integer not null;
         STATUS      : String(255);
+        TableStatus : String(255);
         Date        : Date;
 }
 
