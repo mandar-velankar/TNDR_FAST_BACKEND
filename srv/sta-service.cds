@@ -108,25 +108,26 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join AdminData.PT_TMUSER as CreatedByUser on CreatedByUser.UserID = tender.createdBy 
         inner join AdminData.PT_TMUSER as ModifyedByUser on ModifyedByUser.UserID = tender.modifiedBy
         left join TransactionalData.PT_TMOFRS as offer on offer.TenderID = tender.TenderID
-        left join TransactionalDataViews.BrandsInTender as brands on brands.OFFERID = offer.OfferID {
+        left join TransactionalDataViews.BrandsInTender as brands on brands.OFFERID = offer.OfferID
+        left join TransactionalData.PT_TMQUTO as quotation on quotation.OfferID = offer.OfferID and quotation.Active = 1 {
         tender.CountryCode,
         key tender.TenderID,
         tender.Classification,
         tender.TenderName,
         tender.createdBy,
-        tender.Offer.Distributor.DistributorName,
+        offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
-        key tender.Offer.OfferID,
-        tender.Offer.OfferValue.VALUE,
+        key offer.OfferID,
+        offer.OfferValue.VALUE,
         case 
-            when tender.Offer.OfferStatus.STATUS = 'Results Recorded' and tender.Offer.OfferStatusTable.TableStatus <> ''
-                then tender.Offer.OfferStatusTable.TableStatus
-            else tender.Offer.OfferStatus.STATUS
+            when offer.OfferStatus.STATUS = 'Results Recorded' and offer.OfferStatusTable.TableStatus <> ''
+                then offer.OfferStatusTable.TableStatus
+            else offer.OfferStatus.STATUS
         end as STATUS:String(255),
-        ifnull(tender.Offer.OfferStatusTable.TableStatus, tender.Offer.OfferStatus.STATUS) as TableStatus:String(255),                 
+        ifnull(offer.OfferStatusTable.TableStatus, offer.OfferStatus.STATUS) as TableStatus:String(255),                 
         tender.PublicationDate,
-        tender.Offer.InternalBidDueDate,
+        offer.InternalBidDueDate,
         tender.BidDueDate,
         max(brands.BRANDID) as BrandID:String,
         tender.createdAt,
@@ -137,22 +138,24 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Country.Region,
         tender.Custom.Integer_1 as Custom_Integer_1,
         tender.Custom.Integer_2 as Custom_Integer_2,
-        tender.Custom.Integer_3 as Custom_Integer_3
-    }where tender.Active = 1 and ifnull(tender.Offer.Active, 1) = 1
+        tender.Custom.Integer_3 as Custom_Integer_3,
+        ifnull(quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate:Date,
+        ifnull(quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate:Date
+    }where tender.Active = 1 and ifnull(offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
         tender.Classification,
         tender.TenderName,
         tender.createdBy,
-        tender.Offer.Distributor.DistributorName,
+        offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
-        tender.Offer.OfferID,
-        tender.Offer.OfferValue.VALUE,
-        tender.Offer.OfferStatus.STATUS,     
-        tender.Offer.OfferStatusTable.TableStatus,    
+        offer.OfferID,
+        offer.OfferValue.VALUE,
+        offer.OfferStatus.STATUS,     
+        offer.OfferStatusTable.TableStatus,    
         tender.PublicationDate,
-        tender.Offer.InternalBidDueDate,
+        offer.InternalBidDueDate,
         tender.BidDueDate,
         tender.createdAt,
         tender.modifiedBy,
@@ -162,7 +165,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Country.Region,
         tender.Custom.Integer_1,
         tender.Custom.Integer_2,
-        tender.Custom.Integer_3;
+        tender.Custom.Integer_3,
+        quotation.EffectiveDate,
+        quotation.ExpiryDate;
 
     @cds.redirection.target
     entity InstitutesView as select from MasterData.PT_TMINST as inst
