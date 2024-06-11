@@ -2252,19 +2252,19 @@ module.exports = (srv) => {
             CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
 			CONTENT :tender.CONTENT,
 			Unitofvalidityperiod: quotation?.Custom_String_1,
-			DeliveryDue: quotation?.Custom_Integer_1,
-			Unitofdeliverydue: quotation?.Custom_String_2,
+			DeliveryDue: tender?.Custom_Integer_1,
+			Unitofdeliverydue: tender?.Custom_String_4,
 			QuotationDeliverymethod: quotation?.Custom_String_3,
 			QuotationRecipientname: quotation?.Custom_String_4,
 			QuotationRecipientcontact: quotation?.Custom_String_5,
 			Expectdatetoreceivethedocument: quotation?.Custom_Date_1,
-			RequestorPphoneNnumber: tender.Custom_Integer_1,
+			RequestorPphoneNnumber: tender.Custom_String_2,
             BayerRepresentativeName: tender.Custom_String_1,
-            BayerRepresentativePhoneNumber: tender.Custom_Integer_2,
+            BayerRepresentativePhoneNumber: tender.Custom_String_3,
             PeriodOfBankGauranteeStart: tender.Custom_Date_1,
             PeriodOfBankGauranteeEnd: tender.Custom_Date_2,
             BGValueBaht: tender.Custom_Double_1,
-			TenderAnnouncementReference: selectedOffer?.Custom_String_1
+			TenderAnnouncementReference: selectedOffer?.Custom_String_1,
 		};
 		return results;
 		

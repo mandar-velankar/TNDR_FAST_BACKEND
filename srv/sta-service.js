@@ -500,6 +500,7 @@ module.exports = async (srv) => {
 
 		const cwid = res.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+		const instituteTerritory = await SELECT.from(InstituteTerritory);
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
@@ -509,14 +510,20 @@ module.exports = async (srv) => {
 		const resultsArray = Array.isArray(req) ? req : [req];
 	  
 		const territoryMatches = resultsArray.filter(item => {
+			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
+			
 			return userTerritories.some(userTerritory => {
-			  return item.Territory === userTerritory.Territory;
+				const territoryIndex = filteredInstituteTerritory.findIndex(el => el.Territory === userTerritory.Territory);
+			  	return territoryIndex !== -1;
 			});
 		  });
 		  
 		const finalFilteredResults = territoryMatches.filter(item => {
+			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
+			
 			return userTerritories.some(userTerritory => {
-			return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+				const territoryIndex = filteredInstituteTerritory.findIndex(el => el.Territory === userTerritory.Territory && el.IsKAM === userTerritory.IsKAM);
+			  	return territoryIndex !== -1;
 			});
 		});
 			
@@ -1090,7 +1097,9 @@ module.exports = async (srv) => {
 		async (req) => {
 			try{
 			// validate form
-			req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+				if(req.data.CountryCode !== "AU"){
+					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+				}
 			}
 			catch(error){
 				console.error('Error in validation of PriceCondition View before CREATE');
@@ -3499,7 +3508,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				COGS_EUR_PACK: productInfo.CommnonProductInfo.CogsEurPack,
 				GROSS_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.GrossSales,
 				GROSS_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.GrossSales),
-				NET_SALES_OFFER_CURRENCY: offer.Region === 'MEA' ? productInfo.CommnonProductInfo.GrossSales * (1 - productConditions[0].Level3Discount1) : productInfo.CommnonProductInfo.NetSales,
+				NET_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetSales,
 				NET_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetSales),
 				NET_OFFER_SALES_OFFER_CURRENCY: productInfo.CommnonProductInfo.NetOfferSales,
 				NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS: NumberHelper.formatNumberToText(offer.COUNTRYCODE, productInfo.CommnonProductInfo.NetOfferSales),
@@ -3952,7 +3961,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 
 		let grossSales = offerPrice * paidVolume;
 		let netOfferSales = netOfferPrice * totalVolume;
-		let netSales = netPrice * totalVolume;
+		let netSales = grossSales * (1 - product.Deductions);
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
 
@@ -4302,10 +4311,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			prd.Price0 = prd.Region === 'MEA' ? prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 3, 3) : prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
 			prd.Price1 = prd.Region === 'MEA' ? prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 3, 3) : prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
 			prd.Price3 = prd.Region === 'MEA' ? prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 3, 3) : prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
-			prd.Level1Discount1 = ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
-			prd.Level2Discount1 = ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
-			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
-			prd.Level3Discount1 = prd.Region === 'MEA' ? ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 3, 3) : ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 2, 2);
+			prd.Level1Discount1 = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 4, 4) : ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
+			prd.Level2Discount1 = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 4, 4) : ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
+			prd.Level2Discount2 = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 4, 4) : ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
+			prd.Level3Discount1 = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 3, 3) : ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 2, 2);
 			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
 			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
 			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
@@ -4360,7 +4369,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4373,7 +4382,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			// zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4421,7 +4430,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4430,7 +4439,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			// zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
