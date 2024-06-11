@@ -2708,53 +2708,64 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
     and offer.Active = 1
     and pr.Results.Outcome = 'Won';
 
-    entity  ZuelligExtractView as projection on zuelligExtract{
+    entity ZuelligExtractDistinctView as projection on zuelligExtract{
         TenderID,
-        createdAt,
+        MAX(createdAt) AS createdAt,
         OfferID,
-        CountryCode,
-        CreationDate,
-        SubmittedBy,
-        SubmittedOn,
-        UserName,   
+        MAX(CountryCode) AS CountryCode,
+        MAX(CreationDate) AS CreationDate,
+        MAX(SubmittedBy) AS SubmittedBy,
+        MAX(SubmittedOn) AS SubmittedOn,
+        MAX(UserName) AS UserName,
         ProductCode,
+        MAX(InstituteName) AS InstituteName,
+        MAX(InstituteType) AS InstituteType,
+        InstituteID,
+        MAX(External_InstituteId) AS External_InstituteId,
+        MAX(ParentInst_External_InstituteId) AS ParentInst_External_InstituteId,
+        MAX(Class) AS Class,
+        MAX(KAM_Territory) AS KAM_Territory,
+        MAX(CNPJ) AS CNPJ,
+        MAX(ParentInstituteID) AS ParentInstituteID,
+        MAX(EffectiveDate) AS EffectiveDate,
+        MAX(PRODUCTPACKNAME) AS PRODUCTPACKNAME,
+        MAX(PACKFACTOR) AS PACKFACTOR,
+        MAX(SKUCode) AS SKUCode,
+        MAX(Display) AS Display,
+        MAX(BU) AS BU,
+        MAX(Price0) AS Price0,
+        MAX(Price1) AS Price1,
+        MAX(Price2) AS Price2,
+        MAX(Price3) AS Price3,
+        MAX(TotalDiscountNHI) AS TotalDiscountNHI,
+        MAX(Level2Discount1) AS Level2Discount1,
+        MAX(Level2Discount2) AS Level2Discount2,
+        MAX(Level3Discount1) AS Level3Discount1,
+        MAX(GeneralDiscount_Amount) AS GeneralDiscount_Amount,
+        MAX(SecondDiscount_Amount) AS SecondDiscount_Amount,
+        MAX(FreeGoods_Amount) AS FreeGoods_Amount,
+        MAX(FreeGoods_Percentage) AS FreeGoods_Percentage,
+        MAX(AnnualDiscount_Percentage) AS AnnualDiscount_Percentage,
+        MAX(AnnualDiscountForBranch) AS AnnualDiscountForBranch,
+        MAX(RegisteredPrice) AS RegisteredPrice,
+        MAX(Status) AS Status,
+        MAX(BranchInstitute) AS BranchInstitute,
+        MAX(SORTER) AS SORTER
+    }group by 
+        TenderID,
+        OfferID,
+        InstituteID,
+        ProductCode;
+    
+    entity ZuelligExtractView as projection on ZuelligExtractDistinctView {
+        *,
         case 
             when BranchInstitute <> ''
-                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY ProductCode) 
-            else SORTER + 1
-		end	as CountProducts: Integer,
-        InstituteName,
-        InstituteType,
-        InstituteID,
-        External_InstituteId,
-        ParentInst_External_InstituteId,
-        Class,
-        KAM_Territory,
-        CNPJ,
-        ParentInstituteID,
-        EffectiveDate,
-        PRODUCTPACKNAME,
-        PACKFACTOR,
-        SKUCode,
-        Display,
-        BU,
-        Price0,
-        Price1,
-        Price2,
-        Price3,
-        TotalDiscountNHI,
-        Level2Discount1,
-        Level2Discount2,
-        Level3Discount1,
-        GeneralDiscount_Amount,
-        SecondDiscount_Amount,
-        FreeGoods_Amount,
-        FreeGoods_Percentage,
-        AnnualDiscount_Percentage,
-        AnnualDiscountForBranch,
-        RegisteredPrice,
-        Status
-    };
+                then ROW_NUMBER() OVER (PARTITION BY OfferID) 
+                else SORTER + 1
+        end	as CountProducts: Integer,
+    } order by CreationDate desc, OfferID desc, CountProducts asc;
+ 
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
         key hier.ParentInstituteID,

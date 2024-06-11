@@ -4369,7 +4369,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4382,7 +4382,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			// zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4430,7 +4430,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4439,7 +4439,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			// zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
