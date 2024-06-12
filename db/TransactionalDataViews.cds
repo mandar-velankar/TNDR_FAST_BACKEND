@@ -789,6 +789,21 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           then ifnull(offer.Quotation.OfferValidity,ADD_MONTHS(CURRENT_DATE,1))
         when offer.CountryCode = 'IT'
            then ifnull(offer.Quotation.OfferValidity, ifnull(offer.Tender.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay))))
+        when offer.CountryCode = 'TH'
+            then
+                case
+                    when offer.Quotation.OfferValidity is null 
+                        then
+                            case
+                                when offer.Tender.Custom.String_5 = 'Days'
+                                    then  ADD_DAYS(CURRENT_DATE, offer.Tender.ContractLength)
+                                when offer.Tender.Custom.String_5 = 'Months'
+                                    then  ADD_MONTHS(CURRENT_DATE, offer.Tender.ContractLength)
+                                when offer.Tender.Custom.String_5 = 'Years'
+                                    then  ADD_YEARS(CURRENT_DATE, offer.Tender.ContractLength)
+                            end
+                    else offer.Quotation.OfferValidity
+                end
        else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
     end as OFFERVALIDITY,
 
@@ -977,7 +992,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Comment,
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region,
-          offer.InternalBidDueDate;
+          offer.InternalBidDueDate,
+          offer.Tender.Custom.String_5;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
