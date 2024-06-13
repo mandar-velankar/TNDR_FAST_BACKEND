@@ -490,29 +490,53 @@ module.exports = async (srv) => {
         }
 	});
 
-	srv.after('READ', 'TenderMasterView', async (req, res, next) => {
+	srv.on('READ', 'TenderMasterView', async (req, next) => {
 		try{
 		//const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
+		const tx = cds.tx(req);
 		
-    	const isCountQuery = Array.isArray(req) && req.some(item => '$count' in item);
-    
-		if (isCountQuery) {
-		// If $count is present, return the original result
-		return req;
-		}
+		let result = [];
+        let tmvQuery = SELECT.from(req.query.SELECT.from);
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
+            tmvQuery.columns(req.query.SELECT.columns);
+        }
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode'); 
+        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
 
-		const cwid = res.user.id;
+        result = await tx.run(tmvQuery);
+
+    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+    
+		if (isCountQuery || countryCode[0] !== 'TW' || countryCode.length <= 0) {
+		// If $count is present, return the original result
+		return result;
+		}
+		
+		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		const instituteTerritory = await SELECT.from(InstituteTerritory);
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return req;
+		  return result;
 		}
 
-		const resultsArray = Array.isArray(req) ? req : [req];
+		let resultsArray = Array.isArray(result) ? result : [result];
 	  
+		// const territoryMatches = resultsArray.filter(item => {
+		// 	return userTerritories.some(userTerritory => {
+		// 	  return item.Territory === userTerritory.Territory;
+		// 	});
+		//   });
+		  
+		// const finalFilteredResults = territoryMatches.filter(item => {
+		// 	return userTerritories.some(userTerritory => {
+		// 	return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+		// 	});
+		// });
+		resultsArray = resultsArray.filter(ra => ra.createdBy === cwid);
 		const territoryMatches = resultsArray.filter(item => {
 			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
 			
@@ -533,17 +557,15 @@ module.exports = async (srv) => {
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
-			req = finalFilteredResults
-			return req;
+			return finalFilteredResults;
 		}else{
 			// If no territory matches, return an empty array
-			req = territoryMatches
-			return req;
+			return territoryMatches;
 		}
 		}
 		catch(error){
             console.error('Error in TenderMasterView READ');
-            return res.reject(403, error?.message||"Error in TenderMasterView");
+            return req.reject(403, error?.message||"Error in TenderMasterView");
         }
 	  });
 

@@ -2774,10 +2774,10 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         *,
         case 
             when BranchInstitute <> ''
-                then ROW_NUMBER() OVER (PARTITION BY OfferID) 
+                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc) 
                 else SORTER + 1
         end	as CountProducts: Integer,
-    } order by CreationDate desc, OfferID desc, CountProducts asc;
+    };
  
     entity TaiwanInstituteInBranchView as select from MasterData.PT_TMINST as inst
         inner join MasterData.PT_TMINSHIER as hier on inst.InstituteID = hier.InstituteID {
