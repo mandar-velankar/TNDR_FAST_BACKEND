@@ -2143,6 +2143,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PeriodOfBankGauranteeEnd: Date;
             BGValueBaht: Double;
             TenderAnnouncementReference: String;
+            ContractLenghtUnit: String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
