@@ -1703,10 +1703,15 @@ module.exports = async (srv) => {
 	}
 
 	const upsertPriceCondition = async function(req){
-
+		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
 			ProductCode: req.data.ProductCode
+		});
+
+		const productCurrentPrice = await SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({
+			ProductCode: req.data.ProductCode,
+			INSTITUTE_ID: selectedTender.InstituteID
 		});
 
 		let individualCustomer = true;
@@ -1714,7 +1719,7 @@ module.exports = async (srv) => {
 			individualCustomer = await validateIndividualCustomerTaiwan(req);
 		}
 
-		const mappedPriceCondition = mapPriceCondition(req, individualCustomer);
+		const mappedPriceCondition = mapPriceCondition(req, individualCustomer, productCurrentPrice);
 
 		if(priceCondition){
 			foc = await SELECT.from(FreeGoodsOther).where({
@@ -1752,7 +1757,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	const mapPriceCondition = function(req, individualCustomer){
+	const mapPriceCondition = function(req, individualCustomer, productCurrentPrice){
 		const mappings = {
 			"Discount" : {
 				Price0: req.data.BasePrice,
@@ -1846,7 +1851,22 @@ module.exports = async (srv) => {
     			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
-				PriceConditionClassification_ID: req.data.ClassificationID
+				PriceConditionClassification_ID: req.data.ClassificationID,
+				CurrentBasePrice: productCurrentPrice && productCurrentPrice.Price0,
+				CurrentInvoicePrice: productCurrentPrice && productCurrentPrice.Price1,
+				CurrentGeneralDiscount: productCurrentPrice && productCurrentPrice.Level2Discount1,
+				CurrentGeneralDiscount_Amount: productCurrentPrice && productCurrentPrice.GeneralDiscount_Amount,
+				CurrentSecondDiscount: productCurrentPrice && productCurrentPrice.Level2Discount2,
+				CurrentSecondlDiscount_Amount: productCurrentPrice && productCurrentPrice.SecondDiscount_Amount,
+				CurrentNetOfferPrice: productCurrentPrice && productCurrentPrice.Price2,
+				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice && productCurrentPrice.AnnualDiscountForBranch,
+				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice && productCurrentPrice.Level3Discount1,
+				CurrentNetPrice: productCurrentPrice && productCurrentPrice.Price3,
+				CurrentNegotiationPrice: productCurrentPrice && productCurrentPrice.AwardedPrice,
+				CurrentTotalYearlyValueMainCustomer: productCurrentPrice && productCurrentPrice.TotalYearlyValueMainCustomer,
+				CurrentTotalYearlyValueBranch: productCurrentPrice && productCurrentPrice.TotalYearlyValueBranch,
+				CurrentTotalDiscountNHI: productCurrentPrice && productCurrentPrice.TotalDiscountNHI,
+				CurrentTotalDiscountInvoice: productCurrentPrice && productCurrentPrice.TotalDiscountInvoice
 			},
 			"TaiwanDiscount": {
 				Price0: req.data.BasePrice,
@@ -1875,7 +1895,22 @@ module.exports = async (srv) => {
     			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
-				PriceConditionClassification_ID: req.data.ClassificationID
+				PriceConditionClassification_ID: req.data.ClassificationID,
+				CurrentBasePrice: productCurrentPrice && productCurrentPrice.Price0,
+				CurrentInvoicePrice: productCurrentPrice && productCurrentPrice.Price1,
+				CurrentGeneralDiscount: productCurrentPrice && productCurrentPrice.Level2Discount1,
+				CurrentGeneralDiscount_Amount: productCurrentPrice && productCurrentPrice.GeneralDiscount_Amount,
+				CurrentSecondDiscount: productCurrentPrice && productCurrentPrice.Level2Discount2,
+				CurrentSecondlDiscount_Amount: productCurrentPrice && productCurrentPrice.SecondDiscount_Amount,
+				CurrentNetOfferPrice: productCurrentPrice && productCurrentPrice.Price2,
+				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice && productCurrentPrice.AnnualDiscountForBranch,
+				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice && productCurrentPrice.Level3Discount1,
+				CurrentNetPrice: productCurrentPrice && productCurrentPrice.Price3,
+				CurrentNegotiationPrice: productCurrentPrice && productCurrentPrice.AwardedPrice,
+				CurrentTotalYearlyValueMainCustomer: productCurrentPrice && productCurrentPrice.TotalYearlyValueMainCustomer,
+				CurrentTotalYearlyValueBranch: productCurrentPrice && productCurrentPrice.TotalYearlyValueBranch,
+				CurrentTotalDiscountNHI: productCurrentPrice && productCurrentPrice.TotalDiscountNHI,
+				CurrentTotalDiscountInvoice: productCurrentPrice && productCurrentPrice.TotalDiscountInvoice
 			}
 		}
 
