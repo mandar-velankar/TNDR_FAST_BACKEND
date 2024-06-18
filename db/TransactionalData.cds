@@ -911,3 +911,10 @@ entity ExcelUpload:cuid {
     @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     content             : LargeBinary;
 };
+
+entity THQuotationDelevery : cuid {
+    OfferID                   : String;
+    QuotationDeliverymethod   : String;
+    QuotationRecipientname    : String;
+    QuotationRecipientcontact : String;
+}
