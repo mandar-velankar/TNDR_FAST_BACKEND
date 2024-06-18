@@ -47,7 +47,8 @@ module.exports = (srv) => {
 		DiscountCondition, 
 		PriceConditionClassification, 
 		ProductTypeProfitability,
-		CountrySpecificTenderInfo
+		CountrySpecificTenderInfo,
+		THQuotationDelevery
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate,SchedulerApiConfig,SchedulerApiConfigOAuth
@@ -2164,6 +2165,28 @@ module.exports = (srv) => {
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
 		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+		const THQuotationDeleveryResults = {
+			QuotationDeliverymethod: '',
+			QuotationRecipientname: '',
+			QuotationRecipientcontact: '',
+		};
+		
+		if (tender.CountryCode === 'TH') {
+			let QuotationDeleveryTH = await tx.run(SELECT.from(THQuotationDelevery).where({ "OfferID": offer.OFFERID }));
+			
+			QuotationDeleveryTH.forEach((item, index) => {
+				if (item.QuotationDeliverymethod) {
+					THQuotationDeleveryResults.QuotationDeliverymethod += (THQuotationDeleveryResults.QuotationDeliverymethod ? ',' : '') + item.QuotationDeliverymethod;
+				}
+				if (item.QuotationRecipientname) {
+					THQuotationDeleveryResults.QuotationRecipientname += (THQuotationDeleveryResults.QuotationRecipientname ? ',' : '') + item.QuotationRecipientname;
+				}
+				if (item.QuotationRecipientcontact) {
+					THQuotationDeleveryResults.QuotationRecipientcontact += (THQuotationDeleveryResults.QuotationRecipientcontact ? ',' : '') + item.QuotationRecipientcontact;
+				}
+			});
+		}
+		
 		//EHQUT- Spain - correct mistakes on Commercial agreement templates
 		results = {
 			OFFERSTATUSPATH: offer.OFFERSTATUSPATH,
@@ -2254,9 +2277,9 @@ module.exports = (srv) => {
 			Unitofvalidityperiod: quotation?.Custom_String_1,
 			DeliveryDue: tender?.Custom_Integer_1,
 			Unitofdeliverydue: tender?.Custom_String_4,
-			QuotationDeliverymethod: quotation?.Custom_String_3,
-			QuotationRecipientname: quotation?.Custom_String_4,
-			QuotationRecipientcontact: quotation?.Custom_String_5,
+			QuotationDeliverymethod: THQuotationDeleveryResults?.QuotationDeliverymethod,
+			QuotationRecipientname: THQuotationDeleveryResults?.QuotationRecipientname,
+			QuotationRecipientcontact: THQuotationDeleveryResults?.QuotationRecipientcontact,
 			Expectdatetoreceivethedocument: quotation?.Custom_Date_1,
 			RequestorPphoneNnumber: tender.Custom_String_2,
             BayerRepresentativeName: tender.Custom_String_1,
