@@ -4835,6 +4835,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		['CREATE','UPDATE'], 'PT_TMBDPR', 
 		async (req) => {
 			try{
+			await updateApprovalsSent(req.data.OfferID);
 			await updateProductPricing(req);
 			await updatePriceCondition(req);
 
