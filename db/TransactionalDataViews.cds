@@ -2144,6 +2144,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             BGValueBaht: Double;
             TenderAnnouncementReference: String;
             ContractLenghtUnit: String;
+            AttentionTo: String;
+            QuotationDate: Date;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
