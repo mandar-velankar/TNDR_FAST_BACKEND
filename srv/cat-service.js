@@ -2290,7 +2290,8 @@ module.exports = (srv) => {
 			TenderAnnouncementReference: selectedOffer?.Custom_String_1,
 			ContractLength: tender.ContractLength,
             ContractLenghtUnit: tender.Custom_String_5,
-
+			AttentionTo: quotation?.Custom_String_6,
+            QuotationDate: quotation?.Custom_Date_3
 		};
 		return results;
 		
