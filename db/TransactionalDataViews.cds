@@ -1499,35 +1499,35 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     ifnull(priceCondition.FreeGoods_Percentage,0) as FreeGoods_Percentage:Double,
     priceCondition.NLPriceConditionType,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentBasePrice, curentSection.Price0) as TWCurrentBasePrice,
+    ifnull(priceCondition.CurrentBasePrice, curentSection.Price0) as TWCurrentBasePrice: Decimal,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentInvoicePrice, curentSection.Price1) as CurrentInvoicePrice,
+    ifnull(priceCondition.CurrentInvoicePrice, curentSection.Price1) as CurrentInvoicePrice: Decimal,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentGeneralDiscount, curentSection.Level2Discount1) as CurrentGeneralDiscount,
+    ifnull(priceCondition.CurrentGeneralDiscount, curentSection.Level2Discount1) as CurrentGeneralDiscount: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentGeneralDiscount_Amount, curentSection.GeneralDiscount_Amount) as CurrentGeneralDiscount_Amount,
+    ifnull(priceCondition.CurrentGeneralDiscount_Amount, curentSection.GeneralDiscount_Amount) as CurrentGeneralDiscount_Amount: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentSecondDiscount, curentSection.Level2Discount2) as CurrentSecondDiscount,
+    ifnull(priceCondition.CurrentSecondDiscount, curentSection.Level2Discount2) as CurrentSecondDiscount: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentSecondlDiscount_Amount, curentSection.SecondDiscount_Amount) as CurrentSecondlDiscount_Amount,
+    ifnull(priceCondition.CurrentSecondlDiscount_Amount, curentSection.SecondDiscount_Amount) as CurrentSecondlDiscount_Amount: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentNetOfferPrice, curentSection.Price2) as CurrentNetOfferPrice,
+    ifnull(priceCondition.CurrentNetOfferPrice, curentSection.Price2) as CurrentNetOfferPrice: Decimal,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentAnnualDiscount_Amount_Branch, curentSection.AnnualDiscountForBranch) as CurrentAnnualDiscount_Amount_Branch,
+    ifnull(priceCondition.CurrentAnnualDiscount_Amount_Branch, curentSection.AnnualDiscountForBranch) as CurrentAnnualDiscount_Amount_Branch: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentAnnualDiscount_Amount_Per_Unit, curentSection.Level3Discount1) as CurrentAnnualDiscount_Amount_Per_Unit,
+    ifnull(priceCondition.CurrentAnnualDiscount_Amount_Per_Unit, curentSection.Level3Discount1) as CurrentAnnualDiscount_Amount_Per_Unit: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentNetPrice, curentSection.Price3) as CurrentNetPrice,
+    ifnull(priceCondition.CurrentNetPrice, curentSection.Price3) as CurrentNetPrice: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentNegotiationPrice, curentSection.AwardedPrice) as CurrentNegotiationPrice,
+    ifnull(priceCondition.CurrentNegotiationPrice, curentSection.AwardedPrice) as CurrentNegotiationPrice: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentTotalYearlyValueMainCustomer, curentSection.TotalYearlyValueMainCustomer) as CurrentTotalYearlyValueMainCustomer,
+    ifnull(priceCondition.CurrentTotalYearlyValueMainCustomer, curentSection.TotalYearlyValueMainCustomer) as CurrentTotalYearlyValueMainCustomer: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentTotalYearlyValueBranch, curentSection.TotalYearlyValueBranch) as CurrentTotalYearlyValueBranch,
+    ifnull(priceCondition.CurrentTotalYearlyValueBranch, curentSection.TotalYearlyValueBranch) as CurrentTotalYearlyValueBranch: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentTotalDiscountNHI, curentSection.TotalDiscountNHI) as CurrentTotalDiscountNHI,
+    ifnull(priceCondition.CurrentTotalDiscountNHI, curentSection.TotalDiscountNHI) as CurrentTotalDiscountNHI: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentTotalDiscountInvoice, curentSection.TotalDiscountInvoice) as CurrentTotalDiscountInvoice
+    ifnull(priceCondition.CurrentTotalDiscountInvoice, curentSection.TotalDiscountInvoice) as CurrentTotalDiscountInvoice: Double
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
