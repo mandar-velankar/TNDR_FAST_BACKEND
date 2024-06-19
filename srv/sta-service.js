@@ -3478,10 +3478,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 						FOCInfoText = `${Math.round(productFreeGoodsOther.FreeGoodsOther * 10000) / 100}% (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					case 'ABS':
-						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT} (${productFreeGoodsOther.ADD_INCLUDE})`
+						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					case 'STP':
-						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT} for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT} purchased (${productFreeGoodsOther.ADD_INCLUDE})`
+						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT}(s) purchased (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					default:
 						break;
