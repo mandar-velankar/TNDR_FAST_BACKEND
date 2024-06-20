@@ -486,29 +486,53 @@ module.exports = async (srv) => {
         }
 	});
 
-	srv.after('READ', 'TenderMasterView', async (req, res, next) => {
+	srv.on('READ', 'TenderMasterView', async (req, next) => {
 		try{
 		//const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
+		const tx = cds.tx(req);
 		
-    	const isCountQuery = Array.isArray(req) && req.some(item => '$count' in item);
-    
-		if (isCountQuery) {
-		// If $count is present, return the original result
-		return req;
-		}
+		let result = [];
+        let tmvQuery = SELECT.from(req.query.SELECT.from);
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
+            tmvQuery.columns(req.query.SELECT.columns);
+        }
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode'); 
+        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
 
-		const cwid = res.user.id;
+        result = await tx.run(tmvQuery);
+
+    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+    
+		if (isCountQuery || countryCode[0] !== 'TW' || countryCode.length <= 0) {
+		// If $count is present, return the original result
+		return result;
+		}
+		
+		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		const instituteTerritory = await SELECT.from(InstituteTerritory);
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return req;
+		  return result;
 		}
 
-		const resultsArray = Array.isArray(req) ? req : [req];
+		let resultsArray = Array.isArray(result) ? result : [result];
 	  
+		// const territoryMatches = resultsArray.filter(item => {
+		// 	return userTerritories.some(userTerritory => {
+		// 	  return item.Territory === userTerritory.Territory;
+		// 	});
+		//   });
+		  
+		// const finalFilteredResults = territoryMatches.filter(item => {
+		// 	return userTerritories.some(userTerritory => {
+		// 	return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+		// 	});
+		// });
+		resultsArray = resultsArray.filter(ra => ra.createdBy === cwid);
 		const territoryMatches = resultsArray.filter(item => {
 			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
 			
@@ -529,17 +553,15 @@ module.exports = async (srv) => {
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
-			req = finalFilteredResults
-			return req;
+			return finalFilteredResults;
 		}else{
 			// If no territory matches, return an empty array
-			req = territoryMatches
-			return req;
+			return territoryMatches;
 		}
 		}
 		catch(error){
             console.error('Error in TenderMasterView READ');
-            return res.reject(403, error?.message||"Error in TenderMasterView");
+            return req.reject(403, error?.message||"Error in TenderMasterView");
         }
 	  });
 
@@ -1681,10 +1703,15 @@ module.exports = async (srv) => {
 	}
 
 	const upsertPriceCondition = async function(req){
-
+		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
 			ProductCode: req.data.ProductCode
+		});
+
+		const productCurrentPrice = await SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({
+			ProductCode: req.data.ProductCode,
+			INSTITUTE_ID: selectedTender.InstituteID
 		});
 
 		let individualCustomer = true;
@@ -1692,7 +1719,7 @@ module.exports = async (srv) => {
 			individualCustomer = await validateIndividualCustomerTaiwan(req);
 		}
 
-		const mappedPriceCondition = mapPriceCondition(req, individualCustomer);
+		const mappedPriceCondition = mapPriceCondition(req, individualCustomer, productCurrentPrice);
 
 		if(priceCondition){
 			foc = await SELECT.from(FreeGoodsOther).where({
@@ -1730,7 +1757,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	const mapPriceCondition = function(req, individualCustomer){
+	const mapPriceCondition = function(req, individualCustomer, productCurrentPrice){
 		const mappings = {
 			"Discount" : {
 				Price0: req.data.BasePrice,
@@ -1824,7 +1851,22 @@ module.exports = async (srv) => {
     			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
-				PriceConditionClassification_ID: req.data.ClassificationID
+				PriceConditionClassification_ID: req.data.ClassificationID,
+				CurrentBasePrice: productCurrentPrice && productCurrentPrice.Price0,
+				CurrentInvoicePrice: productCurrentPrice && productCurrentPrice.Price1,
+				CurrentGeneralDiscount: productCurrentPrice && productCurrentPrice.Level2Discount1,
+				CurrentGeneralDiscount_Amount: productCurrentPrice && productCurrentPrice.GeneralDiscount_Amount,
+				CurrentSecondDiscount: productCurrentPrice && productCurrentPrice.Level2Discount2,
+				CurrentSecondlDiscount_Amount: productCurrentPrice && productCurrentPrice.SecondDiscount_Amount,
+				CurrentNetOfferPrice: productCurrentPrice && productCurrentPrice.Price2,
+				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice && productCurrentPrice.AnnualDiscountForBranch,
+				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice && productCurrentPrice.Level3Discount1,
+				CurrentNetPrice: productCurrentPrice && productCurrentPrice.Price3,
+				CurrentNegotiationPrice: productCurrentPrice && productCurrentPrice.AwardedPrice,
+				CurrentTotalYearlyValueMainCustomer: productCurrentPrice && productCurrentPrice.TotalYearlyValueMainCustomer,
+				CurrentTotalYearlyValueBranch: productCurrentPrice && productCurrentPrice.TotalYearlyValueBranch,
+				CurrentTotalDiscountNHI: productCurrentPrice && productCurrentPrice.TotalDiscountNHI,
+				CurrentTotalDiscountInvoice: productCurrentPrice && productCurrentPrice.TotalDiscountInvoice
 			},
 			"TaiwanDiscount": {
 				Price0: req.data.BasePrice,
@@ -1853,7 +1895,22 @@ module.exports = async (srv) => {
     			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
-				PriceConditionClassification_ID: req.data.ClassificationID
+				PriceConditionClassification_ID: req.data.ClassificationID,
+				CurrentBasePrice: productCurrentPrice && productCurrentPrice.Price0,
+				CurrentInvoicePrice: productCurrentPrice && productCurrentPrice.Price1,
+				CurrentGeneralDiscount: productCurrentPrice && productCurrentPrice.Level2Discount1,
+				CurrentGeneralDiscount_Amount: productCurrentPrice && productCurrentPrice.GeneralDiscount_Amount,
+				CurrentSecondDiscount: productCurrentPrice && productCurrentPrice.Level2Discount2,
+				CurrentSecondlDiscount_Amount: productCurrentPrice && productCurrentPrice.SecondDiscount_Amount,
+				CurrentNetOfferPrice: productCurrentPrice && productCurrentPrice.Price2,
+				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice && productCurrentPrice.AnnualDiscountForBranch,
+				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice && productCurrentPrice.Level3Discount1,
+				CurrentNetPrice: productCurrentPrice && productCurrentPrice.Price3,
+				CurrentNegotiationPrice: productCurrentPrice && productCurrentPrice.AwardedPrice,
+				CurrentTotalYearlyValueMainCustomer: productCurrentPrice && productCurrentPrice.TotalYearlyValueMainCustomer,
+				CurrentTotalYearlyValueBranch: productCurrentPrice && productCurrentPrice.TotalYearlyValueBranch,
+				CurrentTotalDiscountNHI: productCurrentPrice && productCurrentPrice.TotalDiscountNHI,
+				CurrentTotalDiscountInvoice: productCurrentPrice && productCurrentPrice.TotalDiscountInvoice
 			}
 		}
 
@@ -3421,10 +3478,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 						FOCInfoText = `${Math.round(productFreeGoodsOther.FreeGoodsOther * 10000) / 100}% (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					case 'ABS':
-						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT} (${productFreeGoodsOther.ADD_INCLUDE})`
+						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					case 'STP':
-						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT} for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT} purchased (${productFreeGoodsOther.ADD_INCLUDE})`
+						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT}(s) purchased (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					default:
 						break;
@@ -4594,6 +4651,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		['CREATE','UPDATE'], 'PT_TMBDPR', 
 		async (req) => {
 			try{
+			await updateApprovalsSent(req.data.OfferID);
 			await updateProductPricing(req);
 			await updatePriceCondition(req);
 
