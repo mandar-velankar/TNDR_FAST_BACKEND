@@ -4831,6 +4831,17 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return nextValue
 	}
 
+	srv.after(
+		['UPDATE'], 'FreeGoodsOther', 
+		async (data) => {
+			const priceCondition = await SELECT.one.from(PriceCondition).where({
+				ID: data?.PriceCondition_ID
+			});
+			await updateApprovalsSent(priceCondition?.OfferID);
+			return data;
+		}
+	);
+
 	srv.on(
 		['CREATE','UPDATE'], 'PT_TMBDPR', 
 		async (req) => {
