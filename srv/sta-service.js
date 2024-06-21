@@ -4832,7 +4832,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	}
 
 	srv.after(
-		['UPDATE'], 'FreeGoodsOther', 
+		['CREATE','UPDATE'], 'FreeGoodsOther', 
 		async (data) => {
 			const priceCondition = await SELECT.one.from(PriceCondition).where({
 				ID: data?.PriceCondition_ID
