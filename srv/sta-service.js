@@ -1999,7 +1999,7 @@ module.exports = async (srv) => {
 			VolumeTo              : 0, 
 			RegPrice              : priceCondition.BasePrice, 
 			FOC                   : foc?.FreeGoodsOther || 0, 
-			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
@@ -4647,6 +4647,17 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		return nextValue
 	}
 
+	srv.after(
+		['CREATE','UPDATE'], 'FreeGoodsOther', 
+		async (data) => {
+			const priceCondition = await SELECT.one.from(PriceCondition).where({
+				ID: data?.PriceCondition_ID
+			});
+			await updateApprovalsSent(priceCondition?.OfferID);
+			return data;
+		}
+	);
+
 	srv.on(
 		['CREATE','UPDATE'], 'PT_TMBDPR', 
 		async (req) => {
@@ -4772,10 +4783,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 	function mapPTTMBDPR({priceCondition, foc}){
 		return {
 			FOC                   : foc?.FreeGoodsOther || 0, 
-			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			OfferPrice            : priceCondition.OfferPrice,
-			NetofferPrice         : priceCondition.NetofferPrice,
+			NetofferPrice         : priceCondition.NetofferPrice || priceCondition.OfferPrice,
 			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT,
 			NetPrice              : priceCondition.NetPrice
 		}
