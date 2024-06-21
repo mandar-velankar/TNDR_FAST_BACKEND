@@ -869,4 +869,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         content    : LargeBinary;
     }
+
+    entity NLOfferDistributors as projection on TransactionalData.NLOfferDistributors;
 }
