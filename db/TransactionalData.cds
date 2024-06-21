@@ -913,3 +913,11 @@ type NLConditions {
     Discount: Double;
     NetPrice: Double;
 };
+
+entity NLOfferDistributors: cuid {
+    OfferID: String;
+    DistributorName: String;
+    DistributorID: Integer;
+    ProductPackName: String;
+    ProductPackID: Integer;
+}
