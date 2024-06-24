@@ -871,4 +871,126 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }
 
     entity NLOfferDistributors as projection on TransactionalData.NLOfferDistributors;
+     entity ExtractNLHistoricalInformation {
+        key templateId : Integer;
+            content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType  : String      @Core.IsMediaType;
+    }
+   entity MaxHierarchy as select from TransactionalData.PT_TMAPPRST{	
+        OfferId,
+        productcode,
+        max(Hierarchy) AS MaxHierarchy,
+        ApproverName,
+        ApprovalStatus
+    }where ApprovalStatus = 'Waiting'
+    group by OfferId, productcode, ApproverName, ApprovalStatus;
+    entity NLContractDurations as select from TransactionalData.NLPriceConditions{
+        PriceCondition: redirected to PriceCondition,
+        PriceCondition.ID as PriceConditionID,
+        ContractDuration,
+        OfferPrice,
+        max(ContractDuration) OVER (PARTITION BY PriceCondition.ID) AS MaxContractDuration,
+        min(ContractDuration) OVER (PARTITION BY PriceCondition.ID) AS MinContractDuration,
+        avg(ContractDuration) OVER (PARTITION BY PriceCondition.ID) AS AvgContractDuration
+    };
+    entity NLOfferPrice_1 as select from TransactionalData.PriceCondition as pc
+        inner join NLContractDurations as nlpc
+              on nlpc.PriceConditionID = pc.ID{
+        pc.OfferID,
+        pc.ID as priceconditionID,
+        pc.ProductCode,
+        nlpc.OfferPrice AS OfferPrice_1
+    } where nlpc.ContractDuration = nlpc.MinContractDuration;
+    entity NLOfferPrice_2 as select from TransactionalData.PriceCondition as pc
+        inner join NLContractDurations as nlpc
+              on nlpc.PriceConditionID = pc.ID{
+        pc.OfferID,
+        pc.ID as priceconditionID,
+        pc.ProductCode,
+        nlpc.OfferPrice AS OfferPrice_2
+    } where nlpc.ContractDuration = nlpc.AvgContractDuration;
+    entity NLOfferPrice_3 as select from TransactionalData.PriceCondition as pc
+        inner join NLContractDurations as nlpc
+              on nlpc.PriceConditionID = pc.ID{
+        pc.OfferID,
+        pc.ID as priceconditionID,
+        pc.ProductCode,
+        nlpc.OfferPrice AS OfferPrice_3
+    } where nlpc.ContractDuration = nlpc.MaxContractDuration;
+    entity NLExtractOffers as select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+        inner join MasterData.PT_TMINST as inst
+            on inst.CountryCode = tender.CountryCode
+            and inst.InstituteID = tender.InstituteID
+        inner join TransactionalData.PT_TMQUTO as qoutation
+            on qoutation.OfferID = offer.OfferID
+            and qoutation.Active = 1
+        inner join TransactionalData.PT_TMTNOFST as offerStatus
+            on offerStatus.OfferID = offer.OfferID
+            and offerStatus.Active = 1
+        inner join TransactionalData.PT_TMOFPR as product
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+        inner join MasterData.PT_TMCTPRDPCK as ctprdpck
+            on ctprdpck.PRODUCTPACKID = product.ProductCode
+            and ctprdpck.COUNTRYCODE = tender.CountryCode
+        inner join MasterData.PT_TMPRDPCK as productpack
+            on productpack.PRODUCTPACKID = product.ProductCode
+        inner join TransactionalData.PriceCondition as pc
+            on pc.CountryCode = tender.CountryCode
+            and pc.OfferID = offer.OfferID
+            and pc.ProductCode = product.ProductCode
+        inner join TransactionalData.PT_TMTRRES as res
+            on res.OfferID = offer.OfferID
+            and res.ProductCode = product.ProductCode
+        inner join TransactionalData.PT_TMBDPR as PT_TMBDPR
+            on PT_TMBDPR.OfferID = offer.OfferID
+            and PT_TMBDPR.ProductCode = product.ProductCode
+            and PT_TMBDPR.Active = 1
+        inner join InstitutesInGroup as instgroup
+            on instgroup.ParentInstituteID = tender.InstituteID
+            and instgroup.InstituteID <> tender.InstituteID
+        left join MaxHierarchy as maxapprHier
+            on maxapprHier.OfferId = offer.OfferID
+            and maxapprHier.productcode = product.ProductCode
+        left join NLOfferPrice_3 as maxop
+            on maxop.OfferID = offer.OfferID
+            and maxop.priceconditionID = pc.ID
+            and maxop.ProductCode = product.ProductCode
+        left join NLOfferPrice_2 as secondop
+            on secondop.OfferID = offer.OfferID
+            and secondop.priceconditionID = pc.ID
+            and secondop.ProductCode = product.ProductCode
+        left join NLOfferPrice_1 as minop
+            on minop.OfferID = offer.OfferID
+            and minop.priceconditionID = pc.ID
+            and minop.ProductCode = product.ProductCode
+            {
+            key tender.TenderID,
+            key offer.OfferID,
+            offer.Custom.String_1 as Source,
+            CASE when inst.InstituteType = 'Buying Group'
+                then 'Purchasing Group'
+                else 'Bilatreaal'
+            end AS Inkoopgroep: String,
+            inst.InstituteName,
+            tender.TenderName,
+            qoutation.EffectiveDate,
+            qoutation.ExpiryDate,
+            tender.BidDueDate,
+            offerStatus.TableStatus,
+            tender.Custom.String_1,
+            tender.PublicationDate,
+            ctprdpck.GOV_CODE,
+            maxapprHier.ApproverName,
+            productpack.PRODUCTPACKNAME,
+            tender.InstituteID,
+            maxop.OfferPrice_3,
+            secondop.OfferPrice_2,
+            minop.OfferPrice_1,
+            PT_TMBDPR.NetPrice,
+            res.Outcome,
+            ifnull(instgroup.InstituteName, '') as childInstituteName: String  
+        }where(tender.CountryCode = 'NL')
 }

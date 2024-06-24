@@ -140,7 +140,9 @@ module.exports = async (srv) => {
 		InstitutesView,
 		InstituteInBranchView,
 		TenderMasterView,
-		ZagisUploadFile
+		ZagisUploadFile,
+		ExtractNLHistoricalInformation,
+		NLExtractOffers
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -4977,4 +4979,26 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 		return arrayBuffer;
 	}
+	srv.on('READ', 'ExtractNLHistoricalInformation', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+
+		const templateId = req.data.templateId;
+
+		const templates = await tx.run(SELECT.from(ExtractNLHistoricalInformation).where({ templateId: templateId }));
+		const excelData = await tx.run(SELECT.from(NLExtractOffers));
+
+		const templateContent = templates[0].content;
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,excelData,1);
+
+			req._.res.setHeader('Content-disposition', `attachment; filename= Extract History.xlsx`);
+			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in ExcelAttachments READ');
+            return req.reject(403, error?.message||"Error in ExcelAttachments");
+        }
+	})
 }
