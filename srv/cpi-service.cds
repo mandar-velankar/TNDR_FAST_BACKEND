@@ -27,6 +27,29 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity FASTCoreProduct as projection on SAP.FASTCoreProduct;
     entity SalesSpecification as projection on SAP.SalesSpecification;
     entity SubscriptionProductSalesData as projection on SAP.SubscriptionProductSalesData;
+    entity ValuationArea as projection on SAP.ValuationArea;
+    entity ValuationAccount as projection on SAP.ValuationAccount;
+    entity LedgerAccount as projection on SAP.LedgerAccount;
+    entity FuturePrice as projection on SAP.FuturePrice;
+    entity ValuationCosting as projection on SAP.ValuationCosting;
+    entity Plant as projection on SAP.Plant;
+    entity Costing as projection on SAP.Costing;
+    entity SupplyPlanning as projection on SAP.SupplyPlanning;
+    entity Sales as projection on SAP.Sales;
+    entity QualityManagement as projection on SAP.QualityManagement;
+    entity Forecasting as projection on SAP.Forecasting;
+    entity InternationalTrade as projection on SAP.InternationalTrade;
+    entity Storage as projection on SAP.Storage;
+    entity StorageLocation as projection on SAP.StorageLocation;
+    entity Purchasing as projection on SAP.Purchasing;
+    entity WorkScheduling as projection on SAP.WorkScheduling;
+    entity PlantSCMAdvancedPlanning as projection on SAP.PlantSCMAdvancedPlanning;
+    entity Planning as projection on SAP.Planning;
+    entity ForecastParameters as projection on SAP.ForecastParameters;
+    entity ProductionResourceTool as projection on SAP.ProductionResourceTool;
+    entity PlantSCMDemandPenalty as projection on SAP.PlantSCMDemandPenalty;
+    entity PlanteSPPProduct as projection on SAP.PlanteSPPProduct;
+    entity eSPPLocProd as projection on SAP.eSPPLocProd;
 
     function createBrazilContract() returns LargeString;
 
