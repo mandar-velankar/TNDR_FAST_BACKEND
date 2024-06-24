@@ -493,3 +493,901 @@ entity SpainRappel : cuid {
 	SOLD_TO 			: String;	
 	MATNR 				: String(18);			// Material number
 }
+
+entity FASTCoreProduct: cuid, managed {
+    ProductInternalID: String;
+    UnformattedProductInternalID: String;
+    ProductUUID: String;
+    ReceiverProductInternalID: String;
+    UnformattedReceiverProductInternalID: String;
+    ReceiverProductUUID: String;
+    ProductTypeCode: String;
+    IndustrySectorCode: String;
+    RetailProductCategoryCode: String;
+    DivisionCode: String;
+    DeletedIndicator: Boolean;
+    LockedIndicator: Boolean;
+    ANPCode: String;
+    SerialNumberExplicitnessLevelCode: String;
+    QualityManagementInProcurementIsActiveIndicator: Boolean;
+    ProductAllocationProcedureID: String;
+    ReceiverProductAllocationProcedureID: String;
+    ConfigurableProductInternalID: String;
+    ReceiverConfigurableProductInternalID: String;
+    ProductHierarchyInternalID: String;
+    ReceiverProductHierarchyInternalID: String;
+    ProductGroupInternalID: String;
+    ReceiverProductGroupInternalID: String;
+    ExternalProductGroupInternalID: String;
+    ReceiverExternalProductGroupInternalID: String;
+    BaseMeasureUnitCode: String;
+    ProductDiscountInKindCode: String;
+    DesignOfficeCode: String;
+    AuthorisationGroupCode: String;
+    EnvironmentRelevanceIndicator: Boolean;
+    BasicProductCode: String;
+    ProductSalesProcessUsabilityProfileCode: String;
+    DangerousGoodsIndicatorProfileCode: String;
+    BatchManagementRequiredIndicator: Boolean;
+    ComputerAidedDesignMaintainedIndicator: Boolean;
+    BasicViewMaintainedIndicator: Boolean;
+    ConfigurableProductDeterminedIndicator: Boolean;
+    ProductSalesProcessUsabilityProfileValidityDate: String;
+    ProductionText: String;
+    ProductSizeText: String;
+    ProductionMemoPageFormatName: String;
+    PreviousName: String;
+    IndustryStandardDescription: String;
+    ValidityStartDate: String;
+    ProductHandlingIndicatorCode: String;
+    AdjustmentProfileCode: String;
+    HandlingUnitTypeCode: String;
+    ManufacturerPartProfileCode: String;
+    SmartFormName: String;
+    ItemCategoryGroupCode: String;
+    WarehouseStorageConditionCode: String;
+    WarehouseProductGroupCode: String;
+    StandardHandlingUnitTypeCode: String;
+    ProductHighlyViscousIndicator: Boolean;
+    TransportInBulkIndicator: Boolean;
+    ProductRelevantForHazardousSubstancesIndicator: Boolean;
+    VariableTareWeightIndicator: Boolean;
+    OwnInventoryManagedProductInternalID: String;
+    PackingReferenceProductInternalID: String;
+    ApprovedBatchRecordRequiredIndicator: Boolean;
+    ProductEffectivityParameterValuesAssignmentIndicator: Boolean;
+    ProductDocumentPageNumber: String;
+    ProductDocumentType: String;
+    GlobalTradeItemNumberVariant: String;
+    ProductDocumentChangeNumber: String;
+    ProductDocumentVersion: String;
+    OvercapacityTolerance: Double;
+    MaximumCapacity: Double;
+    ProductDocumentPageCount: Integer;
+    SerialIdentifierAssignmentProfileCode: String;
+    ProductOriginCountryCode: String;
+    CompetitorID: String;
+    ProductDocumentPageFormat: String;
+    ProductDocumentNumber: String;
+    PilferableIndicator: Boolean;
+    PackagingMaterialGroupCode: String;
+    QualityInspectionGroupCode: String;
+    CatalogProfileCode: String;
+    QuarantinePeriod: String;
+    MaximumPackagingHeight: String;
+    MaximumPackagingWidth: String;
+    MaximumPackagingLength: String;
+    MaximumPackagingUnitCode: String;
+    NetContent: String;
+    ComparisonPriceQuantity: String;
+    GrossContent: String;
+    ProductHasEmptiesBOM: Boolean;
+    HasTextilePartsWthAnimalOrigin: Boolean;
+    BrandID: String;
+    RetailArticleGeneral: Composition of one RetailArticleGeneral on RetailArticleGeneral.parent = $self;
+	Description: Composition of one Description on Description.parent = $self;
+    QuantityConversion: Composition of many QuantityConversion on QuantityConversion.parent = $self;
+    QuantityCharacteristic: Composition of many QuantityCharacteristic on QuantityCharacteristic.parent = $self;
+	TextCollection: Composition of one TextCollection on TextCollection.parent = $self;
+	StorageSpecification: Composition of one StorageSpecification on StorageSpecification.parent = $self;
+    DistributionChainIndependentSalesSpecification: Composition of one DistributionChainIndependentSalesSpecification on DistributionChainIndependentSalesSpecification.parent = $self;
+    PlantIndependentProcurementSpecification: Composition of one PlantIndependentProcurementSpecification on PlantIndependentProcurementSpecification.parent = $self;
+    ProductSCMAdvancedPlanning: Composition of one ProductSCMAdvancedPlanning on ProductSCMAdvancedPlanning.parent = $self;
+	SalesSpecification: Composition of one SalesSpecification on SalesSpecification.parent = $self;
+    SalesSpecificTaxClassification: Composition of one SalesSpecificTaxClassification on SalesSpecificTaxClassification.parent = $self;
+    SubscriptionProduct: Composition of one SubscriptionProduct on SubscriptionProduct.parent = $self;
+    eSPPProduct: Composition of one eSPPProduct on eSPPProduct.parent = $self;
+	Plant:Composition of many Plant on Plant.parent = $self;
+	ValuationArea:Composition of many ValuationArea on ValuationArea.parent = $self;
+	Warehouse:Composition of many Warehouse on Warehouse.parent = $self;
+}
+
+entity Description: cuid{
+    Description: String;
+    parent: Association to FASTCoreProduct;
+}
+
+entity TextCollection: cuid{
+    TextExistsIndicator:  Boolean;
+    parent: Association to FASTCoreProduct;
+}
+
+entity StorageSpecification: cuid{
+    ProductStorageRequirementsCode: String;  
+    ProductStorageTemperatureRangeCode: String;  
+    HazardousMaterialID: String; 
+    ProductLabelTypeCode: String; 
+    ProductLabelFormCode: String;  
+    MinimumRemainingShelfLifeCode: Integer;
+    NumberOfGoodsReceiptIssueSlipsToPrintValue: String; 
+    ExpirationDateCode: String;
+    ShelfLifeExpirationDatePeriod: String;  
+    TotalShelfLifeStoragePercent: Integer;
+    StorageBinInstructionCode: String;  
+    ShelfLifeExpirationDateRoundingRuleCode: String; 
+    TotalShelfLife: Integer;
+    parent: Association to FASTCoreProduct;
+}
+
+entity DistributionChainIndependentSalesSpecification: cuid{
+    TransportProductGroupCode: String;
+    ProductSalesProcessUsabilityProfileCode: String;
+    ProductSalesProcessUsabilityProfileValidityDate: Date;
+    PricingReferenceProductID: String;  // Nullable field
+    TaxClassificationID: String;  // Nullable field
+    AllowedPackagingVolumeQuantity: String;  // Nullable field
+    VolumeMaximumLevel: Integer;
+    StackingFactor: Integer;
+    ClosedPackagingProductIndicator: Boolean;
+    ExcessWeightTolerance: Double;
+    ExcessVolumeTolerance: Double;
+    AllowedPackagingWeightQuantity: String;  // Nullable field
+    ProductFreightGroupCode: String;  // Nullable field
+    PackagingProductTypeCode: String;  // Nullable field
+    VariantsPricingProfileCode: String;  // Nullable field
+    IsVariantPriceAllowed: Boolean;
+    parent: Association to FASTCoreProduct;
+}
+
+entity PlantIndependentProcurementSpecification: cuid{
+    ManufacturerID: String;
+    ProductManufacturerID: String;
+    PurchasingAcknowledgmentProfileCode: String;
+    OrderMeasureUnitCode: String;  // Nullable field
+    VariablePurchaseOrderUnitOfMeasureActivationStatusCode: String;  // Nullable field
+    parent: Association to FASTCoreProduct;
+}
+
+entity ProductSCMAdvancedPlanning: cuid{
+    RequiredMaximumShelfLife:Integer;
+    MaturationTime:String;
+    parent: Association to FASTCoreProduct;
+}
+
+entity SalesSpecification: cuid{
+    AccountDeterminationProductGroupCode: String; // Nullable field
+    MinimumOrderQuantity: Decimal;
+    MinimumOrderQuantityUnitCode: String; // for unitCode attribute
+    SalesOrganizationID: String;
+    ReceiverSalesOrganizationID: String; // Nullable field
+    DistributionChannelCode: String;
+    SupplyingPlantID: String; // Nullable field
+    ReceiverSupplyingPlantID: String; // Nullable field
+    StandardProductCategoryInternalID: String;
+    CustomerTransactionDocumentItemProcessingTypeDeterminationProductGroupCode: String;
+    SalesMeasureUnitCode: String; // Nullable field
+    PriceSpecificationProductGroupCode: String; // Nullable field
+    FirstSalesSpecificationProductGroupCode: String; // Nullable field
+    SecondSalesSpecificationProductGroupCode: String; // Nullable field
+    DeliveryNoteProcessingMinimumDeliveryQuantity: Decimal;
+    DeliveryNoteProcessingMinimumDeliveryQuantityUnitCode: String; // for unitCode attribute
+    ThirdSalesSpecificationProductGroupCode: String; // Nullable field
+    FourthSalesSpecificationProductGroupCode: String; // Nullable field
+    FifthSalesSpecificationProductGroupCode: String; // Nullable field
+    ProductSalesProcessUsabilityProfileCode: String; // Nullable field
+    DeletedIndicator: Boolean;
+    DeliveryQuantity: Decimal;
+    DeliveryQuantityUnitCode: String; // for unitCode attribute
+    DeliveryQuantityMeasureUnitCode: String; // Nullable field
+    MinimumMakeToOrderOrderQuantity: Decimal;
+    MinimumMakeToOrderOrderQuantityUnitCode: String; // for unitCode attribute
+    ProductSalesProcessUsabilityProfileValidityDate: Date; // Nullable field
+    ProductExternalAssortmentPriorityTypeCode: String; // Nullable field
+    VolumeRebateGroupCode: String; // Nullable field
+    StoreOrderProcessingMaximumDeliveryQuantity: Decimal;
+    StoreOrderProcessingMaximumDeliveryQuantityUnitCode: String; // for unitCode attribute
+    CompetitionCharacterizationTypeCode: String; // Nullable field
+    ProductUnitGroupCode: String; // Nullable field
+    PriceFixingControlCategoryCode: String; // Nullable field
+    PricingReferenceProductID: String; // Nullable field
+    ProductHasAttributeID01Indicator: Boolean;
+    ProductHasAttributeID02Indicator: Boolean;
+    ProductHasAttributeID03Indicator: Boolean;
+    ProductHasAttributeID04Indicator: Boolean;
+    ProductHasAttributeID05Indicator: Boolean;
+    ProductHasAttributeID06Indicator: Boolean;
+    ProductHasAttributeID07Indicator: Boolean;
+    ProductHasAttributeID08Indicator: Boolean;
+    ProductHasAttributeID09Indicator: Boolean;
+    ProductHasAttributeID10Indicator: Boolean;
+    ProductCommissionGroupCode: String; // Nullable field
+    RoundingProfileCode: String; // Nullable field
+    CashDiscountIndicator: Boolean;
+    VariableSalesUnitNotAllowedIndicator: Boolean;
+    ProductStatisticsGroupCode: String; // Nullable field
+    StoreSaleStartDate: Date; // Nullable field
+    StoreSaleEndDate: Date; // Nullable field
+    DistributionCenterSaleStartDate: Date; // Nullable field
+    DistributionCenterSaleEndDate: Date; // Nullable field
+    AssortmentGrade: String; // Nullable field
+    StoreListingProcedure: String; // Nullable field
+    DistributionCenterListingProcedure: String; // Nullable field
+    StoreListingStartDate: Date; // Nullable field
+    StoreListingEndDate: Date; // Nullable field
+    DistributionCenterListingStartDate: Date; // Nullable field
+    DistributionCenterListingEndDate: Date; // Nullable field
+    ProductEntitlementRelevantIndicator: Boolean;
+    SubscriptionProductSalesData: Composition of many SubscriptionProductSalesData on SubscriptionProductSalesData.parentSalesSpecification = $self;
+    parent: Association to FASTCoreProduct;
+}
+
+entity SubscriptionProductSalesData: cuid{
+	DefaultContractTerm: Integer; // Nullable field
+    AltContractTerm1: Integer; // Nullable field
+    AltContractTerm2: Integer; // Nullable field
+    ContractTermUnit: String; // Nullable field
+    DefaultExtensionPeriod: Integer; // Nullable field
+    AltExtensionPeriod1: Integer; // Nullable field
+    AltExtensionPeriod2: Integer; // Nullable field
+    ExtensionPeriodUnit: String; // Nullable field
+    parentSalesSpecification: Association to SalesSpecification;
+}
+
+entity SalesSpecificTaxClassification: cuid{
+    CountryCode: String;
+    TaxTypeCode: String;
+    TaxRateTypeCode: String;
+    parent: Association to FASTCoreProduct;
+}
+
+entity SubscriptionProduct: cuid{
+    BillingCycle                        : String; // nullable
+    BillingCycleDeterminationRuleId     : String; // nullable
+    ContractAutoRenewalIndicator        : String; // nullable
+    parent: Association to FASTCoreProduct;
+}
+
+entity eSPPProduct: cuid{
+    ProductIsForKitToOrder                     : Boolean;
+    ProductIsForProcureToOrder                 : Boolean;
+    ProdIsForPushDplntFromSupplier             : Boolean;
+    InventoryBalancingIsNotAllowed             : Boolean;
+    ProdIsForGlobalStockOnEntryLoc             : Boolean;
+    ProdIsExclFromExpressShipment              : Boolean;
+    SrvcPartsProductIsNew                      : Boolean;
+    SrvcPartsProdProdnStartDate                : DateTime; // nullable
+    SrvcPartsProdProdnEndDate                  : DateTime; // nullable
+    SrvcPartsInvtryPlngMode                    : String;   // nullable
+    parent: Association to FASTCoreProduct;
+}
+
+entity RetailArticleGeneral: cuid{
+	ServiceAgreementTypeCode: String;
+    ProductRequirementsPlanningABCClassificationCode: String;
+    GoodsIssueUnitCode: String;
+    ProductOriginCountryCode: String;
+    ProductOriginRegionCode: String;
+    AssortmentGradeTypeCode: String;
+    StoreListingProcedureTypeCode: String;
+    DistributionCenterListingProcedureTypeCode: String;
+    StoreListingStartDate: String;
+    StoreListingEndDate: String;
+    DistributionCenterListingStartDate: String;
+    DistributionCenterListingEndDate: String;
+    StoreSaleStartDate: String;
+    StoreSaleEndDate: String;
+    DistributionCenterSaleStartDate: String;
+    DistributionCenterSaleEndDate: String;
+    AccountDeterminationProductValuationDataGroupCode: String;
+    CustomsCommodityClassificationCode: String;
+    ValuationMarginValue: String;
+    CustomsCommodityClassificationCodeUnitCode: String;
+    SalesUnitCode: String;
+    PurchasingGroupID: String;
+    LoadingGroupCode: String;
+    ProductExternalAssortmentPriorityTypeCode: String;
+    parent: Association to FASTCoreProduct;
+}
+
+entity QuantityConversion: cuid {
+	Quantity: Double;
+	CorrespondingQuantity: Double;
+	parent: Association to FASTCoreProduct;
+}
+
+entity QuantityCharacteristic: cuid{
+	Quantity: Double;
+	CharacteristicQuantity: Double;
+	CharacteristicQuantityTypeCode: String;
+	parent: Association to FASTCoreProduct;
+}
+
+entity Warehouse: cuid {
+    CapacityConsumptionUnitCode                             : String; // nullable
+    ProductBulkStorageMethod                                : String; // nullable
+    WarehouseManagementSpecialMovementTypeCode               : String; // nullable
+    WarehouseManagementMessageToInventoryManagementRequiredIndicator: Boolean;
+    AdditionToExistingStockAllowedIndicator                 : Boolean;
+    ProductIsRelevantForTwoStepPicking                      : String; // nullable
+    FirstProductStorageUnitTypeCode                         : String; // nullable
+    SecondProductStorageUnitTypeCode                        : String; // nullable
+    ThirdProductStorageUnitTypeCode                         : String; // nullable
+    ProductStorageSectionMethod                             : String; // nullable
+    WarehouseNumber                                         : String;
+    ProductWarehouseFirstLoadingEquipmentQuantityUnitCode    : String; // nullable
+    ProductWarehouseSecondLoadingEquipmentQuantityUnitCode   : String; // nullable
+    ProductWarehouseThirdLoadingEquipmentQuantityUnitCode    : String; // nullable
+    ProductWarehouseFirstLoadingEquipmentQuantity            : String; // nullable
+    ProductWarehouseSecondLoadingEquipmentQuantity           : String; // nullable
+    ProductWarehouseThirdLoadingEquipmentQuantity            : String; // nullable
+    ProductWarehouseStockRemovalStorageTypeCode              : String; // nullable
+    ProductWarehouseStockPlacementStorageTypeCode            : String; // nullable
+    DeletedIndicator                                        : Boolean;
+    ProductWarehouseManagementUnitCode                      : String; // nullable
+    CapacityUsage                                           : String; // nullable
+    ProductWarehousePickingStorageTypeCode                  : String; // nullable
+    ProductWarehouseMaterialMasterDefaultUnitTypeCode       : String; // nullable
+	parent: Association to FASTCoreProduct;
+}
+
+entity ValuationArea: cuid {
+    ValuationAreaID                          : String;
+    InventoryValuationTypeCode               : String; // nullable
+    DeletedIndicator                         : Boolean;
+    AccountDeterminationProductValuationDataGroupCode: String;
+    ProductPriceDeterminationApproachCode    : String; // nullable
+    InventoryValuationCategoryCode           : String; // nullable
+    ProductUsageTypeCode                     : String; // nullable
+    ProductOriginTypeCode                    : String; // nullable
+    ProductProducedInhouseIndicator          : Boolean;
+    SalesOrderStockAccountDeterminationProductValuationDataGroupCode: String; // nullable
+    ProjectStockAccountDeterminationProductValuationDataGroupCode: String; // nullable
+    FirstFuturePlannedPriceAmountValue       : String; // nullable
+    SecondFuturePlannedPriceAmountValue      : String; // nullable
+    ThirdFuturePlannedPriceAmountValue       : String; // nullable
+    FirstFuturePlannedPriceValidityDate      : String; // nullable
+    SecondFuturePlannedPriceValidityDate     : String; // nullable
+    ThirdFuturePlannedPriceValidityDate      : String; // nullable
+    ValuationMargin                         : String; // nullable
+    PriceLastChangeDate                     : String; // nullable
+    PreviousInventoryPriceInCompanyCodeCurrency: String; // nullable
+    ValuationAccount: Composition of one ValuationAccount on ValuationAccount.parentValuationArea = $self;
+    LedgerAccount: Composition of one LedgerAccount on LedgerAccount.parentValuationArea = $self;
+    FuturePrice:Composition of one FuturePrice on FuturePrice.parentValuationArea = $self;
+    ValuationCosting: Composition of one ValuationCosting on ValuationCosting.parentValuationArea = $self;
+	parent: Association to FASTCoreProduct;
+}
+
+entity ValuationAccount: cuid{
+    CommercialLawLevelOneEvaluatedAmountValue  : String; // nullable
+	CommercialLawLevelTwoEvaluatedAmountValue  : String; // nullable
+	CommercialLawLevelThreeEvaluatedAmountValue: String; // nullable
+	DevaluationMeasureNumberValue             : String; // nullable
+	LIFOValuationRelevanceIndicator           : Boolean;
+	LIFOValuationPoolTypeCode                 : String; // nullable
+	TaxLawLevelOneEvaluatedAmountValue        : String; // nullable
+	TaxLawLevelTwoEvaluatedAmountValue        : String; // nullable
+	TaxLawLevelThreeEvaluatedAmountValue      : String; // nullable
+	ValuationPriceUnitNumberValue             : String;
+    parentValuationArea : Association to ValuationArea;
+}
+
+entity LedgerAccount: cuid{
+    CurrencyRoleCode                        : String;
+	CurrencyCode                            : String;
+	InventoryValuationProcedureCode         : String;
+	PriceUnitNumberValue                    : String;
+	PriceAmountValue                        : String; // nullable
+    parentValuationArea : Association to ValuationArea;
+}
+
+entity FuturePrice: cuid{
+    CurrencyRoleCode                        : String;
+	FuturePriceAmountValue                  : String; // nullable
+	FuturePriceValidityStartDate            : String; // nullable
+    parentValuationArea : Association to ValuationArea;
+}
+
+entity ValuationCosting: cuid{
+    MaterialCostedWithQuantityStructureIndicator: Boolean;
+	MaterialRelatedOriginIndicator          : Boolean;
+	CostOriginGroupCode                     : String; // nullable
+	CostingOverheadGroupCode                : String; // nullable
+	PlannedPrice                            : String; // nullable
+    parentValuationArea : Association to ValuationArea;
+}
+
+entity Plant: cuid {
+    PlantID                     : String; 
+    ProfileCode                 : String; // nullable
+    ProfileValidityStartDate    : String; // nullable
+    DeletedIndicator            : String; 
+    BatchManagementRequiredIndicator : String; 
+    SerialIdentifierAssignmentProfileCode : String; // nullable
+    ProfitCenterID              : String; 
+    GoodsIssueUnitCode          : String; // nullable
+    NegativeStockAllowedIndicator : String; 
+    StockDeterminationGroupCode : String; // nullable
+    ProductExciseTaxRelevanceIndicator : String; 
+    ConfigurableProductID       : String; // nullable
+    ProductCFOPCategoryCode     : String; // nullable
+    ProductCriticalPartIndicator : String; 
+    ProductLogisticsHandlingGroupCode : String; // nullable
+    ProductFreightGroupCode     : String; // nullable
+    ProductDistributionProfileCode : String; // nullable
+    OriginalBatchManagementRequiredIndicator : String; 
+    OriginalBatchReferenceProductID : String; // nullable
+	Costing: Composition of one Costing on Costing.parentPlant = $self;
+	SupplyPlanning: Composition of one SupplyPlanning on SupplyPlanning.parentPlant = $self;
+	Sales: Composition of one Sales on Sales.parentPlant = $self;
+	QualityManagement: Composition of one QualityManagement on QualityManagement.parentPlant = $self;
+    PlantText: String;
+	Forecasting: Composition of one Forecasting on Forecasting.parentPlant = $self;
+	InternationalTrade: Composition of one InternationalTrade on InternationalTrade.parentPlant = $self;
+	Storage:Composition of one Storage on Storage.parentPlant = $self;
+	StorageLocation:Composition of many StorageLocation on StorageLocation.parentPlant = $self;
+	Purchasing:Composition of one Purchasing on Purchasing.parentPlant = $self;
+	WorkScheduling:Composition of one WorkScheduling on WorkScheduling.parentPlant = $self;
+	PlantSCMAdvancedPlanning:Composition of one PlantSCMAdvancedPlanning on PlantSCMAdvancedPlanning.parentPlant = $self;
+	Planning:Composition of one Planning on Planning.parentPlant = $self;
+	ForecastParameters:Composition of one ForecastParameters on ForecastParameters.parentPlant = $self;
+	ProductionResourceTool:Composition of one ProductionResourceTool on ProductionResourceTool.parentPlant = $self;
+	PlantSCMDemandPenalty:Composition of many PlantSCMDemandPenalty on PlantSCMDemandPenalty.parentPlant = $self;
+    ProductMinControlTemperatureQuantity: String; // nullable
+	ProductMaxControlTemperatureQuantity: String; // nullable
+	ProductControlTemperatureUnitCode: String; // nullable
+	PlanteSPPProduct:Composition of one PlanteSPPProduct on PlanteSPPProduct.parentPlant = $self;
+	eSPPLocProd:Composition of one eSPPLocProd on eSPPLocProd.parentPlant = $self;
+	parent: Association to FASTCoreProduct;
+}
+
+entity Costing: cuid{
+    CoProductIndicator                          : String; // CoProductIndicator
+    ProductBillOfMaterialUsageCategoryCode       : String; // nullable
+    AlternativeBillOfMaterial                   : String; // nullable
+    VarianceKeyCode                             : String; // nullable
+    CostingProductionVersionCode                : String; // nullable
+    FixedPriceCoProductIndicator                : String; // FixedPriceCoProductIndicator
+    CostingLotSizeQuantity                      : String; // CostingLotSizeQuantity (unitCode="KGM")
+    ProductIsNotCostingRelevantIndicator        : String; // ProductIsNotCostingRelevantIndicator
+    TaskListGroupCode                           : String; // nullable
+    TaskListTypeCode                            : String; // nullable
+    CostingSpecialProcurementTypeCode           : String; // nullable
+    TaskListGroupCounter                       : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity SupplyPlanning: cuid {
+    ProductRequirementsPlanningTypeCode                : String; // ProductRequirementsPlanningTypeCode
+    ProductRequirementsPlanningResponsibleCode         : String; // ProductRequirementsPlanningResponsibleCode
+    AvailabilityCheckGroupCode                        : String; // nullable
+    LotSizeProcedureCode                              : String; // LotSizeProcedureCode
+    FixedLotSizeQuantity                              : String; // FixedLotSizeQuantity (unitCode="KGM")
+    MaximumLotSizeQuantity                            : String; // MaximumLotSizeQuantity (unitCode="KGM")
+    MinimumLotSizeQuantity                            : String; // MinimumLotSizeQuantity (unitCode="KGM")
+    LotSizeRoundingQuantity                           : String; // LotSizeRoundingQuantity (unitCode="KGM")
+    SafetyStockQuantity                               : String; // SafetyStockQuantity (unitCode="KGM")
+    SafetyDaysOfSupplyDuration                        : String; // SafetyDaysOfSupplyDuration
+    MinimumSafetyStockQuantity                        : String; // MinimumSafetyStockQuantity (unitCode="KGM")
+    MasterPlanAutomaticChangeRestrictedDuration       : String; // MasterPlanAutomaticChangeRestrictedDuration
+    ProductRequirementsPlanningABCClassificationCode   : String; // nullable
+    MaximumStockQuantity                              : String; // MaximumStockQuantity (unitCode="KGM")
+    ReorderThresholdQuantity                          : String; // ReorderThresholdQuantity (unitCode="KGM")
+    PlannedDeliveryDuration                           : String; // PlannedDeliveryDuration
+    ProductRequirementsPlanningStrategyGroupCode      : String; // ProductRequirementsPlanningStrategyGroupCode
+    TotalReplinishmentLeadTimeDuration                : String; // TotalReplinishmentLeadTimeDuration
+    ProcurementTypeCode                               : String; // ProcurementTypeCode
+    ProcurementSubTypeCode                            : String; // nullable
+    AssemblyProductScrapPercent                        : String; // nullable
+    ProcurementInventoryManagedLocationInternalID     : String; // nullable
+    GoodsReceiptDuration                              : String; // GoodsReceiptDuration
+    ProductRequirementsPlanningGroupCode              : String; // nullable
+    ProductRequirementsPlanningStorageCostDeterminationProfileCode : String; // nullable
+    PlanningCalendarCode                              : String; // nullable
+    DynamicSafetyStockCalculationProfileCode          : String; // nullable
+    SafetyDaysOfSupplyRelevanceCode                   : String; // nullable
+    SafetyDaysOfSupplyDurationProfileCode             : String; // nullable
+    MRPDependentRequirementCode                       : String; // nullable
+    LotSizeOrderAmountValue                           : String; // nullable (currencyCode="   ")
+    LotSizeTaktTimeOffsetDuration                     : String; // LotSizeTaktTimeOffsetDuration
+    ServiceLevelPercent                               : String; // nullable
+    ProductionDuration                                : String; // ProductionDuration
+    ProposedProductSupplyAreaCode                     : String; // nullable
+    ProductRequirementsConsumptionModeTypeCode        : String; // ProductRequirementsConsumptionModeTypeCode
+    ForecastRequirementsSplitCategoryCode             : String; // nullable
+    ConsignmentControlCode                            : String; // nullable
+    MRPProfileCode                                    : String; // nullable
+    SchedulingMarginCode                              : String; // nullable
+    ProductRequirementsConsolidationCode              : String; // nullable
+    PlanAndOrderDayDeterminationCode                  : String; // nullable
+    MRPAvailabilityTypeCode                           : String; // nullable
+    RoundingProfileCode                               : String; // nullable
+    RepetitiveManufacturingAllowedIndicator           : String; // RepetitiveManufacturingAllowedIndicator
+    CrossProjectProductIndicatorCode                  : String; // nullable
+    BulkProductComponentIndicator                     : String; // BulkProductComponentIndicator
+    DependentRequirementsTypeCode                     : String; // nullable
+    RepetitiveManufacturingProfileCode                : String; // nullable
+    FollowUpProductInternalID                         : String; // nullable
+    EffectiveOutDate                                  : String; // nullable
+    GoodsIssueProcessingDuration                      : String; // GoodsIssueProcessingDuration
+    ComponentScrapPercent                             : String; // nullable
+    BackwardConsumptionPeriodDuration                : String; // BackwardConsumptionPeriodDuration
+    ForwardConsumptionPeriodDuration                 : String; // ForwardConsumptionPeriodDuration
+    ProductDiscontinuationTypeCode                    : String; // nullable
+    PlannedOrderActionControlCode                     : String; // nullable
+    ProductUnitGroupCode                              : String; // nullable
+    JITProdnConfProfileCode                          : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity Sales: cuid {
+    LoadingGroupCode                          : String; // LoadingGroupCode
+    ReplacementPartTypeCode                   : String; // nullable
+    WorkCentersShippingSetupDuration          : String; // nullable
+    ProductShippingProcessingDuration         : String; // nullable
+    CapacityPlanningQuantity                  : String; // CapacityPlanningQuantity (unitCode="KGM")
+	parentPlant: Association to Plant;
+}
+
+entity QualityManagement: cuid {
+    InspectionStockIndicator                        : String; // InspectionStockIndicator
+    QualityManagementControlKeyCode                 : String; // nullable
+    ProductQualityAuthorizationGroupCode             : String; // nullable
+    ProductQualityCertificateTypeCode               : String; // nullable
+    InspectionLotDocumentationRequiredIndicator     : String; // InspectionLotDocumentationRequiredIndicator
+    RecurringInspectionIntervalDuration             : String; // RecurringInspectionIntervalDuration
+    SupplierQualityManagementSystemCode             : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity Forecasting: cuid {
+    ConsumptionReferenceUsageEndDate                : String; // nullable
+    ConsumptionReferenceProductQuantityMultiplier   : String; // nullable
+    ConsumptionReferenceProductID                   : String; // nullable
+    ConsumptionReferencePlantID                     : String; // nullable
+    FiscalYearVariantCode                           : String; // nullable
+    ProductConsumptionPeriodTypeCode                : String; // ProductConsumptionPeriodTypeCode
+    ForecastModelResetIndicator                     : String; // ForecastModelResetIndicator
+    CorrectionFactorRequiredIndicator              : String; // CorrectionFactorRequiredIndicator
+	parentPlant: Association to Plant;
+}
+
+entity InternationalTrade: cuid {
+    ProductOriginCountryCode                        : String; // nullable
+    ProductOriginRegionCode                         : String; // nullable
+    ConsumptionTaxControlCode                       : String; // nullable
+    ExportAndImportProductGroupCode                 : String; // nullable
+    ProductInternationalTradeClassificationNumber   : String; // nullable
+    ProductCASNumber                                : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity Storage: cuid {
+    PhysicalInventoryCycleCountingProfileCode      : String; // nullable
+    WarehouseManagementPutawayAndStockRemovalStrategyCode : String; // nullable
+    ProvisioningServiceLevelCode                   : String; // nullable
+    ProductMaximumStoragePeriodUnitCode            : String; // nullable
+    MaximumStoragePeriodDuration                   : String; // MaximumStoragePeriodDuration
+    CycleCountingCategoryIsFixedIndicator          : String; // CycleCountingCategoryIsFixedIndicator
+	parentPlant: Association to Plant;
+}
+
+entity StorageLocation: cuid {
+    StorageLocationID                       : String; // StorageLocationID
+    StorageBinID                            : String; // nullable
+    DeletedIndicator                        : String; // DeletedIndicator
+    LeanWarehouseManagementPickingAreaCode  : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity Purchasing: cuid {
+    AutomaticPurchaseOrderAllowedIndicator        : String; // AutomaticPurchaseOrderAllowedIndicator
+    SourceListRequirementIndicator                : String; // SourceListRequirementIndicator
+    PurchasingGroupID                             : String; // PurchasingGroupID
+    SourceOfSupplyCategoryCode                    : String; // nullable
+    PurchasingAcrossPurchasingGroupIndicator      : String; // PurchasingAcrossPurchasingGroupIndicator
+    JITDeliverySchedulesRelevantIndicator         : String; // JITDeliverySchedulesRelevantIndicator
+    TaxIndicator                                  : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity WorkScheduling: cuid {
+    ProductBaseQuantity                               : String; // nullable
+    OverDeliveryToleranceLimit                        : String; // nullable
+    UnderDeliveryToleranceLimit                       : String; // nullable
+    UnlimitedOverDeliveryIsAllowedIndicator           : String; // UnlimitedOverDeliveryIsAllowedIndicator
+    ProductionInventoryManagedLocationInternalID      : String; // nullable
+    ProductionSupervisorCode                          : String; // nullable
+    ProductionOrderBatchEntryDeterminationCode        : String; // nullable
+    OrderChangeManagementProfileCode                  : String; // nullable
+    BackflushIndicatorCode                            : String; // nullable
+    ProductionSchedulingProfileCode                   : String; // nullable
+    ProductWithdrawnFromProductionBinIndicator        : String; // ProductWithdrawnFromProductionBinIndicator
+    ProductProductionQuantityUnitCode                 : String; // nullable
+    ProductProcessingDuration                         : String; // nullable
+    SetupAndTeardownTimeDuration                     : String; // SetupAndTeardownTimeDuration
+    TransitionMatrixProductsGroupID                   : String; // nullable
+    TransitionDuration                                : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity PlantSCMAdvancedPlanning: cuid {
+    ConsumptionOfStorageCapacity                : String; // ConsumptionOfStorageCapacity
+    GoodsIssueHandlingCost                      : String; // GoodsIssueHandlingCost
+    GoodsReceiptHandlingCost                    : String; // GoodsReceiptHandlingCost
+    ProductProcurementCostsVal                  : String; // ProductProcurementCostsVal
+    ProductPriority                             : String; // nullable
+    PeggingStrategy                             : String; // nullable
+    LotSizeUnit                                 : String; // nullable
+    BOMTypeExplosionUsed                        : String; // nullable
+    PlngCalendarPerdcLotSizing                  : String; // nullable
+    TargetDaysSupplyInWorkDays                  : String; // TargetDaysSupplyInWorkDays
+    RequirementStrategy                         : String; // nullable
+    SftyStkVioltnPnltyCostValue                : String; // SftyStkVioltnPnltyCostValue
+    RqdMinShelfLifeLocDepdnt                   : String; // RqdMinShelfLifeLocDepdnt
+    RqdMaxShelfLifeLocDepdnt                   : String; // RqdMaxShelfLifeLocDepdnt
+    IsLocDependentShelfLifeUsed                 : String; // IsLocDependentShelfLifeUsed
+    ShelfLifeLocDependent                       : String; // ShelfLifeLocDependent
+    LocProdStorageCostValue                     : String; // LocProdStorageCostValue
+    PPPlanningProcedure                         : String; // nullable
+    ProductPlanningGroup                        : String; // nullable
+    ResourceNetworkName                         : String; // nullable
+    ReorderDaysSupplyInWorkDays                 : String; // ReorderDaysSupplyInWorkDays
+    ReplenishmentLeadTimeDays                   : String; // ReplenishmentLeadTimeDays
+    ConversionRule                              : String; // nullable
+    IsAlertsInPeggingAvoided                    : String; // IsAlertsInPeggingAvoided
+    AlertThldForDlydRcptDurn                   : String; // AlertThldForDlydRcptDurn
+    AlertThldForEarlyRcptDurn                  : String; // AlertThldForEarlyRcptDurn
+    ProductPlanningPackage                      : String; // nullable
+    MinPassingAmtContinuousPegging              : String; // nullable
+    MaturationDurnLocDependent                  : String; // MaturationDurnLocDependent
+    InteractiveSourcingProfile                  : String; // nullable
+    ProdnPlngHeuristic                          : String; // nullable
+    LocProdGoodsReceiptProcHours                : String; // LocProdGoodsReceiptProcHours
+    LocProdGoodsIssueProcHours                  : String; // LocProdGoodsIssueProcHours
+    ProductAlertRelevanceCode                   : String; // nullable
+    IsTotalQtyReceiptElement                    : String; // IsTotalQtyReceiptElement
+    IsTotalQtyStockElement                      : String; // IsTotalQtyStockElement
+    IsFixedPeggingForProdRetained               : String; // nullable
+    GIHandlingCapacity                          : String; // nullable
+    GRHandlingCapacity                          : String; // nullable
+    MaxDaysOfSupplyIsActive                     : String; // MaxDaysOfSupplyIsActive
+    MaxDaysOfSupplyPenaltyAmount                : String; // MaxDaysOfSupplyPenaltyAmount
+    AdvncdPlngTgtStkLvlMeth                     : String; // nullable
+    SftyStkMethIsAutomlyDtmnd                  : String; // SftyStkMethIsAutomlyDtmnd
+    AdvncdPlngSftyStkMeth                      : String; // nullable
+    PeriodFactorIsUsed                          : String; // PeriodFactorIsUsed
+    AdvncdPlngPeriodFactorValue                 : String; // nullable
+    TimeDepdntStkLvlPerdFactorVal              : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity Planning: cuid {
+    PlanningMaterialID                              : String; // nullable
+    PlanningPlantID                                 : String; // nullable
+    ProductPlantPlanningMaterialConversionFactor    : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity ForecastParameters: cuid {
+    ForecastBasicValueAlphaFactor                    : String; // nullable
+    NumberOfForecastPeriod                          : String; // nullable
+    ForecastTrendValueBetaFactor                    : String; // nullable
+    MeanAbsoluteDeviationDeltaFactor                : String; // nullable
+    ForecastNumberOfFixedPeriod                     : String; // nullable
+    ForecastSeasonalIndexGammaFactor                : String; // nullable
+    ForecastWeightingGroupCode                      : String; // nullable
+    ForecastModelInitializationIndicator            : String; // nullable
+    ForecastParameterIsOptimizedIndicator           : Boolean;
+    ForecastModelSelectionProcedureCode             : String; // nullable
+    ForecastModelSelectionMethod                    : String; // nullable
+    OptimizationLevel                               : String; // nullable
+    HistoricalPeriodCountForForecast                : String; // nullable
+    PeriodsCountForForecastInitialization          : String; // nullable
+    ForecastPeriodCountPerSeasonCycle               : String; // nullable
+    LastForecastDate                                : String; // nullable
+    ForecastModel                                   : String; // nullable
+    ForecastValueTrackingLimit                      : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+entity ProductionResourceTool: cuid {
+    ControlProfileCode                                    : String; // nullable
+    ControlProfileReferencedIndicator                    : Boolean;
+    Group1                                                : String; // nullable
+    Group2                                                : String; // nullable
+    ProductionResourceUsageCode                           : String; // nullable
+    StandardTextCode                                      : String; // nullable
+    StandardTextCodeReferencedIndicator                   : Boolean;
+    StartDateOffsetReferenceCode                          : String; // nullable
+    StartDateOffsetReferenceCodeReferencedIndicator       : Boolean;
+    StartDateOffset                                       : String; // nullable
+    StartDateOffsetReferencedIndicator                    : Boolean;
+    EndDateOffsetReferenceCode                            : String; // nullable
+    EndDateOffsetReferenceCodeReferencedIndicator         : Boolean;
+    EndDateOffset                                         : String; // nullable
+    EndDateOffsetReferencedIndicator                      : Boolean;
+    TotalQuantityCalculationFormula                       : String; // nullable
+    TotalQuantityCalculationFormulaReferencedIndicator    : Boolean;
+    UsageQuantityCalculationFormula                       : String; // nullable
+    UsageQuantityCalculationFormulaReferencedIndicator    : Boolean;
+	parentPlant: Association to Plant;
+}
+
+entity PlantSCMDemandPenalty: cuid {
+    DemandType                    : String;
+    DelayPenaltyAmount                : Double;
+    MaximumDelayInDays                : Integer;
+    NonDeliveryPenaltyAmount          : Double;
+	parentPlant: Association to Plant;
+}
+
+entity PlanteSPPProduct: cuid {
+    ESPPIsUsed                              : String; // nullable
+    ProductAlertRelevanceCode               : String; // nullable
+    LocProdGoodsReceiptProcHours            : Integer;
+    LocProdGoodsIssueProcHours              : Integer;
+    ParLocSafetyStockQuantity              : Double; // nullable
+    RepairSafetyStockQuantity              : Double;// nullable
+    VCLSafetyStockQuantity                 : Double;// nullable
+    VCLParLocSafetyStockQuantity           : Double;// nullable
+    VCLRepairSafetyStockQuantity           : Double;// nullable
+    VCLReorderPointQuantity                : Double;// nullable
+    VCLMaximumStockQuantity                : Double;// nullable
+    ProductProcurementCostsVal             : Double;
+    GoodsReceiptHandlingCost               : Double;
+    GoodsIssueHandlingCost                 : Double;
+    CostFactorForStockHoldingVal           : Double;
+    ThirdPartyOrderProcessing              : String; // nullable
+    SrvcPartsThroughputTimeDurn            : Integer;
+	parentPlant: Association to Plant;
+}
+
+entity eSPPLocProd: cuid {
+    ReplenishmentStatusCode                 : String; // nullable
+    SrvcPartsProductProcureToOrder          : String; // nullable
+    ReplenishmentIndIsLocked                : Boolean;
+    SrvcPartsLocationExclusionRsn           : String; // nullable
+    SrvcPartsStkngStbltyDurnInHrs          : Double; // nullable
+    SrvcPartsDstkngStbltyDurnInHrs         : Double; // nullable
+    SrvcPartsCustInfoStkDcsnIsUsd           : Boolean;
+    SrvcPartsOEMMngdInvtryIsRlvt            : Boolean;
+    SrvcPartsVCLDstkngStbltyPerd            : Double; // nullable
+    SrvcPartsVCLStkngStabilityPerd          : Double; // nullable
+    SrvcPartsSftyStkEOQLockRsn              : String; // nullable
+    SrvcPartsStstclCalcEOQSfty              : String; // nullable
+    SrvcPartsNrOfDaysEOQPlngDurn            : String; // nullable
+    SrvcPartsEconomicOrderQty               : String; // nullable
+    SrvcPartsPlngLockEOQEndDate             : String; // nullable
+    SrvcPartsPlngLockEOQStrtDate            : String; // nullable
+    SrvcPartsSftyStkCalcMethod              : String; // nullable
+    SrvcPartsVCLSftyStkEOQLockRsn           : String; // nullable
+    SrvcPartsVCLStstclCalcEOQSfty           : String; // nullable
+    SrvcPartsVrtlChildLocEOQPerd            : String; // nullable
+    SrvcPartsEOQFixPeriod                   : String; // nullable
+    SrvcPartsVrtlChildLocEOQQty             : String; // nullable
+    SrvcPartsNrOfMaxDaysEOQ                : String; // nullable
+    SrvcPartsNrOfMaxDaysEOQParent          : String; // nullable
+    SrvcPartsNrOfMaxDaysReorderPt          : String; // nullable
+    SrvcPartsNrOfMinDaysEOQPeriod          : String; // nullable
+    SrvcPartsVCLPlngLockEOQEndDte          : String; // nullable
+    SrvcPartsVCLPlngLockEOQStrtDte         : String; // nullable
+    SrvcPartsNrOfOrdDepdntPortion          : String; // nullable
+    SrvcPartsVCLSftyStkCalcMethod          : String; // nullable
+    SrvcPartsFixOrdgCostPullAmtVal         : String; // nullable
+    SrvcPartsFixOrdgCostPushAmtVal         : String; // nullable
+    SrvcPartsMinPurOrderQty                : String; // nullable
+    SrvcPartsSupplyChainAnalyst            : String; // nullable
+    SrvcPartsDRPPlanner                    : String; // nullable
+    SrvcPartsInventoryPlanner              : String; // nullable
+    SrvcPartsForecastPlanner               : String; // nullable
+    SrvcPartsPlanningBuyer                 : String; // nullable
+    SrvcPartsSCMAnalystIsLocked            : Boolean;
+    SrvcPartsDRPLockRsn                    : String; // nullable
+    SrvcPartsDRPPlngMode                   : String; // nullable
+    SrvcPartsPseasnIsExcluded              : Boolean;
+    SrvcPartsVCLPseasnIsExcluded           : Boolean;
+    SrvcPartsMinNetDemandQty               : String; // nullable
+    SrvcPartsVCLMinNetDemandQty            : String; // nullable
+    SrvcPartsManFreezeHrznDteTme           : String; // nullable
+    SrvcPartsDRPMaxCostRndngAmtVal         : String; // nullable
+    SrvcPartsDRPMinCostRndngAmtVal         : String; // nullable
+    SrvcPartsDRPNrOfMonthsRndng            : String; // nullable
+    SrvcPartsDRPPlanningRunDurn            : String; // nullable
+    SrvcPartsDRPPlngLockEndDteTme          : String; // nullable
+    SrvcPartsDRPPlngLockStrtDteTme         : String; // nullable
+    SrvcPartsHrznFixedDmndIsTaken          : Boolean;
+    SrvcPartsProcmtLeadTimeDetn            : String; // nullable
+    SrvcPartsNmbrOfDaysForHorizon          : String; // nullable
+    NoSubOrdRemnftdIsAllwd                 : Boolean;
+    NoSubOrdSupersessionIsAllwd            : Boolean;
+    SrvcPartsDRPReviewTimeDurn             : String; // nullable
+    SrvcPartsAntcptdDemandCoverage         : String; // nullable
+    SrvcPartsVCLAntcptdDemandCvrg          : String; // nullable
+    SrvcPartsStabilityRuleDRP              : String; // nullable
+    SrvcPartsSupplierShutdown              : String; // nullable
+    SrvcPartsCnsldtdOrdering               : String; // nullable
+    SrvcPartsVCLCnsldtdOrdering            : String; // nullable
+    SrvcPartsDRPPlngModeTrggrIsSet         : Boolean;
+    SrvcPartsRndngMaxStockIsSet            : Boolean;
+    SrvcPartsPrflMaxValApprvlRules         : String; // nullable
+    SrvcPartsManRevLFHStartDteTme          : String; // nullable
+    SrvcPartsManRevLFHEndDteTme            : String; // nullable
+    SrvcPartsPostpnRevStrtDteTme           : String; // nullable
+    SrvcPartsPostpnRevEndDteTme            : String; // nullable
+    SrvcPartsProdPromnStartDate            : String; // nullable
+    SrvcPartsProdPromnEndDate              : String; // nullable
+    SrvcPartsStockIsInaccurate             : String; // nullable
+    SrvcPartsProductKitToOrder             : String; // nullable
+    SrvcPartsSaleIsRestricted              : Boolean;
+    SrvcPartsReprBuyOrKitStkSwitch         : String; // nullable
+    SrvcPartsReprBuyOrKitStkType           : String; // nullable
+    SrvcPartsReprRetsForecastType          : String; // nullable
+    SrvcPartsRetProdPctGoodQty             : String; // nullable
+    SrvcPartsReprblProdPctRetVal           : String; // nullable
+    SrvcPartsProductRepairTimeInt          : String; // nullable
+    SrvcPartsProdRepairTimeBuffer          : String; // nullable
+    SrvcPartsLateRqmtCvrgAmtVal            : String; // nullable
+    SrvcPartsReprReturnsForecast           : String; // nullable
+    SrvcPartsKitToStkShutdown              : String; // nullable
+    SrvcPartsKitStkReprPlngHrznVal         : String; // nullable
+    SrvcPartsDeploymentPlng                : String; // nullable
+    SrvcPartsDplntPlngStbltyDteTme         : String; // nullable
+    SrvcPartsPushDplntFromSupplier         : String; // nullable
+    SrvcPartsMltplrExprShptVal             : String; // nullable
+    SrvcPartsDplntReviewTimeDurn           : String; // nullable
+    SrvcPartsDplntPlanningRunDurn          : String; // nullable
+    SrvcPartsCustApprvlReplnmtOrd          : String; // nullable
+    SrvcPartsDeploymentVCL                 : String; // nullable
+    SrvcPartsParLocRmngQtyIsKept           : Boolean;
+    SrvcPartsAddlGrossDemandVal            : String; // nullable
+    SrvcPartsMaximumGrossDemandVal         : String; // nullable
+    SrvcPartsLockStartDteTme               : String; // nullable
+    SrvcPartsLockEndDteTme                 : String; // nullable
+    SrvcPartsDeploymentLockRsn             : String; // nullable
+    SrvcPartsLocLockStrtDteTme             : String; // nullable
+    SrvcPartsLocLockEndDteTme              : String; // nullable
+    SrvcPartsLocationLockRsn               : String; // nullable
+    SrvcPartsWrhsSpaceSvngStorType         : String; // nullable
+    SrvcPartsSvngPreventedLossVal          : String; // nullable
+    SrvcPartsAvgQtyStorBinQty              : String; // nullable
+    SrvcPartsInventoryBalancing            : String; // nullable
+    SrvcPartsLongEOQSftyMod                : String; // nullable
+    SrvcPartsLongEOQSftyModVCL             : String; // nullable
+    SrvcPartsEOQCalculationType            : String; // nullable
+    SrvcPartsEOQSftyStkHasTimeSers         : Boolean;
+    SrvcPartsVCLSftyStkIsTimeSers          : Boolean;
+    SrvcPartsLocationIsStockedRgnl         : Boolean;
+    SrvcPartsRecmddStorQuantity            : String; // nullable
+    SrvcPartProdRepairCostsAmtVal          : String; // nullable
+    SrvcPartsUnsrvcblRetTimeVal            : String; // nullable
+	parentPlant: Association to Plant;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
