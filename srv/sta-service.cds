@@ -896,45 +896,45 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             mediaType  : String      @Core.IsMediaType;
     }
    entity MaxHierarchy as select from TransactionalData.PT_TMAPPRST{	
-        OfferId,
-        productcode,
-        max(Hierarchy) AS MaxHierarchy,
+        key OfferId,
+        key productcode,
+        max(Hierarchy) as MaxHierarchy: Integer,
         ApproverName,
         ApprovalStatus
     }where ApprovalStatus = 'Waiting'
     group by OfferId, productcode, ApproverName, ApprovalStatus;
     entity NLContractDurations as select from TransactionalData.NLPriceConditions{
         PriceCondition: redirected to PriceCondition,
-        PriceCondition.ID as PriceConditionID,
+        key PriceCondition.ID as PriceConditionID : UUID,
         ContractDuration,
         OfferPrice,
-        max(ContractDuration) OVER (PARTITION BY PriceCondition.ID) AS MaxContractDuration,
-        min(ContractDuration) OVER (PARTITION BY PriceCondition.ID) AS MinContractDuration,
-        avg(ContractDuration) OVER (PARTITION BY PriceCondition.ID) AS AvgContractDuration
+        max(ContractDuration) OVER (PARTITION BY PriceCondition.ID) as MaxContractDuration : Double,
+        min(ContractDuration) OVER (PARTITION BY PriceCondition.ID) as MinContractDuration : Double,
+        avg(ContractDuration) OVER (PARTITION BY PriceCondition.ID) as AvgContractDuration : Double
     };
     entity NLOfferPrice_1 as select from TransactionalData.PriceCondition as pc
         inner join NLContractDurations as nlpc
               on nlpc.PriceConditionID = pc.ID{
-        pc.OfferID,
-        pc.ID as priceconditionID,
-        pc.ProductCode,
-        nlpc.OfferPrice AS OfferPrice_1
+        key pc.OfferID,
+        key pc.ID as priceconditionID : UUID ,
+        key pc.ProductCode,
+        nlpc.OfferPrice as OfferPrice_1: Double
     } where nlpc.ContractDuration = nlpc.MinContractDuration;
     entity NLOfferPrice_2 as select from TransactionalData.PriceCondition as pc
         inner join NLContractDurations as nlpc
               on nlpc.PriceConditionID = pc.ID{
-        pc.OfferID,
-        pc.ID as priceconditionID,
-        pc.ProductCode,
-        nlpc.OfferPrice AS OfferPrice_2
+        key pc.OfferID,
+        key pc.ID as priceconditionID,
+        key pc.ProductCode,
+        nlpc.OfferPrice as OfferPrice_2: Double
     } where nlpc.ContractDuration = nlpc.AvgContractDuration;
     entity NLOfferPrice_3 as select from TransactionalData.PriceCondition as pc
         inner join NLContractDurations as nlpc
               on nlpc.PriceConditionID = pc.ID{
-        pc.OfferID,
-        pc.ID as priceconditionID,
-        pc.ProductCode,
-        nlpc.OfferPrice AS OfferPrice_3
+        key pc.OfferID,
+        key pc.ID as priceconditionID,
+        key pc.ProductCode,
+        nlpc.OfferPrice as OfferPrice_3: Double
     } where nlpc.ContractDuration = nlpc.MaxContractDuration;
     entity NLExtractOffers as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer
@@ -988,18 +988,18 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             {
             key tender.TenderID,
             key offer.OfferID,
-            offer.Custom.String_1 as Source,
-            CASE when inst.InstituteType = 'Buying Group'
+            offer.Custom.String_1 as Source : String,
+            case when inst.InstituteType = 'Buying Group'
                 then 'Purchasing Group'
                 else 'Bilatreaal'
-            end AS Inkoopgroep: String,
+            end as Inkoopgroep: String,
             inst.InstituteName,
             tender.TenderName,
             qoutation.EffectiveDate,
             qoutation.ExpiryDate,
             tender.BidDueDate,
             offerStatus.TableStatus,
-            tender.Custom.String_1,
+            tender.Custom.String_1 as ManagedBy : String,
             tender.PublicationDate,
             ctprdpck.GOV_CODE,
             maxapprHier.ApproverName,
