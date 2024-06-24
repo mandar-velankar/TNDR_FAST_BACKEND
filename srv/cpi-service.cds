@@ -26,6 +26,7 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity SpainRappel as projection on SAP.SpainRappel;
     entity FASTCoreProduct as projection on SAP.FASTCoreProduct;
     entity SalesSpecification as projection on SAP.SalesSpecification;
+    entity SubscriptionProductSalesData as projection on SAP.SubscriptionProductSalesData;
 
     function createBrazilContract() returns LargeString;
 

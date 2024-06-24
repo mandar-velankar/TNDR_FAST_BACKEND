@@ -727,7 +727,7 @@ entity SalesSpecification: cuid{
     DistributionCenterListingStartDate: Date; // Nullable field
     DistributionCenterListingEndDate: Date; // Nullable field
     ProductEntitlementRelevantIndicator: Boolean;
-    SubscriptionProductSalesData: Composition of many SubscriptionProductSalesData on SubscriptionProductSalesData.parentSalesSpecification = $self;
+    SubscriptionProductSalesData: Composition of one SubscriptionProductSalesData on SubscriptionProductSalesData.parentSalesSpecification = $self;
     parent: Association to FASTCoreProduct;
 }
 
