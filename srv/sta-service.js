@@ -116,7 +116,8 @@ module.exports = async (srv) => {
 		PT_TMTNOFST,
 		TransCompetitorResult,
 		OutgoingMails,
-		NLPriceConditions
+		NLPriceConditions,
+		NLOfferDistributors
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -5000,5 +5001,42 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             console.error('Error in ExcelAttachments READ');
             return req.reject(403, error?.message||"Error in ExcelAttachments");
         }
-	})
+	});
+
+	srv.on('CREATE', 'NLOfferDistributors', async (req, res) => {
+		try {
+			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({CountryCode: "NL"});
+			const productPacks = await SELECT.from(PT_TMPRDPCK);
+
+			const { DistributorName, ProductPackName, OfferID} = req.data;
+			const mappedNLOfferDistributors = [];
+			
+			if (DistributorName && ProductPackName) {
+				DistributorName.split(';').map(dId => {
+					ProductPackName.split(';').map(pId => {
+						const distributorName = distributors.find(dist => dist.DistributorID == dId);
+						const productName = productPacks.find(product => product.PRODUCTPACKID == pId);
+						mappedNLOfferDistributors.push({
+							OfferID: OfferID,
+							DistributorName: distributorName.DistributorName,
+							ProductPackName: productName.PRODUCTPACKNAME,
+							DistributorID: dId,
+							ProductPackID: pId
+						})
+					});
+				});
+			}	
+			
+			const deletePromise = DELETE.from(NLOfferDistributors).where({OfferID: OfferID});
+			let insertPromise;
+			if (mappedNLOfferDistributors.length > 0) {
+				insertPromise = INSERT.into(NLOfferDistributors).entries(mappedNLOfferDistributors);
+			}
+			await Promise.all([deletePromise, insertPromise]);
+			return req.data;
+		} catch (error) {
+			console.error('Error in NLOfferDistributors CREATE');
+            return req.reject(403, error?.message||"Error in NLOfferDistributors");
+		}
+	});
 }
