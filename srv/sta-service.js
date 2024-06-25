@@ -4987,11 +4987,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const templateId = req.data.templateId;
 
 		const templates = await tx.run(SELECT.from(ExtractNLHistoricalInformation).where({ templateId: templateId }));
-		const excelData = await tx.run(SELECT.from(NLExtractOffers));
-
+		let excelData = await tx.run(SELECT.from(NLExtractOffers));
+		const data = {excelData}
 		const templateContent = templates[0].content;
 
-		let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,excelData,1);
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,data,1);
 
 			req._.res.setHeader('Content-disposition', `attachment; filename= Extract History.xlsx`);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
