@@ -2760,91 +2760,30 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
     and offer.Active = 1
     and pr.Results.Outcome = 'Won';
 
-    entity ZuelligExtractDistinctView as projection on zuelligExtract{
-        TenderID,
-        createdAt,
-        OfferID,
-        CountryCode,
-        MAX(CreationDate) AS CreationDate,
-        SubmittedBy,
-        SubmittedOn,
-        UserName,
+    entity maxCreationDateView as select from zuelligExtract {
+        key TenderID,
+        key OfferID,
+        InstituteID, 
         ProductCode,
-        InstituteName,
-        InstituteType,
-        InstituteID,
-        External_InstituteId,
-        ParentInst_External_InstituteId,
-        Class,
-        KAM_Territory,
-        CNPJ,
-        ParentInstituteID,
-        EffectiveDate,
-        PRODUCTPACKNAME,
-        PACKFACTOR,
-        SKUCode,
-        Display,
-        BU,
-        Price0,
-        Price1,
-        Price2,
-        Price3,
-        TotalDiscountNHI,
-        Level2Discount1,
-        Level2Discount2,
-        Level3Discount1,
-        GeneralDiscount_Amount,
-        SecondDiscount_Amount,
-        FreeGoods_Amount,
-        FreeGoods_Percentage,
-        AnnualDiscount_Percentage,
-        AnnualDiscountForBranch,
-        RegisteredPrice,
-        Status,
-        BranchInstitute,
-        SORTER 
-    }group by 
-        TenderID,
-        createdAt,
+        MAX(CreationDate) over (partition by InstituteID, ProductCode ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc)  as maxCreationDate
+    }group by TenderID,
         OfferID,
-        CountryCode,
-        SubmittedBy,
-        SubmittedOn,
-        UserName,
+        InstituteID, 
         ProductCode,
-        InstituteName,
-        InstituteType,
-        InstituteID,
-        External_InstituteId,
-        ParentInst_External_InstituteId,
-        Class,
-        KAM_Territory,
-        CNPJ,
-        ParentInstituteID,
-        EffectiveDate,
-        PRODUCTPACKNAME,
-        PACKFACTOR,
-        SKUCode,
-        Display,
-        BU,
-        Price0,
-        Price1,
-        Price2,
-        Price3,
-        TotalDiscountNHI,
-        Level2Discount1,
-        Level2Discount2,
-        Level3Discount1,
-        GeneralDiscount_Amount,
-        SecondDiscount_Amount,
-        FreeGoods_Amount,
-        FreeGoods_Percentage,
-        AnnualDiscount_Percentage,
-        AnnualDiscountForBranch,
-        RegisteredPrice,
-        Status,
-        BranchInstitute,
-        SORTER 
+        CreationDate;
+
+    entity ZuelligExtractDistinctView as select from zuelligExtract as extract
+        inner join maxCreationDateView as maxCreationDateView 
+            ON extract.InstituteID = maxCreationDateView.InstituteID 
+            and extract.ProductCode = maxCreationDateView.ProductCode 
+            AND extract.CreationDate = maxCreationDateView.maxCreationDate
+            and extract.OfferID = maxCreationDateView.OfferID {
+                *,
+                key extract.TenderID,
+                key extract.OfferID,
+                extract.InstituteID, 
+                extract.ProductCode
+    };
     
     entity ZuelligExtractView as projection on ZuelligExtractDistinctView {
         *,
