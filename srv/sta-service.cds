@@ -918,6 +918,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key pc.OfferID,
         key pc.ID as priceconditionID : UUID ,
         key pc.ProductCode,
+        nlpc.ContractDuration,
         nlpc.OfferPrice as OfferPrice_1: Double
     } where nlpc.ContractDuration = nlpc.MinContractDuration;
     entity NLOfferPrice_2 as select from TransactionalData.PriceCondition as pc
@@ -926,6 +927,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key pc.OfferID,
         key pc.ID as priceconditionID,
         key pc.ProductCode,
+        nlpc.ContractDuration,
         nlpc.OfferPrice as OfferPrice_2: Double
     } where nlpc.ContractDuration = nlpc.AvgContractDuration;
     entity NLOfferPrice_3 as select from TransactionalData.PriceCondition as pc
@@ -934,8 +936,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key pc.OfferID,
         key pc.ID as priceconditionID,
         key pc.ProductCode,
+        nlpc.ContractDuration,
         nlpc.OfferPrice as OfferPrice_3: Double
     } where nlpc.ContractDuration = nlpc.MaxContractDuration;
+   entity NLDistributorsView as select from TransactionalData.NLOfferDistributors{
+        key OfferID,
+        case
+           	when count(*) = count(CASE WHEN DistributorName = 'Bayer' then 1 END) then 'Direct'
+	        when count(CASE when DistributorName = 'Bayer' then 1 END) > 0 then 'Mixed'
+            else 'Wholesaler'
+        end as DistributionType: String
+    }group by OfferID;
     entity NLExtractOffers as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer
             on offer.TenderID = tender.TenderID
@@ -985,6 +996,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             on minop.OfferID = offer.OfferID
             and minop.priceconditionID = pc.ID
             and minop.ProductCode = product.ProductCode
+        left join NLDistributorsView as nldist
+            on nldist.OfferID = offer.OfferID
             {
             key tender.TenderID,
             key offer.OfferID,
@@ -1008,8 +1021,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             maxop.OfferPrice_3,
             secondop.OfferPrice_2,
             minop.OfferPrice_1,
+            maxop.ContractDuration as maxContrDur: Double,
+            secondop.ContractDuration as secContrDur: Double,
+            minop.ContractDuration as minContrDur: Double,
             PT_TMBDPR.NetPrice,
             res.Outcome,
-            ifnull(instgroup.InstituteName, '') as childInstituteName: String  
+            ifnull(instgroup.InstituteName, '') as childInstituteName: String,
+            nldist.DistributionType
         }where(tender.CountryCode = 'NL')
 }
