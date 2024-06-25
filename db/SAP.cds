@@ -1374,9 +1374,77 @@ entity eSPPLocProd: cuid {
 	parentPlant: Association to Plant;
 }
 
+entity FASTCoreBusinessPartner: cuid, managed{
+	UUID: UUID;
+	InternalID                                                    : String; // Adjust length if necessary
+    CategoryCode                                                  : String; // Adjust length if necessary
+    NumberRangeIntervalBusinessPartnerGroupCode                   : String;
+	Customer: Association to Customer on Customer.parent = $self;
+}
 
+entity Customer: cuid {  
+    InternalID                                     : String;
+    MaintenanceProfileCode                         : String;
+    AuthorisationGroupCode                         : String;
+    ExpressTrainStationLocationName                : String;
+    TrainStationLocationName                       : String;
+    CustomerPartyWithFiscalAddressInternalID       : String;
+    ReceiverCustomerPartyWithFiscalAddressInternalID : String;
+    AlternativePayeePartyInternalID                : String;
+    ReceiverAlternativePayeePartyInternalID        : String;
+    AlternativePayeeAllowedIndicator               : Boolean;
+    CorporateGroupName                             : String;
+    StandardPointLocationCode                      : String;
+    DeletionBlockedIndicator                       : Boolean;
+    DeletedIndicator                               : Boolean;
+    CountyCode                                     : String;
+    CityCode                                       : String;
+    PostingBlockedIndicator                        : Boolean;
+    EqualizationTaxRelevanceIndicator              : Boolean;
+    ValueAddedTaxRelevanceIndicator                : Boolean;
+    TradingPartnerCompanyID                        : String;
+    TaxGroupCode                                   : String;
+    ICMSExemptionIndicator                         : Boolean;
+    IPIExemptionIndicator                          : Boolean;
+    TaxSubstitutionGroupCode                       : String;
+    CFOPCategoryCode                               : String;
+    IndustrialSectorCode                           : String; 
+    FirstAdditionalIndustrialSectorCode            : String; 
+    SecondAdditionalIndustrialSectorCode           : String; 
+    ThirdAdditionalIndustrialSectorCode            : String; 
+    FourthAdditionalIndustrialSectorCode           : String; 
+    CustomerGroupCode                              : String; 
+    CustomerNielsenRegionCode                      : String; 
+    FiscalYearVariantCode                          : String;  
+    AnnualSalesVolumeAmount                        : Decimal; 
+    AnnualSalesVolumeAmountReportedYear            : Integer;   
+    EmployeeNumberValue                            : Integer;   
+    EmployeeNumberValueReportedYear                : Integer;  
+    BiochemicalWarfareIndicator                    : Boolean;
+    NuclearNonproliferationIndicator               : Boolean;
+    NationalSecurityIndicator                      : Boolean;
+    MissileTechnologyIndicator                     : Boolean;
+    CustomerConditionGroupCode                     : String; 
+    FirstAdditionalCustomerConditionGroupCode      : String; 
+    SecondAdditionalCustomerConditionGroupCode     : String; 
+    ThirdAdditionalCustomerConditionGroupCode      : String; 
+    FourthAdditionalCustomerConditionGroupCode     : String; 
+    RepresentativeName                             : String; 
+    BusinessTypeName                               : String; 
+    IndustryTypeName                               : String; 
+    RelatedSupplierInternalID                      : String;  
+    PaymentReasonCode                              : String;
+    SaleSalesAndDistributionBlocks: Association to SaleSalesAndDistributionBlocks on SaleSalesAndDistributionBlocks.parentCustomer = $self;
+    parent: Association to FASTCoreBusinessPartner;
+}
 
-
+entity SaleSalesAndDistributionBlocks: cuid{
+    OrderBlockingReasonCode                        : String; 
+    BillingBlockingReasonCode                      : String; 
+    DeliveryBlockingReasonCode                     : String; 
+    SalesSupportBlockedIndicator                   : Boolean;
+    parentCustomer: Association to Customer;
+}
 
 
 
