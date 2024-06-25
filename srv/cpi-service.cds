@@ -50,15 +50,16 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity PlantSCMDemandPenalty as projection on SAP.PlantSCMDemandPenalty;
     entity PlanteSPPProduct as projection on SAP.PlanteSPPProduct;
     entity eSPPLocProd as projection on SAP.eSPPLocProd;
-    entity FASTCoreBusinessPartner as projection on SAP.FASTCoreBusinessPartner{
-        *,
-        Customer,
-        Customer.SaleSalesAndDistributionBlocks.ID,
-        Customer.SaleSalesAndDistributionBlocks.OrderBlockingReasonCode,
-        Customer.SaleSalesAndDistributionBlocks.BillingBlockingReasonCode,
-        Customer.SaleSalesAndDistributionBlocks.DeliveryBlockingReasonCode,
-        Customer.SaleSalesAndDistributionBlocks.SalesSupportBlockedIndicator
-    };
+    entity FASTCoreBusinessPartner as projection on SAP.FASTCoreBusinessPartner;
+    entity Customer as projection on SAP.Customer;
+    entity Supplier as projection on SAP.Supplier;
+    entity AddressInformation as projection on SAP.AddressInformation;
+    entity Common as projection on SAP.Common;
+    entity Role as projection on SAP.Role;
+    entity TaxNumber as projection on SAP.TaxNumber;
+    entity FinancialServicesCommon as projection on SAP.FinancialServicesCommon;
+    entity CreditManagementProfile as projection on SAP.CreditManagementProfile;
+    entity CreditManagementCreditWorthiness as projection on SAP.CreditManagementCreditWorthiness;
     entity SaleSalesAndDistributionBlocks as projection on SAP.SaleSalesAndDistributionBlocks;
 
     function createBrazilContract() returns LargeString;
