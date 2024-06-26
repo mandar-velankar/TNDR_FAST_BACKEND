@@ -238,10 +238,36 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key ProductScope
     } group by ProductScope, COUNTRYCODE;
 
-    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR{
+    entity NLContractDurationOfferPrices as select from TransactionalData.PT_TMOFPR as pr
+        inner join TransactionalData.PriceCondition as pc
+            on pc.OfferID = pr.OfferID
+            and pc.ProductCode = pr.ProductCode
+        left join NLOfferPrice_1 as nlpc_1
+            on nlpc_1.OfferID = pr.OfferID
+            and nlpc_1.priceconditionID = pc.ID
+        left join NLOfferPrice_2 as nlpc_2
+            on nlpc_2.OfferID = pr.OfferID
+            and nlpc_2.priceconditionID = pc.ID
+        left join NLOfferPrice_3 as nlpc_3
+            on nlpc_3.OfferID = pr.OfferID
+            and nlpc_3.priceconditionID = pc.ID {
+                key pr.OfferID,
+                key pr.ProductCode,
+                nlpc_1.ContractDuration as ContractDuration_1: Double,
+                nlpc_1.OfferPrice_1,
+                nlpc_2.ContractDuration as ContractDuration_2: Double,
+                nlpc_2.OfferPrice_2,
+                nlpc_3.ContractDuration as ContractDuration_3: Double,
+                nlpc_3.OfferPrice_3
+    }where pr.CountryCode = 'NL';
+
+    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR as product
+        left join NLContractDurationOfferPrices as nlOfferPrices
+            on nlOfferPrices.OfferID = product.OfferID
+            and nlOfferPrices.ProductCode = product.ProductCode{
         *,
-        key ProductCode,
-        key OfferID,
+        key product.ProductCode,
+        key product.OfferID,
         key TenderID,
         Active,
         SKU.PRODUCTPACKNAME as ProductPackName,
