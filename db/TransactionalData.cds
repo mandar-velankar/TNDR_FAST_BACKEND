@@ -414,6 +414,10 @@ entity PT_TMOFPR {
         PricingPolicy            : Association to MasterData.PricingPolicy
                                         on PricingPolicy.CountryCode = CountryCode
                                         and PricingPolicy.ProductPackID = ProductCode;
+        ContractInfomation       :  Association to many ContractInfomation 
+                                        on ContractInfomation.OfferID = OfferID
+                                        and ContractInfomation.ProductCode = ProductCode;                                
+                                        
 }
 
 //brazil
@@ -920,4 +924,18 @@ entity NLOfferDistributors: cuid {
     DistributorID: Integer;
     ProductPackName: String;
     ProductPackID: Integer;
+}
+
+entity ContractInfomation : cuid, managed {
+    OfferID: String;
+    ProductCode: Integer;
+    InstituteID: Integer;
+    InstituteName: String;
+    ContractDuration: Double;
+    ContractStartDate: Date;
+    ContractEndDate: Date;
+    Active: Boolean;
+    OfferProduct: Association to PT_TMOFPR
+        on OfferProduct.OfferID = OfferID
+        and OfferProduct.ProductCode = ProductCode;
 }
