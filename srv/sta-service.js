@@ -4960,16 +4960,48 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: 'NL', OfferID: OfferID});
 			const zagisFile = await SELECT.one.from(ZagisUploadFile).where({"OfferID": OfferID});
 			const ctryProductPack = await SELECT.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": 'NL'});
+
+			if (!zagisFile) {
+				throw { message: "The file appears to be corrupted. Please check the file and upload a valid ZAGIS file." };
+			}
+
 			/**
 			 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
 			 */
 			const arrayBuffer = bufferToArrayBuffer(zagisFile.content);
-			const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+			try {
+				workbook = XLSX.read(arrayBuffer, { type: 'array' });
+			} catch (error) {
+				throw { message: "The file format is incorrect. Please upload a valid ZAGIS file." };
+			}
 
 			// Assuming the Excel file has only one sheet, you can get the data from it
 			const sheetName = workbook.SheetNames[0];
 			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 			products.shift();
+
+			// Validate required fields
+			const requiredFields = ["ZI-Nr.", "Aantal stuks in verpakking"];
+			const missingFields = requiredFields.filter(field => !products[0].hasOwnProperty(field) || !products[0][field]);
+
+			if (missingFields.length > 0) {
+				throw { message: `The file is missing required fields: ${missingFields.join(', ')}. Please update the file and try again.` };
+			}
+
+			// Validate data in fields and check if ZI-Nr. exists in the database
+			const invalidZIFields = [];
+			products.forEach(product => {
+				const ziNr = product["ZI-Nr."];
+				const productPack = ctryProductPack.find(pck => pck.GOV_CODE == ziNr);
+				if (!productPack) {
+					invalidZIFields.push(ziNr);
+				}
+			});
+
+			if (invalidZIFields.length > 0) {
+				throw { message: `The following ZI-Nr. values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` };
+			}
+
 			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
 			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
 			const promises = products.map(product => {
@@ -4987,6 +5019,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			return req;
 		} catch (error) {
 			console.error('Error in ZagisUploadFile');
+			return res.reject(400, error.message || 'An unexpected error occurred.')
 		}
 	});
 
