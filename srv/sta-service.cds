@@ -838,6 +838,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
+    entity ContractInfomation as projection on TransactionalData.ContractInfomation{
+        OfferProduct: redirected to PT_TMOFPR,
+        *
+    };
 
     entity MailTemplates                                as projection on AdminData.MailTemplate;
     entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
