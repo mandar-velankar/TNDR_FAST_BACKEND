@@ -885,7 +885,9 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Custom.Integer_1 as NumberOfExtension,
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
-    offer.Tender.Country.Region
+    offer.Tender.Country.Region,
+    offer.Tender.Custom.Integer_2 as Contract_Length2,
+    offer.Tender.Custom.Integer_3 as Contract_Length3
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -971,6 +973,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.ContractLength,
           offer.Tender.ContractExtenseion,
           offer.Tender.Custom.Integer_1,
+          offer.Tender.Custom.Integer_2,
+          offer.Tender.Custom.Integer_3,
           offer.Comment,
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region;
@@ -2103,6 +2107,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Regions                : String;
             InternalDueDate        : Date;
             ExpectedAwardDate      : Date;
+            Contract_Length1       : Integer; //PT_TMTEND/CUSTOM_INTEGER_1
+            Contract_Length2       : Integer; //PT_TMTEND/CUSTOM_INTEGER_2
+            Contract_Length3       : Integer; //PT_TMTEND/CUSTOM_INTEGER_3
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2303,6 +2310,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Discount_1                                  : Double;
             Discount_2                                  : Double;
             Discount_3                                  : Double;
+            NLPriceConditionType                        : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
