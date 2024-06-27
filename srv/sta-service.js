@@ -3101,8 +3101,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			NumberOfExtension: offer.NumberOfExtension,
 			ClientComment: offer.ClientComment,
 			Regions: offer.Regions,
-			InternalDueDate: offer.InternalBidDueDate,
-        	ExpectedAwardDate: tender.AwardDate
+			InternalDueDate: tender.BidDueDate,
+        	ExpectedAwardDate: tender.AwardDate,
+			Contract_Length1: offer.NumberOfExtension,
+			Contract_Length2: offer.Contract_Length2,
+			Contract_Length3: offer.Contract_Length3
 		};
 		return results;
 	
@@ -3449,6 +3452,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				CountryCode: offer.COUNTRYCODE
 			}
 			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
+			const priceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productConditionstmp[0]?.PriceConditionClassification_ID }));
 			const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
 				productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
 				productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
@@ -3787,7 +3791,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Discount_1: productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.Discount,
 				Discount_2: productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.Discount,
 				Discount_3: productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.Discount,
-				FOCInfoText: FOCInfoText
+				FOCInfoText: FOCInfoText,
+				NLPriceConditionType: priceConditionClassification?.ConditionType?.replace(/^NL/, '')
 			}
 		});
 		let resolvedResults = await Promise.all(results);
