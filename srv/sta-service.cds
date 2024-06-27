@@ -262,13 +262,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 nlpc_3.OfferPrice_3
     }where pr.CountryCode = 'NL';
 
-    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR as product
-        left join NLContractDurationOfferPrices as nlOfferPrices
-            on nlOfferPrices.OfferID = product.OfferID
-            and nlOfferPrices.ProductCode = product.ProductCode{
+    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR {
         *,
-        key product.ProductCode,
-        key product.OfferID,
+        key ProductCode,
+        key OfferID,
         key TenderID,
         Active,
         SKU.PRODUCTPACKNAME as ProductPackName,
