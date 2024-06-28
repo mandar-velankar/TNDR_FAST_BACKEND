@@ -698,6 +698,12 @@ module.exports = async (srv) => {
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
 		delete req.data.Region;
+		delete req.data.ContractDuration_1;
+		delete req.data.OfferPrice_1;
+		delete req.data.ContractDuration_2;
+		delete req.data.OfferPrice_2;
+		delete req.data.ContractDuration_3;
+		delete req.data.OfferPrice_3;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');

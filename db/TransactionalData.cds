@@ -416,7 +416,10 @@ entity PT_TMOFPR {
                                         and PricingPolicy.ProductPackID = ProductCode;
         ContractInfomation       :  Association to many ContractInfomation 
                                         on ContractInfomation.OfferID = OfferID
-                                        and ContractInfomation.ProductCode = ProductCode;                                
+                                        and ContractInfomation.ProductCode = ProductCode;   
+        NLContractDurationOfferPrices : Association to TransactionalDataViews.NLContractDurationOfferPrices 
+                                            on NLContractDurationOfferPrices.OfferID = OfferID
+                                            and NLContractDurationOfferPrices.ProductCode = ProductCode;                              
                                         
 }
 
