@@ -2470,6 +2470,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.Discount as DISCOUNT,
     priceCondition.GeneralDiscount_Amount, 
     priceCondition.SecondDiscount_Amount,
+    priceCondition.NegotiationPrice,
     product.Results.AwardedPrice,
     offer.OfferStatusTable.STATUS as OfferStatus,
     CASE 
@@ -2527,6 +2528,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.TotalDiscountInvoice,
         priceCondition.GeneralDiscount_Amount, 
         priceCondition.SecondDiscount_Amount,
+        priceCondition.NegotiationPrice,
         offer.OfferStatusTable.STATUS,
         product.Results.Outcome,
         foc.ProductPackId;
@@ -2553,7 +2555,8 @@ inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCo
     standardTenderHistory.TotalDiscountNHI,
     standardTenderHistory.TotalDiscountInvoice,
     standardTenderHistory.GeneralDiscount_Amount,
-    standardTenderHistory.SecondDiscount_Amount
+    standardTenderHistory.SecondDiscount_Amount,
+    standardTenderHistory.NegotiationPrice
 }where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW'
 union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
@@ -2579,7 +2582,8 @@ inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.P
     standardTenderHistory.TotalDiscountNHI,
     standardTenderHistory.TotalDiscountInvoice,
     standardTenderHistory.GeneralDiscount_Amount,
-    standardTenderHistory.SecondDiscount_Amount
+    standardTenderHistory.SecondDiscount_Amount,
+    standardTenderHistory.NegotiationPrice
 }where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW';
 
 entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHistory
