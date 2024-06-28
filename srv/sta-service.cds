@@ -905,6 +905,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             else 'Wholesaler'
         end as DistributionType: String
     }group by OfferID;
+
+    entity SelectedContractDuration as select from  ContractInfomation{
+        key OfferID,
+        key ProductCode,
+        max(ContractDuration) as ContractDuration: Double
+    }group by OfferID, ProductCode;
     entity NLExtractOffers as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer
             on offer.TenderID = tender.TenderID
@@ -956,6 +962,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             and minop.ProductCode = product.ProductCode
         left join NLDistributorsView as nldist
             on nldist.OfferID = offer.OfferID
+        inner join SelectedContractDuration as selectedcontractduration
+            on selectedcontractduration.OfferID = offer.OfferID
+            and selectedcontractduration.ProductCode = product.ProductCode
             {
             key tender.TenderID,
             key offer.OfferID,
@@ -985,7 +994,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             PT_TMBDPR.NetPrice,
             res.Outcome,
             ifnull(instgroup.InstituteName, '') as childInstituteName: String,
-            nldist.DistributionType
+            nldist.DistributionType,
+            selectedcontractduration.ContractDuration
         }where(tender.CountryCode = 'NL');
 
     @cds.redirection.target
