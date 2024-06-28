@@ -667,6 +667,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.Custom.Date_8 as Custom_Date_8,
         result.Custom.Date_9 as Custom_Date_9,
         result.Custom.Date_10 as Custom_Date_10,
+        priceCondition.ID as priceconditionID : UUID
 
     };
     entity MasterCountryOutComes as select from MasterData.MASTER_COUNTRY_OUTCOMES;
@@ -985,5 +986,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             res.Outcome,
             ifnull(instgroup.InstituteName, '') as childInstituteName: String,
             nldist.DistributionType
-        }where(tender.CountryCode = 'NL')
+        }where(tender.CountryCode = 'NL');
+
+    @cds.redirection.target
+    entity NLPriceConditions as projection on TransactionalData.NLPriceConditions;    
 }

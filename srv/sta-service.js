@@ -1193,6 +1193,7 @@ module.exports = async (srv) => {
 			delete req.data.FreeGoodsOther_ABS_PCT;
 			delete req.data.FreeGoodsOther_Step;
 			delete req.data.ADD_INCLUDE;
+			delete req.data.priceconditionID
 		}
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
