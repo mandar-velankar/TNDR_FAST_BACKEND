@@ -2757,25 +2757,31 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
         nlpc.OfferPrice as OfferPrice_3: Double
     } where nlpc.ContractDuration = nlpc.MaxContractDuration;
 
-    entity NLContractDurationOfferPrices as select from TransactionalData.PT_TMOFPR as pr
-        inner join TransactionalData.PriceCondition as pc
-            on pc.OfferID = pr.OfferID
-            and pc.ProductCode = pr.ProductCode
-        left join NLOfferPrice_1 as nlpc_1
-            on nlpc_1.OfferID = pr.OfferID
-            and nlpc_1.priceconditionID = pc.ID
-        left join NLOfferPrice_2 as nlpc_2
-            on nlpc_2.OfferID = pr.OfferID
-            and nlpc_2.priceconditionID = pc.ID
-        left join NLOfferPrice_3 as nlpc_3
-            on nlpc_3.OfferID = pr.OfferID
-            and nlpc_3.priceconditionID = pc.ID {
+    entity NLContractDurationOfferPrices as select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        inner join TransactionalData.PT_TMOFPR as pr
+            on pr.OfferID = offer.OfferID
+            and pr.Active = 1
+        inner join TransactionalData.PriceCondition as pricecondition
+            on pricecondition.OfferID = pr.OfferID
+            and pricecondition.ProductCode = pr.ProductCode
+        left join TransactionalData.NLPriceConditions as nlpc1
+            on nlpc1.PriceCondition.ID = pricecondition.ID
+            and nlpc1.ContractDuration= tender.Custom.Integer_1
+        left join TransactionalData.NLPriceConditions as nlpc2
+            on nlpc2.PriceCondition.ID = pricecondition.ID
+            and nlpc2.ContractDuration = tender.Custom.Integer_2
+        left join TransactionalData.NLPriceConditions as nlpc3
+            on nlpc3.PriceCondition.ID = pricecondition.ID
+            and nlpc3.ContractDuration = tender.Custom.Integer_3 {
                 key pr.OfferID,
                 key pr.ProductCode,
-                nlpc_1.ContractDuration as ContractDuration_1: Double,
-                nlpc_1.OfferPrice_1,
-                nlpc_2.ContractDuration as ContractDuration_2: Double,
-                nlpc_2.OfferPrice_2,
-                nlpc_3.ContractDuration as ContractDuration_3: Double,
-                nlpc_3.OfferPrice_3
-    }where pr.CountryCode = 'NL';
+                nlpc1.ContractDuration as ContractDuration_1: Double,
+                nlpc1.OfferPrice as OfferPrice_1: Double,
+                nlpc2.ContractDuration as ContractDuration_2: Double,
+                nlpc2.OfferPrice as OfferPrice_2: Double,
+                nlpc3.ContractDuration as ContractDuration_3: Double,
+                nlpc3.OfferPrice as OfferPrice_3: Double
+    }where tender.CountryCode = 'NL';
