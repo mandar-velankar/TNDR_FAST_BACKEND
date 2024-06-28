@@ -919,3 +919,18 @@ entity PaymentTerms {
     E1KNVVM_ZTERM : String(6) not null;
     Description : String;
 }
+
+entity NLPPP: cuid, managed{
+	CountryCode: String;
+	ProductPackID:Integer;
+	MaterialNumber: Integer;
+	StartDate: Date;
+	EndDate: Date;
+	Comment: String;
+	Status: String;
+	ApprovalsCount: Integer;
+	MaxPrice: Double;
+	PPP: Double;
+	PowerApproverCWID: String;
+	PowerApprovalDate: Date;
+}
