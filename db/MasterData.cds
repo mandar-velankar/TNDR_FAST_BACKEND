@@ -158,6 +158,8 @@ entity PT_TMPRDPCK{
 	ProductFullDescription: LargeString;
     Nucleus: String(100);
     ProductGenericName: String(500);
+	Bundle: Integer;
+	OuterCarton: Integer;
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
