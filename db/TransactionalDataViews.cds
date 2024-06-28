@@ -2849,3 +2849,63 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         foc.FreeGoodsOther_Step,
         foc.FreeGoodsOther_ABS_PCT,
         foc.ADD_INCLUDE;
+
+    entity NLContractDurations as select from TransactionalData.NLPriceConditions{
+        PriceCondition: redirected to TransactionalData.PriceCondition,
+        key PriceCondition.ID as PriceConditionID : UUID,
+        ContractDuration,
+        OfferPrice,
+        max(ContractDuration) OVER (PARTITION BY PriceCondition.ID) as MaxContractDuration : Double,
+        min(ContractDuration) OVER (PARTITION BY PriceCondition.ID) as MinContractDuration : Double,
+        avg(ContractDuration) OVER (PARTITION BY PriceCondition.ID) as AvgContractDuration : Double
+    };
+    entity NLOfferPrice_1 as select from TransactionalData.PriceCondition as pc
+        inner join NLContractDurations as nlpc
+              on nlpc.PriceConditionID = pc.ID{
+        key pc.OfferID,
+        key pc.ID as priceconditionID : UUID ,
+        key pc.ProductCode,
+        nlpc.ContractDuration,
+        nlpc.OfferPrice as OfferPrice_1: Double
+    } where nlpc.ContractDuration = nlpc.MinContractDuration;
+    entity NLOfferPrice_2 as select from TransactionalData.PriceCondition as pc
+        inner join NLContractDurations as nlpc
+              on nlpc.PriceConditionID = pc.ID{
+        key pc.OfferID,
+        key pc.ID as priceconditionID,
+        key pc.ProductCode,
+        nlpc.ContractDuration,
+        nlpc.OfferPrice as OfferPrice_2: Double
+    } where nlpc.ContractDuration = nlpc.AvgContractDuration;
+    entity NLOfferPrice_3 as select from TransactionalData.PriceCondition as pc
+        inner join NLContractDurations as nlpc
+              on nlpc.PriceConditionID = pc.ID{
+        key pc.OfferID,
+        key pc.ID as priceconditionID,
+        key pc.ProductCode,
+        nlpc.ContractDuration,
+        nlpc.OfferPrice as OfferPrice_3: Double
+    } where nlpc.ContractDuration = nlpc.MaxContractDuration;
+
+    entity NLContractDurationOfferPrices as select from TransactionalData.PT_TMOFPR as pr
+        inner join TransactionalData.PriceCondition as pc
+            on pc.OfferID = pr.OfferID
+            and pc.ProductCode = pr.ProductCode
+        left join NLOfferPrice_1 as nlpc_1
+            on nlpc_1.OfferID = pr.OfferID
+            and nlpc_1.priceconditionID = pc.ID
+        left join NLOfferPrice_2 as nlpc_2
+            on nlpc_2.OfferID = pr.OfferID
+            and nlpc_2.priceconditionID = pc.ID
+        left join NLOfferPrice_3 as nlpc_3
+            on nlpc_3.OfferID = pr.OfferID
+            and nlpc_3.priceconditionID = pc.ID {
+                key pr.OfferID,
+                key pr.ProductCode,
+                nlpc_1.ContractDuration as ContractDuration_1: Double,
+                nlpc_1.OfferPrice_1,
+                nlpc_2.ContractDuration as ContractDuration_2: Double,
+                nlpc_2.OfferPrice_2,
+                nlpc_3.ContractDuration as ContractDuration_3: Double,
+                nlpc_3.OfferPrice_3
+    }where pr.CountryCode = 'NL';

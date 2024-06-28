@@ -23,6 +23,7 @@ const { nextTick } = require('process');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
 const XLSX = require("xlsx");
+const { isGeneratorFunction } = require('util/types');
 
 module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
@@ -117,7 +118,8 @@ module.exports = async (srv) => {
 		TransCompetitorResult,
 		OutgoingMails,
 		NLPriceConditions,
-		NLOfferDistributors
+		NLOfferDistributors,
+		ContractInfomation
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -671,6 +673,12 @@ module.exports = async (srv) => {
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
 		delete req.data.Region;
+		delete req.data.ContractDuration_1;
+		delete req.data.OfferPrice_1;
+		delete req.data.ContractDuration_2;
+		delete req.data.OfferPrice_2;
+		delete req.data.ContractDuration_3;
+		delete req.data.OfferPrice_3;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');
@@ -1160,6 +1168,7 @@ module.exports = async (srv) => {
 			delete req.data.FreeGoodsOther_ABS_PCT;
 			delete req.data.FreeGoodsOther_Step;
 			delete req.data.ADD_INCLUDE;
+			delete req.data.priceconditionID
 		}
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
@@ -5135,6 +5144,51 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		} catch (error) {
 			console.error('Error in NLOfferDistributors CREATE');
             return req.reject(403, error?.message||"Error in NLOfferDistributors");
+		}
+	});
+
+	srv.on('CREATE', 'ContractInfomation', async (req, res) => {
+		try {
+			const { InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate} = req.data;
+			const Institutes = await SELECT.from(PT_TMINST).where({CountryCode: "NL"});
+            const existingContractDurations = await SELECT.from(ContractInfomation).where({ProductCode: ProductCode, OfferID: OfferID})		     
+
+			const mappedContractDurations = [];
+			
+			if (InstituteName) {
+					InstituteName.split(',').map(instID => {
+						const Institute = Institutes.find(inst => inst.InstituteID == instID);
+						
+						mappedContractDurations.push({
+							OfferID: OfferID,
+                            ProductCode: ProductCode,
+                            InstituteID: instID,
+                            InstituteName: Institute.InstituteName,
+                            ContractDuration: ContractDuration,
+                            ContractStartDate: ContractStartDate,
+                            ContractEndDate: ContractEndDate,
+                            Active: true,
+						})
+					});
+			}	
+			
+			const deletePromise = DELETE.from(ContractInfomation).where({OfferID: OfferID, ProductCode: ProductCode});
+			let insertPromises = [];
+			if (mappedContractDurations.length > 0) {
+				insertPromises = mappedContractDurations.map(item =>{
+					const existingContractDuration = existingContractDurations.find(cd => cd.InstituteID == item.InstituteID && cd.ProductCode == item.ProductCode &&  cd.OfferID == item.OfferID)
+					if(existingContractDuration){
+						return UPDATE(ContractInfomation).with(item).where({InstituteID: item.InstituteID , ProductCode: item.ProductCode,OfferID: item.OfferID})
+					}else{
+                       return INSERT(ContractInfomation).into(item);
+					}
+				});
+			}
+			await Promise.all([insertPromises, deletePromise]);
+			return req.data;
+		} catch (error) {
+			console.error('Error in ContractInfomation CREATE');
+            return req.reject(403, error?.message||"Error in ContractInfomation");
 		}
 	});
 }
