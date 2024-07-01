@@ -2778,10 +2778,10 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
             and nlpc3.ContractDuration = tender.Custom.Integer_3 {
                 key pr.OfferID,
                 key pr.ProductCode,
-                nlpc1.ContractDuration as ContractDuration_1: Double,
+                tender.Custom.Integer_1 as ContractDuration_1: Double,
                 nlpc1.OfferPrice as OfferPrice_1: Double,
-                nlpc2.ContractDuration as ContractDuration_2: Double,
+                tender.Custom.Integer_2 as ContractDuration_2: Double,
                 nlpc2.OfferPrice as OfferPrice_2: Double,
-                nlpc3.ContractDuration as ContractDuration_3: Double,
+                tender.Custom.Integer_3 as ContractDuration_3: Double,
                 nlpc3.OfferPrice as OfferPrice_3: Double
     }where tender.CountryCode = 'NL';
