@@ -1379,8 +1379,8 @@ entity FASTCoreBusinessPartner: cuid, managed{
 	InternalID                                                    : String; // Adjust length if necessary
     CategoryCode                                                  : String; // Adjust length if necessary
     NumberRangeIntervalBusinessPartnerGroupCode                   : String;
-	Customer: Composition of one Customer on Customer.parent = $self;
-    Supplier: Composition of one Supplier on Supplier.parent = $self;
+	Customer: Composition of many Customer on Customer.parent = $self;
+    Supplier: Composition of many Supplier on Supplier.parent = $self;
 	AddressInformation: Composition of one AddressInformation on AddressInformation.parent = $self;
 	AddressIndependentCommInfo: Composition of one AddressIndependentCommInfo on AddressIndependentCommInfo.parent = $self;
 	Common: Composition of one Common on Common.parent = $self;
