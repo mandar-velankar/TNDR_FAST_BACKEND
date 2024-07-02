@@ -1790,7 +1790,9 @@ module.exports = async (srv) => {
 		}else {
 			await Promise.all(req.data.NLPriceConditionType.map(pc => {
 				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
-				return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+				if (mappedNLPriceCondition.ContractDuration) {
+					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+				}
 			}))
 		}
 	}

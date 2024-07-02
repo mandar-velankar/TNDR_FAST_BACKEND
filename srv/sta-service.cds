@@ -961,29 +961,20 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             on PT_TMBDPR.OfferID = offer.OfferID
             and PT_TMBDPR.ProductCode = product.ProductCode
             and PT_TMBDPR.Active = 1
-        inner join InstitutesInGroup as instgroup
-            on instgroup.ParentInstituteID = tender.InstituteID
-            and instgroup.InstituteID <> tender.InstituteID
         left join MaxHierarchy as maxapprHier
             on maxapprHier.OfferId = offer.OfferID
             and maxapprHier.productcode = product.ProductCode
-        left join TransactionalDataViews.NLOfferPrice_3 as maxop
-            on maxop.OfferID = offer.OfferID
-            and maxop.priceconditionID = pc.ID
-            and maxop.ProductCode = product.ProductCode
-        left join TransactionalDataViews.NLOfferPrice_2 as secondop
-            on secondop.OfferID = offer.OfferID
-            and secondop.priceconditionID = pc.ID
-            and secondop.ProductCode = product.ProductCode
-        left join TransactionalDataViews.NLOfferPrice_1 as minop
-            on minop.OfferID = offer.OfferID
-            and minop.priceconditionID = pc.ID
-            and minop.ProductCode = product.ProductCode
+        left join TransactionalDataViews.NLContractDurations as contractdur
+            on contractdur.OfferID = offer.OfferID
+            and contractdur.PriceCondition_ID = pc.ID
         left join NLDistributorsView as nldist
             on nldist.OfferID = offer.OfferID
         inner join SelectedContractDuration as selectedcontractduration
             on selectedcontractduration.OfferID = offer.OfferID
             and selectedcontractduration.ProductCode = product.ProductCode
+        inner join TransactionalData.ContractInfomation as contractinfo
+            on contractinfo.OfferID = offer.OfferID
+            and contractinfo.ProductCode = product.ProductCode
             {
             key tender.TenderID,
             key offer.OfferID,
@@ -1004,17 +995,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             maxapprHier.ApproverName,
             productpack.PRODUCTPACKNAME,
             tender.InstituteID,
-            maxop.OfferPrice_3,
-            secondop.OfferPrice_2,
-            minop.OfferPrice_1,
-            maxop.ContractDuration as maxContrDur: Double,
-            secondop.ContractDuration as secContrDur: Double,
-            minop.ContractDuration as minContrDur: Double,
+            round(contractdur.MaxOfferPrice, 2) as OfferPrice_3: Double,
+            round(contractdur.AvgOfferPrice, 2) as OfferPrice_2: Double,
+            round(contractdur.MinOfferPrice, 2) as OfferPrice_1: Double,
+            contractdur.MaxContractDuration as maxContrDur: Double,
+            contractdur.AvgContractDuration as secContrDur: Double,
+            contractdur.MinContractDuration as minContrDur: Double,
             PT_TMBDPR.NetPrice,
             res.Outcome,
-            ifnull(instgroup.InstituteName, '') as childInstituteName: String,
+            ifnull(contractinfo.InstituteName, '') as childInstituteName: String,
             nldist.DistributionType,
-            selectedcontractduration.ContractDuration
+            selectedcontractduration.ContractDuration,
         }where(tender.CountryCode = 'NL');
 
     @cds.redirection.target
