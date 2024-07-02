@@ -266,11 +266,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Offer.Currency as Currency,
         Offer.Tender.Country.Region,
         SKUCountry.RegistrationValidUntil,
-        NLContractDurationOfferPrices.ContractDuration_1,
+        Offer.Tender.Custom.Integer_1 as ContractDuration_1,
         NLContractDurationOfferPrices.OfferPrice_1,
-        NLContractDurationOfferPrices.ContractDuration_2,
+        Offer.Tender.Custom.Integer_2 as ContractDuration_2,
         NLContractDurationOfferPrices.OfferPrice_2,
-        NLContractDurationOfferPrices.ContractDuration_3,
+        Offer.Tender.Custom.Integer_3 as ContractDuration_3,
         NLContractDurationOfferPrices.OfferPrice_3
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
