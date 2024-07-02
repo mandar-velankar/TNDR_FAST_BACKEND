@@ -1,0 +1,4 @@
+[
+    "src/gen/com.bayer.SXTENDER.TransactionalDataViews.ContractDurationBase.hdbview",
+    "src/gen/com.bayer.SXTENDER.TransactionalDataViews.NLContractDurations.hdbview"
+]
