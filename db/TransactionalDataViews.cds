@@ -2727,13 +2727,13 @@ entity ZuelligExtractView as select from TransactionalData.PT_TMTEND as tender
         key nlpc.PriceCondition.ID as PriceCondition_ID: UUID,
         nlpc.ContractDuration,
         nlpc.OfferPrice,
-        COUNT(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS CountContractDuration,
-        MIN(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS MinContractDuration,
-        MAX(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS MaxContractDuration,
-        ROW_NUMBER() OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration) AS RowAsc,
-        ROW_NUMBER() OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration DESC) AS RowDesc,
-        FIRST_VALUE(nlpc.OfferPrice) OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration) AS MinOfferPrice,
-        FIRST_VALUE(nlpc.OfferPrice) OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration DESC) AS MaxOfferPrice
+        COUNT(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS CountContractDuration: Integer,
+        MIN(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS MinContractDuration: Double,
+        MAX(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS MaxContractDuration: Double,
+        ROW_NUMBER() OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration) AS RowAsc: Integer,
+        ROW_NUMBER() OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration DESC) AS RowDesc: Integer,
+        FIRST_VALUE(nlpc.OfferPrice) OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration) AS MinOfferPrice: Double,
+        FIRST_VALUE(nlpc.OfferPrice) OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration DESC) AS MaxOfferPrice: Double
     };
     entity NLContractDurations as select from ContractDurationBase as rd{
         key rd.OfferID,
