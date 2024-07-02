@@ -1379,8 +1379,8 @@ entity FASTCoreBusinessPartner: cuid, managed{
 	InternalID                                                    : String; // Adjust length if necessary
     CategoryCode                                                  : String; // Adjust length if necessary
     NumberRangeIntervalBusinessPartnerGroupCode                   : String;
-	Customer: Composition of one Customer on Customer.parent = $self;
-    Supplier: Composition of one Supplier on Supplier.parent = $self;
+	Customer: Composition of many Customer on Customer.parent = $self;
+    Supplier: Composition of many Supplier on Supplier.parent = $self;
 	AddressInformation: Composition of one AddressInformation on AddressInformation.parent = $self;
 	AddressIndependentCommInfo: Composition of one AddressIndependentCommInfo on AddressIndependentCommInfo.parent = $self;
 	Common: Composition of one Common on Common.parent = $self;
@@ -1425,11 +1425,11 @@ entity Customer: cuid {
     AccountingInformation: Composition of many AccountingInformation on AccountingInformation.parentCustomer = $self;
     SalesArrangement: Composition of many SalesArrangement on SalesArrangement.parentCustomer = $self;
     TaxClassification: Composition of many TaxClassification on TaxClassification.parentCustomer = $self;
-    SaleSalesAndDistributionBlocks: Composition of one SaleSalesAndDistributionBlocks on SaleSalesAndDistributionBlocks.parent = $self;
-    IndustrySector: Composition of one IndustrySector on IndustrySector.parent = $self;
-    MarketingAttributes: Composition of one MarketingAttributes on MarketingAttributes.parent = $self;
-    LegalControlIndicators: Composition of one LegalControlIndicators on LegalControlIndicators.parent = $self;
-    PriceSpecifications: Composition of one PriceSpecifications on PriceSpecifications.parent = $self;
+    SaleSalesAndDistributionBlocks: Composition of one SaleSalesAndDistributionBlocks on SaleSalesAndDistributionBlocks.parentCustomer = $self;
+    IndustrySector: Composition of one IndustrySector on IndustrySector.parentCustomer = $self;
+    MarketingAttributes: Composition of one MarketingAttributes on MarketingAttributes.parentCustomer = $self;
+    LegalControlIndicators: Composition of one LegalControlIndicators on LegalControlIndicators.parentCustomer = $self;
+    PriceSpecifications: Composition of one PriceSpecifications on PriceSpecifications.parentCustomer = $self;
     parent: Association to FASTCoreBusinessPartner;
 }
 
@@ -1559,7 +1559,7 @@ entity SaleSalesAndDistributionBlocks: cuid{
     BillingBlockingReasonCode                      : String; 
     DeliveryBlockingReasonCode                     : String; 
     SalesSupportBlockedIndicator                   : Boolean;
-    parent: Association to Customer;
+    parentCustomer: Association to Customer;
 }
 
 entity IndustrySector: cuid{
@@ -1568,7 +1568,7 @@ entity IndustrySector: cuid{
     SecondAdditionalIndustrialSectorCode           : String; 
     ThirdAdditionalIndustrialSectorCode            : String; 
     FourthAdditionalIndustrialSectorCode           : String; 
-    parent: Association to Customer;
+    parentCustomer: Association to Customer;
 }
 
 entity MarketingAttributes: cuid{
@@ -1579,7 +1579,7 @@ entity MarketingAttributes: cuid{
     AnnualSalesVolumeAmountReportedYear            : Integer;   
     EmployeeNumberValue                            : Integer;   
     EmployeeNumberValueReportedYear                : Integer; 
-    parent: Association to Customer; 
+    parentCustomer: Association to Customer; 
 }
 
 entity LegalControlIndicators: cuid{
@@ -1587,7 +1587,7 @@ entity LegalControlIndicators: cuid{
     NuclearNonproliferationIndicator               : Boolean;
     NationalSecurityIndicator                      : Boolean;
     MissileTechnologyIndicator                     : Boolean;
-    parent: Association to Customer; 
+    parentCustomer: Association to Customer; 
 }
 
 entity PriceSpecifications: cuid{
@@ -1596,7 +1596,7 @@ entity PriceSpecifications: cuid{
     SecondAdditionalCustomerConditionGroupCode     : String; 
     ThirdAdditionalCustomerConditionGroupCode      : String; 
     FourthAdditionalCustomerConditionGroupCode     : String; 
-    parent: Association to Customer; 
+    parentCustomer: Association to Customer; 
 }
 
 entity AccountingInformation: cuid {
