@@ -267,11 +267,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Offer.Currency as Currency,
         Offer.Tender.Country.Region,
         SKUCountry.RegistrationValidUntil,
-        NLContractDurationOfferPrices.ContractDuration_1,
+        Offer.Tender.Custom.Integer_1 as ContractDuration_1,
         NLContractDurationOfferPrices.OfferPrice_1,
-        NLContractDurationOfferPrices.ContractDuration_2,
+        Offer.Tender.Custom.Integer_2 as ContractDuration_2,
         NLContractDurationOfferPrices.OfferPrice_2,
-        NLContractDurationOfferPrices.ContractDuration_3,
+        Offer.Tender.Custom.Integer_3 as ContractDuration_3,
         NLContractDurationOfferPrices.OfferPrice_3
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
@@ -964,9 +964,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         left join MaxHierarchy as maxapprHier
             on maxapprHier.OfferId = offer.OfferID
             and maxapprHier.productcode = product.ProductCode
-        left join TransactionalDataViews.NLContractDurations as contractdur
-            on contractdur.OfferID = offer.OfferID
-            and contractdur.PriceCondition_ID = pc.ID
+        left join TransactionalDataViews.NLOfferPrice_3 as maxop
+            on maxop.OfferID = offer.OfferID
+            and maxop.priceconditionID = pc.ID
+            and maxop.ProductCode = product.ProductCode
+        left join TransactionalDataViews.NLOfferPrice_2 as secondop
+            on secondop.OfferID = offer.OfferID
+            and secondop.priceconditionID = pc.ID
+            and secondop.ProductCode = product.ProductCode
+        left join TransactionalDataViews.NLOfferPrice_1 as minop
+            on minop.OfferID = offer.OfferID
+            and minop.priceconditionID = pc.ID
         left join NLDistributorsView as nldist
             on nldist.OfferID = offer.OfferID
         inner join SelectedContractDuration as selectedcontractduration
@@ -995,12 +1003,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             maxapprHier.ApproverName,
             productpack.PRODUCTPACKNAME,
             tender.InstituteID,
-            round(contractdur.MaxOfferPrice, 2) as OfferPrice_3: Double,
-            round(contractdur.AvgOfferPrice, 2) as OfferPrice_2: Double,
-            round(contractdur.MinOfferPrice, 2) as OfferPrice_1: Double,
-            contractdur.MaxContractDuration as maxContrDur: Double,
-            contractdur.AvgContractDuration as secContrDur: Double,
-            contractdur.MinContractDuration as minContrDur: Double,
+            maxop.OfferPrice_3,
+            secondop.OfferPrice_2,
+            minop.OfferPrice_1,
+            maxop.ContractDuration as maxContrDur: Double,
+            secondop.ContractDuration as secContrDur: Double,
+            minop.ContractDuration as minContrDur: Double,
             PT_TMBDPR.NetPrice,
             res.Outcome,
             ifnull(contractinfo.InstituteName, '') as childInstituteName: String,
