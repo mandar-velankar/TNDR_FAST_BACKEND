@@ -927,6 +927,7 @@ entity NLOfferDistributors: cuid {
     DistributorID: Integer;
     ProductPackName: String;
     ProductPackID: Integer;
+    AssignedProductCode: Integer;
 }
 
 entity ContractInfomation : cuid, managed {
