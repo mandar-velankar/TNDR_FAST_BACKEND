@@ -390,9 +390,6 @@ left outer join MasterData.PT_TMINST as inst
 };
 
 entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
-	inner join MasterData.PT_TMSKUPRDPCK as sku
-		on sku.CountryCode = ctprdpck.COUNTRYCODE
-		and sku.ProductPackID = ctprdpck.PRODUCTPACKID
 	inner join MasterData.PT_TMPRDPCK as prdpck
 		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	inner join MasterData.CountryCurrency as ctryCurrency
@@ -403,7 +400,6 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
 		key ctprdpck.PRODUCTPACKID,
 		key ctprdpck.COUNTRYCODE,
 		ctprdpck.GOV_CODE,
-		sku.SKUCode,
 		prdpck.PRODUCTPACKNAME,
 		prdpck.PRESENTATION,
 		distAgreements.DistributorID,
@@ -413,5 +409,5 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
 		distAgreements.Type,
 		distAgreements.Value,
 		ctryCurrency.Currency,
-} where sku.ActiveRecord = 'Yes'
-  and ctprdpck.COUNTRYCODE = 'NL';
+		prdpck.ProductPackSKUs: redirected to ProductPackSKUs,
+} where ctprdpck.COUNTRYCODE = 'NL';
