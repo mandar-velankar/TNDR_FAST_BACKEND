@@ -1396,6 +1396,12 @@ left outer join TransactionalData.PriceCondition as priceCondition
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
+left outer join MasterData.NLPPP as nlppp 
+    on nlppp.CountryCode = product.CountryCode
+    and nlppp.ProductPackID = product.ProductCode
+    and nlppp.Status = 'Approved'
+    and nlppp.StartDate <= CURRENT_DATE
+    and CURRENT_DATE <= nlppp.EndDate
 {
     tender.CountryCode,
     tender.Country.Region,
@@ -1427,6 +1433,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             then  ifnull(priceCondition.Price0, (RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
         else ifnull(priceCondition.Price0, RegisteredPrice.REGISTERED_PRICE)
     end as BasePrice:Double,
+    nlppp.PPP as masterPriceAIP: Double,
     @Core.Computed: false
     case 
         when priceCondition.Price1 is null or priceCondition.Price1 = 0 and tender.CountryCode = 'TW'
