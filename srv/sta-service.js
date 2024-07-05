@@ -5104,27 +5104,25 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		try {
 			const { InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate} = req.data;
 			const Institutes = await SELECT.from(PT_TMINST).where({CountryCode: "NL"});	     
-
+			if (!InstituteName) {return req.reject(403,"Institutes In Group field is mandatory")}
+			if (!ContractDuration) {return req.reject(403,"Contract Duration field is mandatory")}
+			if (!ContractStartDate) {return req.reject(403,"Contract Start Date field is mandatory")}
 			const mappedContractDurations = [];
-			
-			if (InstituteName) {
-					InstituteName.split(',').map(instID => {
-						const Institute = Institutes.find(inst => inst.InstituteID == instID);
-						
-						mappedContractDurations.push({
-							OfferID: OfferID,
-                            ProductCode: ProductCode,
-                            InstituteID: +instID,
-                            InstituteName: Institute.InstituteName,
-                            ContractDuration: ContractDuration,
-                            ContractStartDate: ContractStartDate,
-                            ContractEndDate: ContractEndDate,
-                            Active: true,
-							createdBy: req.user.id
-						})
-					});
-			}	
-			
+			InstituteName.split(',').map(instID => {
+				const Institute = Institutes.find(inst => inst.InstituteID == instID);
+				
+				mappedContractDurations.push({
+					OfferID: OfferID,
+					ProductCode: ProductCode,
+					InstituteID: +instID,
+					InstituteName: Institute.InstituteName,
+					ContractDuration: ContractDuration,
+					ContractStartDate: ContractStartDate,
+					ContractEndDate: ContractEndDate,
+					Active: true,
+					createdBy: req.user.id
+				})
+			});
 			const deletePromise = DELETE.from(ContractInfomation).where({OfferID: OfferID, ProductCode: ProductCode});
 			let insertPromises = [];
 			if (mappedContractDurations.length > 0) {
