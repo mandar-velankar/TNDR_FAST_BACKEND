@@ -4922,7 +4922,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const ctryProductPack = await SELECT.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": 'NL'});
 
 			if (!zagisFile) {
-				throw { message: "The file appears to be corrupted. Please check the file and upload a valid ZAGIS file." };
+				res.warn(400, "The file appears to be corrupted. Please check the file and upload a valid ZAGIS file." );
 			}
 
 			/**
@@ -4940,14 +4940,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 			products.shift();
 
-			// Validate required fields
-			const requiredFields = ["ZI-Nr.", "Aantal stuks in verpakking"];
-			const missingFields = requiredFields.filter(field => !products[0].hasOwnProperty(field) || !products[0][field]);
-
-			if (missingFields.length > 0) {
-				throw { message: `The file is missing required fields: ${missingFields.join(', ')}. Please update the file and try again.` };
-			}
-
 			// Validate data in fields and check if ZI-Nr. exists in the database
 			const invalidZIFields = [];
 			products.forEach(product => {
@@ -4957,25 +4949,44 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					invalidZIFields.push(ziNr);
 				}
 			});
+			// Validate required fields
+			const requiredFields = ["ZI-Nr.", "Aantal stuks in verpakking"];
+			let missingFields = [];
 
-			if (invalidZIFields.length > 0) {
-				throw { message: `The following ZI-Nr. values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` };
-			}
-
-			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
-			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
-			const promises = products.map(product => {
-				const productPack = ctryProductPack.find(pck => pck.GOV_CODE == product["ZI-Nr."]);
-				const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
-				const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
-				if (productIndex === -1) {
-					sorter++; // Increment sorter only for new products
+			products.forEach((product, index) => {
+				const productMissingFields = requiredFields.filter(field => !product.hasOwnProperty(field) || !product[field]);
+				if (productMissingFields.length > 0) {
+				  missingFields.push({
+					index,
+					fields: productMissingFields
+				  });
 				}
-				return promise;
 			});
 
-			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
-			await Promise.all(promises);
+			let promises;
+			if (missingFields.length > 0) {
+				const errorMessages = missingFields.map(item => `Product at index ${item.index + 1} is missing fields: ${item.fields.join(", ")}`);
+				res.warn(400,`The file is missing required fields:\n${errorMessages.join("\n")}. Please update the file and try again.`);
+			}
+			else if(invalidZIFields.length > 0){
+				res.warn(400,`The following ZI-Nr. values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` );
+			}
+			else{
+				// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+				let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+				promises = products.map(product => {
+					const productPack = ctryProductPack.find(pck => pck.GOV_CODE == product["ZI-Nr."]);
+					const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
+					const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
+					if (productIndex === -1) {
+						sorter++; // Increment sorter only for new products
+					}
+					return promise;
+				});
+			}
+
+			const deletePromise =await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
+			await Promise.all([deletePromise, promises]);
 			return req;
 		} catch (error) {
 			console.error('Error in ZagisUploadFile');
