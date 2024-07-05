@@ -937,3 +937,14 @@ entity NLPPP: cuid, managed{
 	PowerApproverCWID: String;
 	PowerApprovalDate: Date;
 }
+
+entity DistributionAgreements: cuid, managed {
+	CountryCode: String;
+	ProductPackID: Integer;
+	DistributorID: Integer;
+	MaterialNumbers: String;
+	StartDate: Date;
+	EndDate: Date;
+	Type: String;
+	Value: Double;
+}
