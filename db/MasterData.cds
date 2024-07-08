@@ -158,6 +158,8 @@ entity PT_TMPRDPCK{
 	ProductFullDescription: LargeString;
     Nucleus: String(100);
     ProductGenericName: String(500);
+	Bundle: Integer;
+	OuterCarton: Integer;
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
@@ -919,4 +921,30 @@ entity UserTerritory {
 entity PaymentTerms {
     E1KNVVM_ZTERM : String(6) not null;
     Description : String;
+}
+
+entity NLPPP: cuid, managed{
+	CountryCode: String;
+	ProductPackID:Integer;
+	MaterialNumber: Integer;
+	StartDate: Date;
+	EndDate: Date;
+	Comment: String;
+	Status: String;
+	ApprovalsCount: Integer;
+	MaxPrice: Double;
+	PPP: Double;
+	PowerApproverCWID: String;
+	PowerApprovalDate: Date;
+}
+
+entity DistributionAgreements: cuid, managed {
+	CountryCode: String;
+	ProductPackID: Integer;
+	DistributorID: Integer;
+	MaterialNumbers: String;
+	StartDate: Date;
+	EndDate: Date;
+	Type: String;
+	Value: Double;
 }

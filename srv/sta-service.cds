@@ -239,7 +239,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key ProductScope
     } group by ProductScope, COUNTRYCODE;
 
-    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR{
+
+    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR {
         *,
         key ProductCode,
         key OfferID,
@@ -265,7 +266,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         end as TotalAmount:Double,
         Offer.Currency as Currency,
         Offer.Tender.Country.Region,
-        SKUCountry.RegistrationValidUntil
+        SKUCountry.RegistrationValidUntil,
+        Offer.Tender.Custom.Integer_1 as ContractDuration_1,
+        NLContractDurationOfferPrices.OfferPrice_1,
+        Offer.Tender.Custom.Integer_2 as ContractDuration_2,
+        NLContractDurationOfferPrices.OfferPrice_2,
+        Offer.Tender.Custom.Integer_3 as ContractDuration_3,
+        NLContractDurationOfferPrices.OfferPrice_3
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
@@ -661,6 +668,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.Custom.Date_8 as Custom_Date_8,
         result.Custom.Date_9 as Custom_Date_9,
         result.Custom.Date_10 as Custom_Date_10,
+        priceCondition.ID as priceconditionID : UUID
 
     };
     entity MasterCountryOutComes as select from MasterData.MASTER_COUNTRY_OUTCOMES;
@@ -857,6 +865,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity PT_TMSKUPRDPCK as projection on MasterData.PT_TMSKUPRDPCK;
+    entity ContractInfomation as projection on TransactionalData.ContractInfomation{
+        OfferProduct: redirected to PT_TMOFPR,
+        *
+    };
 
     entity MailTemplates                                as projection on AdminData.MailTemplate;
     entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
@@ -888,4 +900,114 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         @Core.MediaType     : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         content    : LargeBinary;
     }
+
+    entity NLOfferDistributors as projection on TransactionalData.NLOfferDistributors;
+     entity ExtractNLHistoricalInformation {
+        key templateId : Integer;
+            content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType  : String      @Core.IsMediaType;
+    }
+   entity MaxHierarchy as select from TransactionalData.PT_TMAPPRST{	
+        key OfferId,
+        key productcode,
+        max(Hierarchy) as MaxHierarchy: Integer,
+        ApproverName,
+        ApprovalStatus
+    }where ApprovalStatus = 'Waiting'
+    group by OfferId, productcode, ApproverName, ApprovalStatus;
+    
+   entity NLDistributorsView as select from TransactionalData.NLOfferDistributors{
+        key OfferID,
+        case
+           	when count(*) = count(CASE WHEN DistributorName = 'Bayer' then 1 END) then 'Direct'
+	        when count(CASE when DistributorName = 'Bayer' then 1 END) > 0 then 'Mixed'
+            else 'Wholesaler'
+        end as DistributionType: String
+    }group by OfferID;
+
+    entity SelectedContractDuration as select from  ContractInfomation{
+        key OfferID,
+        key ProductCode,
+        max(ContractDuration) as ContractDuration: Double
+    }group by OfferID, ProductCode;
+    entity NLExtractOffers as select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+        inner join MasterData.PT_TMINST as inst
+            on inst.CountryCode = tender.CountryCode
+            and inst.InstituteID = tender.InstituteID
+        inner join TransactionalData.PT_TMQUTO as qoutation
+            on qoutation.OfferID = offer.OfferID
+            and qoutation.Active = 1
+        inner join TransactionalData.PT_TMTNOFST as offerStatus
+            on offerStatus.OfferID = offer.OfferID
+            and offerStatus.Active = 1
+        inner join TransactionalData.PT_TMOFPR as product
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+        inner join MasterData.PT_TMCTPRDPCK as ctprdpck
+            on ctprdpck.PRODUCTPACKID = product.ProductCode
+            and ctprdpck.COUNTRYCODE = tender.CountryCode
+        inner join MasterData.PT_TMPRDPCK as productpack
+            on productpack.PRODUCTPACKID = product.ProductCode
+        inner join TransactionalData.PriceCondition as pc
+            on pc.CountryCode = tender.CountryCode
+            and pc.OfferID = offer.OfferID
+            and pc.ProductCode = product.ProductCode
+        inner join TransactionalData.PT_TMTRRES as res
+            on res.OfferID = offer.OfferID
+            and res.ProductCode = product.ProductCode
+        inner join TransactionalData.PT_TMBDPR as PT_TMBDPR
+            on PT_TMBDPR.OfferID = offer.OfferID
+            and PT_TMBDPR.ProductCode = product.ProductCode
+            and PT_TMBDPR.Active = 1
+        left join MaxHierarchy as maxapprHier
+            on maxapprHier.OfferId = offer.OfferID
+            and maxapprHier.productcode = product.ProductCode
+          left join TransactionalDataViews.NLContractDurationsView as contractdur
+            on contractdur.OfferID = offer.OfferID
+            and contractdur.PriceCondition_ID = pc.ID
+        left join NLDistributorsView as nldist
+            on nldist.OfferID = offer.OfferID
+        inner join SelectedContractDuration as selectedcontractduration
+            on selectedcontractduration.OfferID = offer.OfferID
+            and selectedcontractduration.ProductCode = product.ProductCode
+        inner join TransactionalData.ContractInfomation as contractinfo
+            on contractinfo.OfferID = offer.OfferID
+            and contractinfo.ProductCode = product.ProductCode
+            {
+            key tender.TenderID,
+            key offer.OfferID,
+            offer.Custom.String_1 as Source : String,
+            case when inst.InstituteType = 'Buying Group'
+                then 'Purchasing Group'
+                else 'Bilatreaal'
+            end as Inkoopgroep: String,
+            inst.InstituteName,
+            tender.TenderName,
+            qoutation.EffectiveDate,
+            qoutation.ExpiryDate,
+            tender.BidDueDate,
+            offerStatus.TableStatus,
+            tender.Custom.String_1 as ManagedBy : String,
+            tender.PublicationDate,
+            ctprdpck.GOV_CODE,
+            maxapprHier.ApproverName,
+            productpack.PRODUCTPACKNAME,
+            tender.InstituteID,
+            round(contractdur.MaxOfferPrice, 2) as OfferPrice_3: Double,
+            round(contractdur.AvgOfferPrice, 2) as OfferPrice_2: Double,
+            round(contractdur.MinOfferPrice, 2) as OfferPrice_1: Double,
+            contractdur.MaxContractDuration as maxContrDur: Double,
+            contractdur.AvgContractDuration as secContrDur: Double,
+            contractdur.MinContractDuration as minContrDur: Double,
+            PT_TMBDPR.NetPrice,
+            res.Outcome,
+            ifnull(contractinfo.InstituteName, '') as childInstituteName: String,
+            nldist.DistributionType,
+            selectedcontractduration.ContractDuration,
+        }where(tender.CountryCode = 'NL');
+
+    @cds.redirection.target
+    entity NLPriceConditions as projection on TransactionalData.NLPriceConditions;    
 }

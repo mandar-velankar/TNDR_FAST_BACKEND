@@ -23,6 +23,7 @@ const { nextTick } = require('process');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
 const XLSX = require("xlsx");
+const { isGeneratorFunction } = require('util/types');
 
 module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
@@ -116,7 +117,9 @@ module.exports = async (srv) => {
 		PT_TMTNOFST,
 		TransCompetitorResult,
 		OutgoingMails,
-		NLPriceConditions
+		NLPriceConditions,
+		NLOfferDistributors,
+		ContractInfomation
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -141,7 +144,9 @@ module.exports = async (srv) => {
 		InstituteInBranchView,
 		TenderMasterView,
 		AwardedProductFormView,
-		ZagisUploadFile
+		ZagisUploadFile,
+		ExtractNLHistoricalInformation,
+		NLExtractOffers
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -668,8 +673,8 @@ module.exports = async (srv) => {
         // !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
         // !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
 		if (req.data.CountryCode === 'NL') {
-			const masterDistributor =  await SELECT.one.from('StandardAppService.MasterDistributors').where({CountryCode: "NL", DistributorName: 'Defined At Results Level'})
-			req.data.DistributorID = masterDistributor.DistributorID
+			const masterDistributor =  await SELECT.one.from('StandardAppService.MasterDistributors').where({CountryCode: "NL", DistributorID: 100000226})
+			req.data.DistributorID = masterDistributor?.DistributorID
 		}
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
 		req.data.DistributorComments = null; //for mandatory field check in sta-service
@@ -690,6 +695,12 @@ module.exports = async (srv) => {
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
 		delete req.data.Region;
+		delete req.data.ContractDuration_1;
+		delete req.data.OfferPrice_1;
+		delete req.data.ContractDuration_2;
+		delete req.data.OfferPrice_2;
+		delete req.data.ContractDuration_3;
+		delete req.data.OfferPrice_3;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');
@@ -1181,6 +1192,7 @@ module.exports = async (srv) => {
 			delete req.data.FreeGoodsOther_ABS_PCT;
 			delete req.data.FreeGoodsOther_Step;
 			delete req.data.ADD_INCLUDE;
+			delete req.data.priceconditionID
 		}
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
@@ -1807,7 +1819,9 @@ module.exports = async (srv) => {
 		}else {
 			await Promise.all(req.data.NLPriceConditionType.map(pc => {
 				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
-				return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+				if (mappedNLPriceCondition.ContractDuration) {
+					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+				}
 			}))
 		}
 	}
@@ -3158,8 +3172,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			NumberOfExtension: offer.NumberOfExtension,
 			ClientComment: offer.ClientComment,
 			Regions: offer.Regions,
-			InternalDueDate: offer.InternalBidDueDate,
-        	ExpectedAwardDate: tender.AwardDate
+			InternalDueDate: tender.BidDueDate,
+        	ExpectedAwardDate: tender.AwardDate,
+			Contract_Length1: offer.NumberOfExtension,
+			Contract_Length2: offer.Contract_Length2,
+			Contract_Length3: offer.Contract_Length3
 		};
 		return results;
 	
@@ -3506,6 +3523,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				CountryCode: offer.COUNTRYCODE
 			}
 			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
+			const priceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productConditionstmp[0]?.PriceConditionClassification_ID }));
 			const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
 				productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
 				productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
@@ -3844,7 +3862,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Discount_1: productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.Discount,
 				Discount_2: productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.Discount,
 				Discount_3: productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.Discount,
-				FOCInfoText: FOCInfoText
+				FOCInfoText: FOCInfoText,
+				NLPriceConditionType: priceConditionClassification?.ConditionType?.replace(/^NL/, '')
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -5034,16 +5053,48 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: 'NL', OfferID: OfferID});
 			const zagisFile = await SELECT.one.from(ZagisUploadFile).where({"OfferID": OfferID});
 			const ctryProductPack = await SELECT.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": 'NL'});
+
+			if (!zagisFile) {
+				throw { message: "The file appears to be corrupted. Please check the file and upload a valid ZAGIS file." };
+			}
+
 			/**
 			 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
 			 */
 			const arrayBuffer = bufferToArrayBuffer(zagisFile.content);
-			const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+			try {
+				workbook = XLSX.read(arrayBuffer, { type: 'array' });
+			} catch (error) {
+				throw { message: "The file format is incorrect. Please upload a valid ZAGIS file." };
+			}
 
 			// Assuming the Excel file has only one sheet, you can get the data from it
 			const sheetName = workbook.SheetNames[0];
 			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 			products.shift();
+
+			// Validate required fields
+			const requiredFields = ["ZI-Nr.", "Aantal stuks in verpakking"];
+			const missingFields = requiredFields.filter(field => !products[0].hasOwnProperty(field) || !products[0][field]);
+
+			if (missingFields.length > 0) {
+				throw { message: `The file is missing required fields: ${missingFields.join(', ')}. Please update the file and try again.` };
+			}
+
+			// Validate data in fields and check if ZI-Nr. exists in the database
+			const invalidZIFields = [];
+			products.forEach(product => {
+				const ziNr = product["ZI-Nr."];
+				const productPack = ctryProductPack.find(pck => pck.GOV_CODE == ziNr);
+				if (!productPack) {
+					invalidZIFields.push(ziNr);
+				}
+			});
+
+			if (invalidZIFields.length > 0) {
+				throw { message: `The following ZI-Nr. values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` };
+			}
+
 			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
 			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
 			const promises = products.map(product => {
@@ -5061,6 +5112,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			return req;
 		} catch (error) {
 			console.error('Error in ZagisUploadFile');
+			return res.reject(400, error.message || 'An unexpected error occurred.')
 		}
 	});
 
@@ -5114,4 +5166,111 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const factor = Math.pow(10, decimalPlaces);
 		return Math.round(number * factor) / factor;
 	};
+	srv.on('READ', 'ExtractNLHistoricalInformation', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+
+		const templateId = req.data.templateId;
+
+		const templates = await tx.run(SELECT.from(ExtractNLHistoricalInformation).where({ templateId: templateId }));
+		let excelData = await tx.run(SELECT.from(NLExtractOffers));
+		const data = {excelData}
+		const templateContent = templates[0].content;
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,data,1);
+
+			req._.res.setHeader('Content-disposition', `attachment; filename= Extract History.xlsx`);
+			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in ExcelAttachments READ');
+            return req.reject(403, error?.message||"Error in ExcelAttachments");
+        }
+	});
+
+	srv.on('CREATE', 'NLOfferDistributors', async (req, res) => {
+		try {
+			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({CountryCode: "NL"});
+			const productPacks = await SELECT.from(PT_TMPRDPCK);
+
+			const { DistributorName, ProductPackName, OfferID} = req.data;
+			const mappedNLOfferDistributors = [];
+			
+			if (DistributorName && ProductPackName) {
+				DistributorName.split(';').map(dId => {
+					ProductPackName.split(';').map(pId => {
+						const distributorName = distributors.find(dist => dist.DistributorID == dId);
+						const productName = productPacks.find(product => product.PRODUCTPACKID == pId);
+						mappedNLOfferDistributors.push({
+							OfferID: OfferID,
+							DistributorName: distributorName.DistributorName,
+							ProductPackName: productName.PRODUCTPACKNAME,
+							DistributorID: dId,
+							ProductPackID: pId
+						})
+					});
+				});
+			}	
+			
+			const deletePromise = DELETE.from(NLOfferDistributors).where({OfferID: OfferID});
+			let insertPromise;
+			if (mappedNLOfferDistributors.length > 0) {
+				insertPromise = INSERT.into(NLOfferDistributors).entries(mappedNLOfferDistributors);
+			}
+			await Promise.all([deletePromise, insertPromise]);
+			return req.data;
+		} catch (error) {
+			console.error('Error in NLOfferDistributors CREATE');
+            return req.reject(403, error?.message||"Error in NLOfferDistributors");
+		}
+	});
+
+	srv.on('CREATE', 'ContractInfomation', async (req, res) => {
+		try {
+			const { InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate} = req.data;
+			const Institutes = await SELECT.from(PT_TMINST).where({CountryCode: "NL"});	     
+
+			const mappedContractDurations = [];
+			
+			if (InstituteName) {
+					InstituteName.split(',').map(instID => {
+						const Institute = Institutes.find(inst => inst.InstituteID == instID);
+						
+						mappedContractDurations.push({
+							OfferID: OfferID,
+                            ProductCode: ProductCode,
+                            InstituteID: +instID,
+                            InstituteName: Institute.InstituteName,
+                            ContractDuration: ContractDuration,
+                            ContractStartDate: ContractStartDate,
+                            ContractEndDate: ContractEndDate,
+                            Active: true,
+							createdBy: req.user.id
+						})
+					});
+			}	
+			
+			const deletePromise = DELETE.from(ContractInfomation).where({OfferID: OfferID, ProductCode: ProductCode});
+			let insertPromises = [];
+			if (mappedContractDurations.length > 0) {
+				insertPromises = INSERT.into(ContractInfomation).entries(mappedContractDurations);
+			}
+			await Promise.all([deletePromise, insertPromises]);
+			return req.data;
+		} catch (error) {
+			console.error('Error in ContractInfomation CREATE');
+            return req.reject(403, error?.message||"Error in ContractInfomation");
+		}
+	});
+
+	srv.after('READ', 'NLPriceConditions', data => {
+		data.unshift({
+			ID: "99999999-9999-9999-9999-999999999999",
+			ContractDuration: "",
+            OfferPrice: "", 
+            Discount: "",
+            NetPrice: "",
+		})
+	});
 }

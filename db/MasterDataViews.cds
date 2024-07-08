@@ -388,3 +388,26 @@ left outer join MasterData.PT_TMINST as inst
 	policy.Value,
 	policy.Currency
 };
+
+entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+	inner join MasterData.PT_TMPRDPCK as prdpck
+		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+	left join MasterData.DistributionAgreements as distAgreements
+		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
+		and distAgreements.ProductPackID = ctprdpck.PRODUCTPACKID {
+		key ctprdpck.PRODUCTPACKID,
+		key ctprdpck.COUNTRYCODE,
+		ctprdpck.GOV_CODE,
+		prdpck.PRODUCTPACKNAME,
+		prdpck.PRESENTATION,
+		distAgreements.DistributorID,
+		distAgreements.MaterialNumbers,
+		distAgreements.StartDate,
+		distAgreements.EndDate,
+		distAgreements.Type,
+		distAgreements.Value,
+		ctryCurrency.Currency,
+		prdpck.ProductPackSKUs: redirected to ProductPackSKUs,
+} where ctprdpck.COUNTRYCODE = 'NL';
