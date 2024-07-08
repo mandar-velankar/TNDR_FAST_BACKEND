@@ -928,7 +928,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity SelectedContractDuration as select from  ContractInfomation{
         key OfferID,
         key ProductCode,
-        max(ContractDuration) as ContractDuration: Double
+        max(ContractDuration) as ContractDuration: Double,
+        max(ContractStartDate) as ContractStartDate : Date,
+        max(ContractEndDate) as ContractEndDate : Date,
     }group by OfferID, ProductCode;
     entity NLExtractOffers as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer
@@ -936,13 +938,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join MasterData.PT_TMINST as inst
             on inst.CountryCode = tender.CountryCode
             and inst.InstituteID = tender.InstituteID
-        inner join TransactionalData.PT_TMQUTO as qoutation
+        left join TransactionalData.PT_TMQUTO as qoutation
             on qoutation.OfferID = offer.OfferID
             and qoutation.Active = 1
-        inner join TransactionalData.PT_TMTNOFST as offerStatus
+        left join TransactionalData.PT_TMTNOFST as offerStatus
             on offerStatus.OfferID = offer.OfferID
             and offerStatus.Active = 1
-        inner join TransactionalData.PT_TMOFPR as product
+        left join TransactionalData.PT_TMOFPR as product
             on product.OfferID = offer.OfferID
             and product.Active = 1
         inner join MasterData.PT_TMCTPRDPCK as ctprdpck
@@ -950,29 +952,96 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             and ctprdpck.COUNTRYCODE = tender.CountryCode
         inner join MasterData.PT_TMPRDPCK as productpack
             on productpack.PRODUCTPACKID = product.ProductCode
-        inner join TransactionalData.PriceCondition as pc
+        left join TransactionalData.PriceCondition as pc
             on pc.CountryCode = tender.CountryCode
             and pc.OfferID = offer.OfferID
             and pc.ProductCode = product.ProductCode
-        inner join TransactionalData.PT_TMTRRES as res
+        left join TransactionalData.PT_TMTRRES as res
             on res.OfferID = offer.OfferID
             and res.ProductCode = product.ProductCode
-        inner join TransactionalData.PT_TMBDPR as PT_TMBDPR
+        left join TransactionalData.PT_TMBDPR as PT_TMBDPR
             on PT_TMBDPR.OfferID = offer.OfferID
             and PT_TMBDPR.ProductCode = product.ProductCode
             and PT_TMBDPR.Active = 1
-        left join MaxHierarchy as maxapprHier
-            on maxapprHier.OfferId = offer.OfferID
-            and maxapprHier.productcode = product.ProductCode
-          left join TransactionalDataViews.NLContractDurationsView as contractdur
+        left join TransactionalDataViews.NLContractDurationsView as contractdur
             on contractdur.OfferID = offer.OfferID
             and contractdur.PriceCondition_ID = pc.ID
         left join NLDistributorsView as nldist
             on nldist.OfferID = offer.OfferID
-        inner join SelectedContractDuration as selectedcontractduration
+        left join SelectedContractDuration as selectedcontractduration
             on selectedcontractduration.OfferID = offer.OfferID
             and selectedcontractduration.ProductCode = product.ProductCode
-        inner join TransactionalData.ContractInfomation as contractinfo
+            {
+            key tender.TenderID,
+            key offer.OfferID,
+            offer.Custom.String_1 as Source : String,
+            case when inst.InstituteType = 'Buying Group'
+                then 'Purchasing Group'
+                else 'Bilatreaal'
+            end as Inkoopgroep: String,
+            inst.InstituteName,
+            tender.TenderName,
+            selectedcontractduration.ContractStartDate as EffectiveDate : Date,
+            selectedcontractduration.ContractEndDate as ExpiryDate : Date,
+            tender.BidDueDate,
+            offerStatus.TableStatus,
+            tender.Custom.String_1 as ManagedBy : String,
+            tender.PublicationDate,
+            ctprdpck.GOV_CODE,
+            productpack.PRODUCTPACKNAME,
+            tender.InstituteID,
+            round(contractdur.MaxOfferPrice, 2) as OfferPrice_3: Double,
+            round(contractdur.AvgOfferPrice, 2) as OfferPrice_2: Double,
+            round(contractdur.MinOfferPrice, 2) as OfferPrice_1: Double,
+            contractdur.MaxContractDuration as maxContrDur: Double,
+            contractdur.AvgContractDuration as secContrDur: Double,
+            contractdur.MinContractDuration as minContrDur: Double,
+            PT_TMBDPR.NetPrice,
+            res.Outcome,
+            ifnull(inst.InstituteName, '') as childInstituteName: String,
+            nldist.DistributionType,
+            selectedcontractduration.ContractDuration,
+        }where(tender.CountryCode = 'NL' and tender.Active = 1 and offer.Active = 1 and tender.Custom.String_3 <> '')
+    union select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+        inner join MasterData.PT_TMINST as inst
+            on inst.CountryCode = tender.CountryCode
+            and inst.InstituteID = tender.InstituteID
+        left join TransactionalData.PT_TMQUTO as qoutation
+            on qoutation.OfferID = offer.OfferID
+            and qoutation.Active = 1
+        left join TransactionalData.PT_TMTNOFST as offerStatus
+            on offerStatus.OfferID = offer.OfferID
+            and offerStatus.Active = 1
+        left join TransactionalData.PT_TMOFPR as product
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+        inner join MasterData.PT_TMCTPRDPCK as ctprdpck
+            on ctprdpck.PRODUCTPACKID = product.ProductCode
+            and ctprdpck.COUNTRYCODE = tender.CountryCode
+        inner join MasterData.PT_TMPRDPCK as productpack
+            on productpack.PRODUCTPACKID = product.ProductCode
+        left join TransactionalData.PriceCondition as pc
+            on pc.CountryCode = tender.CountryCode
+            and pc.OfferID = offer.OfferID
+            and pc.ProductCode = product.ProductCode
+        left join TransactionalData.PT_TMTRRES as res
+            on res.OfferID = offer.OfferID
+            and res.ProductCode = product.ProductCode
+        left join TransactionalData.PT_TMBDPR as PT_TMBDPR
+            on PT_TMBDPR.OfferID = offer.OfferID
+            and PT_TMBDPR.ProductCode = product.ProductCode
+            and PT_TMBDPR.Active = 1
+        left join TransactionalDataViews.NLContractDurationsView as contractdur
+            on contractdur.OfferID = offer.OfferID
+            and contractdur.PriceCondition_ID = pc.ID
+        left join NLDistributorsView as nldist
+            on nldist.OfferID = offer.OfferID
+        left join SelectedContractDuration as selectedcontractduration
+            on selectedcontractduration.OfferID = offer.OfferID
+            and selectedcontractduration.ProductCode = product.ProductCode
+        left join TransactionalData.ContractInfomation as contractinfo
             on contractinfo.OfferID = offer.OfferID
             and contractinfo.ProductCode = product.ProductCode
             {
@@ -985,14 +1054,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             end as Inkoopgroep: String,
             inst.InstituteName,
             tender.TenderName,
-            qoutation.EffectiveDate,
-            qoutation.ExpiryDate,
+            contractinfo.ContractStartDate as EffectiveDate : Date,
+            contractinfo.ContractEndDate as ExpiryDate : Date,
             tender.BidDueDate,
             offerStatus.TableStatus,
             tender.Custom.String_1 as ManagedBy : String,
             tender.PublicationDate,
             ctprdpck.GOV_CODE,
-            maxapprHier.ApproverName,
             productpack.PRODUCTPACKNAME,
             tender.InstituteID,
             round(contractdur.MaxOfferPrice, 2) as OfferPrice_3: Double,
@@ -1003,11 +1071,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             contractdur.MinContractDuration as minContrDur: Double,
             PT_TMBDPR.NetPrice,
             res.Outcome,
-            ifnull(contractinfo.InstituteName, '') as childInstituteName: String,
+            case
+                when tender.Custom.String_3 = ''
+                    then ''
+                else contractinfo.InstituteName
+            end as childInstituteName: String,
             nldist.DistributionType,
             selectedcontractduration.ContractDuration,
-        }where(tender.CountryCode = 'NL');
-
+        }where(tender.CountryCode = 'NL' and tender.Active = 1 and offer.Active = 1);
     @cds.redirection.target
     entity NLPriceConditions as projection on TransactionalData.NLPriceConditions;    
 }
