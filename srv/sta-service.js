@@ -1951,7 +1951,7 @@ module.exports = async (srv) => {
 				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"NLDiscount" : {
-				Price0: req.data.BasePrice,
+				Price0: req.data.masterPriceAIP,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
 				NetOfferPrice: req.data.OfferPrice,
@@ -1968,7 +1968,7 @@ module.exports = async (srv) => {
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"NLPrice" : {
-				Price0: req.data.BasePrice,
+				Price0: req.data.masterPriceAIP,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
 				NetOfferPrice: req.data.OfferPrice,
@@ -2069,7 +2069,7 @@ module.exports = async (srv) => {
 			Tier                  : 1, 
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
-			RegPrice              : priceCondition.BasePrice, 
+			RegPrice              : priceCondition.CountryCode === 'NL' ? priceCondition.masterPriceAIP : priceCondition.BasePrice, 
 			FOC                   : foc?.FreeGoodsOther || 0, 
 			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
 			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
