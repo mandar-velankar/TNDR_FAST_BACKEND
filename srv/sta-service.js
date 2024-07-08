@@ -5065,41 +5065,82 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	srv.on('CREATE', 'NLOfferDistributors', async (req, res) => {
 		try {
-			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({CountryCode: "NL"});
+			const { DistributorName, ProductPackName, OfferID, AssignedProductCode } = req.data;
+			let splitedDistributors = DistributorName.split(';');
+			const splitedProductPacks = ProductPackName.split(';');
+			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: "NL" });
 			const productPacks = await SELECT.from(PT_TMPRDPCK);
+			const nlOfferDistributors = await SELECT.from(NLOfferDistributors).where({
+				OfferID: OfferID,
+				ProductPackID: AssignedProductCode
+			});
 
-			const { DistributorName, ProductPackName, OfferID} = req.data;
+	
+			const deletePromises = nlOfferDistributors.map(el => {
+				if (!splitedDistributors.includes(el.DistributorID) && el.AssignedProductCode == AssignedProductCode) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						DistributorID: el.DistributorID
+					});
+				} else if (!splitedDistributors.includes(el.DistributorID) && el.AssignedProductCode !== AssignedProductCode && el.ProductPackID == AssignedProductCode) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						ProductPackID: AssignedProductCode,
+						DistributorID: el.DistributorID
+					});
+				}
+				// const existingWholesalersIndex = splitedDistributors.findIndex(dist => dist == el.DistributorID);
+				// if (existingWholesalersIndex > -1) {
+				// 	splitedDistributors.splice(existingWholesalersIndex, 1);
+				// 	return null;
+				// } else {
+				// 	return DELETE.from(NLOfferDistributors).where({
+				// 		OfferID: OfferID,
+				// 		ProductPackID: AssignedProductCode,
+				// 		DistributorID: el.DistributorID
+				// 	});
+				// }
+			}).filter(el => el);
+	
 			const mappedNLOfferDistributors = [];
-			
+	
 			if (DistributorName && ProductPackName) {
-				DistributorName.split(';').map(dId => {
-					ProductPackName.split(';').map(pId => {
-						const distributorName = distributors.find(dist => dist.DistributorID == dId);
-						const productName = productPacks.find(product => product.PRODUCTPACKID == pId);
+				splitedDistributors.forEach(dId => {
+					splitedProductPacks.forEach(pId => {
+						const distributor = distributors.find(dist => dist.DistributorID == dId);
+						const product = productPacks.find(product => product.PRODUCTPACKID == pId);
 						mappedNLOfferDistributors.push({
 							OfferID: OfferID,
-							DistributorName: distributorName.DistributorName,
-							ProductPackName: productName.PRODUCTPACKNAME,
+							DistributorName: distributor?.DistributorName,
+							ProductPackName: product?.PRODUCTPACKNAME,
 							DistributorID: dId,
-							ProductPackID: pId
-						})
+							ProductPackID: pId,
+							AssignedProductCode: AssignedProductCode
+						});
 					});
 				});
-			}	
-			
-			const deletePromise = DELETE.from(NLOfferDistributors).where({OfferID: OfferID});
+			}
+	
 			let insertPromise;
 			if (mappedNLOfferDistributors.length > 0) {
+				// const existingChildNLOfferDistributors = mappedNLOfferDistributors.findIndex(el => el.OfferID == nlOfferDistributors.OfferID && el.ProductPackID == nlOfferDistributors.ProductPackID && el.DistributorID == nlOfferDistributors.DistributorID);
+				// const existingParentNLOfferDistributors = mappedNLOfferDistributors.findIndex(el => el.OfferID == nlOfferDistributors.OfferID && el.AssignedProductCode == nlOfferDistributors.AssignedProductCode && el.DistributorID == nlOfferDistributors.DistributorID);
+
+				// if (existingChildNLOfferDistributors) {
+
+				// }
+				// if (nlOfferDistributors)
 				insertPromise = INSERT.into(NLOfferDistributors).entries(mappedNLOfferDistributors);
 			}
-			await Promise.all([deletePromise, insertPromise]);
+	
+			await Promise.all([...deletePromises, insertPromise]);
+	
 			return req.data;
 		} catch (error) {
-			console.error('Error in NLOfferDistributors CREATE');
-            return req.reject(403, error?.message||"Error in NLOfferDistributors");
+			console.error('Error in NLOfferDistributors CREATE', error);
+			return req.reject(403, error?.message || "Error in NLOfferDistributors");
 		}
 	});
-
 	srv.on('CREATE', 'ContractInfomation', async (req, res) => {
 		try {
 			const { InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate} = req.data;
