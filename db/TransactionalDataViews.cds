@@ -888,7 +888,9 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
     offer.Tender.Country.Region,
-    offer.InternalBidDueDate
+    offer.InternalBidDueDate,
+    offer.Tender.Custom.Integer_2 as Contract_Length2,
+    offer.Tender.Custom.Integer_3 as Contract_Length3
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -974,6 +976,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.ContractLength,
           offer.Tender.ContractExtenseion,
           offer.Tender.Custom.Integer_1,
+          offer.Tender.Custom.Integer_2,
+          offer.Tender.Custom.Integer_3,
           offer.Comment,
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region,
@@ -1396,6 +1400,12 @@ left outer join TransactionalData.PriceCondition as priceCondition
 left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as curentSection
 	on curentSection.INSTITUTE_ID = tender.InstituteID
 	and curentSection.ProductCode = product.ProductCode
+left outer join MasterData.NLPPP as nlppp 
+    on nlppp.CountryCode = product.CountryCode
+    and nlppp.ProductPackID = product.ProductCode
+    and nlppp.Status = 'Approved'
+    and nlppp.StartDate <= CURRENT_DATE
+    and CURRENT_DATE <= nlppp.EndDate
 {
     tender.CountryCode,
     tender.Country.Region,
@@ -1427,6 +1437,7 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
             then  ifnull(priceCondition.Price0, (RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
         else ifnull(priceCondition.Price0, RegisteredPrice.REGISTERED_PRICE)
     end as BasePrice:Double,
+    nlppp.PPP as masterPriceAIP: Double,
     @Core.Computed: false
     case 
         when priceCondition.Price1 is null or priceCondition.Price1 = 0 and tender.CountryCode = 'TW'
@@ -2164,6 +2175,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PeriodOfBankGauranteeEnd: Date;
             BGValueBaht: Double;
             TenderAnnouncementReference: String;
+            Contract_Length1       : Integer; //PT_TMTEND/CUSTOM_INTEGER_1
+            Contract_Length2       : Integer; //PT_TMTEND/CUSTOM_INTEGER_2
+            Contract_Length3       : Integer; //PT_TMTEND/CUSTOM_INTEGER_3
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2366,6 +2380,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Discount_2                                  : Double;
             Discount_3                                  : Double;
             ItemNumber                                  : Integer;
+            NLPriceConditionType                        : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2866,3 +2881,100 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         foc.FreeGoodsOther_Step,
         foc.FreeGoodsOther_ABS_PCT,
         foc.ADD_INCLUDE;
+
+    entity ContractDurationBase as select from TransactionalData.NLPriceConditions as nlpc
+        inner join TransactionalData.PriceCondition as pc
+             on pc.ID = nlpc.PriceCondition.ID{
+        pc.OfferID,
+        key nlpc.PriceCondition.ID as PriceCondition_ID: UUID,
+        nlpc.ContractDuration,
+        nlpc.OfferPrice,
+        COUNT(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS CountContractDuration: Integer,
+        MIN(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS MinContractDuration: Double,
+        MAX(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS MaxContractDuration: Double,
+        ROW_NUMBER() OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration) AS RowAsc: Integer,
+        ROW_NUMBER() OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration DESC) AS RowDesc: Integer,
+        FIRST_VALUE(nlpc.OfferPrice) OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration) AS MinOfferPrice: Double,
+        FIRST_VALUE(nlpc.OfferPrice) OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration DESC) AS MaxOfferPrice: Double
+    };
+     entity NLContractDurationsView as select from ContractDurationBase as rd{
+        key rd.OfferID,
+        key rd.PriceCondition_ID,
+        rd.MinContractDuration AS MinContractDuration: Double,
+        rd.MinOfferPrice AS MinOfferPrice: Double,
+        CASE
+            WHEN rd.CountContractDuration = 1 THEN NULL
+            WHEN rd.CountContractDuration = 2 THEN (
+                SELECT cd.ContractDuration 
+                FROM ContractDurationBase AS cd 
+                WHERE cd.PriceCondition_ID = rd.PriceCondition_ID 
+                AND cd.RowAsc = 2
+            )
+            ELSE (
+                SELECT cd.ContractDuration 
+                FROM ContractDurationBase AS cd 
+                WHERE cd.PriceCondition_ID = rd.PriceCondition_ID 
+                AND cd.RowAsc = 2
+            )
+        END AS AvgContractDuration: Double,
+        CASE
+            WHEN rd.CountContractDuration = 1 THEN NULL
+            WHEN rd.CountContractDuration = 2 THEN (
+                SELECT cd.OfferPrice 
+                FROM ContractDurationBase AS cd 
+                WHERE cd.PriceCondition_ID = rd.PriceCondition_ID 
+                AND cd.RowAsc = 2
+            )
+            ELSE (
+                SELECT cd.OfferPrice 
+                FROM ContractDurationBase AS cd 
+                WHERE cd.PriceCondition_ID = rd.PriceCondition_ID 
+                AND cd.RowAsc = 2
+            )
+        END AS AvgOfferPrice : Double,
+        CASE
+            WHEN rd.CountContractDuration = 1 THEN NULL
+            WHEN rd.CountContractDuration = 2 THEN NULL
+            ELSE rd.MaxContractDuration
+        END AS MaxContractDuration : Double,
+        CASE
+            WHEN rd.CountContractDuration = 1 THEN NULL
+            WHEN rd.CountContractDuration = 2 THEN NULL
+            ELSE rd.MaxOfferPrice
+        END AS MaxOfferPrice : Double
+    }GROUP BY 
+    rd.OfferID,
+    rd.PriceCondition_ID,
+    rd.MinContractDuration,
+    rd.MinOfferPrice,
+    rd.CountContractDuration,
+    rd.MaxContractDuration,
+    rd.MaxOfferPrice;
+    entity NLContractDurationOfferPrices as select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        inner join TransactionalData.PT_TMOFPR as pr
+            on pr.OfferID = offer.OfferID
+            and pr.Active = 1
+        inner join TransactionalData.PriceCondition as pricecondition
+            on pricecondition.OfferID = pr.OfferID
+            and pricecondition.ProductCode = pr.ProductCode
+        left join TransactionalData.NLPriceConditions as nlpc1
+            on nlpc1.PriceCondition.ID = pricecondition.ID
+            and nlpc1.ContractDuration= tender.Custom.Integer_1
+        left join TransactionalData.NLPriceConditions as nlpc2
+            on nlpc2.PriceCondition.ID = pricecondition.ID
+            and nlpc2.ContractDuration = tender.Custom.Integer_2
+        left join TransactionalData.NLPriceConditions as nlpc3
+            on nlpc3.PriceCondition.ID = pricecondition.ID
+            and nlpc3.ContractDuration = tender.Custom.Integer_3 {
+                key pr.OfferID,
+                key pr.ProductCode,
+                tender.Custom.Integer_1 as ContractDuration_1: Double,
+                nlpc1.OfferPrice as OfferPrice_1: Double,
+                tender.Custom.Integer_2 as ContractDuration_2: Double,
+                nlpc2.OfferPrice as OfferPrice_2: Double,
+                tender.Custom.Integer_3 as ContractDuration_3: Double,
+                nlpc3.OfferPrice as OfferPrice_3: Double
+    }where tender.CountryCode = 'NL';
