@@ -5087,6 +5087,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						ProductPackID: AssignedProductCode,
 						DistributorID: el.DistributorID
 					});
+				} else if (
+					(!splitedProductPacks.includes(`${el.ProductPackID}`) && 
+					el.AssignedProductCode == AssignedProductCode) || 
+					(!splitedProductPacks.includes(`${el.ProductPackID}`) && 
+					el.AssignedProductCode !== AssignedProductCode && 
+					el.ProductPackID == AssignedProductCode)) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						ProductPackID: el.ProductPackID
+					});
 				}
 			}).filter(el => el);
 	
