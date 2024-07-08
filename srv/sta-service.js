@@ -5071,38 +5071,26 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: "NL" });
 			const productPacks = await SELECT.from(PT_TMPRDPCK);
 			const nlOfferDistributors = await SELECT.from(NLOfferDistributors).where({
-				OfferID: OfferID,
-				ProductPackID: AssignedProductCode
+				OfferID: OfferID
 			});
 
 	
 			const deletePromises = nlOfferDistributors.map(el => {
-				if (!splitedDistributors.includes(el.DistributorID) && el.AssignedProductCode == AssignedProductCode) {
+				if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode == AssignedProductCode) {
 					return DELETE.from(NLOfferDistributors).where({
 						OfferID: OfferID,
 						DistributorID: el.DistributorID
 					});
-				} else if (!splitedDistributors.includes(el.DistributorID) && el.AssignedProductCode !== AssignedProductCode && el.ProductPackID == AssignedProductCode) {
+				} else if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode !== AssignedProductCode && el.ProductPackID == AssignedProductCode) {
 					return DELETE.from(NLOfferDistributors).where({
 						OfferID: OfferID,
 						ProductPackID: AssignedProductCode,
 						DistributorID: el.DistributorID
 					});
 				}
-				// const existingWholesalersIndex = splitedDistributors.findIndex(dist => dist == el.DistributorID);
-				// if (existingWholesalersIndex > -1) {
-				// 	splitedDistributors.splice(existingWholesalersIndex, 1);
-				// 	return null;
-				// } else {
-				// 	return DELETE.from(NLOfferDistributors).where({
-				// 		OfferID: OfferID,
-				// 		ProductPackID: AssignedProductCode,
-				// 		DistributorID: el.DistributorID
-				// 	});
-				// }
 			}).filter(el => el);
 	
-			const mappedNLOfferDistributors = [];
+			let mappedNLOfferDistributors = [];
 	
 			if (DistributorName && ProductPackName) {
 				splitedDistributors.forEach(dId => {
@@ -5121,15 +5109,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				});
 			}
 	
+			// Remove items already saved in db from mappedNLOfferDistributors
+			mappedNLOfferDistributors = mappedNLOfferDistributors.filter(el => 
+				!nlOfferDistributors.some(nlo => 
+					el.OfferID == nlo.OfferID && 
+					el.ProductPackID == nlo.ProductPackID && 
+					el.DistributorID == nlo.DistributorID
+				)
+			);
 			let insertPromise;
 			if (mappedNLOfferDistributors.length > 0) {
-				// const existingChildNLOfferDistributors = mappedNLOfferDistributors.findIndex(el => el.OfferID == nlOfferDistributors.OfferID && el.ProductPackID == nlOfferDistributors.ProductPackID && el.DistributorID == nlOfferDistributors.DistributorID);
-				// const existingParentNLOfferDistributors = mappedNLOfferDistributors.findIndex(el => el.OfferID == nlOfferDistributors.OfferID && el.AssignedProductCode == nlOfferDistributors.AssignedProductCode && el.DistributorID == nlOfferDistributors.DistributorID);
-
-				// if (existingChildNLOfferDistributors) {
-
-				// }
-				// if (nlOfferDistributors)
 				insertPromise = INSERT.into(NLOfferDistributors).entries(mappedNLOfferDistributors);
 			}
 	
