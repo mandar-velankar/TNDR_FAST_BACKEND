@@ -940,7 +940,7 @@ entity NLPPP: cuid, managed{
 
 entity DistributionAgreements: cuid, managed {
 	CountryCode: String;
-	ProductPackID: Integer;
+	PRODUCTPACKID: Integer;
 	DistributorID: Integer;
 	MaterialNumbers: String;
 	StartDate: Date;
