@@ -922,9 +922,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         left join TransactionalData.PT_TMQUTO as qoutation
             on qoutation.OfferID = offer.OfferID
             and qoutation.Active = 1
-        left join TransactionalData.PT_TMTNOFST as offerStatus
-            on offerStatus.OfferID = offer.OfferID
-            and offerStatus.Active = 1
+        left join TransactionalDataViews.OfferStatus as offerStatus
+            on offerStatus.OFFER_ID = offer.OfferID
         left join TransactionalData.PT_TMOFPR as product
             on product.OfferID = offer.OfferID
             and product.Active = 1
@@ -965,7 +964,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             selectedcontractduration.ContractStartDate as EffectiveDate : Date,
             selectedcontractduration.ContractEndDate as ExpiryDate : Date,
             tender.BidDueDate,
-            offerStatus.TableStatus,
+            offerStatus.STATUS,
             tender.Custom.String_1 as ManagedBy : String,
             tender.PublicationDate,
             ctprdpck.GOV_CODE,
@@ -992,9 +991,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         left join TransactionalData.PT_TMQUTO as qoutation
             on qoutation.OfferID = offer.OfferID
             and qoutation.Active = 1
-        left join TransactionalData.PT_TMTNOFST as offerStatus
-            on offerStatus.OfferID = offer.OfferID
-            and offerStatus.Active = 1
+        left join TransactionalDataViews.OfferStatus as offerStatus
+            on offerStatus.OFFER_ID = offer.OfferID
         left join TransactionalData.PT_TMOFPR as product
             on product.OfferID = offer.OfferID
             and product.Active = 1
@@ -1038,7 +1036,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             contractinfo.ContractStartDate as EffectiveDate : Date,
             contractinfo.ContractEndDate as ExpiryDate : Date,
             tender.BidDueDate,
-            offerStatus.TableStatus,
+            offerStatus.STATUS,
             tender.Custom.String_1 as ManagedBy : String,
             tender.PublicationDate,
             ctprdpck.GOV_CODE,
