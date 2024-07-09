@@ -550,6 +550,21 @@ entity PriceCondition: cuid, managed {
     Settlement                          : Association to MasterData.Settlements;
     IsPricingUnlocked                   : Boolean default false;
     NLPriceConditionType                : Array of NLConditions;
+    CurrentBasePrice                    : Decimal;
+    CurrentInvoicePrice                 : Decimal;
+    CurrentGeneralDiscount              : Double;
+    CurrentGeneralDiscount_Amount       : Double;
+    CurrentSecondDiscount               : Double;
+    CurrentSecondlDiscount_Amount       : Double;
+    CurrentNetOfferPrice                : Decimal;
+    CurrentAnnualDiscount_Amount_Branch : Double;
+    CurrentAnnualDiscount_Amount_Per_Unit : Double;
+    CurrentNetPrice                     : Double;
+    CurrentNegotiationPrice             : Double;
+    CurrentTotalYearlyValueMainCustomer : Double;
+    CurrentTotalYearlyValueBranch       : Double;
+    CurrentTotalDiscountNHI             : Double;
+    CurrentTotalDiscountInvoice         : Double;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
@@ -942,4 +957,11 @@ entity ContractInfomation : cuid, managed {
     OfferProduct: Association to PT_TMOFPR
         on OfferProduct.OfferID = OfferID
         and OfferProduct.ProductCode = ProductCode;
+}
+        
+entity THQuotationDelevery : cuid {
+    OfferID                   : String;
+    QuotationDeliverymethod   : String;
+    QuotationRecipientname    : String;
+    QuotationRecipientcontact : String;
 }

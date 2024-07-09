@@ -251,18 +251,18 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Price.NetPrice as NetPrice,
         RequestedVolume,
         PriceCondition.AnticipatedYearlyVolumeBranch,
-        Price.NetPrice *
+        Price.OfferPrice * (1 - Price.Deductions) *
         case 
         when Price.FOCType = 'FOC 1'
-            then RequestedVolume
-            else 
+            then 
                 case 
                     when Price.FOC_ABS_PCT = 'PCT'
-                        then RequestedVolume + round(RequestedVolume * Price.FOC)
+                        then RequestedVolume - round(RequestedVolume * Price.FOC)
                             when Price.FOC_ABS_PCT = 'STP'
-                            then RequestedVolume + floor(RequestedVolume / Price.FOCStep) * Price.FOC
-                        else RequestedVolume + Price.FOC
+                            then RequestedVolume - floor(RequestedVolume / Price.FOCStep) * Price.FOC
+                        else RequestedVolume - Price.FOC
                 end
+            else RequestedVolume        
         end as TotalAmount:Double,
         Offer.Currency as Currency,
         Offer.Tender.Country.Region,
@@ -623,9 +623,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             when freegoods.FreeGoodsOther_ABS_PCT = 'PCT'
                 then round(100 * freegoods.FreeGoodsOther, 2) || '% (' || freegoods.ADD_INCLUDE || ')'
             when freegoods.FreeGoodsOther_ABS_PCT = 'ABS'
-                then freegoods.FreeGoodsOther || ' '  || result.UoM || ' (' || freegoods.ADD_INCLUDE || ')'
+                then freegoods.FreeGoodsOther || ' '  || result.UoM || '(s)' || ' (' || freegoods.ADD_INCLUDE || ')'
             when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
-                then freegoods.FreeGoodsOther || ' '  || result.UoM || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || ' purchased (' || freegoods.ADD_INCLUDE || ')'
+                then freegoods.FreeGoodsOther || ' '  || result.UoM || '(s)' || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || '(s)' || ' purchased (' || freegoods.ADD_INCLUDE || ')'
         end as FOC:String,
         product.RequestedVolume as RequestedVolume: Integer,
         result.Custom.String_1 as Custom_String_1,

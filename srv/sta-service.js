@@ -495,29 +495,53 @@ module.exports = async (srv) => {
         }
 	});
 
-	srv.after('READ', 'TenderMasterView', async (req, res, next) => {
+	srv.on('READ', 'TenderMasterView', async (req, next) => {
 		try{
 		//const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
+		const tx = cds.tx(req);
 		
-    	const isCountQuery = Array.isArray(req) && req.some(item => '$count' in item);
-    
-		if (isCountQuery) {
-		// If $count is present, return the original result
-		return req;
-		}
+		let result = [];
+        let tmvQuery = SELECT.from(req.query.SELECT.from);
+        if (req.query.SELECT.columns?.[0]?.func !== "count") {
+            tmvQuery.columns(req.query.SELECT.columns);
+        }
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode'); 
+        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
 
-		const cwid = res.user.id;
+        result = await tx.run(tmvQuery);
+
+    	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+    
+		if (isCountQuery || countryCode[0] !== 'TW' || countryCode.length <= 0) {
+		// If $count is present, return the original result
+		return result;
+		}
+		
+		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		const instituteTerritory = await SELECT.from(InstituteTerritory);
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return req;
+		  return result;
 		}
 
-		const resultsArray = Array.isArray(req) ? req : [req];
+		let resultsArray = Array.isArray(result) ? result : [result];
 	  
+		// const territoryMatches = resultsArray.filter(item => {
+		// 	return userTerritories.some(userTerritory => {
+		// 	  return item.Territory === userTerritory.Territory;
+		// 	});
+		//   });
+		  
+		// const finalFilteredResults = territoryMatches.filter(item => {
+		// 	return userTerritories.some(userTerritory => {
+		// 	return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+		// 	});
+		// });
+		resultsArray = resultsArray.filter(ra => ra.createdBy === cwid);
 		const territoryMatches = resultsArray.filter(item => {
 			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
 			
@@ -538,17 +562,15 @@ module.exports = async (srv) => {
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
-			req = finalFilteredResults
-			return req;
+			return finalFilteredResults;
 		}else{
 			// If no territory matches, return an empty array
-			req = territoryMatches
-			return req;
+			return territoryMatches;
 		}
 		}
 		catch(error){
             console.error('Error in TenderMasterView READ');
-            return res.reject(403, error?.message||"Error in TenderMasterView");
+            return req.reject(403, error?.message||"Error in TenderMasterView");
         }
 	  });
 
@@ -1121,7 +1143,9 @@ module.exports = async (srv) => {
 		async (req) => {
 			try{
 			// validate form
-			req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+				if(req.data.CountryCode !== "AU"){
+					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+				}
 			}
 			catch(error){
 				console.error('Error in validation of PriceCondition View before CREATE');
@@ -1729,10 +1753,15 @@ module.exports = async (srv) => {
 	}
 
 	const upsertPriceCondition = async function(req){
-
+		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
 			ProductCode: req.data.ProductCode
+		});
+
+		const productCurrentPrice = await SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({
+			ProductCode: req.data.ProductCode,
+			INSTITUTE_ID: selectedTender.InstituteID
 		});
 
 		let individualCustomer = true;
@@ -1740,7 +1769,7 @@ module.exports = async (srv) => {
 			individualCustomer = await validateIndividualCustomerTaiwan(req);
 		}
 
-		const mappedPriceCondition = mapPriceCondition(req, individualCustomer);
+		const mappedPriceCondition = mapPriceCondition(req, individualCustomer, productCurrentPrice);
 
 		if(priceCondition){
 			foc = await SELECT.from(FreeGoodsOther).where({
@@ -1819,7 +1848,7 @@ module.exports = async (srv) => {
 		}
 	}
 
-	const mapPriceCondition = function(req, individualCustomer){
+	const mapPriceCondition = function(req, individualCustomer, productCurrentPrice){
 		const mappings = {
 			"Discount" : {
 				Price0: req.data.BasePrice,
@@ -1916,7 +1945,22 @@ module.exports = async (srv) => {
     			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
-				PriceConditionClassification_ID: req.data.ClassificationID
+				PriceConditionClassification_ID: req.data.ClassificationID,
+				CurrentBasePrice: productCurrentPrice?.Price0 || 0,
+				CurrentInvoicePrice: productCurrentPrice?.Price1 || 0,
+				CurrentGeneralDiscount: productCurrentPrice?.Level2Discount1 || 0,
+				CurrentGeneralDiscount_Amount: productCurrentPrice?.GeneralDiscount_Amount || 0,
+				CurrentSecondDiscount: productCurrentPrice?.Level2Discount2 || 0,
+				CurrentSecondlDiscount_Amount: productCurrentPrice?.SecondDiscount_Amount || 0,
+				CurrentNetOfferPrice: productCurrentPrice?.Price2 || 0,
+				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice?.AnnualDiscountForBranch || 0,
+				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice?.Level3Discount1 || 0,
+				CurrentNetPrice: productCurrentPrice?.Price3 || 0,
+				CurrentNegotiationPrice: productCurrentPrice?.NegotiationPrice || 0,
+				CurrentTotalYearlyValueMainCustomer: productCurrentPrice?.TotalYearlyValueMainCustomer || 0,
+				CurrentTotalYearlyValueBranch: productCurrentPrice?.TotalYearlyValueBranch || 0,
+				CurrentTotalDiscountNHI: productCurrentPrice?.TotalDiscountNHI || 0,
+				CurrentTotalDiscountInvoice: productCurrentPrice?.TotalDiscountInvoice || 0
 			},
 			"TaiwanDiscount": {
 				Price0: req.data.BasePrice,
@@ -1945,7 +1989,22 @@ module.exports = async (srv) => {
     			AnnualDiscount_Percentage: (req.data.Level3Discount1 / req.data.OfferPrice),
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
-				PriceConditionClassification_ID: req.data.ClassificationID
+				PriceConditionClassification_ID: req.data.ClassificationID,
+				CurrentBasePrice: productCurrentPrice?.Price0 || 0,
+				CurrentInvoicePrice: productCurrentPrice?.Price1 || 0,
+				CurrentGeneralDiscount: productCurrentPrice?.Level2Discount1 || 0,
+				CurrentGeneralDiscount_Amount: productCurrentPrice?.GeneralDiscount_Amount || 0,
+				CurrentSecondDiscount: productCurrentPrice?.Level2Discount2 || 0,
+				CurrentSecondlDiscount_Amount: productCurrentPrice?.SecondDiscount_Amount || 0,
+				CurrentNetOfferPrice: productCurrentPrice?.Price2 || 0,
+				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice?.AnnualDiscountForBranch || 0,
+				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice?.Level3Discount1 || 0,
+				CurrentNetPrice: productCurrentPrice?.Price3 || 0,
+				CurrentNegotiationPrice: productCurrentPrice?.NegotiationPrice || 0,
+				CurrentTotalYearlyValueMainCustomer: productCurrentPrice?.TotalYearlyValueMainCustomer || 0,
+				CurrentTotalYearlyValueBranch: productCurrentPrice?.TotalYearlyValueBranch || 0,
+				CurrentTotalDiscountNHI: productCurrentPrice?.TotalDiscountNHI || 0,
+				CurrentTotalDiscountInvoice: productCurrentPrice?.TotalDiscountInvoice || 0
 			},
 			"NLDiscount" : {
 				Price0: req.data.masterPriceAIP,
@@ -1980,7 +2039,7 @@ module.exports = async (srv) => {
 				Price1: req.data.OfferPrice, 
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
-			},
+			}
 		}
 
 		return mappings[req.data.ConditionType];
@@ -2068,7 +2127,7 @@ module.exports = async (srv) => {
 			VolumeTo              : 0, 
 			RegPrice              : priceCondition.CountryCode === 'NL' ? priceCondition.masterPriceAIP : priceCondition.BasePrice, 
 			FOC                   : foc?.FreeGoodsOther || 0, 
-			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.Discount, 
 			OfferPrice            : priceCondition.OfferPrice, 
@@ -3586,10 +3645,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						FOCInfoText = `${Math.round(productFreeGoodsOther.FreeGoodsOther * 10000) / 100}% (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					case 'ABS':
-						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT} (${productFreeGoodsOther.ADD_INCLUDE})`
+						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					case 'STP':
-						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT} for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT} purchased (${productFreeGoodsOther.ADD_INCLUDE})`
+						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT}(s) purchased (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					default:
 						break;
@@ -4161,7 +4220,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		let grossSales = offerPrice * paidVolume;
 		let netOfferSales = netOfferPrice * totalVolume;
-		let netSales = netPrice * totalVolume;
+		let netSales = grossSales * (1 - product.Deductions);
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
 
@@ -4511,10 +4570,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.Price0 = prd.Region === 'MEA' ? prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 3, 3) : prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
 			prd.Price1 = prd.Region === 'MEA' ? prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 3, 3) : prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
 			prd.Price3 = prd.Region === 'MEA' ? prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 3, 3) : prd.Price3 && ServiceHelper.formatNumber(Number(prd.Price3.replace(/\,/g,'')), 2, 2);
-			prd.Level1Discount1 = ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
-			prd.Level2Discount1 = ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
-			prd.Level2Discount2 = ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
-			prd.Level3Discount1 = prd.Region === 'MEA' ? ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 3, 3) : ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 2, 2);
+			prd.Level1Discount1 = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 4, 4) : ServiceHelper.formatNumber((prd.Level1Discount1 * 100), 2, 2);
+			prd.Level2Discount1 = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 4, 4) : ServiceHelper.formatNumber((prd.Level2Discount1 * 100), 2, 2);
+			prd.Level2Discount2 = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 4, 4) : ServiceHelper.formatNumber((prd.Level2Discount2 * 100), 2, 2);
+			prd.Level3Discount1 = prd.COUNTRY_CODE === 'AU' ? ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 3, 3) : ServiceHelper.formatNumber((prd.Level3Discount1 * 100), 2, 2);
 			prd.AnnualDiscount_Percentage = ServiceHelper.formatNumber((prd.AnnualDiscount_Percentage * 100), 2, 2);
 			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
 			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
@@ -4569,7 +4628,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4582,7 +4641,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			// zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4630,7 +4689,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			console.log("Fetching data from ZuelligExtractView...");
         	startTime = moment();
 			console.log("Start Time: ", startTime.format());
-			let zuelligExtract = await SELECT.from(ZuelligExtractView).orderBy({CreationDate: 'desc', OfferID: 'desc'});
+			let zuelligExtract = await SELECT.from(ZuelligExtractView);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4639,7 +4698,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			console.log("Filtering data...");
 			startTime = moment(); 
 			console.log("Start Time: ", startTime.format());
-			zuelligExtract = getUniqueFilterItems(zuelligExtract);
+			// zuelligExtract = getUniqueFilterItems(zuelligExtract);
 			endTime = moment();
 			console.log("End Time: ", endTime.format());
         	console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
@@ -4694,16 +4753,21 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			"FGBuy": 0,
 			"FGGift": 0,
 			"NetPrice": Number(item.Price3).toFixed(4),
-			"BT": "BT"
+			"BT": "BT",
+			"FreeGoods_Amount": item.FreeGoods_Amount.toFixed(4),
+			"ModifiedAt": item.SubmittedOn? moment(item.SubmittedOn).format('YYYY-MM-DD') : "",
+			"OfferID": item.OfferID,
+			"BranchNumber": item.ParentInst_External_InstituteId || ''
+			
 		}
 	}
 	function mappedSingleView (zuelligExtract) { // TaiwanFASTData
 		return zuelligExtract.map(item => {
 			return {
-				"CreationDate": moment(item.CreationDate).format('YYYY-MM-DD'),
+				"CreationDate":item.CreationDate? moment(item.CreationDate).format('YYYY-MM-DD'): "",
 				"CWID": item.SubmittedBy,
 				"BU": item.BU,
-				"EffectiveDate": moment(item.EffectiveDate).format('YYYY-MM-DD'),
+				"EffectiveDate":item.EffectiveDate? moment(item.EffectiveDate).format('YYYY-MM-DD'): "",
 				"PreviousNetPrice": Number(item.Price3).toFixed(4),
 				"CountProducts": item.CountProducts,
 				"Invoice Price": Number(item.Price1).toFixed(4),
@@ -4711,9 +4775,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				"Institute Type": item.InstituteType,
 				"Class": item.Class || "",
 				"PackFactor": item.PACKFACTOR || "",
-				"CreatedAt/CreationDate": moment(item.createdAt).format('YYYY-MM-DD'),
+				"CreatedAt/CreationDate":item.createdAt? moment(item.createdAt).format('YYYY-MM-DD'): "",
 				"Branch": item.ParentInstituteID || "",
-				"ModifiedAt": moment(item.SubmittedOn).format('YYYY-MM-DD'),
+				"ModifiedAt":item.SubmittedOn? moment(item.SubmittedOn).format('YYYY-MM-DD'): "",
 				"InvoicePrice": Number(item.Price1).toFixed(4),
 				"NetPrice": Number(item.Price3).toFixed(4),
 				"TotalDiscount": (item.TotalDiscountNHI * 100).toFixed(4),
@@ -4785,10 +4849,22 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return nextValue
 	}
 
+	srv.after(
+		['CREATE','UPDATE'], 'FreeGoodsOther', 
+		async (data) => {
+			const priceCondition = await SELECT.one.from(PriceCondition).where({
+				ID: data?.PriceCondition_ID
+			});
+			await updateApprovalsSent(priceCondition?.OfferID);
+			return data;
+		}
+	);
+
 	srv.on(
 		['CREATE','UPDATE'], 'PT_TMBDPR', 
 		async (req) => {
 			try{
+			await updateApprovalsSent(req.data.OfferID);
 			await updateProductPricing(req);
 			await updatePriceCondition(req);
 
@@ -4913,10 +4989,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	function mapPTTMBDPR({priceCondition, foc}){
 		return {
 			FOC                   : foc?.FreeGoodsOther || 0, 
-			FOCStep               : foc?.FreeGoodsOther_Step || 0, 
+			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			OfferPrice            : priceCondition.OfferPrice,
-			NetofferPrice         : priceCondition.NetofferPrice,
+			NetofferPrice         : priceCondition.NetofferPrice || priceCondition.OfferPrice,
 			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT,
 			NetPrice              : priceCondition.NetPrice
 		}
