@@ -397,8 +397,9 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
 	left join MasterData.DistributionAgreements as distAgreements
 		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
 		and distAgreements.ProductPackID = ctprdpck.PRODUCTPACKID {
-		key ctprdpck.PRODUCTPACKID,
-		key ctprdpck.COUNTRYCODE,
+		key distAgreements.ID as  DistributionAgreementID : UUID,
+		key ctprdpck.PRODUCTPACKID as ProductPackID: Integer,
+		ctprdpck.COUNTRYCODE as CountryCode: String,
 		ctprdpck.GOV_CODE,
 		prdpck.PRODUCTPACKNAME,
 		prdpck.PRESENTATION,
