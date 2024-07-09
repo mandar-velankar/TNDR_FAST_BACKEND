@@ -418,6 +418,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                 case 
                     when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID) then 'In FOC Negotiation'
                     when exists (select * from ResultsWithAppealInProgress where OfferID = offer.OfferID) then 'Appeal in Progress'
+                    when offer.OfferStatusTable.CountryCode = 'NL' and offer.OfferStatusTable.TableStatus is not null then offer.OfferStatusTable.TableStatus
                     else offer.OfferStatusTable.STATUS 
             end
         else offer.OfferStatusTable.STATUS 
