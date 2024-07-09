@@ -4962,10 +4962,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				  });
 				}
 			});
+			const errorMessages = missingFields?.map(item => `Product at index ${item?.index + 1} is missing fields: ${item?.fields?.join(", ")}`);
 
 			let promises;
 			if (missingFields.length > 0) {
-				const errorMessages = missingFields.map(item => `Product at index ${item.index + 1} is missing fields: ${item.fields.join(", ")}`);
 				res.warn(400,`The file is missing required fields:\n${errorMessages.join("\n")}. Please update the file and try again.`);
 			}
 			else if(invalidZIFields.length > 0){
