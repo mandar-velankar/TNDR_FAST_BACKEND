@@ -424,7 +424,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
         else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
-group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS; //group by missing?
+group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus; //group by missing?
 
 entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.TenderID as TENDER_ID,
