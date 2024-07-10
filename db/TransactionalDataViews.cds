@@ -1414,9 +1414,6 @@ left outer join TransactionalData.PriceCondition as priceCondition
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
-left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as curentSection
-	on curentSection.INSTITUTE_ID = tender.InstituteID
-	and curentSection.ProductCode = product.ProductCode
 left outer join MasterData.NLPPP as nlppp 
     on nlppp.CountryCode = product.CountryCode
     and nlppp.ProductPackID = product.ProductCode
