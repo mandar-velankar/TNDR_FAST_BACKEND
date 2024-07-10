@@ -418,12 +418,13 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                 case 
                     when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID) then 'In FOC Negotiation'
                     when exists (select * from ResultsWithAppealInProgress where OfferID = offer.OfferID) then 'Appeal in Progress'
+                    when offer.OfferStatusTable.CountryCode = 'NL' and offer.OfferStatusTable.TableStatus is not null then offer.OfferStatusTable.TableStatus
                     else offer.OfferStatusTable.STATUS 
             end
         else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
-group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS; //group by missing?
+group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus; //group by missing?
 
 entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.TenderID as TENDER_ID,
@@ -789,6 +790,21 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           then ifnull(offer.Quotation.OfferValidity,ADD_MONTHS(CURRENT_DATE,1))
         when offer.CountryCode = 'IT'
            then ifnull(offer.Quotation.OfferValidity, ifnull(offer.Tender.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay))))
+        when offer.CountryCode = 'TH'
+            then
+                case
+                    when offer.Quotation.OfferValidity is null 
+                        then
+                            case
+                                when offer.Tender.Custom.String_5 = 'Days'
+                                    then  ADD_DAYS(CURRENT_DATE, offer.Tender.ContractLength)
+                                when offer.Tender.Custom.String_5 = 'Months'
+                                    then  ADD_MONTHS(CURRENT_DATE, offer.Tender.ContractLength)
+                                when offer.Tender.Custom.String_5 = 'Years'
+                                    then  ADD_YEARS(CURRENT_DATE, offer.Tender.ContractLength)
+                            end
+                    else offer.Quotation.OfferValidity
+                end
        else ifnull(offer.Quotation.OfferValidity, TO_DATE(TO_NVARCHAR(YEAR(ADD_YEARS(CURRENT_DATE, date_settings.NextYearDelta))) || '-' || TO_NVARCHAR(date_settings.NextMonth) || '-' ||TO_NVARCHAR(date_settings.NextDay)))
     end as OFFERVALIDITY,
 
@@ -981,7 +997,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Comment,
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region,
-          offer.InternalBidDueDate;
+          offer.InternalBidDueDate,
+          offer.Tender.Custom.String_5;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -1406,6 +1423,9 @@ left outer join MasterData.NLPPP as nlppp
     and nlppp.Status = 'Approved'
     and nlppp.StartDate <= CURRENT_DATE
     and CURRENT_DATE <= nlppp.EndDate
+left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as curentSection
+	on curentSection.INSTITUTE_ID = tender.InstituteID
+	and curentSection.ProductCode = product.ProductCode
 {
     tender.CountryCode,
     tender.Country.Region,
@@ -2178,6 +2198,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Contract_Length1       : Integer; //PT_TMTEND/CUSTOM_INTEGER_1
             Contract_Length2       : Integer; //PT_TMTEND/CUSTOM_INTEGER_2
             Contract_Length3       : Integer; //PT_TMTEND/CUSTOM_INTEGER_3
+            ContractLenghtUnit: String;
+            AttentionTo: String;
+            QuotationDate: Date;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };

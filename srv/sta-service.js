@@ -2005,10 +2005,9 @@ module.exports = async (srv) => {
 				CurrentTotalYearlyValueBranch: productCurrentPrice?.TotalYearlyValueBranch || 0,
 				CurrentTotalDiscountNHI: productCurrentPrice?.TotalDiscountNHI || 0,
 				CurrentTotalDiscountInvoice: productCurrentPrice?.TotalDiscountInvoice || 0
-
 			},
 			"NLDiscount" : {
-				Price0: req.data.BasePrice,
+				Price0: req.data.masterPriceAIP,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
 				NetOfferPrice: req.data.OfferPrice,
@@ -2025,7 +2024,7 @@ module.exports = async (srv) => {
 				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"NLPrice" : {
-				Price0: req.data.BasePrice,
+				Price0: req.data.masterPriceAIP,
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
 				NetOfferPrice: req.data.OfferPrice,
@@ -2040,7 +2039,7 @@ module.exports = async (srv) => {
 				Price1: req.data.OfferPrice, 
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
-			},
+			}
 		}
 
 		return mappings[req.data.ConditionType];
@@ -2126,7 +2125,7 @@ module.exports = async (srv) => {
 			Tier                  : 1, 
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
-			RegPrice              : priceCondition.BasePrice, 
+			RegPrice              : priceCondition.CountryCode === 'NL' ? priceCondition.masterPriceAIP : priceCondition.BasePrice, 
 			FOC                   : foc?.FreeGoodsOther || 0, 
 			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
@@ -5055,7 +5054,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const ctryProductPack = await SELECT.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": 'NL'});
 
 			if (!zagisFile) {
-				throw { message: "The file appears to be corrupted. Please check the file and upload a valid ZAGIS file." };
+				res.warn(400, "The file appears to be corrupted. Please check the file and upload a valid ZAGIS file." );
 			}
 
 			/**
@@ -5073,14 +5072,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 			products.shift();
 
-			// Validate required fields
-			const requiredFields = ["ZI-Nr.", "Aantal stuks in verpakking"];
-			const missingFields = requiredFields.filter(field => !products[0].hasOwnProperty(field) || !products[0][field]);
-
-			if (missingFields.length > 0) {
-				throw { message: `The file is missing required fields: ${missingFields.join(', ')}. Please update the file and try again.` };
-			}
-
 			// Validate data in fields and check if ZI-Nr. exists in the database
 			const invalidZIFields = [];
 			products.forEach(product => {
@@ -5090,25 +5081,44 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					invalidZIFields.push(ziNr);
 				}
 			});
+			// Validate required fields
+			const requiredFields = ["ZI-Nr.", "Aantal stuks in verpakking"];
+			let missingFields = [];
 
-			if (invalidZIFields.length > 0) {
-				throw { message: `The following ZI-Nr. values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` };
+			products.forEach((product, index) => {
+				const productMissingFields = requiredFields.filter(field => !product.hasOwnProperty(field) || !product[field]);
+				if (productMissingFields.length > 0) {
+				  missingFields.push({
+					index,
+					fields: productMissingFields
+				  });
+				}
+			});
+			const errorMessages = missingFields?.map(item => `Product at index ${item?.index + 1} is missing fields: ${item?.fields?.join(", ")}`);
+
+			let promises;
+			if (missingFields.length > 0) {
+				res.warn(400,`The file is missing required fields:\n${errorMessages.join("\n")}. Please update the file and try again.`);
+			}
+			else if(invalidZIFields.length > 0){
+				res.warn(400,`The following ZI-Nr. values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` );
+			}
+			else{
+				// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+				let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+				promises = products.map(product => {
+					const productPack = ctryProductPack.find(pck => pck.GOV_CODE == product["ZI-Nr."]);
+					const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
+					const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
+					if (productIndex === -1) {
+						sorter++; // Increment sorter only for new products
+					}
+					return promise;
+				});
 			}
 
-			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
-			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
-			const promises = products.map(product => {
-				const productPack = ctryProductPack.find(pck => pck.GOV_CODE == product["ZI-Nr."]);
-				const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
-				const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
-				if (productIndex === -1) {
-					sorter++; // Increment sorter only for new products
-				}
-				return promise;
-			});
-
-			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
-			await Promise.all(promises);
+			const deletePromise =await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
+			await Promise.all([deletePromise, promises]);
 			return req;
 		} catch (error) {
 			console.error('Error in ZagisUploadFile');
@@ -5191,66 +5201,104 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	srv.on('CREATE', 'NLOfferDistributors', async (req, res) => {
 		try {
-			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({CountryCode: "NL"});
+			const { DistributorName, ProductPackName, OfferID, AssignedProductCode } = req.data;
+			let splitedDistributors = DistributorName.split(';');
+			const splitedProductPacks = ProductPackName.split(';');
+			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: "NL" });
 			const productPacks = await SELECT.from(PT_TMPRDPCK);
+			const nlOfferDistributors = await SELECT.from(NLOfferDistributors).where({
+				OfferID: OfferID
+			});
 
-			const { DistributorName, ProductPackName, OfferID} = req.data;
-			const mappedNLOfferDistributors = [];
-			
+	
+			const deletePromises = nlOfferDistributors.map(el => {
+				if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode == AssignedProductCode) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						DistributorID: el.DistributorID
+					});
+				} else if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode !== AssignedProductCode && el.ProductPackID == AssignedProductCode) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						ProductPackID: AssignedProductCode,
+						DistributorID: el.DistributorID
+					});
+				} else if (
+					(!splitedProductPacks.includes(`${el.ProductPackID}`) && 
+					el.AssignedProductCode == AssignedProductCode) || 
+					(!splitedProductPacks.includes(`${el.ProductPackID}`) && 
+					el.AssignedProductCode !== AssignedProductCode && 
+					el.ProductPackID == AssignedProductCode)) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						ProductPackID: el.ProductPackID
+					});
+				}
+			}).filter(el => el);
+	
+			let mappedNLOfferDistributors = [];
+	
 			if (DistributorName && ProductPackName) {
-				DistributorName.split(';').map(dId => {
-					ProductPackName.split(';').map(pId => {
-						const distributorName = distributors.find(dist => dist.DistributorID == dId);
-						const productName = productPacks.find(product => product.PRODUCTPACKID == pId);
+				splitedDistributors.forEach(dId => {
+					splitedProductPacks.forEach(pId => {
+						const distributor = distributors.find(dist => dist.DistributorID == dId);
+						const product = productPacks.find(product => product.PRODUCTPACKID == pId);
 						mappedNLOfferDistributors.push({
 							OfferID: OfferID,
-							DistributorName: distributorName.DistributorName,
-							ProductPackName: productName.PRODUCTPACKNAME,
+							DistributorName: distributor?.DistributorName,
+							ProductPackName: product?.PRODUCTPACKNAME,
 							DistributorID: dId,
-							ProductPackID: pId
-						})
+							ProductPackID: pId,
+							AssignedProductCode: AssignedProductCode
+						});
 					});
 				});
-			}	
-			
-			const deletePromise = DELETE.from(NLOfferDistributors).where({OfferID: OfferID});
+			}
+	
+			// Remove items already saved in db from mappedNLOfferDistributors
+			mappedNLOfferDistributors = mappedNLOfferDistributors.filter(el => 
+				!nlOfferDistributors.some(nlo => 
+					el.OfferID == nlo.OfferID && 
+					el.ProductPackID == nlo.ProductPackID && 
+					el.DistributorID == nlo.DistributorID
+				)
+			);
 			let insertPromise;
 			if (mappedNLOfferDistributors.length > 0) {
 				insertPromise = INSERT.into(NLOfferDistributors).entries(mappedNLOfferDistributors);
 			}
-			await Promise.all([deletePromise, insertPromise]);
+	
+			await Promise.all([...deletePromises, insertPromise]);
+	
 			return req.data;
 		} catch (error) {
-			console.error('Error in NLOfferDistributors CREATE');
-            return req.reject(403, error?.message||"Error in NLOfferDistributors");
+			console.error('Error in NLOfferDistributors CREATE', error);
+			return req.reject(403, error?.message || "Error in NLOfferDistributors");
 		}
 	});
-
 	srv.on('CREATE', 'ContractInfomation', async (req, res) => {
 		try {
 			const { InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate} = req.data;
 			const Institutes = await SELECT.from(PT_TMINST).where({CountryCode: "NL"});	     
-
+			if (!InstituteName) {return req.reject(403,"Institutes In Group field is mandatory")}
+			if (!ContractDuration) {return req.reject(403,"Contract Duration field is mandatory")}
+			if (!ContractStartDate) {return req.reject(403,"Contract Start Date field is mandatory")}
 			const mappedContractDurations = [];
-			
-			if (InstituteName) {
-					InstituteName.split(',').map(instID => {
-						const Institute = Institutes.find(inst => inst.InstituteID == instID);
-						
-						mappedContractDurations.push({
-							OfferID: OfferID,
-                            ProductCode: ProductCode,
-                            InstituteID: +instID,
-                            InstituteName: Institute.InstituteName,
-                            ContractDuration: ContractDuration,
-                            ContractStartDate: ContractStartDate,
-                            ContractEndDate: ContractEndDate,
-                            Active: true,
-							createdBy: req.user.id
-						})
-					});
-			}	
-			
+			InstituteName.split(',').map(instID => {
+				const Institute = Institutes.find(inst => inst.InstituteID == instID);
+				
+				mappedContractDurations.push({
+					OfferID: OfferID,
+					ProductCode: ProductCode,
+					InstituteID: +instID,
+					InstituteName: Institute.InstituteName,
+					ContractDuration: ContractDuration,
+					ContractStartDate: ContractStartDate,
+					ContractEndDate: ContractEndDate,
+					Active: true,
+					createdBy: req.user.id
+				})
+			});
 			const deletePromise = DELETE.from(ContractInfomation).where({OfferID: OfferID, ProductCode: ProductCode});
 			let insertPromises = [];
 			if (mappedContractDurations.length > 0) {

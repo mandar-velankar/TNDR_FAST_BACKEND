@@ -160,6 +160,7 @@ entity PT_TMPRDPCK{
     ProductGenericName: String(500);
 	Bundle: Integer;
 	OuterCarton: Integer;
+	CalculationFactorIRP: Double;
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
