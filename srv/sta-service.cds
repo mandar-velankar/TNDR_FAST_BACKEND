@@ -1000,7 +1000,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             ifnull(inst.InstituteName, '') as childInstituteName: String,
             nldist.DistributionType,
             selectedcontractduration.ContractDuration,
-        }where(tender.CountryCode = 'NL' and tender.Active = 1 and offer.Active = 1 and tender.Custom.String_3 <> '')
+        }where(tender.CountryCode = 'NL' and tender.Active = 1 and offer.Active = 1 and tender.Custom.String_3 <> '' and inst.InstituteType <> 'Buying Group')
     union select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer
             on offer.TenderID = tender.TenderID
