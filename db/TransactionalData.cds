@@ -958,3 +958,10 @@ entity ContractInfomation : cuid, managed {
         on OfferProduct.OfferID = OfferID
         and OfferProduct.ProductCode = ProductCode;
 }
+        
+entity THQuotationDelevery : cuid {
+    OfferID                   : String;
+    QuotationDeliverymethod   : String;
+    QuotationRecipientname    : String;
+    QuotationRecipientcontact : String;
+}
