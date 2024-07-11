@@ -16,6 +16,10 @@ module.exports = (srv) => {
 	SalesData
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
+    const{
+        CurrentDistributionAgreementView
+	}= cds.entities("com.bayer.SXTENDER.MasterDataViews")
+
 	const {
 		ExcelUpload
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
@@ -353,11 +357,24 @@ module.exports = (srv) => {
 			BU: null
 		})
 	});
-	srv.before('CREATE', 'DistributionAgreements', async (req) => {
-		const { StartDate, Type, Value } = req.data;
-		!StartDate && req.error({code: 400,	message: 'Start Date is required', target: 'StartDate'});
-		!Type && req.error({code: 400,	message: 'Type is required', target: 'Type'});
-		!Value && req.error({code: 400,	message: 'Distribution Arrangement is required', target: 'Value'});
-	});
-	
+
+    srv.before('CREATE', 'DistributionAgreements', async (req) => {
+        const { StartDate, Type, Value, PRODUCTPACKID } = req.data;
+        !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
+        !Type && req.error({code: 400, message: 'Type is required', target: 'Type'});
+        !Value && req.error({code: 400, message: 'Distribution Arrangement is required', target: 'Value'});
+   
+        const currentDistributionAgreementView = await SELECT.one.from(CurrentDistributionAgreementView).where({PRODUCTPACKID: PRODUCTPACKID});
+        debugger;
+        if (currentDistributionAgreementView) {
+            req.data.CurrentStartDate = currentDistributionAgreementView.StartDate;
+            req.data.CurrentType = currentDistributionAgreementView.Type;
+            req.data.CurrentValue = currentDistributionAgreementView.Value;
+   
+            const currentEndDate = new Date(StartDate);
+            currentEndDate.setDate(currentEndDate.getDate() - 1);
+            req.data.CurrentEndDate = currentEndDate.toISOString().split('T')[0];
+        }
+    });
+ 
 };
