@@ -947,4 +947,8 @@ entity DistributionAgreements: cuid, managed {
 	EndDate: Date;
 	Type: String;
 	Value: Double;
+	CurrentStartDate: Date;
+	CurrentEndDate: Date;
+	CurrentType: String;
+	CurrentValue: Double;
 }
