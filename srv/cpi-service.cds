@@ -64,15 +64,6 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity SubscriptionProduct as projection on SAP.SubscriptionProduct;
     entity eSPPProduct as projection on SAP.eSPPProduct;
     entity FASTCoreBusinessPartner as projection on SAP.FASTCoreBusinessPartner;
-    entity Customer as projection on SAP.Customer;
-    entity AccountingInformation as projection on SAP.AccountingInformation;
-    entity SalesArrangement as projection on SAP.SalesArrangement;
-    entity TaxClassification as projection on SAP.TaxClassification;
-    entity SaleSalesAndDistributionBlocks as projection on SAP.SaleSalesAndDistributionBlocks;
-    entity IndustrySector as projection on SAP.IndustrySector;
-    entity MarketingAttributes as projection on SAP.MarketingAttributes;
-    entity LegalControlIndicators as projection on SAP.LegalControlIndicators;
-    entity PriceSpecifications as projection on SAP.PriceSpecifications; 
     entity Supplier as projection on SAP.Supplier;
     entity ProcurementArrangement as projection on SAP.ProcurementArrangement;
     entity WithholdingTax as projection on SAP.WithholdingTax;
@@ -84,6 +75,8 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity FinancialServicesCommon as projection on SAP.FinancialServicesCommon;
     entity CreditManagementProfile as projection on SAP.CreditManagementProfile;
     entity CreditManagementCreditWorthiness as projection on SAP.CreditManagementCreditWorthiness;
+    entity BusinessPartner as projection on SAP.BusinessPartner;
+    entity BPCustomer as projection on SAP.BPCustomer;
 
     function createBrazilContract() returns LargeString;
 
