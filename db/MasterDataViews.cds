@@ -417,3 +417,12 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
 		ctryCurrency.Currency,
 		prdpck.ProductPackSKUs: redirected to ProductPackSKUs,
 } where ctprdpck.COUNTRYCODE = 'NL';
+
+entity CurrentDistributionAgreementView as select from MasterData.DistributionAgreements{
+    ID,
+    PRODUCTPACKID,
+    StartDate,
+    EndDate,
+    Type,
+    Value
+}where EndDate = '9999-12-31';
