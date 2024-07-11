@@ -957,4 +957,8 @@ entity NLPPPApprovers: cuid, managed{
 	NLPPPApproverType: String;
 	NLPPPApproverName: String;
 	NLPPPApproverEmailID: String;
+	CurrentStartDate: Date;
+	CurrentEndDate: Date;
+	CurrentType: String;
+	CurrentValue: Double;
 }

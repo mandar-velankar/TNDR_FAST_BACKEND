@@ -410,6 +410,10 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
 		distAgreements.Type,
 		distAgreements.Value,
 		distAgreements.createdAt,
+		distAgreements.CurrentStartDate,
+		distAgreements.CurrentEndDate,
+		distAgreements.CurrentType,
+		distAgreements.CurrentValue,
 		ctryCurrency.Currency,
 		prdpck.ProductPackSKUs: redirected to ProductPackSKUs,
 } where ctprdpck.COUNTRYCODE = 'NL';
