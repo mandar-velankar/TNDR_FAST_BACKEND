@@ -899,12 +899,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     
    entity NLDistributorsView as select from TransactionalData.NLOfferDistributors{
         key OfferID,
+        key ProductPackID,
         case
-           	when count(*) = count(CASE WHEN DistributorName = 'Bayer' then 1 END) then 'Direct'
-	        when count(CASE when DistributorName = 'Bayer' then 1 END) > 0 then 'Mixed'
+           	when count(*) = count(CASE WHEN DistributorName = 'Bayer BV' then 1 END) then 'Direct'
+	        when count(CASE when DistributorName = 'Bayer BV' then 1 END) > 0 then 'Mixed'
             else 'Wholesaler'
         end as DistributionType: String
-    }group by OfferID;
+    }group by OfferID, ProductPackID;
 
     entity SelectedContractDuration as select from  ContractInfomation{
         key OfferID,
@@ -948,6 +949,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             and contractdur.PriceCondition_ID = pc.ID
         left join NLDistributorsView as nldist
             on nldist.OfferID = offer.OfferID
+            and nldist.ProductPackID = product.ProductCode
         left join SelectedContractDuration as selectedcontractduration
             on selectedcontractduration.OfferID = offer.OfferID
             and selectedcontractduration.ProductCode = product.ProductCode
@@ -1017,6 +1019,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             and contractdur.PriceCondition_ID = pc.ID
         left join NLDistributorsView as nldist
             on nldist.OfferID = offer.OfferID
+            and nldist.ProductPackID = product.ProductCode
         left join SelectedContractDuration as selectedcontractduration
             on selectedcontractduration.OfferID = offer.OfferID
             and selectedcontractduration.ProductCode = product.ProductCode
