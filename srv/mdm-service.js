@@ -365,7 +365,6 @@ module.exports = (srv) => {
         !Value && req.error({code: 400, message: 'Distribution Arrangement is required', target: 'Value'});
    
         const currentDistributionAgreementView = await SELECT.one.from(CurrentDistributionAgreementView).where({PRODUCTPACKID: PRODUCTPACKID});
-        debugger;
         if (currentDistributionAgreementView) {
             req.data.CurrentStartDate = currentDistributionAgreementView.StartDate;
             req.data.CurrentType = currentDistributionAgreementView.Type;

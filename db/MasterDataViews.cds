@@ -419,8 +419,7 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
 } where ctprdpck.COUNTRYCODE = 'NL';
 
 entity CurrentDistributionAgreementView as select from MasterData.DistributionAgreements{
-    ID,
-    PRODUCTPACKID,
+    key PRODUCTPACKID,
     StartDate,
     EndDate,
     Type,
