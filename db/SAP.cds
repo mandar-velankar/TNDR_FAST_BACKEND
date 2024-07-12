@@ -1706,6 +1706,7 @@ entity FASTCoreBusinessPartner: cuid, managed{
 	InternalID                                                    : String; // Adjust length if necessary
     CategoryCode                                                  : String; // Adjust length if necessary
     NumberRangeIntervalBusinessPartnerGroupCode                   : String;
+	Customer: Composition of many Customer on Customer.parent = $self;
     Supplier: Composition of many Supplier on Supplier.parent = $self;
 	AddressInformation: Composition of one AddressInformation on AddressInformation.parent = $self;
 	AddressIndependentCommInfo: Composition of one AddressIndependentCommInfo on AddressIndependentCommInfo.parent = $self;
@@ -1717,578 +1718,46 @@ entity FASTCoreBusinessPartner: cuid, managed{
 	CreditManagementCreditWorthiness: Composition of one CreditManagementCreditWorthiness on CreditManagementCreditWorthiness.parent = $self;
 }
 
-entity BusinessPartner: cuid, managed{
-    UUID: UUID;
-	InternalID: String; // Adjust length if necessary
-    ReceiverUUID: String;
-    ReceiverInternalID: String;
-    CategoryCode: String; // Adjust length if necessary
-    ExternalID: String;
-    NumberRangeIntervalBusinessPartnerGroupCode: String;
-    BPCustomer: Composition of many BPCustomer on BPCustomer.parent = $self;
-}
-
-entity BPCustomer: cuid{
-    InternalID: String;
-    ReceiverInternalID: String;
-    MaintenanceProfileCode: String;
-    AuthorisationGroupCode: String;
-    ExpressTrainStationLocationName: String;
-    TrainStationLocationName: String;
-    CustomerPartyWithFiscalAddressInternalID: String;
-    ReceiverCustomerPartyWithFiscalAddressInternalID: String;
-    AlternativePayeePartyInternalID: String;
-    ReceiverAlternativePayeePartyInternalID: String;
-    AlternativePayeeAllowedIndicator: Boolean;
-    PermittedPayer: String;
-    CorporateGroupName: String;
-    StandardPointLocationCode: String;
-    DeletionBlockedIndicator: Boolean;
-    DeletedIndicator: Boolean;
-    CountyCode: String;
-    CityCode: String;
-    PostingBlockedIndicator: Boolean;
-    EqualizationTaxRelevanceIndicator: Boolean;
-    ValueAddedTaxRelevanceIndicator: Boolean;
-    TradingPartnerCompanyID: String;
-    TaxGroupCode: String;
-    ICMSExemptionIndicator: Boolean;
-    IPIExemptionIndicator: Boolean;
-    TaxSubstitutionGroupCode: String;
-    CFOPCategoryCode: String;
-    CustSaleSalesAndDistributionBlocks:Composition of one CustSaleSalesAndDistributionBlocks on CustSaleSalesAndDistributionBlocks.parentBPCustomer = $self;
-    CustIndustrySector:Composition of one CustIndustrySector on CustIndustrySector.parentBPCustomer = $self;
-    CustMarketingAttributes: Composition of one CustMarketingAttributes on CustMarketingAttributes.parentBPCustomer = $self;
-    CustomerExtensionCode: String;
-    FirstAdditionalCustomerExtensionCode: String;
-    SecondAdditionalCustomerExtensionCode: String;
-    ThirdAdditionalCustomerExtensionCode: String;
-    FourthAdditionalCustomerExtensionCode: String;
-    FifthAdditionalCustomerExtensionCode: String;
-    SixthAdditionalCustomerExtensionCode: String;
-    SeventhAdditionalCustomerExtensionCode: String;
-    EighthAdditionalCustomerExtensionCode: String;
-    NinthAdditionalCustomerExtensionCode: String;
-    DataMediumExchangeReportCode: String;
-    DataMediumExchangeInstructionCode: String;
-    CivilUseIndicator: Boolean;
-    MilitaryUseIndicator: Boolean;
-    CustLegalControlIndicators: Composition of one CustLegalControlIndicators on CustLegalControlIndicators.parentBPCustomer = $self;
-    CustPriceSpecifications: Composition of one CustPriceSpecifications on CustPriceSpecifications.parentBPCustomer = $self;
-    RepresentativeName: String;
-    BusinessTypeName: String;
-    IndustryTypeName: String;
-    RelatedSupplierInternalID: String;
-    ReceiverRelatedSupplierInternalID: String;
-    PaymentReasonCode: String;
-    CustAccountingInformation: Composition of many CustAccountingInformation on CustAccountingInformation.parentBPCustomer = $self;
-    CustSalesArrangement: Composition of many CustSalesArrangement on CustSalesArrangement.parentBPCustomer = $self;
-    UnloadingPoints: Composition of many UnloadingPoints on UnloadingPoints.parentBPCustomer = $self;
-    AddressDependentUnloadingPoints:Composition of many AddressDependentUnloadingPoints on AddressDependentUnloadingPoints.parentBPCustomer = $self;
-    CustTaxClassification: Composition of many CustTaxClassification on CustTaxClassification.parentBPCustomer = $self;
-    AddressDependentTaxClassification: Composition of many AddressDependentTaxClassification on AddressDependentTaxClassification.parentBPCustomer = $self;
-    TaxGrouping: Composition of many TaxGrouping on TaxGrouping.parentBPCustomer = $self;
-    CustomerText: Composition of many CustomerText on CustomerText.parentBPCustomer = $self;
-    CustomerDocument: Composition of many CustomerDocument on CustomerDocument.parentBPCustomer = $self;
-    PropertyList: Composition of many PropertyList on PropertyList.parentBPCustomer = $self;
-    PropertyValuation: Composition of many PropertyValuation on PropertyValuation.parentBPCustomer = $self;
-    AddressDependentCustomerInformation: Composition of many AddressDependentCustomerInformation on AddressDependentCustomerInformation.parentBPCustomer = $self;
-    AddressDependentExternalReference: Composition of many AddressDependentExternalReference on AddressDependentExternalReference.parentBPCustomer = $self;
-    parent:Association to BusinessPartner;
-}
-
-entity CustSaleSalesAndDistributionBlocks: cuid{
-    OrderBlockingReasonCode                        : String; 
-    BillingBlockingReasonCode                      : String; 
-    DeliveryBlockingReasonCode                     : String; 
-    SalesSupportBlockedIndicator                   : Boolean;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity CustIndustrySector: cuid{
-    IndustrialSectorCode                           : String; 
-    FirstAdditionalIndustrialSectorCode            : String; 
-    SecondAdditionalIndustrialSectorCode           : String; 
-    ThirdAdditionalIndustrialSectorCode            : String; 
-    FourthAdditionalIndustrialSectorCode           : String; 
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity CustMarketingAttributes: cuid{
-    CustomerGroupCode                              : String; 
-    CustomerNielsenRegionCode                      : String; 
-    FiscalYearVariantCode                          : String;  
-    AnnualSalesVolumeAmount                        : Decimal; 
-    AnnualSalesVolumeAmountReportedYear            : Integer;   
-    EmployeeNumberValue                            : Integer;   
-    EmployeeNumberValueReportedYear                : Integer; 
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity CustLegalControlIndicators: cuid{
-    BiochemicalWarfareIndicator                    : Boolean;
-    NuclearNonproliferationIndicator               : Boolean;
-    NationalSecurityIndicator                      : Boolean;
-    MissileTechnologyIndicator                     : Boolean;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity CustPriceSpecifications: cuid{
-    CustomerConditionGroupCode                     : String; 
-    FirstAdditionalCustomerConditionGroupCode      : String; 
-    SecondAdditionalCustomerConditionGroupCode     : String; 
-    ThirdAdditionalCustomerConditionGroupCode      : String; 
-    FourthAdditionalCustomerConditionGroupCode     : String; 
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity CustAccountingInformation: cuid{
-    CompanyID                              : String;
-    EmployeeID                                 : String;
-    BlockedIndicator                           : Boolean;
-    DeletedIndicator                           : Boolean;
-    SortCode                                   : String;
-    AccountingClerkInitialsCode                : String;
-    GeneralLedgerAccountReferenceID             : String;
-    AuthorisationGroupCode                     : String;
-    HeadOfficeAccountInternalID                : String;
-    ReceiverHeadOfficeAccountInternalID        : String;
-    AlternativePayeePartyInternalID            : String;
-    ReceiverAlternativePayeePartyInternalID    : String;
-    PaymentNoticeCustomerClearedItemsIndicator : Boolean;
-    PaymentNoticeSalesDepartmentIndicator      : Boolean;
-    PaymentNoticeLegalDepartmentIndicator      : Boolean;
-    PaymentNoticeAccountingIndicator           : Boolean;
-    PaymentNoticeCustomerWithoutClearedItemsIndicator : Boolean;
-    PaymentMethodsCode                         : String;
-    CustomerSupplierClearingIndicator          : Boolean;
-    PaymentBlockCode                           : String;
-    CashDiscountTermsCode                      : String;
-    BillOfExchangeChargesCashDiscountTermsCode : String;
-    InterestCalculationInclusionCode           : String;
-    LastInterestCalculationKeyDate             : String;
-    InterestCalculationFrequencyCode           : String;
-    DebtorPartyCreditorID                      : String;
-    EmployeeResponsiblePartyName               : String;
-    Note                                       : String;
-    PlanningGroupCode                          : String;
-    ExportCreditInsuranceInstitutionID         : String;
-    InsuredAmount                              : Double;
-    InsuranceLeadDuration                      : Integer;
-    DeductiblePercent                          : Double;
-    InsuranceID                                : String;
-    InsuranceValidityDate                      : String;
-    CollectiveInvoiceVariantID                 : String;
-    LocalProcessingIndicator                   : Boolean;
-    PeriodicAccountStatementsCode              : String;
-    BillOfExchangeLimitAmount                  : Double;
-    NextPayeeInternalID                        : String;
-    ReceiverNextPayeeInternalID                : String;
-    LastInterestCalculationRunDate             : String;
-    RecordPaymentHistoryIndicator              : Boolean;
-    BusinessPartnerToleranceGroupCode          : String;
-    ProbableCheckPaidDuration                  : Integer;
-    HouseBankInternalID                        : String;
-    PayItemsSeparatelyIndicator                : Boolean;
-    ReductionRatesDeterminationCode            : String;
-    PreviousCustomerInternalID                 : String;
-    PaymentGroupingCode                        : String;
-    LeaveReasonCode                            : String;
-    DunningNoticeGroupingCode                  : String;
-    LockboxCode                                : String;
-    PaymentMethodSupplementCode                : String;
-    BuyingGroupInternalID                      : String;
-    ReceiverBuyingGroupInternalID              : String;
-    PaymentAdvicesSelectionRuleCode            : String;
-    PaymentAdvicesByEDIIndicator               : Boolean;
-    ReleaseApprovalGroupCode                   : String;
-    ConversionVersionReasonCode                : String;
-    EmployeeResponsiblePartyTelephoneFormattedNumberDescription : String;
-    EmployeeResponsiblePartyFaxFormattedNumberDescription : String;
-    EmployeeResponsiblePartyWebAddress         : String;
-    CreditMemosPaymentTermsCode                : String;
-    ValueAdjustmentCode                        : String;
-    DeletionBlockedIndicator                   : Boolean;
-    AccountsReceivablePledgingCode             : String;
-    PaymentReasonCode                          : String;
-    DunningInformation: Composition of many DunningInformation on DunningInformation.parentCustAccountingInformation = $self;
-    CustWithholdingTax: Composition of many CustWithholdingTax on CustWithholdingTax.parentCustAccountingInformation = $self;
-    AccountingText: Composition of many AccountingText on AccountingText.parentCustAccountingInformation = $self;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity DunningInformation: cuid{
-    DunningAreaID: String;
-    DunningProcedureCode: String;
-    DunningBlockCode: String;
-    LastDunningNoticeDate: Date;
-    DunningLevelCode: String;
-    DunningRecipientID: String;
-    ReceiverDunningRecipientID: String;
-    LegalDunningProceedingsDate: Date;
-    DunningClerkInitialsCode: String;
-    parentCustAccountingInformation: Association to CustAccountingInformation;
-}
-
-entity CustWithholdingTax: cuid{
-    WithholdingTaxTypeCode                     : String;
-    WithholdingTaxIdentificationNumber         : String;
-    WithholdingTaxCode                         : String;
-    WithholdingTaxAgentIndicator: String;
-    WithholdingTaxObligationPeriod: String;
-    WithholdingTaxExemptionCertificateID       : String;
-    WithholdingTaxExemptionRate                : Double;
-    CustWithholdingTaxExemptionValidityPeriod : Composition of one CustWithholdingTaxExemptionValidityPeriod on CustWithholdingTaxExemptionValidityPeriod.parentCustWithholdingTax = $self;
-    WithholdingTaxExemptionReasonCode           : String;
-    parentCustAccountingInformation: Association to CustAccountingInformation;
-}
-
-entity CustWithholdingTaxExemptionValidityPeriod: cuid{
-    StartDate                                 : Date;
-    EndDate                                   : Date;
-    parentCustWithholdingTax: Association to CustWithholdingTax;
-}
-
-entity AccountingText: cuid{
-    TextTypeCode: String;
-    LanguageCode: String;
-    TextSAPScriptLine: Composition of many TextSAPScriptLine on TextSAPScriptLine.parentAccountingText = $self;
-    parentCustAccountingInformation: Association to CustAccountingInformation;
-}
-
-entity TextSAPScriptLine: cuid{
-    OrdinalNumberValue: String;
-    SAPScriptLineFormatCode: String;
-    SAPScriptLineText: String;
-    parentAccountingText: Association to AccountingText;
-    parentSalesArrangementText: Association to SalesArrangementText;
-    parentCustomerText: Association to CustomerText;
-}
-
-entity CustSalesArrangement: cuid{
-    SalesOrganisationID                   : String;
-    DistributionChannelCode                   : String;
-    DivisionCode                              : String;
-    AuthorisationGroupCode                    : String;
-    DeletedIndicator                          : Boolean;
-    StatisticsGroupCode                       : String;
-    OrderBlockingReasonCode                   : String;
-    PricingProcedureDeterminationCode         : String;
-    PricingProcedureDeterminationCodeLong     : String;
-    GroupCode                                 : String;
-    SalesDistrictCode                         : String;
-    PriceGroupCode                            : String;
-    PriceListTypeCode                         : String;
-    ItemOrderProbabilityNumberValue           : Double;
-    DeliveryBlockingReasonCode                : String;
-    BatchSplitAllowedIndicator                : Boolean;
-    SellerPartyBuyerID                        : String;
-    TransportServiceLevelCode                 : String;
-    BillingBlockingReasonCode                 : String;
-    ManualInvoiceMaintenanceIndicator         : Boolean;
-    InvoiceDatesCalendarCode                  : String;
-    IncoiceListScheduleCalendarCode           : String;
-    CurrencyCode                              : String;
-    ABCClassificationCode                     : String;
-    AccountAssignmentGroupCode                : String;
-    CashDiscountTermsCode                     : String;
-    DeliveringPlantID                         : String;
-    SalesGroupCode                            : String;
-    SalesOfficeCode                           : String;
-    ProductProposalID                         : String;
-    CustomerDefinedGroupCode                  : String;
-    FirstAdditionalCustomerDefinedGroupCode   : String;
-    SecondAdditionalCustomerDefinedGroupCode  : String;
-    ThirdAdditionalCustomerDefinedGroupCode   : String;
-    FourthAdditionalCustomerDefinedGroupCode  : String;
-    RebateRelevantIndicator                   : Boolean;
-    ExchangeRateTypeCode                      : String;
-    PricingRelevanceIndicator                 : Boolean;
-    PaymentGuaranteeProcedureCode             : String;
-    CreditControlAreaCode                     : String;
-    SalesSupportBlockedIndicator              : Boolean;
-    RoundingSwitchOffIndicator                : Boolean;
-    AgencyBusinessRelevanceIndicator          : Boolean;
-    MeasureUnitGroupCode                      : String;
-    ProductProposalCustomerProcedureCode      : String;
-    PODRelevanceIndicator                     : Boolean;
-    PODConfirmationTimeframeDuration          : Integer;
-    DocumentIndexAllowedIndicator             : Boolean;
-    FifthAdditionalCustomerDefinedGroupCode   : String;
-    SixthAdditionalCustomerDefinedGroupCode   : String;
-    SeventhAdditionalCustomerDefinedGroupCode : String;
-    EighthAdditionalCustomerDefinedGroupCode  : String;
-    NinthAdditionalCustomerDefinedGroupCode   : String;
-    ValueAddedServiceDeterminationModeCode    : String;
-    ValueAddedServiceCustomerGroupCode        : String;
-    CharacteristicValueConversionCode         : String;
-    OrderSchedulingStrategyCode               : String;
-    OrderSchedulingStrategyFillRatePercent    : Double;
-    OrderSchedulingStratgeyAggregationLevelCode : String;
-    MultiShiptoOrderCustomerDistributionCenterID : String;
-    MultiShiptoOrderCustomerName              : String;
-    PSSTGroupingRuleCode                      : String;
-    PSSTGroupingRuleExcludeIndicator          : Boolean;
-    CustDeliveryTerms: Composition of one CustDeliveryTerms on CustDeliveryTerms.parentCustSalesArrangement = $self;
-    CustPartnerFunctions : Composition of many CustPartnerFunctions on CustPartnerFunctions.parentCustSalesArrangement = $self;
-    SalesArrangementText: Composition of many SalesArrangementText on SalesArrangementText.parentCustSalesArrangement = $self;
-    AddressDependentSalesArrangement: Composition of many AddressDependentSalesArrangement on AddressDependentSalesArrangement.parentCustSalesArrangement = $self;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity CustDeliveryTerms: cuid{
-    DeliveryPriorityCode                      : String;
-    CustIncoterms: Composition of one CustIncoterms on CustIncoterms.parentCustDeliveryTerms = $self;
-    SalesOrderCompleteDeliveryIndicator       : Boolean;
-    OrderCombinationAllowedIndicator          : Boolean;
-    PartialDeliveryControlCode                : String;
-    PartialDeliveryMaximumNumberValue         : Integer;
-    CustQuantityTolerance: Composition of one CustQuantityTolerance on CustQuantityTolerance.parentCustDeliveryTerms = $self;
-    parentCustSalesArrangement: Association to CustSalesArrangement;
-}
-
-entity CustIncoterms: cuid{
-    ClassificationCode                      : String;
-    TransferLocationName                    : String;
-    TransferLocationNameLong                : String;
-    TransferLocationInternalID              : String;
-    DestinationLocationName                 : String;
-    DestinationLocationInternalID           : String;
-    DeviatingDestinationLocationInternalID  : String;
-    Version                                 : String;
-    parentCustDeliveryTerms: Association to CustDeliveryTerms;
-    parentAddrDepdntDeliveryTerms: Association to AddrDepdntDeliveryTerms;
-}
-
-entity CustQuantityTolerance: cuid{
-    OverPercent                              : Double;
-    OverPercentUnlimitedIndicator            : Boolean;
-    UnderPercent                             : Double;
-    parentCustDeliveryTerms: Association to CustDeliveryTerms;
-}
-
-entity CustPartnerFunctions: cuid{
-    PartyRoleCode                        : String;
-    PartyInternalID                          : String;
-    ReceiverPartyInternalID                  : String;
-    DefaultIndicator                         : Boolean;
-    PartnerDescription: String;
-    AddressKey : Composition of one AddressKey on AddressKey.parentCustPartnerFunctions = $self;
-    parentCustSalesArrangement: Association to CustSalesArrangement;
-} 
-
-entity AddressKey: cuid{
-    ReceiverUUID: UUID;
-    UUID: UUID;
-    ExternalAddressID: String;
-    parentCustPartnerFunctions: Association to CustPartnerFunctions;
-    parentAddressDependentSalesArrangement: Association to AddressDependentSalesArrangement;
-    parentAddressDependentUnloadingPoints: Association to AddressDependentUnloadingPoints;
-    parentAddressDependentTaxClassification: Association to AddressDependentTaxClassification;
-    parentAddressDependentCustomerInformation: Association to AddressDependentCustomerInformation;
-    parentAddressDependentExternalReference: Association to AddressDependentExternalReference;
-}
-
-entity SalesArrangementText: cuid{
-    TextTypeCode: String;
-    LanguageCode: String;
-    TextSAPScriptLine: Composition of many TextSAPScriptLine on TextSAPScriptLine.parentSalesArrangementText = $self;
-    parentCustSalesArrangement: Association to CustSalesArrangement;
-} 
-
-entity AddressDependentSalesArrangement: cuid{
-    AddressKey: Composition of one AddressKey on AddressKey.parentAddressDependentSalesArrangement = $self;
-    DeliveryBlockingReasonCode: String;
-    TransportServiceLevelCode: String;
-    DeliveringPlantID: String;
-    SalesGroupCode: String;
-    SalesOfficeCode: String;
-    AddrDepdntDeliveryTerms: Composition of one AddrDepdntDeliveryTerms on AddrDepdntDeliveryTerms.parentAddressDependentSalesArrangement = $self;
-    parentCustSalesArrangement: Association to CustSalesArrangement;
-} 
-
-entity AddrDepdntDeliveryTerms: cuid{
-    CustIncoterms: Composition of one CustIncoterms on CustIncoterms.parentAddrDepdntDeliveryTerms = $self;
-    parentAddressDependentSalesArrangement: Association to AddressDependentSalesArrangement;
-}
-
-entity UnloadingPoints: cuid{
-    UnloadingPointName: String;
-    GoodsReceivingHoursID: String;
-    DefaultIndicator: Boolean;
-    BusinessHours: Composition of one BusinessHours on BusinessHours.parentUnloadingPoints = $self;
-    parentBPCustomer: Association to BPCustomer;
-} 
-
-entity BusinessHours: cuid{
-    FactoryCalenderCode: String;
-    TimeZoneCode: String;
-    MondayAMStartTime: String;
-    MondayAMEndTime: String;
-    MondayPMStartTime: String;
-    MondayPMEndTime: String;
-    TuesdayAMStartTime: String;
-    TuesdayAMEndTime: String;
-    TuesdayPMStartTime: String;
-    TuesdayPMEndTime: String;
-    WednesdayAMStartTime: String;
-    WednesdayAMEndTime: String;
-    WednesdayPMStartTime: String;
-    WednesdayPMEndTime: String;
-    ThursdayAMStartTime: String;
-    ThursdayAMEndTime: String;
-    ThursdayPMStartTime: String;
-    ThursdayPMEndTime: String;
-    FridayAMStartTime: String;
-    FridayAMEndTime: String;
-    FridayPMStartTime: String;
-    FridayPMEndTime: String;
-    SaturdayAMStartTime: String;
-    SaturdayAMEndTime: String;
-    SaturdayPMStartTime: String;
-    SaturdayPMEndTime: String;
-    SundayAMStartTime: String;
-    SundayAMEndTime: String;
-    SundayPMStartTime: String;
-    SundayPMEndTime: String;
-    parentUnloadingPoints: Association to UnloadingPoints;
-    parentAddressDependentUnloadingPoints: Association to AddressDependentUnloadingPoints;
-}
-
-entity AddressDependentUnloadingPoints: cuid{
-    AddressKey: Composition of one AddressKey on AddressKey.parentAddressDependentUnloadingPoints = $self;
-    UnloadingPointName: String;
-    GoodsReceivingHoursID: String;
-    DefaultIndicator: String;
-    BusinessHours: Composition of one BusinessHours on BusinessHours.parentAddressDependentUnloadingPoints = $self;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity CustTaxClassification: cuid{
-    TaxCountryCode                           : String;
-    TaxTypeCode                              : String;
-    TaxGroupCode                             : String;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity AddressDependentTaxClassification: cuid{
-    AddressKey: Composition of one AddressKey on AddressKey.parentAddressDependentTaxClassification = $self;
-    TaxCountryCode: String;
-    TaxTypeCode: String;
-    TaxGroupCode: String;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity TaxGrouping: cuid{
-    TaxCodeCategoryIndicator: Boolean;
-    CustValidityPeriod: Composition of one CustValidityPeriod on CustValidityPeriod.parentTaxGrouping = $self;
-    TaxExemption: Composition of one TaxExemption on TaxExemption.parentTaxGrouping = $self;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity TaxExemption: cuid{
-    CertificateID: String;
-    Percent: Double;
-    CustValidityPeriod: Composition of one CustValidityPeriod on CustValidityPeriod.parentTaxExemption = $self;
-    parentTaxGrouping: Association to TaxGrouping;
-}
-
-entity CustValidityPeriod: cuid{
-    StartDate                                 : Date;
-    EndDate                                   : Date;
-    parentTaxGrouping: Association to TaxGrouping;
-    parentTaxExemption: Association to TaxExemption;
-}
-
-entity CustomerText: cuid{
-    TextTypeCode: String;
-    LanguageCode: String;
-    TextSAPScriptLine: Composition of many TextSAPScriptLine on TextSAPScriptLine.parentCustomerText = $self;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity CustomerDocument: cuid{
-    DocumentTypeCode: String;
-    DocumentID: String;
-    AlternativeDocumentID: String;
-    DocumentVersionID: String;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity PropertyList: cuid{
-    ID: String;
-    TypeCode: String;
-    DefaultIndicator: Boolean;
-    AssignmentStatusCode: String;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity PropertyValuation: cuid{
-    PropertyID: String;
-    PropertyListTypeCode: String;
-    PropertyValue: Composition of many PropertyValue on PropertyValue.parentPropertyValuation = $self;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity PropertyValue: cuid{
-    IntervalBoundaryTypeCode: String;
-    LowerBoundaryObjectPropertyValue: Composition of one LowerBoundaryObjectPropertyValue on LowerBoundaryObjectPropertyValue.parentPropertyValue = $self;
-    UpperBoundaryObjectPropertyValue: Composition of one UpperBoundaryObjectPropertyValue on UpperBoundaryObjectPropertyValue.parentPropertyValue = $self;
-    parentPropertyValuation: Association to PropertyValuation;
-}
-
-entity LowerBoundaryObjectPropertyValue: cuid{
-    Amount: Double;
-    Quantity: Double;
-    DecimalValue: Decimal;
-    FloatValue: Double;
-    IntegerValue: Integer;
-    Date: Date;
-    Time: String;
-    DateTime: DateTime;
-    Name: String;
-    Indicator: Boolean;
-    Measure: String;
-    Code: String;
-    Identifier: String;
-    URI: String;
-    BinaryObject: String;
-    Duration: String;
-    Percent: Double;
-    Ratio: String;
-    Text: String;
-    parentPropertyValue:  Association to PropertyValue;
-}
-
-entity UpperBoundaryObjectPropertyValue: cuid{
-    Amount: Double; 
-    Quantity: Double;  
-    DecimalValue: Decimal;  
-    FloatValue: Double;  
-    IntegerValue: Integer;  
-    Date: Date;
-    Time: String;  
-    DateTime: DateTime;  
-    Measure: String;  
-    Duration: String;  
-    Percent: Double;  
-    Ratio: String;
-    parentPropertyValue:  Association to PropertyValue;
-}
-
-entity AddressDependentCustomerInformation: cuid{
-    AddressKey: Composition of one AddressKey on AddressKey.parentAddressDependentCustomerInformation = $self;
-    ExpressTrainStationLocationName: String;
-    TrainStationLocationName: String;
-    CountyCode: String;
-    CityCode: String;
-    parentBPCustomer: Association to BPCustomer;
-}
-
-entity AddressDependentExternalReference: cuid{
-    AddressKey: Composition of one AddressKey on AddressKey.parentAddressDependentExternalReference = $self;
-    ExternalReferenceID: String;
-    parentBPCustomer: Association to BPCustomer;
+entity Customer: cuid {  
+    InternalID                                     : String;
+    MaintenanceProfileCode                         : String;
+    AuthorisationGroupCode                         : String;
+    ExpressTrainStationLocationName                : String;
+    TrainStationLocationName                       : String;
+    CustomerPartyWithFiscalAddressInternalID       : String;
+    ReceiverCustomerPartyWithFiscalAddressInternalID : String;
+    AlternativePayeePartyInternalID                : String;
+    ReceiverAlternativePayeePartyInternalID        : String;
+    AlternativePayeeAllowedIndicator               : Boolean;
+    CorporateGroupName                             : String;
+    StandardPointLocationCode                      : String;
+    DeletionBlockedIndicator                       : Boolean;
+    DeletedIndicator                               : Boolean;
+    CountyCode                                     : String;
+    CityCode                                       : String;
+    PostingBlockedIndicator                        : Boolean;
+    EqualizationTaxRelevanceIndicator              : Boolean;
+    ValueAddedTaxRelevanceIndicator                : Boolean;
+    TradingPartnerCompanyID                        : String;
+    TaxGroupCode                                   : String;
+    ICMSExemptionIndicator                         : Boolean;
+    IPIExemptionIndicator                          : Boolean;
+    TaxSubstitutionGroupCode                       : String;
+    CFOPCategoryCode                               : String;
+    RepresentativeName                             : String; 
+    BusinessTypeName                               : String; 
+    IndustryTypeName                               : String; 
+    RelatedSupplierInternalID                      : String;  
+    PaymentReasonCode                              : String;
+    AccountingInformation: Composition of many AccountingInformation on AccountingInformation.parentCustomer = $self;
+    SalesArrangement: Composition of many SalesArrangement on SalesArrangement.parentCustomer = $self;
+    TaxClassification: Composition of many TaxClassification on TaxClassification.parentCustomer = $self;
+    SaleSalesAndDistributionBlocks: Composition of one SaleSalesAndDistributionBlocks on SaleSalesAndDistributionBlocks.parentCustomer = $self;
+    IndustrySector: Composition of one IndustrySector on IndustrySector.parentCustomer = $self;
+    MarketingAttributes: Composition of one MarketingAttributes on MarketingAttributes.parentCustomer = $self;
+    LegalControlIndicators: Composition of one LegalControlIndicators on LegalControlIndicators.parentCustomer = $self;
+    PriceSpecifications: Composition of one PriceSpecifications on PriceSpecifications.parentCustomer = $self;
+    parent: Association to FASTCoreBusinessPartner;
 }
 
 entity Supplier: cuid {  
@@ -2404,6 +1873,59 @@ entity PurchasingTerms: cuid {
     parentProcurementArrangement: Association to ProcurementArrangement;
 }
 
+
+entity TaxClassification: cuid{
+    TaxCountryCode                           : String;
+    TaxTypeCode                              : String;
+    TaxGroupCode                             : String;
+    parentCustomer: Association to Customer;
+}
+
+entity SaleSalesAndDistributionBlocks: cuid{
+    OrderBlockingReasonCode                        : String; 
+    BillingBlockingReasonCode                      : String; 
+    DeliveryBlockingReasonCode                     : String; 
+    SalesSupportBlockedIndicator                   : Boolean;
+    parentCustomer: Association to Customer;
+}
+
+entity IndustrySector: cuid{
+    IndustrialSectorCode                           : String; 
+    FirstAdditionalIndustrialSectorCode            : String; 
+    SecondAdditionalIndustrialSectorCode           : String; 
+    ThirdAdditionalIndustrialSectorCode            : String; 
+    FourthAdditionalIndustrialSectorCode           : String; 
+    parentCustomer: Association to Customer;
+}
+
+entity MarketingAttributes: cuid{
+    CustomerGroupCode                              : String; 
+    CustomerNielsenRegionCode                      : String; 
+    FiscalYearVariantCode                          : String;  
+    AnnualSalesVolumeAmount                        : Decimal; 
+    AnnualSalesVolumeAmountReportedYear            : Integer;   
+    EmployeeNumberValue                            : Integer;   
+    EmployeeNumberValueReportedYear                : Integer; 
+    parentCustomer: Association to Customer; 
+}
+
+entity LegalControlIndicators: cuid{
+    BiochemicalWarfareIndicator                    : Boolean;
+    NuclearNonproliferationIndicator               : Boolean;
+    NationalSecurityIndicator                      : Boolean;
+    MissileTechnologyIndicator                     : Boolean;
+    parentCustomer: Association to Customer; 
+}
+
+entity PriceSpecifications: cuid{
+    CustomerConditionGroupCode                     : String; 
+    FirstAdditionalCustomerConditionGroupCode      : String; 
+    SecondAdditionalCustomerConditionGroupCode     : String; 
+    ThirdAdditionalCustomerConditionGroupCode      : String; 
+    FourthAdditionalCustomerConditionGroupCode     : String; 
+    parentCustomer: Association to Customer; 
+}
+
 entity AccountingInformation: cuid {
     CompanyID                              : String;
     EmployeeID                                 : String;
@@ -2487,6 +2009,7 @@ entity AccountingInformation: cuid {
     AssignmentTestGroupCode                    : String;
     PrePaymentRelevancyCode                    : String;
     WithholdingTax: Composition of many WithholdingTax on WithholdingTax.parentAccountingInformation = $self;
+    parentCustomer: Association to Customer;
     parentSupplier: Association to Supplier;
 }
 
@@ -2575,6 +2098,7 @@ entity SalesArrangement: cuid {
     PSSTGroupingRuleExcludeIndicator          : Boolean;
     DeliveryTerms: Composition of one DeliveryTerms on DeliveryTerms.parentSalesArrangement = $self;
     PartnerFunctions : Composition of many PartnerFunctions on PartnerFunctions.parentSalesArrangement = $self;
+    parentCustomer: Association to Customer;
 }
 
 entity PartnerFunctions: cuid {
@@ -2873,28 +2397,3 @@ entity FinancialServicesCommonOrganisation {
     MaxSizeOfOrderingFile                  : Integer;
     parentFinancialServicesCommon: Association to FinancialServicesCommon;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

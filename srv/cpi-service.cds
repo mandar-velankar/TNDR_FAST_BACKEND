@@ -75,9 +75,6 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity FinancialServicesCommon as projection on SAP.FinancialServicesCommon;
     entity CreditManagementProfile as projection on SAP.CreditManagementProfile;
     entity CreditManagementCreditWorthiness as projection on SAP.CreditManagementCreditWorthiness;
-    entity BusinessPartner as projection on SAP.BusinessPartner;
-    entity BPCustomer as projection on SAP.BPCustomer;
-
     function createBrazilContract() returns LargeString;
 
 }
