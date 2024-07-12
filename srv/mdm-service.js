@@ -353,4 +353,11 @@ module.exports = (srv) => {
 			BU: null
 		})
 	});
+	srv.before('CREATE', 'DistributionAgreements', async (req) => {
+		const { StartDate, Type, Value } = req.data;
+		!StartDate && req.error({code: 400,	message: 'Start Date is required', target: 'StartDate'});
+		!Type && req.error({code: 400,	message: 'Type is required', target: 'Type'});
+		!Value && req.error({code: 400,	message: 'Distribution Arrangement is required', target: 'Value'});
+	});
+	
 };
