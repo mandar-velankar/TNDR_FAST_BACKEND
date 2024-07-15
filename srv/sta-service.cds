@@ -876,13 +876,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity StandardTenderFOCInformation                 as projection on TransactionalDataViews.StandardTenderFOCInformation;   
     @cds.redirection.target
     entity NotificationUserList as select from AdminData.PT_TMUSERCTRY{
-        *,
-        Key CountryCode,
-        CWID,
+        key CountryCode,
+        key CWID,
         User: redirected to Users,
+        ActiveRecord,
         User.Role,
         User.UserName,
-        User.UserEmail,
+        User.UserEmail
     }where CountryCode = 'NL' and User.Role = 'Hospital Manager';
     
     entity InstitutesInGroup as select from PT_TMINST as inst
