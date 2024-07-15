@@ -363,16 +363,12 @@ module.exports = (srv) => {
         !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
         !Type && req.error({code: 400, message: 'Type is required', target: 'Type'});
         !Value && req.error({code: 400, message: 'Distribution Arrangement is required', target: 'Value'});
-   
+		
         const currentDistributionAgreementView = await SELECT.one.from(CurrentDistributionAgreementView).where({PRODUCTPACKID: PRODUCTPACKID});
         if (currentDistributionAgreementView) {
-            req.data.CurrentStartDate = currentDistributionAgreementView.StartDate;
-            req.data.CurrentType = currentDistributionAgreementView.Type;
-            req.data.CurrentValue = currentDistributionAgreementView.Value;
-   
-            const currentEndDate = new Date(StartDate);
-            currentEndDate.setDate(currentEndDate.getDate() - 1);
-            req.data.CurrentEndDate = currentEndDate.toISOString().split('T')[0];
+			await UPDATE(CurrentDistributionAgreementView).with ({EndDate: req.data.CurrentEndDate}).where({
+				PRODUCTPACKID: PRODUCTPACKID
+			})
         }
     });
  
