@@ -941,11 +941,15 @@ entity NLPPP: cuid, managed{
 
 entity DistributionAgreements: cuid, managed {
 	CountryCode: String;
-	ProductPackID: Integer;
+	PRODUCTPACKID: Integer;
 	DistributorID: Integer;
 	MaterialNumbers: String;
 	StartDate: Date;
 	EndDate: Date;
 	Type: String;
 	Value: Double;
+	CurrentStartDate: Date;
+	CurrentEndDate: Date;
+	CurrentType: String;
+	CurrentValue: Double;
 }

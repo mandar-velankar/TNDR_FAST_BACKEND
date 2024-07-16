@@ -396,9 +396,10 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
 	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
 	left join MasterData.DistributionAgreements as distAgreements
 		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
-		and distAgreements.ProductPackID = ctprdpck.PRODUCTPACKID {
+		and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID {
+		key distAgreements.ID as  DistributionAgreementID : UUID,
 		key ctprdpck.PRODUCTPACKID,
-		key ctprdpck.COUNTRYCODE,
+		ctprdpck.COUNTRYCODE as CountryCode: String,
 		ctprdpck.GOV_CODE,
 		prdpck.PRODUCTPACKNAME,
 		prdpck.PRESENTATION,
@@ -408,6 +409,19 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
 		distAgreements.EndDate,
 		distAgreements.Type,
 		distAgreements.Value,
+		distAgreements.createdAt,
+		distAgreements.CurrentStartDate,
+		distAgreements.CurrentEndDate,
+		distAgreements.CurrentType,
+		distAgreements.CurrentValue,
 		ctryCurrency.Currency,
 		prdpck.ProductPackSKUs: redirected to ProductPackSKUs,
 } where ctprdpck.COUNTRYCODE = 'NL';
+
+entity CurrentDistributionAgreementView as select from MasterData.DistributionAgreements{
+    key PRODUCTPACKID,
+    StartDate,
+    EndDate,
+    Type,
+    Value
+}where EndDate = '9999-12-31';
