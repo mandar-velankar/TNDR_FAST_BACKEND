@@ -4107,7 +4107,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
 
 		aApproverTypes.map(async function (oApproverType) {
-			oApproverType.ApproverType === 'Chapter Head Esthablished Products BeNeLux' ||
+			oApproverType.ApproverType === 'Chapter Head Established Products BeNeLux' ||
 			oApproverType.ApproverType === 'Hospital Management Lead BeNeLux' ? oApproverType.ValidationType = 3 : oApproverType.ValidationType = 1;
 		});
 		if(ctryProductPack.BU === 'RAD'){
