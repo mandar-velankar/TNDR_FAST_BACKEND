@@ -2781,7 +2781,7 @@ module.exports = (srv) => {
 	async function buildWorkflowApprovalApprovalsEntries(tx, offerId, approvalStatus) {
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", offerId);
 		let offerApprovals = await buildOfferApproval(tx, whereOffer);//HERE
-
+		
 		offerApprovals = offerApprovals.filter((d) => d.ApprovalStatus === approvalStatus);
 
 		whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
@@ -2879,7 +2879,7 @@ module.exports = (srv) => {
 		return results;
 	}
 	async function getOfferData(tx,offerId){
-		
+		const QuotationDeleveryTH = await tx.run(SELECT.from(THQuotationDelevery).where({ "OfferID": offerId }));
 		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
 		let offerValidation = await buildOfferValidation(tx, whereOffer);
 		if (!offerValidation) {
@@ -2926,7 +2926,8 @@ module.exports = (srv) => {
 		return {
 			offerValidation: offerValidation,
 			offerProductValidation: productValidation,
-			groupedOfferProductValidation: groupedOfferProductValidation
+			groupedOfferProductValidation: groupedOfferProductValidation,
+			quotationDelevery: QuotationDeleveryTH
 			// flatOfferProductValidation.reduce((group, product) => {
 			// 	const { PriceConditionClassification } = product;
 			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
