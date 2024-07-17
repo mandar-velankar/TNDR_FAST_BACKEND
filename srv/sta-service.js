@@ -526,6 +526,7 @@ module.exports = async (srv) => {
         }
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(offerIDfullWhere));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+        req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
 
         result = await tx.run(tmvQuery);
 
