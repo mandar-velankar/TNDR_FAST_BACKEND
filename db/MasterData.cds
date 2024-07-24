@@ -938,3 +938,12 @@ entity NLPPP: cuid, managed{
 	PowerApproverCWID: String;
 	PowerApprovalDate: Date;
 }
+
+entity NLPPPApproverTypes: cuid, managed{
+	NLPPPApproverTypes: String;
+}
+entity NLPPPApprovers: cuid, managed{
+	NLPPPApproverType: String;
+	NLPPPApproverName: String;
+	NLPPPApproverEmailID: String;
+}
