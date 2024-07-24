@@ -1,5 +1,6 @@
 const cds = require('@sap/cds');
 const XLSX = require("xlsx");
+const moment = require('moment');
 
 module.exports = (srv) => {
 
@@ -363,6 +364,10 @@ module.exports = (srv) => {
         !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
         !Type && req.error({code: 400, message: 'Type is required', target: 'Type'});
         !Value && req.error({code: 400, message: 'Distribution Arrangement is required', target: 'Value'});
+
+		//check if dates are correct
+		if(req.data.CurrentStartDate && moment(req.data.StartDate).isSame(req.data.CurrentStartDate))
+			req.error({ code: 404, message: "The contract start date of the new agreement should not be the same as the start date of the current agreement", target: "startDate" });
 		
         const currentDistributionAgreementView = await SELECT.one.from(CurrentDistributionAgreementView).where({PRODUCTPACKID: PRODUCTPACKID});
         if (currentDistributionAgreementView) {
