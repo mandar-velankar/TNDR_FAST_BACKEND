@@ -695,6 +695,52 @@ module.exports = async (srv) => {
         }
 	});
 
+	srv.before(['CREATE','UPDATE','DELETE'], ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
+		try{
+		const sections = {
+			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
+			'StandardAppService.SupplyManagementView': 'SupplyManagement',
+			'StandardAppService.GlobalStrategicMarketingView': 'GlobalStrategicMarketing'
+		};
+		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		const fieldMapping = {
+			'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
+		};
+		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		  
+		for (const item of mandatoryFielddata) {
+			let frontendField = item.Field;
+			if (frontendField.includes("path")) {
+				const match = regex.exec(frontendField);
+				frontendField = match ? match[1] : frontendField;
+			}
+			// Check if there's a mapping, and if so, replace it
+			if (fieldMapping[frontendField]) {
+				frontendField = fieldMapping[frontendField];
+			}
+		
+			if (
+				!(frontendField in req.data) ||
+				req.data[frontendField] === null ||
+				req.data[frontendField] === ''
+			) {
+				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+			}
+		}	
+
+		req.data.NewOfferDueDate = req.data.OfferDueDate;
+		req.data.DistributorComments = null; //for mandatory field check in sta-service
+		delete req.data.OfferDueDate;
+		delete req.data.OfferStatus;
+		delete req.data.InstituteID;
+        delete req.data.Channel;
+		}
+		catch(error){
+            console.error('Error in OfferFormView CREATE');
+            return req.reject(403, error?.message||"Error in OfferFormView");
+        }
+	});
+
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsTableView', async (req) => {
 		try{
 		delete req.data.ProductPackName;

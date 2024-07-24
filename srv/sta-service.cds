@@ -1062,5 +1062,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             selectedcontractduration.ContractDuration,
         }where(tender.CountryCode = 'NL' and tender.Active = 1 and offer.Active = 1);
     @cds.redirection.target
-    entity NLPriceConditions as projection on TransactionalData.NLPriceConditions;    
+    entity NLPriceConditions as projection on TransactionalData.NLPriceConditions; 
+
+    entity ComplianceOfficerView as projection on OfferFormView;   
+    entity SupplyManagementView as projection on OfferFormView;   
+    entity GlobalStrategicMarketingView as projection on OfferFormView;   
 }
