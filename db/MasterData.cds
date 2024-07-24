@@ -954,3 +954,12 @@ entity DistributionAgreements: cuid, managed {
 	CurrentType: String;
 	CurrentValue: Double;
 }
+
+entity NLPPPApproverTypes: cuid, managed{
+	NLPPPApproverTypes: String;
+}
+entity NLPPPApprovers: cuid, managed{
+	NLPPPApproverType: String;
+	NLPPPApproverName: String;
+	NLPPPApproverEmailID: String;
+}
