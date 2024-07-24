@@ -128,6 +128,7 @@ entity PT_TMDIST{
 	INCOTerms:String(500);
 	PaymentTerms:String(500);
 	ForAllBrands:Boolean;
+	ClaimEligible: String;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
