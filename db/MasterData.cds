@@ -938,6 +938,7 @@ entity NLPPP: cuid, managed{
 	PPP: Double;
 	PowerApproverCWID: String;
 	PowerApprovalDate: Date;
+	NLPPPApprovals: Association to many NLPPPApprovals on NLPPPApprovals.NLPPP = $self
 }
 
 entity DistributionAgreements: cuid, managed {
@@ -961,4 +962,13 @@ entity NLPPPApprovers: cuid, managed{
 	CurrentEndDate: Date;
 	CurrentType: String;
 	CurrentValue: Double;
+}
+entity NLPPPApprovals  : cuid, managed {
+	ApproverRole: String;
+	ApprovalStatus: String;
+	ApproverComment: String;
+	ApproverCWID: String;
+	ApprovalDate: Date;
+	SenderComment: String;
+	NLPPP: Association to NLPPP
 }
