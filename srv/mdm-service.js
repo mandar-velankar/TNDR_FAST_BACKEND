@@ -366,7 +366,7 @@ module.exports = (srv) => {
         !Value && req.error({code: 400, message: 'Distribution Arrangement is required', target: 'Value'});
 
 		//check if dates are correct
-		if(req.data.CurrentStartDate && moment(req.data.StartDate).isSame(req.data.CurrentStartDate))
+		if(req.data.CurrentStartDate &&( moment(req.data.StartDate).isSame(req.data.CurrentStartDate) || moment(req.data.StartDate).isBefore(req.data.CurrentStartDate)))
 			req.error({ code: 404, message: "The contract start date of the new agreement should not be the same as the start date of the current agreement", target: "startDate" });
 		
         const currentDistributionAgreementView = await SELECT.one.from(CurrentDistributionAgreementView).where({PRODUCTPACKID: PRODUCTPACKID});
