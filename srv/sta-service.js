@@ -5488,19 +5488,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			// Assuming the Excel file has only one sheet, you can get the data from it
 			const sheetName = workbook.SheetNames[0];
 			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-			products.shift();
 
 			// Validate data in fields and check if ZI-Nr. exists in the database
 			const invalidZIFields = [];
 			products.forEach(product => {
-				const ziNr = product["ZI-Nr."];
-				const productPack = ctryProductPack.find(pck => pck.GOV_CODE == ziNr);
+				const code1 = product["PRK"];
+				const productPack = ctryProductPack.find(pck => pck.CODE1 == code1);
 				if (!productPack) {
-					invalidZIFields.push(ziNr);
+					invalidZIFields.push(code1);
 				}
 			});
 			// Validate required fields
-			const requiredFields = ["ZI-Nr.", "Aantal stuks in verpakking"];
+			const requiredFields = ["PRK"];
 			let missingFields = [];
 
 			products.forEach((product, index) => {
@@ -5519,13 +5518,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				res.warn(400,`The file is missing required fields:\n${errorMessages.join("\n")}. Please update the file and try again.`);
 			}
 			else if(invalidZIFields.length > 0){
-				res.warn(400,`The following ZI-Nr. values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` );
+				res.warn(400,`The following PRK values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` );
 			}
 			else{
 				// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
 				let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
 				promises = products.map(product => {
-					const productPack = ctryProductPack.find(pck => pck.GOV_CODE == product["ZI-Nr."]);
+					const productPack = ctryProductPack.find(pck => pck.CODE1 == product["PRK"]);
 					const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
 					const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
 					if (productIndex === -1) {
@@ -5535,8 +5534,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				});
 			}
 
-			const deletePromise =await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
-			await Promise.all([deletePromise, promises]);
+			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
+			await Promise.all([promises]);
 			return req;
 		} catch (error) {
 			console.error('Error in ZagisUploadFile');
@@ -5553,7 +5552,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			SubmittedBy: req.user.id,
 			Active: 1,
 			ProductCode: productPack.PRODUCTPACKID,
-			RequestedVolume: product["Aantal stuks in verpakking"],
+			RequestedVolume: 1,
 			UnitPerPack: "Pack",
 			DistributorID: offer.DistributorID,
 			ActiveProduct: 1,
