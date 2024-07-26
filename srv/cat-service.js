@@ -1847,7 +1847,8 @@ module.exports = (srv) => {
 				LINE: offerProduct.LINE,
 				REFERENCE: offerProduct.REFERENCE,
 				IBIZWORKFLOWID: offerProduct.IBIZWORKFLOWID,
-				ItemNumber: offerProduct.ItemNumber
+				ItemNumber: offerProduct.ItemNumber,
+				TenderAnnouncementReference: offer.PaymentTerms
 			}
 		});
 		let resolvedResults = await Promise.all(results);
