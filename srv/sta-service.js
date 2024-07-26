@@ -1827,7 +1827,7 @@ module.exports = async (srv) => {
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
-			"TaiwanPrice": {
+			"TaiwanContractPrice": {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level2Discount1:req.data.Deductions,
@@ -4734,7 +4734,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				Price3: req.data.NetPrice,
 				Price1: req.data.OfferPrice
 			},
-			"TaiwanPrice": {
+			"TaiwanContractPrice": {
 				Price2: req.data.NetofferPrice,
 				Price3: req.data.NetPrice,
 				Price1: req.data.OfferPrice, 
