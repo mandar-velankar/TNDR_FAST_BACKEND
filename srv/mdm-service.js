@@ -359,6 +359,17 @@ module.exports = (srv) => {
 		})
 	});
 
+	srv.after('READ', 'DistributionAgreementsView', async (data) => {
+		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
+		countryProducts.forEach(item => {
+			const filteredData = data.filter(agreement => agreement.PRODUCTPACKID == item.PRODUCTPACKID);
+			if (filteredData.length > 1) {
+				const defaultProductIndex = data.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.DistributionAgreementID == null);
+				data.splice(defaultProductIndex, 1);
+			}
+		});
+	});
+
     srv.before('CREATE', 'DistributionAgreements', async (req) => {
         const { StartDate, Type, Value, PRODUCTPACKID } = req.data;
         !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
@@ -372,6 +383,7 @@ module.exports = (srv) => {
         const currentDistributionAgreementView = await SELECT.one.from(CurrentDistributionAgreementView).where({PRODUCTPACKID: PRODUCTPACKID});
         if (currentDistributionAgreementView) {
 			await UPDATE(CurrentDistributionAgreementView).with ({EndDate: req.data.CurrentEndDate}).where({
+				ID: currentDistributionAgreementView.ID,
 				PRODUCTPACKID: PRODUCTPACKID
 			})
         }

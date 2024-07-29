@@ -388,22 +388,35 @@ left outer join MasterData.PT_TMINST as inst
 	policy.Value,
 	policy.Currency
 };
-entity DistAgreementsData as select from MasterData.PT_TMCTPRDPCK as ctprdpck
-    inner join MasterData.PT_TMPRDPCK as prdpck
-        on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
-    inner join MasterData.CountryCurrency as ctryCurrency
-        on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
-    left join MasterData.DistributionAgreements as distAgreements
-        on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
-        and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID {
-        key distAgreements.ID as DistributionAgreementID : UUID,
+
+entity DistributionAgreementMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
+	CountryCode,
+	ProductPackID,
+	STRING_AGG(SKUCode, ',') as MaterialNumbers: String
+}where CountryCode = 'NL'
+	and ActiveRecord = 'Yes'
+group by 
+	CountryCode,
+	ProductPackID;
+
+entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+	inner join MasterData.PT_TMPRDPCK as prdpck
+		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+	left join MasterData.DistributionAgreements as distAgreements
+		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
+		and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join DistributionAgreementMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID{
+		key distAgreements.ID as DistributionAgreementID,
         key ctprdpck.PRODUCTPACKID,
-        ctprdpck.COUNTRYCODE as CountryCode: String,
+        ctprdpck.COUNTRYCODE as CountryCode,
         ctprdpck.GOV_CODE,
         prdpck.PRODUCTPACKNAME,
         prdpck.PRESENTATION,
         distAgreements.DistributorID,
-        distAgreements.MaterialNumbers,
+        materialNumbers.MaterialNumbers,
         distAgreements.StartDate,
         distAgreements.EndDate,
         distAgreements.Type,
@@ -414,71 +427,7 @@ entity DistAgreementsData as select from MasterData.PT_TMCTPRDPCK as ctprdpck
         distAgreements.CurrentType,
         distAgreements.CurrentValue,
         ctryCurrency.Currency
-} where ctprdpck.COUNTRYCODE = 'NL'
-union select from MasterData.PT_TMCTPRDPCK as ctprdpck
-	inner join MasterData.PT_TMPRDPCK as prdpck
-		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
-	inner join MasterData.CountryCurrency as ctryCurrency
-	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
-	left join MasterData.DistributionAgreements as distAgreements
-		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
-		and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID {
-		key null as  DistributionAgreementID : UUID,
-		key ctprdpck.PRODUCTPACKID,
-		ctprdpck.COUNTRYCODE as CountryCode: String,
-		ctprdpck.GOV_CODE,
-		prdpck.PRODUCTPACKNAME,
-		prdpck.PRESENTATION,
-		null as DistributorID,
-		null as MaterialNumbers,
-		null as StartDate,
-		null as EndDate,
-		null as Type,
-		null as Value,
-		null as createdAt,
-		null as CurrentStartDate,
-		null as CurrentEndDate,
-		null as CurrentType,
-		null as CurrentValue,
-		ctryCurrency.Currency,
-		prdpck.ProductPackSKUs: redirected to ProductPackSKUs,
-} where ctprdpck.COUNTRYCODE = 'NL';
-entity CheckDistAgreements as select from DistAgreementsData {
-    COUNT(*) as DistAgreementsCount : Integer,
-	PRODUCTPACKID
-}group by
-	PRODUCTPACKID;
-
-entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
-	inner join MasterData.PT_TMPRDPCK as prdpck
-		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
-	inner join MasterData.CountryCurrency as ctryCurrency
-	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
-	left join MasterData.DistributionAgreements as distAgreements
-		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
-		and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID 
-	inner join CheckDistAgreements as checkCount
-		on checkCount.PRODUCTPACKID = ctprdpck.PRODUCTPACKID{
-		key distAgreements.ID as DistributionAgreementID,
-        key ctprdpck.PRODUCTPACKID,
-        ctprdpck.COUNTRYCODE as CountryCode,
-        ctprdpck.GOV_CODE,
-        prdpck.PRODUCTPACKNAME,
-        prdpck.PRESENTATION,
-        distAgreements.DistributorID,
-        distAgreements.MaterialNumbers,
-        distAgreements.StartDate,
-        distAgreements.EndDate,
-        distAgreements.Type,
-        distAgreements.Value,
-        distAgreements.createdAt,
-        distAgreements.CurrentStartDate,
-        distAgreements.CurrentEndDate,
-        distAgreements.CurrentType,
-        distAgreements.CurrentValue,
-        ctryCurrency.Currency,
-		prdpck.ProductPackSKUs: redirected to ProductPackSKUs
-} where ctprdpck.COUNTRYCODE = 'NL' and  checkCount.DistAgreementsCount > 1 and distAgreements.ID is not null
+} where ctprdpck.COUNTRYCODE = 'NL' and distAgreements.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
 		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
@@ -487,8 +436,8 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	left join MasterData.DistributionAgreements as distAgreements
 		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
 		and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
-	inner join CheckDistAgreements as checkCount
-		on checkCount.PRODUCTPACKID = ctprdpck.PRODUCTPACKID {
+	inner join DistributionAgreementMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID{
 		key null as  DistributionAgreementID : UUID,
 		key ctprdpck.PRODUCTPACKID,
 		ctprdpck.COUNTRYCODE as CountryCode: String,
@@ -496,7 +445,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		prdpck.PRODUCTPACKNAME,
 		prdpck.PRESENTATION,
 		null as DistributorID,
-		null as MaterialNumbers,
+		materialNumbers.MaterialNumbers,
 		null as StartDate,
 		null as EndDate,
 		null as Type,
@@ -507,9 +456,9 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		null as CurrentType,
 		null as CurrentValue,
 		ctryCurrency.Currency,
-		prdpck.ProductPackSKUs: redirected to ProductPackSKUs,
-} where ctprdpck.COUNTRYCODE = 'NL' and checkCount.DistAgreementsCount > 1;
+} where ctprdpck.COUNTRYCODE = 'NL';
 entity CurrentDistributionAgreementView as select from MasterData.DistributionAgreements{
+	key ID,
     key PRODUCTPACKID,
     StartDate,
     EndDate,
