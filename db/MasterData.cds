@@ -950,7 +950,12 @@ entity DistributionAgreements: cuid, managed {
 	EndDate: Date;
 	Type: String;
 	Value: Double;
+	CurrentStartDate: Date;
+	CurrentEndDate: Date;
+	CurrentType: String;
+	CurrentValue: Double;
 }
+
 entity NLPPPApproverTypes: cuid, managed{
 	NLPPPApproverTypes: String;
 }
@@ -958,10 +963,6 @@ entity NLPPPApprovers: cuid, managed{
 	NLPPPApproverType: String;
 	NLPPPApproverName: String;
 	NLPPPApproverEmailID: String;
-	CurrentStartDate: Date;
-	CurrentEndDate: Date;
-	CurrentType: String;
-	CurrentValue: Double;
 }
 entity NLPPPApprovals  : cuid, managed {
 	ApproverRole: String;
