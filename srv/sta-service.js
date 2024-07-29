@@ -690,7 +690,7 @@ module.exports = async (srv) => {
         }
 	});
 
-	srv.before(['CREATE','UPDATE','DELETE'], ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
+	srv.before(['UPDATE'], ['ComplianceOfficerView'], async (req) => {
 		try{
 		const sections = {
 			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
@@ -3344,16 +3344,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             Offer_Custom_Date_8: offerInformation?.Custom_Date_8,
             Offer_Custom_Date_9: offerInformation?.Custom_Date_9,
             Offer_Custom_Date_10: offerInformation?.Custom_Date_10,
-            Offer_Custom_Boolean_1: offerInformation?.Custom_Boolean_1,
-            Offer_Custom_Boolean_2: offerInformation?.Custom_Boolean_2,
-            Offer_Custom_Boolean_3: offerInformation?.Custom_Boolean_3,
-            Offer_Custom_Boolean_4: offerInformation?.Custom_Boolean_4,
-            Offer_Custom_Boolean_5: offerInformation?.Custom_Boolean_5,
-            Offer_Custom_Boolean_6: offerInformation?.Custom_Boolean_6,
-            Offer_Custom_Boolean_7: offerInformation?.Custom_Boolean_7,
-            Offer_Custom_Boolean_8: offerInformation?.Custom_Boolean_8,
-            Offer_Custom_Boolean_9: offerInformation?.Custom_Boolean_9,
-            Offer_Custom_Boolean_10: offerInformation?.Custom_Boolean_10,
+            Offer_Custom_Boolean_1: offerInformation?.Custom_Boolean_1 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_2: offerInformation?.Custom_Boolean_2 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_3: offerInformation?.Custom_Boolean_3 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_4: offerInformation?.Custom_Boolean_4 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_5: offerInformation?.Custom_Boolean_5 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_6: offerInformation?.Custom_Boolean_6 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_7: offerInformation?.Custom_Boolean_7 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_8: offerInformation?.Custom_Boolean_8 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_9: offerInformation?.Custom_Boolean_9 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_10: offerInformation?.Custom_Boolean_10 === true ? 'Yes' : 'No',
             Offer_Custom_Datetime_1: offerInformation?.Custom_Datetime_1,
             Offer_Custom_Datetime_2: offerInformation?.Custom_Datetime_2,
             Offer_Custom_Datetime_3: offerInformation?.Custom_Datetime_3,

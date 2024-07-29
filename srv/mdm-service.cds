@@ -225,4 +225,6 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     group by COUNTRYCODE, BU;
 
     entity DistributionAgreementsView as projection on MasterDataViews.DistributionAgreementsView;
+    entity DistributionAgreements as projection on MasterData.DistributionAgreements;
+    entity CurrentDistributionAgreementView as projection on MasterDataViews.CurrentDistributionAgreementView;
 }
