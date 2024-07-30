@@ -15,7 +15,8 @@ module.exports = (srv) => {
 			adminAccess:{
 				ConsumerPrices:req.user.is('f_tndr_cag_consumerprice_user'),
 				DistributorManagememt:req.user.is('f_tndr_cag_distributormanagement_user'),
-				DistributorManagementExclusiveAccess:req.user.is('f_tndr_cag_distributormanagementexclusiveaccess_user')
+				DistributorManagementExclusiveAccess:req.user.is('f_tndr_cag_distributormanagementexclusiveaccess_user'),
+				COGSManagementView:req.user.is('f_tndr_cag_admincogsview_user')
 			},
 			standardtenderAccess: {
 				OverviewDownload: req.user.is('f_tnndr_cag_standardtenderdownload_user'),
