@@ -678,8 +678,8 @@ module.exports = async (srv) => {
 		// !req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
         // !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
         // !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
-		if (req.data.CountryCode === 'NL') {
-			const masterDistributor =  await SELECT.one.from('StandardAppService.MasterDistributors').where({CountryCode: "NL", DistributorName: "Defined at results Level"})
+		if (req.data.CountryCode === 'NL' || req.data.CountryCode === 'PL') {
+			const masterDistributor =  await SELECT.one.from('StandardAppService.MasterDistributors').where({DistributorName: "Defined at results Level"})
 			req.data.DistributorID = masterDistributor?.DistributorID
 		}
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
