@@ -1161,6 +1161,10 @@ module.exports = async (srv) => {
 		// !req.data.Custom_Integer_1 && req.error({ code: 404, message: "Pack size is required.", target: "Custom_Integer_1" });
 		// !req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
 		
+		if (req.data.CountryCode == 'NL' && (req.data.RequestedVolume == 0 || req.data.RequestedVolume == null)) {
+			req.data.RequestedVolume = 1
+		}
+		
 		req.data.Line = null; //for mandatory field check in sta-service
 		delete req.data.MoleculeName;
         delete req.data.Code1;
