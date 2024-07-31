@@ -139,7 +139,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Custom.Integer_2 as Custom_Integer_2,
         tender.Custom.Integer_3 as Custom_Integer_3,
         ifnull(quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1)) as EffectiveDate:Date,
-        ifnull(quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate:Date
+        ifnull(quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate:Date,
+        tender.Custom.String_1 as Custom_String_1,
+        tender.Custom.Date_1 as Custom_Date_1
     }where tender.Active = 1 and ifnull(offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -166,7 +168,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Custom.Integer_2,
         tender.Custom.Integer_3,
         quotation.EffectiveDate,
-        quotation.ExpiryDate;
+        quotation.ExpiryDate,
+        tender.Custom.String_1,
+        tender.Custom.Date_1;
 
     @cds.redirection.target
     entity InstitutesView as select from MasterData.PT_TMINST as inst
