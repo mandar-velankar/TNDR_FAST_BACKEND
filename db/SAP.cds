@@ -585,21 +585,134 @@ entity FASTCoreProduct: cuid, managed {
     HasTextilePartsWthAnimalOrigin: Boolean;
     BrandID: String;
     RetailArticleGeneral: Composition of one RetailArticleGeneral on RetailArticleGeneral.parent = $self;
-	Description: Composition of one Description on Description.parent = $self;
+    ProductRetailSeason: Composition of many ProductRetailSeason on ProductRetailSeason.parent = $self;
+    ProductRetailHierarchy: Composition of many ProductRetailHierarchy on ProductRetailHierarchy.parent = $self;
+    GlobalTradeItemNumber: Composition of many GlobalTradeItemNumber on GlobalTradeItemNumber.parent = $self;
+	Description: Composition of many Description on Description.parent = $self;
     QuantityConversion: Composition of many QuantityConversion on QuantityConversion.parent = $self;
     QuantityCharacteristic: Composition of many QuantityCharacteristic on QuantityCharacteristic.parent = $self;
+    Classification: Composition of many Classification on Classification.parent = $self;
+    InternationalTrade: Composition of one InternationalTrade on InternationalTrade.parent = $self;
+    VariantConfiguration: Composition of many VariantConfiguration on VariantConfiguration.parent = $self;
 	TextCollection: Composition of one TextCollection on TextCollection.parent = $self;
 	StorageSpecification: Composition of one StorageSpecification on StorageSpecification.parent = $self;
     DistributionChainIndependentSalesSpecification: Composition of one DistributionChainIndependentSalesSpecification on DistributionChainIndependentSalesSpecification.parent = $self;
     PlantIndependentProcurementSpecification: Composition of one PlantIndependentProcurementSpecification on PlantIndependentProcurementSpecification.parent = $self;
     ProductSCMAdvancedPlanning: Composition of one ProductSCMAdvancedPlanning on ProductSCMAdvancedPlanning.parent = $self;
-	SalesSpecification: Composition of one SalesSpecification on SalesSpecification.parent = $self;
-    SalesSpecificTaxClassification: Composition of one SalesSpecificTaxClassification on SalesSpecificTaxClassification.parent = $self;
-    SubscriptionProduct: Composition of one SubscriptionProduct on SubscriptionProduct.parent = $self;
-    eSPPProduct: Composition of one eSPPProduct on eSPPProduct.parent = $self;
-	Plant:Composition of many Plant on Plant.parent = $self;
-	ValuationArea:Composition of many ValuationArea on ValuationArea.parent = $self;
+	SalesSpecification: Composition of many SalesSpecification on SalesSpecification.parent = $self;
+    SalesSpecificTaxClassification: Composition of many SalesSpecificTaxClassification on SalesSpecificTaxClassification.parent = $self;
+    Plant:Composition of many Plant on Plant.parent = $self;
+    ValuationArea:Composition of many ValuationArea on ValuationArea.parent = $self;
 	Warehouse:Composition of many Warehouse on Warehouse.parent = $self;
+    SubscriptionProduct: Composition of one SubscriptionProduct on SubscriptionProduct.parent = $self;
+    ProductBOM:Composition of many ProductBOM on ProductBOM.parent = $self;
+    EWMWarehouse:Composition of many EWMWarehouse on EWMWarehouse.parent = $self;
+    SCMProductGroups: Composition of many SCMProductGroups on SCMProductGroups.parent = $self;
+    eSPPProduct: Composition of one eSPPProduct on eSPPProduct.parent = $self;
+}
+
+entity VariantConfiguration: cuid{
+    VarConfignStatus: String;
+    VCHCharacteristicValuation: Composition of many VCHCharacteristicValuation on VCHCharacteristicValuation.parentVariantConfiguration = $self;
+    parent: Association to FASTCoreProduct;
+}
+
+entity VCHCharacteristicValuation: cuid{
+    Characteristic: String;
+    CharcValue: String;
+    CharcValueTo: String;
+    CharcValueIntervalType: String;
+    CharcValueAssignmentType: String;
+    parentVariantConfiguration: Association to VariantConfiguration;
+}
+
+entity InternationalTrade: cuid{
+    TradeClassificationNumberingScheme: Composition of many TradeClassificationNumberingScheme on TradeClassificationNumberingScheme.parentInternationalTrade = $self;
+    parent: Association to FASTCoreProduct;
+}
+
+entity TradeClassificationNumberingScheme: cuid{
+    TradeClassificationNumberingSchemeCode: String;
+    TradeClassification: Composition of many TradeClassification on TradeClassification.parentTradeClassificationNumberingScheme = $self;
+    parentInternationalTrade: Association to InternationalTrade;
+}
+
+entity TradeClassification: cuid{
+    TrdClassfctnNmbr: String;
+    ValidityStartDate: Date;
+    ValidityEndDate: Date;
+    parentTradeClassificationNumberingScheme: Association to TradeClassificationNumberingScheme;
+}
+
+entity Classification: cuid{
+    ChangeNumber: String;
+    ClassAssignmentByClassType: Composition of many ClassAssignmentByClassType on ClassAssignmentByClassType.parentClassification = $self;
+    CharcValuationByClassType: Composition of many CharcValuationByClassType on CharcValuationByClassType.parentClassification = $self;
+    parent: Association to FASTCoreProduct;
+}
+
+entity ClassAssignmentByClassType: cuid{
+    ClassType: String;
+    ClassAssignment: Composition of many ClassAssignment on ClassAssignment.parentClassAssignmentByClassType = $self;
+    parentClassification: Association to Classification;
+}
+
+entity ClassAssignment: cuid{
+    Class: String;
+    ClfnStatus: String;
+    StdClass: String;
+    parentClassAssignmentByClassType: Association to ClassAssignmentByClassType;
+}
+
+entity CharcValuationByClassType: cuid{
+    ClassType: String;
+    CharacteristicValuation: Composition of many CharacteristicValuation on CharacteristicValuation.parentCharcValuationByClassType = $self;
+    parentClassification: Association to Classification;
+}
+
+entity CharacteristicValuation: cuid{
+    Characteristic: String;
+    CharcValue: String;
+    CharcValueDisplayUnit: String;
+    CharcValueTo: String;
+    CharcValueToDisplayUnit: String;
+    CharcValueIntervalType: String;
+    parentCharcValuationByClassType: Association to CharcValuationByClassType;
+}
+
+entity ProductRetailSeason: cuid{
+    ProductSeasonYear: String;
+    ProductSeason: String;
+    ProductCollection: String;
+    ProductTheme: String;
+    IsProductSeasonType1: Boolean;
+    IsProductSeasonType2: Boolean;
+    IsProductSeasonType3: Boolean;
+    parent: Association to FASTCoreProduct;
+}
+
+entity ProductRetailHierarchy: cuid{
+    HierarchyID: String;
+    HierarchyNode: String;
+    DateFrom: Date;
+    DateTo: Date;
+    IsMainFlag: Boolean;
+    parent: Association to FASTCoreProduct;
+}
+
+entity GlobalTradeItemNumber: cuid{
+    ProductStandardID: String;
+    ProductStandardVariantID: String;
+    MeasureUnitCode: String;
+    ProductStandardMainIndicator: String;
+    ProductRetailSupplierGTIN: Composition of many ProductRetailSupplierGTIN on ProductRetailSupplierGTIN.parentGlobalTradeItemNumber = $self;
+    parent: Association to FASTCoreProduct;
+}
+
+entity ProductRetailSupplierGTIN: cuid{
+    SupplierID: String;
+    SupplierProductID: String;
+    parentGlobalTradeItemNumber: Association to GlobalTradeItemNumber;
 }
 
 entity Description: cuid{
@@ -609,8 +722,25 @@ entity Description: cuid{
 
 entity TextCollection: cuid{
     TextExistsIndicator:  Boolean;
+    Text: Composition of many Text on Text.parentTextCollection = $self;
     parent: Association to FASTCoreProduct;
 }
+
+entity Text: cuid{
+    ID: String;
+    TypeCode: String;
+    LanguageCode: String;
+    SAPScriptLine: Composition of many SAPScriptLine on SAPScriptLine.parentText = $self;
+    parentTextCollection: Association to TextCollection;
+}
+
+entity SAPScriptLine: cuid{
+    OrdinalNumberValue: String;
+    SAPScriptLineFormatCode: String;
+    SAPScriptLineText: String;
+    parentText: Association to Text;
+}
+
 
 entity StorageSpecification: cuid{
     ProductStorageRequirementsCode: String;  
@@ -727,8 +857,36 @@ entity SalesSpecification: cuid{
     DistributionCenterListingStartDate: Date; // Nullable field
     DistributionCenterListingEndDate: Date; // Nullable field
     ProductEntitlementRelevantIndicator: Boolean;
+    ProductRetailPOS:Composition of many ProductRetailPOS on ProductRetailPOS.parentSalesSpecification = $self;
+    SalesSpecificationText:Composition of many SalesSpecificationText on SalesSpecificationText.parentSalesSpecification = $self;
     SubscriptionProductSalesData: Composition of one SubscriptionProductSalesData on SubscriptionProductSalesData.parentSalesSpecification = $self;
+    CommodityQuantityForPricing:Composition of many CommodityQuantityForPricing on CommodityQuantityForPricing.parentSalesSpecification = $self;
     parent: Association to FASTCoreProduct;
+}
+
+entity ProductRetailPOS: cuid{
+    Plant: String;
+    StoreSaleStartDate: Date;
+    StoreSaleEndDate: Date;
+    ProductSalesProcessUsabilityProfileCode: String;
+    DistrChainSpcfcProdStsValidityDate: Date;
+    IsPointOfSalesDiscountAllowed: Boolean;
+    ScalesGroup: String;
+    parentSalesSpecification: Association to SalesSpecification;
+}
+
+entity SalesSpecificationText: cuid{
+    TypeCode: String;
+    LanguageCode: String;
+    SalesSpecificationTextSAPScriptLine: Composition of many SalesSpecificationTextSAPScriptLine on SalesSpecificationTextSAPScriptLine.parentSalesSpecificationText = $self;
+    parentSalesSpecification: Association to SalesSpecification;
+}
+
+entity SalesSpecificationTextSAPScriptLine: cuid{
+    OrdinalNumberValue: String;
+    SAPScriptLineFormatCode: String;
+    SAPScriptLineText: String;
+    parentSalesSpecificationText: Association to SalesSpecificationText;
 }
 
 entity SubscriptionProductSalesData: cuid{
@@ -740,6 +898,13 @@ entity SubscriptionProductSalesData: cuid{
     AltExtensionPeriod1: Integer; // Nullable field
     AltExtensionPeriod2: Integer; // Nullable field
     ExtensionPeriodUnit: String; // Nullable field
+    parentSalesSpecification: Association to SalesSpecification;
+}
+
+entity CommodityQuantityForPricing: cuid{
+    Commodity: String;
+    CommodityQuantity: Double;
+    ReferenceQuantity: Double;
     parentSalesSpecification: Association to SalesSpecification;
 }
 
@@ -755,6 +920,78 @@ entity SubscriptionProduct: cuid{
     BillingCycleDeterminationRuleId     : String; // nullable
     ContractAutoRenewalIndicator        : String; // nullable
     parent: Association to FASTCoreProduct;
+}
+
+entity SCMProductGroups: cuid{
+    ProductGroupType: String;
+    ProductGroupValue: String;
+    parent: Association to FASTCoreProduct;
+}
+
+entity ProductBOM: cuid{
+    BillOfMaterial: String;
+    BillOfMaterialVariantUsageCode: String;
+    BillOfMaterialVariantID: String;
+    Plant: String;
+    MeasureUnitCode: String;
+    BOMItem: Composition of many BOMItem on BOMItem.parentProductBOM = $self;
+    parent: Association to FASTCoreProduct; 
+}
+
+entity BOMItem: cuid{
+    BillOfMaterialComponent: String;
+    BillOfMaterialItemCategory: String;
+    BillOfMaterialItemQuantity: Double;
+    parentProductBOM: Association to ProductBOM;
+}
+
+entity EWMWarehouse: cuid{
+    EWMWarehouseNumber: String;
+    EWMPartyEntitledToDispose: String;
+    SupplyChainUnitUUID: String;
+    EWMPartyEntitledToDisposeUUID: String;
+    EWMProductProcessBlockProfile: String;
+    EWMWarehouseProcessType: String;
+    EWMProductLoadCategory: String;
+    EWMPhysInventoryCountingCycle: String;
+    RequiredMinShelfLife: String;
+    EWMProdBackflushWthdrwlMethod: String;
+    EWMKitQuantityCorrelation: String;
+    EWMIsCnsmpnRlvtForValAddedSrvc: String;
+    EWMQuantityAdjustmentProfile: String;
+    EWMMrchdsDistrQtyClassfctn: String;
+    EWMPreferredUnit: String;
+    EWMQualityInspectionGroup: String;
+    EWMPtwyControlStrategy: String;
+    EWMStorageBinType: String;
+    EWMBulkStorageMethod: String;
+    EWMStorageSectionMethod: String;
+    EWMStockRemovalControlStrategy: String;
+    EWMStockDeterminationGroup: String;
+    EWMProdTwoStepPickingRelevant: String;
+    EWMStggAreaDeterminationGroup: String;
+    EWMStorageType: Composition of many EWMStorageType on EWMStorageType.parentEWMWarehouse = $self;
+    parent: Association to FASTCoreProduct;
+}
+
+entity EWMStorageType: cuid{
+    EWMStorageTypeID: String;
+    EWMStorageBinType: String;
+    EWMStorageSectionMethod: String;
+    EWMStorageBinSearchRule: String;
+    EWMMaximumNumberOfBins: String;
+    EWMSpltPtwyThresholdInPercent: Double;
+    EWMPtwySequence: String;
+    EWMProdQuantityClassification: String;
+    EWMProdPtwyQtyClassification: String;
+    EWMProdIsSplitOnPtwy: String;
+    EWMProdIsSkippedOnPtwy: String;
+    EWMHasNoReplenishment: String;
+    EWMMinReplnmtQuantity: Double;
+    EWMMinimumStorageQuantity: Double;
+    EWMMaximumStorageQuantity: Double;
+    EWMMinStorQtyOfMaxStorQtyInPct: Double;
+    parentEWMWarehouse: Association to EWMWarehouse;
 }
 
 entity eSPPProduct: cuid{
@@ -809,7 +1046,14 @@ entity QuantityCharacteristic: cuid{
 	Quantity: Double;
 	CharacteristicQuantity: Double;
 	CharacteristicQuantityTypeCode: String;
+    ProductRetailUoMTexts: Composition of many ProductRetailUoMTexts on ProductRetailUoMTexts.parentQuantityCharacteristic = $self;
 	parent: Association to FASTCoreProduct;
+}
+
+entity ProductRetailUoMTexts: cuid{
+    ProductUoMDescription: String;
+    ProductUnitTextSeqNum: String;
+    parentQuantityCharacteristic: Association to QuantityCharacteristic;
 }
 
 entity Warehouse: cuid {
@@ -837,7 +1081,22 @@ entity Warehouse: cuid {
     CapacityUsage                                           : String; // nullable
     ProductWarehousePickingStorageTypeCode                  : String; // nullable
     ProductWarehouseMaterialMasterDefaultUnitTypeCode       : String; // nullable
+    StorageType: Composition of many StorageType on StorageType.parentWarehouse = $self;
 	parent: Association to FASTCoreProduct;
+}
+
+entity StorageType: cuid{
+    WarehouseNumber: String;
+    LeanWarehouseManagementPickingAreaCode: String;
+    StorageBin: String;
+    StorageType: String;
+    ProductWarehouseMaximumStorageBinQuantity: Double;
+    ProductWarehouseMinimumStorageBinQuantity: Double;
+    DeletedIndicator: String;
+    ProductWarehouseStorageTypeControlQuantity: Double;
+    ProductWarehouseStorageTypeReplenishmentQuantity: Double;
+    ProductWarehouseStorageTypeRoundingQuantity: Double;
+    parentWarehouse: Association to Warehouse;
 }
 
 entity ValuationArea: cuid {
@@ -929,11 +1188,12 @@ entity Plant: cuid {
     OriginalBatchReferenceProductID : String; // nullable
 	Costing: Composition of one Costing on Costing.parentPlant = $self;
 	SupplyPlanning: Composition of one SupplyPlanning on SupplyPlanning.parentPlant = $self;
+    MRPArea:Composition of many MRPArea on MRPArea.parentPlant = $self;
 	Sales: Composition of one Sales on Sales.parentPlant = $self;
 	QualityManagement: Composition of one QualityManagement on QualityManagement.parentPlant = $self;
-    PlantText: String;
+    PlantText: Composition of one PlantText on PlantText.parentPlant = $self;
 	Forecasting: Composition of one Forecasting on Forecasting.parentPlant = $self;
-	InternationalTrade: Composition of one InternationalTrade on InternationalTrade.parentPlant = $self;
+	ProductMDMRplctReqPlantIntlTrade: Composition of one ProductMDMRplctReqPlantIntlTrade on ProductMDMRplctReqPlantIntlTrade.parentPlant = $self;
 	Storage:Composition of one Storage on Storage.parentPlant = $self;
 	StorageLocation:Composition of many StorageLocation on StorageLocation.parentPlant = $self;
 	Purchasing:Composition of one Purchasing on Purchasing.parentPlant = $self;
@@ -946,6 +1206,8 @@ entity Plant: cuid {
     ProductMinControlTemperatureQuantity: String; // nullable
 	ProductMaxControlTemperatureQuantity: String; // nullable
 	ProductControlTemperatureUnitCode: String; // nullable
+    PlantCommodityQuantityForPricing:Composition of many PlantCommodityQuantityForPricing on PlantCommodityQuantityForPricing.parentPlant = $self;
+    EmbeddedCommodityQuantity:Composition of many EmbeddedCommodityQuantity on EmbeddedCommodityQuantity.parentPlant = $self;
 	PlanteSPPProduct:Composition of one PlanteSPPProduct on PlanteSPPProduct.parentPlant = $self;
 	eSPPLocProd:Composition of one eSPPLocProd on eSPPLocProd.parentPlant = $self;
 	parent: Association to FASTCoreProduct;
@@ -1030,6 +1292,45 @@ entity SupplyPlanning: cuid {
 	parentPlant: Association to Plant;
 }
 
+entity MRPArea: cuid{
+    MRPAreaID: String;
+    ProductRequirementsPlanningTypeCode: String;
+    ProductRequirementsPlanningResponsibleCode: String;
+    LotSizeProcedureCode: String;
+    FixedLotSizeQuantity:Double;
+    MaximumLotSizeQuantity:Double;
+    MinimumLotSizeQuantity:Double;
+    LotSizeRoundingQuantity:Double;
+    SafetyStockQuantity:Double;
+    SafetyDaysOfSupplyDuration: String;
+    MasterPlanAutomaticChangeRestrictedDuration: String;
+    MaximumStockQuantity:Double;
+    ReorderThresholdQuantity:Double;
+    PlannedDeliveryDuration: String;
+    ProcurementSubTypeCode: String;
+    AssemblyProductScrapPercent:Double;
+    ProcurementInventoryManagedLocationInternalID: String;
+    ProductRequirementsPlanningGroupCode: String;
+    ProductRequirementsPlanningStorageCostDeterminationProfileCode: String;
+    PlanningCalendarCode: String;
+    DynamicSafetyStockCalculationProfileCode: String;
+    SafetyDaysOfSupplyRelevanceCode: String;
+    SafetyDaysOfSupplyDurationProfileCode: String;
+    MRPDependentRequirementCode: String;
+    LotSizeOrderAmountValue:Double;
+    LotSizeTaktTimeOffsetDuration: String;
+    ServiceLevelPercent:Double;
+    DeletedIndicator: String;
+    PlannedDeliveryDurationIndicator: String;
+    PlanAndOrderDayDeterminationCode: String;
+    RoudingProfileCode: String;
+    ProductionInventoryManagedLocationInternalID: String;
+    MRPAreaSCMAdvancedPlanning: String;
+    MRPAreaeSPP: String;
+    eSPPLocProdMRP: String;
+    parentPlant: Association to Plant;
+}
+
 entity Sales: cuid {
     LoadingGroupCode                          : String; // LoadingGroupCode
     ReplacementPartTypeCode                   : String; // nullable
@@ -1050,6 +1351,18 @@ entity QualityManagement: cuid {
 	parentPlant: Association to Plant;
 }
 
+entity PlantText: cuid{
+    PlantTextSAPScriptLine: Composition of many PlantTextSAPScriptLine on PlantTextSAPScriptLine.parentPlantText = $self;
+    parentPlant: Association to Plant;
+}
+
+entity PlantTextSAPScriptLine: cuid{
+    OrdinalNumberValue: String;
+    SAPScriptLineFormatCode: String;
+    SAPScriptLineText: String;
+    parentPlantText: Association to PlantText;
+}
+
 entity Forecasting: cuid {
     ConsumptionReferenceUsageEndDate                : String; // nullable
     ConsumptionReferenceProductQuantityMultiplier   : String; // nullable
@@ -1062,7 +1375,7 @@ entity Forecasting: cuid {
 	parentPlant: Association to Plant;
 }
 
-entity InternationalTrade: cuid {
+entity ProductMDMRplctReqPlantIntlTrade: cuid {
     ProductOriginCountryCode                        : String; // nullable
     ProductOriginRegionCode                         : String; // nullable
     ConsumptionTaxControlCode                       : String; // nullable
@@ -1230,6 +1543,20 @@ entity PlantSCMDemandPenalty: cuid {
     MaximumDelayInDays                : Integer;
     NonDeliveryPenaltyAmount          : Double;
 	parentPlant: Association to Plant;
+}
+
+entity PlantCommodityQuantityForPricing: cuid{
+    Commodity: String;
+    CommodityQuantity: Double;
+    ReferenceQuantity: Double;
+    parentPlant: Association to Plant;
+}
+
+entity EmbeddedCommodityQuantity: cuid{
+    Commodity: String;
+    CommodityQuantity: Double;
+    ReferenceQuantity: Double;
+    parentPlant: Association to Plant; 
 }
 
 entity PlanteSPPProduct: cuid {
@@ -2070,28 +2397,3 @@ entity FinancialServicesCommonOrganisation {
     MaxSizeOfOrderingFile                  : Integer;
     parentFinancialServicesCommon: Association to FinancialServicesCommon;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
