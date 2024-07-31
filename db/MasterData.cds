@@ -957,3 +957,13 @@ entity NLPPPApprovals  : cuid, managed {
 	SenderComment: String;
 	NLPPP: Association to NLPPP
 }
+
+entity WholesalePurchasePriceApproverTypes: cuid, managed{
+	WholesalePurchasePriceApproverTypes: String;
+}
+
+entity WholesalePurchasePriceApprovers: cuid, managed{
+	WholesalePurchasePriceApproverTypes: String;
+	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverEmailID: String;
+}
