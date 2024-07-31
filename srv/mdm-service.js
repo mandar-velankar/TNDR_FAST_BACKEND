@@ -359,6 +359,17 @@ module.exports = (srv) => {
 		})
 	});
 
+	srv.after('READ', 'DistributionAgreementsView', async (data) => {
+		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
+		countryProducts.forEach(item => {
+			const filteredData = data.filter(agreement => agreement.PRODUCTPACKID == item.PRODUCTPACKID);
+			if (filteredData.length > 1) {
+				const defaultProductIndex = data.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.DistributionAgreementID == null);
+				data.splice(defaultProductIndex, 1);
+			}
+		});
+	});
+
     srv.before('CREATE', 'DistributionAgreements', async (req) => {
         const { StartDate, Type, Value, PRODUCTPACKID } = req.data;
         !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
@@ -366,12 +377,13 @@ module.exports = (srv) => {
         !Value && req.error({code: 400, message: 'Distribution Arrangement is required', target: 'Value'});
 
 		//check if dates are correct
-		if(req.data.CurrentStartDate && moment(req.data.StartDate).isSame(req.data.CurrentStartDate))
+		if(req.data.CurrentStartDate &&( moment(req.data.StartDate).isSame(req.data.CurrentStartDate) || moment(req.data.StartDate).isBefore(req.data.CurrentStartDate)))
 			req.error({ code: 404, message: "The contract start date of the new agreement should not be the same as the start date of the current agreement", target: "startDate" });
 		
         const currentDistributionAgreementView = await SELECT.one.from(CurrentDistributionAgreementView).where({PRODUCTPACKID: PRODUCTPACKID});
         if (currentDistributionAgreementView) {
 			await UPDATE(CurrentDistributionAgreementView).with ({EndDate: req.data.CurrentEndDate}).where({
+				ID: currentDistributionAgreementView.ID,
 				PRODUCTPACKID: PRODUCTPACKID
 			})
         }

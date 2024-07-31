@@ -142,7 +142,7 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                                 qcPrice.Status = this.validatePriceCondition(qcPrice);
                             }
                             else{
-                                if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
+                                if(qcPrice.CountChecks < 20) qcPrice.CountChecks++;
                                 else qcPrice.Status = "NotInSAP";
                             }
                         }
@@ -162,12 +162,12 @@ module.exports = class PriceConditionQualityControl extends BaseJob {
                                 qcPrice.Status = this.validatePriceCondition(qcPrice);
                             }
                             else{
-                                if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
+                                if(qcPrice.CountChecks < 20) qcPrice.CountChecks++;
                                 else qcPrice.Status = "NotInSAP";
                             }
                         }                           
                     }else{
-                        if(qcPrice.CountChecks < 10) qcPrice.CountChecks++;
+                        if(qcPrice.CountChecks < 20) qcPrice.CountChecks++;
                         else qcPrice.Status = "NotInSAP";
                     }
 
