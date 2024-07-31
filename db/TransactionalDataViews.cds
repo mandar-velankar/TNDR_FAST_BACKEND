@@ -1485,7 +1485,7 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     @Core.Computed: false
     ifnull(priceCondition.AnticipatedYearlyVolumeMainCustomer,1) as AnticipatedYearlyVolumeMainCustomer:Integer,
     @Core.Computed: false
-    priceCondition.AnticipatedYearlyVolumeBranch,
+    ifnull(priceCondition.AnticipatedYearlyVolumeBranch,1) as AnticipatedYearlyVolumeBranch: Integer,
     @Core.Computed: false
     ifnull(priceCondition.Level2Discount2,0) as Level2Discount2:Double,
      @Core.Computed: false
@@ -2471,6 +2471,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.Discount as DISCOUNT,
     priceCondition.GeneralDiscount_Amount, 
     priceCondition.SecondDiscount_Amount,
+    priceCondition.NegotiationPrice,
     product.Results.AwardedPrice,
     offer.OfferStatusTable.STATUS as OfferStatus,
     CASE 
@@ -2528,6 +2529,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.TotalDiscountInvoice,
         priceCondition.GeneralDiscount_Amount, 
         priceCondition.SecondDiscount_Amount,
+        priceCondition.NegotiationPrice,
         offer.OfferStatusTable.STATUS,
         product.Results.Outcome,
         foc.ProductPackId;
@@ -2554,7 +2556,8 @@ inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCo
     standardTenderHistory.TotalDiscountNHI,
     standardTenderHistory.TotalDiscountInvoice,
     standardTenderHistory.GeneralDiscount_Amount,
-    standardTenderHistory.SecondDiscount_Amount
+    standardTenderHistory.SecondDiscount_Amount,
+    standardTenderHistory.NegotiationPrice
 }where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW'
 union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
@@ -2580,7 +2583,8 @@ inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.P
     standardTenderHistory.TotalDiscountNHI,
     standardTenderHistory.TotalDiscountInvoice,
     standardTenderHistory.GeneralDiscount_Amount,
-    standardTenderHistory.SecondDiscount_Amount
+    standardTenderHistory.SecondDiscount_Amount,
+    standardTenderHistory.NegotiationPrice
 }where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW';
 
 entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHistory
@@ -2761,91 +2765,30 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
     and offer.Active = 1
     and pr.Results.Outcome = 'Won';
 
-    entity ZuelligExtractDistinctView as projection on zuelligExtract{
-        TenderID,
-        MAX(createdAt) AS createdAt,
-        OfferID,
-        CountryCode,
-        MAX(CreationDate) AS CreationDate,
-        SubmittedBy,
-        SubmittedOn,
-        UserName,
+    entity maxCreationDateView as select from zuelligExtract {
+        key TenderID,
+        key OfferID,
+        InstituteID, 
         ProductCode,
-        InstituteName,
-        InstituteType,
-        InstituteID,
-        External_InstituteId,
-        ParentInst_External_InstituteId,
-        Class,
-        KAM_Territory,
-        CNPJ,
-        ParentInstituteID,
-        EffectiveDate,
-        PRODUCTPACKNAME,
-        PACKFACTOR,
-        SKUCode,
-        Display,
-        BU,
-        Price0,
-        Price1,
-        Price2,
-        Price3,
-        TotalDiscountNHI,
-        Level2Discount1,
-        Level2Discount2,
-        Level3Discount1,
-        GeneralDiscount_Amount,
-        SecondDiscount_Amount,
-        FreeGoods_Amount,
-        FreeGoods_Percentage,
-        AnnualDiscount_Percentage,
-        AnnualDiscountForBranch,
-        RegisteredPrice,
-        Status,
-        BranchInstitute,
-        SORTER 
-    }group by 
-        TenderID,
-        createdAt,
+        MAX(CreationDate) over (partition by InstituteID, ProductCode ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc)  as maxCreationDate
+    }group by TenderID,
         OfferID,
-        CountryCode,
-        SubmittedBy,
-        SubmittedOn,
-        UserName,
+        InstituteID, 
         ProductCode,
-        InstituteName,
-        InstituteType,
-        InstituteID,
-        External_InstituteId,
-        ParentInst_External_InstituteId,
-        Class,
-        KAM_Territory,
-        CNPJ,
-        ParentInstituteID,
-        EffectiveDate,
-        PRODUCTPACKNAME,
-        PACKFACTOR,
-        SKUCode,
-        Display,
-        BU,
-        Price0,
-        Price1,
-        Price2,
-        Price3,
-        TotalDiscountNHI,
-        Level2Discount1,
-        Level2Discount2,
-        Level3Discount1,
-        GeneralDiscount_Amount,
-        SecondDiscount_Amount,
-        FreeGoods_Amount,
-        FreeGoods_Percentage,
-        AnnualDiscount_Percentage,
-        AnnualDiscountForBranch,
-        RegisteredPrice,
-        Status,
-        BranchInstitute,
-        SORTER 
+        CreationDate;
+
+    entity ZuelligExtractDistinctView as select from zuelligExtract as extract
+        inner join maxCreationDateView as maxCreationDateView 
+            ON extract.InstituteID = maxCreationDateView.InstituteID 
+            and extract.ProductCode = maxCreationDateView.ProductCode 
+            AND extract.CreationDate = maxCreationDateView.maxCreationDate
+            and extract.OfferID = maxCreationDateView.OfferID {
+                *,
+                key extract.TenderID,
+                key extract.OfferID,
+                extract.InstituteID, 
+                extract.ProductCode
+    };
     
     entity ZuelligExtractView as projection on ZuelligExtractDistinctView {
         *,

@@ -1764,15 +1764,16 @@ module.exports = async (srv) => {
 				CountryCode: req.data.CountryCode,
 				Level1Discount1: req.data.Discount,
 				NetOfferPrice: req.data.OfferPrice,
-				Price2: req.data.NetPrice,
+				Price2: req.data.OfferPrice,
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
 				Discount: req.data.Discount,
+				Price3: req.data.NetPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Tax: req.data.Tax,
 				Price1: req.data.OfferPrice, 
-				Level2Discount1: req.data.Deductions,
+				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"Price" : {
@@ -1783,18 +1784,20 @@ module.exports = async (srv) => {
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
 				Discount: req.data.Discount,
-				Price2: req.data.NetPrice,
+				Price3: req.data.NetPrice,
+				Price2: req.data.OfferPrice,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				Tax: req.data.Tax,
 				Price1: req.data.OfferPrice, 
-				Level2Discount1: req.data.Deductions,
+				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"PriceWithFOC" : {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
-				Price2: req.data.Discount,
+				Level1Discount1: req.data.Discount,
+				Price2: req.data.NetOfferPrice,
 				NetOfferPrice: req.data.NetOfferPrice,
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
@@ -1824,7 +1827,7 @@ module.exports = async (srv) => {
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
-			"TaiwanPrice": {
+			"TaiwanContractPrice": {
 				Price0: req.data.BasePrice,
 				CountryCode: req.data.CountryCode,
 				Level2Discount1:req.data.Deductions,
@@ -1852,21 +1855,21 @@ module.exports = async (srv) => {
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
 				PriceConditionClassification_ID: req.data.ClassificationID,
-				CurrentBasePrice: productCurrentPrice && productCurrentPrice.Price0,
-				CurrentInvoicePrice: productCurrentPrice && productCurrentPrice.Price1,
-				CurrentGeneralDiscount: productCurrentPrice && productCurrentPrice.Level2Discount1,
-				CurrentGeneralDiscount_Amount: productCurrentPrice && productCurrentPrice.GeneralDiscount_Amount,
-				CurrentSecondDiscount: productCurrentPrice && productCurrentPrice.Level2Discount2,
-				CurrentSecondlDiscount_Amount: productCurrentPrice && productCurrentPrice.SecondDiscount_Amount,
-				CurrentNetOfferPrice: productCurrentPrice && productCurrentPrice.Price2,
-				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice && productCurrentPrice.AnnualDiscountForBranch,
-				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice && productCurrentPrice.Level3Discount1,
-				CurrentNetPrice: productCurrentPrice && productCurrentPrice.Price3,
-				CurrentNegotiationPrice: productCurrentPrice && productCurrentPrice.AwardedPrice,
-				CurrentTotalYearlyValueMainCustomer: productCurrentPrice && productCurrentPrice.TotalYearlyValueMainCustomer,
-				CurrentTotalYearlyValueBranch: productCurrentPrice && productCurrentPrice.TotalYearlyValueBranch,
-				CurrentTotalDiscountNHI: productCurrentPrice && productCurrentPrice.TotalDiscountNHI,
-				CurrentTotalDiscountInvoice: productCurrentPrice && productCurrentPrice.TotalDiscountInvoice
+				CurrentBasePrice: productCurrentPrice?.Price0 || 0,
+				CurrentInvoicePrice: productCurrentPrice?.Price1 || 0,
+				CurrentGeneralDiscount: productCurrentPrice?.Level2Discount1 || 0,
+				CurrentGeneralDiscount_Amount: productCurrentPrice?.GeneralDiscount_Amount || 0,
+				CurrentSecondDiscount: productCurrentPrice?.Level2Discount2 || 0,
+				CurrentSecondlDiscount_Amount: productCurrentPrice?.SecondDiscount_Amount || 0,
+				CurrentNetOfferPrice: productCurrentPrice?.Price2 || 0,
+				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice?.AnnualDiscountForBranch || 0,
+				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice?.Level3Discount1 || 0,
+				CurrentNetPrice: productCurrentPrice?.Price3 || 0,
+				CurrentNegotiationPrice: productCurrentPrice?.NegotiationPrice || 0,
+				CurrentTotalYearlyValueMainCustomer: productCurrentPrice?.TotalYearlyValueMainCustomer || 0,
+				CurrentTotalYearlyValueBranch: productCurrentPrice?.TotalYearlyValueBranch || 0,
+				CurrentTotalDiscountNHI: productCurrentPrice?.TotalDiscountNHI || 0,
+				CurrentTotalDiscountInvoice: productCurrentPrice?.TotalDiscountInvoice || 0
 			},
 			"TaiwanDiscount": {
 				Price0: req.data.BasePrice,
@@ -1896,21 +1899,21 @@ module.exports = async (srv) => {
     			FreeGoods_Amount: (req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)),
     			FreeGoods_Percentage: ((req.data.NetPrice - req.data.OfferPrice *  (1 - req.data.Deductions - req.data.Level2Discount2)) / req.data.OfferPrice),
 				PriceConditionClassification_ID: req.data.ClassificationID,
-				CurrentBasePrice: productCurrentPrice && productCurrentPrice.Price0,
-				CurrentInvoicePrice: productCurrentPrice && productCurrentPrice.Price1,
-				CurrentGeneralDiscount: productCurrentPrice && productCurrentPrice.Level2Discount1,
-				CurrentGeneralDiscount_Amount: productCurrentPrice && productCurrentPrice.GeneralDiscount_Amount,
-				CurrentSecondDiscount: productCurrentPrice && productCurrentPrice.Level2Discount2,
-				CurrentSecondlDiscount_Amount: productCurrentPrice && productCurrentPrice.SecondDiscount_Amount,
-				CurrentNetOfferPrice: productCurrentPrice && productCurrentPrice.Price2,
-				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice && productCurrentPrice.AnnualDiscountForBranch,
-				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice && productCurrentPrice.Level3Discount1,
-				CurrentNetPrice: productCurrentPrice && productCurrentPrice.Price3,
-				CurrentNegotiationPrice: productCurrentPrice && productCurrentPrice.AwardedPrice,
-				CurrentTotalYearlyValueMainCustomer: productCurrentPrice && productCurrentPrice.TotalYearlyValueMainCustomer,
-				CurrentTotalYearlyValueBranch: productCurrentPrice && productCurrentPrice.TotalYearlyValueBranch,
-				CurrentTotalDiscountNHI: productCurrentPrice && productCurrentPrice.TotalDiscountNHI,
-				CurrentTotalDiscountInvoice: productCurrentPrice && productCurrentPrice.TotalDiscountInvoice
+				CurrentBasePrice: productCurrentPrice?.Price0 || 0,
+				CurrentInvoicePrice: productCurrentPrice?.Price1 || 0,
+				CurrentGeneralDiscount: productCurrentPrice?.Level2Discount1 || 0,
+				CurrentGeneralDiscount_Amount: productCurrentPrice?.GeneralDiscount_Amount || 0,
+				CurrentSecondDiscount: productCurrentPrice?.Level2Discount2 || 0,
+				CurrentSecondlDiscount_Amount: productCurrentPrice?.SecondDiscount_Amount || 0,
+				CurrentNetOfferPrice: productCurrentPrice?.Price2 || 0,
+				CurrentAnnualDiscount_Amount_Branch: productCurrentPrice?.AnnualDiscountForBranch || 0,
+				CurrentAnnualDiscount_Amount_Per_Unit: productCurrentPrice?.Level3Discount1 || 0,
+				CurrentNetPrice: productCurrentPrice?.Price3 || 0,
+				CurrentNegotiationPrice: productCurrentPrice?.NegotiationPrice || 0,
+				CurrentTotalYearlyValueMainCustomer: productCurrentPrice?.TotalYearlyValueMainCustomer || 0,
+				CurrentTotalYearlyValueBranch: productCurrentPrice?.TotalYearlyValueBranch || 0,
+				CurrentTotalDiscountNHI: productCurrentPrice?.TotalDiscountNHI || 0,
+				CurrentTotalDiscountInvoice: productCurrentPrice?.TotalDiscountInvoice || 0
 			}
 		}
 
@@ -4701,7 +4704,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		const mappings = {
 			"Discount" : {
 				NetOfferPrice: req.data.OfferPrice,
-				Price2: req.data.NetPrice,
+				Price2: req.data.OfferPrice,
+				Price3: req.data.NetPrice,
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
 				Price1: req.data.OfferPrice
@@ -4709,14 +4713,16 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			"Price" : {
 				NetOfferPrice: req.data.OfferPrice,
 				NetPrice: req.data.NetPrice,
+				Price3: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
-				Price2: req.data.NetPrice,
+				Price2: req.data.OfferPrice,
 				Price1: req.data.OfferPrice
 			},
 			"PriceWithFOC" : {
 				NetOfferPrice: req.data.NetofferPrice,
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
+				Price2: req.data.NetofferPrice,
 				Price3: req.data.NetPrice,
 				Price1: req.data.OfferPrice
 			},
@@ -4725,9 +4731,10 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				NetPrice: req.data.NetPrice,
 				OfferPrice: req.data.OfferPrice,
 				Price2: req.data.NetofferPrice,
-				Price3: req.data.NetPrice
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice
 			},
-			"TaiwanPrice": {
+			"TaiwanContractPrice": {
 				Price2: req.data.NetofferPrice,
 				Price3: req.data.NetPrice,
 				Price1: req.data.OfferPrice, 
