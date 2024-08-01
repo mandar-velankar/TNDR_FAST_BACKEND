@@ -1001,3 +1001,13 @@ entity WholesalePurchasePriceApprovals: cuid, managed {
 	SenderComment: String;
 	WholesalePurchasePrice: Association to WholesalePurchasePrice;
 }
+
+entity WholesalePurchasePriceApproverTypes: cuid, managed{
+	WholesalePurchasePriceApproverTypes: String;
+}
+
+entity WholesalePurchasePriceApprovers: cuid, managed{
+	WholesalePurchasePriceApproverTypes: String;
+	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverEmailID: String;
+}
