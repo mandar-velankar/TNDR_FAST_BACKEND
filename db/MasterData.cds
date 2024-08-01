@@ -973,3 +973,41 @@ entity NLPPPApprovals  : cuid, managed {
 	SenderComment: String;
 	NLPPP: Association to NLPPP
 }
+
+entity WholesalePurchasePrice: cuid, managed {
+	CountryCode: String;
+	ProductPackID: Integer;
+	DistributorID: Integer;
+	MaterialNumbers: Integer;
+	Type: String;
+	Margin: String;
+	WPPWithoutTax: Double;
+	StartDate: Date;
+	EndDate: Date;
+	Comment: String;
+	Status: String;
+	ApprovalsCount: Integer;
+	PowerApproverCWID: String;
+	PowerApprovalDate: String;
+	WholesalePurchasePriceApprovals: Association to many WholesalePurchasePriceApprovals on WholesalePurchasePriceApprovals.WholesalePurchasePrice = $self;
+}
+
+entity WholesalePurchasePriceApprovals: cuid, managed {
+	ApproverRole: String;
+	ApprovalStatus: String;
+	ApproverComment: String;
+	ApproverCWID: String;
+	ApprovalDate: Date;
+	SenderComment: String;
+	WholesalePurchasePrice: Association to WholesalePurchasePrice;
+}
+
+entity WholesalePurchasePriceApproverTypes: cuid, managed{
+	WholesalePurchasePriceApproverTypes: String;
+}
+
+entity WholesalePurchasePriceApprovers: cuid, managed{
+	WholesalePurchasePriceApproverTypes: String;
+	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverEmailID: String;
+}
