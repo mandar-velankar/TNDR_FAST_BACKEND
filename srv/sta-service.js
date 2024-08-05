@@ -1834,12 +1834,17 @@ module.exports = async (srv) => {
 		if (existingNLPriceConditions.length > 0) {
 			await Promise.all(req.data.NLPriceConditionType.map(pc => {
 				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
-				return UPDATE(NLPriceConditions)
-				.with(mappedNLPriceCondition)
-				.where({
-					ContractDuration: pc.ContractDuration,
-					PriceCondition_ID: priceCondition.ID
-				});
+				const nlPriceCondIndex = existingNLPriceConditions.findIndex(el => el.ContractDuration == pc.ContractDuration);
+				if (nlPriceCondIndex > -1) {
+					return UPDATE(NLPriceConditions)
+					.with(mappedNLPriceCondition)
+					.where({
+						ContractDuration: pc.ContractDuration,
+						PriceCondition_ID: priceCondition.ID
+					});
+				}else if (nlPriceCondIndex == -1 && pc.ContractDuration) {
+					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+				}
 			}))
 		}else {
 			await Promise.all(req.data.NLPriceConditionType.map(pc => {
@@ -2300,19 +2305,22 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 
 		async function fnMapNlConditions(item){
-			if (item.PriceConditionID) {
-				item.NLPriceConditionType = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: item.PriceConditionID});
-			}else {
-				item.NLPriceConditionType = [];
-				for(let i = 1; i <= 3; i++) {
-					item.NLPriceConditionType.push({
+			const nlPriceConditions = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: item.PriceConditionID});
+			item.NLPriceConditionType = [];
+			for(let i = 1; i <= 3; i++) {
+				const existingCondition = nlPriceConditions.find(el => el.ContractDuration == item[`Custom_Integer_${i}`] && el.ID);
+				if (existingCondition) {
+					item.NLPriceConditionType[i] = existingCondition;
+				}else {
+					item.NLPriceConditionType[i] = {
 						ContractDuration: item[`Custom_Integer_${i}`],
 						OfferPrice: item.OfferPrice,
 						Discount: 0,
 						NetPrice: 0,
-					})
+					}
 				}
 			}
+			item.NLPriceConditionType = item.NLPriceConditionType.filter(el => el);
 			item.NetOfferPrice = await calculateNetOfferPrice(item);
 			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 		};
