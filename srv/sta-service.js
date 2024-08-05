@@ -1860,12 +1860,17 @@ module.exports = async (srv) => {
 		if (existingNLPriceConditions.length > 0) {
 			await Promise.all(req.data.NLPriceConditionType.map(pc => {
 				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
-				return UPDATE(NLPriceConditions)
-				.with(mappedNLPriceCondition)
-				.where({
-					ContractDuration: pc.ContractDuration,
-					PriceCondition_ID: priceCondition.ID
-				});
+				const nlPriceCondIndex = existingNLPriceConditions.findIndex(el => el.ContractDuration == pc.ContractDuration);
+				if (nlPriceCondIndex > -1) {
+					return UPDATE(NLPriceConditions)
+					.with(mappedNLPriceCondition)
+					.where({
+						ContractDuration: pc.ContractDuration,
+						PriceCondition_ID: priceCondition.ID
+					});
+				}else if (nlPriceCondIndex == -1 && pc.ContractDuration) {
+					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+				}
 			}))
 		}else {
 			await Promise.all(req.data.NLPriceConditionType.map(pc => {
@@ -2365,19 +2370,22 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 
 		async function fnMapNlConditions(item){
-			if (item.PriceConditionID) {
-				item.NLPriceConditionType = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: item.PriceConditionID});
-			}else {
-				item.NLPriceConditionType = [];
-				for(let i = 1; i <= 3; i++) {
-					item.NLPriceConditionType.push({
+			const nlPriceConditions = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: item.PriceConditionID});
+			item.NLPriceConditionType = [];
+			for(let i = 1; i <= 3; i++) {
+				const existingCondition = nlPriceConditions.find(el => el.ContractDuration == item[`Custom_Integer_${i}`] && el.ID);
+				if (existingCondition) {
+					item.NLPriceConditionType[i] = existingCondition;
+				}else {
+					item.NLPriceConditionType[i] = {
 						ContractDuration: item[`Custom_Integer_${i}`],
 						OfferPrice: item.OfferPrice,
 						Discount: 0,
 						NetPrice: 0,
-					})
+					}
 				}
 			}
+			item.NLPriceConditionType = item.NLPriceConditionType.filter(el => el);
 			item.NetOfferPrice = await calculateNetOfferPrice(item);
 			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 		};
@@ -4126,16 +4134,15 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
 				AlternateOfferYN: offerProduct.AlternateOfferYN,
-				ContractDuration_1: productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.ContractDuration,
-				ContractDuration_2: productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.ContractDuration,
-				ContractDuration_3: productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.ContractDuration,
-				OfferPrice_1: productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.OfferPrice,
-				OfferPrice_2: productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.OfferPrice,
-				OfferPrice_3: productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.OfferPrice,
-				Discount_1: productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.Discount,
-				Discount_2: productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.Discount,
-				Discount_3: productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.Discount,
-				FOCInfoText: FOCInfoText,
+				ContractDuration_1: (productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.ContractDuration) || null,
+				ContractDuration_2: (productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.ContractDuration) || null,
+				ContractDuration_3: (productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.ContractDuration) || null,
+				OfferPrice_1: (productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.OfferPrice) || null,
+				OfferPrice_2: (productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.OfferPrice) || null,
+				OfferPrice_3: (productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.OfferPrice) || null,
+				Discount_1: (productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.Discount) || null,
+				Discount_2: (productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.Discount) || null,
+				Discount_3: (productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.Discount) || null,
 				NLPriceConditionType: priceConditionClassification && priceConditionClassification.ConditionType.replace(/^NL/, ''),
 				Product_Custom_Integer_1: productDistributorInfo?.Custom_Integer_1,
 				Product_Custom_Integer_2: productDistributorInfo?.Custom_Integer_2,
