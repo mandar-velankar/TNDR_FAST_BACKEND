@@ -228,4 +228,5 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity DistributionAgreements as projection on MasterData.DistributionAgreements;
     entity DistributionAgreement as projection on MasterDataViews.DistributionAgreementsView;
     entity CurrentDistributionAgreementView as projection on MasterDataViews.CurrentDistributionAgreementView;
+    entity WholesalePurchasePriceView as projection on MasterDataViews.WholesalePurchasePriceView;
 }

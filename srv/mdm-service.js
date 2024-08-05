@@ -369,7 +369,17 @@ module.exports = (srv) => {
 			}
 		});
 	});
-
+	srv.after('READ', 'WholesalePurchasePriceView', async (data) => {
+		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
+		countryProducts.forEach(item => {
+			const filteredData = data.filter(purchaseprice => purchaseprice.PRODUCTPACKID == item.PRODUCTPACKID);
+			if (filteredData.length > 1) {
+				const defaultProductIndex = data.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.WholesalePurchasePriceID == null);
+				defaultProductIndex > -1 && data.splice(defaultProductIndex, 1);
+			}
+		});
+		
+	});
     srv.before('CREATE', 'DistributionAgreements', async (req) => {
         const { StartDate, Type, Value, PRODUCTPACKID } = req.data;
         !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
