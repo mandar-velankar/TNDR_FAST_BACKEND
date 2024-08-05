@@ -5576,11 +5576,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	const mapNotificationData = function (template, offerInformation,offerValidation,url) {
 		
 		const data = {
-			OfferID : offerInformation.OfferID,
-			InstituteName : offerInformation.InstituteName,
-			TenderReference : offerInformation.TenderName,
-			ContractStartDate : offerValidation.EffectiveDate,
-			ContractEndDate : offerValidation.ExpiryDate,
+			offerInformation: offerInformation,
+			offerValidation: offerValidation,
 			DirectURLToOffer : url
 		}
 		
