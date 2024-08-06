@@ -478,7 +478,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
 	left join MasterData.WholesalePurchasePrice as wholesalepp
 		on wholesalepp.CountryCode = ctprdpck.COUNTRYCODE
-		and wholesalepp.ProductPackID = ctprdpck.PRODUCTPACKID
+		and wholesalepp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	inner join DistributionAgreementMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
 	left join MasterData.NLPPP as nlppp
