@@ -976,7 +976,7 @@ entity NLPPPApprovals  : cuid, managed {
 
 entity WholesalePurchasePrice: cuid, managed {
 	CountryCode: String;
-	ProductPackID: Integer;
+	PRODUCTPACKIDAdding and Saving a new wholesaler Price: Integer;
 	DistributorID: Integer;
 	MaterialNumbers: Integer;
 	Type: String;
