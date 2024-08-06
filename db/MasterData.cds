@@ -1004,10 +1004,11 @@ entity WholesalePurchasePriceApprovals: cuid, managed {
 
 entity WholesalePurchasePriceApproverTypes: cuid, managed{
 	WholesalePurchasePriceApproverTypes: String;
+	WholesalePurchasePriceApprovers: Association to WholesalePurchasePriceApprovers;
 }
 
-entity WholesalePurchasePriceApprovers: cuid, managed{
-	WholesalePurchasePriceApproverTypes: String;
+entity WholesalePurchasePriceApprovers: cuid, managed{	
 	WholesalePurchasePriceApproverName: String;
 	WholesalePurchasePriceApproverEmailID: String;
+	WholesalePurchasePriceApproverTypes: Association to many WholesalePurchasePriceApproverTypes on WholesalePurchasePriceApproverTypes.WholesalePurchasePriceApprovers = $self;
 }
