@@ -980,8 +980,8 @@ entity WholesalePurchasePrice: cuid, managed {
 	DistributorID: Integer;
 	MaterialNumbers: Integer;
 	Type: String;
-	Margin: String;
-	WPPWithoutTax: Double;
+	Margin: Double;
+	WPPWithoutTax: Decimal;
 	StartDate: Date;
 	EndDate: Date;
 	Comment: String;
