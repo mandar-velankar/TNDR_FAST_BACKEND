@@ -405,6 +405,7 @@ module.exports = (srv) => {
 	srv.on('ApproveWPP', async (req, res) => {
 		try {
 			const { data: { ID, ProductCode }} = req;
+			if (!ID) throw Error('Wholesale Purchase Price not found');
 
 			const mappedWpp = {
 				Status: 'Approved',
@@ -413,10 +414,10 @@ module.exports = (srv) => {
 			}; 
 
 			await UPDATE(WholesalePurchasePrices).with(mappedWpp).where({
-				ID: IDs
+				ID: ID
 			});
 
-			return 'Wholesaler Purcahse Price approved successfully';
+			return 'Wholesale Purcahse Price approved successfully';
 		} catch (error) {
 			console.error('Error in ApproveWPP');
             return req.reject(403, error?.message||"Error in ApproveWPP");

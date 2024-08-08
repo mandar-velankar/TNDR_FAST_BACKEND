@@ -127,8 +127,8 @@
       "description": "f_tndr_cag_standardtenderlimitedpricingtabaccess_user"
     },
     {
-      "name": "$XSAPPNAME.f_tndr_cag_wppexclusiveaccess_user",
-      "description": "f_tndr_cag_wppexclusiveaccess_user"
+      "name": "$XSAPPNAME.f_tndr_cag_wpppowerapproveraccess_user",
+      "description": "f_tndr_cag_wpppowerapproveraccess_user"
     }
   ],
   "attributes": [],
@@ -366,10 +366,10 @@
       "attribute-references": []
     },
     {		  
-      "name": "f_tndr_cag_wppexclusiveaccess_user",
+      "name": "f_tndr_cag_wpppowerapproveraccess_user",
       "description": "generated",
       "scope-references": [
-        "$XSAPPNAME.f_tndr_cag_wppexclusiveaccess_user"
+        "$XSAPPNAME.f_tndr_cag_wpppowerapproveraccess_user"
       ],
       "attribute-references": []
     }
