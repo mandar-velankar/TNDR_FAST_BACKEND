@@ -2785,7 +2785,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         inner join maxCreationDateView as maxCreationDateView 
             ON extract.InstituteID = maxCreationDateView.InstituteID 
             and extract.ProductCode = maxCreationDateView.ProductCode 
-            AND extract.CreationDate = maxCreationDateView.maxCreationDate
+            AND extract.ResultModifiedAt = maxCreationDateView.maxCreationDate
             and extract.OfferID = maxCreationDateView.OfferID {
                 *,
                 key extract.TenderID,
@@ -2798,7 +2798,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         *,
         case 
             when BranchInstitute <> ''
-                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc) 
+                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY ResultModifiedAt desc, OfferID desc, InstituteID desc, ProductCode desc) 
                 else SORTER + 1
         end	as CountProducts: Integer,
     };
