@@ -3152,6 +3152,8 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
             offer.CreationDate,
             offer.SubmittedBy,
             pr.Results.SubmittedOn,
+            pr.Results.createdAt as ResultCreatedAt,
+            pr.Results.modifiedAt as ResultModifiedAt,
             CreatedByUser.UserName,
             pr.ProductCode,
             pr.SORTER,
@@ -3238,6 +3240,8 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
             offer.CreationDate,
             offer.SubmittedBy,
             pr.Results.SubmittedOn,
+            pr.Results.createdAt as ResultCreatedAt,
+            pr.Results.modifiedAt as ResultModifiedAt,
             CreatedByUser.UserName,
             pr.ProductCode,
             pr.SORTER,
@@ -3289,7 +3293,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         key OfferID,
         InstituteID, 
         ProductCode,
-        MAX(CreationDate) over (partition by InstituteID, ProductCode ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc)  as maxCreationDate
+        MAX(ResultModifiedAt) over (partition by InstituteID, ProductCode ORDER BY ResultModifiedAt desc, OfferID desc, InstituteID desc, ProductCode desc)  as maxCreationDate
     }group by TenderID,
         OfferID,
         InstituteID, 
