@@ -988,7 +988,7 @@ entity WholesalePurchasePrice: cuid, managed {
 	Status: String;
 	ApprovalsCount: Integer;
 	PowerApproverCWID: String;
-	PowerApprovalDate: String;
+	PowerApprovalDate: DateTime;
 	WholesalePurchasePriceApprovals: Association to many WholesalePurchasePriceApprovals on WholesalePurchasePriceApprovals.WholesalePurchasePrice = $self;
 }
 

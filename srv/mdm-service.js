@@ -25,6 +25,9 @@ module.exports = (srv) => {
 		ExcelUpload
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
+	const {
+		WholesalePurchasePrices
+	} = cds.entities("MasterDataManagementService");
 
 
 
@@ -398,5 +401,26 @@ module.exports = (srv) => {
 			})
         }
     });
- 
+
+	srv.on('ApproveWPP', async (req, res) => {
+		try {
+			const { data: { ID, ProductCode }} = req;
+
+			const mappedWpp = {
+				Status: 'Approved',
+				PowerApproverCWID: req.user.id,
+				PowerApprovalDate: new Date()
+			}; 
+
+			await UPDATE(WholesalePurchasePrices).with(mappedWpp).where({
+				ID: IDs
+			});
+
+			return 'Wholesaler Purcahse Price approved successfully';
+		} catch (error) {
+			console.error('Error in ApproveWPP');
+            return req.reject(403, error?.message||"Error in ApproveWPP");
+		}
+	});
+	
 };
