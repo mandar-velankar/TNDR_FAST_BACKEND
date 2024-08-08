@@ -3298,7 +3298,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         OfferID,
         InstituteID, 
         ProductCode,
-        CreationDate;
+        ResultModifiedAt;
 
     entity ZuelligExtractDistinctView as select from zuelligExtract as extract
         inner join maxCreationDateView as maxCreationDateView 
