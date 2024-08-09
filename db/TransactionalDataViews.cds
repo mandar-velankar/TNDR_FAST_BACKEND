@@ -2633,6 +2633,8 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
             offer.CreationDate,
             offer.SubmittedBy,
             pr.Results.SubmittedOn,
+            pr.Results.createdAt as ResultCreatedAt,
+            pr.Results.modifiedAt as ResultModifiedAt,
             CreatedByUser.UserName,
             pr.ProductCode,
             pr.SORTER,
@@ -2719,6 +2721,8 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
             offer.CreationDate,
             offer.SubmittedBy,
             pr.Results.SubmittedOn,
+            pr.Results.createdAt as ResultCreatedAt,
+            pr.Results.modifiedAt as ResultModifiedAt,
             CreatedByUser.UserName,
             pr.ProductCode,
             pr.SORTER,
@@ -2770,18 +2774,18 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         key OfferID,
         InstituteID, 
         ProductCode,
-        MAX(CreationDate) over (partition by InstituteID, ProductCode ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc)  as maxCreationDate
+        MAX(ResultModifiedAt) over (partition by InstituteID, ProductCode ORDER BY ResultModifiedAt desc, OfferID desc, InstituteID desc, ProductCode desc)  as maxCreationDate
     }group by TenderID,
         OfferID,
         InstituteID, 
         ProductCode,
-        CreationDate;
+        ResultModifiedAt;
 
     entity ZuelligExtractDistinctView as select from zuelligExtract as extract
         inner join maxCreationDateView as maxCreationDateView 
             ON extract.InstituteID = maxCreationDateView.InstituteID 
             and extract.ProductCode = maxCreationDateView.ProductCode 
-            AND extract.CreationDate = maxCreationDateView.maxCreationDate
+            AND extract.ResultModifiedAt = maxCreationDateView.maxCreationDate
             and extract.OfferID = maxCreationDateView.OfferID {
                 *,
                 key extract.TenderID,
@@ -2794,7 +2798,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         *,
         case 
             when BranchInstitute <> ''
-                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc) 
+                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY ResultModifiedAt desc, OfferID desc, InstituteID desc, ProductCode desc) 
                 else SORTER + 1
         end	as CountProducts: Integer,
     };
