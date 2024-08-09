@@ -14,7 +14,9 @@ module.exports = (srv) => {
     PT_TMCTLE,
 	PT_TMSKUPRDPCK,
 	PT_TMREGPR,
-	SalesData
+	SalesData,
+	WholesalePurchasePriceApprovals,
+	WholesalePurchasePriceApproverTypes
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
     const{
@@ -372,6 +374,39 @@ module.exports = (srv) => {
 			}
 		});
 	});
+
+	srv.on('CREATE', 'WholesalePurchasePriceApprovals', async (req) => {
+		try{
+			await upsertWholesalePurchasePriceApprovals(req);
+			return req.data;
+		}
+		catch(error){
+			console.error('Error in WholesalePurchasePriceApprovals CREATE');
+			return req.reject(403, error?.message||"Error in WholesalePurchasePriceApprovals CREATE");
+		}
+	});
+
+	const upsertWholesalePurchasePriceApprovals = async function(req){
+		const approvalsType = await SELECT.one.from(WholesalePurchasePriceApproverTypes);
+		let approvals = [];
+		let approvalObject = {
+			ApproverRole: null,
+			ApprovalStatus: req.data.ApprovalStatus,
+			ApproverComment: null,
+			ApproverCWID: null,
+			ApprovalDate: null,
+			SenderComment: null,
+			WholesalePurchasePrice_ID: req.data.WholesalePurchasePrice_ID
+		};
+
+		for (let i = 0; i < approvalsType.WholesalePurchasePriceApproverTypes; i++) {
+			approvals.push({...approvalObject});
+		}
+
+		await INSERT(approvals).into(WholesalePurchasePriceApprovals);
+	}
+
+
 	srv.after('READ', 'WholesalePurchasePriceView', async (data) => {
 		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
 		countryProducts.forEach(item => {
