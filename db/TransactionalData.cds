@@ -742,7 +742,7 @@ entity PT_TMTNOFST {
         Date        : Date;
 }
 
-entity PT_TMTRRES {
+entity PT_TMTRRES: managed {
         TenderID          : String(50);
     key OfferID           : String(30) not null;
         CountryCode       : String;
