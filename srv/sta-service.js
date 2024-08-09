@@ -507,7 +507,7 @@ module.exports = async (srv) => {
             tmvQuery.columns(req.query.SELECT.columns);
         }
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
-		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode'); 
+		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
         req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
 
