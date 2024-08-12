@@ -980,10 +980,15 @@ entity WholesalePurchasePrice: cuid, managed {
 	DistributorID: Integer;
 	MaterialNumbers: Integer;
 	Type: String;
+	CurrentType: String;
 	Margin: Double;
+	CurrentMargin: Double;
 	WPPWithoutTax: Decimal;
+	CurrentWPPWithoutTax: Decimal;
+	CurrentStartDate: Date;
 	StartDate: Date;
 	EndDate: Date;
+	CurrentEndDate: Date;
 	Comment: String;
 	Status: String;
 	ApprovalsCount: Integer;

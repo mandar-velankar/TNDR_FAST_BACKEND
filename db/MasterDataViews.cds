@@ -497,14 +497,18 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         wholesalepp.DistributorID,
         materialNumbers.MaterialNumbers,
         wholesalepp.StartDate,
+        wholesalepp.CurrentStartDate,
         wholesalepp.EndDate,
+        wholesalepp.CurrentEndDate,
         wholesalepp.Type,
+        wholesalepp.CurrentType,
         wholesalepp.createdAt,
         case 
             when wholesalepp.Type = 'Margin'
 				then wholesalepp.Margin
             else (nlppp.PPP - wholesalepp.WPPWithoutTax) / nlppp.PPP
         end as Margin: Double,
+		wholesalepp.CurrentMargin,
         wholesalepp.PowerApproverCWID,
         wholesalepp.PowerApprovalDate,
 		case 
@@ -512,6 +516,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 				then wholesalepp.WPPWithoutTax
 			else nlppp.PPP * (1 - wholesalepp.Margin)
 		end as WPPWithoutTax : Double,
+		wholesalepp.CurrentWPPWithoutTax,
         wholesalepp.Status,
 		ctryCurrency.Currency,
         wholesalepp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String
@@ -540,14 +545,29 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         null as DistributorID,
         materialNumbers.MaterialNumbers,
         null as StartDate,
+        null as CurrentStartDate,
         null as EndDate,
+        null as CurrentEndDate,
         null as Type,
+        null as CurrentType,
         null as createdAt,
         null as Margin,
+		null as CurrentMargin,
         null as PowerApproverCWID,
         null as PowerApprovalDate,
         null as WPPWithoutTax,
+		null as CurrentWPPWithoutTax,
         null as Status,
 		ctryCurrency.Currency,
         null as ApprovalsCount,
 } where ctprdpck.COUNTRYCODE = 'NL';
+
+entity CurrentWholesalePurchasePriceView as select from MasterData.WholesalePurchasePrice{
+	key ID,
+    key PRODUCTPACKID,
+    StartDate,
+    EndDate,
+    Type,
+    Margin,
+	WPPWithoutTax
+}where EndDate = '9999-12-31';

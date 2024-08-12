@@ -20,7 +20,8 @@ module.exports = (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
     const{
-        CurrentDistributionAgreementView
+        CurrentDistributionAgreementView,
+		CurrentWholesalePurchasePriceView
 	}= cds.entities("com.bayer.SXTENDER.MasterDataViews")
 
 	const {
@@ -436,7 +437,25 @@ module.exports = (srv) => {
 			})
         }
     });
+    srv.before('CREATE', 'WholesalePurchasePrices', async (req) => {
+        const { StartDate, Type, PRODUCTPACKID,Margin , WPPWithoutTax } = req.data;
+        !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
+        !Type && req.error({code: 400, message: 'Type is required', target: 'Type'});
+        !Margin && req.error({code: 400, message: 'Margin is required', target: 'Margin'});
+        !WPPWithoutTax && req.error({code: 400, message: 'WPP Without Tax is required', target: 'WPPWithoutTax'});
 
+		//check if dates are correct
+		if(req.data.CurrentStartDate &&( moment(req.data.StartDate).isSame(req.data.CurrentStartDate) || moment(req.data.StartDate).isBefore(req.data.CurrentStartDate)))
+			req.error({ code: 404, message: "The contract start date of the new agreement should not be the same as the start date of the current agreement", target: "startDate" });
+		
+        const currentWholesalePurchasePriceView = await SELECT.one.from(CurrentWholesalePurchasePriceView).where({PRODUCTPACKID: PRODUCTPACKID});
+        if (currentWholesalePurchasePriceView) {
+			await UPDATE(CurrentWholesalePurchasePriceView).with ({EndDate: req.data.CurrentEndDate}).where({
+				ID: currentWholesalePurchasePriceView.ID,
+				PRODUCTPACKID: PRODUCTPACKID
+			})
+        }
+    });
 	srv.on('ApproveWPP', async (req, res) => {
 		try {
 			const { data: { ID, ProductCode }} = req;
