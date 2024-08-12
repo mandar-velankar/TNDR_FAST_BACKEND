@@ -503,19 +503,11 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         wholesalepp.Type,
         wholesalepp.CurrentType,
         wholesalepp.createdAt,
-        case 
-            when wholesalepp.Type = 'Margin'
-				then wholesalepp.Margin
-            else (nlppp.PPP - wholesalepp.WPPWithoutTax) / nlppp.PPP
-        end as Margin: Double,
+		wholesalepp.Margin,
 		wholesalepp.CurrentMargin,
         wholesalepp.PowerApproverCWID,
         wholesalepp.PowerApprovalDate,
-		case 
-			when wholesalepp.Type = 'Net Price'
-				then wholesalepp.WPPWithoutTax
-			else nlppp.PPP * (1 - wholesalepp.Margin)
-		end as WPPWithoutTax : Double,
+		wholesalepp.WPPWithoutTax,
 		wholesalepp.CurrentWPPWithoutTax,
         wholesalepp.Status,
 		ctryCurrency.Currency,
