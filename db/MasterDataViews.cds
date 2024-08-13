@@ -4,6 +4,7 @@ using { User, Country, managed } from '@sap/cds/common';
 using { com.bayer.SXTENDER.MasterData } from './MasterData';
 using { com.bayer.SXTENDER.MasterData.SAP } from './SAP';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
+using { com.bayer.SXTENDER.AdminData } from './AdminData';
 
 entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK as sku {
 	sku.ProductPackID,
@@ -565,3 +566,21 @@ entity CurrentWholesalePurchasePriceView as select from MasterData.WholesalePurc
     Margin,
 	WPPWithoutTax
 }where EndDate = '9999-12-31';
+
+entity WholesalePurchasePriceApprovals as select from MasterData.WholesalePurchasePriceApprovals as wppapprovals
+	left join AdminData.PT_TMUSER as user
+		on user.UserID = wppapprovals.ApproverCWID{
+	wppapprovals.ID,		
+	wppapprovals.ApproverRole,
+	wppapprovals.ApprovalStatus,
+	wppapprovals.ApproverComment,
+	wppapprovals.ApproverCWID,
+	wppapprovals.ApprovalDate,
+	wppapprovals.SenderComment,
+	wppapprovals.createdAt,
+	wppapprovals.createdBy,
+	wppapprovals.modifiedAt,
+	wppapprovals.modifiedBy,
+	wppapprovals.WholesalePurchasePrice.ID as WholesalePurchasePrice_ID,
+	user.UserName
+};
