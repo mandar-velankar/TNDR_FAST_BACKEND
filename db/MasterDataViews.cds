@@ -493,7 +493,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         prdpck.PRESENTATION,
         prdpck.Bundle,
 		prdpck.OuterCarton,
-		nlppp.PPP,
+		ifnull(nlppp.PPP, 0) as PPP: Double,
         wholesalepp.DistributorID,
         materialNumbers.MaterialNumbers,
         wholesalepp.StartDate,
@@ -511,7 +511,8 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 		wholesalepp.CurrentWPPWithoutTax,
         wholesalepp.Status,
 		ctryCurrency.Currency,
-        wholesalepp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String
+        wholesalepp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
+		wholesalepp.Comment
 } where ctprdpck.COUNTRYCODE = 'NL'  and wholesalepp.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
@@ -533,7 +534,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         prdpck.PRESENTATION,
         prdpck.Bundle,
 		prdpck.OuterCarton,
-		nlppp.PPP,
+		ifnull(nlppp.PPP, 0) as PPP: Double,
         null as DistributorID,
         materialNumbers.MaterialNumbers,
         null as StartDate,
@@ -552,6 +553,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         null as Status,
 		ctryCurrency.Currency,
         null as ApprovalsCount,
+		null as Comment
 } where ctprdpck.COUNTRYCODE = 'NL';
 
 entity CurrentWholesalePurchasePriceView as select from MasterData.WholesalePurchasePrice{

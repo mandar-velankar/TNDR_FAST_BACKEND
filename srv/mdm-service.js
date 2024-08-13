@@ -459,7 +459,7 @@ module.exports = (srv) => {
 	srv.on('ApproveWPP', async (req, res) => {
 		try {
 			const { data: { ID, ProductCode }} = req;
-			if (!ID) throw Error('Wholesale Purchase Price not found');
+			if (!ID || ID == "NA") throw Error('Wholesale Purchase Price not found');
 
 			const mappedWpp = {
 				Status: 'Approved',
