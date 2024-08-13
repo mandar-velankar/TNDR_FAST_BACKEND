@@ -938,6 +938,8 @@ entity NLPPP: cuid, managed{
 	PPP: Double;
 	PowerApproverCWID: String;
 	PowerApprovalDate: Date;
+	GovPPP: Double;
+	TemporaryMeasure: Boolean;
 	NLPPPApprovals: Association to many NLPPPApprovals on NLPPPApprovals.NLPPP = $self
 }
 
