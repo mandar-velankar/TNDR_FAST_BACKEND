@@ -5567,7 +5567,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 	})
 	const mapNotificationData = function (template, offerInformation,offerValidation,url) {
-		
+		offerInformation.BidDueDate = offerInformation.BidDueDate && ServiceHelper.formatDate(offerInformation.BidDueDate, 'YYYY-MM-DD','DD-MM-YYYY');
+		offerInformation.Custom_Date_1 = offerInformation.Custom_Date_1 && ServiceHelper.formatDate(offerInformation.Custom_Date_1, 'YYYY-MM-DD','DD-MM-YYYY');
+
 		const data = {
 			offerInformation: offerInformation,
 			offerValidation: offerValidation,
