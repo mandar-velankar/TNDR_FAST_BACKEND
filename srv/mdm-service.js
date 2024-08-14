@@ -16,7 +16,8 @@ module.exports = (srv) => {
 	PT_TMREGPR,
 	SalesData,
 	WholesalePurchasePriceApprovals,
-	WholesalePurchasePriceApproverTypes
+	WholesalePurchasePriceApproverTypes,
+	WholesalePurchasePriceApprovers
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
     const{
@@ -389,24 +390,31 @@ module.exports = (srv) => {
 
 	const upsertWholesalePurchasePriceApprovals = async function(req){
 		const approvalsType = await SELECT.from(WholesalePurchasePriceApproverTypes);
-		let approvals = [];
-		let approvalObject = {
-			ApproverRole: null,
-			ApprovalStatus: req.data.ApprovalStatus,
-			ApproverComment: null,
-			ApproverCWID: null,
-			ApprovalDate: null,
-			SenderComment: null,
-			WholesalePurchasePrice_ID: req.data.WholesalePurchasePrice_ID
-		};
-
-		for (let i = 0; i < approvalsType.length; i++) {
-			approvals.push({...approvalObject});
-		}
+		const approvers = await SELECT.from(WholesalePurchasePriceApprovers);
+		
+		let approvals = matchApprovalsData (approvalsType, approvers, req);
 
 		await INSERT(approvals).into(WholesalePurchasePriceApprovals);
 	}
 
+	function matchApprovalsData(approvalsType, approvers, req) {
+		return approvalsType.map(approval => {
+			const approver = approvers.find(approver => approver.ID === approval.WholesalePurchasePriceApprovers_ID);
+	
+			if (approver) {
+				return {
+					ApproverRole: approval.WholesalePurchasePriceApproverTypes,
+					ApproverCWID: approver.WholesalePurchasePriceApproverCWID,
+					ApproverName: approver.WholesalePurchasePriceApproverName,
+					ApprovalStatus: req.data.ApprovalStatus,
+					ApproverComment: null,
+					ApprovalDate: null,
+					SenderComment: null,
+					WholesalePurchasePrice_ID: req.data.WholesalePurchasePrice_ID
+				};
+			}
+		}).filter(item => item); // Filter out undefined results
+	}
 
 	srv.after('READ', 'WholesalePurchasePriceView', async (data) => {
 		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
