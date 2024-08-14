@@ -388,7 +388,7 @@ module.exports = (srv) => {
 	});
 
 	const upsertWholesalePurchasePriceApprovals = async function(req){
-		const approvalsType = await SELECT.one.from(WholesalePurchasePriceApproverTypes);
+		const approvalsType = await SELECT.from(WholesalePurchasePriceApproverTypes);
 		let approvals = [];
 		let approvalObject = {
 			ApproverRole: null,
@@ -400,7 +400,7 @@ module.exports = (srv) => {
 			WholesalePurchasePrice_ID: req.data.WholesalePurchasePrice_ID
 		};
 
-		for (let i = 0; i < approvalsType.WholesalePurchasePriceApproverTypes; i++) {
+		for (let i = 0; i < approvalsType.length; i++) {
 			approvals.push({...approvalObject});
 		}
 

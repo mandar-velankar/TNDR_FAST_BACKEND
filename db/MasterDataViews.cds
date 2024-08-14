@@ -581,7 +581,7 @@ entity WholesalePurchasePriceApprovals as select from MasterData.WholesalePurcha
 	wppapprovals.createdBy,
 	wppapprovals.modifiedAt,
 	wppapprovals.modifiedBy,
-	wppapprovals.WholesalePurchasePrice.ID as WholesalePurchasePrice_ID,
-	wppapprovals.WholesalePurchasePrice.PRODUCTPACKID as WholesalePurchasePrice_PRODUCTPACKID,
+	wppapprovals.WholesalePurchasePrice.ID as WholesalePurchasePrice_ID: UUID,
+	wppapprovals.WholesalePurchasePrice.PRODUCTPACKID as WholesalePurchasePrice_PRODUCTPACKID: Integer,
 	user.UserName
 };
