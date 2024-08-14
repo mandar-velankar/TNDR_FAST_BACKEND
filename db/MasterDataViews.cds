@@ -568,8 +568,7 @@ entity CurrentWholesalePurchasePriceView as select from MasterData.WholesalePurc
 }where EndDate = '9999-12-31';
 
 entity WholesalePurchasePriceApprovals as select from MasterData.WholesalePurchasePriceApprovals as wppapprovals
-	left join AdminData.PT_TMUSER as user
-		on user.UserID = wppapprovals.ApproverCWID{
+{
 	wppapprovals.ID,		
 	wppapprovals.ApproverRole,
 	wppapprovals.ApprovalStatus,
@@ -583,5 +582,5 @@ entity WholesalePurchasePriceApprovals as select from MasterData.WholesalePurcha
 	wppapprovals.modifiedBy,
 	wppapprovals.WholesalePurchasePrice.ID as WholesalePurchasePrice_ID: UUID,
 	wppapprovals.WholesalePurchasePrice.PRODUCTPACKID as WholesalePurchasePrice_PRODUCTPACKID: Integer,
-	user.UserName
+	wppapprovals.ApproverName
 };

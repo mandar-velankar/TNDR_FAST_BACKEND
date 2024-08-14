@@ -960,16 +960,19 @@ entity DistributionAgreements: cuid, managed {
 
 entity NLPPPApproverTypes: cuid, managed{
 	NLPPPApproverTypes: String;
+	NLPPPApprovers: Association to NLPPPApprovers;
 }
 entity NLPPPApprovers: cuid, managed{
-	NLPPPApproverType: String;
+	NLPPPApproverCWID: String;
 	NLPPPApproverName: String;
 	NLPPPApproverEmailID: String;
+	NLPPPApproverTypes: Association to many NLPPPApproverTypes on NLPPPApproverTypes.NLPPPApprovers = $self;
 }
 entity NLPPPApprovals  : cuid, managed {
 	ApproverRole: String;
 	ApprovalStatus: String;
 	ApproverComment: String;
+	ApproverName: String;
 	ApproverCWID: String;
 	ApprovalDate: Date;
 	SenderComment: String;
@@ -1003,6 +1006,7 @@ entity WholesalePurchasePriceApprovals: cuid, managed {
 	ApproverRole: String;
 	ApprovalStatus: String;
 	ApproverComment: String;
+	ApproverName: String;
 	ApproverCWID: String;
 	ApprovalDate: Date;
 	SenderComment: String;
@@ -1016,6 +1020,7 @@ entity WholesalePurchasePriceApproverTypes: cuid, managed{
 
 entity WholesalePurchasePriceApprovers: cuid, managed{	
 	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverCWID: String;
 	WholesalePurchasePriceApproverEmailID: String;
 	WholesalePurchasePriceApproverTypes: Association to many WholesalePurchasePriceApproverTypes on WholesalePurchasePriceApproverTypes.WholesalePurchasePriceApprovers = $self;
 }
