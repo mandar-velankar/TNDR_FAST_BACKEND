@@ -1416,7 +1416,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     and product.ProductCode = priceCondition.ProductCode
 left outer join MasterData.NLPPP as nlppp 
     on nlppp.CountryCode = product.CountryCode
-    and nlppp.ProductPackID = product.ProductCode
+    and nlppp.PRODUCTPACKID = product.ProductCode
     and nlppp.Status = 'Approved'
     and nlppp.StartDate <= CURRENT_DATE
     and CURRENT_DATE <= nlppp.EndDate
