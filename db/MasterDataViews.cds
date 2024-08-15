@@ -636,7 +636,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		and ppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	inner join DistributionAgreementMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID{
-		key null as  DistributionAgreementID : UUID,
+		key null as PPPID : UUID,
 		key ctprdpck.PRODUCTPACKID,
 		ctprdpck.COUNTRYCODE as CountryCode: String,
 		ctprdpck.GOV_CODE,
@@ -645,7 +645,6 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		materialNumbers.MaterialNumbers,
 		null as Comment,
         null as Status,
-        null as ApprovalsCount,
         null as StartDate,
         null as MaxPrice,
         null as PPP,
@@ -661,6 +660,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         null as PowerApproverCWID,
         null as PowerApprovalDate,
 		ctryCurrency.Currency,
+		null as ApprovalsCount,
 } where ctprdpck.COUNTRYCODE = 'NL';
 
 entity CurrentNLpppView as select from MasterData.NLPPP{
