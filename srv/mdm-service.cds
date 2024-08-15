@@ -236,6 +236,12 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity WholesalePurchasePriceApproverTypes as projection on MasterData.WholesalePurchasePriceApproverTypes; 
     entity WholesalePurchasePriceApprovers as projection on MasterData.WholesalePurchasePriceApprovers; 
     entity NLpppView as projection on MasterDataViews.NLpppView; 
+    entity NLppp as projection on MasterDataViews.NLpppView;
+    entity NLppps as projection on MasterData.NLPPP;
+    entity NLPPPApprovalsView @(cds.redirection.target:false) as projection on MasterDataViews.NLPPPApprovals; 
+    entity NLPPPApprovals as projection on MasterData.NLPPPApprovals;
+    entity NLPPPApproverTypes as projection on MasterData.NLPPPApproverTypes; 
+    entity NLPPPApprovers as projection on MasterData.NLPPPApprovers; 
 
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
 }

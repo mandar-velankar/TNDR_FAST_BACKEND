@@ -17,7 +17,10 @@ module.exports = (srv) => {
 	SalesData,
 	WholesalePurchasePriceApprovals,
 	WholesalePurchasePriceApproverTypes,
-	WholesalePurchasePriceApprovers
+	WholesalePurchasePriceApprovers,
+	NLPPPApproverTypes,
+	NLPPPApprovers,
+	NLPPPApprovals
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
     const{
@@ -411,6 +414,45 @@ module.exports = (srv) => {
 					ApprovalDate: null,
 					SenderComment: null,
 					WholesalePurchasePrice_ID: req.data.WholesalePurchasePrice_ID
+				};
+			}
+		}).filter(item => item); // Filter out undefined results
+	}
+
+	srv.on('CREATE', 'NLPPPApprovals', async (req) => {
+		try{
+			await upsertNLPPPApprovals(req);
+			return req.data;
+		}
+		catch(error){
+			console.error('Error in NLPPPApprovals CREATE');
+			return req.reject(403, error?.message||"Error in NLPPPApprovals CREATE");
+		}
+	});
+
+	const upsertNLPPPApprovals = async function(req){
+		const approvalsType = await SELECT.from(NLPPPApproverTypes);
+		const approvers = await SELECT.from(NLPPPApprovers);
+		
+		let approvals = matchNLPPPApprovalsData (approvalsType, approvers, req);
+
+		await INSERT(approvals).into(NLPPPApprovals);
+	}
+
+	function matchNLPPPApprovalsData(approvalsType, approvers, req) {
+		return approvalsType.map(approval => {
+			const approver = approvers.find(approver => approver.ID === approval.NLPPPApprovers_ID);
+	
+			if (approver) {
+				return {
+					ApproverRole: approval.NLPPPApproverTypes,
+					ApproverCWID: approver.NLPPPApproverCWID,
+					ApproverName: approver.NLPPPApproverName,
+					ApprovalStatus: req.data.ApprovalStatus,
+					ApproverComment: null,
+					ApprovalDate: null,
+					SenderComment: null,
+					NLPPP_ID: req.data.NLPPP_ID
 				};
 			}
 		}).filter(item => item); // Filter out undefined results

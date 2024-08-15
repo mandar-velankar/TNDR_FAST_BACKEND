@@ -483,7 +483,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 	inner join DistributionAgreementMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
 	left join MasterData.NLPPP as nlppp
-		on nlppp.ProductPackID = ctprdpck.PRODUCTPACKID
+		on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	left join WholesalePurchasePriceApprovalsCount as approvalscount
 		on approvalscount.WholesalePurchasePriceID = wholesalepp.ID{
 		key wholesalepp.ID as WholesalePurchasePriceID,
@@ -526,7 +526,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join DistributionAgreementMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
 	left join MasterData.NLPPP as nlppp
-		on nlppp.ProductPackID = ctprdpck.PRODUCTPACKID{
+		on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID{
 		key null as WholesalePurchasePriceID : UUID,
         key ctprdpck.PRODUCTPACKID,
         ctprdpck.COUNTRYCODE as CountryCode : String,
@@ -595,7 +595,7 @@ entity NLpppView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
 	left join MasterData.NLPPP as ppp
 		on ppp.CountryCode = ctprdpck.COUNTRYCODE
-		and ppp.ProductPackID = ctprdpck.PRODUCTPACKID
+		and ppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	inner join DistributionAgreementMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
 	left join NLPPPApprovalsCount as approvalscount
@@ -633,7 +633,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
 	left join MasterData.NLPPP as ppp
 		on ppp.CountryCode = ctprdpck.COUNTRYCODE
-		and ppp.ProductPackID = ctprdpck.PRODUCTPACKID
+		and ppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	inner join DistributionAgreementMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID{
 		key null as  DistributionAgreementID : UUID,
@@ -665,10 +665,28 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 
 entity CurrentNLpppView as select from MasterData.NLPPP{
 	key ID,
-    key ProductPackID,
+    key PRODUCTPACKID,
     StartDate,
     EndDate,
     TemporaryMeasure,
     PPP,
 	GovPPP
 }where EndDate = '9999-12-31';
+
+entity NLPPPApprovals as select from MasterData.NLPPPApprovals as nlpppapprovals
+{
+	nlpppapprovals.ID,		
+	nlpppapprovals.ApproverRole,
+	nlpppapprovals.ApprovalStatus,
+	nlpppapprovals.ApproverComment,
+	nlpppapprovals.ApproverCWID,
+	nlpppapprovals.ApprovalDate,
+	nlpppapprovals.SenderComment,
+	nlpppapprovals.createdAt,
+	nlpppapprovals.createdBy,
+	nlpppapprovals.modifiedAt,
+	nlpppapprovals.modifiedBy,
+	nlpppapprovals.NLPPP.ID as NLPPP_ID: UUID,
+	nlpppapprovals.NLPPP.PRODUCTPACKID as NLPPP_PRODUCTPACKID: Integer,
+	nlpppapprovals.ApproverName
+};

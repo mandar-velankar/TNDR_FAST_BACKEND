@@ -927,7 +927,7 @@ entity PaymentTerms {
 
 entity NLPPP: cuid, managed{
 	CountryCode: String;
-	ProductPackID:Integer;
+	PRODUCTPACKID:Integer;
 	MaterialNumber: Integer;
 	StartDate: Date;
 	EndDate: Date;
