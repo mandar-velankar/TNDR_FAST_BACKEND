@@ -485,5 +485,15 @@ module.exports = (srv) => {
             return req.reject(403, error?.message||"Error in ApproveWPP");
 		}
 	});
-	
+	srv.after('READ', 'NLpppView', async (data) => {
+		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
+		countryProducts.forEach(item => {
+			const filteredData = data.filter(ppp => ppp.PRODUCTPACKID == item.PRODUCTPACKID);
+			if (filteredData.length > 1) {
+				const defaultProductIndex = data.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.PPPID == null);
+				defaultProductIndex > -1 && data.splice(defaultProductIndex, 1);
+			}
+		});
+		
+	});
 };
