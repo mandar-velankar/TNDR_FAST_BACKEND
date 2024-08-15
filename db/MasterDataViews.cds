@@ -520,9 +520,9 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	inner join MasterData.CountryCurrency as ctryCurrency
 	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
-	left join MasterData.DistributionAgreements as distAgreements
-		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
-		and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	left join MasterData.WholesalePurchasePrice as wholesalepp
+		on wholesalepp.CountryCode = ctprdpck.COUNTRYCODE
+		and wholesalepp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	inner join DistributionAgreementMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
 	left join MasterData.NLPPP as nlppp
