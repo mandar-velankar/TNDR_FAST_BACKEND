@@ -933,6 +933,7 @@ entity NLPPP: cuid, managed{
 	EndDate: Date;
 	Comment: String;
 	Status: String;
+	Type: String;
 	ApprovalsCount: Integer;
 	MaxPrice: Double;
 	PPP: Double;
