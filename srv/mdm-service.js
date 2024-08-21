@@ -25,7 +25,8 @@ module.exports = (srv) => {
 
     const{
         CurrentDistributionAgreementView,
-		CurrentWholesalePurchasePriceView
+		CurrentWholesalePurchasePriceView,
+		CurrentNLpppView
 	}= cds.entities("com.bayer.SXTENDER.MasterDataViews")
 
 	const {
@@ -502,6 +503,24 @@ module.exports = (srv) => {
         if (currentWholesalePurchasePriceView) {
 			await UPDATE(CurrentWholesalePurchasePriceView).with ({EndDate: req.data.CurrentEndDate}).where({
 				ID: currentWholesalePurchasePriceView.ID,
+				PRODUCTPACKID: PRODUCTPACKID
+			})
+        }
+    });
+	srv.before('CREATE', 'NLppps', async (req) => {
+        const { StartDate, Type, PRODUCTPACKID, MaxPrice} = req.data;
+        !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
+        !Type && req.error({code: 400, message: 'Type is required', target: 'Type'});
+        !MaxPrice && req.error({code: 400, message: 'MaxPrice is required', target: 'MaxPrice'});
+
+		//check if dates are correct
+		if(req.data.CurrentStartDate &&( moment(req.data.StartDate).isSame(req.data.CurrentStartDate) || moment(req.data.StartDate).isBefore(req.data.CurrentStartDate)))
+			req.error({ code: 404, message: "The contract start date of the new agreement should not be the same as the start date of the current agreement", target: "startDate" });
+		
+        const currentNLPPPView = await SELECT.one.from(CurrentNLpppView).where({PRODUCTPACKID: PRODUCTPACKID});
+        if (currentNLPPPView) {
+			await UPDATE(CurrentNLpppView).with ({EndDate: req.data.CurrentEndDate}).where({
+				ID: currentNLPPPView.ID,
 				PRODUCTPACKID: PRODUCTPACKID
 			})
         }
