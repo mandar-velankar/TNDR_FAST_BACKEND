@@ -569,6 +569,22 @@ module.exports = (srv) => {
 		req.data.CurrentEndDate = formattedEndDate;
 	});
 
+	srv.before('UPDATE', 'WholesalePurchasePrices', async(req) => {
+		const wholesalePurchasePrices = await SELECT.one.from(WholesalePurchasePrices).where({PRODUCTPACKID: req.data.PRODUCTPACKID, EndDate: req.data?.CurrentEndDate});
+		let newEndDate = new Date(req.data?.StartDate);
+		// Subtract one day
+		newEndDate.setDate(newEndDate.getDate() - 1);
+		// Get the formatted date as 'YYYY-MM-DD'
+		let formattedEndDate = newEndDate.toISOString().split('T')[0];
+		if (wholesalePurchasePrices) {
+			await UPDATE(WholesalePurchasePrices).with ({EndDate: formattedEndDate}).where({
+				ID: wholesalePurchasePrices.ID,
+				PRODUCTPACKID: req.data?.PRODUCTPACKID
+			})
+        }
+		req.data.CurrentEndDate = formattedEndDate;
+	});
+
 	srv.on('ApproveWPP', async (req, res) => {
 		try {
 			const { data: { ID, ProductCode }} = req;
