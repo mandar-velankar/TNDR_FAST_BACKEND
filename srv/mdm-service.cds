@@ -242,6 +242,6 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity NLPPPApprovals as projection on MasterData.NLPPPApprovals;
     entity NLPPPApproverTypes as projection on MasterData.NLPPPApproverTypes; 
     entity NLPPPApprovers as projection on MasterData.NLPPPApprovers; 
-
+    entity NLPPPApprovalsNotification as projection on MasterData.NLPPPApprovalsNotification;
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
 }

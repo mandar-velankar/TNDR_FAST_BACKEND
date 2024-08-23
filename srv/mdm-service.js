@@ -557,4 +557,27 @@ module.exports = (srv) => {
 		});
 		
 	});
+
+	srv.on("READ", "NLPPPApprovalsNotification", async req => {
+		try {
+			const results = mappedNLPPPAppovals();
+			return results;
+		} catch (error) {
+			console.error('Error in NLPPPApprovalsNotification READ');
+			return req.reject(403, error?.message||"Error in NLPPPApprovalsNotification READ");
+		}
+	});
+
+	async function mappedNLPPPAppovals () {
+		const pppApproverTypes = await SELECT.from(NLPPPApproverTypes);
+
+		return pppApproverTypes.map(pppAt => ({
+			NLPPPApproverType: pppAt.NLPPPApproverTypes,
+			Send: 'Yes',
+			SenderComment: null,
+			NLPPPApproverCWID: null,
+			NLPPPApproverName: null,
+			NLPPPApproverEmailID: null,
+		}));
+	}
 };

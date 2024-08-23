@@ -1030,3 +1030,12 @@ entity WholesalePurchasePriceApprovers: cuid, managed{
 	WholesalePurchasePriceApproverEmailID: String;
 	WholesalePurchasePriceApproverTypes: Association to many WholesalePurchasePriceApproverTypes on WholesalePurchasePriceApproverTypes.WholesalePurchasePriceApprovers = $self;
 }
+
+entity NLPPPApprovalsNotification {
+    key NLPPPApproverType: String not null;
+	Send: String;
+	SenderComment: String;
+    NLPPPApproverCWID: String;
+	NLPPPApproverName: String;
+	NLPPPApproverEmailID: String;
+}
