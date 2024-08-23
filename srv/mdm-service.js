@@ -464,8 +464,12 @@ module.exports = (srv) => {
 		countryProducts.forEach(item => {
 			const filteredData = data.filter(purchaseprice => purchaseprice.PRODUCTPACKID == item.PRODUCTPACKID);
 			if (filteredData.length > 1) {
-				const defaultProductIndex = data.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.WholesalePurchasePriceID == null);
-				defaultProductIndex > -1 && data.splice(defaultProductIndex, 1);
+				filteredData.forEach(fd => {
+					const index = data.findIndex(el => el === fd && el.WholesalePurchasePriceID == null);
+					if (index > -1) {
+						data.splice(index, 1);
+					}
+				});
 			}
 		});
 		

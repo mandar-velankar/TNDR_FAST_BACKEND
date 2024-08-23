@@ -484,6 +484,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
 	left join MasterData.NLPPP as nlppp
 		on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+		and nlppp.ID = wholesalepp.NLPPP_ID
 	left join WholesalePurchasePriceApprovalsCount as approvalscount
 		on approvalscount.WholesalePurchasePriceID = wholesalepp.ID{
 		key wholesalepp.ID as WholesalePurchasePriceID,
@@ -494,6 +495,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         prdpck.PRESENTATION,
         prdpck.Bundle,
 		prdpck.OuterCarton,
+		wholesalepp.NLPPP_ID,
 		nlppp.PPP: Double,
 		nlppp.StartDate as PPPStartDate,
 		nlppp.EndDate as PPPEndDate,
@@ -537,9 +539,10 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         prdpck.PRESENTATION,
         prdpck.Bundle,
 		prdpck.OuterCarton,
-		null as PPP,
-		null as PPPStartDate,
-		null as PPPEndDate,
+		nlppp.ID as NLPPP_ID,
+		nlppp.PPP: Double,
+		nlppp.StartDate as PPPStartDate,
+		nlppp.EndDate as PPPEndDate,
         null as DistributorID,
         materialNumbers.MaterialNumbers,
         null as StartDate,
