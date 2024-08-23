@@ -21,14 +21,16 @@ module.exports = (srv) => {
 	NLPPPApproverTypes,
 	NLPPPApprovers,
 	NLPPPApprovals,
-	NLPPP
+	NLPPP,
+	DistributionAgreements
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
     const{
         CurrentDistributionAgreementView,
 		CurrentWholesalePurchasePriceView,
 		CurrentNLpppView,
-		NLpppView
+		NLpppView,
+		DistributionAgreementsView
 	}= cds.entities("com.bayer.SXTENDER.MasterDataViews")
 
 	const {
@@ -490,6 +492,24 @@ module.exports = (srv) => {
 			})
         }
     });
+
+	srv.before('UPDATE', 'DistributionAgreements', async(req) => {
+		const data = req.data;
+		const daview = await SELECT.one.from(DistributionAgreementsView).where({PRODUCTPACKID: req.data.PRODUCTPACKID, EndDate: req.data?.CurrentEndDate});
+		let newEndDate = new Date(req.data?.StartDate);
+		// Subtract one day
+		newEndDate.setDate(newEndDate.getDate() - 1);
+		// Get the formatted date as 'YYYY-MM-DD'
+		let formattedEndDate = newEndDate.toISOString().split('T')[0];
+		if (daview) {
+			await UPDATE(DistributionAgreements).with ({EndDate: formattedEndDate}).where({
+				ID: daview.DistributionAgreementID,
+				PRODUCTPACKID: req.data?.PRODUCTPACKID
+			})
+        }
+		req.data?.CurrentEndDate = formattedEndDate;
+	});
+
     srv.before('CREATE', 'WholesalePurchasePrices', async (req) => {
         const { StartDate, Type, PRODUCTPACKID,Margin , WPPWithoutTax } = req.data;
         !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
