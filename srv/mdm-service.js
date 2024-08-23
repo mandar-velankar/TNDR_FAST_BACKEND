@@ -20,13 +20,15 @@ module.exports = (srv) => {
 	WholesalePurchasePriceApprovers,
 	NLPPPApproverTypes,
 	NLPPPApprovers,
-	NLPPPApprovals
+	NLPPPApprovals,
+	NLPPP
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
     const{
         CurrentDistributionAgreementView,
 		CurrentWholesalePurchasePriceView,
-		CurrentNLpppView
+		CurrentNLpppView,
+		NLpppView
 	}= cds.entities("com.bayer.SXTENDER.MasterDataViews")
 
 	const {
@@ -525,6 +527,24 @@ module.exports = (srv) => {
 			})
         }
     });
+
+	srv.before('UPDATE', 'NLppps', async(req) => {
+		const data = req.data;
+		const nlpppview = await SELECT.one.from(NLpppView).where({PRODUCTPACKID: req.data.PRODUCTPACKID, EndDate: req.data?.CurrentEndDate});
+		let newEndDate = new Date(req.data?.StartDate);
+		// Subtract one day
+		newEndDate.setDate(newEndDate.getDate() - 1);
+		// Get the formatted date as 'YYYY-MM-DD'
+		let formattedEndDate = newEndDate.toISOString().split('T')[0];
+		if (nlpppview) {
+			await UPDATE(NLPPP).with ({EndDate: formattedEndDate}).where({
+				ID: nlpppview.PPPID,
+				PRODUCTPACKID: req.data?.PRODUCTPACKID
+			})
+        }
+		req.data?.CurrentEndDate = formattedEndDate;
+	});
+
 	srv.on('ApproveWPP', async (req, res) => {
 		try {
 			const { data: { ID, ProductCode }} = req;
