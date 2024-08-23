@@ -507,7 +507,7 @@ module.exports = (srv) => {
 				PRODUCTPACKID: req.data?.PRODUCTPACKID
 			})
         }
-		req.data?.CurrentEndDate = formattedEndDate;
+		req.data.CurrentEndDate = formattedEndDate;
 	});
 
     srv.before('CREATE', 'WholesalePurchasePrices', async (req) => {
@@ -562,7 +562,7 @@ module.exports = (srv) => {
 				PRODUCTPACKID: req.data?.PRODUCTPACKID
 			})
         }
-		req.data?.CurrentEndDate = formattedEndDate;
+		req.data.CurrentEndDate = formattedEndDate;
 	});
 
 	srv.on('ApproveWPP', async (req, res) => {
