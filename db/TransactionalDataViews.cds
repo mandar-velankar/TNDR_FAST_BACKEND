@@ -2892,6 +2892,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             CompetitorResult_Custom_Datetime_9: DateTime;
             CompetitorResult_Custom_Datetime_10: DateTime;
             TenderAnnouncementReference                 : String;
+            NLStaticField1                      : String default 'N';
+            NLStaticField2                      : String default 'NA';
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
