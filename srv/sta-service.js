@@ -4424,6 +4424,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				CompetitorResult_Custom_Datetime_8: competitorResult?.Custom_Datetime_8,
 				CompetitorResult_Custom_Datetime_9: competitorResult?.Custom_Datetime_9,
 				CompetitorResult_Custom_Datetime_10: competitorResult?.Custom_Datetime_10,
+				NLStaticField1: 'N',
+				NLStaticField2: 'NA',
 			}
 		});
 		let resolvedResults = await Promise.all(results);
