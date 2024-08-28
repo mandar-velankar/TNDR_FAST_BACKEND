@@ -245,8 +245,8 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity NLPPPApprovalsNotification as projection on MasterData.NLPPPApprovalsNotification;
     entity NLDAExcelTemplates {
         key templateId   : Integer;
-            validDate    : String;
-            distributorID       : Integer;
+        key validDate    : String;
+        key distributorID       : String;
             content      : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType    : String      @Core.IsMediaType;
     };
