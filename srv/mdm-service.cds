@@ -243,6 +243,29 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity NLPPPApproverTypes as projection on MasterData.NLPPPApproverTypes; 
     entity NLPPPApprovers as projection on MasterData.NLPPPApprovers; 
     entity NLPPPApprovalsNotification as projection on MasterData.NLPPPApprovalsNotification;
+    entity NLDAExcelTemplates {
+        key templateId   : Integer;
+        key validDate    : String;
+        key distributorID       : Integer;
+            content      : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType    : String      @Core.IsMediaType;
+    };
+
+    entity NLDAExcelExtract as select from DistributionAgreementsView as dav
+    left join PT_TMDIST as dist on dav.DistributorID = dist.DistributorID{
+        MaterialNumbers,
+        GOV_CODE,
+        PRODUCTPACKNAME,
+        PRESENTATION,
+        dav.DistributorID,
+        dist.DistributorName,
+        Type,
+        Value,
+        StartDate,
+        EndDate
+    }
+
+    
     entity ExcelTemplate as projection on AdminData.ExcelTemplate;
     entity ExcelTemplateCountry as projection on AdminData.ExcelTemplateCountry
     entity NLExcelTemplates {

@@ -41,6 +41,8 @@ module.exports = (srv) => {
 	const {
 		WholesalePurchasePrices,
 		ExcelTemplate,
+		NLDAExcelTemplates,
+		NLDAExcelExtract
 	} = cds.entities("MasterDataManagementService");
 
 
@@ -683,6 +685,35 @@ module.exports = (srv) => {
 		catch(error){
             console.error('Error in NLExcelTemplates READ');
             return req.reject(403, error?.message||"Error in NLExcelTemplates");
+        }
+	});
+
+	srv.on('READ', 'NLDAExcelTemplates', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+		const {templateId, validDate, distributorID} = req.data;
+
+		const templates = await tx.run(SELECT.from(NLDAExcelTemplates).where({ templateId: templateId }));
+		//Filtering
+		const fullWhere = cds.parse.expr(`(StartDate <= date'${validDate}' or StartDate = null) and (EndDate >= date'${validDate}' or EndDate = null) and (DistributorID = ${distributorID} or DistributorID = null)`);
+		const query = SELECT.from(NLDAExcelExtract).where(fullWhere);
+
+
+		//Sorting
+		query.orderBy("PRODUCTPACKNAME asc");
+		const excelData = await tx.run(query);
+		const data = {excelData}
+		const templateContent = templates[0].content;
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,data,1);
+
+			req._.res.setHeader('Content-disposition', `attachment; filename= Distribution Agreement.xlsx`);
+			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in NLDAExcelTemplates READ');
+            return req.reject(403, error?.message||"Error in NLDAExcelTemplates");
         }
 	});
 };
