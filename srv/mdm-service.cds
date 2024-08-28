@@ -263,11 +263,11 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         Value,
         StartDate,
         EndDate
-    }
+    };
 
     
     entity ExcelTemplate as projection on AdminData.ExcelTemplate;
-    entity ExcelTemplateCountry as projection on AdminData.ExcelTemplateCountry
+    entity ExcelTemplateCountry as projection on AdminData.ExcelTemplateCountry;
     entity NLExcelTemplates {
         key templateId   : Integer;
         key validDate    : String;
