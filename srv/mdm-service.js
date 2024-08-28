@@ -693,23 +693,24 @@ module.exports = (srv) => {
 		const tx = cds.tx(req);
 		const {templateId, validDate, distributorID} = req.data;
 
-		const templates = await tx.run(SELECT.from(NLDAExcelTemplates).where({ templateId: templateId }));
+		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+
+		if (!template || !template.content) {
+			return req.reject(404, 'No template found for templateid:' + templateId);
+		}
 		//Filtering
 		const fullWhere = cds.parse.expr(`(StartDate <= date'${validDate}' or StartDate = null) and (EndDate >= date'${validDate}' or EndDate = null) and (DistributorID = ${distributorID} or DistributorID = null)`);
 		const query = SELECT.from(NLDAExcelExtract).where(fullWhere);
 
-
 		//Sorting
 		query.orderBy("PRODUCTPACKNAME asc");
 		const excelData = await tx.run(query);
-		const data = {excelData}
-		const templateContent = templates[0].content;
 
-		let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,data,1);
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
 
-			req._.res.setHeader('Content-disposition', `attachment; filename= Distribution Agreement.xlsx`);
-			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			return excelStreamValue;
+		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
 		}
 		catch(error){
             console.error('Error in NLDAExcelTemplates READ');
