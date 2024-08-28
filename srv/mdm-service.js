@@ -1,6 +1,7 @@
 const cds = require('@sap/cds');
 const XLSX = require("xlsx");
 const moment = require('moment');
+const XLSXHelper = require("./utils/XLSXHelper");
 
 module.exports = (srv) => {
 
@@ -38,7 +39,8 @@ module.exports = (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
 	const {
-		WholesalePurchasePrices
+		WholesalePurchasePrices,
+		ExcelTemplate,
 	} = cds.entities("MasterDataManagementService");
 
 
@@ -640,4 +642,47 @@ module.exports = (srv) => {
 			NLPPPApproverEmailID: null,
 		}));
 	}
+
+	srv.on('READ', 'NLExcelTemplates', async (req, next) => {
+		try{
+			const tx = cds.tx(req);
+			const {templateId, validDate, status} = req.data;
+			const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
+			const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+
+			if (!template || !template.content) {
+				return req.reject(404, 'No template found for templateid:' + templateId);
+			}
+
+			//Filtering
+			const fullWhere = cds.parse.expr(`(StartDate <= date'${validDate}' or StartDate = null) and (EndDate >= date'${validDate}' or EndDate = null)`);
+			const query = SELECT.from(NLpppView).where(fullWhere);
+			!!status && query.where({Status: { '=': status }});
+
+			//Sorting
+			query.orderBy("PRODUCTPACKNAME asc");
+
+			//Request to the database
+			const excelData = await tx.run(query);
+
+			//Delete empty PPP if there is at least one contract with the same PRODUCTPACKID 
+			countryProducts.forEach(item => {
+				const filteredData = excelData.filter(ppp => ppp.PRODUCTPACKID == item.PRODUCTPACKID);
+				if (filteredData.length > 1) {
+					const defaultProductIndex = excelData.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.PPPID == null);
+					defaultProductIndex > -1 && excelData.splice(defaultProductIndex, 1);
+				}
+			});
+
+			let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content, { excelData }, 1);
+
+			req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
+			req._.res.setHeader('Content-type', template.mediaType);
+			return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in NLExcelTemplates READ');
+            return req.reject(403, error?.message||"Error in NLExcelTemplates");
+        }
+	});
 };

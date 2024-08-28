@@ -243,5 +243,14 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity NLPPPApproverTypes as projection on MasterData.NLPPPApproverTypes; 
     entity NLPPPApprovers as projection on MasterData.NLPPPApprovers; 
     entity NLPPPApprovalsNotification as projection on MasterData.NLPPPApprovalsNotification;
+    entity ExcelTemplate as projection on AdminData.ExcelTemplate;
+    entity ExcelTemplateCountry as projection on AdminData.ExcelTemplateCountry
+    entity NLExcelTemplates {
+        key templateId   : Integer;
+        key validDate    : String;
+        key status       : String;
+            content      : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType    : String      @Core.IsMediaType;
+    };
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
 }
