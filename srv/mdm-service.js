@@ -2,6 +2,7 @@ const cds = require('@sap/cds');
 const XLSX = require("xlsx");
 const moment = require('moment');
 const XLSXHelper = require("./utils/XLSXHelper");
+const ServiceHelper = require('./utils/ServiceHelper');
 
 module.exports = (srv) => {
 
@@ -674,6 +675,10 @@ module.exports = (srv) => {
 					const defaultProductIndex = excelData.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.PPPID == null);
 					defaultProductIndex > -1 && excelData.splice(defaultProductIndex, 1);
 				}
+			});
+			// Formatting
+			excelData.forEach(ed => {
+				ed.PPP = ServiceHelper.formatCurrency(ed.PPP, 'nl-NL', 2, 2);
 			});
 
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content, { excelData }, 1);
