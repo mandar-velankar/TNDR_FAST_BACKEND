@@ -1034,6 +1034,7 @@ entity WholesalePurchasePriceApprovers: cuid, managed{
 
 entity NLPPPApprovalsNotification {
     key NLPPPApproverType: String not null;
+	CountryCode: String;
 	Send: String;
 	SenderComment: String;
     NLPPPApproverCWID: String;

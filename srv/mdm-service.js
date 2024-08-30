@@ -2,10 +2,14 @@ const cds = require('@sap/cds');
 const XLSX = require("xlsx");
 const moment = require('moment');
 const XLSXHelper = require("./utils/XLSXHelper");
+const Handlebars = require("handlebars");
 
 module.exports = (srv) => {
 
-
+	const {
+		MailTemplate
+	} = cds.entities("com.bayer.SXTENDER.AdminData");
+	
 	const {
 		PT_TMDIST,
 		PT_TMINST,
@@ -35,14 +39,15 @@ module.exports = (srv) => {
 	}= cds.entities("com.bayer.SXTENDER.MasterDataViews")
 
 	const {
-		ExcelUpload
+		ExcelUpload,
+		OutgoingMails
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 
 	const {
 		WholesalePurchasePrices,
 		ExcelTemplate,
 		NLDAExcelTemplates,
-		NLDAExcelExtract
+		NLDAExcelExtract,
 	} = cds.entities("MasterDataManagementService");
 
 
@@ -637,6 +642,7 @@ module.exports = (srv) => {
 
 		return pppApproverTypes.map(pppAt => ({
 			NLPPPApproverType: pppAt.NLPPPApproverTypes,
+			CountryCode: 'NL',
 			Send: 'Yes',
 			SenderComment: null,
 			NLPPPApproverCWID: null,
@@ -717,4 +723,57 @@ module.exports = (srv) => {
             return req.reject(403, error?.message||"Error in NLDAExcelTemplates");
         }
 	});
+
+	srv.on("CREATE", "NLPPPApprovalsNotification", async (req, next) => {
+		try {
+			const nlPPPs = await SELECT.from(NLpppView).where({Status: "New"});
+			if (Array.isArray(nlPPPs) && nlPPPs.length > 0) {
+				addOutgoingMail(req, "NLPPPApprovalNotificationMail", "New PPP Prices Pending Approval Or Your approval is required");
+			}
+			return req.reject(404, 'No PPP found to approve');
+		} catch (error) {
+			console.error('Error in NLPPPApprovalsNotification CREATE');
+            return req.reject(403, error?.message||"Error in NLPPPApprovalsNotification");
+		}
+	});
+
+	const addOutgoingMail = async function (req, templateId, subject) {
+		const mailTemplate = await getMailTemplate(templateId);
+		const mappedData = mapDataToMail(req, mailTemplate, subject);
+
+		await INSERT(mappedData).into(OutgoingMails);
+
+	}
+
+	const mapDataToMail = function (req, template, subject) {
+		const data = req.data;
+        return {
+            CountryCode: data.CountryCode,
+            Sender: req.user.attr.email,
+            Recipients: data.NLPPPApproverEmailID,
+            Subject: subject,
+            MailBody: generateMailBody(template, {
+                data: { 
+                    approval: data
+                }
+            }),
+            Sent: false
+        };
+    }
+
+    const generateMailBody = function (mail, data) {
+        return Handlebars.compile("" + mail.content)(data);
+    }
+
+    const getMailTemplate = async function (templateId) {
+        try{
+            const result = await SELECT.one.from(MailTemplate)
+			.columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+			.where({ TemplateId: templateId });
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            return;
+        }
+    }
 };
