@@ -253,6 +253,10 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
 
     entity NLDAExcelExtract as select from DistributionAgreementsView as dav
     left join PT_TMDIST as dist on dav.DistributorID = dist.DistributorID{
+        DistributionAgreementID,
+        PRODUCTPACKID,
+        dav.CountryCode,
+        Currency,
         MaterialNumbers,
         GOV_CODE,
         PRODUCTPACKNAME,
