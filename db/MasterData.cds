@@ -1040,4 +1040,5 @@ entity NLPPPApprovalsNotification {
     NLPPPApproverCWID: String;
 	NLPPPApproverName: String;
 	NLPPPApproverEmailID: String;
+	NLPPPApprovalPageLink: String;
 }
