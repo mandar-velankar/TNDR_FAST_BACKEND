@@ -705,19 +705,33 @@ module.exports = (srv) => {
 		try{
 		const tx = cds.tx(req);
 		const {templateId, validDate, distributorID} = req.data;
-
+		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
 		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
 
 		if (!template || !template.content) {
 			return req.reject(404, 'No template found for templateid:' + templateId);
 		}
 		//Filtering
-		const fullWhere = cds.parse.expr(`(StartDate <= date'${validDate}' or StartDate = null) and (EndDate >= date'${validDate}' or EndDate = null) and (DistributorID = ${distributorID} or DistributorID = null)`);
+		const fullWhere = cds.parse.expr(`StartDate <= date'${validDate}' and EndDate >= date'${validDate}' and DistributorID = ${distributorID}`);
 		const query = SELECT.from(NLDAExcelExtract).where(fullWhere);
 
 		//Sorting
 		query.orderBy("PRODUCTPACKNAME asc");
 		const excelData = await tx.run(query);
+
+		//Delete empty PPP if there is at least one contract with the same PRODUCTPACKID 
+		countryProducts.forEach(item => {
+			const filteredData = excelData.filter(da => da.PRODUCTPACKID == item.PRODUCTPACKID);
+			if (filteredData.length > 1) {
+				const defaultProductIndex = excelData.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.DistributionAgreementID == null);
+				defaultProductIndex > -1 && excelData.splice(defaultProductIndex, 1);
+			}
+		});
+
+		excelData.forEach(item => {
+			// Assuming 'Type' and 'Currency' fields are part of the item
+			item.Value = formatterDistributonArrangement(item.Value, item.Type);
+		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
 
@@ -792,4 +806,18 @@ module.exports = (srv) => {
             return;
         }
     }
+
+	function formatterDistributonArrangement(Value, Type) {
+		if (!Value || !Type) {
+			return "";
+		}
+
+		Type = Type.toLowerCase();
+		if (Type === "fixed") {
+			return ServiceHelper.formatCurrency(Value, 'nl-NL', 2, 2);
+		}
+		if (Type === "percentage") {
+			return (Value*100).toFixed(2)+"%";
+		}
+	}
 };
