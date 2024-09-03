@@ -705,7 +705,7 @@ module.exports = (srv) => {
 		try{
 		const tx = cds.tx(req);
 		const {templateId, validDate, distributorID} = req.data;
-		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
+
 		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
 
 		if (!template || !template.content) {
@@ -718,15 +718,6 @@ module.exports = (srv) => {
 		//Sorting
 		query.orderBy("PRODUCTPACKNAME asc");
 		const excelData = await tx.run(query);
-
-		// //Delete empty PPP if there is at least one contract with the same PRODUCTPACKID 
-		// countryProducts.forEach(item => {
-		// 	const filteredData = excelData.filter(da => da.PRODUCTPACKID == item.PRODUCTPACKID);
-		// 	if (filteredData.length > 1) {
-		// 		const defaultProductIndex = excelData.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.DistributionAgreementID == null);
-		// 		defaultProductIndex > -1 && excelData.splice(defaultProductIndex, 1);
-		// 	}
-		// });
 
 		excelData.forEach(item => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
