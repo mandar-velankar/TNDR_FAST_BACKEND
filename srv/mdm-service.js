@@ -719,14 +719,14 @@ module.exports = (srv) => {
 		query.orderBy("PRODUCTPACKNAME asc");
 		const excelData = await tx.run(query);
 
-		//Delete empty PPP if there is at least one contract with the same PRODUCTPACKID 
-		countryProducts.forEach(item => {
-			const filteredData = excelData.filter(da => da.PRODUCTPACKID == item.PRODUCTPACKID);
-			if (filteredData.length > 1) {
-				const defaultProductIndex = excelData.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.DistributionAgreementID == null);
-				defaultProductIndex > -1 && excelData.splice(defaultProductIndex, 1);
-			}
-		});
+		// //Delete empty PPP if there is at least one contract with the same PRODUCTPACKID 
+		// countryProducts.forEach(item => {
+		// 	const filteredData = excelData.filter(da => da.PRODUCTPACKID == item.PRODUCTPACKID);
+		// 	if (filteredData.length > 1) {
+		// 		const defaultProductIndex = excelData.findIndex(el => el.PRODUCTPACKID == item.PRODUCTPACKID && el.DistributionAgreementID == null);
+		// 		defaultProductIndex > -1 && excelData.splice(defaultProductIndex, 1);
+		// 	}
+		// });
 
 		excelData.forEach(item => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
