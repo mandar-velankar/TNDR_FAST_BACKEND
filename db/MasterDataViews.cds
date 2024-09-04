@@ -701,3 +701,44 @@ entity NLPPPApprovals as select from MasterData.NLPPPApprovals as nlpppapprovals
 	nlpppapprovals.NLPPP.PRODUCTPACKID as NLPPP_PRODUCTPACKID: Integer,
 	nlpppapprovals.ApproverName
 };
+
+entity PPPApprovalsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+inner join MasterData.PT_TMPRDPCK as prdpck
+	on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+inner join MasterData.CountryCurrency as ctryCurrency
+	on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+inner join MasterData.NLPPP as ppp
+	on ppp.CountryCode = ctprdpck.COUNTRYCODE
+	and ppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+inner join MasterData.NLPPPApprovals as pppapprovals
+	on pppapprovals.NLPPP.ID = ppp.ID{
+	ppp.ID,
+	ctprdpck.PRODUCTPACKID,
+	ctprdpck.COUNTRYCODE as CountryCode,
+	ctprdpck.GOV_CODE,
+	prdpck.PRODUCTPACKNAME,
+	prdpck.PRESENTATION,
+	ppp.PPP,
+	pppapprovals.ApprovalStatus,
+	pppapprovals.ApproverComment,
+	ppp.CurrentPPP,
+	ppp.StartDate,
+	pppapprovals.ApproverCWID,
+	ctryCurrency.Currency,
+	(ppp.PPP-ppp.CurrentPPP)/ppp.CurrentPPP as PercentageChange 
+}
+where ppp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL'
+group by 
+	ppp.ID,
+	ctprdpck.PRODUCTPACKID,
+	ctprdpck.COUNTRYCODE,
+	ctprdpck.GOV_CODE,
+	prdpck.PRODUCTPACKNAME,
+	prdpck.PRESENTATION,
+	ppp.PPP,
+	pppapprovals.ApprovalStatus,
+	pppapprovals.ApproverComment,
+	ppp.CurrentPPP,
+	ppp.StartDate,
+	ctryCurrency.Currency,
+	pppapprovals.ApproverCWID;
