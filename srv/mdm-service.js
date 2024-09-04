@@ -873,4 +873,35 @@ module.exports = (srv) => {
 			}
 		});
 	}
+
+	srv.on("READ", "PPPApprovalsView", async (req, next) => {
+		try {
+			const tx = cds.tx(req);
+		
+			let result = [];
+			let tmvQuery = SELECT.from(req.query.SELECT.from);
+			req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+
+			result = await tx.run(tmvQuery);
+
+			const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+		
+			if (isCountQuery) {
+				// If $count is present, return the original result
+				return result;
+			}
+			
+			const cwid = req.user.id;
+
+			let resultsArray = Array.isArray(result) ? result : [result];
+
+			resultsArray = resultsArray.filter(ra => ra.ApproverCWID === cwid);
+
+			return resultsArray;
+
+		} catch (error) {
+			console.error('Error in PPPApprovalsView READ');
+            return req.reject(403, error?.message||"Error in PPPApprovalsView");
+		}
+	});
 };
