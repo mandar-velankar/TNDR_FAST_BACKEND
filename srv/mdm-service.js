@@ -639,18 +639,39 @@ module.exports = (srv) => {
 	});
 
 	async function mappedNLPPPAppovals () {
-		const pppApproverTypes = await SELECT.from(NLPPPApproverTypes);
+		const pppApproverTypes = await SELECT.from(NLPPPApproverTypes).columns(
+			"*", 
+			"NLPPPApprovers.NLPPPApproverCWID", 
+			"NLPPPApprovers.NLPPPApproverName",
+			"NLPPPApprovers.NLPPPApproverEmailID"
+		);
 
-		return pppApproverTypes.map(pppAt => ({
-			NLPPPApproverType: pppAt.NLPPPApproverTypes,
-			CountryCode: 'NL',
-			Send: 'Yes',
-			SenderComment: null,
-			NLPPPApproverCWID: null,
-			NLPPPApproverName: null,
-			NLPPPApproverEmailID: null,
-			NLPPPApprovalPageLink: null
-		}));
+		// Deleting duplicate NLPPP ApproverTypes
+		const uniqueValues = new Map();
+		pppApproverTypes.forEach(item => {
+			uniqueValues.set(item["NLPPPApproverTypes"], item);
+		});
+		const filteredNLPPPApproverTypes = Array.from(uniqueValues.values());
+
+		return filteredNLPPPApproverTypes.map(pppAt => {
+			// Getting Approvers list which assigned to the specific role
+			const filteredApprovers = pppApproverTypes
+				.filter(pppAppr => pppAppr.NLPPPApproverTypes.toLowerCase() === pppAt.NLPPPApproverTypes.toLowerCase())
+				.map(el => ({
+					NLPPPApproverCWID: el.NLPPPApproverCWID,
+					NLPPPApproverName: el.NLPPPApproverName,
+					NLPPPApproverEmailID: el.NLPPPApproverEmailID
+				}));
+			return {
+				NLPPPApproverType: pppAt.NLPPPApproverTypes,
+				CountryCode: 'NL',
+				Send: 'Yes',
+				SenderComment: null,
+				NLPPPApprovers: filteredApprovers,
+				SelectedNLPPPApprover: null,
+				NLPPPApprovalPageLink: null
+			}
+		});
 	}
 
 	srv.on('READ', 'NLExcelTemplates', async (req, next) => {
@@ -739,9 +760,8 @@ module.exports = (srv) => {
 	srv.on("CREATE", "NLPPPApprovalsNotification", async (req, next) => {
 		try {
 			const nlPPPs = await SELECT.from(NLpppView).where({Status: "New"});
-			const nlPPPappovers = await SELECT.from(NLPPPApprovers);
 			if (Array.isArray(nlPPPs) && nlPPPs.length > 0) {
-				addOutgoingMail(req, nlPPPappovers, "NLPPPApprovalNotificationMail", "New PPP Prices Pending Approval Or Your approval is required");
+				addOutgoingMail(req, "NLPPPApprovalNotificationMail", "New PPP Prices Pending Approval Or Your approval is required");
 				return req.data;
 			}else {
 				return req.reject(404, 'No PPP found to approve');
@@ -752,26 +772,21 @@ module.exports = (srv) => {
 		}
 	});
 
-	const addOutgoingMail = async function (req, nlPPPappovers, templateId, subject) {
+	const addOutgoingMail = async function (req, templateId, subject) {
 		const mailTemplate = await getMailTemplate(templateId);
-		const mappedData = mapDataToMail(req, nlPPPappovers, mailTemplate, subject);
+		const mappedData = mapDataToMail(req, mailTemplate, subject);
 
 		await INSERT(mappedData).into(OutgoingMails);
 
 	}
 
-	const mapDataToMail = function (req, nlPPPappovers, template, subject) {
-		const nlPPPapprover = nlPPPappovers.find(el => el.NLPPPApproverCWID === req.data.NLPPPApproverCWID);
-		const data = {
-			...req.data,
-			NLPPPApproverName: nlPPPapprover.NLPPPApproverName,
-			NLPPPApproverEmailID: nlPPPapprover.NLPPPApproverEmailID
-		};
+	const mapDataToMail = function (req, template, subject) {
+		const data = req.data;
 		
         return {
             CountryCode: data.CountryCode,
             Sender: req.user.attr.email,
-            Recipients: data.NLPPPApproverEmailID,
+            Recipients: data.SelectedNLPPPApprover_NLPPPApproverName,
             Subject: subject,
             MailBody: generateMailBody(template, {
                 data: { 

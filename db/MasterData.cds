@@ -1032,14 +1032,19 @@ entity WholesalePurchasePriceApprovers: cuid, managed{
 	WholesalePurchasePriceApproverTypes: Association to many WholesalePurchasePriceApproverTypes on WholesalePurchasePriceApproverTypes.WholesalePurchasePriceApprovers = $self;
 }
 
+type NLPPPApproversType {
+	NLPPPApproverCWID: String;
+	NLPPPApproverName: String;
+	NLPPPApproverEmailID: String;
+}
+
 entity NLPPPApprovalsNotification {
     key NLPPPApproverType: String not null;
 	CountryCode: String;
 	Send: String;
 	SenderComment: String;
-    NLPPPApproverCWID: String;
-	NLPPPApproverName: String;
-	NLPPPApproverEmailID: String;
+    NLPPPApprovers: Array of NLPPPApproversType;
+	SelectedNLPPPApprover: NLPPPApproversType;
 	NLPPPApprovalPageLink: String;
 }
 
