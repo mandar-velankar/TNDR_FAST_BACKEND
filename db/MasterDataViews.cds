@@ -725,7 +725,7 @@ inner join MasterData.NLPPPApprovals as pppapprovals
 	ppp.StartDate,
 	pppapprovals.ApproverCWID,
 	ctryCurrency.Currency,
-	(ppp.PPP-ppp.CurrentPPP)/ppp.CurrentPPP as PercentageChange 
+	(ppp.PPP-ppp.CurrentPPP)/ppp.CurrentPPP as PercentageChange: Double
 }
 where ppp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL'
 group by 
