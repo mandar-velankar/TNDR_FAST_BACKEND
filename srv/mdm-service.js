@@ -811,4 +811,51 @@ module.exports = (srv) => {
 			return (Value*100).toFixed(2)+"%";
 		}
 	}
+
+	srv.on("READ", "WholesalePurchasePriceApprovalsNotification", async req => {
+		try {
+			const results = mappedWholesalePurchasePriceAppovals();
+			return results;
+		} catch (error) {
+			console.error('Error in WholesalePurchasePriceApprovalsNotification READ');
+			return req.reject(403, error?.message||"Error in WholesalePurchasePriceApprovalsNotification READ");
+		}
+	});
+
+	async function mappedWholesalePurchasePriceAppovals () {
+		const wpppApproverTypes = await SELECT.from(WholesalePurchasePriceApproverTypes)
+									.columns(
+										"*", 
+										"WholesalePurchasePriceApprovers.WholesalePurchasePriceApproverCWID", 
+										"WholesalePurchasePriceApprovers.WholesalePurchasePriceApproverName",
+										"WholesalePurchasePriceApprovers.WholesalePurchasePriceApproverEmailID",
+									);
+
+		// Deleting duplicate WPP ApproverTypes
+		const uniqueValues = new Map();
+		wpppApproverTypes.forEach(item => {
+			uniqueValues.set(item["WholesalePurchasePriceApproverTypes"], item);
+		});
+		const filteredWPPApproverTypes = Array.from(uniqueValues.values());
+
+		return filteredWPPApproverTypes.map(wpppAt => {
+			// Getting Approvers list which assigned to the specific role
+			const filteredApprovers = wpppApproverTypes
+				.filter(wppAppr => wppAppr.WholesalePurchasePriceApproverTypes.toLowerCase() === wpppAt.WholesalePurchasePriceApproverTypes.toLowerCase())
+				.map(el => ({
+					WholesalePurchasePriceApproverName: el.WholesalePurchasePriceApproverName,
+					WholesalePurchasePriceApproverCWID: el.WholesalePurchasePriceApproverCWID,
+					WholesalePurchasePriceApproverEmailID: el.WholesalePurchasePriceApproverEmailID
+				}));
+
+			return {
+				WholesalePurchasePriceApproverType: wpppAt.WholesalePurchasePriceApproverTypes,
+				CountryCode: 'NL',
+				Send: 'Yes',
+				SenderComment: null,
+				WPPApprovers: filteredApprovers,
+				SelectedWppApprover: null
+			}
+		});
+	}
 };

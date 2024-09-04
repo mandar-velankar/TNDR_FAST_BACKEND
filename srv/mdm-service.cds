@@ -276,5 +276,6 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
             content      : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType    : String      @Core.IsMediaType;
     };
+    entity WholesalePurchasePriceApprovalsNotification as projection on MasterData.WholesalePurchasePriceApprovalsNotification;
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
 }

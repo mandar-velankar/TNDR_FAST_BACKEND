@@ -1042,3 +1042,19 @@ entity NLPPPApprovalsNotification {
 	NLPPPApproverEmailID: String;
 	NLPPPApprovalPageLink: String;
 }
+
+type WPPApprovers {
+	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverCWID: String;
+	WholesalePurchasePriceApproverEmailID: String;
+}
+
+entity WholesalePurchasePriceApprovalsNotification {
+    key WholesalePurchasePriceApproverType: String not null;
+	CountryCode: String;
+	Send: String;
+	SenderComment: String;
+	WPPApprovers: Array of WPPApprovers;
+	SelectedWppApprover: WPPApprovers;
+	WholesalePurchasePriceApprovalPageLink: String;
+}
