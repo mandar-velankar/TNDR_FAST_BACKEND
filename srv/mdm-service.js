@@ -507,6 +507,41 @@ module.exports = (srv) => {
         }
     });
 
+	srv.after('UPDATE', 'NLPPPApprovals', async (data) => {
+		await updateNLPPP(data);
+		return data;
+	});
+
+	async function updateNLPPP (data) {
+		const nlPPPApprovals =  await SELECT.from(NLPPPApprovals).where({NLPPP_ID: data.NLPPP_ID}); 
+		// Include the current data in the check
+		const updatedApprovals = nlPPPApprovals.map(approval => {
+			if (approval.ID === data.ID) {
+				// Replace the approval record with the incoming data
+				return { ...approval, ApprovalStatus: data.ApprovalStatus };
+			}
+			return approval;
+		});
+
+		if(data.ApprovalStatus === 'Rejected'){
+			await UPDATE(NLPPP).with ({Status: 'Rejected'}).where({
+				ID: data.NLPPP_ID
+			})
+		}
+		else if(data.ApprovalStatus === 'Approved'){
+			const nlppp = await SELECT.one.from(NLPPP).where({ID: data.NLPPP_ID}); 
+			await UPDATE(NLPPP).with({ApprovalsCount: nlppp.ApprovalsCount + 1}).where({ ID: data.NLPPP_ID });
+
+			const allApproved = updatedApprovals.every(approval => approval.ApprovalStatus === 'Approved');
+
+			if (allApproved) {
+				// If all approvals are 'Approved', update the status to 'Approved'
+				await UPDATE(NLPPP).with({ Status: 'Approved' }).where({ ID: data.NLPPP_ID });
+			}
+
+		}
+	}
+
 	srv.before('UPDATE', 'DistributionAgreements', async(req) => {
 		const data = req.data;
 		const daview = await SELECT.one.from(DistributionAgreementsView).where({PRODUCTPACKID: req.data.PRODUCTPACKID, EndDate: req.data?.CurrentEndDate});
