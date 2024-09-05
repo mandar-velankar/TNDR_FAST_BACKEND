@@ -712,7 +712,7 @@ inner join MasterData.NLPPP as ppp
 	and ppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 inner join MasterData.NLPPPApprovals as pppapprovals
 	on pppapprovals.NLPPP.ID = ppp.ID{
-	ppp.ID,
+	ppp.ID as NLPPP_ID: UUID,
 	ctprdpck.PRODUCTPACKID,
 	ctprdpck.COUNTRYCODE as CountryCode,
 	ctprdpck.GOV_CODE,
@@ -721,6 +721,7 @@ inner join MasterData.NLPPPApprovals as pppapprovals
 	ppp.PPP,
 	pppapprovals.ApprovalStatus,
 	pppapprovals.ApproverComment,
+	pppapprovals.ID as NLPPPApprovals_ID: UUID,
 	ppp.CurrentPPP,
 	ppp.StartDate,
 	pppapprovals.ApproverCWID,
@@ -738,6 +739,7 @@ group by
 	ppp.PPP,
 	pppapprovals.ApprovalStatus,
 	pppapprovals.ApproverComment,
+	pppapprovals.ID,
 	ppp.CurrentPPP,
 	ppp.StartDate,
 	ctryCurrency.Currency,
