@@ -47,8 +47,8 @@ module.exports = (srv) => {
 	const {
 		WholesalePurchasePrices,
 		ExcelTemplate,
-		NLDAExcelTemplates,
 		NLDAExcelExtract,
+		NLWPPExcelExtract
 	} = cds.entities("MasterDataManagementService");
 
 
@@ -791,6 +791,43 @@ module.exports = (srv) => {
 		catch(error){
             console.error('Error in NLDAExcelTemplates READ');
             return req.reject(403, error?.message||"Error in NLDAExcelTemplates");
+        }
+	});
+
+	srv.on('READ', 'NLWPPExcelTemplates', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+		const {templateId, validDate, status, distributorID} = req.data;
+
+		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+
+		if (!template || !template.content) {
+			return req.reject(404, 'No template found for templateid:' + templateId);
+		}
+		//Filtering
+		const fullWhere = cds.parse.expr(`StartDate <= date'${validDate}' and EndDate >= date'${validDate}' and DistributorID = ${distributorID}`);
+		const query = SELECT.from(NLWPPExcelExtract).where(fullWhere);
+
+		//Sorting
+		query.orderBy("PRODUCTPACKNAME asc");
+		const excelData = await tx.run(query);
+
+		excelData.forEach(item => {
+			// Assuming 'Type' and 'Currency' fields are part of the item
+			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2);
+			item.WPPWithoutTax = ServiceHelper.formatCurrency(item.WPPWithoutTax, 'nl-NL', 2, 2);
+			item.Margin = (item.Margin*100).toFixed(2)+"%";
+		});
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+
+		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in NLWPPExcelTemplates READ');
+            return req.reject(403, error?.message||"Error in NLWPPExcelTemplates");
         }
 	});
 

@@ -277,5 +277,31 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
             mediaType    : String      @Core.IsMediaType;
     };
     entity WholesalePurchasePriceApprovalsNotification as projection on MasterData.WholesalePurchasePriceApprovalsNotification;
+    entity NLWPPExcelTemplates {
+        key templateId   : Integer;
+        key validDate    : String;
+        key status       : String;
+        key distributorID: String;
+            content      : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType    : String      @Core.IsMediaType;
+    };
+    entity NLWPPExcelExtract as select from WholesalePurchasePriceView as wpp
+    left join PT_TMDIST as dist on wpp.DistributorID = dist.DistributorID{
+        MaterialNumbers,
+        GOV_CODE,
+        PRODUCTPACKNAME,
+        PRESENTATION,
+        wpp.DistributorID,
+        dist.DistributorName,
+        Bundle,
+        OuterCarton,
+        PPP,
+        Type,
+        Margin,
+        WPPWithoutTax,
+        StartDate,
+        EndDate,
+        Status
+    };
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
 }
