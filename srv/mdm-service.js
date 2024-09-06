@@ -703,7 +703,9 @@ module.exports = (srv) => {
 				Send: 'Yes',
 				SenderComment: null,
 				NLPPPApprovers: filteredApprovers,
-				SelectedNLPPPApprover: null,
+				SelectedNLPPPApprover_NLPPPApproverCWID: filteredApprovers?.[0]?.NLPPPApproverCWID,
+				SelectedNLPPPApprover_NLPPPApproverName: filteredApprovers?.[0]?.NLPPPApproverName,
+				SelectedNLPPPApprover_NLPPPApproverEmailID: filteredApprovers?.[0]?.NLPPPApproverEmailID,
 				NLPPPApprovalPageLink: null
 			}
 		});
@@ -794,9 +796,10 @@ module.exports = (srv) => {
 
 	srv.on("CREATE", "NLPPPApprovalsNotification", async (req, next) => {
 		try {
+			const {SelectedNLPPPApprover_NLPPPApproverEmailID} = req.data;
 			const nlPPPs = await SELECT.from(NLpppView).where({Status: "New"});
 			if (Array.isArray(nlPPPs) && nlPPPs.length > 0) {
-				addOutgoingMail(req, "NLPPPApprovalNotificationMail", "New PPP Prices Pending Approval Or Your approval is required");
+				addOutgoingMail(req, "NLPPPApprovalNotificationMail", "New PPP Prices Pending Approval Or Your approval is required", SelectedNLPPPApprover_NLPPPApproverEmailID);
 				return req.data;
 			}else {
 				return req.reject(404, 'No PPP found to approve');
@@ -807,21 +810,21 @@ module.exports = (srv) => {
 		}
 	});
 
-	const addOutgoingMail = async function (req, templateId, subject) {
+	const addOutgoingMail = async function (req, templateId, subject, recipients) {
 		const mailTemplate = await getMailTemplate(templateId);
-		const mappedData = mapDataToMail(req, mailTemplate, subject);
+		const mappedData = mapDataToMail(req, mailTemplate, subject, recipients);
 
 		await INSERT(mappedData).into(OutgoingMails);
 
 	}
 
-	const mapDataToMail = function (req, template, subject) {
+	const mapDataToMail = function (req, template, subject, recipients) {
 		const data = req.data;
 		
         return {
             CountryCode: data.CountryCode,
             Sender: req.user.attr.email,
-            Recipients: data.SelectedNLPPPApprover_NLPPPApproverName,
+            Recipients: recipients,
             Subject: subject,
             MailBody: generateMailBody(template, {
                 data: { 
@@ -904,7 +907,9 @@ module.exports = (srv) => {
 				Send: 'Yes',
 				SenderComment: null,
 				WPPApprovers: filteredApprovers,
-				SelectedWppApprover: null
+				SelectedWppApprover_WholesalePurchasePriceApproverCWID: filteredApprovers?.[0]?.WholesalePurchasePriceApproverCWID,
+				SelectedWppApprover_WholesalePurchasePriceApproverName: filteredApprovers?.[0]?.WholesalePurchasePriceApproverName,
+				SelectedWppApprover_WholesalePurchasePriceApproverEmailID: filteredApprovers?.[0]?.WholesalePurchasePriceApproverEmailID
 			}
 		});
 	}
@@ -937,6 +942,22 @@ module.exports = (srv) => {
 		} catch (error) {
 			console.error('Error in PPPApprovalsView READ');
             return req.reject(403, error?.message||"Error in PPPApprovalsView");
+		}
+	});
+
+	srv.on("CREATE", "WholesalePurchasePriceApprovalsNotification", async (req, next) => {
+		try {
+			const {SelectedWppApprover_WholesalePurchasePriceApproverEmailID} = req.data;
+			const wholesalePurchasePrices = await SELECT.from(WholesalePurchasePrices).where({Status: "New"});
+			if (Array.isArray(wholesalePurchasePrices) && wholesalePurchasePrices.length > 0) {
+				addOutgoingMail(req, "WPPApprovalNotificationMail", "New WPP Prices Pending Approval Or Your approval is required", SelectedWppApprover_WholesalePurchasePriceApproverEmailID);
+				return req.data;
+			}else {
+				return req.reject(404, 'No WPP found to approve');
+			}
+		} catch (error) {
+			console.error('Error in WholesalePurchasePriceApprovalsNotification CREATE');
+            return req.reject(403, error?.message||"Error in WholesalePurchasePriceApprovalsNotification");
 		}
 	});
 };
