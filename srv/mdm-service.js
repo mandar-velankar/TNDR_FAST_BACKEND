@@ -612,6 +612,15 @@ module.exports = (srv) => {
 			})
         }
 		req.data.CurrentEndDate = formattedEndDate;
+
+		if(data.Status === 'Approved' && data.PPP != data.CurrentPPP){
+			const nlpppapprovals = await SELECT.from(NLPPPApprovals).where({NLPPP_ID: req.data.ID});
+			for (const nlpppapproval of nlpppapprovals) {
+                await UPDATE(NLPPPApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:nlpppapproval.ID});
+            }
+			req.data.Status = 'New';
+			req.data.ApprovalsCount = 0;
+		}
 	});
 
 	srv.before('UPDATE', 'WholesalePurchasePrices', async(req) => {
