@@ -235,6 +235,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity WholesalePurchasePriceApprovals as projection on MasterData.WholesalePurchasePriceApprovals;
     entity WholesalePurchasePriceApproverTypes as projection on MasterData.WholesalePurchasePriceApproverTypes; 
     entity WholesalePurchasePriceApprovers as projection on MasterData.WholesalePurchasePriceApprovers; 
+    entity WPPApprovalsView as projection on MasterDataViews.WPPApprovalsView;
     entity NLpppView as projection on MasterDataViews.NLpppView; 
     entity NLppp as projection on MasterDataViews.NLpppView;
     entity NLppps as projection on MasterData.NLPPP;

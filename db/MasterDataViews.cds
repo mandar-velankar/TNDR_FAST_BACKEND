@@ -746,3 +746,54 @@ group by
 	ppp.StartDate,
 	ctryCurrency.Currency,
 	pppapprovals.ApproverCWID;
+
+entity WPPApprovalsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+inner join MasterData.PT_TMPRDPCK as prdpck
+	on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+inner join MasterData.CountryCurrency as ctryCurrency
+	on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+inner join MasterData.WholesalePurchasePrice as wpp
+	on wpp.CountryCode = ctprdpck.COUNTRYCODE
+	and wpp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+inner join MasterData.WholesalePurchasePriceApprovals as wppapprovals
+	on wppapprovals.WholesalePurchasePrice.ID = wpp.ID
+left join MasterData.NLPPP as nlppp
+	on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	and nlppp.ID = wpp.NLPPP_ID{
+	wpp.ID as WPP_ID: UUID,
+	wpp.NLPPP_ID,
+	ctprdpck.PRODUCTPACKID,
+	ctprdpck.COUNTRYCODE as CountryCode,
+	ctprdpck.GOV_CODE,
+	prdpck.PRODUCTPACKNAME,
+	prdpck.PRESENTATION,
+	nlppp.PPP: Double,
+	wpp.WPPWithoutTax,
+	wpp.CurrentWPPWithoutTax,
+	wpp.Status,
+	wpp.StartDate,
+	wppapprovals.ApprovalStatus,
+	wppapprovals.ApproverComment,
+	wppapprovals.ID as WPPApprovals_ID: UUID,
+	wppapprovals.ApproverCWID,
+	ctryCurrency.Currency
+}
+where wpp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and wppapprovals.ApprovalStatus != 'Approved'
+group by 
+	wpp.ID,
+	wpp.NLPPP_ID,
+	ctprdpck.PRODUCTPACKID,
+	ctprdpck.COUNTRYCODE,
+	ctprdpck.GOV_CODE,
+	prdpck.PRODUCTPACKNAME,
+	prdpck.PRESENTATION,
+	nlppp.PPP,
+	wpp.WPPWithoutTax,
+	wpp.CurrentWPPWithoutTax,
+	wpp.Status,
+	wpp.StartDate,
+	wppapprovals.ApprovalStatus,
+	wppapprovals.ApproverComment,
+	wppapprovals.ID,
+	wppapprovals.ApproverCWID,
+	ctryCurrency.Currency;
