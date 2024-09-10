@@ -304,4 +304,5 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         Status
     };
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
+    action ApprovePPP(ID: String, ProductCode: Integer) returns String;
 }

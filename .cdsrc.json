@@ -134,7 +134,8 @@
                                 "f_tndr_cag_ctr_user",
                                 "f_tndr_cag_tnd_user",
                                 "f_tndr_cag_cogs_user",
-                                "f_tndr_cag_wpppowerapproveraccess_user"
+                                "f_tndr_cag_wpppowerapproveraccess_user",
+                                "f_tndr_cag_ppppowerapproveraccess_user"
                             ]
                         }
                     },

@@ -660,6 +660,29 @@ module.exports = (srv) => {
             return req.reject(403, error?.message||"Error in ApproveWPP");
 		}
 	});
+
+	srv.on('ApprovePPP', async (req, res) => {
+		try {
+			const { data: { ID, ProductCode }} = req;
+			if (!ID || ID == "NA") throw Error('Purchase Price not found');
+
+			const mappedPpp = {
+				Status: 'Approved',
+				PowerApproverCWID: req.user.id,
+				PowerApprovalDate: new Date()
+			}; 
+
+			await UPDATE(NLPPP).with(mappedPpp).where({
+				ID: ID
+			});
+
+			return 'Purchase Price approved successfully';
+		} catch (error) {
+			console.error('Error in ApprovePPP');
+            return req.reject(403, error?.message||"Error in ApprovePPP");
+		}
+	});
+
 	srv.after('READ', 'NLpppView', async (data) => {
 		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
 		countryProducts.forEach(item => {

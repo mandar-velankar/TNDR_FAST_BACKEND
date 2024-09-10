@@ -14,7 +14,8 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             ConsumerPrices:Boolean;
             DistributorManagememt:Boolean;
             DistributorManagementExclusiveAccess:Boolean;
-            WPPManagementPowerApproverAccess: Boolean
+            WPPManagementPowerApproverAccess: Boolean;
+            PPPManagementPowerApproverAccess: Boolean;
         };
         standardtenderAccess: {
 			OverviewDownload: Boolean;

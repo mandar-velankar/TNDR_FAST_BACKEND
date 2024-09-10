@@ -16,7 +16,8 @@ module.exports = (srv) => {
 				ConsumerPrices:req.user.is('f_tndr_cag_consumerprice_user'),
 				DistributorManagememt:req.user.is('f_tndr_cag_distributormanagement_user'),
 				DistributorManagementExclusiveAccess:req.user.is('f_tndr_cag_distributormanagementexclusiveaccess_user'),
-				WPPManagementPowerApproverAccess: req.user.is('f_tndr_cag_wpppowerapproveraccess_user')
+				WPPManagementPowerApproverAccess: req.user.is('f_tndr_cag_wpppowerapproveraccess_user'),
+				PPPManagementPowerApproverAccess: req.user.is('f_tndr_cag_ppppowerapproveraccess_user'),
 			},
 			standardtenderAccess: {
 				OverviewDownload: req.user.is('f_tnndr_cag_standardtenderdownload_user'),

@@ -938,7 +938,7 @@ entity NLPPP: cuid, managed{
 	MaxPrice: Double;
 	PPP: Double;
 	PowerApproverCWID: String;
-	PowerApprovalDate: Date;
+	PowerApprovalDate: DateTime;
 	GovPPP: Double;
 	TemporaryMeasure: Boolean;
 	CurrentStartDate: Date;
