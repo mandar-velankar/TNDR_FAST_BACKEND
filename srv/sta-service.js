@@ -1285,31 +1285,37 @@ module.exports = async (srv) => {
 		}
 
 		if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
-			await addOutgoingMail(req);
+			const recipientCWIDs = ['TWHWE', 'TWKUA'];
+			const recipients = await SELECT.from(PT_TMUSER).where({CWID: {in: recipientCWIDs}});
+			const promises = recipients.map(recipient => {
+				return addOutgoingMail(req, "TaiwanResultsRecordedNotification", `Results recorded for Price Request ID:${req.data.OfferID}`, {RecipientEmail: recipient.UserEmail, RecipientName: recipient.UserName});
+			});
+
+			await Promise.all(promises);
+
 		}
 	}
 
-	const addOutgoingMail = async function (req) {
-		const templateName = "TaiwanResultsRecordedNotification"
+	const addOutgoingMail = async function (req, templateName, subject, RecipientInfo) {
 		const mailTemplate = await getMailTemplate(templateName);
-		const mappedData = mapDataToMail(mailTemplate, req.data);
+		const mappedData = mapDataToMail(mailTemplate, req.data, subject, RecipientInfo);
 
-		await INSERT(mappedData).into(OutgoingMails);
+		return INSERT(mappedData).into(OutgoingMails);
 
 	}
 
-	const mapDataToMail = function (template, data) {
+	const mapDataToMail = function (template, data, subject, {RecipientEmail, RecipientName}) {
         return {
             CountryCode: data.CountryCode,
             TenderID: data.TenderID,
             OfferID: data.OfferID,
             Sender: 'FAST-Admin@bayer.com',
-            Recipients: 'amanda.kuo@bayer.com',
-            Subject: `Results recorded for Price Request ID:${data.OfferID}`,
+            Recipients: RecipientEmail,
+            Subject: subject,
             MailBody: generateMailBody(template, {
                 data: { 
                     Offer: data,
-					ReceipientName: 'Amanda'
+					ReceipientName: RecipientName
                 }
             }),
             Sent: false
