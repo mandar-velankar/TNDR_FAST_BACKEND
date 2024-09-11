@@ -27,6 +27,7 @@ module.exports = (srv) => {
 	NLPPPApproverTypes,
 	NLPPPApprovers,
 	NLPPPApprovals,
+	WholesalePurchasePrice,
 	NLPPP,
 	DistributionAgreements
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
@@ -542,6 +543,41 @@ module.exports = (srv) => {
 		}
 	}
 
+	srv.after('UPDATE', 'WholesalePurchasePriceApprovals', async (data) => {
+		await updateWPP(data);
+		return data;
+	});
+
+	async function updateWPP (data) {
+		const wPPApprovals =  await SELECT.from(WholesalePurchasePriceApprovals).where({WholesalePurchasePrice_ID: data.WPP_ID}); 
+		// Include the current data in the check
+		const updatedApprovals = wPPApprovals.map(approval => {
+			if (approval.ID === data.ID) {
+				// Replace the approval record with the incoming data
+				return { ...approval, ApprovalStatus: data.ApprovalStatus };
+			}
+			return approval;
+		});
+
+		if(data.ApprovalStatus === 'Rejected'){
+			await UPDATE(WholesalePurchasePrice).with ({Status: 'Rejected'}).where({
+				ID: data.WPP_ID
+			})   
+		}
+		else if(data.ApprovalStatus === 'Approved'){
+			const wpp = await SELECT.one.from(WholesalePurchasePrice).where({ID: data.WPP_ID}); 
+			await UPDATE(WholesalePurchasePrice).with({ApprovalsCount: wpp.ApprovalsCount + 1}).where({ ID: data.WPP_ID });
+
+			const allApproved = updatedApprovals.every(approval => approval.ApprovalStatus === 'Approved');
+
+			if (allApproved) {
+				// If all approvals are 'Approved', update the status to 'Approved'
+				await UPDATE(WholesalePurchasePrice).with({ Status: 'Approved' }).where({ ID: data.WPP_ID });
+			}
+
+		}
+	}
+
 	srv.before('UPDATE', 'DistributionAgreements', async(req) => {
 		const data = req.data;
 		const daview = await SELECT.one.from(DistributionAgreementsView).where({PRODUCTPACKID: req.data.PRODUCTPACKID, EndDate: req.data?.CurrentEndDate});
@@ -624,6 +660,7 @@ module.exports = (srv) => {
 	});
 
 	srv.before('UPDATE', 'WholesalePurchasePrices', async(req) => {
+		const data = req.data;
 		const wholesalePurchasePrices = await SELECT.one.from(WholesalePurchasePrices).where({PRODUCTPACKID: req.data.PRODUCTPACKID, EndDate: req.data?.CurrentEndDate});
 		let newEndDate = new Date(req.data?.StartDate);
 		// Subtract one day
@@ -637,6 +674,15 @@ module.exports = (srv) => {
 			})
         }
 		req.data.CurrentEndDate = formattedEndDate;
+
+		if(data.Status === 'Approved' || data.Status === 'Rejected'){
+			const wppapprovals = await SELECT.from(WholesalePurchasePriceApprovals).where({WholesalePurchasePrice_ID: req.data.ID});
+			for (const wppapproval of wppapprovals) {
+                await UPDATE(WholesalePurchasePriceApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:wppapproval.ID});
+            }
+			req.data.Status = 'New';
+			req.data.ApprovalsCount = 0;
+		}
 	});
 
 	srv.on('ApproveWPP', async (req, res) => {
