@@ -762,6 +762,7 @@ left join MasterData.NLPPP as nlppp
 	and nlppp.ID = wpp.NLPPP_ID{
 	wpp.ID as WPP_ID: UUID,
 	wpp.NLPPP_ID,
+	wpp.DistributorID,
 	ctprdpck.PRODUCTPACKID,
 	ctprdpck.COUNTRYCODE as CountryCode,
 	ctprdpck.GOV_CODE,
@@ -782,6 +783,7 @@ where wpp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and ((wppapprov
 group by 
 	wpp.ID,
 	wpp.NLPPP_ID,
+	wpp.DistributorID,
 	ctprdpck.PRODUCTPACKID,
 	ctprdpck.COUNTRYCODE,
 	ctprdpck.GOV_CODE,
