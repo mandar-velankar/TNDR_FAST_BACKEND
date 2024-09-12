@@ -729,7 +729,7 @@ inner join MasterData.NLPPPApprovals as pppapprovals
 	ctryCurrency.Currency,
 	(ppp.PPP-ppp.CurrentPPP)/ppp.CurrentPPP as PercentageChange: Double
 }
-where ppp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and pppapprovals.ApprovalStatus != 'Approved' and ppp.Status != 'Approved'
+where ppp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and (pppapprovals.ApprovalStatus != 'Approved' or ppp.Status != 'Approved')
 group by 
 	ppp.ID,
 	ctprdpck.PRODUCTPACKID,
@@ -778,7 +778,7 @@ left join MasterData.NLPPP as nlppp
 	wppapprovals.ApproverCWID,
 	ctryCurrency.Currency
 }
-where wpp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and wppapprovals.ApprovalStatus != 'Approved' and wpp.Status != 'Approved'
+where wpp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and (wppapprovals.ApprovalStatus != 'Approved' or wpp.Status != 'Approved')
 group by 
 	wpp.ID,
 	wpp.NLPPP_ID,
