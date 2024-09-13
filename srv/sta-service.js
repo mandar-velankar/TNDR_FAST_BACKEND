@@ -1285,7 +1285,7 @@ module.exports = async (srv) => {
 		}
 
 		if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
-			const recipientCWIDs = ['TWHWE', 'TWKUA'];
+			const recipientCWIDs = ['EHMHV', 'EFUAO'];
 			const recipients = await SELECT.from(PT_TMUSER).where({CWID: {in: recipientCWIDs}});
 			const promises = recipients.map(recipient => {
 				return addOutgoingMail(req, "TaiwanResultsRecordedNotification", `Results recorded for Price Request ID:${req.data.OfferID}`, {RecipientEmail: recipient.UserEmail, RecipientName: recipient.UserName});
