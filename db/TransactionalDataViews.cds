@@ -1416,7 +1416,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     and product.ProductCode = priceCondition.ProductCode
 left outer join MasterData.NLPPP as nlppp 
     on nlppp.CountryCode = product.CountryCode
-    and nlppp.ProductPackID = product.ProductCode
+    and nlppp.PRODUCTPACKID = product.ProductCode
     and nlppp.Status = 'Approved'
     and nlppp.StartDate <= CURRENT_DATE
     and CURRENT_DATE <= nlppp.EndDate
@@ -2892,6 +2892,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             CompetitorResult_Custom_Datetime_9: DateTime;
             CompetitorResult_Custom_Datetime_10: DateTime;
             TenderAnnouncementReference                 : String;
+            NLStaticField1                      : String;
+            NLStaticField2                      : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;

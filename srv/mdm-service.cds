@@ -228,4 +228,82 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity DistributionAgreements as projection on MasterData.DistributionAgreements;
     entity DistributionAgreement as projection on MasterDataViews.DistributionAgreementsView;
     entity CurrentDistributionAgreementView as projection on MasterDataViews.CurrentDistributionAgreementView;
+    entity WholesalePurchasePriceView as projection on MasterDataViews.WholesalePurchasePriceView;
+    entity WholesalePurchasePrice as projection on MasterDataViews.WholesalePurchasePriceView;
+    entity WholesalePurchasePrices as projection on MasterData.WholesalePurchasePrice;
+    entity WholesalePurchasePriceApprovalsView @(cds.redirection.target:false) as projection on MasterDataViews.WholesalePurchasePriceApprovals; 
+    entity WholesalePurchasePriceApprovals as projection on MasterData.WholesalePurchasePriceApprovals;
+    entity WholesalePurchasePriceApproverTypes as projection on MasterData.WholesalePurchasePriceApproverTypes; 
+    entity WholesalePurchasePriceApprovers as projection on MasterData.WholesalePurchasePriceApprovers; 
+    entity WPPApprovalsView as projection on MasterDataViews.WPPApprovalsView;
+    entity NLpppView as projection on MasterDataViews.NLpppView; 
+    entity NLppp as projection on MasterDataViews.NLpppView;
+    entity NLppps as projection on MasterData.NLPPP;
+    entity NLPPPApprovalsView @(cds.redirection.target:false) as projection on MasterDataViews.NLPPPApprovals; 
+    entity NLPPPApprovals as projection on MasterData.NLPPPApprovals;
+    entity NLPPPApproverTypes as projection on MasterData.NLPPPApproverTypes; 
+    entity NLPPPApprovers as projection on MasterData.NLPPPApprovers; 
+    entity NLPPPApprovalsNotification as projection on MasterData.NLPPPApprovalsNotification;
+    entity PPPApprovalsView as projection on MasterDataViews.PPPApprovalsView;
+    entity NLDAExcelTemplates {
+        key templateId   : Integer;
+        key validDate    : String;
+        key distributorID       : String;
+            content      : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType    : String      @Core.IsMediaType;
+    };
+
+    entity NLDAExcelExtract as select from DistributionAgreementsView as dav
+    left join PT_TMDIST as dist on dav.DistributorID = dist.DistributorID{
+        MaterialNumbers,
+        GOV_CODE,
+        PRODUCTPACKNAME,
+        PRESENTATION,
+        dav.DistributorID,
+        dist.DistributorName,
+        Type,
+        Value,
+        StartDate,
+        EndDate
+    };
+
+    
+    entity ExcelTemplate as projection on AdminData.ExcelTemplate;
+    entity ExcelTemplateCountry as projection on AdminData.ExcelTemplateCountry;
+    entity NLExcelTemplates {
+        key templateId   : Integer;
+        key validDate    : String;
+        key status       : String;
+            content      : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType    : String      @Core.IsMediaType;
+    };
+    entity WholesalePurchasePriceApprovalsNotification as projection on MasterData.WholesalePurchasePriceApprovalsNotification;
+    entity NLWPPExcelTemplates {
+        key templateId   : Integer;
+        key validDate    : String;
+        key status       : String;
+        key distributorID: String;
+            content      : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType    : String      @Core.IsMediaType;
+    };
+    entity NLWPPExcelExtract as select from WholesalePurchasePriceView as wpp
+    left join PT_TMDIST as dist on wpp.DistributorID = dist.DistributorID{
+        MaterialNumbers,
+        GOV_CODE,
+        PRODUCTPACKNAME,
+        PRESENTATION,
+        wpp.DistributorID,
+        dist.DistributorName,
+        Bundle,
+        OuterCarton,
+        PPP,
+        Type,
+        Margin,
+        WPPWithoutTax,
+        StartDate,
+        EndDate,
+        Status
+    };
+    action ApproveWPP(ID: String, ProductCode: Integer) returns String;
+    action ApprovePPP(ID: String, ProductCode: Integer) returns String;
 }
