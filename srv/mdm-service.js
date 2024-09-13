@@ -549,7 +549,7 @@ module.exports = (srv) => {
 	});
 
 	async function updateWPP (data) {
-		const wPPApprovals =  await SELECT.from(WholesalePurchasePriceApprovals).where({WholesalePurchasePrice_ID: data.WPP_ID}); 
+		const wPPApprovals =  await SELECT.from(WholesalePurchasePriceApprovals).where({WholesalePurchasePrice_ID: data.WholesalePurchasePrice_ID}); 
 		// Include the current data in the check
 		const updatedApprovals = wPPApprovals.map(approval => {
 			if (approval.ID === data.ID) {
@@ -561,18 +561,18 @@ module.exports = (srv) => {
 
 		if(data.ApprovalStatus === 'Rejected'){
 			await UPDATE(WholesalePurchasePrice).with ({Status: 'Rejected'}).where({
-				ID: data.WPP_ID
+				ID: data.WholesalePurchasePrice_ID
 			})   
 		}
 		else if(data.ApprovalStatus === 'Approved'){
-			const wpp = await SELECT.one.from(WholesalePurchasePrice).where({ID: data.WPP_ID}); 
-			await UPDATE(WholesalePurchasePrice).with({ApprovalsCount: wpp.ApprovalsCount + 1}).where({ ID: data.WPP_ID });
+			const wpp = await SELECT.one.from(WholesalePurchasePrice).where({ID: data.WholesalePurchasePrice_ID}); 
+			await UPDATE(WholesalePurchasePrice).with({ApprovalsCount: wpp.ApprovalsCount + 1}).where({ ID: data.WholesalePurchasePrice_ID });
 
 			const allApproved = updatedApprovals.every(approval => approval.ApprovalStatus === 'Approved');
 
 			if (allApproved) {
 				// If all approvals are 'Approved', update the status to 'Approved'
-				await UPDATE(WholesalePurchasePrice).with({ Status: 'Approved' }).where({ ID: data.WPP_ID });
+				await UPDATE(WholesalePurchasePrice).with({ Status: 'Approved' }).where({ ID: data.WholesalePurchasePrice_ID });
 			}
 
 		}
