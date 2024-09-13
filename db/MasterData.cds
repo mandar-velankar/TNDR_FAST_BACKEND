@@ -927,17 +927,25 @@ entity PaymentTerms {
 
 entity NLPPP: cuid, managed{
 	CountryCode: String;
-	ProductPackID:Integer;
-	MaterialNumber: Integer;
+	PRODUCTPACKID:Integer;
+	MaterialNumbers: Integer;
 	StartDate: Date;
 	EndDate: Date;
 	Comment: String;
 	Status: String;
+	Type: String;
 	ApprovalsCount: Integer;
 	MaxPrice: Double;
 	PPP: Double;
 	PowerApproverCWID: String;
-	PowerApprovalDate: Date;
+	PowerApprovalDate: DateTime;
+	GovPPP: Double;
+	TemporaryMeasure: Boolean;
+	CurrentStartDate: Date;
+	CurrentEndDate: Date;
+	CurrentTemporaryMeasure: Boolean;
+	CurrentPPP: Double;
+	CurrentGovPPP: Double;
 	NLPPPApprovals: Association to many NLPPPApprovals on NLPPPApprovals.NLPPP = $self
 }
 
@@ -958,16 +966,19 @@ entity DistributionAgreements: cuid, managed {
 
 entity NLPPPApproverTypes: cuid, managed{
 	NLPPPApproverTypes: String;
+	NLPPPApprovers: Association to NLPPPApprovers;
 }
 entity NLPPPApprovers: cuid, managed{
-	NLPPPApproverType: String;
+	NLPPPApproverCWID: String;
 	NLPPPApproverName: String;
 	NLPPPApproverEmailID: String;
+	NLPPPApproverTypes: Association to many NLPPPApproverTypes on NLPPPApproverTypes.NLPPPApprovers = $self;
 }
 entity NLPPPApprovals  : cuid, managed {
 	ApproverRole: String;
 	ApprovalStatus: String;
 	ApproverComment: String;
+	ApproverName: String;
 	ApproverCWID: String;
 	ApprovalDate: Date;
 	SenderComment: String;
@@ -976,19 +987,25 @@ entity NLPPPApprovals  : cuid, managed {
 
 entity WholesalePurchasePrice: cuid, managed {
 	CountryCode: String;
-	ProductPackID: Integer;
+	PRODUCTPACKID: Integer;
 	DistributorID: Integer;
 	MaterialNumbers: Integer;
 	Type: String;
-	Margin: String;
-	WPPWithoutTax: Double;
+	CurrentType: String;
+	Margin: Double;
+	CurrentMargin: Double;
+	WPPWithoutTax: Decimal;
+	CurrentWPPWithoutTax: Decimal;
+	CurrentStartDate: Date;
 	StartDate: Date;
 	EndDate: Date;
+	CurrentEndDate: Date;
 	Comment: String;
 	Status: String;
 	ApprovalsCount: Integer;
 	PowerApproverCWID: String;
-	PowerApprovalDate: String;
+	PowerApprovalDate: DateTime;
+	NLPPP_ID: UUID;
 	WholesalePurchasePriceApprovals: Association to many WholesalePurchasePriceApprovals on WholesalePurchasePriceApprovals.WholesalePurchasePrice = $self;
 }
 
@@ -996,6 +1013,7 @@ entity WholesalePurchasePriceApprovals: cuid, managed {
 	ApproverRole: String;
 	ApprovalStatus: String;
 	ApproverComment: String;
+	ApproverName: String;
 	ApproverCWID: String;
 	ApprovalDate: Date;
 	SenderComment: String;
@@ -1004,10 +1022,44 @@ entity WholesalePurchasePriceApprovals: cuid, managed {
 
 entity WholesalePurchasePriceApproverTypes: cuid, managed{
 	WholesalePurchasePriceApproverTypes: String;
+	WholesalePurchasePriceApprovers: Association to WholesalePurchasePriceApprovers;
 }
 
-entity WholesalePurchasePriceApprovers: cuid, managed{
-	WholesalePurchasePriceApproverTypes: String;
+entity WholesalePurchasePriceApprovers: cuid, managed{	
 	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverCWID: String;
 	WholesalePurchasePriceApproverEmailID: String;
+	WholesalePurchasePriceApproverTypes: Association to many WholesalePurchasePriceApproverTypes on WholesalePurchasePriceApproverTypes.WholesalePurchasePriceApprovers = $self;
+}
+
+type NLPPPApproversType {
+	NLPPPApproverCWID: String;
+	NLPPPApproverName: String;
+	NLPPPApproverEmailID: String;
+}
+
+entity NLPPPApprovalsNotification {
+    key NLPPPApproverType: String not null;
+	CountryCode: String;
+	Send: String;
+	SenderComment: String;
+    NLPPPApprovers: Array of NLPPPApproversType;
+	SelectedNLPPPApprover: NLPPPApproversType;
+	NLPPPApprovalPageLink: String;
+}
+
+type WPPApprovers {
+	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverCWID: String;
+	WholesalePurchasePriceApproverEmailID: String;
+}
+
+entity WholesalePurchasePriceApprovalsNotification {
+    key WholesalePurchasePriceApproverType: String not null;
+	CountryCode: String;
+	Send: String;
+	SenderComment: String;
+	WPPApprovers: Array of WPPApprovers;
+	SelectedWppApprover: WPPApprovers;
+	WholesalePurchasePriceApprovalPageLink: String;
 }

@@ -129,6 +129,13 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_admincogsview_user",
       "description": "f_tndr_cag_admincogsview_user"
+    },
+      "name": "$XSAPPNAME.f_tndr_cag_wpppowerapproveraccess_user",
+      "description": "f_tndr_cag_wpppowerapproveraccess_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_ppppowerapproveraccess_user",
+      "description": "f_tndr_cag_ppppowerapproveraccess_user"
     }
   ],
   "attributes": [],
@@ -370,6 +377,22 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_admincogsview_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_wpppowerapproveraccess_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_wpppowerapproveraccess_user"
+      ],
+      "attribute-references": []
+    },
+    {		  
+      "name": "f_tndr_cag_ppppowerapproveraccess_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_ppppowerapproveraccess_user"
       ],
       "attribute-references": []
     }
