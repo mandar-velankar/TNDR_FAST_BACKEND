@@ -647,16 +647,15 @@ module.exports = (srv) => {
 				PRODUCTPACKID: req.data?.PRODUCTPACKID
 			})
         }
-		req.data.CurrentEndDate = formattedEndDate;
-
-		if(data.Status === 'Approved' || data.Status === 'Rejected'){
-			const nlpppapprovals = await SELECT.from(NLPPPApprovals).where({NLPPP_ID: req.data.ID});
-			for (const nlpppapproval of nlpppapprovals) {
-                await UPDATE(NLPPPApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:nlpppapproval.ID});
-            }
-			req.data.Status = 'New';
-			req.data.ApprovalsCount = 0;
+		
+		const nlpppapprovals = await SELECT.from(NLPPPApprovals).where({NLPPP_ID: req.data.ID});
+		for (const nlpppapproval of nlpppapprovals) {
+			await UPDATE(NLPPPApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:nlpppapproval.ID});
 		}
+		req.data.CurrentEndDate = formattedEndDate;
+		req.data.Status = 'New';
+		req.data.ApprovalsCount = 0;
+
 	});
 
 	srv.before('UPDATE', 'WholesalePurchasePrices', async(req) => {
@@ -673,16 +672,15 @@ module.exports = (srv) => {
 				PRODUCTPACKID: req.data?.PRODUCTPACKID
 			})
         }
-		req.data.CurrentEndDate = formattedEndDate;
 
-		if(data.Status === 'Approved' || data.Status === 'Rejected'){
-			const wppapprovals = await SELECT.from(WholesalePurchasePriceApprovals).where({WholesalePurchasePrice_ID: req.data.ID});
-			for (const wppapproval of wppapprovals) {
-                await UPDATE(WholesalePurchasePriceApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:wppapproval.ID});
-            }
-			req.data.Status = 'New';
-			req.data.ApprovalsCount = 0;
+		const wppapprovals = await SELECT.from(WholesalePurchasePriceApprovals).where({WholesalePurchasePrice_ID: req.data.ID});
+		for (const wppapproval of wppapprovals) {
+			await UPDATE(WholesalePurchasePriceApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:wppapproval.ID});
 		}
+		req.data.CurrentEndDate = formattedEndDate;
+		req.data.Status = 'New';
+		req.data.ApprovalsCount = 0;
+		
 	});
 
 	srv.on('ApproveWPP', async (req, res) => {
