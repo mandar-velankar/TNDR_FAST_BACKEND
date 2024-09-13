@@ -18,7 +18,7 @@ module.exports = (srv) => {
 				DistributorManagementExclusiveAccess:req.user.is('f_tndr_cag_distributormanagementexclusiveaccess_user'),
 				COGSManagementView:req.user.is('f_tndr_cag_admincogsview_user'),
 				WPPManagementPowerApproverAccess: req.user.is('f_tndr_cag_wpppowerapproveraccess_user'),
-				PPPManagementPowerApproverAccess: req.user.is('f_tndr_cag_ppppowerapproveraccess_user'),
+				PPPManagementPowerApproverAccess: req.user.is('f_tndr_cag_ppppowerapproveraccess_user')
 			},
 			standardtenderAccess: {
 				OverviewDownload: req.user.is('f_tnndr_cag_standardtenderdownload_user'),
