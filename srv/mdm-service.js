@@ -8,7 +8,8 @@ const ServiceHelper = require('./utils/ServiceHelper');
 module.exports = (srv) => {
 
 	const {
-		MailTemplate
+		MailTemplate,
+		Users
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 	
 	const {
@@ -100,6 +101,38 @@ module.exports = (srv) => {
 			ProductPack: productPack
 		}
 	};
+
+	srv.on('READ', 'Users', async(req) => {
+		try {
+			const tx = cds.tx(req);
+		
+			let result = [];
+			let tmvQuery = SELECT.from(req.query.SELECT.from);
+			req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+
+			result = await tx.run(tmvQuery);
+
+			const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+		
+			if (isCountQuery) {
+				// If $count is present, return the original result
+				return result;
+			}
+			
+			const cwid = req.user.id;
+
+			let resultsArray = Array.isArray(result) ? result : [result];
+
+			resultsArray = resultsArray.filter(ra => ra.CWID === cwid);
+
+			return resultsArray;
+
+		} catch (error) {
+			console.error('Error in PT_TMUSER READ');
+            return req.reject(403, error?.message||"Error in PT_TMUSER");
+		}
+
+	});
 
 	srv.before('CREATE', 'PT_TMDIST', async (req) => {
 		req.data.DistributorID = await getNextValue(PT_TMDIST, "DistributorID");
