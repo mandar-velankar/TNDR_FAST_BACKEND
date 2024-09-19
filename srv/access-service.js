@@ -37,6 +37,7 @@ module.exports = (srv) => {
 			cpi: req.user.is('f_tndr_cag_cpi_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			standardtender: req.user.is('f_tndr_cag_standardtender_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			whc: req.user.is('f_tndr_cag_whc_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user') || req.user.is('f_tndr_cag_whcapprover_user') || req.user.is('f_tndr_cag_whcproposalcreator_user'),
+			claims: req.user.is('f_tndr_cag_claims_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 		};
     });
 };

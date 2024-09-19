@@ -6,7 +6,7 @@ using { com.bayer.SXTENDER.MasterDataViews } from '../db/MasterDataViews';
 using { com.bayer.SXTENDER.ClaimsViews } from '../db/ClaimsViews';
 using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 
-service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_cag_technical_user','authenticated-user']){
+service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_cag_claims_user','f_tndr_cag_technical_user','authenticated-user']){
 
 
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;

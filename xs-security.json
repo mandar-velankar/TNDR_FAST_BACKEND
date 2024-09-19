@@ -137,6 +137,10 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_nlpricesmanagement_user",
       "description": "f_tndr_cag_nlpricesmanagement_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_claims_user",
+      "description": "f_tndr_cag_claims_user"
     }
   ],
   "attributes": [],
@@ -394,6 +398,14 @@
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_nlpricesmanagement_user"
+      ],
+      "attribute-references": []
+    },
+    {		  
+      "name": "f_tndr_cag_claims_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_claims_user"
       ],
       "attribute-references": []
     }

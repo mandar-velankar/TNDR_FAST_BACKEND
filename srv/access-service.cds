@@ -34,7 +34,8 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         cpi:Boolean;
         brazilcontracting:Boolean;
         standardtender:Boolean;
-        whc:Boolean
+        whc:Boolean;
+        claims:Boolean;
     };
 
     function getAccess() returns Access;
