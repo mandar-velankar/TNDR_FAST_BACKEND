@@ -16,6 +16,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             DistributorManagementExclusiveAccess:Boolean;
             WPPManagementPowerApproverAccess: Boolean;
             PPPManagementPowerApproverAccess: Boolean;
+            NLPricesManagementAccess: Boolean;
         };
         standardtenderAccess: {
 			OverviewDownload: Boolean;
