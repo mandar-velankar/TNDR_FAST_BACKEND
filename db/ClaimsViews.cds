@@ -10,16 +10,8 @@ using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
 entity ClaimFilesView as select from ClaimsData.ClaimFiles;
 entity ClaimDataView as select from ClaimsData.ClaimData as cd
 {
-    cd.Institute.InstituteName,
-    cd.Date,
-    cd.SKU.PRODUCTPACKNAME,
-    cd.Type,
-    cd.Quantity,
-    cd.PurchasePrice,
-    cd.DistributionArrangement,
-    cd.ContractPrice,
-    cd.TotalClaim,
-    cd.ClaimFiles.ID as ClaimFiles_ID:UUID
+    *,
+    cd.SKU.PRODUCTPACKNAME
 };
 
 //To get the list of material numbers for each ProductCode
