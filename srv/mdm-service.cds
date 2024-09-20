@@ -208,6 +208,17 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     group by CWID
     having count(CountryCode) = 1;
 
+    entity UserCountries @readonly @(restrict: [
+		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
+	])as projection on AdminData.PT_TMUSERCTRY {
+        *,
+        Country: redirected to Country,
+        User: redirected to Users,
+        User.UserName,
+        User.UserEmail,
+        Country.CountryName
+    };
+    
     entity CountryRegionsTableView @(cds.redirection.target:false) as projection on MasterData.CountryRegions;
     entity CountryLegalEntitySignatories as projection on MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory {
         *,
