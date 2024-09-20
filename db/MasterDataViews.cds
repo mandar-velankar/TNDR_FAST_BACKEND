@@ -465,7 +465,8 @@ entity CurrentDistributionAgreementView as select from MasterData.DistributionAg
     StartDate,
     EndDate,
     Type,
-    Value
+    Value,
+	DistributorID
 }where EndDate = '9999-12-31';
 
 entity WholesalePurchasePriceApprovalsCount as select from MasterData.WholesalePurchasePriceApprovals{
@@ -572,7 +573,8 @@ entity CurrentWholesalePurchasePriceView as select from MasterData.WholesalePurc
     EndDate,
     Type,
     Margin,
-	WPPWithoutTax
+	WPPWithoutTax,
+	DistributorID
 }where EndDate = '9999-12-31';
 
 entity WholesalePurchasePriceApprovals as select from MasterData.WholesalePurchasePriceApprovals as wppapprovals
