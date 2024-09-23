@@ -10,6 +10,8 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
 
 
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
+    entity Country as projection on MasterData.PT_TMCTRY;
+    entity Users as projection on AdminData.PT_TMUSER;
     entity CountryTenderBrands @readonly as projection on TransactionalDataViews.CountryTenderBrands;
 
     entity ClaimFiles @(cds.redirection.target:true) as projection on ClaimsData.ClaimFiles;
@@ -17,6 +19,24 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ClaimFilesView as projection on ClaimsViews.ClaimFilesView;
     entity ClaimDataView as projection on ClaimsViews.ClaimDataView;
 
+    entity UserCountries @readonly @(restrict: [
+		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
+	])as projection on AdminData.PT_TMUSERCTRY {
+        *,
+        Country: redirected to Country,
+        User: redirected to Users,
+        User.UserName,
+        User.UserEmail
+    };
 
+    entity ClaimDataBrandsView as select from ClaimData as cd
+        inner join TransactionalDataViews.BrandsInTender as bt
+            on bt.COUNTRYCODE = cd.CountryCode
+            and bt.OFFERID = cd.OfferID {
+        key bt.BRANDID,
+        key bt.OFFERID,
+        bt.COUNTRYCODE,
+        cd.ClaimFiles.ID as ClaimFiles_ID
+    };
 
 }
