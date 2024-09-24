@@ -19,6 +19,9 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ClaimFilesView as projection on ClaimsViews.ClaimFilesView;
     entity ClaimDataView as projection on ClaimsViews.ClaimDataView;
 
+    entity ContrastAgentSalesData as projection on ClaimsData.ContrastAgentSalesData;
+    entity SalesReportFile as projection on ClaimsData.SalesReportFile;
+
     entity UserCountries @readonly @(restrict: [
 		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
 	])as projection on AdminData.PT_TMUSERCTRY {

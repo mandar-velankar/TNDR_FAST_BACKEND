@@ -214,6 +214,13 @@ entity ContrastAgentSalesData: cuid, managed {
     ClaimFiles: Association to ClaimFiles on ClaimFiles.ContrastAgentSalesData = $self;
 };
 
-
+entity SalesReportFile {
+    key DistributorID   : String;
+    key CountryCode     : String;
+    key FileName        : String;
+    key FileType        : String;
+    @Core.MediaType     : 'application/octet-stream'
+    content    : LargeBinary;
+}
 
 
