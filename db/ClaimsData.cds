@@ -28,7 +28,7 @@ entity ClaimFiles : managed, cuid {
     Brocacef                : Association to BrocacefData;
     Pluripharm              : Association to PluripharmData;
     FrescoFarma             : Association to FrescoFarmaData;
-    ContrastAgentSalesData  : Association to ContrastAgentSalesData;    
+    ContrastAgentSalesData  : Association to many ContrastAgentSalesData on ContrastAgentSalesData.ClaimFiles = $self;    
 };
 
 entity ClaimData : managed, cuid {
@@ -211,7 +211,7 @@ entity ContrastAgentSalesData: cuid, managed {
     WartoscDoWyrownania              : Double;
     IloscSztukDoWyrownania           : Double;
     NrFakturyZakupu                  : String;
-    ClaimFiles: Association to ClaimFiles on ClaimFiles.ContrastAgentSalesData = $self;
+    ClaimFiles: Association to ClaimFiles;
 };
 
 entity SalesReportFile {
