@@ -219,6 +219,7 @@ entity SalesReportFile {
     key CountryCode     : String;
     key FileName        : String;
     key FileType        : String;
+    key FilePeriod      : String;
     @Core.MediaType     : 'application/octet-stream'
     content    : LargeBinary;
 }
