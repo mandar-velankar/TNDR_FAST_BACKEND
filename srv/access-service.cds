@@ -17,6 +17,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             COGSManagementView:Boolean;
             WPPManagementPowerApproverAccess: Boolean;
             PPPManagementPowerApproverAccess: Boolean;
+            NLPricesManagementAccess: Boolean;
         };
         standardtenderAccess: {
 			OverviewDownload: Boolean;
