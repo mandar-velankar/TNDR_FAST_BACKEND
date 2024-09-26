@@ -32,13 +32,23 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         User.UserEmail
     };
 
+    entity ClaimProductBrands as select from TransactionalData.PT_TMTEND as tender{
+        tender.CountryCode as COUNTRYCODE,
+        key tender.TenderID as TENDERID,
+        key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
+        key tender.Offer.OfferID as OFFERID,
+        tender.Offer.Product.ProductCode as PRODUCTCODE
+    };
+
     entity ClaimDataBrandsView as select from ClaimData as cd
-        inner join TransactionalDataViews.BrandsInTender as bt
+        inner join ClaimProductBrands as bt
             on bt.COUNTRYCODE = cd.CountryCode
-            and bt.OFFERID = cd.OfferID {
+            and bt.OFFERID = cd.OfferID
+            and bt.PRODUCTCODE = cd.ProductPackID {
         key bt.BRANDID,
         key bt.OFFERID,
         bt.COUNTRYCODE,
+        cd.ID as ClaimData_ID,
         cd.ClaimFiles.ID as ClaimFiles_ID
     };
 

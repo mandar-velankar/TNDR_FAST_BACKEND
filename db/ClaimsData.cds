@@ -66,6 +66,8 @@ entity ClaimData : managed, cuid {
     FASTWholesalerPurchasePrice             : Double;
     FASTContractPrice                       : Double;
     FASTDistributionArrangement             : Double;
+    QC1Passed                               : Boolean;
+    QC2Passed                               : Boolean;
     ClaimFiles                              : Association to ClaimFiles;
     Product                                 : Association to TransactionalData.PT_TMOFPR 
                                                 on Product.OfferID = OfferID 
