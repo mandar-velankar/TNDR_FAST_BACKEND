@@ -25,9 +25,9 @@ group by
 	ProductPackID;
 
 entity ExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
-	inner join ClaimsData.ClaimData as clmd 		
+	left join ClaimsData.ClaimData as clmd 		
             on clmd.ClaimFiles.ID = clmf.ID 
-	inner join TransactionalData.PT_TMOFRS as offer 		
+	left join TransactionalData.PT_TMOFRS as offer 		
             on clmd.OfferID = offer.OfferID 
 			and offer.Active = 1
 	inner join MasterData.PT_TMINST as inst 
