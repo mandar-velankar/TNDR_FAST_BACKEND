@@ -18,6 +18,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ClaimData @(cds.redirection.target:true) as projection on ClaimsData.ClaimData;
     entity ClaimFilesView as projection on ClaimsViews.ClaimFilesView;
     entity ClaimDataView as projection on ClaimsViews.ClaimDataView;
+    entity ExcelTemplate as projection on AdminData.ExcelTemplate;
 
     entity ContrastAgentSalesData as projection on ClaimsData.ContrastAgentSalesData;
     entity SalesReportFile as projection on ClaimsData.SalesReportFile;
@@ -51,5 +52,17 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         cd.ID as ClaimData_ID,
         cd.ClaimFiles.ID as ClaimFiles_ID
     };
+    entity ExtractClaimsSales {
+        key templateId    : Integer;
+        key CountryCode   : String;
+        key DistributorID : String;
+        key BrandId         : String;
+        key Status        : String;
+        key DateFrom      : String;
+        key DateTo        : String;
+            content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType     : String      @Core.IsMediaType;
+    }
+    entity ExtractClaimFilesView as projection on ClaimsViews.ExtractClaimFilesView;
 
 }
