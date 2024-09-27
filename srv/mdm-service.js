@@ -943,7 +943,7 @@ module.exports = (srv) => {
 			const {SelectedNLPPPApprover_NLPPPApproverEmailID} = req.data;
 			const nlPPPs = await SELECT.from(NLpppView).where({Status: "New"});
 			if (Array.isArray(nlPPPs) && nlPPPs.length > 0) {
-				addOutgoingMail(req, "NLPPPApprovalNotificationMail", "New PPP Prices Pending Approval Or Your approval is required", SelectedNLPPPApprover_NLPPPApproverEmailID);
+				addOutgoingMail(req, "NLPPPApprovalNotificationMail", "New PPP Prices Pending Approval", SelectedNLPPPApprover_NLPPPApproverEmailID);
 				return req.data;
 			}else {
 				return req.reject(404, 'No PPP found to approve');
@@ -1125,7 +1125,7 @@ module.exports = (srv) => {
 			const {SelectedWppApprover_WholesalePurchasePriceApproverEmailID} = req.data;
 			const wholesalePurchasePrices = await SELECT.from(WholesalePurchasePrices).where({Status: "New"});
 			if (Array.isArray(wholesalePurchasePrices) && wholesalePurchasePrices.length > 0) {
-				addOutgoingMail(req, "WPPApprovalNotificationMail", "New WPP Prices Pending Approval Or Your approval is required", SelectedWppApprover_WholesalePurchasePriceApproverEmailID);
+				addOutgoingMail(req, "WPPApprovalNotificationMail", "New WPP Prices Pending Approval", SelectedWppApprover_WholesalePurchasePriceApproverEmailID);
 				return req.data;
 			}else {
 				return req.reject(404, 'No WPP found to approve');
