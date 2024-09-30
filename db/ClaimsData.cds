@@ -52,6 +52,8 @@ entity ClaimData : managed, cuid {
     FASTPendingCorrection                   : Double;
     BrandContractVolume                     : Double;
     PercentageUsage                         : Double;
+    BrandId                                 : String;
+    BrandName                               : String;
     Balance                                 : Integer;
     BrandUsedVolume                         : Double;
     WholesalerContractPriceClaim            : Double;
