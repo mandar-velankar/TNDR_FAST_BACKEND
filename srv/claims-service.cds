@@ -106,4 +106,6 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.SKU.Product.HLEVEL4_CODE,
         product.SKU.CONCENTRATION;
 
+    entity ClaimApproverTypes as projection on ClaimsData.ClaimApproverTypes;
+    entity ClaimApprovals as projection on ClaimsData.ClaimApprovals;
 }

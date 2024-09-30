@@ -29,6 +29,7 @@ entity ClaimFiles : managed, cuid {
     Pluripharm              : Association to PluripharmData;
     FrescoFarma             : Association to FrescoFarmaData;
     ContrastAgentSalesData  : Association to many ContrastAgentSalesData on ContrastAgentSalesData.ClaimFiles = $self;    
+    ClaimApprovals          : Association to many ClaimApprovals on ClaimApprovals.ClaimFiles = $self;    
 };
 
 entity ClaimData : managed, cuid {
@@ -235,6 +236,14 @@ entity ClaimApproverTypes: cuid, managed {
     ApproverName: String;
     ApproverEmail: String;
     Hierarchy: Integer;
-}
+};
+
+entity ClaimApprovals: cuid, managed {
+    ApproverName: String;
+    ApproverEmail: String;
+    Hierarchy: Integer;
+    Status: String;
+    ClaimFiles: Association to ClaimFiles;
+};
 
 
