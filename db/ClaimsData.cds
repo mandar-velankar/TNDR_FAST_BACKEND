@@ -226,6 +226,15 @@ entity SalesReportFile {
     key FilePeriod      : String;
     @Core.MediaType     : 'application/octet-stream'
     content    : LargeBinary;
+};
+
+entity ClaimApproverTypes: cuid, managed {
+    CountryCode: String;
+    ApproverType: String;
+    ApproverCWID: String;
+    ApproverName: String;
+    ApproverEmail: String;
+    Hierarchy: Integer;
 }
 
 
