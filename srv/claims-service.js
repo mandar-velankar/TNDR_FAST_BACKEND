@@ -4,6 +4,7 @@ const moment = require('moment');
 const XLSXHelper = require("./utils/XLSXHelper");
 const Handlebars = require("handlebars");
 const ServiceHelper = require('./utils/ServiceHelper');
+const crypto = require('crypto');
 
 module.exports = (srv) => {
 
