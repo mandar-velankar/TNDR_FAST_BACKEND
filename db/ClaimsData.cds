@@ -49,7 +49,7 @@ entity ClaimData : managed, cuid {
     AppliedWholesalerCorrection             : Double; //coming in the extract
     WholesalerContractPrice                 : Double; //coming in the extract
     TotalClaim                              : Double; //coming in the extract
-    MainCustomerForContract                 : String;
+    MainCustomerForContract                 : Integer;
     FASTPendingCorrection                   : Double;
     BrandContractVolume                     : Double;
     PercentageUsage                         : Double;
