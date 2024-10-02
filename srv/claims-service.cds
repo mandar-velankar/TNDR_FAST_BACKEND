@@ -18,6 +18,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ClaimData @(cds.redirection.target:true) as projection on ClaimsData.ClaimData;
     entity ClaimFilesView as projection on ClaimsViews.ClaimFilesView;
     entity ClaimDataView as projection on ClaimsViews.ClaimDataView;
+    entity ClaimDataCalculatedView as projection on ClaimsViews.ClaimDataCalculatedView;
     entity ExcelTemplate as projection on AdminData.ExcelTemplate;
 
     entity ContrastAgentSalesData as projection on ClaimsData.ContrastAgentSalesData;
