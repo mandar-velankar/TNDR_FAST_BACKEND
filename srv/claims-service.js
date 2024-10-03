@@ -27,13 +27,20 @@ module.exports = (srv) => {
     const {
         PT_TMOFRS,
         PT_TMOFPR,
-        PT_TMTEND
+        PT_TMTEND,
+		OutgoingMails
     } = cds.entities("com.bayer.SXTENDER.TransactionalData");
+	const {
+		MailTemplate
+	} = cds.entities("com.bayer.SXTENDER.AdminData");
     const {
         ExcelTemplate,
         ExtractClaimFilesView,
         ClaimDataBrandsView,
-		ExtractFASTOffer
+		ExtractFASTOffer,
+		ClaimApproverTypes,
+		ClaimApprovals,
+		ClaimFileStatusView
     } = cds.entities("ClaimsService");
 
 	function bufferToArrayBuffer(buffer) {
@@ -374,5 +381,95 @@ module.exports = (srv) => {
 		  filePeriodDate
 		};
 	}
+
+	srv.on('approveRejectClaimFiles', async (req) => {
+		try {
+			const { claimFile_ID, countryCode, status, claimFileDetailPageURL } = req.data;
+
+			const claimFile = await SELECT.one.from(ClaimFiles).where({ID: claimFile_ID});
+			const claimFileStatus = await SELECT.one.from(ClaimFileStatusView).where({ClaimFiles_ID: claimFile_ID});
+			const approvals = await SELECT.from(ClaimApprovals).where({ClaimFiles_ID: claimFile_ID});
+			const currentApprover = approvals.find(approval => approval.ApproverCWID === req.user.id);
+
+			// Getting next level Approval
+			const nextHierarchylvl = currentApprover.Hierarchy + 1;
+			const nextHierarchyApproval = approvals.find(approval => approval.Hierarchy == nextHierarchylvl);
+
+			// Validation messages
+			const messages = {
+				'rejected': 'Claim File rejected successfully',
+				'approved': 'Claim File approved successfully',
+				'notification': 'Approval notification sent to the next hierarchy level approver',
+			}
+			let validationAction = '';
+
+			// If selected status is Approved and there is next level hierarchy approval then sending notification
+			if (claimFileStatus?.STATUS?.toLowerCase() === 'pending' && status?.toLowerCase() === 'approved' && nextHierarchyApproval) {
+				const approvalContentmapping = {
+					CountryCode: countryCode,
+					ApproverName: nextHierarchyApproval.ApproverName,
+					WholesalerName: claimFile.DistributorName,
+					ClaimFileDetailPageURL: claimFileDetailPageURL
+				};
+				await addOutgoingMail(req, approvalContentmapping, "ClaimFileApprovalNotificationMail", "Claim File for Review and Approval", nextHierarchyApproval?.ApproverEmail);
+				validationAction = 'notification';
+			}
+
+			if (!validationAction) {
+				validationAction = status.toLowerCase();
+			};
+
+			// Updating Claim file and approvals statuses
+			await UPDATE(ClaimApprovals).with({Status: status}).where({ClaimFiles_ID: claimFile_ID, ApproverCWID: currentApprover?.ApproverCWID});
+			const updatedClaimFileStatus = await SELECT.one.from(ClaimFileStatusView).where({ClaimFiles_ID: claimFile_ID});
+			await UPDATE(ClaimFiles).with({Status: updatedClaimFileStatus?.STATUS}).where({ID: claimFile_ID});
+
+			return messages[validationAction];
+			
+		} catch (error) {
+			console.error('Error in approveRejectClaimFiles');
+			return req.reject(400, error.message || 'An unexpected error occurred.')
+		}
+	});
+
+	const addOutgoingMail = async function (req, data, templateId, subject, recipients) {
+		const mailTemplate = await getMailTemplate(templateId);
+		const mappedData = mapDataToMail(req, data, mailTemplate, subject, recipients);
+
+		await INSERT(mappedData).into(OutgoingMails);
+
+	}
+
+	const mapDataToMail = function (req, data, template, subject, recipients) {
+		
+        return {
+            CountryCode: data.CountryCode,
+            Sender: "FAST-Admin@bayer.com",
+            Recipients: recipients,
+            Subject: subject,
+            MailBody: generateMailBody(template, {
+                data: { 
+                    content: data
+                }
+            }),
+            Sent: false
+        };
+    }
+
+    const generateMailBody = function (mail, data) {
+        return Handlebars.compile("" + mail.content)(data);
+    }
+
+    const getMailTemplate = async function (templateId) {
+        try{
+            const result = await SELECT.one.from(MailTemplate)
+			.columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+			.where({ TemplateId: templateId });
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            return;
+        }
+    }
 
 };
