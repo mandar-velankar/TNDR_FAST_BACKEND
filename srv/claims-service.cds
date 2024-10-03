@@ -107,5 +107,11 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.SKU.CONCENTRATION;
 
     entity ClaimApproverTypes as projection on ClaimsData.ClaimApproverTypes;
-    entity ClaimApprovals as projection on ClaimsData.ClaimApprovals;
+    entity ClaimApprovals @(cds.redirection.target:true) as projection on ClaimsData.ClaimApprovals;
+    entity UserClaimApprovals @(restrict: [
+		{grant: '*', to: 'authenticated-user', where: 'ApproverCWID = $user.id'}
+	])as projection on ClaimsData.ClaimApprovals;
+    entity ClaimFileStatusView as projection on ClaimsViews.ClaimFileStatusView;
+
+    action approveRejectClaimFiles(claimFile_ID: String, countryCode: String, status: String, claimFileDetailPageURL: String) returns String;
 }

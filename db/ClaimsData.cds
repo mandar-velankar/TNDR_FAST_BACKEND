@@ -241,6 +241,7 @@ entity ClaimApproverTypes: cuid, managed {
 entity ClaimApprovals: cuid, managed {
     ApproverName: String;
     ApproverEmail: String;
+    ApproverCWID: String;
     Hierarchy: Integer;
     Status: String;
     ClaimFiles: Association to ClaimFiles;

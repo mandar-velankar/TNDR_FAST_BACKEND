@@ -59,3 +59,17 @@ entity ExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 				clmd.CountryCode,
 				clmd.Status
 		};
+
+entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
+	key ID as CLAIMFILES_ID,
+	case
+	    when max(case when ClaimApprovals.Status = 'Rejected' then 1 else 0 end) = 1 then 'Rejected'
+	    when 
+	    	min(case when ClaimApprovals.Status = 'Approved' then 1 else 0 end) = 1 and min(case when ClaimData.Status = 'Passed' then 1 else 0 end) = 1
+	    then 'Approved (All QC Passed)'
+	    when 
+	    	min(case when ClaimApprovals.Status = 'Approved' then 1 else 0 end) = 1 and min(case when ClaimData.Status != 'Passed' then 1 else 0 end) = 0
+	    then 'Approved (Some QC Failed)'
+	    else 'Pending'
+	end as STATUS: String
+}group by ID;
