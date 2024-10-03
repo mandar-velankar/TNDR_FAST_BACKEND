@@ -13,7 +13,46 @@ entity ClaimDataView as select from ClaimsData.ClaimData as cd
     *,
     cd.SKU.PRODUCTPACKNAME
 };
-
+entity CalculatedBrandVolumes as select from ClaimsData.ClaimData as cd
+{
+	key cd.OfferID,
+	key cd.ProductPackID,
+	SUM(cd.BrandContractVolume) OVER (PARTITION BY cd.OfferID, cd.MainInstituteID, cd.BrandId ORDER BY cd.OfferID, cd.MainInstituteID, cd.BrandId) as BrandContractCalculatedVolume : Double,
+	SUM(cd.BrandUsedVolume) OVER (PARTITION BY cd.OfferID, cd.MainInstituteID, cd.BrandId ORDER BY cd.OfferID, cd.MainInstituteID, cd.BrandId) as BrandUsedCalculatedVolume : Double
+	
+};
+entity ClaimDataCalculatedView as select from ClaimsData.ClaimData as cd
+	inner join ClaimsMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = cd.ProductPackID
+	left join CalculatedBrandVolumes as calcbrandvolumes
+		on calcbrandvolumes.OfferID = cd.OfferID
+		and calcbrandvolumes.ProductPackID = cd.ProductPackID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = cd.CountryCode{
+    *,
+	key cd.ID,
+	ctryCurrency.Currency,
+	cd.createdAt,
+    cd.createdBy,
+    cd.modifiedAt,
+	cd.modifiedBy,
+	cd.OfferID,
+	cd.ProductPackID,
+	cd.CountryCode,
+	ctryCurrency.CountryCode as CurrencyCountry,
+    cd.SKU.PRODUCTPACKNAME,
+    cd.SKUCountry.GOV_CODE,
+    materialNumbers.MaterialNumbers,
+	calcbrandvolumes.BrandUsedCalculatedVolume,
+	calcbrandvolumes.BrandContractCalculatedVolume,
+	CASE 
+        WHEN calcbrandvolumes.BrandContractCalculatedVolume != 0 
+        THEN calcbrandvolumes.BrandUsedCalculatedVolume 
+              / 
+             calcbrandvolumes.BrandContractCalculatedVolume
+        ELSE 0 
+    END as CalculatedUsage : Double
+};
 //To get the list of material numbers for each ProductCode
 entity ClaimsMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
 	CountryCode,
