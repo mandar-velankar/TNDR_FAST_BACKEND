@@ -66,7 +66,7 @@ group by
 entity ExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 	left join ClaimsData.ClaimData as clmd 		
             on clmd.ClaimFiles.ID = clmf.ID 
-	left join TransactionalData.PT_TMOFRS as offer 		
+	inner join TransactionalData.PT_TMOFRS as offer 		
             on clmd.OfferID = offer.OfferID 
 			and offer.Active = 1
 	inner join MasterData.PT_TMINST as inst 
@@ -77,26 +77,36 @@ entity ExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 	inner join MasterData.PT_TMPRDPCK as productPack
     		on productPack.PRODUCTPACKID = clmd.ProductPackID
     		and productPack.ACTIVERECORD = 'Yes'
+	inner join TransactionalData.PT_TMOFPR as product
+			on productPack.PRODUCTPACKID = clmd.ProductPackID
+			and product.OfferID = clmd.OfferID
+			and product.Active = 1
+	inner join TransactionalData.PriceCondition as priceCondition 
+			on clmd.CountryCode = priceCondition.CountryCode
+			and product.ProductCode = priceCondition.ProductCode
+			and clmd.OfferID = priceCondition.OfferID
+	inner join MasterData.PT_TMPRDHIER as hier
+			on productPack.HLEVEL6_CODE = hier.HLEVEL6_CODE
 			{
-				key clmf.ClaimData.OfferID,
+				clmd.OfferID,
 				clmf.ID as ClaimFileID,
-				clmf.ClaimData.ID as ClaimDataID,
+				clmd.ID as ClaimDataID,
 				distributor.DistributorID,
 				distributor.DistributorName,
 				inst.InstituteName,
-				clmf.ClaimData.Date,
+				clmd.Date,
 				productPack.PRODUCTPACKNAME,
-				clmf.ClaimData.Product.RequestedVolume,
-				productPack.Product.HLEVEL4_NAME,
-				clmf.ClaimData.Product.PriceCondition.Price0,
-				clmf.ClaimData.Product.PriceCondition.OfferPrice,
-				clmf.ClaimData.Product.PriceCondition.Price0 * clmf.ClaimData.Product.RequestedVolume as WholesalerPurchasedAmount: Double, 
-				clmf.ClaimData.Product.PriceCondition.OfferPrice * clmf.ClaimData.Product.RequestedVolume as NetSales: Double,
-				productPack.CONCENTRATION * clmf.ClaimData.Product.RequestedVolume as ContractBrandVolume: Double ,
+				product.RequestedVolume,
+				hier.HLEVEL4_NAME,
+				priceCondition.Price0,
+				priceCondition.OfferPrice,
+				priceCondition.Price0 * product.RequestedVolume as WholesalerPurchasedAmount: Double, 
+				priceCondition.OfferPrice * product.RequestedVolume as NetSales: Double,
+				productPack.CONCENTRATION * product.RequestedVolume as ContractBrandVolume: Double ,
 				clmf.DateFrom,
 				clmf.DateTo,
-				clmd.CountryCode,
-				clmd.Status
+				clmf.CountryCode,
+				clmf.Status
 		};
 
 entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {

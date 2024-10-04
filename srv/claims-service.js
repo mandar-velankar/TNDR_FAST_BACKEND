@@ -95,13 +95,18 @@ module.exports = (srv) => {
         if (DistributorID) {
             where += `and DistributorID = '${DistributorID}'`
         }
-        if (DateFrom) {
-            where += `and DateFrom <= date'${DateFrom}'`
-        }
         if (DateTo) {
-            where += `and DateTo >= date'${DateTo}'`
+			where += `and DateFrom <= date'${DateTo}'`;
+        }
+        if (DateFrom) {
+			where += `and DateTo >= date'${DateFrom}'`;
         }
         let brandFilter = ''
+
+		if (BrandId !== 'All_Brands' && Array.isArray(CountryBrands) && CountryBrands.length == 0) {
+            where += " and "
+			brandFilter += `ClaimFileID = 'null'`;
+        }
         if (Array.isArray(CountryBrands) && CountryBrands.length > 0) {
             where += " and "
             for (let i = 0; i < CountryBrands.length; i++) {
@@ -115,8 +120,20 @@ module.exports = (srv) => {
 
         const fullWhere = cds.parse.expr(where + brandFilter);
 		const query = SELECT.from(ExtractClaimFilesView).where(fullWhere);
+		const countryCodeLocals = {
+			'NL': 'nl-NL',
+			'PL': 'en-US'
+		}
+	
 
         const excelData = await tx.run(query);
+
+		excelData.forEach(ed => {
+			ed.Price0 = ServiceHelper.formatCurrency(Number(ed.Price0), countryCodeLocals[CountryCode], 2, 2);
+			ed.OfferPrice = ServiceHelper.formatCurrency(Number(ed.OfferPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerPurchasedAmount = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasedAmount), countryCodeLocals[CountryCode], 2, 2);
+			ed.NetSales = ServiceHelper.formatCurrency(Number(ed.NetSales), countryCodeLocals[CountryCode], 2, 2);
+		});
 		if (!template || !template.content) {
 			return req.reject(404, 'No template found for templateid:' + templateId);
 		}
