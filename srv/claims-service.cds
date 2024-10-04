@@ -53,7 +53,12 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         cd.ID as ClaimData_ID,
         cd.ClaimFiles.ID as ClaimFiles_ID
     };
-    entity ExtractClaimsSales {
+    entity ExtractApprovedClaim{
+        key templateId    : Integer;
+            content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType     : String      @Core.IsMediaType;
+    }
+     entity ExtractClaimsSales {
         key templateId    : Integer;
         key CountryCode   : String;
         key DistributorID : String;
@@ -65,6 +70,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
             mediaType     : String      @Core.IsMediaType;
     }
     entity ExtractClaimFilesView as projection on ClaimsViews.ExtractClaimFilesView;
+    entity ExtractClaimDataView as projection on ClaimsViews.ExtractClaimDataView;
 
     entity ExtractFASTOffer as select from TransactionalData.PT_TMTEND as tender 
         inner join TransactionalData.PT_TMOFRS as offer 

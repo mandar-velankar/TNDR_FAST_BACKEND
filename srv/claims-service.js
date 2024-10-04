@@ -36,6 +36,7 @@ module.exports = (srv) => {
     const {
         ExcelTemplate,
         ExtractClaimFilesView,
+		ExtractClaimDataView,
         ClaimDataBrandsView,
 		ExtractFASTOffer,
 		ClaimApproverTypes,
@@ -150,7 +151,38 @@ module.exports = (srv) => {
         }
         
 	});
-	
+
+
+	srv.on('READ', 'ExtractApprovedClaim', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+
+		const {templateId} = req.data;
+
+		const query = SELECT.from(ExtractClaimDataView);
+
+        const excelData = await tx.run(query);
+		
+		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+
+		if (!template || !template.content) {
+			return req.reject(404, 'No template found for templateid:' + templateId);
+		}
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+
+		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in ExtractApprovedClaim READ');
+            return req.reject(403, error?.message||"Error in ExtractApprovedClaim");
+        }
+        
+	});
+
+
     srv.after("UPDATE", "SalesReportFile", async (req, res) => {
 		/**
 		 * @param {Object} file - This is uploaded excel file

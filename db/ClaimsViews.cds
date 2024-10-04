@@ -122,3 +122,33 @@ entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
 	    else 'Pending'
 	end as STATUS: String
 }group by ID;
+
+
+entity ExtractClaimDataView  as select from ClaimsData.ClaimFiles as clmf
+	inner join ClaimsData.ClaimData as clmd 		
+            on clmd.ClaimFiles.ID = clmf.ID 
+	inner join MasterData.PT_TMPRDPCK as productPack
+    		on productPack.PRODUCTPACKID = clmd.ProductPackID
+			and productPack.ACTIVERECORD = 'Yes'
+	inner join MasterData.PT_TMINST as inst 
+			on inst.InstituteID = clmd.MainInstituteID 
+			and inst.CountryCode = clmd.CountryCode
+	inner join ClaimsData.ContrastAgentSalesData as cas
+			on cas.ClaimFiles.ID = clmf.ID{
+	
+			productPack.PRODUCTPACKNAME,
+			clmd.SKUCountry.GOV_CODE,
+			clmd.Quantity,
+			clmd.WholesalerPurchasePrice,
+			clmd.WholesalerContractPrice,
+			inst.External_InstituteId,
+			clmd.MainInstituteName,
+			cas.NrFaktury,
+			clmd.Date,
+			cas.RoznicaCenaZakupuPNM,
+			cas.WartoscPNM,
+			clmd.TotalWholesalerClaim,
+			cas.IloscSztukDoWyrownania,
+			cas.NrFakturyZakupu,
+			clmd.Comment,
+}where  clmf.Status = 'Approved (All QC Passed)' or clmf.Status = 'Approved (Some QC Failed)';
