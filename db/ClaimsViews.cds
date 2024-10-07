@@ -123,6 +123,13 @@ entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
 	end as STATUS: String
 }group by ID;
 
+entity ClaimDataBrandsView as select from ClaimsData.ClaimData{
+    key BrandId as BRANDID,
+    CountryCode as COUNTRYCODE,
+    ID as ClaimData_ID,
+    ClaimFiles.ID as ClaimFiles_ID
+};
+
 
 entity ExtractClaimDataView  as select from ClaimsData.ClaimFiles as clmf
 	inner join ClaimsData.ClaimData as clmd 		
