@@ -157,12 +157,26 @@ module.exports = (srv) => {
 		try{
 		const tx = cds.tx(req);
 
-		const {templateId} = req.data;
+		const {templateId, CountryCode} = req.data;
 
 		const query = SELECT.from(ExtractClaimDataView);
 
+		const countryCodeLocals = {
+			'NL': 'nl-NL',
+			'PL': 'en-US'
+		}
+	
         const excelData = await tx.run(query);
 		
+		excelData.forEach(ed => {
+			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WartoscPNM = ServiceHelper.formatCurrency(Number(ed.WartoscPNM), countryCodeLocals[CountryCode], 2, 2);
+			ed.RoznicaCenaZakupuPNM = ServiceHelper.formatCurrency(Number(ed.RoznicaCenaZakupuPNM), countryCodeLocals[CountryCode], 2, 2);
+			ed.IloscSztukDoWyrownania = ServiceHelper.formatCurrency(Number(ed.IloscSztukDoWyrownania), countryCodeLocals[CountryCode], 2, 2);
+			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2);
+		});
+
 		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
 
 		if (!template || !template.content) {
