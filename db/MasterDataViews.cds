@@ -762,7 +762,9 @@ inner join MasterData.WholesalePurchasePriceApprovals as wppapprovals
 	on wppapprovals.WholesalePurchasePrice.ID = wpp.ID
 left join MasterData.NLPPP as nlppp
 	on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
-	and nlppp.ID = wpp.NLPPP_ID{
+	and nlppp.ID = wpp.NLPPP_ID
+inner join MasterData.PT_TMDIST as dist
+	on wpp.DistributorID = dist.DistributorID{
 	wpp.ID as WPP_ID: UUID,
 	wpp.NLPPP_ID,
 	wpp.DistributorID,
@@ -780,7 +782,8 @@ left join MasterData.NLPPP as nlppp
 	wppapprovals.ApproverComment,
 	wppapprovals.ID as WPPApprovals_ID: UUID,
 	wppapprovals.ApproverCWID,
-	ctryCurrency.Currency
+	ctryCurrency.Currency,
+	dist.DistributorName
 }
 where wpp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and ((wppapprovals.ApprovalStatus = 'Waiting' and wpp.Status = 'New') or wppapprovals.ApprovalStatus = 'Rejected')
 group by 
@@ -801,4 +804,5 @@ group by
 	wppapprovals.ApproverComment,
 	wppapprovals.ID,
 	wppapprovals.ApproverCWID,
-	ctryCurrency.Currency;
+	ctryCurrency.Currency,
+	dist.DistributorName;
