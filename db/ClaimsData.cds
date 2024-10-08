@@ -23,11 +23,7 @@ entity ClaimFiles : managed, cuid {
     Status                  : String;//Pending upon upload, then as per status set through approvals on screen
     ApprovalsCount          : Integer;
     ClaimData               : Association to many ClaimData on ClaimData.ClaimFiles = $self;
-    AllianceHealthcare      : Association to AllianceHealthcareData;
-    Ovidius                 : Association to OvidiusData;
-    Brocacef                : Association to BrocacefData;
-    Pluripharm              : Association to PluripharmData;
-    FrescoFarma             : Association to FrescoFarmaData;
+    ContrastAgentSalesDataNL: Association to many ContrastAgentSalesDataNL on ContrastAgentSalesDataNL.ClaimFiles = $self;
     ContrastAgentSalesData  : Association to many ContrastAgentSalesData on ContrastAgentSalesData.ClaimFiles = $self;    
     ClaimApprovals          : Association to many ClaimApprovals on ClaimApprovals.ClaimFiles = $self;    
 };
@@ -36,6 +32,8 @@ entity ClaimData : managed, cuid {
     CountryCode                             : String;
     OfferID                                 : String;   //link to offer mapped to claim line item
     ProductPackID                           : Integer;  //link to product within offer mapped on claim line item
+    ProductPackName                         : String;
+    EANNumber                               : String;
     MainInstituteID                         : Integer;  //set based on customer mapping on each line of file
     ChildInstituteID                        : Integer;  //set based on customer mapping on each line of file
     MainInstituteName                       : String;
@@ -71,6 +69,10 @@ entity ClaimData : managed, cuid {
     FASTDistributionArrangement             : Double;
     QC1Passed                               : Boolean;
     QC2Passed                               : Boolean;
+    WholesalerClaim1                        : Double;
+    WholesalerClaim2                        : Double;
+    FASTClaim1                              : Double;
+    FASTClaim2                              : Double;
     ClaimFiles                              : Association to ClaimFiles;
     Product                                 : Association to TransactionalData.PT_TMOFPR 
                                                 on Product.OfferID = OfferID 
@@ -83,33 +85,33 @@ entity ClaimData : managed, cuid {
                                                 and SKUCountry.COUNTRYCODE = CountryCode;
 };
 
-entity AllianceHealthcareData: cuid, managed {
-    ID                    : Integer;
-    TypeRecord            : String;
-    DateFrom              : Date;
-    DateTo                : Date;
-    IDFNumber             : String;
-    EANCustomerNumber     : String;
-    CustomerName          : String;
-    EANNoItem             : String;
-    ZIndexNumber          : String;
-    ItemNoSupplier        : String;
-    DiscountPercentage2   : Double;
-    PurchasePrice         : Double;
-    ClaimPercentage       : Double;
-    ClaimAmount           : Double;
-    TotalDelivered        : Integer;
-    Claim1Amount          : Double;
-    Claim2Amount          : Double;
-    ClaimTotal            : Double;
-    ClaimPeriod           : String;
-    ClaimBasis            : String;
-    ClaimFiles: Association to ClaimFiles on ClaimFiles.AllianceHealthcare = $self;
-};
-
-entity OvidiusData: cuid, managed{
-    Klantnummer                     : Integer;
+entity ContrastAgentSalesDataNL: cuid, managed {
+    ID                              : Integer;
+    TypeRecord                      : String;
+    DatumVan                        : Date;
+    DatumTm                         : Date;
+    IDFNummerKlant                  : String;
+    EANNrKlant                      : String;
     Klantnaam                       : String;
+    EANNrArtikel                    : String;
+    ZINrArtikel                     : String;
+    ArtnrLeverancier                : String;
+    NaamArtikel                     : String;
+    Eenheid1                        : String;
+    Eenheid2                        : String;
+    VastePrijs                      : Double;
+    Kortingsperc1                   : Double;
+    Kortingsperc2                   : Double;
+    Inkoopprijs                     : Double;
+    Claimpercentage                 : Double;
+    Claimbedrag                     : Double;
+    AantalGeleverd                  : Integer;
+    Claim1Bedrag                    : Double;
+    Claim2Bedrag                    : Double;
+    ClaimTotaal                     : Double;
+    ClaimPeriode                    : String;
+    ClaimGrondslag                  : String;
+    Klantnummer                     : Integer;
     KlantenOvidiusPharmaceutische   : String;
     IDFNummer                       : String;
     KlantenLairesseZiekenhuis       : String;
@@ -118,87 +120,45 @@ entity OvidiusData: cuid, managed{
     ArtikelNummerLeverancier        : String;
     ArtikelNaam                     : String;
     EenheidStuks                    : Integer;
-    VastePrijs                      : Double;
-    Inkoopprijs                     : Double;
     Claim1PerEenheid                : Double;
-    AantalGeleverd                  : Integer;
     TotaalClaim1                    : Double;
     Claim2PerEenheid                : Double;
     TotaalClaim2                    : Double;
     ClaimbedragTotaal               : Double;
-    ClaimFiles: Association to ClaimFiles on ClaimFiles.Ovidius = $self;
-};
-
-entity BrocacefData: cuid, managed {
-    ID                        : Integer;
-    TypeRecord                : String;
-    DatumVan                  : Date;
-    DatumTm                   : Date;
-    IDFNummerKlant            : String;
-    EANNrKlant                : String;
-    Klantnaam                 : String;
-    EANNrArtikel              : String;
-    ZINrArtikel               : String;
-    ArtnrLeverancier          : String;
-    NaamArtikel               : String;
-    Eenheid1                  : String;
-    Eenheid2                  : String;
-    VastePrijs                : Double;
-    Kortingsperc1             : Double;
-    Kortingsperc2             : Double;
-    Inkoopprijs               : Double;
-    Claimpercentage           : Double;
-    Claimbedrag               : Double;
-    AantalGeleverd            : Integer;
-    Claim1Bedrag              : Double;
-    Claim2Bedrag              : Double;
-    ClaimTotaal               : Double;
-    ClaimPeriode              : String;
-    ClaimGrondslag            : String;
-    ClaimFiles: Association to ClaimFiles on ClaimFiles.Brocacef = $self;
-};
-
-entity PluripharmData: cuid, managed {
-    Leverancier                        : String;
-    AccountcombinatieNaam              : String;
-    Klantnaam                          : String;
-    Woonplaats                         : String;
-    IDFCode                            : String;
-    Uitleverdatum                      : Date;
-    OrderNummer                        : String;
-    RegelNr                            : Integer;
-    Jaarweek                           : Integer;
-    Jaar                               : Integer;
-    KalenderMaand                      : Integer;
-    ZINummer                           : String;
-    ArtikelnrLeverancier               : String;
-    ArtikelOmschrijving                : String;
-    VerpakkingAantal                   : Integer;
-    VerpakkingsEenheid                 : String;
-    AIP                                : Double;
-    AantalGeleverd                     : Integer;
-    DAPrijs                            : Double;
-    LeveranciersbijdragePercentage     : Double;
-    Grondslag                          : String;
-    LeveranciersbijdrageBedrag         : Double;
-    TotaalLeveranciersbijdrage         : Double;
-    Ultimo                             : Double;
-    Betaald                            : Double;
-    DAClaimPerArtikel                  : Double;
-    TotaleClaimPerArtikel              : Double;
-    TotaleClaimPerRegel                : Double;
-    ClaimFiles: Association to ClaimFiles on ClaimFiles.Pluripharm = $self;
-};
-
-entity FrescoFarmaData: cuid, managed{
-    ContractPrice       : Double;
-    WPP                 : Double;
-    Claim1              : Double;
-    Claim2              : Double;
-    Quantity            : Double;
-    TotalClaim          : Double;
-    Date                : Date;
-    ClaimFiles: Association to ClaimFiles on ClaimFiles.FrescoFarma = $self;
+    Leverancier                     : String;
+    AccountcombinatieNaam           : String;
+    Woonplaats                      : String;
+    IDFCode                         : String;
+    Uitleverdatum                   : Date;
+    OrderNummer                     : String;
+    RegelNr                         : Integer;
+    Jaarweek                        : Integer;
+    Jaar                            : Integer;
+    KalenderMaand                   : Integer;
+    ZINummer                        : String;
+    ArtikelnrLeverancier            : String;
+    ArtikelOmschrijving             : String;
+    VerpakkingAantal                : Integer;
+    VerpakkingsEenheid              : String;
+    AIP                             : Double;
+    DAPrijs                         : Double;
+    LeveranciersbijdragePercentage  : Double;
+    Grondslag                       : String;
+    LeveranciersbijdrageBedrag      : Double;
+    TotaalLeveranciersbijdrage      : Double;
+    Ultimo                          : Double;
+    Betaald                         : Double;
+    DAClaimPerArtikel               : Double;
+    TotaleClaimPerArtikel           : Double;
+    TotaleClaimPerRegel             : Double;
+    ContractPrice                   : Double;
+    WPP                             : Double;
+    Claim1                          : Double;
+    Claim2                          : Double;
+    Quantity                        : Double;
+    TotalClaim                      : Double;
+    Date                            : Date;
+    ClaimFiles: Association to ClaimFiles;
 };
 
 entity ContrastAgentSalesData: cuid, managed {

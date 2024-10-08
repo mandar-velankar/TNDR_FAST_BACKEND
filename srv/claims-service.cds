@@ -22,6 +22,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ExcelTemplate as projection on AdminData.ExcelTemplate;
 
     entity ContrastAgentSalesData as projection on ClaimsData.ContrastAgentSalesData;
+    entity ContrastAgentSalesDataNL as projection on ClaimsData.ContrastAgentSalesDataNL;
     entity SalesReportFile as projection on ClaimsData.SalesReportFile;
 
     entity UserCountries @readonly @(restrict: [
