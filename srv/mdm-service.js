@@ -851,7 +851,7 @@ module.exports = (srv) => {
 
 			// Formatting
 			excelData.forEach(ed => {
-				ed.PPP = ServiceHelper.formatCurrency(ed.PPP, 'nl-NL', 2, 2);
+				ed.PPP = ServiceHelper.formatCurrency(ed.PPP, 'nl-NL', 2, 2, true);
 			});
 
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content, { excelData }, 1);
@@ -921,8 +921,8 @@ module.exports = (srv) => {
 
 		excelData.forEach(item => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
-			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2);
-			item.WPPWithoutTax = ServiceHelper.formatCurrency(item.WPPWithoutTax, 'nl-NL', 2, 2);
+			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
+			item.WPPWithoutTax = ServiceHelper.formatCurrency(item.WPPWithoutTax, 'nl-NL', 2, 2, false);
 			item.Margin = (item.Margin*100).toFixed(2)+"%";
 		});
 
@@ -1002,7 +1002,7 @@ module.exports = (srv) => {
 
 		Type = Type.toLowerCase();
 		if (Type === "fixed") {
-			return ServiceHelper.formatCurrency(Value, 'nl-NL', 2, 2);
+			return ServiceHelper.formatCurrency(Value, 'nl-NL', 2, 2, false);
 		}
 		if (Type === "percentage") {
 			return (Value*100).toFixed(2)+"%";
