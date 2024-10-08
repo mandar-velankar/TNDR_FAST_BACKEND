@@ -8,11 +8,7 @@ using {com.bayer.SXTENDER.TransactionalDataViews} from '../db/TransactionalDataV
 using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
 
 entity ClaimFilesView as select from ClaimsData.ClaimFiles;
-entity ClaimDataView as select from ClaimsData.ClaimData as cd
-{
-    *,
-    cd.SKU.PRODUCTPACKNAME
-};
+entity ClaimDataView as select from ClaimsData.ClaimData;
 entity CalculatedBrandVolumes as select from ClaimsData.ClaimData as cd
 {
 	key cd.OfferID,
