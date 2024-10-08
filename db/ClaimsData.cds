@@ -32,7 +32,7 @@ entity ClaimData : managed, cuid {
     CountryCode                             : String;
     OfferID                                 : String;   //link to offer mapped to claim line item
     ProductPackID                           : Integer;  //link to product within offer mapped on claim line item
-    ProductPackName                         : String;
+    PRODUCTPACKNAME                         : String;
     EANNumber                               : String;
     MainInstituteID                         : Integer;  //set based on customer mapping on each line of file
     ChildInstituteID                        : Integer;  //set based on customer mapping on each line of file
