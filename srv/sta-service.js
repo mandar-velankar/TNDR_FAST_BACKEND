@@ -690,7 +690,7 @@ module.exports = async (srv) => {
         }
 	});
 
-	srv.before(['UPDATE'], ['ComplianceOfficerView'], async (req) => {
+	srv.before(['UPDATE'], ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
 		try{
 		const sections = {
 			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
