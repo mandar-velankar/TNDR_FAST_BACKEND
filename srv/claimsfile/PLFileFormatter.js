@@ -190,7 +190,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					BrandName								: fastOffer && fastOffer.BrandName || null,
 					Balance                                 : null,
 					BrandUsedVolume                         : fastOffer && (curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI * fastOffer.CONCENTRATION) || 0,
-					WholesalerContractPriceClaim            : curr.PODSTAWANALICZENIAMARŻYNETTOPNM,
+					WholesalerContractPriceClaim            : curr.Wartośćdowyrównania,
 					WholesalerDistributionArrangementClaim  : null,
 					TotalWholesalerClaim                    : curr.Wartośćdowyrównania,
 					FASTContractClaim                       : fastContractClaim,
