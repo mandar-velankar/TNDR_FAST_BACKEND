@@ -1135,4 +1135,13 @@ module.exports = (srv) => {
             return req.reject(403, error?.message||"Error in WholesalePurchasePriceApprovalsNotification");
 		}
 	});
+	srv.after('READ', 'WPPApprovalDistributors', data => {
+        const countryCode = data?.[0]?.CountryCode;
+		data.unshift({
+			ID: "99999999-9999-9999-9999-999999999999",
+			CountryCode: countryCode,
+            DistributorID: "",
+            DistributorName: "All",
+		})
+	});
 };

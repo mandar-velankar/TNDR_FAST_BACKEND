@@ -245,6 +245,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity NLPPPApprovers as projection on MasterData.NLPPPApprovers; 
     entity NLPPPApprovalsNotification as projection on MasterData.NLPPPApprovalsNotification;
     entity PPPApprovalsView as projection on MasterDataViews.PPPApprovalsView;
+    entity WPPApprovalDistributors @(cds.redirection.target:false) as projection on MasterData.PT_TMDIST;
     entity NLDAExcelTemplates {
         key templateId   : Integer;
         key validDate    : String;
