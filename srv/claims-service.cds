@@ -105,5 +105,55 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
 	])as projection on ClaimsData.ClaimApprovals;
     entity ClaimFileStatusView as projection on ClaimsViews.ClaimFileStatusView;
 
+    entity ExtractFASTOfferNL as select from TransactionalData.PT_TMTEND as tender 
+        inner join TransactionalData.PT_TMOFRS as offer 
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        inner join TransactionalData.PT_TMOFPR as product 
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+        inner join TransactionalData.ContractInfomation as contract
+            on contract.ProductCode = product.ProductCode
+            and contract.Active = true{
+    	tender.TenderID,
+        contract.InstituteID,
+        contract.ContractStartDate,
+        contract.ContractEndDate,
+        contract.ContractDuration,
+        offer.DistributorID,
+        offer.OfferID,
+        product.ProductCode,
+        tender.CountryCode,
+        product.RequestedVolume,
+        product.Results.Outcome,
+        offer.Quotation.EffectiveDate,
+        offer.Quotation.ExpiryDate,
+        product.Price.OfferPrice,
+        product.Price.RegPrice,
+        product.SKU.CONCENTRATION,
+        product.SKU.Product.HLEVEL4_CODE as BrandId:String,
+        product.SKU.Product.HLEVEL4_NAME as BrandName:String
+    }
+    where product.Results.Outcome = 'Won' and tender.Active = 1 and offer.Active = 1
+    group by 
+        tender.TenderID,
+        contract.InstituteID,
+        contract.ContractStartDate,
+        contract.ContractEndDate,
+        contract.ContractDuration,
+        offer.DistributorID,
+        offer.OfferID,
+        product.ProductCode,
+        product.RequestedVolume,
+        tender.CountryCode,
+        product.Results.Outcome,
+        offer.Quotation.EffectiveDate,
+        offer.Quotation.ExpiryDate,
+        product.Price.OfferPrice,
+        product.Price.RegPrice,
+        product.SKU.Product.HLEVEL4_NAME,
+        product.SKU.Product.HLEVEL4_CODE,
+        product.SKU.CONCENTRATION;
+
     action approveRejectClaimFiles(claimFile_ID: String, countryCode: String, status: String, claimFileDetailPageURL: String) returns String;
 }

@@ -15,6 +15,7 @@ module.exports = (srv) => {
         ClaimFiles,
         ClaimData,
         ContrastAgentSalesData,
+		ContrastAgentSalesDataNL,
         SalesReportFile
     } = cds.entities("com.bayer.SXTENDER.ClaimsData");
     const {
@@ -188,7 +189,11 @@ module.exports = (srv) => {
 			const result = await fileFactory.format();
 
 			// Insert metadata into ContrastAgentSalesData
-			await INSERT.into(ContrastAgentSalesData).entries(result.contrastAgentSalesData);
+			if(req.CountryCode === 'PL'){
+				await INSERT.into(ContrastAgentSalesData).entries(result.contrastAgentSalesData);
+			}else{
+				await INSERT.into(ContrastAgentSalesDataNL).entries(result.contrastAgentSalesData);
+			}
 
 			//Insert metadata into ClaimFiles
 			await INSERT.into(ClaimFiles).entries(result.claimFile);
