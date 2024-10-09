@@ -1089,5 +1089,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     @cds.redirection.target
     entity NLPriceConditions as projection on TransactionalData.NLPriceConditions; 
 
-    entity ComplianceOfficerView as projection on OfferFormView;    
+    entity ComplianceOfficerView as projection on OfferFormView; 
+    entity GlobalStrategicMarketingView as projection on OfferFormView;   
+    entity SupplyManagementView as projection on OfferFormView;     
 }
