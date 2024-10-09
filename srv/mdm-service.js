@@ -13,6 +13,7 @@ module.exports = (srv) => {
     PT_TMCTLE,
 	PT_TMSKUPRDPCK,
 	PT_TMREGPR,
+	PT_TMCOGS,
 	SalesData
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
@@ -352,5 +353,46 @@ module.exports = (srv) => {
 			COUNTRYCODE: "PK",
 			BU: null
 		})
+	});
+
+	srv.on('SoftDeleteProductPrices', async (req) => {
+		try {
+			const {productPackID, countryCode} = req.data;
+
+			const regPr = await SELECT.from(PT_TMREGPR).where({CountryCode: countryCode, ProductPackID: productPackID});
+			const skuPrdpck = await SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: countryCode, ProductPackID: productPackID});
+			let promises = [];
+
+			if (Array.isArray(regPr) && regPr.length > 0) {
+				promises = promises.concat(regPr.map(rp => {
+					return UPDATE(PT_TMREGPR).with({
+						ACTIVERECORD: 'No'
+					}).where({
+						CountryCode: rp.CountryCode,
+						ProductPackID: rp.ProductPackID,
+						EffDate: rp.EffDate
+					});
+				}));
+			}
+
+			if (Array.isArray(skuPrdpck) && skuPrdpck.length > 0) {
+				promises = promises.concat(skuPrdpck.map(sp => {
+					return UPDATE(PT_TMSKUPRDPCK).with({
+						ACTIVERECORD: 'No'
+					}).where({
+						CountryCode: sp.CountryCode,
+						ProductPackID: sp.ProductPackID,
+						SKUCode: sp.SKUCode
+					});
+				}));
+			}
+
+			await Promise.all(promises);
+
+			return 'Product prices were deleted successfully';
+		} catch (error) {
+			console.error('Error in SoftDeleteProductPrices');
+            return req.reject(403, error?.message||"Error in SoftDeleteProductPrices");
+		}
 	});
 };
