@@ -698,9 +698,6 @@ module.exports = async (srv) => {
 			'StandardAppService.GlobalStrategicMarketingView': 'GlobalStrategicMarketing'
 		};
 		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
-		const fieldMapping = {
-			'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
-		};
 		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
 		for (const item of mandatoryFielddata) {
@@ -709,17 +706,14 @@ module.exports = async (srv) => {
 				const match = regex.exec(frontendField);
 				frontendField = match ? match[1] : frontendField;
 			}
-			// Check if there's a mapping, and if so, replace it
-			if (fieldMapping[frontendField]) {
-				frontendField = fieldMapping[frontendField];
-			}
 		
 			if (
 				!(frontendField in req.data) ||
 				req.data[frontendField] === null ||
 				req.data[frontendField] === ''
 			) {
-				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+				// Error status code is set 400 to stop creation process when validation failed 
+				req.error({ code: 400, message: `${item.Label} is required.`, target: frontendField });
 			}
 		}	
 
