@@ -282,6 +282,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
+    action sendMEACHNotificationMailTemplate(offerID:String,tenderId: String, CountryCode: String, url: String) returns String;
     action softDeleteOffer(offerID:String) returns String;
     function getNotificationMailTemplate(offerID:String, templateId: String, url: String) returns String;
 
@@ -879,7 +880,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MailTemplates                                as projection on AdminData.MailTemplate;
     entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
-    entity MEACHOutbox                                  as projection on TransactionalData.OutgoingMails;
     entity StandardTenderFOCInformation                 as projection on TransactionalDataViews.StandardTenderFOCInformation;   
     @cds.redirection.target
     entity NotificationUserList as select from AdminData.PT_TMUSERCTRY{
