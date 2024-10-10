@@ -5607,7 +5607,44 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
 		
 	});
-	
+	srv.on('CREATE', 'MEACHOutbox', async (req) => {
+		const { data: {TenderID,OfferID,templateId,url, CountryCode} } = req;
+		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({Role: 'Tenedr Manager'}));
+			const tx = cds.tx(req);
+			const offerInformation = await SELECT.one.from(TenderMasterView).where({OfferID: OfferID})
+			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", OfferID);
+			const offerValidation = await buildOfferValidation(tx, whereOffer);
+			const mailTemplate = await getMailTemplate(templateId);
+			const {createdByName} = await SELECT.one.from(TenderMasterView).where({TenderID:TenderID,OfferID:OfferID});
+
+			mappedMEACHNotificationData(userInfo,offerInformation,mailTemplate,req,offerValidation,createdByName)
+	});
+	function mappedMEACHNotificationData (userInfo, offerInformation,mailTemplate,req,offerValidation,createdByName){
+		userInfo.map(data =>{
+			return {
+				CountryCode: req.data.CountryCode,
+				TenderID: req.data.TenderID,
+				OfferID: req.data.OfferID,
+				Sender: data.UserName,
+				Recipients: LargeString,
+				Subject: LargeString,
+				MailBody: generateMailBody(mailTemplate, {
+					data: { 
+						content:{
+							UserName: data.UserName,
+							OFFERID:req.data.OfferID,
+							COUNTRYCODE: req.data.CountryCode,
+							InternalDueDate: offerValidation.InternalDueDate,
+							BID_DUE_DATE: offerValidation.BID_DUE_DATE,
+							DirectURLToOffer: req.data.url,
+							TenderCreator: createdByName,
+						}
+					}
+				}),
+				Sent: false,
+			}
+		})
+	}
 	function addLeadingZeros (num, size) {
         if (num === null) {
             throw new Error(`${text} doesn't exist`);
