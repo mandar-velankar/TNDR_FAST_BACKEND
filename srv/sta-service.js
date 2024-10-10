@@ -4521,31 +4521,41 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			switch(policy.Type){
 				case 'OfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? priceCondition.OfferPrice * product.PACKSIZE : priceCondition.OfferPrice;
+					break;
 				case 'NetOfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetOfferPrice * product.PACKSIZE : priceCondition.NetOfferPrice;
+					break;
 				case 'NetPrice':
 					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetPrice * product.PACKSIZE : priceCondition.NetPrice;
+					break;
 				case 'OfferPriceVSRegisteredPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.OfferPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) : 
 															(priceCondition.Price0 - priceCondition.OfferPrice) / priceCondition.Price0;
+					break;
 				case 'NetPriceVSRegisteredPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) :
 															(priceCondition.Price0 - priceCondition.NetPrice) / priceCondition.Price0;
+					break;
 				case 'NetOfferPriceVSRegisteredPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - priceCondition.NetOfferPrice) / (priceCondition.Price0 * product.PACKSIZE) :
 															(priceCondition.Price0 - priceCondition.NetOfferPrice) / priceCondition.Price0;
+					break;
 				case 'NetOfferPriceVSOfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetOfferPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE) : 
 																(priceCondition.OfferPrice - priceCondition.NetOfferPrice) / priceCondition.OfferPrice;
+					break;
 				case 'NetPriceVSOfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE): 
 																(priceCondition.OfferPrice - priceCondition.NetPrice) / priceCondition.OfferPrice;
+					break;
 				case 'NetPriceVSNetOfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetOfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.NetOfferPrice * product.PACKSIZE) : 
 																(priceCondition.NetOfferPrice - priceCondition.NetPrice) / priceCondition.NetOfferPrice;
+					break;
 				case 'BudgetedProfitability':
 					comparisonPrice = product.UOM === 'Unit' ? (priceCondition.NetPrice - productInfo.cogsEurUnit) / priceCondition.NetPrice :
 																(priceCondition.NetPrice - productInfo.cogsEurPack) / priceCondition.NetPrice;
+					break;
 			}
 
 			if(comparisonPrice < policy.Value){
