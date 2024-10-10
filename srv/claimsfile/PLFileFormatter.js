@@ -10,7 +10,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 
     async format() {
 
-        console.log('Processing reminder mails for Price Agreements started ...');
+        console.log('Processing of Poland Sales Report File Started ...');
 
         try {
 			this.db = await cds.connect.to('db');
@@ -60,7 +60,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
             console.error(error);
         }
 
-        console.log('Processing reminder mails for Price Agreements finished.');
+        console.log('Processing of Poland Sales Report File finished.');
     }
 
     /**
