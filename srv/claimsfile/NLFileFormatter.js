@@ -10,7 +10,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
     async format() {
 
-        console.log('Processing reminder mails for Price Agreements started ...');
+        console.log('Processing of Nederlands Sales Report File started ...');
 
         try {
 			this.db = await cds.connect.to('db');
@@ -20,7 +20,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const columnNames = this.data[0].map(col => col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().]/g, ''));
 
 			// Remove initial rows that are not real data
-			this.data = this.data.slice(5);
+			this.data = this.data.slice(1);
 	
 			// Remove empty records
 			this.data = this.data.filter(row => row.some(cell => cell !== null && cell !== ''));
@@ -34,22 +34,29 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 				return obj;
 			});
 
-			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER} = this.db.entities("com.bayer.SXTENDER.MasterData");
-			const { ExtractFASTOffer } = this.db.entities("ClaimsService");
+			this.data = this.data.filter(row => row.TypeRecord !== 'H' && row.TypeRecord !== 'E');
+
+			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
+			const { ExtractFASTOfferNL } = this.db.entities("ClaimsService");
             const distributor = await SELECT.one.from(PT_TMDIST).where({DistributorID: this.distributorId, CountryCode: this.countryCode});
+			const wPPS = await SELECT.from(WholesalePurchasePrice).where({COUNTRYCODE: this.countryCode, DistributorID:this.distributorId, Status: 'Approved'});
+			const distributionAgreements = await SELECT.from(DistributionAgreements).where({COUNTRYCODE: this.countryCode, DistributorID:this.distributorId});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
+			const productPacks = await SELECT.from(PT_TMPRDPCK).where({ACTIVERECORD: 'Yes'});
 			const institutes = await SELECT.from(PT_TMINST).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const instituteHierarcis = await SELECT.from(PT_TMINSHIER).where({ActiveRecord: 'Yes'});
-			const fastOfferData = await SELECT.from(ExtractFASTOffer).where({CountryCode: this.countryCode});
+			const fastOfferData = await SELECT.from(ExtractFASTOfferNL).where({CountryCode: this.countryCode});
+
+			const { dateFrom, dateTo, filePeriodDate } = this.getDateFromAndTo(this.data[0].Claimperiode, this.filePeriod);
 
             // Map sales data to buffer entity
-			const contrastAgentSalesData = this.mapContrastAgentSalesData(this.data, UUID);
+			const contrastAgentSalesData = this.mapContrastAgentSalesData(this.data, UUID, { dateFrom, dateTo, filePeriodDate });
 
 			// Map sales data to claim file
-			const claimFile = this.mapSalesDataToClaimFiles(this.data, distributor, UUID, this.cwid);
+			const claimFile = this.mapSalesDataToClaimFiles(this.data, distributor, UUID, this.cwid, { dateFrom, dateTo, filePeriodDate });
 
 			// Map sales data to claim data
-			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, institutes, instituteHierarcis, fastOfferData, UUID, this.cwid);
+			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, { dateFrom, dateTo, filePeriodDate });
 
             const result = {contrastAgentSalesData, claimFile, claimData};
 
@@ -59,7 +66,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
             console.error(error);
         }
 
-        console.log('Processing reminder mails for Price Agreements finished.');
+        console.log('Processing of Nederlands Sales Report File finished.');
     }
 
     /**
@@ -68,14 +75,13 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	 * @param {Object} req - Request object containing additional data
 	 * @returns {Object} claimFile
 	 */
-	mapSalesDataToClaimFiles(salesData, distributor, UUID, CWID) {
+	mapSalesDataToClaimFiles(salesData, distributor, UUID, CWID, { dateFrom, dateTo, filePeriodDate }) {
 		console.log(`JOB: Mapping Sales Data to Claim Files ...`);
 
 		// Calculate metadata for ClaimFiles
-		const { dateFrom, dateTo, filePeriodDate } = this.getDateFromAndTo(salesData, this.filePeriod);
-		const wholesalerPurchaseAmount = salesData.reduce((sum, row) => sum + (row.CENAZAKUPUNETTO * row.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI), 0);
-		const netSales = salesData.reduce((sum, row) => sum + (row.PODSTAWANALICZENIAMARŻYNETTOPNM * row.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI), 0);
-		const totalClaimAmount = salesData.reduce((sum, row) => sum + row.Wartośćdowyrównania, 0);
+		
+		const wholesalerPurchaseAmount = salesData.reduce((sum, row) => sum + (row.Inkoopprijs * row.Aantalgeleverd), 0);
+		const totalClaimAmount = salesData.reduce((sum, row) => sum + row.Claimtotaal, 0);
 
 		const claimFile = {
 			ID						: UUID,
@@ -90,7 +96,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			DistributorID			: this.distributorId,
 			DistributorName			: distributor.DistributorName,
 			WholesalerPurchaseAmount: wholesalerPurchaseAmount,
-			NetSales				: netSales,
+			NetSales				: wholesalerPurchaseAmount,
 			TotalClaimAmount		: totalClaimAmount,
 			Status					: "Pending",
 			ApprovalsCount			: 0
@@ -104,26 +110,84 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
      * @param {[Objects]} salesData 
      * @returns {[Objects]} mapped bufferdata
      */
-	mapContrastAgentSalesData(salesData, UUID) {
+	mapContrastAgentSalesData(salesData, UUID, { dateFrom, dateTo, filePeriodDate }) {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to ContrastAgentSalesData ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
 			prev.push(
 				{
-					NazwaArtykulu                    : curr.NAZWAARTYKUŁU,
-					KODEANArtykulu                   : String(curr.KODEANARTYKUŁU),
-					IloscSztukSprzedanychKlientowi   : curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI,
-					CenaZakupuNetto                  : curr.CENAZAKUPUNETTO,
-					PodstawaNaliczeniaMarzyNettoPNM  : curr.PODSTAWANALICZENIAMARŻYNETTOPNM,
-					KodKlientaBayer                  : curr.KODKLIENTAwgBAYERSpzoo,
-					KlientNazwa                      : curr.KLIENTnazwa,
-					NrFaktury                        : curr.NRFAKTURY,
-					DataSprzedazy                    : this.excelDateToJSDate(curr.DATASPRZEDAŻY),
-					RoznicaCenaZakupuPNM             : curr.RóżnicapomiędzycenązakupuaPNM,
-					WartoscPNM                       : curr.WartośćwgPNM,
-					WartoscDoWyrownania              : curr.Wartośćdowyrównania,
-					IloscSztukDoWyrownania           : curr.Ilośćsztukdowyrównania,
-					NrFakturyZakupu                  : curr.NRFAKTURYZAKUPU || null,
+					ID                              : curr.ID,
+					TypeRecord                      : curr.TypeRecord,
+					DatumVan                        : dateFrom,
+					DatumTm                         : dateTo,
+					IDFNummerKlant                  : curr.IDFnrklant,
+					EANNrKlant                      : curr.EANNrklant || null,
+					Klantnaam                       : curr.Klantnaam,
+					EANNrArtikel                    : curr.EANNrArtikel,
+					ZINrArtikel                     : curr.ZInrartikel,
+					ArtnrLeverancier                : curr.ArtnrLeverancier,
+					NaamArtikel                     : curr.NaamArtikel,
+					Eenheid1                        : curr.Eenheid1 || null,
+					Eenheid2                        : curr.Eenheid2 || null,
+					VastePrijs                      : curr.Vasteprijs,
+					Kortingsperc1                   : curr.kortingsperc1,
+					Kortingsperc2                   : curr.kortingsperc2,
+					Inkoopprijs                     : curr.Inkoopprijs,
+					Claimpercentage                 : curr.Claimpercentage,
+					Claimbedrag                     : curr.Claimbedrag,
+					AantalGeleverd                  : curr.Aantalgeleverd,
+					Claim1Bedrag                    : curr.Claim1bedrag,
+					Claim2Bedrag                    : curr.Claim2bedrag,
+					ClaimTotaal                     : curr.Claimtotaal,
+					ClaimPeriode                    : curr.Claimperiode,
+					ClaimGrondslag                  : curr.claimgrondslag,
+					Klantnummer                     : null,
+					KlantenOvidiusPharmaceutische   : null,
+					IDFNummer                       : null,
+					KlantenLairesseZiekenhuis       : null,
+					Periode                         : null,
+					ZIndexNummer                    : null,
+					ArtikelNummerLeverancier        : null,
+					ArtikelNaam                     : null,
+					EenheidStuks                    : null,
+					Claim1PerEenheid                : null,
+					TotaalClaim1                    : null,
+					Claim2PerEenheid                : null,
+					TotaalClaim2                    : null,
+					ClaimbedragTotaal               : null,
+					Leverancier                     : null,
+					AccountcombinatieNaam           : null,
+					Woonplaats                      : null,
+					IDFCode                         : null,
+					Uitleverdatum                   : null,
+					OrderNummer                     : null,
+					RegelNr                         : null,
+					Jaarweek                        : null,
+					Jaar                            : null,
+					KalenderMaand                   : null,
+					ZINummer                        : null,
+					ArtikelnrLeverancier            : null,
+					ArtikelOmschrijving             : null,
+					VerpakkingAantal                : null,
+					VerpakkingsEenheid              : null,
+					AIP                             : null,
+					DAPrijs                         : null,
+					LeveranciersbijdragePercentage  : null,
+					Grondslag                       : null,
+					LeveranciersbijdrageBedrag      : null,
+					TotaalLeveranciersbijdrage      : null,
+					Ultimo                          : null,
+					Betaald                         : null,
+					DAClaimPerArtikel               : null,
+					TotaleClaimPerArtikel           : null,
+					TotaleClaimPerRegel             : null,
+					ContractPrice                   : null,
+					WPP                             : null,
+					Claim1                          : null,
+					Claim2                          : null,
+					Quantity                        : null,
+					TotalClaim                      : null,
+					Date                            : null,
 					ClaimFiles_ID					 : UUID
 				}
 			);
@@ -138,25 +202,36 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	 * @param {Object} req - Request object containing additional data
 	 * @returns {Object} claimData
 	 */
-	mapSalesDataToClaimData(salesData, countryProductPacks, institutes, instituteHierarcis, fastOfferData, UUID, CWID) {
+	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, { dateFrom, dateTo, filePeriodDate }) {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
-			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.KODEANARTYKUŁU);
+			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.ZInrartikel);
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
-			const institute = institutes.find(item => item.External_InstituteId == curr.KODKLIENTAwgBAYERSpzoo.replace(/\s+/g,''));
+			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
+			const productPackName = productPack && productPack?.PRODUCTPACKNAME || null;
+			let IDFnrklant = 'H0' + curr.IDFnrklant;
+			const institute = institutes.find(item => item.External_InstituteId == IDFnrklant);
 			const instituteId = institute && institute.InstituteID || null;
-			const instituteName = institute && institute?.InstituteName || null;
+			const instituteName = institute && institute?.InstituteName || 'Customer Not Found';
 			const childInstitute = instituteHierarcis.find(item => item.ParentInstituteID == instituteId);
 			const childInstituteID = childInstitute && childInstitute.InstituteID || null;
 			const childInstituteData = institutes.find(item => item.InstituteID == childInstituteID);
-			const childInstituteName = childInstituteData && childInstituteData.InstituteName || null;
+			const childInstituteName = childInstituteData && childInstituteData.InstituteName || 'Customer Not Found';
+			const wPP = wPPS.find(item => item.PRODUCTPACKID == productCode && item.StartDate <= dateFrom && item.EndDate >= dateFrom);
+			const wppValue = wPP && wPP.WPPWithoutTax || 0;
+			const distributionAgreement = distributionAgreements.find(item => item.PRODUCTPACKID == productCode && item.StartDate <= dateFrom && item.EndDate >= dateFrom);
+			const daValue = distributionAgreement && distributionAgreement.Value || 0;
 			const filteredItems = fastOfferData.filter(item => item.InstituteID == instituteId &&
+																item.DistributorID == this.distributorId &&
 																item.ProductCode === productCode &&
-																item.EffectiveDate <= this.excelDateToJSDate(curr.DATASPRZEDAŻY) &&
-																item.ExpiryDate >= this.excelDateToJSDate(curr.DATASPRZEDAŻY));
+																item.ContractStartDate <= dateFrom &&
+																item.ContractEndDate >= dateFrom);
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
-			const fastContractClaim = fastOffer && (fastOffer.RequestedVolume * (fastOffer.RegPrice - fastOffer.OfferPrice)) || 0;
+			const fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * fastOffer.RequestedVolume) || 0;
+			const fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * fastOffer.RequestedVolume) : ((fastOffer.OfferPrice * daValue) * fastOffer.RequestedVolume)) : 0;
+			const totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
+			const wholesalerDisArPrice = curr.Vasteprijs - (curr.Claim2bedrag/curr.Aantalgeleverd);
 			prev.push(
 				{
 					CountryCode                             : this.countryCode,
@@ -164,41 +239,46 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					modifiedBy         						: CWID,
 					OfferID                                 : fastOffer && fastOffer.OfferID || null, 
 					ProductPackID                           : productCode,
+					PRODUCTPACKNAME							: productPackName,
 					MainInstituteID                         : instituteId,
 					ChildInstituteID                        : childInstituteID,
 					MainInstituteName                       : instituteName,
 					ChildInstituteName                      : childInstituteName,
 					DistributorID                           : this.distributorId,
-					Date                                    : this.excelDateToJSDate(curr.DATASPRZEDAŻY),
-					Type                                    : 'Claim',
-					Quantity                                : curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI,
-					WholesalerPurchasePrice                 : curr.CENAZAKUPUNETTO, 
-					WholesalerDistributionArrangement       : null,
-					AppliedWholesalerCorrection             : null,
-					WholesalerContractPrice                 : curr.PODSTAWANALICZENIAMARŻYNETTOPNM,
-					TotalClaim                              : curr.Wartośćdowyrównania,
+					Date                                    : filePeriodDate,
+					Type                                    : curr.Claimtotaal < 0 ? 'Correction' : 'Claim',
+					Quantity                                : curr.Aantalgeleverd,
+					WholesalerPurchasePrice                 : curr.Inkoopprijs, 
+					WholesalerDistributionArrangement       : distributionAgreement?.Type === 'Fixed' ? wholesalerDisArPrice : 1 - wholesalerDisArPrice / curr.Vasteprijs,
+					AppliedWholesalerCorrection             : curr.Claimtotaal < 0 ? curr.Claimtotaal : null,
+					WholesalerContractPrice                 : curr.Vasteprijs,
+					TotalClaim                              : curr.Claimtotaal > 0 ? curr.Claimtotaal : null,
 					MainCustomerForContract                 : instituteId,
 					FASTPendingCorrection                   : null,
-					BrandContractVolume                     : fastOffer && (fastOffer.RequestedVolume * fastOffer.CONCENTRATION) || 0,
+					BrandContractVolume                     : null,
 					PercentageUsage                         : null,
 					BrandId									: fastOffer && fastOffer.BrandId || null,
 					BrandName								: fastOffer && fastOffer.BrandName || null,
 					Balance                                 : null,
-					BrandUsedVolume                         : fastOffer && (curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI * fastOffer.CONCENTRATION) || 0,
-					WholesalerContractPriceClaim            : curr.PODSTAWANALICZENIAMARŻYNETTOPNM,
-					WholesalerDistributionArrangementClaim  : null,
-					TotalWholesalerClaim                    : curr.Wartośćdowyrównania,
+					BrandUsedVolume                         : null,
+					WholesalerContractPriceClaim            : curr.Vasteprijs,
+					WholesalerDistributionArrangementClaim  : curr.Claim2bedrag,
+					TotalWholesalerClaim                    : curr.Claimtotaal,
 					FASTContractClaim                       : fastContractClaim,
-					FASTDistributionArrangementClaim        : 0,
-					TotalFASTClaim                          : fastContractClaim,
-					PercentageDifference                    : fastOffer && ((curr.Wartośćdowyrównania - fastContractClaim)/fastContractClaim) || 0,
-					Status                                  : fastOffer ? (fastContractClaim == curr.Wartośćdowyrównania ? 'Passed' : 'FailedPriceCheck') : 'NoContract',
+					FASTDistributionArrangementClaim        : fastDistributionArrangementClaim,
+					TotalFASTClaim                          : totalFASTClaim,
+					PercentageDifference                    : fastOffer && ((curr.Claimtotaal - totalFASTClaim)/totalFASTClaim) || 0,
+					Status                                  : fastOffer ? (totalFASTClaim == curr.Claimtotaal ? 'Passed' : 'FailedPriceCheck') : 'CustomerNotFound',
 					Comment                                 : null,
-					FASTWholesalerPurchasePrice             : fastOffer && fastOffer.RegPrice || 0,
+					FASTWholesalerPurchasePrice             : wppValue || 0,
 					FASTContractPrice                       : fastOffer && fastOffer.OfferPrice || 0,
-					FASTDistributionArrangement             : null,
-					QC1Passed                               : null,
-					QC2Passed                               : null,
+					FASTDistributionArrangement             : daValue,
+					QC1Passed                               : fastContractClaim == curr.Claim1bedrag ? true : false,
+					QC2Passed                               : fastDistributionArrangementClaim == curr.Claim2bedrag ? true : false,
+					WholesalerClaim1                        : curr.Claim1bedrag,
+					WholesalerClaim2                        : curr.Claim2bedrag,
+					FASTClaim1                              : fastContractClaim,
+					FASTClaim2                              : fastDistributionArrangementClaim,
 					ClaimFiles_ID					 		: UUID
 				}
 			);
@@ -208,15 +288,18 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	}
 
 	
-	getDateFromAndTo(salesData, filePeriod) {
-		// Assuming all dates are in the same month/year, we extract year and month from the first date
-		let firstDate = new Date(this.excelDateToJSDate(salesData[0].DATASPRZEDAŻY));
+	getDateFromAndTo(claimperiode, filePeriod) {
 
+		let incomingPeriod = claimperiode ? claimperiode : filePeriod;
+		// Extract year and month from the filePeriod
+		const year = parseInt(incomingPeriod.slice(0, 4));
+		const month = parseInt(incomingPeriod.slice(4, 6)) - 1; // JavaScript months are 0-based (0 = January, 11 = December)
+	
 		// Get the first day of the month
-		let dateFrom = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+		const dateFrom = new Date(year, month, 1);
 		
 		// Get the last day of the month
-		let dateTo = new Date(firstDate.getFullYear(), firstDate.getMonth() + 1, 0);
+		const dateTo = new Date(year, month + 1, 0);
 		
 		// Format the dates to YYYY-MM-DD
 		let formatDate = (date) => date.toISOString().split('T')[0];
