@@ -143,7 +143,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         Cogs.COGSType,
         Cogs.ActiveRecord as CogsActiveRecord,
         ProductPack.PRODUCTPACKNAME as ProductPackName
-    }where ProductPack.ACTIVERECORD = 'Yes';
+    }where CountryProductPack.ACTIVERECORD = 'Yes';
 
    
 
@@ -234,4 +234,6 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         key BU
     }where COUNTRYCODE = 'PK'
     group by COUNTRYCODE, BU;
+
+    action SoftDeleteProductPrices(productPackID: Integer, countryCode: String) returns String;
 }
