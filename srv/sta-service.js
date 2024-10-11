@@ -5607,32 +5607,39 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
 		
 	});
-	srv.on('CREATE', 'MEACHOutbox', async (req) => {
-		const { data: {TenderID,OfferID,templateId,url, CountryCode} } = req;
-		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({Role: 'Tenedr Manager'}));
+	srv.on('sendMEACHNotificationMailTemplate', async (req) => {
+		try {
+			const { data: {tenderId, offerID, url, CountryCode} } = req;
 			const tx = cds.tx(req);
-			const offerInformation = await SELECT.one.from(TenderMasterView).where({OfferID: OfferID})
-			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", OfferID);
+			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({Role: 'Tenedr Manager'}));
+			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
 			const offerValidation = await buildOfferValidation(tx, whereOffer);
-			const mailTemplate = await getMailTemplate(templateId);
-			const {createdByName} = await SELECT.one.from(TenderMasterView).where({TenderID:TenderID,OfferID:OfferID});
+			const mailTemplate = await getMailTemplate('CHNotificationMailTemplate');
+			const {createdByName} = await SELECT.one.from(TenderMasterView).where({TenderID:tenderId,OfferID:offerID});
 
-			mappedMEACHNotificationData(userInfo,offerInformation,mailTemplate,req,offerValidation,createdByName)
+			const MEACHNotificationData = mappedMEACHNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName)
+			await INSERT.into(OutgoingMails).entries(MEACHNotificationData);
+			return "Notification mail sent successfully"
+		}catch (error) {
+				console.error('Error in sendMEACHNotificationMailTemplate');
+				return res.reject(400, error.message || 'An unexpected error occurred.')
+		}
+
 	});
-	function mappedMEACHNotificationData (userInfo, offerInformation,mailTemplate,req,offerValidation,createdByName){
-		userInfo.map(data =>{
+	function mappedMEACHNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName){
+		return userInfo.map(data =>{
 			return {
 				CountryCode: req.data.CountryCode,
-				TenderID: req.data.TenderID,
-				OfferID: req.data.OfferID,
-				Sender: data.UserName,
-				Recipients: LargeString,
-				Subject: LargeString,
+				TenderID: req.data.tenderId,
+				OfferID: req.data.offerID,
+				Sender: 'FAST-Admin@bayer.com',
+				Recipients:  data.UserEmail,
+				Subject: `New HEM Tender Created for ${req.data.CountryCode}`,
 				MailBody: generateMailBody(mailTemplate, {
 					data: { 
 						content:{
 							UserName: data.UserName,
-							OFFERID:req.data.OfferID,
+							OFFERID:req.data.offerID,
 							COUNTRYCODE: req.data.CountryCode,
 							InternalDueDate: offerValidation.InternalDueDate,
 							BID_DUE_DATE: offerValidation.BID_DUE_DATE,
