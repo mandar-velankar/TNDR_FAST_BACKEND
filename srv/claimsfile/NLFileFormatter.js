@@ -14,17 +14,32 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
         try {
 			this.db = await cds.connect.to('db');
+			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
+			const { ExtractFASTOfferNL } = this.db.entities("ClaimsService");
 
 			let UUID = this.generateUUID();
-            // Get column names from the 5th row
-			const columnNames = this.data[0].map(col => col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().]/g, ''));
+			const distributor = await SELECT.one.from(PT_TMDIST).where({DistributorID: this.distributorId, CountryCode: this.countryCode});
+			let columnNames = null;
 
-			// Remove initial rows that are not real data
-			this.data = this.data.slice(1);
-	
+			// Get the mapping for the distributor
+			const currentMappings = this.columnMappings(distributor);
+
+			if(distributor?.DistributorName === 'Ovidius Pharma & Care'){
+				// Get column names from the 5th row
+				columnNames = this.data[2].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+
+				// Remove initial rows that are not real data
+				this.data = this.data.slice(3);
+			}else{
+				// Get column names from the 5th row
+				columnNames = this.data[0].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+
+				// Remove initial rows that are not real data
+				this.data = this.data.slice(1);						
+			}
 			// Remove empty records
-			this.data = this.data.filter(row => row.some(cell => cell !== null && cell !== ''));
-	
+			this.data = this.data.filter(row => row.some(cell => cell !== null && cell !== '' && cell !== ' '));
+		
 			// Map the data to the correct column names
 			this.data = this.data.map(row => {
 				let obj = {};
@@ -35,10 +50,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			});
 
 			this.data = this.data.filter(row => row.TypeRecord !== 'H' && row.TypeRecord !== 'E');
-
-			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
-			const { ExtractFASTOfferNL } = this.db.entities("ClaimsService");
-            const distributor = await SELECT.one.from(PT_TMDIST).where({DistributorID: this.distributorId, CountryCode: this.countryCode});
+            
 			const wPPS = await SELECT.from(WholesalePurchasePrice).where({COUNTRYCODE: this.countryCode, DistributorID:this.distributorId, Status: 'Approved'});
 			const distributionAgreements = await SELECT.from(DistributionAgreements).where({COUNTRYCODE: this.countryCode, DistributorID:this.distributorId});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
@@ -80,8 +92,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
 		// Calculate metadata for ClaimFiles
 		
-		const wholesalerPurchaseAmount = salesData.reduce((sum, row) => sum + (row.Inkoopprijs * row.Aantalgeleverd), 0);
-		const totalClaimAmount = salesData.reduce((sum, row) => sum + row.Claimtotaal, 0);
+		const wholesalerPurchaseAmount = salesData.reduce((sum, row) => sum + (row.PurchasePrice * row.TotalDelivered), 0);
+		const totalClaimAmount = salesData.reduce((sum, row) => sum + row.ClaimTotal, 0);
 
 		const claimFile = {
 			ID						: UUID,
@@ -116,43 +128,43 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
 			prev.push(
 				{
-					ID                              : curr.ID,
-					TypeRecord                      : curr.TypeRecord,
-					DatumVan                        : dateFrom,
-					DatumTm                         : dateTo,
-					IDFNummerKlant                  : curr.IDFnrklant,
-					EANNrKlant                      : curr.EANNrklant || null,
-					Klantnaam                       : curr.Klantnaam,
-					EANNrArtikel                    : curr.EANNrArtikel,
-					ZINrArtikel                     : curr.ZInrartikel,
-					ArtnrLeverancier                : curr.ArtnrLeverancier,
-					NaamArtikel                     : curr.NaamArtikel,
-					Eenheid1                        : curr.Eenheid1 || null,
-					Eenheid2                        : curr.Eenheid2 || null,
-					VastePrijs                      : curr.Vasteprijs,
-					Kortingsperc1                   : curr.kortingsperc1,
-					Kortingsperc2                   : curr.kortingsperc2,
-					Inkoopprijs                     : curr.Inkoopprijs,
-					Claimpercentage                 : curr.Claimpercentage,
-					Claimbedrag                     : curr.Claimbedrag,
-					AantalGeleverd                  : curr.Aantalgeleverd,
-					Claim1Bedrag                    : curr.Claim1bedrag,
-					Claim2Bedrag                    : curr.Claim2bedrag,
-					ClaimTotaal                     : curr.Claimtotaal,
-					ClaimPeriode                    : curr.Claimperiode,
-					ClaimGrondslag                  : curr.claimgrondslag,
+					ID                              : curr.ID || null,
+					TypeRecord                      : String(curr.TypeRecord) || null,
+					DatumVan                        : curr.DatumVan || null ,
+					DatumTm                         : curr.Datumtm || null,
+					IDFNummerKlant                  : String(curr.IDFNumber) || null,
+					EANNrKlant                      : String(curr.EANCustomerNumber) || null,
+					Klantnaam                       : String(curr.CustomerName) || null,
+					EANNrArtikel                    : String(curr.EANItemNumber) || null,
+					ZINrArtikel                     : String(curr.ZIndexNumber) || null,
+					ArtnrLeverancier                : String(curr.SupplierItemNumber) || null,
+					NaamArtikel                     : String(curr.ProductName) || null,
+					Eenheid1                        : String(curr.Eenheid1) || null,
+					Eenheid2                        : String(curr.Eenheid2) || null,
+					VastePrijs                      : curr.FixedPrice || null,
+					Kortingsperc1                   : curr.kortingsperc1 || null,
+					Kortingsperc2                   : curr.kortingsperc2 || null,
+					Inkoopprijs                     : curr.PurchasePrice || null,
+					Claimpercentage                 : curr.ClaimPercentage || null,
+					Claimbedrag                     : curr.ClaimAmount || null,
+					AantalGeleverd                  : curr.TotalDelivered || null,
+					Claim1Bedrag                    : curr.Claim1Amount || null,
+					Claim2Bedrag                    : curr.Claim2Amount || null,
+					ClaimTotaal                     : curr.ClaimTotal || null,
+					ClaimPeriode                    : String(curr.Claimperiode) || null,
+					ClaimGrondslag                  : String(curr.claimgrondslag) || null,
 					Klantnummer                     : null,
-					KlantenOvidiusPharmaceutische   : null,
+					KlantenOvidiusPharmaceutische   : String(curr.KlantenOvidiusPahramceutischeGroothandel) || null,
 					IDFNummer                       : null,
-					KlantenLairesseZiekenhuis       : null,
+					KlantenLairesseZiekenhuis       : String(curr.KlantenLairesseziekenhuisfarmacie) || null,
 					Periode                         : null,
 					ZIndexNummer                    : null,
-					ArtikelNummerLeverancier        : null,
-					ArtikelNaam                     : null,
-					EenheidStuks                    : null,
-					Claim1PerEenheid                : null,
+					ArtikelNummerLeverancier        : String(curr.artikelnummerleverancier) || null,
+					ArtikelNaam                     : String(curr.Artikelnaam) || null,
+					EenheidStuks                    : curr.Eenheidstuks || null,
+					Claim1PerEenheid                : curr.Claim1pereenheid || null,
 					TotaalClaim1                    : null,
-					Claim2PerEenheid                : null,
+					Claim2PerEenheid                : curr.Claim22pereenheid || null,
 					TotaalClaim2                    : null,
 					ClaimbedragTotaal               : null,
 					Leverancier                     : null,
@@ -206,12 +218,12 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
-			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.ZInrartikel);
+			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.ZIndexNumber);
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
 			const productPackName = productPack && productPack?.PRODUCTPACKNAME || null;
-			let IDFnrklant = 'H0' + curr.IDFnrklant;
-			const institute = institutes.find(item => item.External_InstituteId == IDFnrklant);
+			let IDFNumber = 'H0' + curr.IDFNumber;
+			const institute = institutes.find(item => item.External_InstituteId == IDFNumber);
 			const instituteId = institute && institute.InstituteID || null;
 			const instituteName = institute && institute?.InstituteName || 'Customer Not Found';
 			const childInstitute = instituteHierarcis.find(item => item.ParentInstituteID == instituteId);
@@ -231,7 +243,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * fastOffer.RequestedVolume) || 0;
 			const fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * fastOffer.RequestedVolume) : ((fastOffer.OfferPrice * daValue) * fastOffer.RequestedVolume)) : 0;
 			const totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
-			const wholesalerDisArPrice = curr.Vasteprijs - (curr.Claim2bedrag/curr.Aantalgeleverd);
+			const wholesalerDisArPrice = curr.FixedPrice - (curr.Claim2Amount/curr.TotalDelivered);
 			prev.push(
 				{
 					CountryCode                             : this.countryCode,
@@ -246,13 +258,13 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					ChildInstituteName                      : childInstituteName,
 					DistributorID                           : this.distributorId,
 					Date                                    : filePeriodDate,
-					Type                                    : curr.Claimtotaal < 0 ? 'Correction' : 'Claim',
-					Quantity                                : curr.Aantalgeleverd,
-					WholesalerPurchasePrice                 : curr.Inkoopprijs, 
-					WholesalerDistributionArrangement       : distributionAgreement?.Type === 'Fixed' ? wholesalerDisArPrice : 1 - wholesalerDisArPrice / curr.Vasteprijs,
-					AppliedWholesalerCorrection             : curr.Claimtotaal < 0 ? curr.Claimtotaal : null,
-					WholesalerContractPrice                 : curr.Vasteprijs,
-					TotalClaim                              : curr.Claimtotaal > 0 ? curr.Claimtotaal : null,
+					Type                                    : curr.ClaimTotal < 0 ? 'Correction' : 'Claim',
+					Quantity                                : curr.TotalDelivered,
+					WholesalerPurchasePrice                 : curr.PurchasePrice, 
+					WholesalerDistributionArrangement       : distributionAgreement?.Type === 'Fixed' ? wholesalerDisArPrice : 1 - wholesalerDisArPrice / curr.FixedPrice,
+					AppliedWholesalerCorrection             : curr.ClaimTotal < 0 ? curr.ClaimTotal : null,
+					WholesalerContractPrice                 : curr.FixedPrice,
+					TotalClaim                              : curr.ClaimTotal > 0 ? curr.ClaimTotal : null,
 					MainCustomerForContract                 : instituteId,
 					FASTPendingCorrection                   : null,
 					BrandContractVolume                     : null,
@@ -261,22 +273,22 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					BrandName								: fastOffer && fastOffer.BrandName || null,
 					Balance                                 : null,
 					BrandUsedVolume                         : null,
-					WholesalerContractPriceClaim            : curr.Vasteprijs,
-					WholesalerDistributionArrangementClaim  : curr.Claim2bedrag,
-					TotalWholesalerClaim                    : curr.Claimtotaal,
+					WholesalerContractPriceClaim            : curr.FixedPrice,
+					WholesalerDistributionArrangementClaim  : curr.Claim2Amount,
+					TotalWholesalerClaim                    : curr.ClaimTotal,
 					FASTContractClaim                       : fastContractClaim,
 					FASTDistributionArrangementClaim        : fastDistributionArrangementClaim,
 					TotalFASTClaim                          : totalFASTClaim,
-					PercentageDifference                    : fastOffer && ((curr.Claimtotaal - totalFASTClaim)/totalFASTClaim) || 0,
-					Status                                  : fastOffer ? (totalFASTClaim == curr.Claimtotaal ? 'Passed' : 'FailedPriceCheck') : 'CustomerNotFound',
+					PercentageDifference                    : fastOffer && ((curr.ClaimTotal - totalFASTClaim)/totalFASTClaim) || 0,
+					Status                                  : fastOffer ? (totalFASTClaim == curr.ClaimTotal ? 'Passed' : 'FailedPriceCheck') : 'CustomerNotFound',
 					Comment                                 : null,
 					FASTWholesalerPurchasePrice             : wppValue || 0,
 					FASTContractPrice                       : fastOffer && fastOffer.OfferPrice || 0,
 					FASTDistributionArrangement             : daValue,
-					QC1Passed                               : fastContractClaim == curr.Claim1bedrag ? true : false,
-					QC2Passed                               : fastDistributionArrangementClaim == curr.Claim2bedrag ? true : false,
-					WholesalerClaim1                        : curr.Claim1bedrag,
-					WholesalerClaim2                        : curr.Claim2bedrag,
+					QC1Passed                               : fastContractClaim == curr.Claim1Amount ? true : false,
+					QC2Passed                               : fastDistributionArrangementClaim == curr.Claim2Amount ? true : false,
+					WholesalerClaim1                        : curr.Claim1Amount,
+					WholesalerClaim2                        : curr.Claim2Amount,
 					FASTClaim1                              : fastContractClaim,
 					FASTClaim2                              : fastDistributionArrangementClaim,
 					ClaimFiles_ID					 		: UUID
@@ -290,18 +302,21 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	
 	getDateFromAndTo(claimperiode, filePeriod) {
 
-		let incomingPeriod = claimperiode ? claimperiode : filePeriod;
-		// Extract year and month from the filePeriod
-		const year = parseInt(incomingPeriod.slice(0, 4));
-		const month = parseInt(incomingPeriod.slice(4, 6)) - 1; // JavaScript months are 0-based (0 = January, 11 = December)
+		let incomingPeriod = claimperiode || filePeriod;
+		let year, month;
 	
-		// Get the first day of the month
+		if (incomingPeriod.includes('-')) {
+			const [monthStr, yearStr] = incomingPeriod.split('-');
+			month = new Date(Date.parse(`${monthStr} 1, ${yearStr}`)).getMonth();
+			year = parseInt(yearStr);
+		} else {
+			year = parseInt(incomingPeriod.slice(0, 4));
+			month = parseInt(incomingPeriod.slice(4, 6)) - 1; // JavaScript months are 0-based (0 = January, 11 = December)
+		}
+	
 		const dateFrom = new Date(year, month, 1);
-		
-		// Get the last day of the month
 		const dateTo = new Date(year, month + 1, 0);
 		
-		// Format the dates to YYYY-MM-DD
 		let formatDate = (date) => date.toISOString().split('T')[0];
 
 		// Convert filePeriod to a date
@@ -338,6 +353,87 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 		  view[i] = buffer[i];
 		}
 		return arrayBuffer;
+	}
+
+	// Column mappings defined outside the function
+	columnMappings = function(distributor){
+		const mappings = {
+    		'Ovidius Pharma & Care': {
+				"Klantnummer": "EANCustomerNumber",
+				"Klantnaam": "CustomerName",
+				"KlantenOvidiusPahramceutischeGroothandel": "KlantenOvidiusPahramceutischeGroothandel",
+				"IDFnummer": "IDFNumber",
+				"KlantenLairesseziekenhuisfarmacie": "KlantenLairesseziekenhuisfarmacie",
+				"Periode": "Claimperiode",
+				"Z-indexnummer": "ZIndexNumber",
+				"artikelnummerleverancier": "SupplierItemNumber",
+				"Artikelnaam": "ProductName",
+				"Eenheidstuks": "Eenheid1",
+				"Vasteprijs": "FixedPrice",
+				"Inkoopprijs": "PurchasePrice",
+				"Claim1pereenheid": "Claim1pereenheid",
+				"Aantalgeleverd": "TotalDelivered",
+				"Totaalclaim1": "Claim1Amount",
+				"Claim22pereenheid": "Claim22pereenheid",
+				"Totaalclaim2": "Claim2Amount",
+				"Claimbedragtotaal": "ClaimTotal"
+    		},
+    		'Alliance Healthcare Nederland B.V.': {
+				"Aantalgeleverd": "TotalDelivered",
+				"ArtnrLeverancier": "SupplierItemNumber",
+				"Claim1bedrag": "Claim1Amount",
+				"Claim2bedrag": "Claim2Amount",
+				"Claimbedrag": "ClaimAmount",
+				"claimgrondslag": "claimgrondslag",
+				"Claimpercentage": "ClaimPercentage",
+				"Claimperiode": "Claimperiode",
+				"Claimtotaal": "ClaimTotal",
+				"Datumtm": "Datumtm",
+				"Datumvan": "Datumvan",
+				"EANNrArtikel": "EANItemNumber",
+				"EANNrklant": "EANCustomerNumber",
+				"Eenheid1": "Eenheid1",
+				"Eenheid2": "Eenheid2",
+				"ID": "ID",
+				"IDFnrklant": "IDFNumber",
+				"Inkoopprijs": "PurchasePrice",
+				"Klantnaam": "CustomerName",
+				"kortingsperc1": "kortingsperc1",
+				"kortingsperc2": "kortingsperc2",
+				"NaamArtikel": "ProductName",
+				"TypeRecord": "TypeRecord",
+				"Vasteprijs": "FixedPrice",
+				"ZInrartikel": "ZIndexNumber"
+    		},
+			'Brocacef B.V.': {
+				"Aantalgeleverd": "TotalDelivered",
+				"ArtnrLeverancier": "SupplierItemNumber",
+				"Claim1bedrag": "Claim1Amount",
+				"Claim2bedrag": "Claim2Amount",
+				"Claimbedrag": "ClaimAmount",
+				"claimgrondslag": "claimgrondslag",
+				"Claimpercentage": "ClaimPercentage",
+				"Claimperiode": "Claimperiode",
+				"Claimtotaal": "ClaimTotal",
+				"Datumtm": "Datumtm",
+				"Datumvan": "Datumvan",
+				"EANNrArtikel": "EANItemNumber",
+				"EANNrklant": "EANCustomerNumber",
+				"Eenheid1": "Eenheid1",
+				"Eenheid2": "Eenheid2",
+				"ID": "ID",
+				"IDFnrklant": "IDFNumber",
+				"Inkoopprijs": "PurchasePrice",
+				"Klantnaam": "CustomerName",
+				"kortingsperc1": "kortingsperc1",
+				"kortingsperc2": "kortingsperc2",
+				"NaamArtikel": "ProductName",
+				"TypeRecord": "TypeRecord",
+				"Vasteprijs": "FixedPrice",
+				"ZInrartikel": "ZIndexNumber"
+    		}
+		}
+		return mappings[distributor.DistributorName];
 	}
 
 };
