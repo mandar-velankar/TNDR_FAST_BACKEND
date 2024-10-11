@@ -228,6 +228,13 @@ module.exports = (srv) => {
 				'approved': 'Claim File approved successfully',
 				'notification': 'Approval notification sent to the next hierarchy level approver',
 			}
+
+			// Claim Notification mail template ids
+			const templateIds = {
+				"NL": "NLClaimFileApprovalNotificationMail",
+				"PL": "PLClaimFileApprovalNotificationMail"
+			}
+
 			let validationAction = '';
 
 			// If selected status is Approved and there is next level hierarchy approval then sending notification
@@ -238,7 +245,7 @@ module.exports = (srv) => {
 					WholesalerName: claimFile.DistributorName,
 					ClaimFileDetailPageURL: claimFileDetailPageURL
 				};
-				await addOutgoingMail(req, approvalContentmapping, "ClaimFileApprovalNotificationMail", "Claim File for Review and Approval", nextHierarchyApproval?.ApproverEmail);
+				await addOutgoingMail(req, approvalContentmapping, templateIds[countryCode], "Claim File for Review and Approval", nextHierarchyApproval?.ApproverEmail);
 				validationAction = 'notification';
 			}
 
@@ -249,7 +256,12 @@ module.exports = (srv) => {
 			// Updating Claim file and approvals statuses
 			await UPDATE(ClaimApprovals).with({Status: status}).where({ClaimFiles_ID: claimFile_ID, ApproverCWID: currentApprover?.ApproverCWID});
 			const updatedClaimFileStatus = await SELECT.one.from(ClaimFileStatusView).where({ClaimFiles_ID: claimFile_ID});
-			await UPDATE(ClaimFiles).with({Status: updatedClaimFileStatus?.STATUS}).where({ID: claimFile_ID});
+
+			if (status?.toLowerCase() === 'approved') {
+				await UPDATE(ClaimFiles).with({Status: updatedClaimFileStatus?.STATUS, ApprovalsCount: claimFile.ApprovalsCount + 1}).where({ID: claimFile_ID});
+			}else {
+				await UPDATE(ClaimFiles).with({Status: updatedClaimFileStatus?.STATUS}).where({ID: claimFile_ID});
+			}
 
 			return messages[validationAction];
 			

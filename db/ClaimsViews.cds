@@ -7,7 +7,16 @@ using { com.bayer.SXTENDER.TransactionalData } from '../db/TransactionalData';
 using {com.bayer.SXTENDER.TransactionalDataViews} from '../db/TransactionalDataViews';
 using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
 
-entity ClaimFilesView as select from ClaimsData.ClaimFiles;
+entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
+	left join ClaimFilesApprovalsCount as approvalscount
+		on approvalscount.ClaimFiles_ID = cf.ID {
+	*,
+    case
+		when approvalscount.TotalApprovalsCount > 0
+			then cf.ApprovalsCount || '/' || approvalscount.TotalApprovalsCount
+		else '0'
+	end as ApprovalsCount : String
+};
 entity ClaimDataView as select from ClaimsData.ClaimData;
 entity CalculatedBrandVolumes as select from ClaimsData.ClaimData as cd
 {
@@ -113,7 +122,7 @@ entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
 	    	min(case when ClaimApprovals.Status = 'Approved' then 1 else 0 end) = 1 and min(case when ClaimData.Status = 'Passed' then 1 else 0 end) = 1
 	    then 'Approved (All QC Passed)'
 	    when 
-	    	min(case when ClaimApprovals.Status = 'Approved' then 1 else 0 end) = 1 and min(case when ClaimData.Status != 'Passed' then 1 else 0 end) = 0
+	    	min(case when ClaimApprovals.Status = 'Approved' then 1 else 0 end) = 1 and max(case when ClaimData.Status != 'Passed' then 1 else 0 end) = 1
 	    then 'Approved (Some QC Failed)'
 	    else 'Pending'
 	end as STATUS: String
@@ -155,3 +164,8 @@ entity ExtractClaimDataView  as select from ClaimsData.ClaimFiles as clmf
 			cas.NrFakturyZakupu,
 			clmd.Comment,
 }where  clmf.Status = 'Approved (All QC Passed)' or clmf.Status = 'Approved (Some QC Failed)';
+
+entity ClaimFilesApprovalsCount as select from ClaimsData.ClaimApprovals{
+	key ClaimFiles.ID as ClaimFiles_ID,
+    count(*) as TotalApprovalsCount: Integer
+}group by ClaimFiles.ID;
