@@ -680,7 +680,7 @@ module.exports = async (srv) => {
 		}
 
 		if (req.data.CountryCode.toLowerCase().includes('hm') && (req.event == 'CREATE' || req.method == 'CREATE')) {
-			const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: {in: ['ComplianceOfficer', 'SupplyManagementView', 'GlobalStrategicMarketing']}, CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+			const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: {in: ['ComplianceOfficer', 'SupplyManagement', 'GlobalStrategicMarketing']}, CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
 			const { data } = mappedHaematologyFields(req, formFieldsData);
 			req.data = data;
 		}
