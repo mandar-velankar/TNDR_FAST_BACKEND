@@ -46,7 +46,8 @@ module.exports = async (srv) => {
 		ValueHelp,
 		Filter,
 		StaticValue,
-		MandatoryFieldsView
+		MandatoryFieldsView,
+		FormFieldsView
 	} = UITemplatesService.entities;
 
 	// Use reflection to get the csn definition
@@ -677,6 +678,13 @@ module.exports = async (srv) => {
 			const masterDistributor =  await SELECT.one.from('StandardAppService.MasterDistributors').where({CountryCode: req.data.CountryCode, DistributorName: "Defined at results Level"})
 			req.data.DistributorID = masterDistributor?.DistributorID
 		}
+
+		if (req.data.CountryCode.toLowerCase().includes('hm') && (req.event == 'CREATE' || req.method == 'CREATE')) {
+			const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: {in: ['ComplianceOfficer', 'SupplyManagementView', 'GlobalStrategicMarketing']}, CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+			const { data } = mappedHaematologyFields(req, formFieldsData);
+			req.data = data;
+		}
+
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
 		req.data.DistributorComments = null; //for mandatory field check in sta-service
 		delete req.data.OfferDueDate;
@@ -689,8 +697,7 @@ module.exports = async (srv) => {
             return req.reject(403, error?.message||"Error in OfferFormView");
         }
 	});
-
-	srv.before(['UPDATE'], ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
+	srv.before(['CREATE', 'UPDATE'], ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
 		try{
 		const sections = {
 			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
@@ -712,23 +719,53 @@ module.exports = async (srv) => {
 				req.data[frontendField] === null ||
 				req.data[frontendField] === ''
 			) {
-				// Error status code is set 400 to stop creation process when validation failed 
-				req.error({ code: 400, message: `${item.Label} is required.`, target: frontendField });
+				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
 			}
-		}	
-
-		req.data.NewOfferDueDate = req.data.OfferDueDate;
-		req.data.DistributorComments = null; //for mandatory field check in sta-service
-		delete req.data.OfferDueDate;
-		delete req.data.OfferStatus;
-		delete req.data.InstituteID;
-        delete req.data.Channel;
+		}
 		}
 		catch(error){
             console.error('Error in OfferFormView CREATE');
             return req.reject(403, error?.message||"Error in OfferFormView");
         }
 	});
+
+	srv.on('UPDATE', ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
+		const sections = {
+			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
+			'StandardAppService.SupplyManagementView': 'SupplyManagement',
+			'StandardAppService.GlobalStrategicMarketingView': 'GlobalStrategicMarketing'
+		};
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
+		const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		const { mappedFields } = mappedHaematologyFields(req, formFieldsData);
+
+		if (offer) {
+			await UPDATE(PT_TMOFRS).with(mappedFields).where({OfferID: req.data.OfferID});
+		}
+	});
+
+	/**
+	 * 
+	 * @param {Object} req  Request object containing additional data
+	 * @param {Object} entity Entity name of the request
+	 * @param {[Objects]} entity Form field paths of Haematology Offer forms from UITemplates service 
+	 * @returns Updated requset data if entity name is StandardAppService.OfferFormView resets field values of Compliance Officer, Supply Management and Global Strategic Marketing forms
+	 * otherwise returns mappedFields with only updated values from ui side
+	 */
+	const mappedHaematologyFields = function ({data, entity}, formFieldsData) {
+		const mappedFields = {};
+		formFieldsData.forEach(el => {
+			if (entity == 'StandardAppService.OfferFormView') {
+				data[el.Field] = null;
+			}else {
+				mappedFields[el.Field] = data?.[el.Field];
+			}
+		});
+		return {
+			data,
+			mappedFields
+		};
+	};
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsTableView', async (req) => {
 		try{
