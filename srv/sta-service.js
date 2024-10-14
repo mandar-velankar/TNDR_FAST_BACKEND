@@ -5616,17 +5616,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const offerValidation = await buildOfferValidation(tx, whereOffer);
 			const mailTemplate = await getMailTemplate('CHNotificationMailTemplate');
 			const {createdByName} = await SELECT.one.from(TenderMasterView).where({TenderID:tenderId,OfferID:offerID});
-
-			const MEACHNotificationData = mappedMEACHNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName)
+			const {CountryName} = await SELECT.one.from(PT_TMCTRY).where({CountryCode: CountryCode});
+			const CountryNameReplace = CountryName.replace('Consumer Health', '');
+			const MEACHNotificationData = mappedMEACHNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace);
 			await INSERT.into(OutgoingMails).entries(MEACHNotificationData);
-			return "Notification mail sent successfully"
+			return "Notification mail sent successfully";
 		}catch (error) {
 				console.error('Error in sendMEACHNotificationMailTemplate');
-				return res.reject(400, error.message || 'An unexpected error occurred.')
+				return res.reject(400, error.message || 'An unexpected error occurred.');
 		}
 
 	});
-	function mappedMEACHNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName){
+	function mappedMEACHNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace){
 		return userInfo.map(data =>{
 			return {
 				CountryCode: req.data.CountryCode,
@@ -5634,13 +5635,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				OfferID: req.data.offerID,
 				Sender: 'FAST-Admin@bayer.com',
 				Recipients:  data.UserEmail,
-				Subject: `New HEM Tender Created for ${req.data.CountryCode}`,
+				Subject: `New HEM Tender Created for ${CountryNameReplace}`,
 				MailBody: generateMailBody(mailTemplate, {
 					data: { 
 						content:{
 							UserName: data.UserName,
 							OFFERID:req.data.offerID,
-							COUNTRYCODE: req.data.CountryCode,
+							CountryName: CountryNameReplace,
 							InternalDueDate: offerValidation.InternalDueDate,
 							BID_DUE_DATE: offerValidation.BID_DUE_DATE,
 							DirectURLToOffer: req.data.url,
