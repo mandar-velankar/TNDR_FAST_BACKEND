@@ -10,7 +10,19 @@ using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
 entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	left join ClaimFilesApprovalsCount as approvalscount
 		on approvalscount.ClaimFiles_ID = cf.ID {
-	*,
+	key cf.ID,
+	key cf.CountryCode,
+	cf.ClaimFileFormat,
+    cf.FileName,
+    cf.DateFrom,
+    cf.DateTo,
+    cf.FilePeriod,
+    cf.DistributorID,
+    cf.DistributorName,
+    cf.WholesalerPurchaseAmount,
+    cf.NetSales,
+    cf.TotalClaimAmount,
+    cf.Status,
     case
 		when approvalscount.TotalApprovalsCount > 0
 			then cf.ApprovalsCount || '/' || approvalscount.TotalApprovalsCount
