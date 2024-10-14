@@ -188,6 +188,10 @@ module.exports = (srv) => {
 			
 			const result = await fileFactory.format();
 
+			const claimApprovertypes = await SELECT.from(ClaimApproverTypes).where({CountryCode: req.CountryCode}); 
+
+			const mappedClaimApprovals = mapClaimApprovals(claimApprovertypes, result.claimFile);
+
 			// Insert metadata into ContrastAgentSalesData
 			if(req.CountryCode === 'PL'){
 				await INSERT.into(ContrastAgentSalesData).entries(result.contrastAgentSalesData);
@@ -200,6 +204,9 @@ module.exports = (srv) => {
 
 			//Insert metadata into ClaimData
 			await INSERT.into(ClaimData).entries(result.claimData);
+
+			//Insert Claim Approvals
+			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
 
 			await DELETE.from(SalesReportFile).where({DistributorID: req.DistributorID});
 		} catch (error) {
@@ -310,5 +317,24 @@ module.exports = (srv) => {
             return;
         }
     }
+
+	function mapClaimApprovals(claimApprovertypes, claimFile) {
+
+		console.log(`JOB (${this.jobName }): Mapping SalesData to ContrastAgentSalesData ...`);
+		claimApprovertypes = claimApprovertypes.reduce((prev, curr, idx, claimApprovertypes) => {
+			prev.push(
+				{
+					ApproverName: curr.ApproverName,
+					ApproverEmail: curr.ApproverEmail,
+					ApproverCWID: curr.ApproverCWID,
+					Hierarchy: curr.Hierarchy,
+					Status: "Waiting",
+					ClaimFiles: claimFile.ID
+				}
+			);
+			return prev;
+		}, []);
+		return claimApprovertypes;
+	}
 
 };
