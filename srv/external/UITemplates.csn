@@ -1,6 +1,6 @@
 {
  "meta": {
-  "creator": "cds-dk 7.5.1"
+  "creator": "cds-dk 7.9.5"
  },
  "$version": "2.0",
  "definitions": {
@@ -526,6 +526,9 @@
     "Importance": {
      "type": "cds.LargeString"
     },
+    "Rank": {
+     "type": "cds.Integer"
+    },
     "IsValueHelpKey": {
      "type": "cds.Boolean",
      "default": {
@@ -816,8 +819,7 @@
      "notNull": true
     },
     "CountryCode": {
-     "type": "cds.String",
-     "length": 2
+     "type": "cds.LargeString"
     },
     "KeyID": {
      "type": "cds.String",
@@ -904,7 +906,57 @@
     "CountryCode": {
      "key": true,
      "type": "cds.LargeString",
+     "notNull": true,
+     "@Core.Computed": true
+    },
+    "ProductScope": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true,
+     "@Core.Computed": true
+    },
+    "Label": {
+     "type": "cds.LargeString"
+    },
+    "Field": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "UITemplates.FullPropertiesView": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ControlID": {
+     "key": true,
+     "type": "cds.UUID",
      "notNull": true
+    },
+    "Type": {
+     "type": "cds.LargeString"
+    },
+    "FieldName": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "UITemplates.FormFieldsView": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Section": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true,
+     "@Core.Computed": true
+    },
+    "CountryCode": {
+     "key": true,
+     "type": "cds.LargeString",
+     "notNull": true,
+     "@Core.Computed": true
     },
     "ProductScope": {
      "key": true,
