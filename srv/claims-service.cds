@@ -8,7 +8,7 @@ using { com.bayer.SXTENDER.AdminData } from '../db/AdminData';
 
 service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_cag_claims_user','f_tndr_cag_technical_user','authenticated-user']){
 
-
+    entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
     entity Country as projection on MasterData.PT_TMCTRY;
     entity Users as projection on AdminData.PT_TMUSER;
