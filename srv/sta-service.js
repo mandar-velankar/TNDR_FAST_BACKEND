@@ -5644,27 +5644,27 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
 		
 	});
-	srv.on('sendMEACHNotificationMailTemplate', async (req) => {
+	srv.on('sendHematologyNotificationMailTemplate', async (req) => {
 		try {
 			const { data: {tenderId, offerID, url, CountryCode} } = req;
 			const tx = cds.tx(req);
 			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({Role: 'Tender Manager'}));
 			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
 			const offerValidation = await buildOfferValidation(tx, whereOffer);
-			const mailTemplate = await getMailTemplate('CHNotificationMailTemplate');
+			const mailTemplate = await getMailTemplate('HematologyNotificationMailTemplate');
 			const {createdByName} = await SELECT.one.from(TenderMasterView).where({TenderID:tenderId,OfferID:offerID});
 			const {CountryName} = await SELECT.one.from(PT_TMCTRY).where({CountryCode: CountryCode});
-			const CountryNameReplace = CountryName.replace('Consumer Health', '');
-			const MEACHNotificationData = mappedMEACHNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace);
-			await INSERT.into(OutgoingMails).entries(MEACHNotificationData);
+			const CountryNameReplace = CountryName.replace('Hematology', '');
+			const HematologyNotificationData = mappedHematologyNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace);
+			await INSERT.into(OutgoingMails).entries(HematologyNotificationData);
 			return "Notification mail sent successfully";
 		}catch (error) {
-				console.error('Error in sendMEACHNotificationMailTemplate');
+				console.error('Error in sendHematologyNotificationMailTemplate');
 				return res.reject(400, error.message || 'An unexpected error occurred.');
 		}
 
 	});
-	function mappedMEACHNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace){
+	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace){
 		return userInfo.map(data =>{
 			return {
 				CountryCode: req.data.CountryCode,
