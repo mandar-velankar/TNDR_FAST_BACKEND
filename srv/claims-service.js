@@ -38,7 +38,8 @@ module.exports = (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
     const {
         ExcelTemplate,
-        ExtractClaimFilesView,
+        PLExtractClaimFilesView,
+        NLExtractClaimFilesView,
 		ExtractClaimDataView,
         ClaimDataBrandsView,
 		ExtractFASTOffer,
@@ -94,7 +95,7 @@ module.exports = (srv) => {
 		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
 
         const fullWhere = cds.parse.expr(where + brandFilter);
-		const query = SELECT.from(ExtractClaimFilesView).where(fullWhere);
+		const query = SELECT.from(PLExtractClaimFilesView).where(fullWhere);
 		const countryCodeLocals = {
 			'NL': 'nl-NL',
 			'PL': 'en-US'

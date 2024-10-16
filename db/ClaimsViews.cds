@@ -80,7 +80,7 @@ group by
 	CountryCode,
 	ProductPackID;
 
-entity ExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
+entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 	left join ClaimsData.ClaimData as clmd 		
             on clmd.ClaimFiles.ID = clmf.ID 
 	inner join TransactionalData.PT_TMOFRS as offer 		
@@ -124,7 +124,29 @@ entity ExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 				clmf.DateTo,
 				clmf.CountryCode,
 				clmf.Status
-		};
+		}where clmf.CountryCode = 'PL';
+
+entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles{
+	ID as ClaimFileID,
+	DistributorName,
+	WholesalerPurchaseAmount,
+	NetSales,
+	DateFrom,
+	DateTo,
+	CountryCode,
+	Status,
+	ClaimData.OfferID,
+	ClaimData.ID as ClaimDataID,
+	ClaimData.MainInstituteName,
+	ClaimData.ChildInstituteName,
+	ClaimData.Date,
+	ClaimData.PRODUCTPACKNAME,
+	ClaimData.FASTWholesalerPurchasePrice,
+	ClaimData.FASTDistributionArrangement,
+	ClaimData.Product.RequestedVolume,
+	ClaimData.Product.PriceCondition.OfferPrice
+} where CountryCode = 'NL' 
+   	and ClaimData.Type = 'Claim';
 
 entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
 	key ID as CLAIMFILES_ID,

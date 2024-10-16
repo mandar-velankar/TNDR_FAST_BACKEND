@@ -54,7 +54,8 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
             content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType     : String      @Core.IsMediaType;
     }
-    entity ExtractClaimFilesView as projection on ClaimsViews.ExtractClaimFilesView;
+    entity PLExtractClaimFilesView as projection on ClaimsViews.PLExtractClaimFilesView;
+    entity NLExtractClaimFilesView as projection on ClaimsViews.NLExtractClaimFilesView;
     entity ExtractClaimDataView as projection on ClaimsViews.ExtractClaimDataView;
 
     entity ExtractFASTOffer as select from TransactionalData.PT_TMTEND as tender 
