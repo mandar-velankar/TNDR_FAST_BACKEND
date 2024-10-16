@@ -15,6 +15,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
         try {
 			this.db = await cds.connect.to('db');
 			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
+			const { ClaimData } = this.db.entities("com.bayer.SXTENDER.ClaimsData");
 			const { ExtractFASTOfferNL } = this.db.entities("ClaimsService");
 
 			let UUID = this.generateUUID();
@@ -24,7 +25,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			// Get the mapping for the distributor
 			const currentMappings = this.columnMappings(distributor);
 
-			if(distributor?.DistributorName === 'Ovidius Pharma & Care'){
+			if(distributor?.DistributorName === 'Ovidius Pharma & Care' || distributor?.DistributorName === 'Klinifarma'){
 				// Get column names from the 5th row
 				columnNames = this.data[2].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
 
@@ -58,6 +59,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const institutes = await SELECT.from(PT_TMINST).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const instituteHierarcis = await SELECT.from(PT_TMINSHIER).where({ActiveRecord: 'Yes'});
 			const fastOfferData = await SELECT.from(ExtractFASTOfferNL).where({CountryCode: this.countryCode});
+			const claimsData = await SELECT.from(ClaimData).where({CountryCode: this.countryCode});
+
 
 			const { dateFrom, dateTo, filePeriodDate } = this.getDateFromAndTo(this.data[0].Claimperiode, this.filePeriod);
 
@@ -68,7 +71,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const claimFile = this.mapSalesDataToClaimFiles(this.data, distributor, UUID, this.cwid, { dateFrom, dateTo, filePeriodDate });
 
 			// Map sales data to claim data
-			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, { dateFrom, dateTo, filePeriodDate });
+			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, claimsData, { dateFrom, dateTo, filePeriodDate });
 
             const result = {contrastAgentSalesData, claimFile, claimData};
 
@@ -93,6 +96,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 		// Calculate metadata for ClaimFiles
 		
 		const wholesalerPurchaseAmount = salesData.reduce((sum, row) => sum + (row.PurchasePrice * row.TotalDelivered), 0);
+		const netSales = salesData.reduce((sum, row) => sum + (row.FixedPrice * row.TotalDelivered), 0);
 		const totalClaimAmount = salesData.reduce((sum, row) => sum + row.ClaimTotal, 0);
 
 		const claimFile = {
@@ -108,7 +112,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			DistributorID			: this.distributorId,
 			DistributorName			: distributor.DistributorName,
 			WholesalerPurchaseAmount: wholesalerPurchaseAmount,
-			NetSales				: wholesalerPurchaseAmount,
+			NetSales				: netSales,
 			TotalClaimAmount		: totalClaimAmount,
 			Status					: "Pending",
 			ApprovalsCount			: 0
@@ -214,7 +218,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	 * @param {Object} req - Request object containing additional data
 	 * @returns {Object} claimData
 	 */
-	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, { dateFrom, dateTo, filePeriodDate }) {
+	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, claimsData, { dateFrom, dateTo, filePeriodDate }) {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
@@ -240,16 +244,20 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 																item.ContractStartDate <= dateFrom &&
 																item.ContractEndDate >= dateFrom);
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
+			const offerID = fastOffer && fastOffer.OfferID || null;
 			const fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * fastOffer.RequestedVolume) || 0;
 			const fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * fastOffer.RequestedVolume) : ((fastOffer.OfferPrice * daValue) * fastOffer.RequestedVolume)) : 0;
 			const totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
 			const wholesalerDisArPrice = curr.FixedPrice - (curr.Claim2Amount/curr.TotalDelivered);
+			const filteredClaimsData = claimsData.filter(item => item.OfferID == offerID && item.MainInstituteID == instituteId && item.ProductPackID == productCode);
+			const fastPendingCorrection = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + (row.TotalWholesalerClaim - row.TotalFASTClaim), 0) : 0;
+			const usageCalculation = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.Quantity, 0) : 0;
 			prev.push(
 				{
 					CountryCode                             : this.countryCode,
 					createdBy           					: CWID,
 					modifiedBy         						: CWID,
-					OfferID                                 : fastOffer && fastOffer.OfferID || null, 
+					OfferID                                 : offerID, 
 					ProductPackID                           : productCode,
 					PRODUCTPACKNAME							: productPackName,
 					MainInstituteID                         : instituteId,
@@ -266,9 +274,9 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					WholesalerContractPrice                 : curr.FixedPrice,
 					TotalClaim                              : curr.ClaimTotal > 0 ? curr.ClaimTotal : null,
 					MainCustomerForContract                 : instituteId,
-					FASTPendingCorrection                   : null,
+					FASTPendingCorrection                   : fastPendingCorrection,
 					BrandContractVolume                     : null,
-					PercentageUsage                         : null,
+					PercentageUsage                         : usageCalculation + curr.TotalDelivered,
 					BrandId									: fastOffer && fastOffer.BrandId || null,
 					BrandName								: fastOffer && fastOffer.BrandName || null,
 					Balance                                 : null,
@@ -359,6 +367,26 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	columnMappings = function(distributor){
 		const mappings = {
     		'Ovidius Pharma & Care': {
+				"Klantnummer": "EANCustomerNumber",
+				"Klantnaam": "CustomerName",
+				"KlantenOvidiusPahramceutischeGroothandel": "KlantenOvidiusPahramceutischeGroothandel",
+				"IDFnummer": "IDFNumber",
+				"KlantenLairesseziekenhuisfarmacie": "KlantenLairesseziekenhuisfarmacie",
+				"Periode": "Claimperiode",
+				"Z-indexnummer": "ZIndexNumber",
+				"artikelnummerleverancier": "SupplierItemNumber",
+				"Artikelnaam": "ProductName",
+				"Eenheidstuks": "Eenheid1",
+				"Vasteprijs": "FixedPrice",
+				"Inkoopprijs": "PurchasePrice",
+				"Claim1pereenheid": "Claim1pereenheid",
+				"Aantalgeleverd": "TotalDelivered",
+				"Totaalclaim1": "Claim1Amount",
+				"Claim22pereenheid": "Claim22pereenheid",
+				"Totaalclaim2": "Claim2Amount",
+				"Claimbedragtotaal": "ClaimTotal"
+    		},
+			'Klinifarma': {
 				"Klantnummer": "EANCustomerNumber",
 				"Klantnaam": "CustomerName",
 				"KlantenOvidiusPahramceutischeGroothandel": "KlantenOvidiusPahramceutischeGroothandel",
