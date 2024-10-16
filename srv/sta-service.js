@@ -5653,9 +5653,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const offerValidation = await buildOfferValidation(tx, whereOffer);
 			const mailTemplate = await getMailTemplate('HematologyNotificationMailTemplate');
 			const {createdByName} = await SELECT.one.from(TenderMasterView).where({TenderID:tenderId,OfferID:offerID});
+			const offer = await SELECT.one.from('StandardAppService.OfferFormView').where({TenderID:tenderId,OfferID:offerID});
 			const {CountryName} = await SELECT.one.from(PT_TMCTRY).where({CountryCode: CountryCode});
 			const CountryNameReplace = CountryName.replace('Hematology', '');
-			const HematologyNotificationData = mappedHematologyNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace);
+			const HematologyNotificationData = mappedHematologyNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer);
 			await INSERT.into(OutgoingMails).entries(HematologyNotificationData);
 			return "Notification mail sent successfully";
 		}catch (error) {
@@ -5664,7 +5665,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 
 	});
-	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace){
+	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer){
 		return userInfo.map(data =>{
 			return {
 				CountryCode: req.data.CountryCode,
@@ -5677,10 +5678,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					data: { 
 						content:{
 							UserName: data.UserName,
-							OFFERID:req.data.offerID,
 							CountryName: CountryNameReplace,
-							InternalDueDate: offerValidation.InternalDueDate,
-							BID_DUE_DATE: offerValidation.BID_DUE_DATE,
+							Offer: offer,
 							DirectURLToOffer: req.data.url,
 							TenderCreator: createdByName,
 						}
