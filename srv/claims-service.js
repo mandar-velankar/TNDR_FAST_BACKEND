@@ -328,8 +328,8 @@ module.exports = (srv) => {
 					ApproverEmail: curr.ApproverEmail,
 					ApproverCWID: curr.ApproverCWID,
 					Hierarchy: curr.Hierarchy,
-					Status: "Waiting",
-					ClaimFiles: claimFile.ID
+					Status: "Pending",
+					ClaimFiles_ID: claimFile.ID
 				}
 			);
 			return prev;
