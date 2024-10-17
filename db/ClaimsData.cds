@@ -67,6 +67,7 @@ entity ClaimData : managed, cuid {
     FASTWholesalerPurchasePrice             : Double;
     FASTContractPrice                       : Double;
     FASTDistributionArrangement             : Double;
+    FASTDistributionAgreementType           : String;
     QC1Passed                               : Boolean;
     QC2Passed                               : Boolean;
     WholesalerClaim1                        : Double;
