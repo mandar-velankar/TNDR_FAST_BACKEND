@@ -73,6 +73,8 @@
         <EntitySet Name="ProductScopeView" EntityType="CatalogService.ProductScopeView"/>
         <EntitySet Name="PropertiesView" EntityType="CatalogService.PropertiesView"/>
         <EntitySet Name="MandatoryFieldsView" EntityType="CatalogService.MandatoryFieldsView"/>
+        <EntitySet Name="FullPropertiesView" EntityType="CatalogService.FullPropertiesView"/>
+        <EntitySet Name="FormFieldsView" EntityType="CatalogService.FormFieldsView"/>
       </EntityContainer>
       <EntityType Name="CountryTemplate">
         <Key>
@@ -214,6 +216,7 @@
         <Property Name="TitleLocale" Type="Edm.String"/>
         <Property Name="Description" Type="Edm.String"/>
         <Property Name="Importance" Type="Edm.String"/>
+        <Property Name="Rank" Type="Edm.Int32"/>
         <Property Name="IsValueHelpKey" Type="Edm.Boolean" DefaultValue="false"/>
         <Property Name="IsValueHelpText" Type="Edm.Boolean" DefaultValue="false"/>
         <NavigationProperty Name="Table" Type="CatalogService.Table" Partner="Columns">
@@ -290,7 +293,7 @@
           <PropertyRef Name="ID"/>
         </Key>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="CountryCode" Type="Edm.String" MaxLength="2"/>
+        <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="KeyID" Type="Edm.String" MaxLength="40"/>
         <Property Name="ValueText" Type="Edm.String" MaxLength="40"/>
         <NavigationProperty Name="ValueHelp" Type="CatalogService.ValueHelp" Partner="StaticValues">
@@ -326,6 +329,26 @@
         <Property Name="Label" Type="Edm.String"/>
         <Property Name="Field" Type="Edm.String"/>
       </EntityType>
+      <EntityType Name="FullPropertiesView">
+        <Key>
+          <PropertyRef Name="ControlID"/>
+        </Key>
+        <Property Name="ControlID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Type" Type="Edm.String"/>
+        <Property Name="FieldName" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="FormFieldsView">
+        <Key>
+          <PropertyRef Name="Section"/>
+          <PropertyRef Name="CountryCode"/>
+          <PropertyRef Name="ProductScope"/>
+        </Key>
+        <Property Name="Section" Type="Edm.String" Nullable="false"/>
+        <Property Name="CountryCode" Type="Edm.String" Nullable="false"/>
+        <Property Name="ProductScope" Type="Edm.String" Nullable="false"/>
+        <Property Name="Label" Type="Edm.String"/>
+        <Property Name="Field" Type="Edm.String"/>
+      </EntityType>
       <ComplexType Name="com_bayer_SXTENDER_templates_SelectedField">
         <Property Name="ID" Type="Edm.String"/>
         <Property Name="Name" Type="Edm.String"/>
@@ -350,7 +373,19 @@
       <Annotations Target="CatalogService.MandatoryFieldsView/Section">
         <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
+      <Annotations Target="CatalogService.MandatoryFieldsView/CountryCode">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
       <Annotations Target="CatalogService.MandatoryFieldsView/ProductScope">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="CatalogService.FormFieldsView/Section">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="CatalogService.FormFieldsView/CountryCode">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="CatalogService.FormFieldsView/ProductScope">
         <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
     </Schema>

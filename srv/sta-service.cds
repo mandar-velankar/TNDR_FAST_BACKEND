@@ -68,6 +68,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     @readonly
     entity MandatoryFieldsView as projection on UITemplateSrv.MandatoryFieldsView;
     @readonly 
+    entity FullPropertiesView as projection on UITemplateSrv.FullPropertiesView;
+    @readonly 
+    entity FormFieldsView as projection on UITemplateSrv.FormFieldsView;
+    @readonly 
     entity BrandsInTender  as projection on TransactionalDataViews.BrandsInTender;
     @cds.redirection.target
     entity TenderFormView as projection on TransactionalData.PT_TMTEND {
@@ -282,6 +286,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
+    action sendHematologyNotificationMailTemplate(offerID:String,tenderId: String, CountryCode: String, url: String) returns String;
     action softDeleteOffer(offerID:String) returns String;
     function getNotificationMailTemplate(offerID:String, templateId: String, url: String) returns String;
 
@@ -1089,5 +1094,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     @cds.redirection.target
     entity NLPriceConditions as projection on TransactionalData.NLPriceConditions; 
 
-    entity ComplianceOfficerView as projection on OfferFormView;    
+    entity ComplianceOfficerView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS; 
+    entity GlobalStrategicMarketingView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;   
+    entity SupplyManagementView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;     
 }

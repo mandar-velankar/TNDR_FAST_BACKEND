@@ -46,7 +46,8 @@ module.exports = async (srv) => {
 		ValueHelp,
 		Filter,
 		StaticValue,
-		MandatoryFieldsView
+		MandatoryFieldsView,
+		FormFieldsView
 	} = UITemplatesService.entities;
 
 	// Use reflection to get the csn definition
@@ -677,6 +678,13 @@ module.exports = async (srv) => {
 			const masterDistributor =  await SELECT.one.from('StandardAppService.MasterDistributors').where({CountryCode: req.data.CountryCode, DistributorName: "Defined at results Level"})
 			req.data.DistributorID = masterDistributor?.DistributorID
 		}
+
+		if (req.data.CountryCode.toLowerCase().includes('hm') && (req.event == 'CREATE' || req.method == 'CREATE')) {
+			const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: {in: ['ComplianceOfficer', 'SupplyManagement', 'GlobalStrategicMarketing']}, CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+			const { data } = mappedHaematologyFields(req, formFieldsData);
+			req.data = data;
+		}
+
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
 		req.data.DistributorComments = null; //for mandatory field check in sta-service
 		delete req.data.OfferDueDate;
@@ -689,8 +697,7 @@ module.exports = async (srv) => {
             return req.reject(403, error?.message||"Error in OfferFormView");
         }
 	});
-
-	srv.before(['UPDATE'], ['ComplianceOfficerView'], async (req) => {
+	srv.before(['CREATE', 'UPDATE'], ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
 		try{
 		const sections = {
 			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
@@ -698,9 +705,6 @@ module.exports = async (srv) => {
 			'StandardAppService.GlobalStrategicMarketingView': 'GlobalStrategicMarketing'
 		};
 		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
-		const fieldMapping = {
-			'DistributorName' : 'DistributorID', //this field mapping is required as on screen we display Distributor Name, but while saving we use DistributorID
-		};
 		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
 		for (const item of mandatoryFielddata) {
@@ -708,10 +712,6 @@ module.exports = async (srv) => {
 			if (frontendField.includes("path")) {
 				const match = regex.exec(frontendField);
 				frontendField = match ? match[1] : frontendField;
-			}
-			// Check if there's a mapping, and if so, replace it
-			if (fieldMapping[frontendField]) {
-				frontendField = fieldMapping[frontendField];
 			}
 		
 			if (
@@ -721,20 +721,51 @@ module.exports = async (srv) => {
 			) {
 				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
 			}
-		}	
-
-		req.data.NewOfferDueDate = req.data.OfferDueDate;
-		req.data.DistributorComments = null; //for mandatory field check in sta-service
-		delete req.data.OfferDueDate;
-		delete req.data.OfferStatus;
-		delete req.data.InstituteID;
-        delete req.data.Channel;
+		}
 		}
 		catch(error){
             console.error('Error in OfferFormView CREATE');
             return req.reject(403, error?.message||"Error in OfferFormView");
         }
 	});
+
+	srv.on('UPDATE', ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
+		const sections = {
+			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
+			'StandardAppService.SupplyManagementView': 'SupplyManagement',
+			'StandardAppService.GlobalStrategicMarketingView': 'GlobalStrategicMarketing'
+		};
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
+		const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		const { mappedFields } = mappedHaematologyFields(req, formFieldsData);
+
+		if (offer) {
+			await UPDATE(PT_TMOFRS).with(mappedFields).where({OfferID: req.data.OfferID});
+		}
+	});
+
+	/**
+	 * 
+	 * @param {Object} req  Request object containing additional data
+	 * @param {Object} entity Entity name of the request
+	 * @param {[Objects]} entity Form field paths of Haematology Offer forms from UITemplates service 
+	 * @returns Updated requset data if entity name is StandardAppService.OfferFormView resets field values of Compliance Officer, Supply Management and Global Strategic Marketing forms
+	 * otherwise returns mappedFields with only updated values from ui side
+	 */
+	const mappedHaematologyFields = function ({data, entity}, formFieldsData) {
+		const mappedFields = {};
+		formFieldsData.forEach(el => {
+			if (entity == 'StandardAppService.OfferFormView') {
+				data[el.Field] = null;
+			}else {
+				mappedFields[el.Field] = data?.[el.Field];
+			}
+		});
+		return {
+			data,
+			mappedFields
+		};
+	};
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsTableView', async (req) => {
 		try{
@@ -5613,7 +5644,51 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
 		
 	});
-	
+	srv.on('sendHematologyNotificationMailTemplate', async (req) => {
+		try {
+			const { data: {tenderId, offerID, url, CountryCode} } = req;
+			const tx = cds.tx(req);
+			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({Role: 'Tender Manager'}));
+			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
+			const offerValidation = await buildOfferValidation(tx, whereOffer);
+			const mailTemplate = await getMailTemplate('HematologyNotificationMailTemplate');
+			const {createdByName} = await SELECT.one.from(TenderMasterView).where({TenderID:tenderId,OfferID:offerID});
+			const offer = await SELECT.one.from('StandardAppService.OfferFormView').where({TenderID:tenderId,OfferID:offerID});
+			const {CountryName} = await SELECT.one.from(PT_TMCTRY).where({CountryCode: CountryCode});
+			const CountryNameReplace = CountryName.replace('Hematology', '');
+			const HematologyNotificationData = mappedHematologyNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer);
+			await INSERT.into(OutgoingMails).entries(HematologyNotificationData);
+			return "Notification mail sent successfully";
+		}catch (error) {
+				console.error('Error in sendHematologyNotificationMailTemplate');
+				return res.reject(400, error.message || 'An unexpected error occurred.');
+		}
+
+	});
+	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer){
+		return userInfo.map(data =>{
+			return {
+				CountryCode: req.data.CountryCode,
+				TenderID: req.data.tenderId,
+				OfferID: req.data.offerID,
+				Sender: 'FAST-Admin@bayer.com',
+				Recipients:  data.UserEmail,
+				Subject: `New HEM Tender Created for ${CountryNameReplace}`,
+				MailBody: generateMailBody(mailTemplate, {
+					data: { 
+						content:{
+							UserName: data.UserName,
+							CountryName: CountryNameReplace,
+							Offer: offer,
+							DirectURLToOffer: req.data.url,
+							TenderCreator: createdByName,
+						}
+					}
+				}),
+				Sent: false,
+			}
+		})
+	}
 	function addLeadingZeros (num, size) {
         if (num === null) {
             throw new Error(`${text} doesn't exist`);
