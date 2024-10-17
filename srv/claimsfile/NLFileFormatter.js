@@ -238,6 +238,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const wppValue = wPP && wPP.WPPWithoutTax || 0;
 			const distributionAgreement = distributionAgreements.find(item => item.PRODUCTPACKID == productCode && item.StartDate <= dateFrom && item.EndDate >= dateFrom);
 			const daValue = distributionAgreement && distributionAgreement.Value || 0;
+			const daType = distributionAgreement && distributionAgreement.Type || null;
 			const filteredItems = fastOfferData.filter(item => item.InstituteID == instituteId &&
 																item.DistributorID == this.distributorId &&
 																item.ProductCode === productCode &&
@@ -293,6 +294,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					FASTWholesalerPurchasePrice             : wppValue || 0,
 					FASTContractPrice                       : fastOffer && fastOffer.OfferPrice || 0,
 					FASTDistributionArrangement             : daValue,
+					FASTDistributionAgreementType			: daType,
 					QC1Passed                               : fastContractClaim == curr.Claim1Amount ? true : false,
 					QC2Passed                               : fastDistributionArrangementClaim == curr.Claim2Amount ? true : false,
 					WholesalerClaim1                        : curr.Claim1Amount,

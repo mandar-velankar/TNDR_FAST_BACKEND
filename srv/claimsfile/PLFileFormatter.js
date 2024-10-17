@@ -202,6 +202,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					FASTWholesalerPurchasePrice             : fastOffer && fastOffer.RegPrice || 0,
 					FASTContractPrice                       : fastOffer && fastOffer.OfferPrice || 0,
 					FASTDistributionArrangement             : null,
+					FASTDistributionAgreementType			: null,
 					QC1Passed                               : false,
 					QC2Passed                               : false,
 					WholesalerClaim1                        : null,
