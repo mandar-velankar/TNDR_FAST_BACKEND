@@ -9,7 +9,9 @@ using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
 
 entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	left join ClaimFilesApprovalsCount as approvalscount
-		on approvalscount.ClaimFiles_ID = cf.ID {
+		on approvalscount.ClaimFiles_ID = cf.ID
+	left join CountryCurrencyView as ctryCurrency
+	    on ctryCurrency.CountryCode = cf.CountryCode {
 	key cf.ID,
 	key cf.CountryCode,
 	cf.ClaimFileFormat,
@@ -23,13 +25,23 @@ entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
     cf.NetSales,
     cf.TotalClaimAmount,
     cf.Status,
+	ctryCurrency.Currency,
     case
 		when approvalscount.TotalApprovalsCount > 0
 			then cf.ApprovalsCount || '/' || approvalscount.TotalApprovalsCount
 		else '0'
 	end as ApprovalsCount : String
 };
-entity ClaimDataView as select from ClaimsData.ClaimData;
+
+entity ClaimDataView as select from ClaimsData.ClaimData as cd 
+	left join CountryCurrencyView as ctryCurrency
+	    on ctryCurrency.CountryCode = cd.CountryCode{
+	*,
+	key cd.ID,
+	cd.CountryCode,
+	ctryCurrency.Currency
+};
+
 entity CalculatedBrandVolumes as select from ClaimsData.ClaimData as cd
 {
 	key cd.OfferID,
@@ -44,7 +56,7 @@ entity ClaimDataCalculatedView as select from ClaimsData.ClaimData as cd
 	left join CalculatedBrandVolumes as calcbrandvolumes
 		on calcbrandvolumes.OfferID = cd.OfferID
 		and calcbrandvolumes.ProductPackID = cd.ProductPackID
-	inner join MasterData.CountryCurrency as ctryCurrency
+	left join MasterData.CountryCurrency as ctryCurrency
 	    on ctryCurrency.CountryCode = cd.CountryCode{
     *,
 	key cd.ID,
@@ -59,6 +71,7 @@ entity ClaimDataCalculatedView as select from ClaimsData.ClaimData as cd
 	ctryCurrency.CountryCode as CurrencyCountry,
     cd.SKU.PRODUCTPACKNAME,
     cd.SKUCountry.GOV_CODE,
+	cd.FASTDistributionAgreementType,
     materialNumbers.MaterialNumbers,
 	calcbrandvolumes.BrandUsedCalculatedVolume,
 	calcbrandvolumes.BrandContractCalculatedVolume,
@@ -181,3 +194,8 @@ entity ClaimFilesApprovalsCount as select from ClaimsData.ClaimApprovals{
 	key ClaimFiles.ID as ClaimFiles_ID,
     count(*) as TotalApprovalsCount: Integer
 }group by ClaimFiles.ID;
+
+entity CountryCurrencyView as select from MasterData.CountryCurrency {
+	key CountryCode,
+	Currency
+};
