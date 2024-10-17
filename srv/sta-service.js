@@ -22,6 +22,8 @@ const qs = require("qs");
 const { nextTick } = require('process');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
+const XLSX = require("xlsx");
+const { isGeneratorFunction } = require('util/types');
 
 module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
@@ -44,7 +46,8 @@ module.exports = async (srv) => {
 		ValueHelp,
 		Filter,
 		StaticValue,
-		MandatoryFieldsView
+		MandatoryFieldsView,
+		FormFieldsView
 	} = UITemplatesService.entities;
 
 	// Use reflection to get the csn definition
@@ -114,7 +117,10 @@ module.exports = async (srv) => {
 		CountrySpecificTenderInfo,
 		PT_TMTNOFST,
 		TransCompetitorResult,
-		OutgoingMails
+		OutgoingMails,
+		NLPriceConditions,
+		NLOfferDistributors,
+		ContractInfomation
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -137,7 +143,11 @@ module.exports = async (srv) => {
 	const {
 		InstitutesView,
 		InstituteInBranchView,
-		AwardedProductFormView
+		TenderMasterView,
+		AwardedProductFormView,
+		ZagisUploadFile,
+		ExtractNLHistoricalInformation,
+		NLExtractOffers
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -500,6 +510,7 @@ module.exports = async (srv) => {
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+        req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
 
         result = await tx.run(tmvQuery);
 
@@ -663,7 +674,17 @@ module.exports = async (srv) => {
 		// !req.data.InternalBidDueDate && req.error({ code: 404, message: "InternalBidDueDate is required.", target: "InternalBidDueDate" });
         // !req.data.Custom_String_1 && req.error({ code: 404, message: "Payment Term is required.", target: "Custom_String_1" });
         // !req.data.Currency && req.error({ code: 404, message: "Currency is required.", target: "Currency" });
-		
+		if (req.data.CountryCode === 'NL' || req.data.CountryCode === 'PL') {
+			const masterDistributor =  await SELECT.one.from('StandardAppService.MasterDistributors').where({CountryCode: req.data.CountryCode, DistributorName: "Defined at results Level"})
+			req.data.DistributorID = masterDistributor?.DistributorID
+		}
+
+		if (req.data.CountryCode.toLowerCase().includes('hm') && (req.event == 'CREATE' || req.method == 'CREATE')) {
+			const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: {in: ['ComplianceOfficer', 'SupplyManagement', 'GlobalStrategicMarketing']}, CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+			const { data } = mappedHaematologyFields(req, formFieldsData);
+			req.data = data;
+		}
+
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
 		req.data.DistributorComments = null; //for mandatory field check in sta-service
 		delete req.data.OfferDueDate;
@@ -676,6 +697,75 @@ module.exports = async (srv) => {
             return req.reject(403, error?.message||"Error in OfferFormView");
         }
 	});
+	srv.before(['CREATE', 'UPDATE'], ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
+		try{
+		const sections = {
+			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
+			'StandardAppService.SupplyManagementView': 'SupplyManagement',
+			'StandardAppService.GlobalStrategicMarketingView': 'GlobalStrategicMarketing'
+		};
+		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
+		  
+		for (const item of mandatoryFielddata) {
+			let frontendField = item.Field;
+			if (frontendField.includes("path")) {
+				const match = regex.exec(frontendField);
+				frontendField = match ? match[1] : frontendField;
+			}
+		
+			if (
+				!(frontendField in req.data) ||
+				req.data[frontendField] === null ||
+				req.data[frontendField] === ''
+			) {
+				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
+			}
+		}
+		}
+		catch(error){
+            console.error('Error in OfferFormView CREATE');
+            return req.reject(403, error?.message||"Error in OfferFormView");
+        }
+	});
+
+	srv.on('UPDATE', ['ComplianceOfficerView', 'SupplyManagementView', 'GlobalStrategicMarketingView'], async (req) => {
+		const sections = {
+			'StandardAppService.ComplianceOfficerView': 'ComplianceOfficer',
+			'StandardAppService.SupplyManagementView': 'SupplyManagement',
+			'StandardAppService.GlobalStrategicMarketingView': 'GlobalStrategicMarketing'
+		};
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
+		const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
+		const { mappedFields } = mappedHaematologyFields(req, formFieldsData);
+
+		if (offer) {
+			await UPDATE(PT_TMOFRS).with(mappedFields).where({OfferID: req.data.OfferID});
+		}
+	});
+
+	/**
+	 * 
+	 * @param {Object} req  Request object containing additional data
+	 * @param {Object} entity Entity name of the request
+	 * @param {[Objects]} entity Form field paths of Haematology Offer forms from UITemplates service 
+	 * @returns Updated requset data if entity name is StandardAppService.OfferFormView resets field values of Compliance Officer, Supply Management and Global Strategic Marketing forms
+	 * otherwise returns mappedFields with only updated values from ui side
+	 */
+	const mappedHaematologyFields = function ({data, entity}, formFieldsData) {
+		const mappedFields = {};
+		formFieldsData.forEach(el => {
+			if (entity == 'StandardAppService.OfferFormView') {
+				data[el.Field] = null;
+			}else {
+				mappedFields[el.Field] = data?.[el.Field];
+			}
+		});
+		return {
+			data,
+			mappedFields
+		};
+	};
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsTableView', async (req) => {
 		try{
@@ -683,6 +773,12 @@ module.exports = async (srv) => {
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
 		delete req.data.Region;
+		delete req.data.ContractDuration_1;
+		delete req.data.OfferPrice_1;
+		delete req.data.ContractDuration_2;
+		delete req.data.OfferPrice_2;
+		delete req.data.ContractDuration_3;
+		delete req.data.OfferPrice_3;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');
@@ -752,6 +848,7 @@ module.exports = async (srv) => {
 		const revisedOfferStatus = {...offerStatus};
 		revisedOfferStatus.OfferID = revisedOfferID;
 		revisedOfferStatus.STATUS = "Offer Created";
+		revisedOfferStatus.TableStatus = null;
 		revisedOfferStatus.Date = todaysDate;
 
 		const revisedOfferProducts = offerProducts.map(pr => {
@@ -825,6 +922,7 @@ module.exports = async (srv) => {
 		const continuedOfferStatus = {...offerStatus};
 		continuedOfferStatus.OfferID = continuedOfferID;
 		continuedOfferStatus.STATUS = "Offer Created";
+		continuedOfferStatus.TableStatus = null;
 		continuedOfferStatus.Date = todaysDate;
 
 		const continuedOfferProducts = offerProducts.map(pr => {
@@ -897,6 +995,7 @@ module.exports = async (srv) => {
 		const affiliateOfferStatus = {...offerStatus};
 		affiliateOfferStatus.OfferID = affiliateOfferID;
 		affiliateOfferStatus.STATUS = "Offer Created";
+		affiliateOfferStatus.TableStatus = null;
 		affiliateOfferStatus.Date = todaysDate;
 
 		const affiliateOfferProducts = offerProducts.map(pr => {
@@ -962,6 +1061,7 @@ module.exports = async (srv) => {
 		const differentAwardPriceOfferStatus = {...offerStatus};
 		differentAwardPriceOfferStatus.OfferID = differentAwardPriceOfferID;
 		differentAwardPriceOfferStatus.STATUS = "Offer Created";
+		differentAwardPriceOfferStatus.TableStatus = null;
 		differentAwardPriceOfferStatus.Date = todaysDate;
 
 		const filteredAwardedProducts = awardedProducts.filter(pr => pr.Outcome === 'Award Price Update');
@@ -1087,6 +1187,10 @@ module.exports = async (srv) => {
 		// !req.data.Custom_Integer_1 && req.error({ code: 404, message: "Pack size is required.", target: "Custom_Integer_1" });
 		// !req.data.VwBudgetedProfitability && req.error({ code: 404, message: "Budgeted profitability is required.", target: "VwBudgetedProfitability" });
 		
+		if (req.data.CountryCode == 'NL' && (req.data.RequestedVolume == 0 || req.data.RequestedVolume == null)) {
+			req.data.RequestedVolume = 1
+		}
+		
 		req.data.Line = null; //for mandatory field check in sta-service
 		delete req.data.MoleculeName;
         delete req.data.Code1;
@@ -1114,7 +1218,9 @@ module.exports = async (srv) => {
 			'PriceConditionPriceView',
 			'PriceConditionDiscountView',
 			'PriceConditionPriceWithFOCView',
-			'PriceConditionDiscountWithFOCView'
+			'PriceConditionDiscountWithFOCView',
+			"PriceConditionNLPriceView", 
+			"PriceConditionNLDiscountView"
 		], 
 		async (req) => {
 			try{
@@ -1168,6 +1274,7 @@ module.exports = async (srv) => {
 			delete req.data.FreeGoodsOther_ABS_PCT;
 			delete req.data.FreeGoodsOther_Step;
 			delete req.data.ADD_INCLUDE;
+			delete req.data.priceconditionID
 		}
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
@@ -1277,22 +1384,44 @@ module.exports = async (srv) => {
 			OfferID: req.data.OfferID
 		});
 
-		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
-		const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
-
-		if (awardedProductsHaveOutcome) {
-			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
+		if (req.data.CountryCode === "NL") {
+			await updateNLOfferStatuses(req, existingAwardedProducts);
+		}else {
+			const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+			const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
+	
+			awardedProductsHaveOutcome && await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
+	
+			if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
+				const recipientCWIDs = ['TWHWE', 'TWKUA'];
+				const recipients = await SELECT.from(PT_TMUSER).where({CWID: {in: recipientCWIDs}});
+				const promises = recipients.map(recipient => {
+					return addOutgoingMail(req, "TaiwanResultsRecordedNotification", `Results recorded for Price Request ID:${req.data.OfferID}`, {RecipientEmail: recipient.UserEmail, RecipientName: recipient.UserName});
+				});
+	
+				await Promise.all(promises);
+			}
 		}
+		
+	}
 
-		if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
-			const recipientCWIDs = ['TWHWE', 'TWKUA'];
-			const recipients = await SELECT.from(PT_TMUSER).where({CWID: {in: recipientCWIDs}});
-			const promises = recipients.map(recipient => {
-				return addOutgoingMail(req, "TaiwanResultsRecordedNotification", `Results recorded for Price Request ID:${req.data.OfferID}`, {RecipientEmail: recipient.UserEmail, RecipientName: recipient.UserName});
-			});
+	const updateNLOfferStatuses = async function (req, existingAwardedProducts) {
+		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
+		if (!awardedProductsHaveOutcome) return;
 
-			await Promise.all(promises);
+		const isEveryOutcomeWon = existingAwardedProducts.every(pr => pr.Outcome === 'Won');
+		const isEveryOutcomeLost = existingAwardedProducts.every(pr => pr.Outcome === 'Lost');
 
+		if (isEveryOutcomeWon) {
+			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Accepted');
+		}else if (isEveryOutcomeLost) {
+			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Rejected');
+		}else {
+			const outcomes = existingAwardedProducts.map(pr => pr.Outcome);
+			const isOfferPartialyAccepted = outcomes.includes('Won') && outcomes.includes('Lost') && !existingAwardedProducts.some(pr => pr.Outcome !== 'Won' && pr.Outcome !== 'Lost');
+			isOfferPartialyAccepted 
+				? await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
+				: await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', '');
 		}
 	}
 
@@ -1528,9 +1657,9 @@ module.exports = async (srv) => {
 		return req.data;
 	};
 
-	const upsertOfferStatus = async function(offerId, tenderId, sStatus){
+	const upsertOfferStatus = async function(offerId, tenderId, sStatus, tableStatus){
 		await UPDATE(PT_TMTNOFST)
-			.with({STATUS: sStatus})
+			.with({STATUS: sStatus, TableStatus: tableStatus})
 			.where({
 				OfferID: offerId,
 				TenderID: tenderId,
@@ -1588,6 +1717,8 @@ module.exports = async (srv) => {
 			'PriceConditionDiscountWithFOCView',
 			'PriceConditionTaiwanPriceView',
 			'PriceConditionTaiwanDiscountView',
+			"PriceConditionNLPriceView", 
+			"PriceConditionNLDiscountView"
 		], 
 		async (req) => {
 			try{
@@ -1749,6 +1880,42 @@ module.exports = async (srv) => {
 		else{
 			await handlePriceConditionUpsert(priceCondition, mappedPriceCondition);		
 		}
+
+		if(req.data.CountryCode === 'NL'){
+			await handleNetherlandsPriceConditions(req);
+		}
+	}
+
+	async function handleNetherlandsPriceConditions(req) {
+		const priceCondition = await SELECT.one.from(PriceCondition).where({
+			OfferID: req.data.OfferID,
+			ProductCode: req.data.ProductCode
+		});
+		const existingNLPriceConditions = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: priceCondition.ID});
+
+		if (existingNLPriceConditions.length > 0) {
+			await Promise.all(req.data.NLPriceConditionType.map(pc => {
+				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
+				const nlPriceCondIndex = existingNLPriceConditions.findIndex(el => el.ContractDuration == pc.ContractDuration);
+				if (nlPriceCondIndex > -1) {
+					return UPDATE(NLPriceConditions)
+					.with(mappedNLPriceCondition)
+					.where({
+						ContractDuration: pc.ContractDuration,
+						PriceCondition_ID: priceCondition.ID
+					});
+				}else if (nlPriceCondIndex == -1 && pc.ContractDuration) {
+					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+				}
+			}))
+		}else {
+			await Promise.all(req.data.NLPriceConditionType.map(pc => {
+				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
+				if (mappedNLPriceCondition.ContractDuration) {
+					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+				}
+			}))
+		}
 	}
 
 	async function handlePriceConditionUpsert(priceCondition, mappedPriceCondition){
@@ -1760,6 +1927,16 @@ module.exports = async (srv) => {
 				});
 		} else {
 			await INSERT.into(PriceCondition).entries(mappedPriceCondition);
+		}
+	}
+
+	const mappedNLPriceConditions = function(pc, PriceconditionID) {
+		return {
+			ContractDuration: pc.ContractDuration,
+			OfferPrice: pc.OfferPrice,
+			Discount: pc.Discount,
+			NetPrice: pc.NetPrice,
+			PriceCondition_ID: PriceconditionID
 		}
 	}
 
@@ -1920,6 +2097,40 @@ module.exports = async (srv) => {
 				CurrentTotalYearlyValueBranch: productCurrentPrice?.TotalYearlyValueBranch || 0,
 				CurrentTotalDiscountNHI: productCurrentPrice?.TotalDiscountNHI || 0,
 				CurrentTotalDiscountInvoice: productCurrentPrice?.TotalDiscountInvoice || 0
+			},
+			"NLDiscount" : {
+				Price0: req.data.masterPriceAIP,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID
+			},
+			"NLPrice" : {
+				Price0: req.data.masterPriceAIP,
+				CountryCode: req.data.CountryCode,
+				Level1Discount1: req.data.Discount,
+				NetOfferPrice: req.data.OfferPrice,
+				Price2: req.data.OfferPrice,
+				NetPrice: req.data.NetPrice,
+				OfferPrice: req.data.OfferPrice,
+				Discount: req.data.Discount,
+				Price3: req.data.NetPrice,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				Tax: req.data.Tax,
+				Price1: req.data.OfferPrice, 
+				Level3Discount1: req.data.Deductions,
+				PriceConditionClassification_ID: req.data.ClassificationID 
 			}
 		}
 
@@ -2006,7 +2217,7 @@ module.exports = async (srv) => {
 			Tier                  : 1, 
 			VolumeFrom            : 0, 
 			VolumeTo              : 0, 
-			RegPrice              : priceCondition.BasePrice, 
+			RegPrice              : priceCondition.CountryCode === 'NL' ? priceCondition.masterPriceAIP : priceCondition.BasePrice, 
 			FOC                   : foc?.FreeGoodsOther || 0, 
 			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
@@ -2176,6 +2387,43 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			// item.TotalYearlyValueBranch = item.Price3 * item.AnticipatedYearlyVolumeBranch;
 			item.TotalDiscountNHI = (item.TotalDiscountNHI * 100).toFixed(2) / 100;
 			item.TotalDiscountInvoice = (item.TotalDiscountInvoice * 100).toFixed(2) / 100;
+		};
+	}
+	catch(error){
+		console.error('Error in PriceConditionTaiwanPriceView READ');
+		return req.reject(403, error?.message||"Error in PriceConditionTaiwanPriceView READ");
+	}
+}
+);
+
+srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'], (items, req) => {
+	try{
+		if(!items) return [];
+		if(Array.isArray(items)){
+			return items.map(fnMapNlConditions)
+		}else{
+			return fnMapNlConditions(items);
+		}
+
+		async function fnMapNlConditions(item){
+			const nlPriceConditions = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: item.PriceConditionID});
+			item.NLPriceConditionType = [];
+			for(let i = 1; i <= 3; i++) {
+				const existingCondition = nlPriceConditions.find(el => el.ContractDuration == item[`Custom_Integer_${i}`] && el.ID);
+				if (existingCondition) {
+					item.NLPriceConditionType[i] = existingCondition;
+				}else {
+					item.NLPriceConditionType[i] = {
+						ContractDuration: item[`Custom_Integer_${i}`],
+						OfferPrice: item.OfferPrice,
+						Discount: 0,
+						NetPrice: 0,
+					}
+				}
+			}
+			item.NLPriceConditionType = item.NLPriceConditionType.filter(el => el);
+			item.NetOfferPrice = await calculateNetOfferPrice(item);
+			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 		};
 	}
 	catch(error){
@@ -2632,7 +2880,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			return results;
 		}
 		offer = offer[0];
-
+		const offerInformation = await SELECT.one.from(PT_TMOFRS).where({OfferID: offer.OFFERID, Active: 1});
 
 		//get tender info
 		const whereTender = ServiceHelper.buildFullWhere("TenderID", "=", offer.TENDERID);
@@ -2644,6 +2892,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		//EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 		const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", offer.INSTITUTE_ID);
 		const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
+		const quotation = await tx.run(SELECT.one.from(PT_TMQUTO).where({OfferID: offer.OFFERID,Active: 1}));
 		let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 		//EHQUT-INC0170495/INC15491446-Customer specific comment not included in the offer
 
@@ -3018,8 +3267,221 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			NumberOfExtension: offer.NumberOfExtension,
 			ClientComment: offer.ClientComment,
 			Regions: offer.Regions,
-			InternalDueDate: offer.InternalBidDueDate,
-        	ExpectedAwardDate: tender.AwardDate
+			InternalDueDate: tender.BidDueDate,
+        	ExpectedAwardDate: tender.AwardDate,
+			Contract_Length1: offer.NumberOfExtension,
+			Contract_Length2: offer.Contract_Length2,
+			Contract_Length3: offer.Contract_Length3,
+			Tender_Custom_Integer_1: tender?.Custom_Integer_1,
+            Tender_Custom_Integer_2: tender?.Custom_Integer_2,
+            Tender_Custom_Integer_3: tender?.Custom_Integer_3,
+            Tender_Custom_Integer_4: tender?.Custom_Integer_4,
+            Tender_Custom_Integer_5: tender?.Custom_Integer_5,
+            Tender_Custom_Integer_6: tender?.Custom_Integer_6,
+            Tender_Custom_Integer_7: tender?.Custom_Integer_7,
+            Tender_Custom_Integer_8: tender?.Custom_Integer_8,
+            Tender_Custom_Integer_9: tender?.Custom_Integer_9,
+            Tender_Custom_Integer_10: tender?.Custom_Integer_10,
+            Tender_Custom_String_1: tender?.Custom_String_1,
+            Tender_Custom_String_2: tender?.Custom_String_2,
+            Tender_Custom_String_3: tender?.Custom_String_3,
+            Tender_Custom_String_4: tender?.Custom_String_4,
+            Tender_Custom_String_5: tender?.Custom_String_5,
+            Tender_Custom_String_6: tender?.Custom_String_6,
+            Tender_Custom_String_7: tender?.Custom_String_7,
+            Tender_Custom_String_8: tender?.Custom_String_8,
+            Tender_Custom_String_9: tender?.Custom_String_9,
+            Tender_Custom_String_10: tender?.Custom_String_10,
+            Tender_Custom_String_11: tender?.Custom_String_11,
+            Tender_Custom_String_12: tender?.Custom_String_12,
+            Tender_Custom_String_13: tender?.Custom_String_13,
+            Tender_Custom_String_14: tender?.Custom_String_14,
+            Tender_Custom_String_15: tender?.Custom_String_15,
+            Tender_Custom_String_16: tender?.Custom_String_16,
+            Tender_Custom_String_17: tender?.Custom_String_17,
+            Tender_Custom_String_18: tender?.Custom_String_18,
+            Tender_Custom_String_19: tender?.Custom_String_19,
+            Tender_Custom_String_20: tender?.Custom_String_20,
+            Tender_Custom_Double_1: tender?.Custom_Double_1,
+            Tender_Custom_Double_2: tender?.Custom_Double_2,
+            Tender_Custom_Double_3: tender?.Custom_Double_3,
+            Tender_Custom_Double_4: tender?.Custom_Double_4,
+            Tender_Custom_Double_5: tender?.Custom_Double_5,
+            Tender_Custom_Double_6: tender?.Custom_Double_6,
+            Tender_Custom_Double_7: tender?.Custom_Double_7,
+            Tender_Custom_Double_8: tender?.Custom_Double_8,
+            Tender_Custom_Double_9: tender?.Custom_Double_9,
+            Tender_Custom_Double_10: tender?.Custom_Double_10,
+            Tender_Custom_Date_1: tender?.Custom_Date_1,
+            Tender_Custom_Date_2: tender?.Custom_Date_2,
+            Tender_Custom_Date_3: tender?.Custom_Date_3,
+            Tender_Custom_Date_4: tender?.Custom_Date_4,
+            Tender_Custom_Date_5: tender?.Custom_Date_5,
+            Tender_Custom_Date_6: tender?.Custom_Date_6,
+            Tender_Custom_Date_7: tender?.Custom_Date_7,
+            Tender_Custom_Date_8: tender?.Custom_Date_8,
+            Tender_Custom_Date_9: tender?.Custom_Date_9,
+            Tender_Custom_Date_10: tender?.Custom_Date_10,
+            Tender_Custom_Boolean_1: tender?.Custom_Boolean_1,
+            Tender_Custom_Boolean_2: tender?.Custom_Boolean_2,
+            Tender_Custom_Boolean_3: tender?.Custom_Boolean_3,
+            Tender_Custom_Boolean_4: tender?.Custom_Boolean_4,
+            Tender_Custom_Boolean_5: tender?.Custom_Boolean_5,
+            Tender_Custom_Boolean_6: tender?.Custom_Boolean_6,
+            Tender_Custom_Boolean_7: tender?.Custom_Boolean_7,
+            Tender_Custom_Boolean_8: tender?.Custom_Boolean_8,
+            Tender_Custom_Boolean_9: tender?.Custom_Boolean_9,
+            Tender_Custom_Boolean_10: tender?.Custom_Boolean_10,
+            Tender_Custom_Datetime_1: tender?.Custom_Datetime_1,
+            Tender_Custom_Datetime_2: tender?.Custom_Datetime_2,
+            Tender_Custom_Datetime_3: tender?.Custom_Datetime_3,
+            Tender_Custom_Datetime_4: tender?.Custom_Datetime_4,
+            Tender_Custom_Datetime_5: tender?.Custom_Datetime_5,
+            Tender_Custom_Datetime_6: tender?.Custom_Datetime_6,
+            Tender_Custom_Datetime_7: tender?.Custom_Datetime_7,
+            Tender_Custom_Datetime_8: tender?.Custom_Datetime_8,
+            Tender_Custom_Datetime_9: tender?.Custom_Datetime_9,
+            Tender_Custom_Datetime_10: tender?.Custom_Datetime_10,
+			Offer_Custom_Integer_1: offerInformation?.Custom_Integer_1,
+            Offer_Custom_Integer_2: offerInformation?.Custom_Integer_2,
+            Offer_Custom_Integer_3: offerInformation?.Custom_Integer_3,
+            Offer_Custom_Integer_4: offerInformation?.Custom_Integer_4,
+            Offer_Custom_Integer_5: offerInformation?.Custom_Integer_5,
+            Offer_Custom_Integer_6: offerInformation?.Custom_Integer_6,
+            Offer_Custom_Integer_7: offerInformation?.Custom_Integer_7,
+            Offer_Custom_Integer_8: offerInformation?.Custom_Integer_8,
+            Offer_Custom_Integer_9: offerInformation?.Custom_Integer_9,
+            Offer_Custom_Integer_10: offerInformation?.Custom_Integer_10,
+            Offer_Custom_String_1: offerInformation?.Custom_String_1,
+            Offer_Custom_String_2: offerInformation?.Custom_String_2,
+            Offer_Custom_String_3: offerInformation?.Custom_String_3,
+            Offer_Custom_String_4: offerInformation?.Custom_String_4,
+            Offer_Custom_String_5: offerInformation?.Custom_String_5,
+            Offer_Custom_String_6: offerInformation?.Custom_String_6,
+            Offer_Custom_String_7: offerInformation?.Custom_String_7,
+            Offer_Custom_String_8: offerInformation?.Custom_String_8,
+            Offer_Custom_String_9: offerInformation?.Custom_String_9,
+            Offer_Custom_String_10: offerInformation?.Custom_String_10,
+            Offer_Custom_String_11: offerInformation?.Custom_String_11,
+            Offer_Custom_String_12: offerInformation?.Custom_String_12,
+            Offer_Custom_String_13: offerInformation?.Custom_String_13,
+            Offer_Custom_String_14: offerInformation?.Custom_String_14,
+            Offer_Custom_String_15: offerInformation?.Custom_String_15,
+            Offer_Custom_String_16: offerInformation?.Custom_String_16,
+            Offer_Custom_String_17: offerInformation?.Custom_String_17,
+            Offer_Custom_String_18: offerInformation?.Custom_String_18,
+            Offer_Custom_String_19: offerInformation?.Custom_String_19,
+            Offer_Custom_String_20: offerInformation?.Custom_String_20,
+            Offer_Custom_Double_1: offerInformation?.Custom_Double_1,
+            Offer_Custom_Double_2: offerInformation?.Custom_Double_2,
+            Offer_Custom_Double_3: offerInformation?.Custom_Double_3,
+            Offer_Custom_Double_4: offerInformation?.Custom_Double_4,
+            Offer_Custom_Double_5: offerInformation?.Custom_Double_5,
+            Offer_Custom_Double_6: offerInformation?.Custom_Double_6,
+            Offer_Custom_Double_7: offerInformation?.Custom_Double_7,
+            Offer_Custom_Double_8: offerInformation?.Custom_Double_8,
+            Offer_Custom_Double_9: offerInformation?.Custom_Double_9,
+            Offer_Custom_Double_10: offerInformation?.Custom_Double_10,
+            Offer_Custom_Date_1: offerInformation?.Custom_Date_1,
+            Offer_Custom_Date_2: offerInformation?.Custom_Date_2,
+            Offer_Custom_Date_3: offerInformation?.Custom_Date_3,
+            Offer_Custom_Date_4: offerInformation?.Custom_Date_4,
+            Offer_Custom_Date_5: offerInformation?.Custom_Date_5,
+            Offer_Custom_Date_6: offerInformation?.Custom_Date_6,
+            Offer_Custom_Date_7: offerInformation?.Custom_Date_7,
+            Offer_Custom_Date_8: offerInformation?.Custom_Date_8,
+            Offer_Custom_Date_9: offerInformation?.Custom_Date_9,
+            Offer_Custom_Date_10: offerInformation?.Custom_Date_10,
+            Offer_Custom_Boolean_1: offerInformation?.Custom_Boolean_1 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_2: offerInformation?.Custom_Boolean_2 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_3: offerInformation?.Custom_Boolean_3 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_4: offerInformation?.Custom_Boolean_4 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_5: offerInformation?.Custom_Boolean_5 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_6: offerInformation?.Custom_Boolean_6 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_7: offerInformation?.Custom_Boolean_7 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_8: offerInformation?.Custom_Boolean_8 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_9: offerInformation?.Custom_Boolean_9 === true ? 'Yes' : 'No',
+            Offer_Custom_Boolean_10: offerInformation?.Custom_Boolean_10 === true ? 'Yes' : 'No',
+            Offer_Custom_Datetime_1: offerInformation?.Custom_Datetime_1,
+            Offer_Custom_Datetime_2: offerInformation?.Custom_Datetime_2,
+            Offer_Custom_Datetime_3: offerInformation?.Custom_Datetime_3,
+            Offer_Custom_Datetime_4: offerInformation?.Custom_Datetime_4,
+            Offer_Custom_Datetime_5: offerInformation?.Custom_Datetime_5,
+            Offer_Custom_Datetime_6: offerInformation?.Custom_Datetime_6,
+            Offer_Custom_Datetime_7: offerInformation?.Custom_Datetime_7,
+            Offer_Custom_Datetime_8: offerInformation?.Custom_Datetime_8,
+            Offer_Custom_Datetime_9: offerInformation?.Custom_Datetime_9,
+            Offer_Custom_Datetime_10: offerInformation?.Custom_Datetime_10,
+			Quotation_Custom_Integer_1: quotation?.Custom_Integer_1,
+            Quotation_Custom_Integer_2: quotation?.Custom_Integer_2,
+            Quotation_Custom_Integer_3: quotation?.Custom_Integer_3,
+            Quotation_Custom_Integer_4: quotation?.Custom_Integer_4,
+            Quotation_Custom_Integer_5: quotation?.Custom_Integer_5,
+            Quotation_Custom_Integer_6: quotation?.Custom_Integer_6,
+            Quotation_Custom_Integer_7: quotation?.Custom_Integer_7,
+            Quotation_Custom_Integer_8: quotation?.Custom_Integer_8,
+            Quotation_Custom_Integer_9: quotation?.Custom_Integer_9,
+            Quotation_Custom_Integer_10: quotation?.Custom_Integer_10,
+            Quotation_Custom_String_1: quotation?.Custom_String_1,
+            Quotation_Custom_String_2: quotation?.Custom_String_2,
+            Quotation_Custom_String_3: quotation?.Custom_String_3,
+            Quotation_Custom_String_4: quotation?.Custom_String_4,
+            Quotation_Custom_String_5: quotation?.Custom_String_5,
+            Quotation_Custom_String_6: quotation?.Custom_String_6,
+            Quotation_Custom_String_7: quotation?.Custom_String_7,
+            Quotation_Custom_String_8: quotation?.Custom_String_8,
+            Quotation_Custom_String_9: quotation?.Custom_String_9,
+            Quotation_Custom_String_10: quotation?.Custom_String_10,
+            Quotation_Custom_String_11: quotation?.Custom_String_11,
+            Quotation_Custom_String_12: quotation?.Custom_String_12,
+            Quotation_Custom_String_13: quotation?.Custom_String_13,
+            Quotation_Custom_String_14: quotation?.Custom_String_14,
+            Quotation_Custom_String_15: quotation?.Custom_String_15,
+            Quotation_Custom_String_16: quotation?.Custom_String_16,
+            Quotation_Custom_String_17: quotation?.Custom_String_17,
+            Quotation_Custom_String_18: quotation?.Custom_String_18,
+            Quotation_Custom_String_19: quotation?.Custom_String_19,
+            Quotation_Custom_String_20: quotation?.Custom_String_20,
+            Quotation_Custom_Double_1: quotation?.Custom_Double_1,
+            Quotation_Custom_Double_2: quotation?.Custom_Double_2,
+            Quotation_Custom_Double_3: quotation?.Custom_Double_3,
+            Quotation_Custom_Double_4: quotation?.Custom_Double_4,
+            Quotation_Custom_Double_5: quotation?.Custom_Double_5,
+            Quotation_Custom_Double_6: quotation?.Custom_Double_6,
+            Quotation_Custom_Double_7: quotation?.Custom_Double_7,
+            Quotation_Custom_Double_8: quotation?.Custom_Double_8,
+            Quotation_Custom_Double_9: quotation?.Custom_Double_9,
+            Quotation_Custom_Double_10: quotation?.Custom_Double_10,
+            Quotation_Custom_Date_1: quotation?.Custom_Date_1,
+            Quotation_Custom_Date_2: quotation?.Custom_Date_2,
+            Quotation_Custom_Date_3: quotation?.Custom_Date_3,
+            Quotation_Custom_Date_4: quotation?.Custom_Date_4,
+            Quotation_Custom_Date_5: quotation?.Custom_Date_5,
+            Quotation_Custom_Date_6: quotation?.Custom_Date_6,
+            Quotation_Custom_Date_7: quotation?.Custom_Date_7,
+            Quotation_Custom_Date_8: quotation?.Custom_Date_8,
+            Quotation_Custom_Date_9: quotation?.Custom_Date_9,
+            Quotation_Custom_Date_10: quotation?.Custom_Date_10,
+            Quotation_Custom_Boolean_1: quotation?.Custom_Boolean_1,
+            Quotation_Custom_Boolean_2: quotation?.Custom_Boolean_2,
+            Quotation_Custom_Boolean_3: quotation?.Custom_Boolean_3,
+            Quotation_Custom_Boolean_4: quotation?.Custom_Boolean_4,
+            Quotation_Custom_Boolean_5: quotation?.Custom_Boolean_5,
+            Quotation_Custom_Boolean_6: quotation?.Custom_Boolean_6,
+            Quotation_Custom_Boolean_7: quotation?.Custom_Boolean_7,
+            Quotation_Custom_Boolean_8: quotation?.Custom_Boolean_8,
+            Quotation_Custom_Boolean_9: quotation?.Custom_Boolean_9,
+            Quotation_Custom_Boolean_10: quotation?.Custom_Boolean_10,
+            Quotation_Custom_Datetime_1: quotation?.Custom_Datetime_1,
+            Quotation_Custom_Datetime_2: quotation?.Custom_Datetime_2,
+            Quotation_Custom_Datetime_3: quotation?.Custom_Datetime_3,
+            Quotation_Custom_Datetime_4: quotation?.Custom_Datetime_4,
+            Quotation_Custom_Datetime_5: quotation?.Custom_Datetime_5,
+            Quotation_Custom_Datetime_6: quotation?.Custom_Datetime_6,
+            Quotation_Custom_Datetime_7: quotation?.Custom_Datetime_7,
+            Quotation_Custom_Datetime_8: quotation?.Custom_Datetime_8,
+            Quotation_Custom_Datetime_9: quotation?.Custom_Datetime_9,
+            Quotation_Custom_Datetime_10: quotation?.Custom_Datetime_10,
 		};
 		return results;
 	
@@ -3324,6 +3786,18 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				Active: 1
 			}
 			const productDistributorInfo = await tx.run(SELECT.one.from(PT_TMOFPR).where(whereProductId));
+			const whereDelivery ={
+				OfferID: offer.OFFERID,
+				ProductCode: offerProduct.ProductCode,
+				LotID: 1
+			}
+			const delivery = await tx.run(SELECT.one.from(PT_TMDLVTR).where(whereDelivery));
+			const whereCompetitorResult ={
+				OFFERID: offer.OFFERID,
+				PRODUCTCODE: offerProduct.ProductCode,
+				LOTID: 1
+			}
+			const competitorResult = await tx.run(SELECT.one.from(TransCompetitorResult).where(whereCompetitorResult));
 
 			if(productDistributorInfo.Custom_String_1 && offer.COUNTRYCODE == 'PK'){
 				//Get corresponding Distributor Data
@@ -3366,6 +3840,7 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				CountryCode: offer.COUNTRYCODE
 			}
 			const productConditionstmp = await tx.run(SELECT.from(PriceCondition).where(whereProductConditions));
+			const priceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productConditionstmp[0]?.PriceConditionClassification_ID }));
 			const productConditions = await Promise.all(productConditionstmp.map( async (productCondition) => {
 				productCondition.DiscountCondition = await tx.run(SELECT.from(DiscountCondition).where({ PriceCondition_ID: productCondition.ID }));
 				productCondition.FreeGoodsOther = await tx.run(SELECT.from(FreeGoodsOther).where({ PriceCondition_ID: productCondition.ID }));
@@ -3376,7 +3851,8 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }));
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-				return productCondition;
+				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID}));
+				return productCondition;		
 			}));
 			/*end of ProductCondition information */
 
@@ -3694,7 +4170,299 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 				Level1Discount1: productConditionstmp[0] && productConditionstmp[0].Level1Discount1,
 				Region: offer.Region,
 				AlternateOfferYN: offerProduct.AlternateOfferYN,
-				FOCInfoText: FOCInfoText
+				FOCInfoText: FOCInfoText,
+				ContractDuration_1: (productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.ContractDuration) || null,
+				ContractDuration_2: (productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.ContractDuration) || null,
+				ContractDuration_3: (productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.ContractDuration) || null,
+				OfferPrice_1: (productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.OfferPrice) || null,
+				OfferPrice_2: (productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.OfferPrice) || null,
+				OfferPrice_3: (productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.OfferPrice) || null,
+				Discount_1: (productConditions[0] && productConditions[0].NLPriceConditions?.[0]?.Discount) || null,
+				Discount_2: (productConditions[0] && productConditions[0].NLPriceConditions?.[1]?.Discount) || null,
+				Discount_3: (productConditions[0] && productConditions[0].NLPriceConditions?.[2]?.Discount) || null,
+				NLPriceConditionType: priceConditionClassification && priceConditionClassification.ConditionType.replace(/^NL/, ''),
+				Product_Custom_Integer_1: productDistributorInfo?.Custom_Integer_1,
+				Product_Custom_Integer_2: productDistributorInfo?.Custom_Integer_2,
+				Product_Custom_Integer_3: productDistributorInfo?.Custom_Integer_3,
+				Product_Custom_Integer_4: productDistributorInfo?.Custom_Integer_4,
+				Product_Custom_Integer_5: productDistributorInfo?.Custom_Integer_5,
+				Product_Custom_Integer_6: productDistributorInfo?.Custom_Integer_6,
+				Product_Custom_Integer_7: productDistributorInfo?.Custom_Integer_7,
+				Product_Custom_Integer_8: productDistributorInfo?.Custom_Integer_8,
+				Product_Custom_Integer_9: productDistributorInfo?.Custom_Integer_9,
+				Product_Custom_Integer_10: productDistributorInfo?.Custom_Integer_10,
+				Product_Custom_String_1: productDistributorInfo?.Custom_String_1,
+				Product_Custom_String_2: productDistributorInfo?.Custom_String_2,
+				Product_Custom_String_3: productDistributorInfo?.Custom_String_3,
+				Product_Custom_String_4: productDistributorInfo?.Custom_String_4,
+				Product_Custom_String_5: productDistributorInfo?.Custom_String_5,
+				Product_Custom_String_6: productDistributorInfo?.Custom_String_6,
+				Product_Custom_String_7: productDistributorInfo?.Custom_String_7,
+				Product_Custom_String_8: productDistributorInfo?.Custom_String_8,
+				Product_Custom_String_9: productDistributorInfo?.Custom_String_9,
+				Product_Custom_String_10: productDistributorInfo?.Custom_String_10,
+				Product_Custom_String_11: productDistributorInfo?.Custom_String_11,
+				Product_Custom_String_12: productDistributorInfo?.Custom_String_12,
+				Product_Custom_String_13: productDistributorInfo?.Custom_String_13,
+				Product_Custom_String_14: productDistributorInfo?.Custom_String_14,
+				Product_Custom_String_15: productDistributorInfo?.Custom_String_15,
+				Product_Custom_String_16: productDistributorInfo?.Custom_String_16,
+				Product_Custom_String_17: productDistributorInfo?.Custom_String_17,
+				Product_Custom_String_18: productDistributorInfo?.Custom_String_18,
+				Product_Custom_String_19: productDistributorInfo?.Custom_String_19,
+				Product_Custom_String_20: productDistributorInfo?.Custom_String_20,
+				Product_Custom_Double_1: productDistributorInfo?.Custom_Double_1,
+				Product_Custom_Double_2: productDistributorInfo?.Custom_Double_2,
+				Product_Custom_Double_3: productDistributorInfo?.Custom_Double_3,
+				Product_Custom_Double_4: productDistributorInfo?.Custom_Double_4,
+				Product_Custom_Double_5: productDistributorInfo?.Custom_Double_5,
+				Product_Custom_Double_6: productDistributorInfo?.Custom_Double_6,
+				Product_Custom_Double_7: productDistributorInfo?.Custom_Double_7,
+				Product_Custom_Double_8: productDistributorInfo?.Custom_Double_8,
+				Product_Custom_Double_9: productDistributorInfo?.Custom_Double_9,
+				Product_Custom_Double_10: productDistributorInfo?.Custom_Double_10,
+				Product_Custom_Date_1: productDistributorInfo?.Custom_Date_1,
+				Product_Custom_Date_2: productDistributorInfo?.Custom_Date_2,
+				Product_Custom_Date_3: productDistributorInfo?.Custom_Date_3,
+				Product_Custom_Date_4: productDistributorInfo?.Custom_Date_4,
+				Product_Custom_Date_5: productDistributorInfo?.Custom_Date_5,
+				Product_Custom_Date_6: productDistributorInfo?.Custom_Date_6,
+				Product_Custom_Date_7: productDistributorInfo?.Custom_Date_7,
+				Product_Custom_Date_8: productDistributorInfo?.Custom_Date_8,
+				Product_Custom_Date_9: productDistributorInfo?.Custom_Date_9,
+				Product_Custom_Date_10: productDistributorInfo?.Custom_Date_10,
+				Product_Custom_Boolean_1: productDistributorInfo?.Custom_Boolean_1,
+				Product_Custom_Boolean_2: productDistributorInfo?.Custom_Boolean_2,
+				Product_Custom_Boolean_3: productDistributorInfo?.Custom_Boolean_3,
+				Product_Custom_Boolean_4: productDistributorInfo?.Custom_Boolean_4,
+				Product_Custom_Boolean_5: productDistributorInfo?.Custom_Boolean_5,
+				Product_Custom_Boolean_6: productDistributorInfo?.Custom_Boolean_6,
+				Product_Custom_Boolean_7: productDistributorInfo?.Custom_Boolean_7,
+				Product_Custom_Boolean_8: productDistributorInfo?.Custom_Boolean_8,
+				Product_Custom_Boolean_9: productDistributorInfo?.Custom_Boolean_9,
+				Product_Custom_Boolean_10: productDistributorInfo?.Custom_Boolean_10,
+				Product_Custom_Datetime_1: productDistributorInfo?.Custom_Datetime_1,
+				Product_Custom_Datetime_2: productDistributorInfo?.Custom_Datetime_2,
+				Product_Custom_Datetime_3: productDistributorInfo?.Custom_Datetime_3,
+				Product_Custom_Datetime_4: productDistributorInfo?.Custom_Datetime_4,
+				Product_Custom_Datetime_5: productDistributorInfo?.Custom_Datetime_5,
+				Product_Custom_Datetime_6: productDistributorInfo?.Custom_Datetime_6,
+				Product_Custom_Datetime_7: productDistributorInfo?.Custom_Datetime_7,
+				Product_Custom_Datetime_8: productDistributorInfo?.Custom_Datetime_8,
+				Product_Custom_Datetime_9: productDistributorInfo?.Custom_Datetime_9,
+				Product_Custom_Datetime_10: productDistributorInfo?.Custom_Datetime_10,
+				Delivery_Custom_Integer_1: delivery?.Custom_Integer_1,
+				Delivery_Custom_Integer_2: delivery?.Custom_Integer_2,
+				Delivery_Custom_Integer_3: delivery?.Custom_Integer_3,
+				Delivery_Custom_Integer_4: delivery?.Custom_Integer_4,
+				Delivery_Custom_Integer_5: delivery?.Custom_Integer_5,
+				Delivery_Custom_Integer_6: delivery?.Custom_Integer_6,
+				Delivery_Custom_Integer_7: delivery?.Custom_Integer_7,
+				Delivery_Custom_Integer_8: delivery?.Custom_Integer_8,
+				Delivery_Custom_Integer_9: delivery?.Custom_Integer_9,
+				Delivery_Custom_Integer_10: delivery?.Custom_Integer_10,
+				Delivery_Custom_String_1: delivery?.Custom_String_1,
+				Delivery_Custom_String_2: delivery?.Custom_String_2,
+				Delivery_Custom_String_3: delivery?.Custom_String_3,
+				Delivery_Custom_String_4: delivery?.Custom_String_4,
+				Delivery_Custom_String_5: delivery?.Custom_String_5,
+				Delivery_Custom_String_6: delivery?.Custom_String_6,
+				Delivery_Custom_String_7: delivery?.Custom_String_7,
+				Delivery_Custom_String_8: delivery?.Custom_String_8,
+				Delivery_Custom_String_9: delivery?.Custom_String_9,
+				Delivery_Custom_String_10: delivery?.Custom_String_10,
+				Delivery_Custom_String_11: delivery?.Custom_String_11,
+				Delivery_Custom_String_12: delivery?.Custom_String_12,
+				Delivery_Custom_String_13: delivery?.Custom_String_13,
+				Delivery_Custom_String_14: delivery?.Custom_String_14,
+				Delivery_Custom_String_15: delivery?.Custom_String_15,
+				Delivery_Custom_String_16: delivery?.Custom_String_16,
+				Delivery_Custom_String_17: delivery?.Custom_String_17,
+				Delivery_Custom_String_18: delivery?.Custom_String_18,
+				Delivery_Custom_String_19: delivery?.Custom_String_19,
+				Delivery_Custom_String_20: delivery?.Custom_String_20,
+				Delivery_Custom_Double_1: delivery?.Custom_Double_1,
+				Delivery_Custom_Double_2: delivery?.Custom_Double_2,
+				Delivery_Custom_Double_3: delivery?.Custom_Double_3,
+				Delivery_Custom_Double_4: delivery?.Custom_Double_4,
+				Delivery_Custom_Double_5: delivery?.Custom_Double_5,
+				Delivery_Custom_Double_6: delivery?.Custom_Double_6,
+				Delivery_Custom_Double_7: delivery?.Custom_Double_7,
+				Delivery_Custom_Double_8: delivery?.Custom_Double_8,
+				Delivery_Custom_Double_9: delivery?.Custom_Double_9,
+				Delivery_Custom_Double_10: delivery?.Custom_Double_10,
+				Delivery_Custom_Date_1: delivery?.Custom_Date_1,
+				Delivery_Custom_Date_2: delivery?.Custom_Date_2,
+				Delivery_Custom_Date_3: delivery?.Custom_Date_3,
+				Delivery_Custom_Date_4: delivery?.Custom_Date_4,
+				Delivery_Custom_Date_5: delivery?.Custom_Date_5,
+				Delivery_Custom_Date_6: delivery?.Custom_Date_6,
+				Delivery_Custom_Date_7: delivery?.Custom_Date_7,
+				Delivery_Custom_Date_8: delivery?.Custom_Date_8,
+				Delivery_Custom_Date_9: delivery?.Custom_Date_9,
+				Delivery_Custom_Date_10: delivery?.Custom_Date_10,
+				Delivery_Custom_Boolean_1: delivery?.Custom_Boolean_1,
+				Delivery_Custom_Boolean_2: delivery?.Custom_Boolean_2,
+				Delivery_Custom_Boolean_3: delivery?.Custom_Boolean_3,
+				Delivery_Custom_Boolean_4: delivery?.Custom_Boolean_4,
+				Delivery_Custom_Boolean_5: delivery?.Custom_Boolean_5,
+				Delivery_Custom_Boolean_6: delivery?.Custom_Boolean_6,
+				Delivery_Custom_Boolean_7: delivery?.Custom_Boolean_7,
+				Delivery_Custom_Boolean_8: delivery?.Custom_Boolean_8,
+				Delivery_Custom_Boolean_9: delivery?.Custom_Boolean_9,
+				Delivery_Custom_Boolean_10: delivery?.Custom_Boolean_10,
+				Delivery_Custom_Datetime_1: delivery?.Custom_Datetime_1,
+				Delivery_Custom_Datetime_2: delivery?.Custom_Datetime_2,
+				Delivery_Custom_Datetime_3: delivery?.Custom_Datetime_3,
+				Delivery_Custom_Datetime_4: delivery?.Custom_Datetime_4,
+				Delivery_Custom_Datetime_5: delivery?.Custom_Datetime_5,
+				Delivery_Custom_Datetime_6: delivery?.Custom_Datetime_6,
+				Delivery_Custom_Datetime_7: delivery?.Custom_Datetime_7,
+				Delivery_Custom_Datetime_8: delivery?.Custom_Datetime_8,
+				Delivery_Custom_Datetime_9: delivery?.Custom_Datetime_9,
+				Delivery_Custom_Datetime_10: delivery?.Custom_Datetime_10,
+				TenderResults_Custom_Integer_1: awardedProduct?.Custom_Integer_1,
+				TenderResults_Custom_Integer_2: awardedProduct?.Custom_Integer_2,
+				TenderResults_Custom_Integer_3: awardedProduct?.Custom_Integer_3,
+				TenderResults_Custom_Integer_4: awardedProduct?.Custom_Integer_4,
+				TenderResults_Custom_Integer_5: awardedProduct?.Custom_Integer_5,
+				TenderResults_Custom_Integer_6: awardedProduct?.Custom_Integer_6,
+				TenderResults_Custom_Integer_7: awardedProduct?.Custom_Integer_7,
+				TenderResults_Custom_Integer_8: awardedProduct?.Custom_Integer_8,
+				TenderResults_Custom_Integer_9: awardedProduct?.Custom_Integer_9,
+				TenderResults_Custom_Integer_10: awardedProduct?.Custom_Integer_10,
+				TenderResults_Custom_String_1: awardedProduct?.Custom_String_1,
+				TenderResults_Custom_String_2: awardedProduct?.Custom_String_2,
+				TenderResults_Custom_String_3: awardedProduct?.Custom_String_3,
+				TenderResults_Custom_String_4: awardedProduct?.Custom_String_4,
+				TenderResults_Custom_String_5: awardedProduct?.Custom_String_5,
+				TenderResults_Custom_String_6: awardedProduct?.Custom_String_6,
+				TenderResults_Custom_String_7: awardedProduct?.Custom_String_7,
+				TenderResults_Custom_String_8: awardedProduct?.Custom_String_8,
+				TenderResults_Custom_String_9: awardedProduct?.Custom_String_9,
+				TenderResults_Custom_String_10: awardedProduct?.Custom_String_10,
+				TenderResults_Custom_String_11: awardedProduct?.Custom_String_11,
+				TenderResults_Custom_String_12: awardedProduct?.Custom_String_12,
+				TenderResults_Custom_String_13: awardedProduct?.Custom_String_13,
+				TenderResults_Custom_String_14: awardedProduct?.Custom_String_14,
+				TenderResults_Custom_String_15: awardedProduct?.Custom_String_15,
+				TenderResults_Custom_String_16: awardedProduct?.Custom_String_16,
+				TenderResults_Custom_String_17: awardedProduct?.Custom_String_17,
+				TenderResults_Custom_String_18: awardedProduct?.Custom_String_18,
+				TenderResults_Custom_String_19: awardedProduct?.Custom_String_19,
+				TenderResults_Custom_String_20: awardedProduct?.Custom_String_20,
+				TenderResults_Custom_Double_1: awardedProduct?.Custom_Double_1,
+				TenderResults_Custom_Double_2: awardedProduct?.Custom_Double_2,
+				TenderResults_Custom_Double_3: awardedProduct?.Custom_Double_3,
+				TenderResults_Custom_Double_4: awardedProduct?.Custom_Double_4,
+				TenderResults_Custom_Double_5: awardedProduct?.Custom_Double_5,
+				TenderResults_Custom_Double_6: awardedProduct?.Custom_Double_6,
+				TenderResults_Custom_Double_7: awardedProduct?.Custom_Double_7,
+				TenderResults_Custom_Double_8: awardedProduct?.Custom_Double_8,
+				TenderResults_Custom_Double_9: awardedProduct?.Custom_Double_9,
+				TenderResults_Custom_Double_10: awardedProduct?.Custom_Double_10,
+				TenderResults_Custom_Date_1: awardedProduct?.Custom_Date_1,
+				TenderResults_Custom_Date_2: awardedProduct?.Custom_Date_2,
+				TenderResults_Custom_Date_3: awardedProduct?.Custom_Date_3,
+				TenderResults_Custom_Date_4: awardedProduct?.Custom_Date_4,
+				TenderResults_Custom_Date_5: awardedProduct?.Custom_Date_5,
+				TenderResults_Custom_Date_6: awardedProduct?.Custom_Date_6,
+				TenderResults_Custom_Date_7: awardedProduct?.Custom_Date_7,
+				TenderResults_Custom_Date_8: awardedProduct?.Custom_Date_8,
+				TenderResults_Custom_Date_9: awardedProduct?.Custom_Date_9,
+				TenderResults_Custom_Date_10: awardedProduct?.Custom_Date_10,
+				TenderResults_Custom_Boolean_1: awardedProduct?.Custom_Boolean_1,
+				TenderResults_Custom_Boolean_2: awardedProduct?.Custom_Boolean_2,
+				TenderResults_Custom_Boolean_3: awardedProduct?.Custom_Boolean_3,
+				TenderResults_Custom_Boolean_4: awardedProduct?.Custom_Boolean_4,
+				TenderResults_Custom_Boolean_5: awardedProduct?.Custom_Boolean_5,
+				TenderResults_Custom_Boolean_6: awardedProduct?.Custom_Boolean_6,
+				TenderResults_Custom_Boolean_7: awardedProduct?.Custom_Boolean_7,
+				TenderResults_Custom_Boolean_8: awardedProduct?.Custom_Boolean_8,
+				TenderResults_Custom_Boolean_9: awardedProduct?.Custom_Boolean_9,
+				TenderResults_Custom_Boolean_10: awardedProduct?.Custom_Boolean_10,
+				TenderResults_Custom_Datetime_1: awardedProduct?.Custom_Datetime_1,
+				TenderResults_Custom_Datetime_2: awardedProduct?.Custom_Datetime_2,
+				TenderResults_Custom_Datetime_3: awardedProduct?.Custom_Datetime_3,
+				TenderResults_Custom_Datetime_4: awardedProduct?.Custom_Datetime_4,
+				TenderResults_Custom_Datetime_5: awardedProduct?.Custom_Datetime_5,
+				TenderResults_Custom_Datetime_6: awardedProduct?.Custom_Datetime_6,
+				TenderResults_Custom_Datetime_7: awardedProduct?.Custom_Datetime_7,
+				TenderResults_Custom_Datetime_8: awardedProduct?.Custom_Datetime_8,
+				TenderResults_Custom_Datetime_9: awardedProduct?.Custom_Datetime_9,
+				TenderResults_Custom_Datetime_10: awardedProduct?.Custom_Datetime_10,
+				CompetitorResult_Custom_Integer_1: competitorResult?.Custom_Integer_1,
+				CompetitorResult_Custom_Integer_2: competitorResult?.Custom_Integer_2,
+				CompetitorResult_Custom_Integer_3: competitorResult?.Custom_Integer_3,
+				CompetitorResult_Custom_Integer_4: competitorResult?.Custom_Integer_4,
+				CompetitorResult_Custom_Integer_5: competitorResult?.Custom_Integer_5,
+				CompetitorResult_Custom_Integer_6: competitorResult?.Custom_Integer_6,
+				CompetitorResult_Custom_Integer_7: competitorResult?.Custom_Integer_7,
+				CompetitorResult_Custom_Integer_8: competitorResult?.Custom_Integer_8,
+				CompetitorResult_Custom_Integer_9: competitorResult?.Custom_Integer_9,
+				CompetitorResult_Custom_Integer_10: competitorResult?.Custom_Integer_10,
+				CompetitorResult_Custom_String_1: competitorResult?.Custom_String_1,
+				CompetitorResult_Custom_String_2: competitorResult?.Custom_String_2,
+				CompetitorResult_Custom_String_3: competitorResult?.Custom_String_3,
+				CompetitorResult_Custom_String_4: competitorResult?.Custom_String_4,
+				CompetitorResult_Custom_String_5: competitorResult?.Custom_String_5,
+				CompetitorResult_Custom_String_6: competitorResult?.Custom_String_6,
+				CompetitorResult_Custom_String_7: competitorResult?.Custom_String_7,
+				CompetitorResult_Custom_String_8: competitorResult?.Custom_String_8,
+				CompetitorResult_Custom_String_9: competitorResult?.Custom_String_9,
+				CompetitorResult_Custom_String_10: competitorResult?.Custom_String_10,
+				CompetitorResult_Custom_String_11: competitorResult?.Custom_String_11,
+				CompetitorResult_Custom_String_12: competitorResult?.Custom_String_12,
+				CompetitorResult_Custom_String_13: competitorResult?.Custom_String_13,
+				CompetitorResult_Custom_String_14: competitorResult?.Custom_String_14,
+				CompetitorResult_Custom_String_15: competitorResult?.Custom_String_15,
+				CompetitorResult_Custom_String_16: competitorResult?.Custom_String_16,
+				CompetitorResult_Custom_String_17: competitorResult?.Custom_String_17,
+				CompetitorResult_Custom_String_18: competitorResult?.Custom_String_18,
+				CompetitorResult_Custom_String_19: competitorResult?.Custom_String_19,
+				CompetitorResult_Custom_String_20: competitorResult?.Custom_String_20,
+				CompetitorResult_Custom_Double_1: competitorResult?.Custom_Double_1,
+				CompetitorResult_Custom_Double_2: competitorResult?.Custom_Double_2,
+				CompetitorResult_Custom_Double_3: competitorResult?.Custom_Double_3,
+				CompetitorResult_Custom_Double_4: competitorResult?.Custom_Double_4,
+				CompetitorResult_Custom_Double_5: competitorResult?.Custom_Double_5,
+				CompetitorResult_Custom_Double_6: competitorResult?.Custom_Double_6,
+				CompetitorResult_Custom_Double_7: competitorResult?.Custom_Double_7,
+				CompetitorResult_Custom_Double_8: competitorResult?.Custom_Double_8,
+				CompetitorResult_Custom_Double_9: competitorResult?.Custom_Double_9,
+				CompetitorResult_Custom_Double_10: competitorResult?.Custom_Double_10,
+				CompetitorResult_Custom_Date_1: competitorResult?.Custom_Date_1,
+				CompetitorResult_Custom_Date_2: competitorResult?.Custom_Date_2,
+				CompetitorResult_Custom_Date_3: competitorResult?.Custom_Date_3,
+				CompetitorResult_Custom_Date_4: competitorResult?.Custom_Date_4,
+				CompetitorResult_Custom_Date_5: competitorResult?.Custom_Date_5,
+				CompetitorResult_Custom_Date_6: competitorResult?.Custom_Date_6,
+				CompetitorResult_Custom_Date_7: competitorResult?.Custom_Date_7,
+				CompetitorResult_Custom_Date_8: competitorResult?.Custom_Date_8,
+				CompetitorResult_Custom_Date_9: competitorResult?.Custom_Date_9,
+				CompetitorResult_Custom_Date_10: competitorResult?.Custom_Date_10,
+				CompetitorResult_Custom_Boolean_1: competitorResult?.Custom_Boolean_1,
+				CompetitorResult_Custom_Boolean_2: competitorResult?.Custom_Boolean_2,
+				CompetitorResult_Custom_Boolean_3: competitorResult?.Custom_Boolean_3,
+				CompetitorResult_Custom_Boolean_4: competitorResult?.Custom_Boolean_4,
+				CompetitorResult_Custom_Boolean_5: competitorResult?.Custom_Boolean_5,
+				CompetitorResult_Custom_Boolean_6: competitorResult?.Custom_Boolean_6,
+				CompetitorResult_Custom_Boolean_7: competitorResult?.Custom_Boolean_7,
+				CompetitorResult_Custom_Boolean_8: competitorResult?.Custom_Boolean_8,
+				CompetitorResult_Custom_Boolean_9: competitorResult?.Custom_Boolean_9,
+				CompetitorResult_Custom_Boolean_10: competitorResult?.Custom_Boolean_10,
+				CompetitorResult_Custom_Datetime_1: competitorResult?.Custom_Datetime_1,
+				CompetitorResult_Custom_Datetime_2: competitorResult?.Custom_Datetime_2,
+				CompetitorResult_Custom_Datetime_3: competitorResult?.Custom_Datetime_3,
+				CompetitorResult_Custom_Datetime_4: competitorResult?.Custom_Datetime_4,
+				CompetitorResult_Custom_Datetime_5: competitorResult?.Custom_Datetime_5,
+				CompetitorResult_Custom_Datetime_6: competitorResult?.Custom_Datetime_6,
+				CompetitorResult_Custom_Datetime_7: competitorResult?.Custom_Datetime_7,
+				CompetitorResult_Custom_Datetime_8: competitorResult?.Custom_Datetime_8,
+				CompetitorResult_Custom_Datetime_9: competitorResult?.Custom_Datetime_9,
+				CompetitorResult_Custom_Datetime_10: competitorResult?.Custom_Datetime_10,
+				NLStaticField1: 'N',
+				NLStaticField2: 'NA',
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -3728,7 +4496,9 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		if (offer.APPROVAL_TYPE === 16) {
 			productValidation = await buildProductValidationForType16(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue, productPack, instituteTerritory);
 		}
-
+		if (offer.APPROVAL_TYPE === 17) {
+			productValidation = await buildProductValidationForType17(tx, offer, product, aApproverTypes);
+		}
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
@@ -3782,31 +4552,41 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			switch(policy.Type){
 				case 'OfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? priceCondition.OfferPrice * product.PACKSIZE : priceCondition.OfferPrice;
+					break;
 				case 'NetOfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetOfferPrice * product.PACKSIZE : priceCondition.NetOfferPrice;
+					break;
 				case 'NetPrice':
 					comparisonPrice = product.UOM === 'Unit' ? priceCondition.NetPrice * product.PACKSIZE : priceCondition.NetPrice;
+					break;
 				case 'OfferPriceVSRegisteredPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.OfferPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) : 
 															(priceCondition.Price0 - priceCondition.OfferPrice) / priceCondition.Price0;
+					break;
 				case 'NetPriceVSRegisteredPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.Price0 * product.PACKSIZE) :
 															(priceCondition.Price0 - priceCondition.NetPrice) / priceCondition.Price0;
+					break;
 				case 'NetOfferPriceVSRegisteredPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.Price0 * product.PACKSIZE) - priceCondition.NetOfferPrice) / (priceCondition.Price0 * product.PACKSIZE) :
 															(priceCondition.Price0 - priceCondition.NetOfferPrice) / priceCondition.Price0;
+					break;
 				case 'NetOfferPriceVSOfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetOfferPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE) : 
 																(priceCondition.OfferPrice - priceCondition.NetOfferPrice) / priceCondition.OfferPrice;
+					break;
 				case 'NetPriceVSOfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.OfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.OfferPrice * product.PACKSIZE): 
 																(priceCondition.OfferPrice - priceCondition.NetPrice) / priceCondition.OfferPrice;
+					break;
 				case 'NetPriceVSNetOfferPrice':
 					comparisonPrice = product.UOM === 'Unit' ? ((priceCondition.NetOfferPrice * product.PACKSIZE) - (priceCondition.NetPrice * product.PACKSIZE)) / (priceCondition.NetOfferPrice * product.PACKSIZE) : 
 																(priceCondition.NetOfferPrice - priceCondition.NetPrice) / priceCondition.NetOfferPrice;
+					break;
 				case 'BudgetedProfitability':
 					comparisonPrice = product.UOM === 'Unit' ? (priceCondition.NetPrice - productInfo.cogsEurUnit) / priceCondition.NetPrice :
 																(priceCondition.NetPrice - productInfo.cogsEurPack) / priceCondition.NetPrice;
+					break;
 			}
 
 			if(comparisonPrice < policy.Value){
@@ -3928,7 +4708,30 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		return results;
 		
 	}
+	async function buildProductValidationForType17(tx, offer, product, aApproverTypes) {
 
+		let results = {
+			IN_POLICY: false
+		}
+
+		const ctryProductPack = await tx.run(SELECT.one.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": offer.COUNTRYCODE, "PRODUCTPACKID": product.ProductCode}));
+
+		aApproverTypes.map(async function (oApproverType) {
+			oApproverType.ApproverType === 'Chapter Head Established Products BeNeLux' ||
+			oApproverType.ApproverType === 'Hospital Management Lead BeNeLux' ? oApproverType.ValidationType = 3 : oApproverType.ValidationType = 1;
+		});
+		if(ctryProductPack.BU === 'RAD'){
+			aApproverTypes.map(async function (oApproverType) {
+				if (oApproverType.ApproverType === 'Country Head Radiology BeNeLux') {
+					oApproverType.ValidationType = 3;
+				}
+			});
+			
+		}
+		results.IN_POLICY = true
+		return results;
+			
+	}
 	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
 		const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === 'Squad Lead');
 		aApproverTypes.splice(apprIndex, 1);
@@ -4365,14 +5168,14 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
 			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
-			prd.NET_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
+			prd.NET_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_PRICE, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_PRICE, 4, 4) : ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
+			prd.NET_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 4, 4) : ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
 			prd.NegotiationPrice = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NegotiationPrice, 3, 3) : ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
 			prd.Price0 = prd.Region === 'MEA' ? prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 3, 3) : prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
 			prd.Price1 = prd.Region === 'MEA' ? prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 3, 3) : prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
@@ -4804,7 +5607,88 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
 			NetPrice              : priceCondition.NetPrice
 		}
 	}
-	
+	srv.on('getNotificationMailTemplate', async (req) => {
+		try{
+			const { data: {offerID,templateId,url} } = req;
+			const tx = cds.tx(req);
+			const offerInformation = await SELECT.one.from(TenderMasterView).where({OfferID: offerID})
+			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
+			const offerValidation = await buildOfferValidation(tx, whereOffer);
+			const mailTemplate = await getMailTemplate(templateId);
+			const mappedData = mapNotificationData(mailTemplate, offerInformation,offerValidation,url);
+			return mappedData
+		}catch(error){
+			console.error('Error in getNotificationMailTemplate');
+            return req.reject(403, error?.message||"Error in getNotificationMailTemplate");
+		}
+	})
+	const mapNotificationData = function (template, offerInformation,offerValidation,url) {
+		offerInformation.BidDueDate = offerInformation.BidDueDate && ServiceHelper.formatDate(offerInformation.BidDueDate, 'YYYY-MM-DD','DD-MM-YYYY');
+		offerInformation.Custom_Date_1 = offerInformation.Custom_Date_1 && ServiceHelper.formatDate(offerInformation.Custom_Date_1, 'YYYY-MM-DD','DD-MM-YYYY');
+
+		const data = {
+			offerInformation: offerInformation,
+			offerValidation: offerValidation,
+			DirectURLToOffer : url
+		}
+		
+        return generateMailBody(template, {
+			data
+		})	
+    }
+	srv.before(['CREATE','UPDATE'], ['Outbox'], async (req) => {
+
+		!req.data.Sender && req.error({ code: 404, message: "Sender is required", target: "Sender" });
+		!req.data.Recipients && req.error({ code: 404, message: "Recipients is required", target: "Recipients" });
+		!req.data.Subject && req.error({ code: 404, message: "Subject is required", target: "subject" });
+		!req.data.MailBody && req.error({ code: 404, message: "MailBody is required", target: "content" });
+		
+	});
+	srv.on('sendHematologyNotificationMailTemplate', async (req) => {
+		try {
+			const { data: {tenderId, offerID, url, CountryCode} } = req;
+			const tx = cds.tx(req);
+			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({Role: 'Tender Manager'}));
+			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
+			const offerValidation = await buildOfferValidation(tx, whereOffer);
+			const mailTemplate = await getMailTemplate('HematologyNotificationMailTemplate');
+			const {createdByName} = await SELECT.one.from(TenderMasterView).where({TenderID:tenderId,OfferID:offerID});
+			const offer = await SELECT.one.from('StandardAppService.OfferFormView').where({TenderID:tenderId,OfferID:offerID});
+			const {CountryName} = await SELECT.one.from(PT_TMCTRY).where({CountryCode: CountryCode});
+			const CountryNameReplace = CountryName.replace('Hematology', '');
+			const HematologyNotificationData = mappedHematologyNotificationData(userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer);
+			await INSERT.into(OutgoingMails).entries(HematologyNotificationData);
+			return "Notification mail sent successfully";
+		}catch (error) {
+				console.error('Error in sendHematologyNotificationMailTemplate');
+				return res.reject(400, error.message || 'An unexpected error occurred.');
+		}
+
+	});
+	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer){
+		return userInfo.map(data =>{
+			return {
+				CountryCode: req.data.CountryCode,
+				TenderID: req.data.tenderId,
+				OfferID: req.data.offerID,
+				Sender: 'FAST-Admin@bayer.com',
+				Recipients:  data.UserEmail,
+				Subject: `New HEM Tender Created for ${CountryNameReplace}`,
+				MailBody: generateMailBody(mailTemplate, {
+					data: { 
+						content:{
+							UserName: data.UserName,
+							CountryName: CountryNameReplace,
+							Offer: offer,
+							DirectURLToOffer: req.data.url,
+							TenderCreator: createdByName,
+						}
+					}
+				}),
+				Sent: false,
+			}
+		})
+	}
 	function addLeadingZeros (num, size) {
         if (num === null) {
             throw new Error(`${text} doesn't exist`);
@@ -4814,8 +5698,279 @@ srv.after('READ', ['PriceConditionTaiwanPriceView', 'PriceConditionTaiwanDiscoun
         return num;
     };
 
+	srv.after("UPDATE", "ZagisUploadFile", async (req, res) => {
+		try {
+			const {OfferID} = req;
+			const offer = await SELECT.one.from(PT_TMOFRS).where({CountryCode: 'NL', OfferID: OfferID});
+			const offerProducts = await SELECT.from(PT_TMOFPR).where({CountryCode: 'NL', OfferID: OfferID});
+			const zagisFile = await SELECT.one.from(ZagisUploadFile).where({"OfferID": OfferID});
+			const ctryProductPack = await SELECT.from(PT_TMCTPRDPCK).where({"COUNTRYCODE": 'NL'});
+
+			if (!zagisFile) {
+				res.warn(400, "The file appears to be corrupted. Please check the file and upload a valid ZAGIS file." );
+			}
+
+			/**
+			 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
+			 */
+			const arrayBuffer = bufferToArrayBuffer(zagisFile.content);
+			try {
+				workbook = XLSX.read(arrayBuffer, { type: 'array' });
+			} catch (error) {
+				throw { message: "The file format is incorrect. Please upload a valid ZAGIS file." };
+			}
+
+			// Assuming the Excel file has only one sheet, you can get the data from it
+			const sheetName = workbook.SheetNames[0];
+			const products = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+			// Validate data in fields and check if ZI-Nr. exists in the database
+			const invalidZIFields = [];
+			products.forEach(product => {
+				const code1 = product["PRK"];
+				const productPack = ctryProductPack.find(pck => pck.CODE1 == code1);
+				if (!productPack) {
+					invalidZIFields.push(code1);
+				}
+			});
+			// Validate required fields
+			const requiredFields = ["PRK"];
+			let missingFields = [];
+
+			products.forEach((product, index) => {
+				const productMissingFields = requiredFields.filter(field => !product.hasOwnProperty(field) || !product[field]);
+				if (productMissingFields.length > 0) {
+				  missingFields.push({
+					index,
+					fields: productMissingFields
+				  });
+				}
+			});
+			const errorMessages = missingFields?.map(item => `Product at index ${item?.index + 1} is missing fields: ${item?.fields?.join(", ")}`);
+
+			let promises;
+			if (missingFields.length > 0) {
+				res.warn(400,`The file is missing required fields:\n${errorMessages.join("\n")}. Please update the file and try again.`);
+			}
+			else if(invalidZIFields.length > 0){
+				res.warn(400,`The following PRK values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` );
+			}
+			else{
+				// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+				let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+				promises = products.map(product => {
+					const productPack = ctryProductPack.find(pck => pck.CODE1 == product["PRK"]);
+					const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
+					const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
+					if (productIndex === -1) {
+						sorter++; // Increment sorter only for new products
+					}
+					return promise;
+				});
+			}
+
+			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
+			await Promise.all([promises]);
+			return req;
+		} catch (error) {
+			console.error('Error in ZagisUploadFile');
+			return res.reject(400, error.message || 'An unexpected error occurred.')
+		}
+	});
+
+	async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
+		const mappedProduct = {
+			TenderID: offer.TenderID,
+			OfferID: offer.OfferID,
+			CountryCode: offer.CountryCode,
+			SubmittedOn: new Date().toISOString(),
+			SubmittedBy: req.user.id,
+			Active: 1,
+			ProductCode: productPack.PRODUCTPACKID,
+			RequestedVolume: product["Jaarverbruik in stuks"] || product["Totaal verbruik in stuks"] || 1,
+			UnitPerPack: "Pack",
+			DistributorID: offer.DistributorID,
+			ActiveProduct: 1,
+			SORTER: sorter,
+			SUPPLY_UPDATE: 0,
+			PAYMENT_UPDATE: 0,
+			Line: "1",
+			LotID: 1,
+			SampleQuantity: 0,
+			NoofLots: 0,
+			IntervalBetweenShipments: 0,
+			NoOfTier: 0,
+			DEFAULT_COMMISSION_RATE: 0,
+			MinInvoiceAmount: 0,
+		}
+	
+		if (productIndex > -1) {
+			// deleting SORTER to avoid incrementing already created products SORTER
+			delete mappedProduct.SORTER;
+			return await UPDATE(PT_TMOFPR).with(mappedProduct).where({
+				OfferID: offer.OfferID,
+				ProductCode: productPack.PRODUCTPACKID
+			})
+		}else {
+			return await INSERT(mappedProduct).into(PT_TMOFPR);
+		}
+	}
+
+	function bufferToArrayBuffer(buffer) {
+		const arrayBuffer = new ArrayBuffer(buffer.length);
+		const view = new Uint8Array(arrayBuffer);
+		for (let i = 0; i < buffer.length; ++i) {
+		  view[i] = buffer[i];
+		}
+		return arrayBuffer;
+	}
 	function roundToDecimalPlaces(number, decimalPlaces) {
 		const factor = Math.pow(10, decimalPlaces);
 		return Math.round(number * factor) / factor;
 	};
+	srv.on('READ', 'ExtractNLHistoricalInformation', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+
+		const templateId = req.data.templateId;
+
+		const templates = await tx.run(SELECT.from(ExtractNLHistoricalInformation).where({ templateId: templateId }));
+		let excelData = await tx.run(SELECT.from(NLExtractOffers));
+		const data = {excelData}
+		const templateContent = templates[0].content;
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,data,1);
+
+			req._.res.setHeader('Content-disposition', `attachment; filename= Extract History.xlsx`);
+			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in ExcelAttachments READ');
+            return req.reject(403, error?.message||"Error in ExcelAttachments");
+        }
+	});
+
+	srv.on('CREATE', 'NLOfferDistributors', async (req, res) => {
+		try {
+			const { DistributorName, ProductPackName, OfferID, AssignedProductCode } = req.data;
+			let splitedDistributors = DistributorName.split(';');
+			const splitedProductPacks = ProductPackName.split(';');
+			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: "NL" });
+			const productPacks = await SELECT.from(PT_TMPRDPCK);
+			const nlOfferDistributors = await SELECT.from(NLOfferDistributors).where({
+				OfferID: OfferID
+			});
+
+	
+			const deletePromises = nlOfferDistributors.map(el => {
+				if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode == AssignedProductCode) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						DistributorID: el.DistributorID
+					});
+				} else if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode !== AssignedProductCode && el.ProductPackID == AssignedProductCode) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						ProductPackID: AssignedProductCode,
+						DistributorID: el.DistributorID
+					});
+				} else if (
+					(!splitedProductPacks.includes(`${el.ProductPackID}`) && 
+					el.AssignedProductCode == AssignedProductCode) || 
+					(!splitedProductPacks.includes(`${el.ProductPackID}`) && 
+					el.AssignedProductCode !== AssignedProductCode && 
+					el.ProductPackID == AssignedProductCode)) {
+					return DELETE.from(NLOfferDistributors).where({
+						OfferID: OfferID,
+						ProductPackID: el.ProductPackID
+					});
+				}
+			}).filter(el => el);
+	
+			let mappedNLOfferDistributors = [];
+	
+			if (DistributorName && ProductPackName) {
+				splitedDistributors.forEach(dId => {
+					splitedProductPacks.forEach(pId => {
+						const distributor = distributors.find(dist => dist.DistributorID == dId);
+						const product = productPacks.find(product => product.PRODUCTPACKID == pId);
+						mappedNLOfferDistributors.push({
+							OfferID: OfferID,
+							DistributorName: distributor?.DistributorName,
+							ProductPackName: product?.PRODUCTPACKNAME,
+							DistributorID: dId,
+							ProductPackID: pId,
+							AssignedProductCode: AssignedProductCode
+						});
+					});
+				});
+			}
+	
+			// Remove items already saved in db from mappedNLOfferDistributors
+			mappedNLOfferDistributors = mappedNLOfferDistributors.filter(el => 
+				!nlOfferDistributors.some(nlo => 
+					el.OfferID == nlo.OfferID && 
+					el.ProductPackID == nlo.ProductPackID && 
+					el.DistributorID == nlo.DistributorID
+				)
+			);
+			let insertPromise;
+			if (mappedNLOfferDistributors.length > 0) {
+				insertPromise = INSERT.into(NLOfferDistributors).entries(mappedNLOfferDistributors);
+			}
+	
+			await Promise.all([...deletePromises, insertPromise]);
+	
+			return req.data;
+		} catch (error) {
+			console.error('Error in NLOfferDistributors CREATE', error);
+			return req.reject(403, error?.message || "Error in NLOfferDistributors");
+		}
+	});
+	srv.on('CREATE', 'ContractInfomation', async (req, res) => {
+		try {
+			const { InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate} = req.data;
+			const Institutes = await SELECT.from(PT_TMINST).where({CountryCode: "NL"});	     
+			if (!InstituteName) {return req.reject(403,"Institutes In Group field is mandatory")}
+			if (!ContractDuration) {return req.reject(403,"Contract Duration field is mandatory")}
+			if (!ContractStartDate) {return req.reject(403,"Contract Start Date field is mandatory")}
+			const mappedContractDurations = [];
+			InstituteName.split(',').map(instID => {
+				const Institute = Institutes.find(inst => inst.InstituteID == instID);
+				
+				mappedContractDurations.push({
+					OfferID: OfferID,
+					ProductCode: ProductCode,
+					InstituteID: +instID,
+					InstituteName: Institute.InstituteName,
+					ContractDuration: ContractDuration,
+					ContractStartDate: ContractStartDate,
+					ContractEndDate: ContractEndDate,
+					Active: true,
+					createdBy: req.user.id
+				})
+			});
+			const deletePromise = DELETE.from(ContractInfomation).where({OfferID: OfferID, ProductCode: ProductCode});
+			let insertPromises = [];
+			if (mappedContractDurations.length > 0) {
+				insertPromises = INSERT.into(ContractInfomation).entries(mappedContractDurations);
+			}
+			await Promise.all([deletePromise, insertPromises]);
+			return req.data;
+		} catch (error) {
+			console.error('Error in ContractInfomation CREATE');
+            return req.reject(403, error?.message||"Error in ContractInfomation");
+		}
+	});
+
+	srv.after('READ', 'NLPriceConditions', data => {
+		data.unshift({
+			ID: "99999999-9999-9999-9999-999999999999",
+			ContractDuration: "",
+            OfferPrice: "", 
+            Discount: "",
+            NetPrice: "",
+		})
+	});
 }

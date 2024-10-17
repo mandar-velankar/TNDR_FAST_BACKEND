@@ -15,10 +15,14 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             DistributorManagememt:Boolean;
             DistributorManagementExclusiveAccess:Boolean;
             COGSManagementView:Boolean;
+            WPPManagementPowerApproverAccess: Boolean;
+            PPPManagementPowerApproverAccess: Boolean;
+            NLPricesManagementAccess: Boolean;
         };
         standardtenderAccess: {
 			OverviewDownload: Boolean;
             ZuelligExtract: Boolean;
+            LimitedPricingTabAccess: Boolean;
 		};
         ppa:Boolean;
         contract:Boolean;

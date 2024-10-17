@@ -123,8 +123,24 @@
       "description": "f_tndr_cag_distributormanagementexclusiveaccess_user"
     },
     {
+      "name": "$XSAPPNAME.f_tndr_cag_standardtenderlimitedpricingtabaccess_user",
+      "description": "f_tndr_cag_standardtenderlimitedpricingtabaccess_user"
+    },
+    {
       "name": "$XSAPPNAME.f_tndr_cag_admincogsview_user",
       "description": "f_tndr_cag_admincogsview_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_wpppowerapproveraccess_user",
+      "description": "f_tndr_cag_wpppowerapproveraccess_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_ppppowerapproveraccess_user",
+      "description": "f_tndr_cag_ppppowerapproveraccess_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_nlpricesmanagement_user",
+      "description": "f_tndr_cag_nlpricesmanagement_user"
     }
   ],
   "attributes": [],
@@ -241,21 +257,21 @@
       ],
       "attribute-references": []
     },
-	{
-        "name": "f_tndr_cag_cogs_user",
-        "description": "generated",
-        "scope-references": [
-          "$XSAPPNAME.f_tndr_cag_cogs_user"
-        ],
-        "attribute-references": []
+	  {
+      "name": "f_tndr_cag_cogs_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_cogs_user"
+      ],
+      "attribute-references": []
     },
     {
-        "name": "f_tndr_cag_spaintenderview_user",
-        "description": "generated",
-        "scope-references": [
-          "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
-        ],
-        "attribute-references": []
+      "name": "f_tndr_cag_spaintenderview_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
+      ],
+      "attribute-references": []
     },
 	{
       "name": "f_tndr_cag_Pharmatenderview_user",
@@ -353,11 +369,43 @@
       ],
       "attribute-references": []
     },
+    {
+      "name": "f_tndr_cag_standardtenderlimitedpricingtabaccess_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_standardtenderlimitedpricingtabaccess_user"
+      ],
+      "attribute-references": []
+    },
     {		  
       "name": "f_tndr_cag_admincogsview_user",
       "description": "generated",
       "scope-references": [
         "$XSAPPNAME.f_tndr_cag_admincogsview_user"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "f_tndr_cag_wpppowerapproveraccess_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_wpppowerapproveraccess_user"
+      ],
+      "attribute-references": []
+    },
+    {		  
+      "name": "f_tndr_cag_ppppowerapproveraccess_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_ppppowerapproveraccess_user"
+      ],
+      "attribute-references": []
+    },
+    {		  
+      "name": "f_tndr_cag_nlpricesmanagement_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_nlpricesmanagement_user"
       ],
       "attribute-references": []
     }

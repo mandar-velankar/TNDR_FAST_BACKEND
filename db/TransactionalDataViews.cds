@@ -418,12 +418,13 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                 case 
                     when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID) then 'In FOC Negotiation'
                     when exists (select * from ResultsWithAppealInProgress where OfferID = offer.OfferID) then 'Appeal in Progress'
+                    when offer.OfferStatusTable.CountryCode = 'NL' and offer.OfferStatusTable.TableStatus is not null then offer.OfferStatusTable.TableStatus
                     else offer.OfferStatusTable.STATUS 
             end
         else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
-group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS; //group by missing?
+group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus; //group by missing?
 
 entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.TenderID as TENDER_ID,
@@ -903,7 +904,9 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Comment as ClientComment,
     offer.Tender.Custom.String_2 as Regions,
     offer.Tender.Country.Region,
-    offer.InternalBidDueDate
+    offer.InternalBidDueDate,
+    offer.Tender.Custom.Integer_2 as Contract_Length2,
+    offer.Tender.Custom.Integer_3 as Contract_Length3
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -989,6 +992,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.ContractLength,
           offer.Tender.ContractExtenseion,
           offer.Tender.Custom.Integer_1,
+          offer.Tender.Custom.Integer_2,
+          offer.Tender.Custom.Integer_3,
           offer.Comment,
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region,
@@ -1409,12 +1414,21 @@ left outer join TransactionalData.PriceCondition as priceCondition
     on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
     and product.OfferID = priceCondition.OfferID
     and product.ProductCode = priceCondition.ProductCode
+left outer join MasterData.NLPPP as nlppp 
+    on nlppp.CountryCode = product.CountryCode
+    and nlppp.PRODUCTPACKID = product.ProductCode
+    and nlppp.Status = 'Approved'
+    and nlppp.StartDate <= CURRENT_DATE
+    and CURRENT_DATE <= nlppp.EndDate
 left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as curentSection
 	on curentSection.INSTITUTE_ID = tender.InstituteID
 	and curentSection.ProductCode = product.ProductCode
 {
     tender.CountryCode,
     tender.Country.Region,
+    tender.Custom.Integer_1 as Custom_Integer_1,
+    tender.Custom.Integer_2 as Custom_Integer_2,
+    tender.Custom.Integer_3 as Custom_Integer_3,
     key product.TenderID,
     key offer.OfferID,
     key product.ProductCode,
@@ -1440,6 +1454,7 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
             then  ifnull(priceCondition.Price0, (RegisteredPrice.REGISTERED_PRICE / product.SKU.PACKFACTOR))
         else ifnull(priceCondition.Price0, RegisteredPrice.REGISTERED_PRICE)
     end as BasePrice:Double,
+    nlppp.PPP as masterPriceAIP: Double,
     @Core.Computed: false
     case 
         when priceCondition.Price1 is null or priceCondition.Price1 = 0 and tender.CountryCode = 'TW'
@@ -1510,6 +1525,7 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     ifnull(priceCondition.FreeGoods_Amount,0) as FreeGoods_Amount:Double,
      @Core.Computed: false
     ifnull(priceCondition.FreeGoods_Percentage,0) as FreeGoods_Percentage:Double,
+    priceCondition.NLPriceConditionType,
     @Core.Computed: false
     ifnull(priceCondition.CurrentBasePrice, curentSection.Price0) as TWCurrentBasePrice: Decimal,
     @Core.Computed: false
@@ -2176,9 +2192,222 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PeriodOfBankGauranteeEnd: Date;
             BGValueBaht: Double;
             TenderAnnouncementReference: String;
+            Contract_Length1       : Integer; //PT_TMTEND/CUSTOM_INTEGER_1
+            Contract_Length2       : Integer; //PT_TMTEND/CUSTOM_INTEGER_2
+            Contract_Length3       : Integer; //PT_TMTEND/CUSTOM_INTEGER_3
             ContractLenghtUnit: String;
             AttentionTo: String;
             QuotationDate: Date;
+            Tender_Custom_Integer_1: Integer;
+            Tender_Custom_Integer_2: Integer;
+            Tender_Custom_Integer_3: Integer;
+            Tender_Custom_Integer_4: Integer;
+            Tender_Custom_Integer_5: Integer;
+            Tender_Custom_Integer_6: Integer;
+            Tender_Custom_Integer_7: Integer;
+            Tender_Custom_Integer_8: Integer;
+            Tender_Custom_Integer_9: Integer;
+            Tender_Custom_Integer_10: Integer;
+            Tender_Custom_String_1: String;
+            Tender_Custom_String_2: String;
+            Tender_Custom_String_3: String;
+            Tender_Custom_String_4: String;
+            Tender_Custom_String_5: String;
+            Tender_Custom_String_6: String;
+            Tender_Custom_String_7: String;
+            Tender_Custom_String_8: String;
+            Tender_Custom_String_9: String;
+            Tender_Custom_String_10: String;
+            Tender_Custom_String_11: String;
+            Tender_Custom_String_12: String;
+            Tender_Custom_String_13: String;
+            Tender_Custom_String_14: String;
+            Tender_Custom_String_15: String;
+            Tender_Custom_String_16: String;
+            Tender_Custom_String_17: String;
+            Tender_Custom_String_18: String;
+            Tender_Custom_String_19: String;
+            Tender_Custom_String_20: String;
+            Tender_Custom_Double_1: Double;
+            Tender_Custom_Double_2: Double;
+            Tender_Custom_Double_3: Double;
+            Tender_Custom_Double_4: Double;
+            Tender_Custom_Double_5: Double;
+            Tender_Custom_Double_6: Double;
+            Tender_Custom_Double_7: Double;
+            Tender_Custom_Double_8: Double;
+            Tender_Custom_Double_9: Double;
+            Tender_Custom_Double_10: Double;
+            Tender_Custom_Date_1: Date;
+            Tender_Custom_Date_2: Date;
+            Tender_Custom_Date_3: Date;
+            Tender_Custom_Date_4: Date;
+            Tender_Custom_Date_5: Date;
+            Tender_Custom_Date_6: Date;
+            Tender_Custom_Date_7: Date;
+            Tender_Custom_Date_8: Date;
+            Tender_Custom_Date_9: Date;
+            Tender_Custom_Date_10: Date;
+            Tender_Custom_Boolean_1: Boolean;
+            Tender_Custom_Boolean_2: Boolean;
+            Tender_Custom_Boolean_3: Boolean;
+            Tender_Custom_Boolean_4: Boolean;
+            Tender_Custom_Boolean_5: Boolean;
+            Tender_Custom_Boolean_6: Boolean;
+            Tender_Custom_Boolean_7: Boolean;
+            Tender_Custom_Boolean_8: Boolean;
+            Tender_Custom_Boolean_9: Boolean;
+            Tender_Custom_Boolean_10: Boolean;
+            Tender_Custom_Datetime_1: DateTime;
+            Tender_Custom_Datetime_2: DateTime;
+            Tender_Custom_Datetime_3: DateTime;
+            Tender_Custom_Datetime_4: DateTime;
+            Tender_Custom_Datetime_5: DateTime;
+            Tender_Custom_Datetime_6: DateTime;
+            Tender_Custom_Datetime_7: DateTime;
+            Tender_Custom_Datetime_8: DateTime;
+            Tender_Custom_Datetime_9: DateTime;
+            Tender_Custom_Datetime_10: DateTime;
+            Offer_Custom_Integer_1: Integer;
+            Offer_Custom_Integer_2: Integer;
+            Offer_Custom_Integer_3: Integer;
+            Offer_Custom_Integer_4: Integer;
+            Offer_Custom_Integer_5: Integer;
+            Offer_Custom_Integer_6: Integer;
+            Offer_Custom_Integer_7: Integer;
+            Offer_Custom_Integer_8: Integer;
+            Offer_Custom_Integer_9: Integer;
+            Offer_Custom_Integer_10: Integer;
+            Offer_Custom_String_1: String;
+            Offer_Custom_String_2: String;
+            Offer_Custom_String_3: String;
+            Offer_Custom_String_4: String;
+            Offer_Custom_String_5: String;
+            Offer_Custom_String_6: String;
+            Offer_Custom_String_7: String;
+            Offer_Custom_String_8: String;
+            Offer_Custom_String_9: String;
+            Offer_Custom_String_10: String;
+            Offer_Custom_String_11: String;
+            Offer_Custom_String_12: String;
+            Offer_Custom_String_13: String;
+            Offer_Custom_String_14: String;
+            Offer_Custom_String_15: String;
+            Offer_Custom_String_16: String;
+            Offer_Custom_String_17: String;
+            Offer_Custom_String_18: String;
+            Offer_Custom_String_19: String;
+            Offer_Custom_String_20: String;
+            Offer_Custom_Double_1: Double;
+            Offer_Custom_Double_2: Double;
+            Offer_Custom_Double_3: Double;
+            Offer_Custom_Double_4: Double;
+            Offer_Custom_Double_5: Double;
+            Offer_Custom_Double_6: Double;
+            Offer_Custom_Double_7: Double;
+            Offer_Custom_Double_8: Double;
+            Offer_Custom_Double_9: Double;
+            Offer_Custom_Double_10: Double;
+            Offer_Custom_Date_1: Date;
+            Offer_Custom_Date_2: Date;
+            Offer_Custom_Date_3: Date;
+            Offer_Custom_Date_4: Date;
+            Offer_Custom_Date_5: Date;
+            Offer_Custom_Date_6: Date;
+            Offer_Custom_Date_7: Date;
+            Offer_Custom_Date_8: Date;
+            Offer_Custom_Date_9: Date;
+            Offer_Custom_Date_10: Date;
+            Offer_Custom_Boolean_1: String;
+            Offer_Custom_Boolean_2: String;
+            Offer_Custom_Boolean_3: String;
+            Offer_Custom_Boolean_4: String;
+            Offer_Custom_Boolean_5: String;
+            Offer_Custom_Boolean_6: String;
+            Offer_Custom_Boolean_7: String;
+            Offer_Custom_Boolean_8: String;
+            Offer_Custom_Boolean_9: String;
+            Offer_Custom_Boolean_10: String;
+            Offer_Custom_Datetime_1: DateTime;
+            Offer_Custom_Datetime_2: DateTime;
+            Offer_Custom_Datetime_3: DateTime;
+            Offer_Custom_Datetime_4: DateTime;
+            Offer_Custom_Datetime_5: DateTime;
+            Offer_Custom_Datetime_6: DateTime;
+            Offer_Custom_Datetime_7: DateTime;
+            Offer_Custom_Datetime_8: DateTime;
+            Offer_Custom_Datetime_9: DateTime;
+            Offer_Custom_Datetime_10: DateTime;
+            Quotation_Custom_Integer_1: Integer;
+            Quotation_Custom_Integer_2: Integer;
+            Quotation_Custom_Integer_3: Integer;
+            Quotation_Custom_Integer_4: Integer;
+            Quotation_Custom_Integer_5: Integer;
+            Quotation_Custom_Integer_6: Integer;
+            Quotation_Custom_Integer_7: Integer;
+            Quotation_Custom_Integer_8: Integer;
+            Quotation_Custom_Integer_9: Integer;
+            Quotation_Custom_Integer_10: Integer;
+            Quotation_Custom_String_1: String;
+            Quotation_Custom_String_2: String;
+            Quotation_Custom_String_3: String;
+            Quotation_Custom_String_4: String;
+            Quotation_Custom_String_5: String;
+            Quotation_Custom_String_6: String;
+            Quotation_Custom_String_7: String;
+            Quotation_Custom_String_8: String;
+            Quotation_Custom_String_9: String;
+            Quotation_Custom_String_10: String;
+            Quotation_Custom_String_11: String;
+            Quotation_Custom_String_12: String;
+            Quotation_Custom_String_13: String;
+            Quotation_Custom_String_14: String;
+            Quotation_Custom_String_15: String;
+            Quotation_Custom_String_16: String;
+            Quotation_Custom_String_17: String;
+            Quotation_Custom_String_18: String;
+            Quotation_Custom_String_19: String;
+            Quotation_Custom_String_20: String;
+            Quotation_Custom_Double_1: Double;
+            Quotation_Custom_Double_2: Double;
+            Quotation_Custom_Double_3: Double;
+            Quotation_Custom_Double_4: Double;
+            Quotation_Custom_Double_5: Double;
+            Quotation_Custom_Double_6: Double;
+            Quotation_Custom_Double_7: Double;
+            Quotation_Custom_Double_8: Double;
+            Quotation_Custom_Double_9: Double;
+            Quotation_Custom_Double_10: Double;
+            Quotation_Custom_Date_1: Date;
+            Quotation_Custom_Date_2: Date;
+            Quotation_Custom_Date_3: Date;
+            Quotation_Custom_Date_4: Date;
+            Quotation_Custom_Date_5: Date;
+            Quotation_Custom_Date_6: Date;
+            Quotation_Custom_Date_7: Date;
+            Quotation_Custom_Date_8: Date;
+            Quotation_Custom_Date_9: Date;
+            Quotation_Custom_Date_10: Date;
+            Quotation_Custom_Boolean_1: Boolean;
+            Quotation_Custom_Boolean_2: Boolean;
+            Quotation_Custom_Boolean_3: Boolean;
+            Quotation_Custom_Boolean_4: Boolean;
+            Quotation_Custom_Boolean_5: Boolean;
+            Quotation_Custom_Boolean_6: Boolean;
+            Quotation_Custom_Boolean_7: Boolean;
+            Quotation_Custom_Boolean_8: Boolean;
+            Quotation_Custom_Boolean_9: Boolean;
+            Quotation_Custom_Boolean_10: Boolean;
+            Quotation_Custom_Datetime_1: DateTime;
+            Quotation_Custom_Datetime_2: DateTime;
+            Quotation_Custom_Datetime_3: DateTime;
+            Quotation_Custom_Datetime_4: DateTime;
+            Quotation_Custom_Datetime_5: DateTime;
+            Quotation_Custom_Datetime_6: DateTime;
+            Quotation_Custom_Datetime_7: DateTime;
+            Quotation_Custom_Datetime_8: DateTime;
+            Quotation_Custom_Datetime_9: DateTime;
+            Quotation_Custom_Datetime_10: DateTime;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2371,8 +2600,300 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NET_OFFER_SALES_OFFER_CURRENCY              : Double;
             NET_OFFER_SALES_OFFER_CURRENCY_IN_WORDS     : String;
             FOCInfoText                                 : String;
+            ContractDuration_1                          : Double;
+            ContractDuration_2                          : Double;
+            ContractDuration_3                          : Double;
+            OfferPrice_1                                : Double;
+            OfferPrice_2                                : Double;
+            OfferPrice_3                                : Double;
+            Discount_1                                  : Double;
+            Discount_2                                  : Double;
+            Discount_3                                  : Double;
             ItemNumber                                  : Integer;
+            NLPriceConditionType                        : String;
+            Product_Custom_Integer_1: Integer;
+            Product_Custom_Integer_2: Integer;
+            Product_Custom_Integer_3: Integer;
+            Product_Custom_Integer_4: Integer;
+            Product_Custom_Integer_5: Integer;
+            Product_Custom_Integer_6: Integer;
+            Product_Custom_Integer_7: Integer;
+            Product_Custom_Integer_8: Integer;
+            Product_Custom_Integer_9: Integer;
+            Product_Custom_Integer_10: Integer;
+            Product_Custom_String_1: String;
+            Product_Custom_String_2: String;
+            Product_Custom_String_3: String;
+            Product_Custom_String_4: String;
+            Product_Custom_String_5: String;
+            Product_Custom_String_6: String;
+            Product_Custom_String_7: String;
+            Product_Custom_String_8: String;
+            Product_Custom_String_9: String;
+            Product_Custom_String_10: String;
+            Product_Custom_String_11: String;
+            Product_Custom_String_12: String;
+            Product_Custom_String_13: String;
+            Product_Custom_String_14: String;
+            Product_Custom_String_15: String;
+            Product_Custom_String_16: String;
+            Product_Custom_String_17: String;
+            Product_Custom_String_18: String;
+            Product_Custom_String_19: String;
+            Product_Custom_String_20: String;
+            Product_Custom_Double_1: Double;
+            Product_Custom_Double_2: Double;
+            Product_Custom_Double_3: Double;
+            Product_Custom_Double_4: Double;
+            Product_Custom_Double_5: Double;
+            Product_Custom_Double_6: Double;
+            Product_Custom_Double_7: Double;
+            Product_Custom_Double_8: Double;
+            Product_Custom_Double_9: Double;
+            Product_Custom_Double_10: Double;
+            Product_Custom_Date_1: Date;
+            Product_Custom_Date_2: Date;
+            Product_Custom_Date_3: Date;
+            Product_Custom_Date_4: Date;
+            Product_Custom_Date_5: Date;
+            Product_Custom_Date_6: Date;
+            Product_Custom_Date_7: Date;
+            Product_Custom_Date_8: Date;
+            Product_Custom_Date_9: Date;
+            Product_Custom_Date_10: Date;
+            Product_Custom_Boolean_1: Boolean;
+            Product_Custom_Boolean_2: Boolean;
+            Product_Custom_Boolean_3: Boolean;
+            Product_Custom_Boolean_4: Boolean;
+            Product_Custom_Boolean_5: Boolean;
+            Product_Custom_Boolean_6: Boolean;
+            Product_Custom_Boolean_7: Boolean;
+            Product_Custom_Boolean_8: Boolean;
+            Product_Custom_Boolean_9: Boolean;
+            Product_Custom_Boolean_10: Boolean;
+            Product_Custom_Datetime_1: DateTime;
+            Product_Custom_Datetime_2: DateTime;
+            Product_Custom_Datetime_3: DateTime;
+            Product_Custom_Datetime_4: DateTime;
+            Product_Custom_Datetime_5: DateTime;
+            Product_Custom_Datetime_6: DateTime;
+            Product_Custom_Datetime_7: DateTime;
+            Product_Custom_Datetime_8: DateTime;
+            Product_Custom_Datetime_9: DateTime;
+            Product_Custom_Datetime_10: DateTime;
+            Delivery_Custom_Integer_1: Integer;
+            Delivery_Custom_Integer_2: Integer;
+            Delivery_Custom_Integer_3: Integer;
+            Delivery_Custom_Integer_4: Integer;
+            Delivery_Custom_Integer_5: Integer;
+            Delivery_Custom_Integer_6: Integer;
+            Delivery_Custom_Integer_7: Integer;
+            Delivery_Custom_Integer_8: Integer;
+            Delivery_Custom_Integer_9: Integer;
+            Delivery_Custom_Integer_10: Integer;
+            Delivery_Custom_String_1: String;
+            Delivery_Custom_String_2: String;
+            Delivery_Custom_String_3: String;
+            Delivery_Custom_String_4: String;
+            Delivery_Custom_String_5: String;
+            Delivery_Custom_String_6: String;
+            Delivery_Custom_String_7: String;
+            Delivery_Custom_String_8: String;
+            Delivery_Custom_String_9: String;
+            Delivery_Custom_String_10: String;
+            Delivery_Custom_String_11: String;
+            Delivery_Custom_String_12: String;
+            Delivery_Custom_String_13: String;
+            Delivery_Custom_String_14: String;
+            Delivery_Custom_String_15: String;
+            Delivery_Custom_String_16: String;
+            Delivery_Custom_String_17: String;
+            Delivery_Custom_String_18: String;
+            Delivery_Custom_String_19: String;
+            Delivery_Custom_String_20: String;
+            Delivery_Custom_Double_1: Double;
+            Delivery_Custom_Double_2: Double;
+            Delivery_Custom_Double_3: Double;
+            Delivery_Custom_Double_4: Double;
+            Delivery_Custom_Double_5: Double;
+            Delivery_Custom_Double_6: Double;
+            Delivery_Custom_Double_7: Double;
+            Delivery_Custom_Double_8: Double;
+            Delivery_Custom_Double_9: Double;
+            Delivery_Custom_Double_10: Double;
+            Delivery_Custom_Date_1: Date;
+            Delivery_Custom_Date_2: Date;
+            Delivery_Custom_Date_3: Date;
+            Delivery_Custom_Date_4: Date;
+            Delivery_Custom_Date_5: Date;
+            Delivery_Custom_Date_6: Date;
+            Delivery_Custom_Date_7: Date;
+            Delivery_Custom_Date_8: Date;
+            Delivery_Custom_Date_9: Date;
+            Delivery_Custom_Date_10: Date;
+            Delivery_Custom_Boolean_1: Boolean;
+            Delivery_Custom_Boolean_2: Boolean;
+            Delivery_Custom_Boolean_3: Boolean;
+            Delivery_Custom_Boolean_4: Boolean;
+            Delivery_Custom_Boolean_5: Boolean;
+            Delivery_Custom_Boolean_6: Boolean;
+            Delivery_Custom_Boolean_7: Boolean;
+            Delivery_Custom_Boolean_8: Boolean;
+            Delivery_Custom_Boolean_9: Boolean;
+            Delivery_Custom_Boolean_10: Boolean;
+            Delivery_Custom_Datetime_1: DateTime;
+            Delivery_Custom_Datetime_2: DateTime;
+            Delivery_Custom_Datetime_3: DateTime;
+            Delivery_Custom_Datetime_4: DateTime;
+            Delivery_Custom_Datetime_5: DateTime;
+            Delivery_Custom_Datetime_6: DateTime;
+            Delivery_Custom_Datetime_7: DateTime;
+            Delivery_Custom_Datetime_8: DateTime;
+            Delivery_Custom_Datetime_9: DateTime;
+            Delivery_Custom_Datetime_10: DateTime;
+            TenderResults_Custom_Integer_1: Integer;
+            TenderResults_Custom_Integer_2: Integer;
+            TenderResults_Custom_Integer_3: Integer;
+            TenderResults_Custom_Integer_4: Integer;
+            TenderResults_Custom_Integer_5: Integer;
+            TenderResults_Custom_Integer_6: Integer;
+            TenderResults_Custom_Integer_7: Integer;
+            TenderResults_Custom_Integer_8: Integer;
+            TenderResults_Custom_Integer_9: Integer;
+            TenderResults_Custom_Integer_10: Integer;
+            TenderResults_Custom_String_1: String;
+            TenderResults_Custom_String_2: String;
+            TenderResults_Custom_String_3: String;
+            TenderResults_Custom_String_4: String;
+            TenderResults_Custom_String_5: String;
+            TenderResults_Custom_String_6: String;
+            TenderResults_Custom_String_7: String;
+            TenderResults_Custom_String_8: String;
+            TenderResults_Custom_String_9: String;
+            TenderResults_Custom_String_10: String;
+            TenderResults_Custom_String_11: String;
+            TenderResults_Custom_String_12: String;
+            TenderResults_Custom_String_13: String;
+            TenderResults_Custom_String_14: String;
+            TenderResults_Custom_String_15: String;
+            TenderResults_Custom_String_16: String;
+            TenderResults_Custom_String_17: String;
+            TenderResults_Custom_String_18: String;
+            TenderResults_Custom_String_19: String;
+            TenderResults_Custom_String_20: String;
+            TenderResults_Custom_Double_1: Double;
+            TenderResults_Custom_Double_2: Double;
+            TenderResults_Custom_Double_3: Double;
+            TenderResults_Custom_Double_4: Double;
+            TenderResults_Custom_Double_5: Double;
+            TenderResults_Custom_Double_6: Double;
+            TenderResults_Custom_Double_7: Double;
+            TenderResults_Custom_Double_8: Double;
+            TenderResults_Custom_Double_9: Double;
+            TenderResults_Custom_Double_10: Double;
+            TenderResults_Custom_Date_1: Date;
+            TenderResults_Custom_Date_2: Date;
+            TenderResults_Custom_Date_3: Date;
+            TenderResults_Custom_Date_4: Date;
+            TenderResults_Custom_Date_5: Date;
+            TenderResults_Custom_Date_6: Date;
+            TenderResults_Custom_Date_7: Date;
+            TenderResults_Custom_Date_8: Date;
+            TenderResults_Custom_Date_9: Date;
+            TenderResults_Custom_Date_10: Date;
+            TenderResults_Custom_Boolean_1: Boolean;
+            TenderResults_Custom_Boolean_2: Boolean;
+            TenderResults_Custom_Boolean_3: Boolean;
+            TenderResults_Custom_Boolean_4: Boolean;
+            TenderResults_Custom_Boolean_5: Boolean;
+            TenderResults_Custom_Boolean_6: Boolean;
+            TenderResults_Custom_Boolean_7: Boolean;
+            TenderResults_Custom_Boolean_8: Boolean;
+            TenderResults_Custom_Boolean_9: Boolean;
+            TenderResults_Custom_Boolean_10: Boolean;
+            TenderResults_Custom_Datetime_1: DateTime;
+            TenderResults_Custom_Datetime_2: DateTime;
+            TenderResults_Custom_Datetime_3: DateTime;
+            TenderResults_Custom_Datetime_4: DateTime;
+            TenderResults_Custom_Datetime_5: DateTime;
+            TenderResults_Custom_Datetime_6: DateTime;
+            TenderResults_Custom_Datetime_7: DateTime;
+            TenderResults_Custom_Datetime_8: DateTime;
+            TenderResults_Custom_Datetime_9: DateTime;
+            TenderResults_Custom_Datetime_10: DateTime;
+            CompetitorResult_Custom_Integer_1: Integer;
+            CompetitorResult_Custom_Integer_2: Integer;
+            CompetitorResult_Custom_Integer_3: Integer;
+            CompetitorResult_Custom_Integer_4: Integer;
+            CompetitorResult_Custom_Integer_5: Integer;
+            CompetitorResult_Custom_Integer_6: Integer;
+            CompetitorResult_Custom_Integer_7: Integer;
+            CompetitorResult_Custom_Integer_8: Integer;
+            CompetitorResult_Custom_Integer_9: Integer;
+            CompetitorResult_Custom_Integer_10: Integer;
+            CompetitorResult_Custom_String_1: String;
+            CompetitorResult_Custom_String_2: String;
+            CompetitorResult_Custom_String_3: String;
+            CompetitorResult_Custom_String_4: String;
+            CompetitorResult_Custom_String_5: String;
+            CompetitorResult_Custom_String_6: String;
+            CompetitorResult_Custom_String_7: String;
+            CompetitorResult_Custom_String_8: String;
+            CompetitorResult_Custom_String_9: String;
+            CompetitorResult_Custom_String_10: String;
+            CompetitorResult_Custom_String_11: String;
+            CompetitorResult_Custom_String_12: String;
+            CompetitorResult_Custom_String_13: String;
+            CompetitorResult_Custom_String_14: String;
+            CompetitorResult_Custom_String_15: String;
+            CompetitorResult_Custom_String_16: String;
+            CompetitorResult_Custom_String_17: String;
+            CompetitorResult_Custom_String_18: String;
+            CompetitorResult_Custom_String_19: String;
+            CompetitorResult_Custom_String_20: String;
+            CompetitorResult_Custom_Double_1: Double;
+            CompetitorResult_Custom_Double_2: Double;
+            CompetitorResult_Custom_Double_3: Double;
+            CompetitorResult_Custom_Double_4: Double;
+            CompetitorResult_Custom_Double_5: Double;
+            CompetitorResult_Custom_Double_6: Double;
+            CompetitorResult_Custom_Double_7: Double;
+            CompetitorResult_Custom_Double_8: Double;
+            CompetitorResult_Custom_Double_9: Double;
+            CompetitorResult_Custom_Double_10: Double;
+            CompetitorResult_Custom_Date_1: Date;
+            CompetitorResult_Custom_Date_2: Date;
+            CompetitorResult_Custom_Date_3: Date;
+            CompetitorResult_Custom_Date_4: Date;
+            CompetitorResult_Custom_Date_5: Date;
+            CompetitorResult_Custom_Date_6: Date;
+            CompetitorResult_Custom_Date_7: Date;
+            CompetitorResult_Custom_Date_8: Date;
+            CompetitorResult_Custom_Date_9: Date;
+            CompetitorResult_Custom_Date_10: Date;
+            CompetitorResult_Custom_Boolean_1: Boolean;
+            CompetitorResult_Custom_Boolean_2: Boolean;
+            CompetitorResult_Custom_Boolean_3: Boolean;
+            CompetitorResult_Custom_Boolean_4: Boolean;
+            CompetitorResult_Custom_Boolean_5: Boolean;
+            CompetitorResult_Custom_Boolean_6: Boolean;
+            CompetitorResult_Custom_Boolean_7: Boolean;
+            CompetitorResult_Custom_Boolean_8: Boolean;
+            CompetitorResult_Custom_Boolean_9: Boolean;
+            CompetitorResult_Custom_Boolean_10: Boolean;
+            CompetitorResult_Custom_Datetime_1: DateTime;
+            CompetitorResult_Custom_Datetime_2: DateTime;
+            CompetitorResult_Custom_Datetime_3: DateTime;
+            CompetitorResult_Custom_Datetime_4: DateTime;
+            CompetitorResult_Custom_Datetime_5: DateTime;
+            CompetitorResult_Custom_Datetime_6: DateTime;
+            CompetitorResult_Custom_Datetime_7: DateTime;
+            CompetitorResult_Custom_Datetime_8: DateTime;
+            CompetitorResult_Custom_Datetime_9: DateTime;
+            CompetitorResult_Custom_Datetime_10: DateTime;
             TenderAnnouncementReference                 : String;
+            NLStaticField1                      : String;
+            NLStaticField2                      : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -2877,3 +3398,100 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         foc.FreeGoodsOther_Step,
         foc.FreeGoodsOther_ABS_PCT,
         foc.ADD_INCLUDE;
+
+    entity ContractDurationBase as select from TransactionalData.NLPriceConditions as nlpc
+        inner join TransactionalData.PriceCondition as pc
+             on pc.ID = nlpc.PriceCondition.ID{
+        pc.OfferID,
+        key nlpc.PriceCondition.ID as PriceCondition_ID: UUID,
+        nlpc.ContractDuration,
+        nlpc.OfferPrice,
+        COUNT(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS CountContractDuration: Integer,
+        MIN(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS MinContractDuration: Double,
+        MAX(nlpc.ContractDuration) OVER (PARTITION BY nlpc.PriceCondition.ID) AS MaxContractDuration: Double,
+        ROW_NUMBER() OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration) AS RowAsc: Integer,
+        ROW_NUMBER() OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration DESC) AS RowDesc: Integer,
+        FIRST_VALUE(nlpc.OfferPrice) OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration) AS MinOfferPrice: Double,
+        FIRST_VALUE(nlpc.OfferPrice) OVER (PARTITION BY nlpc.PriceCondition.ID ORDER BY nlpc.ContractDuration DESC) AS MaxOfferPrice: Double
+    };
+     entity NLContractDurationsView as select from ContractDurationBase as rd{
+        key rd.OfferID,
+        key rd.PriceCondition_ID,
+        rd.MinContractDuration AS MinContractDuration: Double,
+        rd.MinOfferPrice AS MinOfferPrice: Double,
+        CASE
+            WHEN rd.CountContractDuration = 1 THEN NULL
+            WHEN rd.CountContractDuration = 2 THEN (
+                SELECT cd.ContractDuration 
+                FROM ContractDurationBase AS cd 
+                WHERE cd.PriceCondition_ID = rd.PriceCondition_ID 
+                AND cd.RowAsc = 2
+            )
+            ELSE (
+                SELECT cd.ContractDuration 
+                FROM ContractDurationBase AS cd 
+                WHERE cd.PriceCondition_ID = rd.PriceCondition_ID 
+                AND cd.RowAsc = 2
+            )
+        END AS AvgContractDuration: Double,
+        CASE
+            WHEN rd.CountContractDuration = 1 THEN NULL
+            WHEN rd.CountContractDuration = 2 THEN (
+                SELECT cd.OfferPrice 
+                FROM ContractDurationBase AS cd 
+                WHERE cd.PriceCondition_ID = rd.PriceCondition_ID 
+                AND cd.RowAsc = 2
+            )
+            ELSE (
+                SELECT cd.OfferPrice 
+                FROM ContractDurationBase AS cd 
+                WHERE cd.PriceCondition_ID = rd.PriceCondition_ID 
+                AND cd.RowAsc = 2
+            )
+        END AS AvgOfferPrice : Double,
+        CASE
+            WHEN rd.CountContractDuration = 1 THEN NULL
+            WHEN rd.CountContractDuration = 2 THEN NULL
+            ELSE rd.MaxContractDuration
+        END AS MaxContractDuration : Double,
+        CASE
+            WHEN rd.CountContractDuration = 1 THEN NULL
+            WHEN rd.CountContractDuration = 2 THEN NULL
+            ELSE rd.MaxOfferPrice
+        END AS MaxOfferPrice : Double
+    }GROUP BY 
+    rd.OfferID,
+    rd.PriceCondition_ID,
+    rd.MinContractDuration,
+    rd.MinOfferPrice,
+    rd.CountContractDuration,
+    rd.MaxContractDuration,
+    rd.MaxOfferPrice;
+    entity NLContractDurationOfferPrices as select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        inner join TransactionalData.PT_TMOFPR as pr
+            on pr.OfferID = offer.OfferID
+            and pr.Active = 1
+        inner join TransactionalData.PriceCondition as pricecondition
+            on pricecondition.OfferID = pr.OfferID
+            and pricecondition.ProductCode = pr.ProductCode
+        left join TransactionalData.NLPriceConditions as nlpc1
+            on nlpc1.PriceCondition.ID = pricecondition.ID
+            and nlpc1.ContractDuration= tender.Custom.Integer_1
+        left join TransactionalData.NLPriceConditions as nlpc2
+            on nlpc2.PriceCondition.ID = pricecondition.ID
+            and nlpc2.ContractDuration = tender.Custom.Integer_2
+        left join TransactionalData.NLPriceConditions as nlpc3
+            on nlpc3.PriceCondition.ID = pricecondition.ID
+            and nlpc3.ContractDuration = tender.Custom.Integer_3 {
+                key pr.OfferID,
+                key pr.ProductCode,
+                tender.Custom.Integer_1 as ContractDuration_1: Double,
+                nlpc1.OfferPrice as OfferPrice_1: Double,
+                tender.Custom.Integer_2 as ContractDuration_2: Double,
+                nlpc2.OfferPrice as OfferPrice_2: Double,
+                tender.Custom.Integer_3 as ContractDuration_3: Double,
+                nlpc3.OfferPrice as OfferPrice_3: Double
+    }where tender.CountryCode = 'NL';

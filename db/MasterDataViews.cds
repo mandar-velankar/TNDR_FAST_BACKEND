@@ -4,6 +4,7 @@ using { User, Country, managed } from '@sap/cds/common';
 using { com.bayer.SXTENDER.MasterData } from './MasterData';
 using { com.bayer.SXTENDER.MasterData.SAP } from './SAP';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
+using { com.bayer.SXTENDER.AdminData } from './AdminData';
 
 entity MostRecentSkuCodeForProductPack as select from MasterData.PT_TMSKUPRDPCK as sku {
 	sku.ProductPackID,
@@ -389,3 +390,420 @@ left outer join MasterData.PT_TMINST as inst
 	policy.Value,
 	policy.Currency
 };
+
+entity DistributionAgreementMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
+	CountryCode,
+	ProductPackID,
+	STRING_AGG(SKUCode, ',') as MaterialNumbers: String
+}where CountryCode = 'NL'
+	and ActiveRecord = 'Yes'
+group by 
+	CountryCode,
+	ProductPackID;
+
+entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+	inner join MasterData.PT_TMPRDPCK as prdpck
+		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+	left join MasterData.DistributionAgreements as distAgreements
+		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
+		and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join DistributionAgreementMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID{
+		key distAgreements.ID as DistributionAgreementID,
+        key ctprdpck.PRODUCTPACKID,
+        ctprdpck.COUNTRYCODE as CountryCode,
+        ctprdpck.GOV_CODE,
+        prdpck.PRODUCTPACKNAME,
+        prdpck.PRESENTATION,
+        distAgreements.DistributorID,
+        materialNumbers.MaterialNumbers,
+        distAgreements.StartDate,
+        distAgreements.EndDate,
+        distAgreements.Type,
+        distAgreements.Value,
+        distAgreements.createdAt,
+        distAgreements.CurrentStartDate,
+        distAgreements.CurrentEndDate,
+        distAgreements.CurrentType,
+        distAgreements.CurrentValue,
+        ctryCurrency.Currency
+} where ctprdpck.COUNTRYCODE = 'NL' and distAgreements.ID is not null
+union select from MasterData.PT_TMCTPRDPCK as ctprdpck
+	inner join MasterData.PT_TMPRDPCK as prdpck
+		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+	left join MasterData.DistributionAgreements as distAgreements
+		on distAgreements.CountryCode = ctprdpck.COUNTRYCODE
+		and distAgreements.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join DistributionAgreementMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID{
+		key null as  DistributionAgreementID : UUID,
+		key ctprdpck.PRODUCTPACKID,
+		ctprdpck.COUNTRYCODE as CountryCode: String,
+		ctprdpck.GOV_CODE,
+		prdpck.PRODUCTPACKNAME,
+		prdpck.PRESENTATION,
+		null as DistributorID,
+		materialNumbers.MaterialNumbers,
+		null as StartDate,
+		null as EndDate,
+		null as Type,
+		null as Value,
+		null as createdAt,
+		null as CurrentStartDate,
+		null as CurrentEndDate,
+		null as CurrentType,
+		null as CurrentValue,
+		ctryCurrency.Currency,
+} where ctprdpck.COUNTRYCODE = 'NL';
+
+entity CurrentDistributionAgreementView as select from MasterData.DistributionAgreements{
+	key ID,
+    key PRODUCTPACKID,
+    StartDate,
+    EndDate,
+    Type,
+    Value,
+	DistributorID
+}where EndDate = '9999-12-31';
+
+entity WholesalePurchasePriceApprovalsCount as select from MasterData.WholesalePurchasePriceApprovals{
+	key WholesalePurchasePrice.ID as WholesalePurchasePriceID : UUID,
+    count(*) as TotalApprovals
+}group by WholesalePurchasePrice.ID;
+
+entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+	inner join MasterData.PT_TMPRDPCK as prdpck
+		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+	left join MasterData.WholesalePurchasePrice as wholesalepp
+		on wholesalepp.CountryCode = ctprdpck.COUNTRYCODE
+		and wholesalepp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join DistributionAgreementMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
+	left join MasterData.NLPPP as nlppp
+		on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+		and nlppp.ID = wholesalepp.NLPPP_ID
+	left join WholesalePurchasePriceApprovalsCount as approvalscount
+		on approvalscount.WholesalePurchasePriceID = wholesalepp.ID{
+		key wholesalepp.ID as WholesalePurchasePriceID,
+        key ctprdpck.PRODUCTPACKID,
+        ctprdpck.COUNTRYCODE as CountryCode,
+        ctprdpck.GOV_CODE,
+        prdpck.PRODUCTPACKNAME,
+        prdpck.PRESENTATION,
+        prdpck.Bundle,
+		prdpck.OuterCarton,
+		wholesalepp.NLPPP_ID,
+		nlppp.PPP: Double,
+		nlppp.StartDate as PPPStartDate,
+		nlppp.EndDate as PPPEndDate,
+        wholesalepp.DistributorID,
+        materialNumbers.MaterialNumbers,
+        wholesalepp.StartDate,
+        wholesalepp.CurrentStartDate,
+        wholesalepp.EndDate,
+        wholesalepp.CurrentEndDate,
+        wholesalepp.Type,
+        wholesalepp.CurrentType,
+        wholesalepp.createdAt,
+		wholesalepp.Margin,
+		wholesalepp.CurrentMargin,
+        wholesalepp.PowerApproverCWID,
+        wholesalepp.PowerApprovalDate,
+		wholesalepp.WPPWithoutTax,
+		wholesalepp.CurrentWPPWithoutTax,
+        wholesalepp.Status,
+		ctryCurrency.Currency,
+        wholesalepp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
+		wholesalepp.Comment
+} where ctprdpck.COUNTRYCODE = 'NL'  and wholesalepp.ID is not null
+union select from MasterData.PT_TMCTPRDPCK as ctprdpck
+	inner join MasterData.PT_TMPRDPCK as prdpck
+		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+	left join MasterData.WholesalePurchasePrice as wholesalepp
+		on wholesalepp.CountryCode = ctprdpck.COUNTRYCODE
+		and wholesalepp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join DistributionAgreementMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
+	left join MasterData.NLPPP as nlppp
+		on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID{
+		key null as WholesalePurchasePriceID : UUID,
+        key ctprdpck.PRODUCTPACKID,
+        ctprdpck.COUNTRYCODE as CountryCode : String,
+        ctprdpck.GOV_CODE,
+        prdpck.PRODUCTPACKNAME,
+        prdpck.PRESENTATION,
+        prdpck.Bundle,
+		prdpck.OuterCarton,
+		nlppp.ID as NLPPP_ID,
+		nlppp.PPP: Double,
+		nlppp.StartDate as PPPStartDate,
+		nlppp.EndDate as PPPEndDate,
+        null as DistributorID,
+        materialNumbers.MaterialNumbers,
+        null as StartDate,
+        null as CurrentStartDate,
+        null as EndDate,
+        null as CurrentEndDate,
+        null as Type,
+        null as CurrentType,
+        null as createdAt,
+        null as Margin,
+		null as CurrentMargin,
+        null as PowerApproverCWID,
+        null as PowerApprovalDate,
+        null as WPPWithoutTax,
+		null as CurrentWPPWithoutTax,
+        null as Status,
+		ctryCurrency.Currency,
+        null as ApprovalsCount,
+		null as Comment
+} where ctprdpck.COUNTRYCODE = 'NL';
+
+entity CurrentWholesalePurchasePriceView as select from MasterData.WholesalePurchasePrice{
+	key ID,
+    key PRODUCTPACKID,
+    StartDate,
+    EndDate,
+    Type,
+    Margin,
+	WPPWithoutTax,
+	DistributorID
+}where EndDate = '9999-12-31';
+
+entity WholesalePurchasePriceApprovals as select from MasterData.WholesalePurchasePriceApprovals as wppapprovals
+{
+	wppapprovals.ID,		
+	wppapprovals.ApproverRole,
+	wppapprovals.ApprovalStatus,
+	wppapprovals.ApproverComment,
+	wppapprovals.ApproverCWID,
+	wppapprovals.ApprovalDate,
+	wppapprovals.SenderComment,
+	wppapprovals.createdAt,
+	wppapprovals.createdBy,
+	wppapprovals.modifiedAt,
+	wppapprovals.modifiedBy,
+	wppapprovals.WholesalePurchasePrice.ID as WholesalePurchasePrice_ID: UUID,
+	wppapprovals.WholesalePurchasePrice.PRODUCTPACKID as WholesalePurchasePrice_PRODUCTPACKID: Integer,
+	wppapprovals.ApproverName
+};
+entity NLPPPApprovalsCount as select from MasterData.NLPPPApprovals{
+	key NLPPP.ID as NLPPPID : UUID,
+    count(*) as TotalApprovals
+}group by NLPPP.ID;
+entity NLpppView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+	inner join MasterData.PT_TMPRDPCK as prdpck
+		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+	left join MasterData.NLPPP as ppp
+		on ppp.CountryCode = ctprdpck.COUNTRYCODE
+		and ppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join DistributionAgreementMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
+	left join NLPPPApprovalsCount as approvalscount
+		on approvalscount.NLPPPID = ppp.ID{
+		key ppp.ID as PPPID,
+        key ctprdpck.PRODUCTPACKID,
+        ctprdpck.COUNTRYCODE as CountryCode,
+        ctprdpck.GOV_CODE,
+        prdpck.PRODUCTPACKNAME,
+        prdpck.PRESENTATION,
+		prdpck.CalculationFactorIRP,
+        materialNumbers.MaterialNumbers,
+        ppp.Comment,
+        ppp.Status,
+		ppp.Type,
+        ppp.StartDate,
+        ppp.MaxPrice,
+        ppp.PPP,
+        ppp.GovPPP,
+        ppp.EndDate,
+        ppp.createdAt,
+        ppp.TemporaryMeasure,
+        ppp.CurrentStartDate,
+        ppp.CurrentEndDate,
+        ppp.CurrentTemporaryMeasure,
+        ppp.CurrentPPP,
+        ppp.CurrentGovPPP,
+        ppp.PowerApproverCWID,
+        ppp.PowerApprovalDate,
+        ctryCurrency.Currency,
+        ppp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
+} where ctprdpck.COUNTRYCODE = 'NL' and ppp.ID is not null
+union select from MasterData.PT_TMCTPRDPCK as ctprdpck
+	inner join MasterData.PT_TMPRDPCK as prdpck
+		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join MasterData.CountryCurrency as ctryCurrency
+	    on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+	left join MasterData.NLPPP as ppp
+		on ppp.CountryCode = ctprdpck.COUNTRYCODE
+		and ppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	inner join DistributionAgreementMaterialNumbers as materialNumbers
+		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID{
+		key null as PPPID : UUID,
+		key ctprdpck.PRODUCTPACKID,
+		ctprdpck.COUNTRYCODE as CountryCode: String,
+		ctprdpck.GOV_CODE,
+		prdpck.PRODUCTPACKNAME,
+		prdpck.PRESENTATION,
+		prdpck.CalculationFactorIRP,
+		materialNumbers.MaterialNumbers,
+		null as Comment,
+        null as Status,
+		null as Type,
+        null as StartDate,
+        null as MaxPrice,
+        null as PPP,
+        null as GovPPP,
+        null as EndDate,
+        null as createdAt,
+        null as TemporaryMeasure,
+        null as CurrentStartDate,
+        null as CurrentEndDate,
+        null as CurrentTemporaryMeasure,
+        null as CurrentPPP,
+        null as CurrentGovPPP,
+        null as PowerApproverCWID,
+        null as PowerApprovalDate,
+		ctryCurrency.Currency,
+		null as ApprovalsCount,
+} where ctprdpck.COUNTRYCODE = 'NL';
+
+entity CurrentNLpppView as select from MasterData.NLPPP{
+	key ID,
+    key PRODUCTPACKID,
+    StartDate,
+    EndDate,
+    TemporaryMeasure,
+    PPP,
+	GovPPP
+}where EndDate = '9999-12-31';
+
+entity NLPPPApprovals as select from MasterData.NLPPPApprovals as nlpppapprovals
+{
+	nlpppapprovals.ID,		
+	nlpppapprovals.ApproverRole,
+	nlpppapprovals.ApprovalStatus,
+	nlpppapprovals.ApproverComment,
+	nlpppapprovals.ApproverCWID,
+	nlpppapprovals.ApprovalDate,
+	nlpppapprovals.SenderComment,
+	nlpppapprovals.createdAt,
+	nlpppapprovals.createdBy,
+	nlpppapprovals.modifiedAt,
+	nlpppapprovals.modifiedBy,
+	nlpppapprovals.NLPPP.ID as NLPPP_ID: UUID,
+	nlpppapprovals.NLPPP.PRODUCTPACKID as NLPPP_PRODUCTPACKID: Integer,
+	nlpppapprovals.ApproverName
+};
+
+entity PPPApprovalsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+inner join MasterData.PT_TMPRDPCK as prdpck
+	on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+inner join MasterData.CountryCurrency as ctryCurrency
+	on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+inner join MasterData.NLPPP as ppp
+	on ppp.CountryCode = ctprdpck.COUNTRYCODE
+	and ppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+inner join MasterData.NLPPPApprovals as pppapprovals
+	on pppapprovals.NLPPP.ID = ppp.ID{
+	ppp.ID as NLPPP_ID: UUID,
+	ctprdpck.PRODUCTPACKID,
+	ctprdpck.COUNTRYCODE as CountryCode,
+	ctprdpck.GOV_CODE,
+	prdpck.PRODUCTPACKNAME,
+	prdpck.PRESENTATION,
+	ppp.PPP,
+	ppp.Status,
+	pppapprovals.ApprovalStatus,
+	pppapprovals.ApproverComment,
+	pppapprovals.ID as NLPPPApprovals_ID: UUID,
+	ppp.CurrentPPP,
+	ppp.StartDate,
+	pppapprovals.ApproverCWID,
+	ctryCurrency.Currency,
+	(ppp.PPP-ppp.CurrentPPP)/ppp.CurrentPPP as PercentageChange: Double
+}
+where ppp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and ((pppapprovals.ApprovalStatus = 'Waiting' and ppp.Status = 'New') or pppapprovals.ApprovalStatus = 'Rejected')
+group by 
+	ppp.ID,
+	ctprdpck.PRODUCTPACKID,
+	ctprdpck.COUNTRYCODE,
+	ctprdpck.GOV_CODE,
+	prdpck.PRODUCTPACKNAME,
+	prdpck.PRESENTATION,
+	ppp.PPP,
+	ppp.Status,
+	pppapprovals.ApprovalStatus,
+	pppapprovals.ApproverComment,
+	pppapprovals.ID,
+	ppp.CurrentPPP,
+	ppp.StartDate,
+	ctryCurrency.Currency,
+	pppapprovals.ApproverCWID;
+
+entity WPPApprovalsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
+inner join MasterData.PT_TMPRDPCK as prdpck
+	on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+inner join MasterData.CountryCurrency as ctryCurrency
+	on ctryCurrency.CountryCode = ctprdpck.COUNTRYCODE
+inner join MasterData.WholesalePurchasePrice as wpp
+	on wpp.CountryCode = ctprdpck.COUNTRYCODE
+	and wpp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+inner join MasterData.WholesalePurchasePriceApprovals as wppapprovals
+	on wppapprovals.WholesalePurchasePrice.ID = wpp.ID
+left join MasterData.NLPPP as nlppp
+	on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
+	and nlppp.ID = wpp.NLPPP_ID
+inner join MasterData.PT_TMDIST as dist
+	on wpp.DistributorID = dist.DistributorID{
+	wpp.ID as WPP_ID: UUID,
+	wpp.NLPPP_ID,
+	wpp.DistributorID,
+	ctprdpck.PRODUCTPACKID,
+	ctprdpck.COUNTRYCODE as CountryCode,
+	ctprdpck.GOV_CODE,
+	prdpck.PRODUCTPACKNAME,
+	prdpck.PRESENTATION,
+	nlppp.PPP: Double,
+	wpp.WPPWithoutTax,
+	wpp.CurrentWPPWithoutTax,
+	wpp.Status,
+	wpp.StartDate,
+	wppapprovals.ApprovalStatus,
+	wppapprovals.ApproverComment,
+	wppapprovals.ID as WPPApprovals_ID: UUID,
+	wppapprovals.ApproverCWID,
+	ctryCurrency.Currency,
+	dist.DistributorName
+}
+where wpp.EndDate = '9999-12-31' and ctprdpck.COUNTRYCODE = 'NL' and ((wppapprovals.ApprovalStatus = 'Waiting' and wpp.Status = 'New') or wppapprovals.ApprovalStatus = 'Rejected')
+group by 
+	wpp.ID,
+	wpp.NLPPP_ID,
+	wpp.DistributorID,
+	ctprdpck.PRODUCTPACKID,
+	ctprdpck.COUNTRYCODE,
+	ctprdpck.GOV_CODE,
+	prdpck.PRODUCTPACKNAME,
+	prdpck.PRESENTATION,
+	nlppp.PPP,
+	wpp.WPPWithoutTax,
+	wpp.CurrentWPPWithoutTax,
+	wpp.Status,
+	wpp.StartDate,
+	wppapprovals.ApprovalStatus,
+	wppapprovals.ApproverComment,
+	wppapprovals.ID,
+	wppapprovals.ApproverCWID,
+	ctryCurrency.Currency,
+	dist.DistributorName;
