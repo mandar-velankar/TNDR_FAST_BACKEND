@@ -157,6 +157,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.SKU.CONCENTRATION;
 
     entity ExcelClaimFileSalesReportTemplate as projection on ClaimsData.ExcelClaimFileSalesReportTemplate;
+    entity NLExtractClaimDataView as projection on ClaimsViews.NLExtractClaimDataView;
 
     action approveRejectClaimFiles(claimFile_ID: String, countryCode: String, status: String, claimFileDetailPageURL: String) returns String;
 }

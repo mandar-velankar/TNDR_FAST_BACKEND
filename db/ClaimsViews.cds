@@ -156,7 +156,8 @@ entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	cf.DateFrom,
 	cf.DateTo,
 	cf.CountryCode,
-	cf.Status,
+	cf.Status as ClaimFileStatus,
+	cd.Status as ClaimDataStatus,
 	cd.OfferID,
 	cd.ID as ClaimDataID,
 	cd.MainInstituteName,
@@ -185,6 +186,11 @@ entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	sku.SKUCode,
 } where cf.CountryCode = 'NL';
 
+
+
+entity NLExtractClaimDataView as select from NLExtractClaimFilesView as cd{
+	*,
+};
 entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
 	key ID as CLAIMFILES_ID,
 	case
