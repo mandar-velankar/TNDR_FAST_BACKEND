@@ -1393,13 +1393,7 @@ module.exports = async (srv) => {
 			awardedProductsHaveOutcome && await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
 	
 			if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
-				const recipientCWIDs = ['TWHWE', 'TWKUA'];
-				const recipients = await SELECT.from(PT_TMUSER).where({CWID: {in: recipientCWIDs}});
-				const promises = recipients.map(recipient => {
-					return addOutgoingMail(req, "TaiwanResultsRecordedNotification", `Results recorded for Price Request ID:${req.data.OfferID}`, {RecipientEmail: recipient.UserEmail, RecipientName: recipient.UserName});
-				});
-	
-				await Promise.all(promises);
+				await sendTWResultsRecordedNotification(req);
 			}
 		}
 		
@@ -1423,6 +1417,16 @@ module.exports = async (srv) => {
 				? await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
 				: await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', '');
 		}
+	}
+
+	const sendTWResultsRecordedNotification = async function (req) {
+		const recipientCWIDs = ['TWHWE', 'TWMLI'];
+		const recipients = await SELECT.from(PT_TMUSER).where({CWID: {in: recipientCWIDs}});
+		const promises = recipients.map(recipient => {
+			return addOutgoingMail(req, "TaiwanResultsRecordedNotification", `Results recorded for Price Request ID:${req.data.OfferID}`, {RecipientEmail: recipient.UserEmail, RecipientName: recipient.UserName});
+		});
+
+		await Promise.all(promises);
 	}
 
 	const addOutgoingMail = async function (req, templateName, subject, RecipientInfo) {
