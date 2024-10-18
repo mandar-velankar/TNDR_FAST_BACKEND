@@ -65,54 +65,16 @@ module.exports = (srv) => {
 		try{
 		const tx = cds.tx(req);
 		const {templateId, CountryCode, DistributorID, BrandId, Status, DateFrom, DateTo} = req.data;
+
+		const template = await SELECT.one.from(ExcelClaimFileSalesReportTemplate).where({ templateId: templateId });
 		const CountryBrands = await SELECT.from(ClaimDataBrandsView).where({ COUNTRYCODE: CountryCode,BRANDID: BrandId});
-        let where = `
-            
-            CountryCode = '${CountryCode}' and 
-            Status = '${Status}' 
-        `
-        if (DistributorID) {
-            where += `and DistributorID = '${DistributorID}'`
-        }
-        if (DateTo) {
-			where += `and DateFrom <= date'${DateTo}'`;
-        }
-        if (DateFrom) {
-			where += `and DateTo >= date'${DateFrom}'`;
-        }
-        let brandFilter = ''
 
-		if (BrandId !== 'All_Brands' && Array.isArray(CountryBrands) && CountryBrands.length == 0) {
-            where += " and "
-			brandFilter += `ClaimFileID = 'null'`;
-        }
-        if (Array.isArray(CountryBrands) && CountryBrands.length > 0) {
-            where += " and "
-            for (let i = 0; i < CountryBrands.length; i++) {
-                brandFilter += `ClaimFileID = '${CountryBrands[i].ClaimFiles_ID}'`;
-                if (i < CountryBrands.length - 1) {
-                    brandFilter += " or ";
-                }
-            }
-        }
-		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
-
-        const fullWhere = cds.parse.expr(where + brandFilter);
-		const query = SELECT.from(PLExtractClaimFilesView).where(fullWhere);
-		const countryCodeLocals = {
-			'NL': 'nl-NL',
-			'PL': 'en-US'
-		}
-	
-
-        const excelData = await tx.run(query);
-
-		excelData.forEach(ed => {
-			ed.Price0 = ServiceHelper.formatCurrency(Number(ed.Price0), countryCodeLocals[CountryCode], 2, 2);
-			ed.OfferPrice = ServiceHelper.formatCurrency(Number(ed.OfferPrice), countryCodeLocals[CountryCode], 2, 2);
-			ed.WholesalerPurchasedAmount = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasedAmount), countryCodeLocals[CountryCode], 2, 2);
-			ed.NetSales = ServiceHelper.formatCurrency(Number(ed.NetSales), countryCodeLocals[CountryCode], 2, 2);
-		});
+		// Getting full where query
+		const query = buildClaimSalesReportFullWhereQuery(CountryCode, Status, DistributorID, DateFrom, DateTo, CountryBrands, BrandId);
+        const salesReportExtract = await tx.run(query);
+		
+		const excelData = formattedClaimFilesSalesReportExtract(salesReportExtract, CountryCode);
+		
 		if (!template || !template.content) {
 			return req.reject(404, 'No template found for templateid:' + templateId);
 		}
@@ -129,6 +91,76 @@ module.exports = (srv) => {
         }
         
 	});
+
+	const buildClaimSalesReportFullWhereQuery = function (CountryCode, Status, DistributorID, DateFrom, DateTo, CountryBrands, BrandId) {
+		// Statuses based on selected Sales Report template name
+		const statuses = {
+			"NL": {
+				"excludepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`],
+				"includepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`, `'Pending'`],
+			}
+		};
+
+		// Build full wheres
+		const countryCodeFullWhere = (CountryCode && ServiceHelper.buildFullWhere('CountryCode', '=', CountryCode)) || [];
+		const statusFullWhere = CountryCode === 'NL' ? ServiceHelper.buildWhereExpression('ClaimFileStatus', 'or', statuses[CountryCode][Status]) : ServiceHelper.buildFullWhere('ClaimFileStatus', '=', Status)
+      	const wholesalerFullWhere = (DistributorID && ServiceHelper.buildFullWhere('DistributorID', '=', DistributorID)) || [];
+		const dateFromFullWhere =  (DateTo && ServiceHelper.buildFullWhere('DateFrom', '<=', DateTo)) || [];
+		const dateToFullWhere =  (DateFrom && ServiceHelper.buildFullWhere('DateTo', '>=', DateFrom)) || [];
+		let brandFullWhere = [];
+
+		if (BrandId !== 'All_Brands' && Array.isArray(CountryBrands) && CountryBrands.length == 0) {
+			brandFullWhere = ServiceHelper.buildFullWhere('ClaimFileID', '=', null);
+		}
+		if (Array.isArray(CountryBrands) && CountryBrands.length > 0) {
+			brandFullWhere = ServiceHelper.buildWhereExpression('ClaimFileID', 'or', CountryBrands);
+		}
+
+		const entity = CountryCode === 'NL' ? NLExtractClaimFilesView : PLExtractClaimFilesView;
+		
+		// return fullwhere query
+		return SELECT.from(entity)
+				.where(countryCodeFullWhere)
+				.where(statusFullWhere)
+				.where(wholesalerFullWhere)
+				.where(dateFromFullWhere)
+				.where(dateToFullWhere)
+				.where(brandFullWhere);
+	};
+
+	const formattedClaimFilesSalesReportExtract = function (excelData, CountryCode) {
+		const countryCodeLocals = {
+			'NL': 'nl-NL',
+			'PL': 'en-US'
+		}
+	
+		excelData.forEach(ed => {
+			// Format Quantities
+			ed.Quantity = ServiceHelper.formatNumber(Number(ed.Quantity), 0, 0);
+
+			// Format Prices
+			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTContractPrice = ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTWholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.FASTWholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerClaim1 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim1), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTClaim1 = ServiceHelper.formatCurrency(Number(ed.FASTClaim1), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerClaim2 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim2), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTClaim2 = ServiceHelper.formatCurrency(Number(ed.FASTClaim2), countryCodeLocals[CountryCode], 2, 2);
+			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2);
+			ed.TotalFASTClaim = ServiceHelper.formatCurrency(Number(ed.TotalFASTClaim), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerPurchaseAmount = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchaseAmount), countryCodeLocals[CountryCode], 2, 2);
+			ed.NetSales = ServiceHelper.formatCurrency(Number(ed.NetSales), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTDistributionArrangement = ed.FASTDistributionArrangement || 0;
+			ed.FASTDistributionArrangement = ed.FASTDistributionAgreementType === 'Fixed' ? ServiceHelper.formatCurrency(Number(ed.FASTDistributionArrangement), countryCodeLocals[CountryCode], 2, 2) : (Number(ed.FASTDistributionArrangement) * 100).toFixed(2)
+			
+			// Format Date
+			ed.Date = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'YYYY-MM-DD');
+			ed.ClaimApprovalModifiedAt = ed.ClaimApprovalModifiedAt && ServiceHelper.formatDate(ed.ClaimApprovalModifiedAt, '', 'YYYY-MM-DD');
+		});
+
+		return excelData
+	}
 
 
 	srv.on('READ', 'ExtractApprovedClaim', async (req, next) => {

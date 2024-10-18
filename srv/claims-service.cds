@@ -47,10 +47,10 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
             mediaType     : String      @Core.IsMediaType;
     }
      entity ExtractClaimsSales {
-        key templateId    : Integer;
+        key templateId    : String;
         key CountryCode   : String;
         key DistributorID : String;
-        key BrandId         : String;
+        key BrandId       : String;
         key Status        : String;
         key DateFrom      : String;
         key DateTo        : String;
