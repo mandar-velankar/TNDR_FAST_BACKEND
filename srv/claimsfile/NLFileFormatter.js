@@ -312,7 +312,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	
 	getDateFromAndTo(claimperiode, filePeriod) {
 
-		let incomingPeriod = claimperiode || filePeriod;
+		let incomingPeriod = String(claimperiode || filePeriod);
 		let year, month;
 	
 		if (incomingPeriod.includes('-')) {
