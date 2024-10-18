@@ -139,27 +139,51 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 				clmf.Status
 		}where clmf.CountryCode = 'PL';
 
-entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles{
-	ID as ClaimFileID,
-	DistributorName,
-	WholesalerPurchaseAmount,
-	NetSales,
-	DateFrom,
-	DateTo,
-	CountryCode,
-	Status,
-	ClaimData.OfferID,
-	ClaimData.ID as ClaimDataID,
-	ClaimData.MainInstituteName,
-	ClaimData.ChildInstituteName,
-	ClaimData.Date,
-	ClaimData.PRODUCTPACKNAME,
-	ClaimData.FASTWholesalerPurchasePrice,
-	ClaimData.FASTDistributionArrangement,
-	ClaimData.Product.RequestedVolume,
-	ClaimData.Product.PriceCondition.OfferPrice
-} where CountryCode = 'NL' 
-   	and ClaimData.Type = 'Claim';
+entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
+	left join ClaimsData.ClaimData as cd 		
+            on cd.ClaimFiles.ID = cf.ID 
+	inner join MasterData.PT_TMPRDPCK as productPack
+    		on productPack.PRODUCTPACKID = cd.ProductPackID
+    		and productPack.ACTIVERECORD = 'Yes'
+	inner join MasterData.PT_TMPRDHIER as hier
+			on productPack.HLEVEL6_CODE = hier.HLEVEL6_CODE
+	inner join MasterData.PT_TMSKUPRDPCK as sku
+			on sku.CountryCode = cf.CountryCode
+			and sku.ActiveRecord = 'Yes'
+			and sku.ProductPackID = cd.ProductPackID{
+	cf.ID as ClaimFileID,
+	cf.DistributorName,
+	cf.DateFrom,
+	cf.DateTo,
+	cf.CountryCode,
+	cf.Status,
+	cd.OfferID,
+	cd.ID as ClaimDataID,
+	cd.MainInstituteName,
+	cd.ChildInstituteName,
+	cd.Date,
+	cd.PRODUCTPACKNAME,
+	cd.FASTDistributionArrangement,
+	cd.Quantity,
+	cd.WholesalerContractPrice,
+	cd.FASTContractPrice,
+	cd.WholesalerPurchasePrice,
+	cd.FASTWholesalerPurchasePrice,
+	cd.WholesalerClaim1,
+	cd.FASTClaim1,
+	cd.WholesalerClaim2,
+	cd.FASTClaim2,
+	cd.TotalWholesalerClaim,
+	cd.TotalFASTClaim,
+	cd.Comment,
+	cd.FASTWholesalerPurchasePrice * cd.Quantity as WholesalerPurchaseAmount: Double,
+	cd.FASTContractPrice * cd.Quantity as NetSales: Double,
+	cd.ClaimFiles.ClaimApprovals.modifiedAt as ClaimApprovalModifiedAt,
+	cd.Product.PriceCondition.OfferPrice,
+	cd.Product.SKUCountry.GOV_CODE,
+	hier.HLEVEL4_NAME,
+	sku.SKUCode,
+} where cf.CountryCode = 'NL';
 
 entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
 	key ID as CLAIMFILES_ID,

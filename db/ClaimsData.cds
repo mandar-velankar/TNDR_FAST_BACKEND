@@ -208,4 +208,13 @@ entity ClaimApprovals: cuid, managed {
     ClaimFiles: Association to ClaimFiles;
 };
 
+entity ExcelClaimFileSalesReportTemplate {
+    key templateId          : String(100);
+    countryCode             : String;
+    section                 : String;
+    title                   : String(100);
+    filename                : String(250);
+    content                 : LargeBinary @Core.MediaType: mediaType;//'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    mediaType               : String @Core.IsMediaType;
+}
 

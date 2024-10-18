@@ -156,5 +156,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.SKU.Product.HLEVEL4_CODE,
         product.SKU.CONCENTRATION;
 
+    entity ExcelClaimFileSalesReportTemplate as projection on ClaimsData.ExcelClaimFileSalesReportTemplate;
+
     action approveRejectClaimFiles(claimFile_ID: String, countryCode: String, status: String, claimFileDetailPageURL: String) returns String;
 }
