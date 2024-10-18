@@ -38,8 +38,11 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ClaimDataBrandsView as projection on ClaimsViews.ClaimDataBrandsView;
 
     entity ExtractApprovedClaim{
-        key templateId    : Integer;
+        key templateId    : String;
         key CountryCode   : String;
+        key Brand         : String;
+        key Status        : String;
+        key Type          : String;
             content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType     : String      @Core.IsMediaType;
     }

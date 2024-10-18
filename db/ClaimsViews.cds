@@ -177,6 +177,8 @@ entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	cd.TotalWholesalerClaim,
 	cd.TotalFASTClaim,
 	cd.Comment,
+	cd.BrandId,
+	cd.Type,
 	cd.FASTWholesalerPurchasePrice * cd.Quantity as WholesalerPurchaseAmount: Double,
 	cd.FASTContractPrice * cd.Quantity as NetSales: Double,
 	cd.ClaimFiles.ClaimApprovals.modifiedAt as ClaimApprovalModifiedAt,
@@ -190,7 +192,7 @@ entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 
 entity NLExtractClaimDataView as select from NLExtractClaimFilesView as cd{
 	*,
-};
+}where cd.ClaimFileStatus = 'Approved (All QC passed)' or cd.ClaimFileStatus = 'Approved (Some QC failed)';
 entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
 	key ID as CLAIMFILES_ID,
 	case

@@ -38,6 +38,7 @@ module.exports = (srv) => {
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
     const {
         ExcelTemplate,
+		ExtractApprovedClaim,
         PLExtractClaimFilesView,
         NLExtractClaimFilesView,
 		ExtractClaimDataView,
@@ -45,7 +46,9 @@ module.exports = (srv) => {
 		ExtractFASTOffer,
 		ClaimApproverTypes,
 		ClaimApprovals,
-		ClaimFileStatusView
+		ClaimFileStatusView,
+		NLExtractClaimDataView,
+		ExcelClaimFileSalesReportTemplate
     } = cds.entities("ClaimsService");
 
     srv.after('READ', 'PT_TMDIST', data => {
@@ -131,34 +134,41 @@ module.exports = (srv) => {
 	srv.on('READ', 'ExtractApprovedClaim', async (req, next) => {
 		try{
 		const tx = cds.tx(req);
+		let query;
+		const {templateId, CountryCode, Brand, Status, Type} = req.data;
+			if (CountryCode === 'PL') {
+				query = SELECT.from(ExtractClaimDataView);
+			}else{
+			    query = SELECT.from(NLExtractClaimDataView);
+				if (templateId === 'NLClaimDataFilteredFiles') {
+					let where = ``
+					if (Brand) {
+						where += `BrandId = '${Brand}'`
+					}
+					if (Status) {
+						where += `and ClaimDataStatus = '${Status}'`;
+					}
+					if (Type) {
+						where += `and Type = '${Type}'`;
+					}
+					const fullWhere = cds.parse.expr(where)
+					query = SELECT.from(NLExtractClaimDataView).where(fullWhere);
+				}
+			}
 
-		const {templateId, CountryCode} = req.data;
-
-		const query = SELECT.from(ExtractClaimDataView);
-
-		const countryCodeLocals = {
-			'NL': 'nl-NL',
-			'PL': 'en-US'
-		}
 	
         const excelData = await tx.run(query);
-		
-		excelData.forEach(ed => {
-			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
-			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2);
-			ed.WartoscPNM = ServiceHelper.formatCurrency(Number(ed.WartoscPNM), countryCodeLocals[CountryCode], 2, 2);
-			ed.RoznicaCenaZakupuPNM = ServiceHelper.formatCurrency(Number(ed.RoznicaCenaZakupuPNM), countryCodeLocals[CountryCode], 2, 2);
-			ed.IloscSztukDoWyrownania = ServiceHelper.formatCurrency(Number(ed.IloscSztukDoWyrownania), countryCodeLocals[CountryCode], 2, 2);
-			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2);
-		});
 
-		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+		const formattedData = formattingExcelValue(excelData, CountryCode)
+		
+
+		const template = await SELECT.one.from(ExcelClaimFileSalesReportTemplate).where({ templateId: templateId });
 
 		if (!template || !template.content) {
 			return req.reject(404, 'No template found for templateid:' + templateId);
 		}
 
-		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData: formattedData },1);
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -171,7 +181,21 @@ module.exports = (srv) => {
         
 	});
 
-
+	const formattingExcelValue = function (excelData, CountryCode) {
+		const countryCodeLocals = {
+			'NL': 'nl-NL',
+			'PL': 'en-US'
+		}
+		 excelData.forEach(ed => {
+			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WartoscPNM = ServiceHelper.formatCurrency(Number(ed.WartoscPNM), countryCodeLocals[CountryCode], 2, 2);
+			ed.RoznicaCenaZakupuPNM = ServiceHelper.formatCurrency(Number(ed.RoznicaCenaZakupuPNM), countryCodeLocals[CountryCode], 2, 2);
+			ed.IloscSztukDoWyrownania = ServiceHelper.formatCurrency(Number(ed.IloscSztukDoWyrownania), countryCodeLocals[CountryCode], 2, 2);
+			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2);
+		});
+		return excelData
+	}
     srv.after("UPDATE", "SalesReportFile", async (req, res) => {
 		/**
 		 * @param {Object} file - This is uploaded excel file
