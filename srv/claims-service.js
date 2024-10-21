@@ -386,4 +386,63 @@ module.exports = (srv) => {
 		return claimApprovertypes;
 	}
 
+	srv.on('READ', 'ExtractCustomerNotFoundClaim', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+		const {templateId, CountryCode, DistributorID, Status} = req.data;
+
+		const template = await SELECT.one.from(ExcelClaimFileSalesReportTemplate).where({ templateId: templateId });
+
+		// Getting full where query
+		const query = buildCustomerNotFoundClaimFullWhereQuery(CountryCode, Status, DistributorID);
+        const customerNotFoundExtract = await tx.run(query);
+		
+		const excelData = formattedcustomerNotFoundExtract(customerNotFoundExtract, CountryCode);
+		
+		if (!template || !template.content) {
+			return req.reject(404, 'No template found for templateid:' + templateId);
+		}
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+
+		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in ExtractCustomerNotFoundClaim READ');
+            return req.reject(403, error?.message||"Error in ExtractCustomerNotFoundClaim");
+        }
+        
+	});
+
+	const buildCustomerNotFoundClaimFullWhereQuery = function (CountryCode, Status, DistributorID) {
+
+		// Build full wheres
+		const countryCodeFullWhere = (CountryCode && ServiceHelper.buildFullWhere('CountryCode', '=', CountryCode)) || [];
+		const statusFullWhere = ServiceHelper.buildWhereExpression('ClaimFileStatus', '=', 'CustomerNotFound');
+      	const wholesalerFullWhere = (DistributorID && ServiceHelper.buildFullWhere('DistributorID', '=', DistributorID)) || [];
+		
+		// return fullwhere query
+		return SELECT.from(NLExtractClaimFilesView)
+				.where(countryCodeFullWhere)
+				.where(statusFullWhere)
+				.where(wholesalerFullWhere)
+	};
+
+	const formattedcustomerNotFoundExtract = function (excelData, CountryCode) {
+		const countryCodeLocals = {
+			'NL': 'nl-NL',
+			'PL': 'en-US'
+		}
+		 excelData.forEach(ed => {
+			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerClaim1 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim1), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerClaim2 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim2), countryCodeLocals[CountryCode], 2, 2);
+			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2);
+		});
+		return excelData
+	}
+
 };
