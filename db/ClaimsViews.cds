@@ -93,7 +93,7 @@ group by
 	CountryCode,
 	ProductPackID;
 
-entity ExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
+entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 	left join ClaimsData.ClaimData as clmd 		
             on clmd.ClaimFiles.ID = clmf.ID 
 	inner join TransactionalData.PT_TMOFRS as offer 		
@@ -137,8 +137,102 @@ entity ExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 				clmf.DateTo,
 				clmf.CountryCode,
 				clmf.Status
-		};
+		}where clmf.CountryCode = 'PL';
 
+entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
+	left join ClaimsData.ClaimData as cd 		
+            on cd.ClaimFiles.ID = cf.ID 
+	inner join MasterData.PT_TMPRDPCK as productPack
+    		on productPack.PRODUCTPACKID = cd.ProductPackID
+    		and productPack.ACTIVERECORD = 'Yes'
+	inner join MasterData.PT_TMPRDHIER as hier
+			on productPack.HLEVEL6_CODE = hier.HLEVEL6_CODE
+	inner join MasterData.PT_TMSKUPRDPCK as sku
+			on sku.CountryCode = cf.CountryCode
+			and sku.ActiveRecord = 'Yes'
+			and sku.ProductPackID = cd.ProductPackID{
+	cf.ID as ClaimFileID,
+	cf.DistributorName,
+	cf.DistributorID,
+	cf.DateFrom,
+	cf.DateTo,
+	cf.CountryCode,
+	cf.ClaimApprovals.modifiedAt as ClaimApprovalModifiedAt,
+	cf.Status as ClaimFileStatus,
+	cd.Status as ClaimDataStatus,
+	cd.OfferID,
+	cd.ID as ClaimDataID,
+	cd.MainInstituteName,
+	cd.ChildInstituteName,
+	cd.Date,
+	cd.PRODUCTPACKNAME,
+	cd.ProductPackID,
+	cd.FASTDistributionArrangement,
+	cd.Quantity,
+	cd.WholesalerContractPrice,
+	cd.FASTContractPrice,
+	cd.WholesalerPurchasePrice,
+	cd.FASTWholesalerPurchasePrice,
+	cd.WholesalerClaim1,
+	cd.FASTClaim1,
+	cd.WholesalerClaim2,
+	cd.FASTClaim2,
+	cd.TotalWholesalerClaim,
+	cd.TotalFASTClaim,
+	cd.Comment,
+	cd.BrandId,
+	cd.Type,
+	cd.FASTDistributionAgreementType,
+	cd.FASTWholesalerPurchasePrice * cd.Quantity as WholesalerPurchaseAmount: Double,
+	cd.FASTContractPrice * cd.Quantity as NetSales: Double,
+	cd.Product.PriceCondition.OfferPrice,
+	cd.Product.SKUCountry.GOV_CODE,
+	hier.HLEVEL4_NAME,
+	sku.SKUCode
+} where cf.CountryCode = 'NL'
+group by cf.ID,
+	cf.DistributorName,
+	cf.DistributorID,
+	cf.DateFrom,
+	cf.DateTo,
+	cf.CountryCode,
+	cf.ClaimApprovals.modifiedAt,
+	cf.Status,
+	cd.Status,
+	cd.OfferID,
+	cd.ID,
+	cd.MainInstituteName,
+	cd.ChildInstituteName,
+	cd.Date,
+	cd.PRODUCTPACKNAME,
+	cd.ProductPackID,
+	cd.FASTDistributionArrangement,
+	cd.Quantity,
+	cd.WholesalerContractPrice,
+	cd.FASTContractPrice,
+	cd.WholesalerPurchasePrice,
+	cd.FASTWholesalerPurchasePrice,
+	cd.WholesalerClaim1,
+	cd.FASTClaim1,
+	cd.WholesalerClaim2,
+	cd.FASTClaim2,
+	cd.TotalWholesalerClaim,
+	cd.TotalFASTClaim,
+	cd.Comment,
+	cd.BrandId,
+	cd.Type,
+	cd.FASTDistributionAgreementType,
+	cd.FASTWholesalerPurchasePrice,
+	cd.FASTContractPrice,
+	cd.Product.PriceCondition.OfferPrice,
+	cd.Product.SKUCountry.GOV_CODE,
+	hier.HLEVEL4_NAME,
+	sku.SKUCode;
+
+
+entity NLExtractClaimDataView as select from NLExtractClaimFilesView as cd{
+	*,
+}where cd.ClaimFileStatus = 'Approved (All QC passed)' or cd.ClaimFileStatus = 'Approved (Some QC failed)';
 entity ClaimFileStatusView as select from ClaimsData.ClaimFiles {
 	key ID as CLAIMFILES_ID,
 	case

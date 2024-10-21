@@ -38,23 +38,27 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ClaimDataBrandsView as projection on ClaimsViews.ClaimDataBrandsView;
 
     entity ExtractApprovedClaim{
-        key templateId    : Integer;
+        key templateId    : String;
         key CountryCode   : String;
+        key Brand         : String;
+        key Status        : String;
+        key Type          : String;
             content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType     : String      @Core.IsMediaType;
     }
      entity ExtractClaimsSales {
-        key templateId    : Integer;
+        key templateId    : String;
         key CountryCode   : String;
         key DistributorID : String;
-        key BrandId         : String;
+        key BrandId       : String;
         key Status        : String;
         key DateFrom      : String;
         key DateTo        : String;
             content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType     : String      @Core.IsMediaType;
     }
-    entity ExtractClaimFilesView as projection on ClaimsViews.ExtractClaimFilesView;
+    entity PLExtractClaimFilesView as projection on ClaimsViews.PLExtractClaimFilesView;
+    entity NLExtractClaimFilesView as projection on ClaimsViews.NLExtractClaimFilesView;
     entity ExtractClaimDataView as projection on ClaimsViews.ExtractClaimDataView;
 
     entity ExtractFASTOffer as select from TransactionalData.PT_TMTEND as tender 
@@ -154,6 +158,9 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.SKU.Product.HLEVEL4_NAME,
         product.SKU.Product.HLEVEL4_CODE,
         product.SKU.CONCENTRATION;
+
+    entity ExcelClaimFileSalesReportTemplate as projection on ClaimsData.ExcelClaimFileSalesReportTemplate;
+    entity NLExtractClaimDataView as projection on ClaimsViews.NLExtractClaimDataView;
 
     action approveRejectClaimFiles(claimFile_ID: String, countryCode: String, status: String, claimFileDetailPageURL: String) returns String;
 }
