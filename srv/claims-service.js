@@ -67,10 +67,9 @@ module.exports = (srv) => {
 		const {templateId, CountryCode, DistributorID, BrandId, Status, DateFrom, DateTo} = req.data;
 
 		const template = await SELECT.one.from(ExcelClaimFileSalesReportTemplate).where({ templateId: templateId });
-		const CountryBrands = await SELECT.from(ClaimDataBrandsView).where({ COUNTRYCODE: CountryCode,BRANDID: BrandId});
 
 		// Getting full where query
-		const query = buildClaimSalesReportFullWhereQuery(CountryCode, Status, DistributorID, DateFrom, DateTo, CountryBrands, BrandId);
+		const query = buildClaimSalesReportFullWhereQuery(CountryCode, Status, DistributorID, DateFrom, DateTo, BrandId);
         const salesReportExtract = await tx.run(query);
 		
 		const excelData = formattedClaimFilesSalesReportExtract(salesReportExtract, CountryCode);
@@ -92,7 +91,7 @@ module.exports = (srv) => {
         
 	});
 
-	const buildClaimSalesReportFullWhereQuery = function (CountryCode, Status, DistributorID, DateFrom, DateTo, CountryBrands, BrandId) {
+	const buildClaimSalesReportFullWhereQuery = function (CountryCode, Status, DistributorID, DateFrom, DateTo, BrandId) {
 		// Statuses based on selected Sales Report template name
 		const statuses = {
 			"NL": {
@@ -107,14 +106,7 @@ module.exports = (srv) => {
       	const wholesalerFullWhere = (DistributorID && ServiceHelper.buildFullWhere('DistributorID', '=', DistributorID)) || [];
 		const dateFromFullWhere =  (DateTo && ServiceHelper.buildFullWhere('DateFrom', '<=', DateTo)) || [];
 		const dateToFullWhere =  (DateFrom && ServiceHelper.buildFullWhere('DateTo', '>=', DateFrom)) || [];
-		let brandFullWhere = [];
-
-		if (BrandId !== 'All_Brands' && Array.isArray(CountryBrands) && CountryBrands.length == 0) {
-			brandFullWhere = ServiceHelper.buildFullWhere('ClaimFileID', '=', null);
-		}
-		if (Array.isArray(CountryBrands) && CountryBrands.length > 0) {
-			brandFullWhere = ServiceHelper.buildWhereExpression('ClaimFileID', 'or', CountryBrands);
-		}
+		const brandFullWhere = BrandId && BrandId !== 'All_Brands' ? ServiceHelper.buildFullWhere('BrandId', '=', BrandId) : [];
 
 		const entity = CountryCode === 'NL' ? NLExtractClaimFilesView : PLExtractClaimFilesView;
 		
