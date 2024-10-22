@@ -146,7 +146,9 @@ module.exports = (srv) => {
 			ed.NetSales = ServiceHelper.formatCurrency(Number(ed.NetSales), countryCodeLocals[CountryCode], 2, 2);
 			ed.FASTDistributionArrangement = ed.FASTDistributionArrangement || 0;
 			ed.FASTDistributionArrangement = ed.FASTDistributionAgreementType === 'Fixed' ? ServiceHelper.formatCurrency(Number(ed.FASTDistributionArrangement), countryCodeLocals[CountryCode], 2, 2) : (Number(ed.FASTDistributionArrangement) * 100).toFixed(2)
-			
+			ed.FASTPendingCorrection = ed.FASTPendingCorrection && ServiceHelper.formatCurrency(Number(ed.FASTPendingCorrection), countryCodeLocals[CountryCode], 2, 2);
+			ed.Balance = ed.Balance && ServiceHelper.formatCurrency(Number(ed.Balance), countryCodeLocals[CountryCode], 2, 2);
+
 			// Format Date
 			ed.Date = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'YYYY-MM-DD');
 			ed.ClaimApprovalModifiedAt = ed.ClaimApprovalModifiedAt && ServiceHelper.formatDate(ed.ClaimApprovalModifiedAt, '', 'YYYY-MM-DD');
