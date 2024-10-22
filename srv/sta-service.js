@@ -5750,19 +5750,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			else if(invalidZIFields.length > 0){
 				res.warn(400,`The following PRK values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` );
 			}
-			else{
-				// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
-				let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
-				promises = products.map(product => {
-					const productPack = ctryProductPack.find(pck => pck.CODE1 == product["PRK"]);
+			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+			promises = products.filter(product => product["PRK"]).map(product => {
+				const productPack = ctryProductPack.find(pck => pck.CODE1 == product["PRK"]);
+				if (productPack) {
 					const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
 					const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
 					if (productIndex === -1) {
 						sorter++; // Increment sorter only for new products
 					}
 					return promise;
-				});
-			}
+				}
+				return []
+			});
 
 			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
 			await Promise.all([promises]);
@@ -5773,7 +5774,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 	});
 
-	async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
+	 async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
 		const mappedProduct = {
 			TenderID: offer.TenderID,
 			OfferID: offer.OfferID,
@@ -5802,12 +5803,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		if (productIndex > -1) {
 			// deleting SORTER to avoid incrementing already created products SORTER
 			delete mappedProduct.SORTER;
-			return await UPDATE(PT_TMOFPR).with(mappedProduct).where({
+			return UPDATE(PT_TMOFPR).with(mappedProduct).where({
 				OfferID: offer.OfferID,
 				ProductCode: productPack.PRODUCTPACKID
 			})
 		}else {
-			return await INSERT(mappedProduct).into(PT_TMOFPR);
+			return INSERT(mappedProduct).into(PT_TMOFPR);
 		}
 	}
 
