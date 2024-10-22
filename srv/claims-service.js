@@ -39,6 +39,7 @@ module.exports = (srv) => {
     const {
         ExcelTemplate,
 		ExtractApprovedClaim,
+		ExtractCustomerNotFoundClaim,
         PLExtractClaimFilesView,
         NLExtractClaimFilesView,
 		ExtractClaimDataView,
@@ -420,7 +421,7 @@ module.exports = (srv) => {
 
 		// Build full wheres
 		const countryCodeFullWhere = (CountryCode && ServiceHelper.buildFullWhere('CountryCode', '=', CountryCode)) || [];
-		const statusFullWhere = ServiceHelper.buildWhereExpression('ClaimFileStatus', '=', 'CustomerNotFound');
+		const statusFullWhere = (CountryCode && ServiceHelper.buildFullWhere('ClaimDataStatus', '=', Status)) || [];
       	const wholesalerFullWhere = (DistributorID && ServiceHelper.buildFullWhere('DistributorID', '=', DistributorID)) || [];
 		
 		// return fullwhere query
