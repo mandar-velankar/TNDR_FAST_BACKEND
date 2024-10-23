@@ -150,8 +150,8 @@ module.exports = (srv) => {
 			ed.Balance = ed.Balance && ServiceHelper.formatCurrency(Number(ed.Balance), countryCodeLocals[CountryCode], 2, 2);
 
 			// Format Date
-			ed.Date = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'YYYY-MM-DD');
-			ed.ClaimApprovalModifiedAt = ed.ClaimApprovalModifiedAt && ServiceHelper.formatDate(ed.ClaimApprovalModifiedAt, '', 'YYYY-MM-DD');
+			ed.Date = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'DD-MM-YYYY');
+			ed.ClaimApprovalModifiedAt = ed.ClaimApprovalModifiedAt && ServiceHelper.formatDate(ed.ClaimApprovalModifiedAt, '', 'DD-MM-YYYY');
 		});
 
 		return excelData
@@ -162,24 +162,30 @@ module.exports = (srv) => {
 		try{
 		const tx = cds.tx(req);
 		let query;
-		const {templateId, CountryCode, Brand, Status, Type} = req.data;
+		const {templateId, ClaimFileID, CountryCode, Brand, Status, Type} = req.data;
 			if (CountryCode === 'PL') {
 				query = SELECT.from(ExtractClaimDataView);
 			}else{
-			    query = SELECT.from(NLExtractClaimDataView);
+				query = SELECT.from(NLExtractClaimDataView).where({ClaimFileID: ClaimFileID});
+	
+				let whereBrand, whereStatus, whereType;
+	
 				if (templateId === 'NLClaimDataFilteredFiles') {
-					let where = ``
-					if (Brand) {
-						where += `BrandId = '${Brand}'`
+					let QCPassedStatus = {
+						'failedpricecheck' : 'QC1Passed',
+						'faileddistributioncheck' : 'QC2Passed'
 					}
-					if (Status) {
-						where += `and ClaimDataStatus = '${Status}'`;
+					whereBrand = Brand && Brand !== 'All_Brands' ? ServiceHelper.buildFullWhere('BrandId', '=', Brand) : [];
+
+					if (QCPassedStatus[Status]) {
+						whereStatus = Status ? ServiceHelper.buildFullWhere(QCPassedStatus[Status], '=', false) : [];
+					}else{
+						whereStatus = Status ? ServiceHelper.buildFullWhere('ClaimDataStatus', '=', Status) : [];
 					}
-					if (Type) {
-						where += `and Type = '${Type}'`;
-					}
-					const fullWhere = cds.parse.expr(where)
-					query = SELECT.from(NLExtractClaimDataView).where(fullWhere);
+					
+					whereType = Type ?  ServiceHelper.buildFullWhere('Type', '=', Type) : [];
+					
+					query = query.where(whereBrand).where(whereStatus).where(whereType);
 				}
 			}
 
@@ -214,12 +220,24 @@ module.exports = (srv) => {
 			'PL': 'en-US'
 		}
 		 excelData.forEach(ed => {
+			ed.Quantity = ServiceHelper.formatNumber(Number(ed.Quantity), 0, 0);
 			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
 			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2);
 			ed.WartoscPNM = ServiceHelper.formatCurrency(Number(ed.WartoscPNM), countryCodeLocals[CountryCode], 2, 2);
 			ed.RoznicaCenaZakupuPNM = ServiceHelper.formatCurrency(Number(ed.RoznicaCenaZakupuPNM), countryCodeLocals[CountryCode], 2, 2);
 			ed.IloscSztukDoWyrownania = ServiceHelper.formatCurrency(Number(ed.IloscSztukDoWyrownania), countryCodeLocals[CountryCode], 2, 2);
 			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTContractPrice = ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTWholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.FASTWholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerClaim1 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim1), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTClaim1 = ServiceHelper.formatCurrency(Number(ed.FASTClaim1), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerClaim2 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim2), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTClaim2 = ServiceHelper.formatCurrency(Number(ed.FASTClaim2), countryCodeLocals[CountryCode], 2, 2);
+			ed.TotalFASTClaim = ServiceHelper.formatCurrency(Number(ed.TotalFASTClaim), countryCodeLocals[CountryCode], 2, 2);
+			ed.TotalFASTClaim = ServiceHelper.formatCurrency(Number(ed.TotalFASTClaim), countryCodeLocals[CountryCode], 2, 2);
+			ed.Balance = ServiceHelper.formatCurrency(Number(ed.Balance), countryCodeLocals[CountryCode], 2, 2);
+			ed.ClaimApprovalModifiedAt = ed.ClaimApprovalModifiedAt && ServiceHelper.formatDate(ed.ClaimApprovalModifiedAt, '', 'DD-MM-YYYY');
+			ed.Date = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'DD-MM-YYYY');
 		});
 		return excelData
 	}

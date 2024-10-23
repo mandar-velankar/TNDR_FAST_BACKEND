@@ -245,7 +245,6 @@ group by cf.ID,
 	hier.HLEVEL4_NAME,
 	sku.SKUCode;
 
-
 entity NLExtractClaimDataView as select from NLExtractClaimFilesView as cd{
 	*,
 }where cd.ClaimFileStatus = 'Approved (All QC passed)' or cd.ClaimFileStatus = 'Approved (Some QC failed)';

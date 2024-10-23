@@ -40,6 +40,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ExtractApprovedClaim{
         key templateId    : String;
         key CountryCode   : String;
+        key ClaimFileID   : String;
         key Brand         : String;
         key Status        : String;
         key Type          : String;
