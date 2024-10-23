@@ -226,13 +226,17 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
 			const productPackName = productPack && productPack?.PRODUCTPACKNAME || null;
-			let IDFNumber = 'H0' + curr.IDFNumber;
-			const institute = institutes.find(item => item.External_InstituteId == IDFNumber);
+			const institute = institutes.find(item => {
+				const externalIds = item.External_InstituteId || ""; // Fallback to an empty string if null or undefined
+				return externalIds.split(',')
+					.map(id => id.trim())
+					.includes(String(curr.IDFNumber));
+			});
 			const instituteId = institute && institute.InstituteID || null;
 			const instituteName = institute && institute?.InstituteName || 'Customer Not Found';
-			const childInstitute = instituteHierarcis.find(item => item.ParentInstituteID == instituteId);
+			const childInstitute = instituteHierarcis.find(item => item.ParentInstituteID === instituteId);
 			const childInstituteID = childInstitute && childInstitute.InstituteID || null;
-			const childInstituteData = institutes.find(item => item.InstituteID == childInstituteID);
+			const childInstituteData = institutes.find(item => item.InstituteID === childInstituteID);
 			const childInstituteName = childInstituteData && childInstituteData.InstituteName || 'Customer Not Found';
 			const wPP = wPPS.find(item => item.PRODUCTPACKID == productCode && item.StartDate <= dateFrom && item.EndDate >= dateFrom);
 			const wppValue = wPP && wPP.WPPWithoutTax || 0;
@@ -315,20 +319,21 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 		let incomingPeriod = String(claimperiode || filePeriod);
 		let year, month;
 	
-		// Check if incomingPeriod is a serial number (Excel date)
-		if (!isNaN(incomingPeriod) && incomingPeriod.length > 4) {
+		if (incomingPeriod.length === 6 && !isNaN(incomingPeriod) && parseInt(incomingPeriod.slice(0, 4)) > 1900 && parseInt(incomingPeriod.slice(0, 4)) < 2100) {
+			year = parseInt(incomingPeriod.slice(0, 4));
+			month = parseInt(incomingPeriod.slice(4, 6)) - 1; // JavaScript months are 0-based (0 = January, 11 = December)
+		} else if (!isNaN(incomingPeriod) && incomingPeriod.length > 4) {
 			// Convert Excel date serial number to JS date
 			const excelEpoch = new Date(1899, 11, 30);
 			const jsDate = new Date(excelEpoch.getTime() + (parseInt(incomingPeriod)) * 86400000); // 86400000 ms in a day
 			year = jsDate.getFullYear();
-			month = jsDate.getMonth(); 
-		}else if (incomingPeriod.includes('-')) {
+			month = jsDate.getMonth();
+		} else if (incomingPeriod.includes('-')) {
 			const [monthStr, yearStr] = incomingPeriod.split('-');
 			month = new Date(Date.parse(`${monthStr} 1, ${yearStr}`)).getMonth();
 			year = parseInt(yearStr);
-		}else {
-			year = parseInt(incomingPeriod.slice(0, 4));
-			month = parseInt(incomingPeriod.slice(4, 6)) - 1; // JavaScript months are 0-based (0 = January, 11 = December)
+		} else {
+			throw new Error("Invalid claim period format");
 		}
 	
 		const dateFrom = new Date(year, month, 1);

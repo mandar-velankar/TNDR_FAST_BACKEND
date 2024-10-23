@@ -34,6 +34,7 @@ entity ClaimData : managed, cuid {
     ProductPackID                           : Integer;  //link to product within offer mapped on claim line item
     PRODUCTPACKNAME                         : String;
     EANNumber                               : String;
+    External_InstituteId                    : String;
     MainInstituteID                         : Integer;  //set based on customer mapping on each line of file
     ChildInstituteID                        : Integer;  //set based on customer mapping on each line of file
     MainInstituteName                       : String;

@@ -147,12 +147,13 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
 			const productPackName = productPack && productPack?.PRODUCTPACKNAME || null;
-			const institute = institutes.find(item => item.External_InstituteId == curr.KODKLIENTAwgBAYERSpzoo.replace(/\s+/g,''));
+			const institute = institutes.find(item => item.External_InstituteId == curr.KODKLIENTAwgBAYERSpzoo);
 			const instituteId = institute && institute.InstituteID || null;
 			const instituteName = institute && institute?.InstituteName || null;
-			const childInstitute = instituteHierarcis.find(item => item.ParentInstituteID == instituteId);
+			const externalInstituteId = institute && institute.External_InstituteId || null;
+			const childInstitute = instituteHierarcis.find(item => item.ParentInstituteID === instituteId);
 			const childInstituteID = childInstitute && childInstitute.InstituteID || null;
-			const childInstituteData = institutes.find(item => item.InstituteID == childInstituteID);
+			const childInstituteData = institutes.find(item => item.InstituteID === childInstituteID);
 			const childInstituteName = childInstituteData && childInstituteData.InstituteName || null;
 			const filteredItems = fastOfferData.filter(item => item.InstituteID == instituteId &&
 																item.ProductCode === productCode &&
@@ -170,6 +171,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					PRODUCTPACKNAME							: productPackName,
 					MainInstituteID                         : instituteId,
 					EANNumber                               : String(curr.KODEANARTYKUŁU),
+					External_InstituteId					: externalInstituteId,
 					ChildInstituteID                        : childInstituteID,
 					MainInstituteName                       : instituteName,
 					ChildInstituteName                      : childInstituteName,
