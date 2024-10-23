@@ -415,6 +415,13 @@ entity PT_TMOFPR {
         PricingPolicy            : Association to MasterData.PricingPolicy
                                         on PricingPolicy.CountryCode = CountryCode
                                         and PricingPolicy.ProductPackID = ProductCode;
+        ContractInfomation       :  Association to many ContractInfomation 
+                                        on ContractInfomation.OfferID = OfferID
+                                        and ContractInfomation.ProductCode = ProductCode;   
+        NLContractDurationOfferPrices : Association to TransactionalDataViews.NLContractDurationOfferPrices 
+                                            on NLContractDurationOfferPrices.OfferID = OfferID
+                                            and NLContractDurationOfferPrices.ProductCode = ProductCode;                              
+                                        
 }
 
 //brazil
@@ -543,6 +550,7 @@ entity PriceCondition: cuid, managed {
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
     IsPricingUnlocked                   : Boolean default false;
+    NLPriceConditionType                : Array of NLConditions;
     CurrentBasePrice                    : Decimal;
     CurrentInvoicePrice                 : Decimal;
     CurrentGeneralDiscount              : Double;
@@ -561,6 +569,7 @@ entity PriceCondition: cuid, managed {
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
+    NLPriceConditions                   : Association to many NLPriceConditions on NLPriceConditions.PriceCondition = $self;
 }
 
 //EHQUT-INC18178128-FAST - Error decimals discounts
@@ -913,6 +922,44 @@ entity ExcelUpload:cuid {
     content             : LargeBinary;
 };
 
+entity NLPriceConditions: cuid {
+    ContractDuration: Double;
+    OfferPrice: Double;
+    Discount: Double;
+    NetPrice: Double;
+    PriceCondition: Association to PriceCondition;
+}
+
+type NLConditions {
+    ContractDuration: Double;
+    OfferPrice: Double;
+    Discount: Double;
+    NetPrice: Double;
+};
+
+entity NLOfferDistributors: cuid {
+    OfferID: String;
+    DistributorName: String;
+    DistributorID: Integer;
+    ProductPackName: String;
+    ProductPackID: Integer;
+    AssignedProductCode: Integer;
+}
+
+entity ContractInfomation : cuid, managed {
+    OfferID: String;
+    ProductCode: Integer;
+    InstituteID: Integer;
+    InstituteName: String;
+    ContractDuration: Double;
+    ContractStartDate: Date;
+    ContractEndDate: Date;
+    Active: Boolean;
+    OfferProduct: Association to PT_TMOFPR
+        on OfferProduct.OfferID = OfferID
+        and OfferProduct.ProductCode = ProductCode;
+}
+        
 entity THQuotationDelevery : cuid {
     OfferID                   : String;
     QuotationDeliverymethod   : String;

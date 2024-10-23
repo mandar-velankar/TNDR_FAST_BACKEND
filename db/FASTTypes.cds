@@ -19,6 +19,16 @@ type Custom : {
     String_8: String;
     String_9: String;
     String_10: String;
+    String_11: String;
+    String_12: String;
+    String_13: String;
+    String_14: String;
+    String_15: String;
+    String_16: String;
+    String_17: String;
+    String_18: String;
+    String_19: String;
+    String_20: String;
     Double_1: Double;
     Double_2: Double;
     Double_3: Double;

@@ -159,7 +159,21 @@ module.exports = {
 
     formatDate(dateString, inputFormat, outputFormat) {
         return moment(dateString, inputFormat).format(outputFormat);
-    }
+    },
+
+    formatCurrency: function (num, locale, minDigits, maxDigits, truncate) {
+		if (!num){
+            num = 0;
+        };
+
+        if (truncate) {
+            num = Number((Math.floor(num * 100) / 100).toFixed(2));
+        }
+        return num.toLocaleString(locale, { 
+            minimumFractionDigits: minDigits, 
+            maximumFractionDigits: maxDigits 
+        });
+	}
 
 
 /*

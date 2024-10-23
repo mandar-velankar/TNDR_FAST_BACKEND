@@ -128,6 +128,7 @@ entity PT_TMDIST{
 	INCOTerms:String(500);
 	PaymentTerms:String(500);
 	ForAllBrands:Boolean;
+	ClaimEligible: String;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	DistributorBrands:Association to many PT_TMDISBRD on DistributorBrands.Distributor = $self;
@@ -158,6 +159,9 @@ entity PT_TMPRDPCK{
 	ProductFullDescription: LargeString;
     Nucleus: String(100);
     ProductGenericName: String(500);
+	Bundle: Integer;
+	OuterCarton: Integer;
+	CalculationFactorIRP: Double;
 	//Associations
 	COGS:Association to many PT_TMCOGS on COGS.ProductPack = $self;
 	CountryPacks:Association to many PT_TMCTPRDPCK on CountryPacks.ProductPack = $self;
@@ -920,4 +924,143 @@ entity UserTerritory {
 entity PaymentTerms {
     E1KNVVM_ZTERM : String(6) not null;
     Description : String;
+}
+
+entity NLPPP: cuid, managed{
+	CountryCode: String;
+	PRODUCTPACKID:Integer;
+	MaterialNumbers: Integer;
+	StartDate: Date;
+	EndDate: Date;
+	Comment: String;
+	Status: String;
+	Type: String;
+	ApprovalsCount: Integer;
+	MaxPrice: Double;
+	PPP: Double;
+	PowerApproverCWID: String;
+	PowerApprovalDate: DateTime;
+	GovPPP: Double;
+	TemporaryMeasure: Boolean;
+	CurrentStartDate: Date;
+	CurrentEndDate: Date;
+	CurrentTemporaryMeasure: Boolean;
+	CurrentPPP: Double;
+	CurrentGovPPP: Double;
+	NLPPPApprovals: Association to many NLPPPApprovals on NLPPPApprovals.NLPPP = $self
+}
+
+entity DistributionAgreements: cuid, managed {
+	CountryCode: String;
+	PRODUCTPACKID: Integer;
+	DistributorID: Integer;
+	MaterialNumbers: String;
+	StartDate: Date;
+	EndDate: Date;
+	Type: String;
+	Value: Double;
+	CurrentStartDate: Date;
+	CurrentEndDate: Date;
+	CurrentType: String;
+	CurrentValue: Double;
+}
+
+entity NLPPPApproverTypes: cuid, managed{
+	NLPPPApproverTypes: String;
+	NLPPPApprovers: Association to NLPPPApprovers;
+}
+entity NLPPPApprovers: cuid, managed{
+	NLPPPApproverCWID: String;
+	NLPPPApproverName: String;
+	NLPPPApproverEmailID: String;
+	NLPPPApproverTypes: Association to many NLPPPApproverTypes on NLPPPApproverTypes.NLPPPApprovers = $self;
+}
+entity NLPPPApprovals  : cuid, managed {
+	ApproverRole: String;
+	ApprovalStatus: String;
+	ApproverComment: String;
+	ApproverName: String;
+	ApproverCWID: String;
+	ApprovalDate: Date;
+	SenderComment: String;
+	NLPPP: Association to NLPPP
+}
+
+entity WholesalePurchasePrice: cuid, managed {
+	CountryCode: String;
+	PRODUCTPACKID: Integer;
+	DistributorID: Integer;
+	MaterialNumbers: Integer;
+	Type: String;
+	CurrentType: String;
+	Margin: Double;
+	CurrentMargin: Double;
+	WPPWithoutTax: Decimal;
+	CurrentWPPWithoutTax: Decimal;
+	CurrentStartDate: Date;
+	StartDate: Date;
+	EndDate: Date;
+	CurrentEndDate: Date;
+	Comment: String;
+	Status: String;
+	ApprovalsCount: Integer;
+	PowerApproverCWID: String;
+	PowerApprovalDate: DateTime;
+	NLPPP_ID: UUID;
+	WholesalePurchasePriceApprovals: Association to many WholesalePurchasePriceApprovals on WholesalePurchasePriceApprovals.WholesalePurchasePrice = $self;
+}
+
+entity WholesalePurchasePriceApprovals: cuid, managed {
+	ApproverRole: String;
+	ApprovalStatus: String;
+	ApproverComment: String;
+	ApproverName: String;
+	ApproverCWID: String;
+	ApprovalDate: Date;
+	SenderComment: String;
+	WholesalePurchasePrice: Association to WholesalePurchasePrice;
+}
+
+entity WholesalePurchasePriceApproverTypes: cuid, managed{
+	WholesalePurchasePriceApproverTypes: String;
+	WholesalePurchasePriceApprovers: Association to WholesalePurchasePriceApprovers;
+}
+
+entity WholesalePurchasePriceApprovers: cuid, managed{	
+	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverCWID: String;
+	WholesalePurchasePriceApproverEmailID: String;
+	WholesalePurchasePriceApproverTypes: Association to many WholesalePurchasePriceApproverTypes on WholesalePurchasePriceApproverTypes.WholesalePurchasePriceApprovers = $self;
+}
+
+type NLPPPApproversType {
+	NLPPPApproverCWID: String;
+	NLPPPApproverName: String;
+	NLPPPApproverEmailID: String;
+}
+
+entity NLPPPApprovalsNotification {
+    key NLPPPApproverType: String not null;
+	CountryCode: String;
+	Send: String;
+	SenderComment: String;
+    NLPPPApprovers: Array of NLPPPApproversType;
+	SelectedNLPPPApprover: NLPPPApproversType;
+	NLPPPApprovalPageLink: String;
+}
+
+type WPPApprovers {
+	WholesalePurchasePriceApproverName: String;
+	WholesalePurchasePriceApproverCWID: String;
+	WholesalePurchasePriceApproverEmailID: String;
+}
+
+entity WholesalePurchasePriceApprovalsNotification {
+    key WholesalePurchasePriceApproverType: String not null;
+	CountryCode: String;
+	Send: String;
+	SenderComment: String;
+	WPPApprovers: Array of WPPApprovers;
+	SelectedWppApprover: WPPApprovers;
+	WholesalePurchasePriceApprovalPageLink: String;
 }
