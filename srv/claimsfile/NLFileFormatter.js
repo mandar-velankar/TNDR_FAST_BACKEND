@@ -315,11 +315,18 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 		let incomingPeriod = String(claimperiode || filePeriod);
 		let year, month;
 	
-		if (incomingPeriod.includes('-')) {
+		// Check if incomingPeriod is a serial number (Excel date)
+		if (!isNaN(incomingPeriod) && incomingPeriod.length > 4) {
+			// Convert Excel date serial number to JS date
+			const excelEpoch = new Date(1899, 11, 30);
+			const jsDate = new Date(excelEpoch.getTime() + (parseInt(incomingPeriod)) * 86400000); // 86400000 ms in a day
+			year = jsDate.getFullYear();
+			month = jsDate.getMonth(); 
+		}else if (incomingPeriod.includes('-')) {
 			const [monthStr, yearStr] = incomingPeriod.split('-');
 			month = new Date(Date.parse(`${monthStr} 1, ${yearStr}`)).getMonth();
 			year = parseInt(yearStr);
-		} else {
+		}else {
 			year = parseInt(incomingPeriod.slice(0, 4));
 			month = parseInt(incomingPeriod.slice(4, 6)) - 1; // JavaScript months are 0-based (0 = January, 11 = December)
 		}
