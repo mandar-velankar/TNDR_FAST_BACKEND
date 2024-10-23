@@ -14,6 +14,7 @@ entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	    on ctryCurrency.CountryCode = cf.CountryCode {
 	key cf.ID,
 	key cf.CountryCode,
+	cf.createdAt,
 	cf.ClaimFileFormat,
     cf.FileName,
     cf.DateFrom,
