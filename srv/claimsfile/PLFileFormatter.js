@@ -39,6 +39,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
             const distributor = await SELECT.one.from(PT_TMDIST).where({DistributorID: this.distributorId, CountryCode: this.countryCode});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
 			const productPacks = await SELECT.from(PT_TMPRDPCK).where({ACTIVERECORD: 'Yes'});
+			const brands =  await SELECT.from(PT_TMPRDHIER);
 			const institutes = await SELECT.from(PT_TMINST).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const instituteHierarcis = await SELECT.from(PT_TMINSHIER).where({ActiveRecord: 'Yes'});
 			const fastOfferData = await SELECT.from(ExtractFASTOffer).where({CountryCode: this.countryCode});
@@ -50,7 +51,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const claimFile = this.mapSalesDataToClaimFiles(this.data, distributor, UUID, this.cwid);
 
 			// Map sales data to claim data
-			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, UUID, this.cwid);
+			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, brands, institutes, instituteHierarcis, fastOfferData, UUID, this.cwid);
 
             const result = {contrastAgentSalesData, claimFile, claimData};
 
@@ -139,7 +140,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 	 * @param {Object} req - Request object containing additional data
 	 * @returns {Object} claimData
 	 */
-	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, UUID, CWID) {
+	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, brands, institutes, instituteHierarcis, fastOfferData, UUID, CWID) {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
@@ -147,6 +148,10 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
 			const productPackName = productPack && productPack?.PRODUCTPACKNAME || null;
+			const hLEVEL6_CODE = productPack && productPack?.HLEVEL6_CODE || null;
+			const brand =  brands.find(i => i.HLEVEL6_CODE == hLEVEL6_CODE);
+			const brandName = brand && brand?.HLEVEL4_NAME || null;
+			const brandId = brand && brand?.HLEVEL4_CODE || null;
 			const institute = institutes.find(item => item.External_InstituteId == curr.KODKLIENTAwgBAYERSpzoo);
 			const instituteId = institute && institute.InstituteID || null;
 			const instituteName = institute && institute?.InstituteName || null;
@@ -188,8 +193,8 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					FASTPendingCorrection                   : null,
 					BrandContractVolume                     : fastOffer && (fastOffer.RequestedVolume * fastOffer.CONCENTRATION) || 0,
 					PercentageUsage                         : null,
-					BrandId									: fastOffer && fastOffer.BrandId || null,
-					BrandName								: fastOffer && fastOffer.BrandName || null,
+					BrandId									: brandId,
+					BrandName								: brandName,
 					Balance                                 : null,
 					BrandUsedVolume                         : fastOffer && (curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI * fastOffer.CONCENTRATION) || 0,
 					WholesalerContractPriceClaim            : curr.Wartośćdowyrównania,

@@ -14,7 +14,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
         try {
 			this.db = await cds.connect.to('db');
-			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
+			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, PT_TMPRDHIER, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
 			const { ClaimData } = this.db.entities("com.bayer.SXTENDER.ClaimsData");
 			const { ExtractFASTOfferNL } = this.db.entities("ClaimsService");
 
@@ -56,6 +56,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const distributionAgreements = await SELECT.from(DistributionAgreements).where({COUNTRYCODE: this.countryCode, DistributorID:this.distributorId});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
 			const productPacks = await SELECT.from(PT_TMPRDPCK).where({ACTIVERECORD: 'Yes'});
+			const brands =  await SELECT.from(PT_TMPRDHIER);
 			const institutes = await SELECT.from(PT_TMINST).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const instituteHierarcis = await SELECT.from(PT_TMINSHIER).where({ActiveRecord: 'Yes'});
 			const fastOfferData = await SELECT.from(ExtractFASTOfferNL).where({CountryCode: this.countryCode});
@@ -71,7 +72,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const claimFile = this.mapSalesDataToClaimFiles(this.data, distributor, UUID, this.cwid, { dateFrom, dateTo, filePeriodDate });
 
 			// Map sales data to claim data
-			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, claimsData, { dateFrom, dateTo, filePeriodDate });
+			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, claimsData, { dateFrom, dateTo, filePeriodDate });
 
             const result = {contrastAgentSalesData, claimFile, claimData};
 
@@ -218,7 +219,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	 * @param {Object} req - Request object containing additional data
 	 * @returns {Object} claimData
 	 */
-	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, claimsData, { dateFrom, dateTo, filePeriodDate }) {
+	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, claimsData, { dateFrom, dateTo, filePeriodDate }) {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
@@ -226,6 +227,10 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
 			const productPackName = productPack && productPack?.PRODUCTPACKNAME || null;
+			const hLEVEL6_CODE = productPack && productPack?.HLEVEL6_CODE || null;
+			const brand =  brands.find(i => i.HLEVEL6_CODE == hLEVEL6_CODE);
+			const brandName = brand && brand?.HLEVEL4_NAME || null;
+			const brandId = brand && brand?.HLEVEL4_CODE || null;
 			const institute = institutes.find(item => {
 				const externalIds = item.External_InstituteId || ""; // Fallback to an empty string if null or undefined
 				return externalIds.split(',')
@@ -282,8 +287,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					FASTPendingCorrection                   : fastPendingCorrection,
 					BrandContractVolume                     : null,
 					PercentageUsage                         : usageCalculation + curr.TotalDelivered,
-					BrandId									: fastOffer && fastOffer.BrandId || null,
-					BrandName								: fastOffer && fastOffer.BrandName || null,
+					BrandId									: brandId,
+					BrandName								: brandName,
 					Balance                                 : null,
 					BrandUsedVolume                         : null,
 					WholesalerContractPriceClaim            : curr.FixedPrice,
