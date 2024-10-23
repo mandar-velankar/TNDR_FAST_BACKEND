@@ -307,8 +307,26 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         EndDate,
         Status,
         ctryCurrency.Currency,
-        Type as CombinedWPPMarginNetPriceValues
-    };
+        Type as CombinedWPPMarginNetPriceValues,
+        min(EndDate) as minEndDate: Date
+    }group by 
+        MaterialNumbers,
+        GOV_CODE,
+        PRODUCTPACKNAME,
+        PRESENTATION,
+        wpp.DistributorID,
+        dist.DistributorName,
+        Bundle,
+        OuterCarton,
+        PPP,
+        Type,
+        Margin,
+        WPPWithoutTax,
+        StartDate,
+        EndDate,
+        Status,
+        ctryCurrency.Currency;
+
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
 }

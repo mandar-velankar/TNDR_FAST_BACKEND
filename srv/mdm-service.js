@@ -927,6 +927,7 @@ module.exports = (srv) => {
 			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Neto Prijs ${item.WPPWithoutTax} ${item.Currency}`;
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD-MM-YYYY');
 			item.EndDate = item.EndDate && ServiceHelper.formatDate(item.EndDate, '', 'DD-MM-YYYY');
+			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD-MM-YYYY');
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
