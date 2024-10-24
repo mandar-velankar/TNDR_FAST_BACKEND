@@ -5021,6 +5021,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						dateFormatUK: (input) => {
 							return input.split("-").reverse().join("-").replaceAll("-","/");
 						},
+						dateFormatHEM: (input) => {
+							return input.split("-").reverse().join("-").replaceAll("-",".");
+						},
 						currentdatePK: (input) => {
 							const curr_date = new Date();
 							return curr_date.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
