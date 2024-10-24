@@ -270,6 +270,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					OfferID                                 : offerID, 
 					ProductPackID                           : productCode,
 					PRODUCTPACKNAME							: productPackName,
+					EANNumber								: String(curr.ZIndexNumber),
+					External_InstituteId					: String(curr.IDFNumber),
 					MainInstituteID                         : instituteId,
 					ChildInstituteID                        : childInstituteID,
 					MainInstituteName                       : instituteName,

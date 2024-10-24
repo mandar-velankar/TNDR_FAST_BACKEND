@@ -176,7 +176,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					PRODUCTPACKNAME							: productPackName,
 					MainInstituteID                         : instituteId,
 					EANNumber                               : String(curr.KODEANARTYKUŁU),
-					External_InstituteId					: externalInstituteId,
+					External_InstituteId					: String(curr.KODKLIENTAwgBAYERSpzoo),
 					ChildInstituteID                        : childInstituteID,
 					MainInstituteName                       : instituteName,
 					ChildInstituteName                      : childInstituteName,
