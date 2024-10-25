@@ -5675,7 +5675,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			return "Notification mail sent successfully";
 		}catch (error) {
 				console.error('Error in sendHematologyNotificationMailTemplate');
-				return res.reject(400, error.message || 'An unexpected error occurred.');
+				return req.reject(400, error.message || 'An unexpected error occurred.');
 		}
 
 	});
