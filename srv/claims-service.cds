@@ -119,11 +119,19 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
             on product.OfferID = offer.OfferID
             and product.Active = 1
         inner join TransactionalData.ContractInfomation as contract
-            on contract.ProductCode = product.ProductCode
+            on contract.OfferID = offer.OfferID
+            and contract.ProductCode = product.ProductCode
             and contract.Active = true
         inner join TransactionalData.NLOfferDistributors as nldist
             on nldist.OfferID = offer.OfferID
-            and nldist.ProductPackID = product.ProductCode{
+            and nldist.ProductPackID = product.ProductCode
+        inner join TransactionalData.PriceCondition as pc
+	        on tender.CountryCode = pc.CountryCode
+	    	and product.ProductCode = pc.ProductCode
+	    	and offer.OfferID = pc.OfferID
+        inner join TransactionalData.NLPriceConditions as nlprice
+        	on contract.ContractDuration = nlprice.ContractDuration
+        	and pc.ID = nlprice.PriceCondition.ID{
     	tender.TenderID,
         contract.InstituteID,
         contract.ContractStartDate,
@@ -137,7 +145,9 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.Results.Outcome,
         offer.Quotation.EffectiveDate,
         offer.Quotation.ExpiryDate,
-        product.Price.OfferPrice,
+        nlprice.OfferPrice,
+        nlprice.NetPrice,
+        nlprice.Discount,
         product.Price.RegPrice,
         product.SKU.CONCENTRATION,
         product.SKU.Product.HLEVEL4_CODE as BrandId:String,
@@ -158,7 +168,9 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.Results.Outcome,
         offer.Quotation.EffectiveDate,
         offer.Quotation.ExpiryDate,
-        product.Price.OfferPrice,
+        nlprice.OfferPrice,
+        nlprice.NetPrice,
+        nlprice.Discount,
         product.Price.RegPrice,
         product.SKU.Product.HLEVEL4_NAME,
         product.SKU.Product.HLEVEL4_CODE,

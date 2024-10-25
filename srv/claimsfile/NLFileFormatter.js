@@ -255,8 +255,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 																item.ContractEndDate >= dateFrom);
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
 			const offerID = fastOffer && fastOffer.OfferID || null;
-			const fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * fastOffer.RequestedVolume) || 0;
-			const fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * fastOffer.RequestedVolume) : ((fastOffer.OfferPrice * daValue) * fastOffer.RequestedVolume)) : 0;
+			const fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * curr.TotalDelivered) || 0;
+			const fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * curr.TotalDelivered) : ((fastOffer.OfferPrice * daValue) * curr.TotalDelivered)) : 0;
 			const totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
 			const wholesalerDisArPrice = curr.FixedPrice - (curr.Claim2Amount/curr.TotalDelivered);
 			const filteredClaimsData = claimsData.filter(item => item.OfferID == offerID && item.MainInstituteID == instituteId && item.ProductPackID == productCode);
@@ -288,7 +288,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					MainCustomerForContract                 : instituteId,
 					FASTPendingCorrection                   : fastPendingCorrection,
 					BrandContractVolume                     : null,
-					PercentageUsage                         : usageCalculation + curr.TotalDelivered,
+					PercentageUsage                         : null,
+					UsedVolume								: usageCalculation + curr.TotalDelivered,
 					BrandId									: brandId,
 					BrandName								: brandName,
 					Balance                                 : null,

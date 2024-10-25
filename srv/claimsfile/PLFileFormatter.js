@@ -193,6 +193,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					FASTPendingCorrection                   : null,
 					BrandContractVolume                     : fastOffer && (fastOffer.RequestedVolume * fastOffer.CONCENTRATION) || 0,
 					PercentageUsage                         : null,
+					UsedVolume								: null,
 					BrandId									: brandId,
 					BrandName								: brandName,
 					Balance                                 : null,
