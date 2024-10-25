@@ -120,13 +120,16 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
             and product.Active = 1
         inner join TransactionalData.ContractInfomation as contract
             on contract.ProductCode = product.ProductCode
-            and contract.Active = true{
+            and contract.Active = true
+        inner join TransactionalData.NLOfferDistributors as nldist
+            on nldist.OfferID = offer.OfferID
+            and nldist.ProductPackID = product.ProductCode{
     	tender.TenderID,
         contract.InstituteID,
         contract.ContractStartDate,
         contract.ContractEndDate,
         contract.ContractDuration,
-        offer.DistributorID,
+        nldist.DistributorID,
         offer.OfferID,
         product.ProductCode,
         tender.CountryCode,
@@ -147,7 +150,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         contract.ContractStartDate,
         contract.ContractEndDate,
         contract.ContractDuration,
-        offer.DistributorID,
+        nldist.DistributorID,
         offer.OfferID,
         product.ProductCode,
         product.RequestedVolume,
