@@ -242,7 +242,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const childInstitute = instituteHierarcis.find(item => item.ParentInstituteID === instituteId);
 			const childInstituteID = childInstitute && childInstitute.InstituteID || null;
 			const childInstituteData = institutes.find(item => item.InstituteID === childInstituteID);
-			const childInstituteName = childInstituteData && childInstituteData.InstituteName || 'Customer Not Found';
+			const childInstituteName = childInstituteData && childInstituteData.InstituteName || null;
 			const wPP = wPPS.find(item => item.PRODUCTPACKID == productCode && item.StartDate <= dateFrom && item.EndDate >= dateFrom);
 			const wppValue = wPP && wPP.WPPWithoutTax || 0;
 			const distributionAgreement = distributionAgreements.find(item => item.PRODUCTPACKID == productCode && item.StartDate <= dateFrom && item.EndDate >= dateFrom);
@@ -281,7 +281,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					Type                                    : curr.ClaimTotal < 0 ? 'Correction' : 'Claim',
 					Quantity                                : curr.TotalDelivered,
 					WholesalerPurchasePrice                 : curr.PurchasePrice, 
-					WholesalerDistributionArrangement       : distributionAgreement?.Type === 'Fixed' ? wholesalerDisArPrice : 1 - wholesalerDisArPrice / curr.FixedPrice,
+					WholesalerDistributionArrangement       : distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(2)) : parseFloat((1 - wholesalerDisArPrice / curr.FixedPrice).toFixed(2)),
 					AppliedWholesalerCorrection             : curr.ClaimTotal < 0 ? curr.ClaimTotal : null,
 					WholesalerContractPrice                 : curr.FixedPrice,
 					TotalClaim                              : curr.ClaimTotal > 0 ? curr.ClaimTotal : null,
@@ -300,7 +300,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					FASTDistributionArrangementClaim        : fastDistributionArrangementClaim,
 					TotalFASTClaim                          : totalFASTClaim,
 					PercentageDifference                    : fastOffer && ((curr.ClaimTotal - totalFASTClaim)/totalFASTClaim) || 0,
-					Status                                  : fastOffer ? (totalFASTClaim == curr.ClaimTotal ? 'Passed' : 'FailedPriceCheck') : 'CustomerNotFound',
+					Status                                  : instituteName === 'Customer Not Found' ? 'CustomerNotFound' : (fastOffer ? (totalFASTClaim == curr.ClaimTotal) ? 'Passed' : 'Failed' :'Failed'),
 					Comment                                 : null,
 					FASTWholesalerPurchasePrice             : wppValue || 0,
 					FASTContractPrice                       : fastOffer && fastOffer.OfferPrice || 0,
