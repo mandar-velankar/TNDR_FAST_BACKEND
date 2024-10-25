@@ -161,12 +161,23 @@ module.exports = (srv) => {
 		const tx = cds.tx(req);
 		let query;
 		const {templateId, ClaimFileID, CountryCode, Brand, Status, Type} = req.data;
+		let whereBrand, whereStatus, whereType;
+
 			if (CountryCode === 'PL') {
-				query = SELECT.from(ExtractClaimDataView);
+				query = SELECT.from(ExtractClaimDataView).where({ClaimFileID: ClaimFileID});
+
+	
+				if (templateId === 'PLClaimDataFilteredFiles') {
+					whereBrand = Brand && Brand !== 'All_Brands' ? ServiceHelper.buildFullWhere('BrandId', '=', Brand) : [];
+
+					whereStatus = Status ? ServiceHelper.buildFullWhere('Status', '=', Status) : [];
+					
+					whereType = Type ?  ServiceHelper.buildFullWhere('Type', '=', Type) : [];
+					
+					query = query.where(whereBrand).where(whereStatus).where(whereType);
+				}
 			}else{
 				query = SELECT.from(NLExtractClaimFilesView).where({ClaimFileID: ClaimFileID});
-	
-				let whereBrand, whereStatus, whereType;
 	
 				if (templateId === 'NLClaimDataFilteredFiles') {
 					let QCPassedStatus = {

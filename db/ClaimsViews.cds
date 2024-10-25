@@ -272,17 +272,16 @@ entity ClaimDataBrandsView as select from ClaimsData.ClaimData{
 
 
 entity ExtractClaimDataView  as select from ClaimsData.ClaimFiles as clmf
-	inner join ClaimsData.ClaimData as clmd 		
+	left join ClaimsData.ClaimData as clmd 		
             on clmd.ClaimFiles.ID = clmf.ID 
 	inner join MasterData.PT_TMPRDPCK as productPack
     		on productPack.PRODUCTPACKID = clmd.ProductPackID
 			and productPack.ACTIVERECORD = 'Yes'
-	inner join MasterData.PT_TMINST as inst 
+	left join MasterData.PT_TMINST as inst 
 			on inst.InstituteID = clmd.MainInstituteID 
-			and inst.CountryCode = clmd.CountryCode
-	inner join ClaimsData.ContrastAgentSalesData as cas
-			on cas.ClaimFiles.ID = clmf.ID{
-	
+			and inst.CountryCode = clmd.CountryCode{
+			clmf.ID as ClaimFileID,
+			clmd.ID as ClaimDataID,
 			productPack.PRODUCTPACKNAME,
 			clmd.SKUCountry.GOV_CODE,
 			clmd.Quantity,
@@ -290,16 +289,44 @@ entity ExtractClaimDataView  as select from ClaimsData.ClaimFiles as clmf
 			clmd.WholesalerContractPrice,
 			inst.External_InstituteId,
 			clmd.MainInstituteName,
-			cas.NrFaktury,
+			clmf.ContrastAgentSalesData.NrFaktury,
 			clmd.Date,
-			cas.RoznicaCenaZakupuPNM,
-			cas.WartoscPNM,
+			clmf.ContrastAgentSalesData.RoznicaCenaZakupuPNM,
+			clmf.ContrastAgentSalesData.WartoscPNM,
 			clmd.TotalWholesalerClaim,
-			cas.IloscSztukDoWyrownania,
-			cas.NrFakturyZakupu,
+			clmf.ContrastAgentSalesData.IloscSztukDoWyrownania,
+			clmf.ContrastAgentSalesData.NrFakturyZakupu,
+			clmd.Product.PriceCondition.Price0,
+			clmd.FASTContractPrice,
+			clmd.FASTContractClaim,
 			clmd.Comment,
-}where  clmf.Status = 'Approved (All QC Passed)' or clmf.Status = 'Approved (Some QC Failed)';
-
+			clmd.Status,
+			clmd.Type,
+			clmd.BrandId,
+}where  clmf.Status = 'Approved (All QC passed)' or clmf.Status = 'Approved (Some QC failed)'
+	group by clmf.ID,
+			clmd.ID,
+			productPack.PRODUCTPACKNAME,
+			clmd.SKUCountry.GOV_CODE,
+			clmd.Quantity,
+			clmd.WholesalerPurchasePrice,
+			clmd.WholesalerContractPrice,
+			inst.External_InstituteId,
+			clmd.MainInstituteName,
+			clmf.ContrastAgentSalesData.NrFaktury,
+			clmd.Date,
+			clmf.ContrastAgentSalesData.RoznicaCenaZakupuPNM,
+			clmf.ContrastAgentSalesData.WartoscPNM,
+			clmd.TotalWholesalerClaim,
+			clmf.ContrastAgentSalesData.IloscSztukDoWyrownania,
+			clmf.ContrastAgentSalesData.NrFakturyZakupu,
+			clmd.Product.PriceCondition.Price0,
+			clmd.FASTContractPrice,
+			clmd.FASTContractClaim,
+			clmd.Comment,
+			clmd.Status,
+			clmd.Type,
+			clmd.BrandId;
 entity ClaimFilesApprovalsCount as select from ClaimsData.ClaimApprovals{
 	key ClaimFiles.ID as ClaimFiles_ID,
     count(*) as TotalApprovalsCount: Integer
