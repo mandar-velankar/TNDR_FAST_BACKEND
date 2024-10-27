@@ -912,7 +912,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         content    : LargeBinary;
     }
 
-    entity NLOfferDistributors as projection on TransactionalData.NLOfferDistributors;
+    entity AwardedOfferDistributors as projection on TransactionalData.AwardedOfferDistributors;
      entity ExtractNLHistoricalInformation {
         key templateId : Integer;
             content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -927,7 +927,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }where ApprovalStatus = 'Waiting'
     group by OfferId, productcode, ApproverName, ApprovalStatus;
     
-   entity NLDistributorsView as select from TransactionalData.NLOfferDistributors{
+   entity NLDistributorsView as select from TransactionalData.AwardedOfferDistributors{
         key OfferID,
         key ProductPackID,
         case
