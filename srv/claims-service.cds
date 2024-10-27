@@ -122,7 +122,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
             on contract.OfferID = offer.OfferID
             and contract.ProductCode = product.ProductCode
             and contract.Active = true
-        inner join TransactionalData.NLOfferDistributors as nldist
+        inner join TransactionalData.AwardedOfferDistributors as nldist
             on nldist.OfferID = offer.OfferID
             and nldist.ProductPackID = product.ProductCode
         inner join TransactionalData.PriceCondition as pc
