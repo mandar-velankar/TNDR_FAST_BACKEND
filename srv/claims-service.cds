@@ -52,7 +52,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         key CountryCode   : String;
         key DistributorID : String;
         key BrandId       : String;
-        key Status        : String;
+        key templateName  : String;
         key DateFrom      : String;
         key DateTo        : String;
             content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';

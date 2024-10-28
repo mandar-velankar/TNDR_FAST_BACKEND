@@ -63,12 +63,12 @@ module.exports = (srv) => {
     srv.on('READ', 'ExtractClaimsSales', async (req, next) => {
 		try{
 		const tx = cds.tx(req);
-		const {templateId, CountryCode, DistributorID, BrandId, Status, DateFrom, DateTo} = req.data;
+		const {templateId, CountryCode, DistributorID, BrandId, templateName, DateFrom, DateTo} = req.data;
 
 		const template = await SELECT.one.from(ExcelClaimFileSalesReportTemplate).where({ templateId: templateId });
 
 		// Getting full where query
-		const query = buildClaimSalesReportFullWhereQuery(CountryCode, Status, DistributorID, DateFrom, DateTo, BrandId);
+		const query = buildClaimSalesReportFullWhereQuery(CountryCode, templateName, DistributorID, DateFrom, DateTo, BrandId);
         const salesReportExtract = await tx.run(query);
 		
 		const excelData = formattedClaimFilesSalesReportExtract(salesReportExtract, CountryCode);
@@ -90,18 +90,22 @@ module.exports = (srv) => {
         
 	});
 
-	const buildClaimSalesReportFullWhereQuery = function (CountryCode, Status, DistributorID, DateFrom, DateTo, BrandId) {
+	const buildClaimSalesReportFullWhereQuery = function (CountryCode, templateName, DistributorID, DateFrom, DateTo, BrandId) {
 		// Statuses based on selected Sales Report template name
 		const statuses = {
 			"NL": {
 				"excludepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`],
 				"includepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`, `'Pending'`],
+			},
+			"PL": {
+				"excludepending": [`'Approved (All QC Passed)'`],
+				"includepending": [`'Approved (All QC Passed)'`, `'Pending'`],
 			}
 		};
 
 		// Build full wheres
 		const countryCodeFullWhere = (CountryCode && ServiceHelper.buildFullWhere('CountryCode', '=', CountryCode)) || [];
-		const statusFullWhere = CountryCode === 'NL' ? ServiceHelper.buildWhereExpression('ClaimFileStatus', 'or', statuses[CountryCode][Status]) : ServiceHelper.buildFullWhere('ClaimFileStatus', '=', Status)
+		const statusFullWhere = ServiceHelper.buildWhereExpression('ClaimFileStatus', 'or', statuses[CountryCode][templateName]) || [];
       	const wholesalerFullWhere = (DistributorID && ServiceHelper.buildFullWhere('DistributorID', '=', DistributorID)) || [];
 		const dateFromFullWhere =  (DateTo && ServiceHelper.buildFullWhere('DateFrom', '<=', DateTo)) || [];
 		const dateToFullWhere =  (DateFrom && ServiceHelper.buildFullWhere('DateTo', '>=', DateFrom)) || [];
@@ -128,9 +132,14 @@ module.exports = (srv) => {
 		excelData.forEach(ed => {
 			// Format Quantities
 			ed.Quantity = ServiceHelper.formatNumber(Number(ed.Quantity), 0, 0);
+			ed.QuantityML = ServiceHelper.formatNumber(Number(ed.QuantityML), 0, 0);
+			ed.ContractBrandUsage = ServiceHelper.formatNumber(Number(ed.ContractBrandUsage), 0, 0);
+			ed.BrandUsedCalculatedVolume = ServiceHelper.formatNumber(Number(ed.BrandUsedCalculatedVolume), 0, 0);
+			ed.BrandContractCalculatedVolume = ServiceHelper.formatNumber(Number(ed.BrandContractCalculatedVolume), 0, 0);
 
 			// Format Prices
 			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.WholesalerPurchasedAmount = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasedAmount), countryCodeLocals[CountryCode], 2, 2);
 			ed.FASTContractPrice = ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), countryCodeLocals[CountryCode], 2, 2);
 			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
 			ed.FASTWholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.FASTWholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);

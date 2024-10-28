@@ -95,50 +95,57 @@ group by
 	CountryCode,
 	ProductPackID;
 
+entity ExtractCalculatedBrandVolumes as select from ClaimsData.ClaimData as cd
+{
+	key cd.OfferID,
+	key cd.ProductPackID,
+	SUM(cd.BrandContractVolume) OVER (PARTITION BY cd.BrandId ORDER BY cd.BrandId) as BrandContractCalculatedVolume : Double,
+	SUM(cd.BrandUsedVolume) OVER (PARTITION BY cd.OfferID, cd.BrandId ORDER BY cd.OfferID, cd.BrandId) as BrandUsedCalculatedVolume : Double
+	
+};
 entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 	left join ClaimsData.ClaimData as clmd 		
             on clmd.ClaimFiles.ID = clmf.ID 
-	inner join TransactionalData.PT_TMOFRS as offer 		
-            on clmd.OfferID = offer.OfferID 
-			and offer.Active = 1
-	inner join MasterData.PT_TMINST as inst 
-			on inst.InstituteID = clmd.MainInstituteID 
-			and inst.CountryCode = clmd.CountryCode
 	inner join MasterData.PT_TMDIST as distributor
     		on clmf.DistributorID = distributor.DistributorID
 	inner join MasterData.PT_TMPRDPCK as productPack
     		on productPack.PRODUCTPACKID = clmd.ProductPackID
     		and productPack.ACTIVERECORD = 'Yes'
-	inner join TransactionalData.PT_TMOFPR as product
-			on productPack.PRODUCTPACKID = clmd.ProductPackID
-			and product.OfferID = clmd.OfferID
-			and product.Active = 1
-	inner join TransactionalData.PriceCondition as priceCondition 
-			on clmd.CountryCode = priceCondition.CountryCode
-			and product.ProductCode = priceCondition.ProductCode
-			and clmd.OfferID = priceCondition.OfferID
-	inner join MasterData.PT_TMPRDHIER as hier
-			on productPack.HLEVEL6_CODE = hier.HLEVEL6_CODE
+	left join CalculatedBrandVolumes as calcbrandvolumes
+			on calcbrandvolumes.OfferID = clmd.OfferID
+			and calcbrandvolumes.ProductPackID = clmd.ProductPackID
 			{
-				clmd.OfferID,
 				clmf.ID as ClaimFileID,
 				clmd.ID as ClaimDataID,
+				clmd.OfferID,
 				distributor.DistributorID,
 				distributor.DistributorName,
-				inst.InstituteName,
+				clmd.MainInstituteName,
+				clmd.External_InstituteId,
 				clmd.Date,
-				productPack.PRODUCTPACKNAME,
-				product.RequestedVolume,
-				hier.HLEVEL4_NAME,
-				priceCondition.Price0,
-				priceCondition.OfferPrice,
-				priceCondition.Price0 * product.RequestedVolume as WholesalerPurchasedAmount: Double, 
-				priceCondition.OfferPrice * product.RequestedVolume as NetSales: Double,
-				productPack.CONCENTRATION * product.RequestedVolume as ContractBrandVolume: Double ,
+				clmd.BrandName,
+				clmd.PRODUCTPACKNAME,
+				clmd.EANNumber,
+				clmd.Quantity,
+				clmd.Quantity * productPack.CONCENTRATION as QuantityML: Double,
+				clmd.WholesalerPurchasePrice,
+				clmd.WholesalerContractPrice,
+				clmd.Quantity * clmd.WholesalerPurchasePrice as WholesalerPurchasedAmount: Double, 
+				clmd.Quantity * clmd.WholesalerContractPrice as NetSales: Double,
+				calcbrandvolumes.BrandContractCalculatedVolume,
+				calcbrandvolumes.BrandUsedCalculatedVolume,
+				CASE 
+					WHEN calcbrandvolumes.BrandContractCalculatedVolume != 0 
+					THEN calcbrandvolumes.BrandUsedCalculatedVolume 
+						/ 
+						calcbrandvolumes.BrandContractCalculatedVolume
+					ELSE 0 
+				END as ContractBrandUsage : Double,
 				clmf.DateFrom,
 				clmf.DateTo,
 				clmf.CountryCode,
-				clmf.Status
+				clmf.Status as ClaimFileStatus : String,
+				clmd.BrandId
 		}where clmf.CountryCode = 'PL';
 
 entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
