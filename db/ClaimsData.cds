@@ -220,3 +220,9 @@ entity ExcelClaimFileSalesReportTemplate {
     mediaType               : String @Core.IsMediaType;
 }
 
+entity SalesReportFileFieldMetaData {
+    Wholesaler              : String;
+    FieldName               : String;
+    FieldLength             : Integer;
+}
+

@@ -294,7 +294,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					BrandName								: brandName,
 					Balance                                 : null,
 					BrandUsedVolume                         : null,
-					WholesalerContractPriceClaim            : curr.FixedPrice,
+					WholesalerContractPriceClaim            : curr.Claim1Amount,
 					WholesalerDistributionArrangementClaim  : curr.Claim2Amount,
 					TotalWholesalerClaim                    : curr.ClaimTotal,
 					FASTContractClaim                       : fastContractClaim,

@@ -24,6 +24,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity ContrastAgentSalesData as projection on ClaimsData.ContrastAgentSalesData;
     entity ContrastAgentSalesDataNL as projection on ClaimsData.ContrastAgentSalesDataNL;
     entity SalesReportFile as projection on ClaimsData.SalesReportFile;
+    entity SalesReportFileFieldMetaData as projection on ClaimsData.SalesReportFileFieldMetaData;
 
     entity UserCountries @readonly @(restrict: [
 		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
