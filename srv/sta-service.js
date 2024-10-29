@@ -3276,6 +3276,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			Contract_Length1: offer.NumberOfExtension,
 			Contract_Length2: offer.Contract_Length2,
 			Contract_Length3: offer.Contract_Length3,
+			InternalBidDueDate: offer.InternalBidDueDate,
 			Tender_Custom_Integer_1: tender?.Custom_Integer_1,
             Tender_Custom_Integer_2: tender?.Custom_Integer_2,
             Tender_Custom_Integer_3: tender?.Custom_Integer_3,
@@ -5662,7 +5663,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		try {
 			const { data: {tenderId, offerID, url, CountryCode} } = req;
 			const tx = cds.tx(req);
-			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({Role: 'Tender Manager'}));
+			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({
+				Role: { in: ['Supply Management', 'Compliance Officer', 'Price Management', 'Global Strategic Marketing'] }
+			  }));
 			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
 			const offerValidation = await buildOfferValidation(tx, whereOffer);
 			const mailTemplate = await getMailTemplate('HematologyNotificationMailTemplate');
@@ -5675,11 +5678,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			return "Notification mail sent successfully";
 		}catch (error) {
 				console.error('Error in sendHematologyNotificationMailTemplate');
-				return res.reject(400, error.message || 'An unexpected error occurred.');
+				return req.reject(400, error.message || 'An unexpected error occurred.');
 		}
 
 	});
 	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer){
+		// Format Date
+		offer.InternalBidDueDate  = offer.InternalBidDueDate  && ServiceHelper.formatDate(offer.InternalBidDueDate , 'YYYY-MM-DD','DD-MM-YYYY');
+		offer.OfferDueDate  = offer.OfferDueDate  && ServiceHelper.formatDate(offer.OfferDueDate , 'YYYY-MM-DD','DD-MM-YYYY');
 		return userInfo.map(data =>{
 			return {
 				CountryCode: req.data.CountryCode,
