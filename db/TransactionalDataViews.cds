@@ -1493,6 +1493,10 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
         else priceCondition.Level3Discount1
     end as Level3Discount1:Double,
     offer.Currency,
+    priceCondition.Price0,
+    priceCondition.Price1,
+    priceCondition.Price2,
+    priceCondition.Level2Discount1,
     @Core.Computed: false
     ifnull(priceCondition.Last12MonthsVolumeMainCustomer,1) as Last12MonthsVolumeMainCustomer:Integer,
     @Core.Computed: false
