@@ -507,8 +507,15 @@ module.exports = async (srv) => {
         if (req.query.SELECT.columns?.[0]?.func !== "count") {
             tmvQuery.columns(req.query.SELECT.columns);
         }
-        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
+		let createdByFullWhere = [];
+
+		// Only for Taiwan this code will return the offers which belongs to the current user  
+		if (Array.isArray(countryCode) && countryCode.length > 0 && countryCode[0] === 'TW') {
+			createdByFullWhere = ServiceHelper.buildFullWhere('createdBy', '=', req.user.id) || [];
+		}
+
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(createdByFullWhere));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
         req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
 
@@ -543,7 +550,7 @@ module.exports = async (srv) => {
 		// 	return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
 		// 	});
 		// });
-		resultsArray = resultsArray.filter(ra => ra.createdBy === cwid);
+		// resultsArray = resultsArray.filter(ra => ra.createdBy === cwid);
 		const territoryMatches = resultsArray.filter(item => {
 			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
 			
@@ -5684,8 +5691,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	});
 	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer){
 		// Format Date
-		offer.InternalBidDueDate  = offer.InternalBidDueDate  && ServiceHelper.formatDate(offer.InternalBidDueDate , 'YYYY-MM-DD','DD-MM-YYYY');
-		offer.OfferDueDate  = offer.OfferDueDate  && ServiceHelper.formatDate(offer.OfferDueDate , 'YYYY-MM-DD','DD-MM-YYYY');
+		offer.InternalBidDueDate  = offer.InternalBidDueDate  && ServiceHelper.formatDate(offer.InternalBidDueDate , 'YYYY-MM-DD','DD.MM.YYYY');
+		offer.OfferDueDate  = offer.OfferDueDate  && ServiceHelper.formatDate(offer.OfferDueDate , 'YYYY-MM-DD','DD.MM.YYYY');
 		return userInfo.map(data =>{
 			return {
 				CountryCode: req.data.CountryCode,
