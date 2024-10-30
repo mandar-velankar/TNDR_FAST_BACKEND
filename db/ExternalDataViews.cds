@@ -742,6 +742,7 @@ left outer join MasterDataLatestValues.VWBUDGETEDPROFITABILITY as MasterBudgeted
     max(MasterBudgetedProfitability.PROFITABILITY) as PROFITABILITY:Double,
 	sku.SKUCode as MaterialNumbers:Integer,
 	CP.QTY_THRESHOLD,
+    CP.OutSourcedStatus,
 	P.ACTIVERECORD as ACTIVE_PRODUCT,
 	CP.ACTIVERECORD as ACTIVE_COUNTRY_PRODUCT
 } group by P.PRODUCTPACKID,
