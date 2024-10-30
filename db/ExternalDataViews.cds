@@ -776,6 +776,7 @@ left outer join MasterDataLatestValues.VWBUDGETEDPROFITABILITY as MasterBudgeted
 	cogs.COGS,
 	sku.SKUCode,
 	CP.QTY_THRESHOLD,
+    CP.OutSourcedStatus,
 	P.ACTIVERECORD,
 	CP.ACTIVERECORD
   order by CP.COUNTRYCODE,
