@@ -128,6 +128,7 @@ module.exports = async (srv) => {
 		MandatoryTableFieldsCountry, 
 		MailTemplate, 
 		PT_TMUSER, 
+		PT_TMUSERCTRY,
 		ExcelAttachment, 
 		WordAttachment, 
 		WordTemplateCountry,
@@ -5662,9 +5663,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		try {
 			const { data: {tenderId, offerID, url, CountryCode} } = req;
 			const tx = cds.tx(req);
-			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({
-				Role: { in: ['Supply Management', 'Compliance Officer', 'Price Management', 'Global Strategic Marketing'] }
-			  }));
+			const userInfo = await tx.run(
+				SELECT.from(PT_TMUSERCTRY)
+					.columns('User.CWID', 'User.Role', 'User.UserName', 'User.UserEmail', 'CountryCode' )
+					.where({ CountryCode: CountryCode, 'User.Role': { in: ['Supply Management', 'Compliance Officer', 'Price Management', 'Global Strategic Marketing'] }})
+			);
 			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
 			const offerValidation = await buildOfferValidation(tx, whereOffer);
 			const mailTemplate = await getMailTemplate('HematologyNotificationMailTemplate');
