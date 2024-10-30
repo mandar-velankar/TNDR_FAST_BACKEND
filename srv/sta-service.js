@@ -5204,6 +5204,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
 			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
 			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? prd.EARLIEST_DATE && ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
+			prd.Product_Custom_Integer_1 = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.Product_Custom_Integer_1, 0, 0) : prd.Product_Custom_Integer_1;
+			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.REQUESTED_QUANTITY, 0, 0) : prd.REQUESTED_QUANTITY;
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
