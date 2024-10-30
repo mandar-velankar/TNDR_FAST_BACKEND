@@ -5684,8 +5684,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	});
 	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer){
 		// Format Date
-		offer.InternalBidDueDate  = offer.InternalBidDueDate  && ServiceHelper.formatDate(offer.InternalBidDueDate , 'YYYY-MM-DD','DD-MM-YYYY');
-		offer.OfferDueDate  = offer.OfferDueDate  && ServiceHelper.formatDate(offer.OfferDueDate , 'YYYY-MM-DD','DD-MM-YYYY');
+		offer.InternalBidDueDate  = offer.InternalBidDueDate  && ServiceHelper.formatDate(offer.InternalBidDueDate , 'YYYY-MM-DD','DD.MM.YYYY');
+		offer.OfferDueDate  = offer.OfferDueDate  && ServiceHelper.formatDate(offer.OfferDueDate , 'YYYY-MM-DD','DD.MM.YYYY');
 		return userInfo.map(data =>{
 			return {
 				CountryCode: req.data.CountryCode,
