@@ -1100,12 +1100,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity GlobalStrategicMarketingView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;   
     entity SupplyManagementView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;     
     entity PLOwnerNameView  @(cds.redirection.target:false) as select from AdminData.PT_TMUSER{
-        UserID,
-        UserName,
-        CWID,
-        UserEmail,
-        Role,
-        BU,
-        Countries.CountryCode
+        key UserID,
+            UserName,
+            CWID,
+            UserEmail,
+            Role,
+            BU,
+            Countries.CountryCode
     } where Countries.CountryCode = 'PL' and Role = 'KAM';
 }
