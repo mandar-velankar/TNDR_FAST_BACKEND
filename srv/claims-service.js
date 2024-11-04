@@ -264,7 +264,7 @@ module.exports = (srv) => {
 		 * @param {Object} file - This is uploaded excel file
 		 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
 		 */
-		try {
+		// try {
 			let CWID = res.user.id;
 			const file = await SELECT.one.from(SalesReportFile).where({DistributorID: req.DistributorID});
 
@@ -297,10 +297,10 @@ module.exports = (srv) => {
 			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
 
 			await DELETE.from(SalesReportFile).where({DistributorID: req.DistributorID});
-		} catch (error) {
-			console.error('Error in SalesReportUploadFile');
-			return res.reject(400, error.message || 'An unexpected error occurred.')
-		}		
+		// } catch (error) {
+		// 	console.error('Error in SalesReportUploadFile');
+		// 	return res.reject(400, error.message || 'An unexpected error occurred.')
+		// }		
 		return res.reply("Sales Data uploaded successfully");
 	});
 

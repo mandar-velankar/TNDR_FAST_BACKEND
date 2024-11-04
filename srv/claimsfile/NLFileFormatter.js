@@ -12,46 +12,21 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
         console.log('Processing of Nederlands Sales Report File started ...');
 
-        try {
+       // try {
 			this.db = await cds.connect.to('db');
 			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, PT_TMPRDHIER, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
-			const { ClaimData } = this.db.entities("com.bayer.SXTENDER.ClaimsData");
+			const { ClaimData, SalesReportFileFieldMetaData} = this.db.entities("com.bayer.SXTENDER.ClaimsData");
 			const { ExtractFASTOfferNL } = this.db.entities("ClaimsService");
 
-			let UUID = this.generateUUID();
+			let UUID = this.generateUUID(); 
 			const distributor = await SELECT.one.from(PT_TMDIST).where({DistributorID: this.distributorId, CountryCode: this.countryCode});
-			let columnNames = null;
+			const fieldMetadata = await SELECT.from(SalesReportFileFieldMetaData).where({Wholesaler: distributor?.DistributorName});
 
 			// Get the mapping for the distributor
 			const currentMappings = this.columnMappings(distributor);
 
-			if(distributor?.DistributorName === 'Ovidius Pharma & Care' || distributor?.DistributorName === 'Klinifarma'){
-				// Get column names from the 5th row
-				columnNames = this.data[2].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
-
-				// Remove initial rows that are not real data
-				this.data = this.data.slice(3);
-			}else{
-				// Get column names from the 5th row
-				columnNames = this.data[0].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
-
-				// Remove initial rows that are not real data
-				this.data = this.data.slice(1);						
-			}
-			// Remove empty records
-			this.data = this.data.filter(row => row.some(cell => cell !== null && cell !== '' && cell !== ' '));
-		
-			// Map the data to the correct column names
-			this.data = this.data.map(row => {
-				let obj = {};
-				columnNames.forEach((col, index) => {
-					obj[col] = row[index];
-				});
-				return obj;
-			});
-
-			this.data = this.data.filter(row => row.TypeRecord !== 'H' && row.TypeRecord !== 'E');
-            
+			this.data = this.formatData(this.data, currentMappings, distributor?.DistributorName, fieldMetadata);
+           
 			const wPPS = await SELECT.from(WholesalePurchasePrice).where({COUNTRYCODE: this.countryCode, DistributorID:this.distributorId, Status: 'Approved'});
 			const distributionAgreements = await SELECT.from(DistributionAgreements).where({COUNTRYCODE: this.countryCode, DistributorID:this.distributorId});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
@@ -61,7 +36,6 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const instituteHierarcis = await SELECT.from(PT_TMINSHIER).where({ActiveRecord: 'Yes'});
 			const fastOfferData = await SELECT.from(ExtractFASTOfferNL).where({CountryCode: this.countryCode});
 			const claimsData = await SELECT.from(ClaimData).where({CountryCode: this.countryCode});
-
 
 			const { dateFrom, dateTo, filePeriodDate } = this.getDateFromAndTo(this.data[0].Claimperiode, this.filePeriod);
 
@@ -78,11 +52,10 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
             return result;
 
-        } catch (error) {
-            console.error(error);
-        }
+        // } catch (error) {
+        //     console.error(error);
+        // }
 
-        console.log('Processing of Nederlands Sales Report File finished.');
     }
 
     /**
@@ -112,9 +85,9 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			FilePeriod				: filePeriodDate,
 			DistributorID			: this.distributorId,
 			DistributorName			: distributor.DistributorName,
-			WholesalerPurchaseAmount: wholesalerPurchaseAmount,
-			NetSales				: netSales,
-			TotalClaimAmount		: totalClaimAmount,
+			WholesalerPurchaseAmount: isNaN(wholesalerPurchaseAmount) ? 0 : wholesalerPurchaseAmount,
+			NetSales				: isNaN(netSales) ? 0 : netSales,
+			TotalClaimAmount		: isNaN(totalClaimAmount) ? 0 : totalClaimAmount,
 			Status					: "Pending",
 			ApprovalsCount			: 0
 		};
@@ -385,6 +358,90 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 		return arrayBuffer;
 	}
 
+	formatData(salesdata, currentMappings, DistributorName, fieldMetadata){
+		if(DistributorName === 'Ovidius Pharma & Care' || DistributorName === 'Klinifarma'){
+			salesdata = this.formatXslxData(salesdata, currentMappings);
+		}
+		else{
+			salesdata = this.formatFixData(salesdata, fieldMetadata);
+		}
+		return salesdata;
+	}
+	
+	formatXslxData(salesdata, currentMappings){
+		// Get column names from the 5th row
+		let columnNames = salesdata[2].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+
+		// Remove initial rows that are not real data
+		salesdata = salesdata.slice(3);
+
+		salesdata = salesdata.filter(row => row.some(cell => cell !== null && cell !== '' && cell !== ' '));
+
+		// Map the data to the correct column names
+		salesdata = salesdata.map(row => {
+			let obj = {};
+			columnNames.forEach((col, index) => {
+				let value = row[index];
+				
+				if (['FixedPrice', 'PurchasePrice', 'Claim1Amount', 'Claim2Amount','ClaimTotal'].includes(col)) {
+					// Convert last two digits to decimal
+					value = parseFloat(String(value).replace(/^\+?0+/, '')) / 100;
+				}
+				obj[col] = value;
+			});
+			return obj;
+		});
+
+		return salesdata;
+	}
+
+	formatFixData(salesdata, fieldMetadata){
+		// Remove initial rows that are not real data
+		salesdata = salesdata.slice(1);		
+
+		// Calculate the start and end positions for each field based on its length
+		let currentPosition = 1;
+		fieldMetadata.forEach((field) => {
+			field.startPosition = currentPosition;
+			field.endPosition = currentPosition + field.FieldLength - 1;
+			currentPosition += field.FieldLength;
+		});
+		
+		salesdata = salesdata.map((line) => {
+			const detailRecord = {};  // Create a new object for the parsed fields
+		
+			// Parse each field based on metadata and add it to detailRecord
+			fieldMetadata.forEach((field) => {
+				const startPosition = field.startPosition - 1;
+				const endPosition = field.endPosition;
+				
+				// Extract and trim the value
+				let value = line.substring(startPosition, endPosition).trim();
+
+				// Apply transformations based on field requirements
+				if (['FixedPrice', 'PurchasePrice', 'Claim1Amount', 'Claim2Amount','ClaimTotal'].includes(field.FieldName)) {
+					// Convert last two digits to decimal
+					value = parseFloat(value.replace(/^\+?0+/, '')) / 100;
+				} else if (field.FieldName === 'TotalDelivered') {
+					// Remove leading + and leading zeros
+					value = parseInt(value.replace(/^\+?0+/, ''), 10);
+				}
+				
+				// Assign the extracted value to the field name
+				detailRecord[field.FieldName] = value;
+			});
+			
+				// Return the enriched line object
+				return detailRecord;
+		}).filter((record) => {
+			// Filter out records with TypeOfRecord as 'E' or empty records
+			return record.TypeOfRecord && !record.TypeOfRecord?.startsWith('E') && record.TypeOfRecord !== String.fromCharCode(26) && Object.values(record).some((value) => value !== "");
+		});
+
+		return salesdata;
+	}
+
+
 	// Column mappings defined outside the function
 	columnMappings = function(distributor){
 		const mappings = {
@@ -427,60 +484,6 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 				"Claim22pereenheid": "Claim22pereenheid",
 				"Totaalclaim2": "Claim2Amount",
 				"Claimbedragtotaal": "ClaimTotal"
-    		},
-    		'Alliance Healthcare Nederland B.V.': {
-				"Aantalgeleverd": "TotalDelivered",
-				"ArtnrLeverancier": "SupplierItemNumber",
-				"Claim1bedrag": "Claim1Amount",
-				"Claim2bedrag": "Claim2Amount",
-				"Claimbedrag": "ClaimAmount",
-				"claimgrondslag": "claimgrondslag",
-				"Claimpercentage": "ClaimPercentage",
-				"Claimperiode": "Claimperiode",
-				"Claimtotaal": "ClaimTotal",
-				"Datumtm": "Datumtm",
-				"Datumvan": "Datumvan",
-				"EANNrArtikel": "EANItemNumber",
-				"EANNrklant": "EANCustomerNumber",
-				"Eenheid1": "Eenheid1",
-				"Eenheid2": "Eenheid2",
-				"ID": "ID",
-				"IDFnrklant": "IDFNumber",
-				"Inkoopprijs": "PurchasePrice",
-				"Klantnaam": "CustomerName",
-				"kortingsperc1": "kortingsperc1",
-				"kortingsperc2": "kortingsperc2",
-				"NaamArtikel": "ProductName",
-				"TypeRecord": "TypeRecord",
-				"Vasteprijs": "FixedPrice",
-				"ZInrartikel": "ZIndexNumber"
-    		},
-			'Brocacef B.V.': {
-				"Aantalgeleverd": "TotalDelivered",
-				"ArtnrLeverancier": "SupplierItemNumber",
-				"Claim1bedrag": "Claim1Amount",
-				"Claim2bedrag": "Claim2Amount",
-				"Claimbedrag": "ClaimAmount",
-				"claimgrondslag": "claimgrondslag",
-				"Claimpercentage": "ClaimPercentage",
-				"Claimperiode": "Claimperiode",
-				"Claimtotaal": "ClaimTotal",
-				"Datumtm": "Datumtm",
-				"Datumvan": "Datumvan",
-				"EANNrArtikel": "EANItemNumber",
-				"EANNrklant": "EANCustomerNumber",
-				"Eenheid1": "Eenheid1",
-				"Eenheid2": "Eenheid2",
-				"ID": "ID",
-				"IDFnrklant": "IDFNumber",
-				"Inkoopprijs": "PurchasePrice",
-				"Klantnaam": "CustomerName",
-				"kortingsperc1": "kortingsperc1",
-				"kortingsperc2": "kortingsperc2",
-				"NaamArtikel": "ProductName",
-				"TypeRecord": "TypeRecord",
-				"Vasteprijs": "FixedPrice",
-				"ZInrartikel": "ZIndexNumber"
     		}
 		}
 		return mappings[distributor.DistributorName];

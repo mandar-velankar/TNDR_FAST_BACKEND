@@ -116,9 +116,11 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         inner join TransactionalData.PT_TMOFRS as offer 
             on offer.TenderID = tender.TenderID
             and offer.Active = 1
+            and offer.ActiveOffer = 1
         inner join TransactionalData.PT_TMOFPR as product 
             on product.OfferID = offer.OfferID
             and product.Active = 1
+            and product.ActiveProduct = 1
         inner join TransactionalData.ContractInfomation as contract
             on contract.OfferID = offer.OfferID
             and contract.ProductCode = product.ProductCode
