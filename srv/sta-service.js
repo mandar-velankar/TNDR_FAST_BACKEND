@@ -128,6 +128,7 @@ module.exports = async (srv) => {
 		MandatoryTableFieldsCountry, 
 		MailTemplate, 
 		PT_TMUSER, 
+		PT_TMUSERCTRY,
 		ExcelAttachment, 
 		WordAttachment, 
 		WordTemplateCountry,
@@ -508,16 +509,10 @@ module.exports = async (srv) => {
             tmvQuery.columns(req.query.SELECT.columns);
         }
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
-		let createdByFullWhere = [];
 
-		// Only for Taiwan this code will return the offers which belongs to the current user  
-		if (Array.isArray(countryCode) && countryCode.length > 0 && countryCode[0] === 'TW') {
-			createdByFullWhere = ServiceHelper.buildFullWhere('createdBy', '=', req.user.id) || [];
-		}
-
-        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(createdByFullWhere));
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
-        req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
+        req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
 
         result = await tx.run(tmvQuery);
 
@@ -531,6 +526,15 @@ module.exports = async (srv) => {
 		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		const instituteTerritory = await SELECT.from(InstituteTerritory);
+
+		// Taiwan doesn't have standart limit method tmvQuery.limit(req.query.SELECT.limit); instead of that returning empty array if offset and result lengts are same
+		if (
+			Array.isArray(countryCode) && 
+			countryCode.length > 0 && countryCode[0] === 'TW' && 
+			req.query.SELECT.limit?.offset?.val == result.length
+			) {
+			return [];
+		}
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
@@ -568,6 +572,18 @@ module.exports = async (srv) => {
 			  	return territoryIndex !== -1;
 			});
 		});
+
+		// Taiwan doesn't have standart limit method tmvQuery.limit(req.query.SELECT.limit); instead of that returning empty array if offset and final result lengts are same
+		if (
+			Array.isArray(countryCode) && 
+			countryCode.length > 0 && 
+			countryCode[0] === 'TW' && 
+			(
+				req.query.SELECT.limit?.offset?.val == finalFilteredResults.length || 
+				req.query.SELECT.limit?.offset?.val == territoryMatches.length)
+			) {
+			return [];
+		}
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
@@ -2338,11 +2354,11 @@ module.exports = async (srv) => {
 
 			async function fnCalculateFields(item){
 				item.NetOfferPrice = await calculateNetOfferPrice(item);
-				item.NetOfferPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : roundToDecimalPlaces(item.NetOfferPrice,2);
+				item.NetOfferPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : roundToDecimalPlaces(item.NetOfferPrice,2);
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-				item.Discount = item.Region === 'MEA' ? roundToDecimalPlaces(item.Discount,3) : (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : roundToDecimalPlaces(item.Discount,2);
+				item.Discount = (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.Discount,3) : roundToDecimalPlaces(item.Discount,2);
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
-				item.NetPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
+				item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : roundToDecimalPlaces(item.NetPrice,2);
 			};
 		}
 		catch(error){
@@ -2365,9 +2381,9 @@ module.exports = async (srv) => {
 
 			async function fnCalculateFields(item){
 				item.NetOfferPrice = await calculateNetOfferPrice(item);
-				item.NetOfferPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : roundToDecimalPlaces(item.NetOfferPrice,2);
+				item.NetOfferPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : roundToDecimalPlaces(item.NetOfferPrice,2);
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
-				item.NetPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
+				item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : roundToDecimalPlaces(item.NetPrice,2);
 			};
 		}
 		catch(error){
@@ -5183,14 +5199,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
 			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_PRICE, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_PRICE, 4, 4) : ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
-			prd.NET_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 4, 4) : ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
+			prd.NET_PRICE = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_PRICE, 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
+			prd.NET_SALES_OFFER_CURRENCY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
 			prd.NegotiationPrice = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NegotiationPrice, 3, 3) : ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
 			prd.Price0 = prd.Region === 'MEA' ? prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 3, 3) : prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
 			prd.Price1 = prd.Region === 'MEA' ? prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 3, 3) : prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
@@ -5203,6 +5219,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
 			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
 			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? prd.EARLIEST_DATE && ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
+			prd.Product_Custom_Integer_1 = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.Product_Custom_Integer_1, 0, 0) : prd.Product_Custom_Integer_1;
+			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.REQUESTED_QUANTITY, 0, 0) : prd.REQUESTED_QUANTITY;
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
@@ -5670,9 +5688,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		try {
 			const { data: {tenderId, offerID, url, CountryCode} } = req;
 			const tx = cds.tx(req);
-			const userInfo = await tx.run(SELECT.from(PT_TMUSER).where({
-				Role: { in: ['Supply Management', 'Compliance Officer', 'Price Management', 'Global Strategic Marketing'] }
-			  }));
+			const userInfo = await tx.run(
+				SELECT.from(PT_TMUSERCTRY)
+					.columns('User.CWID', 'User.Role', 'User.UserName', 'User.UserEmail', 'CountryCode' )
+					.where({ CountryCode: CountryCode, 'User.Role': { in: ['Supply Management', 'Compliance Officer', 'Price Management', 'Global Strategic Marketing'] }})
+			);
 			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
 			const offerValidation = await buildOfferValidation(tx, whereOffer);
 			const mailTemplate = await getMailTemplate('HematologyNotificationMailTemplate');
