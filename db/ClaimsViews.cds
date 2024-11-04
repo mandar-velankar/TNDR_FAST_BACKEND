@@ -313,7 +313,7 @@ entity ExtractClaimDataView  as select from ClaimsData.ClaimFiles as clmf
 			clmd.Status,
 			clmd.Type,
 			clmd.BrandId,
-}where  clmf.Status = 'Approved (All QC passed)' or clmf.Status = 'Approved (Some QC failed)'
+}
 	group by clmf.ID,
 			clmd.ID,
 			productPack.PRODUCTPACKNAME,
