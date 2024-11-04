@@ -1,6 +1,7 @@
 const express = require("express");
 const cds = require("@sap/cds");
 const proxy = require("@sap/cds-odata-v2-adapter-proxy");
+const compression = require("compression");
 const args = process.argv.slice(2);
 const host = "localhost";
 const port = process.env.PORT || 4004;
@@ -17,6 +18,16 @@ const jobManager = require("./jobs/JobManager");
   }catch(ex){
     console.log(ex);
   }
+
+function shouldCompress(req, res) {
+  const type = res.getHeader("Content-Type");
+  if (type && typeof type === "string" && type.startsWith("multipart/mixed")) {
+    return true;
+  }
+  // fallback to standard filter function
+  return compression.filter(req, res);
+}
+app.use(compression({ filter: shouldCompress }));
   // OData V2
   app.use(proxy({
     path: "v2",
