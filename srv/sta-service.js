@@ -508,10 +508,11 @@ module.exports = async (srv) => {
         if (req.query.SELECT.columns?.[0]?.func !== "count") {
             tmvQuery.columns(req.query.SELECT.columns);
         }
-        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
+
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
-        req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
+        req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
 
         result = await tx.run(tmvQuery);
 
@@ -525,6 +526,15 @@ module.exports = async (srv) => {
 		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		const instituteTerritory = await SELECT.from(InstituteTerritory);
+
+		// Taiwan doesn't have standart limit method tmvQuery.limit(req.query.SELECT.limit); instead of that returning empty array if offset and result lengts are same
+		if (
+			Array.isArray(countryCode) && 
+			countryCode.length > 0 && countryCode[0] === 'TW' && 
+			req.query.SELECT.limit?.offset?.val == result.length
+			) {
+			return [];
+		}
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
@@ -544,7 +554,7 @@ module.exports = async (srv) => {
 		// 	return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
 		// 	});
 		// });
-		resultsArray = resultsArray.filter(ra => ra.createdBy === cwid);
+		// resultsArray = resultsArray.filter(ra => ra.createdBy === cwid);
 		const territoryMatches = resultsArray.filter(item => {
 			const filteredInstituteTerritory = instituteTerritory.filter(it => it.InstituteID === item.InstituteID);
 			
@@ -562,6 +572,18 @@ module.exports = async (srv) => {
 			  	return territoryIndex !== -1;
 			});
 		});
+
+		// Taiwan doesn't have standart limit method tmvQuery.limit(req.query.SELECT.limit); instead of that returning empty array if offset and final result lengts are same
+		if (
+			Array.isArray(countryCode) && 
+			countryCode.length > 0 && 
+			countryCode[0] === 'TW' && 
+			(
+				req.query.SELECT.limit?.offset?.val == finalFilteredResults.length || 
+				req.query.SELECT.limit?.offset?.val == territoryMatches.length)
+			) {
+			return [];
+		}
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
@@ -1394,13 +1416,7 @@ module.exports = async (srv) => {
 			awardedProductsHaveOutcome && await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded');
 	
 			if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
-				const recipientCWIDs = ['EHMHV', 'EFUAO'];
-				const recipients = await SELECT.from(PT_TMUSER).where({CWID: {in: recipientCWIDs}});
-				const promises = recipients.map(recipient => {
-					return addOutgoingMail(req, "TaiwanResultsRecordedNotification", `Results recorded for Price Request ID:${req.data.OfferID}`, {RecipientEmail: recipient.UserEmail, RecipientName: recipient.UserName});
-				});
-	
-				await Promise.all(promises);
+				await sendTWResultsRecordedNotification(req);
 			}
 		}
 		
@@ -1424,6 +1440,16 @@ module.exports = async (srv) => {
 				? await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
 				: await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', '');
 		}
+	}
+
+	const sendTWResultsRecordedNotification = async function (req) {
+		const recipientCWIDs = ['TWHWE', 'TWMLI'];
+		const recipients = await SELECT.from(PT_TMUSER).where({CWID: {in: recipientCWIDs}});
+		const promises = recipients.map(recipient => {
+			return addOutgoingMail(req, "TaiwanResultsRecordedNotification", `Results recorded for Price Request ID:${req.data.OfferID}`, {RecipientEmail: recipient.UserEmail, RecipientName: recipient.UserName});
+		});
+
+		await Promise.all(promises);
 	}
 
 	const addOutgoingMail = async function (req, templateName, subject, RecipientInfo) {
@@ -2328,11 +2354,11 @@ module.exports = async (srv) => {
 
 			async function fnCalculateFields(item){
 				item.NetOfferPrice = await calculateNetOfferPrice(item);
-				item.NetOfferPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : roundToDecimalPlaces(item.NetOfferPrice,2);
+				item.NetOfferPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : roundToDecimalPlaces(item.NetOfferPrice,2);
 				item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-				item.Discount = item.Region === 'MEA' ? roundToDecimalPlaces(item.Discount,3) : (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : roundToDecimalPlaces(item.Discount,2);
+				item.Discount = (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.Discount,3) : roundToDecimalPlaces(item.Discount,2);
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
-				item.NetPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
+				item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : roundToDecimalPlaces(item.NetPrice,2);
 			};
 		}
 		catch(error){
@@ -2355,9 +2381,9 @@ module.exports = async (srv) => {
 
 			async function fnCalculateFields(item){
 				item.NetOfferPrice = await calculateNetOfferPrice(item);
-				item.NetOfferPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : roundToDecimalPlaces(item.NetOfferPrice,2);
+				item.NetOfferPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetOfferPrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.NetOfferPrice,3) : roundToDecimalPlaces(item.NetOfferPrice,2);
 				item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
-				item.NetPrice = item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
+				item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(item.NetPrice,3) : roundToDecimalPlaces(item.NetPrice,2);
 			};
 		}
 		catch(error){
@@ -3273,6 +3299,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			Contract_Length1: offer.NumberOfExtension,
 			Contract_Length2: offer.Contract_Length2,
 			Contract_Length3: offer.Contract_Length3,
+			InternalBidDueDate: offer.InternalBidDueDate,
 			Tender_Custom_Integer_1: tender?.Custom_Integer_1,
             Tender_Custom_Integer_2: tender?.Custom_Integer_2,
             Tender_Custom_Integer_3: tender?.Custom_Integer_3,
@@ -5018,6 +5045,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						dateFormatUK: (input) => {
 							return input.split("-").reverse().join("-").replaceAll("-","/");
 						},
+						dateFormatHEM: (input) => {
+							return input.split("-").reverse().join("-").replaceAll("-",".");
+						},
 						currentdatePK: (input) => {
 							const curr_date = new Date();
 							return curr_date.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
@@ -5169,14 +5199,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
 			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_PRICE, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_PRICE, 4, 4) : ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
-			prd.NET_SALES_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 3, 3) : prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 4, 4) : ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
+			prd.NET_PRICE = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_PRICE, 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
+			prd.NET_SALES_OFFER_CURRENCY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.NET_SALES_OFFER_CURRENCY, 2, 2);
 			prd.NegotiationPrice = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.NegotiationPrice, 3, 3) : ServiceHelper.formatNumber(prd.NegotiationPrice, 2, 2);
 			prd.Price0 = prd.Region === 'MEA' ? prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 3, 3) : prd.Price0 && ServiceHelper.formatNumber(Number(prd.Price0.replace(/\,/g,'')), 2, 2);
 			prd.Price1 = prd.Region === 'MEA' ? prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 3, 3) : prd.Price1 && ServiceHelper.formatNumber(Number(prd.Price1.replace(/\,/g,'')), 2, 2);
@@ -5189,19 +5219,28 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.REQ_PRICE_UNIT_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_UNIT_OFFER_CURRENCY, 2, 2);
 			prd.REQ_PRICE_PACK_OFFER_CURRENCY = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 3, 3) : ServiceHelper.formatNumber(prd.REQ_PRICE_PACK_OFFER_CURRENCY, 2, 2); 
 			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? prd.EARLIEST_DATE && ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
+			prd.Product_Custom_Integer_1 = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.Product_Custom_Integer_1, 0, 0) : prd.Product_Custom_Integer_1;
+			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.REQUESTED_QUANTITY, 0, 0) : prd.REQUESTED_QUANTITY;
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
 		offerValidation.VAT_TOTAL = ServiceHelper.formatNumber(offerValidation.VAT_TOTAL, 2, 2);
 		offerValidation.AMOUNT_IN_NUMBERS_VAT = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS_VAT, 2, 2);
-		offerValidation.OFFERDATE = productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERDATE && ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? offerValidation.OFFERDATE && ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERDATE);
-		offerValidation.OFFERVALIDITY = productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD-MMM-YYYY') : (offerValidation.COUNTRYCODE === 'AU' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.OFFERVALIDITY);
-		offerValidation.PUBLICATION_DATE = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
-		offerValidation.InternalDueDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.InternalDueDate && ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
-		offerValidation.BID_DUE_DATE = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
-		offerValidation.ExpectedAwardDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
+		offerValidation.OFFERDATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM'))
+									? offerValidation.OFFERDATE && ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD', 'DD.MM.YYYY')
+									: (productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERDATE && ServiceHelper.formatDate(offerValidation.OFFERDATE, 'YYYY-MM-DD', 'DD-MMM-YYYY') : offerValidation.OFFERDATE);
+		offerValidation.OFFERVALIDITY = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM'))
+										? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD', 'DD.MM.YYYY')
+										: (productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD', 'DD-MMM-YYYY') : offerValidation.OFFERVALIDITY);
+		offerValidation.PUBLICATION_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
+		offerValidation.InternalDueDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.InternalDueDate && ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
+		offerValidation.BID_DUE_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
+		offerValidation.ExpectedAwardDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
 		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
 		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpiryDate;
+		offerValidation.Offer_Custom_Date_1 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_1 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_1, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_1;
+		offerValidation.Offer_Custom_Date_4 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_4 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_4, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_4;
+		offerValidation.Offer_Custom_Date_5 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_5 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_5, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_5;
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
@@ -5671,6 +5710,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	});
 	function mappedHematologyNotificationData (userInfo,mailTemplate,req,offerValidation,createdByName,CountryNameReplace, offer){
+		// Format Date
+		offer.InternalBidDueDate  = offer.InternalBidDueDate  && ServiceHelper.formatDate(offer.InternalBidDueDate , 'YYYY-MM-DD','DD.MM.YYYY');
+		offer.OfferDueDate  = offer.OfferDueDate  && ServiceHelper.formatDate(offer.OfferDueDate , 'YYYY-MM-DD','DD.MM.YYYY');
 		return userInfo.map(data =>{
 			return {
 				CountryCode: req.data.CountryCode,
