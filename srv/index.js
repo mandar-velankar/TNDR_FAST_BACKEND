@@ -43,6 +43,7 @@ const jobManager = require("./jobs/JobManager");
     await cds.serve("CpiService").from("./gen/srv/").in(app);
     await cds.serve("BrazilContractingService").from("./gen/srv/").in(app);
     await cds.serve("StandardAppService").from("./gen/srv/").in(app);
+    await cds.serve("ClaimsService").from("./gen/srv/").in(app);
     await cds.serve("UITemplateService").from("./gen/srv/").in(app);
     await cds.serve("ExternalService").from("./gen/srv/").in(app);
 

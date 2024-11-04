@@ -431,6 +431,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     };
 
     entity StandardTenderPriceConditionView as select from TransactionalDataViews.StandardTenderPriceConditionView;
+
+    entity PriceConditionSpecialPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionWithMaximumPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
         CountryCode,
         Region,
@@ -912,7 +915,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         content    : LargeBinary;
     }
 
-    entity NLOfferDistributors as projection on TransactionalData.NLOfferDistributors;
+    entity AwardedOfferDistributors as projection on TransactionalData.AwardedOfferDistributors;
      entity ExtractNLHistoricalInformation {
         key templateId : Integer;
             content    : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -927,7 +930,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }where ApprovalStatus = 'Waiting'
     group by OfferId, productcode, ApproverName, ApprovalStatus;
     
-   entity NLDistributorsView as select from TransactionalData.NLOfferDistributors{
+   entity NLDistributorsView as select from TransactionalData.AwardedOfferDistributors{
         key OfferID,
         key ProductPackID,
         case
@@ -1097,4 +1100,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity ComplianceOfficerView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS; 
     entity GlobalStrategicMarketingView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;   
     entity SupplyManagementView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;     
+    entity PLOwnerNameView  @(cds.redirection.target:false) as select from AdminData.PT_TMUSER{
+        key UserID,
+            UserName,
+            CWID,
+            UserEmail,
+            Role,
+            BU,
+            Countries.CountryCode
+    } where Countries.CountryCode = 'PL' and Role = 'KAM';
 }
