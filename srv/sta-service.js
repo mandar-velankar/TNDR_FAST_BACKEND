@@ -1249,6 +1249,11 @@ module.exports = async (srv) => {
 			try{
 			// validate form
 				if(req.data.CountryCode !== "AU"){
+					if(req.data.ConditionType === 'PriceWithFOC' || req.data.ConditionType === 'DiscountWithFOC')
+						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(req.data.BasePrice,3) : roundToDecimalPlaces(req.data.BasePrice,2);
+					if(req.data.ConditionType === 'Price' || req.data.ConditionType === 'Discount'){
+						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : roundToDecimalPlaces(req.data.BasePrice,2);
+					}
 					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 				}
 			}
