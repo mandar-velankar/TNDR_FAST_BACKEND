@@ -119,7 +119,7 @@ module.exports = async (srv) => {
 		TransCompetitorResult,
 		OutgoingMails,
 		NLPriceConditions,
-		NLOfferDistributors,
+		AwardedOfferDistributors,
 		ContractInfomation
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
@@ -5760,19 +5760,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			else if(invalidZIFields.length > 0){
 				res.warn(400,`The following PRK values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` );
 			}
-			else{
-				// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
-				let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
-				promises = products.map(product => {
-					const productPack = ctryProductPack.find(pck => pck.CODE1 == product["PRK"]);
+			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+			promises = products.filter(product => product["PRK"]).map(product => {
+				const productPack = ctryProductPack.find(pck => pck.CODE1 == product["PRK"]);
+				if (productPack) {
 					const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
 					const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
 					if (productIndex === -1) {
 						sorter++; // Increment sorter only for new products
 					}
 					return promise;
-				});
-			}
+				}
+				return []
+			});
 
 			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
 			await Promise.all([promises]);
@@ -5783,7 +5784,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 	});
 
-	async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
+	 async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
 		const mappedProduct = {
 			TenderID: offer.TenderID,
 			OfferID: offer.OfferID,
@@ -5812,12 +5813,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		if (productIndex > -1) {
 			// deleting SORTER to avoid incrementing already created products SORTER
 			delete mappedProduct.SORTER;
-			return await UPDATE(PT_TMOFPR).with(mappedProduct).where({
+			return UPDATE(PT_TMOFPR).with(mappedProduct).where({
 				OfferID: offer.OfferID,
 				ProductCode: productPack.PRODUCTPACKID
 			})
 		}else {
-			return await INSERT(mappedProduct).into(PT_TMOFPR);
+			return INSERT(mappedProduct).into(PT_TMOFPR);
 		}
 	}
 
@@ -5856,26 +5857,27 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         }
 	});
 
-	srv.on('CREATE', 'NLOfferDistributors', async (req, res) => {
+	srv.on('CREATE', 'AwardedOfferDistributors', async (req, res) => {
 		try {
-			const { DistributorName, ProductPackName, OfferID, AssignedProductCode } = req.data;
+			const { DistributorName, ProductPackName, OfferID, AssignedProductCode, CountryCode } = req.data;
 			let splitedDistributors = DistributorName.split(';');
 			const splitedProductPacks = ProductPackName.split(';');
-			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: "NL" });
+			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: CountryCode});
 			const productPacks = await SELECT.from(PT_TMPRDPCK);
-			const nlOfferDistributors = await SELECT.from(NLOfferDistributors).where({
-				OfferID: OfferID
+			const awardedOfferDistributors = await SELECT.from(AwardedOfferDistributors).where({
+				OfferID: OfferID,
+				CountryCode: CountryCode
 			});
 
 	
-			const deletePromises = nlOfferDistributors.map(el => {
+			const deletePromises = awardedOfferDistributors.map(el => {
 				if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode == AssignedProductCode) {
-					return DELETE.from(NLOfferDistributors).where({
+					return DELETE.from(AwardedOfferDistributors).where({
 						OfferID: OfferID,
 						DistributorID: el.DistributorID
 					});
 				} else if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode !== AssignedProductCode && el.ProductPackID == AssignedProductCode) {
-					return DELETE.from(NLOfferDistributors).where({
+					return DELETE.from(AwardedOfferDistributors).where({
 						OfferID: OfferID,
 						ProductPackID: AssignedProductCode,
 						DistributorID: el.DistributorID
@@ -5886,22 +5888,23 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					(!splitedProductPacks.includes(`${el.ProductPackID}`) && 
 					el.AssignedProductCode !== AssignedProductCode && 
 					el.ProductPackID == AssignedProductCode)) {
-					return DELETE.from(NLOfferDistributors).where({
+					return DELETE.from(AwardedOfferDistributors).where({
 						OfferID: OfferID,
 						ProductPackID: el.ProductPackID
 					});
 				}
 			}).filter(el => el);
 	
-			let mappedNLOfferDistributors = [];
+			let mappedAwardedOfferDistributors = [];
 	
 			if (DistributorName && ProductPackName) {
 				splitedDistributors.forEach(dId => {
 					splitedProductPacks.forEach(pId => {
 						const distributor = distributors.find(dist => dist.DistributorID == dId);
 						const product = productPacks.find(product => product.PRODUCTPACKID == pId);
-						mappedNLOfferDistributors.push({
+						mappedAwardedOfferDistributors.push({
 							OfferID: OfferID,
+							CountryCode: CountryCode,
 							DistributorName: distributor?.DistributorName,
 							ProductPackName: product?.PRODUCTPACKNAME,
 							DistributorID: dId,
@@ -5912,25 +5915,25 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				});
 			}
 	
-			// Remove items already saved in db from mappedNLOfferDistributors
-			mappedNLOfferDistributors = mappedNLOfferDistributors.filter(el => 
-				!nlOfferDistributors.some(nlo => 
+			// Remove items already saved in db from mappedAwardedOfferDistributors
+			mappedAwardedOfferDistributors = mappedAwardedOfferDistributors.filter(el => 
+				!awardedOfferDistributors.some(nlo => 
 					el.OfferID == nlo.OfferID && 
 					el.ProductPackID == nlo.ProductPackID && 
 					el.DistributorID == nlo.DistributorID
 				)
 			);
 			let insertPromise;
-			if (mappedNLOfferDistributors.length > 0) {
-				insertPromise = INSERT.into(NLOfferDistributors).entries(mappedNLOfferDistributors);
+			if (mappedAwardedOfferDistributors.length > 0) {
+				insertPromise = INSERT.into(AwardedOfferDistributors).entries(mappedAwardedOfferDistributors);
 			}
 	
 			await Promise.all([...deletePromises, insertPromise]);
 	
 			return req.data;
 		} catch (error) {
-			console.error('Error in NLOfferDistributors CREATE', error);
-			return req.reject(403, error?.message || "Error in NLOfferDistributors");
+			console.error('Error in AwardedOfferDistributors CREATE', error);
+			return req.reject(403, error?.message || "Error in AwardedOfferDistributors");
 		}
 	});
 	srv.on('CREATE', 'ContractInfomation', async (req, res) => {

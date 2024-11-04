@@ -288,7 +288,9 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
             mediaType    : String      @Core.IsMediaType;
     };
     entity NLWPPExcelExtract as select from WholesalePurchasePriceView as wpp
-    left join PT_TMDIST as dist on wpp.DistributorID = dist.DistributorID{
+    left join PT_TMDIST as dist on wpp.DistributorID = dist.DistributorID
+    left join MasterCountryCurrencies as ctryCurrency
+	    on ctryCurrency.CountryCode = wpp.CountryCode{
         MaterialNumbers,
         GOV_CODE,
         PRODUCTPACKNAME,
@@ -303,8 +305,28 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         WPPWithoutTax,
         StartDate,
         EndDate,
-        Status
-    };
+        Status,
+        ctryCurrency.Currency,
+        Type as CombinedWPPMarginNetPriceValues,
+        min(EndDate) as minEndDate: Date
+    }group by 
+        MaterialNumbers,
+        GOV_CODE,
+        PRODUCTPACKNAME,
+        PRESENTATION,
+        wpp.DistributorID,
+        dist.DistributorName,
+        Bundle,
+        OuterCarton,
+        PPP,
+        Type,
+        Margin,
+        WPPWithoutTax,
+        StartDate,
+        EndDate,
+        Status,
+        ctryCurrency.Currency;
+
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
 }

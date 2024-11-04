@@ -18,6 +18,7 @@
         "cron": "^1.8.2",
         "cron-es6": "^1.0.3",
         "cron-job-manager": "^2.2.1",
+        "data-to-json": "^1.0.5",
         "dynamic-html-pdf": "^1.0.2",
         "easy-template-x": "^2.1.0",
         "export-to-csv": "^1.2.1",

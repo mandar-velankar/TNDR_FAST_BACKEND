@@ -922,8 +922,12 @@ module.exports = (srv) => {
 		excelData.forEach(item => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
 			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
-			item.WPPWithoutTax = ServiceHelper.formatCurrency(item.WPPWithoutTax, 'nl-NL', 2, 2, false);
+			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
 			item.Margin = (item.Margin*100).toFixed(2)+"%";
+			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Neto Prijs ${item.WPPWithoutTax} ${item.Currency}`;
+			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD-MM-YYYY');
+			item.EndDate = item.EndDate && ServiceHelper.formatDate(item.EndDate, '', 'DD-MM-YYYY');
+			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD-MM-YYYY');
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
