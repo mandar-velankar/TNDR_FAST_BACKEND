@@ -509,16 +509,10 @@ module.exports = async (srv) => {
             tmvQuery.columns(req.query.SELECT.columns);
         }
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
-		let createdByFullWhere = [];
 
-		// Only for Taiwan this code will return the offers which belongs to the current user  
-		if (Array.isArray(countryCode) && countryCode.length > 0 && countryCode[0] === 'TW') {
-			createdByFullWhere = ServiceHelper.buildFullWhere('createdBy', '=', req.user.id) || [];
-		}
-
-        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where).where(createdByFullWhere));
+        req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
-        req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
+        req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
 
         result = await tx.run(tmvQuery);
 
@@ -532,6 +526,15 @@ module.exports = async (srv) => {
 		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		const instituteTerritory = await SELECT.from(InstituteTerritory);
+
+		// Taiwan doesn't have standart limit method tmvQuery.limit(req.query.SELECT.limit); instead of that returning empty array if offset and result lengts are same
+		if (
+			Array.isArray(countryCode) && 
+			countryCode.length > 0 && countryCode[0] === 'TW' && 
+			req.query.SELECT.limit?.offset?.val == result.length
+			) {
+			return [];
+		}
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
@@ -569,6 +572,18 @@ module.exports = async (srv) => {
 			  	return territoryIndex !== -1;
 			});
 		});
+
+		// Taiwan doesn't have standart limit method tmvQuery.limit(req.query.SELECT.limit); instead of that returning empty array if offset and final result lengts are same
+		if (
+			Array.isArray(countryCode) && 
+			countryCode.length > 0 && 
+			countryCode[0] === 'TW' && 
+			(
+				req.query.SELECT.limit?.offset?.val == finalFilteredResults.length || 
+				req.query.SELECT.limit?.offset?.val == territoryMatches.length)
+			) {
+			return [];
+		}
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
