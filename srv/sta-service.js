@@ -5226,6 +5226,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? prd.EARLIEST_DATE && ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
 			prd.Product_Custom_Integer_1 = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.Product_Custom_Integer_1, 0, 0) : prd.Product_Custom_Integer_1;
 			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.REQUESTED_QUANTITY, 0, 0) : prd.REQUESTED_QUANTITY;
+			if (prd.COUNTRY_CODE.includes('HM') && prd.PriceCondition?.[0]?.FreeGoodsOther?.[0]) {
+				const freeGoodsOther = prd.PriceCondition[0].FreeGoodsOther[0];
+				if (['STP', 'ABS'].includes(freeGoodsOther.FreeGoodsOther_ABS_PCT)) {
+					freeGoodsOther.FreeGoodsOther = freeGoodsOther.FreeGoodsOther && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther, 0, 0);
+					freeGoodsOther.FreeGoodsOther_Step = freeGoodsOther.FreeGoodsOther_Step && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther_Step, 0, 0);
+				}
+			}
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
