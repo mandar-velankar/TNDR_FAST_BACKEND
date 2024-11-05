@@ -1493,10 +1493,21 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
         else priceCondition.Level3Discount1
     end as Level3Discount1:Double,
     offer.Currency,
-    priceCondition.Price0,
-    priceCondition.Price1,
-    priceCondition.Price2,
-    priceCondition.Level2Discount1,
+    case 
+        when priceConditionClassification.ConditionType = 'WithMaximumPrice'
+            then ifnull(priceCondition.OfferPrice, priceCondition.Price1 * (1 - ifnull(priceCondition.Level2Discount1, 0)))
+        else priceCondition.OfferPrice
+    end as SpecialPrice: Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Price0, 0) as Price0: Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Price1, 0) as Price1: Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Price2, 0) as Price2: Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Level2Discount1, 0) as Level2Discount1: Double,
+    @Core.Computed: false
+    ifnull(product.Price.COGS, product.Cogs.COGS) as COGS: Double,
     @Core.Computed: false
     ifnull(priceCondition.Last12MonthsVolumeMainCustomer,1) as Last12MonthsVolumeMainCustomer:Integer,
     @Core.Computed: false
