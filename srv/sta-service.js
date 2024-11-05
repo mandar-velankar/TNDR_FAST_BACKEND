@@ -1249,6 +1249,11 @@ module.exports = async (srv) => {
 			try{
 			// validate form
 				if(req.data.CountryCode !== "AU"){
+					if(req.data.ConditionType === 'PriceWithFOC' || req.data.ConditionType === 'DiscountWithFOC')
+						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : item.Region === 'MEA' ? roundToDecimalPlaces(req.data.BasePrice,3) : roundToDecimalPlaces(req.data.BasePrice,2);
+					if(req.data.ConditionType === 'Price' || req.data.ConditionType === 'Discount'){
+						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : roundToDecimalPlaces(req.data.BasePrice,2);
+					}
 					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 				}
 			}
@@ -5221,6 +5226,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? prd.EARLIEST_DATE && ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
 			prd.Product_Custom_Integer_1 = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.Product_Custom_Integer_1, 0, 0) : prd.Product_Custom_Integer_1;
 			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.REQUESTED_QUANTITY, 0, 0) : prd.REQUESTED_QUANTITY;
+			if (prd.COUNTRY_CODE.includes('HM') && prd.PriceCondition?.[0]?.FreeGoodsOther?.[0]) {
+				const freeGoodsOther = prd.PriceCondition[0].FreeGoodsOther[0];
+				if (['STP', 'ABS'].includes(freeGoodsOther.FreeGoodsOther_ABS_PCT)) {
+					freeGoodsOther.FreeGoodsOther = freeGoodsOther.FreeGoodsOther && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther, 0, 0);
+					freeGoodsOther.FreeGoodsOther_Step = freeGoodsOther.FreeGoodsOther_Step && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther_Step, 0, 0);
+				}
+			}
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
@@ -5234,6 +5246,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 										: (productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD', 'DD-MMM-YYYY') : offerValidation.OFFERVALIDITY);
 		offerValidation.PUBLICATION_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
 		offerValidation.InternalDueDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.InternalDueDate && ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
+		offerValidation.InternalBidDueDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.InternalBidDueDate && ServiceHelper.formatDate(offerValidation.InternalBidDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalBidDueDate;
 		offerValidation.BID_DUE_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
 		offerValidation.ExpectedAwardDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
 		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
