@@ -1493,6 +1493,7 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
         else priceCondition.Level3Discount1
     end as Level3Discount1:Double,
     offer.Currency,
+    @Core.Computed: false
     case 
         when priceConditionClassification.ConditionType = 'WithMaximumPrice'
             then ifnull(priceCondition.OfferPrice, priceCondition.Price1 * (1 - ifnull(priceCondition.Level2Discount1, 0)))
