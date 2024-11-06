@@ -1496,7 +1496,9 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     case 
         when priceConditionClassification.ConditionType = 'WithMaximumPrice'
             then ifnull(priceCondition.OfferPrice, priceCondition.Price1 * (1 - ifnull(priceCondition.Level2Discount1, 0)))
-        else priceCondition.OfferPrice
+        when priceConditionClassification.ConditionType = 'SpecialPrice'
+            then priceCondition.OfferPrice
+        else null
     end as SpecialPrice: Double,
     @Core.Computed: false
     ifnull(priceCondition.Price0, 0) as Price0: Double,

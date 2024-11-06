@@ -434,11 +434,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity PriceConditionSpecialPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
         *,
-        ifnull((SpecialPrice - COGS) / SpecialPrice, Level2Discount2) as Margin: Double
+        ifnull(Level2Discount2, (SpecialPrice - COGS) / SpecialPrice) as Margin: Double
     } where CountryCode = 'PL';
     entity PriceConditionWithMaximumPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
         *,
-        ifnull((SpecialPrice - COGS) / SpecialPrice, Level2Discount2) as Margin: Double
+        ifnull(Level2Discount2, (SpecialPrice - COGS) / SpecialPrice) as Margin: Double
     } where CountryCode = 'PL';
     entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
         CountryCode,
