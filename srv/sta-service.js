@@ -3755,6 +3755,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
 		let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 		let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
+		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
 
 		//where statement
 		let whereApproverType = {
@@ -3773,7 +3774,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory, userInfo);
 
 			//Get corresponding Product Distributor ID
 			const whereProductId = {
@@ -4473,7 +4474,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory, userInfo) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 
@@ -4494,6 +4495,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 		if (offer.APPROVAL_TYPE === 17) {
 			productValidation = await buildProductValidationForType17(tx, offer, product, aApproverTypes);
+		}
+		if (offer.APPROVAL_TYPE === 18) {
+			productValidation = await buildProductValidationForType18(tx, offer, product, aApproverTypes, userInfo);
 		}
 		return {
 			CommnonProductInfo: commnonProductInfo,
@@ -4727,6 +4731,27 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		results.IN_POLICY = true
 		return results;
 			
+	}
+	async function buildProductValidationForType18(tx, offer, product, aApproverTypes, { Role }) {
+		let results = { IN_POLICY: false };
+		const role = Role?.toLowerCase().replace(/ /g, '');
+	
+		const validationMap = {
+			'kam': [{ type: 'nsm', value: 3 }, { type: 'tm', value: 3 }],
+			'nsm': [{ type: 'tm', value: 3 }, { type: 'nsm', value: 1 }],
+			'tendermanager': [{ type: 'nsm', value: 2 }, { type: 'tm', value: 1 }]
+		};
+	
+		(validationMap[role] || []).forEach(({ type, value }) => {
+			aApproverTypes.map(oApproverType => {
+				if (oApproverType.ApproverType.toLowerCase().replace(/ /g, '').includes(type)) {
+					oApproverType.ValidationType = value;
+				}
+			});
+		});
+		
+		results.IN_POLICY = true
+		return results;
 	}
 	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
 		const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === 'Squad Lead');
