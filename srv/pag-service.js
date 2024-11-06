@@ -1534,7 +1534,7 @@ module.exports = async (srv) => {
                     KUNNR: curr.KUNNR && addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
                     MATNR: curr.MATNR && addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
                     YCIG: curr.REFVAL || null,   // Contract Reference
-                    KBETR: curr.KBETR.toString() || null,   // Condition Value
+                    KBETR: curr.KBETR && curr.KBETR.toString() || null,   // Condition Value
                     KPEIN: curr.CountryCode == 'IT' ? '1' : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? '10000' : null || null,   // Unit for price
                     DATAB: curr.DATAB || null,   // Effective Date
                     DATBI: curr.DATBI || null,   // Expiry Date
@@ -1542,9 +1542,9 @@ module.exports = async (srv) => {
                     KONMS: curr.KONMS || null,   // 
                     MEINS: curr.MEINS || null,   // 
                     BOMAT: curr.BOMAT && addLeadingZeros(curr.BOMAT, 18) || null,   // 
-                    KSTBM: curr.KSTBM || null,   // 
-                    MIKBAS: curr.MIKBAS || null,   // 
-                    MXBAS: curr.MXBAS || null   //
+                    KSTBM: curr.KSTBM && curr.KSTBM.toString() || null,   // 
+                    MIKBAS: curr.MIKBAS && curr.MIKBAS.toString() || null,   // 
+                    MXBAS: curr.MXBAS && curr.MXBAS.toString() || null   //
                 }
             );
             return prev;
