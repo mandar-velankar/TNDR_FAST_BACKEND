@@ -69,9 +69,12 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
 		// Calculate metadata for ClaimFiles
 		
-		const wholesalerPurchaseAmount = salesData.reduce((sum, row) => sum + (row.PurchasePrice * row.TotalDelivered), 0);
-		const netSales = salesData.reduce((sum, row) => sum + (row.FixedPrice * row.TotalDelivered), 0);
-		const totalClaimAmount = salesData.reduce((sum, row) => sum + row.ClaimTotal, 0);
+		let wholesalerPurchaseAmount = salesData.reduce((sum, row) => sum + (row.PurchasePrice * row.TotalDelivered), 0);
+		wholesalerPurchaseAmount = (!wholesalerPurchaseAmount && wholesalerPurchaseAmount !== 0) ? 0 : wholesalerPurchaseAmount;
+		let netSales = salesData.reduce((sum, row) => sum + (row.FixedPrice * row.TotalDelivered), 0);
+		netSales = (!netSales && netSales !== 0) ? 0 : netSales;
+		let totalClaimAmount = salesData.reduce((sum, row) => sum + row.ClaimTotal, 0);
+		totalClaimAmount = (!totalClaimAmount && totalClaimAmount !== 0) ? 0 : totalClaimAmount; 
 
 		const claimFile = {
 			ID						: UUID,
@@ -85,9 +88,9 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			FilePeriod				: filePeriodDate,
 			DistributorID			: this.distributorId,
 			DistributorName			: distributor.DistributorName,
-			WholesalerPurchaseAmount: isNaN(wholesalerPurchaseAmount) ? 0 : wholesalerPurchaseAmount,
-			NetSales				: isNaN(netSales) ? 0 : netSales,
-			TotalClaimAmount		: isNaN(totalClaimAmount) ? 0 : totalClaimAmount,
+			WholesalerPurchaseAmount: wholesalerPurchaseAmount,
+			NetSales				: netSales,
+			TotalClaimAmount		: totalClaimAmount,
 			Status					: "Pending",
 			ApprovalsCount			: 0
 		};
@@ -228,9 +231,11 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 																item.ContractEndDate >= dateFrom);
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
 			const offerID = fastOffer && fastOffer.OfferID || null;
-			const fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * curr.TotalDelivered) || 0;
-			const fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * curr.TotalDelivered) : ((fastOffer.OfferPrice * daValue) * curr.TotalDelivered)) : 0;
-			const totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
+			let fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * curr.TotalDelivered) || 0;
+			fastContractClaim = Math.round(fastContractClaim * 100) / 100;
+			let fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * curr.TotalDelivered) : ((fastOffer.OfferPrice * daValue) * curr.TotalDelivered)) : 0;
+			fastDistributionArrangementClaim = Math.round(fastDistributionArrangementClaim * 100) / 100;
+			let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
 			const wholesalerDisArPrice = curr.FixedPrice - (curr.Claim2Amount/curr.TotalDelivered);
 			const filteredClaimsData = claimsData.filter(item => item.OfferID == offerID && item.MainInstituteID == instituteId && item.ProductPackID == productCode);
 			const fastPendingCorrection = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + (row.TotalWholesalerClaim - row.TotalFASTClaim), 0) : 0;
@@ -252,11 +257,11 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					DistributorID                           : this.distributorId,
 					Date                                    : filePeriodDate,
 					Type                                    : curr.ClaimTotal < 0 ? 'Correction' : 'Claim',
-					Quantity                                : curr.TotalDelivered,
-					WholesalerPurchasePrice                 : curr.PurchasePrice, 
-					WholesalerDistributionArrangement       : distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(2)) : parseFloat((1 - wholesalerDisArPrice / curr.FixedPrice).toFixed(2)),
+					Quantity                                : (!curr.TotalDelivered && curr.TotalDelivered !== 0) ? null : curr.TotalDelivered,
+					WholesalerPurchasePrice                 : (!curr.PurchasePrice && curr.PurchasePrice !== 0) ? null : curr.PurchasePrice, 
+					WholesalerDistributionArrangement       : distributionAgreement && distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(2)) : parseFloat((1 - wholesalerDisArPrice / curr.FixedPrice).toFixed(2)) || null,
 					AppliedWholesalerCorrection             : curr.ClaimTotal < 0 ? curr.ClaimTotal : null,
-					WholesalerContractPrice                 : isNaN(curr.FixedPrice) ? null : curr.FixedPrice,
+					WholesalerContractPrice                 : (!curr.FixedPrice && curr.FixedPrice !== 0) ? null : curr.FixedPrice,
 					TotalClaim                              : curr.ClaimTotal > 0 ? curr.ClaimTotal : null,
 					MainCustomerForContract                 : instituteId,
 					FASTPendingCorrection                   : fastPendingCorrection,
@@ -267,13 +272,13 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					BrandName								: brandName,
 					Balance                                 : null,
 					BrandUsedVolume                         : null,
-					WholesalerContractPriceClaim            : isNaN(curr.Claim1Amount) ? null : curr.Claim1Amount,
-					WholesalerDistributionArrangementClaim  : isNaN(curr.Claim2Amount) ? null : curr.Claim2Amount,
-					TotalWholesalerClaim                    : isNaN(curr.ClaimTotal) ? null : curr.ClaimTotal,
+					WholesalerContractPriceClaim            : (!curr.Claim1Amount && curr.Claim1Amount !== 0) ? null : curr.Claim1Amount,
+					WholesalerDistributionArrangementClaim  : (!curr.Claim2Amount && curr.Claim2Amount !== 0) ? null : curr.Claim2Amount,
+					TotalWholesalerClaim                    : (!curr.ClaimTotal && curr.ClaimTotal !== 0) ? null : curr.ClaimTotal,
 					FASTContractClaim                       : fastContractClaim,
 					FASTDistributionArrangementClaim        : fastDistributionArrangementClaim,
 					TotalFASTClaim                          : totalFASTClaim,
-					PercentageDifference                    : fastOffer && ((curr.ClaimTotal - totalFASTClaim)/totalFASTClaim) || 0,
+					PercentageDifference                    : fastOffer && parseFloat(((curr.ClaimTotal - totalFASTClaim)/totalFASTClaim).toFixed(2)) || 0,
 					Status                                  : instituteName === 'Customer Not Found' ? 'CustomerNotFound' : (fastOffer ? (totalFASTClaim == curr.ClaimTotal) ? 'Passed' : 'Failed' :'Failed'),
 					Comment                                 : null,
 					FASTWholesalerPurchasePrice             : wppValue || 0,
@@ -282,8 +287,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					FASTDistributionAgreementType			: daType,
 					QC1Passed                               : fastContractClaim == curr.Claim1Amount ? true : false,
 					QC2Passed                               : fastDistributionArrangementClaim == curr.Claim2Amount ? true : false,
-					WholesalerClaim1                        : isNaN(curr.Claim1Amount) ? null : curr.Claim1Amount,
-					WholesalerClaim2                        : isNaN(curr.Claim2Amount) ? null : curr.Claim2Amount,
+					WholesalerClaim1                        : (!curr.Claim1Amount && curr.Claim1Amount !== 0) ? null : curr.Claim1Amount,
+					WholesalerClaim2                        : (!curr.Claim2Amount && curr.Claim2Amount !== 0) ? null : curr.Claim2Amount,
 					FASTClaim1                              : fastContractClaim,
 					FASTClaim2                              : fastDistributionArrangementClaim,
 					ClaimFiles_ID					 		: UUID
