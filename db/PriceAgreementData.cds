@@ -288,7 +288,8 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ifnull(cp.EffectiveDate, pa.EffectiveDate) as EffectiveDate:DateTime,
         ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime,
         ins.CustomerID, //by candidate
-        cp.PriceCondition
+        cp.PriceCondition,
+        ins.Comment
         // pa.Institute.CustomerID //by price agreement
 }where (case when ma.ActiveRecord = 'No' and (cp.Synchronized is null or cp.Synchronized = false) then 0 else 1 end)= 1;
 
