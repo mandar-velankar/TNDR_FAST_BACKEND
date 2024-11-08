@@ -3152,6 +3152,15 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
 
+		let userSignatureImageBuffer = null;
+
+		if(offer.COUNTRYCODE === 'NL'){
+			const userInfoSignature = await tx.run(SELECT.from(PT_TMUSER).where({UserName: tender.Custom_String_1}));
+			if (userInfoSignature && userInfoSignature.length > 0 && userInfoSignature[0].UserSignatureImg) {
+				userSignatureImageBuffer = Buffer.from(userInfoSignature[0].UserSignatureImg, 'base64');
+			}
+		}
+
 		let distributor = null;
 		if(offer.TENDER_CHANNEL === "Direct"){
 			distributor = await tx.run(SELECT.one.from(PT_TMDIST).where({
@@ -3478,6 +3487,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             Quotation_Custom_Datetime_8: quotation?.Custom_Datetime_8,
             Quotation_Custom_Datetime_9: quotation?.Custom_Datetime_9,
             Quotation_Custom_Datetime_10: quotation?.Custom_Datetime_10,
+			UserSignatureImg			: userSignatureImageBuffer,
 		};
 		return results;
 	
@@ -5222,6 +5232,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.ExpectedAwardDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
 		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
 		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpiryDate;
+		offerValidation.UserSignature = {
+			_type: "image",
+			source: offerValidation.UserSignatureImg, 
+			format: "image/jpeg",
+			width: 100, 
+			height: 50 
+		};
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
