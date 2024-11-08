@@ -2426,6 +2426,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Quotation_Custom_Datetime_8: DateTime;
             Quotation_Custom_Datetime_9: DateTime;
             Quotation_Custom_Datetime_10: DateTime;
+            UserSignatureImg            : String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
