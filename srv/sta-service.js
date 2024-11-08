@@ -1221,7 +1221,9 @@ module.exports = async (srv) => {
 			'PriceConditionPriceWithFOCView',
 			'PriceConditionDiscountWithFOCView',
 			"PriceConditionNLPriceView", 
-			"PriceConditionNLDiscountView"
+			"PriceConditionNLDiscountView",
+			"PriceConditionSpecialPriceView",
+			"PriceConditionWithMaximumPriceView"
 		], 
 		async (req) => {
 			try{
@@ -1714,7 +1716,9 @@ module.exports = async (srv) => {
 			'PriceConditionTaiwanPriceView',
 			'PriceConditionTaiwanDiscountView',
 			"PriceConditionNLPriceView", 
-			"PriceConditionNLDiscountView"
+			"PriceConditionNLDiscountView",
+			"PriceConditionSpecialPriceView",
+			"PriceConditionWithMaximumPriceView"
 		], 
 		async (req) => {
 			try{
@@ -2127,6 +2131,34 @@ module.exports = async (srv) => {
 				Price1: req.data.OfferPrice, 
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"SpecialPrice": {
+				CountryCode: req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				NetPrice: req.data.SpecialPrice,
+				Price0: req.data.BasePrice,
+				Price1: req.data.SpecialPrice, 
+				Price2: req.data.SpecialPrice,
+				Level2Discount1: 0,
+				Level2Discount2: req.data.Margin,
+				OfferPrice: req.data.SpecialPrice,
+				NetOfferPrice: req.data.SpecialPrice,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"WithMaximumPrice": {
+				CountryCode: req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				NetPrice: req.data.SpecialPrice,
+				Price0: req.data.BasePrice,
+				Price1: req.data.Price1, 
+				Price2: req.data.SpecialPrice,
+				Level2Discount1: req.data.Level2Discount1,
+				Level2Discount2: req.data.Margin,
+				OfferPrice: req.data.SpecialPrice,
+				NetOfferPrice: req.data.SpecialPrice,
+				PriceConditionClassification_ID: req.data.ClassificationID 
 			}
 		}
 
@@ -2216,25 +2248,25 @@ module.exports = async (srv) => {
 			RegPrice              : priceCondition.CountryCode === 'NL' ? priceCondition.masterPriceAIP : priceCondition.BasePrice, 
 			FOC                   : foc?.FreeGoodsOther || 0, 
 			FOCStep               : foc?.FreeGoodsOther_Step || null, 
-			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
-			Discount              : priceCondition.Discount, 
-			OfferPrice            : priceCondition.OfferPrice, 
+			FOCType               : priceCondition.CountryCode === 'PL' ? 'FOC 1' : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			Discount              : priceCondition.CountryCode === 'PL' ? 0 : priceCondition.Discount, 
+			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.OfferPrice, 
 			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
 			SpotRate              : spotRate?.X_RATE || 0,
 			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
-			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT, 
+			FOC_ABS_PCT           : priceCondition.CountryCode === 'PL' ? 'ABS' : foc?.FreeGoodsOther_ABS_PCT, 
 			FOC_Bundled_1         : 0, 
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
-			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.NetPrice, 
+			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.NetPrice, 
 			NetPrice_OfPaid       : 0, 
 			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
