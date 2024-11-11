@@ -1206,6 +1206,7 @@ module.exports = async (srv) => {
 		delete req.data.VwBudgetedProfitability;
 		delete req.data.PACKFACTOR;
 		delete req.data.INCOTerms;
+		delete req.data.InstituteName;
 		}
 		catch(error){
             console.error('Error in OfferProductsDetailView CREATE');
