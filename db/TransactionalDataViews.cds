@@ -2964,6 +2964,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         and product.ProductCode = priceCondition.ProductCode
     left outer join TransactionalData.FreeGoodsOther as foc
         on foc.PriceCondition.ID = priceCondition.ID
+    left join ProductTotalAmount as productTotal
+            on productTotal.OfferID = offer.OfferID
+            and productTotal.ProductCode = product.ProductCode
     {
     key tender.TenderID,
     key offer.OfferID,
@@ -3020,7 +3023,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             then 'Yes' 
             else 'No'
     end as FOC:String(3),
-    ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
+    ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10),
+    productTotal.TotalAmount
     }
     where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
     group by tender.TenderID,
@@ -3074,7 +3078,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.NegotiationPrice,
         offer.OfferStatusTable.STATUS,
         product.Results.Outcome,
-        foc.ProductPackId;
+        foc.ProductPackId,
+        productTotal.TotalAmount;
 
 entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
@@ -3512,3 +3517,21 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                 tender.Custom.Integer_3 as ContractDuration_3: Double,
                 nlpc3.OfferPrice as OfferPrice_3: Double
     }where tender.CountryCode = 'NL';
+
+    entity ProductTotalAmount as select from TransactionalData.PT_TMOFPR {
+        key ProductCode,
+        key OfferID,
+        CountryCode,
+        case
+            when Price.FOCType = 'FOC 1'
+                then 
+                    case 
+                        when Price.FOC_ABS_PCT = 'PCT'
+                            then RequestedVolume - round(RequestedVolume * Price.FOC)
+                        when Price.FOC_ABS_PCT = 'STP'
+                            then RequestedVolume - floor(RequestedVolume / Price.FOCStep) * Price.FOC
+                        else RequestedVolume - Price.FOC
+                    end
+                else RequestedVolume        
+        end as TotalAmount:Double
+    };

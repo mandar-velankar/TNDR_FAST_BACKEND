@@ -874,17 +874,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     and i.InstituteType <> 'Branch' 
     and i.ActiveRecord = 'Yes';
 
-    entity StandardTenderHistory as select from TransactionalDataViews.StandardTenderHistory as history
-        inner join OfferTotalAmount as offerTotal
-            on offerTotal.OfferID = history.OfferID
-            and offerTotal.CountryCode = history.CountryCode {
-            *,
-            key history.ProductCode,
-            key history.OfferID,
-            key history.TenderID,
-            key history.CountryCode,
-            offerTotal.OfferTotal
-    };
+    entity StandardTenderHistory as projection on TransactionalDataViews.StandardTenderHistory;
 
     entity PriceConditionCurrentSectionTaiwanView as projection on TransactionalDataViews.PriceConditionCurrentSectionTaiwanView;
     
@@ -1128,19 +1118,5 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             BU,
             Countries.CountryCode
     } where Countries.CountryCode = 'PL' and Role = 'KAM';
-
-    entity OfferTotalAmount as projection on OfferProductsTableView {
-        key ProductCode,
-        key OfferID,
-        key TenderID,
-        CountryCode,
-        sum(TotalAmount) as OfferTotal:Double
-    }group by ProductCode,
-        OfferID,
-        TenderID,
-        CountryCode,
-        Active,
-        ProductPackName,
-        RequestedVolume;
     
 }
