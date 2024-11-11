@@ -3522,6 +3522,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         key ProductCode,
         key OfferID,
         CountryCode,
+        Price.OfferPrice * (1 - Price.Deductions) *
         case
             when Price.FOCType = 'FOC 1'
                 then 
