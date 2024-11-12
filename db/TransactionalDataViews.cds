@@ -418,7 +418,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                 case 
                     when exists (select * from ResultsWithNegotiation where OfferID = offer.OfferID) then 'In FOC Negotiation'
                     when exists (select * from ResultsWithAppealInProgress where OfferID = offer.OfferID) then 'Appeal in Progress'
-                    when offer.OfferStatusTable.CountryCode = 'NL' and offer.OfferStatusTable.TableStatus is not null then offer.OfferStatusTable.TableStatus
+                    when (offer.OfferStatusTable.CountryCode = 'NL' or offer.OfferStatusTable.CountryCode = 'PL') and offer.OfferStatusTable.TableStatus is not null then offer.OfferStatusTable.TableStatus
                     else offer.OfferStatusTable.STATUS 
             end
         else offer.OfferStatusTable.STATUS 
@@ -1493,10 +1493,24 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
         else priceCondition.Level3Discount1
     end as Level3Discount1:Double,
     offer.Currency,
-    priceCondition.Price0,
-    priceCondition.Price1,
-    priceCondition.Price2,
-    priceCondition.Level2Discount1,
+    @Core.Computed: false
+    case 
+        when priceConditionClassification.ConditionType = 'WithMaximumPrice'
+            then ifnull(priceCondition.OfferPrice, priceCondition.Price1 * (1 - ifnull(priceCondition.Level2Discount1, 0)))
+        when priceConditionClassification.ConditionType = 'SpecialPrice'
+            then priceCondition.OfferPrice
+        else null
+    end as SpecialPrice: Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Price0, 0) as Price0: Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Price1, 0) as Price1: Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Price2, 0) as Price2: Double,
+    @Core.Computed: false
+    ifnull(priceCondition.Level2Discount1, 0) as Level2Discount1: Double,
+    @Core.Computed: false
+    ifnull(product.Price.COGS, (product.Cogs.COGS / productPacks.PACKFACTOR)) as COGS: Double,
     @Core.Computed: false
     ifnull(priceCondition.Last12MonthsVolumeMainCustomer,1) as Last12MonthsVolumeMainCustomer:Integer,
     @Core.Computed: false
@@ -2413,6 +2427,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Quotation_Custom_Datetime_8: DateTime;
             Quotation_Custom_Datetime_9: DateTime;
             Quotation_Custom_Datetime_10: DateTime;
+            UserSignatureImg            : String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2950,6 +2965,9 @@ left outer join TransactionalData.PriceCondition as priceCondition
         and product.ProductCode = priceCondition.ProductCode
     left outer join TransactionalData.FreeGoodsOther as foc
         on foc.PriceCondition.ID = priceCondition.ID
+    left join ProductTotalAmount as productTotal
+            on productTotal.OfferID = offer.OfferID
+            and productTotal.ProductCode = product.ProductCode
     {
     key tender.TenderID,
     key offer.OfferID,
@@ -2968,6 +2986,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     institute.InstituteName as INSTITUTE_NAME,
     product.SKU.PRODUCTPACKNAME as PRODUCT_NAME,
     product.Price.OfferPrice as OfferPriceBDPR,
+    product.RequestedVolume,
     priceCondition.Tax,
     priceCondition.StandardDiscount,
     priceCondition.AdditionalDiscount,
@@ -3005,7 +3024,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             then 'Yes' 
             else 'No'
     end as FOC:String(3),
-    ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
+    ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10),
+    productTotal.TotalAmount
     }
     where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
     group by tender.TenderID,
@@ -3027,6 +3047,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         product.Results.AwardedPrice,
         product.Price.NetofferPrice,
         product.Price.NetPrice,
+        product.RequestedVolume,
         offer.Quotation.EffectiveDate,
         offer.Quotation.ExpiryDate,
         priceCondition.Tax,
@@ -3058,7 +3079,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.NegotiationPrice,
         offer.OfferStatusTable.STATUS,
         product.Results.Outcome,
-        foc.ProductPackId;
+        foc.ProductPackId,
+        productTotal.TotalAmount;
 
 entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
@@ -3500,3 +3522,22 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                 tender.Custom.Integer_3 as ContractDuration_3: Double,
                 nlpc3.OfferPrice as OfferPrice_3: Double
     }where tender.CountryCode = 'NL';
+
+    entity ProductTotalAmount as select from TransactionalData.PT_TMOFPR {
+        key ProductCode,
+        key OfferID,
+        CountryCode,
+        Price.OfferPrice * (1 - Price.Deductions) *
+        case
+            when Price.FOCType = 'FOC 1'
+                then 
+                    case 
+                        when Price.FOC_ABS_PCT = 'PCT'
+                            then RequestedVolume - round(RequestedVolume * Price.FOC)
+                        when Price.FOC_ABS_PCT = 'STP'
+                            then RequestedVolume - floor(RequestedVolume / Price.FOCStep) * Price.FOC
+                        else RequestedVolume - Price.FOC
+                    end
+                else RequestedVolume        
+        end as TotalAmount:Double
+    };

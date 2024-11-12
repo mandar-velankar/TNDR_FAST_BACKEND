@@ -1228,6 +1228,7 @@ module.exports = async (srv) => {
 		delete req.data.VwBudgetedProfitability;
 		delete req.data.PACKFACTOR;
 		delete req.data.INCOTerms;
+		delete req.data.InstituteName;
 		}
 		catch(error){
             console.error('Error in OfferProductsDetailView CREATE');
@@ -1243,7 +1244,9 @@ module.exports = async (srv) => {
 			'PriceConditionPriceWithFOCView',
 			'PriceConditionDiscountWithFOCView',
 			"PriceConditionNLPriceView", 
-			"PriceConditionNLDiscountView"
+			"PriceConditionNLDiscountView",
+			"PriceConditionSpecialPriceView",
+			"PriceConditionWithMaximumPriceView"
 		], 
 		async (req) => {
 			try{
@@ -1407,8 +1410,8 @@ module.exports = async (srv) => {
 			OfferID: req.data.OfferID
 		});
 
-		if (req.data.CountryCode === "NL") {
-			await updateNLOfferStatuses(req, existingAwardedProducts);
+		if (req.data.CountryCode === "NL" || req.data.CountryCode === "PL") {
+			await updateResultRecordedOutcomeOfferStatuses(req, existingAwardedProducts);
 		}else {
 			const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
 			const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
@@ -1422,7 +1425,7 @@ module.exports = async (srv) => {
 		
 	}
 
-	const updateNLOfferStatuses = async function (req, existingAwardedProducts) {
+	const updateResultRecordedOutcomeOfferStatuses = async function (req, existingAwardedProducts) {
 		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
 		if (!awardedProductsHaveOutcome) return;
 
@@ -1434,11 +1437,7 @@ module.exports = async (srv) => {
 		}else if (isEveryOutcomeLost) {
 			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Rejected');
 		}else {
-			const outcomes = existingAwardedProducts.map(pr => pr.Outcome);
-			const isOfferPartialyAccepted = outcomes.includes('Won') && outcomes.includes('Lost') && !existingAwardedProducts.some(pr => pr.Outcome !== 'Won' && pr.Outcome !== 'Lost');
-			isOfferPartialyAccepted 
-				? await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
-				: await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', '');
+			upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
 		}
 	}
 
@@ -1745,7 +1744,9 @@ module.exports = async (srv) => {
 			'PriceConditionTaiwanPriceView',
 			'PriceConditionTaiwanDiscountView',
 			"PriceConditionNLPriceView", 
-			"PriceConditionNLDiscountView"
+			"PriceConditionNLDiscountView",
+			"PriceConditionSpecialPriceView",
+			"PriceConditionWithMaximumPriceView"
 		], 
 		async (req) => {
 			try{
@@ -2158,6 +2159,34 @@ module.exports = async (srv) => {
 				Price1: req.data.OfferPrice, 
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"SpecialPrice": {
+				CountryCode: req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				NetPrice: req.data.SpecialPrice,
+				Price0: req.data.BasePrice,
+				Price1: req.data.SpecialPrice, 
+				Price2: req.data.SpecialPrice,
+				Level2Discount1: 0,
+				Level2Discount2: req.data.Margin,
+				OfferPrice: req.data.SpecialPrice,
+				NetOfferPrice: req.data.SpecialPrice,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"WithMaximumPrice": {
+				CountryCode: req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				NetPrice: req.data.SpecialPrice,
+				Price0: req.data.BasePrice,
+				Price1: req.data.Price1, 
+				Price2: req.data.SpecialPrice,
+				Level2Discount1: req.data.Level2Discount1,
+				Level2Discount2: req.data.Margin,
+				OfferPrice: req.data.SpecialPrice,
+				NetOfferPrice: req.data.SpecialPrice,
+				PriceConditionClassification_ID: req.data.ClassificationID 
 			}
 		}
 
@@ -2247,25 +2276,25 @@ module.exports = async (srv) => {
 			RegPrice              : priceCondition.CountryCode === 'NL' ? priceCondition.masterPriceAIP : priceCondition.BasePrice, 
 			FOC                   : foc?.FreeGoodsOther || 0, 
 			FOCStep               : foc?.FreeGoodsOther_Step || null, 
-			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
-			Discount              : priceCondition.Discount, 
-			OfferPrice            : priceCondition.OfferPrice, 
+			FOCType               : priceCondition.CountryCode === 'PL' ? 'FOC 1' : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			Discount              : priceCondition.CountryCode === 'PL' ? 0 : priceCondition.Discount, 
+			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.OfferPrice, 
 			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
 			SpotRate              : spotRate?.X_RATE || 0,
 			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
-			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT, 
+			FOC_ABS_PCT           : priceCondition.CountryCode === 'PL' ? 'ABS' : foc?.FreeGoodsOther_ABS_PCT, 
 			FOC_Bundled_1         : 0, 
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
-			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.NetPrice, 
+			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.NetPrice, 
 			NetPrice_OfPaid       : 0, 
 			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
@@ -3183,6 +3212,15 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
 
+		let userSignatureImageBuffer = null;
+
+		if(offer.COUNTRYCODE === 'NL'){
+			const userInfoSignature = await tx.run(SELECT.from(PT_TMUSER).where({UserName: tender.Custom_String_1}));
+			if (userInfoSignature && userInfoSignature.length > 0 && userInfoSignature[0].UserSignatureImg) {
+				userSignatureImageBuffer = Buffer.from(userInfoSignature[0].UserSignatureImg, 'base64');
+			}
+		}
+
 		let distributor = null;
 		if(offer.TENDER_CHANNEL === "Direct"){
 			distributor = await tx.run(SELECT.one.from(PT_TMDIST).where({
@@ -3510,6 +3548,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             Quotation_Custom_Datetime_8: quotation?.Custom_Datetime_8,
             Quotation_Custom_Datetime_9: quotation?.Custom_Datetime_9,
             Quotation_Custom_Datetime_10: quotation?.Custom_Datetime_10,
+			UserSignatureImg			: userSignatureImageBuffer,
 		};
 		return results;
 	
@@ -3787,6 +3826,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
 		let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 		let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
+		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
 
 		//where statement
 		let whereApproverType = {
@@ -3805,7 +3845,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory, userInfo);
 
 			//Get corresponding Product Distributor ID
 			const whereProductId = {
@@ -4505,7 +4545,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory, userInfo) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 
@@ -4526,6 +4566,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 		if (offer.APPROVAL_TYPE === 17) {
 			productValidation = await buildProductValidationForType17(tx, offer, product, aApproverTypes);
+		}
+		if (offer.APPROVAL_TYPE === 18) {
+			productValidation = await buildProductValidationForType18(tx, offer, product, aApproverTypes, userInfo);
 		}
 		return {
 			CommnonProductInfo: commnonProductInfo,
@@ -4759,6 +4802,27 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		results.IN_POLICY = true
 		return results;
 			
+	}
+	async function buildProductValidationForType18(tx, offer, product, aApproverTypes, { Role }) {
+		let results = { IN_POLICY: false };
+		const role = Role?.toLowerCase().replace(/ /g, '');
+	
+		const validationMap = {
+			'kam': [{ type: 'nsm', value: 3 }, { type: 'tm', value: 3 }],
+			'nsm': [{ type: 'tm', value: 3 }, { type: 'nsm', value: 1 }],
+			'tendermanager': [{ type: 'nsm', value: 2 }, { type: 'tm', value: 1 }]
+		};
+	
+		(validationMap[role] || []).forEach(({ type, value }) => {
+			aApproverTypes.map(oApproverType => {
+				if (oApproverType.ApproverType.toLowerCase().replace(/ /g, '').includes(type)) {
+					oApproverType.ValidationType = value;
+				}
+			});
+		});
+		
+		results.IN_POLICY = true
+		return results;
 	}
 	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
 		const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === 'Squad Lead');
@@ -5241,6 +5305,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.Offer_Custom_Date_1 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_1 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_1, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_1;
 		offerValidation.Offer_Custom_Date_4 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_4 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_4, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_4;
 		offerValidation.Offer_Custom_Date_5 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_5 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_5, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_5;
+		offerValidation.UserSignature = {
+			_type: "image",
+			source: offerValidation.UserSignatureImg, 
+			format: "image/jpeg",
+			width: 100, 
+			height: 50 
+		};
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;

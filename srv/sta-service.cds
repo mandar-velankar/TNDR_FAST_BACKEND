@@ -371,6 +371,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKU.Product.HLEVEL4_NAME as BrandName,
         SKU.PACKFACTOR,
         Offer.Tender.Institute.INCOTerms,
+        Offer.Tender.Institute.InstituteName,
         @Core.Computed: false
         case when PricingPolicy.Type = 'BudgetedProfitability'
             then PricingPolicy.Value 
@@ -432,8 +433,16 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity StandardTenderPriceConditionView as select from TransactionalDataViews.StandardTenderPriceConditionView;
 
-    entity PriceConditionSpecialPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
-    entity PriceConditionWithMaximumPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionSpecialPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
+        *,
+        @Core.Computed: false
+        ifnull(Level2Discount2, (SpecialPrice - COGS) / SpecialPrice) as Margin: Double
+    } where CountryCode = 'PL';
+    entity PriceConditionWithMaximumPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
+        *,
+        @Core.Computed: false
+        ifnull(Level2Discount2, (SpecialPrice - COGS) / SpecialPrice) as Margin: Double
+    } where CountryCode = 'PL';
     entity PriceConditionPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
         CountryCode,
         Region,
@@ -1109,4 +1118,5 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             BU,
             Countries.CountryCode
     } where Countries.CountryCode = 'PL' and Role = 'KAM';
+    
 }

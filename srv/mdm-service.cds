@@ -271,12 +271,14 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         GOV_CODE,
         PRODUCTPACKNAME,
         PRESENTATION,
+        PACKFACTOR,
         dav.DistributorID,
         dist.DistributorName,
         Type,
         Value,
         StartDate,
-        EndDate
+        EndDate,
+        PACKFACTOR || ' ' || PRESENTATION as CombinedPackSizePresentation: String
     };
 
     
@@ -306,6 +308,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         GOV_CODE,
         PRODUCTPACKNAME,
         PRESENTATION,
+        PACKFACTOR,
         wpp.DistributorID,
         dist.DistributorName,
         Bundle,
@@ -319,12 +322,14 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         Status,
         ctryCurrency.Currency,
         Type as CombinedWPPMarginNetPriceValues,
-        min(EndDate) as minEndDate: Date
+        min(EndDate) as minEndDate: Date,
+        PACKFACTOR || ' ' || PRESENTATION as CombinedPackSizePresentation: String
     }group by 
         MaterialNumbers,
         GOV_CODE,
         PRODUCTPACKNAME,
         PRESENTATION,
+        PACKFACTOR,
         wpp.DistributorID,
         dist.DistributorName,
         Bundle,
