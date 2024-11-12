@@ -1388,8 +1388,8 @@ module.exports = async (srv) => {
 			OfferID: req.data.OfferID
 		});
 
-		if (req.data.CountryCode === "NL") {
-			await updateNLOfferStatuses(req, existingAwardedProducts);
+		if (req.data.CountryCode === "NL" || req.data.CountryCode === "PL") {
+			await updateResultRecordedOutcomeOfferStatuses(req, existingAwardedProducts);
 		}else {
 			const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
 			const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
@@ -1403,7 +1403,7 @@ module.exports = async (srv) => {
 		
 	}
 
-	const updateNLOfferStatuses = async function (req, existingAwardedProducts) {
+	const updateResultRecordedOutcomeOfferStatuses = async function (req, existingAwardedProducts) {
 		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
 		if (!awardedProductsHaveOutcome) return;
 
@@ -1415,11 +1415,7 @@ module.exports = async (srv) => {
 		}else if (isEveryOutcomeLost) {
 			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Rejected');
 		}else {
-			const outcomes = existingAwardedProducts.map(pr => pr.Outcome);
-			const isOfferPartialyAccepted = outcomes.includes('Won') && outcomes.includes('Lost') && !existingAwardedProducts.some(pr => pr.Outcome !== 'Won' && pr.Outcome !== 'Lost');
-			isOfferPartialyAccepted 
-				? await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
-				: await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', '');
+			upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
 		}
 	}
 
