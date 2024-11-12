@@ -1510,7 +1510,7 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     @Core.Computed: false
     ifnull(priceCondition.Level2Discount1, 0) as Level2Discount1: Double,
     @Core.Computed: false
-    ifnull(product.Price.COGS, product.Cogs.COGS) as COGS: Double,
+    ifnull(product.Price.COGS, (product.Cogs.COGS / productPacks.PACKFACTOR)) as COGS: Double,
     @Core.Computed: false
     ifnull(priceCondition.Last12MonthsVolumeMainCustomer,1) as Last12MonthsVolumeMainCustomer:Integer,
     @Core.Computed: false
