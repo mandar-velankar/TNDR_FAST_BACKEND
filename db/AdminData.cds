@@ -33,6 +33,8 @@ entity PT_TMUSER {
         Role            : String(100);
         ContactNumber   : String(20);
         BU              : String;
+        UserSignatureImg: LargeBinary @Core.MediaType: mediaType;
+        mediaType       : String @Core.IsMediaType;
         //Associations
         Countries       : Association to many PT_TMUSERCTRY
                               on Countries.User = $self;

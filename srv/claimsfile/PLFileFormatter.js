@@ -34,7 +34,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 				return obj;
 			});
 
-			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
+			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, PT_TMPRDHIER} = this.db.entities("com.bayer.SXTENDER.MasterData");
 			const { ExtractFASTOffer } = this.db.entities("ClaimsService");
             const distributor = await SELECT.one.from(PT_TMDIST).where({DistributorID: this.distributorId, CountryCode: this.countryCode});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
