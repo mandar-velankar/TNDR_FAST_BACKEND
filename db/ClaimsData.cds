@@ -76,6 +76,11 @@ entity ClaimData : managed, cuid {
     WholesalerClaim2                        : Double;
     FASTClaim1                              : Double;
     FASTClaim2                              : Double;
+    NrFaktury                               : String;
+    RoznicaCenaZakupuPNM                    : Double;
+    WartoscPNM                              : Double;
+    IloscSztukDoWyrownania                  : Double;
+    NrFakturyZakupu                         : String;
     ClaimFiles                              : Association to ClaimFiles;
     Product                                 : Association to TransactionalData.PT_TMOFPR 
                                                 on Product.OfferID = OfferID 
