@@ -124,6 +124,7 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 				clmd.External_InstituteId,
 				clmd.Date,
 				clmd.Status,
+				clmd.Type,
 				clmd.Comment,
 				clmd.BrandName,
 				clmd.PRODUCTPACKNAME,
