@@ -3187,10 +3187,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		if(offer.COUNTRYCODE === 'NL'){
 			const userInfoSignature = await tx.run(SELECT.from(PT_TMUSER).where({UserName: tender.Custom_String_1}));
+			NLHospitalManagerEmail = userInfoSignature[0]?.UserEmail;
+			NLHospitalManagerContactNumber = userInfoSignature[0]?.ContactNumber;
 			if (userInfoSignature && userInfoSignature.length > 0 && userInfoSignature[0].UserSignatureImg) {
 				userSignatureImageBuffer = Buffer.from(userInfoSignature[0].UserSignatureImg, 'base64');
-				NLHospitalManagerEmail = userInfoSignature[0].UserEmail;
-				NLHospitalManagerContactNumber = userInfoSignature[0].ContactNumber;
 			}
 		}
 
@@ -4016,6 +4016,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}else {
 				FOCInfoText = 'NA';
 			}
+			let PL_VolumeInPacks = 0;
+			let PNM_VALUE = 0;
+			if(offer.COUNTRYCODE === 'PL'){
+				PL_VolumeInPacks = parseInt(productInfo.CommnonProductInfo.RequestedQuantityString)/offerProduct.PACKSIZE;
+				PNM_VALUE = offerProduct.OFFER_PRICE * PL_VolumeInPacks;
+			}
 			
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -4505,6 +4511,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				CompetitorResult_Custom_Datetime_10: competitorResult?.Custom_Datetime_10,
 				NLStaticField1: 'N',
 				NLStaticField2: 'NA',
+				PL_VolumeInPacks: PL_VolumeInPacks,
+				PNM_VALUE		: PNM_VALUE,
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -5258,11 +5266,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.OfferPrice_2 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_2 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_2), 'nl-NL', 2, 2) : prd.OfferPrice_2;
 			prd.OfferPrice_3 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_3 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_3), 'nl-NL', 2, 2) : prd.OfferPrice_3;
 			prd.NET_PRICE_PACK_OFFER_CURRENCY = prd.COUNTRY_CODE === 'PL' ? prd.NET_PRICE_PACK_OFFER_CURRENCY && ServiceHelper.formatNumber(prd.NET_PRICE_PACK_OFFER_CURRENCY, 2, 2) : prd.NET_PRICE_PACK_OFFER_CURRENCY;
-			if(prd.COUNTRY_CODE === 'PL'){
-				prd.PL_VolumeInPacks = prd.REQUESTED_QUANTITY/prd.PACKSIZE;
-				prd.PNM_VALUE = prd.OFFER_PRICE * prd.PL_VolumeInPacks;
-				prd.PNM_VALUE = prd.PNM_VALUE && ServiceHelper.formatNumber(prd.PNM_VALUE, 2, 2);
-			}
+			prd.PNM_VALUE = prd.COUNTRY_CODE === 'PL' ? prd.PNM_VALUE && ServiceHelper.formatNumber(prd.PNM_VALUE, 2, 2) : prd.PNM_VALUE;
+
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
