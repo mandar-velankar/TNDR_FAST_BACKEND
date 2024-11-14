@@ -3213,9 +3213,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
 
 		let userSignatureImageBuffer = null;
+		let NLHospitalManagerEmail = null;
+		let NLHospitalManagerContactNumber = null;
 
 		if(offer.COUNTRYCODE === 'NL'){
 			const userInfoSignature = await tx.run(SELECT.from(PT_TMUSER).where({UserName: tender.Custom_String_1}));
+			NLHospitalManagerEmail = userInfoSignature[0]?.UserEmail;
+			NLHospitalManagerContactNumber = userInfoSignature[0]?.ContactNumber;
 			if (userInfoSignature && userInfoSignature.length > 0 && userInfoSignature[0].UserSignatureImg) {
 				userSignatureImageBuffer = Buffer.from(userInfoSignature[0].UserSignatureImg, 'base64');
 			}
@@ -3549,6 +3553,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             Quotation_Custom_Datetime_9: quotation?.Custom_Datetime_9,
             Quotation_Custom_Datetime_10: quotation?.Custom_Datetime_10,
 			UserSignatureImg			: userSignatureImageBuffer,
+			NLHospitalManagerEmail: NLHospitalManagerEmail,
+            NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
 		};
 		return results;
 	
@@ -4042,6 +4048,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}else {
 				FOCInfoText = 'NA';
 			}
+			let PL_VolumeInPacks = 0;
+			let PNM_VALUE = 0;
+			if(offer.COUNTRYCODE === 'PL'){
+				PL_VolumeInPacks = parseInt(productInfo.CommnonProductInfo.RequestedQuantityString)/offerProduct.PACKSIZE;
+				PNM_VALUE = productInfo.CommnonProductInfo.NetPricePack * PL_VolumeInPacks;
+			}
 			
 			return {
 				TENDER_ID: offer.TENDERID,
@@ -4531,6 +4543,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				CompetitorResult_Custom_Datetime_10: competitorResult?.Custom_Datetime_10,
 				NLStaticField1: 'N',
 				NLStaticField2: 'NA',
+				PL_VolumeInPacks: PL_VolumeInPacks,
+				PNM_VALUE		: PNM_VALUE,
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -5263,7 +5277,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : prd.COUNTRY_CODE === 'PL' ? ServiceHelper.formatCurrency(prd.OFFER_PRICE, 'pl-PL', 2, 2) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
 			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
@@ -5285,6 +5299,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? prd.EARLIEST_DATE && ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
 			prd.Product_Custom_Integer_1 = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.Product_Custom_Integer_1, 0, 0) : prd.Product_Custom_Integer_1;
 			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.REQUESTED_QUANTITY, 0, 0) : prd.REQUESTED_QUANTITY;
+			prd.OfferPrice_1 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_1 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_1), 'nl-NL', 2, 2) : prd.OfferPrice_1;
+			prd.OfferPrice_2 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_2 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_2), 'nl-NL', 2, 2) : prd.OfferPrice_2;
+			prd.OfferPrice_3 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_3 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_3), 'nl-NL', 2, 2) : prd.OfferPrice_3;
+			prd.NET_PRICE_PACK_OFFER_CURRENCY = prd.COUNTRY_CODE === 'PL' ? prd.NET_PRICE_PACK_OFFER_CURRENCY && ServiceHelper.formatCurrency(prd.NET_PRICE_PACK_OFFER_CURRENCY, 'pl-PL', 2, 2) : prd.NET_PRICE_PACK_OFFER_CURRENCY;
+			prd.PNM_VALUE = prd.COUNTRY_CODE === 'PL' ? prd.PNM_VALUE && ServiceHelper.formatCurrency(Number(prd.PNM_VALUE), 'pl-PL', 2, 2) : prd.PNM_VALUE;
+
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
@@ -5296,12 +5316,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.OFFERVALIDITY = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM'))
 										? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD', 'DD.MM.YYYY')
 										: (productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD', 'DD-MMM-YYYY') : offerValidation.OFFERVALIDITY);
-		offerValidation.PUBLICATION_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
+		offerValidation.PUBLICATION_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.PUBLICATION_DATE);
 		offerValidation.InternalDueDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.InternalDueDate && ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
-		offerValidation.BID_DUE_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
+		offerValidation.BID_DUE_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.BID_DUE_DATE);
 		offerValidation.ExpectedAwardDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
-		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
-		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpiryDate;
+		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.EffectiveDate);
+		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.ExpiryDate);
 		offerValidation.Offer_Custom_Date_1 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_1 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_1, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_1;
 		offerValidation.Offer_Custom_Date_4 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_4 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_4, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_4;
 		offerValidation.Offer_Custom_Date_5 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_5 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_5, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_5;
