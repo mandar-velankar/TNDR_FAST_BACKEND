@@ -123,6 +123,9 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 				clmd.MainInstituteName,
 				clmd.External_InstituteId,
 				clmd.Date,
+				clmd.Status,
+				clmd.Type,
+				clmd.Comment,
 				clmd.BrandName,
 				clmd.PRODUCTPACKNAME,
 				clmd.EANNumber,
@@ -145,7 +148,16 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 				clmf.DateTo,
 				clmf.CountryCode,
 				clmf.Status as ClaimFileStatus : String,
-				clmd.BrandId
+				clmd.BrandId,
+				clmd.FASTContractPrice,
+				clmd.FASTContractClaim,
+				clmd.TotalWholesalerClaim,
+				clmd.FASTWholesalerPurchasePrice,
+				clmd.NrFaktury,
+				clmd.RoznicaCenaZakupuPNM,
+				clmd.WartoscPNM,
+				clmd.IloscSztukDoWyrownania,
+				clmd.NrFakturyZakupu
 		}where clmf.CountryCode = 'PL';
 
 entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf

@@ -217,6 +217,11 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					WholesalerClaim2                        : null,
 					FASTClaim1                              : null,
 					FASTClaim2                              : null,
+					NrFaktury                               : curr.NRFAKTURY || null,
+					RoznicaCenaZakupuPNM                    : curr.RóżnicapomiędzycenązakupuaPNM || null,
+					WartoscPNM                              : curr.WartośćwgPNM || null,
+					IloscSztukDoWyrownania                  : curr.Ilośćsztukdowyrównania || null,
+					NrFakturyZakupu                         : curr.NRFAKTURYZAKUPU || null,
 					ClaimFiles_ID					 		: UUID
 				}
 			);

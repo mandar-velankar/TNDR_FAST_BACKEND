@@ -2428,6 +2428,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Quotation_Custom_Datetime_9: DateTime;
             Quotation_Custom_Datetime_10: DateTime;
             UserSignatureImg            : String;
+            NLHospitalManagerEmail: String;
+            NLHospitalManagerContactNumber : String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -2914,6 +2916,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             TenderAnnouncementReference                 : String;
             NLStaticField1                      : String;
             NLStaticField2                      : String;
+            PL_VolumeInPacks                    : Double;
+            PNM_VALUE                           : Double;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -3018,7 +3022,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.SecondDiscount_Amount,
     priceCondition.NegotiationPrice,
     product.Results.AwardedPrice,
-    offer.OfferStatusTable.STATUS as OfferStatus,
+    offer.OfferStatus.STATUS as OfferStatus,
     CASE 
         when (product.ProductCode = foc.ProductPackId) 
             then 'Yes' 

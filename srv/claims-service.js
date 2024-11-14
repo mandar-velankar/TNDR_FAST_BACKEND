@@ -173,7 +173,7 @@ module.exports = (srv) => {
 		let whereBrand, whereStatus, whereType;
 
 			if (CountryCode === 'PL') {
-				query = SELECT.from(ExtractClaimDataView).where({ClaimFileID: ClaimFileID});
+				query = SELECT.from(PLExtractClaimFilesView).where({ClaimFileID: ClaimFileID});
 
 	
 				if (templateId === 'PLClaimDataFilteredFiles') {
@@ -408,7 +408,7 @@ module.exports = (srv) => {
 
 	function mapClaimApprovals(claimApprovertypes, claimFile) {
 
-		console.log(`JOB (${this.jobName }): Mapping SalesData to ContrastAgentSalesData ...`);
+		console.log(`JOB (${this.jobName }): Mapping ClaimsApprovals ...`);
 		claimApprovertypes = claimApprovertypes.reduce((prev, curr, idx, claimApprovertypes) => {
 			prev.push(
 				{
