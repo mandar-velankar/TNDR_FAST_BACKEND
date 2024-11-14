@@ -4822,9 +4822,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const role = Role?.toLowerCase().replace(/ /g, '');
 	
 		const validationMap = {
-			'kam': [{ type: 'nsm', value: 3 }, { type: 'tm', value: 3 }],
-			'nsm': [{ type: 'tm', value: 3 }, { type: 'nsm', value: 1 }],
-			'tendermanager': [{ type: 'nsm', value: 2 }, { type: 'tm', value: 1 }]
+			'kam': [{ type: 'sm', value: 3 }, { type: 'tm', value: 3 }],
+			'salesmanager': [{ type: 'tm', value: 3 }, { type: 'sm', value: 1 }],
+			'tendermanager': [{ type: 'sm', value: 2 }, { type: 'tm', value: 1 }]
 		};
 	
 		(validationMap[role] || []).forEach(({ type, value }) => {
