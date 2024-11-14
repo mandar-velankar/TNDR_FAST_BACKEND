@@ -707,6 +707,7 @@ module.exports = async (srv) => {
 			const { data } = mappedHaematologyFields(req, formFieldsData);
 			req.data = data;
 		}
+		await resetProductPaymentSupplyFields(req.data.OfferID);
 
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
 		req.data.DistributorComments = null; //for mandatory field check in sta-service
@@ -761,7 +762,8 @@ module.exports = async (srv) => {
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
 		const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
 		const { mappedFields } = mappedHaematologyFields(req, formFieldsData);
-
+		await resetProductPaymentSupplyFields(req.data.OfferID);
+		mappedFields.APPROVALS_SENT = 0; // Needed to revert Offer status back to Offer Created when updating those 3 forms
 		if (offer) {
 			await UPDATE(PT_TMOFRS).with(mappedFields).where({OfferID: req.data.OfferID});
 		}
@@ -792,6 +794,9 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsTableView', async (req) => {
 		try{
+		await resetApprovalsSent(req.data.OfferID);
+		await resetProductPaymentSupplyFields(req.data.OfferID);
+
 		delete req.data.ProductPackName;
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
@@ -1194,7 +1199,6 @@ module.exports = async (srv) => {
 				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
 			}
 		}	
-		await updateApprovalsSent(req.data.OfferID);
 		// validate form
 		// !req.data.RequestedVolume &&  req.error({ code: 404, message: "RequestedVolume is required.", target: "RequestedVolume" });
 		// !req.data.UnitPerPack &&  req.error({ code: 404, message: "UoM is required.", target: "UnitPerPack" });
@@ -1215,6 +1219,8 @@ module.exports = async (srv) => {
 		}
 		
 		req.data.Line = null; //for mandatory field check in sta-service
+		req.data.SUPPLY_UPDATE = req.data.SUPPLY_UPDATE + 1;
+
 		delete req.data.MoleculeName;
         delete req.data.Code1;
         delete req.data.Code2;
@@ -1676,13 +1682,6 @@ module.exports = async (srv) => {
 			}
 		});
 
-		if(existingApprovals?.length > 0){
-			//remove old entries before inserting
-			await DELETE.from(PT_TMAPPRST)
-				.where({
-					OfferID: req.data.OfferId
-				})
-		}
 		
 		await INSERT.into(PT_TMAPPRST).entries(aApprovalsSaveInfo);
 
@@ -1754,7 +1753,7 @@ module.exports = async (srv) => {
 		], 
 		async (req) => {
 			try{
-			await updateApprovalsSent(req.data.OfferID);
+			await updatePaymentField(req.data.OfferID, req.data.ProductCode);
 			await upsertPriceCondition(req);
 			await upsertProductPricing(req);
 			// Check if CountryCode is TW (Taiwan)
@@ -1851,25 +1850,55 @@ module.exports = async (srv) => {
 	 * @returns {Promise<void>} A promise that resolves when the upsert operation is complete.
 	 */
 
-	const updateApprovalsSent = async function (OfferID) {
-		const existingApprovals = await SELECT.from(PT_TMAPPRST).where({OfferID: OfferID});
-
+	const resetApprovalsSent = async function (OfferID) {
 		await UPDATE(PT_TMOFRS)
 			.with({APPROVALS_SENT: 0})
 			.where({
 				OfferID: OfferID
 			});
+	};
 
-		// After setting back offer status to Offer Created we must make sure that previous approvals are removed 
-		// otherwise if you open Approvals in overview page you will approvals which status is approved however your offer status is Offer Created
-		if (existingApprovals.length > 0) {
-			await DELETE(PT_TMAPPRST)
-				.where({
-					OfferID: OfferID
-				});
-		}
-		
+	const updatePaymentField = async function (OfferID, ProductCode) {
+		const existingProduct = await SELECT.one.from(PT_TMOFPR).where({OfferID: OfferID, ProductCode: ProductCode});
+
+		await UPDATE(PT_TMOFPR)
+			.with({PAYMENT_UPDATE: existingProduct.PAYMENT_UPDATE + 1})
+			.where({
+				OfferID: OfferID,
+				ProductCode: ProductCode
+			});			
 	}
+
+	const resetProductPaymentSupplyFields = async function (OfferID) {
+		const products = await SELECT.from(PT_TMOFPR).where({OfferID: OfferID});
+		const prices = await SELECT.from(PT_TMBDPR).where({OfferID: OfferID});
+		let promises = [];
+
+		if (prices.length > 0) {
+			const pricePromises = prices.map(price => {
+				return UPDATE(PT_TMBDPR)
+				.with({PRICE_UPDATE: 0})
+				.where({
+					OfferID: price.OfferID,
+					ProductCode: price.ProductCode
+				});
+			});
+			promises = promises.concat(pricePromises);
+		}
+
+		if (products.length > 0) {
+			const productPromises = products.map(product => {
+				return UPDATE(PT_TMOFPR)
+				.with({SUPPLY_UPDATE: 0, PAYMENT_UPDATE: 0})
+				.where({
+					OfferID: product.OfferID,
+					ProductCode: product.ProductCode
+				});
+			});
+			promises = promises.concat(productPromises);
+		}
+		Promise.all(promises);
+	};
 
 	const upsertPriceCondition = async function(req){
 		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
@@ -2651,7 +2680,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			await upsertOfferStatus(req.data.OFFERID, req.data.TENDERID, 'Quotation Submitted');
 			delete req.data.Submitted;
 		}else {
-			await updateApprovalsSent(req.data.OFFERID);
+			await resetApprovalsSent(req.data.OFFERID);
 		}
 		await upsertQuotation(req);
 		return req.data;
@@ -5518,7 +5547,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const priceCondition = await SELECT.one.from(PriceCondition).where({
 				ID: data?.PriceCondition_ID
 			});
-			await updateApprovalsSent(priceCondition?.OfferID);
+			await updatePaymentField(priceCondition?.OfferID, priceCondition?.ProductCode);
 			return data;
 		}
 	);
@@ -5527,7 +5556,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		['CREATE','UPDATE'], 'PT_TMBDPR', 
 		async (req) => {
 			try{
-			await updateApprovalsSent(req.data.OfferID);
 			await updateProductPricing(req);
 			await updatePriceCondition(req);
 
