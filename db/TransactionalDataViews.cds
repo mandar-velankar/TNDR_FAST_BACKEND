@@ -3082,6 +3082,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         priceCondition.NegotiationPrice,
         offer.OfferStatusTable.STATUS,
         product.Results.Outcome,
+        offer.OfferStatus.STATUS,
         foc.ProductPackId,
         productTotal.TotalAmount;
 
