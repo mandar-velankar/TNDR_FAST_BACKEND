@@ -3021,7 +3021,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     priceCondition.SecondDiscount_Amount,
     priceCondition.NegotiationPrice,
     product.Results.AwardedPrice,
-    offer.OfferStatusTable.STATUS as OfferStatus,
+    offer.OfferStatus.STATUS as OfferStatus,
     CASE 
         when (product.ProductCode = foc.ProductPackId) 
             then 'Yes' 
