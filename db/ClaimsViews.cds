@@ -113,52 +113,86 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
     		and productPack.ACTIVERECORD = 'Yes'
 	left join CalculatedBrandVolumes as calcbrandvolumes
 			on calcbrandvolumes.OfferID = clmd.OfferID
-			and calcbrandvolumes.ProductPackID = clmd.ProductPackID
-			{
-				clmf.ID as ClaimFileID,
-				clmd.ID as ClaimDataID,
-				clmd.OfferID,
-				distributor.DistributorID,
-				distributor.DistributorName,
-				clmd.MainInstituteName,
-				clmd.External_InstituteId,
-				clmd.Date,
-				clmd.Status,
-				clmd.Type,
-				clmd.Comment,
-				clmd.BrandName,
-				clmd.PRODUCTPACKNAME,
-				clmd.EANNumber,
-				clmd.Quantity,
-				clmd.Quantity * productPack.CONCENTRATION as QuantityML: Double,
-				clmd.WholesalerPurchasePrice,
-				clmd.WholesalerContractPrice,
-				clmd.Quantity * clmd.WholesalerPurchasePrice as WholesalerPurchasedAmount: Double, 
-				clmd.Quantity * clmd.WholesalerContractPrice as NetSales: Double,
-				calcbrandvolumes.BrandContractCalculatedVolume,
-				calcbrandvolumes.BrandUsedCalculatedVolume,
-				CASE 
-					WHEN calcbrandvolumes.BrandContractCalculatedVolume != 0 
-					THEN calcbrandvolumes.BrandUsedCalculatedVolume 
-						/ 
-						calcbrandvolumes.BrandContractCalculatedVolume
-					ELSE 0 
-				END as ContractBrandUsage : Double,
-				clmf.DateFrom,
-				clmf.DateTo,
-				clmf.CountryCode,
-				clmf.Status as ClaimFileStatus : String,
-				clmd.BrandId,
-				clmd.FASTContractPrice,
-				clmd.FASTContractClaim,
-				clmd.TotalWholesalerClaim,
-				clmd.FASTWholesalerPurchasePrice,
-				clmd.NrFaktury,
-				clmd.RoznicaCenaZakupuPNM,
-				clmd.WartoscPNM,
-				clmd.IloscSztukDoWyrownania,
-				clmd.NrFakturyZakupu
-		}where clmf.CountryCode = 'PL';
+			and calcbrandvolumes.ProductPackID = clmd.ProductPackID{
+		clmf.ID as ClaimFileID,
+		clmd.ID as ClaimDataID,
+		clmd.OfferID,
+		distributor.DistributorID,
+		distributor.DistributorName,
+		clmd.MainInstituteName,
+		clmd.External_InstituteId,
+		clmd.Date,
+		clmd.Status,
+		clmd.Type,
+		clmd.Comment,
+		clmd.BrandName,
+		clmd.PRODUCTPACKNAME,
+		clmd.EANNumber,
+		clmd.Quantity,
+		clmd.Quantity * productPack.CONCENTRATION as QuantityML: Double,
+		clmd.WholesalerPurchasePrice,
+		clmd.WholesalerContractPrice,
+		clmd.Quantity * clmd.WholesalerPurchasePrice as WholesalerPurchasedAmount: Double, 
+		clmd.Quantity * clmd.WholesalerContractPrice as NetSales: Double,
+		calcbrandvolumes.BrandContractCalculatedVolume,
+		calcbrandvolumes.BrandUsedCalculatedVolume,
+		CASE 
+			WHEN calcbrandvolumes.BrandContractCalculatedVolume != 0 
+			THEN calcbrandvolumes.BrandUsedCalculatedVolume 
+				/ 
+				calcbrandvolumes.BrandContractCalculatedVolume
+			ELSE 0 
+		END as ContractBrandUsage : Double,
+		clmf.DateFrom,
+		clmf.DateTo,
+		clmf.CountryCode,
+		clmf.Status as ClaimFileStatus : String,
+		clmd.BrandId,
+		clmd.FASTContractPrice,
+		clmd.FASTContractClaim,
+		clmd.TotalWholesalerClaim,
+		clmd.FASTWholesalerPurchasePrice,
+		clmd.NrFaktury,
+		clmd.RoznicaCenaZakupuPNM,
+		clmd.WartoscPNM,
+		clmd.IloscSztukDoWyrownania,
+		clmd.NrFakturyZakupu
+	}where clmf.CountryCode = 'PL'
+	group by
+		clmf.ID,
+		clmd.ID,
+		clmd.OfferID,
+		distributor.DistributorID,
+		distributor.DistributorName,
+		clmd.MainInstituteName,
+		clmd.External_InstituteId,
+		clmd.Date,
+		clmd.Status,
+		clmd.Type,
+		clmd.Comment,
+		clmd.BrandName,
+		clmd.PRODUCTPACKNAME,
+		clmd.EANNumber,
+		productPack.CONCENTRATION,
+		clmd.WholesalerPurchasePrice,
+		clmd.WholesalerContractPrice,
+		clmd.Quantity,
+		calcbrandvolumes.BrandContractCalculatedVolume,
+		calcbrandvolumes.BrandUsedCalculatedVolume,
+		clmf.DateFrom,
+		clmf.DateTo,
+		clmf.CountryCode,
+		clmf.Status,
+		clmd.BrandId,
+		clmd.FASTContractPrice,
+		clmd.FASTContractClaim,
+		clmd.TotalWholesalerClaim,
+		clmd.FASTWholesalerPurchasePrice,
+		clmd.NrFaktury,
+		clmd.RoznicaCenaZakupuPNM,
+		clmd.WartoscPNM,
+		clmd.IloscSztukDoWyrownania,
+		clmd.NrFakturyZakupu;
 
 entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	left join ClaimsData.ClaimData as cd 		
