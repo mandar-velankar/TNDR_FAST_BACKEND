@@ -199,11 +199,19 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         
         // KBETR per Pack or Unit
         //if(customerPrice.CountryCode === 'IT'){
-            if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" ){// convert and send per pack
-                kbetr  = kbetr * packFactor;
-            }else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" ) { // => radiology so per unit
-                kbetr  = kbetr / packFactor;
-            }
+            if (customerPrice.CountryCode === 'ES') {
+                if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" && customerPrice.PriceCondition !== "YL60") {// convert and send per pack
+                    kbetr = kbetr * packFactor;
+                } else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" && customerPrice.PriceCondition !== "YL60") { // => radiology so per unit
+                    kbetr = kbetr / packFactor;
+                }
+           }else{
+                if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit") {// convert and send per pack
+                    kbetr = kbetr * packFactor;
+                } else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack") { // => radiology so per unit
+                    kbetr = kbetr / packFactor;
+                }
+           }
         //}
         //EHQUT-INC17748342-Rates incorrectly synchronized.
         //EHQUT-INC18178128-FAST - Error decimals discounts
