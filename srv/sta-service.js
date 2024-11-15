@@ -1217,9 +1217,11 @@ module.exports = async (srv) => {
 		if (req.data.CountryCode == 'NL' && (req.data.RequestedVolume == 0 || req.data.RequestedVolume == null)) {
 			req.data.RequestedVolume = 1
 		}
-		
+
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
+
 		req.data.Line = null; //for mandatory field check in sta-service
-		req.data.SUPPLY_UPDATE = req.data.SUPPLY_UPDATE + 1;
+		req.data.SUPPLY_UPDATE = offer.APPROVALS_SENT;
 
 		delete req.data.MoleculeName;
         delete req.data.Code1;
@@ -1859,10 +1861,10 @@ module.exports = async (srv) => {
 	};
 
 	const updatePaymentField = async function (OfferID, ProductCode) {
-		const existingProduct = await SELECT.one.from(PT_TMOFPR).where({OfferID: OfferID, ProductCode: ProductCode});
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: OfferID});
 
 		await UPDATE(PT_TMOFPR)
-			.with({PAYMENT_UPDATE: existingProduct.PAYMENT_UPDATE + 1})
+			.with({PAYMENT_UPDATE: offer.APPROVALS_SENT})
 			.where({
 				OfferID: OfferID,
 				ProductCode: ProductCode
