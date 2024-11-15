@@ -244,8 +244,24 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 		// Format the dates to YYYY-MM-DD
 		let formatDate = (date) => date.toISOString().split('T')[0];
 
+		const polishToEnglishMonths = {
+			'sty': 'Jan',
+			'lut': 'Feb',
+			'mar': 'Mar',
+			'kwi': 'Apr',
+			'maj': 'May',
+			'cze': 'Jun',
+			'lip': 'Jul',
+			'sie': 'Aug',
+			'wrz': 'Sep',
+			'paź': 'Oct',
+			'lis': 'Nov',
+			'gru': 'Dec'
+		};
+
 		// Convert filePeriod to a date
-		const [filePeriodMonth, filePeriodYear] = filePeriod.split('-');
+		let [filePeriodMonth, filePeriodYear] = filePeriod.split('-');
+		filePeriodMonth = polishToEnglishMonths[filePeriodMonth] || filePeriodMonth;
 		const monthIndex = new Date(`${filePeriodMonth} 1, ${filePeriodYear}`).getMonth() + 1;
 		const formattedMonth = String(monthIndex).padStart(2, '0');
 		const filePeriodDate = `${filePeriodYear}-${formattedMonth}-01`;
