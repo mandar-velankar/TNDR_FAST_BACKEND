@@ -2342,7 +2342,9 @@ module.exports = (srv) => {
 		// }
 		
 		let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
-		if(tenderyear> '22' && regionname === 'MEA'){
+		let countriesNeedCountryBusinessApproverType = ['AL', 'TN', 'MO'];
+
+		if(tenderyear> '22' && regionname === 'MEA' && !countriesNeedCountryBusinessApproverType.includes(Countrycode)){
 			if (CountryBusinessindex !== -1) {
 				aApproverTypes.splice(CountryBusinessindex, 1);
 			}				
