@@ -2973,6 +2973,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
 		let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION }));
 		let division = (divisions.length === 1) ? divisions[0] : "Both";
+
+		let totalPnmValue = offerProductValidation.reduce((a, b) => a + b.PNM_VALUE, 0);
 /*
 		//In case we have any FOC (on main products) in the offer, a comment should be in remarks
 		let maxFOC = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FOC }));
@@ -3523,6 +3525,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			UserSignatureImg			: userSignatureImageBuffer,
 			NLHospitalManagerEmail: NLHospitalManagerEmail,
             NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
+			TotalPNM_Value				: totalPnmValue,
 		};
 		return results;
 	
