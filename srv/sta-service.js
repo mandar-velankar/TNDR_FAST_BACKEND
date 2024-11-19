@@ -518,7 +518,7 @@ module.exports = async (srv) => {
 
     	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
-		if (isCountQuery || countryCode[0] !== 'TW' || countryCode.length <= 0) {
+		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
 		return result;
 		}
