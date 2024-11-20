@@ -5284,7 +5284,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.ExpectedAwardDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
 		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.EffectiveDate);
 		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.ExpiryDate);
-		offerValidation.TotalPNM_Value = offerValidation.COUNTRY_CODE === 'PL' ? offerValidation.TotalPNM_Value && ServiceHelper.formatCurrency(Number(offerValidation.TotalPNM_Value), 'pl-PL', 2, 2) : offerValidation.TotalPNM_Value;
+		offerValidation.TotalPNM_Value = offerValidation.COUNTRYCODE === 'PL' ? offerValidation.TotalPNM_Value && ServiceHelper.formatCurrency(Number(offerValidation.TotalPNM_Value), 'pl-PL', 2, 2) : offerValidation.TotalPNM_Value;
 		offerValidation.UserSignature = {
 			_type: "image",
 			source: offerValidation.UserSignatureImg, 
