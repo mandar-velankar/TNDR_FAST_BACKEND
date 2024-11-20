@@ -108,9 +108,6 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
             on clmd.ClaimFiles.ID = clmf.ID 
 	inner join MasterData.PT_TMDIST as distributor
     		on clmf.DistributorID = distributor.DistributorID
-	inner join MasterData.PT_TMPRDPCK as productPack
-    		on productPack.PRODUCTPACKID = clmd.ProductPackID
-    		and productPack.ACTIVERECORD = 'Yes'
 	left join CalculatedBrandVolumes as calcbrandvolumes
 			on calcbrandvolumes.OfferID = clmd.OfferID
 			and calcbrandvolumes.ProductPackID = clmd.ProductPackID{
@@ -129,7 +126,7 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 		clmd.PRODUCTPACKNAME,
 		clmd.EANNumber,
 		clmd.Quantity,
-		clmd.Quantity * productPack.CONCENTRATION as QuantityML: Double,
+		clmd.BrandUsedVolume as QuantityML: Double,
 		clmd.WholesalerPurchasePrice,
 		clmd.WholesalerContractPrice,
 		clmd.Quantity * clmd.WholesalerPurchasePrice as WholesalerPurchasedAmount: Double, 
@@ -173,7 +170,7 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 		clmd.BrandName,
 		clmd.PRODUCTPACKNAME,
 		clmd.EANNumber,
-		productPack.CONCENTRATION,
+		clmd.BrandUsedVolume,
 		clmd.WholesalerPurchasePrice,
 		clmd.WholesalerContractPrice,
 		clmd.Quantity,
