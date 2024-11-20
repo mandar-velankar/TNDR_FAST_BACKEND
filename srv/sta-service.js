@@ -5328,7 +5328,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.Offer_Custom_Date_1 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_1 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_1, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_1;
 		offerValidation.Offer_Custom_Date_4 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_4 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_4, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_4;
 		offerValidation.Offer_Custom_Date_5 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_5 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_5, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_5;
-		offerValidation.TotalPNM_Value = offerValidation.COUNTRY_CODE === 'PL' ? offerValidation.TotalPNM_Value && ServiceHelper.formatCurrency(Number(offerValidation.TotalPNM_Value), 'pl-PL', 2, 2) : offerValidation.TotalPNM_Value;
+		offerValidation.TotalPNM_Value = offerValidation.COUNTRYCODE === 'PL' ? offerValidation.TotalPNM_Value && ServiceHelper.formatCurrency(Number(offerValidation.TotalPNM_Value), 'pl-PL', 2, 2) : offerValidation.TotalPNM_Value;
 		offerValidation.UserSignature = {
 			_type: "image",
 			source: offerValidation.UserSignatureImg, 
