@@ -2430,6 +2430,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             UserSignatureImg            : String;
             NLHospitalManagerEmail: String;
             NLHospitalManagerContactNumber : String;
+            TotalPNM_Value               : Double;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };

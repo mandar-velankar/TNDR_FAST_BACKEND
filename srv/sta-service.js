@@ -518,7 +518,7 @@ module.exports = async (srv) => {
 
     	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
-		if (isCountQuery || countryCode[0] !== 'TW' || countryCode.length <= 0) {
+		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
 		return result;
 		}
@@ -3004,6 +3004,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
 		let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION }));
 		let division = (divisions.length === 1) ? divisions[0] : "Both";
+
+		let totalPnmValue = offerProductValidation.reduce((a, b) => a + b.PNM_VALUE, 0);
 /*
 		//In case we have any FOC (on main products) in the offer, a comment should be in remarks
 		let maxFOC = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FOC }));
@@ -3555,6 +3557,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			UserSignatureImg			: userSignatureImageBuffer,
 			NLHospitalManagerEmail: NLHospitalManagerEmail,
             NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
+			TotalPNM_Value				: totalPnmValue,
 		};
 		return results;
 	
@@ -5107,8 +5110,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							usString = usString.replace(/\./g,',');  
 							usString = usString.replace(/\$/g,'.');   
 							return  usString;                  
-					},
-					numberUS2: (input) => {  
+						},
+						numberNL: (input) => {  
+							if(Number(input) === 0 || input === null  ){
+								return "0,00";
+							}          
+							let usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'.')).toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							} else {
+								usString = input.toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							} 
+							return  usString;                  
+						},
+						numberUS2: (input) => {  
 							if(Number(input) === 0 || input === null  ){
 								return "0.00";
 							}          
@@ -5140,46 +5155,46 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							return current_date;
 						},				   
 						numberEU5: (input) => {
-						if(Number(input) === 0 || input === null  ){
-							return "0,00000";
-						} 
-						var usString;
-						if(typeof input === 'string'){
-							usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-						} else {
-							usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							if(Number(input) === 0 || input === null  ){
+								return "0,00000";
+							} 
+							var usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							} else {
+								usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							}
+							usString = usString.replace(/\,/g,'$');
+							usString = usString.replace(/\./g,',');  
+							usString = usString.replace('$','.');   
+							return  usString; 
+						},
+						dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+						dateYear: (input) => input.substring(0,4),
+						extract2Decimals: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 2);
+							} else {
+								return Number(input).toFixed(2).split(".")[1];
+							}
+						},
+						extract5Decimals: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 5);
+							} else {
+								return Number(input).toFixed(5).split(".")[1];
+							}
+						},
+						//EHQUT-167492-Quotation Adjustment in word file
+						Decimals2Unit: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 2);
+							} else {
+								return Number(input).toFixed(2);
+							}
+							
 						}
-						usString = usString.replace(/\,/g,'$');
-						usString = usString.replace(/\./g,',');  
-						usString = usString.replace('$','.');   
-						return  usString; 
-					},
-					dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-					dateYear: (input) => input.substring(0,4),
-					extract2Decimals: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 2);
-						} else {
-							return Number(input).toFixed(2).split(".")[1];
-						}
-					},
-					extract5Decimals: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 5);
-						} else {
-							return Number(input).toFixed(5).split(".")[1];
-						}
-					},
-					//EHQUT-167492-Quotation Adjustment in word file
-					Decimals2Unit: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 2);
-						} else {
-							return Number(input).toFixed(2);
-						}
-						
-					}
-					//EHQUT-167492-Quotation Adjustment in word file
+						//EHQUT-167492-Quotation Adjustment in word file
 
 
 					}
@@ -5325,6 +5340,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.Offer_Custom_Date_1 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_1 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_1, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_1;
 		offerValidation.Offer_Custom_Date_4 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_4 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_4, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_4;
 		offerValidation.Offer_Custom_Date_5 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_5 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_5, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_5;
+		offerValidation.TotalPNM_Value = offerValidation.COUNTRYCODE === 'PL' ? offerValidation.TotalPNM_Value && ServiceHelper.formatCurrency(Number(offerValidation.TotalPNM_Value), 'pl-PL', 2, 2) : offerValidation.TotalPNM_Value;
 		offerValidation.UserSignature = {
 			_type: "image",
 			source: offerValidation.UserSignatureImg, 
