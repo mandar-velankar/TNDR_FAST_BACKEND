@@ -5078,8 +5078,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							usString = usString.replace(/\./g,',');  
 							usString = usString.replace(/\$/g,'.');   
 							return  usString;                  
-					},
-					numberUS2: (input) => {  
+						},
+						numberNL: (input) => {  
+							if(Number(input) === 0 || input === null  ){
+								return "0,00";
+							}          
+							let usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'.')).toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							} else {
+								usString = input.toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							} 
+							return  usString;                  
+						},
+						numberUS2: (input) => {  
 							if(Number(input) === 0 || input === null  ){
 								return "0.00";
 							}          
@@ -5108,46 +5120,46 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							return current_date;
 						},				   
 						numberEU5: (input) => {
-						if(Number(input) === 0 || input === null  ){
-							return "0,00000";
-						} 
-						var usString;
-						if(typeof input === 'string'){
-							usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-						} else {
-							usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							if(Number(input) === 0 || input === null  ){
+								return "0,00000";
+							} 
+							var usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							} else {
+								usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							}
+							usString = usString.replace(/\,/g,'$');
+							usString = usString.replace(/\./g,',');  
+							usString = usString.replace('$','.');   
+							return  usString; 
+						},
+						dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+						dateYear: (input) => input.substring(0,4),
+						extract2Decimals: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 2);
+							} else {
+								return Number(input).toFixed(2).split(".")[1];
+							}
+						},
+						extract5Decimals: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 5);
+							} else {
+								return Number(input).toFixed(5).split(".")[1];
+							}
+						},
+						//EHQUT-167492-Quotation Adjustment in word file
+						Decimals2Unit: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 2);
+							} else {
+								return Number(input).toFixed(2);
+							}
+							
 						}
-						usString = usString.replace(/\,/g,'$');
-						usString = usString.replace(/\./g,',');  
-						usString = usString.replace('$','.');   
-						return  usString; 
-					},
-					dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-					dateYear: (input) => input.substring(0,4),
-					extract2Decimals: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 2);
-						} else {
-							return Number(input).toFixed(2).split(".")[1];
-						}
-					},
-					extract5Decimals: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 5);
-						} else {
-							return Number(input).toFixed(5).split(".")[1];
-						}
-					},
-					//EHQUT-167492-Quotation Adjustment in word file
-					Decimals2Unit: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 2);
-						} else {
-							return Number(input).toFixed(2);
-						}
-						
-					}
-					//EHQUT-167492-Quotation Adjustment in word file
+						//EHQUT-167492-Quotation Adjustment in word file
 
 
 					}
