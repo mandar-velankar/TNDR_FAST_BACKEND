@@ -2426,7 +2426,6 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Quotation_Custom_Datetime_8: DateTime;
             Quotation_Custom_Datetime_9: DateTime;
             Quotation_Custom_Datetime_10: DateTime;
-            UserSignatureImg            : String;
             NLHospitalManagerEmail: String;
             NLHospitalManagerContactNumber : String;
             TotalPNM_Value               : Double;
