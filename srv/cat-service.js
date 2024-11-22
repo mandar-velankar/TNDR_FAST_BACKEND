@@ -1149,13 +1149,13 @@ module.exports = (srv) => {
 			//based upon the country the correct approverType will be handled 
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
-					case "HBU":
+					case "PoH/CEH":
 						oApproverType.ValidationType = 1;
 						break;
 					case "CDH":
 						oApproverType.ValidationType = 1;
 						break;
-					case "NSM/SM/FM":
+					case "SM/PCEA":
 						oApproverType.ValidationType = 1;
 						break;
 					case "Supply Chain":
@@ -1217,13 +1217,13 @@ module.exports = (srv) => {
 			//based upon the country the correct approverType will be handled 
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
-					case "HBU":
+					case "PoH/CEH":
 						oApproverType.ValidationType = 1;
 						break;
 					case "CDH":
 						oApproverType.ValidationType = 1;
 						break;
-					case "NSM/SM/FM":
+					case "SM/PCEA":
 						oApproverType.ValidationType = 1;
 						break;
 					case "Supply Chain":
@@ -1266,10 +1266,10 @@ module.exports = (srv) => {
 			*/
 		}
 		//Set variables for policy prices thresholds
-		let nsmMSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'MSP') / uomFactor;
-		let nsmNSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'NSP') / uomFactor;
-		let hbuMSP = extractPolicyValue(productPolicyPrices, 'HBU', 'MSP') / uomFactor;
-		let hbuNSP = extractPolicyValue(productPolicyPrices, 'HBU', 'NSP') / uomFactor;
+		let nsmMSP = extractPolicyValue(productPolicyPrices, 'SM/PCEA', 'MSP') / uomFactor;
+		let nsmNSP = extractPolicyValue(productPolicyPrices, 'SM/PCEA', 'NSP') / uomFactor;
+		let hbuMSP = extractPolicyValue(productPolicyPrices, 'PoH/CEH', 'MSP') / uomFactor;
+		let hbuNSP = extractPolicyValue(productPolicyPrices, 'PoH/CEH', 'NSP') / uomFactor;
 		let cdhMSP = extractPolicyValue(productPolicyPrices, 'CDH', 'MSP') / uomFactor;
 		let cdhNSP = extractPolicyValue(productPolicyPrices, 'CDH', 'NSP') / uomFactor;
 
@@ -1284,15 +1284,15 @@ module.exports = (srv) => {
 
 		const FOCValue = calculateFOCVolume(product) * product.REGISTERED_PRICE;
 
-		let requiredApprovalLevel = 0;//0: No business approval required; 1:NSM/SM/FM; 2: HBU; 3: CDH; 4: Approval not allowed
+		let requiredApprovalLevel = 0;//0: No business approval required; 1:SM/PCEA; 2: PoH/CEH; 3: CDH; 4: Approval not allowed
 		if (//This means it's first offer for account or offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountOfferPrice, 0) ||
 			ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, preApprovedAccountOfferPrice)
 		) {
-			if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)) {//NSM/SM/FM can approve
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)) {//SM/PCEA can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)) {//HBU can approve
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)) {//PoH/CEH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
 			}
 			else if (ServiceHelper.isDoubleXBelowEqualY(cdhMSP, product.OFFER_PRICE)) {//CDH can approve
@@ -1307,10 +1307,10 @@ module.exports = (srv) => {
 			ServiceHelper.isDoubleEqual(preApprovedAccountNetOfferPrice, 0) ||
 			ServiceHelper.isDoubleXBelowY(product.NET_PRICE, preApprovedAccountNetOfferPrice)
 		) {
-			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_PRICE)) {//NSM/SM/FM can approve
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_PRICE)) {//SM/PCEA can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_PRICE)) {//HBU can approve
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_PRICE)) {//PoH/CEH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
 			}
 			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_PRICE)) {//CDH can approve
@@ -1350,13 +1350,13 @@ module.exports = (srv) => {
 		//based upon the country the correct approverType will be handled 
 		aApproverTypes.map(async function (oApproverType) {
 			switch (oApproverType.ApproverType) {
-				case "HBU":
+				case "PoH/CEH":
 					oApproverType.ValidationType = hbuLevel;
 					break;
 				case "CDH":
 					oApproverType.ValidationType = cdhLevel;
 					break;
-				case "NSM/SM/FM":
+				case "SM/PCEA":
 					oApproverType.ValidationType = nsmLevel;
 					break;
 				case "Supply Chain":
@@ -2367,8 +2367,8 @@ module.exports = (srv) => {
 
 		//EHQUT-197882-Thailand - Additional approver for Nalador
 		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
-		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
-		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
+		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'SM/PCEA');
+		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'PoH/CEH');
 		if (oCDH && oNSM && oHBU) {
 			//If CDH approval is mandatory, lower levels do not need to approve
 			if (oCDH.ValidationType === 3) {
@@ -2495,6 +2495,13 @@ module.exports = (srv) => {
 	}
 
 	function mapApprovalForType(approverType, latestApproval, division) {
+		const THApproverTypes = {
+			"SM/PCEA": "NSM/SM/FM",
+			"PoH/CEH": "HBU"
+		};
+
+		approverType = THApproverTypes[approverType] && latestApproval.filter(la => la.ApproverType === approverType).length == 0 ? THApproverTypes[approverType] : approverType;
+
 		aApprovalForTypeResult = [];
 		oApprovalForType = latestApproval.filter((d => d.ApproverType === approverType));
 		if (oApprovalForType.length > 1 && approverType != 'Supply Chain' && approverType != 'Regulatory' && approverType != 'Legal' && approverType != 'Controlling') {
