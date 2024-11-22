@@ -271,12 +271,14 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         GOV_CODE,
         PRODUCTPACKNAME,
         PRESENTATION,
+        PACKFACTOR,
         dav.DistributorID,
         dist.DistributorName,
         Type,
         Value,
         StartDate,
-        EndDate
+        EndDate,
+        PACKFACTOR || ' ' || PRESENTATION as CombinedPackSizePresentation: String
     };
 
     
@@ -299,11 +301,14 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
             mediaType    : String      @Core.IsMediaType;
     };
     entity NLWPPExcelExtract as select from WholesalePurchasePriceView as wpp
-    left join PT_TMDIST as dist on wpp.DistributorID = dist.DistributorID{
+    left join PT_TMDIST as dist on wpp.DistributorID = dist.DistributorID
+    left join MasterCountryCurrencies as ctryCurrency
+	    on ctryCurrency.CountryCode = wpp.CountryCode{
         MaterialNumbers,
         GOV_CODE,
         PRODUCTPACKNAME,
         PRESENTATION,
+        PACKFACTOR,
         wpp.DistributorID,
         dist.DistributorName,
         Bundle,
@@ -314,8 +319,30 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         WPPWithoutTax,
         StartDate,
         EndDate,
-        Status
-    };
+        Status,
+        ctryCurrency.Currency,
+        Type as CombinedWPPMarginNetPriceValues,
+        min(EndDate) as minEndDate: Date,
+        PACKFACTOR || ' ' || PRESENTATION as CombinedPackSizePresentation: String
+    }group by 
+        MaterialNumbers,
+        GOV_CODE,
+        PRODUCTPACKNAME,
+        PRESENTATION,
+        PACKFACTOR,
+        wpp.DistributorID,
+        dist.DistributorName,
+        Bundle,
+        OuterCarton,
+        PPP,
+        Type,
+        Margin,
+        WPPWithoutTax,
+        StartDate,
+        EndDate,
+        Status,
+        ctryCurrency.Currency;
+
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
     action SoftDeleteProductPrices(productPackID: Integer, countryCode: String) returns String;
