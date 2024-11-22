@@ -125,9 +125,6 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
             on contract.OfferID = offer.OfferID
             and contract.ProductCode = product.ProductCode
             and contract.Active = true
-        inner join TransactionalData.AwardedOfferDistributors as nldist
-            on nldist.OfferID = offer.OfferID
-            and nldist.ProductPackID = product.ProductCode
         inner join TransactionalData.PriceCondition as pc
 	        on tender.CountryCode = pc.CountryCode
 	    	and product.ProductCode = pc.ProductCode
@@ -140,7 +137,6 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         contract.ContractStartDate,
         contract.ContractEndDate,
         contract.ContractDuration,
-        nldist.DistributorID,
         offer.OfferID,
         product.ProductCode,
         tender.CountryCode,
@@ -163,7 +159,6 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         contract.ContractStartDate,
         contract.ContractEndDate,
         contract.ContractDuration,
-        nldist.DistributorID,
         offer.OfferID,
         product.ProductCode,
         product.RequestedVolume,

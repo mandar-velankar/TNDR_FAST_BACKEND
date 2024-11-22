@@ -225,7 +225,6 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const daValue = distributionAgreement && distributionAgreement.Value || 0;
 			const daType = distributionAgreement && distributionAgreement.Type || null;
 			const filteredItems = fastOfferData.filter(item => item.InstituteID == instituteId &&
-																item.DistributorID == this.distributorId &&
 																item.ProductCode === productCode &&
 																item.ContractStartDate <= dateFrom &&
 																item.ContractEndDate >= dateFrom);
