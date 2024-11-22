@@ -966,9 +966,9 @@ module.exports = (srv) => {
 			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
 			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
 			item.Margin = (item.Margin*100).toFixed(2)+"%";
-			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Neto Prijs ${item.WPPWithoutTax} ${item.Currency}`;
+			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Neto Prijs`;
+			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('DD-MM-YYYY') : moment(item.EndDate).format('DD-MM-YYYY');
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD-MM-YYYY');
-			item.EndDate = item.EndDate && ServiceHelper.formatDate(item.EndDate, '', 'DD-MM-YYYY');
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD-MM-YYYY');
 		});
 

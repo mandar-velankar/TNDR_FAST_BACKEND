@@ -1395,7 +1395,7 @@ module.exports = async (srv) => {
 					LotID: awardedProduct.LotID
 				})
 			await UPDATE(PT_TMOFPR)
-				.with ({RequestedVolume: req.data.RequestedVolume})
+				.with ({RequestedVolume: req.data.AwardedQty})
 				.where({
 					OfferID: offerProduct.OfferID,
 					ProductCode: offerProduct.ProductCode,
@@ -3214,7 +3214,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
 
-		let userSignatureImageBuffer = null;
 		let NLHospitalManagerEmail = null;
 		let NLHospitalManagerContactNumber = null;
 
@@ -3222,9 +3221,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const userInfoSignature = await tx.run(SELECT.from(PT_TMUSER).where({UserName: tender.Custom_String_1}));
 			NLHospitalManagerEmail = userInfoSignature[0]?.UserEmail;
 			NLHospitalManagerContactNumber = userInfoSignature[0]?.ContactNumber;
-			if (userInfoSignature && userInfoSignature.length > 0 && userInfoSignature[0].UserSignatureImg) {
-				userSignatureImageBuffer = Buffer.from(userInfoSignature[0].UserSignatureImg, 'base64');
-			}
 		}
 
 		let distributor = null;
@@ -3554,7 +3550,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             Quotation_Custom_Datetime_8: quotation?.Custom_Datetime_8,
             Quotation_Custom_Datetime_9: quotation?.Custom_Datetime_9,
             Quotation_Custom_Datetime_10: quotation?.Custom_Datetime_10,
-			UserSignatureImg			: userSignatureImageBuffer,
 			NLHospitalManagerEmail: NLHospitalManagerEmail,
             NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
 			TotalPNM_Value				: totalPnmValue,
@@ -5288,6 +5283,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		//Get product data
 		let productValidation = await buildOfferProductValidation(tx, whereOffer);
 
+		let userSignatureImageBuffer = await getUserSignatureBuffer(tx, offerValidation);
+
 		//format prices
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
@@ -5343,7 +5340,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.TotalPNM_Value = offerValidation.COUNTRYCODE === 'PL' ? offerValidation.TotalPNM_Value && ServiceHelper.formatCurrency(Number(offerValidation.TotalPNM_Value), 'pl-PL', 2, 2) : offerValidation.TotalPNM_Value;
 		offerValidation.UserSignature = {
 			_type: "image",
-			source: offerValidation.UserSignatureImg, 
+			source: userSignatureImageBuffer, 
 			format: "image/jpeg",
 			width: 100, 
 			height: 50 
@@ -5373,6 +5370,15 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			//   }, {})
 		};
 
+	}
+
+	async function getUserSignatureBuffer(tx, offerValidation){
+		let signatureBuffer = null;
+		const userInfoSignature = await tx.run(SELECT.from(PT_TMUSER).where({UserName: offerValidation.Tender_Custom_String_1}));
+		if (userInfoSignature && userInfoSignature.length > 0 && userInfoSignature[0].UserSignatureImg) {
+			signatureBuffer = Buffer.from(userInfoSignature[0].UserSignatureImg, 'base64');
+		}
+		return signatureBuffer;
 	}
 
 	srv.on("READ", "CSVAttachment", async (req, res) => {
