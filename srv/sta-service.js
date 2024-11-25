@@ -3213,6 +3213,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
 		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+		
+		const user = userInfo?.[0] || {};
 
 		let NLHospitalManagerEmail = null;
 		let NLHospitalManagerContactNumber = null;
@@ -3318,16 +3320,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			//SBR: sbrLevel,
 			PUBLICATION_DATE: offer.PUBLICATION_DATE,
 			BID_DUE_DATE: offer.BID_DUE_DATE,
-			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
+			TENDER_SUBMITTED_BY: user.UserName || null,
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
 			// TENDER_TYPE: tenderType[0].NAME,
-			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
-			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
-			CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
+			CREATED_BY_USER_EMAIL : user.UserEmail || null,
+			CREATED_BY_USER_ROLE : user.Role || null,
+			CREATED_BY_USER_CONTACTNUMBER : user.ContactNumber || null,
 			TenderChannel: offer.TenderChannel,
 			ContractLength: offer.ContractLength,
 			ContractExtenseion: offer.ContractExtenseion,
