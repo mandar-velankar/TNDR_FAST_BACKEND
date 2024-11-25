@@ -2733,7 +2733,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	}
 
 	srv.on('READ', 'OfferValidation', async (req) => {
-		// try{
+		try{
 			const tx = cds.tx(req);
 		
 			let results = [];
@@ -2743,11 +2743,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				results = await buildOfferValidation(tx, whereOffer);
 			}
 			return results;
-		// }
-		// catch(error){
-		// 	console.error('Error in OfferValidation READ');
-		// 	return req.reject(403, error?.message||"Error in OfferValidation READ");
-		// }
+		}
+		catch(error){
+			console.error('Error in OfferValidation READ');
+			return req.reject(403, error?.message||"Error in OfferValidation READ");
+		}
 	});
 
 	srv.on('READ', 'OfferProductValidation', async (req) => {
