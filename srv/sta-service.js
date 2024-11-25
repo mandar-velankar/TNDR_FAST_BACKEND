@@ -4817,9 +4817,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return results;
 			
 	}
-	async function buildProductValidationForType18(tx, offer, product, aApproverTypes, { Role }) {
+	async function buildProductValidationForType18(tx, offer, product, aApproverTypes, userInfo) {
 		let results = { IN_POLICY: false };
-		const role = Role?.toLowerCase().replace(/ /g, '');
+
+		// Safely extract and validate Role
+		const role = userInfo?.Role;
+
+		if (!role) {
+			console.warn("Role is missing in userInfo:", userInfo);
+			return results; // Return early or handle as required if Role is missing
+		}
+		
+		const normalizedRole = role.toLowerCase().replace(/ /g, '');
 	
 		const validationMap = {
 			'kam': [{ type: 'sm', value: 3 }, { type: 'tm', value: 3 }],
@@ -4827,7 +4836,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			'tendermanager': [{ type: 'sm', value: 2 }, { type: 'tm', value: 1 }]
 		};
 	
-		(validationMap[role] || []).forEach(({ type, value }) => {
+		(validationMap[normalizedRole] || []).forEach(({ type, value }) => {
 			aApproverTypes.map(oApproverType => {
 				if (oApproverType.ApproverType.toLowerCase().replace(/ /g, '').includes(type)) {
 					oApproverType.ValidationType = value;
