@@ -6008,6 +6008,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const templates = await tx.run(SELECT.from(ExtractNLHistoricalInformation).where({ templateId: templateId }));
 		let excelData = await tx.run(SELECT.from(NLExtractOffers));
+		excelData = formatNLExtractOfferHistoryData(excelData);
 		const data = {excelData}
 		const templateContent = templates[0].content;
 
@@ -6022,6 +6023,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             return req.reject(403, error?.message||"Error in ExcelAttachments");
         }
 	});
+
+	function formatNLExtractOfferHistoryData (excelData) {
+		excelData.forEach(ed => {
+			ed.OfferPrice_1 = ed.OfferPrice_1 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_1), 'nl-NL', 2, 2);
+			ed.OfferPrice_2 = ed.OfferPrice_2 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_2), 'nl-NL', 2, 2);
+			ed.OfferPrice_3 = ed.OfferPrice_3 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_3), 'nl-NL', 2, 2);
+			ed.NetPrice = ed.NetPrice && ServiceHelper.formatCurrency(Number(ed.NetPrice), 'nl-NL', 2, 2);
+			ed.EffectiveDate = ed.EffectiveDate && ServiceHelper.formatDate(ed.EffectiveDate, '', 'DD-MM-YYYY');
+			ed.ExpiryDate = ed.ExpiryDate && ServiceHelper.formatDate(ed.ExpiryDate, '', 'DD-MM-YYYY');
+			ed.BidDueDate = ed.BidDueDate && ServiceHelper.formatDate(ed.BidDueDate, '', 'DD-MM-YYYY');
+			ed.PublicationDate = ed.PublicationDate && ServiceHelper.formatDate(ed.PublicationDate, '', 'DD-MM-YYYY');
+		});
+		return excelData;
+	}
 
 	srv.on('CREATE', 'AwardedOfferDistributors', async (req, res) => {
 		try {

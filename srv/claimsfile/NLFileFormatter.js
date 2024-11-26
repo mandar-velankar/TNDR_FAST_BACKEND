@@ -14,7 +14,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
        // try {
 			this.db = await cds.connect.to('db');
-			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, PT_TMPRDHIER, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
+			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMSKUPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, PT_TMPRDHIER, WholesalePurchasePrice, DistributionAgreements} = this.db.entities("com.bayer.SXTENDER.MasterData");
 			const { ClaimData, SalesReportFileFieldMetaData} = this.db.entities("com.bayer.SXTENDER.ClaimsData");
 			const { ExtractFASTOfferNL } = this.db.entities("ClaimsService");
 
@@ -31,6 +31,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const distributionAgreements = await SELECT.from(DistributionAgreements).where({COUNTRYCODE: this.countryCode, DistributorID:this.distributorId});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
 			const productPacks = await SELECT.from(PT_TMPRDPCK).where({ACTIVERECORD: 'Yes'});
+			const productPackSKUs = await SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const brands =  await SELECT.from(PT_TMPRDHIER);
 			const institutes = await SELECT.from(PT_TMINST).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const instituteHierarcis = await SELECT.from(PT_TMINSHIER).where({ActiveRecord: 'Yes'});
@@ -46,7 +47,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const claimFile = this.mapSalesDataToClaimFiles(this.data, distributor, UUID, this.cwid, { dateFrom, dateTo, filePeriodDate });
 
 			// Map sales data to claim data
-			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, claimsData, { dateFrom, dateTo, filePeriodDate });
+			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, claimsData, { dateFrom, dateTo, filePeriodDate });
 
             const result = {contrastAgentSalesData, claimFile, claimData};
 
@@ -195,7 +196,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	 * @param {Object} req - Request object containing additional data
 	 * @returns {Object} claimData
 	 */
-	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, claimsData, { dateFrom, dateTo, filePeriodDate }) {
+	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, claimsData, { dateFrom, dateTo, filePeriodDate }) {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
@@ -207,6 +208,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const brand =  brands.find(i => i.HLEVEL6_CODE == hLEVEL6_CODE);
 			const brandName = brand && brand?.HLEVEL4_NAME || null;
 			const brandId = brand && brand?.HLEVEL4_CODE || null;
+			const productPackSKU = productPackSKUs.find(item => item.ProductPackID == productCode);
+			const sKUCode = productPackSKU && productPackSKU?.SKUCode || null;
 			const institute = institutes.find(item => {
 				const externalIds = item.External_InstituteId || ""; // Fallback to an empty string if null or undefined
 				return externalIds.split(',')
@@ -297,6 +300,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					WartoscPNM                              : null,
 					IloscSztukDoWyrownania                  : null,
 					NrFakturyZakupu                         : null,
+					SKUCode									: sKUCode,
 					ClaimFiles_ID					 		: UUID
 				}
 			);
@@ -371,7 +375,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
 	formatData(salesdata, currentMappings, DistributorName, fieldMetadata){
 		if(DistributorName === 'Ovidius Pharma & Care' || DistributorName === 'Klinifarma'){
-			salesdata = this.formatXslxData(salesdata, currentMappings);
+			salesdata = this.formatXslxData(salesdata, currentMappings, DistributorName);
 		}
 		else{
 			salesdata = this.formatFixData(salesdata, fieldMetadata);
@@ -379,12 +383,23 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 		return salesdata;
 	}
 	
-	formatXslxData(salesdata, currentMappings){
-		// Get column names from the 5th row
-		let columnNames = salesdata[2].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+	formatXslxData(salesdata, currentMappings, DistributorName){
 
-		// Remove initial rows that are not real data
-		salesdata = salesdata.slice(3);
+		let columnNames = null;
+		if(DistributorName === 'Ovidius Pharma & Care'){
+			// Get column names from the 5th row
+			columnNames = salesdata[2].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+
+			// Remove initial rows that are not real data
+			salesdata = salesdata.slice(3);
+		}
+		else{
+			// Get column names from the 5th row
+			columnNames = salesdata[0].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+
+			// Remove initial rows that are not real data
+			salesdata = salesdata.slice(1);
+		}
 
 		salesdata = salesdata.filter(row => row.some(cell => cell !== null && cell !== '' && cell !== ' '));
 
@@ -432,10 +447,14 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 				// Apply transformations based on field requirements
 				if (['FixedPrice', 'PurchasePrice', 'Claim1Amount', 'Claim2Amount','ClaimTotal'].includes(field.FieldName)) {
 					// Convert last two digits to decimal
-					value = parseFloat(value.replace(/^\+?0+/, '')) / 100;
+					if (/^\+?0+$/.test(value)) {
+						value = 0;
+					} else {
+						value = parseFloat(value.replace(/^\+?0+/, '')) / 100;
+					}
 				} else if (field.FieldName === 'TotalDelivered') {
 					// Remove leading + and leading zeros
-					value = parseInt(value.replace(/^\+?0+/, ''), 10);
+					value = /^\+?0+$/.test(value) ? 0 : parseInt(value.replace(/^\+?0+/, ''), 10);
 				}
 				
 				// Assign the extracted value to the field name

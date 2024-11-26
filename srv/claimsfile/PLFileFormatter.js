@@ -34,11 +34,12 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 				return obj;
 			});
 
-			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, PT_TMPRDHIER} = this.db.entities("com.bayer.SXTENDER.MasterData");
+			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMSKUPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, PT_TMPRDHIER} = this.db.entities("com.bayer.SXTENDER.MasterData");
 			const { ExtractFASTOffer } = this.db.entities("ClaimsService");
             const distributor = await SELECT.one.from(PT_TMDIST).where({DistributorID: this.distributorId, CountryCode: this.countryCode});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
 			const productPacks = await SELECT.from(PT_TMPRDPCK).where({ACTIVERECORD: 'Yes'});
+			const productPackSKUs = await SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const brands =  await SELECT.from(PT_TMPRDHIER);
 			const institutes = await SELECT.from(PT_TMINST).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const instituteHierarcis = await SELECT.from(PT_TMINSHIER).where({ActiveRecord: 'Yes'});
@@ -51,7 +52,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const claimFile = this.mapSalesDataToClaimFiles(this.data, distributor, UUID, this.cwid);
 
 			// Map sales data to claim data
-			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, brands, institutes, instituteHierarcis, fastOfferData, UUID, this.cwid);
+			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, UUID, this.cwid);
 
             const result = {contrastAgentSalesData, claimFile, claimData};
 
@@ -140,7 +141,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 	 * @param {Object} req - Request object containing additional data
 	 * @returns {Object} claimData
 	 */
-	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, brands, institutes, instituteHierarcis, fastOfferData, UUID, CWID) {
+	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, UUID, CWID) {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
@@ -152,6 +153,8 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const brand =  brands.find(i => i.HLEVEL6_CODE == hLEVEL6_CODE);
 			const brandName = brand && brand?.HLEVEL4_NAME || null;
 			const brandId = brand && brand?.HLEVEL4_CODE || null;
+			const productPackSKU = productPackSKUs.find(item => item.ProductPackID == productCode);
+			const sKUCode = productPackSKU && productPackSKU?.SKUCode || null;
 			const institute = institutes.find(item => item.External_InstituteId == curr.KODKLIENTAwgBAYERSpzoo);
 			const instituteId = institute && institute.InstituteID || null;
 			const instituteName = institute && institute?.InstituteName || null;
@@ -222,6 +225,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					WartoscPNM                              : curr.WartośćwgPNM || null,
 					IloscSztukDoWyrownania                  : curr.Ilośćsztukdowyrównania || null,
 					NrFakturyZakupu                         : curr.NRFAKTURYZAKUPU || null,
+					SKUCode									: sKUCode,
 					ClaimFiles_ID					 		: UUID
 				}
 			);
