@@ -210,8 +210,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const institute = institutes.find(item => {
 				const externalIds = item.External_InstituteId || ""; // Fallback to an empty string if null or undefined
 				return externalIds.split(',')
-					.map(id => id.trim())
-					.includes(String(curr.IDFNumber));
+					.map(id => Number(id.trim()))
+					.includes(Number(curr.IDFNumber));
 			});
 			const instituteId = institute && institute.InstituteID || null;
 			const instituteName = institute && institute?.InstituteName || 'Customer Not Found';
