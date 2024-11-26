@@ -3249,6 +3249,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
 		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+		
+		const user = userInfo?.[0] || {};
 
 		let NLHospitalManagerEmail = null;
 		let NLHospitalManagerContactNumber = null;
@@ -3354,16 +3356,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			//SBR: sbrLevel,
 			PUBLICATION_DATE: offer.PUBLICATION_DATE,
 			BID_DUE_DATE: offer.BID_DUE_DATE,
-			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
+			TENDER_SUBMITTED_BY: user.UserName || null,
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
 			// TENDER_TYPE: tenderType[0].NAME,
-			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
-			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
-			CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
+			CREATED_BY_USER_EMAIL : user.UserEmail || null,
+			CREATED_BY_USER_ROLE : user.Role || null,
+			CREATED_BY_USER_CONTACTNUMBER : user.ContactNumber || null,
 			TenderChannel: offer.TenderChannel,
 			ContractLength: offer.ContractLength,
 			ContractExtenseion: offer.ContractExtenseion,
@@ -4851,9 +4853,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return results;
 			
 	}
-	async function buildProductValidationForType18(tx, offer, product, aApproverTypes, { Role }) {
+	async function buildProductValidationForType18(tx, offer, product, aApproverTypes, userInfo) {
 		let results = { IN_POLICY: false };
-		const role = Role?.toLowerCase().replace(/ /g, '');
+
+		// Safely extract and validate Role
+		const role = userInfo?.Role;
+
+		if (!role) {
+			console.warn("Role is missing in userInfo:", userInfo);
+			return results; // Return early or handle as required if Role is missing
+		}
+		
+		const normalizedRole = role.toLowerCase().replace(/ /g, '');
 	
 		const validationMap = {
 			'kam': [{ type: 'sm', value: 3 }, { type: 'tm', value: 3 }],
@@ -4861,7 +4872,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			'tendermanager': [{ type: 'sm', value: 2 }, { type: 'tm', value: 1 }]
 		};
 	
-		(validationMap[role] || []).forEach(({ type, value }) => {
+		(validationMap[normalizedRole] || []).forEach(({ type, value }) => {
 			aApproverTypes.map(oApproverType => {
 				if (oApproverType.ApproverType.toLowerCase().replace(/ /g, '').includes(type)) {
 					oApproverType.ValidationType = value;
@@ -6040,6 +6051,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const templates = await tx.run(SELECT.from(ExtractNLHistoricalInformation).where({ templateId: templateId }));
 		let excelData = await tx.run(SELECT.from(NLExtractOffers));
+		excelData = formatNLExtractOfferHistoryData(excelData);
 		const data = {excelData}
 		const templateContent = templates[0].content;
 
@@ -6054,6 +6066,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             return req.reject(403, error?.message||"Error in ExcelAttachments");
         }
 	});
+
+	function formatNLExtractOfferHistoryData (excelData) {
+		excelData.forEach(ed => {
+			ed.OfferPrice_1 = ed.OfferPrice_1 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_1), 'nl-NL', 2, 2);
+			ed.OfferPrice_2 = ed.OfferPrice_2 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_2), 'nl-NL', 2, 2);
+			ed.OfferPrice_3 = ed.OfferPrice_3 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_3), 'nl-NL', 2, 2);
+			ed.NetPrice = ed.NetPrice && ServiceHelper.formatCurrency(Number(ed.NetPrice), 'nl-NL', 2, 2);
+			ed.EffectiveDate = ed.EffectiveDate && ServiceHelper.formatDate(ed.EffectiveDate, '', 'DD-MM-YYYY');
+			ed.ExpiryDate = ed.ExpiryDate && ServiceHelper.formatDate(ed.ExpiryDate, '', 'DD-MM-YYYY');
+			ed.BidDueDate = ed.BidDueDate && ServiceHelper.formatDate(ed.BidDueDate, '', 'DD-MM-YYYY');
+			ed.PublicationDate = ed.PublicationDate && ServiceHelper.formatDate(ed.PublicationDate, '', 'DD-MM-YYYY');
+		});
+		return excelData;
+	}
 
 	srv.on('CREATE', 'AwardedOfferDistributors', async (req, res) => {
 		try {
