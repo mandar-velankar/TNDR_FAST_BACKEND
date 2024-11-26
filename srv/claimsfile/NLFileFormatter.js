@@ -432,10 +432,14 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 				// Apply transformations based on field requirements
 				if (['FixedPrice', 'PurchasePrice', 'Claim1Amount', 'Claim2Amount','ClaimTotal'].includes(field.FieldName)) {
 					// Convert last two digits to decimal
-					value = parseFloat(value.replace(/^\+?0+/, '')) / 100;
+					if (/^\+?0+$/.test(value)) {
+						value = 0;
+					} else {
+						value = parseFloat(value.replace(/^\+?0+/, '')) / 100;
+					}
 				} else if (field.FieldName === 'TotalDelivered') {
 					// Remove leading + and leading zeros
-					value = parseInt(value.replace(/^\+?0+/, ''), 10);
+					value = /^\+?0+$/.test(value) ? 0 : parseInt(value.replace(/^\+?0+/, ''), 10);
 				}
 				
 				// Assign the extracted value to the field name
