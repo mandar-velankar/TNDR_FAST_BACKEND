@@ -375,7 +375,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 
 	formatData(salesdata, currentMappings, DistributorName, fieldMetadata){
 		if(DistributorName === 'Ovidius Pharma & Care' || DistributorName === 'Klinifarma'){
-			salesdata = this.formatXslxData(salesdata, currentMappings);
+			salesdata = this.formatXslxData(salesdata, currentMappings, DistributorName);
 		}
 		else{
 			salesdata = this.formatFixData(salesdata, fieldMetadata);
@@ -383,12 +383,23 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 		return salesdata;
 	}
 	
-	formatXslxData(salesdata, currentMappings){
-		// Get column names from the 5th row
-		let columnNames = salesdata[2].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+	formatXslxData(salesdata, currentMappings, DistributorName){
 
-		// Remove initial rows that are not real data
-		salesdata = salesdata.slice(3);
+		let columnNames = null;
+		if(DistributorName === 'Ovidius Pharma & Care'){
+			// Get column names from the 5th row
+			columnNames = salesdata[2].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+
+			// Remove initial rows that are not real data
+			salesdata = salesdata.slice(3);
+		}
+		else{
+			// Get column names from the 5th row
+			columnNames = salesdata[0].map(col => currentMappings[col.replace(/\s+/g, '').replace(/.*\//, '').replace(/[().€%]/g, '')] || col);
+
+			// Remove initial rows that are not real data
+			salesdata = salesdata.slice(1);
+		}
 
 		salesdata = salesdata.filter(row => row.some(cell => cell !== null && cell !== '' && cell !== ' '));
 
