@@ -256,6 +256,7 @@ module.exports = (srv) => {
 			ed.Balance = ServiceHelper.formatCurrency(Number(ed.Balance), countryCodeLocals[CountryCode], 2, 2);
 			ed.ClaimApprovalModifiedAt = ed.ClaimApprovalModifiedAt && ServiceHelper.formatDate(ed.ClaimApprovalModifiedAt, '', 'DD-MM-YYYY');
 			ed.Date = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'DD-MM-YYYY');
+			ed.FASTPendingCorrection = ed.FASTPendingCorrection && ed.Type === 'Correction' ? ServiceHelper.formatCurrency(Number(ed.FASTPendingCorrection), countryCodeLocals[CountryCode], 2, 2) : '';
 		});
 		return excelData
 	}
