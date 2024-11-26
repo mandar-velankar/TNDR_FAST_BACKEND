@@ -206,16 +206,7 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 
 entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	left join ClaimsData.ClaimData as cd 		
-            on cd.ClaimFiles.ID = cf.ID 
-	inner join MasterData.PT_TMPRDPCK as productPack
-    		on productPack.PRODUCTPACKID = cd.ProductPackID
-    		and productPack.ACTIVERECORD = 'Yes'
-	inner join MasterData.PT_TMPRDHIER as hier
-			on productPack.HLEVEL6_CODE = hier.HLEVEL6_CODE
-	inner join MasterData.PT_TMSKUPRDPCK as sku
-			on sku.CountryCode = cf.CountryCode
-			and sku.ActiveRecord = 'Yes'
-			and sku.ProductPackID = cd.ProductPackID
+            on cd.ClaimFiles.ID = cf.ID
 	left join ClaimFileOverAllApprovedDateView as ca
 		on ca.ClaimFile_ID = cf.ID{
 	cf.ID as ClaimFileID,
@@ -236,7 +227,7 @@ entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	cd.FASTDistributionArrangement,
 	cd.Quantity,
 	cd.WholesalerContractPrice,
-	cd.FASTContractPrice,
+	cd.FASTContractPrice as OfferPrice: Double,
 	cd.WholesalerPurchasePrice,
 	cd.FASTWholesalerPurchasePrice,
 	cd.WholesalerClaim1,
@@ -258,12 +249,11 @@ entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	cd.QC1Passed,
 	cd.QC2Passed,
 	cd.Balance,
-	cd.FASTWholesalerPurchasePrice * cd.Quantity as WholesalerPurchaseAmount: Double,
-	cd.FASTContractPrice * cd.Quantity as NetSales: Double,
-	cd.Product.PriceCondition.OfferPrice,
-	cd.Product.SKUCountry.GOV_CODE,
-	hier.HLEVEL4_NAME,
-	sku.SKUCode,
+	cf.WholesalerPurchaseAmount,
+	cf.NetSales,
+	cd.EANNumber as GOV_CODE: String,
+	cd.BrandName as HLEVEL4_NAME: String,
+	cd.SKUCode,
 	ca.ClaimApprovalModifiedAt
 } where cf.CountryCode = 'NL'
 group by cf.ID,
@@ -310,8 +300,11 @@ group by cf.ID,
 	cd.QC1Passed,
 	cd.QC2Passed,
 	cd.Balance,
-	hier.HLEVEL4_NAME,
-	sku.SKUCode,
+	cf.WholesalerPurchaseAmount,
+	cf.NetSales,
+	cd.EANNumber,
+	cd.BrandName,
+	cd.SKUCode,
 	ca.ClaimApprovalModifiedAt;
 
 entity NLExtractClaimDataView as select from NLExtractClaimFilesView as cd{

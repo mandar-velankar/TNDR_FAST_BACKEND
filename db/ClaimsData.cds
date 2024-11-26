@@ -81,6 +81,7 @@ entity ClaimData : managed, cuid {
     WartoscPNM                              : Double;
     IloscSztukDoWyrownania                  : Double;
     NrFakturyZakupu                         : String;
+    SKUCode                                 : Integer;
     ClaimFiles                              : Association to ClaimFiles;
     Product                                 : Association to TransactionalData.PT_TMOFPR 
                                                 on Product.OfferID = OfferID 
