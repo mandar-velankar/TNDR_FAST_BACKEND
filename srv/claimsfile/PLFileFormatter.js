@@ -26,8 +26,8 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			this.data = this.data.filter(row => row.some(cell => cell !== null && cell !== ''));
 	
 			// Map the data to the correct column names
-			this.data = this.data.map(row => {
-				let obj = {};
+			this.data = this.data.map((row, rowIndex) => {
+				let obj = {RowOrder: rowIndex + 1};
 				columnNames.forEach((col, index) => {
 					obj[col] = row[index];
 				});
@@ -226,6 +226,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					IloscSztukDoWyrownania                  : curr.Ilośćsztukdowyrównania || null,
 					NrFakturyZakupu                         : curr.NRFAKTURYZAKUPU || null,
 					SKUCode									: sKUCode,
+					RowOrder								: curr.RowOrder,
 					ClaimFiles_ID					 		: UUID
 				}
 			);
