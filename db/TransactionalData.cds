@@ -937,8 +937,9 @@ type NLConditions {
     NetPrice: Double;
 };
 
-entity NLOfferDistributors: cuid {
+entity AwardedOfferDistributors: cuid {
     OfferID: String;
+    CountryCode: String;
     DistributorName: String;
     DistributorID: Integer;
     ProductPackName: String;

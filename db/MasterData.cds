@@ -83,7 +83,7 @@ entity PT_TMINST{
 	ContactEmail:String(100);
 	CNPJ:String;
 	Shortname:String;
-	KAM_Territory: String(12);
+	KAM_Territory: String;
 	External_InstituteId: String(50);
 	Class: Integer;
 	//Associations

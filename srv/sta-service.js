@@ -119,7 +119,7 @@ module.exports = async (srv) => {
 		TransCompetitorResult,
 		OutgoingMails,
 		NLPriceConditions,
-		NLOfferDistributors,
+		AwardedOfferDistributors,
 		ContractInfomation
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
@@ -518,7 +518,7 @@ module.exports = async (srv) => {
 
     	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
-		if (isCountQuery || countryCode[0] !== 'TW' || countryCode.length <= 0) {
+		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
 		return result;
 		}
@@ -1236,6 +1236,7 @@ module.exports = async (srv) => {
 		delete req.data.VwBudgetedProfitability;
 		delete req.data.PACKFACTOR;
 		delete req.data.INCOTerms;
+		delete req.data.InstituteName;
 		}
 		catch(error){
             console.error('Error in OfferProductsDetailView CREATE');
@@ -1251,7 +1252,9 @@ module.exports = async (srv) => {
 			'PriceConditionPriceWithFOCView',
 			'PriceConditionDiscountWithFOCView',
 			"PriceConditionNLPriceView", 
-			"PriceConditionNLDiscountView"
+			"PriceConditionNLDiscountView",
+			"PriceConditionSpecialPriceView",
+			"PriceConditionWithMaximumPriceView"
 		], 
 		async (req) => {
 			try{
@@ -1405,7 +1408,7 @@ module.exports = async (srv) => {
 					LotID: awardedProduct.LotID
 				})
 			await UPDATE(PT_TMOFPR)
-				.with ({RequestedVolume: req.data.RequestedVolume})
+				.with ({RequestedVolume: req.data.AwardedQty})
 				.where({
 					OfferID: offerProduct.OfferID,
 					ProductCode: offerProduct.ProductCode,
@@ -1420,8 +1423,8 @@ module.exports = async (srv) => {
 			OfferID: req.data.OfferID
 		});
 
-		if (req.data.CountryCode === "NL") {
-			await updateNLOfferStatuses(req, existingAwardedProducts);
+		if (req.data.CountryCode === "NL" || req.data.CountryCode === "PL") {
+			await updateResultRecordedOutcomeOfferStatuses(req, existingAwardedProducts);
 		}else {
 			const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
 			const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
@@ -1435,7 +1438,7 @@ module.exports = async (srv) => {
 		
 	}
 
-	const updateNLOfferStatuses = async function (req, existingAwardedProducts) {
+	const updateResultRecordedOutcomeOfferStatuses = async function (req, existingAwardedProducts) {
 		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
 		if (!awardedProductsHaveOutcome) return;
 
@@ -1447,11 +1450,7 @@ module.exports = async (srv) => {
 		}else if (isEveryOutcomeLost) {
 			await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Rejected');
 		}else {
-			const outcomes = existingAwardedProducts.map(pr => pr.Outcome);
-			const isOfferPartialyAccepted = outcomes.includes('Won') && outcomes.includes('Lost') && !existingAwardedProducts.some(pr => pr.Outcome !== 'Won' && pr.Outcome !== 'Lost');
-			isOfferPartialyAccepted 
-				? await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
-				: await upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', '');
+			upsertOfferStatus(req.data.OfferID, req.data.TenderID, 'Results Recorded', 'Outcome Partially Accepted')
 		}
 	}
 
@@ -1751,7 +1750,9 @@ module.exports = async (srv) => {
 			'PriceConditionTaiwanPriceView',
 			'PriceConditionTaiwanDiscountView',
 			"PriceConditionNLPriceView", 
-			"PriceConditionNLDiscountView"
+			"PriceConditionNLDiscountView",
+			"PriceConditionSpecialPriceView",
+			"PriceConditionWithMaximumPriceView"
 		], 
 		async (req) => {
 			try{
@@ -2194,6 +2195,34 @@ module.exports = async (srv) => {
 				Price1: req.data.OfferPrice, 
 				Level3Discount1: req.data.Deductions,
 				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"SpecialPrice": {
+				CountryCode: req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				NetPrice: req.data.SpecialPrice,
+				Price0: req.data.BasePrice,
+				Price1: req.data.SpecialPrice, 
+				Price2: req.data.SpecialPrice,
+				Level2Discount1: 0,
+				Level2Discount2: req.data.Margin,
+				OfferPrice: req.data.SpecialPrice,
+				NetOfferPrice: req.data.SpecialPrice,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"WithMaximumPrice": {
+				CountryCode: req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				NetPrice: req.data.SpecialPrice,
+				Price0: req.data.BasePrice,
+				Price1: req.data.Price1, 
+				Price2: req.data.SpecialPrice,
+				Level2Discount1: req.data.Level2Discount1,
+				Level2Discount2: req.data.Margin,
+				OfferPrice: req.data.SpecialPrice,
+				NetOfferPrice: req.data.SpecialPrice,
+				PriceConditionClassification_ID: req.data.ClassificationID 
 			}
 		}
 
@@ -2283,25 +2312,25 @@ module.exports = async (srv) => {
 			RegPrice              : priceCondition.CountryCode === 'NL' ? priceCondition.masterPriceAIP : priceCondition.BasePrice, 
 			FOC                   : foc?.FreeGoodsOther || 0, 
 			FOCStep               : foc?.FreeGoodsOther_Step || null, 
-			FOCType               : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
-			Discount              : priceCondition.Discount, 
-			OfferPrice            : priceCondition.OfferPrice, 
+			FOCType               : priceCondition.CountryCode === 'PL' ? 'FOC 1' : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
+			Discount              : priceCondition.CountryCode === 'PL' ? 0 : priceCondition.Discount, 
+			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.OfferPrice, 
 			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : 0, 
 			AdditionalDiscount    : 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
 			SpotRate              : spotRate?.X_RATE || 0,
 			BudgetRate            : budgetRate?.X_RATE || 0,
 			Scenario              : 0, 
-			FOC_ABS_PCT           : foc?.FreeGoodsOther_ABS_PCT, 
+			FOC_ABS_PCT           : priceCondition.CountryCode === 'PL' ? 'ABS' : foc?.FreeGoodsOther_ABS_PCT, 
 			FOC_Bundled_1         : 0, 
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
-			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.NetPrice, 
+			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.NetPrice, 
 			NetPrice_OfPaid       : 0, 
 			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
@@ -3011,6 +3040,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		//If products from both divisions are in offer, then both Pharma and Radiology approvers are required
 		let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION }));
 		let division = (divisions.length === 1) ? divisions[0] : "Both";
+
+		let totalPnmValue = offerProductValidation.reduce((a, b) => a + b.PNM_VALUE, 0);
 /*
 		//In case we have any FOC (on main products) in the offer, a comment should be in remarks
 		let maxFOC = Math.max.apply(Math, offerProductValidation.map((d) => { return d.FOC }));
@@ -3218,6 +3249,17 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const whereCWID = ServiceHelper.buildFullWhere("CWID", "=", offer.TENDER_SUBMITTED_BY);
 		
 		const userInfo = await tx.run(SELECT.from(PT_TMUSER).where(whereCWID));
+		
+		const user = userInfo?.[0] || {};
+
+		let NLHospitalManagerEmail = null;
+		let NLHospitalManagerContactNumber = null;
+
+		if(offer.COUNTRYCODE === 'NL'){
+			const userInfoSignature = await tx.run(SELECT.from(PT_TMUSER).where({UserName: tender.Custom_String_1}));
+			NLHospitalManagerEmail = userInfoSignature[0]?.UserEmail;
+			NLHospitalManagerContactNumber = userInfoSignature[0]?.ContactNumber;
+		}
 
 		let distributor = null;
 		if(offer.TENDER_CHANNEL === "Direct"){
@@ -3314,16 +3356,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			//SBR: sbrLevel,
 			PUBLICATION_DATE: offer.PUBLICATION_DATE,
 			BID_DUE_DATE: offer.BID_DUE_DATE,
-			TENDER_SUBMITTED_BY: userInfo[0] && userInfo[0].UserName,
+			TENDER_SUBMITTED_BY: user.UserName || null,
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,
 			SPOT_RATE: spotRate,
 			EXTERNAL_ID: tender.ExternalID,
 			SAP_ID: tender.SAPID,
 			// TENDER_TYPE: tenderType[0].NAME,
-			CREATED_BY_USER_EMAIL : userInfo[0] && userInfo[0].UserEmail,
-			CREATED_BY_USER_ROLE :userInfo[0] && userInfo[0].Role,
-			CREATED_BY_USER_CONTACTNUMBER :userInfo[0] && userInfo[0].ContactNumber,
+			CREATED_BY_USER_EMAIL : user.UserEmail || null,
+			CREATED_BY_USER_ROLE : user.Role || null,
+			CREATED_BY_USER_CONTACTNUMBER : user.ContactNumber || null,
 			TenderChannel: offer.TenderChannel,
 			ContractLength: offer.ContractLength,
 			ContractExtenseion: offer.ContractExtenseion,
@@ -3546,6 +3588,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             Quotation_Custom_Datetime_8: quotation?.Custom_Datetime_8,
             Quotation_Custom_Datetime_9: quotation?.Custom_Datetime_9,
             Quotation_Custom_Datetime_10: quotation?.Custom_Datetime_10,
+			NLHospitalManagerEmail: NLHospitalManagerEmail,
+            NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
+			TotalPNM_Value				: totalPnmValue,
 		};
 		return results;
 	
@@ -3823,6 +3868,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
 		let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 		let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
+		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
 
 		//where statement
 		let whereApproverType = {
@@ -3841,7 +3887,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 			const productPack = await tx.run(SELECT.from(PT_TMPRDPCK).where(whereProductPack));
 
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory, userInfo);
 
 			//Get corresponding Product Distributor ID
 			const whereProductId = {
@@ -4037,6 +4083,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				}
 			}else {
 				FOCInfoText = 'NA';
+			}
+			let PL_VolumeInPacks = 0;
+			let PNM_VALUE = 0;
+			if(offer.COUNTRYCODE === 'PL'){
+				PL_VolumeInPacks = parseInt(productInfo.CommnonProductInfo.RequestedQuantityString)/offerProduct.PACKSIZE;
+				PNM_VALUE = productInfo.CommnonProductInfo.NetPricePack * PL_VolumeInPacks;
 			}
 			
 			return {
@@ -4527,6 +4579,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				CompetitorResult_Custom_Datetime_10: competitorResult?.Custom_Datetime_10,
 				NLStaticField1: 'N',
 				NLStaticField2: 'NA',
+				PL_VolumeInPacks: PL_VolumeInPacks,
+				PNM_VALUE		: PNM_VALUE,
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -4541,7 +4595,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, productPack, instituteTerritory, userInfo) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 
@@ -4562,6 +4616,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 		if (offer.APPROVAL_TYPE === 17) {
 			productValidation = await buildProductValidationForType17(tx, offer, product, aApproverTypes);
+		}
+		if (offer.APPROVAL_TYPE === 18) {
+			productValidation = await buildProductValidationForType18(tx, offer, product, aApproverTypes, userInfo);
 		}
 		return {
 			CommnonProductInfo: commnonProductInfo,
@@ -4795,6 +4852,36 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		results.IN_POLICY = true
 		return results;
 			
+	}
+	async function buildProductValidationForType18(tx, offer, product, aApproverTypes, userInfo) {
+		let results = { IN_POLICY: false };
+
+		// Safely extract and validate Role
+		const role = userInfo?.Role;
+
+		if (!role) {
+			console.warn("Role is missing in userInfo:", userInfo);
+			return results; // Return early or handle as required if Role is missing
+		}
+		
+		const normalizedRole = role.toLowerCase().replace(/ /g, '');
+	
+		const validationMap = {
+			'kam': [{ type: 'sm', value: 3 }, { type: 'tm', value: 3 }],
+			'salesmanager': [{ type: 'tm', value: 3 }, { type: 'sm', value: 1 }],
+			'tendermanager': [{ type: 'sm', value: 2 }, { type: 'tm', value: 1 }]
+		};
+	
+		(validationMap[normalizedRole] || []).forEach(({ type, value }) => {
+			aApproverTypes.map(oApproverType => {
+				if (oApproverType.ApproverType.toLowerCase().replace(/ /g, '').includes(type)) {
+					oApproverType.ValidationType = value;
+				}
+			});
+		});
+		
+		results.IN_POLICY = true
+		return results;
 	}
 	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
 		const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === 'Squad Lead');
@@ -5065,8 +5152,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							usString = usString.replace(/\./g,',');  
 							usString = usString.replace(/\$/g,'.');   
 							return  usString;                  
-					},
-					numberUS2: (input) => {  
+						},
+						numberNL: (input) => {  
+							if(Number(input) === 0 || input === null  ){
+								return "0,00";
+							}          
+							let usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'.')).toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							} else {
+								usString = input.toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+							} 
+							return  usString;                  
+						},
+						numberUS2: (input) => {  
 							if(Number(input) === 0 || input === null  ){
 								return "0.00";
 							}          
@@ -5098,46 +5197,46 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							return current_date;
 						},				   
 						numberEU5: (input) => {
-						if(Number(input) === 0 || input === null  ){
-							return "0,00000";
-						} 
-						var usString;
-						if(typeof input === 'string'){
-							usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
-						} else {
-							usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							if(Number(input) === 0 || input === null  ){
+								return "0,00000";
+							} 
+							var usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							} else {
+								usString = input.toLocaleString('en-US',{ minimumFractionDigits: 5, maximumFractionDigits: 5 });
+							}
+							usString = usString.replace(/\,/g,'$');
+							usString = usString.replace(/\./g,',');  
+							usString = usString.replace('$','.');   
+							return  usString; 
+						},
+						dateFormatterEU: (input) => input.split("-").reverse().join("-"),
+						dateYear: (input) => input.substring(0,4),
+						extract2Decimals: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 2);
+							} else {
+								return Number(input).toFixed(2).split(".")[1];
+							}
+						},
+						extract5Decimals: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 5);
+							} else {
+								return Number(input).toFixed(5).split(".")[1];
+							}
+						},
+						//EHQUT-167492-Quotation Adjustment in word file
+						Decimals2Unit: (input) => {
+							if(typeof input === 'string'){
+								return input.split(".")[1].substring(0, 2);
+							} else {
+								return Number(input).toFixed(2);
+							}
+							
 						}
-						usString = usString.replace(/\,/g,'$');
-						usString = usString.replace(/\./g,',');  
-						usString = usString.replace('$','.');   
-						return  usString; 
-					},
-					dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-					dateYear: (input) => input.substring(0,4),
-					extract2Decimals: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 2);
-						} else {
-							return Number(input).toFixed(2).split(".")[1];
-						}
-					},
-					extract5Decimals: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 5);
-						} else {
-							return Number(input).toFixed(5).split(".")[1];
-						}
-					},
-					//EHQUT-167492-Quotation Adjustment in word file
-					Decimals2Unit: (input) => {
-						if(typeof input === 'string'){
-							return input.split(".")[1].substring(0, 2);
-						} else {
-							return Number(input).toFixed(2);
-						}
-						
-					}
-					//EHQUT-167492-Quotation Adjustment in word file
+						//EHQUT-167492-Quotation Adjustment in word file
 
 
 					}
@@ -5231,11 +5330,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		//Get product data
 		let productValidation = await buildOfferProductValidation(tx, whereOffer);
 
+		let userSignatureImageBuffer = await getUserSignatureBuffer(tx, offerValidation);
+
 		//format prices
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
 			prd.PACKSIZE = ServiceHelper.formatNumber(prd.PACKSIZE, 0, 0);
-			prd.OFFER_PRICE = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
+			prd.OFFER_PRICE = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 4, 4) : prd.COUNTRY_CODE === 'PL' ? ServiceHelper.formatCurrency(prd.OFFER_PRICE, 'pl-PL', 2, 2) : prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE, 2, 2);
 			prd.OFFER_PRICE_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 3, 3) : ServiceHelper.formatNumber(prd.OFFER_PRICE_VAT, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY, 2, 2);
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = prd.Region === 'MEA' ? ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 3, 3) : ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
@@ -5264,6 +5365,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					freeGoodsOther.FreeGoodsOther_Step = freeGoodsOther.FreeGoodsOther_Step && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther_Step, 0, 0);
 				}
 			}
+			prd.OfferPrice_1 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_1 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_1), 'nl-NL', 2, 2) : prd.OfferPrice_1;
+			prd.OfferPrice_2 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_2 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_2), 'nl-NL', 2, 2) : prd.OfferPrice_2;
+			prd.OfferPrice_3 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_3 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_3), 'nl-NL', 2, 2) : prd.OfferPrice_3;
+			prd.NET_PRICE_PACK_OFFER_CURRENCY = prd.COUNTRY_CODE === 'PL' ? prd.NET_PRICE_PACK_OFFER_CURRENCY && ServiceHelper.formatCurrency(prd.NET_PRICE_PACK_OFFER_CURRENCY, 'pl-PL', 2, 2) : prd.NET_PRICE_PACK_OFFER_CURRENCY;
+			prd.PNM_VALUE = prd.COUNTRY_CODE === 'PL' ? prd.PNM_VALUE && ServiceHelper.formatCurrency(Number(prd.PNM_VALUE), 'pl-PL', 2, 2) : prd.PNM_VALUE;
+
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
@@ -5275,16 +5382,24 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.OFFERVALIDITY = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM'))
 										? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD', 'DD.MM.YYYY')
 										: (productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD', 'DD-MMM-YYYY') : offerValidation.OFFERVALIDITY);
-		offerValidation.PUBLICATION_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.PUBLICATION_DATE;
+		offerValidation.PUBLICATION_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.PUBLICATION_DATE);
 		offerValidation.InternalDueDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.InternalDueDate && ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
 		offerValidation.InternalBidDueDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.InternalBidDueDate && ServiceHelper.formatDate(offerValidation.InternalBidDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalBidDueDate;
-		offerValidation.BID_DUE_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.BID_DUE_DATE;
+		offerValidation.BID_DUE_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.BID_DUE_DATE);
 		offerValidation.ExpectedAwardDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
-		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.EffectiveDate;
-		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpiryDate;
+		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.EffectiveDate);
+		offerValidation.ExpiryDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.ExpiryDate && ServiceHelper.formatDate(offerValidation.ExpiryDate, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.ExpiryDate);
 		offerValidation.Offer_Custom_Date_1 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_1 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_1, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_1;
 		offerValidation.Offer_Custom_Date_4 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_4 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_4, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_4;
 		offerValidation.Offer_Custom_Date_5 = offerValidation.COUNTRYCODE.includes('HM') ? offerValidation.Offer_Custom_Date_5 && ServiceHelper.formatDate(offerValidation.Offer_Custom_Date_5, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.Offer_Custom_Date_5;
+		offerValidation.TotalPNM_Value = offerValidation.COUNTRYCODE === 'PL' ? offerValidation.TotalPNM_Value && ServiceHelper.formatCurrency(Number(offerValidation.TotalPNM_Value), 'pl-PL', 2, 2) : offerValidation.TotalPNM_Value;
+		offerValidation.UserSignature = {
+			_type: "image",
+			source: userSignatureImageBuffer, 
+			format: "image/jpeg",
+			width: 100, 
+			height: 50 
+		};
 		const flatOfferProductValidation = productValidation.reduce((acc,prod)=> acc.concat(prod.PriceCondition.map(pc=>({...pc,...prod}))),[]);
 		const groupedOfferProductValidation = flatOfferProductValidation.reduce((groups, product) => {
 			const { ConditionType } = product.PriceConditionClassification;
@@ -5310,6 +5425,15 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			//   }, {})
 		};
 
+	}
+
+	async function getUserSignatureBuffer(tx, offerValidation){
+		let signatureBuffer = null;
+		const userInfoSignature = await tx.run(SELECT.from(PT_TMUSER).where({UserName: offerValidation.Tender_Custom_String_1}));
+		if (userInfoSignature && userInfoSignature.length > 0 && userInfoSignature[0].UserSignatureImg) {
+			signatureBuffer = Buffer.from(userInfoSignature[0].UserSignatureImg, 'base64');
+		}
+		return signatureBuffer;
 	}
 
 	srv.on("READ", "CSVAttachment", async (req, res) => {
@@ -5845,19 +5969,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			else if(invalidZIFields.length > 0){
 				res.warn(400,`The following PRK values do not exist in the database: ${invalidZIFields.join(', ')}. Please check and correct the data.` );
 			}
-			else{
-				// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
-				let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
-				promises = products.map(product => {
-					const productPack = ctryProductPack.find(pck => pck.CODE1 == product["PRK"]);
+			// setting initial sorter as SORTER + 1 if there is product already, otherwise 0
+			let sorter = offerProducts[offerProducts.length - 1]?.SORTER + 1 || 0;
+			promises = products.filter(product => product["PRK"]).map(product => {
+				const productPack = ctryProductPack.find(pck => pck.CODE1 == product["PRK"]);
+				if (productPack) {
 					const productIndex = offerProducts.findIndex(pr => pr.ProductCode === productPack.PRODUCTPACKID);
 					const promise = upsertOfferProduct(res.req, product, offer, productPack, productIndex, sorter);
 					if (productIndex === -1) {
 						sorter++; // Increment sorter only for new products
 					}
 					return promise;
-				});
-			}
+				}
+				return []
+			});
 
 			await DELETE.from(ZagisUploadFile).where({offerId: OfferID});
 			await Promise.all([promises]);
@@ -5868,7 +5993,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 	});
 
-	async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
+	 async function upsertOfferProduct (req, product, offer, productPack, productIndex, sorter) {	
 		const mappedProduct = {
 			TenderID: offer.TenderID,
 			OfferID: offer.OfferID,
@@ -5897,12 +6022,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		if (productIndex > -1) {
 			// deleting SORTER to avoid incrementing already created products SORTER
 			delete mappedProduct.SORTER;
-			return await UPDATE(PT_TMOFPR).with(mappedProduct).where({
+			return UPDATE(PT_TMOFPR).with(mappedProduct).where({
 				OfferID: offer.OfferID,
 				ProductCode: productPack.PRODUCTPACKID
 			})
 		}else {
-			return await INSERT(mappedProduct).into(PT_TMOFPR);
+			return INSERT(mappedProduct).into(PT_TMOFPR);
 		}
 	}
 
@@ -5926,6 +6051,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const templates = await tx.run(SELECT.from(ExtractNLHistoricalInformation).where({ templateId: templateId }));
 		let excelData = await tx.run(SELECT.from(NLExtractOffers));
+		excelData = formatNLExtractOfferHistoryData(excelData);
 		const data = {excelData}
 		const templateContent = templates[0].content;
 
@@ -5941,26 +6067,41 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         }
 	});
 
-	srv.on('CREATE', 'NLOfferDistributors', async (req, res) => {
+	function formatNLExtractOfferHistoryData (excelData) {
+		excelData.forEach(ed => {
+			ed.OfferPrice_1 = ed.OfferPrice_1 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_1), 'nl-NL', 2, 2);
+			ed.OfferPrice_2 = ed.OfferPrice_2 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_2), 'nl-NL', 2, 2);
+			ed.OfferPrice_3 = ed.OfferPrice_3 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_3), 'nl-NL', 2, 2);
+			ed.NetPrice = ed.NetPrice && ServiceHelper.formatCurrency(Number(ed.NetPrice), 'nl-NL', 2, 2);
+			ed.EffectiveDate = ed.EffectiveDate && ServiceHelper.formatDate(ed.EffectiveDate, '', 'DD-MM-YYYY');
+			ed.ExpiryDate = ed.ExpiryDate && ServiceHelper.formatDate(ed.ExpiryDate, '', 'DD-MM-YYYY');
+			ed.BidDueDate = ed.BidDueDate && ServiceHelper.formatDate(ed.BidDueDate, '', 'DD-MM-YYYY');
+			ed.PublicationDate = ed.PublicationDate && ServiceHelper.formatDate(ed.PublicationDate, '', 'DD-MM-YYYY');
+		});
+		return excelData;
+	}
+
+	srv.on('CREATE', 'AwardedOfferDistributors', async (req, res) => {
 		try {
-			const { DistributorName, ProductPackName, OfferID, AssignedProductCode } = req.data;
+			const { DistributorName, ProductPackName, OfferID, AssignedProductCode, CountryCode } = req.data;
 			let splitedDistributors = DistributorName.split(';');
 			const splitedProductPacks = ProductPackName.split(';');
-			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: "NL" });
+			const distributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: CountryCode});
 			const productPacks = await SELECT.from(PT_TMPRDPCK);
-			const nlOfferDistributors = await SELECT.from(NLOfferDistributors).where({
-				OfferID: OfferID
+			const awardedOfferDistributors = await SELECT.from(AwardedOfferDistributors).where({
+				OfferID: OfferID,
+				CountryCode: CountryCode
 			});
 
 	
-			const deletePromises = nlOfferDistributors.map(el => {
+			const deletePromises = awardedOfferDistributors.map(el => {
 				if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode == AssignedProductCode) {
-					return DELETE.from(NLOfferDistributors).where({
+					return DELETE.from(AwardedOfferDistributors).where({
 						OfferID: OfferID,
 						DistributorID: el.DistributorID
 					});
 				} else if (!splitedDistributors.includes(`${el.DistributorID}`) && el.AssignedProductCode !== AssignedProductCode && el.ProductPackID == AssignedProductCode) {
-					return DELETE.from(NLOfferDistributors).where({
+					return DELETE.from(AwardedOfferDistributors).where({
 						OfferID: OfferID,
 						ProductPackID: AssignedProductCode,
 						DistributorID: el.DistributorID
@@ -5971,22 +6112,23 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					(!splitedProductPacks.includes(`${el.ProductPackID}`) && 
 					el.AssignedProductCode !== AssignedProductCode && 
 					el.ProductPackID == AssignedProductCode)) {
-					return DELETE.from(NLOfferDistributors).where({
+					return DELETE.from(AwardedOfferDistributors).where({
 						OfferID: OfferID,
 						ProductPackID: el.ProductPackID
 					});
 				}
 			}).filter(el => el);
 	
-			let mappedNLOfferDistributors = [];
+			let mappedAwardedOfferDistributors = [];
 	
 			if (DistributorName && ProductPackName) {
 				splitedDistributors.forEach(dId => {
 					splitedProductPacks.forEach(pId => {
 						const distributor = distributors.find(dist => dist.DistributorID == dId);
 						const product = productPacks.find(product => product.PRODUCTPACKID == pId);
-						mappedNLOfferDistributors.push({
+						mappedAwardedOfferDistributors.push({
 							OfferID: OfferID,
+							CountryCode: CountryCode,
 							DistributorName: distributor?.DistributorName,
 							ProductPackName: product?.PRODUCTPACKNAME,
 							DistributorID: dId,
@@ -5997,25 +6139,25 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				});
 			}
 	
-			// Remove items already saved in db from mappedNLOfferDistributors
-			mappedNLOfferDistributors = mappedNLOfferDistributors.filter(el => 
-				!nlOfferDistributors.some(nlo => 
+			// Remove items already saved in db from mappedAwardedOfferDistributors
+			mappedAwardedOfferDistributors = mappedAwardedOfferDistributors.filter(el => 
+				!awardedOfferDistributors.some(nlo => 
 					el.OfferID == nlo.OfferID && 
 					el.ProductPackID == nlo.ProductPackID && 
 					el.DistributorID == nlo.DistributorID
 				)
 			);
 			let insertPromise;
-			if (mappedNLOfferDistributors.length > 0) {
-				insertPromise = INSERT.into(NLOfferDistributors).entries(mappedNLOfferDistributors);
+			if (mappedAwardedOfferDistributors.length > 0) {
+				insertPromise = INSERT.into(AwardedOfferDistributors).entries(mappedAwardedOfferDistributors);
 			}
 	
 			await Promise.all([...deletePromises, insertPromise]);
 	
 			return req.data;
 		} catch (error) {
-			console.error('Error in NLOfferDistributors CREATE', error);
-			return req.reject(403, error?.message || "Error in NLOfferDistributors");
+			console.error('Error in AwardedOfferDistributors CREATE', error);
+			return req.reject(403, error?.message || "Error in AwardedOfferDistributors");
 		}
 	});
 	srv.on('CREATE', 'ContractInfomation', async (req, res) => {

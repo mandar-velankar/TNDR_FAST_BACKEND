@@ -39,6 +39,7 @@ app.use(compression({ filter: shouldCompress }));
   await cds.serve("EpaService").from("./srv/").in(app);
   await cds.serve("CatalogService").from("./srv/").in(app);
   await cds.serve("StandardAppService").from("./srv/").in(app);
+  await cds.serve("ClaimsService").from("./srv/").in(app);
   await cds.serve("PolicyService").from("./srv/").in(app);
   await cds.serve("ContractService").from("./srv/").in(app);
   await cds.serve("AccessService").from("./srv/").in(app);

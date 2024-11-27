@@ -420,6 +420,7 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
         ctprdpck.GOV_CODE,
         prdpck.PRODUCTPACKNAME,
         prdpck.PRESENTATION,
+		prdpck.PACKFACTOR,
         distAgreements.DistributorID,
         materialNumbers.MaterialNumbers,
         distAgreements.StartDate,
@@ -431,7 +432,8 @@ entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctp
         distAgreements.CurrentEndDate,
         distAgreements.CurrentType,
         distAgreements.CurrentValue,
-        ctryCurrency.Currency
+        ctryCurrency.Currency,
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
 } where ctprdpck.COUNTRYCODE = 'NL' and distAgreements.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
@@ -449,6 +451,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		ctprdpck.GOV_CODE,
 		prdpck.PRODUCTPACKNAME,
 		prdpck.PRESENTATION,
+		prdpck.PACKFACTOR,
 		null as DistributorID,
 		materialNumbers.MaterialNumbers,
 		null as StartDate,
@@ -461,6 +464,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		null as CurrentType,
 		null as CurrentValue,
 		ctryCurrency.Currency,
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
 } where ctprdpck.COUNTRYCODE = 'NL';
 
 entity CurrentDistributionAgreementView as select from MasterData.DistributionAgreements{
@@ -501,6 +505,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         prdpck.PRESENTATION,
         prdpck.Bundle,
 		prdpck.OuterCarton,
+		prdpck.PACKFACTOR,
 		wholesalepp.NLPPP_ID,
 		nlppp.PPP: Double,
 		nlppp.StartDate as PPPStartDate,
@@ -523,7 +528,8 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         wholesalepp.Status,
 		ctryCurrency.Currency,
         wholesalepp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
-		wholesalepp.Comment
+		wholesalepp.Comment,
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
 } where ctprdpck.COUNTRYCODE = 'NL'  and wholesalepp.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
@@ -545,6 +551,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         prdpck.PRESENTATION,
         prdpck.Bundle,
 		prdpck.OuterCarton,
+		prdpck.PACKFACTOR,
 		nlppp.ID as NLPPP_ID,
 		nlppp.PPP: Double,
 		nlppp.StartDate as PPPStartDate,
@@ -567,7 +574,8 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         null as Status,
 		ctryCurrency.Currency,
         null as ApprovalsCount,
-		null as Comment
+		null as Comment,
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
 } where ctprdpck.COUNTRYCODE = 'NL';
 
 entity CurrentWholesalePurchasePriceView as select from MasterData.WholesalePurchasePrice{
@@ -621,6 +629,7 @@ entity NLpppView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
         prdpck.PRODUCTPACKNAME,
         prdpck.PRESENTATION,
 		prdpck.CalculationFactorIRP,
+		prdpck.PACKFACTOR,
         materialNumbers.MaterialNumbers,
         ppp.Comment,
         ppp.Status,
@@ -641,6 +650,7 @@ entity NLpppView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
         ppp.PowerApprovalDate,
         ctryCurrency.Currency,
         ppp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
 } where ctprdpck.COUNTRYCODE = 'NL' and ppp.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
@@ -659,6 +669,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		prdpck.PRODUCTPACKNAME,
 		prdpck.PRESENTATION,
 		prdpck.CalculationFactorIRP,
+		prdpck.PACKFACTOR,
 		materialNumbers.MaterialNumbers,
 		null as Comment,
         null as Status,
@@ -679,6 +690,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         null as PowerApprovalDate,
 		ctryCurrency.Currency,
 		null as ApprovalsCount,
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
 } where ctprdpck.COUNTRYCODE = 'NL';
 
 entity CurrentNLpppView as select from MasterData.NLPPP{
