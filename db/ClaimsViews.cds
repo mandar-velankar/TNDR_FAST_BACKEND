@@ -11,7 +11,9 @@ entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	left join ClaimFilesApprovalsCount as approvalscount
 		on approvalscount.ClaimFiles_ID = cf.ID
 	left join CountryCurrencyView as ctryCurrency
-	    on ctryCurrency.CountryCode = cf.CountryCode {
+	    on ctryCurrency.CountryCode = cf.CountryCode
+	left join AdminData.PT_TMUSER as user 
+		on cf.createdBy = user.UserID{
 	key cf.ID,
 	key cf.CountryCode,
 	cf.createdAt,
@@ -27,6 +29,7 @@ entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
     cf.TotalClaimAmount,
     cf.Status,
 	ctryCurrency.Currency,
+	user.UserName,
     case
 		when approvalscount.TotalApprovalsCount > 0
 			then cf.ApprovalsCount || '/' || approvalscount.TotalApprovalsCount
