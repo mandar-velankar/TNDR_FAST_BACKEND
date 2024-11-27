@@ -1251,7 +1251,7 @@ module.exports = async (srv) => {
 		async (req) => {
 			try{
 			// validate form
-				if(req.data.CountryCode !== "AU"){
+				if(req.data.CountryCode !== "AU" && req.data.CountryCode !== "PL"){
 					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 				}
 			}
