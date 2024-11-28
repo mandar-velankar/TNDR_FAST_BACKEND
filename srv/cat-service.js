@@ -1118,6 +1118,10 @@ module.exports = (srv) => {
 	}
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
+		let results = {
+			//In Policy flag
+			IN_POLICY: false
+		};
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -1366,7 +1370,7 @@ module.exports = (srv) => {
 			}
 		});
 
-		let results = {
+		results = {
 			//In Policy flag
 			IN_POLICY: inPolicy
 		};
