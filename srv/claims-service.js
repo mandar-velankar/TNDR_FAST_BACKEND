@@ -175,7 +175,7 @@ module.exports = (srv) => {
 		let whereBrand, whereStatus, whereType;
 
 			if (CountryCode === 'PL') {
-				query = SELECT.from(PLExtractClaimFilesView).where({ClaimFileID: ClaimFileID});
+				query = SELECT.from(PLExtractClaimFilesView).where({ClaimFileID: ClaimFileID}).orderBy([{ref:["RowOrder"], sort:'asc' }]);
 
 	
 				if (templateId === 'PLClaimDataFilteredFiles') {
