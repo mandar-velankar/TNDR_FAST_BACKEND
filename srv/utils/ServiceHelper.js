@@ -150,18 +150,30 @@ module.exports = {
         return Math.round(10000*x) / 10000  <= Math.round(10000*y) / 10000 ? true : false;
     },
 
-    formatNumber: function(num, minDigits, maxDigits) {
+    formatNumber: function(num, minDigits, maxDigits, locale, isGroupingEnabled) {
         if (!num){
             num = 0;
         }
-        return num.toLocaleString('en-US', { minimumFractionDigits: minDigits, maximumFractionDigits: maxDigits });
+
+        locale = locale ? locale : 'en-US';
+
+        const options = { 
+            minimumFractionDigits: minDigits, 
+            maximumFractionDigits: maxDigits
+        };
+
+        if (isGroupingEnabled) {
+            options.useGrouping = isGroupingEnabled
+        }
+
+        return num.toLocaleString(locale, options);
     },
 
     formatDate(dateString, inputFormat, outputFormat) {
         return moment(dateString, inputFormat).format(outputFormat);
     },
 
-    formatCurrency: function (num, locale, minDigits, maxDigits, truncate) {
+    formatCurrency: function (num, locale, minDigits, maxDigits, truncate, isGroupingEnabled) {
 		if (!num){
             num = 0;
         };
@@ -169,10 +181,17 @@ module.exports = {
         if (truncate) {
             num = Number((Math.floor(num * 100) / 100).toFixed(2));
         }
-        return num.toLocaleString(locale, { 
+
+        const options = { 
             minimumFractionDigits: minDigits, 
-            maximumFractionDigits: maxDigits 
-        });
+            maximumFractionDigits: maxDigits
+        };
+
+        if (isGroupingEnabled) {
+            options.useGrouping = isGroupingEnabled
+        }
+
+        return num.toLocaleString(locale, options);
 	}
 
 
