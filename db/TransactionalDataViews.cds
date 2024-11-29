@@ -480,7 +480,8 @@ entity BrandsInTender as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRYCODE,
     key tender.TenderID as TENDERID,
     key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
-    key tender.Offer.OfferID as OFFERID
+    key tender.Offer.OfferID as OFFERID,
+    tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRANDNAME
 }
 where tender.Active = 1
     and tender.Offer.Active = 1

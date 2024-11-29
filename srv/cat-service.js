@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -48,7 +48,8 @@ module.exports = (srv) => {
 		PriceConditionClassification, 
 		ProductTypeProfitability,
 		CountrySpecificTenderInfo,
-		THQuotationDelevery
+		THQuotationDelevery,
+		OutgoingMails,
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate,SchedulerApiConfig,SchedulerApiConfigOAuth
@@ -1117,6 +1118,10 @@ module.exports = (srv) => {
 	}
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
+		let results = {
+			//In Policy flag
+			IN_POLICY: false
+		};
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -1365,7 +1370,7 @@ module.exports = (srv) => {
 			}
 		});
 
-		let results = {
+		results = {
 			//In Policy flag
 			IN_POLICY: inPolicy
 		};
@@ -3910,8 +3915,69 @@ module.exports = (srv) => {
         }
     });
 
+	srv.on('sendTHNotificationMailTemplate', async (req) => {
+		try {
+			const { data: {tenderId, offerID, CountryCode} } = req;
+			const tx = cds.tx(req);
+			const mailTemplate = await getMailTemplate('THNotificationMailTemplate');
+			const checkOfferForBrand = await tx.run(SELECT.from(BrandsInTender).where({ OfferID: offerID }));
+			const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: tenderId }))
+			let recipient;
+			let brandNames = checkOfferForBrand.map(el => el.BRANDNAME.toLowerCase())
+			if (brandNames.includes('xofigo')) {
+				if (tender.Classification === "Tender") {
+					recipient = "quotation.hec.th@ipservices.co.th"
+				} else {
+					recipient = "tender.hec.th@ipservices.co.th"
+				}
+			} else {
+				recipient = "nutthawuth.nainanont@globalmedicalsolutions.com"
+			}
+			const THNotificationData = mappedTHNotificationData(mailTemplate, req, recipient);
+			await INSERT.into(OutgoingMails).entries(THNotificationData);
+			return "Notification mail sent successfully";
+		}catch (error) {
+				console.error('Error in sendTHNotificationMailTemplate');
+				return req.reject(400, error.message || 'An unexpected error occurred.');
+		}
 
-
+	});
+	function mappedTHNotificationData (mailTemplate, req, recipient){
+		return {
+			CountryCode: 'TH',
+			TenderID: req.tenderId,
+			OfferID: req.offerID,
+			Sender: 'FAST-Admin@bayer.com',
+			Recipients:  recipient,
+			Subject: `New TH Tender Created for`,
+			MailBody: generateMailBody(mailTemplate, {
+				data: { 
+					content:{
+						UserName: 'Test',
+						CountryName: 'Test',
+						Offer: 'Test',
+						DirectURLToOffer: 'Test',
+						TenderCreator: 'Test',
+					}
+				}
+			}),
+			Sent: false,
+		}
+	}
+    const getMailTemplate = async function (templateId) {
+        try{
+            const result = await SELECT.one.from(MailTemplate)
+			.columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+			.where({ TemplateId: templateId });
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            return;
+        }
+    }
+	const generateMailBody = function (mail, data) {
+        return Handlebars.compile("" + mail.content)(data);
+    }
 	async function getContract(tx, offerID, lotID, productCode, conditionType){
 
 		const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: offerID }));
