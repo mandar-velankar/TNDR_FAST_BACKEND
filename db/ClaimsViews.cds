@@ -55,7 +55,7 @@ entity CalculatedBrandVolumes as select from ClaimsData.ClaimData as cd
 	
 };
 entity ClaimDataCalculatedView as select from ClaimsData.ClaimData as cd
-	inner join ClaimsMaterialNumbers as materialNumbers
+	left join ClaimsMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = cd.ProductPackID
 	left join CalculatedBrandVolumes as calcbrandvolumes
 		on calcbrandvolumes.OfferID = cd.OfferID
