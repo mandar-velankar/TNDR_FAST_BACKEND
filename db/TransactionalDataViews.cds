@@ -490,6 +490,7 @@ group by
     tender.CountryCode,
     tender.TenderID,
     tender.Offer.Product.SKU.Product.HLEVEL4_CODE,
+    tender.Offer.Product.SKU.Product.HLEVEL4_NAME,
     tender.Offer.OfferID;
 //EHQUT-397790-Italy-Search function is slow and system crashes
 //EHQUT-189207-Creation Date instead of BidDueDate on main page
