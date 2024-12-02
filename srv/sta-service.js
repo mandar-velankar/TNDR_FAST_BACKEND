@@ -2949,6 +2949,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let approverTypes = [];
 		let latestApproval = await tx.run(SELECT.from(ApprovalRequests).where(whereOffer));
 
+		whereOffer[0].ref[0] = 'OFFER_ID'
+		let offerStatus = await tx.run(SELECT.one.from(OfferStatus).where(whereOffer));
+
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offerValidation = await buildOfferValidation(tx, whereOffer);
 
@@ -2969,7 +2972,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			approverTypes = offerValidation.ApproverTypes;
 		}
 
-		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs);
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerStatus, offerValidation, countryApprovers, countryProductPackBUs);
 
 	}
 
@@ -3607,7 +3610,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 	}
 
-	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs) {
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerStatus, offerValidation, countryApprovers, countryProductPackBUs) {
 
 		let aResults = [];
 		approverTypes.forEach(function (type, index) {
@@ -3631,7 +3634,21 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
 			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation, countryProductPackBUs);
 
-			if (approvalForType.length !== 0) {
+			if (offerStatus.STATUS === 'Offer Created'){
+				if (defaultForType.length !== 0) {
+					approverName = defaultForType[0].ApproverName;
+					approverEmailID = defaultForType[0].ApproverEmailID;
+					approverType = defaultForType[0].ApproverType;
+					division = defaultForType[0].Division;
+					requiredAction = approverTypes.filter((d) => d.ApproverType === defaultForType[0].ApproverType)[0].ValidationType
+					approverType = defaultForType[0].ApproverType;
+					division = defaultForType[0].Division;
+				}
+				else {
+					return null;
+				}
+			}
+			else if (approvalForType.length !== 0) {
 				approverName = approvalForType[0].ApproverName;
 				approverEmailID = approvalForType[0].ApproverEmailID;
 				statusTime = approvalForType[0].Statustime;
@@ -3667,7 +3684,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 			}
 			let approvalTypeSection = (requiredAction === 1) ? 2 : 1;
-			let approvalTypeStatus = (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus
+			let approvalTypeStatus = (offerStatus.STATUS === 'Offer Created' || approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus
 			aResults.push({
 				TenderID: offerValidation.TENDERID,
 				OfferId: offerValidation.OFFERID,
