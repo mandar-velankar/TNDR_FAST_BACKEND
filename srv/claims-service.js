@@ -123,40 +123,73 @@ module.exports = (srv) => {
 				.where(brandFullWhere);
 	};
 
+	const formatClaimPrices = function (value, locale, countryCode) {
+		if (!value){
+            value = 0;
+        };
+		switch (countryCode) {
+			case 'PL':
+				const formattedValue = ServiceHelper.formatCurrency(Number(value), locale, 2, 2);
+				return formattedValue.replace(/,/g, ' ').replace(/\.(?=\d{2}$)/, ',');
+				break;
+			case 'NL':
+				return ServiceHelper.formatCurrency(Number(value), locale, 2, 2);
+				break;
+			default:
+				break;
+		}
+	}
+
+	const formatClaimQuantities = function (value, countryCode) {
+		if (!value){
+            value = 0;
+        };
+		switch (countryCode) {
+			case 'PL':
+				const formattedValue = ServiceHelper.formatNumber(Number(value), 0, 0);
+				return formattedValue.replace(/,/g, ' ');
+				break;
+			case 'NL':
+				return ServiceHelper.formatNumber(Number(value), 0, 0);
+				break;
+			default:
+				break;
+		}
+	}
+
 	const formattedClaimFilesSalesReportExtract = function (excelData, CountryCode) {
+		// Node JS version 18.18 doesn't support currency formatting with locale pl-PL
 		const countryCodeLocals = {
 			'NL': 'nl-NL',
-			'PL': 'pl-PL'
+			'PL': 'en-US'
 		}
-
-		const formatNumberLocale = CountryCode === 'PL' ? countryCodeLocals[CountryCode] : 'en-US';
 	
 		excelData.forEach(ed => {
 			// Format Quantities
-			ed.Quantity = ServiceHelper.formatNumber(Number(ed.Quantity), 0, 0, formatNumberLocale, true);
-			ed.QuantityML = ServiceHelper.formatNumber(Number(ed.QuantityML), 0, 0, formatNumberLocale, true);
-			ed.ContractBrandUsage = ServiceHelper.formatNumber(Number(ed.ContractBrandUsage), 0, 0, formatNumberLocale, true);
-			ed.BrandUsedCalculatedVolume = ServiceHelper.formatNumber(Number(ed.BrandUsedCalculatedVolume), 0, 0, formatNumberLocale, true);
-			ed.BrandContractCalculatedVolume = ServiceHelper.formatNumber(Number(ed.BrandContractCalculatedVolume), 0, 0, formatNumberLocale, true);
+			ed.Quantity = formatClaimQuantities(ed.Quantity, CountryCode);
+			ed.QuantityML = formatClaimQuantities(ed.QuantityML, CountryCode);
+			ed.ContractBrandUsage = formatClaimQuantities(ed.ContractBrandUsage, CountryCode);
+			ed.BrandUsedCalculatedVolume = formatClaimQuantities(ed.BrandUsedCalculatedVolume, CountryCode);
+			ed.BrandContractCalculatedVolume = formatClaimQuantities(ed.BrandContractCalculatedVolume, CountryCode);
 
 			// Format Prices
-			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WholesalerPurchasedAmount = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasedAmount), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTContractPrice = ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTWholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.FASTWholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WholesalerClaim1 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim1), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTClaim1 = ServiceHelper.formatCurrency(Number(ed.FASTClaim1), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WholesalerClaim2 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim2), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTClaim2 = ServiceHelper.formatCurrency(Number(ed.FASTClaim2), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.TotalFASTClaim = ServiceHelper.formatCurrency(Number(ed.TotalFASTClaim), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WholesalerPurchaseAmount = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchaseAmount), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.NetSales = ServiceHelper.formatCurrency(Number(ed.NetSales), countryCodeLocals[CountryCode], 2, 2, false, true);
+			ed.WholesalerContractPrice = formatClaimPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerPurchasedAmount = formatClaimPrices(ed.WholesalerPurchasedAmount, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTContractPrice = formatClaimPrices(ed.FASTContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerPurchasePrice = formatClaimPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTWholesalerPurchasePrice = formatClaimPrices(ed.FASTWholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerClaim1 = formatClaimPrices(ed.WholesalerClaim1, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTClaim1 = formatClaimPrices(ed.FASTClaim1, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerClaim2 = formatClaimPrices(ed.WholesalerClaim2, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTClaim2 = formatClaimPrices(ed.FASTClaim2, countryCodeLocals[CountryCode], CountryCode);
+			ed.TotalWholesalerClaim = formatClaimPrices(ed.TotalWholesalerClaim, countryCodeLocals[CountryCode], CountryCode);
+			ed.TotalFASTClaim = formatClaimPrices(ed.TotalFASTClaim, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerPurchaseAmount = formatClaimPrices(ed.WholesalerPurchaseAmount, countryCodeLocals[CountryCode], CountryCode);
+			ed.NetSales = formatClaimPrices(ed.NetSales, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTDistributionArrangement = ed.FASTDistributionArrangement || 0;
-			ed.FASTDistributionArrangement = ed.FASTDistributionAgreementType === 'Fixed' ? ServiceHelper.formatCurrency(Number(ed.FASTDistributionArrangement), countryCodeLocals[CountryCode], 2, 2, false, true) : (Number(ed.FASTDistributionArrangement) * 100).toFixed(2)
-			ed.FASTPendingCorrection = ed.FASTPendingCorrection && ServiceHelper.formatCurrency(Number(ed.FASTPendingCorrection), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.Balance = ed.Balance && ServiceHelper.formatCurrency(Number(ed.Balance), countryCodeLocals[CountryCode], 2, 2, false, true);
+			ed.FASTDistributionArrangement = ed.FASTDistributionAgreementType === 'Fixed' ? formatClaimPrices(ed.FASTDistributionArrangement, countryCodeLocals[CountryCode]) : (Number(ed.FASTDistributionArrangement) * 100).toFixed(2)
+			ed.FASTPendingCorrection = ed.FASTPendingCorrection && ed.Type === 'Correction' ? formatClaimPrices(ed.FASTPendingCorrection, countryCodeLocals[CountryCode]) : '';
+			ed.Balance = ed.Balance && formatClaimPrices(ed.Balance, countryCodeLocals[CountryCode]);
 
 			// Format Date
 			ed.Date = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'DD-MM-YYYY');
@@ -235,34 +268,33 @@ module.exports = (srv) => {
 	});
 
 	const formattingExcelValue = function (excelData, CountryCode) {
+		// Node JS version 18.18 doesn't support currency formatting with locale pl-PL
 		const countryCodeLocals = {
 			'NL': 'nl-NL',
-			'PL': 'pl-PL'
+			'PL': 'en-US'
 		}
 
-		const formatNumberLocale = CountryCode === 'PL' ? countryCodeLocals[CountryCode] : 'en-US';
-
 		 excelData.forEach(ed => {
-			ed.Quantity = ServiceHelper.formatNumber(Number(ed.Quantity), 0, 0, formatNumberLocale, true);
-			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WartoscPNM = ServiceHelper.formatCurrency(Number(ed.WartoscPNM), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.RoznicaCenaZakupuPNM = ServiceHelper.formatCurrency(Number(ed.RoznicaCenaZakupuPNM), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.IloscSztukDoWyrownania = ServiceHelper.formatCurrency(Number(ed.IloscSztukDoWyrownania), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTContractPrice = ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTWholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.FASTWholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WholesalerClaim1 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim1), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTClaim1 = ServiceHelper.formatCurrency(Number(ed.FASTClaim1), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.WholesalerClaim2 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim2), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTClaim2 = ServiceHelper.formatCurrency(Number(ed.FASTClaim2), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.TotalFASTClaim = ServiceHelper.formatCurrency(Number(ed.TotalFASTClaim), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.TotalFASTClaim = ServiceHelper.formatCurrency(Number(ed.TotalFASTClaim), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.Balance = ServiceHelper.formatCurrency(Number(ed.Balance), countryCodeLocals[CountryCode], 2, 2, false, true);
-			ed.FASTContractClaim = ServiceHelper.formatCurrency(Number(ed.FASTContractClaim), countryCodeLocals[CountryCode], 2, 2, false, true);
+			ed.Quantity = formatClaimQuantities(ed.Quantity, CountryCode);
+			ed.WholesalerPurchasePrice = formatClaimPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerContractPrice = formatClaimPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WartoscPNM = formatClaimPrices(ed.WartoscPNM, countryCodeLocals[CountryCode], CountryCode);
+			ed.RoznicaCenaZakupuPNM = formatClaimPrices(ed.RoznicaCenaZakupuPNM, countryCodeLocals[CountryCode], CountryCode);
+			ed.IloscSztukDoWyrownania = formatClaimPrices(ed.IloscSztukDoWyrownania, countryCodeLocals[CountryCode], CountryCode);
+			ed.TotalWholesalerClaim = formatClaimPrices(ed.TotalWholesalerClaim, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTContractPrice = formatClaimPrices(ed.FASTContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTWholesalerPurchasePrice = formatClaimPrices(ed.FASTWholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerClaim1 = formatClaimPrices(ed.WholesalerClaim1, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTClaim1 = formatClaimPrices(ed.FASTClaim1, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerClaim2 = formatClaimPrices(ed.WholesalerClaim2, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTClaim2 = formatClaimPrices(ed.FASTClaim2, countryCodeLocals[CountryCode], CountryCode);
+			ed.TotalFASTClaim = formatClaimPrices(ed.TotalFASTClaim, countryCodeLocals[CountryCode], CountryCode);
+			ed.TotalFASTClaim = formatClaimPrices(ed.TotalFASTClaim, countryCodeLocals[CountryCode], CountryCode);
+			ed.Balance = formatClaimPrices(ed.Balance, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTContractClaim = formatClaimPrices(ed.FASTContractClaim, countryCodeLocals[CountryCode], CountryCode);
 			ed.ClaimApprovalModifiedAt = ed.ClaimApprovalModifiedAt && ServiceHelper.formatDate(ed.ClaimApprovalModifiedAt, '', 'DD-MM-YYYY');
 			ed.Date = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'DD-MM-YYYY');
-			ed.FASTPendingCorrection = ed.FASTPendingCorrection && ed.Type === 'Correction' ? ServiceHelper.formatCurrency(Number(ed.FASTPendingCorrection), countryCodeLocals[CountryCode], 2, 2, false, true) : '';
+			ed.FASTPendingCorrection = ed.FASTPendingCorrection && ed.Type === 'Correction' ? formatClaimPrices(ed.FASTPendingCorrection, countryCodeLocals[CountryCode], CountryCode) : '';
 		});
 		return excelData
 	}
