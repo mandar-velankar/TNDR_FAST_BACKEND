@@ -3683,6 +3683,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 			}
+			if(offerValidation.COUNTRYCODE === 'PK' && countryProductPackBUs.includes("SM")){
+				type.ApproverType === 'Finance Approver' ? type.Hierarchy = 1 : type.Hierarchy;
+				if(type.ApproverType === 'Country Commercial Lead') {
+					type.ValidationType = 3;
+					type.ValidationType2 = 3;
+					requiredAction = 3;
+				} 
+			}
 			let approvalTypeSection = (requiredAction === 1) ? 2 : 1;
 			let approvalTypeStatus = (offerStatus.STATUS === 'Offer Created' || approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus
 			aResults.push({
