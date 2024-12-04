@@ -1001,7 +1001,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             offer.Custom.String_1 as Source : String,
             case when inst.InstituteType = 'Buying Group'
                 then 'Purchasing Group'
-                else 'Bilatreaal'
+                else 'BILATERAAL'
             end as Inkoopgroep: String,
             inst.InstituteName,
             tender.TenderName,
@@ -1074,7 +1074,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             offer.Custom.String_1 as Source : String,
             case when inst.InstituteType = 'Buying Group'
                 then 'Purchasing Group'
-                else 'Bilatreaal'
+                else 'BILATERAAL'
             end as Inkoopgroep: String,
             inst.InstituteName,
             tender.TenderName,
