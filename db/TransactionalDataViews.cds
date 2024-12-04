@@ -890,11 +890,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.FOCType as FOC_TYPE,
     ifnull(offer.Country.COMMENT, '') as COUNTRY_COMMENT,
     offer.Tender.PublicationDate as PUBLICATION_DATE,
-    CASE
-        WHEN (offer.RevisedOfferNo <> 0 or offer.ContinuationOfferNo <> 0)
-        	THEN offer.NewOfferDueDate
-        ELSE offer.Tender.BidDueDate
-    END AS BID_DUE_DATE: Date,
+    offer.Tender.BidDueDate as BID_DUE_DATE,
     offer.Quotation.SubmittedBy as TENDER_SUBMITTED_BY,
     offer.Custom.String_1 as PaymentTerms,
     offer.Custom.String_2 as DeliveryTerms,
@@ -916,9 +912,6 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.OfferID,
           offer.QuotationInstituteID,
           offer.Tender.TenderChannel,
-          offer.RevisedOfferNo,
-          offer.ContinuationOfferNo,
-          offer.NewOfferDueDate,
           offer.Tender.InstituteID,
           offer.Tender.Institute.InstituteType,
           offer.Tender.Institute.State,
