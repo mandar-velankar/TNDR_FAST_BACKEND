@@ -343,6 +343,10 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         Status,
         ctryCurrency.Currency;
 
+    entity LatestCOGSView as select from PT_TMCOGS {
+        max(COGSID) as maxCOGSID: Integer
+    };
+
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
     action SoftDeleteProductPrices(productPackID: Integer, countryCode: String) returns String;

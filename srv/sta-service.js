@@ -3282,6 +3282,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				DistributorID: offer.DISTRIBUTOR_ID
 			}));
 		}
+		function checkContinuationResivedOffer(){
+			if ((offerInformation.RevisedOfferNo !== 0 || offerInformation.ContinuationOfferNo !==0) && !!offerInformation.OfferID.match(/-[^-]*[CR]/)) {
+				return offerInformation.NewOfferDueDate
+			}else{
+				return tender.BidDueDate
+			}
+		}
 
 		//EHQUT- Spain - correct mistakes on Commercial agreement templates
 		results = {
@@ -3369,7 +3376,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			//Transfer_Pricing: transferPricingLevel,
 			//SBR: sbrLevel,
 			PUBLICATION_DATE: offer.PUBLICATION_DATE,
-			BID_DUE_DATE: offer.BID_DUE_DATE,
+			BID_DUE_DATE: checkContinuationResivedOffer(),
 			TENDER_SUBMITTED_BY: user.UserName || null,
 			ApproverTypes: aApproverTypes,
 			BUDGET_RATE: budgetRate,

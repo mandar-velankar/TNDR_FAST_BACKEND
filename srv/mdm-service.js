@@ -943,6 +943,13 @@ module.exports = (srv) => {
         }
 	});
 
+	function formatPercentage(value) {
+		const percentage = value * 100;
+		// Convert to a string with appropriate precision and remove unnecessary decimals
+		const formatted = parseFloat(percentage.toPrecision(12)); 
+		return (Number.isInteger(formatted) ? `${formatted}%` : `${formatted.toFixed(1)}%`);
+	}
+
 	srv.on('READ', 'NLWPPExcelTemplates', async (req, next) => {
 		try{
 		const tx = cds.tx(req);
@@ -965,11 +972,11 @@ module.exports = (srv) => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
 			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
 			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
-			item.Margin = (item.Margin*100).toFixed(2)+"%";
+			item.Margin = formatPercentage(item.Margin);
 			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Netto Prijs`;
-			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('DD-MM-YYYY') : moment(item.EndDate).format('DD-MM-YYYY');
-			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD-MM-YYYY');
-			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD-MM-YYYY');
+			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('MM/DD/YYYY') : moment(item.EndDate).format('MM/DD/YYYY');
+			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'MM/DD/YYYY');
+			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'MM/DD/YYYY');
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
