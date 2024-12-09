@@ -6074,39 +6074,105 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	});
 	srv.on('CREATE', 'ContractInfomation', async (req, res) => {
 		try {
-			const { InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate} = req.data;
-			const Institutes = await SELECT.from(PT_TMINST).where({CountryCode: "NL"});	     
-			if (!InstituteName) {return req.reject(403,"Institutes In Group field is mandatory")}
-			if (!ContractDuration) {return req.reject(403,"Contract Duration field is mandatory")}
-			if (!ContractStartDate) {return req.reject(403,"Contract Start Date field is mandatory")}
-			const mappedContractDurations = [];
-			InstituteName.split(',').map(instID => {
-				const Institute = Institutes.find(inst => inst.InstituteID == instID);
-				
-				mappedContractDurations.push({
-					OfferID: OfferID,
-					ProductCode: ProductCode,
-					InstituteID: +instID,
-					InstituteName: Institute.InstituteName,
-					ContractDuration: ContractDuration,
-					ContractStartDate: ContractStartDate,
-					ContractEndDate: ContractEndDate,
-					Active: true,
-					createdBy: req.user.id
-				})
-			});
-			const deletePromise = DELETE.from(ContractInfomation).where({OfferID: OfferID, ProductCode: ProductCode});
-			let insertPromises = [];
-			if (mappedContractDurations.length > 0) {
-				insertPromises = INSERT.into(ContractInfomation).entries(mappedContractDurations);
+			const { InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate, CountryCode} = req.data;
+			const Institutes = await SELECT.from(PT_TMINST).where({CountryCode: CountryCode});	     
+
+			switch (CountryCode) {
+				case "NL":
+					await saveNetherlandsContractInformation(req, InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate, CountryCode, Institutes);
+					break;
+				case "PL":
+					await savePolandContractInformation(req, ProductCode, OfferID, ContractStartDate, ContractEndDate, CountryCode);
+					break;
+				default:
+					break;
 			}
-			await Promise.all([deletePromise, insertPromises]);
+			
 			return req.data;
 		} catch (error) {
 			console.error('Error in ContractInfomation CREATE');
             return req.reject(403, error?.message||"Error in ContractInfomation");
 		}
 	});
+
+	const savePolandContractInformation = async (req, ProductCode, OfferID, ContractStartDate, ContractEndDate, CountryCode) => {
+		if (!ContractStartDate) {return req.reject(403,"Contract Start Date field is mandatory")}
+		if (!moment(ContractStartDate).isBefore(ContractEndDate)) {return req.reject(403,"Contract Start date should be before the Contract End date.")}
+
+		const mappedContractDurations = [];
+
+		const data = {
+			CountryCode,
+			OfferID,
+			ProductCode,
+			ContractStartDate,
+			ContractEndDate
+		}
+		mappedContractDurations.push(mappedContractInformations(req, data));
+
+		const deletePromise = DELETE.from(ContractInfomation).where({OfferID: OfferID, ProductCode: ProductCode});
+		const insertPromises = INSERT.into(ContractInfomation).entries(mappedContractDurations);
+
+		return Promise.all([deletePromise, insertPromises]);
+	};
+
+	const saveNetherlandsContractInformation = async (req, InstituteName, ProductCode, OfferID, ContractDuration, ContractStartDate, ContractEndDate, CountryCode, Institutes) => {
+		if (!InstituteName) {return req.reject(403,"Institutes In Group field is mandatory")}
+		if (!ContractDuration) {return req.reject(403,"Contract Duration field is mandatory")}
+		if (!ContractStartDate) {return req.reject(403,"Contract Start Date field is mandatory")}
+
+		const mappedContractDurations = [];
+
+		InstituteName.split(',').map(instID => {
+			const Institute = Institutes.find(inst => inst.InstituteID == instID);
+			const data = {
+				CountryCode,
+				OfferID,
+				ProductCode,
+				instID,
+				InstituteName: Institute.InstituteName,
+				ContractDuration,
+				ContractStartDate,
+				ContractEndDate
+			}
+			mappedContractDurations.push(mappedContractInformations(req, data))
+		});
+		const deletePromise = DELETE.from(ContractInfomation).where({OfferID: OfferID, ProductCode: ProductCode});
+
+		let insertPromises = [];
+		if (mappedContractDurations.length > 0) {
+			insertPromises = INSERT.into(ContractInfomation).entries(mappedContractDurations);
+		}
+
+		return Promise.all([deletePromise, insertPromises]);
+	}
+
+	const mappedContractInformations = (req, data) => {
+		const mapping = {
+			"NL": {
+				CountryCode: data.CountryCode,
+				OfferID: data.OfferID,
+				ProductCode: data.ProductCode,
+				InstituteID: +data.instID,
+				InstituteName: data.InstituteName,
+				ContractDuration: data.ContractDuration,
+				ContractStartDate: data.ContractStartDate,
+				ContractEndDate: data.ContractEndDate,
+				Active: true,
+				createdBy: req.user.id
+			},
+			"PL": {
+				CountryCode:  data.CountryCode,
+				ContractStartDate:  data.ContractStartDate,
+				ContractEndDate:  data.ContractEndDate,
+				OfferID: data.OfferID,
+				ProductCode: data.ProductCode,
+				Active: true,
+				createdBy: req.user.id
+			}
+		}
+		return mapping[data.CountryCode]
+	};
 
 	srv.after('READ', 'NLPriceConditions', data => {
 		data.unshift({
