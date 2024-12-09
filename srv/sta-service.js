@@ -2724,7 +2724,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	const upsertQuotation = async function(req){
 		const mappedPTTMQUTO = mappedQuotation(req.user, req.data);
-		const mappedTMOFRS = mappedOffer(req.user, req.data);
 
 		const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
 			OfferID: req.data.OFFERID,
@@ -2742,10 +2741,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}else{
 			await INSERT.into(PT_TMQUTO).entries(mappedPTTMQUTO);
 		}
-		await UPDATE(PT_TMOFRS).with (mappedTMOFRS).where({
-			OfferID: req.data.OFFERID,
-			Active: 1,
-		})
 	}
 
 	const mappedQuotation = (user, data) => {
@@ -2770,12 +2765,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			UPDATED           : 1,
 			EffectiveDate     : data.EffectiveDate,
 			ExpiryDate        : data.ExpiryDate
-		}
-	}
-	const mappedOffer = (user, data) => {
-		return {
-			Custom_Date_4     : data.Offer_Custom_Date_4,
-			Custom_Date_5     : data.Offer_Custom_Date_5,
 		}
 	}
 
