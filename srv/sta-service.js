@@ -512,15 +512,34 @@ module.exports = async (srv) => {
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
-        req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
+        //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
 
         result = await tx.run(tmvQuery);
 
     	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
+		// Custom sorting function
+		const applyCustomSorting = (data) => {
+			return data.sort((a, b) => {
+				const tenderHistA = a.TenderID?.includes('HIST') ? 1 : 0;
+				const tenderHistB = b.TenderID?.includes('HIST') ? 1 : 0;
+		
+				const offerHistA = a.OfferID?.includes('HIST') ? 1 : 0;
+				const offerHistB = b.OfferID?.includes('HIST') ? 1 : 0;
+		
+				if (tenderHistA !== tenderHistB) return tenderHistA - tenderHistB;
+				if (offerHistA !== offerHistB) return offerHistA - offerHistB;
+		
+				const tenderIdComparison = b.TenderID.localeCompare(a.TenderID);
+				if (tenderIdComparison !== 0) return tenderIdComparison;
+		
+				return b.OfferID.localeCompare(a.OfferID);
+			});
+		};
+
 		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
-		return result;
+			return applyCustomSorting(result);
 		}
 		
 		const cwid = req.user.id;
@@ -538,7 +557,7 @@ module.exports = async (srv) => {
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return result;
+		  return applyCustomSorting(result);
 		}
 
 		let resultsArray = Array.isArray(result) ? result : [result];
@@ -587,10 +606,10 @@ module.exports = async (srv) => {
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
-			return finalFilteredResults;
+			return applyCustomSorting(finalFilteredResults);
 		}else{
 			// If no territory matches, return an empty array
-			return territoryMatches;
+			return applyCustomSorting(territoryMatches);
 		}
 		}
 		catch(error){
