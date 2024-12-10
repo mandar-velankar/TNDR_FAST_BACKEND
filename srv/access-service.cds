@@ -14,6 +14,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
             ConsumerPrices:Boolean;
             DistributorManagememt:Boolean;
             DistributorManagementExclusiveAccess:Boolean;
+            COGSManagementView:Boolean;
             WPPManagementPowerApproverAccess: Boolean;
             PPPManagementPowerApproverAccess: Boolean;
             NLPricesManagementAccess: Boolean;

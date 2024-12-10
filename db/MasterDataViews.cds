@@ -51,7 +51,8 @@ MostRecentSkuCodeForProductPack as sku on Product.PRODUCTPACKID = sku.ProductPac
 	Product.RegistrationDate,
 	Product.RegistrationValidUntil,
 	Product.ProductPackSKU: redirected to ProductPackSKUs,
-	Product.ProductPack: redirected to ProductPack
+	Product.ProductPack: redirected to ProductPack,
+	Product.OutSourcedStatus
 }where Product.ACTIVERECORD = 'Yes'
 and Product.ProductPack.ACTIVERECORD = 'Yes'
 order by Product.COUNTRYCODE, Product.ProductPack.Product.HLEVEL4_NAME, Product.ProductPack.PRODUCTPACKNAME;
@@ -462,6 +463,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		ctryCurrency.Currency,
 		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
 } where ctprdpck.COUNTRYCODE = 'NL';
+
 entity CurrentDistributionAgreementView as select from MasterData.DistributionAgreements{
 	key ID,
     key PRODUCTPACKID,

@@ -143,7 +143,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         Cogs.COGSType,
         Cogs.ActiveRecord as CogsActiveRecord,
         ProductPack.PRODUCTPACKNAME as ProductPackName
-    }where ProductPack.ACTIVERECORD = 'Yes';
+    }where CountryProductPack.ACTIVERECORD = 'Yes';
 
    
 
@@ -208,6 +208,17 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     group by CWID
     having count(CountryCode) = 1;
 
+    entity UserCountries @readonly @(restrict: [
+		{grant: '*', to: 'authenticated-user', where: 'User.CWID = $user.id'}
+	])as projection on AdminData.PT_TMUSERCTRY {
+        *,
+        Country: redirected to Country,
+        User: redirected to Users,
+        User.UserName,
+        User.UserEmail,
+        Country.CountryName
+    };
+    
     entity CountryRegionsTableView @(cds.redirection.target:false) as projection on MasterData.CountryRegions;
     entity CountryLegalEntitySignatories as projection on MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory {
         *,
@@ -223,7 +234,7 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         key BU
     }where COUNTRYCODE = 'PK'
     group by COUNTRYCODE, BU;
-
+    
     entity DistributionAgreementsView as projection on MasterDataViews.DistributionAgreementsView;
     entity DistributionAgreements as projection on MasterData.DistributionAgreements;
     entity DistributionAgreement as projection on MasterDataViews.DistributionAgreementsView;
@@ -332,6 +343,11 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         Status,
         ctryCurrency.Currency;
 
+    entity LatestCOGSView as select from PT_TMCOGS {
+        max(COGSID) as maxCOGSID: Integer
+    };
+
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
+    action SoftDeleteProductPrices(productPackID: Integer, countryCode: String) returns String;
 }

@@ -127,6 +127,10 @@
       "description": "f_tndr_cag_standardtenderlimitedpricingtabaccess_user"
     },
     {
+      "name": "$XSAPPNAME.f_tndr_cag_admincogsview_user",
+      "description": "f_tndr_cag_admincogsview_user"
+    },
+    {
       "name": "$XSAPPNAME.f_tndr_cag_wpppowerapproveraccess_user",
       "description": "f_tndr_cag_wpppowerapproveraccess_user"
     },
@@ -257,21 +261,21 @@
       ],
       "attribute-references": []
     },
-	{
-        "name": "f_tndr_cag_cogs_user",
-        "description": "generated",
-        "scope-references": [
-          "$XSAPPNAME.f_tndr_cag_cogs_user"
-        ],
-        "attribute-references": []
+	  {
+      "name": "f_tndr_cag_cogs_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_cogs_user"
+      ],
+      "attribute-references": []
     },
     {
-        "name": "f_tndr_cag_spaintenderview_user",
-        "description": "generated",
-        "scope-references": [
-          "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
-        ],
-        "attribute-references": []
+      "name": "f_tndr_cag_spaintenderview_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_spaintenderview_user"
+      ],
+      "attribute-references": []
     },
 	{
       "name": "f_tndr_cag_Pharmatenderview_user",
@@ -378,6 +382,14 @@
       "attribute-references": []
     },
     {		  
+      "name": "f_tndr_cag_admincogsview_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_admincogsview_user"
+      ],
+      "attribute-references": []
+    },
+    {
       "name": "f_tndr_cag_wpppowerapproveraccess_user",
       "description": "generated",
       "scope-references": [

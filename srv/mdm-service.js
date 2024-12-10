@@ -17,20 +17,21 @@ module.exports = (srv) => {
 		PT_TMINST,
 		PT_TMCTPRDPCK,
 		PT_TMPRDPCK,
-    PT_TMLE,
-    PT_TMCTLE,
-	PT_TMSKUPRDPCK,
-	PT_TMREGPR,
-	SalesData,
-	WholesalePurchasePriceApprovals,
-	WholesalePurchasePriceApproverTypes,
-	WholesalePurchasePriceApprovers,
-	NLPPPApproverTypes,
-	NLPPPApprovers,
-	NLPPPApprovals,
-	WholesalePurchasePrice,
-	NLPPP,
-	DistributionAgreements
+		PT_TMLE,
+		PT_TMCTLE,
+		PT_TMSKUPRDPCK,
+		PT_TMREGPR,
+		PT_TMCOGS,
+		SalesData,
+		WholesalePurchasePriceApprovals,
+		WholesalePurchasePriceApproverTypes,
+		WholesalePurchasePriceApprovers,
+		NLPPPApproverTypes,
+		NLPPPApprovers,
+		NLPPPApprovals,
+		WholesalePurchasePrice,
+		NLPPP,
+		DistributionAgreements
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
     const{
@@ -418,6 +419,47 @@ module.exports = (srv) => {
 		})
 	});
 
+	srv.on('SoftDeleteProductPrices', async (req) => {
+		try {
+			const {productPackID, countryCode} = req.data;
+
+			const regPr = await SELECT.from(PT_TMREGPR).where({CountryCode: countryCode, ProductPackID: productPackID});
+			const skuPrdpck = await SELECT.from(PT_TMSKUPRDPCK).where({CountryCode: countryCode, ProductPackID: productPackID});
+			let promises = [];
+
+			if (Array.isArray(regPr) && regPr.length > 0) {
+				promises = promises.concat(regPr.map(rp => {
+					return UPDATE(PT_TMREGPR).with({
+						ACTIVERECORD: 'No'
+					}).where({
+						CountryCode: rp.CountryCode,
+						ProductPackID: rp.ProductPackID,
+						EffDate: rp.EffDate
+					});
+				}));
+			}
+
+			if (Array.isArray(skuPrdpck) && skuPrdpck.length > 0) {
+				promises = promises.concat(skuPrdpck.map(sp => {
+					return UPDATE(PT_TMSKUPRDPCK).with({
+						ACTIVERECORD: 'No'
+					}).where({
+						CountryCode: sp.CountryCode,
+						ProductPackID: sp.ProductPackID,
+						SKUCode: sp.SKUCode
+					});
+				}));
+			}
+
+			await Promise.all(promises);
+
+			return 'Product prices were deleted successfully';
+		} catch (error) {
+			console.error('Error in SoftDeleteProductPrices');
+            return req.reject(403, error?.message||"Error in SoftDeleteProductPrices");
+		}
+	});
+	
 	srv.after('READ', 'DistributionAgreementsView', async (data) => {
 		const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
 		countryProducts.forEach(item => {
@@ -901,6 +943,13 @@ module.exports = (srv) => {
         }
 	});
 
+	function formatPercentage(value) {
+		const percentage = value * 100;
+		// Convert to a string with appropriate precision and remove unnecessary decimals
+		const formatted = parseFloat(percentage.toPrecision(12)); 
+		return (Number.isInteger(formatted) ? `${formatted}%` : `${formatted.toFixed(1)}%`);
+	}
+
 	srv.on('READ', 'NLWPPExcelTemplates', async (req, next) => {
 		try{
 		const tx = cds.tx(req);
@@ -923,11 +972,11 @@ module.exports = (srv) => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
 			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
 			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
-			item.Margin = (item.Margin*100).toFixed(2)+"%";
-			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Neto Prijs`;
-			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('DD-MM-YYYY') : moment(item.EndDate).format('DD-MM-YYYY');
-			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD-MM-YYYY');
-			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD-MM-YYYY');
+			item.Margin = formatPercentage(item.Margin);
+			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Netto Prijs`;
+			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('MM/DD/YYYY') : moment(item.EndDate).format('MM/DD/YYYY');
+			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'MM/DD/YYYY');
+			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'MM/DD/YYYY');
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);

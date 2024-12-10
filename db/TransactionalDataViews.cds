@@ -480,7 +480,8 @@ entity BrandsInTender as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRYCODE,
     key tender.TenderID as TENDERID,
     key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
-    key tender.Offer.OfferID as OFFERID
+    key tender.Offer.OfferID as OFFERID,
+    tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRANDNAME
 }
 where tender.Active = 1
 and tender.Offer.Active = 1
@@ -2216,6 +2217,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             ContractLenghtUnit: String;
             AttentionTo: String;
             QuotationDate: Date;
+            InternalBidDueDate     : Date;
             Tender_Custom_Integer_1: Integer;
             Tender_Custom_Integer_2: Integer;
             Tender_Custom_Integer_3: Integer;
@@ -2976,6 +2978,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key offer.OfferID,
     key product.ProductCode,
     key tender.CountryCode,
+    tender.Country.Region,
     offer.Currency,
     offer.CreationDate,
     product.Price.NetofferPrice as NetofferPriceBDPR,
@@ -3035,6 +3038,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         offer.OfferID,
         product.ProductCode,
         tender.CountryCode,
+        tender.Country.Region,
         tender.TenderName,
         offer.Currency,
         offer.CreationDate,
@@ -3185,6 +3189,8 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
             offer.CreationDate,
             offer.SubmittedBy,
             pr.Results.SubmittedOn,
+            pr.Results.createdAt as ResultCreatedAt,
+            pr.Results.modifiedAt as ResultModifiedAt,
             CreatedByUser.UserName,
             pr.ProductCode,
             pr.SORTER,
@@ -3271,6 +3277,8 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
             offer.CreationDate,
             offer.SubmittedBy,
             pr.Results.SubmittedOn,
+            pr.Results.createdAt as ResultCreatedAt,
+            pr.Results.modifiedAt as ResultModifiedAt,
             CreatedByUser.UserName,
             pr.ProductCode,
             pr.SORTER,
@@ -3322,18 +3330,18 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         key OfferID,
         InstituteID, 
         ProductCode,
-        MAX(CreationDate) over (partition by InstituteID, ProductCode ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc)  as maxCreationDate
+        MAX(ResultModifiedAt) over (partition by InstituteID, ProductCode ORDER BY ResultModifiedAt desc, OfferID desc, InstituteID desc, ProductCode desc)  as maxCreationDate
     }group by TenderID,
         OfferID,
         InstituteID, 
         ProductCode,
-        CreationDate;
+        ResultModifiedAt;
 
     entity ZuelligExtractDistinctView as select from zuelligExtract as extract
         inner join maxCreationDateView as maxCreationDateView 
             ON extract.InstituteID = maxCreationDateView.InstituteID 
             and extract.ProductCode = maxCreationDateView.ProductCode 
-            AND extract.CreationDate = maxCreationDateView.maxCreationDate
+            AND extract.ResultModifiedAt = maxCreationDateView.maxCreationDate
             and extract.OfferID = maxCreationDateView.OfferID {
                 *,
                 key extract.TenderID,
@@ -3346,7 +3354,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         *,
         case 
             when BranchInstitute <> ''
-                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY CreationDate desc, OfferID desc, InstituteID desc, ProductCode desc) 
+                then ROW_NUMBER() OVER (PARTITION BY OfferID ORDER BY ResultModifiedAt desc, OfferID desc, InstituteID desc, ProductCode desc) 
                 else SORTER + 1
         end	as CountProducts: Integer,
     };

@@ -191,20 +191,21 @@ inner join MasterData.PT_TMINST AS inst on hier.InstituteID = inst.InstituteID
     inst.InstituteName as CandidateName,
     inst.RegionID as RegionId
 }where inst.ActiveRecord = 'Yes'
-and hier.ActiveRecord = 'Yes'
+and hier.ActiveRecord = 'Yes';
 // Add all public institutes in Spain as candidates for price agreement when tender institute is of type "National"
-union
-select from PriceAgreements as pa
-inner join MasterData.PT_TMINST AS inst on pa.InstituteId = inst.InstituteID 
-inner join MasterData.PT_TMINST AS inst2 on (inst2.InstituteType = 'Public Account' or inst2.InstituteType = 'Governmental Account') and pa.CountryCode = inst2.CountryCode
-{
-    pa.ID as PriceAgreementId,
-    pa.TenderId,
-    inst2.InstituteID as CandidateID,
-    inst2.InstituteName as CandidateName,
-    inst2.RegionID as RegionId
-}where inst.InstituteType = 'National'
-and inst.ActiveRecord = 'Yes';
+// union
+// select from PriceAgreements as pa
+// inner join MasterData.PT_TMINST AS inst on pa.InstituteId = inst.InstituteID 
+// inner join MasterData.PT_TMINST AS inst2 on (inst2.InstituteType = 'Public Account' or inst2.InstituteType = 'Governmental Account') and pa.CountryCode = inst2.CountryCode
+// {
+//     pa.ID as PriceAgreementId,
+//     pa.TenderId,
+//     inst2.InstituteID as CandidateID,
+//     inst2.InstituteName as CandidateName,
+//     inst2.RegionID as RegionId
+// }where inst.InstituteType = 'National'
+// and inst.ActiveRecord = 'Yes';
+
 
 
 /**
@@ -287,7 +288,8 @@ left outer join CustomerPrices AS cp on pa.ID = cp.PriceAgreementId
         ifnull(cp.EffectiveDate, pa.EffectiveDate) as EffectiveDate:DateTime,
         ifnull(cp.ExpiryDate, pa.ExpiryDate) as ExpiryDate:DateTime,
         ins.CustomerID, //by candidate
-        cp.PriceCondition
+        cp.PriceCondition,
+        ins.Comment
         // pa.Institute.CustomerID //by price agreement
 }where (case when ma.ActiveRecord = 'No' and (cp.Synchronized is null or cp.Synchronized = false) then 0 else 1 end)= 1;
 

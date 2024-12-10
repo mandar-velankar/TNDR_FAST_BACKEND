@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -48,7 +48,8 @@ module.exports = (srv) => {
 		PriceConditionClassification, 
 		ProductTypeProfitability,
 		CountrySpecificTenderInfo,
-		THQuotationDelevery
+		THQuotationDelevery,
+		OutgoingMails,
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, TemplateCountry, MandatoryTableFieldsCountry, MailTemplate, PT_TMUSER, ExcelAttachment, WordAttachment, WordTemplateCountry,WordTemplate,SchedulerApiConfig,SchedulerApiConfigOAuth
@@ -1117,6 +1118,10 @@ module.exports = (srv) => {
 	}
 
 	async function buildProductValidationForType4(tx, offer, product, productInfo, aApproverTypes) {//Thailand
+		let results = {
+			//In Policy flag
+			IN_POLICY: false
+		};
 		//Legend
 		//1: Optional
 		//2: Mandatory Notification
@@ -1149,13 +1154,13 @@ module.exports = (srv) => {
 			//based upon the country the correct approverType will be handled 
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
-					case "HBU":
+					case "PoH/CEH":
 						oApproverType.ValidationType = 1;
 						break;
 					case "CDH":
 						oApproverType.ValidationType = 1;
 						break;
-					case "NSM/SM/FM":
+					case "SM/PCEA":
 						oApproverType.ValidationType = 1;
 						break;
 					case "Supply Chain":
@@ -1217,13 +1222,13 @@ module.exports = (srv) => {
 			//based upon the country the correct approverType will be handled 
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
-					case "HBU":
+					case "PoH/CEH":
 						oApproverType.ValidationType = 1;
 						break;
 					case "CDH":
 						oApproverType.ValidationType = 1;
 						break;
-					case "NSM/SM/FM":
+					case "SM/PCEA":
 						oApproverType.ValidationType = 1;
 						break;
 					case "Supply Chain":
@@ -1266,10 +1271,10 @@ module.exports = (srv) => {
 			*/
 		}
 		//Set variables for policy prices thresholds
-		let nsmMSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'MSP') / uomFactor;
-		let nsmNSP = extractPolicyValue(productPolicyPrices, 'NSM/SM/FM', 'NSP') / uomFactor;
-		let hbuMSP = extractPolicyValue(productPolicyPrices, 'HBU', 'MSP') / uomFactor;
-		let hbuNSP = extractPolicyValue(productPolicyPrices, 'HBU', 'NSP') / uomFactor;
+		let nsmMSP = extractPolicyValue(productPolicyPrices, 'SM/PCEA', 'MSP') / uomFactor;
+		let nsmNSP = extractPolicyValue(productPolicyPrices, 'SM/PCEA', 'NSP') / uomFactor;
+		let hbuMSP = extractPolicyValue(productPolicyPrices, 'PoH/CEH', 'MSP') / uomFactor;
+		let hbuNSP = extractPolicyValue(productPolicyPrices, 'PoH/CEH', 'NSP') / uomFactor;
 		let cdhMSP = extractPolicyValue(productPolicyPrices, 'CDH', 'MSP') / uomFactor;
 		let cdhNSP = extractPolicyValue(productPolicyPrices, 'CDH', 'NSP') / uomFactor;
 
@@ -1284,15 +1289,15 @@ module.exports = (srv) => {
 
 		const FOCValue = calculateFOCVolume(product) * product.REGISTERED_PRICE;
 
-		let requiredApprovalLevel = 0;//0: No business approval required; 1:NSM/SM/FM; 2: HBU; 3: CDH; 4: Approval not allowed
+		let requiredApprovalLevel = 0;//0: No business approval required; 1:SM/PCEA; 2: PoH/CEH; 3: CDH; 4: Approval not allowed
 		if (//This means it's first offer for account or offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountOfferPrice, 0) ||
 			ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, preApprovedAccountOfferPrice)
 		) {
-			if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)) {//NSM/SM/FM can approve
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)) {//SM/PCEA can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)) {//HBU can approve
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)) {//PoH/CEH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
 			}
 			else if (ServiceHelper.isDoubleXBelowEqualY(cdhMSP, product.OFFER_PRICE)) {//CDH can approve
@@ -1307,10 +1312,10 @@ module.exports = (srv) => {
 			ServiceHelper.isDoubleEqual(preApprovedAccountNetOfferPrice, 0) ||
 			ServiceHelper.isDoubleXBelowY(product.NET_PRICE, preApprovedAccountNetOfferPrice)
 		) {
-			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_PRICE)) {//NSM/SM/FM can approve
+			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_PRICE)) {//SM/PCEA can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_PRICE)) {//HBU can approve
+			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_PRICE)) {//PoH/CEH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
 			}
 			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_PRICE)) {//CDH can approve
@@ -1350,13 +1355,13 @@ module.exports = (srv) => {
 		//based upon the country the correct approverType will be handled 
 		aApproverTypes.map(async function (oApproverType) {
 			switch (oApproverType.ApproverType) {
-				case "HBU":
+				case "PoH/CEH":
 					oApproverType.ValidationType = hbuLevel;
 					break;
 				case "CDH":
 					oApproverType.ValidationType = cdhLevel;
 					break;
-				case "NSM/SM/FM":
+				case "SM/PCEA":
 					oApproverType.ValidationType = nsmLevel;
 					break;
 				case "Supply Chain":
@@ -1365,7 +1370,7 @@ module.exports = (srv) => {
 			}
 		});
 
-		let results = {
+		results = {
 			//In Policy flag
 			IN_POLICY: inPolicy
 		};
@@ -2342,7 +2347,9 @@ module.exports = (srv) => {
 		// }
 		
 		let CountryBusinessindex = aApproverTypes.findIndex(x => x.ApproverType === 'Country Business' );
-		if(tenderyear> '22' && regionname === 'MEA'){
+		let countriesNeedCountryBusinessApproverType = ['AL', 'TN', 'MO'];
+
+		if(tenderyear> '22' && regionname === 'MEA' && !countriesNeedCountryBusinessApproverType.includes(Countrycode)){
 			if (CountryBusinessindex !== -1) {
 				aApproverTypes.splice(CountryBusinessindex, 1);
 			}				
@@ -2365,8 +2372,8 @@ module.exports = (srv) => {
 
 		//EHQUT-197882-Thailand - Additional approver for Nalador
 		let oCDH = aApproverTypes.find(approverType => approverType.ApproverType === 'CDH');
-		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'NSM/SM/FM');
-		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'HBU');
+		let oNSM = aApproverTypes.find(approverType => approverType.ApproverType === 'SM/PCEA');
+		let oHBU = aApproverTypes.find(approverType => approverType.ApproverType === 'PoH/CEH');
 		if (oCDH && oNSM && oHBU) {
 			//If CDH approval is mandatory, lower levels do not need to approve
 			if (oCDH.ValidationType === 3) {
@@ -2493,6 +2500,13 @@ module.exports = (srv) => {
 	}
 
 	function mapApprovalForType(approverType, latestApproval, division) {
+		const THApproverTypes = {
+			"SM/PCEA": "NSM/SM/FM",
+			"PoH/CEH": "HBU"
+		};
+
+		approverType = THApproverTypes[approverType] && latestApproval.filter(la => la.ApproverType === approverType).length == 0 ? THApproverTypes[approverType] : approverType;
+
 		aApprovalForTypeResult = [];
 		oApprovalForType = latestApproval.filter((d => d.ApproverType === approverType));
 		if (oApprovalForType.length > 1 && approverType != 'Supply Chain' && approverType != 'Regulatory' && approverType != 'Legal' && approverType != 'Controlling') {
@@ -2781,7 +2795,7 @@ module.exports = (srv) => {
 	async function buildWorkflowApprovalApprovalsEntries(tx, offerId, approvalStatus) {
 		let whereOffer = ServiceHelper.buildFullWhere("OfferId", "=", offerId);
 		let offerApprovals = await buildOfferApproval(tx, whereOffer);//HERE
-
+		
 		offerApprovals = offerApprovals.filter((d) => d.ApprovalStatus === approvalStatus);
 
 		whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
@@ -2879,7 +2893,7 @@ module.exports = (srv) => {
 		return results;
 	}
 	async function getOfferData(tx,offerId){
-		
+		const QuotationDeleveryTH = await tx.run(SELECT.from(THQuotationDelevery).where({ "OfferID": offerId }));
 		let whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
 		let offerValidation = await buildOfferValidation(tx, whereOffer);
 		if (!offerValidation) {
@@ -2926,7 +2940,8 @@ module.exports = (srv) => {
 		return {
 			offerValidation: offerValidation,
 			offerProductValidation: productValidation,
-			groupedOfferProductValidation: groupedOfferProductValidation
+			groupedOfferProductValidation: groupedOfferProductValidation,
+			quotationDelevery: QuotationDeleveryTH
 			// flatOfferProductValidation.reduce((group, product) => {
 			// 	const { PriceConditionClassification } = product;
 			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
@@ -3900,8 +3915,69 @@ module.exports = (srv) => {
         }
     });
 
+	srv.on('sendTHNotificationMailTemplate', async (req) => {
+		try {
+			const { data: {tenderId, offerID, CountryCode} } = req;
+			const tx = cds.tx(req);
+			const mailTemplate = await getMailTemplate('THNotificationMailTemplate');
+			const checkOfferForBrand = await tx.run(SELECT.from(BrandsInTender).where({ OfferID: offerID }));
+			const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: tenderId }))
+			let recipient;
+			let brandNames = checkOfferForBrand.map(el => el.BRANDNAME.toLowerCase())
+			if (brandNames.includes('xofigo')) {
+				if (tender.Classification === "Tender") {
+					recipient = "quotation.hec.th@ipservices.co.th"
+				} else {
+					recipient = "tender.hec.th@ipservices.co.th"
+				}
+			} else {
+				recipient = "nutthawuth.nainanont@globalmedicalsolutions.com"
+			}
+			const THNotificationData = mappedTHNotificationData(mailTemplate, req, recipient);
+			await INSERT.into(OutgoingMails).entries(THNotificationData);
+			return "Notification mail sent successfully";
+		}catch (error) {
+				console.error('Error in sendTHNotificationMailTemplate');
+				return req.reject(400, error.message || 'An unexpected error occurred.');
+		}
 
-
+	});
+	function mappedTHNotificationData (mailTemplate, req, recipient){
+		return {
+			CountryCode: 'TH',
+			TenderID: req.tenderId,
+			OfferID: req.offerID,
+			Sender: 'FAST-Admin@bayer.com',
+			Recipients:  recipient,
+			Subject: `New TH Tender Created for`,
+			MailBody: generateMailBody(mailTemplate, {
+				data: { 
+					content:{
+						UserName: 'Test',
+						CountryName: 'Test',
+						Offer: 'Test',
+						DirectURLToOffer: 'Test',
+						TenderCreator: 'Test',
+					}
+				}
+			}),
+			Sent: false,
+		}
+	}
+    const getMailTemplate = async function (templateId) {
+        try{
+            const result = await SELECT.one.from(MailTemplate)
+			.columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
+			.where({ TemplateId: templateId });
+            return result;
+        }catch(error){
+            console.error("No mail template found");
+            return;
+        }
+    }
+	const generateMailBody = function (mail, data) {
+        return Handlebars.compile("" + mail.content)(data);
+    }
 	async function getContract(tx, offerID, lotID, productCode, conditionType){
 
 		const offer = await tx.run(SELECT.one.from(PT_TMOFRS).where({ OfferID: offerID }));
