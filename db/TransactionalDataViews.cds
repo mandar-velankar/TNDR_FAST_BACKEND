@@ -480,7 +480,8 @@ entity BrandsInTender as select from TransactionalData.PT_TMTEND as tender{
     tender.CountryCode as COUNTRYCODE,
     key tender.TenderID as TENDERID,
     key tender.Offer.Product.SKU.Product.HLEVEL4_CODE as BRANDID,
-    key tender.Offer.OfferID as OFFERID
+    key tender.Offer.OfferID as OFFERID,
+    tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRANDNAME
 }
 where tender.Active = 1
 and tender.Offer.Active = 1
@@ -2977,6 +2978,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
     key offer.OfferID,
     key product.ProductCode,
     key tender.CountryCode,
+    tender.Country.Region,
     offer.Currency,
     offer.CreationDate,
     product.Price.NetofferPrice as NetofferPriceBDPR,
@@ -3036,6 +3038,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
         offer.OfferID,
         product.ProductCode,
         tender.CountryCode,
+        tender.Country.Region,
         tender.TenderName,
         offer.Currency,
         offer.CreationDate,

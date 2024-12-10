@@ -1409,11 +1409,19 @@ module.exports = async (srv) => {
 
         // KBETR per Pack or Unit
         //if(customerPrice.CountryCode === 'IT'){
-        if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit") {// convert and send per pack
-            kbetr = kbetr * packFactor;
-        } else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack") { // => radiology so per unit
-            kbetr = kbetr / packFactor;
-        }
+       if (customerPrice.CountryCode === 'ES') {
+            if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit" && customerPrice.PriceCondition !== "YL60") {// convert and send per pack
+                kbetr = kbetr * packFactor;
+            } else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack" && customerPrice.PriceCondition !== "YL60") { // => radiology so per unit
+                kbetr = kbetr / packFactor;
+            }
+       }else{
+            if ((offer.Division === "Pharma" || offer.Division === "Consumer Health") && priceAgreement.UoM === "Unit") {// convert and send per pack
+                kbetr = kbetr * packFactor;
+            } else if (offer.Division === "Radiology" && priceAgreement.UoM === "Pack") { // => radiology so per unit
+                kbetr = kbetr / packFactor;
+            }
+       }
         //} 
         //EHQUT-INC17748342-Rates incorrectly synchronized.
         //EHQUT-INC18178128-FAST - Error decimals discounts
@@ -1534,7 +1542,7 @@ module.exports = async (srv) => {
                     KUNNR: curr.KUNNR && addLeadingZeros(curr.KUNNR, 10) || null,   // Customer Number
                     MATNR: curr.MATNR && addLeadingZeros(curr.MATNR, 18) || null,   // Material Number
                     YCIG: curr.REFVAL || null,   // Contract Reference
-                    KBETR: curr.KBETR.toString() || null,   // Condition Value
+                    KBETR: curr.KBETR && curr.KBETR.toString() || null,   // Condition Value
                     KPEIN: curr.CountryCode == 'IT' ? '1' : (curr.KSCHL == 'YLTF' || curr.KSCHL == 'YLTP') ? '10000' : null || null,   // Unit for price
                     DATAB: curr.DATAB || null,   // Effective Date
                     DATBI: curr.DATBI || null,   // Expiry Date
@@ -1542,9 +1550,9 @@ module.exports = async (srv) => {
                     KONMS: curr.KONMS || null,   // 
                     MEINS: curr.MEINS || null,   // 
                     BOMAT: curr.BOMAT && addLeadingZeros(curr.BOMAT, 18) || null,   // 
-                    KSTBM: curr.KSTBM || null,   // 
-                    MIKBAS: curr.MIKBAS || null,   // 
-                    MXBAS: curr.MXBAS || null   //
+                    KSTBM: curr.KSTBM && curr.KSTBM.toString() || null,   // 
+                    MIKBAS: curr.MIKBAS && curr.MIKBAS.toString() || null,   // 
+                    MXBAS: curr.MXBAS && curr.MXBAS.toString() || null   //
                 }
             );
             return prev;

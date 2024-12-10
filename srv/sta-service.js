@@ -707,6 +707,7 @@ module.exports = async (srv) => {
 			const { data } = mappedHaematologyFields(req, formFieldsData);
 			req.data = data;
 		}
+		await resetProductPaymentSupplyFields(req.data.OfferID);
 
 		req.data.NewOfferDueDate = req.data.OfferDueDate;
 		req.data.DistributorComments = null; //for mandatory field check in sta-service
@@ -761,7 +762,8 @@ module.exports = async (srv) => {
 		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
 		const formFieldsData = await UITemplatesService.run(SELECT.from(FormFieldsView).where({Section: sections[req.entity], CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.DistributorComments}));
 		const { mappedFields } = mappedHaematologyFields(req, formFieldsData);
-
+		await resetProductPaymentSupplyFields(req.data.OfferID);
+		mappedFields.APPROVALS_SENT = 0; // Needed to revert Offer status back to Offer Created when updating those 3 forms
 		if (offer) {
 			await UPDATE(PT_TMOFRS).with(mappedFields).where({OfferID: req.data.OfferID});
 		}
@@ -792,6 +794,9 @@ module.exports = async (srv) => {
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferProductsTableView', async (req) => {
 		try{
+		await resetApprovalsSent(req.data.OfferID);
+		await resetProductPaymentSupplyFields(req.data.OfferID);
+
 		delete req.data.ProductPackName;
 		delete req.data.NetPrice;
 		delete req.data.TotalAmount;
@@ -1194,7 +1199,6 @@ module.exports = async (srv) => {
 				req.error({ code: 404, message: `${item.Label} is required.`, target: frontendField });
 			}
 		}	
-		await updateApprovalsSent(req.data.OfferID);
 		// validate form
 		// !req.data.RequestedVolume &&  req.error({ code: 404, message: "RequestedVolume is required.", target: "RequestedVolume" });
 		// !req.data.UnitPerPack &&  req.error({ code: 404, message: "UoM is required.", target: "UnitPerPack" });
@@ -1213,8 +1217,12 @@ module.exports = async (srv) => {
 		if (req.data.CountryCode == 'NL' && (req.data.RequestedVolume == 0 || req.data.RequestedVolume == null)) {
 			req.data.RequestedVolume = 1
 		}
-		
+
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
+
 		req.data.Line = null; //for mandatory field check in sta-service
+		req.data.SUPPLY_UPDATE = offer.APPROVALS_SENT;
+
 		delete req.data.MoleculeName;
         delete req.data.Code1;
         delete req.data.Code2;
@@ -1252,6 +1260,12 @@ module.exports = async (srv) => {
 			try{
 			// validate form
 				if(req.data.CountryCode !== "AU" && req.data.CountryCode !== "PL"){
+					if(req.data.ConditionType === 'PriceWithFOC' || req.data.ConditionType === 'DiscountWithFOC'){
+						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : req.data.Region === 'MEA' ? roundToDecimalPlaces(req.data.BasePrice,3) : roundToDecimalPlaces(req.data.BasePrice,2);
+					}
+					if(req.data.ConditionType === 'Price' || req.data.ConditionType === 'Discount'){
+						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : roundToDecimalPlaces(req.data.BasePrice,2);
+					}
 					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 				}
 			}
@@ -1670,13 +1684,6 @@ module.exports = async (srv) => {
 			}
 		});
 
-		if(existingApprovals?.length > 0){
-			//remove old entries before inserting
-			await DELETE.from(PT_TMAPPRST)
-				.where({
-					OfferID: req.data.OfferId
-				})
-		}
 		
 		await INSERT.into(PT_TMAPPRST).entries(aApprovalsSaveInfo);
 
@@ -1750,7 +1757,7 @@ module.exports = async (srv) => {
 		], 
 		async (req) => {
 			try{
-			await updateApprovalsSent(req.data.OfferID);
+			await updatePaymentField(req.data.OfferID, req.data.ProductCode);
 			await upsertPriceCondition(req);
 			await upsertProductPricing(req);
 			// Check if CountryCode is TW (Taiwan)
@@ -1847,25 +1854,55 @@ module.exports = async (srv) => {
 	 * @returns {Promise<void>} A promise that resolves when the upsert operation is complete.
 	 */
 
-	const updateApprovalsSent = async function (OfferID) {
-		const existingApprovals = await SELECT.from(PT_TMAPPRST).where({OfferID: OfferID});
-
+	const resetApprovalsSent = async function (OfferID) {
 		await UPDATE(PT_TMOFRS)
 			.with({APPROVALS_SENT: 0})
 			.where({
 				OfferID: OfferID
 			});
+	};
 
-		// After setting back offer status to Offer Created we must make sure that previous approvals are removed 
-		// otherwise if you open Approvals in overview page you will approvals which status is approved however your offer status is Offer Created
-		if (existingApprovals.length > 0) {
-			await DELETE(PT_TMAPPRST)
-				.where({
-					OfferID: OfferID
-				});
-		}
-		
+	const updatePaymentField = async function (OfferID, ProductCode) {
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: OfferID});
+
+		await UPDATE(PT_TMOFPR)
+			.with({PAYMENT_UPDATE: offer.APPROVALS_SENT})
+			.where({
+				OfferID: OfferID,
+				ProductCode: ProductCode
+			});			
 	}
+
+	const resetProductPaymentSupplyFields = async function (OfferID) {
+		const products = await SELECT.from(PT_TMOFPR).where({OfferID: OfferID});
+		const prices = await SELECT.from(PT_TMBDPR).where({OfferID: OfferID});
+		let promises = [];
+
+		if (prices.length > 0) {
+			const pricePromises = prices.map(price => {
+				return UPDATE(PT_TMBDPR)
+				.with({PRICE_UPDATE: 0})
+				.where({
+					OfferID: price.OfferID,
+					ProductCode: price.ProductCode
+				});
+			});
+			promises = promises.concat(pricePromises);
+		}
+
+		if (products.length > 0) {
+			const productPromises = products.map(product => {
+				return UPDATE(PT_TMOFPR)
+				.with({SUPPLY_UPDATE: 0, PAYMENT_UPDATE: 0})
+				.where({
+					OfferID: product.OfferID,
+					ProductCode: product.ProductCode
+				});
+			});
+			promises = promises.concat(productPromises);
+		}
+		Promise.all(promises);
+	};
 
 	const upsertPriceCondition = async function(req){
 		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
@@ -2675,7 +2712,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			await upsertOfferStatus(req.data.OFFERID, req.data.TENDERID, 'Quotation Submitted');
 			delete req.data.Submitted;
 		}else {
-			await updateApprovalsSent(req.data.OFFERID);
+			await resetApprovalsSent(req.data.OFFERID);
 		}
 		await upsertQuotation(req);
 		return req.data;
@@ -2902,6 +2939,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let approverTypes = [];
 		let latestApproval = await tx.run(SELECT.from(ApprovalRequests).where(whereOffer));
 
+		whereOffer[0].ref[0] = 'OFFER_ID'
+		let offerStatus = await tx.run(SELECT.one.from(OfferStatus).where(whereOffer));
+
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offerValidation = await buildOfferValidation(tx, whereOffer);
 
@@ -2922,7 +2962,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			approverTypes = offerValidation.ApproverTypes;
 		}
 
-		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs);
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerStatus, offerValidation, countryApprovers, countryProductPackBUs);
 
 	}
 
@@ -3567,7 +3607,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 	}
 
-	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, countryProductPackBUs) {
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerStatus, offerValidation, countryApprovers, countryProductPackBUs) {
 
 		let aResults = [];
 		approverTypes.forEach(function (type, index) {
@@ -3591,7 +3631,21 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			let approvalForType = mapApprovalForType(type.ApproverType, latestApproval, offerValidation.DIVISION);
 			let defaultForType = mapDefaultCountryApprovers(countryApprovers, type.ApproverType, offerValidation, countryProductPackBUs);
 
-			if (approvalForType.length !== 0) {
+			if (offerStatus.STATUS === 'Offer Created'){
+				if (defaultForType.length !== 0) {
+					approverName = defaultForType[0].ApproverName;
+					approverEmailID = defaultForType[0].ApproverEmailID;
+					approverType = defaultForType[0].ApproverType;
+					division = defaultForType[0].Division;
+					requiredAction = approverTypes.filter((d) => d.ApproverType === defaultForType[0].ApproverType)[0].ValidationType
+					approverType = defaultForType[0].ApproverType;
+					division = defaultForType[0].Division;
+				}
+				else {
+					return null;
+				}
+			}
+			else if (approvalForType.length !== 0) {
 				approverName = approvalForType[0].ApproverName;
 				approverEmailID = approvalForType[0].ApproverEmailID;
 				statusTime = approvalForType[0].Statustime;
@@ -3626,8 +3680,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 			}
+			if(offerValidation.COUNTRYCODE === 'PK' && countryProductPackBUs.includes("SM")){
+				type.ApproverType === 'Finance Approver' ? type.Hierarchy = 1 : type.Hierarchy;
+				if(type.ApproverType === 'Country Commercial Lead') {
+					type.ValidationType = 3;
+					type.ValidationType2 = 3;
+					requiredAction = 3;
+				} 
+			}
 			let approvalTypeSection = (requiredAction === 1) ? 2 : 1;
-			let approvalTypeStatus = (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus
+			let approvalTypeStatus = (offerStatus.STATUS === 'Offer Created' || approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus
 			aResults.push({
 				TenderID: offerValidation.TENDERID,
 				OfferId: offerValidation.OFFERID,
@@ -5329,6 +5391,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.EARLIEST_DATE = prd.COUNTRY_CODE === 'AU' ? prd.EARLIEST_DATE && ServiceHelper.formatDate(prd.EARLIEST_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : prd.EARLIEST_DATE;
 			prd.Product_Custom_Integer_1 = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.Product_Custom_Integer_1, 0, 0) : prd.Product_Custom_Integer_1;
 			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE.includes('HM') ? ServiceHelper.formatNumber(prd.REQUESTED_QUANTITY, 0, 0) : prd.REQUESTED_QUANTITY;
+			if (prd.COUNTRY_CODE.includes('HM') && prd.PriceCondition?.[0]?.FreeGoodsOther?.[0]) {
+				const freeGoodsOther = prd.PriceCondition[0].FreeGoodsOther[0];
+				if (['STP', 'ABS'].includes(freeGoodsOther.FreeGoodsOther_ABS_PCT)) {
+					freeGoodsOther.FreeGoodsOther = freeGoodsOther.FreeGoodsOther && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther, 0, 0);
+					freeGoodsOther.FreeGoodsOther_Step = freeGoodsOther.FreeGoodsOther_Step && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther_Step, 0, 0);
+				}
+			}
 			prd.OfferPrice_1 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_1 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_1), 'nl-NL', 2, 2) : prd.OfferPrice_1;
 			prd.OfferPrice_2 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_2 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_2), 'nl-NL', 2, 2) : prd.OfferPrice_2;
 			prd.OfferPrice_3 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_3 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_3), 'nl-NL', 2, 2) : prd.OfferPrice_3;
@@ -5350,6 +5419,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 										: (productValidation[0]?.Region === 'MEA' ? offerValidation.OFFERVALIDITY && ServiceHelper.formatDate(offerValidation.OFFERVALIDITY, 'YYYY-MM-DD', 'DD-MMM-YYYY') : offerValidation.OFFERVALIDITY);
 		offerValidation.PUBLICATION_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.PUBLICATION_DATE && ServiceHelper.formatDate(offerValidation.PUBLICATION_DATE, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.PUBLICATION_DATE);
 		offerValidation.InternalDueDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.InternalDueDate && ServiceHelper.formatDate(offerValidation.InternalDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalDueDate;
+		offerValidation.InternalBidDueDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.InternalBidDueDate && ServiceHelper.formatDate(offerValidation.InternalBidDueDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.InternalBidDueDate;
 		offerValidation.BID_DUE_DATE = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.BID_DUE_DATE && ServiceHelper.formatDate(offerValidation.BID_DUE_DATE, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.BID_DUE_DATE);
 		offerValidation.ExpectedAwardDate = (offerValidation.COUNTRYCODE === 'AU' || offerValidation.COUNTRYCODE.includes('HM')) ? offerValidation.ExpectedAwardDate && ServiceHelper.formatDate(offerValidation.ExpectedAwardDate, 'YYYY-MM-DD','DD.MM.YYYY') : offerValidation.ExpectedAwardDate;
 		offerValidation.EffectiveDate = offerValidation.COUNTRYCODE === 'AU' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD.MM.YYYY') : (offerValidation.COUNTRYCODE === 'PL' ? offerValidation.EffectiveDate && ServiceHelper.formatDate(offerValidation.EffectiveDate, 'YYYY-MM-DD','DD/MM/YYYY') : offerValidation.EffectiveDate);
@@ -5638,7 +5708,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const priceCondition = await SELECT.one.from(PriceCondition).where({
 				ID: data?.PriceCondition_ID
 			});
-			await updateApprovalsSent(priceCondition?.OfferID);
+			await updatePaymentField(priceCondition?.OfferID, priceCondition?.ProductCode);
 			return data;
 		}
 	);
@@ -5647,7 +5717,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		['CREATE','UPDATE'], 'PT_TMBDPR', 
 		async (req) => {
 			try{
-			await updateApprovalsSent(req.data.OfferID);
 			await updateProductPricing(req);
 			await updatePriceCondition(req);
 
