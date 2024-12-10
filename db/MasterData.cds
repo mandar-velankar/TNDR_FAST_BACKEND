@@ -210,7 +210,7 @@ entity COUNTRY_LEGAL_ENTITY_SIGNATORIES {
 
 //Registered Prices
 entity PT_TMREGPR{
-	RegisteredPriceID:Integer;//TODO: check if needed?
+	key RegisteredPriceID:Integer;//TODO: check if needed?
 	key CountryCode:String not null;
 	key ProductPackID:Integer not null;
 	key EffDate:Date not null;
