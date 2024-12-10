@@ -301,6 +301,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					IloscSztukDoWyrownania                  : null,
 					NrFakturyZakupu                         : null,
 					SKUCode									: sKUCode,
+					RowOrder								: null,
 					ClaimFiles_ID					 		: UUID
 				}
 			);

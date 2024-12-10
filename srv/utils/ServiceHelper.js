@@ -154,7 +154,11 @@ module.exports = {
         if (!num){
             num = 0;
         }
-        return num.toLocaleString('en-US', { minimumFractionDigits: minDigits, maximumFractionDigits: maxDigits });
+
+        return num.toLocaleString('en-US', {
+            minimumFractionDigits: minDigits, 
+            maximumFractionDigits: maxDigits
+        });
     },
 
     formatDate(dateString, inputFormat, outputFormat) {
@@ -169,9 +173,10 @@ module.exports = {
         if (truncate) {
             num = Number((Math.floor(num * 100) / 100).toFixed(2));
         }
-        return num.toLocaleString(locale, { 
+
+        return num.toLocaleString(locale, {
             minimumFractionDigits: minDigits, 
-            maximumFractionDigits: maxDigits 
+            maximumFractionDigits: maxDigits
         });
 	}
 

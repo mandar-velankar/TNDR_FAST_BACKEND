@@ -166,7 +166,8 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 		clmd.RoznicaCenaZakupuPNM,
 		clmd.WartoscPNM,
 		clmd.IloscSztukDoWyrownania,
-		clmd.NrFakturyZakupu
+		clmd.NrFakturyZakupu,
+		clmd.RowOrder
 	}where clmf.CountryCode = 'PL'
 	group by
 		clmf.ID,
@@ -202,7 +203,8 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 		clmd.RoznicaCenaZakupuPNM,
 		clmd.WartoscPNM,
 		clmd.IloscSztukDoWyrownania,
-		clmd.NrFakturyZakupu;
+		clmd.NrFakturyZakupu,
+		clmd.RowOrder;
 
 entity NLExtractClaimFilesView as select from ClaimsData.ClaimFiles as cf
 	left join ClaimsData.ClaimData as cd 		

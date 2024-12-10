@@ -948,6 +948,7 @@ entity AwardedOfferDistributors: cuid {
 
 entity ContractInfomation : cuid, managed {
     OfferID: String;
+    CountryCode: String;
     ProductCode: Integer;
     InstituteID: Integer;
     InstituteName: String;
