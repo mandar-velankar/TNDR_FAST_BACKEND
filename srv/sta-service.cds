@@ -14,6 +14,9 @@ using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {com.bayer.SXTENDER.ExternalDataViews} from '../db/ExternalDataViews';
 using {UITemplates as UITemplateSrv} from './external/UITemplates';
+using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
+using { com.bayer.SXTENDER.ClaimsViews } from '../db/ClaimsViews';
+
 
 using {
     User,
@@ -1119,4 +1122,62 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             Countries.CountryCode
     } where Countries.CountryCode = 'PL' and Role = 'KAM';
     
+    entity SalesReportView as select from ClaimsData.ClaimFiles as cf 
+        left join ClaimsData.ClaimData as cd         
+            on cd.ClaimFiles.ID = cf.ID
+        left join MasterData.PT_TMINST as inst 
+            on inst.InstituteID = cd.MainInstituteID 
+            and inst.CountryCode = cd.CountryCode
+        left join TransactionalData.PT_TMOFRS as offer
+            on cd.OfferID = offer.OfferID
+        {
+            key cd.ID,
+            cd.OfferID,
+            cf.DistributorName,
+            cd.MainInstituteName,
+            cd.External_InstituteId,
+            cf.FilePeriod,
+            cd.BrandName,
+            cd.PRODUCTPACKNAME,
+            cd.EANNumber,
+            cd.Quantity,
+            cd.Quantity * cd.SKU.CONCENTRATION as QuantityMl: Double,
+            cd.WholesalerPurchasePrice,
+            cd.WholesalerContractPrice,
+            cf.WholesalerPurchaseAmount,
+            cf.NetSales,
+            cd.Product.RequestedVolume,
+            cd.BrandContractVolume,
+            cd.BrandUsedVolume,
+            cf.CountryCode,
+            inst.InstituteType,
+            inst.KAM_Territory,
+            offer.TenderID,
+	        offer.Currency,
+        } where cf.CountryCode = 'PL'
+        group by 
+            cd.ID,
+            cd.OfferID,
+            cf.DistributorName,
+            cd.MainInstituteName,
+            cd.External_InstituteId,
+            cf.FilePeriod,
+            cd.BrandName,
+            cd.PRODUCTPACKNAME,
+            cd.EANNumber,
+            cd.Quantity,
+            cd.SKU.CONCENTRATION,
+            cd.WholesalerPurchasePrice,
+            cd.WholesalerContractPrice,
+            cf.WholesalerPurchaseAmount, 
+            cf.NetSales,
+            cd.Product.RequestedVolume,
+            cd.BrandContractVolume,
+            cd.BrandUsedVolume,
+            cf.CountryCode,
+            inst.InstituteType,
+            inst.KAM_Territory,
+            offer.TenderID,
+	        offer.Currency;
+
 }
