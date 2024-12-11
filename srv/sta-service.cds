@@ -1130,6 +1130,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             and inst.CountryCode = cd.CountryCode
         left join TransactionalData.PT_TMOFRS as offer
             on cd.OfferID = offer.OfferID
+        left join ClaimsViews.CountryCurrencyView as CountryCurrency
+            on cf.CountryCode = CountryCurrency.CountryCode
         {
             key cd.ID,
             cd.OfferID,
@@ -1153,7 +1155,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             inst.InstituteType,
             inst.KAM_Territory,
             offer.TenderID,
-	        offer.Currency,
+	        CountryCurrency.Currency,
         } where cf.CountryCode = 'PL'
         group by 
             cd.ID,
@@ -1178,6 +1180,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             inst.InstituteType,
             inst.KAM_Territory,
             offer.TenderID,
-	        offer.Currency;
+	        CountryCurrency.Currency;
 
 }
