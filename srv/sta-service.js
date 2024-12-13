@@ -5210,7 +5210,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							}          
 							let usString;
 							if(typeof input === 'string'){
-								usString = Number(input.replace(/\,/g,'.')).toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+								const normalizedInput = input.replace(/,/g, '').replace(/\./, ',');
+								usString = Number(normalizedInput.replace(/\,/g, '.')).toLocaleString('nl-NL', { 
+									minimumFractionDigits: 2, 
+									maximumFractionDigits: 2 
+								});
 							} else {
 								usString = input.toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 							} 
