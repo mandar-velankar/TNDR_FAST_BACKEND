@@ -1132,14 +1132,20 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             on cd.OfferID = offer.OfferID
         left join ClaimsViews.CountryCurrencyView as CountryCurrency
             on cf.CountryCode = CountryCurrency.CountryCode
+        left join ClaimsViews.CalculatedBrandVolumes as calcbrandvolumes
+			on calcbrandvolumes.OfferID = cd.OfferID
+			and calcbrandvolumes.ProductPackID = cd.ProductPackID
         {
             key cd.ID,
             cd.OfferID,
             cf.DistributorName,
+            cf.DistributorID,
             cd.MainInstituteName,
+            cd.MainInstituteID,
             cd.External_InstituteId,
             cf.FilePeriod,
             cd.BrandName,
+            cd.BrandId,
             cd.PRODUCTPACKNAME,
             cd.EANNumber,
             cd.Quantity,
@@ -1151,20 +1157,31 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             cd.Product.RequestedVolume,
             cd.BrandContractVolume,
             cd.BrandUsedVolume,
+            cd.ProductPackID,
             cf.CountryCode,
             inst.InstituteType,
             inst.KAM_Territory,
             offer.TenderID,
 	        CountryCurrency.Currency,
+            CASE 
+			WHEN calcbrandvolumes.BrandContractCalculatedVolume != 0 
+                THEN calcbrandvolumes.BrandUsedCalculatedVolume 
+                    / 
+                    calcbrandvolumes.BrandContractCalculatedVolume
+                ELSE 0 
+            END as ContractBrandUsage : Double,
         } where cf.CountryCode = 'PL'
         group by 
             cd.ID,
             cd.OfferID,
             cf.DistributorName,
+            cf.DistributorID,
             cd.MainInstituteName,
+            cd.MainInstituteID,
             cd.External_InstituteId,
             cf.FilePeriod,
             cd.BrandName,
+            cd.BrandId,
             cd.PRODUCTPACKNAME,
             cd.EANNumber,
             cd.Quantity,
@@ -1176,10 +1193,29 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             cd.Product.RequestedVolume,
             cd.BrandContractVolume,
             cd.BrandUsedVolume,
+            cd.ProductPackID,
             cf.CountryCode,
             inst.InstituteType,
             inst.KAM_Territory,
             offer.TenderID,
-	        CountryCurrency.Currency;
+	        CountryCurrency.Currency,
+            calcbrandvolumes.BrandContractCalculatedVolume,
+            calcbrandvolumes.BrandUsedCalculatedVolume;
+
+    entity ExtractPolandSalesReport {
+        key templateId    : String;
+        key TenderID      : String;
+        key CountryCode   : String;
+        key DistributorID : String;
+        key BrandID       : String;
+        key ProductPackID : String;
+        key KAM_Territory : String;
+        key InstituteType : String;
+        key InstituteID   : String;
+        key DateFrom      : String;
+        key DateTo        : String;
+            content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType     : String      @Core.IsMediaType;
+    }
 
 }
