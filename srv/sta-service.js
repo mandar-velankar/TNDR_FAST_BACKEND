@@ -6342,4 +6342,62 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             DistributorName: "All",
 		})
 	});
+
+	srv.on('READ', 'SalesReportInstitutesView', async (req, next) => {
+		try{
+			//const result = await next(); // Allow the original query to run
+			const tx = cds.tx(req);
+			let result = [];
+			let ivQuery = SELECT.from(req.query.SELECT.from);
+			if (req.query.SELECT.columns?.[0]?.func !== "count") {
+				ivQuery.columns(req.query.SELECT.columns);
+			}
+			req.query.SELECT.where && (ivQuery.where(req.query.SELECT.where));
+			req.query.SELECT.orderBy && (ivQuery.orderBy(req.query.SELECT.orderBy));
+
+			result = await tx.run(ivQuery);
+
+			// Check if the result contains $count
+			const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+		
+			if (isCountQuery) {
+			// If $count is present, return the original result
+			return result;
+			}
+			
+			const cwid = req.user.id;
+			const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+		
+			if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
+			// If no user territories found, return all items
+			return result;
+			}
+
+			const resultsArray = Array.isArray(result) ? result : [result];
+		
+			const territoryMatches = resultsArray.filter(item => {
+				return userTerritories.some(userTerritory => {
+					return item.Territory === userTerritory.Territory;
+				});
+			});
+			
+			const finalFilteredResults = territoryMatches.filter(item => {
+				return userTerritories.some(userTerritory => {
+					return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+				});
+			});
+				
+			if (finalFilteredResults.length > 0) {
+				// Return the final filtered results
+				return finalFilteredResults;
+			}else{
+				// If no territory matches, return an empty array
+				return territoryMatches;
+			}
+		}
+		catch(error){
+            console.error('Error in InstitutesView READ');
+            return req.reject(403, error?.message||"Error in InstitutesView");
+        }
+	});
 }
