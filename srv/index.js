@@ -28,6 +28,11 @@ const jobManager = require("./jobs/JobManager");
     if (type && typeof type === "string" && type.startsWith("multipart/mixed")) {
       return true;
     }
+  
+    if (type && typeof type === "string" && type.startsWith("text/csv")) {
+      return false;
+    }
+    
     // fallback to standard filter function
     return compression.filter(req, res);
   }
