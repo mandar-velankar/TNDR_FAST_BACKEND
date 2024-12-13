@@ -974,9 +974,9 @@ module.exports = (srv) => {
 			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
 			item.Margin = formatPercentage(item.Margin);
 			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Netto Prijs`;
-			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('MM/DD/YYYY') : moment(item.EndDate).format('MM/DD/YYYY');
-			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'MM/DD/YYYY');
-			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'MM/DD/YYYY');
+			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('DD/MM/YYYY') : moment(item.EndDate).format('DD/MM/YYYY');
+			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
+			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
