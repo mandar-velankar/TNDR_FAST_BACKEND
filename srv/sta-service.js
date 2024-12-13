@@ -6323,4 +6323,23 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const formattedValue = ServiceHelper.formatNumber(Number(value), 0, 0);
 		return formattedValue.replace(/,/g, ' ');
 	}
+
+	srv.after('READ', 'PT_TMTEND', data => {
+        const countryCode = data?.[0]?.CountryCode;
+		data.unshift({
+			ID: "99999999-9999-9999-9999-999999999999",
+			CountryCode: countryCode,
+            TenderID: "All",
+		})
+	});
+
+	srv.after('READ', 'PT_TMDIST', data => {
+        const countryCode = data?.[0]?.CountryCode;
+		data.unshift({
+			ID: "99999999-9999-9999-9999-999999999999",
+			CountryCode: countryCode,
+            DistributorID: "",
+            DistributorName: "All",
+		})
+	});
 }

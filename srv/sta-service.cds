@@ -213,6 +213,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     entity PT_TMINST   as projection on MasterData.PT_TMINST;
+    entity PT_TMTEND as projection on TransactionalData.PT_TMTEND;
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
     entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
     entity PT_TMBDPR as projection on TransactionalData.PT_TMBDPR {
@@ -1182,4 +1183,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             offer.TenderID,
 	        CountryCurrency.Currency;
 
+    @cds.redirection.target
+    entity SalesReportInstitutesView as select from MasterData.PT_TMINST as inst {
+        *,
+        inst.InstituteTerritory.Territory,
+        inst.InstituteTerritory.IsKAM
+    }order by CountryCode, InstituteName;
 }
