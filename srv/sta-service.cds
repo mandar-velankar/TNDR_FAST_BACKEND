@@ -1138,7 +1138,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             cf.DateFrom,
             cf.DateTo,
             cd.OfferID,
-            cd.DistributorID,
+            cf.DistributorID,
             cf.DistributorName,
             cd.MainInstituteID,
             cd.MainInstituteName,
@@ -1171,8 +1171,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             cd.OfferID,
             cd.DistributorID,
             cf.DistributorName,
-            cd.MainInstituteID,
+            cf.DistributorID,
             cd.MainInstituteName,
+            cd.MainInstituteID,
             cd.External_InstituteId,
             cf.FilePeriod,
             cd.BrandId,
@@ -1193,12 +1194,60 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             inst.InstituteType,
             inst.KAM_Territory,
             offer.TenderID,
-	        CountryCurrency.Currency;
+	        CountryCurrency.Currency,
+            cd.BrandId;
 
-    @cds.redirection.target
-    entity SalesReportInstitutesView as select from MasterData.PT_TMINST as inst {
-        *,
-        inst.InstituteTerritory.Territory,
-        inst.InstituteTerritory.IsKAM
-    }order by CountryCode, InstituteName;
+    entity OverviewSectionView as select from SalesReportView as ow 
+        inner join OverviewSectionMaxMinAvg as mma
+            on ow.BrandId = mma.BrandId{
+            key ow.ID,
+            ow.TenderID,
+            ow.CountryCode,
+            ow.DistributorID,
+            ow.MainInstituteName,
+            ow.MainInstituteID,
+            ow.ProductPackID,
+            ow.InstituteType,
+            ow.KAM_Territory,
+            ow.Currency,
+            mma.BrandId,
+            mma.BrandName,
+            mma.QuantitySold,
+            mma.MinPrice,
+            mma.MaxPrice,
+            mma.TotalSales,
+            mma.AvgPrice,
+        };
+
+        entity OverviewSectionMaxMinAvg as select from SalesReportView as omma
+            INNER JOIN RankedPrices AS rp
+                ON rp.BrandId = omma.BrandId{
+            omma.BrandId,
+            omma.BrandName,
+            SUM(COALESCE(omma.QuantityMl, 0)) AS QuantitySold : Double,
+            MIN(omma.WholesalerContractPrice) AS MinPrice : Double,
+            MAX(omma.WholesalerContractPrice) AS MaxPrice : Double,
+            SUM(COALESCE(omma.NetSales, 0)) AS TotalSales : Double,
+            CASE 
+                WHEN COUNT(DISTINCT omma.WholesalerContractPrice) > 2 THEN 
+                    AVG(CASE 
+                        WHEN rp.RowNum = (rp.TotalPrices + 1) / 2 OR rp.RowNum = rp.TotalPrices / 2 THEN rp.WholesalerContractPrice
+                        ELSE NULL 
+                    END) 
+                ELSE 
+                    NULL
+            END AS AvgPrice :Double
+        }group by omma.BrandId,omma.BrandName;
+        entity PriceList as select from SalesReportView{
+            BrandId,
+            BrandName,
+            WholesalerContractPrice
+        }WHERE WholesalerContractPrice IS NOT NULL;
+        entity RankedPrices as select from PriceList{
+            BrandId,
+            BrandName,
+            WholesalerContractPrice,
+            ROW_NUMBER() OVER (PARTITION BY BrandId ORDER BY WholesalerContractPrice) AS RowNum : Integer,
+            COUNT(*) OVER (PARTITION BY BrandId) AS TotalPrices : Integer
+        }WHERE WholesalerContractPrice IS NOT NULL
 }

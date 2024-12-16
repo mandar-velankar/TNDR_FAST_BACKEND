@@ -6400,4 +6400,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             return req.reject(403, error?.message||"Error in InstitutesView");
         }
 	});
+
+	srv.after('READ', 'OverviewSectionView', data => {
+		data.unshift({
+			ID: "99999999-9999-9999-9999-999999999999",
+            BrandName: 'Brand',
+            QuantitySold: null,
+            MinPrice: null,
+            MaxPrice: null,
+            TotalSales: null,
+            AvgPrice: null,
+		})
+	});
 }
