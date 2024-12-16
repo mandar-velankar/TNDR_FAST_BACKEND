@@ -6404,7 +6404,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	srv.after('READ', 'OverviewSectionView', data => {
 		data.unshift({
 			ID: "99999999-9999-9999-9999-999999999999",
-            BrandName: 'Brand',
+            BrandName: 'BRAND',
             QuantitySold: null,
             MinPrice: null,
             MaxPrice: null,
