@@ -5210,7 +5210,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							}          
 							let usString;
 							if(typeof input === 'string'){
-								usString = Number(input.replace(/\,/g,'.')).toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+								const normalizedInput = input.replace(/,/g, '').replace(/\./, ',');
+								usString = Number(normalizedInput.replace(/\,/g, '.')).toLocaleString('nl-NL', { 
+									minimumFractionDigits: 2, 
+									maximumFractionDigits: 2 
+								});
 							} else {
 								usString = input.toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 							} 
@@ -5382,7 +5386,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let productValidation = await buildOfferProductValidation(tx, whereOffer);
 
 		let userSignatureImageBuffer = await getUserSignatureBuffer(tx, offerValidation);
-
+		let commaSeparatedBrandName = [...new Set(productValidation?.map(prd => prd.BRANDNAME))]?.join(', ');
 		//format prices
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
@@ -5467,7 +5471,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return {
 			offerValidation: offerValidation,
 			offerProductValidation: productValidation,
-			groupedOfferProductValidation: groupedOfferProductValidation
+			groupedOfferProductValidation: groupedOfferProductValidation,
+			commaSeparatedBrandName: commaSeparatedBrandName
 			// flatOfferProductValidation.reduce((group, product) => {
 			// 	const { PriceConditionClassification } = product;
 			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
