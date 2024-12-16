@@ -148,7 +148,8 @@ module.exports = async (srv) => {
 		AwardedProductFormView,
 		ZagisUploadFile,
 		ExtractNLHistoricalInformation,
-		NLExtractOffers
+		NLExtractOffers,
+		SalesReportView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -6494,7 +6495,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
 
 			//Format Percentage
-			ed.ContractBrandUsage = (ed.ContractBrandUsage || ed.ContractBrandUsage == 0) && ` ${(Number(ed.ContractBrandUsage) * 100).toFixed(2)}% `;
+			ed.ContractBrandUsage = ed.ContractBrandUsage ? ed.ContractBrandUsage : 0; 
+			ed.ContractBrandUsage = `${(Number(ed.ContractBrandUsage) * 100).toFixed(2)}%`;
 		});
 
 		return excelData
