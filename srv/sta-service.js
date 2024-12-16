@@ -6412,4 +6412,91 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             AvgPrice: null,
 		})
 	});
+
+	srv.on('READ', 'ExtractPolandSalesReport', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+		const {templateId, TenderID, CountryCode, DistributorID, BrandID, ProductPackID, KAM_Territory, InstituteType, InstituteID, DateFrom, DateTo} = req.data;
+
+		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+
+		// Getting full where query
+		const query = buildSalesReportFullWhereQuery(TenderID, CountryCode, DistributorID, BrandID, ProductPackID, KAM_Territory, InstituteType, InstituteID, DateFrom, DateTo);
+        const salesReportExtract = await tx.run(query);
+		
+		const excelData = formattedSalesReportExtract(salesReportExtract, CountryCode);
+		
+		if (!template || !template.content) {
+			return req.reject(404, 'No template found for templateid:' + templateId);
+		}
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+
+		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in ExtractClaimsSales READ');
+            return req.reject(403, error?.message||"Error in ExtractPolandSalesReport");
+        }
+        
+	});
+
+	const buildSalesReportFullWhereQuery = function (TenderID, CountryCode, DistributorID, BrandID, ProductPackID, KAM_Territory, InstituteType, InstituteID, DateFrom, DateTo) {
+		// Build full wheres
+		const tenderFullWhere = (TenderID && TenderID !== "All" && ServiceHelper.buildFullWhere('TenderID', '=', TenderID)) || [];
+		const countryCodeFullWhere = (CountryCode && ServiceHelper.buildFullWhere('CountryCode', '=', CountryCode)) || [];
+		const wholesalerFullWhere = (DistributorID && ServiceHelper.buildFullWhere('DistributorID', '=', DistributorID)) || [];
+		const brandFullWhere = BrandID && BrandID !== "All_Brands" ? ServiceHelper.buildFullWhere('BrandId', '=', BrandID) : [];
+      	const productFullWhere = (ProductPackID && ProductPackID !== "All_Products" && ServiceHelper.buildFullWhere('ProductPackID', '=', ProductPackID)) || [];
+      	const kamTerritoryFullWhere = (KAM_Territory && KAM_Territory !== "All" && ServiceHelper.buildFullWhere('KAM_Territory', '=', ProductPackID)) || [];
+      	const instituteTypeFullWhere = (InstituteType && InstituteType !== "All" && ServiceHelper.buildFullWhere('InstituteType', '=', InstituteType)) || [];
+      	const instituteFullWhere = (InstituteID && InstituteID !== "All" && ServiceHelper.buildFullWhere('MainInstituteID', '=', InstituteID)) || [];
+		const dateFromFullWhere =  (DateTo && ServiceHelper.buildFullWhere('DateFrom', '<=', DateTo)) || [];
+		const dateToFullWhere =  (DateFrom && ServiceHelper.buildFullWhere('DateTo', '>=', DateFrom)) || [];
+
+		// return fullwhere query
+		return SELECT.from(SalesReportView)
+				.where(tenderFullWhere)
+				.where(countryCodeFullWhere)
+				.where(wholesalerFullWhere)
+				.where(brandFullWhere)
+				.where(productFullWhere)
+				.where(kamTerritoryFullWhere)
+				.where(instituteTypeFullWhere)
+				.where(instituteFullWhere)
+				.where(dateFromFullWhere)
+				.where(dateToFullWhere)
+	};
+
+	const formattedSalesReportExtract = function (excelData, CountryCode) {
+		// Node JS version 18.18 doesn't support currency formatting with locale pl-PL
+		const countryCodeLocals = {
+			'PL': 'en-US'
+		}
+	
+		excelData.forEach(ed => {
+			// Format Quantities
+			ed.Quantity = formatPolandQuantity(ed.Quantity, CountryCode);
+			ed.QuantityML = formatPolandQuantity(ed.QuantityML, CountryCode);
+			ed.RequestedVolume = formatPolandQuantity(ed.RequestedVolume, CountryCode);
+			ed.BrandUsedVolume = formatPolandQuantity(ed.BrandUsedVolume, CountryCode);
+			ed.BrandContractVolume = formatPolandQuantity(ed.BrandContractVolume, CountryCode);
+
+			// Format Prices
+			ed.WholesalerPurchasePrice = formatPolandPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerContractPrice = formatPolandPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerPurchasedAmount = formatPolandPrices(ed.WholesalerPurchasedAmount, countryCodeLocals[CountryCode], CountryCode);
+			ed.NetSales = formatPolandPrices(ed.NetSales, countryCodeLocals[CountryCode], CountryCode);
+			
+			// Format Date
+			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
+
+			//Format Percentage
+			ed.ContractBrandUsage = (ed.ContractBrandUsage || ed.ContractBrandUsage == 0) && ` ${(Number(ed.ContractBrandUsage) * 100).toFixed(2)}% `;
+		});
+
+		return excelData
+	}
 }

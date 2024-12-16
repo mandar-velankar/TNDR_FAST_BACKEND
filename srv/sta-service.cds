@@ -1258,4 +1258,20 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             inst.InstituteTerritory.Territory,
             inst.InstituteTerritory.IsKAM
         }order by CountryCode, InstituteName;
+
+    entity ExtractPolandSalesReport {
+        key templateId    : String;
+        key TenderID      : String;
+        key CountryCode   : String;
+        key DistributorID : String;
+        key BrandID       : String;
+        key ProductPackID : String;
+        key KAM_Territory : String;
+        key InstituteType : String;
+        key InstituteID   : String;
+        key DateFrom      : String;
+        key DateTo        : String;
+            content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType     : String      @Core.IsMediaType;
+    }
 }
