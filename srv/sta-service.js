@@ -6396,8 +6396,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 		}
 		catch(error){
-            console.error('Error in InstitutesView READ');
-            return req.reject(403, error?.message||"Error in InstitutesView");
+            console.error('Error in SalesReportInstitutesView READ');
+            return req.reject(403, error?.message||"Error in SalesReportInstitutesView");
         }
 	});
 

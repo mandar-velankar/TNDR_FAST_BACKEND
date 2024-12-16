@@ -1243,11 +1243,19 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             BrandName,
             WholesalerContractPrice
         }WHERE WholesalerContractPrice IS NOT NULL;
+
         entity RankedPrices as select from PriceList{
             BrandId,
             BrandName,
             WholesalerContractPrice,
             ROW_NUMBER() OVER (PARTITION BY BrandId ORDER BY WholesalerContractPrice) AS RowNum : Integer,
             COUNT(*) OVER (PARTITION BY BrandId) AS TotalPrices : Integer
-        }WHERE WholesalerContractPrice IS NOT NULL
+        }WHERE WholesalerContractPrice IS NOT NULL;
+
+           @cds.redirection.target
+        entity SalesReportInstitutesView as select from MasterData.PT_TMINST as inst {
+            *,
+            inst.InstituteTerritory.Territory,
+            inst.InstituteTerritory.IsKAM
+        }order by CountryCode, InstituteName;
 }
