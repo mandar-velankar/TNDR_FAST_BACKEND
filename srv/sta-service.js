@@ -6346,7 +6346,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	srv.on('READ', 'SalesReportInstitutesView', async (req, next) => {
 		try{
-			//const result = await next(); // Allow the original query to run
 			const tx = cds.tx(req);
 			let result = [];
 			let ivQuery = SELECT.from(req.query.SELECT.from);
@@ -6358,11 +6357,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 			result = await tx.run(ivQuery);
 
-			// Check if the result contains $count
 			const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
 		
 			if (isCountQuery) {
-			// If $count is present, return the original result
 			return result;
 			}
 			
@@ -6370,7 +6367,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		
 			if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
-			// If no user territories found, return all items
 			return result;
 			}
 
@@ -6389,10 +6385,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			});
 				
 			if (finalFilteredResults.length > 0) {
-				// Return the final filtered results
 				return finalFilteredResults;
 			}else{
-				// If no territory matches, return an empty array
 				return territoryMatches;
 			}
 		}
@@ -6402,17 +6396,102 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         }
 	});
 
-	srv.after('READ', 'OverviewSectionView', data => {
-		data.unshift({
-			ID: "99999999-9999-9999-9999-999999999999",
-            BrandName: 'BRAND',
-            QuantitySold: null,
-            MinPrice: null,
-            MaxPrice: null,
-            TotalSales: null,
-            AvgPrice: null,
-		})
+	srv.on('READ', 'OverviewSectionView', async (req) => {
+		try {
+			const uniqueBrands = [];
+			const brandNames = new Set();
+	
+			const brandData = {};
+			const tx = cds.tx(req);
+	
+			let result = [];
+			let tmvQuery = SELECT.from(req.query.SELECT.from);
+			if (req.query.SELECT.columns?.[0]?.func !== "count") {
+				tmvQuery.columns(req.query.SELECT.columns);
+			}
+	
+			req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+			req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+	
+			result = await tx.run(tmvQuery);
+	
+			const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+	
+			if (isCountQuery) {
+				return result;
+			}
+	
+			result.forEach(item => {
+				if (!brandNames.has(item.BrandName)) {
+					brandNames.add(item.BrandName);
+					uniqueBrands.push(item);
+				}
+	
+				if (!brandData[item.BrandName]) {
+					brandData[item.BrandName] = {
+						prices: [],
+						totalQuantitySold: 0,
+						totalSales: 0
+					};
+				}
+	
+				if (item.MinPrice !== null && item.MaxPrice !== null) {
+					brandData[item.BrandName].prices.push(item.AvgPrice);
+				}
+	
+				if (item.QuantitySold !== null) {
+					brandData[item.BrandName].totalQuantitySold += item.QuantitySold;
+				}
+				if (item.TotalSales !== null) {
+					brandData[item.BrandName].totalSales += item.TotalSales;
+				}
+			});
+	
+			const calculateRealAverage = (values) => {
+				if (!values.length) return null;
+				const sorted = values.slice().sort((a, b) => a - b);
+				const mid = Math.floor(sorted.length / 2);
+				return sorted[mid];
+			};
+	
+			uniqueBrands.forEach(brand => {
+				const brandInfo = brandData[brand.BrandName];
+	
+				let minPrice = brandInfo.prices.length > 0 ? Math.min(...brandInfo.prices) : 0;
+				let maxPrice = brandInfo.prices.length > 0 ? Math.max(...brandInfo.prices) : 0;
+				let avgPrice = brandInfo.prices.length > 2 ? calculateRealAverage(brandInfo.prices) : 0;
+	
+				brand.MinPrice = minPrice;
+				brand.MaxPrice = maxPrice;
+				brand.AvgPrice = avgPrice;
+	
+				brand.TotalSales = brandInfo.totalSales || 0;
+				brand.QuantitySold = brandInfo.totalQuantitySold || 0;
+			});
+	
+			uniqueBrands.unshift({
+				ID: "99999999-9999-9999-9999-999999999999",
+				BrandName: 'BRAND',
+				QuantitySold: null,
+				MinPrice: null,
+				MaxPrice: null,
+				TotalSales: null,
+				AvgPrice: null,
+			});
+	
+			result.length = 0;
+			result.push(...uniqueBrands);
+	
+			return result;
+		} catch (error) {
+			console.error('Error in OverviewSectionView READ');
+			return req.reject(403, error?.message || "Error in OverviewSectionView");
+		}
 	});
+	
+	
+	
+	
 
 	srv.on('READ', 'ExtractPolandSalesReport', async (req, next) => {
 		try{

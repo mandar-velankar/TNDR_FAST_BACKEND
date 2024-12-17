@@ -1197,9 +1197,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 	        CountryCurrency.Currency,
             cd.BrandId;
 
-    entity OverviewSectionView as select from SalesReportView as ow 
-        inner join OverviewSectionMaxMinAvg as mma
-            on ow.BrandId = mma.BrandId{
+    entity OverviewSectionView as select from SalesReportView as ow{
             key ow.ID,
             ow.TenderID,
             ow.CountryCode,
@@ -1210,48 +1208,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             ow.InstituteType,
             ow.KAM_Territory,
             ow.Currency,
-            mma.BrandId,
-            mma.BrandName,
-            mma.QuantitySold,
-            mma.MinPrice,
-            mma.MaxPrice,
-            mma.TotalSales,
-            mma.AvgPrice,
-        };
-
-        entity OverviewSectionMaxMinAvg as select from SalesReportView as omma
-            INNER JOIN RankedPrices AS rp
-                ON rp.BrandId = omma.BrandId{
-            omma.BrandId,
-            omma.BrandName,
-            SUM(COALESCE(omma.QuantityMl, 0)) AS QuantitySold : Double,
-            MIN(omma.WholesalerContractPrice) AS MinPrice : Double,
-            MAX(omma.WholesalerContractPrice) AS MaxPrice : Double,
-            SUM(COALESCE(omma.NetSales, 0)) AS TotalSales : Double,
-            CASE 
-                WHEN COUNT(DISTINCT omma.WholesalerContractPrice) > 2 THEN 
-                    AVG(CASE 
-                        WHEN rp.RowNum = (rp.TotalPrices + 1) / 2 OR rp.RowNum = rp.TotalPrices / 2 THEN rp.WholesalerContractPrice
-                        ELSE NULL 
-                    END) 
-                ELSE 
-                    NULL
-            END AS AvgPrice :Double
-        }group by omma.BrandId,omma.BrandName;
-        entity PriceList as select from SalesReportView{
-            BrandId,
-            BrandName,
-            WholesalerContractPrice
-        }WHERE WholesalerContractPrice IS NOT NULL;
-
-        entity RankedPrices as select from PriceList{
-            BrandId,
-            BrandName,
-            WholesalerContractPrice,
-            ROW_NUMBER() OVER (PARTITION BY BrandId ORDER BY WholesalerContractPrice) AS RowNum : Integer,
-            COUNT(*) OVER (PARTITION BY BrandId) AS TotalPrices : Integer
-        }WHERE WholesalerContractPrice IS NOT NULL;
-
+            ow.QuantityMl AS QuantitySold : Double,
+            ow.NetSales AS TotalSales : Double,
+            ow.WholesalerContractPrice AS MinPrice : Double,
+            ow.WholesalerContractPrice AS MaxPrice : Double,
+            ow.WholesalerContractPrice AS AvgPrice : Double,
+            ow.BrandId,
+            ow.BrandName,
+        } where ow.BrandName IS NOT NULL;
            @cds.redirection.target
         entity SalesReportInstitutesView as select from MasterData.PT_TMINST as inst {
             *,
