@@ -585,6 +585,7 @@ entity PriceConditionClassification: cuid {
     CountryCode     : String;
     ConditionType   : String;
     Classification  : String;
+    InstituteType   : String;
     Division        : String;
     ProductType     : String;
     isMain          : Boolean;
