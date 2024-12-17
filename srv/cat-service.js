@@ -3919,7 +3919,6 @@ module.exports = (srv) => {
 		try {
 			const { data: {tenderId, offerID, CountryCode} } = req;
 			const tx = cds.tx(req);
-			const mailTemplate = await getMailTemplate('THNotificationMailTemplate');
 			const checkOfferForBrand = await tx.run(SELECT.from(BrandsInTender).where({ OfferID: offerID }));
 			const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: tenderId }))
 			let recipient;
