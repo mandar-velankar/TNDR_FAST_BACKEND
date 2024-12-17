@@ -1237,5 +1237,43 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key DateTo        : String;
             content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType     : String      @Core.IsMediaType;
-    }
+    };
+
+    entity SalesReportTenderView as Select from TransactionalData.PT_TMTEND as tender
+        inner join MasterData.PT_TMINST as inst 
+            on inst.InstituteID = tender.InstituteID 
+            and inst.CountryCode = tender.CountryCode
+        inner join TransactionalData.PT_TMOFRS as offer 
+            on offer.TenderID = tender.TenderID 
+            and offer.CountryCode = tender.CountryCode 
+            and offer.Active = 1
+            and offer.ActiveOffer = 1
+        inner join ClaimsData.ClaimData as cd 
+            on cd.OfferID = offer.OfferID 
+            and cd.CountryCode = tender.CountryCode{
+        tender.createdBy,
+        tender.modifiedBy,
+        tender.TenderID,
+        cd.OfferID,
+        tender.CountryCode,
+        tender.SubmittedBy,
+        tender.Active,
+        tender.InstituteID,
+        inst.InstituteType,
+        cd.ProductPackID,
+        cd.BrandId
+    }    
+    where tender.CountryCode = 'PL' and tender.Active = 1
+    group by 
+        tender.createdBy,
+        tender.modifiedBy,
+        tender.TenderID,
+        cd.OfferID,
+        tender.CountryCode,
+        tender.SubmittedBy,
+        tender.Active,
+        tender.InstituteID,
+        inst.InstituteType,
+        cd.ProductPackID,
+        cd.BrandId;
 }

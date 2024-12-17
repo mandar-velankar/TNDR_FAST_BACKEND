@@ -6325,15 +6325,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return formattedValue.replace(/,/g, ' ');
 	}
 
-	srv.after('READ', 'PT_TMTEND', data => {
-        const countryCode = data?.[0]?.CountryCode;
-		data.unshift({
-			ID: "99999999-9999-9999-9999-999999999999",
-			CountryCode: countryCode,
-            TenderID: "All",
-		})
-	});
-
 	srv.after('READ', 'PT_TMDIST', data => {
         const countryCode = data?.[0]?.CountryCode;
 		data.unshift({
