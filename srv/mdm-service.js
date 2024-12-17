@@ -893,7 +893,9 @@ module.exports = (srv) => {
 
 			// Formatting
 			excelData.forEach(ed => {
-				ed.PPP = ServiceHelper.formatCurrency(ed.PPP, 'nl-NL', 2, 2, true);
+				ed.PPP = formatNLPPPPrices(ed.PPP);
+				ed.StartDate = ed.StartDate && ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY');
+				ed.EndDate = ed.EndDate && ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY');
 			});
 
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content, { excelData }, 1);
@@ -907,6 +909,14 @@ module.exports = (srv) => {
             return req.reject(403, error?.message||"Error in NLExcelTemplates");
         }
 	});
+
+	const formatNLPPPPrices = function (value) {
+        if (!value){
+            value = 0;
+        };
+        const formattedValue = ServiceHelper.formatCurrency(Number(value), 'en-US', 2, 2);
+        return formattedValue.replace(/,/g, '.').replace(/\.(?=\d{2}$)/, ',');
+    };
 
 	srv.on('READ', 'NLDAExcelTemplates', async (req, next) => {
 		try{
