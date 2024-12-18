@@ -3915,12 +3915,13 @@ module.exports = (srv) => {
         }
     });
 
-	srv.on('sendTHNotificationMailTemplate', async (req) => {
+	srv.on('getTHNotificationMailTemplate', async (req) => {
 		try {
-			const { data: {tenderId, offerID, CountryCode} } = req;
+			const { data: {tenderId, offerID, CountryCode, templateId} } = req;
 			const tx = cds.tx(req);
 			const checkOfferForBrand = await tx.run(SELECT.from(BrandsInTender).where({ OfferID: offerID }));
 			const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: tenderId }))
+			const mailTemplate = await getMailTemplate(templateId);
 			let recipient;
 			let brandNames = checkOfferForBrand.map(el => el.BRANDNAME.toLowerCase())
 			if (brandNames.includes('xofigo')) {
@@ -3932,9 +3933,7 @@ module.exports = (srv) => {
 			} else {
 				recipient = "nutthawuth.nainanont@globalmedicalsolutions.com"
 			}
-			const THNotificationData = mappedTHNotificationData(mailTemplate, req, recipient);
-			await INSERT.into(OutgoingMails).entries(THNotificationData);
-			return "Notification mail sent successfully";
+			return  mappedTHNotificationData(mailTemplate, req, recipient);
 		}catch (error) {
 				console.error('Error in sendTHNotificationMailTemplate');
 				return req.reject(400, error.message || 'An unexpected error occurred.');
@@ -3942,26 +3941,19 @@ module.exports = (srv) => {
 
 	});
 	function mappedTHNotificationData (mailTemplate, req, recipient){
-		return {
+		const data = {
 			CountryCode: 'TH',
-			TenderID: req.tenderId,
-			OfferID: req.offerID,
+			Reference: req.tenderId,
+			CustomerID: req.offerID,
+			CustomerName: req.offerID,
 			Sender: 'FAST-Admin@bayer.com',
 			Recipients:  recipient,
 			Subject: `New TH Tender Created for`,
-			MailBody: generateMailBody(mailTemplate, {
-				data: { 
-					content:{
-						UserName: 'Test',
-						CountryName: 'Test',
-						Offer: 'Test',
-						DirectURLToOffer: 'Test',
-						TenderCreator: 'Test',
-					}
-				}
-			}),
-			Sent: false,
 		}
+		
+        return generateMailBody(mailTemplate, {
+			data
+		})
 	}
     const getMailTemplate = async function (templateId) {
         try{
