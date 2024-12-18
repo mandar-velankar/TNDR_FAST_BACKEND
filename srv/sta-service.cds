@@ -14,6 +14,9 @@ using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {com.bayer.SXTENDER.ExternalDataViews} from '../db/ExternalDataViews';
 using {UITemplates as UITemplateSrv} from './external/UITemplates';
+using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
+using { com.bayer.SXTENDER.ClaimsViews } from '../db/ClaimsViews';
+
 
 using {
     User,
@@ -210,6 +213,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     entity PT_TMINST   as projection on MasterData.PT_TMINST;
+    entity PT_TMTEND as projection on TransactionalData.PT_TMTEND;
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
     entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
     entity PT_TMBDPR as projection on TransactionalData.PT_TMBDPR {
@@ -1119,4 +1123,157 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             Countries.CountryCode
     } where Countries.CountryCode = 'PL' and Role = 'KAM';
     
+    entity SalesReportView as select from ClaimsData.ClaimFiles as cf 
+        left join ClaimsData.ClaimData as cd         
+            on cd.ClaimFiles.ID = cf.ID
+        left join MasterData.PT_TMINST as inst 
+            on inst.InstituteID = cd.MainInstituteID 
+            and inst.CountryCode = cd.CountryCode
+        left join TransactionalData.PT_TMOFRS as offer
+            on cd.OfferID = offer.OfferID
+        left join ClaimsViews.CountryCurrencyView as CountryCurrency
+            on cf.CountryCode = CountryCurrency.CountryCode
+        {
+            key cd.ID,
+            cf.DateFrom,
+            cf.DateTo,
+            cd.OfferID,
+            cf.DistributorID,
+            cf.DistributorName,
+            cd.MainInstituteID,
+            cd.MainInstituteName,
+            cd.External_InstituteId,
+            cf.FilePeriod,
+            cd.BrandId,
+            cd.BrandName,
+            cd.ProductPackID,
+            cd.PRODUCTPACKNAME,
+            cd.EANNumber,
+            cd.Quantity,
+            cd.Quantity * cd.SKU.CONCENTRATION as QuantityMl: Double,
+            cd.WholesalerPurchasePrice,
+            cd.WholesalerContractPrice,
+            cf.WholesalerPurchaseAmount,
+            cf.NetSales,
+            cd.Product.RequestedVolume,
+            cd.BrandContractVolume,
+            cd.BrandUsedVolume,
+            cf.CountryCode,
+            inst.InstituteType,
+            inst.KAM_Territory,
+            offer.TenderID,
+	        CountryCurrency.Currency,
+        } where cf.CountryCode = 'PL'
+        group by 
+            cd.ID,
+            cf.DateFrom,
+            cf.DateTo,
+            cd.OfferID,
+            cd.DistributorID,
+            cf.DistributorName,
+            cf.DistributorID,
+            cd.MainInstituteName,
+            cd.MainInstituteID,
+            cd.External_InstituteId,
+            cf.FilePeriod,
+            cd.BrandId,
+            cd.BrandName,
+            cd.ProductPackID,
+            cd.PRODUCTPACKNAME,
+            cd.EANNumber,
+            cd.Quantity,
+            cd.SKU.CONCENTRATION,
+            cd.WholesalerPurchasePrice,
+            cd.WholesalerContractPrice,
+            cf.WholesalerPurchaseAmount, 
+            cf.NetSales,
+            cd.Product.RequestedVolume,
+            cd.BrandContractVolume,
+            cd.BrandUsedVolume,
+            cf.CountryCode,
+            inst.InstituteType,
+            inst.KAM_Territory,
+            offer.TenderID,
+	        CountryCurrency.Currency,
+            cd.BrandId;
+
+    entity OverviewSectionView as select from SalesReportView as ow{
+            key ow.ID,
+            ow.TenderID,
+            ow.CountryCode,
+            ow.DistributorID,
+            ow.MainInstituteName,
+            ow.MainInstituteID,
+            ow.ProductPackID,
+            ow.InstituteType,
+            ow.KAM_Territory,
+            ow.Currency,
+            ow.QuantityMl AS QuantitySold : Double,
+            ow.NetSales AS TotalSales : Double,
+            ow.WholesalerContractPrice AS MinPrice : Double,
+            ow.WholesalerContractPrice AS MaxPrice : Double,
+            ow.WholesalerContractPrice AS AvgPrice : Double,
+            ow.BrandId,
+            ow.BrandName,
+        } where ow.BrandName IS NOT NULL;
+           @cds.redirection.target
+        entity SalesReportInstitutesView as select from MasterData.PT_TMINST as inst {
+            *,
+            inst.InstituteTerritory.Territory,
+            inst.InstituteTerritory.IsKAM
+        }order by CountryCode, InstituteName;
+
+    entity ExtractPolandSalesReport {
+        key templateId    : String;
+        key TenderID      : String;
+        key CountryCode   : String;
+        key DistributorID : String;
+        key BrandID       : String;
+        key ProductPackID : String;
+        key KAM_Territory : String;
+        key InstituteType : String;
+        key InstituteID   : String;
+        key DateFrom      : String;
+        key DateTo        : String;
+            content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType     : String      @Core.IsMediaType;
+    };
+
+    entity SalesReportTenderView as Select from TransactionalData.PT_TMTEND as tender
+        inner join MasterData.PT_TMINST as inst 
+            on inst.InstituteID = tender.InstituteID 
+            and inst.CountryCode = tender.CountryCode
+        inner join TransactionalData.PT_TMOFRS as offer 
+            on offer.TenderID = tender.TenderID 
+            and offer.CountryCode = tender.CountryCode 
+            and offer.Active = 1
+            and offer.ActiveOffer = 1
+        inner join ClaimsData.ClaimData as cd 
+            on cd.OfferID = offer.OfferID 
+            and cd.CountryCode = tender.CountryCode{
+        tender.createdBy,
+        tender.modifiedBy,
+        tender.TenderID,
+        cd.OfferID,
+        tender.CountryCode,
+        tender.SubmittedBy,
+        tender.Active,
+        tender.InstituteID,
+        inst.InstituteType,
+        cd.ProductPackID,
+        cd.BrandId
+    }    
+    where tender.CountryCode = 'PL' and tender.Active = 1
+    group by 
+        tender.createdBy,
+        tender.modifiedBy,
+        tender.TenderID,
+        cd.OfferID,
+        tender.CountryCode,
+        tender.SubmittedBy,
+        tender.Active,
+        tender.InstituteID,
+        inst.InstituteType,
+        cd.ProductPackID,
+        cd.BrandId;
 }

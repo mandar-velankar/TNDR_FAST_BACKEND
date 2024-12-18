@@ -71,6 +71,10 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         inner join TransactionalData.PT_TMOFPR as product 
             on product.OfferID = offer.OfferID
             and product.Active = 1 
+        inner join TransactionalData.ContractInfomation as contract
+            on contract.OfferID = offer.OfferID
+            and contract.ProductCode = product.ProductCode
+            and contract.Active = true
         inner join MasterData.PT_TMINST as institute 
             on tender.InstituteID = institute.InstituteID{
     	tender.TenderID,
@@ -80,6 +84,8 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         tender.CountryCode,
         product.RequestedVolume,
         product.Results.Outcome,
+        contract.ContractStartDate,
+        contract.ContractEndDate,
         offer.Quotation.EffectiveDate,
         offer.Quotation.ExpiryDate,
         product.Price.OfferPrice,
@@ -97,6 +103,8 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.RequestedVolume,
         tender.CountryCode,
         product.Results.Outcome,
+        contract.ContractStartDate,
+        contract.ContractEndDate,
         offer.Quotation.EffectiveDate,
         offer.Quotation.ExpiryDate,
         product.Price.OfferPrice,

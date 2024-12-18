@@ -165,8 +165,8 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const childInstituteName = childInstituteData && childInstituteData.InstituteName || null;
 			const filteredItems = fastOfferData.filter(item => item.InstituteID == instituteId &&
 																item.ProductCode === productCode &&
-																item.EffectiveDate <= this.excelDateToJSDate(curr.DATASPRZEDAŻY) &&
-																item.ExpiryDate >= this.excelDateToJSDate(curr.DATASPRZEDAŻY));
+																item.ContractStartDate <= this.excelDateToJSDate(curr.DATASPRZEDAŻY) &&
+																item.ContractEndDate >= this.excelDateToJSDate(curr.DATASPRZEDAŻY));
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
 			const fastContractClaim = fastOffer && (fastOffer.RequestedVolume * (fastOffer.RegPrice - fastOffer.OfferPrice)) || 0;
 			prev.push(

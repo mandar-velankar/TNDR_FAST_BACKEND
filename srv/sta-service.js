@@ -148,7 +148,8 @@ module.exports = async (srv) => {
 		AwardedProductFormView,
 		ZagisUploadFile,
 		ExtractNLHistoricalInformation,
-		NLExtractOffers
+		NLExtractOffers,
+		SalesReportView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -6322,5 +6323,252 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         };
 		const formattedValue = ServiceHelper.formatNumber(Number(value), 0, 0);
 		return formattedValue.replace(/,/g, ' ');
+	}
+
+	srv.after('READ', 'PT_TMDIST', data => {
+        const countryCode = data?.[0]?.CountryCode;
+		data.unshift({
+			ID: "99999999-9999-9999-9999-999999999999",
+			CountryCode: countryCode,
+            DistributorID: "",
+            DistributorName: "All",
+		})
+	});
+
+	srv.on('READ', 'SalesReportInstitutesView', async (req, next) => {
+		try{
+			const tx = cds.tx(req);
+			let result = [];
+			let ivQuery = SELECT.from(req.query.SELECT.from);
+			if (req.query.SELECT.columns?.[0]?.func !== "count") {
+				ivQuery.columns(req.query.SELECT.columns);
+			}
+			req.query.SELECT.where && (ivQuery.where(req.query.SELECT.where));
+			req.query.SELECT.orderBy && (ivQuery.orderBy(req.query.SELECT.orderBy));
+
+			result = await tx.run(ivQuery);
+
+			const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+		
+			if (isCountQuery) {
+			return result;
+			}
+			
+			const cwid = req.user.id;
+			const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
+		
+			if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
+			return result;
+			}
+
+			const resultsArray = Array.isArray(result) ? result : [result];
+		
+			const territoryMatches = resultsArray.filter(item => {
+				return userTerritories.some(userTerritory => {
+					return item.Territory === userTerritory.Territory;
+				});
+			});
+			
+			const finalFilteredResults = territoryMatches.filter(item => {
+				return userTerritories.some(userTerritory => {
+					return (item.Territory === userTerritory.Territory && item.IsKAM === userTerritory.IsKAM);
+				});
+			});
+				
+			if (finalFilteredResults.length > 0) {
+				return finalFilteredResults;
+			}else{
+				return territoryMatches;
+			}
+		}
+		catch(error){
+            console.error('Error in SalesReportInstitutesView READ');
+            return req.reject(403, error?.message||"Error in SalesReportInstitutesView");
+        }
+	});
+
+	srv.on('READ', 'OverviewSectionView', async (req) => {
+		try {
+			const uniqueBrands = [];
+			const brandNames = new Set();
+	
+			const brandData = {};
+			const tx = cds.tx(req);
+	
+			let result = [];
+			let tmvQuery = SELECT.from(req.query.SELECT.from);
+			if (req.query.SELECT.columns?.[0]?.func !== "count") {
+				tmvQuery.columns(req.query.SELECT.columns);
+			}
+	
+			req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+			req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+	
+			result = await tx.run(tmvQuery);
+	
+			const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
+	
+			if (isCountQuery) {
+				return result;
+			}
+	
+			result.forEach(item => {
+				if (!brandNames.has(item.BrandName)) {
+					brandNames.add(item.BrandName);
+					uniqueBrands.push(item);
+				}
+	
+				if (!brandData[item.BrandName]) {
+					brandData[item.BrandName] = {
+						prices: [],
+						totalQuantitySold: 0,
+						totalSales: 0
+					};
+				}
+	
+				if (item.MinPrice !== null && item.MaxPrice !== null) {
+					brandData[item.BrandName].prices.push(item.AvgPrice);
+				}
+	
+				if (item.QuantitySold !== null) {
+					brandData[item.BrandName].totalQuantitySold += item.QuantitySold;
+				}
+				if (item.TotalSales !== null) {
+					brandData[item.BrandName].totalSales += item.TotalSales;
+				}
+			});
+	
+			const calculateRealAverage = (values) => {
+				if (!values.length) return null;
+				const sorted = values.slice().sort((a, b) => a - b);
+				const mid = Math.floor(sorted.length / 2);
+				return sorted[mid];
+			};
+	
+			uniqueBrands.forEach(brand => {
+				const brandInfo = brandData[brand.BrandName];
+	
+				let minPrice = brandInfo.prices.length > 0 ? Math.min(...brandInfo.prices) : 0;
+				let maxPrice = brandInfo.prices.length > 0 ? Math.max(...brandInfo.prices) : 0;
+				let avgPrice = brandInfo.prices.length > 2 ? calculateRealAverage(brandInfo.prices) : 0;
+	
+				brand.MinPrice = minPrice;
+				brand.MaxPrice = maxPrice;
+				brand.AvgPrice = avgPrice;
+	
+				brand.TotalSales = brandInfo.totalSales || 0;
+				brand.QuantitySold = brandInfo.totalQuantitySold || 0;
+			});
+	
+			uniqueBrands.unshift({
+				ID: "99999999-9999-9999-9999-999999999999",
+				BrandName: 'BRAND',
+				QuantitySold: null,
+				MinPrice: null,
+				MaxPrice: null,
+				TotalSales: null,
+				AvgPrice: null,
+			});
+	
+			result.length = 0;
+			result.push(...uniqueBrands);
+	
+			return result;
+		} catch (error) {
+			console.error('Error in OverviewSectionView READ');
+			return req.reject(403, error?.message || "Error in OverviewSectionView");
+		}
+	});
+	
+	
+	
+	
+
+	srv.on('READ', 'ExtractPolandSalesReport', async (req, next) => {
+		try{
+		const tx = cds.tx(req);
+		const {templateId, TenderID, CountryCode, DistributorID, BrandID, ProductPackID, KAM_Territory, InstituteType, InstituteID, DateFrom, DateTo} = req.data;
+
+		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+
+		// Getting full where query
+		const query = buildSalesReportFullWhereQuery(TenderID, CountryCode, DistributorID, BrandID, ProductPackID, KAM_Territory, InstituteType, InstituteID, DateFrom, DateTo);
+        const salesReportExtract = await tx.run(query);
+		
+		const excelData = formattedSalesReportExtract(salesReportExtract, CountryCode);
+		
+		if (!template || !template.content) {
+			return req.reject(404, 'No template found for templateid:' + templateId);
+		}
+
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+
+		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
+		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		return excelStreamValue;
+		}
+		catch(error){
+            console.error('Error in ExtractClaimsSales READ');
+            return req.reject(403, error?.message||"Error in ExtractPolandSalesReport");
+        }
+        
+	});
+
+	const buildSalesReportFullWhereQuery = function (TenderID, CountryCode, DistributorID, BrandID, ProductPackID, KAM_Territory, InstituteType, InstituteID, DateFrom, DateTo) {
+		// Build full wheres
+		const tenderFullWhere = (TenderID && TenderID !== "All" && ServiceHelper.buildFullWhere('TenderID', '=', TenderID)) || [];
+		const countryCodeFullWhere = (CountryCode && ServiceHelper.buildFullWhere('CountryCode', '=', CountryCode)) || [];
+		const wholesalerFullWhere = (DistributorID && ServiceHelper.buildFullWhere('DistributorID', '=', DistributorID)) || [];
+		const brandFullWhere = BrandID && BrandID !== "All_Brands" ? ServiceHelper.buildFullWhere('BrandId', '=', BrandID) : [];
+      	const productFullWhere = (ProductPackID && ProductPackID !== "All_Products" && ServiceHelper.buildFullWhere('ProductPackID', '=', ProductPackID)) || [];
+      	const kamTerritoryFullWhere = (KAM_Territory && KAM_Territory !== "All" && ServiceHelper.buildFullWhere('KAM_Territory', '=', ProductPackID)) || [];
+      	const instituteTypeFullWhere = (InstituteType && InstituteType !== "All" && ServiceHelper.buildFullWhere('InstituteType', '=', InstituteType)) || [];
+      	const instituteFullWhere = (InstituteID && InstituteID !== "All" && ServiceHelper.buildFullWhere('MainInstituteID', '=', InstituteID)) || [];
+		const dateFromFullWhere =  (DateTo && ServiceHelper.buildFullWhere('DateFrom', '<=', DateTo)) || [];
+		const dateToFullWhere =  (DateFrom && ServiceHelper.buildFullWhere('DateTo', '>=', DateFrom)) || [];
+
+		// return fullwhere query
+		return SELECT.from(SalesReportView)
+				.where(tenderFullWhere)
+				.where(countryCodeFullWhere)
+				.where(wholesalerFullWhere)
+				.where(brandFullWhere)
+				.where(productFullWhere)
+				.where(kamTerritoryFullWhere)
+				.where(instituteTypeFullWhere)
+				.where(instituteFullWhere)
+				.where(dateFromFullWhere)
+				.where(dateToFullWhere)
+	};
+
+	const formattedSalesReportExtract = function (excelData, CountryCode) {
+		// Node JS version 18.18 doesn't support currency formatting with locale pl-PL
+		const countryCodeLocals = {
+			'PL': 'en-US'
+		}
+	
+		excelData.forEach(ed => {
+			// Format Quantities
+			ed.Quantity = formatPolandQuantity(ed.Quantity, CountryCode);
+			ed.QuantityML = formatPolandQuantity(ed.QuantityML, CountryCode);
+			ed.RequestedVolume = formatPolandQuantity(ed.RequestedVolume, CountryCode);
+			ed.BrandUsedVolume = formatPolandQuantity(ed.BrandUsedVolume, CountryCode);
+			ed.BrandContractVolume = formatPolandQuantity(ed.BrandContractVolume, CountryCode);
+
+			// Format Prices
+			ed.WholesalerPurchasePrice = formatPolandPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerContractPrice = formatPolandPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.WholesalerPurchasedAmount = formatPolandPrices(ed.WholesalerPurchasedAmount, countryCodeLocals[CountryCode], CountryCode);
+			ed.NetSales = formatPolandPrices(ed.NetSales, countryCodeLocals[CountryCode], CountryCode);
+			
+			// Format Date
+			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
+
+			//Format Percentage
+			ed.ContractBrandUsage = ed.ContractBrandUsage ? ed.ContractBrandUsage : 0; 
+			ed.ContractBrandUsage = `${(Number(ed.ContractBrandUsage) * 100).toFixed(2)}%`;
+		});
+
+		return excelData
 	}
 }
