@@ -6460,16 +6460,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				brand.QuantitySold = brandInfo.totalQuantitySold || 0;
 			});
 	
-			uniqueBrands.unshift({
-				ID: "99999999-9999-9999-9999-999999999999",
-				BrandName: 'BRAND',
-				QuantitySold: null,
-				MinPrice: null,
-				MaxPrice: null,
-				TotalSales: null,
-				AvgPrice: null,
-			});
-	
 			result.length = 0;
 			result.push(...uniqueBrands);
 	
