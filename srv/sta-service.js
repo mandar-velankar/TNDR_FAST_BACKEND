@@ -6440,9 +6440,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 			const calculateRealAverage = (values) => {
 				if (!values.length) return null;
-				const sorted = values.slice().sort((a, b) => a - b);
-				const mid = Math.floor(sorted.length / 2);
-				return sorted[mid];
+				const sumPrice = values.reduce((accumulator, currentValue) => accumulator + currentValue,0);
+				return sumPrice / values.length ;
 			};
 	
 			uniqueBrands.forEach(brand => {
@@ -6450,7 +6449,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 				let minPrice = brandInfo.prices.length > 0 ? Math.min(...brandInfo.prices) : 0;
 				let maxPrice = brandInfo.prices.length > 0 ? Math.max(...brandInfo.prices) : 0;
-				let avgPrice = brandInfo.prices.length > 2 ? calculateRealAverage(brandInfo.prices) : 0;
+				let avgPrice = brandInfo.prices.length > 0 ? calculateRealAverage(brandInfo.prices) : 0;
 	
 				brand.MinPrice = minPrice;
 				brand.MaxPrice = maxPrice;
