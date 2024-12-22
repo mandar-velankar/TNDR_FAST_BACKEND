@@ -1652,6 +1652,14 @@ module.exports = async (srv) => {
 		let sStatusTime = moment().utc().toDate();
 		//let sSubmittedBy = UserInfo.getCWID();
 
+		if(existingApprovals && existingApprovals.some(entry => entry.ApprovalStatus === 'Rejected')){
+			await DELETE.from(PT_TMAPPRST)
+			.where({
+				OfferId: oApprovalData.OfferId,
+				ApprovalStatus: 'Rejected'
+			});
+		}
+
 		offerProducts.forEach(function (oProduct) {
 
 			//ActiveProduct = 2 (excluded product)
