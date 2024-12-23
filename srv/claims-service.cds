@@ -178,4 +178,5 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
     entity NLExtractClaimDataView as projection on ClaimsViews.NLExtractClaimDataView;
 
     action approveRejectClaimFiles(claimFile_ID: String, countryCode: String, status: String, claimFileDetailPageURL: String) returns String;
+    action deleteClaimFile(claimFile_ID: String) returns String;
 }

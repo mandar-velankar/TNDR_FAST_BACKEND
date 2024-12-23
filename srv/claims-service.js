@@ -426,4 +426,20 @@ module.exports = (srv) => {
 		return claimApprovertypes;
 	}
 
+	srv.on('deleteClaimFile', async (req) => {
+		try {
+			const { claimFile_ID } = req.data;
+			const claimFile = await SELECT.one.from(ClaimFiles).where({ID: claimFile_ID});
+			if (claimFile) {
+				await DELETE.from(ClaimFiles).where({ID: claimFile_ID});
+				await DELETE.from(ClaimApprovals).where({ClaimFiles_ID: claimFile_ID});
+				await DELETE.from(ClaimData).where({ClaimFiles_ID: claimFile_ID});
+			}
+			return `Claim file by name: ${claimFile.FileName}  deleted successfully! `
+			
+		} catch (error) {
+			console.error('Error in deleteClaimFile');
+			return req.reject(400, error.message || 'An unexpected error occurred.')
+		}
+	});
 };
