@@ -31,7 +31,8 @@ entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
 		when approvalscount.TotalApprovalsCount > 0
 			then cf.ApprovalsCount || '/' || approvalscount.TotalApprovalsCount
 		else '0'
-	end as ApprovalsCount : String
+	end as ApprovalsCount : String,
+	cf.ApprovalsCount as CountApprovalRequest
 };
 
 entity ClaimDataView as select from ClaimsData.ClaimData as cd 
