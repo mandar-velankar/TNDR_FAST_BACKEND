@@ -1219,6 +1219,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             ow.InstituteType,
             ow.KAM_Territory,
             ow.Currency,
+            ow.DateFrom,
+            ow.DateTo,
             ow.QuantityMl AS QuantitySold : Double,
             ow.NetSales AS TotalSales : Double,
             ow.WholesalerContractPrice AS MinPrice : Double,
