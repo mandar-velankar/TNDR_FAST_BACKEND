@@ -5266,8 +5266,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							usString = usString.replace('$','.');   
 							return  usString; 
 						},
-						dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-						dateYear: (input) => input.substring(0,4),
+						dateFormatterEU: (input) => input && input.split("-").reverse().join("-"),
+						dateYear: (input) => input && input.substring(0,4),
 						extract2Decimals: (input) => {
 							if(typeof input === 'string'){
 								return input.split(".")[1].substring(0, 2);
@@ -5420,9 +5420,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					freeGoodsOther.FreeGoodsOther_Step = freeGoodsOther.FreeGoodsOther_Step && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther_Step, 0, 0);
 				}
 			}
-			prd.OfferPrice_1 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_1 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_1), 'nl-NL', 2, 2) : prd.OfferPrice_1;
-			prd.OfferPrice_2 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_2 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_2), 'nl-NL', 2, 2) : prd.OfferPrice_2;
-			prd.OfferPrice_3 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_3 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_3), 'nl-NL', 2, 2) : prd.OfferPrice_3;
+			prd.OfferPrice_1 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_1 && ServiceHelper.formatNumber(Number((prd.OfferPrice_1).toString().replace(/\,/g,'')), 2, 2) : prd.OfferPrice_1;
+			prd.OfferPrice_2 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_2 && ServiceHelper.formatNumber(Number((prd.OfferPrice_2).toString().replace(/\,/g,'')), 2, 2) : prd.OfferPrice_2;
+			prd.OfferPrice_3 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_3 && ServiceHelper.formatNumber(Number((prd.OfferPrice_3).toString().replace(/\,/g,'')), 2, 2) : prd.OfferPrice_3;
 			prd.NET_PRICE_PACK_OFFER_CURRENCY = prd.COUNTRY_CODE === 'PL' ? prd.NET_PRICE_PACK_OFFER_CURRENCY && ServiceHelper.formatCurrency(prd.NET_PRICE_PACK_OFFER_CURRENCY, 'pl-PL', 2, 2) : prd.NET_PRICE_PACK_OFFER_CURRENCY;
 			prd.PNM_VALUE = prd.COUNTRY_CODE === 'PL' ? prd.PNM_VALUE && ServiceHelper.formatCurrency(Number(prd.PNM_VALUE), 'pl-PL', 2, 2) : prd.PNM_VALUE;
 
