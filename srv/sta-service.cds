@@ -195,7 +195,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         CustomerID as CustomerID: String,
         inst.InstituteTerritory.Territory,
         inst.InstituteTerritory.IsKAM
-    }order by CountryCode, InstituteName;
+    }where inst.ActiveRecord = 'Yes'
+    order by CountryCode, InstituteName;
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
         classification.COUNTRY_CODE as CountryCode: String
