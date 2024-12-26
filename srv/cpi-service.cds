@@ -25,6 +25,20 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity SpainDeliveries as projection on SAP.SpainDeliveries;
     entity SpainRappel as projection on SAP.SpainRappel;
     entity FASTCoreMaterial as projection on SAP.FASTCoreMaterial;
+    entity GTIN as projection on SAP.GTIN;
+    entity QtyCharacteristic as projection on SAP.QtyCharacteristic;
+    entity MatlClassification as projection on SAP.MatlClassification;
+    entity IntlTrade as projection on SAP.IntlTrade;
+    entity VariantConfig as projection on SAP.VariantConfig;
+    entity TxtColl as projection on SAP.TxtColl;
+    entity SalesSpec as projection on SAP.SalesSpec;
+    entity ValuatnArea as projection on SAP.ValuatnArea;
+    entity WHS as projection on SAP.WHS;
+    entity PrdBOM as projection on SAP.PrdBOM;
+    entity EWMWHS as projection on SAP.EWMWHS;
+    entity SalesSpecTxt as projection on SAP.SalesSpecTxt;
+    entity PrdPlant as projection on SAP.PrdPlant;
+    entity PrdPlntTxt as projection on SAP.PrdPlntTxt;
 
     function createBrazilContract() returns LargeString;
 
