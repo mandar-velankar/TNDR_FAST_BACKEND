@@ -6568,4 +6568,23 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		return excelData
 	}
+	srv.after('READ','PriceConditionWithMaximumPriceView', (items, req) => {
+		try{
+			if(!items) return [];
+			const fnCalculateFields = async item => {
+				item.SpecialPrice = parseFloat(item.Price1 * (1 - item.Level2Discount1));
+				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - cogs) / item.SpecialPrice : 0;
+			};
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
+		}
+		catch(error){
+			console.error('Error in PriceConditionWithMaximumPriceView READ');
+			return req.reject(403, error?.message||"Error in PriceConditionWithMaximumPriceView READ");
+		}
+		}
+	);
 }
