@@ -94,6 +94,7 @@ service CpiService @(path: 'cpi') @(requires:['f_tndr_cag_admin','f_tndr_cag_cpi
     entity EmbeddedCmdtyQty as projection on SAP.EmbeddedCmdtyQty;
 	entity PlntSPPPrd as projection on SAP.PlntSPPPrd;
 	entity PlnteSPPLocPrd as projection on SAP.PlnteSPPLocPrd;
+    entity FASTCoreBusinessPartner as projection on SAP.FASTCoreBusinessPartner;
 
     function createBrazilContract() returns LargeString;
 
