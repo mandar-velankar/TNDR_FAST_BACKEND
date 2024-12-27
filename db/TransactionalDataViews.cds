@@ -1509,7 +1509,7 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     @Core.Computed: false
     ifnull(priceCondition.Price2, 0) as Price2: Double,
     @Core.Computed: false
-    ifnull(priceCondition.Level2Discount1, 0) as Level2Discount1 : Double,
+    ifnull(priceCondition.Level2Discount1, offer.Custom.Double_9) as Level2Discount1 : Double,
     @Core.Computed: false
     ifnull(offer.Custom.Double_9, 0) as MaxWholesalerMargin : Double,
     @Core.Computed: false
