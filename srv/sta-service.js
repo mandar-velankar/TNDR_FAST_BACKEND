@@ -6572,8 +6572,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		try{
 			if(!items) return [];
 			const fnCalculateFields = async item => {
-				item.SpecialPrice = parseFloat(item.Price1 * (1 - item.Level2Discount1));
-				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - cogs) / item.SpecialPrice : 0;
+				item.SpecialPrice = parseFloat(item.Price1 * (1 - item.MaxWholesalerMargin));
+				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - item.COGS) / item.SpecialPrice : 0;
 			};
 			if(Array.isArray(items)){
 				return items.map(fnCalculateFields)
