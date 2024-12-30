@@ -5440,7 +5440,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.UserSignature = {
 			_type: "image",
 			source: userSignatureImageBuffer, 
-			format: "image/jpeg",
+			format: "image/png",
 			width: 100, 
 			height: 50 
 		};
