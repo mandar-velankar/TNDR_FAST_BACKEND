@@ -6571,15 +6571,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	srv.after('READ','PriceConditionWithMaximumPriceView', (items, req) => {
 		try{
 			if(!items) return [];
-			const fnCalculateFields = async item => {
-				item.SpecialPrice = parseFloat(item.Price1 * (1 - item.Level2Discount1));
-				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - item.COGS) / item.SpecialPrice : 0;
-			};
+
 			if(Array.isArray(items)){
 				return items.map(fnCalculateFields)
 			}else{
 				return fnCalculateFields(items);
 			}
+
+			async function fnCalculateFields(item){
+				item.SpecialPrice = parseFloat(item.Price1 * (1 - item.Level2Discount1));
+				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - item.COGS) / item.SpecialPrice : 0;
+			};
+
 		}
 		catch(error){
 			console.error('Error in PriceConditionWithMaximumPriceView READ');
