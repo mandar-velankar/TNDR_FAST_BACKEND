@@ -6568,4 +6568,44 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		return excelData
 	}
+	srv.after('READ','PriceConditionWithMaximumPriceView', (items, req) => {
+		try{
+			if(!items) return [];
+			const fnCalculateFields = async item => {
+				item.SpecialPrice = parseFloat(item.Price1 * (1 - item.Level2Discount1));
+				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - item.COGS) / item.SpecialPrice : 0;
+			};
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
+		}
+		catch(error){
+			console.error('Error in PriceConditionWithMaximumPriceView READ');
+			return req.reject(403, error?.message||"Error in PriceConditionWithMaximumPriceView READ");
+		}
+		}
+	);
+	srv.after(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (data, req) => {
+		try{
+			if (data.CountryCode === 'PL') {
+				const priceConditions = await SELECT.from(PriceCondition).columns('*','PriceConditionClassification.ConditionType' ).where({
+					OfferID: data.OfferID,
+					'PriceConditionClassification.ConditionType': 'WithMaximumPrice'
+				});
+				if (priceConditions.length > 0) {
+					await Promise.all(
+						priceConditions.map(item => 
+							UPDATE(PriceCondition).with({ Level2Discount1: data.Custom_Double_9 }).where({ ID: item.ID }) 
+						)
+					);
+				}
+			}
+		}
+		catch(error){
+            console.error('Error in OfferFormView CREATE');
+            return req.reject(403, error?.message||"Error in OfferFormView");
+        }
+	});
 }
