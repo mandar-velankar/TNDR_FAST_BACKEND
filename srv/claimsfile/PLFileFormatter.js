@@ -145,7 +145,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
-			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.KODEANARTYKUŁU);
+			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.KODEANARTYKUŁU.trim());
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
 			const productPackName = productPack && productPack?.PRODUCTPACKNAME || null;
