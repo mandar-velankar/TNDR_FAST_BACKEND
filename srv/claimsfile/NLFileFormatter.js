@@ -409,10 +409,12 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			columnNames.forEach((col, index) => {
 				let value = row[index];
 				
+				/*
 				if (['FixedPrice', 'PurchasePrice', 'Claim1Amount', 'Claim2Amount','ClaimTotal'].includes(col)) {
 					// Convert last two digits to decimal
 					value = parseFloat(String(value).replace(/^\+?0+/, '')) / 100;
-				}
+				}*/
+				
 				obj[col] = value;
 			});
 			return obj;
