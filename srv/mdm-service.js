@@ -914,7 +914,7 @@ module.exports = (srv) => {
         if (!value){
             value = 0;
         };
-        const formattedValue = ServiceHelper.formatCurrency(Number(value), 'en-US', 2, 2);
+        const formattedValue = ServiceHelper.formatCurrency(Number(value), 'en-US', 2, 2, true);
         return formattedValue.replace(/,/g, '.').replace(/\.(?=\d{2}$)/, ',');
     };
 
