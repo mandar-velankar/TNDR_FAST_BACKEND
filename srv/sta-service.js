@@ -604,7 +604,25 @@ module.exports = async (srv) => {
 		try{
 		const today = new Date().toISOString().slice(0, 10);
 
-		const mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
+		let mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
+
+		if(req?.data?.CountryCode === 'ES'){
+			// Exclude specific fields based on Classification
+			if (req.data.Classification === 'Commercial Agreement') {
+				mandatoryFielddata = mandatoryFielddata.filter(item => 
+					item.Label !== 'Publication Date' && 
+					item.Label !== 'Offer Due Date' &&
+					item.Label !== 'Tender Type' &&
+					item.Label !== 'Tender Type 2' &&
+					item.Label !== 'Contract Length [months]'
+				);
+			} else if (req.data.Classification === 'Tender') {
+				mandatoryFielddata = mandatoryFielddata.filter(item => 
+					item.Label !== 'Effective Date' &&
+					item.Label !== 'Expiry Date'
+				);
+			}
+		}
 
 		const regex = /'?(?:path\s*:|type\s*:)\s*'([^']+)'?/;
 		  
@@ -634,9 +652,11 @@ module.exports = async (srv) => {
 		// !req.data.SubmittedBy && req.error({ code: 404, message: "Created By is required.", target: "SubmittedBy" });
 
 		//check if dates are correct
-		if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
-			req.error({ code: 404, message: "Publication date should be before the offer due date.", target: "PublicationDate" });
-
+		if (!(req?.data?.CountryCode === 'ES' && req.data.Classification === 'Commercial Agreement')) {
+			if(!moment(req.data.PublicationDate).isBefore(req.data.BidDueDate))
+				req.error({ code: 404, message: "Publication date should be before the offer due date.", target: "PublicationDate" });
+		}
+		
 		if(req.data.AwardDate){
 
 			if(!moment(req.data.BidDueDate).isBefore(req.data.AwardDate))
