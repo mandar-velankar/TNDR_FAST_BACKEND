@@ -513,15 +513,34 @@ module.exports = async (srv) => {
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
-        req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
+        //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
 
         result = await tx.run(tmvQuery);
 
     	const isCountQuery = Array.isArray(result) && result.some(item => '$count' in item);
     
+		// Custom sorting function
+		const applyCustomSorting = (data) => {
+			return data.sort((a, b) => {
+				const tenderHistA = a.TenderID?.includes('HIST') ? 1 : 0;
+				const tenderHistB = b.TenderID?.includes('HIST') ? 1 : 0;
+		
+				const offerHistA = a.OfferID?.includes('HIST') ? 1 : 0;
+				const offerHistB = b.OfferID?.includes('HIST') ? 1 : 0;
+		
+				if (tenderHistA !== tenderHistB) return tenderHistA - tenderHistB;
+				if (offerHistA !== offerHistB) return offerHistA - offerHistB;
+		
+				const tenderIdComparison = b.TenderID.localeCompare(a.TenderID);
+				if (tenderIdComparison !== 0) return tenderIdComparison;
+		
+				return b.OfferID.localeCompare(a.OfferID);
+			});
+		};
+
 		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
-		return result;
+			return applyCustomSorting(result);
 		}
 		
 		const cwid = req.user.id;
@@ -539,7 +558,7 @@ module.exports = async (srv) => {
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return result;
+		  return applyCustomSorting(result);
 		}
 
 		let resultsArray = Array.isArray(result) ? result : [result];
@@ -588,10 +607,10 @@ module.exports = async (srv) => {
 			
 		if (finalFilteredResults.length > 0) {
 			// Return the final filtered results
-			return finalFilteredResults;
+			return applyCustomSorting(finalFilteredResults);
 		}else{
 			// If no territory matches, return an empty array
-			return territoryMatches;
+			return applyCustomSorting(territoryMatches);
 		}
 		}
 		catch(error){
@@ -5201,7 +5220,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							}          
 							let usString;
 							if(typeof input === 'string'){
-								usString = Number(input.replace(/\,/g,'.')).toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+								const normalizedInput = input.replace(/,/g, '').replace(/\./, ',');
+								usString = Number(normalizedInput.replace(/\,/g, '.')).toLocaleString('nl-NL', { 
+									minimumFractionDigits: 2, 
+									maximumFractionDigits: 2 
+								});
 							} else {
 								usString = input.toLocaleString('nl-NL',{ minimumFractionDigits: 2, maximumFractionDigits: 2 });
 							} 
@@ -5253,8 +5276,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							usString = usString.replace('$','.');   
 							return  usString; 
 						},
-						dateFormatterEU: (input) => input.split("-").reverse().join("-"),
-						dateYear: (input) => input.substring(0,4),
+						dateFormatterEU: (input) => input && input.split("-").reverse().join("-"),
+						dateYear: (input) => input && input.substring(0,4),
 						extract2Decimals: (input) => {
 							if(typeof input === 'string'){
 								return input.split(".")[1].substring(0, 2);
@@ -5373,7 +5396,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let productValidation = await buildOfferProductValidation(tx, whereOffer);
 
 		let userSignatureImageBuffer = await getUserSignatureBuffer(tx, offerValidation);
-
+		let commaSeparatedBrandName = [...new Set(productValidation?.map(prd => prd.BRANDNAME))]?.join(', ');
 		//format prices
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
@@ -5407,9 +5430,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					freeGoodsOther.FreeGoodsOther_Step = freeGoodsOther.FreeGoodsOther_Step && ServiceHelper.formatNumber(freeGoodsOther.FreeGoodsOther_Step, 0, 0);
 				}
 			}
-			prd.OfferPrice_1 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_1 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_1), 'nl-NL', 2, 2) : prd.OfferPrice_1;
-			prd.OfferPrice_2 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_2 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_2), 'nl-NL', 2, 2) : prd.OfferPrice_2;
-			prd.OfferPrice_3 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_3 && ServiceHelper.formatCurrency(Number(prd.OfferPrice_3), 'nl-NL', 2, 2) : prd.OfferPrice_3;
+			prd.OfferPrice_1 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_1 && ServiceHelper.formatNumber(Number((prd.OfferPrice_1).toString().replace(/\,/g,'')), 2, 2) : prd.OfferPrice_1;
+			prd.OfferPrice_2 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_2 && ServiceHelper.formatNumber(Number((prd.OfferPrice_2).toString().replace(/\,/g,'')), 2, 2) : prd.OfferPrice_2;
+			prd.OfferPrice_3 = prd.COUNTRY_CODE === 'NL' ? prd.OfferPrice_3 && ServiceHelper.formatNumber(Number((prd.OfferPrice_3).toString().replace(/\,/g,'')), 2, 2) : prd.OfferPrice_3;
 			prd.NET_PRICE_PACK_OFFER_CURRENCY = prd.COUNTRY_CODE === 'PL' ? prd.NET_PRICE_PACK_OFFER_CURRENCY && formatPolandPrices(prd.NET_PRICE_PACK_OFFER_CURRENCY) : prd.NET_PRICE_PACK_OFFER_CURRENCY;
 			prd.PNM_VALUE = prd.COUNTRY_CODE === 'PL' ? prd.PNM_VALUE && formatPolandPrices(prd.PNM_VALUE) : prd.PNM_VALUE;
 			prd.PL_VolumeInPacks = prd.COUNTRY_CODE === 'PL' ? prd.PL_VolumeInPacks && formatPolandQuantity(prd.PL_VolumeInPacks) : prd.PL_VolumeInPacks;
@@ -5440,7 +5463,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		offerValidation.UserSignature = {
 			_type: "image",
 			source: userSignatureImageBuffer, 
-			format: "image/jpeg",
+			format: "image/png",
 			width: 100, 
 			height: 50 
 		};
@@ -5460,7 +5483,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return {
 			offerValidation: offerValidation,
 			offerProductValidation: productValidation,
-			groupedOfferProductValidation: groupedOfferProductValidation
+			groupedOfferProductValidation: groupedOfferProductValidation,
+			commaSeparatedBrandName: commaSeparatedBrandName
 			// flatOfferProductValidation.reduce((group, product) => {
 			// 	const { PriceConditionClassification } = product;
 			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};

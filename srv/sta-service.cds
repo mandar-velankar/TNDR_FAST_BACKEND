@@ -198,7 +198,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         CustomerID as CustomerID: String,
         inst.InstituteTerritory.Territory,
         inst.InstituteTerritory.IsKAM
-    }order by CountryCode, InstituteName;
+    }where inst.ActiveRecord = 'Yes'
+    order by CountryCode, InstituteName;
     entity ClassifiactionsView as projection on MasterData.MASTER_COUNTRY_CLASSIFICATION as classification {
         *,
         classification.COUNTRY_CODE as CountryCode: String
@@ -921,7 +922,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inst.InstituteName,
 	    hier.ParentInstituteID,
 	    key hier.InstituteID,
-    }where inst.CountryCode = 'NL';
+    }where inst.CountryCode = 'NL' 
+        and inst.ActiveRecord = 'Yes' 
+        and hier.ActiveRecord = 'Yes';
 
     entity ZagisUploadFile {
         key OfferID   : String(50) default '';

@@ -893,7 +893,9 @@ module.exports = (srv) => {
 
 			// Formatting
 			excelData.forEach(ed => {
-				ed.PPP = ServiceHelper.formatCurrency(ed.PPP, 'nl-NL', 2, 2, true);
+				ed.PPP = formatNLPPPPrices(ed.PPP);
+				ed.StartDate = ed.StartDate && ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY');
+				ed.EndDate = ed.EndDate && ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY');
 			});
 
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content, { excelData }, 1);
@@ -907,6 +909,14 @@ module.exports = (srv) => {
             return req.reject(403, error?.message||"Error in NLExcelTemplates");
         }
 	});
+
+	const formatNLPPPPrices = function (value) {
+        if (!value){
+            value = 0;
+        };
+        const formattedValue = ServiceHelper.formatCurrency(Number(value), 'en-US', 2, 2);
+        return formattedValue.replace(/,/g, '.').replace(/\.(?=\d{2}$)/, ',');
+    };
 
 	srv.on('READ', 'NLDAExcelTemplates', async (req, next) => {
 		try{
@@ -974,9 +984,9 @@ module.exports = (srv) => {
 			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
 			item.Margin = formatPercentage(item.Margin);
 			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Netto Prijs`;
-			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('MM/DD/YYYY') : moment(item.EndDate).format('MM/DD/YYYY');
-			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'MM/DD/YYYY');
-			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'MM/DD/YYYY');
+			item.EndDate = item.StartDate && (item.EndDate && moment(item.EndDate).isSame("9999-12-31")) ? moment(item.StartDate).add(5, 'months').endOf('month').format('DD/MM/YYYY') : moment(item.EndDate).format('DD/MM/YYYY');
+			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
+			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);

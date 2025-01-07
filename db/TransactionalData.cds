@@ -847,6 +847,7 @@ entity OutgoingMails : managed, cuid {
     Subject: LargeString;
     MailBody: LargeString;
     Sent: Boolean;
+    RecipientCC: String;
 }
 
 entity CountrySpecificTenderInfo: managed {

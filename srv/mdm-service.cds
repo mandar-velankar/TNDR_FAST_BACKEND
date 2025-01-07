@@ -323,7 +323,8 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         ctryCurrency.Currency,
         Type as CombinedWPPMarginNetPriceValues,
         min(EndDate) as minEndDate: Date,
-        PACKFACTOR || ' ' || PRESENTATION as CombinedPackSizePresentation: String
+        PACKFACTOR || ' ' || PRESENTATION as CombinedPackSizePresentation: String,
+        wpp.Comment
     }group by 
         MaterialNumbers,
         GOV_CODE,
@@ -341,12 +342,15 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         StartDate,
         EndDate,
         Status,
-        ctryCurrency.Currency;
+        ctryCurrency.Currency,
+        wpp.Comment;
 
     entity LatestCOGSView as select from PT_TMCOGS {
         max(COGSID) as maxCOGSID: Integer
     };
-
+    entity LatestPriceView as select from PT_TMREGPR {
+        max(RegisteredPriceID) as maxRegisteredPriceID: Integer
+    };
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
     action SoftDeleteProductPrices(productPackID: Integer, countryCode: String) returns String;
