@@ -1177,7 +1177,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                     calcbrandvolumes.BrandContractCalculatedVolume
                 ELSE 0 
             END as ContractBrandUsage : Double,
-        } where cf.CountryCode = 'PL'
+        } where cf.CountryCode = 'PL' and cd.OfferID is not null
         group by 
             cd.ID,
             cf.DateFrom,
