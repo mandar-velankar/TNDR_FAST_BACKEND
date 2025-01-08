@@ -149,7 +149,7 @@ module.exports = async (srv) => {
 		ZagisUploadFile,
 		ExtractNLHistoricalInformation,
 		NLExtractOffers,
-		SalesReportView
+		SalesReportsView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -6419,7 +6419,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         }
 	});
 
-	srv.on('READ', 'OverviewSectionView', async (req) => {
+	srv.on('READ', 'OverviewSectionsView', async (req) => {
 		try {
 			const uniqueBrands = [];
 			const brandNames = new Set();
@@ -6496,8 +6496,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 			return result;
 		} catch (error) {
-			console.error('Error in OverviewSectionView READ');
-			return req.reject(403, error?.message || "Error in OverviewSectionView");
+			console.error('Error in OverviewSectionsView READ');
+			return req.reject(403, error?.message || "Error in OverviewSectionsView");
 		}
 	});
 	
@@ -6549,7 +6549,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const dateToFullWhere =  (DateFrom && ServiceHelper.buildFullWhere('DateTo', '>=', DateFrom)) || [];
 
 		// return fullwhere query
-		return SELECT.from(SalesReportView)
+		return SELECT.from(SalesReportsView)
 				.where(tenderFullWhere)
 				.where(countryCodeFullWhere)
 				.where(wholesalerFullWhere)
@@ -6580,7 +6580,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ed.WholesalerPurchasePrice = formatPolandPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerContractPrice = formatPolandPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerPurchasedAmount = formatPolandPrices(ed.WholesalerPurchasedAmount, countryCodeLocals[CountryCode], CountryCode);
-			ed.NetSales = formatPolandPrices(ed.NetSales, countryCodeLocals[CountryCode], CountryCode);
+			ed.TotalSales = formatPolandPrices(ed.TotalSales, countryCodeLocals[CountryCode], CountryCode);
 			
 			// Format Date
 			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
