@@ -167,7 +167,8 @@ module.exports = {
         };
 
         if (truncate) {
-            num = Number((Math.floor(num * 100) / 100).toFixed(2));
+            const fixed = (num * 100).toFixed(10); // Fix the precision issue
+            num = Number(Math.floor(fixed) / 100); 
         }
         return num.toLocaleString(locale, { 
             minimumFractionDigits: minDigits, 

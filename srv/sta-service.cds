@@ -917,7 +917,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inst.InstituteName,
 	    hier.ParentInstituteID,
 	    key hier.InstituteID,
-    }where inst.CountryCode = 'NL';
+    }where inst.CountryCode = 'NL' 
+        and inst.ActiveRecord = 'Yes' 
+        and hier.ActiveRecord = 'Yes';
 
     entity ZagisUploadFile {
         key OfferID   : String(50) default '';

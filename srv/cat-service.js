@@ -3929,9 +3929,9 @@ module.exports = (srv) => {
 			let brandNames = checkOfferForBrand.map(el => el.BRANDNAME.toLowerCase())
 			if (brandNames.includes('xofigo')) {
 				if (tender.Classification === "Tender") {
-					recipient = "quotation.hec.th@ipservices.co.th"
-				} else {
 					recipient = "tender.hec.th@ipservices.co.th"
+				} else {
+					recipient = "quotation.hec.th@ipservices.co.th"
 				}
 			} else {
 				recipient = "nutthawuth.nainanont@globalmedicalsolutions.com"
