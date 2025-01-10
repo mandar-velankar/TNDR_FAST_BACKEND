@@ -3915,54 +3915,53 @@ module.exports = (srv) => {
         }
     });
 
-	srv.on('sendTHNotificationMailTemplate', async (req) => {
+	srv.on('getTHNotificationMailTemplate', async (req) => {
 		try {
-			const { data: {tenderId, offerID, CountryCode} } = req;
+			const { data: {tenderId, offerID, CountryCode, templateId} } = req;
 			const tx = cds.tx(req);
-			const mailTemplate = await getMailTemplate('THNotificationMailTemplate');
 			const checkOfferForBrand = await tx.run(SELECT.from(BrandsInTender).where({ OfferID: offerID }));
 			const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: tenderId }))
+			let institute = await tx.run(SELECT.one.from(PT_TMINST).where({InstituteID: tender.InstituteID}));
+			const {UserName} = await tx.run(SELECT.one.from(PT_TMUSER).where({UserID : req.user.id}));
+			const approverList = await tx.run(SELECT.from(PT_TMAPPRST).where({OfferId : offerID, Active : 1, ApprovalStatus : 'Approved'}));
+			const mailTemplate = await getMailTemplate(templateId);
 			let recipient;
 			let brandNames = checkOfferForBrand.map(el => el.BRANDNAME.toLowerCase())
 			if (brandNames.includes('xofigo')) {
 				if (tender.Classification === "Tender") {
-					recipient = "quotation.hec.th@ipservices.co.th"
-				} else {
 					recipient = "tender.hec.th@ipservices.co.th"
+				} else {
+					recipient = "quotation.hec.th@ipservices.co.th"
 				}
 			} else {
 				recipient = "nutthawuth.nainanont@globalmedicalsolutions.com"
 			}
-			const THNotificationData = mappedTHNotificationData(mailTemplate, req, recipient);
-			await INSERT.into(OutgoingMails).entries(THNotificationData);
-			return "Notification mail sent successfully";
+			const tenderClassification = tender.Classification === "RFQ" ? "Quotation" : "Tender";
+			const mappedData = mappedTHNotificationData(offerID, mailTemplate, institute, UserName, tenderClassification)
+			const NotificationData = {
+				Recipients:  recipient,
+				mappedData: mappedData,
+				approverList: approverList,
+				TenderClassification: tenderClassification,
+			}
+			return  NotificationData;
 		}catch (error) {
 				console.error('Error in sendTHNotificationMailTemplate');
 				return req.reject(400, error.message || 'An unexpected error occurred.');
 		}
 
 	});
-	function mappedTHNotificationData (mailTemplate, req, recipient){
-		return {
-			CountryCode: 'TH',
-			TenderID: req.tenderId,
-			OfferID: req.offerID,
-			Sender: 'FAST-Admin@bayer.com',
-			Recipients:  recipient,
-			Subject: `New TH Tender Created for`,
-			MailBody: generateMailBody(mailTemplate, {
-				data: { 
-					content:{
-						UserName: 'Test',
-						CountryName: 'Test',
-						Offer: 'Test',
-						DirectURLToOffer: 'Test',
-						TenderCreator: 'Test',
-					}
-				}
-			}),
-			Sent: false,
+	function mappedTHNotificationData (offerID, mailTemplate, institute, UserName, tenderClassification){
+		const data = {
+			Reference: offerID,
+			CustomerID: institute.CustomerID,
+			CustomerName: institute.InstituteName,
+			RequesterName: UserName,
+			TenderClassification: tenderClassification,
 		}
+		return generateMailBody(mailTemplate, {
+			data
+		})
 	}
     const getMailTemplate = async function (templateId) {
         try{
