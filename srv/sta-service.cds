@@ -86,6 +86,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteID as ParentInstituteID,
         Institute.External_InstituteId,
         Institute.Address,
+        Institute.CustomerID,
+        Institute.Province.Name as ProvinceName,
+        Institute.City,
+        Institute.CifCode,
+        Institute.RegionalHealthSystem,
         Country.Region
     }; 
 
