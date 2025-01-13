@@ -6430,6 +6430,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 			req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
 			req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+			req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
 	
 			result = await tx.run(tmvQuery);
 	
@@ -6598,7 +6599,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 
 			async function fnCalculateFields(item){
-				item.SpecialPrice = parseFloat(item.Price1 * (1 - item.Level2Discount1));
+				item.SpecialPrice = parseFloat(item.Price1 / (1 + item.Level2Discount1));
 				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - item.COGS) / item.SpecialPrice : 0;
 			};
 
