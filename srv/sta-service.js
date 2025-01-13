@@ -6435,6 +6435,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 			req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
 			req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+			req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
 	
 			result = await tx.run(tmvQuery);
 	
