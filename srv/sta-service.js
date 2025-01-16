@@ -5894,23 +5894,54 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const tx = cds.tx(req);
 			const offerInformation = await SELECT.one.from(TenderMasterView).where({OfferID: offerID})
 			const whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerID);
+			let offerConsolidation = await tx.run(SELECT.from(OfferConsolidation).where(whereOffer));
+			let offerProductConsolidation = await tx.run(SELECT.from(OfferProductConsolidation).where(whereOffer));
+			let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 			const offerValidation = await buildOfferValidation(tx, whereOffer);
 			const mailTemplate = await getMailTemplate(templateId);
-			const mappedData = mapNotificationData(mailTemplate, offerInformation,offerValidation,url);
+			const mappedData = mapNotificationData(mailTemplate, offerInformation, offerValidation, offerConsolidation, offerProductConsolidation, offerProductValidation, url);
 			return mappedData
 		}catch(error){
 			console.error('Error in getNotificationMailTemplate');
             return req.reject(403, error?.message||"Error in getNotificationMailTemplate");
 		}
 	})
-	const mapNotificationData = function (template, offerInformation,offerValidation,url) {
-		offerInformation.BidDueDate = offerInformation.BidDueDate && ServiceHelper.formatDate(offerInformation.BidDueDate, 'YYYY-MM-DD','DD-MM-YYYY');
-		offerInformation.Custom_Date_1 = offerInformation.Custom_Date_1 && ServiceHelper.formatDate(offerInformation.Custom_Date_1, 'YYYY-MM-DD','DD-MM-YYYY');
+	const mapNotificationData = function (template, offerInformation,offerValidation, offerConsolidation, offerProductConsolidation, offerProductValidation,url) {
+		let data = {};
+		if(offerInformation.CountryCode === 'NL'){
+			offerInformation.BidDueDate = offerInformation.BidDueDate && ServiceHelper.formatDate(offerInformation.BidDueDate, 'YYYY-MM-DD','DD-MM-YYYY');
+			offerInformation.Custom_Date_1 = offerInformation.Custom_Date_1 && ServiceHelper.formatDate(offerInformation.Custom_Date_1, 'YYYY-MM-DD','DD-MM-YYYY');
 
-		const data = {
-			offerInformation: offerInformation,
-			offerValidation: offerValidation,
-			DirectURLToOffer : url
+			data = {
+				offerInformation: offerInformation,
+				offerValidation: offerValidation,
+				DirectURLToOffer : url
+			}
+		}
+		else if(offerInformation.CountryCode === 'ES'){
+			offerProductConsolidation.forEach(function (product) {
+				product.NET_PRICE_TOTAL = product.NET_OFFER_PRICE * product.REQUESTED_VOLUME;
+				product.NET_PRICE_TOTAL_VAT = product.REGISTERED_PRICE * product.REQUESTED_VOLUME * (1 + product.VAT);
+				product.PSL = ((product.NET_OFFER_PRICE - product.REGISTERED_PRICE) / product.REGISTERED_PRICE) * 100;
+			});
+	
+	
+			offerConsolidation = offerConsolidation[0];
+			if (offerProductValidation.length > 0) {
+				let divisions = R.uniqWith((a, b) => ServiceHelper.isEquivalent(a, b), offerProductValidation.map((d) => { return d.DIVISION })); //TODO include RAMA
+				if (divisions.length > 0) {
+					offerConsolidation.DIVISION = divisions[0];
+				}
+			}
+	
+			//add url to offerConsolidation
+			
+			offerConsolidation.URL = url;
+
+			data = {
+				offerConsolidation: offerConsolidation,
+				offerProductConsolidation: offerProductConsolidation
+			}
 		}
 		
         return generateMailBody(template, {
