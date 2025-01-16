@@ -377,6 +377,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             and inactiveSKUs.CountryCode = product.CountryCode
     {
         *,
+        key product.OfferID,
+        key product.Active,
+        key product.ProductCode,
+        key product.LotID,
         product.CountryCode,
         product.SKU.MoleculeName as MoleculeName,
         product.SKUCountry.CODE1 as Code1,
