@@ -389,6 +389,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         product.SKU.PACKFACTOR,
         product.Offer.Tender.Institute.INCOTerms,
         product.Offer.Tender.Institute.InstituteName,
+        product.Offer.Tender.Classification as TenderClassification,
         activeSKUs.ACTIVE_MATERIAL_NUMBERS,
         inactiveSKUs.INACTIVE_MATERIAL_NUMBERS,
         @Core.Computed: false

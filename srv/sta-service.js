@@ -1267,6 +1267,7 @@ module.exports = async (srv) => {
 		delete req.data.INACTIVE_MATERIAL_NUMBERS;
 		delete req.data.ACTIVE_SKU_PRODUCTPACKID;
 		delete req.data.INACTIVE_SKU_PRODUCTPACKID;
+		delete req.data.TenderClassification;
 		}
 		catch(error){
             console.error('Error in OfferProductsDetailView CREATE');
