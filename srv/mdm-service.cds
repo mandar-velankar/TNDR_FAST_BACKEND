@@ -319,6 +319,8 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         WPPWithoutTax,
         StartDate,
         EndDate,
+        PPPStartDate,
+        PPPEndDate,
         Status,
         ctryCurrency.Currency,
         Type as CombinedWPPMarginNetPriceValues,
@@ -341,6 +343,8 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         WPPWithoutTax,
         StartDate,
         EndDate,
+        PPPStartDate,
+        PPPEndDate,
         Status,
         ctryCurrency.Currency,
         wpp.Comment;

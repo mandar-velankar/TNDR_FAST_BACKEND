@@ -971,7 +971,11 @@ module.exports = (srv) => {
 			return req.reject(404, 'No template found for templateid:' + templateId);
 		}
 		//Filtering
-		const fullWhere = cds.parse.expr(`StartDate <= date'${validDate}' and EndDate >= date'${validDate}' and DistributorID = ${distributorID}`);
+		const fullWhere = cds.parse.expr(`(StartDate <= date'${validDate}' or StartDate = null) 
+										and (EndDate >= date'${validDate}' or EndDate = null) 
+										and (PPPStartDate <= date'${validDate}' or PPPStartDate = null) 
+										and (PPPEndDate >= date'${validDate}' or PPPEndDate = null) 
+										and DistributorID = ${distributorID}`);
 		const query = SELECT.from(NLWPPExcelExtract).where(fullWhere);
 
 		//Sorting
