@@ -238,6 +238,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			let fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * curr.TotalDelivered) : ((fastOffer.OfferPrice * daValue) * curr.TotalDelivered)) : 0;
 			fastDistributionArrangementClaim = Math.round(fastDistributionArrangementClaim * 100) / 100;
 			let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
+			totalFASTClaim = Math.round(totalFASTClaim * 100) / 100;
 			const wholesalerDisArPricePerUnit = curr.Claim2Amount / curr.TotalDelivered;
 			const wholesalerDisArPrice = curr.FixedPrice - wholesalerDisArPricePerUnit;
 			const wholesalerDistributionArrangement = distributionAgreement && distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(3)) : Number((Math.floor((wholesalerDisArPricePerUnit / curr.FixedPrice)*1000)/1000).toFixed(3)) || null;
