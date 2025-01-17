@@ -241,8 +241,8 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			totalFASTClaim = Math.round(totalFASTClaim * 100) / 100;
 			const wholesalerDisArPricePerUnit = curr.Claim2Amount / curr.TotalDelivered;
 			const wholesalerDisArPrice = curr.FixedPrice - wholesalerDisArPricePerUnit;
-			const wholesalerDistributionArrangement = distributionAgreement && distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(3)) : Number((Math.floor((wholesalerDisArPricePerUnit / curr.FixedPrice)*1000)/1000).toFixed(3)) || null;
-			const percentageDifference = fastOffer && Number((Math.floor(((curr.ClaimTotal - totalFASTClaim) /totalFASTClaim)*1000)/1000).toFixed(3)) || 0;
+			const wholesalerDistributionArrangement = distributionAgreement && distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(3)) : Number((Math.round((wholesalerDisArPricePerUnit / curr.FixedPrice)*1000)/1000).toFixed(3)) || null;
+			const percentageDifference = fastOffer && Number((Math.round(((curr.ClaimTotal - totalFASTClaim) /totalFASTClaim)*1000)/1000).toFixed(3)) || 0;
 			const filteredClaimsData = claimsData.filter(item => item.OfferID == offerID && item.MainInstituteID == instituteId && item.ProductPackID == productCode);
 			const fastPendingCorrection = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + (row.TotalWholesalerClaim - row.TotalFASTClaim), 0) : 0;
 			const usageCalculation = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.Quantity, 0) : 0;

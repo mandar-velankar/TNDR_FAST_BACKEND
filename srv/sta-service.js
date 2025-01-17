@@ -5242,6 +5242,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							return input.split("-").reverse().join("-").replaceAll("-","/");
 						},
 						dateFormatHEM: (input) => {
+							if(input==="" || input=== null){
+								return "";
+							}
 							return input.split("-").reverse().join("-").replaceAll("-",".");
 						},
 						currentdatePK: (input) => {
