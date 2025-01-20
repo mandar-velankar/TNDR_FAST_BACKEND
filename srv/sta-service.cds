@@ -1177,7 +1177,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                     calcbrandvolumes.BrandContractCalculatedVolume
                 ELSE 0 
             END as ContractBrandUsage : Double,
-        } where cf.CountryCode = 'PL' and cd.OfferID is not null
+        } where cf.CountryCode = 'PL'
         group by 
             cd.ID,
             cf.DateFrom,
@@ -1260,17 +1260,20 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join MasterData.PT_TMINST as inst 
             on inst.InstituteID = tender.InstituteID 
             and inst.CountryCode = tender.CountryCode
-        inner join TransactionalData.PT_TMOFRS as offer 
+        left outer join TransactionalData.PT_TMOFRS as offer 
             on offer.TenderID = tender.TenderID 
             and offer.CountryCode = tender.CountryCode 
             and offer.Active = 1
             and offer.ActiveOffer = 1
-        inner join ClaimsData.ClaimData as cd 
+        left outer join ClaimsData.ClaimData as cd 
             on cd.OfferID = offer.OfferID 
             and cd.CountryCode = tender.CountryCode{
         tender.createdBy,
         tender.modifiedBy,
-        tender.TenderID,
+        case when cd.OfferID is null 
+            then 'No related tender'
+            else offer.TenderID
+        end as TenderID: String,
         cd.OfferID,
         tender.CountryCode,
         tender.SubmittedBy,
@@ -1284,7 +1287,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     group by 
         tender.createdBy,
         tender.modifiedBy,
-        tender.TenderID,
+        case when cd.OfferID is null 
+            then 'No related tender'
+            else offer.TenderID
+        end,
         cd.OfferID,
         tender.CountryCode,
         tender.SubmittedBy,
