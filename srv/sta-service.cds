@@ -371,10 +371,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as product
         left join ProductActiveMaterialNumbers as activeSKUs 
-            on activeSKUs.ACTIVE_SKU_PRODUCTPACKID = product.ProductCode
+            on activeSKUs.ProductCode = product.ProductCode
             and activeSKUs.CountryCode = product.CountryCode
         left join ProductInActiveMaterialNumbers as inactiveSKUs 
-            on inactiveSKUs.INACTIVE_SKU_PRODUCTPACKID = product.ProductCode
+            on inactiveSKUs.ProductCode = product.ProductCode
             and inactiveSKUs.CountryCode = product.CountryCode
     {
         *,
@@ -1316,7 +1316,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 }
 
 entity ProductActiveMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
-    key ProductPackID as ACTIVE_SKU_PRODUCTPACKID,
+    key ProductPackID as ProductCode,
 	key CountryCode,
 	STRING_AGG(SKUCode, ',') as ACTIVE_MATERIAL_NUMBERS: String
 }where ActiveRecord = 'Yes'
@@ -1325,7 +1325,7 @@ group by
 	ProductPackID;
 
 entity ProductInActiveMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
-	key ProductPackID as INACTIVE_SKU_PRODUCTPACKID,
+	key ProductPackID as ProductCode,
 	key CountryCode,
 	STRING_AGG(SKUCode, ',') as INACTIVE_MATERIAL_NUMBERS: String
 }where ActiveRecord = 'No'
