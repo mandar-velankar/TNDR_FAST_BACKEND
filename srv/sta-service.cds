@@ -363,39 +363,34 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };*/
 
-    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR as product
-        left join ProductActiveMaterialNumbers as activeSKUs 
-            on activeSKUs.ProductCode = product.ProductCode
-            and activeSKUs.CountryCode = product.CountryCode
-        left join ProductInActiveMaterialNumbers as inactiveSKUs 
-            on inactiveSKUs.ProductCode = product.ProductCode
-            and inactiveSKUs.CountryCode = product.CountryCode
-    {
+    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR {
         *,
-        key product.OfferID,
-        key product.Active,
-        key product.ProductCode,
-        key product.LotID,
-        product.CountryCode,
-        product.SKU.MoleculeName as MoleculeName,
-        product.SKUCountry.CODE1 as Code1,
-        product.SKUCountry.CODE2 as Code2,
-        product.SKUCountry.CODE3 as Code3,
-        product.SKU.ProductGenericName as ProductGenericName,
-        product.SKUCountry.GOV_CODE as Gov_Code,
-        product.SKU.PRODUCTPACKNAME,
-        product.SKUCountry.BU,
-        product.SKUCountry.RegistrationValidUntil,
-        product.SKU.Product.HLEVEL4_NAME as BrandName,
-        product.SKU.PACKFACTOR,
-        product.Offer.Tender.Institute.INCOTerms,
-        product.Offer.Tender.Institute.InstituteName,
-        product.Offer.Tender.Classification as TenderClassification,
-        activeSKUs.ACTIVE_MATERIAL_NUMBERS,
-        inactiveSKUs.INACTIVE_MATERIAL_NUMBERS,
+        key OfferID,
+        key Active,
+        key ProductCode,
+        key LotID,
+        CountryCode,
+        SKU.MoleculeName as MoleculeName,
+        SKUCountry.CODE1 as Code1,
+        SKUCountry.CODE2 as Code2,
+        SKUCountry.CODE3 as Code3,
+        SKU.ProductGenericName as ProductGenericName,
+        SKUCountry.GOV_CODE as Gov_Code,
+        SKU.PRODUCTPACKNAME,
+        SKUCountry.BU,
+        SKUCountry.RegistrationValidUntil,
+        SKU.Product.HLEVEL4_NAME as BrandName,
+        SKU.PACKFACTOR,
+        Offer.Tender.Institute.INCOTerms,
+        Offer.Tender.Institute.InstituteName,
+        Offer.Tender.Classification as TenderClassification,
         @Core.Computed: false
-        case when product.PricingPolicy.Type = 'BudgetedProfitability'
-            then product.PricingPolicy.Value 
+        ProductActiveSKUs.ACTIVE_MATERIAL_NUMBERS,
+        @Core.Computed: false
+        ProductInActiveSKUs.INACTIVE_MATERIAL_NUMBERS,
+        @Core.Computed: false
+        case when PricingPolicy.Type = 'BudgetedProfitability'
+            then PricingPolicy.Value 
             else 0
         end as VwBudgetedProfitability:Double
     };
@@ -1315,21 +1310,3 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         cd.ProductPackID,
         cd.BrandId;
 }
-
-entity ProductActiveMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
-    key ProductPackID as ProductCode,
-	key CountryCode,
-	STRING_AGG(SKUCode, ',') as ACTIVE_MATERIAL_NUMBERS: String
-}where ActiveRecord = 'Yes'
-group by 
-	CountryCode,
-	ProductPackID;
-
-entity ProductInActiveMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
-	key ProductPackID as ProductCode,
-	key CountryCode,
-	STRING_AGG(SKUCode, ',') as INACTIVE_MATERIAL_NUMBERS: String
-}where ActiveRecord = 'No'
-group by 
-	CountryCode,
-	ProductPackID;
