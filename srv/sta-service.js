@@ -6566,7 +6566,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const wholesalerFullWhere = (DistributorID && ServiceHelper.buildFullWhere('DistributorID', '=', DistributorID)) || [];
 		const brandFullWhere = BrandID && BrandID !== "All_Brands" ? ServiceHelper.buildFullWhere('BrandId', '=', BrandID) : [];
       	const productFullWhere = (ProductPackID && ProductPackID !== "All_Products" && ServiceHelper.buildFullWhere('ProductPackID', '=', ProductPackID)) || [];
-      	const kamTerritoryFullWhere = (KAM_Territory && KAM_Territory !== "All" && ServiceHelper.buildFullWhere('KAM_Territory', '=', ProductPackID)) || [];
+      	const kamTerritoryFullWhere = (KAM_Territory && KAM_Territory !== "All" && ServiceHelper.buildFullWhere('KAM_Territory', '=', KAM_Territory)) || [];
       	const instituteTypeFullWhere = (InstituteType && InstituteType !== "All" && ServiceHelper.buildFullWhere('InstituteType', '=', InstituteType)) || [];
       	const instituteFullWhere = (InstituteID && InstituteID !== "All" && ServiceHelper.buildFullWhere('MainInstituteID', '=', InstituteID)) || [];
 		const dateFromFullWhere =  (DateTo && ServiceHelper.buildFullWhere('DateFrom', '<=', DateTo)) || [];
