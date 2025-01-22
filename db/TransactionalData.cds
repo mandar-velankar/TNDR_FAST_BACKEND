@@ -419,7 +419,13 @@ entity PT_TMOFPR {
                                         and ContractInfomation.ProductCode = ProductCode;   
         NLContractDurationOfferPrices : Association to TransactionalDataViews.NLContractDurationOfferPrices 
                                             on NLContractDurationOfferPrices.OfferID = OfferID
-                                            and NLContractDurationOfferPrices.ProductCode = ProductCode;                              
+                                            and NLContractDurationOfferPrices.ProductCode = ProductCode;     
+        ProductActiveSKUs             : Association to MasterDataViews.ProductActiveMaterialNumbers
+                                            on ProductActiveSKUs.ProductCode = ProductCode
+                                            and ProductActiveSKUs.CountryCode = CountryCode;         
+        ProductInActiveSKUs           : Association to MasterDataViews.ProductInActiveMaterialNumbers
+                                            on ProductInActiveSKUs.ProductCode = ProductCode
+                                            and ProductInActiveSKUs.CountryCode = CountryCode;             
                                         
 }
 

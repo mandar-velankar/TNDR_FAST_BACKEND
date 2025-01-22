@@ -363,8 +363,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };*/
 
-    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
+    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR {
         *,
+        key OfferID,
+        key Active,
+        key ProductCode,
+        key LotID,
+        CountryCode,
         SKU.MoleculeName as MoleculeName,
         SKUCountry.CODE1 as Code1,
         SKUCountry.CODE2 as Code2,
@@ -378,6 +383,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKU.PACKFACTOR,
         Offer.Tender.Institute.INCOTerms,
         Offer.Tender.Institute.InstituteName,
+        Offer.Tender.Classification as TenderClassification,
+        @Core.Computed: false
+        ProductActiveSKUs.ACTIVE_MATERIAL_NUMBERS,
+        @Core.Computed: false
+        ProductInActiveSKUs.INACTIVE_MATERIAL_NUMBERS,
         @Core.Computed: false
         case when PricingPolicy.Type = 'BudgetedProfitability'
             then PricingPolicy.Value 
