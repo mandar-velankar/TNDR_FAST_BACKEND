@@ -6494,7 +6494,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 			req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
 			req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
-			req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
+			//req.query.SELECT.limit && (tmvQuery.limit(req.query.SELECT.limit));
 	
 			result = await tx.run(tmvQuery);
 	
@@ -6535,12 +6535,34 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				const sumPrice = values.reduce((accumulator, currentValue) => accumulator + currentValue,0);
 				return sumPrice / values.length ;
 			};
+
+			const calculateMin = (prices) => {
+				if (!prices.length) return 0;
+				let min = prices[0];
+				for (let price of prices) {
+					if (price < min) {
+						min = price;
+					}
+				}
+				return min;
+			};
+
+			const calculateMax = (prices) => {
+				if (!prices.length) return 0;
+				let max = prices[0];
+				for (let price of prices) {
+					if (price > max) {
+						max = price;
+					}
+				}
+				return max;
+			};
 	
 			uniqueBrands.forEach(brand => {
 				const brandInfo = brandData[brand.BrandName];
 	
-				let minPrice = brandInfo.prices.length > 0 ? Math.min(...brandInfo.prices) : 0;
-				let maxPrice = brandInfo.prices.length > 0 ? Math.max(...brandInfo.prices) : 0;
+				let minPrice = brandInfo.prices.length > 0 ? calculateMin(brandInfo.prices) : 0;
+				let maxPrice = brandInfo.prices.length > 0 ? calculateMax(brandInfo.prices) : 0;
 				let avgPrice = brandInfo.prices.length > 0 ? calculateRealAverage(brandInfo.prices) : 0;
 	
 				brand.MinPrice = minPrice;
