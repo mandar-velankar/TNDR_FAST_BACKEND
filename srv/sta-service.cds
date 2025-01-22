@@ -1144,7 +1144,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     } where Countries.CountryCode = 'PL' and Role = 'KAM';
     
     entity SalesReportsView as select from ClaimsData.ClaimFiles as cf 
-        left join ClaimsData.ClaimData as cd         
+        inner join ClaimsData.ClaimData as cd         
             on cd.ClaimFiles.ID = cf.ID
         left join MasterData.PT_TMINST as inst 
             on inst.InstituteID = cd.MainInstituteID 
@@ -1230,6 +1230,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity OverviewSectionsView as select from SalesReportsView as ow{
             key ow.ID,
             ow.TenderID,
+            ow.OfferID,
             ow.CountryCode,
             ow.DistributorID,
             ow.MainInstituteName,
