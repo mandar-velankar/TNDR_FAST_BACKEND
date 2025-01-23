@@ -673,7 +673,7 @@ module.exports = (srv) => {
         const { StartDate, Type, PRODUCTPACKID,Margin , WPPWithoutTax, DistributorID } = req.data;
         !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
         !Type && req.error({code: 400, message: 'Type is required', target: 'Type'});
-        !Margin && req.error({code: 400, message: 'Margin is required', target: 'Margin'});
+        // !Margin && req.error({code: 400, message: 'Margin is required', target: 'Margin'});
         !WPPWithoutTax && req.error({code: 400, message: 'WPP Without Tax is required', target: 'WPPWithoutTax'});
 
 		//check if dates are correct
