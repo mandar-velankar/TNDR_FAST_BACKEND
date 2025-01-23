@@ -169,7 +169,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 																item.ContractStartDate <= this.excelDateToJSDate(curr.DATASPRZEDAŻY) &&
 																item.ContractEndDate >= this.excelDateToJSDate(curr.DATASPRZEDAŻY));
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
-			const fastContractClaim = fastOffer && (fastOffer.RequestedVolume * (fastOffer.RegPrice - fastOffer.OfferPrice)) || 0;
+			const fastContractClaim = fastOffer && ((fastOffer.RegPrice - fastOffer.OfferPrice) * curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI) || 0;
 			prev.push(
 				{
 					CountryCode                             : this.countryCode,
