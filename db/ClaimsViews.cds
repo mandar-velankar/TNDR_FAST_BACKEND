@@ -58,9 +58,6 @@ entity CalculatedBrandVolumes as select from ClaimsData.ClaimData as cd
 entity ClaimDataCalculatedView as select from ClaimsData.ClaimData as cd
 	left join ClaimsMaterialNumbers as materialNumbers
 		on materialNumbers.ProductPackID = cd.ProductPackID
-	left join CalculatedBrandVolumes as calcbrandvolumes
-		on calcbrandvolumes.OfferID = cd.OfferID
-		and calcbrandvolumes.ProductPackID = cd.ProductPackID
 	left join MasterData.CountryCurrency as ctryCurrency
 	    on ctryCurrency.CountryCode = cd.CountryCode{
     *,
@@ -79,13 +76,13 @@ entity ClaimDataCalculatedView as select from ClaimsData.ClaimData as cd
     cd.SKUCountry.GOV_CODE,
 	cd.FASTDistributionAgreementType,
     materialNumbers.MaterialNumbers,
-	calcbrandvolumes.BrandUsedCalculatedVolume,
-	calcbrandvolumes.BrandContractCalculatedVolume,
+	cd.BrandUsedCalculatedVolume,
+	cd.BrandContractCalculatedVolume,
 	CASE 
-        WHEN calcbrandvolumes.BrandContractCalculatedVolume != 0 
-        THEN calcbrandvolumes.BrandUsedCalculatedVolume 
+        WHEN cd.BrandContractCalculatedVolume != 0 
+        THEN cd.BrandUsedCalculatedVolume 
               / 
-             calcbrandvolumes.BrandContractCalculatedVolume
+             cd.BrandContractCalculatedVolume
         ELSE 0 
     END as CalculatedUsage : Double
 };
@@ -121,10 +118,7 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 	left join ClaimsData.ClaimData as clmd 		
             on clmd.ClaimFiles.ID = clmf.ID 
 	inner join MasterData.PT_TMDIST as distributor
-    		on clmf.DistributorID = distributor.DistributorID
-	left join CalculatedBrandVolumes as calcbrandvolumes
-			on calcbrandvolumes.OfferID = clmd.OfferID
-			and calcbrandvolumes.ProductPackID = clmd.ProductPackID{
+    		on clmf.DistributorID = distributor.DistributorID{
 		clmf.ID as ClaimFileID,
 		clmd.ID as ClaimDataID,
 		clmd.OfferID,
@@ -145,13 +139,13 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 		clmd.WholesalerContractPrice,
 		clmd.Quantity * clmd.WholesalerPurchasePrice as WholesalerPurchasedAmount: Double, 
 		clmd.Quantity * clmd.WholesalerContractPrice as NetSales: Double,
-		calcbrandvolumes.BrandContractCalculatedVolume,
-		calcbrandvolumes.BrandUsedCalculatedVolume,
+		clmd.BrandContractCalculatedVolume,
+		clmd.BrandUsedCalculatedVolume,
 		CASE 
-			WHEN calcbrandvolumes.BrandContractCalculatedVolume != 0 
-			THEN calcbrandvolumes.BrandUsedCalculatedVolume 
+			WHEN clmd.BrandContractCalculatedVolume != 0 
+			THEN clmd.BrandUsedCalculatedVolume 
 				/ 
-				calcbrandvolumes.BrandContractCalculatedVolume
+				clmd.BrandContractCalculatedVolume
 			ELSE 0 
 		END as ContractBrandUsage : Double,
 		clmf.DateFrom,
@@ -189,8 +183,8 @@ entity PLExtractClaimFilesView as select from ClaimsData.ClaimFiles as clmf
 		clmd.WholesalerPurchasePrice,
 		clmd.WholesalerContractPrice,
 		clmd.Quantity,
-		calcbrandvolumes.BrandContractCalculatedVolume,
-		calcbrandvolumes.BrandUsedCalculatedVolume,
+		clmd.BrandContractCalculatedVolume,
+		clmd.BrandUsedCalculatedVolume,
 		clmf.DateFrom,
 		clmf.DateTo,
 		clmf.CountryCode,

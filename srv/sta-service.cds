@@ -1153,9 +1153,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             on cd.OfferID = offer.OfferID
         left join ClaimsViews.CountryCurrencyView as CountryCurrency
             on cf.CountryCode = CountryCurrency.CountryCode
-        left join ClaimsViews.CalculatedBrandVolumes as calcbrandvolumes
-			on calcbrandvolumes.OfferID = cd.OfferID
-			and calcbrandvolumes.ProductPackID = cd.ProductPackID
         {
             key cd.ID,
             cf.DateFrom,
@@ -1187,10 +1184,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             offer.TenderID,
 	        CountryCurrency.Currency,
             CASE 
-                WHEN calcbrandvolumes.BrandContractCalculatedVolume != 0 
+                WHEN cd.BrandContractCalculatedVolume != 0 
                     THEN cd.Product.RequestedVolume 
                         / 
-                    calcbrandvolumes.BrandContractCalculatedVolume
+                    cd.BrandContractCalculatedVolume
                 ELSE 0 
             END as ContractBrandUsage : Double,
         } where cf.CountryCode = 'PL'
@@ -1225,7 +1222,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             offer.TenderID,
 	        CountryCurrency.Currency,
             cd.BrandId,
-            calcbrandvolumes.BrandContractCalculatedVolume;
+            cd.BrandContractCalculatedVolume;
 
     entity OverviewSectionsView as select from SalesReportsView as ow{
             key ow.ID,
