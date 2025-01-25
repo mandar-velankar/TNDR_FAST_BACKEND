@@ -4670,6 +4670,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				NLStaticField2: 'NA',
 				PL_VolumeInPacks: PL_VolumeInPacks,
 				PNM_VALUE		: PNM_VALUE,
+				MaxNetPricePerPack  : productConditionstmp[0] && (productConditionstmp[0].Price1 * offerProduct.PACKSIZE) || 0
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -5465,6 +5466,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.PNM_VALUE = prd.COUNTRY_CODE === 'PL' ? prd.PNM_VALUE && formatPolandPrices(prd.PNM_VALUE) : prd.PNM_VALUE;
 			prd.PL_VolumeInPacks = prd.COUNTRY_CODE === 'PL' ? prd.PL_VolumeInPacks && formatPolandQuantity(prd.PL_VolumeInPacks) : prd.PL_VolumeInPacks;
 			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE === 'PL' ? prd.REQUESTED_QUANTITY && formatPolandQuantity(prd.REQUESTED_QUANTITY) : prd.REQUESTED_QUANTITY;
+			prd.MaxNetPricePerPack = prd.COUNTRY_CODE === 'PL' ? prd.MaxNetPricePerPack && formatPolandPrices(prd.MaxNetPricePerPack) : prd.MaxNetPricePerPack;
 
 		});
 
