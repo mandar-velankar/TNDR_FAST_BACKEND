@@ -2921,6 +2921,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NLStaticField2                      : String;
             PL_VolumeInPacks                    : Double;
             PNM_VALUE                           : Double;
+            MaxNetPricePerPack                          : Double;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
