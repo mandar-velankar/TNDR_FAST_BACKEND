@@ -735,6 +735,7 @@ module.exports = async (srv) => {
 		delete req.data.OfferStatus;
 		delete req.data.InstituteID;
         delete req.data.Channel;
+        delete req.data.TenderName;
 		}
 		catch(error){
             console.error('Error in OfferFormView CREATE');
