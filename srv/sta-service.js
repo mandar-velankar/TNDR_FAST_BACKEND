@@ -6687,7 +6687,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 
 			async function fnCalculateFields(item){
-				item.SpecialPrice = parseFloat(item.Price1 / (1 + item.Level2Discount1));
+				item.SpecialPrice = parseFloat(item.Price1 / (1 + parseFloat(item.Level2Discount1)));
 				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - item.COGS) / item.SpecialPrice : 0;
 			};
 
