@@ -2233,28 +2233,28 @@ module.exports = async (srv) => {
 				CountryCode: req.data.CountryCode,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
-				NetPrice: req.data.SpecialPrice,
-				Price0: req.data.BasePrice,
-				Price1: req.data.SpecialPrice, 
-				Price2: req.data.SpecialPrice,
+				NetPrice: req.data.SpecialPrice || 0,
+				Price0: req.data.BasePrice || 0,
+				Price1: req.data.SpecialPrice || 0, 
+				Price2: req.data.SpecialPrice || 0,
 				Level2Discount1: 0,
-				Level2Discount2: req.data.Margin,
-				OfferPrice: req.data.SpecialPrice,
-				NetOfferPrice: req.data.SpecialPrice,
+				Level2Discount2: req.data.Margin || 0,
+				OfferPrice: req.data.SpecialPrice || 0,
+				NetOfferPrice: req.data.SpecialPrice || 0,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"WithMaximumPrice": {
 				CountryCode: req.data.CountryCode,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
-				NetPrice: req.data.SpecialPrice,
-				Price0: req.data.BasePrice,
-				Price1: req.data.Price1, 
-				Price2: req.data.SpecialPrice,
-				Level2Discount1: req.data.Level2Discount1,
-				Level2Discount2: req.data.Margin,
-				OfferPrice: req.data.SpecialPrice,
-				NetOfferPrice: req.data.SpecialPrice,
+				NetPrice: req.data.SpecialPrice || 0,
+				Price0: req.data.BasePrice || 0,
+				Price1: req.data.Price1 || 0, 
+				Price2: req.data.SpecialPrice || 0,
+				Level2Discount1: req.data.Level2Discount1 || 0,
+				Level2Discount2: req.data.Margin || 0,
+				OfferPrice: req.data.SpecialPrice || 0,
+				NetOfferPrice: req.data.SpecialPrice || 0,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			}
 		}
@@ -6650,8 +6650,23 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				});
 				if (priceConditions.length > 0) {
 					await Promise.all(
-						priceConditions.map(item => 
-							UPDATE(PriceCondition).with({ Level2Discount1: data.Custom_Double_9 }).where({ ID: item.ID }) 
+						priceConditions.flatMap(item => 
+							{
+								const maxWholealerMargin = data.Custom_Double_9 || 0;
+								const specialPrice = parseFloat(item.Price1 / (1 + parseFloat(maxWholealerMargin)));
+
+								return [
+									UPDATE(PriceCondition).with({ Level2Discount1: maxWholealerMargin }).where({ ID: item.ID }),
+									UPDATE(PT_TMBDPR).with({ OfferPrice: specialPrice,
+										NetofferPrice: specialPrice,
+										NetPrice: specialPrice 
+									}).where({ 
+										OfferID: item.OfferID, 
+										ProductCode: item.ProductCode 
+									}),
+								]
+							}
+							
 						)
 					);
 				}
