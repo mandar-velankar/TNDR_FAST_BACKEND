@@ -673,7 +673,7 @@ module.exports = (srv) => {
         const { StartDate, Type, PRODUCTPACKID,Margin , WPPWithoutTax, DistributorID } = req.data;
         !StartDate && req.error({code: 400, message: 'Start Date is required', target: 'StartDate'});
         !Type && req.error({code: 400, message: 'Type is required', target: 'Type'});
-        !Margin && req.error({code: 400, message: 'Margin is required', target: 'Margin'});
+        // !Margin && req.error({code: 400, message: 'Margin is required', target: 'Margin'});
         !WPPWithoutTax && req.error({code: 400, message: 'WPP Without Tax is required', target: 'WPPWithoutTax'});
 
 		//check if dates are correct
@@ -971,7 +971,11 @@ module.exports = (srv) => {
 			return req.reject(404, 'No template found for templateid:' + templateId);
 		}
 		//Filtering
-		const fullWhere = cds.parse.expr(`StartDate <= date'${validDate}' and EndDate >= date'${validDate}' and DistributorID = ${distributorID}`);
+		const fullWhere = cds.parse.expr(`(StartDate <= date'${validDate}' or StartDate = null) 
+										and (EndDate >= date'${validDate}' or EndDate = null) 
+										and (PPPStartDate <= date'${validDate}' or PPPStartDate = null) 
+										and (PPPEndDate >= date'${validDate}' or PPPEndDate = null) 
+										and DistributorID = ${distributorID}`);
 		const query = SELECT.from(NLWPPExcelExtract).where(fullWhere);
 
 		//Sorting
@@ -988,8 +992,9 @@ module.exports = (srv) => {
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
 		});
+		const formatedValidDate = validDate && ServiceHelper.formatDate(validDate, '', 'DD/MM/YYYY');
 
-		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData, formatedValidDate },1);
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

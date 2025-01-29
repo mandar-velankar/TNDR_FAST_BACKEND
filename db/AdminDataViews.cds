@@ -16,5 +16,6 @@ entity Users as select from AdminData.PT_TMUSER as User{
 entity UserCountries as select from AdminData.PT_TMUSERCTRY as UserCountries{
 	key UserCountries.User.UserID as USER_ID,
     key UserCountries.CountryCode as COUNTRY_CODE,
+    key UserCountries.Application,
     UserCountries.Country.CountryName as COUNTRY_NAME,
 }where UserCountries.ActiveRecord = 'Yes';
