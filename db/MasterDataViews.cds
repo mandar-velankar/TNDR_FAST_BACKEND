@@ -491,7 +491,6 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 		on materialNumbers.ProductPackID = ctprdpck.PRODUCTPACKID
 	left join MasterData.NLPPP as nlppp
 		on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
-		and nlppp.ID = wholesalepp.NLPPP_ID
 	left join WholesalePurchasePriceApprovalsCount as approvalscount
 		on approvalscount.WholesalePurchasePriceID = wholesalepp.ID{
 		key wholesalepp.ID as WholesalePurchasePriceID,
