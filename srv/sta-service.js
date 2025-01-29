@@ -2274,7 +2274,7 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				NetPrice: req.data.SpecialPrice || 0,
 				Price0: req.data.BasePrice || 0,
-				Price1: req.data.Price1 || 0, 
+				Price1: req.data.Price1 || 0,
 				Price2: req.data.SpecialPrice || 0,
 				Level2Discount1: req.data.Level2Discount1 || 0,
 				Level2Discount2: req.data.Margin || 0,
@@ -6714,8 +6714,17 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 								const specialPrice = parseFloat(item.Price1 / (1 + parseFloat(maxWholealerMargin)));
 
 								return [
-									UPDATE(PriceCondition).with({ Level2Discount1: maxWholealerMargin }).where({ ID: item.ID }),
-									UPDATE(PT_TMBDPR).with({ OfferPrice: specialPrice,
+									UPDATE(PriceCondition).with({ 
+										NetPrice: specialPrice,
+										Price2: specialPrice,
+										OfferPrice: specialPrice,
+										NetOfferPrice: specialPrice,
+										Level2Discount1: maxWholealerMargin 
+									}).where({ 
+										ID: item.ID 
+									}),
+									UPDATE(PT_TMBDPR).with({ 
+										OfferPrice: specialPrice,
 										NetofferPrice: specialPrice,
 										NetPrice: specialPrice 
 									}).where({ 
