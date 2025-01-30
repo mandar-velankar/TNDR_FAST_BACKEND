@@ -735,6 +735,7 @@ module.exports = async (srv) => {
 		delete req.data.OfferStatus;
 		delete req.data.InstituteID;
         delete req.data.Channel;
+        delete req.data.TenderName;
 		}
 		catch(error){
             console.error('Error in OfferFormView CREATE');
@@ -2232,28 +2233,28 @@ module.exports = async (srv) => {
 				CountryCode: req.data.CountryCode,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
-				NetPrice: req.data.SpecialPrice,
-				Price0: req.data.BasePrice,
-				Price1: req.data.SpecialPrice, 
-				Price2: req.data.SpecialPrice,
+				NetPrice: req.data.SpecialPrice || 0,
+				Price0: req.data.BasePrice || 0,
+				Price1: req.data.SpecialPrice || 0, 
+				Price2: req.data.SpecialPrice || 0,
 				Level2Discount1: 0,
-				Level2Discount2: req.data.Margin,
-				OfferPrice: req.data.SpecialPrice,
-				NetOfferPrice: req.data.SpecialPrice,
+				Level2Discount2: req.data.Margin || 0,
+				OfferPrice: req.data.SpecialPrice || 0,
+				NetOfferPrice: req.data.SpecialPrice || 0,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"WithMaximumPrice": {
 				CountryCode: req.data.CountryCode,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
-				NetPrice: req.data.SpecialPrice,
-				Price0: req.data.BasePrice,
-				Price1: req.data.Price1, 
-				Price2: req.data.SpecialPrice,
-				Level2Discount1: req.data.Level2Discount1,
-				Level2Discount2: req.data.Margin,
-				OfferPrice: req.data.SpecialPrice,
-				NetOfferPrice: req.data.SpecialPrice,
+				NetPrice: req.data.SpecialPrice || 0,
+				Price0: req.data.BasePrice || 0,
+				Price1: req.data.Price1 || 0,
+				Price2: req.data.SpecialPrice || 0,
+				Level2Discount1: req.data.Level2Discount1 || 0,
+				Level2Discount2: req.data.Margin || 0,
+				OfferPrice: req.data.SpecialPrice || 0,
+				NetOfferPrice: req.data.SpecialPrice || 0,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			}
 		}
@@ -4645,6 +4646,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				NLStaticField2: 'NA',
 				PL_VolumeInPacks: PL_VolumeInPacks,
 				PNM_VALUE		: PNM_VALUE,
+				MaxNetPricePerPack  : productConditionstmp[0] && (productConditionstmp[0].Price1 * offerProduct.PACKSIZE) || 0
 			}
 		});
 		let resolvedResults = await Promise.all(results);
@@ -5439,6 +5441,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			prd.PNM_VALUE = prd.COUNTRY_CODE === 'PL' ? prd.PNM_VALUE && formatPolandPrices(prd.PNM_VALUE) : prd.PNM_VALUE;
 			prd.PL_VolumeInPacks = prd.COUNTRY_CODE === 'PL' ? prd.PL_VolumeInPacks && formatPolandQuantity(prd.PL_VolumeInPacks) : prd.PL_VolumeInPacks;
 			prd.REQUESTED_QUANTITY = prd.COUNTRY_CODE === 'PL' ? prd.REQUESTED_QUANTITY && formatPolandQuantity(prd.REQUESTED_QUANTITY) : prd.REQUESTED_QUANTITY;
+			prd.MaxNetPricePerPack = prd.COUNTRY_CODE === 'PL' ? prd.MaxNetPricePerPack && formatPolandPrices(prd.MaxNetPricePerPack) : prd.MaxNetPricePerPack;
 
 		});
 
@@ -6472,10 +6475,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				}
 			});
 	
-			const calculateRealAverage = (values) => {
-				if (!values.length) return null;
-				const sumPrice = values.reduce((accumulator, currentValue) => accumulator + currentValue,0);
-				return sumPrice / values.length ;
+			const calculateRealAverage = (prices, quantities) => {
+				if (!prices.length || !quantities.length) return 0;
+			
+				const totalWeightedPrice = prices.reduce((acc, price, index) => acc + price * quantities[index], 0);
+				const totalQuantity = quantities.reduce((acc, qty) => acc + qty, 0);
+			
+				return totalQuantity !== 0 ? totalWeightedPrice / totalQuantity : 0;
 			};
 
 			const calculateMin = (prices) => {
@@ -6503,9 +6509,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			uniqueBrands.forEach(brand => {
 				const brandInfo = brandData[brand.BrandName];
 	
-				let minPrice = brandInfo.prices.length > 0 ? calculateMin(brandInfo.prices) : 0;
-				let maxPrice = brandInfo.prices.length > 0 ? calculateMax(brandInfo.prices) : 0;
-				let avgPrice = brandInfo.prices.length > 0 ? calculateRealAverage(brandInfo.prices) : 0;
+				let minPrice = brandInfo.length > 0 ? calculateMin(brandInfo.prices) : 0;
+				let maxPrice = brandInfo.length > 0 ? calculateMax(brandInfo.prices) : 0;
+				let avgPrice = brandInfo.length > 0 ? calculateRealAverage(brandInfo.prices, brandInfo.QuantityMl) : 0;
 	
 				brand.MinPrice = minPrice;
 				brand.MaxPrice = maxPrice;
@@ -6627,7 +6633,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 
 			async function fnCalculateFields(item){
-				item.SpecialPrice = parseFloat(item.Price1 / (1 + item.Level2Discount1));
+				item.SpecialPrice = parseFloat(item.Price1 / (1 + parseFloat(item.Level2Discount1)));
 				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - item.COGS) / item.SpecialPrice : 0;
 			};
 
@@ -6647,8 +6653,32 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				});
 				if (priceConditions.length > 0) {
 					await Promise.all(
-						priceConditions.map(item => 
-							UPDATE(PriceCondition).with({ Level2Discount1: data.Custom_Double_9 }).where({ ID: item.ID }) 
+						priceConditions.flatMap(item => 
+							{
+								const maxWholealerMargin = data.Custom_Double_9 || 0;
+								const specialPrice = parseFloat(item.Price1 / (1 + parseFloat(maxWholealerMargin)));
+
+								return [
+									UPDATE(PriceCondition).with({ 
+										NetPrice: specialPrice,
+										Price2: specialPrice,
+										OfferPrice: specialPrice,
+										NetOfferPrice: specialPrice,
+										Level2Discount1: maxWholealerMargin 
+									}).where({ 
+										ID: item.ID 
+									}),
+									UPDATE(PT_TMBDPR).with({ 
+										OfferPrice: specialPrice,
+										NetofferPrice: specialPrice,
+										NetPrice: specialPrice 
+									}).where({ 
+										OfferID: item.OfferID, 
+										ProductCode: item.ProductCode 
+									}),
+								]
+							}
+							
 						)
 					);
 				}
