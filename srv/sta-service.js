@@ -6533,10 +6533,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				}
 			});
 	
-			const calculateRealAverage = (values) => {
-				if (!values.length) return null;
-				const sumPrice = values.reduce((accumulator, currentValue) => accumulator + currentValue,0);
-				return sumPrice / values.length ;
+			const calculateRealAverage = (prices, quantities) => {
+				if (!prices.length || !quantities.length) return 0;
+			
+				const totalWeightedPrice = prices.reduce((acc, price, index) => acc + price * quantities[index], 0);
+				const totalQuantity = quantities.reduce((acc, qty) => acc + qty, 0);
+			
+				return totalQuantity !== 0 ? totalWeightedPrice / totalQuantity : 0;
 			};
 
 			const calculateMin = (prices) => {
@@ -6564,9 +6567,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			uniqueBrands.forEach(brand => {
 				const brandInfo = brandData[brand.BrandName];
 	
-				let minPrice = brandInfo.prices.length > 0 ? calculateMin(brandInfo.prices) : 0;
-				let maxPrice = brandInfo.prices.length > 0 ? calculateMax(brandInfo.prices) : 0;
-				let avgPrice = brandInfo.prices.length > 0 ? calculateRealAverage(brandInfo.prices) : 0;
+				let minPrice = brandInfo.length > 0 ? calculateMin(brandInfo.prices) : 0;
+				let maxPrice = brandInfo.length > 0 ? calculateMax(brandInfo.prices) : 0;
+				let avgPrice = brandInfo.length > 0 ? calculateRealAverage(brandInfo.prices, brandInfo.QuantityMl) : 0;
 	
 				brand.MinPrice = minPrice;
 				brand.MaxPrice = maxPrice;

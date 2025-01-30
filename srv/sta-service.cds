@@ -1170,7 +1170,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             cd.PRODUCTPACKNAME,
             cd.EANNumber,
             cd.Quantity,
-            cd.Quantity * cd.SKU.CONCENTRATION as QuantityMl: Double,
+            cd.Quantity * cd.SKU.CONCENTRATION * cd.SKU.PACKFACTOR as QuantityMl: Double,
             cd.WholesalerPurchasePrice,
             cd.WholesalerContractPrice,
             cf.WholesalerPurchaseAmount,
@@ -1190,6 +1190,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                     cd.BrandContractCalculatedVolume
                 ELSE 0 
             END as ContractBrandUsage : Double,
+            ((cd.WholesalerContractPrice * cd.Quantity) / (cd.Quantity * cd.SKU.CONCENTRATION * cd.SKU.PACKFACTOR)) as PricePerMl: Double
         } where cf.CountryCode = 'PL'
         group by 
             cd.ID,
@@ -1210,6 +1211,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             cd.EANNumber,
             cd.Quantity,
             cd.SKU.CONCENTRATION,
+            cd.SKU.PACKFACTOR,
             cd.WholesalerPurchasePrice,
             cd.WholesalerContractPrice,
             cf.WholesalerPurchaseAmount,
@@ -1240,9 +1242,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             ow.DateTo,
             ow.QuantityMl AS QuantitySold : Double,
             ow.TotalSales,
-            ow.WholesalerContractPrice AS MinPrice : Double,
-            ow.WholesalerContractPrice AS MaxPrice : Double,
-            ow.WholesalerContractPrice AS AvgPrice : Double,
+            ow.PricePerMl AS MinPrice : Double,
+            ow.PricePerMl AS MaxPrice : Double,
+            ow.PricePerMl AS AvgPrice : Double,
             ow.BrandId,
             ow.BrandName,
         } where ow.BrandName IS NOT NULL;
