@@ -6458,6 +6458,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				if (!brandData[item.BrandName]) {
 					brandData[item.BrandName] = {
 						prices: [],
+						quantities: [],
 						totalQuantitySold: 0,
 						totalSales: 0
 					};
@@ -6465,6 +6466,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 				if (item.MinPrice !== null && item.MaxPrice !== null) {
 					brandData[item.BrandName].prices.push(item.AvgPrice);
+					brandData[item.BrandName].quantities.push(item.QuantitySold);
 				}
 	
 				if (item.QuantitySold !== null) {
@@ -6509,9 +6511,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			uniqueBrands.forEach(brand => {
 				const brandInfo = brandData[brand.BrandName];
 	
-				let minPrice = brandInfo.length > 0 ? calculateMin(brandInfo.prices) : 0;
-				let maxPrice = brandInfo.length > 0 ? calculateMax(brandInfo.prices) : 0;
-				let avgPrice = brandInfo.length > 0 ? calculateRealAverage(brandInfo.prices, brandInfo.QuantityMl) : 0;
+				let minPrice = brandInfo.prices.length > 0 ? calculateMin(brandInfo.prices) : 0;
+				let maxPrice = brandInfo.prices.length > 0 ? calculateMax(brandInfo.prices) : 0;
+				let avgPrice = brandInfo.prices.length > 0 ? calculateRealAverage(brandInfo.prices, brandInfo.quantities) : 0;
 	
 				brand.MinPrice = minPrice;
 				brand.MaxPrice = maxPrice;
