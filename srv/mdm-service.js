@@ -992,8 +992,9 @@ module.exports = (srv) => {
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
 		});
+		const formatedValidDate = validDate && ServiceHelper.formatDate(validDate, '', 'DD/MM/YYYY');
 
-		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData, formatedValidDate },1);
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
