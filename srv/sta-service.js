@@ -6594,25 +6594,68 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	
 	
 	
-
+		/** The below logic to generate PolandSalesReport is moved to the frontend 
+		 * 	due to the issue while parsing data to the excel template
+		 * the data volume was creating sudden memory peak and causing system freeze */ 
+	/* 
 	srv.on('READ', 'ExtractPolandSalesReport', async (req, next) => {
 		try{
+		let startTime, endTime;
 		const tx = cds.tx(req);
 		const {templateId, TenderID, CountryCode, DistributorID, BrandID, ProductPackID, KAM_Territory, InstituteType, InstituteID, DateFrom, DateTo} = req.data;
 
-		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+		console.log("Fetching template from ExcelTemplate...");
+		startTime = moment();
+		console.log("Start Time: ", startTime.format());
+		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: 13 });
+		endTime = moment();
+		console.log("End Time: ", endTime.format());
+		console.log("Finished fetching the template: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
 
+		console.log("Start building the SalesReportFullWhereQuery...");
+		startTime = moment();
+		console.log("Start Time: ", startTime.format());
 		// Getting full where query
 		const query = buildSalesReportFullWhereQuery(TenderID, CountryCode, DistributorID, BrandID, ProductPackID, KAM_Territory, InstituteType, InstituteID, DateFrom, DateTo);
+		endTime = moment();
+		console.log("End Time: ", endTime.format());
+		console.log("Finished building the query: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+
+		console.log("Start Executing the SalesReportExtract Select Query...");
+		startTime = moment();
+		console.log("Start Time: ", startTime.format());
+
         const salesReportExtract = await tx.run(query);
+		endTime = moment();
+		console.log("End Time: ", endTime.format());
+		console.log("Finished Executing the SalesReportExtract Select Query: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
+		console.log(`Number of SalesReportExtract data fetched: ${salesReportExtract.length}`);
+
+		const isCountQuery = Array.isArray(salesReportExtract) && salesReportExtract.some(item => '$count' in item);
 		
+		if (isCountQuery) {
+			return salesReportExtract;
+		}
+		
+		console.log("Start formatting the SalesReportExtract Data...");
+		startTime = moment();
+		console.log("Start Time: ", startTime.format());
 		const excelData = formattedSalesReportExtract(salesReportExtract, CountryCode);
+		endTime = moment();
+		console.log("End Time: ", endTime.format());
+		console.log("Finished formatting the SalesReportExtract Data: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
 		
 		if (!template || !template.content) {
 			return req.reject(404, 'No template found for templateid:' + templateId);
 		}
 
+		console.log("Start parsing the SalesReportExtract data to excel template...");
+		startTime = moment();
+		console.log("Start Time: ", startTime.format());
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
+		endTime = moment();
+		console.log("End Time: ", endTime.format());
+		console.log("Finished parsing the SalesReportExtract data to excel template: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -6682,6 +6725,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		return excelData
 	}
+	*/
+
 	srv.after('READ','PriceConditionWithMaximumPriceView', (items, req) => {
 		try{
 			if(!items) return [];
