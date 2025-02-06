@@ -145,6 +145,20 @@ module.exports = (srv) => {
 		return req;
 	});
 
+	srv.on('READ', 'PT_TMINST', async (req) => {
+		const tx = cds.tx(req);
+		
+		let result = [];
+		let tmvQuery = SELECT.from(req.query.SELECT.from);
+		req.query.SELECT.columns && (tmvQuery.columns(req.query.SELECT.columns));
+		req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+		req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+
+		result = await tx.run(tmvQuery);
+
+		return result;
+	});
+
 
 	srv.before('CREATE', 'CountryBrandProducts', async (req) => {
 		const nextProductID = await getNextValue(PT_TMCTPRDPCK, "PRODUCTPACKID");
