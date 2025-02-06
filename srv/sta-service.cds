@@ -902,12 +902,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity NotificationUserList as select from AdminData.PT_TMUSERCTRY{
         key CountryCode,
         key CWID,
+        key Application,
         User: redirected to Users,
         ActiveRecord,
         User.Role,
         User.UserName,
         User.UserEmail
-    }where CountryCode = 'NL' and User.Role = 'Hospital Manager';
+    }where CountryCode = 'NL' and User.Role = 'Hospital Manager' and Application = 'STA';
     
     entity InstitutesInGroup as select from PT_TMINST as inst
     inner join MasterData.PT_TMINSHIER as hier 
