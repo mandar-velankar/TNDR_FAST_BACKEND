@@ -1049,8 +1049,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             on offerStatus.OFFER_ID = offer.OfferID
         left join TransactionalData.ContractInfomation as contractinfo
             on contractinfo.OfferID = offer.OfferID
-            and contractinfo.ProductCode = product.ProductCode {
-
+            and contractinfo.ProductCode = product.ProductCode
+            and contractinfo.InstituteID = childInst.InstituteID {
         	tender.TenderID,
             key offer.OfferID,
             key product.ProductCode,
