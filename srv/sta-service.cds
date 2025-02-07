@@ -902,12 +902,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity NotificationUserList as select from AdminData.PT_TMUSERCTRY{
         key CountryCode,
         key CWID,
+        key Application,
         User: redirected to Users,
         ActiveRecord,
         User.Role,
         User.UserName,
         User.UserEmail
-    }where CountryCode = 'NL' and User.Role = 'Hospital Manager';
+    }where CountryCode = 'NL' and User.Role = 'Hospital Manager' and Application = 'STA';
     
     entity InstitutesInGroup as select from PT_TMINST as inst
     inner join MasterData.PT_TMINSHIER as hier 
@@ -998,6 +999,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         left join SelectedContractDuration as selectedcontractduration
             on selectedcontractduration.OfferID = offer.OfferID
             and selectedcontractduration.ProductCode = product.ProductCode
+        left join NLExtractOfferChildInstUnderParent as childInst
+            on childInst.OfferID = offer.OfferID
+            and childInst.ProductCode = product.ProductCode
             {
             key tender.TenderID,
             key offer.OfferID,
@@ -1011,7 +1015,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             selectedcontractduration.ContractStartDate as EffectiveDate : Date,
             selectedcontractduration.ContractEndDate as ExpiryDate : Date,
             tender.BidDueDate,
-            offerStatus.STATUS,
+            ifnull(childInst.STATUS, offerStatus.STATUS) as STATUS: String,
             tender.Custom.String_1 as ManagedBy : String,
             tender.PublicationDate,
             ctprdpck.GOV_CODE,
@@ -1025,87 +1029,52 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             contractdur.MinContractDuration as minContrDur: Double,
             PT_TMBDPR.NetPrice,
             res.Outcome,
-            ifnull(inst.InstituteName, '') as childInstituteName: String,
-            nldist.DistributionType,
-            selectedcontractduration.ContractDuration,
-        }where(tender.CountryCode = 'NL' and tender.Active = 1 and offer.Active = 1 and tender.Custom.String_3 <> '' and inst.InstituteType <> 'Buying Group')
-    union select from TransactionalData.PT_TMTEND as tender
-        inner join TransactionalData.PT_TMOFRS as offer
-            on offer.TenderID = tender.TenderID
-        inner join MasterData.PT_TMINST as inst
-            on inst.CountryCode = tender.CountryCode
-            and inst.InstituteID = tender.InstituteID
-        left join TransactionalData.PT_TMQUTO as qoutation
-            on qoutation.OfferID = offer.OfferID
-            and qoutation.Active = 1
-        left join TransactionalDataViews.OfferStatus as offerStatus
-            on offerStatus.OFFER_ID = offer.OfferID
-        left join TransactionalData.PT_TMOFPR as product
-            on product.OfferID = offer.OfferID
-            and product.Active = 1
-        inner join MasterData.PT_TMCTPRDPCK as ctprdpck
-            on ctprdpck.PRODUCTPACKID = product.ProductCode
-            and ctprdpck.COUNTRYCODE = tender.CountryCode
-        inner join MasterData.PT_TMPRDPCK as productpack
-            on productpack.PRODUCTPACKID = product.ProductCode
-        left join TransactionalData.PriceCondition as pc
-            on pc.CountryCode = tender.CountryCode
-            and pc.OfferID = offer.OfferID
-            and pc.ProductCode = product.ProductCode
-        left join TransactionalData.PT_TMTRRES as res
-            on res.OfferID = offer.OfferID
-            and res.ProductCode = product.ProductCode
-        left join TransactionalData.PT_TMBDPR as PT_TMBDPR
-            on PT_TMBDPR.OfferID = offer.OfferID
-            and PT_TMBDPR.ProductCode = product.ProductCode
-            and PT_TMBDPR.Active = 1
-        left join TransactionalDataViews.NLContractDurationsView as contractdur
-            on contractdur.OfferID = offer.OfferID
-            and contractdur.PriceCondition_ID = pc.ID
-        left join NLDistributorsView as nldist
-            on nldist.OfferID = offer.OfferID
-            and nldist.ProductPackID = product.ProductCode
-        left join SelectedContractDuration as selectedcontractduration
-            on selectedcontractduration.OfferID = offer.OfferID
-            and selectedcontractduration.ProductCode = product.ProductCode
-        left join TransactionalData.ContractInfomation as contractinfo
-            on contractinfo.OfferID = offer.OfferID
-            and contractinfo.ProductCode = product.ProductCode
-            {
-            key tender.TenderID,
-            key offer.OfferID,
-            offer.Custom.String_1 as Source : String,
-            case when inst.InstituteType = 'Buying Group'
-                then 'Purchasing Group'
-                else 'BILATERAAL'
-            end as Inkoopgroep: String,
-            inst.InstituteName,
-            tender.TenderName,
-            contractinfo.ContractStartDate as EffectiveDate : Date,
-            contractinfo.ContractEndDate as ExpiryDate : Date,
-            tender.BidDueDate,
-            offerStatus.STATUS,
-            tender.Custom.String_1 as ManagedBy : String,
-            tender.PublicationDate,
-            ctprdpck.GOV_CODE,
-            productpack.PRODUCTPACKNAME,
-            tender.InstituteID,
-            round(contractdur.MaxOfferPrice, 2) as OfferPrice_3: Double,
-            round(contractdur.AvgOfferPrice, 2) as OfferPrice_2: Double,
-            round(contractdur.MinOfferPrice, 2) as OfferPrice_1: Double,
-            contractdur.MaxContractDuration as maxContrDur: Double,
-            contractdur.AvgContractDuration as secContrDur: Double,
-            contractdur.MinContractDuration as minContrDur: Double,
-            PT_TMBDPR.NetPrice,
-            res.Outcome,
-            case
-                when tender.Custom.String_3 = ''
-                    then ''
-                else contractinfo.InstituteName
-            end as childInstituteName: String,
+            childInst.InstituteName as childInstituteName: String,
             nldist.DistributionType,
             selectedcontractduration.ContractDuration,
         }where(tender.CountryCode = 'NL' and tender.Active = 1 and offer.Active = 1);
+
+    entity NLExtractOfferChildInstUnderParent as select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        left join TransactionalData.PT_TMOFPR as product
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+        inner join InstitutesInGroup as childInst
+            on childInst.ParentInstituteID = tender.InstituteID
+            and childInst.InstituteID <> tender.InstituteID
+            and childInst.CountryCode = tender.CountryCode
+        left join TransactionalDataViews.OfferStatus as offerStatus
+            on offerStatus.OFFER_ID = offer.OfferID
+        left join TransactionalData.ContractInfomation as contractinfo
+            on contractinfo.OfferID = offer.OfferID
+            and contractinfo.ProductCode = product.ProductCode
+            and contractinfo.InstituteID = childInst.InstituteID {
+        	tender.TenderID,
+            key offer.OfferID,
+            key product.ProductCode,
+            childInst.InstituteName,
+            childInst.InstituteID,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Results Recorded' 
+                        then 
+                            case 
+                                when contractinfo.InstituteID is null
+                                    then 'Not Accepted'
+                                else
+                                    'Outcome Accepted'
+                            end
+                else	
+                    offerStatus.STATUS
+            end as STATUS: String
+    }where tender.CountryCode = 'NL';
+
+
     @cds.redirection.target
     entity NLPriceConditions as projection on TransactionalData.NLPriceConditions; 
 
