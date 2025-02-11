@@ -175,7 +175,7 @@ module.exports = (srv) => {
 			// Format Prices
 			ed.WholesalerContractPrice = formatClaimPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerPurchasedAmount = formatClaimPrices(ed.WholesalerPurchasedAmount, countryCodeLocals[CountryCode], CountryCode);
-			ed.FASTContractPrice = formatClaimPrices(ed.FASTContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTContractPrice = CountryCode === 'PL' ? formatClaimPrices(ed.FASTContractPrice, 'en-US', CountryCode) : formatClaimPrices(ed.OfferPrice, 'nl-NL', CountryCode);
 			ed.WholesalerPurchasePrice = formatClaimPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTWholesalerPurchasePrice = formatClaimPrices(ed.FASTWholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerClaim1 = formatClaimPrices(ed.WholesalerClaim1, countryCodeLocals[CountryCode], CountryCode);
@@ -282,13 +282,12 @@ module.exports = (srv) => {
 			ed.RoznicaCenaZakupuPNM = formatClaimPrices(ed.RoznicaCenaZakupuPNM, countryCodeLocals[CountryCode], CountryCode);
 			ed.IloscSztukDoWyrownania = formatClaimPrices(ed.IloscSztukDoWyrownania, countryCodeLocals[CountryCode], CountryCode);
 			ed.TotalWholesalerClaim = formatClaimPrices(ed.TotalWholesalerClaim, countryCodeLocals[CountryCode], CountryCode);
-			ed.FASTContractPrice = formatClaimPrices(ed.FASTContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTContractPrice = CountryCode === 'PL' ? formatClaimPrices(ed.FASTContractPrice, 'en-US', CountryCode) : formatClaimPrices(ed.OfferPrice, 'nl-NL', CountryCode);
 			ed.FASTWholesalerPurchasePrice = formatClaimPrices(ed.FASTWholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerClaim1 = formatClaimPrices(ed.WholesalerClaim1, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTClaim1 = formatClaimPrices(ed.FASTClaim1, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerClaim2 = formatClaimPrices(ed.WholesalerClaim2, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTClaim2 = formatClaimPrices(ed.FASTClaim2, countryCodeLocals[CountryCode], CountryCode);
-			ed.TotalFASTClaim = formatClaimPrices(ed.TotalFASTClaim, countryCodeLocals[CountryCode], CountryCode);
 			ed.TotalFASTClaim = formatClaimPrices(ed.TotalFASTClaim, countryCodeLocals[CountryCode], CountryCode);
 			ed.Balance = formatClaimPrices(ed.Balance, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTContractClaim = formatClaimPrices(ed.FASTContractClaim, countryCodeLocals[CountryCode], CountryCode);
