@@ -5604,6 +5604,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			
 			if (mappedTaiwanFASTData.length === 0) return req.reject(404, "No Zuellig Extracts were found");
 			
+			req._.res.setHeader('Content-type', 'application/json');
 			req._.res.json({
 				data: mappedTaiwanFASTData
 			});
