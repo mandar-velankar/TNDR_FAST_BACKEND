@@ -867,28 +867,32 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity InstitutesInBranchWithParent as select from MasterData.PT_TMINSHIER as h
         inner join MasterData.PT_TMINST as i on h.InstituteID = i.InstituteID {
             i.InstituteID,
-            h.ParentInstituteID
+            h.ParentInstituteID,
+            i.InstituteName,
+            i.PaymentTerms,
+            i.InstituteType
     }where h.ActiveRecord = 'Yes' and
+    h.ParentInstituteID <> h.InstituteID and
     i.ActiveRecord = 'Yes' and
     i.CountryCode = 'TW'
     union select from MasterData.PT_TMINSHIER as h 
         inner join MasterData.PT_TMINST as i on h.ParentInstituteID = i.InstituteID {
             i.InstituteID,
-            h.ParentInstituteID
+            h.ParentInstituteID,
+            i.InstituteName,
+            i.PaymentTerms,
+            i.InstituteType
     }where h.ActiveRecord = 'Yes' and
+    h.ParentInstituteID <> h.InstituteID and
     i.ActiveRecord = 'Yes' and
     i.CountryCode = 'TW';
 
-    entity InstituteInBranchView as select from InstitutesInBranchWithParent as p
-        inner join MasterData.PT_TMINSHIER as h on p.ParentInstituteID = h.ParentInstituteID
-        inner join MasterData.PT_TMINST as i on h.InstituteID = i.InstituteID {
+    entity InstituteInBranchView as select from InstitutesInBranchWithParent as p{
             p.ParentInstituteID,
         key p.InstituteID,
-        key i.InstituteName,
-            i.PaymentTerms
-    }where p.ParentInstituteID <> h.InstituteID 
-    and i.InstituteType <> 'Branch' 
-    and i.ActiveRecord = 'Yes';
+        key p.InstituteName,
+            p.PaymentTerms
+    }where p.InstituteType <> 'Branch';
 
     entity StandardTenderHistory as projection on TransactionalDataViews.StandardTenderHistory;
 
