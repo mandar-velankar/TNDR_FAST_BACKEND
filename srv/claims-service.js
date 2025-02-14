@@ -140,7 +140,7 @@ module.exports = (srv) => {
 			// Format Prices
 			ed.WholesalerContractPrice = ServiceHelper.formatCurrency(Number(ed.WholesalerContractPrice), countryCodeLocals[CountryCode], 2, 2);
 			ed.WholesalerPurchasedAmount = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasedAmount), countryCodeLocals[CountryCode], 2, 2);
-			ed.FASTContractPrice = ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTContractPrice = CountryCode === 'PL' ? ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), 'en-US', 2, 2) : ServiceHelper.formatCurrency(Number(ed.OfferPrice), 'nl-NL', 2, 2);
 			ed.WholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.WholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
 			ed.FASTWholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.FASTWholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
 			ed.WholesalerClaim1 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim1), countryCodeLocals[CountryCode], 2, 2);
@@ -245,7 +245,7 @@ module.exports = (srv) => {
 			ed.RoznicaCenaZakupuPNM = ServiceHelper.formatCurrency(Number(ed.RoznicaCenaZakupuPNM), countryCodeLocals[CountryCode], 2, 2);
 			ed.IloscSztukDoWyrownania = ServiceHelper.formatCurrency(Number(ed.IloscSztukDoWyrownania), countryCodeLocals[CountryCode], 2, 2);
 			ed.TotalWholesalerClaim = ServiceHelper.formatCurrency(Number(ed.TotalWholesalerClaim), countryCodeLocals[CountryCode], 2, 2);
-			ed.FASTContractPrice = ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), countryCodeLocals[CountryCode], 2, 2);
+			ed.FASTContractPrice = CountryCode === 'PL' ? ServiceHelper.formatCurrency(Number(ed.FASTContractPrice), 'en-US', 2, 2) : ServiceHelper.formatCurrency(Number(ed.OfferPrice), 'nl-NL', 2, 2);
 			ed.FASTWholesalerPurchasePrice = ServiceHelper.formatCurrency(Number(ed.FASTWholesalerPurchasePrice), countryCodeLocals[CountryCode], 2, 2);
 			ed.WholesalerClaim1 = ServiceHelper.formatCurrency(Number(ed.WholesalerClaim1), countryCodeLocals[CountryCode], 2, 2);
 			ed.FASTClaim1 = ServiceHelper.formatCurrency(Number(ed.FASTClaim1), countryCodeLocals[CountryCode], 2, 2);
