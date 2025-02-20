@@ -28,6 +28,10 @@ function shouldCompress(req, res) {
   if (type && typeof type === "string" && type.startsWith("text/csv")) {
     return false;
   }
+
+  if (type && typeof type === "string" && (type.startsWith("text/plain") && req.url.includes("TaiwanFASTData"))) {
+    return false;
+  }
   
   // fallback to standard filter function
   return compression.filter(req, res);
