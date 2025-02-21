@@ -1110,7 +1110,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             Countries.CountryCode
     } where Countries.CountryCode = 'PL' and Role = 'KAM';
 
-    entity PT_TMQUTO as projection on TransactionalData.PT_TMQUTO;
     
     entity SalesReportsView as select from ClaimsData.ClaimFiles as cf 
         inner join ClaimsData.ClaimData as cd         
