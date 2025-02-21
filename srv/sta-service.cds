@@ -14,6 +14,9 @@ using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {com.bayer.SXTENDER.ExternalDataViews} from '../db/ExternalDataViews';
 using {UITemplates as UITemplateSrv} from './external/UITemplates';
+using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
+using { com.bayer.SXTENDER.ClaimsViews } from '../db/ClaimsViews';
+
 
 using {
     User,
@@ -211,8 +214,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     entity PT_TMINST   as projection on MasterData.PT_TMINST;
+    entity PT_TMTEND as projection on TransactionalData.PT_TMTEND;
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
     entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
+    entity PT_TMQUTO as projection on TransactionalData.PT_TMQUTO;
     entity PT_TMBDPR as projection on TransactionalData.PT_TMBDPR {
         *,
         Product: redirected to TransactionalData.PT_TMOFPR
@@ -358,8 +363,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             ifnull(PricingPolicy.Value, 0) as VwBudgetedProfitability:Double
     };*/
 
-    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR{
+    entity OfferProductsDetailView as select from TransactionalData.PT_TMOFPR {
         *,
+        key OfferID,
+        key Active,
+        key ProductCode,
+        key LotID,
+        CountryCode,
         SKU.MoleculeName as MoleculeName,
         SKUCountry.CODE1 as Code1,
         SKUCountry.CODE2 as Code2,
@@ -373,6 +383,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKU.PACKFACTOR,
         Offer.Tender.Institute.INCOTerms,
         Offer.Tender.Institute.InstituteName,
+        Offer.Tender.Classification as TenderClassification,
+        @Core.Computed: false
+        ProductActiveSKUs.ACTIVE_MATERIAL_NUMBERS,
+        @Core.Computed: false
+        ProductInActiveSKUs.INACTIVE_MATERIAL_NUMBERS,
         @Core.Computed: false
         case when PricingPolicy.Type = 'BudgetedProfitability'
             then PricingPolicy.Value 
@@ -1097,4 +1112,176 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity PT_TMQUTO as projection on TransactionalData.PT_TMQUTO;
     
+    entity SalesReportsView as select from ClaimsData.ClaimFiles as cf 
+        inner join ClaimsData.ClaimData as cd         
+            on cd.ClaimFiles.ID = cf.ID
+        left join MasterData.PT_TMINST as inst 
+            on inst.InstituteID = cd.MainInstituteID 
+            and inst.CountryCode = cd.CountryCode
+        left join TransactionalData.PT_TMOFRS as offer
+            on cd.OfferID = offer.OfferID
+        left join ClaimsViews.CountryCurrencyView as CountryCurrency
+            on cf.CountryCode = CountryCurrency.CountryCode
+        {
+            key cd.ID,
+            cf.DateFrom,
+            cf.DateTo,
+            cd.OfferID,
+            cf.DistributorID,
+            cf.DistributorName,
+            cd.MainInstituteID,
+            cd.MainInstituteName,
+            cd.External_InstituteId,
+            cf.FilePeriod,
+            cd.BrandId,
+            cd.BrandName,
+            cd.ProductPackID,
+            cd.PRODUCTPACKNAME,
+            cd.EANNumber,
+            cd.Quantity,
+            cd.Quantity * cd.SKU.CONCENTRATION * cd.SKU.PACKFACTOR as QuantityMl: Double,
+            cd.WholesalerPurchasePrice,
+            cd.WholesalerContractPrice,
+            cf.WholesalerPurchaseAmount,
+            sum(cd.WholesalerContractPrice * cd.Quantity) as TotalSales: Double,
+            cd.Product.RequestedVolume,
+            cd.BrandContractVolume,
+            cd.BrandUsedVolume,
+            cf.CountryCode,
+            inst.InstituteType,
+            inst.KAM_Territory,
+            offer.TenderID,
+	        CountryCurrency.Currency,
+            CASE 
+                WHEN cd.BrandContractCalculatedVolume != 0 
+                    THEN cd.Product.RequestedVolume 
+                        / 
+                    cd.BrandContractCalculatedVolume
+                ELSE 0 
+            END as ContractBrandUsage : Double,
+            ((cd.WholesalerContractPrice * cd.Quantity) / (cd.Quantity * cd.SKU.CONCENTRATION * cd.SKU.PACKFACTOR)) as PricePerMl: Double
+        } where cf.CountryCode = 'PL'
+        group by 
+            cd.ID,
+            cf.DateFrom,
+            cf.DateTo,
+            cd.OfferID,
+            cd.DistributorID,
+            cf.DistributorName,
+            cf.DistributorID,
+            cd.MainInstituteName,
+            cd.MainInstituteID,
+            cd.External_InstituteId,
+            cf.FilePeriod,
+            cd.BrandId,
+            cd.BrandName,
+            cd.ProductPackID,
+            cd.PRODUCTPACKNAME,
+            cd.EANNumber,
+            cd.Quantity,
+            cd.SKU.CONCENTRATION,
+            cd.SKU.PACKFACTOR,
+            cd.WholesalerPurchasePrice,
+            cd.WholesalerContractPrice,
+            cf.WholesalerPurchaseAmount, 
+            cf.NetSales,
+            cd.Product.RequestedVolume,
+            cd.BrandContractVolume,
+            cd.BrandUsedVolume,
+            cf.CountryCode,
+            inst.InstituteType,
+            inst.KAM_Territory,
+            offer.TenderID,
+	        CountryCurrency.Currency,
+            cd.BrandId,
+            cd.BrandContractCalculatedVolume;
+
+    entity OverviewSectionsView as select from SalesReportsView as ow{
+            key ow.ID,
+            ow.TenderID,
+            ow.OfferID,
+            ow.CountryCode,
+            ow.DistributorID,
+            ow.MainInstituteName,
+            ow.MainInstituteID,
+            ow.ProductPackID,
+            ow.InstituteType,
+            ow.KAM_Territory,
+            ow.Currency,
+            ow.DateFrom,
+            ow.DateTo,
+            ow.QuantityMl AS QuantitySold : Double,
+            ow.TotalSales,
+            ow.PricePerMl AS MinPrice : Double,
+            ow.PricePerMl AS MaxPrice : Double,
+            ow.PricePerMl AS AvgPrice : Double,
+            ow.BrandId,
+            ow.BrandName,
+        } where ow.BrandName IS NOT NULL;
+           @cds.redirection.target
+        entity SalesReportInstitutesView as select from MasterData.PT_TMINST as inst {
+            *,
+            inst.InstituteTerritory.Territory,
+            inst.InstituteTerritory.IsKAM
+        }order by CountryCode, InstituteName;
+
+    entity ExtractPolandSalesReport {
+        key templateId    : String;
+        key TenderID      : String;
+        key CountryCode   : String;
+        key DistributorID : String;
+        key BrandID       : String;
+        key ProductPackID : String;
+        key KAM_Territory : String;
+        key InstituteType : String;
+        key InstituteID   : String;
+        key DateFrom      : String;
+        key DateTo        : String;
+            content       : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            mediaType     : String      @Core.IsMediaType;
+    };
+
+    entity SalesReportTenderView as Select from TransactionalData.PT_TMTEND as tender
+        inner join MasterData.PT_TMINST as inst 
+            on inst.InstituteID = tender.InstituteID 
+            and inst.CountryCode = tender.CountryCode
+        left outer join TransactionalData.PT_TMOFRS as offer 
+            on offer.TenderID = tender.TenderID 
+            and offer.CountryCode = tender.CountryCode 
+            and offer.Active = 1
+            and offer.ActiveOffer = 1
+        left outer join ClaimsData.ClaimData as cd 
+            on cd.OfferID = offer.OfferID 
+            and cd.CountryCode = tender.CountryCode{
+        tender.createdBy,
+        tender.modifiedBy,
+        case when cd.OfferID is null 
+            then 'No related tender'
+            else offer.TenderID
+        end as TenderID: String,
+        cd.OfferID,
+        tender.CountryCode,
+        tender.SubmittedBy,
+        tender.Active,
+        tender.InstituteID,
+        inst.InstituteType,
+        cd.ProductPackID,
+        cd.BrandId
+    }    
+    where tender.CountryCode = 'PL' and tender.Active = 1
+    group by 
+        tender.createdBy,
+        tender.modifiedBy,
+        case when cd.OfferID is null 
+            then 'No related tender'
+            else offer.TenderID
+        end,
+        cd.OfferID,
+        tender.CountryCode,
+        tender.SubmittedBy,
+        tender.Active,
+        tender.InstituteID,
+        inst.InstituteType,
+        cd.ProductPackID,
+        cd.BrandId;
 }

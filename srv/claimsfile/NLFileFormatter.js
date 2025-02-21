@@ -272,12 +272,14 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					MainCustomerForContract                 : instituteId,
 					FASTPendingCorrection                   : Number(fastPendingCorrection || 0),
 					BrandContractVolume                     : null,
+					BrandContractCalculatedVolume			: null,
 					PercentageUsage                         : null,
 					UsedVolume								: Number(usageCalculation + curr.TotalDelivered),
 					BrandId									: brandId,
 					BrandName								: brandName,
 					Balance                                 : null,
 					BrandUsedVolume                         : null,
+					BrandUsedCalculatedVolume				: null,
 					WholesalerContractPriceClaim            : (!curr.Claim1Amount && curr.Claim1Amount !== 0) ? null : Number(curr.Claim1Amount || 0),
 					WholesalerDistributionArrangementClaim  : (!curr.Claim2Amount && curr.Claim2Amount !== 0) ? null : Number(curr.Claim2Amount || 0),
 					TotalWholesalerClaim                    : (!curr.ClaimTotal && curr.ClaimTotal !== 0) ? null : Number(curr.ClaimTotal || 0),
@@ -303,6 +305,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					IloscSztukDoWyrownania                  : null,
 					NrFakturyZakupu                         : null,
 					SKUCode									: sKUCode,
+					RowOrder								: null,
 					ClaimFiles_ID					 		: UUID
 				}
 			);

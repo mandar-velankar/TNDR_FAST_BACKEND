@@ -818,3 +818,21 @@ group by
 	wppapprovals.ApproverCWID,
 	ctryCurrency.Currency,
 	dist.DistributorName;
+
+entity ProductActiveMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
+    key ProductPackID as ProductCode,
+    key CountryCode,
+    STRING_AGG(SKUCode, ',') as ACTIVE_MATERIAL_NUMBERS: String
+}where ActiveRecord = 'Yes'
+    group by 
+        CountryCode,
+        ProductPackID;
+
+entity ProductInActiveMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
+	key ProductPackID as ProductCode,
+	key CountryCode,
+	STRING_AGG(SKUCode, ',') as INACTIVE_MATERIAL_NUMBERS: String
+}where ActiveRecord = 'No'
+	group by 
+		CountryCode,
+		ProductPackID;

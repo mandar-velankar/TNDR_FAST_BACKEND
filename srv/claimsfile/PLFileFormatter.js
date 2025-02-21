@@ -26,8 +26,8 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			this.data = this.data.filter(row => row.some(cell => cell !== null && cell !== ''));
 	
 			// Map the data to the correct column names
-			this.data = this.data.map(row => {
-				let obj = {};
+			this.data = this.data.map((row, rowIndex) => {
+				let obj = {RowOrder: rowIndex + 1};
 				columnNames.forEach((col, index) => {
 					obj[col] = row[index];
 				});
@@ -35,7 +35,9 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			});
 
 			const { PT_TMDIST, PT_TMINST, PT_TMCTPRDPCK, PT_TMSKUPRDPCK, PT_TMINSHIER, PT_TMPRDPCK, PT_TMPRDHIER} = this.db.entities("com.bayer.SXTENDER.MasterData");
+			const { ClaimData} = this.db.entities("com.bayer.SXTENDER.ClaimsData");
 			const { ExtractFASTOffer } = this.db.entities("ClaimsService");
+
             const distributor = await SELECT.one.from(PT_TMDIST).where({DistributorID: this.distributorId, CountryCode: this.countryCode});
 			const countryProductPacks = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: this.countryCode, ACTIVERECORD: 'Yes'});
 			const productPacks = await SELECT.from(PT_TMPRDPCK).where({ACTIVERECORD: 'Yes'});
@@ -44,6 +46,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const institutes = await SELECT.from(PT_TMINST).where({CountryCode: this.countryCode, ActiveRecord: 'Yes'});
 			const instituteHierarcis = await SELECT.from(PT_TMINSHIER).where({ActiveRecord: 'Yes'});
 			const fastOfferData = await SELECT.from(ExtractFASTOffer).where({CountryCode: this.countryCode});
+			const claimsData = await SELECT.from(ClaimData).where({CountryCode: this.countryCode});
 
             // Map sales data to buffer entity
 			const contrastAgentSalesData = this.mapContrastAgentSalesData(this.data, UUID);
@@ -52,7 +55,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const claimFile = this.mapSalesDataToClaimFiles(this.data, distributor, UUID, this.cwid);
 
 			// Map sales data to claim data
-			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, UUID, this.cwid);
+			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, UUID, this.cwid, claimsData);
 
             const result = {contrastAgentSalesData, claimFile, claimData};
 
@@ -141,11 +144,12 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 	 * @param {Object} req - Request object containing additional data
 	 * @returns {Object} claimData
 	 */
-	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, UUID, CWID) {
+	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, UUID, CWID, claimsData) {
 
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
-			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.KODEANARTYKUŁU);
+			const kodeAnArtykulu = typeof curr.KODEANARTYKUŁU === 'string' ? curr.KODEANARTYKUŁU.trim() : String(curr.KODEANARTYKUŁU);
+			const productpack = countryProductPacks.find(item => item.GOV_CODE == kodeAnArtykulu);
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
 			const productPackName = productPack && productPack?.PRODUCTPACKNAME || null;
@@ -165,20 +169,28 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const childInstituteName = childInstituteData && childInstituteData.InstituteName || null;
 			const filteredItems = fastOfferData.filter(item => item.InstituteID == instituteId &&
 																item.ProductCode === productCode &&
-																item.EffectiveDate <= this.excelDateToJSDate(curr.DATASPRZEDAŻY) &&
-																item.ExpiryDate >= this.excelDateToJSDate(curr.DATASPRZEDAŻY));
+																item.ContractStartDate <= this.excelDateToJSDate(curr.DATASPRZEDAŻY) &&
+																item.ContractEndDate >= this.excelDateToJSDate(curr.DATASPRZEDAŻY));
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
-			const fastContractClaim = fastOffer && (fastOffer.RequestedVolume * (fastOffer.RegPrice - fastOffer.OfferPrice)) || 0;
+			const offerID = fastOffer && fastOffer.OfferID || null;
+			const fastContractClaim = fastOffer && ((fastOffer.RegPrice - fastOffer.OfferPrice) * curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI) || 0;
+			const percentageDifference = fastOffer ? (fastContractClaim && fastContractClaim !== 0 ? ((curr.Wartośćdowyrównania - fastContractClaim) / fastContractClaim) : 0) : 0;
+			const filteredClaimsData = claimsData.filter(item => item.OfferID == offerID && item.MainInstituteID == instituteId && item.ProductPackID == productCode && item.BrandId == brandId);
+			const brandContractVolume = fastOffer && (fastOffer.RequestedVolume * fastOffer.CONCENTRATION) || 0;
+			const brandUsedVolume = fastOffer && (curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI * fastOffer.CONCENTRATION) || 0;
+			const brandContractCalculatedVolume = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.BrandContractVolume, 0) : 0;
+			const brandUsedCalculatedVolume = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.BrandUsedVolume, 0) : 0;
+		
 			prev.push(
 				{
 					CountryCode                             : this.countryCode,
 					createdBy           					: CWID,
 					modifiedBy         						: CWID,
-					OfferID                                 : fastOffer && fastOffer.OfferID || null, 
+					OfferID                                 : offerID, 
 					ProductPackID                           : productCode,
 					PRODUCTPACKNAME							: productPackName,
 					MainInstituteID                         : instituteId,
-					EANNumber                               : String(curr.KODEANARTYKUŁU),
+					EANNumber                               : kodeAnArtykulu,
 					External_InstituteId					: String(curr.KODKLIENTAwgBAYERSpzoo),
 					ChildInstituteID                        : childInstituteID,
 					MainInstituteName                       : instituteName,
@@ -186,32 +198,34 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					DistributorID                           : this.distributorId,
 					Date                                    : this.excelDateToJSDate(curr.DATASPRZEDAŻY),
 					Type                                    : 'Claim',
-					Quantity                                : curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI,
-					WholesalerPurchasePrice                 : curr.CENAZAKUPUNETTO, 
+					Quantity                                : Number(curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI || 0),
+					WholesalerPurchasePrice                 : Number(curr.CENAZAKUPUNETTO || 0), 
 					WholesalerDistributionArrangement       : null,
 					AppliedWholesalerCorrection             : null,
-					WholesalerContractPrice                 : curr.PODSTAWANALICZENIAMARŻYNETTOPNM,
+					WholesalerContractPrice                 : Number(curr.PODSTAWANALICZENIAMARŻYNETTOPNM || 0),
 					TotalClaim                              : curr.Wartośćdowyrównania,
 					MainCustomerForContract                 : instituteId,
 					FASTPendingCorrection                   : null,
-					BrandContractVolume                     : fastOffer && (fastOffer.RequestedVolume * fastOffer.CONCENTRATION) || 0,
+					BrandContractVolume                     : brandContractVolume,
+					BrandContractCalculatedVolume			: Number(brandContractVolume + brandContractCalculatedVolume),
 					PercentageUsage                         : null,
 					UsedVolume								: null,
 					BrandId									: brandId,
 					BrandName								: brandName,
 					Balance                                 : null,
-					BrandUsedVolume                         : fastOffer && (curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI * fastOffer.CONCENTRATION) || 0,
-					WholesalerContractPriceClaim            : curr.Wartośćdowyrównania,
+					BrandUsedVolume                         : brandUsedVolume,
+					BrandUsedCalculatedVolume				: Number(brandUsedVolume + brandUsedCalculatedVolume),
+					WholesalerContractPriceClaim            : Number(curr.Wartośćdowyrównania || 0),
 					WholesalerDistributionArrangementClaim  : null,
-					TotalWholesalerClaim                    : curr.Wartośćdowyrównania,
-					FASTContractClaim                       : fastContractClaim,
+					TotalWholesalerClaim                    : Number(curr.Wartośćdowyrównania || 0),
+					FASTContractClaim                       : Number(fastContractClaim || 0),
 					FASTDistributionArrangementClaim        : 0,
-					TotalFASTClaim                          : fastContractClaim,
-					PercentageDifference                    : fastOffer && ((curr.Wartośćdowyrównania - fastContractClaim)/fastContractClaim) || 0,
+					TotalFASTClaim                          : Number(fastContractClaim || 0),
+					PercentageDifference                    : percentageDifference,
 					Status                                  : fastOffer ? (fastContractClaim == curr.Wartośćdowyrównania ? 'Passed' : 'Failed') : 'NoContract',
 					Comment                                 : null,
-					FASTWholesalerPurchasePrice             : fastOffer && fastOffer.RegPrice || 0,
-					FASTContractPrice                       : fastOffer && fastOffer.OfferPrice || 0,
+					FASTWholesalerPurchasePrice             : fastOffer && Number(fastOffer.RegPrice) || 0,
+					FASTContractPrice                       : fastOffer && Number(fastOffer.OfferPrice) || 0,
 					FASTDistributionArrangement             : null,
 					FASTDistributionAgreementType			: null,
 					QC1Passed                               : false,
@@ -220,12 +234,13 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					WholesalerClaim2                        : null,
 					FASTClaim1                              : null,
 					FASTClaim2                              : null,
-					NrFaktury                               : curr.NRFAKTURY || null,
-					RoznicaCenaZakupuPNM                    : curr.RóżnicapomiędzycenązakupuaPNM || null,
-					WartoscPNM                              : curr.WartośćwgPNM || null,
-					IloscSztukDoWyrownania                  : curr.Ilośćsztukdowyrównania || null,
-					NrFakturyZakupu                         : curr.NRFAKTURYZAKUPU || null,
+					NrFaktury                               : String(curr.NRFAKTURY || ''),
+					RoznicaCenaZakupuPNM                    : Number(curr.RóżnicapomiędzycenązakupuaPNM || 0),
+					WartoscPNM                              : Number(curr.WartośćwgPNM || 0),
+					IloscSztukDoWyrownania                  : Number(curr.Ilośćsztukdowyrównania || 0),
+					NrFakturyZakupu                         : String(curr.NRFAKTURYZAKUPU || ''),
 					SKUCode									: sKUCode,
+					RowOrder								: curr.RowOrder,
 					ClaimFiles_ID					 		: UUID
 				}
 			);

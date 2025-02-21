@@ -51,12 +51,14 @@ entity ClaimData : managed, cuid {
     MainCustomerForContract                 : Integer;
     FASTPendingCorrection                   : Double;
     BrandContractVolume                     : Double;
+    BrandContractCalculatedVolume           : Double;
     PercentageUsage                         : Double;
     UsedVolume                              : Double;
     BrandId                                 : String;
     BrandName                               : String;
     Balance                                 : Integer;
     BrandUsedVolume                         : Double;
+    BrandUsedCalculatedVolume               : Double;
     WholesalerContractPriceClaim            : Double;
     WholesalerDistributionArrangementClaim  : Double; 
     TotalWholesalerClaim                    : Double;
@@ -82,6 +84,7 @@ entity ClaimData : managed, cuid {
     IloscSztukDoWyrownania                  : Double;
     NrFakturyZakupu                         : String;
     SKUCode                                 : Integer;
+    RowOrder                                : Integer;
     ClaimFiles                              : Association to ClaimFiles;
     Product                                 : Association to TransactionalData.PT_TMOFPR 
                                                 on Product.OfferID = OfferID 
