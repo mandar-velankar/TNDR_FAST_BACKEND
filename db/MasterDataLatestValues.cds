@@ -7,12 +7,13 @@ entity MostRecentRegisteredPrice as SELECT from MasterData.PT_TMREGPR as Registe
 {
     key RegisteredPrice.CountryCode,
     key RegisteredPrice.ProductPackID,
+    key RegisteredPrice.Currency,
     max(RegisteredPrice.EffDate) as MaxEffectiveDate:Date
 }where RegisteredPrice.ActiveRecord = 'Yes'
-group by RegisteredPrice.CountryCode, RegisteredPrice.ProductPackID;
+group by RegisteredPrice.CountryCode, RegisteredPrice.ProductPackID, RegisteredPrice.Currency;
 
 entity CountryRegisteredPrice as SELECT from MasterData.PT_TMREGPR as RegisteredPrice
-INNER JOIN MostRecentRegisteredPrice as l on RegisteredPrice.CountryCode=l.CountryCode and RegisteredPrice.ProductPackID=l.ProductPackID and RegisteredPrice.EffDate=l.MaxEffectiveDate
+INNER JOIN MostRecentRegisteredPrice as l on RegisteredPrice.CountryCode=l.CountryCode and RegisteredPrice.ProductPackID=l.ProductPackID and RegisteredPrice.Currency=l.Currency and RegisteredPrice.EffDate=l.MaxEffectiveDate
 {
     key RegisteredPrice.CountryCode as COUNTRY_CODE,
     key RegisteredPrice.ProductPackID as PRODUCT_ID,
