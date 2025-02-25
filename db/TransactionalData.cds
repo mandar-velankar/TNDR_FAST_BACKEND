@@ -420,7 +420,13 @@ entity PT_TMOFPR {
                                         and ContractInfomation.ProductCode = ProductCode;   
         NLContractDurationOfferPrices : Association to TransactionalDataViews.NLContractDurationOfferPrices 
                                             on NLContractDurationOfferPrices.OfferID = OfferID
-                                            and NLContractDurationOfferPrices.ProductCode = ProductCode;                              
+                                            and NLContractDurationOfferPrices.ProductCode = ProductCode;     
+        ProductActiveSKUs             : Association to MasterDataViews.ProductActiveMaterialNumbers
+                                            on ProductActiveSKUs.ProductCode = ProductCode
+                                            and ProductActiveSKUs.CountryCode = CountryCode;         
+        ProductInActiveSKUs           : Association to MasterDataViews.ProductInActiveMaterialNumbers
+                                            on ProductInActiveSKUs.ProductCode = ProductCode
+                                            and ProductInActiveSKUs.CountryCode = CountryCode;             
                                         
 }
 
@@ -586,6 +592,7 @@ entity PriceConditionClassification: cuid {
     CountryCode     : String;
     ConditionType   : String;
     Classification  : String;
+    InstituteType   : String;
     Division        : String;
     ProductType     : String;
     isMain          : Boolean;
@@ -950,6 +957,7 @@ entity AwardedOfferDistributors: cuid {
 
 entity ContractInfomation : cuid, managed {
     OfferID: String;
+    CountryCode: String;
     ProductCode: Integer;
     InstituteID: Integer;
     InstituteName: String;
