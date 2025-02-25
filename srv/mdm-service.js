@@ -4,6 +4,7 @@ const moment = require('moment');
 const XLSXHelper = require("./utils/XLSXHelper");
 const Handlebars = require("handlebars");
 const ServiceHelper = require('./utils/ServiceHelper');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = (srv) => {
 
@@ -37,6 +38,7 @@ module.exports = (srv) => {
     const{
         CurrentDistributionAgreementView,
 		CurrentWholesalePurchasePriceView,
+		WholesalePurchasePriceView,
 		CurrentNLpppView,
 		NLpppView,
 		DistributionAgreementsView
@@ -626,9 +628,71 @@ module.exports = (srv) => {
 			if (allApproved) {
 				// If all approvals are 'Approved', update the status to 'Approved'
 				await UPDATE(NLPPP).with({ Status: 'Approved' }).where({ ID: data.NLPPP_ID });
+				await autoUpdateWPP(data);
 			}
 
 		}
+	}
+
+	async function autoUpdateWPP (data) {
+		const newNLPPP =  await SELECT.one.from(NLPPP).where({ ID: data.NLPPP_ID }); 
+		const existingActiveWPPs =  await SELECT.from(WholesalePurchasePriceView).where({ GOV_CODE: newNLPPP.GOV_CODE, Status: 'Approved', Type: 'Margin', EndDate: '9999-12-31',  WholesalePurchasePriceID: {"!=": null}}); 
+
+		if(existingActiveWPPs){
+			const uniqueWPPs = Array.from(
+				new Map(existingActiveWPPs.map(item => [item.WholesalePurchasePriceID, item])).values()
+			);
+
+			let newEndDate = new Date(newNLPPP.StartDate);
+			// Subtract one day
+			newEndDate.setDate(newEndDate.getDate() - 1);
+			// Get the formatted date as 'YYYY-MM-DD'
+			let formattedEndDate = newEndDate.toISOString().split('T')[0];
+			for(const uniqueWPP of uniqueWPPs) {
+				await UPDATE(CurrentWholesalePurchasePriceView).with({EndDate: formattedEndDate}).where({
+					ID: uniqueWPP.WholesalePurchasePriceID
+				})
+			}
+			for(const uniqueWPP of uniqueWPPs) {
+				await UPDATE(WholesalePurchasePrices).with({EndDate: formattedEndDate}).where({
+					ID: uniqueWPP.WholesalePurchasePriceID
+				})
+			}
+
+			const approvers = await SELECT.from(WholesalePurchasePriceApprovers);
+			const mappedWPPs = mapWPPs(uniqueWPPs, newNLPPP, approvers);
+
+			await INSERT(mappedWPPs).into(WholesalePurchasePrice);
+
+		}
+
+	}
+
+	function mapWPPs(uniqueWPPs, newNLPPP, approvers) {
+		return uniqueWPPs.map(uniqueWPP => ({
+		  ID: uuidv4(), 
+		  CountryCode: 'NL',
+		  PRODUCTPACKID: uniqueWPP.PRODUCTPACKID,
+		  DistributorID: uniqueWPP.DistributorID,
+		  MaterialNumbers: uniqueWPP.MaterialNumbers,
+		  GOV_CODE: newNLPPP.GOV_CODE || null, 
+		  Type: 'Margin',
+		  CurrentType: null,
+		  Margin: uniqueWPP.Margin,
+		  CurrentMargin: null,
+		  WPPWithoutTax: newNLPPP.PPP ? newNLPPP.PPP * (1 - uniqueWPP.Margin) : null, 
+		  CurrentWPPWithoutTax: uniqueWPP.WPPWithoutTax,
+		  CurrentStartDate: uniqueWPP.StartDate,
+		  StartDate: newNLPPP.StartDate || null,
+		  EndDate: '9999-12-31',
+		  CurrentEndDate: null,
+		  Comment: null,
+		  Status: 'Approved',
+		  ApprovalsCount: approvers.length, 
+		  PowerApproverCWID: null,
+		  PowerApprovalDate: null,
+		  NLPPP_ID: newNLPPP.ID || null
+		}));
 	}
 
 	srv.after('UPDATE', 'WholesalePurchasePriceApprovals', async (data) => {
