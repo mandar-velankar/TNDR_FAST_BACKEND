@@ -929,6 +929,7 @@ entity NLPPP: cuid, managed{
 	CountryCode: String;
 	PRODUCTPACKID:Integer;
 	MaterialNumbers: Integer;
+	GOV_CODE: String;
 	StartDate: Date;
 	EndDate: Date;
 	Comment: String;
@@ -990,6 +991,7 @@ entity WholesalePurchasePrice: cuid, managed {
 	PRODUCTPACKID: Integer;
 	DistributorID: Integer;
 	MaterialNumbers: Integer;
+	GOV_CODE: String;
 	Type: String;
 	CurrentType: String;
 	Margin: Double;
