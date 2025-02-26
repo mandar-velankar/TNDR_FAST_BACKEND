@@ -505,7 +505,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         prdpck.Bundle,
 		prdpck.OuterCarton,
 		prdpck.PACKFACTOR,
-		wholesalepp.NLPPP_ID,
+		nlppp.ID as NLPPP_ID,
 		nlppp.PPP: Double,
 		nlppp.StartDate as PPPStartDate,
 		nlppp.EndDate as PPPEndDate,
