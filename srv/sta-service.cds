@@ -1453,4 +1453,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inst.InstituteType,
         cd.ProductPackID,
         cd.BrandId;
+
+    entity ProfitabilityCalcParamView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;
 }
