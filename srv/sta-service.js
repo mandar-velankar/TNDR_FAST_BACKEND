@@ -6799,4 +6799,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             return req.reject(403, error?.message||"Error in OfferFormView");
         }
 	});
+	
+	srv.on('UPDATE', ['ProfitabilityCalcParamView'], async (req) => {
+
+		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
+		const { mappedFields } = mappedProfitabilityCalcParam(req);
+		//mappedFields.APPROVALS_SENT = 0; // Needed to revert Offer status back to Offer Created when updating those 3 forms
+		if (offer) {
+			await UPDATE(PT_TMOFRS).with(mappedFields).where({OfferID: req.data.OfferID});
+		}
+	});
 }
