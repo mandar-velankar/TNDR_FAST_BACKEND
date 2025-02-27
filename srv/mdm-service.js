@@ -638,7 +638,7 @@ module.exports = (srv) => {
 		const newNLPPP =  await SELECT.one.from(NLPPP).where({ ID: data.NLPPP_ID }); 
 		const existingActiveWPPs =  await SELECT.from(WholesalePurchasePriceView).where({ GOV_CODE: newNLPPP.GOV_CODE, Status: 'Approved', Type: 'Margin', EndDate: '9999-12-31',  WholesalePurchasePriceID: {"!=": null}}); 
 
-		if(existingActiveWPPs){
+		if(existingActiveWPPs.length > 0){
 			const uniqueWPPs = Array.from(
 				new Map(existingActiveWPPs.map(item => [item.WholesalePurchasePriceID, item])).values()
 			);
@@ -669,30 +669,39 @@ module.exports = (srv) => {
 	}
 
 	function mapWPPs(uniqueWPPs, newNLPPP, approvers) {
-		return uniqueWPPs.map(uniqueWPP => ({
-		  ID: uuidv4(), 
-		  CountryCode: 'NL',
-		  PRODUCTPACKID: uniqueWPP.PRODUCTPACKID,
-		  DistributorID: uniqueWPP.DistributorID,
-		  MaterialNumbers: uniqueWPP.MaterialNumbers,
-		  GOV_CODE: newNLPPP.GOV_CODE || null, 
-		  Type: 'Margin',
-		  CurrentType: null,
-		  Margin: uniqueWPP.Margin,
-		  CurrentMargin: null,
-		  WPPWithoutTax: newNLPPP.PPP ? newNLPPP.PPP * (1 - uniqueWPP.Margin) : null, 
-		  CurrentWPPWithoutTax: uniqueWPP.WPPWithoutTax,
-		  CurrentStartDate: uniqueWPP.StartDate,
-		  StartDate: newNLPPP.StartDate || null,
-		  EndDate: '9999-12-31',
-		  CurrentEndDate: null,
-		  Comment: null,
-		  Status: 'Approved',
-		  ApprovalsCount: approvers.length, 
-		  PowerApproverCWID: null,
-		  PowerApprovalDate: null,
-		  NLPPP_ID: newNLPPP.ID || null
-		}));
+		return uniqueWPPs.map(uniqueWPP => {
+			
+			let WPPWithoutTax = null;
+			if (newNLPPP.PPP) {
+				WPPWithoutTax = newNLPPP.PPP * (1 - uniqueWPP.Margin);				
+				WPPWithoutTax = Math.floor(WPPWithoutTax * 100) / 100;
+			}
+	
+			return {
+				ID: uuidv4(),
+				CountryCode: 'NL',
+				PRODUCTPACKID: uniqueWPP.PRODUCTPACKID,
+				DistributorID: uniqueWPP.DistributorID,
+				MaterialNumbers: uniqueWPP.MaterialNumbers,
+				GOV_CODE: newNLPPP.GOV_CODE || null,
+				Type: 'Margin',
+				CurrentType: null,
+				Margin: uniqueWPP.Margin,
+				CurrentMargin: null,
+				WPPWithoutTax: WPPWithoutTax,
+				CurrentWPPWithoutTax: uniqueWPP.WPPWithoutTax,
+				CurrentStartDate: uniqueWPP.StartDate,
+				StartDate: newNLPPP.StartDate || null,
+				EndDate: '9999-12-31',
+				CurrentEndDate: null,
+				Comment: 'Auto Approved WPP',
+				Status: 'Approved',
+				ApprovalsCount: approvers.length,
+				PowerApproverCWID: null,
+				PowerApprovalDate: null,
+				NLPPP_ID: newNLPPP.ID || null
+			};
+		});
 	}
 
 	srv.after('UPDATE', 'WholesalePurchasePriceApprovals', async (data) => {
