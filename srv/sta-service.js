@@ -1290,6 +1290,9 @@ module.exports = async (srv) => {
 					if(req.data.ConditionType === 'Price' || req.data.ConditionType === 'Discount'){
 						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : roundToDecimalPlaces(req.data.BasePrice,2);
 					}
+					if (req.data.CountryCode?.includes("HM")) {
+						if (!req.data.BasePrice) return;
+					}
 					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 				}
 			}
