@@ -628,14 +628,14 @@ module.exports = (srv) => {
 			if (allApproved) {
 				// If all approvals are 'Approved', update the status to 'Approved'
 				await UPDATE(NLPPP).with({ Status: 'Approved' }).where({ ID: data.NLPPP_ID });
-				await autoUpdateWPP(data);
+				await autoUpdateWPP(data.NLPPP_ID);
 			}
 
 		}
 	}
 
-	async function autoUpdateWPP (data) {
-		const newNLPPP =  await SELECT.one.from(NLPPP).where({ ID: data.NLPPP_ID }); 
+	async function autoUpdateWPP (NLPPP_ID) {
+		const newNLPPP =  await SELECT.one.from(NLPPP).where({ ID: NLPPP_ID }); 
 		const existingActiveWPPs =  await SELECT.from(WholesalePurchasePriceView).where({ GOV_CODE: newNLPPP.GOV_CODE, Status: 'Approved', Type: 'Margin', EndDate: '9999-12-31',  WholesalePurchasePriceID: {"!=": null}}); 
 
 		if(existingActiveWPPs.length > 0){
@@ -879,6 +879,8 @@ module.exports = (srv) => {
 			await UPDATE(NLPPP).with(mappedPpp).where({
 				ID: ID
 			});
+
+			await autoUpdateWPP(ID);
 
 			return 'Purchase Price approved successfully';
 		} catch (error) {
