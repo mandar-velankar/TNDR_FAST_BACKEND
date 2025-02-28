@@ -98,8 +98,8 @@ module.exports = (srv) => {
 				"includepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`, `'Pending'`],
 			},
 			"PL": {
-				"excludepending": [`'Approved (All QC Passed)'`],
-				"includepending": [`'Approved (All QC Passed)'`, `'Pending'`],
+				"excludepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`],
+				"includepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`, `'Pending'`],
 			}
 		};
 
