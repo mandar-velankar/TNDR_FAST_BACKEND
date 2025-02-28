@@ -6633,13 +6633,83 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return excelData
 	}
 
-	srv.on('UPDATE', ['ProfitabilityCalcParamView'], async (req) => {
+	srv.after('READ','PriceConditionWithMaximumPriceView', (items, req) => {
+		try{
+			if(!items) return [];
 
-		const offer = await SELECT.one.from(PT_TMOFRS).where({OfferID: req.data.OfferID});
-		const { mappedFields } = mappedProfitabilityCalcParam(req);
-		//mappedFields.APPROVALS_SENT = 0; // Needed to revert Offer status back to Offer Created when updating those 3 forms
-		if (offer) {
-			await UPDATE(PT_TMOFRS).with(mappedFields).where({OfferID: req.data.OfferID});
+			if(Array.isArray(items)){
+				return items.map(fnCalculateFields)
+			}else{
+				return fnCalculateFields(items);
+			}
+
+			async function fnCalculateFields(item){
+				item.SpecialPrice = parseFloat(item.Price1 / (1 + parseFloat(item.Level2Discount1)));
+				item.Margin = !!item.SpecialPrice ? (item.SpecialPrice - item.COGS) / item.SpecialPrice : 0;
+			};
+
 		}
+		catch(error){
+			console.error('Error in PriceConditionWithMaximumPriceView READ');
+			return req.reject(403, error?.message||"Error in PriceConditionWithMaximumPriceView READ");
+		}
+		}
+	);
+	srv.after(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (data, req) => {
+		try{
+			if (data.CountryCode === 'PL') {
+				const priceConditions = await SELECT.from(PriceCondition).columns('*','PriceConditionClassification.ConditionType' ).where({
+					OfferID: data.OfferID,
+					'PriceConditionClassification.ConditionType': 'WithMaximumPrice'
+				});
+				if (priceConditions.length > 0) {
+					await Promise.all(
+						priceConditions.flatMap(item => 
+							{
+								const maxWholealerMargin = data.Custom_Double_9 || 0;
+								const specialPrice = parseFloat(item.Price1 / (1 + parseFloat(maxWholealerMargin)));
+
+								return [
+									UPDATE(PriceCondition).with({ 
+										NetPrice: specialPrice,
+										Price2: specialPrice,
+										OfferPrice: specialPrice,
+										NetOfferPrice: specialPrice,
+										Level2Discount1: maxWholealerMargin 
+									}).where({ 
+										ID: item.ID 
+									}),
+									UPDATE(PT_TMBDPR).with({ 
+										OfferPrice: specialPrice,
+										NetofferPrice: specialPrice,
+										NetPrice: specialPrice 
+									}).where({ 
+										OfferID: item.OfferID, 
+										ProductCode: item.ProductCode 
+									}),
+								]
+							}
+							
+						)
+					);
+				}
+			}
+		}
+		catch(error){
+            console.error('Error in OfferFormView CREATE');
+            return req.reject(403, error?.message||"Error in OfferFormView");
+        }
 	});
+	
+	srv.on('UPDATE', 'ProfitabilityCalcParamView', async (req) => {
+		
+		await UPDATE(PT_TMOFRS).with({ 
+				ProfitabilityStartMnth: req.data.ProfitabilityStartMnth,
+				ProfitabilityAgrDur   : req.data.ProfitabilityAgrDur,
+				ProfitabilityYrlyMntCost: req.data.ProfitabilityYrlyMntCost,
+				ProfitabilityDiscRate : req.data.ProfitabilityDiscRate,
+				ProfitabilityGrowthRate: req.data.ProfitabilityGrowthRate
+			}).where({OfferID: req.data.OfferID});
+	});
+
 }
