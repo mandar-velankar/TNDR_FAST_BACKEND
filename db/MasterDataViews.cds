@@ -214,6 +214,7 @@ entity Divisions as select from MasterData.PT_TMPRDHIER as ProductHierarchy{
 entity ExchangeRates @readonly as projection on MasterDataLatestValues.ExchangeRates;
 //EHQUT-CR8
 //italy
+//CR8
 entity MostRecentConsumerPricesView as select from MasterData.ConsumerPrices {
 	key CountryCode,
 	key ProductPackId,
@@ -254,7 +255,9 @@ inner join MasterData.CountryProvinces as province
 inner join MasterData.PT_TMINST as institute 
     on customer.E1KNA1M.KUNNR = institute.CustomerID 
 	left outer join MasterData.PaymentTerms as PaymentTerms
-   on PaymentTerms.E1KNVVM_ZTERM = customer.E1KNVVM.ZTERM{
+
+   on PaymentTerms.E1KNVVM_ZTERM = customer.E1KNVVM.ZTERM {
+
 	customer.E1KNA1M.LAND1 as E1KNA1M_LAND1,
 	customer.E1KNA1M.KUNNR as E1KNA1M_KUNNR,
 	customer.E1KNA1M.NAME1 as E1KNA1M_NAME1,
@@ -492,7 +495,10 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 	left join MasterData.NLPPP as nlppp
 		on nlppp.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
 	left join WholesalePurchasePriceApprovalsCount as approvalscount
-		on approvalscount.WholesalePurchasePriceID = wholesalepp.ID{
+		on approvalscount.WholesalePurchasePriceID = wholesalepp.ID
+	left join MasterData.PT_TMDIST as dist
+		on dist.DistributorID = wholesalepp.DistributorID
+		and dist.CountryCode = wholesalepp.CountryCode{
 		key wholesalepp.ID as WholesalePurchasePriceID,
         key ctprdpck.PRODUCTPACKID,
         ctprdpck.COUNTRYCODE as CountryCode,
@@ -507,6 +513,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 		nlppp.StartDate as PPPStartDate,
 		nlppp.EndDate as PPPEndDate,
         wholesalepp.DistributorID,
+		dist.DistributorName,
         materialNumbers.MaterialNumbers,
         wholesalepp.StartDate,
         wholesalepp.CurrentStartDate,
@@ -553,6 +560,7 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		nlppp.StartDate as PPPStartDate,
 		nlppp.EndDate as PPPEndDate,
         null as DistributorID,
+		null as DistributorName,
         materialNumbers.MaterialNumbers,
         null as StartDate,
         null as CurrentStartDate,
