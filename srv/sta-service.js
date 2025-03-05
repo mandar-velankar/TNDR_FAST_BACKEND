@@ -6655,9 +6655,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ed.WholesalerPurchasePrice = formatPolandPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerContractPrice = formatPolandPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerPurchasedAmount = formatPolandPrices(ed.WholesalerPurchasedAmount, countryCodeLocals[CountryCode], CountryCode);
+			ed.ExcelNetSales = ed.TotalSales;
 			ed.TotalSales = formatPolandPrices(ed.TotalSales, countryCodeLocals[CountryCode], CountryCode);
 			
-			// Format Date
+			// // Format Date
+			ed.ExcelDate = new Date(ed.FilePeriod);
 			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
 
 			//Format Percentage
