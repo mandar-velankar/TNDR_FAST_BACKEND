@@ -1063,9 +1063,9 @@ module.exports = (srv) => {
 		const fullWhere = cds.parse.expr(`(StartDate <= date'${validDate}' or StartDate = null) 
 										and (EndDate >= date'${validDate}' or EndDate = null) 
 										and (PPPStartDate <= date'${validDate}' or PPPStartDate = null) 
-										and (PPPEndDate >= date'${validDate}' or PPPEndDate = null) 
-										and DistributorID = ${distributorID}`);
-		const query = SELECT.from(NLWPPExcelExtract).where(fullWhere);
+										and (PPPEndDate >= date'${validDate}' or PPPEndDate = null)`);
+		const whereWholesaler = ((distributorID && distributorID !== 'All_Wholesalers') && ServiceHelper.buildFullWhere('DistributorID', '=', distributorID)) || []
+		const query = SELECT.from(NLWPPExcelExtract).where(fullWhere).where(whereWholesaler);
 
 		//Sorting
 		query.orderBy("PRODUCTPACKNAME asc");
