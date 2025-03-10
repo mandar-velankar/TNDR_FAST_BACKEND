@@ -1465,14 +1465,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity ProfitabilityCalcParamView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;
     entity Settlements                                  as projection on MasterData.Settlements;
-    entity DiscountConditionView                            as Select from TransactionalData.PriceCondition as pc
-        inner join TransactionalData.DiscountCondition as dc on dc.PriceCondition.ID = pc.ID{
-            pc.ID,
+    entity DiscountConditionView as Select from TransactionalDataViews.StandardTenderPriceConditionView as pc
+        inner join TransactionalData.DiscountCondition as dc on dc.PriceCondition.ID = pc.PriceConditionID{
+            pc.PriceConditionID,
             dc.Volume,
             dc.Discount,
             dc.NetPriceWithoutTax,
             dc.NetPriceWithTax, 
             pc.Tax
-    }
+    }where pc.ConditionType = 'Rappel';
     entity PriceConditionRappelView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
 }
