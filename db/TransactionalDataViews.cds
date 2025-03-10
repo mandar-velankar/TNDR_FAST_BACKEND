@@ -1574,7 +1574,14 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     @Core.Computed: false
     ifnull(priceCondition.CurrentTotalDiscountNHI, curentSection.TotalDiscountNHI) as CurrentTotalDiscountNHI: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentTotalDiscountInvoice, curentSection.TotalDiscountInvoice) as CurrentTotalDiscountInvoice: Double
+    ifnull(priceCondition.CurrentTotalDiscountInvoice, curentSection.TotalDiscountInvoice) as CurrentTotalDiscountInvoice: Double,
+    priceCondition.ConfidentialPrice,
+    priceCondition.PVL,
+    priceCondition.RoyalDecree,
+    priceCondition.Liquidation,
+    priceCondition.RefundDate,
+    priceCondition.Settlement.ID as Settlement_ID,
+    priceCondition.PriceConditionCode
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
