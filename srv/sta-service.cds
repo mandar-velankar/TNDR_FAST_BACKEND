@@ -1459,6 +1459,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity DiscountCondition @(cds.redirection.target:false) as projection on TransactionalData.DiscountCondition;
     entity DiscountConditionView as Select from TransactionalDataViews.StandardTenderPriceConditionView as pc
         inner join TransactionalData.DiscountCondition as dc on dc.PriceCondition.ID = pc.PriceConditionID{
+            key dc.ID,
+            pc.CountryCode,
+            pc.Region,
+            pc.Currency,
+            pc.OfferID,
+            pc.ProductCode,
             pc.PriceConditionID,
             dc.Volume,
             dc.Discount,
