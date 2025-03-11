@@ -86,6 +86,7 @@ entity PT_TMINST{
 	KAM_Territory: String;
 	External_InstituteId: String(50);
 	Class: Integer;
+	SAPGroupId: String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
