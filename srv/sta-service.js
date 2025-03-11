@@ -95,7 +95,8 @@ module.exports = async (srv) => {
 		ZuelligExtractView,
 		StandardTenderHistory,
 		PriceConditionCurrentSectionTaiwanView,
-		BrandsInTender
+		BrandsInTender,
+		StandardTenderPriceConditionView
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -6811,5 +6812,96 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				ProfitabilityGrowthRate: req.data.ProfitabilityGrowthRate
 			}).where({OfferID: req.data.OfferID});
 	});
+	
+	srv.on(['CREATE','UPDATE'], 'PriceConditionRappelView' , async (req) => {
+		try{
+			const priceCondition = await SELECT.one.from(PriceCondition).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				PriceConditionCode: 'YAW1'
+			});
+
+			const standardTenderPriceConditionView = await SELECT.one.from(StandardTenderPriceConditionView).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				ConditionType: req.data.ConditionType
+			});
+
+			const mappedPriceConditionRappel = mapPriceConditionRappel(req, standardTenderPriceConditionView);
+
+			if (priceCondition) {
+				await UPDATE(PriceCondition)
+					.with(mappedPriceConditionRappel)
+					.where({
+						ID: priceCondition.ID
+					});
+			}else{
+				mappedPriceConditionRappel.ID = req.data.PriceConditionID;
+				await INSERT.into(PriceCondition).entries(mappedPriceConditionRappel);
+			}
+		}
+		catch(error){
+            console.error('Error in PriceConditionRappelView CREATE');
+            return req.reject(403, error?.message||"Error in PriceConditionRappelView");
+        }
+
+	});
+
+	function mapPriceConditionRappel(req, standardTenderPriceConditionView){
+		return {
+			OfferID                             : req.data.OfferID,
+			ProductCode                         : req.data.ProductCode,
+			PVL                                 : req.data.PVL ? req.data.PVL : standardTenderPriceConditionView?.PVL,
+			ConfidentialPrice                   : req.data.ConfidentialPrice ? req.data.ConfidentialPrice : standardTenderPriceConditionView?.ConfidentialPrice,
+			Discount                            : standardTenderPriceConditionView?.Discount,
+			RoyalDecree                         : req.data.RoyalDecree ? req.data.RoyalDecree : standardTenderPriceConditionView?.RoyalDecree,
+			Tax                                 : standardTenderPriceConditionView?.Tax,
+			Liquidation                         : req.data.Liquidation ? req.data.Liquidation : standardTenderPriceConditionView?.Liquidation,
+			RefundDate                          : req.data.RefundDate ? req.data.RefundDate : standardTenderPriceConditionView?.RefundDate,
+			PriceConditionCode                  : req.data.PriceConditionCode ? req.data.PriceConditionCode : standardTenderPriceConditionView?.PriceConditionCode,
+			LotID                               : 1,
+			Settlement_ID						: req.data.Settlement_ID ? req.data.Settlement_ID : standardTenderPriceConditionView?.Settlement_ID,
+			PriceConditionClassification_ID        : standardTenderPriceConditionView?.ClassificationID,
+		}
+	}
+
+	srv.on(['CREATE','UPDATE'], 'DiscountConditionView' , async (req) => {
+		try{
+			const discountConditions = await SELECT.from(DiscountCondition).where({
+				PriceCondition_ID: req.data.PriceConditionID
+			});
+			if (discountConditions.length > 0){
+				for (const discountCondition of discountConditions) {
+					await UPDATE(DiscountCondition)
+						.with({
+							Volume: req.data.Volume,
+							Discount: req.data.Discount,
+							NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+							NetPriceWithTax: req.data.NetPriceWithTax
+						})
+						.where({ ID: discountCondition.ID });
+				}
+			}else{
+				const mappedDiscountCondition = mapDiscountCondition(req);
+				await INSERT.into(DiscountCondition).entries(mappedDiscountCondition);
+			}
+		}
+		catch(error){
+            console.error('Error in DiscountConditionView CREATE');
+            return req.reject(403, error?.message||"Error in DiscountConditionView");
+        }
+
+	});
+
+	function mapDiscountCondition(req){
+		return {
+			Volume              : req.data.Volume,
+			Discount            : req.data.Discount,
+			NetPriceWithoutTax  : req.data.NetPriceWithoutTax,
+			NetPriceWithTax     : req.data.NetPriceWithTax,
+			PriceCondition_ID      : req.data.PriceConditionID
+		}
+	}
+
 
 }
