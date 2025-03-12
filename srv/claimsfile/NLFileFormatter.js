@@ -285,7 +285,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					TotalWholesalerClaim                    : (!curr.ClaimTotal && curr.ClaimTotal !== 0) ? null : Number(curr.ClaimTotal || 0),
 					FASTContractClaim                       : Number(fastContractClaim || 0),
 					FASTDistributionArrangementClaim        : Number(fastDistributionArrangementClaim || 0),
-					TotalFASTClaim                          : Number(totalFASTClaim || 0),
+					TotalFASTClaim                          : Number(totalFASTClaim && totalFASTClaim >= 0 ? totalFASTClaim : 0),
 					PercentageDifference                    : percentageDifference,
 					Status                                  : instituteName === 'Customer Not Found' ? 'CustomerNotFound' : (fastOffer ? (totalFASTClaim == curr.ClaimTotal) ? 'Passed' : 'Failed' :'Failed'),
 					Comment                                 : null,
