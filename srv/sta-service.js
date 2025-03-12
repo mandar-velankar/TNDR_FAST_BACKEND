@@ -6547,7 +6547,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		/** The below logic to generate PolandSalesReport is moved to the frontend 
 		 * 	due to the issue while parsing data to the excel template
 		 * the data volume was creating sudden memory peak and causing system freeze */ 
-	/* 
+	
 	srv.on('READ', 'ExtractPolandSalesReport', async (req, next) => {
 		try{
 		let startTime, endTime;
@@ -6663,9 +6663,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ed.WholesalerPurchasePrice = formatPolandPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerContractPrice = formatPolandPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerPurchasedAmount = formatPolandPrices(ed.WholesalerPurchasedAmount, countryCodeLocals[CountryCode], CountryCode);
+			ed.ExcelNetSales = ed.TotalSales;
 			ed.TotalSales = formatPolandPrices(ed.TotalSales, countryCodeLocals[CountryCode], CountryCode);
 			
-			// Format Date
+			// // Format Date
+			ed.ExcelDate = new Date(ed.FilePeriod);
 			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
 
 			//Format Percentage
@@ -6675,7 +6677,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		return excelData
 	}
-	*/
 
 	srv.after('READ','PriceConditionWithMaximumPriceView', (items, req) => {
 		try{

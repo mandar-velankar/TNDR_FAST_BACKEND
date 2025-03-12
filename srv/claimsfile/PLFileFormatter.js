@@ -222,7 +222,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					FASTDistributionArrangementClaim        : 0,
 					TotalFASTClaim                          : Number(fastContractClaim || 0),
 					PercentageDifference                    : percentageDifference,
-					Status                                  : fastOffer ? (fastContractClaim == curr.Wartośćdowyrównania ? 'Passed' : 'Failed') : 'NoContract',
+					Status                                  : fastOffer ? (Number(fastContractClaim) >= Number(curr.Wartośćdowyrównania) ? 'Passed' : 'Failed') : 'NoContract',
 					Comment                                 : null,
 					FASTWholesalerPurchasePrice             : fastOffer && Number(fastOffer.RegPrice) || 0,
 					FASTContractPrice                       : fastOffer && Number(fastOffer.OfferPrice) || 0,
