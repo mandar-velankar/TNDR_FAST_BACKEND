@@ -234,7 +234,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
 			const offerID = fastOffer && fastOffer.OfferID || null;
 			let fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * curr.TotalDelivered) || 0;
-			fastContractClaim = Math.round(fastContractClaim * 100) / 100;
+			fastContractClaim = Number(wppValue) < Number(fastOffer?.OfferPrice || 0) ? 0 : Math.round(fastContractClaim * 100) / 100;
 			let fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * curr.TotalDelivered) : ((fastOffer.OfferPrice * daValue) * curr.TotalDelivered)) : 0;
 			fastDistributionArrangementClaim = Math.round(fastDistributionArrangementClaim * 100) / 100;
 			let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
