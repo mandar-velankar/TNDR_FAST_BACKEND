@@ -979,6 +979,27 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         max(ContractStartDate) as ContractStartDate : Date,
         max(ContractEndDate) as ContractEndDate : Date,
     }group by OfferID, ProductCode;
+
+    entity NLExtractAcceptedPrices as select from TransactionalData.ContractInfomation as contractInformation
+        inner join TransactionalData.PriceCondition as pc
+            on pc.OfferID = contractInformation.OfferID
+		    and pc.ProductCode = contractInformation.ProductCode
+        inner join TransactionalData.NLPriceConditions as nlpc
+            on pc.ID = nlpc.PriceCondition.ID
+            and contractInformation.ContractDuration = nlpc.ContractDuration {
+        pc.ID as priceconditionID,
+        contractInformation.OfferID,
+        contractInformation.CountryCode,
+        contractInformation.Active,
+        max(contractInformation.ProductCode) as ProductCode: Integer,
+        nlpc.OfferPrice,
+        max(contractInformation.ContractDuration) as ContractDuration: Double
+    }group by pc.ID,
+        contractInformation.OfferID,
+        contractInformation.CountryCode,
+        contractInformation.Active,
+        nlpc.OfferPrice;
+
     entity NLExtractOffers as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer
             on offer.TenderID = tender.TenderID
@@ -1021,6 +1042,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         left join NLExtractOfferChildInstUnderParent as childInst
             on childInst.OfferID = offer.OfferID
             and childInst.ProductCode = product.ProductCode
+        left join NLExtractAcceptedPrices as nlProductAcceptedPrice
+            on nlProductAcceptedPrice.OfferID = offer.OfferID
+            and nlProductAcceptedPrice.ProductCode = product.ProductCode
             {
             key tender.TenderID,
             key offer.OfferID,
@@ -1047,6 +1071,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             contractdur.AvgContractDuration as secContrDur: Double,
             contractdur.MinContractDuration as minContrDur: Double,
             PT_TMBDPR.NetPrice,
+            nlProductAcceptedPrice.OfferPrice as AcceptedPrice: Double,
             res.Outcome,
             childInst.InstituteName as childInstituteName: String,
             nldist.DistributionType,
