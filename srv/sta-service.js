@@ -6152,6 +6152,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ed.OfferPrice_1 = ed.OfferPrice_1 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_1), 'nl-NL', 2, 2);
 			ed.OfferPrice_2 = ed.OfferPrice_2 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_2), 'nl-NL', 2, 2);
 			ed.OfferPrice_3 = ed.OfferPrice_3 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_3), 'nl-NL', 2, 2);
+			ed.AcceptedPrice = ed.AcceptedPrice && ServiceHelper.formatCurrency(Number(ed.AcceptedPrice), 'nl-NL', 2, 2);
 			ed.NetPrice = ed.NetPrice && ServiceHelper.formatCurrency(Number(ed.NetPrice), 'nl-NL', 2, 2);
 			ed.EffectiveDate = ed.EffectiveDate && ServiceHelper.formatDate(ed.EffectiveDate, '', 'DD-MM-YYYY');
 			ed.ExpiryDate = ed.ExpiryDate && ServiceHelper.formatDate(ed.ExpiryDate, '', 'DD-MM-YYYY');
