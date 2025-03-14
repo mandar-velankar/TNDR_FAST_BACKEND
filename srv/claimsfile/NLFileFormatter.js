@@ -239,10 +239,11 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			fastDistributionArrangementClaim = Math.round(fastDistributionArrangementClaim * 100) / 100;
 			let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
 			totalFASTClaim = Math.round(totalFASTClaim * 100) / 100;
+			const finalTotalFASTClaim = Number(totalFASTClaim && totalFASTClaim >= 0 ? totalFASTClaim : 0)
 			const wholesalerDisArPricePerUnit = curr.Claim2Amount / curr.TotalDelivered;
 			const wholesalerDisArPrice = curr.FixedPrice - wholesalerDisArPricePerUnit;
 			const wholesalerDistributionArrangement = distributionAgreement && distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(3)) : Number((Math.round((wholesalerDisArPricePerUnit / curr.FixedPrice)*1000)/1000).toFixed(3)) || null;
-			const percentageDifference = fastOffer && Number((Math.round(((curr.ClaimTotal - totalFASTClaim) /totalFASTClaim)*1000)/1000).toFixed(3)) || 0;
+			const percentageDifference = fastOffer && finalTotalFASTClaim !== 0 ? Number((Math.round(((curr.ClaimTotal - finalTotalFASTClaim) /finalTotalFASTClaim)*1000)/1000).toFixed(3)) || 0 : 0;
 			const filteredClaimsData = claimsData.filter(item => item.OfferID == offerID && item.MainInstituteID == instituteId && item.ProductPackID == productCode);
 			const fastPendingCorrection = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + (row.TotalWholesalerClaim - row.TotalFASTClaim), 0) : 0;
 			const usageCalculation = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.Quantity, 0) : 0;
@@ -285,9 +286,9 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					TotalWholesalerClaim                    : (!curr.ClaimTotal && curr.ClaimTotal !== 0) ? null : Number(curr.ClaimTotal || 0),
 					FASTContractClaim                       : Number(fastContractClaim || 0),
 					FASTDistributionArrangementClaim        : Number(fastDistributionArrangementClaim || 0),
-					TotalFASTClaim                          : Number(totalFASTClaim || 0),
+					TotalFASTClaim                          : finalTotalFASTClaim,
 					PercentageDifference                    : percentageDifference,
-					Status                                  : instituteName === 'Customer Not Found' ? 'CustomerNotFound' : (fastOffer ? (totalFASTClaim == curr.ClaimTotal) ? 'Passed' : 'Failed' :'Failed'),
+					Status                                  : instituteName === 'Customer Not Found' ? 'CustomerNotFound' : (fastOffer ? (finalTotalFASTClaim == curr.ClaimTotal) ? 'Passed' : 'Failed' :'Failed'),
 					Comment                                 : null,
 					FASTWholesalerPurchasePrice             : Number(wppValue || 0),
 					FASTContractPrice                       : fastOffer && Number(fastOffer.OfferPrice) || 0,
