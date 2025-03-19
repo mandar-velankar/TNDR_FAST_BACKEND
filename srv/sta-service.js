@@ -1292,6 +1292,15 @@ module.exports = async (srv) => {
 					}
 					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 				}
+
+				if (req.data.CountryCode === "PL") {
+					if (req.data.ConditionType === "WithMaximumPrice") {
+						!req.data.Price1 && req.error({ code: 404, message: "Please select value greater than 0", target: "Price1" });
+					}else {
+						!req.data.SpecialPrice && req.error({ code: 404, message: "Please select value greater than 0", target: "SpecialPrice" });
+					}
+					
+				}
 			}
 			catch(error){
 				console.error('Error in validation of PriceCondition View before CREATE');
