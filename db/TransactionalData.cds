@@ -977,3 +977,24 @@ entity THQuotationDelevery : cuid {
     QuotationRecipientname    : String;
     QuotationRecipientcontact : String;
 }
+
+entity PriceConditionPrevious: cuid, managed{
+    CountryCode                         : String;
+    OfferID                             : String;
+    TenderID                            : String;
+    ProductCode                         : Integer;
+    YP00                                : Decimal;
+    YP04                                : Decimal;
+    SAPBaseGrossPrice                   : Decimal;  
+    YP10                                : Decimal;
+    YD75                                : Double;
+    YD06                                : Double;
+    YD02                                : Double;
+    YD30                                : Double;
+    SAPTAX                              : Decimal;
+    SAPPriceWithTax                     : Decimal;
+    RoyalDecree                         : String;
+    RoyalDecreeValue                    : Decimal;
+    RoyalDecreeIncl                     : Boolean default false;
+    ConditionType                       : String;
+}
