@@ -271,6 +271,7 @@ entity CountryApprovers : managed {
 	//Hierarchy:Integer not null;
 	Enabled                 : Boolean; //TODO Boolean not null;
 	key BU: String default 'All';
+	Nucleus: String;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode
 }
