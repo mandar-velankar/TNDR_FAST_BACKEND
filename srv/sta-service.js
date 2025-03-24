@@ -5362,9 +5362,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const filename = offerId+'.docx';
 			req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-			return {
+			const readableStreamValue = {
 				value: readableInstanceStream
-			};
+			}
+			readableStreamValue.value.pipe(req._.res);
+			return;
 		}
 		catch(error){
             console.error('Error in WordAttachments READ');
@@ -5401,7 +5403,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,excelData,1);
 			req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			return excelStreamValue;
+			excelStreamValue.value.pipe(req._.res);
+			return;
 		}
 		catch(error){
             console.error('Error in ExcelAttachments READ');
