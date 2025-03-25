@@ -81,7 +81,8 @@ module.exports = (srv) => {
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		excelStreamValue.value.pipe(req._.res);
+		return;
 		}
 		catch(error){
             console.error('Error in ExtractClaimsSales READ');
@@ -258,7 +259,8 @@ module.exports = (srv) => {
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		excelStreamValue.value.pipe(req._.res);
+		return;
 		}
 		catch(error){
             console.error('Error in ExtractApprovedClaim READ');
