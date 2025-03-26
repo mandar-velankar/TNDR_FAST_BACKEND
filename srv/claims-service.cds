@@ -107,6 +107,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         contract.ContractEndDate,
         offer.Quotation.EffectiveDate,
         offer.Quotation.ExpiryDate,
+        product.SKU.PACKFACTOR,
         product.Price.OfferPrice,
         product.Price.RegPrice,
         product.SKU.Product.HLEVEL4_NAME,
