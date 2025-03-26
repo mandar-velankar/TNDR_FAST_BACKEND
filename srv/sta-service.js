@@ -503,6 +503,11 @@ module.exports = async (srv) => {
 		//const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
 		const tx = cds.tx(req);
+
+		const DEFAULT_SORTING = [
+			{ ref: ["TenderID"], sort: "desc" },
+			{ ref: ["OfferID"], sort: "desc" }
+		];
 		
 		let result = [];
         let tmvQuery = SELECT.from(req.query.SELECT.from);
@@ -512,8 +517,31 @@ module.exports = async (srv) => {
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
-        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
         //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
+
+		// Function to check if sorting matches the default
+		const isDefaultSorting = (orderBy) => {
+			return JSON.stringify(orderBy) === JSON.stringify(DEFAULT_SORTING);
+		};
+
+		// Function to check if sorting is applied only on TenderID or OfferID in descending order
+		const isTenderOrOfferDescSorting = (orderBy) => {
+			return orderBy.some(order => 
+				(order.ref[0] === "TenderID" || order.ref[0] === "OfferID") && order.sort === "desc"
+			);
+		};
+		
+		// Determine sorting behavior
+		const hasOrderBy = req.query.SELECT.orderBy && req.query.SELECT.orderBy.length > 0;
+		const isUserSorting = hasOrderBy && !isDefaultSorting(req.query.SELECT.orderBy);
+		const isDescTenderOfferSorting = hasOrderBy && isTenderOrOfferDescSorting(req.query.SELECT.orderBy);
+
+		// Ensure both TenderID & OfferID are in DESC if either is DESC
+        if (isDescTenderOfferSorting) {
+            req.query.SELECT.orderBy = DEFAULT_SORTING;
+        }
+
+		req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
 
         result = await tx.run(tmvQuery);
 
@@ -540,7 +568,7 @@ module.exports = async (srv) => {
 
 		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
-			return applyCustomSorting(result);
+			return (isUserSorting && !isDescTenderOfferSorting) ? result : applyCustomSorting(result);
 		}
 		
 		const cwid = req.user.id;
@@ -558,7 +586,7 @@ module.exports = async (srv) => {
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return applyCustomSorting(result);
+		  return (isUserSorting && !isDescTenderOfferSorting) ? result : applyCustomSorting(result);
 		}
 
 		let resultsArray = Array.isArray(result) ? result : [result];
@@ -605,13 +633,10 @@ module.exports = async (srv) => {
 			return [];
 		}
 			
-		if (finalFilteredResults.length > 0) {
-			// Return the final filtered results
-			return applyCustomSorting(finalFilteredResults);
-		}else{
-			// If no territory matches, return an empty array
-			return applyCustomSorting(territoryMatches);
-		}
+		return finalFilteredResults.length > 0
+            ? (isUserSorting && !isDescTenderOfferSorting ? finalFilteredResults : applyCustomSorting(finalFilteredResults))
+            : (isUserSorting && !isDescTenderOfferSorting ? territoryMatches : applyCustomSorting(territoryMatches));
+
 		}
 		catch(error){
             console.error('Error in TenderMasterView READ');
@@ -5330,9 +5355,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const filename = offerId+'.docx';
 			req._.res.setHeader('Content-disposition', 'attachment; filename=' + filename);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-			return {
+			const readableStreamValue = {
 				value: readableInstanceStream
-			};
+			}
+			readableStreamValue.value.pipe(req._.res);
+			return;
 		}
 		catch(error){
             console.error('Error in WordAttachments READ');
@@ -5369,7 +5396,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(templateContent,excelData,1);
 			req._.res.setHeader('Content-disposition', `attachment; filename=${offerId}.xlsx`);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			return excelStreamValue;
+			excelStreamValue.value.pipe(req._.res);
+			return;
 		}
 		catch(error){
             console.error('Error in ExcelAttachments READ');
@@ -6140,7 +6168,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 			req._.res.setHeader('Content-disposition', `attachment; filename= Extract History.xlsx`);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			return excelStreamValue;
+			excelStreamValue.value.pipe(req._.res);
+			return;
 		}
 		catch(error){
             console.error('Error in ExcelAttachments READ');
@@ -6610,7 +6639,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		excelStreamValue.value.pipe(req._.res);
+		return;
 		}
 		catch(error){
             console.error('Error in ExtractClaimsSales READ');

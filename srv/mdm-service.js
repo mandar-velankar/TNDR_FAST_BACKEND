@@ -902,7 +902,8 @@ module.exports = (srv) => {
 
 			req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 			req._.res.setHeader('Content-type', template.mediaType);
-			return excelStreamValue;
+			excelStreamValue.value.pipe(req._.res);
+			return;
 		}
 		catch(error){
             console.error('Error in NLExcelTemplates READ');
@@ -945,7 +946,8 @@ module.exports = (srv) => {
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		excelStreamValue.value.pipe(req._.res);
+		return;
 		}
 		catch(error){
             console.error('Error in NLDAExcelTemplates READ');
@@ -999,7 +1001,8 @@ module.exports = (srv) => {
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		excelStreamValue.value.pipe(req._.res);
+		return;
 		}
 		catch(error){
             console.error('Error in NLWPPExcelTemplates READ');
