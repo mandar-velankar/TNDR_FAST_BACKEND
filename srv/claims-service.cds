@@ -88,7 +88,7 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         contract.ContractEndDate,
         offer.Quotation.EffectiveDate,
         offer.Quotation.ExpiryDate,
-        product.Price.OfferPrice,
+        (product.Price.OfferPrice * product.SKU.PACKFACTOR) as OfferPrice:Double,
         product.Price.RegPrice,
         product.SKU.CONCENTRATION,
         product.SKU.Product.HLEVEL4_CODE as BrandId:String,
