@@ -1482,19 +1482,23 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             pc.Tax
     }where pc.ConditionType = 'Rappel';
     entity PriceConditionRappelView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
-    entity PriceConditionPreviousView                   as select from TransactionalData.PriceConditionPrevious{
+    entity CCMPriceConditionView                   as select from TransactionalData.CCMPriceCondition{
         CountryCode,
         key OfferID,
         key TenderID,
         key ProductCode,
+        MaterialNumber,
+        IntituteID,
+        CustomerID,
+        Currency,
         YP00,
         YP04,
-        SAPBaseGrossPrice,  
         YP10,
         YD75,
         YD06,
         YD02,
         YD30,
+        SAPBaseGrossPrice,  
         SAPTAX,
         SAPPriceWithTax,
         RoyalDecree,
