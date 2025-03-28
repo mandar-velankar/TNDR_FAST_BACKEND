@@ -398,7 +398,6 @@ module.exports = (srv) => {
 	}*/
 
 	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers) {//MEA (and default)
-		const filteredCountryApprovers = countryApprovers.filter(ca => ca.Division === product.DIVISION);
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
 		//1: Optional
@@ -489,7 +488,7 @@ module.exports = (srv) => {
 			}
 
 			if (oApproverType.ApproverType.toLowerCase().split(" ").join("").includes("nucleushead")) {
-				const ctryApproverType = filteredCountryApprovers.find(ca => ca.ApproverType = oApproverType.ApproverType);
+				const ctryApproverType = countryApprovers.find(ca => ca.ApproverType === oApproverType.ApproverType);
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
 					oApproverType.ValidationType = 3
