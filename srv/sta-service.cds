@@ -1116,6 +1116,44 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 else	
                     offerStatus.STATUS
             end as STATUS: String
+    }where tender.CountryCode = 'NL'
+    union select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        left join TransactionalData.PT_TMOFPR as product
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+        inner join InstitutesInGroup as childInst
+            on childInst.ParentInstituteID = tender.InstituteID
+            and childInst.InstituteID <> tender.InstituteID
+            and childInst.CountryCode = tender.CountryCode
+        left join TransactionalDataViews.OfferStatus as offerStatus
+            on offerStatus.OFFER_ID = offer.OfferID
+        left join TransactionalData.ContractInfomation as contractinfo
+            on contractinfo.OfferID = offer.OfferID
+            and contractinfo.ProductCode = product.ProductCode{
+        	tender.TenderID,
+            key offer.OfferID,
+            key product.ProductCode,
+            childInst.InstituteName,
+            childInst.InstituteID,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Results Recorded' 
+                        then 
+                            case 
+                                when contractinfo.InstituteID is null
+                                    then 'Not Accepted'
+                                else
+                                    'Outcome Accepted'
+                            end
+                else	
+                    offerStatus.STATUS
+            end as STATUS: String
     }where tender.CountryCode = 'NL';
 
 
