@@ -180,6 +180,9 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const brandUsedVolume = fastOffer && (curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI * fastOffer.CONCENTRATION) || 0;
 			const brandContractCalculatedVolume = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.BrandContractVolume, 0) : 0;
 			const brandUsedCalculatedVolume = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.BrandUsedVolume, 0) : 0;
+			const wholesalerContractPrice = Number(curr.PODSTAWANALICZENIAMARŻYNETTOPNM || 0);
+			const fastContractPrice = fastOffer ? Number(fastOffer.OfferPrice) : 0;
+			const contractPriceDifference = fastOffer ? Math.abs(wholesalerContractPrice-fastContractPrice) <= 0.01 : false;
 		
 			prev.push(
 				{
@@ -222,7 +225,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					FASTDistributionArrangementClaim        : 0,
 					TotalFASTClaim                          : Number(fastContractClaim || 0),
 					PercentageDifference                    : percentageDifference,
-					Status                                  : fastOffer ? (Number(fastContractClaim) >= Number(curr.Wartośćdowyrównania) ? 'Passed' : 'Failed') : 'NoContract',
+					Status                                  : !fastOffer ? 'NoContract' : contractPriceDifference ? 'Passed' : (Number(fastContractClaim) >= Number(curr.Wartośćdowyrównania) ? 'Passed' : 'Failed'),
 					Comment                                 : null,
 					FASTWholesalerPurchasePrice             : fastOffer && Number(fastOffer.RegPrice) || 0,
 					FASTContractPrice                       : fastOffer && Number(fastOffer.OfferPrice) || 0,
