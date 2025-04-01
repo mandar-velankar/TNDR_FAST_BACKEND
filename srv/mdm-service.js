@@ -813,8 +813,8 @@ module.exports = (srv) => {
 			await UPDATE(NLPPPApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:nlpppapproval.ID});
 		}
 		req.data.CurrentEndDate = formattedEndDate;
-		req.data.Status = 'New';
-		req.data.ApprovalsCount = 0;
+		// req.data.Status = 'New';
+		// req.data.ApprovalsCount = 0;
 
 	});
 
@@ -838,8 +838,8 @@ module.exports = (srv) => {
 			await UPDATE(WholesalePurchasePriceApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:wppapproval.ID});
 		}
 		req.data.CurrentEndDate = formattedEndDate;
-		req.data.Status = 'New';
-		req.data.ApprovalsCount = 0;
+		// req.data.Status = 'New';
+		// req.data.ApprovalsCount = 0;
 		
 	});
 
