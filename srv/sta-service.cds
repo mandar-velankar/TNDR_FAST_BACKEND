@@ -1116,7 +1116,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 else	
                     offerStatus.STATUS
             end as STATUS: String
-    }where tender.CountryCode = 'NL' and offer.OfferID NOT LIKE '%' || 'HIST' || '%'
+    }where tender.CountryCode = 'NL'
     union select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer
             on offer.TenderID = tender.TenderID
@@ -1128,7 +1128,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             on offerStatus.OFFER_ID = offer.OfferID
         left join TransactionalData.ContractInfomation as contractinfo
             on contractinfo.OfferID = offer.OfferID
-            and contractinfo.ProductCode = product.ProductCode{
+            and contractinfo.ProductCode = product.ProductCode
+            and contractinfo.InstituteID <> tender.InstituteID{
         	tender.TenderID,
             key offer.OfferID,
             key product.ProductCode,
@@ -1150,7 +1151,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 else	
                     offerStatus.STATUS
             end as STATUS: String
-    }where tender.CountryCode = 'NL' and offer.OfferID LIKE '%' || 'HIST' || '%';
+    }where tender.CountryCode = 'NL';
 
 
     @cds.redirection.target
