@@ -1504,6 +1504,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         RoyalDecree,
         RoyalDecreeValue,
         RoyalDecreeIncl,
+        ConfidentialPrice,
+        NETPRICEWITHOUTTAXAFTERDEDUCTIONRD,
+        NETPRICEWITHTAXAFTERDEDUCTIONRD,
+        NETPRICEWITHOUTTAX,
+        NETPRICEWITHTAX,
         key ConditionType
     };
     entity PriceConditionDescuentoComercialView         as projection on TransactionalDataViews.StandardTenderPriceConditionView;

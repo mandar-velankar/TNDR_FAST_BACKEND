@@ -1583,7 +1583,20 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     priceCondition.Liquidation,
     priceCondition.RefundDate,
     priceCondition.Settlement.ID as Settlement_ID,
-    priceCondition.PriceConditionCode
+    priceCondition.PriceConditionCode,
+    priceCondition.Discount as ESDiscount:Double,
+    priceCondition.RoyalDecreeValue,
+    priceCondition.RoyalDecreeIncl,
+    priceCondition.StandardDiscount,
+    priceCondition.AdditionalDiscount,
+    priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
+    priceCondition.NetPriceWithoutTaxAfterDeductionRD,
+    priceCondition.NetPriceWithTaxAfterDeductionRD,
+    priceCondition.NetPriceWithoutTax,
+    priceCondition.NetPriceWithTax,
+    priceCondition.MaximumPrice,
+    priceCondition.ConfidentialDiscount,
+    priceCondition.RoyalDecreePercentage_1
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 

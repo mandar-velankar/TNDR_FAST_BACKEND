@@ -121,7 +121,8 @@ module.exports = async (srv) => {
 		OutgoingMails,
 		NLPriceConditions,
 		AwardedOfferDistributors,
-		ContractInfomation
+		ContractInfomation,
+		CCMPriceCondition
 	} = cds.entities("com.bayer.SXTENDER.TransactionalData");
 	const {
 		Template, 
@@ -6902,6 +6903,66 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			PriceCondition_ID      : req.data.PriceConditionID
 		}
 	}
+
+	srv.after(
+		'READ', 
+		['PriceConditionDescuentoComercialView','PriceConditionDescuentoEspecialView', 'PriceConditionPrecioNetoView'], 
+		async (items, req) => {
+		try{
+			if(items.hasPriceCondition){
+				return items;
+			}else{
+				const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
+					OfferID: items.OfferID,
+					TenderID: items.TenderID,
+					ProductCode: items.ProductCode,
+					ConditionType: items.ConditionType
+				});
+				items.PVL = ccmPriceCondition.YP00;
+				items.ConfidentialDiscount = ccmPriceCondition.YP04;
+				items.RoyalDecree = ccmPriceCondition.RoyalDecree;
+				items.ConfidentialPrice = ccmPriceCondition.ConfidentialPrice;
+				items.ESDiscount = ccmPriceCondition.YD02;
+				items.RoyalDecreeValue = ccmPriceCondition.RoyalDecreeValue;
+				items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
+				items.RoyalDecreePercentage_1 = ccmPriceCondition.YD06;
+				items.StandardDiscount = ccmPriceCondition.StandardDiscount;
+				items.AdditionalDiscount = ccmPriceCondition.YD75;
+				items.NetPriceWithoutTaxBeforeDeductionRD = ccmPriceCondition.YP10;
+				items.NetPriceWithoutTaxAfterDeductionRD = ccmPriceCondition.NetPriceWithoutTaxAfterDeductionRD;
+				items.NetPriceWithTaxAfterDeductionRD = ccmPriceCondition.NetPriceWithTaxAfterDeductionRD;
+				items.NetPriceWithoutTax = ccmPriceCondition.NetPriceWithoutTax;
+				items.NetPriceWithTax = ccmPriceCondition.NetPriceWithTax;
+				items.Tax = ccmPriceCondition.SAPTAX;
+
+				return items;
+			}
+			// const fnCalculateFields = async item => {
+			// 	if(item.ConditionType === 'Discount'){
+			// 		item.OfferPrice = item.BasePrice * (1 - item.Discount);
+			// 		item.OfferPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.OfferPrice,4) : roundToDecimalPlaces(item.OfferPrice,2);
+			// 		item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+			// 		item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
+			// 	}
+			// 	else{
+			// 		item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
+			// 		item.Discount = (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : roundToDecimalPlaces(item.Discount,2);
+			// 		item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
+			// 		item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
+			// 	}
+			// };
+			// if(Array.isArray(items)){
+			// 	return items.map(fnCalculateFields)
+			// }else{
+			// 	return fnCalculateFields(items);
+			// }
+		}
+		catch(error){
+			console.error('Error in PriceConditionDescuentoComercialView, PriceConditionDescuentoEspecialView, PriceConditionPrecioNetoView after READ');
+			return req.reject(403, error?.message||"Error in PriceConditionDescuentoComercialView, PriceConditionDescuentoEspecialView, PriceConditionPrecioNetoView after READ");
+		}
+		}
+	);
 
 
 }

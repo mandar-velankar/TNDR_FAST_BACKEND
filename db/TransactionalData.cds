@@ -987,18 +987,23 @@ entity CCMPriceCondition: cuid, managed{
     IntituteID                          : Integer;
     CustomerID                          : Integer;
     Currency                            : String;
-    YP00                                : Decimal;
-    YP04                                : Decimal;
-    YP10                                : Decimal;
-    YD75                                : Double;
-    YD06                                : Double;
-    YD02                                : Double;
-    YD30                                : Double;
+    YP00                                : Decimal; //PVL
+    YP04                                : Decimal; //Confidential Discount
+    YP10                                : Decimal; //NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD
+    YD75                                : Double;  //ADDITIONALDISCOUNT
+    YD06                                : Double; //ROYALDECREE
+    YD02                                : Double; //Commercial Discount 
+    YD30                                : Double; //Special Discount (100%) 
     SAPBaseGrossPrice                   : Decimal;  
     SAPTAX                              : Decimal;
     SAPPriceWithTax                     : Decimal;
     RoyalDecree                         : String;
     RoyalDecreeValue                    : Decimal;
     RoyalDecreeIncl                     : Boolean default false;
+    ConfidentialPrice                   : Decimal;
+    NETPRICEWITHOUTTAXAFTERDEDUCTIONRD  : Decimal;
+    NETPRICEWITHTAXAFTERDEDUCTIONRD     : Decimal;
+    NETPRICEWITHOUTTAX                  : Decimal;
+    NETPRICEWITHTAX                     : Decimal;
     ConditionType                       : String;
 }
