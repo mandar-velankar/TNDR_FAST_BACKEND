@@ -1337,7 +1337,10 @@ module.exports = (srv) => {
 				UPDATE(PT_TMPRDPCK).with({ACTIVERECORD: "No"}).where({
 					PRODUCTPACKID: ProductCode
 				}),
-				UPDATE(PT_TMCTPRDPCK).with({ACTIVERECORD: "No"}).where({
+				UPDATE(PT_TMCTPRDPCK).with({
+					ACTIVERECORD: "No", 
+					RegistrationValidUntil: TerminationDate
+				}).where({
 					COUNTRYCODE: CountryCode,
 					PRODUCTPACKID: ProductCode
 				}),
