@@ -1216,4 +1216,63 @@ module.exports = (srv) => {
             DistributorName: "All",
 		})
 	});
+
+	srv.on('TerminateProduct', async (req) => {
+		try {
+			const {
+				ProductCode,
+				CountryCode,
+				TerminationDate
+			} = req.data;
+
+			const tx = cds.tx(req);
+
+			// Get the SKUCode before updating
+			const skuCodes = await tx.run(SELECT.from(PT_TMSKUPRDPCK).where({
+				CountryCode: CountryCode,
+				ProductPackID: ProductCode
+			}).columns("SKUCode"));
+	
+			const updatePromises = [];
+			for (const skuCode of skuCodes) {
+				updatePromises.push(UPDATE(PT_TMSKUPRDPCK).with({ACTIVERECORD: "No"}).where({
+					CountryCode: CountryCode,
+					ProductPackID: ProductCode,
+					SKUCode: skuCode.SKUCode,// Add SKUCode to the WHERE clause
+					ACTIVERECORD: "Yes"
+				}));
+			}
+
+			await tx.run([
+				...updatePromises, // Spread the array of update promises
+				UPDATE(PT_TMPRDPCK).with({ACTIVERECORD: "No"}).where({
+					PRODUCTPACKID: ProductCode
+				}),
+				UPDATE(PT_TMCTPRDPCK).with({
+					ACTIVERECORD: "No", 
+					RegistrationValidUntil: TerminationDate
+				}).where({
+					COUNTRYCODE: CountryCode,
+					PRODUCTPACKID: ProductCode
+				}),
+				UPDATE(WholesalePurchasePrice).with({EndDate: TerminationDate}).where({
+					CountryCode: CountryCode,
+					PRODUCTPACKID: ProductCode,
+					EndDate: "9999-12-31",
+					Status: "Approved"
+				}),
+				UPDATE(NLPPP).with({EndDate: TerminationDate}).where({
+					CountryCode: CountryCode,
+					PRODUCTPACKID: ProductCode,
+					EndDate: "9999-12-31",
+					Status: "Approved"
+				})
+			]);
+			
+			return 'Product is successfully Terminated!';
+		} catch (error) {
+			console.error('Error in TerminateProduct');
+            return req.reject(403, error?.message||"Error in TerminateProduct");
+		}
+	});
 };
