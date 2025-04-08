@@ -399,7 +399,6 @@ entity DistributionAgreementMaterialNumbers as select from MasterData.PT_TMSKUPR
 	ProductPackID,
 	STRING_AGG(SKUCode, ',') as MaterialNumbers: String
 }where CountryCode = 'NL'
-	and ActiveRecord = 'Yes'
 group by 
 	CountryCode,
 	ProductPackID;
