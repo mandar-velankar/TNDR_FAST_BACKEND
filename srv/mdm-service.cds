@@ -358,4 +358,5 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
     action SoftDeleteProductPrices(productPackID: Integer, countryCode: String) returns String;
+    action TerminateProduct(ProductCode: Integer, CountryCode: String, TerminationDate: Date) returns String;
 }
