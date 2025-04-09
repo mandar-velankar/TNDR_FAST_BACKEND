@@ -16,7 +16,8 @@ module.exports = (srv) => {
         ClaimData,
         ContrastAgentSalesData,
 		ContrastAgentSalesDataNL,
-        SalesReportFile
+        SalesReportFile,
+		MappedFASTOfferClaims
     } = cds.entities("com.bayer.SXTENDER.ClaimsData");
     const {
         PT_TMPRDHIER,
@@ -331,7 +332,10 @@ module.exports = (srv) => {
 			await INSERT.into(ClaimFiles).entries(result.claimFile);
 
 			//Insert metadata into ClaimData
-			await INSERT.into(ClaimData).entries(result.claimData);
+			await INSERT.into(ClaimData).entries(result.mappedclaimsData);
+
+			//Insert mapped FAST Offer Claims Data
+			await INSERT.into(MappedFASTOfferClaims).entries(result.mappedFASTOfferClaims);
 
 			//Insert Claim Approvals
 			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
@@ -483,4 +487,66 @@ module.exports = (srv) => {
 			return req.reject(403, error.message || 'An unexpected error occurred.')
 		}
 	});
+
+	/*srv.on('reCalculateClaimData', async (req) => {
+		try {
+			const { claimFile_ID, countryCode, claimData_ID, value } = req.data;
+
+			const claimFile = await SELECT.one.from(ClaimFiles).where({ID: claimFile_ID});
+			const claimFileStatus = await SELECT.one.from(ClaimFileStatusView).where({ClaimFiles_ID: claimFile_ID});
+			const claimData = await SELECT.one.from(ClaimData).where({ID: claimData_ID});
+			const mappedFASTOfferClaims = await SELECT.from(MappedFASTOfferClaims).where({ID: claimData_ID});
+
+			// Getting next level Approval
+			const nextHierarchylvl = currentApprover.Hierarchy + 1;
+			const nextHierarchyApproval = approvals.find(approval => approval.Hierarchy == nextHierarchylvl);
+
+			// Validation messages
+			const messages = {
+				'rejected': 'Claim File rejected successfully',
+				'approved': 'Claim File approved successfully',
+				'notification': 'Approval notification sent to the next hierarchy level approver',
+			}
+
+			// Claim Notification mail template ids
+			const templateIds = {
+				"NL": "NLClaimFileApprovalNotificationMail",
+				"PL": "PLClaimFileApprovalNotificationMail"
+			}
+
+			let validationAction = '';
+
+			// If selected status is Approved and there is next level hierarchy approval then sending notification
+			if (claimFileStatus?.STATUS?.toLowerCase() === 'pending' && status?.toLowerCase() === 'approved' && nextHierarchyApproval) {
+				const approvalContentmapping = {
+					CountryCode: countryCode,
+					ApproverName: nextHierarchyApproval.ApproverName,
+					WholesalerName: claimFile.DistributorName,
+					ClaimFileDetailPageURL: claimFileDetailPageURL
+				};
+				await addOutgoingMail(req, approvalContentmapping, templateIds[countryCode], "Claim File for Review and Approval", nextHierarchyApproval?.ApproverEmail);
+				validationAction = 'notification';
+			}
+
+			if (!validationAction) {
+				validationAction = status.toLowerCase();
+			};
+
+			// Updating Claim file and approvals statuses
+			await UPDATE(ClaimApprovals).with({Status: status}).where({ClaimFiles_ID: claimFile_ID, ApproverCWID: currentApprover?.ApproverCWID});
+			const updatedClaimFileStatus = await SELECT.one.from(ClaimFileStatusView).where({ClaimFiles_ID: claimFile_ID});
+
+			if (status?.toLowerCase() === 'approved') {
+				await UPDATE(ClaimFiles).with({Status: updatedClaimFileStatus?.STATUS, ApprovalsCount: claimFile.ApprovalsCount + 1}).where({ID: claimFile_ID});
+			}else {
+				await UPDATE(ClaimFiles).with({Status: updatedClaimFileStatus?.STATUS}).where({ID: claimFile_ID});
+			}
+
+			return messages[validationAction];
+			
+		} catch (error) {
+			console.error('Error in approveRejectClaimFiles');
+			return req.reject(400, error.message || 'An unexpected error occurred.')
+		}
+	});*/
 };
