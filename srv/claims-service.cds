@@ -193,5 +193,5 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
 
     action approveRejectClaimFiles(claimFile_ID: String, countryCode: String, status: String, claimFileDetailPageURL: String) returns String;
     action deleteClaimFile(claimFile_ID: String) returns String;
-    action reCalculateClaimData(claimFile_ID: String, countryCode: String, claimData_ID: String, value: String) returns String;
+    action reCalculateClaimData(claimFile_ID: String, countryCode: String, claimData_ID: String, offerID: String, packageNumber: String) returns String;
 }
