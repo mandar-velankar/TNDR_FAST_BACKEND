@@ -238,8 +238,8 @@ entity SalesReportFileFieldMetaData {
 entity MappedFASTOfferClaims {
     key ClaimFileID: UUID;
     key CountryCode: String;
-    ClaimDataID: UUID;
-    OfferID: String;
+    key ClaimDataID: UUID;
+    key OfferID: String;
     PackageNumber: String;
     ProductCode: Integer;
     FASTContractPrice: Double;
