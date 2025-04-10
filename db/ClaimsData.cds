@@ -235,3 +235,17 @@ entity SalesReportFileFieldMetaData {
     FieldLength             : Integer;
 }
 
+entity MappedFASTOfferClaims {
+    key ClaimFileID: UUID;
+    key CountryCode: String;
+    key ClaimDataID: UUID;
+    key OfferID: String;
+    PackageNumber: String;
+    ProductCode: Integer;
+    FASTContractPrice: Double;
+    FASTWholesalerPurchasePrice: Double;
+    FASTDistributionArrangement: Double;
+    FASTDistributionAgreementType: String;
+    RequestedVolume: Integer;
+}
+
