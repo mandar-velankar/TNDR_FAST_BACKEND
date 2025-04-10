@@ -240,12 +240,13 @@ entity MappedFASTOfferClaims {
     key CountryCode: String;
     key ClaimDataID: UUID;
     key OfferID: String;
-    PackageNumber: String;
+    key PackageNumber: String default 1;
     ProductCode: Integer;
     FASTContractPrice: Double;
     FASTWholesalerPurchasePrice: Double;
     FASTDistributionArrangement: Double;
     FASTDistributionAgreementType: String;
     RequestedVolume: Integer;
+    CONCENTRATION: Double;
 }
 
