@@ -488,65 +488,67 @@ module.exports = (srv) => {
 		}
 	});
 
-	/*srv.on('reCalculateClaimData', async (req) => {
+	srv.on('reCalculateClaimData', async (req) => {
 		try {
-			const { claimFile_ID, countryCode, claimData_ID, value } = req.data;
+			const { claimFile_ID, countryCode, claimData_ID, offerID, packageNumber } = req.data;
 
 			const claimFile = await SELECT.one.from(ClaimFiles).where({ID: claimFile_ID});
-			const claimFileStatus = await SELECT.one.from(ClaimFileStatusView).where({ClaimFiles_ID: claimFile_ID});
 			const claimData = await SELECT.one.from(ClaimData).where({ID: claimData_ID});
-			const mappedFASTOfferClaims = await SELECT.from(MappedFASTOfferClaims).where({ID: claimData_ID});
-
-			// Getting next level Approval
-			const nextHierarchylvl = currentApprover.Hierarchy + 1;
-			const nextHierarchyApproval = approvals.find(approval => approval.Hierarchy == nextHierarchylvl);
-
-			// Validation messages
-			const messages = {
-				'rejected': 'Claim File rejected successfully',
-				'approved': 'Claim File approved successfully',
-				'notification': 'Approval notification sent to the next hierarchy level approver',
+			const mappedFASTOfferClaims = await SELECT.one.from(MappedFASTOfferClaims).where({OfferID: offerID});
+			let mappedReCalculatedValuestoClaimsData = [];
+			// recalculating the values
+			if(countryCode === 'NL'){
+				let fastContractClaim = mappedFASTOfferClaims && ((mappedFASTOfferClaims.FASTWholesalerPurchasePrice - mappedFASTOfferClaims.FASTContractPrice) * claimData.Quantity) || 0;
+				fastContractClaim = Math.round(fastContractClaim * 100) / 100;
+				let fastDistributionArrangementClaim = mappedFASTOfferClaims ? (mappedFASTOfferClaims.FASTDistributionAgreementType === 'Fixed' ? ((mappedFASTOfferClaims.FASTContractPrice - mappedFASTOfferClaims.FASTDistributionArrangement) * claimData.Quantity) : ((mappedFASTOfferClaims.FASTContractPrice * mappedFASTOfferClaims.FASTDistributionArrangement) * claimData.Quantity)) : 0;
+				fastDistributionArrangementClaim = Math.round(fastDistributionArrangementClaim * 100) / 100;
+				let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
+				totalFASTClaim = Math.round(totalFASTClaim * 100) / 100;
+				const finalTotalFASTClaim = Number(totalFASTClaim && totalFASTClaim >= 0 ? totalFASTClaim : 0)
+				const percentageDifference = mappedFASTOfferClaims && finalTotalFASTClaim !== 0 ? Number((Math.round(((claimData.Quantity - finalTotalFASTClaim) /finalTotalFASTClaim)*1000)/1000).toFixed(3)) || 0 : 0;
+				mappedReCalculatedValuestoClaimsData = {
+					OfferID									: mappedFASTOfferClaims.OfferID,
+					FASTContractClaim                       : Number(fastContractClaim || 0),
+					FASTDistributionArrangementClaim        : Number(fastDistributionArrangementClaim || 0),
+					TotalFASTClaim                          : finalTotalFASTClaim,
+					PercentageDifference                    : percentageDifference,
+					FASTWholesalerPurchasePrice             : Number(mappedFASTOfferClaims.FASTWholesalerPurchasePrice || 0),
+					FASTContractPrice                       : Number(mappedFASTOfferClaims.FASTContractPrice) || 0,
+					QC1Passed                               : fastContractClaim == claimData.WholesalerClaim1 ? true : false,
+					QC2Passed                               : fastDistributionArrangementClaim == claimData.WholesalerClaim2 ? true : false,
+					FASTClaim1                              : Number(fastContractClaim || 0),
+					FASTClaim2                              : Number(fastDistributionArrangementClaim || 0),
+					Status                                  : (finalTotalFASTClaim == claimData.TotalWholesalerClaim) ? 'Passed' : 'Failed',
+				}
+			}
+			else{
+				const fastContractClaim = ((mappedFASTOfferClaims.FASTWholesalerPurchasePrice - mappedFASTOfferClaims.FASTContractPrice) * claimData.Quantity) || 0;
+				const percentageDifference = (fastContractClaim && fastContractClaim !== 0) ? ((claimData.TotalClaim - fastContractClaim) / fastContractClaim) : 0;
+				const brandContractVolume = (mappedFASTOfferClaims.RequestedVolume * mappedFASTOfferClaims.CONCENTRATION) || 0;
+				const brandUsedVolume = (claimData.Quantity * mappedFASTOfferClaims.CONCENTRATION) || 0;
+				const fastContractPrice = Number(mappedFASTOfferClaims.FASTContractPrice) || 0;
+				const contractPriceDifference = Math.abs(claimData.WholesalerContractPrice-fastContractPrice) <= 0.01 ;
+				mappedReCalculatedValuestoClaimsData = {
+					OfferID									: mappedFASTOfferClaims.OfferID,
+					FASTContractClaim                       : Number(fastContractClaim || 0),
+					FASTDistributionArrangementClaim        : Number(fastDistributionArrangementClaim || 0),
+					TotalFASTClaim                          : Number(fastContractClaim || 0),
+					PercentageDifference                    : percentageDifference,
+					FASTWholesalerPurchasePrice             : Number(mappedFASTOfferClaims.FASTWholesalerPurchasePrice || 0),
+					FASTContractPrice                       : Number(mappedFASTOfferClaims.FASTContractPrice) || 0,
+					BrandContractVolume                     : brandContractVolume,
+					BrandUsedVolume                         : brandUsedVolume,
+					Status                                  : contractPriceDifference ? 'Passed' : (Number(fastContractClaim) >= Number(claimData.TotalWholesalerClaim) ? 'Passed' : 'Failed'),
+				}
 			}
 
-			// Claim Notification mail template ids
-			const templateIds = {
-				"NL": "NLClaimFileApprovalNotificationMail",
-				"PL": "PLClaimFileApprovalNotificationMail"
-			}
+			await UPDATE(ClaimData).with(mappedReCalculatedValuestoClaimsData).where({ID: claimData_ID});
 
-			let validationAction = '';
-
-			// If selected status is Approved and there is next level hierarchy approval then sending notification
-			if (claimFileStatus?.STATUS?.toLowerCase() === 'pending' && status?.toLowerCase() === 'approved' && nextHierarchyApproval) {
-				const approvalContentmapping = {
-					CountryCode: countryCode,
-					ApproverName: nextHierarchyApproval.ApproverName,
-					WholesalerName: claimFile.DistributorName,
-					ClaimFileDetailPageURL: claimFileDetailPageURL
-				};
-				await addOutgoingMail(req, approvalContentmapping, templateIds[countryCode], "Claim File for Review and Approval", nextHierarchyApproval?.ApproverEmail);
-				validationAction = 'notification';
-			}
-
-			if (!validationAction) {
-				validationAction = status.toLowerCase();
-			};
-
-			// Updating Claim file and approvals statuses
-			await UPDATE(ClaimApprovals).with({Status: status}).where({ClaimFiles_ID: claimFile_ID, ApproverCWID: currentApprover?.ApproverCWID});
-			const updatedClaimFileStatus = await SELECT.one.from(ClaimFileStatusView).where({ClaimFiles_ID: claimFile_ID});
-
-			if (status?.toLowerCase() === 'approved') {
-				await UPDATE(ClaimFiles).with({Status: updatedClaimFileStatus?.STATUS, ApprovalsCount: claimFile.ApprovalsCount + 1}).where({ID: claimFile_ID});
-			}else {
-				await UPDATE(ClaimFiles).with({Status: updatedClaimFileStatus?.STATUS}).where({ID: claimFile_ID});
-			}
-
-			return messages[validationAction];
+			return "Claim data has been refreshed and recalculated successfully";
 			
 		} catch (error) {
-			console.error('Error in approveRejectClaimFiles');
+			console.error('Error in reCalculateClaimData');
 			return req.reject(400, error.message || 'An unexpected error occurred.')
 		}
-	});*/
+	});
 };
