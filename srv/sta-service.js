@@ -6254,7 +6254,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				!awardedOfferDistributors.some(nlo => 
 					el.OfferID == nlo.OfferID && 
 					el.ProductPackID == nlo.ProductPackID && 
-					el.DistributorID == nlo.DistributorID
+					el.DistributorID == nlo.DistributorID && 
+					nlo.AssignedProductCode == AssignedProductCode
 				)
 			);
 			let insertPromise;
