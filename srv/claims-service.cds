@@ -92,7 +92,8 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         (product.Price.RegPrice * product.SKU.PACKFACTOR) as RegPrice:Double,
         product.SKU.CONCENTRATION,
         product.SKU.Product.HLEVEL4_CODE as BrandId:String,
-        product.SKU.Product.HLEVEL4_NAME as BrandName:String
+        product.SKU.Product.HLEVEL4_NAME as BrandName:String,
+        product.Comment as PackageNumber:String
     }
     where product.Results.Outcome = 'Won' and tender.Active = 1 and offer.Active = 1
     group by 
@@ -112,7 +113,8 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
         product.Price.RegPrice,
         product.SKU.Product.HLEVEL4_NAME,
         product.SKU.Product.HLEVEL4_CODE,
-        product.SKU.CONCENTRATION;
+        product.SKU.CONCENTRATION,
+        product.Comment;
 
     entity ClaimApproverTypes as projection on ClaimsData.ClaimApproverTypes;
     entity ClaimApprovals @(cds.redirection.target:true) as projection on ClaimsData.ClaimApprovals;
@@ -187,7 +189,9 @@ service ClaimsService @(path: 'claims') @(requires:['f_tndr_cag_admin','f_tndr_c
 
     entity ExcelClaimFileSalesReportTemplate as projection on ClaimsData.ExcelClaimFileSalesReportTemplate;
     entity NLExtractClaimDataView as projection on ClaimsViews.NLExtractClaimDataView;
+    entity MappedFASTOfferClaims as projection on ClaimsData.MappedFASTOfferClaims;
 
     action approveRejectClaimFiles(claimFile_ID: String, countryCode: String, status: String, claimFileDetailPageURL: String) returns String;
     action deleteClaimFile(claimFile_ID: String) returns String;
+    action reCalculateClaimData(claimFile_ID: String, countryCode: String, claimData_ID: String, offerID: String, packageNumber: String) returns String;
 }
