@@ -394,14 +394,17 @@ left outer join MasterData.PT_TMINST as inst
 	policy.Currency
 };
 
-entity DistributionAgreementMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK {
-	CountryCode,
-	ProductPackID,
-	STRING_AGG(SKUCode, ',') as MaterialNumbers: String
-}where CountryCode = 'NL'
+entity DistributionAgreementMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK as sku
+	inner join MasterData.PT_TMPRDPCK as product 
+		on product.PRODUCTPACKID = sku.ProductPackID
+		and product.ACTIVERECORD = sku.ActiveRecord {
+	sku.CountryCode,
+	sku.ProductPackID,
+	STRING_AGG(sku.SKUCode, ',') as MaterialNumbers: String
+}where sku.CountryCode = 'NL'
 group by 
-	CountryCode,
-	ProductPackID;
+	sku.CountryCode,
+	sku.ProductPackID;
 
 entity DistributionAgreementsView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
