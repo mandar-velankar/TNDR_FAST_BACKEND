@@ -78,6 +78,7 @@ entity ClaimDataCalculatedView as select from ClaimsData.ClaimData as cd
     materialNumbers.MaterialNumbers,
 	cd.BrandUsedCalculatedVolume,
 	cd.BrandContractCalculatedVolume,
+	cd.ClaimFiles.ApprovalsCount,
 	CASE 
         WHEN cd.BrandContractCalculatedVolume != 0 
         THEN cd.BrandUsedCalculatedVolume 
