@@ -494,8 +494,15 @@ module.exports = (srv) => {
 
 			const claimFile = await SELECT.one.from(ClaimFiles).where({ID: claimFile_ID});
 			const claimData = await SELECT.one.from(ClaimData).where({ID: claimData_ID});
-			const mappedFASTOfferClaims = await SELECT.one.from(MappedFASTOfferClaims).where({OfferID: offerID});
 			let mappedReCalculatedValuestoClaimsData = [];
+			let mappedFASTOfferClaims = [];
+
+			if (packageNumber === null || packageNumber === undefined) {
+				mappedFASTOfferClaims = await SELECT.one.from(MappedFASTOfferClaims).where({ OfferID: offerID });
+			} else {
+				mappedFASTOfferClaims = await SELECT.one.from(MappedFASTOfferClaims).where({ OfferID: offerID, PackageNumber: packageNumber });
+			}
+			
 			// recalculating the values
 			if(countryCode === 'NL'){
 				let fastContractClaim = mappedFASTOfferClaims && ((mappedFASTOfferClaims.FASTWholesalerPurchasePrice - mappedFASTOfferClaims.FASTContractPrice) * claimData.Quantity) || 0;
