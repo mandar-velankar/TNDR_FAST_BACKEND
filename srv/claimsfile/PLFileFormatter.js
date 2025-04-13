@@ -164,7 +164,8 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const brandId = brand && brand?.HLEVEL4_CODE || null;
 			const productPackSKU = productPackSKUs.find(item => item.ProductPackID == productCode);
 			const sKUCode = productPackSKU && productPackSKU?.SKUCode || null;
-			const institute = institutes.find(item => item.External_InstituteId == curr.KODKLIENTAwgBAYERSpzoo);
+			const kODKLIENTAwgBAYERSpzoo = typeof curr.KODKLIENTAwgBAYERSpzoo === 'string' ? curr.KODKLIENTAwgBAYERSpzoo.trim() : String(curr.KODKLIENTAwgBAYERSpzoo);
+			const institute = institutes.find(item => item.External_InstituteId == kODKLIENTAwgBAYERSpzoo);
 			const instituteId = institute && institute.InstituteID || null;
 			const instituteName = institute && institute?.InstituteName || null;
 			const externalInstituteId = institute && institute.External_InstituteId || null;
