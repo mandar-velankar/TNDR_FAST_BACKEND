@@ -504,6 +504,8 @@ module.exports = async (srv) => {
 		// Check if the result contains $count
 		const tx = cds.tx(req);
 
+		const instituteHierarchy = await SELECT.from(PT_TMINSHIER);
+
 		const DEFAULT_SORTING = [
 			{ ref: ["TenderID"], sort: "desc" },
 			{ ref: ["OfferID"], sort: "desc" }
@@ -515,6 +517,10 @@ module.exports = async (srv) => {
             tmvQuery.columns(req.query.SELECT.columns);
         }
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
+		let instituteID =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'InstituteID');
+		
+		// Deleting Institute filter in order to create custom filter logic
+		ServiceHelper.deleteFilter(req, "InstituteID");
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
@@ -565,6 +571,22 @@ module.exports = async (srv) => {
 				return b.OfferID.localeCompare(a.OfferID);
 			});
 		};
+
+		if (instituteID) {
+			const selectedParentInstitute = instituteHierarchy.find(inst => inst.ParentInstituteID === instituteID);
+			const selectedChildInstitute = instituteHierarchy.find(inst => inst.InstituteID === instituteID);
+
+			if (selectedParentInstitute) {
+				result = result.filter(tender => tender.InstituteID === instituteID);
+			}else if (selectedChildInstitute) {
+				result = result.filter(tender => 
+					tender.InstituteID === instituteID || 
+					tender.InstituteID === selectedChildInstitute.ParentInstituteID
+				);
+			}else {
+				result = result.filter(tender => tender.InstituteID === instituteID);
+			}
+		}
 
 		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
