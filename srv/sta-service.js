@@ -574,15 +574,17 @@ module.exports = async (srv) => {
 
 		if (instituteID) {
 			const selectedParentInstitute = instituteHierarchy.find(inst => inst.ParentInstituteID === instituteID);
-			const selectedChildInstitute = instituteHierarchy.find(inst => inst.InstituteID === instituteID);
+			const selectedChildInstitutes = instituteHierarchy.filter(inst => inst.InstituteID === instituteID);
 
 			if (selectedParentInstitute) {
 				result = result.filter(tender => tender.InstituteID === instituteID);
-			}else if (selectedChildInstitute) {
-				result = result.filter(tender => 
-					tender.InstituteID === instituteID || 
-					tender.InstituteID === selectedChildInstitute.ParentInstituteID
-				);
+			}else if (selectedChildInstitutes && selectedChildInstitutes.length > 0) {
+				result = result.filter(tender => {
+					const selectedChildInstituteIndex = selectedChildInstitutes.findIndex(inst => inst.ParentInstituteID === tender.InstituteID);
+
+					return tender.InstituteID === instituteID || 
+					selectedChildInstituteIndex > -1
+				});
 			}else {
 				result = result.filter(tender => tender.InstituteID === instituteID);
 			}
