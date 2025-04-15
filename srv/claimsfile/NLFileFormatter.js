@@ -49,7 +49,10 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			// Map sales data to claim data
 			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, claimsData, { dateFrom, dateTo, filePeriodDate });
 
-            const result = {contrastAgentSalesData, claimFile, claimData};
+			const mappedclaimsData = claimData.mappedclaimsData;
+			const mappedFASTOfferClaims = claimData.mappedFASTOfferClaims;
+
+            const result = {contrastAgentSalesData, claimFile, mappedclaimsData, mappedFASTOfferClaims};
 
             return result;
 
@@ -197,9 +200,10 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	 * @returns {Object} claimData
 	 */
 	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, claimsData, { dateFrom, dateTo, filePeriodDate }) {
-
+		const mappedFASTOfferClaims = [];
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
+			const claimID = this.generateUUID();
 			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.ZIndexNumber);
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
@@ -231,7 +235,21 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 																item.ProductCode === productCode &&
 																item.ContractStartDate <= dateFrom &&
 																item.ContractEndDate >= dateFrom);
-			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
+			filteredItems.forEach(item => {
+				mappedFASTOfferClaims.push({
+					ClaimFileID: UUID,
+					CountryCode: this.countryCode,
+					ClaimDataID: claimID,
+					OfferID: item.OfferID,
+					ProductCode: item.ProductCode,
+					FASTContractPrice: item.OfferPrice,
+					FASTWholesalerPurchasePrice: wppValue,
+					FASTDistributionArrangement: daValue,
+					FASTDistributionAgreementType: daType
+				});
+			});		
+			//const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
+			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((latest, item) => !latest || new Date(item.CreationDate) > new Date(latest.CreationDate) ? item : latest, null) : null;
 			const offerID = fastOffer && fastOffer.OfferID || null;
 			let fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * curr.TotalDelivered) || 0;
 			fastContractClaim = Number(wppValue) < Number(fastOffer?.OfferPrice || 0) ? 0 : Math.round(fastContractClaim * 100) / 100;
@@ -248,6 +266,7 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			const usageCalculation = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.Quantity, 0) : 0;
 			prev.push(
 				{
+					ID										: claimID,
 					CountryCode                             : this.countryCode,
 					createdBy           					: CWID,
 					modifiedBy         						: CWID,
@@ -311,7 +330,10 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			);
 			return prev;
 		}, []);
-		return salesData;
+		return {
+			mappedclaimsData: salesData,
+			mappedFASTOfferClaims
+		};
 	}
 
 	
