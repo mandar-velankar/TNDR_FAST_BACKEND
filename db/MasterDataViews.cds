@@ -396,8 +396,7 @@ left outer join MasterData.PT_TMINST as inst
 
 entity DistributionAgreementMaterialNumbers as select from MasterData.PT_TMSKUPRDPCK as sku
 	inner join MasterData.PT_TMPRDPCK as product 
-		on product.PRODUCTPACKID = sku.ProductPackID
-		and product.ACTIVERECORD = sku.ActiveRecord {
+		on product.PRODUCTPACKID = sku.ProductPackID {
 	sku.CountryCode,
 	sku.ProductPackID,
 	STRING_AGG(sku.SKUCode, ',') as MaterialNumbers: String
