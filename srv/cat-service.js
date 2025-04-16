@@ -487,7 +487,7 @@ module.exports = (srv) => {
 					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
 
-			if (oApproverType.ApproverType.toLowerCase().split(" ").join("").includes("nucleushead")) {
+			if (oApproverType.ApproverType.toLowerCase().split(" ").join("").includes("ptl")) {
 				const ctryApproverType = countryApprovers.find(ca => ca.ApproverType === oApproverType.ApproverType);
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
