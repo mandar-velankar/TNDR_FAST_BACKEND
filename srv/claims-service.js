@@ -534,7 +534,6 @@ module.exports = (srv) => {
 				mappedReCalculatedValuestoClaimsData = {
 					OfferID									: mappedFASTOfferClaims.OfferID,
 					FASTContractClaim                       : Number(fastContractClaim || 0),
-					FASTDistributionArrangementClaim        : Number(fastDistributionArrangementClaim || 0),
 					TotalFASTClaim                          : Number(fastContractClaim || 0),
 					PercentageDifference                    : percentageDifference,
 					FASTWholesalerPurchasePrice             : Number(mappedFASTOfferClaims.FASTWholesalerPurchasePrice || 0),
