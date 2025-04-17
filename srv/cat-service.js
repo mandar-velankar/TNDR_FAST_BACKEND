@@ -2411,8 +2411,13 @@ module.exports = (srv) => {
     //EHQUT-197468-MEA – Nucleus heads notifications flow
 	function getApprovalContent(ApproverType) {
 		switch (ApproverType) {
-			case "Country Business":
-			case "Regional Business":
+			case "Specialty Medicine PTL":
+			case "Value Brands PTL":
+			case "Oncology PTL":
+			case "Cardio-Renal PTL":
+			case "Womens Healthcare PTL":
+			case "Ophthalmology PTL":
+			case "Cardiology PTL":
 			case "Manager Business Operations":
 			case "Legal":
 				return "Profitability";
