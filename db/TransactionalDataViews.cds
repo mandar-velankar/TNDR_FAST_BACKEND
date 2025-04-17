@@ -241,6 +241,8 @@ inner join LatestApprovalRequests as latestApprovals
     and approvals.ApproverType = latestApprovals.ApproverType
     and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
+inner join OfferLatestApprovalStatus as offerLatestApprStatus
+    on offerLatestApprStatus.OfferId = approvals.OfferId
 {
    approvals.OfferId as OFFER_ID,
    approvals.productcode as PRODUCT_ID,
@@ -307,7 +309,71 @@ inner join LatestApprovalRequests as latestApprovals
         approvals.OfferProduct.Price.PRICE_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
         then 1 else 0 end
    ) 
-   as REGULATORY_APPROVED:Integer
+   as REGULATORY_APPROVED:Integer,
+    max(
+        case when
+            approvals.ApproverType = 'Specialty Medicine PTL' and
+            approvals.ApprovalStatus = 'Approved' and
+            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as SPECIALITY_MEDICINE_APPROVED:Integer,
+    max(
+        case when
+            approvals.ApproverType = 'Value Brands PTL' and
+            approvals.ApprovalStatus = 'Approved' and
+            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as VALUE_BRANDS_APPROVED:Integer,
+    max(
+        case when
+            approvals.ApproverType = 'Oncology PTL' and
+            approvals.ApprovalStatus = 'Approved' and
+            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as ONCOLOGY_APPROVED:Integer,
+    max(
+        case when
+            approvals.ApproverType = 'Cardio-Renal PTL' and
+            approvals.ApprovalStatus = 'Approved' and
+            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as CARDIO_RENAL_APPROVED:Integer,
+    max(
+        case when
+            approvals.ApproverType = 'Womens Healthcare PTL' and
+            approvals.ApprovalStatus = 'Approved' and
+            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as WOMENS_HEALTHCARE_APPROVED:Integer,
+    max(
+        case when
+            approvals.ApproverType = 'Ophthalmology PTL' and
+            approvals.ApprovalStatus = 'Approved' and
+            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as OPHTHALMOLOGY_APPROVED:Integer,
+    max(
+        case when
+            approvals.ApproverType = 'Cardiology PTL' and
+            approvals.ApprovalStatus = 'Approved' and
+            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as CARDIOLOGY_APPROVED:Integer,
+    max(
+        case when
+            offerLatestApprStatus.latestOfferStatus = 'Approved' and
+            (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+            approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as CREDIT_MANAGER_APPROVED:Integer
 }group by approvals.OfferId, approvals.productcode;
 
 entity PreviousApproval as select from PreviousApprovalTemp as temp{
@@ -319,7 +385,15 @@ entity PreviousApproval as select from PreviousApprovalTemp as temp{
     temp.COUNTRY_BUSINESS_APPROVED,
     case when temp.PENDING_BUSINESS = 1 then 0 else temp.BUSINESS_APPROVED end as BUSINESS_APPROVED:Integer,
     temp.LEGAL_APPROVED,
-    case when temp.BUSINESS_APPROVED = 1 then 1 else temp.REGULATORY_APPROVED end as REGULATORY_APPROVED:Integer
+    case when temp.BUSINESS_APPROVED = 1 then 1 else temp.REGULATORY_APPROVED end as REGULATORY_APPROVED:Integer,
+    temp.SPECIALITY_MEDICINE_APPROVED,
+    temp.VALUE_BRANDS_APPROVED,
+    temp.ONCOLOGY_APPROVED,
+    temp.CARDIO_RENAL_APPROVED,
+    temp.WOMENS_HEALTHCARE_APPROVED,
+    temp.OPHTHALMOLOGY_APPROVED,
+    temp.CARDIOLOGY_APPROVED,
+    temp.CREDIT_MANAGER_APPROVED
 };
 
 entity InstituteMap as select from MasterData.PT_TMINST as institute{
@@ -654,6 +728,14 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.REGIONAL_BUSINESS_APPROVED as REGIONAL_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.REGULATORY_APPROVED as REGULATORY_APPROVED,
     offerProduct.PreviousApproval.SUPPLY_APPROVED as SUPPLY_APPROVED,
+    offerProduct.PreviousApproval.SPECIALITY_MEDICINE_APPROVED as SPECIALITY_MEDICINE_APPROVED,
+    offerProduct.PreviousApproval.VALUE_BRANDS_APPROVED as VALUE_BRANDS_APPROVED,
+    offerProduct.PreviousApproval.ONCOLOGY_APPROVED as ONCOLOGY_APPROVED,
+    offerProduct.PreviousApproval.CARDIO_RENAL_APPROVED as CARDIO_RENAL_APPROVED,
+    offerProduct.PreviousApproval.WOMENS_HEALTHCARE_APPROVED as WOMENS_HEALTHCARE_APPROVED,
+    offerProduct.PreviousApproval.OPHTHALMOLOGY_APPROVED as OPHTHALMOLOGY_APPROVED,
+    offerProduct.PreviousApproval.CARDIOLOGY_APPROVED as CARDIOLOGY_APPROVED,
+    offerProduct.PreviousApproval.CREDIT_MANAGER_APPROVED as CREDIT_MANAGER_APPROVED,
     ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
     / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,
@@ -3552,3 +3634,15 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                 else RequestedVolume        
         end as TotalAmount:Double
     };
+    entity MaxOfferApprovalStatusTime as select from TransactionalData.PT_TMAPPRST {
+        key OfferId,
+        max(Statustime) as MaxStatusTime
+    }group by OfferId;
+
+    entity OfferLatestApprovalStatus as select from TransactionalData.PT_TMAPPRST as approvals
+        inner join MaxOfferApprovalStatusTime as maxApprTime
+            on maxApprTime.OfferId = approvals.OfferId
+	        and maxApprTime.MaxStatusTime = approvals.Statustime {
+                approvals.OfferId,
+                max(approvals.ApprovalStatus) as latestOfferStatus
+    }group by approvals.OfferId;

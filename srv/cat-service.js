@@ -459,7 +459,18 @@ module.exports = (srv) => {
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
-		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
+		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : product.CREDIT_MANAGER_APPROVED === 1 ? 2 : 3;
+		let creditManager = (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1;
+
+		const NucleusHead = {
+			"Specialty Medicine PTL": !product.SPECIALITY_MEDICINE_APPROVED ? 3 : product.SPECIALITY_MEDICINE_APPROVED === 1 ? 2 : 3,
+			"Value Brands PTL": !product.VALUE_BRANDS_APPROVED ? 3 : product.VALUE_BRANDS_APPROVED === 1 ? 2 : 3,
+			"Oncology PTL": !product.ONCOLOGY_APPROVED ? 3 : product.ONCOLOGY_APPROVED === 1 ? 2 : 3,
+			"Cardio-Renal PTL": !product.CARDIO_RENAL_APPROVED ? 3 : product.CARDIO_RENAL_APPROVED === 1 ? 2 : 3,
+			"Womens Healthcare PTL": !product.WOMENS_HEALTHCARE_APPROVED ? 3 : product.WOMENS_HEALTHCARE_APPROVED === 1 ? 2 : 3,
+			"Ophthalmology PTL": !product.OPHTHALMOLOGY_APPROVED ? 3 : product.OPHTHALMOLOGY_APPROVED === 1 ? 2 : 3,
+			"Cardiology PTL": !product.CARDIOLOGY_APPROVED ? 3 : product.CARDIOLOGY_APPROVED === 1 ? 2 : 3
+		};
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
@@ -483,6 +494,9 @@ module.exports = (srv) => {
 				case "Supply Chain":
 					oApproverType.ValidationType = supply;
 					break;
+				case "Credit Manager":
+					oApproverType.ValidationType = creditManager;
+					break;
 				default:
 					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
@@ -491,7 +505,7 @@ module.exports = (srv) => {
 				const ctryApproverType = countryApprovers.find(ca => ca.ApproverType === oApproverType.ApproverType);
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
-					oApproverType.ValidationType = 3
+					oApproverType.ValidationType = NucleusHead[oApproverType.ApproverType];
 				}
 			}
 			
@@ -2553,7 +2567,7 @@ module.exports = (srv) => {
 		}
 	}
 
-	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers) {
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country) {
 
 		let aResults = [];
 		approverTypes.forEach(function (type, index) {
@@ -2618,7 +2632,7 @@ module.exports = (srv) => {
 				CountryCode: offerValidation.COUNTRYCODE,
 				ApprovalContent: getApprovalContent(approverType),
 				ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
-				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
+				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? country.Region === "MEA" ? getRequiredAction(requiredAction) : approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
 				ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
 				ApproverName: approverName,
 				ApproverEmailID: approverEmailID,
@@ -2658,6 +2672,8 @@ module.exports = (srv) => {
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
+		let country = await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
+
 
 		if (!offerValidation.COUNTRYCODE) return results;
 
@@ -2666,7 +2682,7 @@ module.exports = (srv) => {
 			approverTypes = offerValidation.ApproverTypes;
 		}
 
-		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers);
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country);
 
 	}
 
