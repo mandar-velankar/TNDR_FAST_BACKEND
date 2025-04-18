@@ -24,7 +24,7 @@ module.exports = (srv) => {
 
 	// Use reflection to get the csn definition
 	const {
-		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
+		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand, CountryLegalEntity
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
@@ -61,6 +61,10 @@ module.exports = (srv) => {
 	const {
 		LatestApprovedBrandPolicies
 	} = cds.entities("PolicyService");
+
+	const {
+		InstituteDistributorBrandProduct	
+	} = cds.entities("CatalogService");
 
 
 	const arr = x => Array.from(x);
@@ -397,7 +401,7 @@ module.exports = (srv) => {
 		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
 	}*/
 
-	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers) {//MEA (and default)
+	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct) {//MEA (and default)
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
 		//1: Optional
@@ -460,7 +464,9 @@ module.exports = (srv) => {
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : product.CREDIT_MANAGER_APPROVED === 1 ? 2 : 3;
-		let creditManager = (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1;
+		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
+								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
+								: instituteDistributorBrandProduct?.[0].PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
 
 		const NucleusHead = {
 			"Specialty Medicine PTL": !product.SPECIALITY_MEDICINE_APPROVED ? 3 : product.SPECIALITY_MEDICINE_APPROVED === 1 ? 2 : 3,
@@ -1506,11 +1512,11 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct)
 		}
 		else if (offer.APPROVAL_TYPE === 3) {//Applicable for Mexico
 			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo, aApproverTypes)
@@ -1534,7 +1540,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct)
 		}
 
 		return {
@@ -1569,6 +1575,8 @@ module.exports = (srv) => {
         const offerProductPacks = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: {in: productPackIDs}}));
 
 		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({CountryCode: offer.COUNTRYCODE}));
+		const countryLegalEntity = await tx.run(SELECT.one.from(CountryLegalEntity).where({CountryCode: offer.COUNTRYCODE}));
+
 
 		//where statement
 		let whereApproverType = {
@@ -1580,9 +1588,19 @@ module.exports = (srv) => {
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			const offerProductPack = offerProductPacks.find(pck => pck.PRODUCTPACKID === offerProduct.ProductCode);
+			const instituteDistributorBrandProduct = await srv.run(SELECT.one.from(InstituteDistributorBrandProduct).where({
+				COUNTRY_CODE: offer.COUNTRYCODE,
+				INSTITUTE_ID: offer.INSTITUTE_ID,
+				DISTRIBUTOR_ID: offer.DISTRIBUTOR_ID,
+				PRODUCT_ID: offerProduct.ProductCode,
+				CHANNEL: offerProduct.CHANNEL,
+				LEGAL_ENTITY_CODE: countryLegalEntity.LegalEntityCode,
+				DIVISION: offerProduct.DIVISION
+			}));
+
 
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct);
 			
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
