@@ -373,7 +373,15 @@ inner join OfferLatestApprovalStatus as offerLatestApprStatus
             approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
             then 1 else 0 end
     ) 
-    as CREDIT_MANAGER_APPROVED:Integer
+    as CREDIT_MANAGER_APPROVED:Integer,
+    max(
+       case when
+        offerLatestApprStatus.latestOfferStatus = 'Approved' and
+        (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+        approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+        then 1 else 0 end
+   ) 
+   as CONTROLLING_NOT_REQUIRED:Integer,
 }group by approvals.OfferId, approvals.productcode;
 
 entity PreviousApproval as select from PreviousApprovalTemp as temp{
@@ -393,7 +401,8 @@ entity PreviousApproval as select from PreviousApprovalTemp as temp{
     temp.WOMENS_HEALTHCARE_APPROVED,
     temp.OPHTHALMOLOGY_APPROVED,
     temp.CARDIOLOGY_APPROVED,
-    temp.CREDIT_MANAGER_APPROVED
+    temp.CREDIT_MANAGER_APPROVED,
+    temp.CONTROLLING_NOT_REQUIRED
 };
 
 entity InstituteMap as select from MasterData.PT_TMINST as institute{
@@ -736,6 +745,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.OPHTHALMOLOGY_APPROVED as OPHTHALMOLOGY_APPROVED,
     offerProduct.PreviousApproval.CARDIOLOGY_APPROVED as CARDIOLOGY_APPROVED,
     offerProduct.PreviousApproval.CREDIT_MANAGER_APPROVED as CREDIT_MANAGER_APPROVED,
+    offerProduct.PreviousApproval.CONTROLLING_NOT_REQUIRED as CONTROLLING_NOT_REQUIRED,
     ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
     / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,
@@ -794,10 +804,10 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     and quotation.AS1 = signatory.AUTHORIZED_SIGNATORY
 {
     offer.OfferID,
-    ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
-    ifnull(quotation.Signatory1.NAME, signatory.NAME) as NAME:String,
-    ifnull(quotation.Signatory1.TITLE, signatory.TITLE) as TITLE:String
-};
+    max(ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY)) as AUTHORIZED_SIGNATORY:String,
+    max(ifnull(quotation.Signatory1.NAME, signatory.NAME)) as NAME:String,
+    max(ifnull(quotation.Signatory1.TITLE, signatory.TITLE)) as TITLE:String
+} group by offer.OfferID;
 
 entity OfferSignatory2 as select from TransactionalData.PT_TMOFRS as offer
 inner join ApprovalRequests as approvalRequest
@@ -817,10 +827,10 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     and quotation.AS2 = signatory.AUTHORIZED_SIGNATORY
 {
     offer.OfferID,
-    ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
-    ifnull(quotation.Signatory2.NAME, signatory.NAME) as NAME:String,
-    ifnull(quotation.Signatory2.TITLE, signatory.TITLE) as TITLE:String
-};
+    max(ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY)) as AUTHORIZED_SIGNATORY:String,
+    max(ifnull(quotation.Signatory2.NAME, signatory.NAME)) as NAME:String,
+    max(ifnull(quotation.Signatory2.TITLE, signatory.TITLE)) as TITLE:String
+} group by offer.OfferID;
 
 //EHQUT-RITM12706398-OfferValidity for SEWA
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
