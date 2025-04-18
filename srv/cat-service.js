@@ -24,7 +24,7 @@ module.exports = (srv) => {
 
 	// Use reflection to get the csn definition
 	const {
-		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand
+		CountryBrandProducts, LegalEntityBrand, DirectBrand, DistributorBrand, CountryLegalEntity
 	} = cds.entities("com.bayer.SXTENDER.MasterDataViews");
 	const {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
@@ -61,6 +61,10 @@ module.exports = (srv) => {
 	const {
 		LatestApprovedBrandPolicies
 	} = cds.entities("PolicyService");
+
+	const {
+		InstituteDistributorBrandProduct	
+	} = cds.entities("CatalogService");
 
 
 	const arr = x => Array.from(x);
@@ -397,7 +401,7 @@ module.exports = (srv) => {
 		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
 	}*/
 
-	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes) {//MEA (and default)
+	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct) {//MEA (and default)
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
 		//1: Optional
@@ -430,7 +434,7 @@ module.exports = (srv) => {
 		//Notification if OfferPrice below lowest price
 		let controlling = 1;
 		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
-			controlling = 2;
+			controlling = product.CONTROLLING_NOT_REQUIRED === null || product.CONTROLLING_NOT_REQUIRED === 0 ? 2 : 1;
 		}
 
 		//Country Business
@@ -454,11 +458,25 @@ module.exports = (srv) => {
 		// 		regionalBusiness = 3;
 		// 	}
 		// }
-		let regionalBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : 3;
+		// Regional Business approver type is always mandatory notification
+		let regionalBusiness = product.VOLUME_UOM_UPDATED === null ? 2 : product.VOLUME_UOM_UPDATED === 1 ? 2 : 1 //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
-		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
+		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : product.CREDIT_MANAGER_APPROVED === 1 ? 2 : 3;
+		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
+								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
+								: instituteDistributorBrandProduct?.[0].PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
+
+		const NucleusHead = {
+			"Specialty Medicine PTL": product.SPECIALITY_MEDICINE_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
+			"Value Brands PTL": product.VALUE_BRANDS_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
+			"Oncology PTL": product.ONCOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
+			"Cardio-Renal PTL": product.CARDIO_RENAL_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
+			"Womens Healthcare PTL": product.WOMENS_HEALTHCARE_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
+			"Ophthalmology PTL": product.OPHTHALMOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
+			"Cardiology PTL": product.CARDIOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
+		};
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
@@ -482,9 +500,21 @@ module.exports = (srv) => {
 				case "Supply Chain":
 					oApproverType.ValidationType = supply;
 					break;
+				case "Credit Manager":
+					oApproverType.ValidationType = creditManager;
+					break;
 				default:
 					oApproverType.ValidationType = oApproverType.ValidationType;
 			}
+
+			if (oApproverType.ApproverType.toLowerCase().split(" ").join("").includes("ptl")) {
+				const ctryApproverType = countryApprovers.find(ca => ca.ApproverType === oApproverType.ApproverType);
+
+				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
+					oApproverType.ValidationType = NucleusHead[oApproverType.ApproverType];
+				}
+			}
+			
 		});
 
 		let results = {
@@ -1482,11 +1512,11 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct)
 		}
 		else if (offer.APPROVAL_TYPE === 3) {//Applicable for Mexico
 			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo, aApproverTypes)
@@ -1510,7 +1540,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct)
 		}
 
 		return {
@@ -1541,6 +1571,13 @@ module.exports = (srv) => {
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", offer.COUNTRYCODE);
         let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 
+		const productPackIDs = aOfferProduct.map(el => el.ProductCode);
+        const offerProductPacks = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: {in: productPackIDs}}));
+
+		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({CountryCode: offer.COUNTRYCODE}));
+		const countryLegalEntity = await tx.run(SELECT.one.from(CountryLegalEntity).where({CountryCode: offer.COUNTRYCODE}));
+
+
 		//where statement
 		let whereApproverType = {
 			CountryCode: offer.COUNTRYCODE
@@ -1550,8 +1587,21 @@ module.exports = (srv) => {
 		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
 
 		results = aOfferProduct.map(async function (offerProduct) {
+			const offerProductPack = offerProductPacks.find(pck => pck.PRODUCTPACKID === offerProduct.ProductCode);
+			const instituteDistributorBrandProduct = await srv.run(SELECT.one.from(InstituteDistributorBrandProduct).where({
+				COUNTRY_CODE: offer.COUNTRYCODE,
+				INSTITUTE_ID: offer.INSTITUTE_ID,
+				DISTRIBUTOR_ID: offer.DISTRIBUTOR_ID,
+				PRODUCT_ID: offerProduct.ProductCode,
+				CHANNEL: offerProduct.CHANNEL,
+				LEGAL_ENTITY_CODE: countryLegalEntity.LegalEntityCode,
+				DIVISION: offerProduct.DIVISION
+			}));
+
+
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct);
+			
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
 				OfferID: offer.OFFERID,
@@ -2393,8 +2443,13 @@ module.exports = (srv) => {
     //EHQUT-197468-MEA – Nucleus heads notifications flow
 	function getApprovalContent(ApproverType) {
 		switch (ApproverType) {
-			case "Country Business":
-			case "Regional Business":
+			case "Specialty Medicine PTL":
+			case "Value Brands PTL":
+			case "Oncology PTL":
+			case "Cardio-Renal PTL":
+			case "Womens Healthcare PTL":
+			case "Ophthalmology PTL":
+			case "Cardiology PTL":
 			case "Manager Business Operations":
 			case "Legal":
 				return "Profitability";
@@ -2530,7 +2585,7 @@ module.exports = (srv) => {
 		}
 	}
 
-	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers) {
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country) {
 
 		let aResults = [];
 		approverTypes.forEach(function (type, index) {
@@ -2595,7 +2650,7 @@ module.exports = (srv) => {
 				CountryCode: offerValidation.COUNTRYCODE,
 				ApprovalContent: getApprovalContent(approverType),
 				ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
-				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
+				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? country.Region === "MEA" ? getRequiredAction(requiredAction) : approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
 				ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
 				ApproverName: approverName,
 				ApproverEmailID: approverEmailID,
@@ -2635,6 +2690,8 @@ module.exports = (srv) => {
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
+		let country = await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
+
 
 		if (!offerValidation.COUNTRYCODE) return results;
 
@@ -2643,7 +2700,7 @@ module.exports = (srv) => {
 			approverTypes = offerValidation.ApproverTypes;
 		}
 
-		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers);
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country);
 
 	}
 

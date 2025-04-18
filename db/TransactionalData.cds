@@ -333,6 +333,7 @@ entity PT_TMOFPR {
         DEFAULT_COMMISSION_RATE  : Double;
         SUPPLY_UPDATE            : Integer;
         PAYMENT_UPDATE           : Integer;
+        VOLUME_UOM_UPDATE        : Integer;
         Line                     : String;
         DeliveryConditions       : String;
         MinInvoiceAmount         : Double;
