@@ -382,6 +382,14 @@ inner join OfferLatestApprovalStatus as offerLatestApprStatus
         then 1 else 0 end
    ) 
    as CONTROLLING_NOT_REQUIRED:Integer,
+    max(
+       case when
+        offerLatestApprStatus.latestOfferStatus = 'Approved' and
+        (approvals.OfferProduct.VOLUME_UOM_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+        approvals.OfferProduct.VOLUME_UOM_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+        then 1 else 0 end
+   ) 
+   as VOLUME_UOM_UPDATED:Integer
 }group by approvals.OfferId, approvals.productcode;
 
 entity PreviousApproval as select from PreviousApprovalTemp as temp{
@@ -402,7 +410,8 @@ entity PreviousApproval as select from PreviousApprovalTemp as temp{
     temp.OPHTHALMOLOGY_APPROVED,
     temp.CARDIOLOGY_APPROVED,
     temp.CREDIT_MANAGER_APPROVED,
-    temp.CONTROLLING_NOT_REQUIRED
+    temp.CONTROLLING_NOT_REQUIRED,
+    temp.VOLUME_UOM_UPDATED
 };
 
 entity InstituteMap as select from MasterData.PT_TMINST as institute{
@@ -746,6 +755,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.CARDIOLOGY_APPROVED as CARDIOLOGY_APPROVED,
     offerProduct.PreviousApproval.CREDIT_MANAGER_APPROVED as CREDIT_MANAGER_APPROVED,
     offerProduct.PreviousApproval.CONTROLLING_NOT_REQUIRED as CONTROLLING_NOT_REQUIRED,
+    offerProduct.PreviousApproval.VOLUME_UOM_UPDATED as VOLUME_UOM_UPDATED,
     ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
     / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,
