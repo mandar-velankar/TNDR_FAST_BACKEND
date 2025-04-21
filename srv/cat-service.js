@@ -443,7 +443,7 @@ module.exports = (srv) => {
 		//Note: we had logic only requiring approval if
 		//below APPROVED_PRICE (when existed) or below REGISTERED_PRICE (when existed and no APPROVED_PRICE) or when no REGISTERED_PRICE
 		//this was removed to allow applying e-signature in quotation document (compliance required business approval)
-		let countryBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : 3;
+		let countryBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : product.CREDIT_MANAGER_APPROVED === 1 ? 2 : 3;
 
 		//Regional Business
 		//Optional if business approved
@@ -459,7 +459,7 @@ module.exports = (srv) => {
 		// 	}
 		// }
 		// Regional Business approver type is always mandatory notification
-		let regionalBusiness = product.VOLUME_UOM_UPDATED === null || product.VOLUME_UOM_UPDATED === 1 ? 2 : 1 //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
+		let regionalBusiness = product.VOLUME_UOM_UPDATED === null ? 2 : product.VOLUME_UOM_UPDATED; //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
@@ -468,15 +468,6 @@ module.exports = (srv) => {
 								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
 								: instituteDistributorBrandProduct?.[0].PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
 
-		const NucleusHead = {
-			"Specialty Medicine PTL": product.SPECIALITY_MEDICINE_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
-			"Value Brands PTL": product.VALUE_BRANDS_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
-			"Oncology PTL": product.ONCOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
-			"Cardio-Renal PTL": product.CARDIO_RENAL_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
-			"Womens Healthcare PTL": product.WOMENS_HEALTHCARE_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
-			"Ophthalmology PTL": product.OPHTHALMOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
-			"Cardiology PTL": product.CARDIOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
-		};
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
@@ -511,7 +502,7 @@ module.exports = (srv) => {
 				const ctryApproverType = countryApprovers.find(ca => ca.ApproverType === oApproverType.ApproverType);
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
-					oApproverType.ValidationType = NucleusHead[oApproverType.ApproverType];
+					oApproverType.ValidationType = product.NUCLEUS_HEAD_APPROVED === null ? 3 : product.NUCLEUS_HEAD_APPROVED;
 				}
 			}
 			
