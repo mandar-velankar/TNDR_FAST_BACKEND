@@ -459,7 +459,7 @@ module.exports = (srv) => {
 		// 	}
 		// }
 		// Regional Business approver type is always mandatory notification
-		let regionalBusiness = product.VOLUME_UOM_UPDATED === null ? 2 : product.VOLUME_UOM_UPDATED === 1 ? 2 : 1 //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
+		let regionalBusiness = product.VOLUME_UOM_UPDATED === null || product.VOLUME_UOM_UPDATED === 1 ? 2 : 1 //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
@@ -469,13 +469,13 @@ module.exports = (srv) => {
 								: instituteDistributorBrandProduct?.[0].PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
 
 		const NucleusHead = {
-			"Specialty Medicine PTL": product.SPECIALITY_MEDICINE_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
-			"Value Brands PTL": product.VALUE_BRANDS_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
-			"Oncology PTL": product.ONCOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
-			"Cardio-Renal PTL": product.CARDIO_RENAL_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
-			"Womens Healthcare PTL": product.WOMENS_HEALTHCARE_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
-			"Ophthalmology PTL": product.OPHTHALMOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
-			"Cardiology PTL": product.CARDIOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 1, 
+			"Specialty Medicine PTL": product.SPECIALITY_MEDICINE_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
+			"Value Brands PTL": product.VALUE_BRANDS_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
+			"Oncology PTL": product.ONCOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
+			"Cardio-Renal PTL": product.CARDIO_RENAL_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
+			"Womens Healthcare PTL": product.WOMENS_HEALTHCARE_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
+			"Ophthalmology PTL": product.OPHTHALMOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
+			"Cardiology PTL": product.CARDIOLOGY_APPROVED !== 0 ? (product.CREDIT_MANAGER_APPROVED === 1) ? 2 : 3 : 3, 
 		};
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
