@@ -241,8 +241,8 @@ inner join LatestApprovalRequests as latestApprovals
     and approvals.ApproverType = latestApprovals.ApproverType
     and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
-inner join OfferLatestApprovalStatus as offerLatestApprStatus
-    on offerLatestApprStatus.OfferId = approvals.OfferId
+left join OfferLatestApprovalStatus as offerLatestApprStatus
+    on offerLatestApprStatus.OfferID = approvals.OfferId
 {
    approvals.OfferId as OFFER_ID,
    approvals.productcode as PRODUCT_ID,
@@ -310,84 +310,60 @@ inner join OfferLatestApprovalStatus as offerLatestApprStatus
         then 1 else 0 end
    ) 
    as REGULATORY_APPROVED:Integer,
-    max(
-        case when
-            approvals.ApproverType = 'Specialty Medicine PTL' and
-            approvals.ApprovalStatus = 'Approved' and
-            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1 else 0 end
+   max(
+        case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 3
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 2
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 2 else 3 end
     ) 
-    as SPECIALITY_MEDICINE_APPROVED:Integer,
+    as NUCLEUS_HEAD_APPROVED:Integer,
     max(
-        case when
-            approvals.ApproverType = 'Value Brands PTL' and
-            approvals.ApprovalStatus = 'Approved' and
-            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1 else 0 end
-    ) 
-    as VALUE_BRANDS_APPROVED:Integer,
-    max(
-        case when
-            approvals.ApproverType = 'Oncology PTL' and
-            approvals.ApprovalStatus = 'Approved' and
-            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1 else 0 end
-    ) 
-    as ONCOLOGY_APPROVED:Integer,
-    max(
-        case when
-            approvals.ApproverType = 'Cardio-Renal PTL' and
-            approvals.ApprovalStatus = 'Approved' and
-            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1 else 0 end
-    ) 
-    as CARDIO_RENAL_APPROVED:Integer,
-    max(
-        case when
-            approvals.ApproverType = 'Womens Healthcare PTL' and
-            approvals.ApprovalStatus = 'Approved' and
-            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1 else 0 end
-    ) 
-    as WOMENS_HEALTHCARE_APPROVED:Integer,
-    max(
-        case when
-            approvals.ApproverType = 'Ophthalmology PTL' and
-            approvals.ApprovalStatus = 'Approved' and
-            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1 else 0 end
-    ) 
-    as OPHTHALMOLOGY_APPROVED:Integer,
-    max(
-        case when
-            approvals.ApproverType = 'Cardiology PTL' and
-            approvals.ApprovalStatus = 'Approved' and
-            approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1 else 0 end
-    ) 
-    as CARDIOLOGY_APPROVED:Integer,
-    max(
-        case when
-            offerLatestApprStatus.latestOfferStatus = 'Approved' and
-            (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-            approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+        case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 0
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
             then 1 else 0 end
     ) 
     as CREDIT_MANAGER_APPROVED:Integer,
     max(
-       case when
-        offerLatestApprStatus.latestOfferStatus = 'Approved' and
-        (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-        approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+       case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 0
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
         then 1 else 0 end
    ) 
    as CONTROLLING_NOT_REQUIRED:Integer,
     max(
-       case when
-        offerLatestApprStatus.latestOfferStatus = 'Approved' and
-        (approvals.OfferProduct.VOLUME_UOM_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-        approvals.OfferProduct.VOLUME_UOM_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-        then 1 else 0 end
+       case 
+            when offerLatestApprStatus.approvedStatus = 0
+                then 2                
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.VOLUME_UOM_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.VOLUME_UOM_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 2
+            when offerLatestApprStatus.approvedStatus = 2 and
+                approvals.OfferProduct.VOLUME_UOM_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1
+       else 2 end
    ) 
    as VOLUME_UOM_UPDATED:Integer
 }group by approvals.OfferId, approvals.productcode;
@@ -402,13 +378,7 @@ entity PreviousApproval as select from PreviousApprovalTemp as temp{
     case when temp.PENDING_BUSINESS = 1 then 0 else temp.BUSINESS_APPROVED end as BUSINESS_APPROVED:Integer,
     temp.LEGAL_APPROVED,
     case when temp.BUSINESS_APPROVED = 1 then 1 else temp.REGULATORY_APPROVED end as REGULATORY_APPROVED:Integer,
-    temp.SPECIALITY_MEDICINE_APPROVED,
-    temp.VALUE_BRANDS_APPROVED,
-    temp.ONCOLOGY_APPROVED,
-    temp.CARDIO_RENAL_APPROVED,
-    temp.WOMENS_HEALTHCARE_APPROVED,
-    temp.OPHTHALMOLOGY_APPROVED,
-    temp.CARDIOLOGY_APPROVED,
+    temp.NUCLEUS_HEAD_APPROVED,
     temp.CREDIT_MANAGER_APPROVED,
     temp.CONTROLLING_NOT_REQUIRED,
     temp.VOLUME_UOM_UPDATED
@@ -746,13 +716,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.REGIONAL_BUSINESS_APPROVED as REGIONAL_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.REGULATORY_APPROVED as REGULATORY_APPROVED,
     offerProduct.PreviousApproval.SUPPLY_APPROVED as SUPPLY_APPROVED,
-    offerProduct.PreviousApproval.SPECIALITY_MEDICINE_APPROVED as SPECIALITY_MEDICINE_APPROVED,
-    offerProduct.PreviousApproval.VALUE_BRANDS_APPROVED as VALUE_BRANDS_APPROVED,
-    offerProduct.PreviousApproval.ONCOLOGY_APPROVED as ONCOLOGY_APPROVED,
-    offerProduct.PreviousApproval.CARDIO_RENAL_APPROVED as CARDIO_RENAL_APPROVED,
-    offerProduct.PreviousApproval.WOMENS_HEALTHCARE_APPROVED as WOMENS_HEALTHCARE_APPROVED,
-    offerProduct.PreviousApproval.OPHTHALMOLOGY_APPROVED as OPHTHALMOLOGY_APPROVED,
-    offerProduct.PreviousApproval.CARDIOLOGY_APPROVED as CARDIOLOGY_APPROVED,
+    offerProduct.PreviousApproval.NUCLEUS_HEAD_APPROVED as NUCLEUS_HEAD_APPROVED,
     offerProduct.PreviousApproval.CREDIT_MANAGER_APPROVED as CREDIT_MANAGER_APPROVED,
     offerProduct.PreviousApproval.CONTROLLING_NOT_REQUIRED as CONTROLLING_NOT_REQUIRED,
     offerProduct.PreviousApproval.VOLUME_UOM_UPDATED as VOLUME_UOM_UPDATED,
@@ -3659,10 +3623,22 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         max(Statustime) as MaxStatusTime
     }group by OfferId;
 
-    entity OfferLatestApprovalStatus as select from TransactionalData.PT_TMAPPRST as approvals
-        inner join MaxOfferApprovalStatusTime as maxApprTime
-            on maxApprTime.OfferId = approvals.OfferId
-	        and maxApprTime.MaxStatusTime = approvals.Statustime {
-                approvals.OfferId,
-                max(approvals.ApprovalStatus) as latestOfferStatus
-    }group by approvals.OfferId;
+    entity OfferLatestApprovalStatus as select from TransactionalData.PT_TMOFRS as offer
+        left join TransactionalData.PT_TMAPPRST as approvals
+            on approvals.OfferId = offer.OfferID
+            and approvals.ApprovalStatus in ('Rejected', 'Waiting', 'Processing', 'Cancelled', 'Cancelling', 'Not Sent')
+        left join MaxOfferApprovalStatusTime as maxApprTime
+            on maxApprTime.OfferId = offer.OfferID {
+                offer.OfferID,
+                maxApprTime.MaxStatusTime,
+                case 
+                    when 
+                        max(approvals.ApprovalStatus) is null and maxApprTime.MaxStatusTime is null
+                            then 0
+                    when
+                        count(approvals.ApprovalStatus) > 0
+                        then 1
+                    else 2	
+                end as approvedStatus: Integer
+    } group by  offer.OfferID,
+                maxApprTime.MaxStatusTime;
