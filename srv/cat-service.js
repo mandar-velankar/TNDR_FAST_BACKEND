@@ -2635,6 +2635,15 @@ module.exports = (srv) => {
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 			}
 
+			if (country.Region === "MEA") {
+				if (type.ApproverType === 'Regional Business') {
+					const validationType = type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS) ? 2 : 1;
+					type.ValidationType = validationType;
+					type.ValidationType2 = validationType;
+					requiredAction = validationType;
+				}
+			}
+
 			aResults.push({
 				TenderID: offerValidation.TENDERID,
 				OfferId: offerValidation.OFFERID,
