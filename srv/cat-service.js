@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -2576,7 +2576,7 @@ module.exports = (srv) => {
 		}
 	}
 
-	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country) {
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country, offerLatestApprStatus) {
 
 		let aResults = [];
 		approverTypes.forEach(function (type, index) {
@@ -2635,6 +2635,34 @@ module.exports = (srv) => {
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 			}
 
+			if (country.Region === "MEA") {
+				const creditManager = approverTypes.find(at => at.ApproverType === "Credit Manager");
+				const supplyChain = approverTypes.find(at => at.ApproverType === "Supply Chain");
+
+				if (creditManager.ValidationType === 3 && type.ApproverType !== "Credit Manager") {
+					const validationType = type.ValidationType === 2 ? 2 : 1;
+					type.ValidationType = validationType;
+					type.ValidationType2 = validationType;
+					requiredAction = validationType;
+				}
+
+				if (offerLatestApprStatus[0].approvedStatus == 2 && supplyChain.ValidationType === 3 && type.ApproverType !== "Supply Chain") {
+					if (type.ApproverType.includes("PTL")) {
+						const validationType = type.ValidationType === 2 ? 2 : 1;
+						type.ValidationType = validationType;
+						type.ValidationType2 = validationType;
+						requiredAction = validationType;
+					}
+				}
+
+				if (type.ApproverType === 'Regional Business') {
+					const validationType = type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS) ? 2 : 1;
+					type.ValidationType = validationType;
+					type.ValidationType2 = validationType;
+					requiredAction = validationType;
+				}
+			}
+
 			aResults.push({
 				TenderID: offerValidation.TENDERID,
 				OfferId: offerValidation.OFFERID,
@@ -2672,6 +2700,7 @@ module.exports = (srv) => {
 		let results = [];
 		let approverTypes = [];
 		let latestApproval = await tx.run(SELECT.from(ApprovalRequests).where(whereOffer));
+		let offerLatestApprStatus = await tx.run(SELECT.from(OfferLatestApprovalStatus).where({OfferID: whereOffer[2].val}));
 
 		whereOffer[0].ref[0] = 'OFFERID'
 		let offerValidation = await buildOfferValidation(tx, whereOffer);
@@ -2691,7 +2720,7 @@ module.exports = (srv) => {
 			approverTypes = offerValidation.ApproverTypes;
 		}
 
-		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country);
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country, offerLatestApprStatus);
 
 	}
 
