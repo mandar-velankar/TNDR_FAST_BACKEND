@@ -463,7 +463,7 @@ module.exports = (srv) => {
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
-		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : product.CREDIT_MANAGER_APPROVED === 1 ? 2 : 3;
+		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
 		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
 								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
 								: instituteDistributorBrandProduct?.[0].PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
@@ -2640,10 +2640,12 @@ module.exports = (srv) => {
 				const supplyChain = approverTypes.find(at => at.ApproverType === "Supply Chain");
 
 				if (creditManager.ValidationType === 3 && type.ApproverType !== "Credit Manager") {
-					const validationType = type.ValidationType === 2 ? 2 : 1;
-					type.ValidationType = validationType;
-					type.ValidationType2 = validationType;
-					requiredAction = validationType;
+					if (type.ApproverType.includes("PTL")) {
+						const validationType = type.ValidationType === 2 ? 2 : 1;
+						type.ValidationType = validationType;
+						type.ValidationType2 = validationType;
+						requiredAction = validationType;
+					}
 				}
 
 				if (offerLatestApprStatus[0].approvedStatus == 2 && supplyChain.ValidationType === 3 && type.ApproverType !== "Supply Chain") {
