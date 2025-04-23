@@ -316,15 +316,18 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
                 offerLatestApprStatus.approvedStatus = 0
             then 3
             when
-                offerLatestApprStatus.approvedStatus = 2 and
                 (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-                approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT ))
             then 2
             when
-                offerLatestApprStatus.approvedStatus = 2 and
                 (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-                approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 2 else 3 end
+                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT))
+            then 2
+            else 3 end
     ) 
     as NUCLEUS_HEAD_APPROVED:Integer,
     max(
