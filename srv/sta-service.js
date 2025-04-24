@@ -6777,4 +6777,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             return req.reject(403, error?.message||"Error in OfferFormView");
         }
 	});
+
+	srv.on('copyTender', async (req) => {
+		
+	});
 }
