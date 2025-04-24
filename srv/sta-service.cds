@@ -291,7 +291,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         NLContractDurationOfferPrices.OfferPrice_3
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
+    type copyOfferResponse {
+        TenderID: String;
+        OfferID: String
+    }
+
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
+    action copyTender(TenderID: String) returns copyOfferResponse;
     action sendHematologyNotificationMailTemplate(offerID:String,tenderId: String, CountryCode: String, url: String) returns String;
     action softDeleteOffer(offerID:String) returns String;
     function getNotificationMailTemplate(offerID:String, templateId: String, url: String) returns String;
