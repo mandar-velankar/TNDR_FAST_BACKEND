@@ -1001,6 +1001,7 @@ entity CCMPriceCondition: cuid, managed{
     RoyalDecreeValue                    : Decimal;
     RoyalDecreeIncl                     : Boolean default false;
     ConfidentialPrice                   : Decimal;
+    NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD : Decimal;
     NETPRICEWITHOUTTAXAFTERDEDUCTIONRD  : Decimal;
     NETPRICEWITHTAXAFTERDEDUCTIONRD     : Decimal;
     NETPRICEWITHOUTTAX                  : Decimal;
