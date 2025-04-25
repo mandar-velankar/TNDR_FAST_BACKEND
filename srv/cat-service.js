@@ -434,7 +434,7 @@ module.exports = (srv) => {
 		//Notification if OfferPrice below lowest price
 		let controlling = 1;
 		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
-			controlling = product.CONTROLLING_NOT_REQUIRED === null || product.CONTROLLING_NOT_REQUIRED === 0 ? 2 : 1;
+			controlling = 2;
 		}
 
 		//Country Business
@@ -443,7 +443,7 @@ module.exports = (srv) => {
 		//Note: we had logic only requiring approval if
 		//below APPROVED_PRICE (when existed) or below REGISTERED_PRICE (when existed and no APPROVED_PRICE) or when no REGISTERED_PRICE
 		//this was removed to allow applying e-signature in quotation document (compliance required business approval)
-		let countryBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : product.CREDIT_MANAGER_APPROVED === 1 ? 2 : 3;
+		let countryBusiness = (product.BUSINESS_APPROVED === 1) ? 1 : 3;
 
 		//Regional Business
 		//Optional if business approved
@@ -1586,7 +1586,7 @@ module.exports = (srv) => {
 				INSTITUTE_ID: offer.INSTITUTE_ID,
 				DISTRIBUTOR_ID: offer.DISTRIBUTOR_ID,
 				PRODUCT_ID: offerProduct.ProductCode,
-				CHANNEL: offerProduct.CHANNEL,
+				CHANNEL: offer.TENDER_CHANNEL,
 				LEGAL_ENTITY_CODE: countryLegalEntity.LegalEntityCode,
 				DIVISION: offerProduct.DIVISION
 			}));
