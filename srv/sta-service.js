@@ -6933,6 +6933,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		// mapping new offer product price conditions and free goods other
 		const newProductsPriceCondtions = priceCondtions.map(pc => {
 			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === pc.OfferID);
+			const existingNlPriceConditions = nlPriceConditions.filter(nlpc => nlpc.PriceCondition_ID === pc.ID);
 			const freeGoods = freeGoodsOther.filter(fg => fg.PriceCondition_ID === pc.ID);
 
 			const newPriceCondition = {...pc};
@@ -6941,7 +6942,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newPriceCondition.ID = uuidv4();
 
 			// mapping price conditions specific for NL
-			const newNLPriceConditions = nlPriceConditions.map(nlpc => {
+			const newNLPriceConditions = existingNlPriceConditions.map(nlpc => {
 				const newNLPriceCondition= {...nlpc};
 				newNLPriceCondition.ID = uuidv4();
 				newNLPriceCondition.PriceCondition_ID = newPriceCondition.ID;
