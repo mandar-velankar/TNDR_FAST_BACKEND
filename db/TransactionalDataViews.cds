@@ -241,6 +241,8 @@ inner join LatestApprovalRequests as latestApprovals
     and approvals.ApproverType = latestApprovals.ApproverType
     and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
+left join OfferLatestApprovalStatus as offerLatestApprStatus
+    on offerLatestApprStatus.OfferID = approvals.OfferId
 {
    approvals.OfferId as OFFER_ID,
    approvals.productcode as PRODUCT_ID,
@@ -307,7 +309,83 @@ inner join LatestApprovalRequests as latestApprovals
         approvals.OfferProduct.Price.PRICE_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
         then 1 else 0 end
    ) 
-   as REGULATORY_APPROVED:Integer
+   as REGULATORY_APPROVED:Integer,
+   max(
+        case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 3
+            when
+                (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT ))
+            then 2
+            when
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT))
+            then 2
+            else 
+                case 
+                    when 
+                        approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct'
+                    then 2
+                    else 3
+                end
+            end
+    ) 
+    as NUCLEUS_HEAD_APPROVED:Integer,
+    max(
+        case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 0
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 else 0 end
+    ) 
+    as CREDIT_MANAGER_APPROVED:Integer,
+    max(
+       case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 0
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+        then 1 else 0 end
+   ) 
+   as CONTROLLING_NOT_REQUIRED:Integer,
+    max(
+       case 
+            when offerLatestApprStatus.approvedStatus = 0
+                then 2  
+            when offerLatestApprStatus.approvedStatus = 1 and
+                approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct' and 
+                (approvals.OfferProduct.VOLUME_UOM_UPDATE = 0 and approvals.OfferProduct.VOLUME_UOM_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                then 3              
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.VOLUME_UOM_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.VOLUME_UOM_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 2
+            when offerLatestApprStatus.approvedStatus = 2 and
+                approvals.OfferProduct.VOLUME_UOM_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1
+                // case 
+                //     when 
+                //         approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct'
+                //     then 3
+                //     else 1 
+                // end
+       else 2 end
+   ) 
+   as VOLUME_UOM_UPDATED:Integer
 }group by approvals.OfferId, approvals.productcode;
 
 entity PreviousApproval as select from PreviousApprovalTemp as temp{
@@ -319,7 +397,11 @@ entity PreviousApproval as select from PreviousApprovalTemp as temp{
     temp.COUNTRY_BUSINESS_APPROVED,
     case when temp.PENDING_BUSINESS = 1 then 0 else temp.BUSINESS_APPROVED end as BUSINESS_APPROVED:Integer,
     temp.LEGAL_APPROVED,
-    case when temp.BUSINESS_APPROVED = 1 then 1 else temp.REGULATORY_APPROVED end as REGULATORY_APPROVED:Integer
+    case when temp.BUSINESS_APPROVED = 1 then 1 else temp.REGULATORY_APPROVED end as REGULATORY_APPROVED:Integer,
+    temp.NUCLEUS_HEAD_APPROVED,
+    temp.CREDIT_MANAGER_APPROVED,
+    temp.CONTROLLING_NOT_REQUIRED,
+    temp.VOLUME_UOM_UPDATED
 };
 
 entity InstituteMap as select from MasterData.PT_TMINST as institute{
@@ -654,6 +736,10 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.REGIONAL_BUSINESS_APPROVED as REGIONAL_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.REGULATORY_APPROVED as REGULATORY_APPROVED,
     offerProduct.PreviousApproval.SUPPLY_APPROVED as SUPPLY_APPROVED,
+    offerProduct.PreviousApproval.NUCLEUS_HEAD_APPROVED as NUCLEUS_HEAD_APPROVED,
+    offerProduct.PreviousApproval.CREDIT_MANAGER_APPROVED as CREDIT_MANAGER_APPROVED,
+    offerProduct.PreviousApproval.CONTROLLING_NOT_REQUIRED as CONTROLLING_NOT_REQUIRED,
+    offerProduct.PreviousApproval.VOLUME_UOM_UPDATED as VOLUME_UOM_UPDATED,
     ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
     / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,
@@ -712,10 +798,10 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     and quotation.AS1 = signatory.AUTHORIZED_SIGNATORY
 {
     offer.OfferID,
-    ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
-    ifnull(quotation.Signatory1.NAME, signatory.NAME) as NAME:String,
-    ifnull(quotation.Signatory1.TITLE, signatory.TITLE) as TITLE:String
-};
+    max(ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY)) as AUTHORIZED_SIGNATORY:String,
+    max(ifnull(quotation.Signatory1.NAME, signatory.NAME)) as NAME:String,
+    max(ifnull(quotation.Signatory1.TITLE, signatory.TITLE)) as TITLE:String
+} group by offer.OfferID;
 
 entity OfferSignatory2 as select from TransactionalData.PT_TMOFRS as offer
 inner join ApprovalRequests as approvalRequest
@@ -735,10 +821,10 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     and quotation.AS2 = signatory.AUTHORIZED_SIGNATORY
 {
     offer.OfferID,
-    ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
-    ifnull(quotation.Signatory2.NAME, signatory.NAME) as NAME:String,
-    ifnull(quotation.Signatory2.TITLE, signatory.TITLE) as TITLE:String
-};
+    max(ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY)) as AUTHORIZED_SIGNATORY:String,
+    max(ifnull(quotation.Signatory2.NAME, signatory.NAME)) as NAME:String,
+    max(ifnull(quotation.Signatory2.TITLE, signatory.TITLE)) as TITLE:String
+} group by offer.OfferID;
 
 //EHQUT-RITM12706398-OfferValidity for SEWA
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
@@ -3552,3 +3638,27 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                 else RequestedVolume        
         end as TotalAmount:Double
     };
+    entity MaxOfferApprovalStatusTime as select from TransactionalData.PT_TMAPPRST {
+        key OfferId,
+        max(Statustime) as MaxStatusTime
+    }group by OfferId;
+
+    entity OfferLatestApprovalStatus as select from TransactionalData.PT_TMOFRS as offer
+        left join TransactionalData.PT_TMAPPRST as approvals
+            on approvals.OfferId = offer.OfferID
+            and approvals.ApprovalStatus in ('Rejected', 'Waiting', 'Processing', 'Cancelled', 'Cancelling', 'Not Sent')
+        left join MaxOfferApprovalStatusTime as maxApprTime
+            on maxApprTime.OfferId = offer.OfferID {
+                offer.OfferID,
+                maxApprTime.MaxStatusTime,
+                case 
+                    when 
+                        max(approvals.ApprovalStatus) is null and maxApprTime.MaxStatusTime is null
+                            then 0
+                    when
+                        count(approvals.ApprovalStatus) > 0
+                        then 1
+                    else 2	
+                end as approvedStatus: Integer
+    } group by  offer.OfferID,
+                maxApprTime.MaxStatusTime;
