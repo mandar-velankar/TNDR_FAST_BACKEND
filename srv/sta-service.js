@@ -520,7 +520,7 @@ module.exports = async (srv) => {
 		let instituteID =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'InstituteID');
 		
 		// Deleting Institute filter in order to create custom filter logic
-		ServiceHelper.deleteFilter(req, "InstituteID");
+		instituteID && ServiceHelper.deleteFilter(req, "InstituteID");
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
@@ -6812,6 +6812,174 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	});
 
 	srv.on('copyTender', async (req) => {
-		
+		try{
+			const { data: {TenderID} } = req;
+
+			!TenderID && req.error({ code: 404, message: "TenderID was not provided", target: "TenderID" });
+
+			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: TenderID, Active: 1});
+
+			// checks 
+			if(!tender){
+				return req.error({ code: 403, message: `Tender "${TenderID}" is not active. Only active tender can be copied.`, target: "PT_TMTEND"});
+			}
+
+			const latestTenderID = await SELECT.one.from(PT_TMTEND).columns('max(TenderID) as TenderID').where({ CountryCode: tender.CountryCode })
+			const offers = await SELECT.from(PT_TMOFRS).where({TenderID: TenderID, ActiveOffer: 1});
+			const offerIDs = offers.map(o => o.OfferID);
+			const offerProducts = offerIDs.length > 0 ?await SELECT.from(PT_TMOFPR).where({OfferID: {in: offerIDs}, Active: 1}) : [];
+			const offerProductIDs = offerProducts.map(o => o.ProductCode);
+			const productPricing = offerIDs.length > 0 && offerProductIDs.length > 0 ? await SELECT.from(PT_TMBDPR).where({OfferID: {in: offerIDs}, ProductCode: {in: offerProductIDs},  Active: 1, ActiveTier: 0, LotID: 1 }) : [];
+			const priceCondtions = offerIDs.length > 0 && offerProductIDs.length > 0 ? await SELECT.from(PriceCondition).where({OfferID: {in: offerIDs}, ProductCode: {in: offerProductIDs}}) : [];
+			const priceConditionIDs = priceCondtions.map(pc => pc.ID);
+			const nlPriceConditions = priceConditionIDs.length > 0 ? await SELECT.from(NLPriceConditions).where({PriceCondition_ID: {in: priceConditionIDs}}) : [];
+			const freeGoodsOther = priceConditionIDs.length > 0 ? await SELECT.from(FreeGoodsOther).where({PriceCondition_ID: {in: priceConditionIDs}}) : [];
+
+			const newTenderInformation = getNewCopiedTenderInformation(offers, latestTenderID);
+
+			return createNewTender({tender, offers, newTenderInformation, offerProducts, productPricing, priceCondtions, nlPriceConditions, freeGoodsOther, req});
+		}
+		catch(error){
+            console.error('Error in copyTender');
+            return req.reject(403, error?.message||"Error in copyTender");
+        }
 	});
+
+	function getNewCopiedTenderInformation (offers, latestTenderID) {
+		const splitedTenderID = latestTenderID.TenderID.split("-");
+		splitedTenderID[splitedTenderID.length-1] = Number(splitedTenderID[splitedTenderID.length - 1]) + 1;
+		const newTenderID = splitedTenderID.join("-");
+
+		const offerIDs = offers.map((offer, index) => {
+			const newTenderOfferNo = index + 1;
+			return {
+				oldOfferID: offer.OfferID,
+				newOfferID: newTenderID + "-" + newTenderOfferNo,
+				newTenderOfferNo: newTenderOfferNo
+			}
+		});
+
+		return {
+			newTenderID,
+			newTenderNo: splitedTenderID[splitedTenderID.length - 1],
+			offerIDs
+		}
+	}
+
+
+	async function createNewTender({tender, offers, newTenderInformation, offerProducts, productPricing, priceCondtions, nlPriceConditions, freeGoodsOther, req}){
+		const todaysDate = new Date().toISOString().substring(0,10);
+
+		// mapping new tender 
+		const newTender = {...tender};
+		newTender.TenderID = newTenderInformation.newTenderID;
+		newTender.TenderNo = newTenderInformation.newTenderNo
+		newTender.SubmittedOn = todaysDate;
+
+		// mapping new offers
+		const newOffers = offers.map(offer => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === offer.OfferID);
+			const newOffer = {...offer};
+
+			newOffer.TenderID = newTenderInformation.newTenderID;
+			newOffer.OfferID = NEW_OFFER_ID.newOfferID;
+			newOffer.CreationDate = todaysDate;
+			newOffer.InternalBidDueDate = todaysDate;
+			newOffer.NewOfferDueDate = todaysDate;	
+			newOffer.TenderOfferNo = NEW_OFFER_ID.newTenderOfferNo;
+			newOffer.SubmittedOn = todaysDate;
+
+			return newOffer;
+		});
+
+		// mapping new offer statuses
+		const newOfferStatuses = newOffers.map(newOffer => {
+			return {
+				TenderID: newOffer.TenderID,
+				OfferID: newOffer.OfferID,
+				CountryCode: newOffer.CountryCode,
+				Active: 1,
+				STATUS: "Offer Created",
+				TableStatus: null,
+				Date: todaysDate,
+			};
+		});
+
+		// mapping new offer products
+		const newOfferProducts = offerProducts.map(product => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === product.OfferID);
+			const newOfferProduct = {...product};
+
+			newOfferProduct.TenderID = newTenderInformation.newTenderID;
+			newOfferProduct.OfferID = NEW_OFFER_ID.newOfferID;
+			newOfferProduct.SubmittedOn = todaysDate;
+			newOfferProduct.Active = 1;
+
+			return newOfferProduct;
+		});
+
+		// mapping new offer product pricing
+		const newProductsPricings = productPricing.map(pr => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === pr.OfferID);
+			const newProductPricing = {...pr};
+
+			newProductPricing.TenderID = newTenderInformation.newTenderID;
+			newProductPricing.OfferID = NEW_OFFER_ID.newOfferID;
+			newProductPricing.SubmittedOn = todaysDate;
+
+			return newProductPricing;
+		});
+
+		// mapping new offer product price conditions and free goods other
+		const newProductsPriceCondtions = priceCondtions.map(pc => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === pc.OfferID);
+			const freeGoods = freeGoodsOther.filter(fg => fg.PriceCondition_ID === pc.ID);
+
+			const newPriceCondition = {...pc};
+
+			newPriceCondition.OfferID = NEW_OFFER_ID.newOfferID;
+			newPriceCondition.ID = uuidv4();
+
+			// mapping price conditions specific for NL
+			const newNLPriceConditions = nlPriceConditions.map(nlpc => {
+				const newNLPriceCondition= {...nlpc};
+				newNLPriceCondition.ID = uuidv4();
+				newNLPriceCondition.PriceCondition_ID = newPriceCondition.ID;
+				return newNLPriceCondition;
+			});
+
+			// mapping free good of each price condition
+			const newFreeGoodsOthers = freeGoods.map(fg => {
+				const newFreeGoodsOther= {...fg};
+				newFreeGoodsOther.ID = uuidv4();
+				newFreeGoodsOther.PriceCondition_ID = newPriceCondition.ID;
+				return newFreeGoodsOther;
+			});
+
+			// returns associated free goods and NL priceconditions with pricecondition to cascade insert them
+			return {
+				...newPriceCondition,
+				NLPriceConditions: newNLPriceConditions,
+				FreeGoodsOther: newFreeGoodsOthers
+			};
+		});
+
+		// 1. create new tender
+		newTender && await INSERT.into(PT_TMTEND).entries(newTender);
+		// 2. create new offer
+		newOffers.length > 0 && await INSERT.into(PT_TMOFRS).entries(newOffers);
+		// 3. create new offer status
+		newOfferStatuses.length > 0 && await INSERT.into(PT_TMTNOFST).entries(newOfferStatuses);
+		// 4. create new products
+		newOfferProducts.length > 0 && await INSERT.into(PT_TMOFPR).entries(newOfferProducts);
+		// 5. create new product pricing
+		newProductsPricings.length > 0 && await INSERT.into(PT_TMBDPR).entries(newProductsPricings);
+		// 6. create new price condtions
+		newProductsPriceCondtions.length > 0 && await INSERT.into(PriceCondition).entries(newProductsPriceCondtions);
+
+		return {
+			TenderID: newTender.TenderID,
+			OfferID: newOffers.length > 0 ? newOffers[0].OfferID : "NA"
+		};
+	};
 }
