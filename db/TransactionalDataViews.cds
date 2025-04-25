@@ -327,7 +327,14 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
                 (offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
                 (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT))
             then 2
-            else 3 end
+            else 
+                case 
+                    when 
+                        approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct'
+                    then 2
+                    else 3
+                end
+            end
     ) 
     as NUCLEUS_HEAD_APPROVED:Integer,
     max(
@@ -357,7 +364,11 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
     max(
        case 
             when offerLatestApprStatus.approvedStatus = 0
-                then 2                
+                then 2  
+            when offerLatestApprStatus.approvedStatus = 1 and
+                approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct' and 
+                (approvals.OfferProduct.VOLUME_UOM_UPDATE = 0 and approvals.OfferProduct.VOLUME_UOM_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                then 3              
             when
                 offerLatestApprStatus.approvedStatus = 2 and
                 (approvals.OfferProduct.VOLUME_UOM_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
@@ -366,6 +377,12 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
             when offerLatestApprStatus.approvedStatus = 2 and
                 approvals.OfferProduct.VOLUME_UOM_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
             then 1
+                // case 
+                //     when 
+                //         approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct'
+                //     then 3
+                //     else 1 
+                // end
        else 2 end
    ) 
    as VOLUME_UOM_UPDATED:Integer
