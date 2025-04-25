@@ -460,6 +460,7 @@ module.exports = (srv) => {
 		// }
 		// Regional Business approver type is always mandatory notification
 		let regionalBusiness = product.VOLUME_UOM_UPDATED === null ? 2 : product.VOLUME_UOM_UPDATED; //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
+		if (offer.TENDER_CHANNEL === "Direct" && product.VOLUME_UOM_UPDATED === null) regionalBusiness = 3;
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
@@ -503,6 +504,7 @@ module.exports = (srv) => {
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
 					oApproverType.ValidationType = product.NUCLEUS_HEAD_APPROVED === null ? 3 : product.NUCLEUS_HEAD_APPROVED;
+					if (offer.TENDER_CHANNEL === "Direct" && product.NUCLEUS_HEAD_APPROVED === null) oApproverType.ValidationType = 2;
 				}
 			}
 			
@@ -2658,7 +2660,7 @@ module.exports = (srv) => {
 				}
 
 				if (type.ApproverType === 'Regional Business') {
-					const validationType = type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS) ? 2 : 1;
+					const validationType = type.ValidationType === 3 ? 3 : type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS) ? 2 : 1;
 					type.ValidationType = validationType;
 					type.ValidationType2 = validationType;
 					requiredAction = validationType;
