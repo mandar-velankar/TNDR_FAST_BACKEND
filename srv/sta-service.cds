@@ -1514,4 +1514,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionDescuentoComercialView         as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionDescuentoEspecialView          as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPrecioNetoView                 as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+
+    action getSAPSalesOrderSimulation(customerID: String, materialNumber: String, countryCode: String) returns String;
 }
