@@ -178,6 +178,7 @@ entity SchedulerApiConfigOAuth : cuid {
     GrantType     : String;
     ClientID      : String;
     ClientSecret  : String;
+    Scope         : String;
 }
 
 entity SchedulerJobConfig: cuid , managed{
