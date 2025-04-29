@@ -1488,7 +1488,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key TenderID,
         key ProductCode,
         MaterialNumber,
-        IntituteID,
+        InstituteID,
         CustomerID,
         Currency,
         YP00,
