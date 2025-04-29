@@ -908,6 +908,13 @@ module.exports = (srv) => {
                     }
                 });
 		 }
+
+		// Only for Radilogy products no need to display CDH
+		const CDHApproverTypeIndex = aApproverTypes.findIndex(type => type.ApproverType === "CDH");
+		if (CDHApproverTypeIndex > -1) {
+			aApproverTypes.splice(CDHApproverTypeIndex, 1);
+		}
+		
 		} else if (product.DIVISION === 'Pharma') {
 			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
 			aApproverTypes.map(async function (oApproverType) {
