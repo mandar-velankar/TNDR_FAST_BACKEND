@@ -984,7 +984,7 @@ entity CCMPriceCondition: cuid, managed{
     TenderID                            : String;
     ProductCode                         : Integer;
     MaterialNumber                      : Integer;
-    IntituteID                          : Integer;
+    InstituteID                          : Integer;
     CustomerID                          : Integer;
     Currency                            : String;
     YP00                                : Decimal; //PVL
