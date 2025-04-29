@@ -2641,7 +2641,7 @@ module.exports = (srv) => {
 				const creditManager = approverTypes.find(at => at.ApproverType === "Credit Manager");
 				const supplyChain = approverTypes.find(at => at.ApproverType === "Supply Chain");
 
-				if (creditManager.ValidationType === 3 && type.ApproverType !== "Credit Manager") {
+				if (offerLatestApprStatus[0].approvedStatus == 2 && creditManager.ValidationType === 3 && type.ApproverType !== "Credit Manager") {
 					if (type.ApproverType.includes("PTL")) {
 						const validationType = type.ValidationType === 2 ? 2 : 1;
 						type.ValidationType = validationType;
