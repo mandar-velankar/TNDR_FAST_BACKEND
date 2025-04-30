@@ -6906,7 +6906,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	srv.after(
 		'READ', 
-		['PriceConditionDescuentoComercialView','PriceConditionDescuentoEspecialView', 'PriceConditionPrecioNetoView'], 
+		['PriceConditionDescuentoComercialView','PriceConditionPVLView', 'PriceConditionPrecioNetoView'], 
 		async (items, req) => {
 		try{
 			if(items.hasPriceCondition){
@@ -6958,11 +6958,244 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			// }
 		}
 		catch(error){
-			console.error('Error in PriceConditionDescuentoComercialView, PriceConditionDescuentoEspecialView, PriceConditionPrecioNetoView after READ');
-			return req.reject(403, error?.message||"Error in PriceConditionDescuentoComercialView, PriceConditionDescuentoEspecialView, PriceConditionPrecioNetoView after READ");
+			console.error('Error in PriceConditionDescuentoComercialView, PriceConditionPVLView, PriceConditionPrecioNetoView after READ');
+			return req.reject(403, error?.message||"Error in PriceConditionDescuentoComercialView, PriceConditionPVLView, PriceConditionPrecioNetoView after READ");
 		}
 		}
 	);
+
+	srv.on("getSAPSalesOrderSimulation", async (req) => {
+			const tx = cds.tx(req);
+	
+			try {
+				const { offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode } = req.data;
+				const ccmPriceCondition = await tx.run(SELECT.one.from(CCMPriceCondition).where({
+					OfferID: offerID,
+					TenderID: tenderID,
+					ProductCode: productCode,
+					CountryCode: countryCode
+				}));
+
+				const body = updateSAPSalesOrderSimulationRequestBody(customerID, materialNumber);
+				const response = await getSAPSalesOrderSimulation(tx, countryCode, "SalesOrderSimulation", body);
+
+				const pricingElements = response.data.d.to_Item.results[0].to_PricingElement.results;
+				if (!pricingElements) {
+					return req.reject(404, "No Pricing Exist in SAP");
+				}
+				
+				const mappedData = mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode);
+				
+				if(ccmPriceCondition){
+					await tx.run(UPDATE(CCMPriceCondition).with(mappedData).where({ID: ccmPriceCondition.ID}));
+				}else{
+					await tx.run(INSERT.into(CCMPriceCondition).entries(mappedData));
+				}
+
+				return req.reply("Current Pricing were received from SAP");
+			} catch (error) {
+				if(error.response && error.response.data){
+					console.error(error.response.data);
+					return req.reject(error.response.status, JSON.stringify(error.response.data));
+				}
+				if(error.code && error.message){
+					console.error(error.message);
+					return req.reject(error.code, error.message);
+				}
+				// await tx.rollback(req);
+				return req.reject(500, error.message);
+			}
+	});
+
+	async function getSAPSalesOrderSimulation (tx, countryCode, resource, body) {
+			if (!body) {
+				throw new Error("ERR_MISSING_PARAMETER:body");
+			}
+			try {
+				const apiConfig = await tx.run(SELECT.one.from(SchedulerApiConfig).where({ Provider: 'SAPSalesOrderSimulation', CountryCode: countryCode, Resource: resource })); 
+				const oauthAuth = await tx.run(SELECT.one.from(SchedulerApiConfigOAuth, apiConfig.OAuth_ID));
+				const url = `${apiConfig.Host}${apiConfig.BasePath}${apiConfig.ResourcePath}`;
+	
+				const oauthCredentials = await getBearerToken(oauthAuth);
+	
+				return axios({
+					method: 'post',
+					url: url,
+					headers: {
+						'Authorization': `Bearer ${oauthCredentials.data.access_token}`,
+						'Content-Type': 'application/json'
+					},
+					data: JSON.stringify(body)
+				});
+			} catch (error) {
+				throw error
+			}
+	}
+
+	function updateSAPSalesOrderSimulationRequestBody (customerID, materialNumber) {
+        let body = getSAPSalesOrderSimulationRequestBody();
+        if (!body) {
+            return false;
+        }
+
+		body["SoldToParty"] = customerID;
+        body["to_Item"][0]["Material"] = materialNumber;
+        return body;
+    }
+
+	async function getBearerToken(oauthAuth) {
+	
+			if (oauthAuth.OAuthProvider && oauthAuth.ClientID && oauthAuth.ClientSecret && oauthAuth.Scope) {
+				console.log(`Calling ${oauthAuth.OAuthProvider}`);
+				return axios({
+					method: 'post',
+					url: oauthAuth.OAuthProvider,
+					headers: {
+						'Authorization': `Basic ${Buffer.from(`${oauthAuth.ClientID}:${oauthAuth.ClientSecret}`).toString('base64')}`,
+						'Content-Type': 'application/x-www-form-urlencoded',
+						'Accept-Encoding': 'gzip, deflate',
+						'accept': 'application/json'
+					},
+					data: qs.stringify({
+						'grant_type': oauthAuth.GrantType,
+						'scope': oauthAuth.Scope
+					})/*, when testing locally, comment out the proxy
+					proxy: {
+						host: priceAgreementApi.ProxyHost,
+						port: priceAgreementApi.ProxyPort
+					}*/
+				});
+			}
+	
+			throw Error("Missing OAUTH config parameters");
+	};
+
+	function getSAPSalesOrderSimulationRequestBody () {
+        return {
+			"SalesOrderType": "YCOR",
+			"SalesOrganization": "QFHC",
+			"SoldToParty": "900000352",
+			"to_Pricing": {},
+			"to_Item": [
+				{
+					"Material": "66040304",
+					"RequestedQuantity": "1",
+					"to_PricingElement": []
+				}
+			]
+		}
+    }
+
+	function mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode) {
+		const result = {
+		  CountryCode: countryCode,
+		  OfferID: offerID,
+		  TenderID: tenderID,
+		  ProductCode: productCode,
+		  MaterialNumber: materialNumber,
+		  InstituteID: instituteID,
+		  CustomerID: customerID,
+		  Currency: "EUR",
+		  YP00: 0,
+		  YP04: 0,
+		  ConfidentialPrice: 0,
+		  YD02: 0,
+		  RoyalDecree: "No",
+		  YD06: 0,
+		  RoyalDecreeValue: 0,
+		  RoyalDecreeIncl: true,
+		  YD30: 0,
+		  YD75: null,
+		  YP10: null,
+		  NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD: null,
+		  NETPRICEWITHOUTTAXAFTERDEDUCTIONRD: null,
+		  NETPRICEWITHTAXAFTERDEDUCTIONRD: null,
+		  NETPRICEWITHOUTTAX: null,
+		  NETPRICEWITHTAX: null,
+		  SAPTAX: 0,
+		  SAPPriceWithTax: 0,
+		  SAPBaseGrossPrice: 0,
+		  ConditionType: null
+		};
+	  
+		const conditions = {};
+	  
+		// Iterate through the pricing elements to collect necessary conditions
+		for (const elem of pricingElements) {
+		  const { ConditionType, PricingProcedureStep, ConditionRateValue, ConditionAmount } = elem;
+	  
+		  if (ConditionType) {
+			conditions[ConditionType] = {
+			  ConditionRateValue: parseFloat(ConditionRateValue || 0),
+			  ConditionAmount: parseFloat(ConditionAmount || 0)
+			};
+		  }
+	  
+		  // Handle PricingProcedureStep-specific values
+		  if (PricingProcedureStep === "330") {
+			result.SAPTAX = parseFloat(ConditionAmount || 0);
+		  }
+	  
+		  if (PricingProcedureStep === "332") {
+			result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
+		  }
+
+		  if (PricingProcedureStep === "306") {
+			result.NETPRICEWITHOUTTAX = parseFloat(ConditionAmount || 0);
+		  }
+		}
+	  
+		// Assign the condition values
+		const YP00 = conditions["YP00"]?.ConditionRateValue || 0;
+		const YP04 = conditions["YP04"]?.ConditionRateValue ?? 0;
+		const YP10 = conditions["YP10"]?.ConditionRateValue ?? null;
+		const YD02 = conditions["YD02"]?.ConditionRateValue ?? 0;
+		const YD06 = conditions["YD06"]?.ConditionRateValue ?? 0;
+		const YD75 = conditions["YD75"]?.ConditionAmount ?? null;
+		const YD30 = conditions["YD30"]?.ConditionRateValue ?? 0;
+	  
+		result.YP00 = YP00;
+		result.YP04 = YP04;
+		result.ConfidentialPrice = YP04 ? YP00 * (1 - YP04) : YP00;
+		result.YD02 = YD02;
+		result.RoyalDecree = YD06 ? "Yes" : "No";
+		result.YD06 = YD06;
+		result.RoyalDecreeValue = YD06 && YP10 ? YD06 * YP10 : 0;
+		result.RoyalDecreeIncl = YD06 ? false : true;
+		result.YD30 = YD30;
+		result.YD75 = YD75;
+		result.YP10 = YP10;
+	  
+		// Mapped values for NETPRICE fields
+		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = YP10;
+		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = YP10 ? (YD06 ? YP10 * (1 - YD06) : YP10) : null;
+		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
+		result.NETPRICEWITHOUTTAX = YD02 ? result.NETPRICEWITHOUTTAX : null;  
+		result.NETPRICEWITHTAX = (YD02 || YD30) ? result.SAPPriceWithTax : null;
+		result.SAPBaseGrossPrice = YP00;
+	  
+		// Determine the condition type
+		if (YP10 !== null) {
+			result.ConditionType = "PrecioNeto";
+		  } else if (
+			YP00 !== 0 &&
+			(YP10 === null || YP10 === 0) &&
+			YP04 === 0 &&
+			YD02 === 0 &&
+			(YD75 === null || YD75 === 0 )&&
+			YD06 === 0 &&
+			YD30 === 0
+		  ) {
+			result.ConditionType = "PVL";
+		  } else if (YD02 !== 0) {
+			result.ConditionType = "DescuentoCommercial";
+		  }
+	  
+		return result;
+	  }
+	  
+	  
+	  
 
 
 }
