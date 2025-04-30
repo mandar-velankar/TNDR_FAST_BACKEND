@@ -2162,6 +2162,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             TENDER_SUBMITTED_BY   : String; // Chile
             REMARKS               : String(5000);
             CUSTOM_REMARKS        : String not null;
+            PL_CUSTOM_REMARKS     : LargeString;
             DELIVERYTERMS         : String(5000);
             PAYMENTTERMS          : String(5000);
             SHIPMENTTERMS         : String(5000);
