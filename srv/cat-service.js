@@ -2452,6 +2452,8 @@ module.exports = (srv) => {
 			case "Ophthalmology PTL":
 			case "Cardiology PTL":
 			case "Manager Business Operations":
+			case "Controlling":
+			case "Contrast Media PTL":
 			case "Legal":
 				return "Profitability";
 			case "Regulatory":
