@@ -467,7 +467,7 @@ module.exports = (srv) => {
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
 		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
 								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
-								: instituteDistributorBrandProduct?.[0].PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
+								: instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
 
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
@@ -1575,7 +1575,7 @@ module.exports = (srv) => {
         const offerProductPacks = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: {in: productPackIDs}}));
 
 		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({CountryCode: offer.COUNTRYCODE}));
-		const countryLegalEntity = await tx.run(SELECT.one.from(CountryLegalEntity).where({CountryCode: offer.COUNTRYCODE}));
+		const initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offer.OFFERID }));
 
 
 		//where statement
@@ -1594,8 +1594,9 @@ module.exports = (srv) => {
 				DISTRIBUTOR_ID: offer.DISTRIBUTOR_ID,
 				PRODUCT_ID: offerProduct.ProductCode,
 				CHANNEL: offer.TENDER_CHANNEL,
-				LEGAL_ENTITY_CODE: countryLegalEntity.LegalEntityCode,
-				DIVISION: offerProduct.DIVISION
+				LEGAL_ENTITY_CODE: initialOffer.SellingCompany,
+				DIVISION: offerProduct.DIVISION,
+				BRAND_ID: offerProduct.BRANDID
 			}));
 
 
@@ -2451,6 +2452,9 @@ module.exports = (srv) => {
 			case "Ophthalmology PTL":
 			case "Cardiology PTL":
 			case "Manager Business Operations":
+			case "Controlling":
+			case "Regional Business":
+			case "Contrast Media PTL":
 			case "Legal":
 				return "Profitability";
 			case "Regulatory":
@@ -2648,7 +2652,7 @@ module.exports = (srv) => {
 				const creditManager = approverTypes.find(at => at.ApproverType === "Credit Manager");
 				const supplyChain = approverTypes.find(at => at.ApproverType === "Supply Chain");
 
-				if (creditManager.ValidationType === 3 && type.ApproverType !== "Credit Manager") {
+				if (offerLatestApprStatus[0].approvedStatus == 2 && creditManager.ValidationType === 3 && type.ApproverType !== "Credit Manager") {
 					if (type.ApproverType.includes("PTL")) {
 						const validationType = type.ValidationType === 2 ? 2 : 1;
 						type.ValidationType = validationType;
