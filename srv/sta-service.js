@@ -1817,7 +1817,10 @@ module.exports = async (srv) => {
 			"PriceConditionNLPriceView", 
 			"PriceConditionNLDiscountView",
 			"PriceConditionSpecialPriceView",
-			"PriceConditionWithMaximumPriceView"
+			"PriceConditionWithMaximumPriceView",
+			"PriceConditionDescuentoComercialView",
+			"PriceConditionPrecioNetoView",
+			"PriceConditionPVLView"
 		], 
 		async (req) => {
 			try{
@@ -2288,6 +2291,62 @@ module.exports = async (srv) => {
 				OfferPrice: req.data.SpecialPrice || 0,
 				NetOfferPrice: req.data.SpecialPrice || 0,
 				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"PrecioNeto":{
+				CountryCode : req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				PVL: req.data.PVL,
+				ConfidentialPrice: req.data.ConfidentialPrice,
+				Discount: req.data.Discount,
+				RoyalDecree: req.data.RoyalDecree,
+				RoyalDecreeValue: req.data.RoyalDecreeValue,
+				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
+				StandardDiscount: req.data.StandardDiscount,
+				AdditionalDiscount: req.data.AdditionalDiscount,
+				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
+				NetPriceWithoutTaxAfterDeductionRD: req.data.NetPriceWithoutTaxAfterDeductionRD,
+				NetPriceWithTaxAfterDeductionRD: req.data.NetPriceWithTaxAfterDeductionRD,
+				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+				NetPriceWithTax: req.data.NetPriceWithTax,
+				MaximumPrice: req.data.MaximumPrice,
+				Tax: req.data.Tax,
+				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"DescuentoComercial":{
+				CountryCode : req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				PVL: req.data.PVL,
+				ConfidentialPrice: req.data.ConfidentialPrice,
+				Discount: req.data.Discount,
+				RoyalDecree: req.data.RoyalDecree,
+				RoyalDecreeValue: req.data.RoyalDecreeValue,
+				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
+				StandardDiscount: req.data.StandardDiscount,
+				AdditionalDiscount: req.data.AdditionalDiscount,
+				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
+				NetPriceWithoutTaxAfterDeductionRD: req.data.NetPriceWithoutTaxAfterDeductionRD,
+				NetPriceWithTaxAfterDeductionRD: req.data.NetPriceWithTaxAfterDeductionRD,
+				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+				NetPriceWithTax: req.data.NetPriceWithTax,
+				MaximumPrice: req.data.MaximumPrice,
+				Tax: req.data.Tax,
+				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"PVL":{
+				ountryCode : req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				PVL: req.data.PVL,
+				ConfidentialPrice: req.data.ConfidentialPrice,
+				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+				NetPriceWithTax: req.data.NetPriceWithTax,
+				MaximumPrice: req.data.MaximumPrice,
+				Tax: req.data.Tax,
+				PriceConditionClassification_ID: req.data.ClassificationID 
 			}
 		}
 
@@ -2379,11 +2438,11 @@ module.exports = async (srv) => {
 			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : priceCondition.CountryCode === 'PL' ? 'FOC 1' : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.CountryCode === 'PL' ? 0 : priceCondition.Discount, 
-			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.OfferPrice, 
+			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.OfferPrice, 
 			Deductions            : priceCondition.Deductions, 
-			StandardDiscount      : 0, 
-			AdditionalDiscount    : 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
+			StandardDiscount      : priceCondition.CountryCode === 'ES' ? priceCondition.StandardDiscount: 0, 
+			AdditionalDiscount    : priceCondition.CountryCode === 'ES' ? priceCondition.AdditionalDiscount: 0, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
@@ -2395,7 +2454,7 @@ module.exports = async (srv) => {
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
-			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.NetPrice, 
+			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.NetPrice, 
 			NetPrice_OfPaid       : 0, 
 			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
@@ -6915,25 +6974,26 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
 					OfferID: items.OfferID,
 					TenderID: items.TenderID,
-					ProductCode: items.ProductCode,
-					ConditionType: items.ConditionType
+					ProductCode: items.ProductCode
 				});
-				items.PVL = ccmPriceCondition.YP00;
-				items.ConfidentialDiscount = ccmPriceCondition.YP04;
-				items.RoyalDecree = ccmPriceCondition.RoyalDecree;
-				items.ConfidentialPrice = ccmPriceCondition.ConfidentialPrice;
-				items.ESDiscount = ccmPriceCondition.YD02;
-				items.RoyalDecreeValue = ccmPriceCondition.RoyalDecreeValue;
-				items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
-				items.RoyalDecreePercentage_1 = ccmPriceCondition.YD06;
-				items.StandardDiscount = ccmPriceCondition.StandardDiscount;
-				items.AdditionalDiscount = ccmPriceCondition.YD75;
-				items.NetPriceWithoutTaxBeforeDeductionRD = ccmPriceCondition.YP10;
-				items.NetPriceWithoutTaxAfterDeductionRD = ccmPriceCondition.NetPriceWithoutTaxAfterDeductionRD;
-				items.NetPriceWithTaxAfterDeductionRD = ccmPriceCondition.NetPriceWithTaxAfterDeductionRD;
-				items.NetPriceWithoutTax = ccmPriceCondition.NetPriceWithoutTax;
-				items.NetPriceWithTax = ccmPriceCondition.NetPriceWithTax;
-				items.Tax = ccmPriceCondition.SAPTAX;
+				if(ccmPriceCondition){
+					items.PVL = ccmPriceCondition.YP00;
+					items.ConfidentialDiscount = ccmPriceCondition.YP04;
+					items.RoyalDecree = ccmPriceCondition.RoyalDecree;
+					items.ConfidentialPrice = ccmPriceCondition.ConfidentialPrice;
+					items.ESDiscount = ccmPriceCondition.YD02;
+					items.RoyalDecreeValue = ccmPriceCondition.RoyalDecreeValue;
+					items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
+					items.RoyalDecreePercentage_1 = ccmPriceCondition.YD06;
+					items.StandardDiscount = ccmPriceCondition.StandardDiscount;
+					items.AdditionalDiscount = ccmPriceCondition.YD75;
+					items.NetPriceWithoutTaxBeforeDeductionRD = ccmPriceCondition.YP10;
+					items.NetPriceWithoutTaxAfterDeductionRD = ccmPriceCondition.NetPriceWithoutTaxAfterDeductionRD;
+					items.NetPriceWithTaxAfterDeductionRD = ccmPriceCondition.NetPriceWithTaxAfterDeductionRD;
+					items.NetPriceWithoutTax = ccmPriceCondition.NetPriceWithoutTax;
+					items.NetPriceWithTax = ccmPriceCondition.NetPriceWithTax;
+					items.Tax = ccmPriceCondition.SAPTAX;
+				}
 
 				return items;
 			}
