@@ -7045,6 +7045,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				}
 				
 				const mappedData = mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode);
+
+				if (!mappedData.ConditionType) {
+					return req.reject(422, "SAP response does not match any FAST ConditionType");
+				}
 				
 				if(ccmPriceCondition){
 					await tx.run(UPDATE(CCMPriceCondition).with(mappedData).where({ID: ccmPriceCondition.ID}));
@@ -7235,24 +7239,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.SAPBaseGrossPrice = YP00;
 	  
 		// Determine the condition type
-		if (YP10 !== null) {
+		if (YP10) {
 			result.ConditionType = "PrecioNeto";
-		  } else if (
-			YP00 !== 0 &&
-			(YP10 === null || YP10 === 0) &&
-			YP04 === 0 &&
-			YD02 === 0 &&
-			(YD75 === null || YD75 === 0 )&&
-			YD06 === 0 &&
-			YD30 === 0
-		  ) {
-			result.ConditionType = "PVL";
-		  } else if (YD02 !== 0) {
+		} else if (YD02) {
 			result.ConditionType = "DescuentoCommercial";
-		  }
+		} else if (YP00) {
+			result.ConditionType = "PVL";
+		} else {
+			result.ConditionType = null;
+		}
 	  
 		return result;
-	  }
+	}
 	  
 	  
 	  
