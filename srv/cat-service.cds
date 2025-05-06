@@ -410,6 +410,7 @@ service CatalogService @(path : 'tender')@(requires : [
             DIVISION           : String(500);
             COUNTRYNAME        : String(50);
             HIERARCHY          : Integer;
+            Nucleus            : String(100);
     };
 
     //SALES OPPORTUNINTY
