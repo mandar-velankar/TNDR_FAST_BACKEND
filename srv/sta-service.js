@@ -7218,6 +7218,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const YD75 = conditions["YD75"]?.ConditionAmount ?? null;
 		const YD30 = conditions["YD30"]?.ConditionRateValue ?? 0;
 	  
+		
+
 		result.YP00 = YP00;
 		result.YP04 = YP04;
 		result.ConfidentialPrice = YP04 ? YP00 * (1 - YP04) : YP00;
@@ -7227,8 +7229,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.RoyalDecreeValue = YD06 && YP10 ? YD06 * YP10 : 0;
 		result.RoyalDecreeIncl = YD06 ? false : true;
 		result.YD30 = YD30;
-		result.YD75 = YD75;
 		result.YP10 = YP10;
+
+		const useConfidential = YP04 !== 0;
+		const basePrice = useConfidential ? result.ConfidentialPrice : YP00;
+
+		result.YD75 = (basePrice - YP10) / basePrice;
 	  
 		// Mapped values for NETPRICE fields
 		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = YP10;

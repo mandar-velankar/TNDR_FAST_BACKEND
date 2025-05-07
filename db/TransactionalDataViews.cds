@@ -1594,7 +1594,7 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     priceCondition.NetPriceWithTaxAfterDeductionRD,
     priceCondition.NetPriceWithoutTax,
     priceCondition.NetPriceWithTax,
-    priceCondition.MaximumPrice,
+    product.MaxPrice as MaximumPrice: Double,
     priceCondition.ConfidentialDiscount,
     priceCondition.RoyalDecreePercentage_1
 }where tender.Active = 1;
