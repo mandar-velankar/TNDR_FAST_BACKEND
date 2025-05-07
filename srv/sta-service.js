@@ -2337,7 +2337,7 @@ module.exports = async (srv) => {
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"PVL":{
-				ountryCode : req.data.CountryCode,
+				CountryCode : req.data.CountryCode,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
 				PVL: req.data.PVL,
