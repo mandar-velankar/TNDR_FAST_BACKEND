@@ -6988,11 +6988,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					items.StandardDiscount = ccmPriceCondition.StandardDiscount;
 					items.AdditionalDiscount = ccmPriceCondition.YD75;
 					items.NetPriceWithoutTaxBeforeDeductionRD = ccmPriceCondition.YP10;
-					items.NetPriceWithoutTaxAfterDeductionRD = ccmPriceCondition.NetPriceWithoutTaxAfterDeductionRD;
-					items.NetPriceWithTaxAfterDeductionRD = ccmPriceCondition.NetPriceWithTaxAfterDeductionRD;
-					items.NetPriceWithoutTax = ccmPriceCondition.NetPriceWithoutTax;
-					items.NetPriceWithTax = ccmPriceCondition.NetPriceWithTax;
+					items.NetPriceWithoutTaxAfterDeductionRD = ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD;
+					items.NetPriceWithTaxAfterDeductionRD = ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD;
+					items.NetPriceWithoutTax = ccmPriceCondition.NETPRICEWITHOUTTAX;
+					items.NetPriceWithTax = ccmPriceCondition.NETPRICEWITHTAX;
 					items.Tax = ccmPriceCondition.SAPTAX;
+					items.Currency = 'EUR'
 				}
 
 				return items;
@@ -7211,10 +7212,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		// Assign the condition values
 		const YP00 = conditions["YP00"]?.ConditionRateValue || 0;
-		const YP04 = conditions["YP04"]?.ConditionRateValue ?? 0;
+		const YP04 = conditions["YP04"] ? Math.abs(conditions["YP04"].ConditionRateValue) / 100 : 0;
 		const YP10 = conditions["YP10"]?.ConditionRateValue ?? null;
-		const YD02 = conditions["YD02"]?.ConditionRateValue ?? 0;
-		const YD06 = conditions["YD06"]?.ConditionRateValue ?? 0;
+		const YD02 = conditions["YD02"] ? Math.abs(conditions["YD02"].ConditionRateValue) / 100 : 0;
+		const YD06 = conditions["YD06"] ? Math.abs(conditions["YD06"].ConditionRateValue) / 100 : 0;
 		const YD75 = conditions["YD75"]?.ConditionAmount ?? null;
 		const YD30 = conditions["YD30"]?.ConditionRateValue ?? 0;
 	  
@@ -7248,7 +7249,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		if (YP10) {
 			result.ConditionType = "PrecioNeto";
 		} else if (YD02) {
-			result.ConditionType = "DescuentoCommercial";
+			result.ConditionType = "DescuentoComercial";
 		} else if (YP00) {
 			result.ConditionType = "PVL";
 		} else {
