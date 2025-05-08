@@ -460,11 +460,13 @@ module.exports = (srv) => {
 		// }
 		// Regional Business approver type is always mandatory notification
 		let regionalBusiness = product.VOLUME_UOM_UPDATED === null ? 2 : product.VOLUME_UOM_UPDATED; //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
-		if (offer.TENDER_CHANNEL === "Direct" && product.VOLUME_UOM_UPDATED === null) regionalBusiness = 3;
+		if (offer.TENDER_CHANNEL === "Direct" && (product.VOLUME_UOM_UPDATED === null || product.VOLUME_UOM_FOC_UPDATED === 2)) regionalBusiness = 3;
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
+		if (product.VOLUME_UOM_FOC_UPDATED === 2) supply = 3;
+		
 		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
 								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
 								: instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
@@ -504,7 +506,22 @@ module.exports = (srv) => {
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
 					oApproverType.ValidationType = product.NUCLEUS_HEAD_APPROVED === null ? 3 : product.NUCLEUS_HEAD_APPROVED;
-					if (offer.TENDER_CHANNEL === "Direct" && product.NUCLEUS_HEAD_APPROVED === null) oApproverType.ValidationType = 2;
+
+					switch (offer.TENDER_CHANNEL) {
+						case "Direct":
+							if (product.NUCLEUS_HEAD_APPROVED === null || product.VOLUME_UOM_FOC_UPDATED === 2) {
+								oApproverType.ValidationType = 2;
+							}
+							
+							break;
+						case "Distributor":
+							if (product.VOLUME_UOM_FOC_UPDATED === 2) {
+								oApproverType.ValidationType = 3;
+							}
+							break;
+						default:
+							break;
+					}
 				}
 			}
 			
@@ -2661,14 +2678,14 @@ module.exports = (srv) => {
 					}
 				}
 
-				if (offerLatestApprStatus[0].approvedStatus == 2 && supplyChain.ValidationType === 3 && type.ApproverType !== "Supply Chain") {
-					if (type.ApproverType.includes("PTL")) {
-						const validationType = type.ValidationType === 2 ? 2 : 1;
-						type.ValidationType = validationType;
-						type.ValidationType2 = validationType;
-						requiredAction = validationType;
-					}
-				}
+				// if (offerLatestApprStatus[0].approvedStatus == 2 && supplyChain.ValidationType === 3 && type.ApproverType !== "Supply Chain") {
+				// 	if (type.ApproverType.includes("PTL")) {
+				// 		const validationType = type.ValidationType === 2 ? 2 : 1;
+				// 		type.ValidationType = validationType;
+				// 		type.ValidationType2 = validationType;
+				// 		requiredAction = validationType;
+				// 	}
+				// }
 
 				if (type.ApproverType === 'Regional Business') {
 					const validationType = type.ValidationType === 3 ? 3 : type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS) ? 2 : 1;
