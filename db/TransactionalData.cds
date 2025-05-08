@@ -979,7 +979,9 @@ entity THQuotationDelevery : cuid {
 }
 
 type MEAApprovalUpdatedFields {
-    Volume: Integer;
-    UOM: Integer;
-    FOC: Integer;
+    Volume      : Integer;
+    UOM         : Integer;
+    FOC         : Integer;
+    Price       : Integer;
+    Deductions  : Integer;
 }
