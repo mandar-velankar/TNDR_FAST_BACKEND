@@ -7059,16 +7059,24 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 				return req.reply("Current Pricing were received from SAP");
 			} catch (error) {
-				if(error.response && error.response.data){
+				if (error.response && error.response.data) {
 					console.error(error.response.data);
-					return req.reject(error.response.status, JSON.stringify(error.response.data));
+			
+					const sapError = error.response.data;
+					const errorMessage =
+						sapError?.error?.message?.value ||
+						sapError?.error?.innererror?.errordetails?.[0]?.message ||
+						"Unknown SAP error";
+			
+					return req.reject(error.response.status, errorMessage);
 				}
-				if(error.code && error.message){
+			
+				if (error.code && error.message) {
 					console.error(error.message);
 					return req.reject(error.code, error.message);
 				}
-				// await tx.rollback(req);
-				return req.reject(500, error.message);
+			
+				return req.reject(500, error.message || "Unexpected server error");
 			}
 	});
 
