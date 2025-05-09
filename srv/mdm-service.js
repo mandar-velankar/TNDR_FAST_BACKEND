@@ -972,7 +972,7 @@ module.exports = (srv) => {
 			let excelData = await tx.run(query);
 
 			excelData = excelData.filter(nlppp => {
-				return nlppp.ACTIVERECORD === "Yes" ? true : new Date(validDate) <= nlppp.RegistrationValidUntil;
+				return nlppp.ACTIVERECORD === "Yes" ? true : validDate <= nlppp.RegistrationValidUntil;
 			});
 
 			//Delete empty PPP if there is at least one contract with the same PRODUCTPACKID 
@@ -1078,7 +1078,7 @@ module.exports = (srv) => {
 		let excelData = await tx.run(query);
 
 		excelData = excelData.filter(wpp => {
-			return wpp.ACTIVERECORD === "Yes" ? true : new Date(validDate) <= wpp.RegistrationValidUntil;
+			return wpp.ACTIVERECORD === "Yes" ? true : validDate <= wpp.RegistrationValidUntil;
 		});
 
 		excelData.forEach(item => {
