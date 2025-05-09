@@ -346,6 +346,7 @@ entity PT_TMOFPR {
     key LotID                    : Integer default 1;
         WorkflowProductID        : Integer;
         IbizWorkflowID           : Integer;
+        MEAApprovalUpdatedFields : MEAApprovalUpdatedFields;
         Custom                   : Custom; // Custom attributes for templates usage
         //Associations
         Offer                    : Association to PT_TMOFRS
@@ -971,10 +972,17 @@ entity ContractInfomation : cuid, managed {
         on OfferProduct.OfferID = OfferID
         and OfferProduct.ProductCode = ProductCode;
 }
-        
 entity THQuotationDelevery : cuid {
     OfferID                   : String;
     QuotationDeliverymethod   : String;
     QuotationRecipientname    : String;
     QuotationRecipientcontact : String;
+}
+
+type MEAApprovalUpdatedFields {
+    Volume      : Integer;
+    UOM         : Integer;
+    FOC         : Integer;
+    Price       : Integer;
+    Deductions  : Integer;
 }
