@@ -467,15 +467,14 @@ module.exports = (srv) => {
 				product.PRICE_DEDUCTIONS_UPDATED === 2
 			)
 		) regionalBusiness = 3;
+
+		if (product.CREDIT_MANAGER_APPROVED === 1 && offer.TENDER_CHANNEL === "Direct") regionalBusiness = 2
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
 		if (product.VOLUME_UOM_FOC_UPDATED === 2) supply = 3;
 		if (product.PRICE_DEDUCTIONS_UPDATED === 2) supply = 2;
-		if (offerLatestApprStatus[0].approvedStatus == 2 && product.SUPPLY_APPROVED !== 1 && !aOfferProduct.every(el => el.PRICE_DEDUCTIONS_UPDATED === 2)) {
-			supply = 1;
-		}
 		
 		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
 								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
@@ -2369,7 +2368,8 @@ module.exports = (srv) => {
 			ContractLength: tender.ContractLength,
             ContractLenghtUnit: tender.Custom_String_5,
 			AttentionTo: quotation?.Custom_String_6,
-            QuotationDate: quotation?.Custom_Date_3
+            QuotationDate: quotation?.Custom_Date_3,
+			TenderChannel: offer.TENDER_CHANNEL
 		};
 		return results;
 		
@@ -2691,7 +2691,7 @@ module.exports = (srv) => {
 				// 	}
 				// }
 
-				if (type.ApproverType === 'Regional Business') {
+				if (type.ApproverType === 'Regional Business' && offerValidation.TenderChannel === "Distributor") {
 					const validationType = type.ValidationType === 3 ? 3 : type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS) ? 2 : 1;
 					type.ValidationType = validationType;
 					type.ValidationType2 = validationType;
