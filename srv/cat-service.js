@@ -65,6 +65,9 @@ module.exports = (srv) => {
 	const {
 		InstituteDistributorBrandProduct	
 	} = cds.entities("CatalogService");
+	const {
+		ExchangeRates
+	} = cds.entities("com.bayer.SXTENDER.MasterDataLatestValues");
 
 
 	const arr = x => Array.from(x);
@@ -2610,7 +2613,7 @@ module.exports = (srv) => {
 		}
 	}
 
-	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country, offerLatestApprStatus) {
+	async function buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country, offerLatestApprStatus, exchangeRate) {
 
 		let aResults = [];
 		approverTypes.forEach(function (type, index) {
@@ -2692,7 +2695,7 @@ module.exports = (srv) => {
 				// }
 
 				if (type.ApproverType === 'Regional Business' && offerValidation.TenderChannel === "Distributor") {
-					const validationType = type.ValidationType === 3 ? 3 : type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS) ? 2 : 1;
+					const validationType = type.ValidationType === 3 ? 3 : type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS / (exchangeRate?.ExchangeRate ?? 1)) ? 2 : 1;
 					type.ValidationType = validationType;
 					type.ValidationType2 = validationType;
 					requiredAction = validationType;
@@ -2747,6 +2750,11 @@ module.exports = (srv) => {
 
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
 		let country = await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
+		let initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offerValidation.OFFERID }));
+		let exchangeRate = await SELECT.one.from(ExchangeRates).where({CURRENCY_FROM: initialOffer?.Currency,
+			CURRENCY_TO: 'EUR',
+			X_TYPE: 'Budget'
+		});
 
 
 		if (!offerValidation.COUNTRYCODE) return results;
@@ -2756,7 +2764,7 @@ module.exports = (srv) => {
 			approverTypes = offerValidation.ApproverTypes;
 		}
 
-		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country, offerLatestApprStatus);
+		return await buildValidationEntryNew(approverTypes, latestApproval, offerValidation, countryApprovers, country, offerLatestApprStatus, exchangeRate);
 
 	}
 
