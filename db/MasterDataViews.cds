@@ -504,11 +504,13 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         key ctprdpck.PRODUCTPACKID,
         ctprdpck.COUNTRYCODE as CountryCode,
         ctprdpck.GOV_CODE,
+		ctprdpck.RegistrationValidUntil,
         prdpck.PRODUCTPACKNAME,
         prdpck.PRESENTATION,
         prdpck.Bundle,
 		prdpck.OuterCarton,
 		prdpck.PACKFACTOR,
+		prdpck.ACTIVERECORD,
 		nlppp.ID as NLPPP_ID,
 		nlppp.PPP: Double,
 		nlppp.StartDate as PPPStartDate,
@@ -534,13 +536,7 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
         wholesalepp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
 		wholesalepp.Comment,
 		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
-} where ctprdpck.COUNTRYCODE = 'NL'  and wholesalepp.ID is not null and (
-	ctprdpck.ACTIVERECORD = 'Yes'
-	or (
-		ctprdpck.ACTIVERECORD = 'No'
-		and ctprdpck.RegistrationValidUntil >= CURRENT_DATE
-	)
-)
+} where ctprdpck.COUNTRYCODE = 'NL'  and wholesalepp.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
 		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
@@ -557,11 +553,13 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         key ctprdpck.PRODUCTPACKID,
         ctprdpck.COUNTRYCODE as CountryCode : String,
         ctprdpck.GOV_CODE,
+		ctprdpck.RegistrationValidUntil,
         prdpck.PRODUCTPACKNAME,
         prdpck.PRESENTATION,
         prdpck.Bundle,
 		prdpck.OuterCarton,
 		prdpck.PACKFACTOR,
+		prdpck.ACTIVERECORD,
 		nlppp.ID as NLPPP_ID,
 		nlppp.PPP: Double,
 		nlppp.StartDate as PPPStartDate,
@@ -637,10 +635,12 @@ entity NLpppView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
         key ctprdpck.PRODUCTPACKID,
         ctprdpck.COUNTRYCODE as CountryCode,
         ctprdpck.GOV_CODE,
+		ctprdpck.RegistrationValidUntil,
         prdpck.PRODUCTPACKNAME,
         prdpck.PRESENTATION,
 		prdpck.CalculationFactorIRP,
 		prdpck.PACKFACTOR,
+		prdpck.ACTIVERECORD,
         materialNumbers.MaterialNumbers,
         ppp.Comment,
         ppp.Status,
@@ -662,13 +662,7 @@ entity NLpppView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
         ctryCurrency.Currency,
         ppp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
 		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
-} where ctprdpck.COUNTRYCODE = 'NL' and ppp.ID is not null and (
-	ctprdpck.ACTIVERECORD = 'Yes'
-	or (
-		ctprdpck.ACTIVERECORD = 'No'
-		and ctprdpck.RegistrationValidUntil >= CURRENT_DATE
-	)
-)
+} where ctprdpck.COUNTRYCODE = 'NL' and ppp.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
 		on prdpck.PRODUCTPACKID = ctprdpck.PRODUCTPACKID
@@ -683,10 +677,12 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		key ctprdpck.PRODUCTPACKID,
 		ctprdpck.COUNTRYCODE as CountryCode: String,
 		ctprdpck.GOV_CODE,
+		ctprdpck.RegistrationValidUntil,
 		prdpck.PRODUCTPACKNAME,
 		prdpck.PRESENTATION,
 		prdpck.CalculationFactorIRP,
 		prdpck.PACKFACTOR,
+		prdpck.ACTIVERECORD,
 		materialNumbers.MaterialNumbers,
 		null as Comment,
         null as Status,
