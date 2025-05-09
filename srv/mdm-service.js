@@ -969,7 +969,11 @@ module.exports = (srv) => {
 			query.orderBy("PRODUCTPACKNAME asc");
 
 			//Request to the database
-			const excelData = await tx.run(query);
+			let excelData = await tx.run(query);
+
+			excelData = excelData.filter(nlppp => {
+				return nlppp.ACTIVERECORD === "Yes" ? true : validDate <= nlppp.RegistrationValidUntil;
+			});
 
 			//Delete empty PPP if there is at least one contract with the same PRODUCTPACKID 
 			countryProducts.forEach(item => {
@@ -1071,7 +1075,11 @@ module.exports = (srv) => {
 
 		//Sorting
 		query.orderBy("PRODUCTPACKNAME asc");
-		const excelData = await tx.run(query);
+		let excelData = await tx.run(query);
+
+		excelData = excelData.filter(wpp => {
+			return wpp.ACTIVERECORD === "Yes" ? true : validDate <= wpp.RegistrationValidUntil;
+		});
 
 		excelData.forEach(item => {
 			// Assuming 'Type' and 'Currency' fields are part of the item

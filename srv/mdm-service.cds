@@ -326,7 +326,9 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         Type as CombinedWPPMarginNetPriceValues,
         min(EndDate) as minEndDate: Date,
         PACKFACTOR || ' ' || PRESENTATION as CombinedPackSizePresentation: String,
-        wpp.Comment
+        wpp.Comment,
+        wpp.RegistrationValidUntil,
+        wpp.ACTIVERECORD
     }group by 
         MaterialNumbers,
         GOV_CODE,
@@ -347,7 +349,9 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
         PPPEndDate,
         Status,
         ctryCurrency.Currency,
-        wpp.Comment;
+        wpp.Comment,
+        wpp.RegistrationValidUntil,
+        wpp.ACTIVERECORD;
 
     entity LatestCOGSView as select from PT_TMCOGS {
         max(COGSID) as maxCOGSID: Integer

@@ -16,7 +16,8 @@ module.exports = (srv) => {
         ClaimData,
         ContrastAgentSalesData,
 		ContrastAgentSalesDataNL,
-        SalesReportFile
+        SalesReportFile,
+		MappedFASTOfferClaims
     } = cds.entities("com.bayer.SXTENDER.ClaimsData");
     const {
         PT_TMPRDHIER,
@@ -331,7 +332,10 @@ module.exports = (srv) => {
 			await INSERT.into(ClaimFiles).entries(result.claimFile);
 
 			//Insert metadata into ClaimData
-			await INSERT.into(ClaimData).entries(result.claimData);
+			await INSERT.into(ClaimData).entries(result.mappedclaimsData);
+
+			//Insert mapped FAST Offer Claims Data
+			await INSERT.into(MappedFASTOfferClaims).entries(result.mappedFASTOfferClaims);
 
 			//Insert Claim Approvals
 			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
@@ -508,7 +512,7 @@ module.exports = (srv) => {
 				let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
 				totalFASTClaim = Math.round(totalFASTClaim * 100) / 100;
 				const finalTotalFASTClaim = Number(totalFASTClaim && totalFASTClaim >= 0 ? totalFASTClaim : 0)
-				const percentageDifference = mappedFASTOfferClaims && finalTotalFASTClaim !== 0 ? Number((Math.round(((claimData.Quantity - finalTotalFASTClaim) /finalTotalFASTClaim)*1000)/1000).toFixed(3)) || 0 : 0;
+				const percentageDifference = mappedFASTOfferClaims && finalTotalFASTClaim !== 0 ? Number((Math.round(((claimData.TotalClaim - finalTotalFASTClaim) /finalTotalFASTClaim)*1000)/1000).toFixed(3)) || 0 : 0;
 				mappedReCalculatedValuestoClaimsData = {
 					OfferID									: mappedFASTOfferClaims.OfferID,
 					FASTContractClaim                       : Number(fastContractClaim || 0),
