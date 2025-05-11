@@ -2702,7 +2702,7 @@ module.exports = (srv) => {
 				// }
 
 				if (type.ApproverType === 'Regional Business' && offerValidation.TenderChannel === "Distributor") {
-					const validationType = type.ValidationType === 3 ? 3 : type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS / (exchangeRate?.ExchangeRate ?? 1)) ? 2 : 1;
+					const validationType = type.ValidationType === 3 ? 3 : type.ValidationType === 2 && ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS / (exchangeRate?.X_RATE ?? 1)) ? 2 : 1;
 					type.ValidationType = validationType;
 					type.ValidationType2 = validationType;
 					requiredAction = validationType;
