@@ -520,6 +520,8 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                                 and offer.Product.ApprovalStatus.ApproverTypeSection = 1
                             then 1 else 0 end) <> 0 then 'Offer Created'
                     when count(offer.Product.ApprovalStatus.ApprovalStatus) = 0 then 'Offer Created'
+                    when offer.OfferStatusTable.STATUS = 'Offer Created' and offer.Tender.Country.Region = 'MEA' and (offer.PreviousApprovalHasAddedProduct = 'true' or offer.PreviousApprovalHasDeletedProduct = 'true')
+                        then 'Offer Created'
                     else 'Offer Approved'
                 end
         when offer.OfferStatusTable.STATUS = 'Results Recorded'
@@ -533,7 +535,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
         else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
-group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus; //group by missing?
+group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus, offer.Tender.Country.Region, offer.PreviousApprovalHasAddedProduct, offer.PreviousApprovalHasDeletedProduct; //group by missing?
 
 entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.TenderID as TENDER_ID,
@@ -769,6 +771,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.VOLUME_UOM_UPDATED as VOLUME_UOM_UPDATED,
     offerProduct.PreviousApproval.VOLUME_UOM_FOC_UPDATED as VOLUME_UOM_FOC_UPDATED,
     offerProduct.PreviousApproval.PRICE_DEDUCTIONS_UPDATED as PRICE_DEDUCTIONS_UPDATED,
+    offerProduct.IsProductAddedForPreviousApproval as IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL,
     ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
     / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,

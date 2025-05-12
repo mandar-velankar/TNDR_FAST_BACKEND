@@ -66,6 +66,8 @@ entity PT_TMOFRS { //Offers
         AffiliateOffer         : Boolean default false; 
         QuotationInstituteID   : Integer;
         DifferentAwardPriceParentOfferID : String(30); // Is applicable for Taiwan Different award price Copying option
+        PreviousApprovalHasAddedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHasDeletedProduct: Boolean default false; //MEA specific
         Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND
@@ -346,6 +348,7 @@ entity PT_TMOFPR {
         WorkflowProductID        : Integer;
         IbizWorkflowID           : Integer;
         MEAApprovalUpdatedFields : MEAApprovalUpdatedFields;
+        IsProductAddedForPreviousApproval : Boolean default false;
         Custom                   : Custom; // Custom attributes for templates usage
         //Associations
         Offer                    : Association to PT_TMOFRS
