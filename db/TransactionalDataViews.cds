@@ -1596,7 +1596,9 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     priceCondition.NetPriceWithTax,
     product.MaxPrice as MaximumPrice: Double,
     priceCondition.ConfidentialDiscount,
-    priceCondition.RoyalDecreePercentage_1
+    priceCondition.RoyalDecreePercentage_1,
+    priceCondition.MonthlyRentPerUnit,
+    priceCondition.AnnualValue
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 

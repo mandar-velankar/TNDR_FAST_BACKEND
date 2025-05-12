@@ -442,7 +442,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                         ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                     ) ),2) 
             else null
-        end as GrossMargin:Double
+        end as GrossMargin:Double,
+        SKU.ProductType
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
@@ -546,7 +547,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         case when PricingPolicy.Type = 'BudgetedProfitability'
             then PricingPolicy.Value 
             else 0
-        end as VwBudgetedProfitability:Double
+        end as VwBudgetedProfitability:Double,
+        SKU.ProductType
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
@@ -1515,6 +1517,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionPVLView                        as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionPrecioNetoView                 as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionDescuentoEspecialView          as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionRentalView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
 
     action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String) returns String;
 }
