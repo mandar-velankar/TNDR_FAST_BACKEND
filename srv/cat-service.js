@@ -519,8 +519,10 @@ module.exports = (srv) => {
 
 			if (oApproverType.ApproverType.toLowerCase().split(" ").join("").includes("ptl")) {
 				const ctryApproverType = countryApprovers.find(ca => ca.ApproverType === oApproverType.ApproverType);
+				const isSomeProductAddedForPreviousApproval = aOfferProduct.some(pr => pr.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL);
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
+					
 					oApproverType.ValidationType = product.NUCLEUS_HEAD_APPROVED === null ? 3 : product.NUCLEUS_HEAD_APPROVED;
 
 					switch (offer.TENDER_CHANNEL) {
@@ -532,6 +534,10 @@ module.exports = (srv) => {
 							if (initialOffer.PreviousApprovalHasDeletedProduct) {
 								oApproverType.ValidationType = 1;
 							}
+
+							if (isSomeProductAddedForPreviousApproval) {
+								oApproverType.ValidationType = product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL ? 2 : 1;
+							}
 							
 							break;
 						case "Distributor":
@@ -540,6 +546,10 @@ module.exports = (srv) => {
 							}
 							if (initialOffer.PreviousApprovalHasDeletedProduct) {
 								oApproverType.ValidationType = 2;
+							}
+
+							if (isSomeProductAddedForPreviousApproval) {
+								oApproverType.ValidationType = product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL ? 3 : 1;
 							}
 							break;
 						default:
