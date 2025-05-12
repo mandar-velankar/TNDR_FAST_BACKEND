@@ -16,7 +16,8 @@ module.exports = (srv) => {
         ClaimData,
         ContrastAgentSalesData,
 		ContrastAgentSalesDataNL,
-        SalesReportFile
+        SalesReportFile,
+		MappedFASTOfferClaims
     } = cds.entities("com.bayer.SXTENDER.ClaimsData");
     const {
         PT_TMPRDHIER,
@@ -331,7 +332,10 @@ module.exports = (srv) => {
 			await INSERT.into(ClaimFiles).entries(result.claimFile);
 
 			//Insert metadata into ClaimData
-			await INSERT.into(ClaimData).entries(result.claimData);
+			await INSERT.into(ClaimData).entries(result.mappedclaimsData);
+
+			//Insert mapped FAST Offer Claims Data
+			await INSERT.into(MappedFASTOfferClaims).entries(result.mappedFASTOfferClaims);
 
 			//Insert Claim Approvals
 			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
