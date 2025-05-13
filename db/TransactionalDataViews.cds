@@ -364,11 +364,7 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
     max(
        case 
             when offerLatestApprStatus.approvedStatus = 0
-                then 2  
-            when offerLatestApprStatus.approvedStatus = 1 and
-                approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct' and 
-                (approvals.OfferProduct.VOLUME_UOM_UPDATE = 0 and approvals.OfferProduct.VOLUME_UOM_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT)
-                then 3              
+                then 2               
             when
                 offerLatestApprStatus.approvedStatus = 2 and
                 (approvals.OfferProduct.VOLUME_UOM_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
