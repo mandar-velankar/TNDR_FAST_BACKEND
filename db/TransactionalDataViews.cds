@@ -520,7 +520,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                                 and offer.Product.ApprovalStatus.ApproverTypeSection = 1
                             then 1 else 0 end) <> 0 then 'Offer Created'
                     when count(offer.Product.ApprovalStatus.ApprovalStatus) = 0 then 'Offer Created'
-                    when offer.OfferStatusTable.STATUS = 'Offer Created' and offer.Tender.Country.Region = 'MEA' and (offer.PreviousApprovalHasAddedProduct = 'true' or offer.PreviousApprovalHasDeletedProduct = 'true')
+                    when offer.OfferStatusTable.STATUS = 'Offer Created' and offer.Tender.Country.Region = 'MEA' and (offer.PreviousApprovalHasAddedProduct = 'true' or offer.PreviousApprovalHasDeletedProduct = 'true' or offer.PreviousApprovalHasDeclinedProduct = 'true')
                         then 'Offer Created'
                     else 'Offer Approved'
                 end
@@ -535,7 +535,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
         else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
-group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus, offer.Tender.Country.Region, offer.PreviousApprovalHasAddedProduct, offer.PreviousApprovalHasDeletedProduct; //group by missing?
+group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus, offer.Tender.Country.Region, offer.PreviousApprovalHasAddedProduct, offer.PreviousApprovalHasDeletedProduct, offer.PreviousApprovalHasDeclinedProduct; //group by missing?
 
 entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.TenderID as TENDER_ID,

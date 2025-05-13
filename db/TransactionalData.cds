@@ -68,6 +68,7 @@ entity PT_TMOFRS { //Offers
         DifferentAwardPriceParentOfferID : String(30); // Is applicable for Taiwan Different award price Copying option
         PreviousApprovalHasAddedProduct: Boolean default false; //MEA specific
         PreviousApprovalHasDeletedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHasDeclinedProduct: Boolean default false; //MEA specific
         Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND
