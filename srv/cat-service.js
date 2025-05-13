@@ -471,22 +471,22 @@ module.exports = (srv) => {
 				product.PRICE_DEDUCTIONS_UPDATED === 2
 			) regionalBusiness = 3;
 
-			if (product.CREDIT_MANAGER_APPROVED === 1 || initialOffer.PreviousApprovalHasDeletedProduct) regionalBusiness = 2
+			if (product.CREDIT_MANAGER_APPROVED === 1 || initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) regionalBusiness = 2
 		} else {
-			if (initialOffer.PreviousApprovalHasDeletedProduct) regionalBusiness = 1;
+			if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) regionalBusiness = 1;
 		}
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
 		if (product.VOLUME_UOM_FOC_UPDATED === 2) supply = 3;
-		if (product.PRICE_DEDUCTIONS_UPDATED === 2 || initialOffer.PreviousApprovalHasDeletedProduct) supply = 2;
+		if (product.PRICE_DEDUCTIONS_UPDATED === 2 || initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) supply = 2;
 		
 		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
 								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
 								: instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
 
-		if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasAddedProduct) creditManager = 1;
+		if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasAddedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) creditManager = 1;
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
@@ -531,7 +531,7 @@ module.exports = (srv) => {
 								oApproverType.ValidationType = 2;
 							}
 
-							if (initialOffer.PreviousApprovalHasDeletedProduct) {
+							if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) {
 								oApproverType.ValidationType = 1;
 							}
 
@@ -544,7 +544,7 @@ module.exports = (srv) => {
 							if (product.VOLUME_UOM_FOC_UPDATED === 2 || product.PRICE_DEDUCTIONS_UPDATED === 2) {
 								oApproverType.ValidationType = 3;
 							}
-							if (initialOffer.PreviousApprovalHasDeletedProduct) {
+							if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) {
 								oApproverType.ValidationType = 2;
 							}
 
@@ -590,22 +590,6 @@ module.exports = (srv) => {
 		};
 		*/
 		return results;
-	}
-
-	function updateMEAValidationTypesInCaseDeletedAddedProducts (offer, channel) {
-		switch (channel) {
-			case "Direct":
-				if (offer.PreviousApprovalHasDeletedProduct) {
-			
-				}
-				break;
-			case "Distributor":
-
-				break;
-			default:
-				break;
-		}
-		
 	}
 
 	function buildProductValidationForType3(offer, product, productInfo, aApproverTypes) {//Mexico
