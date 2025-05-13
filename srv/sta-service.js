@@ -860,6 +860,7 @@ module.exports = async (srv) => {
 		delete req.data.GrossSales;
 		delete req.data.GrossProfit;
 		delete req.data.GrossMargin;
+		delete req.data.ProductType;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');
@@ -1293,6 +1294,7 @@ module.exports = async (srv) => {
 		delete req.data.ACTIVE_MATERIAL_NUMBERS;
 		delete req.data.INACTIVE_MATERIAL_NUMBERS;
 		delete req.data.TenderClassification;
+		delete req.data.ProductType;
 		}
 		catch(error){
             console.error('Error in OfferProductsDetailView CREATE');
@@ -1820,7 +1822,9 @@ module.exports = async (srv) => {
 			"PriceConditionWithMaximumPriceView",
 			"PriceConditionDescuentoComercialView",
 			"PriceConditionPrecioNetoView",
-			"PriceConditionPVLView"
+			"PriceConditionPVLView",
+			"PriceConditionDescuentoEspecialView",
+			"PriceConditionRentalView"
 		], 
 		async (req) => {
 			try{
@@ -2298,8 +2302,8 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
-				Discount: req.data.Discount,
-				RoyalDecree: req.data.RoyalDecree,
+				Discount: req.data.ESDiscount,
+				RoyalDecree: req.data.RoyalDecreePercentage_1,
 				RoyalDecreeValue: req.data.RoyalDecreeValue,
 				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
 				StandardDiscount: req.data.StandardDiscount,
@@ -2320,8 +2324,8 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
-				Discount: req.data.Discount,
-				RoyalDecree: req.data.RoyalDecree,
+				Discount: req.data.ESDiscount,
+				RoyalDecree: req.data.RoyalDecreePercentage_1,
 				RoyalDecreeValue: req.data.RoyalDecreeValue,
 				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
 				StandardDiscount: req.data.StandardDiscount,
@@ -2342,12 +2346,45 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
+				RoyalDecree: req.data.RoyalDecreePercentage_1,
+				RoyalDecreeValue: req.data.RoyalDecreeValue,
+				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
 				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
 				PriceConditionClassification_ID: req.data.ClassificationID 
-			}
+			},
+			"DescuentoEspecial":{
+				CountryCode : req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				PVL: req.data.PVL,
+				ConfidentialPrice: req.data.ConfidentialPrice,
+				Discount: req.data.ESDiscount,
+				RoyalDecree: req.data.RoyalDecreePercentage_1,
+				RoyalDecreeValue: req.data.RoyalDecreeValue,
+				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
+				StandardDiscount: req.data.StandardDiscount,
+				AdditionalDiscount: req.data.AdditionalDiscount,
+				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
+				NetPriceWithoutTaxAfterDeductionRD: req.data.NetPriceWithoutTaxAfterDeductionRD,
+				NetPriceWithTaxAfterDeductionRD: req.data.NetPriceWithTaxAfterDeductionRD,
+				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+				NetPriceWithTax: req.data.NetPriceWithTax,
+				MaximumPrice: req.data.MaximumPrice,
+				Tax: req.data.Tax,
+				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
+			"Rental":{
+				CountryCode : req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				MonthlyRentPerUnit: req.data.MonthlyRentPerUnit,
+				AnnualValue: req.data.AnnualValue,
+				PriceConditionClassification_ID: req.data.ClassificationID 
+			},
 		}
 
 		return mappings[req.data.ConditionType];
@@ -6965,7 +7002,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	srv.after(
 		'READ', 
-		['PriceConditionDescuentoComercialView','PriceConditionPVLView', 'PriceConditionPrecioNetoView'], 
+		['PriceConditionDescuentoComercialView','PriceConditionPVLView', 'PriceConditionPrecioNetoView', 'PriceConditionDescuentoEspecialView'], 
 		async (items, req) => {
 		try{
 			if(items.hasPriceCondition){
@@ -6981,7 +7018,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					items.ConfidentialDiscount = ccmPriceCondition.YP04;
 					items.RoyalDecree = ccmPriceCondition.RoyalDecree;
 					items.ConfidentialPrice = ccmPriceCondition.ConfidentialPrice;
-					items.ESDiscount = ccmPriceCondition.YD02;
+					items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : ccmPriceCondition.YD02;
 					items.RoyalDecreeValue = ccmPriceCondition.RoyalDecreeValue;
 					items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
 					items.RoyalDecreePercentage_1 = ccmPriceCondition.YD06;
@@ -6991,7 +7028,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					items.NetPriceWithoutTaxAfterDeductionRD = ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD;
 					items.NetPriceWithTaxAfterDeductionRD = ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD;
 					items.NetPriceWithoutTax = ccmPriceCondition.NETPRICEWITHOUTTAX;
-					items.NetPriceWithTax = ccmPriceCondition.NETPRICEWITHTAX;
+					items.NetPriceWithTax = items.ConditionType === 'DescuentoEspecial' ? (ccmPriceCondition.YP04 !== 0 ?  ccmPriceCondition.ConfidentialPrice : ccmPriceCondition.YP00) : ccmPriceCondition.NETPRICEWITHTAX;
 					items.Tax = ccmPriceCondition.SAPTAX;
 					items.Currency = 'EUR'
 				}
