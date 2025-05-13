@@ -462,31 +462,43 @@ module.exports = (srv) => {
 		// 	}
 		// }
 		// Regional Business approver type is always mandatory notification
-		let regionalBusiness = product.VOLUME_UOM_UPDATED === null ? 2 : product.VOLUME_UOM_UPDATED; //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
-
+		let regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 3 : 2; //product.INCO_TERM_SUPPLY_UPDATED === null ? 2 : product.INCO_TERM_SUPPLY_UPDATED; //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
+		if (product.INCO_TERM_SUPPLY_UPDATED === 1) regionalBusiness = 2;
 		if (offer.TENDER_CHANNEL === "Direct") {
-			if (
-				product.VOLUME_UOM_UPDATED === null || 
+			if (product.CREDIT_MANAGER_APPROVED === 1) regionalBusiness = 2;
+			if (	
+				product.INCO_TERM_SUPPLY_UPDATED === null || 
 				product.VOLUME_UOM_FOC_UPDATED === 2 || 
 				product.PRICE_DEDUCTIONS_UPDATED === 2
 			) regionalBusiness = 3;
 
-			if (product.CREDIT_MANAGER_APPROVED === 1 || initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) regionalBusiness = 2
+			if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) regionalBusiness = 2;
 		} else {
-			if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) regionalBusiness = 1;
+			if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) regionalBusiness = 1;
 		}
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
-		let supply = (product.SUPPLY_APPROVED === 1) ? 1 : 3;
-		if (product.VOLUME_UOM_FOC_UPDATED === 2) supply = 3;
-		if (product.PRICE_DEDUCTIONS_UPDATED === 2 || initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) supply = 2;
+		let supply = 3;
+		
 		
 		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
 								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
 								: instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
+		if (creditManager === 3) {
+			supply = 1;
+		}
+		
+		if (initialOffer.PreviousApprovalHasAddedProduct || initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) creditManager = 1;
 
-		if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasAddedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) creditManager = 1;
+		if (product.VOLUME_UOM_FOC_UPDATED === 2 || product.INCO_TERM_SUPPLY_UPDATED === 1) {
+			creditManager = 1;
+			supply = 3;
+		}
+		if (product.PRICE_DEDUCTIONS_UPDATED === 2 || initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
+			creditManager = 1;
+			supply = 2;
+		}
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
@@ -524,6 +536,7 @@ module.exports = (srv) => {
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
 					
 					oApproverType.ValidationType = product.NUCLEUS_HEAD_APPROVED === null ? 3 : product.NUCLEUS_HEAD_APPROVED;
+					if (product.INCO_TERM_SUPPLY_UPDATED === 1) oApproverType.ValidationType = 2;
 
 					switch (offer.TENDER_CHANNEL) {
 						case "Direct":
@@ -531,12 +544,12 @@ module.exports = (srv) => {
 								oApproverType.ValidationType = 2;
 							}
 
-							if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) {
-								oApproverType.ValidationType = 1;
-							}
-
 							if (isSomeProductAddedForPreviousApproval) {
 								oApproverType.ValidationType = product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL ? 2 : 1;
+							}
+
+							if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
+								oApproverType.ValidationType = 1;
 							}
 							
 							break;
@@ -544,12 +557,13 @@ module.exports = (srv) => {
 							if (product.VOLUME_UOM_FOC_UPDATED === 2 || product.PRICE_DEDUCTIONS_UPDATED === 2) {
 								oApproverType.ValidationType = 3;
 							}
-							if (initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct) {
-								oApproverType.ValidationType = 2;
-							}
 
 							if (isSomeProductAddedForPreviousApproval) {
 								oApproverType.ValidationType = product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL ? 3 : 1;
+							}
+							
+							if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
+								oApproverType.ValidationType = 2;
 							}
 							break;
 						default:
