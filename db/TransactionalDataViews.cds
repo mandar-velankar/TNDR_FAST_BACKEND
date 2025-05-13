@@ -327,14 +327,7 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
                 (offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
                 (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT))
             then 2
-            else 
-                case 
-                    when 
-                        approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct'
-                    then 2
-                    else 3
-                end
-            end
+        end
     ) 
     as NUCLEUS_HEAD_APPROVED:Integer,
     max(
@@ -343,10 +336,17 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
                 offerLatestApprStatus.approvedStatus = 0
             then 0
             when
+                offerLatestApprStatus.approvedStatus = 1 and
+                approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0 and 
+                approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1
+            when
                 offerLatestApprStatus.approvedStatus = 2 and
-                (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-                approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1 else 0 end
+                approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0 and 
+                (approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT)
+            then 1 
+        else 0 end
     ) 
     as CREDIT_MANAGER_APPROVED:Integer,
     max(
@@ -363,33 +363,53 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
    as CONTROLLING_NOT_REQUIRED:Integer,
     max(
        case 
-            when offerLatestApprStatus.approvedStatus = 0
-                then 2               
-            when
-                offerLatestApprStatus.approvedStatus = 2 and
-                (approvals.OfferProduct.VOLUME_UOM_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-                approvals.OfferProduct.VOLUME_UOM_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 2
-            when offerLatestApprStatus.approvedStatus = 2 and
-                approvals.OfferProduct.VOLUME_UOM_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
-            then 1
-                // case 
-                //     when 
-                //         approvals.OfferProduct.Offer.Tender.TenderChannel = 'Direct'
-                //     then 3
-                //     else 1 
-                // end
-       else 2 end
+            when offerLatestApprStatus.approvedStatus = 1 and 
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT and
+                (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT and
+                approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                then 1
+            when offerLatestApprStatus.approvedStatus = 2 and 
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                (approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) and
+                (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT and
+                approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                then 1 
+       else 0 end
    ) 
-   as VOLUME_UOM_UPDATED:Integer,
+   as INCO_TERM_SUPPLY_UPDATED:Integer,
    max(
         case 
             when
                offerLatestApprStatus.approvedStatus = 2 and 
                 (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Volume > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.UOM > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.FOC > 0
+                ) and
+                ((
                     (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
                     (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
                     (approvals.OfferProduct.MEAApprovalUpdatedFields.FOC = approvals.OfferProduct.Offer.APPROVALS_SENT)
+                ) or 
+                (
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                ))
+            then 2
+            when
+               offerLatestApprStatus.approvedStatus = 1 and 
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Volume > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.UOM > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.FOC > 0
+                ) and
+                (
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT)
                 )
             then 2
         else 1 end
@@ -398,10 +418,29 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
    max(
         case 
             when
-               offerLatestApprStatus.approvedStatus = 2 and 
+               offerLatestApprStatus.approvedStatus = 2 and
                 (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Price > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions > 0
+                ) and
+                ((
                     (approvals.OfferProduct.MEAApprovalUpdatedFields.Price = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
                     (approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions = approvals.OfferProduct.Offer.APPROVALS_SENT)
+                ) or
+                (
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Price < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                ))
+            then 2
+            when
+               offerLatestApprStatus.approvedStatus = 1 and 
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Price > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions > 0
+                ) and
+                (
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Price < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions < approvals.OfferProduct.Offer.APPROVALS_SENT)
                 )
             then 2
         else 1 end
@@ -422,7 +461,7 @@ entity PreviousApproval as select from PreviousApprovalTemp as temp{
     temp.NUCLEUS_HEAD_APPROVED,
     temp.CREDIT_MANAGER_APPROVED,
     temp.CONTROLLING_NOT_REQUIRED,
-    temp.VOLUME_UOM_UPDATED,
+    temp.INCO_TERM_SUPPLY_UPDATED,
     temp.VOLUME_UOM_FOC_UPDATED,
     temp.PRICE_DEDUCTIONS_UPDATED
 };
@@ -764,7 +803,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.NUCLEUS_HEAD_APPROVED as NUCLEUS_HEAD_APPROVED,
     offerProduct.PreviousApproval.CREDIT_MANAGER_APPROVED as CREDIT_MANAGER_APPROVED,
     offerProduct.PreviousApproval.CONTROLLING_NOT_REQUIRED as CONTROLLING_NOT_REQUIRED,
-    offerProduct.PreviousApproval.VOLUME_UOM_UPDATED as VOLUME_UOM_UPDATED,
+    offerProduct.PreviousApproval.INCO_TERM_SUPPLY_UPDATED as INCO_TERM_SUPPLY_UPDATED,
     offerProduct.PreviousApproval.VOLUME_UOM_FOC_UPDATED as VOLUME_UOM_FOC_UPDATED,
     offerProduct.PreviousApproval.PRICE_DEDUCTIONS_UPDATED as PRICE_DEDUCTIONS_UPDATED,
     offerProduct.IsProductAddedForPreviousApproval as IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL,
