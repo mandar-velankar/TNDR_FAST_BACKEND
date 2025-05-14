@@ -487,5 +487,5 @@ service CatalogService @(path : 'tender')@(requires : [
 
     entity THQuotationDelevery  as projection on TransactionalData.THQuotationDelevery;
 
-    entity OfferLatestApprovalStatus as projection on TransactionalDataViews.OfferLatestApprovalStatus;
+    entity OfferLatestApprovalStatusView as projection on TransactionalDataViews.OfferLatestApprovalStatus;
 }
