@@ -3708,7 +3708,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
     };
     entity MaxOfferApprovalStatusTime as select from TransactionalData.PT_TMAPPRST {
         key OfferId,
-        max(Statustime) as MaxStatusTime
+        max(Statustime) as MaxStatusTime: DateTime
     }group by OfferId;
 
     entity OfferLatestApprovalStatus as select from TransactionalData.PT_TMOFRS as offer
@@ -3717,7 +3717,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
             and approvals.ApprovalStatus in ('Rejected', 'Waiting', 'Processing', 'Cancelled', 'Cancelling', 'Not Sent')
         left join MaxOfferApprovalStatusTime as maxApprTime
             on maxApprTime.OfferId = offer.OfferID {
-                offer.OfferID,
+                key offer.OfferID,
                 maxApprTime.MaxStatusTime,
                 case 
                     when 
