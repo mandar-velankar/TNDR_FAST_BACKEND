@@ -1490,15 +1490,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             and std.ProductCode = main.ProductCode
             and main.isMain = true
             and main.PriceConditionID is not null{
-                std.TenderID,
-                std.OfferID,
-                std.ProductCode,
+                key std.TenderID,
+                key std.OfferID,
+                key std.ProductCode,
                 std.RequestedVolume,
                 std.hasPriceCondition,
                 std.PriceConditionID,
                 std.ClassificationID,
                 std.Classification,
-                std.ConditionType,
+                key std.ConditionType,
                 std.Division,
                 std.isMain,
                 main.ConfidentialPrice,
