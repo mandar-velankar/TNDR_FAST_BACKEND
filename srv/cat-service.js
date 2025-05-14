@@ -489,14 +489,14 @@ module.exports = (srv) => {
 			supply = 1;
 		}
 		
-		if (initialOffer.PreviousApprovalHasAddedProduct || initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) creditManager = 1;
+		// if (initialOffer.PreviousApprovalHasAddedProduct || initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) creditManager = 1;
 
 		if (product.VOLUME_UOM_FOC_UPDATED === 2 || product.INCO_TERM_SUPPLY_UPDATED === 1) {
-			creditManager = 1;
+			// creditManager = 1;
 			supply = 3;
 		}
 		if (product.PRICE_DEDUCTIONS_UPDATED === 2 || initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
-			creditManager = 1;
+			// creditManager = 1;
 			supply = 2;
 		}
 
