@@ -1483,7 +1483,47 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             dc.NetPriceWithTax, 
             pc.Tax
     }where pc.ConditionType = 'Rappel';
-    entity PriceConditionRappelView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionRappelView as Select from TransactionalDataViews.StandardTenderPriceConditionView as std
+        left outer join TransactionalDataViews.StandardTenderPriceConditionView as main
+            on std.CountryCode = main.CountryCode
+            and std.OfferID = main.OfferID
+            and std.ProductCode = main.ProductCode
+            and main.isMain = true
+            and main.PriceConditionID is not null{
+                std.TenderID,
+                std.OfferID,
+                std.ProductCode,
+                std.RequestedVolume,
+                std.hasPriceCondition,
+                std.PriceConditionID,
+                std.ClassificationID,
+                std.Classification,
+                std.ConditionType,
+                std.Division,
+                std.isMain,
+                main.ConfidentialPrice,
+                main.PVL,
+                main.RoyalDecree,
+                std.Liquidation,
+                std.RefundDate,
+                std.Settlement_ID,
+                std.PriceConditionCode,
+                std.ESDiscount,
+                std.RoyalDecreeValue,
+                std.RoyalDecreeIncl,
+                std.StandardDiscount,
+                std.AdditionalDiscount,
+                std.NetPriceWithoutTaxBeforeDeductionRD,
+                std.NetPriceWithoutTaxAfterDeductionRD,
+                std.NetPriceWithTaxAfterDeductionRD,
+                std.NetPriceWithoutTax,
+                std.NetPriceWithTax,
+                std.MaximumPrice,
+                std.ConfidentialDiscount,
+                std.RoyalDecreePercentage_1,
+                std.MonthlyRentPerUnit,
+                std.AnnualValue
+            };
     entity CCMPriceConditionView                   as select from TransactionalData.CCMPriceCondition{
         CountryCode,
         key OfferID,

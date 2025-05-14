@@ -2303,7 +2303,8 @@ module.exports = async (srv) => {
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
 				Discount: req.data.ESDiscount,
-				RoyalDecree: req.data.RoyalDecreePercentage_1,
+				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
+				RoyalDecree: req.data.RoyalDecree,
 				RoyalDecreeValue: req.data.RoyalDecreeValue,
 				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
 				StandardDiscount: req.data.StandardDiscount,
@@ -2325,7 +2326,8 @@ module.exports = async (srv) => {
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
 				Discount: req.data.ESDiscount,
-				RoyalDecree: req.data.RoyalDecreePercentage_1,
+				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
+				RoyalDecree: req.data.RoyalDecree,
 				RoyalDecreeValue: req.data.RoyalDecreeValue,
 				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
 				StandardDiscount: req.data.StandardDiscount,
@@ -2346,7 +2348,8 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
-				RoyalDecree: req.data.RoyalDecreePercentage_1,
+				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
+				RoyalDecree: req.data.RoyalDecree,
 				RoyalDecreeValue: req.data.RoyalDecreeValue,
 				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
 				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
@@ -2362,7 +2365,8 @@ module.exports = async (srv) => {
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
 				Discount: req.data.ESDiscount,
-				RoyalDecree: req.data.RoyalDecreePercentage_1,
+				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
+				RoyalDecree: req.data.RoyalDecree,
 				RoyalDecreeValue: req.data.RoyalDecreeValue,
 				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
 				StandardDiscount: req.data.StandardDiscount,
@@ -7014,22 +7018,22 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					ProductCode: items.ProductCode
 				});
 				if(ccmPriceCondition){
-					items.PVL = ccmPriceCondition.YP00;
-					items.ConfidentialDiscount = ccmPriceCondition.YP04;
+					items.PVL = parseFloat(ccmPriceCondition.YP00);
+					items.ConfidentialDiscount = parseFloat(ccmPriceCondition.YP04);
 					items.RoyalDecree = ccmPriceCondition.RoyalDecree;
-					items.ConfidentialPrice = ccmPriceCondition.ConfidentialPrice;
-					items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : ccmPriceCondition.YD02;
-					items.RoyalDecreeValue = ccmPriceCondition.RoyalDecreeValue;
+					items.ConfidentialPrice = parseFloat(ccmPriceCondition.ConfidentialPrice);
+					items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : parseFloat(ccmPriceCondition.YD02);
+					items.RoyalDecreeValue = parseFloat(ccmPriceCondition.RoyalDecreeValue);
 					items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
-					items.RoyalDecreePercentage_1 = ccmPriceCondition.YD06;
-					items.StandardDiscount = ccmPriceCondition.StandardDiscount;
-					items.AdditionalDiscount = ccmPriceCondition.YD75;
-					items.NetPriceWithoutTaxBeforeDeductionRD = ccmPriceCondition.YP10;
-					items.NetPriceWithoutTaxAfterDeductionRD = ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD;
-					items.NetPriceWithTaxAfterDeductionRD = ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD;
-					items.NetPriceWithoutTax = ccmPriceCondition.NETPRICEWITHOUTTAX;
-					items.NetPriceWithTax = items.ConditionType === 'DescuentoEspecial' ? (ccmPriceCondition.YP04 !== 0 ?  ccmPriceCondition.ConfidentialPrice : ccmPriceCondition.YP00) : ccmPriceCondition.NETPRICEWITHTAX;
-					items.Tax = ccmPriceCondition.SAPTAX;
+					items.RoyalDecreePercentage_1 = parseFloat(ccmPriceCondition.YD06);
+					items.StandardDiscount = parseFloat(ccmPriceCondition.StandardDiscount);
+					items.AdditionalDiscount = parseFloat(ccmPriceCondition.YD75);
+					items.NetPriceWithoutTaxBeforeDeductionRD = parseFloat(ccmPriceCondition.YP10);
+					items.NetPriceWithoutTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
+					items.NetPriceWithTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
+					items.NetPriceWithoutTax = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAX);
+					items.NetPriceWithTax = items.ConditionType === 'DescuentoEspecial' ? (ccmPriceCondition.YP04 !== 0 ?  parseFloat(ccmPriceCondition.ConfidentialPrice) : parseFloat(ccmPriceCondition.YP00)) : parseFloat(ccmPriceCondition.NETPRICEWITHTAX);
+					items.Tax = parseFloat(ccmPriceCondition.SAPTAX);
 					items.Currency = 'EUR'
 				}
 
