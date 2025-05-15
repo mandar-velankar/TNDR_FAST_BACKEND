@@ -461,44 +461,83 @@ module.exports = (srv) => {
 		// 		regionalBusiness = 3;
 		// 	}
 		// }
-		// Regional Business approver type is always mandatory notification
-		let regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 3 : 2; //product.INCO_TERM_SUPPLY_UPDATED === null ? 2 : product.INCO_TERM_SUPPLY_UPDATED; //(product.BUSINESS_APPROVED === 1) ? 1 : 3;
-		if (product.INCO_TERM_SUPPLY_UPDATED === 1) regionalBusiness = 2;
-		if (offer.TENDER_CHANNEL === "Direct") {
-			if (product.CREDIT_MANAGER_APPROVED === 1) regionalBusiness = 2;
-			if (	
-				product.INCO_TERM_SUPPLY_UPDATED === null || 
-				product.VOLUME_UOM_FOC_UPDATED === 2 || 
-				product.PRICE_DEDUCTIONS_UPDATED === 2
-			) regionalBusiness = 3;
 
-			if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) regionalBusiness = 2;
-		} else {
-			if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) regionalBusiness = 1;
-		}
+		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
+		const latestUpdatedField = product.MEA_APPROVAL_LATEST_UPDATED_FIELD;
+		
 		//Supply
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = 3;
-		
-		
-		let creditManager = product.CREDIT_MANAGER_APPROVED !== null 
-								? (product.CREDIT_MANAGER_APPROVED === 1) ? 3 : 1
-								: instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1
-		if (creditManager === 3) {
-			supply = 1;
-		}
-		
-		if (initialOffer.PreviousApprovalHasAddedProduct || initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) creditManager = 1;
+		let regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 3 : 2;
+		let creditManager = product.CREDIT_MANAGER_APPROVED === null ? instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1 : 1;
+		let nucleus = offer.TENDER_CHANNEL === "Direct" ? 2 : 3;
 
-		if (product.VOLUME_UOM_FOC_UPDATED === 2 || product.INCO_TERM_SUPPLY_UPDATED === 1) {
+		if (offerLatestApprStatus[0].approvedStatus === 2 && !latestUpdatedField) {
+			supply = 1;
+			regionalBusiness = 1;
 			creditManager = 1;
+			nucleus = 1;
+		}
+
+		if (everyProductLatestFieldEmpty) {
 			supply = 3;
+			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 3 : 2;
+			creditManager = product.CREDIT_MANAGER_APPROVED === null ? instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1 : 1;
+			nucleus = offer.TENDER_CHANNEL === "Direct" ? 2 : 3;
 		}
-		if (product.PRICE_DEDUCTIONS_UPDATED === 2 || initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
-			creditManager = 1;
+
+		const validationUpdates = {
+			"CREDIT_MANAGER_APPROVED": {
+				creditManager: 3,
+				supply: 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : 1,
+				nucleus: 2
+			},
+			"INCO_TERM_SUPPLY_UPDATED": {
+				supply: 3,
+				regionalBusiness: 2,
+				nucleus: 2,
+				creditManager: 1
+			},
+			"VOLUME_UOM_FOC_UPDATED": {
+				supply: 3,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : 1,
+				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
+				creditManager: 1
+			},
+			"PRICE_DEDUCTIONS_UPDATED": {
+				supply: 2,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : 1,
+				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
+				creditManager: 1
+			},
+			"IS_NEW_PRODUCT": {
+				supply: 3,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : 1,
+				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
+				creditManager: 1
+			}
+		};
+
+		const updates = validationUpdates[latestUpdatedField];
+		if (updates) {
+			// Apply the updates if the field is found in the object
+			creditManager = updates.creditManager !== undefined ? updates.creditManager : creditManager;
+			supply = updates.supply !== undefined ? updates.supply : supply;
+			regionalBusiness = updates.regionalBusiness !== undefined ? updates.regionalBusiness : regionalBusiness;
+			nucleus = updates.nucleus !== undefined ? updates.nucleus : nucleus;
+			// ... apply other fields if they exist in the updates object
+		}
+
+
+		if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
 			supply = 2;
+			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : 1;
+			nucleus = offer.TENDER_CHANNEL === "Direct" ? 1 : 2; // Check how to set notification only updated ptl
+			creditManager = 1;
 		}
+
 
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
@@ -534,40 +573,9 @@ module.exports = (srv) => {
 				const isSomeProductAddedForPreviousApproval = aOfferProduct.some(pr => pr.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL);
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
-					
-					oApproverType.ValidationType = product.NUCLEUS_HEAD_APPROVED === null ? 3 : product.NUCLEUS_HEAD_APPROVED;
-					if (product.INCO_TERM_SUPPLY_UPDATED === 1) oApproverType.ValidationType = 2;
-
-					switch (offer.TENDER_CHANNEL) {
-						case "Direct":
-							if (product.NUCLEUS_HEAD_APPROVED === null || product.VOLUME_UOM_FOC_UPDATED === 2 || product.PRICE_DEDUCTIONS_UPDATED === 2) {
-								oApproverType.ValidationType = 2;
-							}
-
-							if (isSomeProductAddedForPreviousApproval) {
-								oApproverType.ValidationType = product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL ? 2 : 1;
-							}
-
-							if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
-								oApproverType.ValidationType = 1;
-							}
-							
-							break;
-						case "Distributor":
-							if (product.VOLUME_UOM_FOC_UPDATED === 2 || product.PRICE_DEDUCTIONS_UPDATED === 2) {
-								oApproverType.ValidationType = 3;
-							}
-
-							if (isSomeProductAddedForPreviousApproval) {
-								oApproverType.ValidationType = product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL ? 3 : 1;
-							}
-							
-							if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
-								oApproverType.ValidationType = 2;
-							}
-							break;
-						default:
-							break;
+					oApproverType.ValidationType = !latestUpdatedField && offerLatestApprStatus[0].approvedStatus == 2 ? 1 : nucleus;
+					if (isSomeProductAddedForPreviousApproval) {
+						oApproverType.ValidationType = latestUpdatedField === "IS_NEW_PRODUCT" ? nucleus : 1;
 					}
 				}
 			}
@@ -2714,6 +2722,13 @@ module.exports = (srv) => {
 				if (offerLatestApprStatus[0].approvedStatus == 2 && creditManager.ValidationType === 3 && type.ApproverType !== "Credit Manager") {
 					if (type.ApproverType.includes("PTL")) {
 						const validationType = type.ValidationType === 2 ? 2 : 1;
+						type.ValidationType = validationType;
+						type.ValidationType2 = validationType;
+						requiredAction = validationType;
+					}
+
+					if (type.ApproverType === "Supply Chain") {
+						const validationType = 1
 						type.ValidationType = validationType;
 						type.ValidationType2 = validationType;
 						requiredAction = validationType;
