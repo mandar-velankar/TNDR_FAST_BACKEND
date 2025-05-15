@@ -350,6 +350,7 @@ entity PT_TMOFPR {
         WorkflowProductID        : Integer;
         IbizWorkflowID           : Integer;
         MEAApprovalUpdatedFields : MEAApprovalUpdatedFields;
+        MEAApprovalLatestUpdatedField: String;
         IsProductAddedForPreviousApproval : Boolean default false;
         Custom                   : Custom; // Custom attributes for templates usage
         //Associations
