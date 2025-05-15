@@ -317,14 +317,12 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
             then 3
             when
                 (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                (offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.PAYMENT_UPDATE <= approvals.OfferProduct.Offer.APPROVALS_SENT) or 
                 (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT ))
             then 2
             when
                 (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                (offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE <= approvals.OfferProduct.Offer.APPROVALS_SENT) or 
                 (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT))
             then 2
         end
@@ -343,8 +341,7 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
             when
                 offerLatestApprStatus.approvedStatus = 2 and
                 approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0 and 
-                (approvals.OfferProduct.PAYMENT_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT or 
-                approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                approvals.OfferProduct.PAYMENT_UPDATE <= approvals.OfferProduct.Offer.APPROVALS_SENT
             then 1 
         else 0 end
     ) 
@@ -366,15 +363,14 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
             when offerLatestApprStatus.approvedStatus = 1 and 
                 (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
                 approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT and
-                (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT and
-                approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT and
+                approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT)
                 then 1
             when offerLatestApprStatus.approvedStatus = 2 and 
-                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
-                (approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT or 
-                approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT) and
-                (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT and
-                approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0 and 
+                approvals.OfferProduct.SUPPLY_UPDATE <= approvals.OfferProduct.Offer.APPROVALS_SENT and
+                (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT and
+                approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT)
                 then 1 
        else 0 end
    ) 
@@ -388,16 +384,11 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
                     approvals.OfferProduct.MEAApprovalUpdatedFields.UOM > 0 or
                     approvals.OfferProduct.MEAApprovalUpdatedFields.FOC > 0
                 ) and
-                ((
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.FOC = approvals.OfferProduct.Offer.APPROVALS_SENT)
-                ) or 
                 (
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT)
-                ))
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Volume <= approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.UOM <= approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.FOC <= approvals.OfferProduct.Offer.APPROVALS_SENT
+                )
             then 2
             when
                offerLatestApprStatus.approvedStatus = 1 and 
@@ -407,9 +398,9 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
                     approvals.OfferProduct.MEAApprovalUpdatedFields.FOC > 0
                 ) and
                 (
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT
                 )
             then 2
         else 1 end
@@ -423,14 +414,10 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
                     approvals.OfferProduct.MEAApprovalUpdatedFields.Price > 0 or
                     approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions > 0
                 ) and
-                ((
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Price = approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions = approvals.OfferProduct.Offer.APPROVALS_SENT)
-                ) or
                 (
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Price < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions < approvals.OfferProduct.Offer.APPROVALS_SENT)
-                ))
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Price <= approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions <= approvals.OfferProduct.Offer.APPROVALS_SENT
+                )
             then 2
             when
                offerLatestApprStatus.approvedStatus = 1 and 
@@ -439,8 +426,8 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
                     approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions > 0
                 ) and
                 (
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Price < approvals.OfferProduct.Offer.APPROVALS_SENT) or 
-                    (approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Price < approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions < approvals.OfferProduct.Offer.APPROVALS_SENT
                 )
             then 2
         else 1 end
@@ -807,6 +794,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.VOLUME_UOM_FOC_UPDATED as VOLUME_UOM_FOC_UPDATED,
     offerProduct.PreviousApproval.PRICE_DEDUCTIONS_UPDATED as PRICE_DEDUCTIONS_UPDATED,
     offerProduct.IsProductAddedForPreviousApproval as IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL,
+    offerProduct.MEAApprovalLatestUpdatedField as MEA_APPROVAL_LATEST_UPDATED_FIELD,
     ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
     / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,
