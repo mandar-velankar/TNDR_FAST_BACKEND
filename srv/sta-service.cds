@@ -1468,8 +1468,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity ProfitabilityCalcParamView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;
     entity Settlements                                  as projection on MasterData.Settlements;
     entity DiscountCondition @(cds.redirection.target:false) as projection on TransactionalData.DiscountCondition;
-    entity DiscountConditionView as Select from TransactionalDataViews.StandardTenderPriceConditionView as pc
-        inner join TransactionalData.DiscountCondition as dc on dc.PriceCondition.ID = pc.PriceConditionID{
+    entity DiscountConditionView as Select from TransactionalData.DiscountCondition as dc
+        inner join TransactionalDataViews.StandardTenderPriceConditionView as pc on dc.PriceCondition.ID = pc.PriceConditionID{
             key dc.ID,
             pc.CountryCode,
             pc.Region,
