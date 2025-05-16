@@ -463,7 +463,7 @@ module.exports = (srv) => {
 		// }
 
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
-		const latestUpdatedField = product.MEA_APPROVAL_LATEST_UPDATED_FIELD;
+		const latestUpdatedField = product.MEA_APPROVAL_LATEST_UPDATED_FIELD || product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
 		
 		//Supply
 		//Optional if supply approved
@@ -473,7 +473,7 @@ module.exports = (srv) => {
 		let creditManager = product.CREDIT_MANAGER_APPROVED === null ? instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1 : 1;
 		let nucleus = offer.TENDER_CHANNEL === "Direct" ? 2 : 3;
 
-		if (offerLatestApprStatus[0].approvedStatus === 2 && !latestUpdatedField) {
+		if (offerLatestApprStatus[0].approvedStatus === 2 && !product.HAS_UPDATED_SUPPLY_PAYMENT_PRICE_VALUES) {
 			supply = 1;
 			regionalBusiness = 1;
 			creditManager = 1;
@@ -520,13 +520,19 @@ module.exports = (srv) => {
 			}
 		};
 
-		const updates = validationUpdates[latestUpdatedField];
-		if (updates) {
+		const updates = latestUpdatedField.split(",").filter(Boolean).map(el => validationUpdates[el]);
+		if (updates && updates.length > 0) {
+			const result = updates.reduce((acc, obj) => {
+				for (const key in obj) {
+					acc[key] = acc[key] ? Math.max(acc[key], obj[key]) : obj[key];
+				}
+				return acc;
+			}, {});
 			// Apply the updates if the field is found in the object
-			creditManager = updates.creditManager !== undefined ? updates.creditManager : creditManager;
-			supply = updates.supply !== undefined ? updates.supply : supply;
-			regionalBusiness = updates.regionalBusiness !== undefined ? updates.regionalBusiness : regionalBusiness;
-			nucleus = updates.nucleus !== undefined ? updates.nucleus : nucleus;
+			creditManager = result.creditManager !== undefined ? result.creditManager : creditManager;
+			supply = result.supply !== undefined ? result.supply : supply;
+			regionalBusiness = result.regionalBusiness !== undefined ? result.regionalBusiness : regionalBusiness;
+			nucleus = result.nucleus !== undefined ? result.nucleus : nucleus;
 			// ... apply other fields if they exist in the updates object
 		}
 
@@ -573,9 +579,9 @@ module.exports = (srv) => {
 				const isSomeProductAddedForPreviousApproval = aOfferProduct.some(pr => pr.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL);
 
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
-					oApproverType.ValidationType = !latestUpdatedField && offerLatestApprStatus[0].approvedStatus == 2 ? 1 : nucleus;
+					oApproverType.ValidationType = !product.HAS_UPDATED_SUPPLY_PAYMENT_PRICE_VALUES && offerLatestApprStatus[0].approvedStatus == 2 ? 1 : nucleus;
 					if (isSomeProductAddedForPreviousApproval) {
-						oApproverType.ValidationType = latestUpdatedField === "IS_NEW_PRODUCT" ? nucleus : 1;
+						oApproverType.ValidationType = latestUpdatedField.includes("IS_NEW_PRODUCT") ? nucleus : 1;
 					}
 				}
 			}
@@ -2716,34 +2722,6 @@ module.exports = (srv) => {
 			}
 
 			if (country.Region === "MEA") {
-				const creditManager = approverTypes.find(at => at.ApproverType === "Credit Manager");
-				const supplyChain = approverTypes.find(at => at.ApproverType === "Supply Chain");
-
-				if (offerLatestApprStatus[0].approvedStatus == 2 && creditManager.ValidationType === 3 && type.ApproverType !== "Credit Manager") {
-					if (type.ApproverType.includes("PTL")) {
-						const validationType = type.ValidationType === 2 ? 2 : 1;
-						type.ValidationType = validationType;
-						type.ValidationType2 = validationType;
-						requiredAction = validationType;
-					}
-
-					if (type.ApproverType === "Supply Chain") {
-						const validationType = 1
-						type.ValidationType = validationType;
-						type.ValidationType2 = validationType;
-						requiredAction = validationType;
-					}
-				}
-
-				// if (offerLatestApprStatus[0].approvedStatus == 2 && supplyChain.ValidationType === 3 && type.ApproverType !== "Supply Chain") {
-				// 	if (type.ApproverType.includes("PTL")) {
-				// 		const validationType = type.ValidationType === 2 ? 2 : 1;
-				// 		type.ValidationType = validationType;
-				// 		type.ValidationType2 = validationType;
-				// 		requiredAction = validationType;
-				// 	}
-				// }
-
 				if (type.ApproverType === 'Regional Business' && offerValidation.TenderChannel === "Distributor") {
 					const validationType = type.ValidationType === 3 ? 3 : ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS / (exchangeRate?.X_RATE ?? 1)) ? 2 : 1;
 					type.ValidationType = validationType;
