@@ -794,7 +794,9 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.VOLUME_UOM_FOC_UPDATED as VOLUME_UOM_FOC_UPDATED,
     offerProduct.PreviousApproval.PRICE_DEDUCTIONS_UPDATED as PRICE_DEDUCTIONS_UPDATED,
     offerProduct.IsProductAddedForPreviousApproval as IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL,
+    offerProduct.MEAApprovalLatestUpdatedFieldPreviousState as MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE,
     offerProduct.MEAApprovalLatestUpdatedField as MEA_APPROVAL_LATEST_UPDATED_FIELD,
+    offerProduct.hasUpdatedSupplyPaymentPriceValues as HAS_UPDATED_SUPPLY_PAYMENT_PRICE_VALUES,
     ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
     / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,
