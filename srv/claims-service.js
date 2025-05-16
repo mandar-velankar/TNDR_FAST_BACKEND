@@ -516,7 +516,7 @@ module.exports = (srv) => {
 				let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
 				totalFASTClaim = Math.round(totalFASTClaim * 100) / 100;
 				const finalTotalFASTClaim = Number(totalFASTClaim && totalFASTClaim >= 0 ? totalFASTClaim : 0)
-				const percentageDifference = mappedFASTOfferClaims && finalTotalFASTClaim !== 0 ? Number((Math.round(((claimData.Quantity - finalTotalFASTClaim) /finalTotalFASTClaim)*1000)/1000).toFixed(3)) || 0 : 0;
+				const percentageDifference = mappedFASTOfferClaims && finalTotalFASTClaim !== 0 ? Number((Math.round(((claimData.TotalClaim - finalTotalFASTClaim) /finalTotalFASTClaim)*1000)/1000).toFixed(3)) || 0 : 0;
 				mappedReCalculatedValuestoClaimsData = {
 					OfferID									: mappedFASTOfferClaims.OfferID,
 					FASTContractClaim                       : Number(fastContractClaim || 0),
