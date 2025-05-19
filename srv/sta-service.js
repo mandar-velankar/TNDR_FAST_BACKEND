@@ -85,9 +85,6 @@ module.exports = async (srv) => {
 		OfferProductConsolidation, 
 		ApprovalRequests, 
 		ProductPricingView, 
-		PriceConditionView, 
-		TenderHistorySpain, 
-		PriceConditionBrazilView, 
 		OfferValues, 
 		OfferStatus,
 		OfferRevisions,
@@ -6913,6 +6910,22 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				ProfitabilityGrowthRate: req.data.ProfitabilityGrowthRate
 			}).where({OfferID: req.data.OfferID});
 	});
+
+	srv.before(
+		['CREATE','UPDATE'], 
+		[
+			'PriceConditionRappelView'
+		], 
+		async (req) => {
+			try{
+				delete req.data.MainPrice;
+			}
+			catch(error){
+				console.error('Error in validation of PriceConditionRappelView before CREATE or UPDATE');
+				return req.reject(403, error?.message||"Error in validation of PriceConditionRappelView before CREATE or UPDATE");
+			}
+		}
+	);
 	
 	srv.on(['CREATE','UPDATE'], 'PriceConditionRappelView' , async (req) => {
 		try{
@@ -6952,6 +6965,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return {
 			OfferID                             : req.data.OfferID,
 			ProductCode                         : req.data.ProductCode,
+			CountryCode							: 'ES',
 			PVL                                 : req.data.PVL ? req.data.PVL : standardTenderPriceConditionView?.PVL,
 			ConfidentialPrice                   : req.data.ConfidentialPrice ? req.data.ConfidentialPrice : standardTenderPriceConditionView?.ConfidentialPrice,
 			Discount                            : standardTenderPriceConditionView?.Discount,
@@ -6969,7 +6983,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	srv.on(['CREATE','UPDATE'], 'DiscountConditionView' , async (req) => {
 		try{
 			const discountConditions = await SELECT.from(DiscountCondition).where({
-				PriceCondition_ID: req.data.PriceConditionID
+				ID: req.data.ID
 			});
 			if (discountConditions.length > 0){
 				for (const discountCondition of discountConditions) {
@@ -6985,6 +6999,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}else{
 				const mappedDiscountCondition = mapDiscountCondition(req);
 				await INSERT.into(DiscountCondition).entries(mappedDiscountCondition);
+				return { ID: mappedDiscountCondition.ID };
 			}
 		}
 		catch(error){
@@ -6996,6 +7011,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	function mapDiscountCondition(req){
 		return {
+			ID					: uuidv4(),
 			Volume              : req.data.Volume,
 			Discount            : req.data.Discount,
 			NetPriceWithoutTax  : req.data.NetPriceWithoutTax,
