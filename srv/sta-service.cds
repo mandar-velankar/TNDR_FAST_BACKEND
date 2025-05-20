@@ -272,7 +272,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         UnitPerPack as UoM,
         Price.NetPrice as NetPrice,
         RequestedVolume,
-        PriceCondition.AnticipatedYearlyVolumeBranch,
+        case 
+            when CountryCode = 'TW' 
+                then 
+                    PriceCondition.AnticipatedYearlyVolumeBranch
+                else 
+                    null
+        end as AnticipatedYearlyVolumeBranch:Integer,
         Price.OfferPrice * (1 - Price.Deductions) *
         case 
         when Price.FOCType = 'FOC 1'
