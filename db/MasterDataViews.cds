@@ -535,7 +535,8 @@ entity WholesalePurchasePriceView as select from MasterData.PT_TMCTPRDPCK as ctp
 		ctryCurrency.Currency,
         wholesalepp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
 		wholesalepp.Comment,
-		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String,
+		prdpck.ProductPackSKUs
 } where ctprdpck.COUNTRYCODE = 'NL'  and wholesalepp.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
@@ -584,7 +585,8 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 		ctryCurrency.Currency,
         null as ApprovalsCount,
 		null as Comment,
-		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String,
+		prdpck.ProductPackSKUs
 } where ctprdpck.COUNTRYCODE = 'NL';
 
 entity CurrentWholesalePurchasePriceView as select from MasterData.WholesalePurchasePrice{
@@ -661,7 +663,8 @@ entity NLpppView as select from MasterData.PT_TMCTPRDPCK as ctprdpck
         ppp.PowerApprovalDate,
         ctryCurrency.Currency,
         ppp.ApprovalsCount || '/' || approvalscount.TotalApprovals as ApprovalsCount : String,
-		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String,
+		prdpck.ProductPackSKUs
 } where ctprdpck.COUNTRYCODE = 'NL' and ppp.ID is not null
 union select from MasterData.PT_TMCTPRDPCK as ctprdpck
 	inner join MasterData.PT_TMPRDPCK as prdpck
@@ -703,7 +706,8 @@ union select from MasterData.PT_TMCTPRDPCK as ctprdpck
         null as PowerApprovalDate,
 		ctryCurrency.Currency,
 		null as ApprovalsCount,
-		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String
+		prdpck.PACKFACTOR || ' ' || prdpck.PRESENTATION as CombinedPackSizePresentation: String,
+		prdpck.ProductPackSKUs
 } where ctprdpck.COUNTRYCODE = 'NL';
 
 entity CurrentNLpppView as select from MasterData.NLPPP{

@@ -441,6 +441,8 @@ entity PT_TMSKUPRDPCK{
     key ActiveRecord:String(10) not null;
     key ProductPackID:Integer not null;
     key SKUCode:Integer not null;
+	ValidFrom : Date;
+    ValidTo : Date;
 	//Associations
     Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackID;
