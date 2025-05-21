@@ -262,62 +262,93 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     } group by ProductScope, COUNTRYCODE;
 
 
-    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR {
-        *,
-        key ProductCode,
-        key OfferID,
-        key TenderID,
-        Active,
-        SKU.PRODUCTPACKNAME as ProductPackName,
-        UnitPerPack as UoM,
-        Price.NetPrice as NetPrice,
-        RequestedVolume,
+    entity OfferProductsTableView as select from TransactionalData.PT_TMOFPR as pt
+        left outer join TransactionalData.PriceCondition as pc
+            on pc.ProductCode = pt.ProductCode and pc.OfferID = pt.OfferID and pc.CountryCode = 'TW' and pc.PriceConditionCode is null
+        {
+        key pt.ProductCode,
+        key pt.OfferID,
+        key pt.TenderID,
+        pt.CountryCode,
+        pt.SubmittedOn,
+        pt.SubmittedBy,
+        pt.Active,
+        pt.Reference,
+        pt.AlternateOfferYN,
+        pt.UnitPerPack,
+        pt.SampleYN,
+        pt.SampleQuantity,
+        pt.DocumentsRequired,
+        pt.FirstShipment,
+        pt.NoofLots,
+        pt.IntervalBetweenShipments,
+        pt.NoOfTier,
+        pt.DiscOrOffer,
+        pt.PaymentTerms,
+        pt.DistributorID,
+        pt.SNo,
+        pt.ActiveProduct,
+        pt.Comment,
+        pt.INCOTerms,
+        pt.SORTER,
+        pt.DEFAULT_COMMISSION_RATE,
+        pt.SUPPLY_UPDATE,
+        pt.PAYMENT_UPDATE,
+        pt.Line,
+        pt.DeliveryConditions,
+        pt.MinInvoiceAmount,
+        pt.PricingPolicyCluster,
+        pt.OfferType,
+        pt.AnticipatedRequestedQuantity,
+        pt.MaxPrice,
+        pt.Channel,
+        pt.LotID,
+        pt.WorkflowProductID,
+        pt.IbizWorkflowID,
+        pt.SKU.PRODUCTPACKNAME as ProductPackName,
+        pt.UnitPerPack as UoM,
+        pt.Price.NetPrice as NetPrice,
+        pt.RequestedVolume,
+        pc.AnticipatedYearlyVolumeBranch,
+        pt.Price.OfferPrice * (1 - pt.Price.Deductions) *
         case 
-            when CountryCode = 'TW' 
-                then 
-                    PriceCondition.AnticipatedYearlyVolumeBranch
-                else 
-                    null
-        end as AnticipatedYearlyVolumeBranch:Integer,
-        Price.OfferPrice * (1 - Price.Deductions) *
-        case 
-        when Price.FOCType = 'FOC 1'
+        when pt.Price.FOCType = 'FOC 1'
             then 
                 case 
-                    when Price.FOC_ABS_PCT = 'PCT'
-                        then RequestedVolume - round(RequestedVolume * Price.FOC)
-                            when Price.FOC_ABS_PCT = 'STP'
-                            then RequestedVolume - floor(RequestedVolume / Price.FOCStep) * Price.FOC
-                        else RequestedVolume - Price.FOC
+                    when pt.Price.FOC_ABS_PCT = 'PCT'
+                        then pt.RequestedVolume - round(pt.RequestedVolume * pt.Price.FOC)
+                            when pt.Price.FOC_ABS_PCT = 'STP'
+                            then pt.RequestedVolume - floor(pt.RequestedVolume / pt.Price.FOCStep) * pt.Price.FOC
+                        else pt.RequestedVolume - pt.Price.FOC
                 end
-            else RequestedVolume        
+            else pt.RequestedVolume        
         end as TotalAmount:Double,
-        Offer.Currency as Currency,
-        Offer.Tender.Country.Region,
-        SKUCountry.RegistrationValidUntil,
-        Offer.Tender.Custom.Integer_1 as ContractDuration_1,
-        NLContractDurationOfferPrices.OfferPrice_1,
-        Offer.Tender.Custom.Integer_2 as ContractDuration_2,
-        NLContractDurationOfferPrices.OfferPrice_2,
-        Offer.Tender.Custom.Integer_3 as ContractDuration_3,
-        NLContractDurationOfferPrices.OfferPrice_3,
+        pt.Offer.Currency as Currency,
+        pt.Offer.Tender.Country.Region,
+        pt.SKUCountry.RegistrationValidUntil,
+        pt.Offer.Tender.Custom.Integer_1 as ContractDuration_1,
+        pt.NLContractDurationOfferPrices.OfferPrice_1,
+        pt.Offer.Tender.Custom.Integer_2 as ContractDuration_2,
+        pt.NLContractDurationOfferPrices.OfferPrice_2,
+        pt.Offer.Tender.Custom.Integer_3 as ContractDuration_3,
+        pt.NLContractDurationOfferPrices.OfferPrice_3,
         case   
-            when (Price.NetofferPrice is not null and Price.NetofferPrice <> 0) 
-            and (RequestedVolume is not null and RequestedVolume <> 0) 
-            and (RequestedVolume <> Price.FOC)
+            when (pt.Price.NetofferPrice is not null and pt.Price.NetofferPrice <> 0) 
+            and (pt.RequestedVolume is not null and pt.RequestedVolume <> 0) 
+            and (pt.RequestedVolume <> pt.Price.FOC)
                 then 
-                    round(Price.NetofferPrice * ( 
+                    round(pt.Price.NetofferPrice * ( 
                         (
                             case 
-                                when Offer.FOCType = 'FOC 1'
-                                    then RequestedVolume - (
+                                when pt.Offer.FOCType = 'FOC 1'
+                                    then pt.RequestedVolume - (
                                         case
-                                            when Price.FOC_ABS_PCT = 'ABS'
-                                                then Price.FOC
-                                            else Price.FOC * RequestedVolume
+                                            when pt.Price.FOC_ABS_PCT = 'ABS'
+                                                then pt.Price.FOC
+                                            else pt.Price.FOC * pt.RequestedVolume
                                         end
                                     ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
-                                else RequestedVolume 
+                                else pt.RequestedVolume 
                             end
                         ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                         
@@ -325,15 +356,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                     
                     (
                         case 
-                            when Offer.FOCType = 'FOC 2'
-                                then RequestedVolume + (
+                            when pt.Offer.FOCType = 'FOC 2'
+                                then pt.RequestedVolume + (
                                     case
-                                        when Price.FOC_ABS_PCT = 'ABS'
-                                            then Price.FOC
-                                        else Price.FOC * RequestedVolume
+                                        when pt.Price.FOC_ABS_PCT = 'ABS'
+                                            then pt.Price.FOC
+                                        else pt.Price.FOC * pt.RequestedVolume
                                     end
                                 ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
-                            else RequestedVolume 
+                            else pt.RequestedVolume 
                         end
                     ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                     
@@ -341,115 +372,155 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             else null
         end as NetPriceFOC:Double,
         case   
-            when UnitPerPack = 'Pack'
-                then Cogs.COGS
-            else round(Cogs.COGS / SKU.PACKFACTOR,2)
+            when pt.UnitPerPack = 'Pack'
+                then pt.Cogs.COGS
+            else round(pt.Cogs.COGS / pt.SKU.PACKFACTOR,2)
         end as cogsUoM :Double,
         case   
-            when Price.NetofferPrice is not null
+            when pt.Price.NetofferPrice is not null
                 then 
-                    Price.NetofferPrice * (
+                    pt.Price.NetofferPrice * (
                         case 
-                            when Offer.FOCType = 'FOC 1'
-                                then RequestedVolume - (
+                            when pt.Offer.FOCType = 'FOC 1'
+                                then pt.RequestedVolume - (
                                     case
-                                        when Price.FOC_ABS_PCT = 'ABS'
-                                            then Price.FOC
-                                        else Price.FOC * RequestedVolume
+                                        when pt.Price.FOC_ABS_PCT = 'ABS'
+                                            then pt.Price.FOC
+                                        else pt.Price.FOC * pt.RequestedVolume
                                     end
                                 ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
-                            else RequestedVolume 
+                            else pt.RequestedVolume 
                         end
                     ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
             else null
         end as GrossSales:Double,
         case   
-            when Price.NetofferPrice is not null
+            when pt.Price.NetofferPrice is not null
                 then 
-                    (Price.NetofferPrice * 
+                    (pt.Price.NetofferPrice * 
                         (
                             case 
-                                when Offer.FOCType = 'FOC 1'
-                                    then RequestedVolume - (
+                                when pt.Offer.FOCType = 'FOC 1'
+                                    then pt.RequestedVolume - (
                                         case
-                                            when Price.FOC_ABS_PCT = 'ABS'
-                                                then Price.FOC
-                                            else Price.FOC * RequestedVolume
+                                            when pt.Price.FOC_ABS_PCT = 'ABS'
+                                                then pt.Price.FOC
+                                            else pt.Price.FOC * pt.RequestedVolume
                                         end
                                     ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
-                                else RequestedVolume 
+                                else pt.RequestedVolume 
                             end
                         ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                     ) - (
                         (
                             case   
-                                when UnitPerPack = 'Pack'
-                                    then Cogs.COGS
-                                else round(Cogs.COGS / SKU.PACKFACTOR,2)
+                                when pt.UnitPerPack = 'Pack'
+                                    then pt.Cogs.COGS
+                                else round(pt.Cogs.COGS / pt.SKU.PACKFACTOR,2)
                             end
                         ) //=$self.cogsUoM but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future) 
                     * 
                         (
                             case 
-                                when Offer.FOCType = 'FOC 2'
-                                    then RequestedVolume + (
+                                when pt.Offer.FOCType = 'FOC 2'
+                                    then pt.RequestedVolume + (
                                         case
-                                            when Price.FOC_ABS_PCT = 'ABS'
-                                                then Price.FOC
-                                            else Price.FOC * RequestedVolume
+                                            when pt.Price.FOC_ABS_PCT = 'ABS'
+                                                then pt.Price.FOC
+                                            else pt.Price.FOC * pt.RequestedVolume
                                         end
                                     ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
-                                else RequestedVolume 
+                                else pt.RequestedVolume 
                             end
                         ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                     )
             else null
         end as GrossProfit:Double,
         case   
-            when (Price.NetofferPrice is not null and Price.NetofferPrice <> 0) 
-            and (RequestedVolume is not null and RequestedVolume <> 0) 
-            and (RequestedVolume <> Price.FOC)
+            when (pt.Price.NetofferPrice is not null and pt.Price.NetofferPrice <> 0) 
+            and (pt.RequestedVolume is not null and pt.RequestedVolume <> 0) 
+            and (pt.RequestedVolume <> pt.Price.FOC)
                 then 
                     round(1 - ((
                         (
                             case   
-                                when UnitPerPack = 'Pack'
-                                    then Cogs.COGS
-                                else round(Cogs.COGS / SKU.PACKFACTOR,2)
+                                when pt.UnitPerPack = 'Pack'
+                                    then pt.Cogs.COGS
+                                else round(pt.Cogs.COGS / pt.SKU.PACKFACTOR,2)
                             end
                         ) //=$self.cogsUoM but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                     * 
                         (
                             case 
-                                when Offer.FOCType = 'FOC 2'
-                                    then RequestedVolume + (
+                                when pt.Offer.FOCType = 'FOC 2'
+                                    then pt.RequestedVolume + (
                                         case
-                                            when Price.FOC_ABS_PCT = 'ABS'
-                                                then Price.FOC
-                                            else Price.FOC * RequestedVolume
+                                            when pt.Price.FOC_ABS_PCT = 'ABS'
+                                                then pt.Price.FOC
+                                            else pt.Price.FOC * pt.RequestedVolume
                                         end
                                     ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
-                                else RequestedVolume 
+                                else pt.RequestedVolume 
                             end
                         ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
-                    ) / (Price.NetofferPrice * 
+                    ) / (pt.Price.NetofferPrice * 
                         (
                             case 
-                                when Offer.FOCType = 'FOC 1'
-                                    then RequestedVolume - (
+                                when pt.Offer.FOCType = 'FOC 1'
+                                    then pt.RequestedVolume - (
                                         case
-                                            when Price.FOC_ABS_PCT = 'ABS'
-                                                then Price.FOC
-                                            else Price.FOC * RequestedVolume
+                                            when pt.Price.FOC_ABS_PCT = 'ABS'
+                                                then pt.Price.FOC
+                                            else pt.Price.FOC * pt.RequestedVolume
                                         end
                                     ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
-                                else RequestedVolume 
+                                else pt.RequestedVolume 
                             end
                         ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
                     ) ),2) 
             else null
         end as GrossMargin:Double,
-        SKU.ProductType
+        pt.SKU.ProductType,
+        pt.Custom.String_1 as Custom_String_1,
+        pt.Custom.String_2 as Custom_String_2,
+        pt.Custom.String_3 as Custom_String_3,
+        pt.Custom.String_4 as Custom_String_4,
+        pt.Custom.String_5 as Custom_String_5,
+        pt.Custom.String_6 as Custom_String_6,
+        pt.Custom.String_7 as Custom_String_7,
+        pt.Custom.String_8 as Custom_String_8,
+        pt.Custom.String_9 as Custom_String_9,
+        pt.Custom.String_10 as Custom_String_10,
+        pt.Custom.Integer_1 as Custom_Integer_1,
+        pt.Custom.Integer_2 as Custom_Integer_2,
+        pt.Custom.Integer_3 as Custom_Integer_3,
+        pt.Custom.Integer_4 as Custom_Integer_4,
+        pt.Custom.Integer_5 as Custom_Integer_5,
+        pt.Custom.Integer_6 as Custom_Integer_6,
+        pt.Custom.Integer_7 as Custom_Integer_7,
+        pt.Custom.Integer_8 as Custom_Integer_8,
+        pt.Custom.Integer_9 as Custom_Integer_9,
+        pt.Custom.Integer_10 as Custom_Integer_10,
+        pt.Custom.Double_1 as Custom_Double_1,
+        pt.Custom.Double_2 as Custom_Double_2,
+        pt.Custom.Double_3 as Custom_Double_3,
+        pt.Custom.Double_4 as Custom_Double_4,
+        pt.Custom.Double_5 as Custom_Double_5,
+        pt.Custom.Double_6 as Custom_Double_6,
+        pt.Custom.Double_7 as Custom_Double_7,
+        pt.Custom.Double_8 as Custom_Double_8,
+        pt.Custom.Double_9 as Custom_Double_9,
+        pt.Custom.Double_10 as Custom_Double_10,
+        pt.Custom.Date_1 as Custom_Date_1,
+        pt.Custom.Date_2 as Custom_Date_2,
+        pt.Custom.Date_3 as Custom_Date_3,
+        pt.Custom.Date_4 as Custom_Date_4,
+        pt.Custom.Date_5 as Custom_Date_5,
+        pt.Custom.Date_6 as Custom_Date_6,
+        pt.Custom.Date_7 as Custom_Date_7,
+        pt.Custom.Date_8 as Custom_Date_8,
+        pt.Custom.Date_9 as Custom_Date_9,
+        pt.Custom.Date_10 as Custom_Date_10
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     action copyOffer(offerID:String, type: String, QuotationInstituteID: Integer) returns String;
