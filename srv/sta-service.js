@@ -7116,24 +7116,32 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 				return req.reply("Current Pricing were received from SAP");
 			} catch (error) {
-				if (error.response && error.response.data) {
-					console.error(error.response.data);
-			
+				let statusCode = 500;
+				let userMessage = "Unexpected server error. Please contact the application support team.";
+				
+				if (error.response?.data) {
+					console.error("SAP Error Response:", error.response.data);
 					const sapError = error.response.data;
-					const errorMessage =
-						sapError?.error?.message?.value ||
-						sapError?.error?.innererror?.errordetails?.[0]?.message ||
-						"Unknown SAP error";
-			
-					return req.reject(error.response.status, errorMessage);
+
+					userMessage = sapError?.error?.message?.value ||
+								sapError?.error?.innererror?.errordetails?.[0]?.message ||
+								sapError?.fault?.faultstring || 
+								"An error occurred while communicating with SAP.";
+
+					userMessage = `SAP Error: ${userMessage}. Please contact the SAP support team.`;
+
+					statusCode = error.response.status || 502;
 				}
-			
-				if (error.code && error.message) {
-					console.error(error.message);
-					return req.reject(error.code, error.message);
+				else if (error.code && error.message) {
+					console.error("App Error:", error.message);
+					userMessage = error.message;
+					statusCode = typeof error.code === 'number' ? error.code : 500;
+				}				
+				else {
+					console.error("Unhandled Error:", error);
 				}
-			
-				return req.reject(500, error.message || "Unexpected server error");
+				
+				return req.reject(statusCode, userMessage);
 			}
 	});
 
