@@ -987,7 +987,10 @@ module.exports = (srv) => {
 
 			// Formatting
 			excelData.forEach(ed => {
-				const productSKUs = skuCodes.filter(sku => sku.ProductPackID === ed.PRODUCTPACKID && sku.ValidFrom <= validDate && validDate <= sku.ValidTo).map(el => el.SKUCode).join(",");
+				const productSKUs = skuCodes.filter(sku => 
+						sku.ProductPackID === ed.PRODUCTPACKID && 
+						(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
+						(!sku.ValidTo ||validDate <= sku.ValidTo)).map(el => el.SKUCode).join(",");
 
 				ed.PPP = formatNLPPPPrices(ed.PPP);
 				ed.StartDate = ed.StartDate && ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY');
@@ -1087,7 +1090,11 @@ module.exports = (srv) => {
 		});
 
 		excelData.forEach(item => {
-			const productSKUs = skuCodes.filter(sku => sku.ProductPackID === item.PRODUCTPACKID && sku.ValidFrom <= validDate && validDate <= sku.ValidTo).map(el => el.SKUCode).join(",");
+			const productSKUs = skuCodes.filter(sku => 
+				sku.ProductPackID === item.PRODUCTPACKID && 
+				(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
+				(!sku.ValidTo || validDate <= sku.ValidTo)).map(el => el.SKUCode).join(",");
+
 			// Assuming 'Type' and 'Currency' fields are part of the item
 			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
 			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
