@@ -28,6 +28,7 @@ entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
     cf.NetSales,
     cf.TotalClaimAmount,
     cf.Status,
+	cf.BrandFilter,
 	ctryCurrency.Currency,
 	user.UserName,
     case
@@ -35,7 +36,8 @@ entity ClaimFilesView as select from ClaimsData.ClaimFiles as cf
 			then cf.ApprovalsCount || '/' || approvalscount.TotalApprovalsCount
 		else '0'
 	end as ApprovalsCount : String,
-	cf.ApprovalsCount as CountApprovalRequest : Integer
+	cf.ApprovalsCount as CountApprovalRequest : Integer,
+	cf.ClaimData
 };
 
 entity ClaimDataView as select from ClaimsData.ClaimData as cd 
