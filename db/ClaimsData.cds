@@ -22,6 +22,7 @@ entity ClaimFiles : managed, cuid {
     TotalClaimAmount        : Double;
     Status                  : String;//Pending upon upload, then as per status set through approvals on screen
     ApprovalsCount          : Integer;
+    BrandFilter             : String;//Only needed to be able to send brandid for the filtering to the backend srv handler
     ClaimData               : Association to many ClaimData on ClaimData.ClaimFiles = $self;
     ContrastAgentSalesDataNL: Association to many ContrastAgentSalesDataNL on ContrastAgentSalesDataNL.ClaimFiles = $self;
     ContrastAgentSalesData  : Association to many ContrastAgentSalesData on ContrastAgentSalesData.ClaimFiles = $self;    
