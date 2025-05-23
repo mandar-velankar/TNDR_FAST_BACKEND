@@ -66,6 +66,10 @@ entity PT_TMOFRS { //Offers
         AffiliateOffer         : Boolean default false; 
         QuotationInstituteID   : Integer;
         DifferentAwardPriceParentOfferID : String(30); // Is applicable for Taiwan Different award price Copying option
+        PreviousApprovalHasAddedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHasDeletedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHasDeclinedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHas_Deleted_DeclinedProduct: Boolean default false; //MEA specific
         Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND
@@ -333,6 +337,7 @@ entity PT_TMOFPR {
         DEFAULT_COMMISSION_RATE  : Double;
         SUPPLY_UPDATE            : Integer;
         PAYMENT_UPDATE           : Integer;
+        VOLUME_UOM_UPDATE        : Integer;
         Line                     : String;
         DeliveryConditions       : String;
         MinInvoiceAmount         : Double;
@@ -344,6 +349,11 @@ entity PT_TMOFPR {
     key LotID                    : Integer default 1;
         WorkflowProductID        : Integer;
         IbizWorkflowID           : Integer;
+        MEAApprovalUpdatedFields : MEAApprovalUpdatedFields;
+        MEAApprovalLatestUpdatedField: String;
+        MEAApprovalLatestUpdatedFieldPreviousState: String;
+        hasUpdatedSupplyPaymentPriceValues : Boolean default false;
+        IsProductAddedForPreviousApproval : Boolean default false;
         Custom                   : Custom; // Custom attributes for templates usage
         //Associations
         Offer                    : Association to PT_TMOFRS
@@ -969,10 +979,17 @@ entity ContractInfomation : cuid, managed {
         on OfferProduct.OfferID = OfferID
         and OfferProduct.ProductCode = ProductCode;
 }
-        
 entity THQuotationDelevery : cuid {
     OfferID                   : String;
     QuotationDeliverymethod   : String;
     QuotationRecipientname    : String;
     QuotationRecipientcontact : String;
+}
+
+type MEAApprovalUpdatedFields {
+    Volume      : Integer default 0;
+    UOM         : Integer default 0;
+    FOC         : Integer default 0;
+    Price       : Integer default 0;
+    Deductions  : Integer default 0;
 }
