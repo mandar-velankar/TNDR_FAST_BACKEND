@@ -955,6 +955,7 @@ module.exports = (srv) => {
 			const {templateId, validDate, status} = req.data;
 			const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
 			const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+			const skuCodes = await SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: "NL" });
 
 			if (!template || !template.content) {
 				return req.reject(404, 'No template found for templateid:' + templateId);
@@ -986,9 +987,15 @@ module.exports = (srv) => {
 
 			// Formatting
 			excelData.forEach(ed => {
+				const productSKUs = skuCodes.filter(sku => 
+						sku.ProductPackID === ed.PRODUCTPACKID && 
+						(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
+						(!sku.ValidTo ||validDate <= sku.ValidTo)).map(el => el.SKUCode).join(",");
+
 				ed.PPP = formatNLPPPPrices(ed.PPP);
 				ed.StartDate = ed.StartDate && ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY');
 				ed.EndDate = ed.EndDate && ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY');
+				ed.MaterialNumbers = productSKUs;
 			});
 
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content, { excelData }, 1);
@@ -1061,6 +1068,7 @@ module.exports = (srv) => {
 		const {templateId, validDate, status, distributorID} = req.data;
 
 		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+		const skuCodes = await SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: "NL" });
 
 		if (!template || !template.content) {
 			return req.reject(404, 'No template found for templateid:' + templateId);
@@ -1082,6 +1090,11 @@ module.exports = (srv) => {
 		});
 
 		excelData.forEach(item => {
+			const productSKUs = skuCodes.filter(sku => 
+				sku.ProductPackID === item.PRODUCTPACKID && 
+				(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
+				(!sku.ValidTo || validDate <= sku.ValidTo)).map(el => el.SKUCode).join(",");
+
 			// Assuming 'Type' and 'Currency' fields are part of the item
 			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
 			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
@@ -1090,6 +1103,7 @@ module.exports = (srv) => {
 			item.EndDate = item.StartDate && ServiceHelper.formatDate(item.EndDate, 'DD/MM/YYYY');
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
+			item.MaterialNumbers = productSKUs;
 		});
 		const formatedValidDate = validDate && ServiceHelper.formatDate(validDate, '', 'DD/MM/YYYY');
 		const formatedValidEndDate = validDate &&  moment(validDate).add(5, 'months').endOf('month').format('DD/MM/YYYY');

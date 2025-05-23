@@ -305,7 +305,7 @@ module.exports = (srv) => {
 		 * @param {Object} file - This is uploaded excel file
 		 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
 		 */
-		// try {
+		try {
 			let CWID = res.user.id;
 			const file = await SELECT.one.from(SalesReportFile).where({DistributorID: req.DistributorID});
 
@@ -335,17 +335,21 @@ module.exports = (srv) => {
 			await INSERT.into(ClaimData).entries(result.mappedclaimsData);
 
 			//Insert mapped FAST Offer Claims Data
-			await INSERT.into(MappedFASTOfferClaims).entries(result.mappedFASTOfferClaims);
+			if (result.mappedFASTOfferClaims?.length > 0) {
+				await INSERT.into(MappedFASTOfferClaims).entries(result.mappedFASTOfferClaims);
+			  }
 
 			//Insert Claim Approvals
 			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
 
 			await DELETE.from(SalesReportFile).where({DistributorID: req.DistributorID});
-		// } catch (error) {
-		// 	console.error('Error in SalesReportUploadFile');
-		// 	return res.reject(400, error.message || 'An unexpected error occurred.')
-		// }		
-		return res.reply("Sales Data uploaded successfully");
+
+			return res.reply("Sales Data uploaded successfully");
+
+		} catch (error) {
+			console.error('Error in SalesReportUploadFile');
+			return res.reject(400, error.message || 'An unexpected error occurred.')
+		}				
 	});
 
 	srv.on('approveRejectClaimFiles', async (req) => {
@@ -557,4 +561,60 @@ module.exports = (srv) => {
 			return req.reject(400, error.message || 'An unexpected error occurred.')
 		}
 	});
+
+	/**
+	 * Handler for the READ operation on the 'ClaimFilesView' entity.
+	 *
+	 * This function handles both normal read queries and `$count` queries.
+	 * If a custom filter (`BrandFilter`) is present, it extracts and applies it to the query,
+	 * then removes it from the request to avoid errors.
+	 *
+	 * For `$count` queries, it constructs a custom `SELECT` with a distinct count on the `ID` field.
+	 * For standard reads, it respects `SELECT` properties such as `columns`, `limit`, `orderBy`, and `where`,
+	 * applying the brand ID filter when applicable.
+	 *
+	 */
+	srv.on('READ', 'ClaimFilesView', async (req, next) => {
+		try {
+			const tx = cds.tx(req);
+			let result = [];
+	
+			const isCountQuery = req.query.SELECT?.columns?.[0]?.func === 'count';
+			const brandID = req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'BrandFilter');
+			
+			//Delete BrandFilter to create new filter logic
+			if (brandID) {
+				ServiceHelper.deleteFilter(req, 'BrandFilter');
+			}
+	
+			// Handle $count query with correct DISTINCT count
+			if (isCountQuery) {
+				let countQuery = SELECT.from(req.query.SELECT.from)
+				.columns([{ func: 'count', as: '$count', args: [{ xpr: ['distinct', { ref: ['ID'] }] }] }]);
+	
+				req.query.SELECT.where && countQuery.where(req.query.SELECT.where);
+				brandID && countQuery.where({ 'ClaimData.BrandId': brandID });
+	
+				return await tx.run(countQuery);
+			}
+	
+			let tmvQuery = SELECT.distinct.from(req.query.SELECT.from);
+
+			// Copying standart query parameters 
+			req.query.SELECT.columns && tmvQuery.columns(req.query.SELECT.columns);
+			req.query.SELECT.limit && tmvQuery.limit(req.query.SELECT.limit);
+			req.query.SELECT.orderBy && tmvQuery.orderBy(req.query.SELECT.orderBy);
+			req.query.SELECT.where && tmvQuery.where(req.query.SELECT.where);
+			
+			//Filtering Claim Data BrandId using selected brand
+			brandID && tmvQuery.where({ 'ClaimData.BrandId': brandID });
+			
+			result = await tx.run(tmvQuery);
+			return result;
+		} catch (error) {
+			console.error('Error in ClaimFilesView READ');
+			return req.reject(403, error?.message || "Error in ClaimFilesView");
+		}
+	});
+		
 };
