@@ -1503,6 +1503,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 main.ConfidentialPrice,
                 main.PVL,
                 main.RoyalDecree,
+                main.Tax,
                 std.Liquidation,
                 std.RefundDate,
                 std.Settlement_ID,

@@ -2299,6 +2299,7 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
+				ConfidentialDiscount: req.data.ConfidentialDiscount,
 				Discount: req.data.ESDiscount,
 				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
 				RoyalDecree: req.data.RoyalDecree,
@@ -2322,6 +2323,7 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
+				ConfidentialDiscount: req.data.ConfidentialDiscount,
 				Discount: req.data.ESDiscount,
 				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
 				RoyalDecree: req.data.RoyalDecree,
@@ -2345,22 +2347,7 @@ module.exports = async (srv) => {
 				ProductCode: req.data.ProductCode,
 				PVL: req.data.PVL,
 				ConfidentialPrice: req.data.ConfidentialPrice,
-				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
-				RoyalDecree: req.data.RoyalDecree,
-				RoyalDecreeValue: req.data.RoyalDecreeValue,
-				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
-				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
-				NetPriceWithTax: req.data.NetPriceWithTax,
-				MaximumPrice: req.data.MaximumPrice,
-				Tax: req.data.Tax,
-				PriceConditionClassification_ID: req.data.ClassificationID 
-			},
-			"DescuentoEspecial":{
-				CountryCode : req.data.CountryCode,
-				OfferID: req.data.OfferID,
-				ProductCode: req.data.ProductCode,
-				PVL: req.data.PVL,
-				ConfidentialPrice: req.data.ConfidentialPrice,
+				ConfidentialDiscount: req.data.ConfidentialDiscount,
 				Discount: req.data.ESDiscount,
 				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
 				RoyalDecree: req.data.RoyalDecree,
@@ -2376,12 +2363,54 @@ module.exports = async (srv) => {
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
 				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
-				PriceConditionClassification_ID: req.data.ClassificationID 
+				PriceConditionClassification_ID: req.data.ClassificationID
+			},
+			"DescuentoEspecial":{
+				CountryCode : req.data.CountryCode,
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				PVL: req.data.PVL,
+				ConfidentialPrice: req.data.ConfidentialPrice,
+				ConfidentialDiscount: req.data.ConfidentialDiscount,
+				Discount: req.data.ESDiscount,
+				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
+				RoyalDecree: req.data.RoyalDecree,
+				RoyalDecreeValue: req.data.RoyalDecreeValue,
+				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
+				StandardDiscount: req.data.StandardDiscount,
+				AdditionalDiscount: req.data.AdditionalDiscount,
+				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
+				NetPriceWithoutTaxAfterDeductionRD: req.data.NetPriceWithoutTaxAfterDeductionRD,
+				NetPriceWithTaxAfterDeductionRD: req.data.NetPriceWithTaxAfterDeductionRD,
+				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+				NetPriceWithTax: req.data.NetPriceWithTax,
+				MaximumPrice: req.data.MaximumPrice,
+				Tax: req.data.Tax,
+				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"Rental":{
 				CountryCode : req.data.CountryCode,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
+				PVL: req.data.PVL,
+				ConfidentialPrice: req.data.ConfidentialPrice,
+				ConfidentialDiscount: req.data.ConfidentialDiscount,
+				Discount: req.data.ESDiscount,
+				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
+				RoyalDecree: req.data.RoyalDecree,
+				RoyalDecreeValue: req.data.RoyalDecreeValue,
+				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
+				StandardDiscount: req.data.StandardDiscount,
+				AdditionalDiscount: req.data.AdditionalDiscount,
+				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
+				NetPriceWithoutTaxAfterDeductionRD: req.data.NetPriceWithoutTaxAfterDeductionRD,
+				NetPriceWithTaxAfterDeductionRD: req.data.NetPriceWithTaxAfterDeductionRD,
+				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+				NetPriceWithTax: req.data.NetPriceWithTax,
+				MaximumPrice: req.data.MaximumPrice,
+				Tax: req.data.Tax,
+				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
 				MonthlyRentPerUnit: req.data.MonthlyRentPerUnit,
 				AnnualValue: req.data.AnnualValue,
 				PriceConditionClassification_ID: req.data.ClassificationID 
@@ -7271,7 +7300,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		  // Handle PricingProcedureStep-specific values
 		  if (PricingProcedureStep === "330") {
-			result.SAPTAX = parseFloat(ConditionAmount || 0);
+			result.SAPTAX = parseFloat(ConditionAmount) / 100 || 0;
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
@@ -7314,8 +7343,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = YP10;
 		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = YP10 ? (YD06 ? YP10 * (1 - YD06) : YP10) : null;
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
-		result.NETPRICEWITHOUTTAX = YD02 ? result.NETPRICEWITHOUTTAX : null;  
-		result.NETPRICEWITHTAX = (YD02 || YD30) ? result.SAPPriceWithTax : null;
+		result.NETPRICEWITHOUTTAX = YD02 ? result.ConfidentialPrice * (1 - result.YD02) * (1 - result.YD06) : null;  
+		result.NETPRICEWITHTAX = result.SAPPriceWithTax;
 		result.SAPBaseGrossPrice = YP00;
 	  
 		// Determine the condition type
