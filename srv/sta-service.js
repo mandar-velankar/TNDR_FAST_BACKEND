@@ -4844,6 +4844,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		if (offer.APPROVAL_TYPE === 18) {
 			productValidation = await buildProductValidationForType18(tx, offer, product, aApproverTypes, userInfo);
 		}
+		if (offer.APPROVAL_TYPE === 10) { //Applicable for Spain
+			productValidation = await buildProductValidationForType10(tx, offer, product, commnonProductInfo, aApproverTypes, institute, userInfo);
+		}
 		return {
 			CommnonProductInfo: commnonProductInfo,
 			ProductValidation: productValidation
@@ -5107,6 +5110,185 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		results.IN_POLICY = true
 		return results;
 	}
+
+	async function buildProductValidationForType10(tx, offer, product, productInfo, aApproverTypes, institute) {//Spain
+		//Legend
+		//1: Optional
+		//2: Mandatory Notification
+		//3: Mandatory Approval
+		let supply=(offer.CLASSIFICATION === 'Tender') ? 2 : 1;
+		let Difference_In_Days=0;
+        const whereProductTypeProfitability = {
+            CountryCode: offer.COUNTRYCODE,
+            OfferId: offer.OFFERID,
+            ProductType: 'Total'
+        };
+
+		const whereoffer={
+			OfferId: offer.OFFERID,
+			PriceConditionCode : ['YAW1','YAW2']
+		};
+
+        const whereProduct = {
+            CountryCode: offer.COUNTRYCODE,
+            ProductPackId: product.PRODUCTID,
+			ValidTo :'9999-12-31 00:00:00.000000000'
+        };
+
+		const PriceConditionvalue= await tx.run(SELECT.from(PriceCondition).where(whereoffer));
+		if(PriceConditionvalue.length>0){
+			const EffectiveDate=new Date(offer.EffectiveDate);
+			const PaymentBackdate= new Date(PriceConditionvalue[0].RefundDate);
+			const Difference_In_Time = PaymentBackdate.getTime() - EffectiveDate.getTime();
+		    Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+		}
+        
+        const MasterProductPrice = await tx.run(SELECT.one.from(MasterPrices).where(whereProduct));
+        
+        var dFloorPrice = MasterProductPrice && ( institute.InstituteType === 'Private Account' || institute.InstituteType === 'Cluster' ) ? MasterProductPrice.PRAF_Private :
+						  MasterProductPrice && institute.InstituteType !== 'Private Account' && institute.InstituteType !== 'Cluster' ? MasterProductPrice.PRAF_Public : 0;
+						  var UOMValue=product.UNIT;
+						  var packfactor=product.PACKSIZE;
+						  if(UOMValue=== 'Unit'){
+							  dFloorPrice=dFloorPrice/packfactor;
+						  }
+
+        let dRadiologyProfitability = 0;
+
+        if(product.DIVISION === 'Radiology'){
+            const ProductProfitability = await tx.run(SELECT.one.from(ProductTypeProfitability).where(whereProductTypeProfitability));
+            dRadiologyProfitability = ProductProfitability ? Number(ProductProfitability.Profitability)*100 : 0;
+
+            if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability >= 40){
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "KAMS":
+                            oApproverType.ValidationType = 3;
+                            break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            } else if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability < 40){
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "KAMS":
+                            oApproverType.ValidationType = 3;
+                            break;
+                        case "BU/RAM":
+                            oApproverType.ValidationType = 3;
+                            break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            }
+         else {
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+						case "KAMS":
+							oApproverType.ValidationType = 3;
+							break;
+						case "CDH":
+							oApproverType.ValidationType = 3;
+							break;
+                        case "BU/RAM":
+                            oApproverType.ValidationType = 3;
+                            break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+		 }
+		 // Only for Radilogy products no need to display CDH
+		const CDHApproverTypeIndex = aApproverTypes.findIndex(type => type.ApproverType === "CDH");
+		if (CDHApproverTypeIndex > -1) {
+			aApproverTypes.splice(CDHApproverTypeIndex, 1);
+		}
+		} else if (product.DIVISION === 'Pharma') {
+			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
+			aApproverTypes.map(async function (oApproverType) {
+				switch (oApproverType.ApproverType) {
+					case "BU/RAM 1":
+						oApproverType.ValidationType = 3;
+						break;
+					case "BU/RAM 2":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Legal":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Financial Business Partner":
+						oApproverType.ValidationType = 3;
+						break;
+					case "Supply Chain":
+						oApproverType.ValidationType = supply;
+						break;
+					default:
+						oApproverType.ValidationType = oApproverType.ValidationType;
+				}
+			});
+		}else{
+				aApproverTypes.map(async function (oApproverType) {
+					switch (oApproverType.ApproverType) {
+						case "BU/RAM 1":
+							oApproverType.ValidationType = 3;
+							break;
+						case "BU/RAM 2":
+							oApproverType.ValidationType = 3;
+							break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
+						default:
+							oApproverType.ValidationType = oApproverType.ValidationType;
+					}
+				});
+			}
+		}
+            else {
+                
+                aApproverTypes.map(async function (oApproverType) {
+                    switch (oApproverType.ApproverType) {
+                        case "BU/RAM":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                            break;
+                        case "Legal":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                            break;
+                        case "Financial Business Partner":
+                            oApproverType.ValidationType = product.DIVISION === 'Pharma' ? 3 : oApproverType.ValidationType;
+                            break;
+                        case "Controlling":
+                            oApproverType.ValidationType = product.DIVISION === 'Consumer Health' ? 3 : oApproverType.ValidationType;
+                            break;
+						case "Supply Chain":
+							oApproverType.ValidationType = supply;
+							break;
+                        default:
+                            oApproverType.ValidationType = oApproverType.ValidationType;
+                    }
+                });
+            }
+        
+		
+		let results = {
+			//In Policy flag
+			IN_POLICY: true
+		};
+
+		return results;
+	}
+
 	function mappedApproverTypesForKAMTerritory (aApproverTypes, priceCondition, policy) {
 		const apprIndex = aApproverTypes.findIndex(at => at.ApproverType === 'Squad Lead');
 		aApproverTypes.splice(apprIndex, 1);
