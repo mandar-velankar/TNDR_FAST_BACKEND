@@ -683,8 +683,12 @@ module.exports = async (srv) => {
 			if(req.data.NextPublicationDye && !moment(req.data.AwardDate).isBefore(req.data.NextPublicationDye))
 				req.error({ code: 404, message: "Award date should be before the next publication date.", target: "NextPublicationDye" });
 		}	
-		
-		req.data.ExternalID = null; //for mandatory field check in sta-service
+
+		if(req && req.data && ~req.data.CountryCode.toLowerCase().indexOf('es')){
+			await addTenderExternalIDs(req.data);
+		}else{
+			req.data.ExternalID = null; //for mandatory field check in sta-service
+		}
 		// remove associations data
 		delete req.data.InstituteName;
 		delete req.data.InstituteType;
@@ -706,6 +710,18 @@ module.exports = async (srv) => {
         }
 
 	});
+
+	async function addTenderExternalIDs(tender){
+		// Tender
+		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('tender')){
+			tender.SAPID = "CO-".concat(tender && tender.TenderName && tender.TenderName.replace(/ /g,'-')); 
+			tender.ExternalID = "TE-".concat(tender.TenderID);
+		}
+		// Commercial Agreement
+		if(tender && tender.Classification && ~tender.Classification.toLowerCase().indexOf('commercial agreement')){
+			tender.SAPID = "OF-".concat(tender.TenderID); 
+		}
+	};
 
 	srv.before(['CREATE','UPDATE','DELETE'], 'OfferFormView', async (req) => {
 		try{
