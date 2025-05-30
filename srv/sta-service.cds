@@ -1560,4 +1560,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionRentalView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
 
     action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String) returns String;
+
+    entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees
 }
