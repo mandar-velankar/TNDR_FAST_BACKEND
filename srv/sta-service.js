@@ -7140,22 +7140,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				ProfitabilityGrowthRate: req.data.ProfitabilityGrowthRate
 			}).where({OfferID: req.data.OfferID});
 	});
-
-	srv.before(
-		['CREATE','UPDATE'], 
-		[
-			'PriceConditionRappelView'
-		], 
-		async (req) => {
-			try{
-				delete req.data.MainPrice;
-			}
-			catch(error){
-				console.error('Error in validation of PriceConditionRappelView before CREATE or UPDATE');
-				return req.reject(403, error?.message||"Error in validation of PriceConditionRappelView before CREATE or UPDATE");
-			}
-		}
-	);
 	
 	srv.on(['CREATE','UPDATE'], 'PriceConditionRappelView' , async (req) => {
 		try{
