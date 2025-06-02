@@ -7546,6 +7546,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return result;
 	}
 	  
+	srv.before(["CREATE", "UPDATE"], "BankGuarantees", async (req) => {
+		!req.data.BankRequestDate && req.error({ code: 404, message: "Bank request date is required", target: "BankRequestDate" });
+		!req.data.BankName && req.error({ code: 404, message: "Bank name is required", target: "BankName" });
+		!req.data.GuaranteedAmount && req.error({ code: 404, message: "Amount is required", target: "GuaranteedAmount" });
+		!req.data.Currency && req.error({ code: 404, message: "Currency is required", target: "Currency" });
+		!req.data.Reference && req.error({ code: 404, message: "Bank guarantee ID is required", target: "Reference" });
+		!req.data.IssueDate && req.error({ code: 404, message: "Bank guarantee issue date is required", target: "IssueDate" });
+	});
 	  
 	  
 
