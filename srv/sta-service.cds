@@ -86,6 +86,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteID as ParentInstituteID,
         Institute.External_InstituteId,
         Institute.Address,
+        Institute.CustomerID,
+        Institute.Province.Name as ProvinceName,
+        Institute.City,
+        Institute.CifCode,
+        Institute.RegionalHealthSystem,
         Country.Region
     }; 
 
@@ -230,6 +235,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         ifnull(NewOfferDueDate, Tender.BidDueDate) as OfferDueDate: Date,
         Tender.InstituteID as InstituteID,
         Tender.TenderChannel as Channel,
+        Tender.TenderName,
         OfferStatus.STATUS as OfferStatus
     };
     //inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID ;
@@ -266,7 +272,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         UnitPerPack as UoM,
         Price.NetPrice as NetPrice,
         RequestedVolume,
-        PriceCondition.AnticipatedYearlyVolumeBranch,
         Price.OfferPrice * (1 - Price.Deductions) *
         case 
         when Price.FOCType = 'FOC 1'
@@ -288,7 +293,156 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Offer.Tender.Custom.Integer_2 as ContractDuration_2,
         NLContractDurationOfferPrices.OfferPrice_2,
         Offer.Tender.Custom.Integer_3 as ContractDuration_3,
-        NLContractDurationOfferPrices.OfferPrice_3
+        NLContractDurationOfferPrices.OfferPrice_3,
+        case   
+            when (Price.NetofferPrice is not null and Price.NetofferPrice <> 0) 
+            and (RequestedVolume is not null and RequestedVolume <> 0) 
+            and (RequestedVolume <> Price.FOC)
+                then 
+                    round(Price.NetofferPrice * ( 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 1'
+                                    then RequestedVolume - (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                        
+                    / 
+                    
+                    (
+                        case 
+                            when Offer.FOCType = 'FOC 2'
+                                then RequestedVolume + (
+                                    case
+                                        when Price.FOC_ABS_PCT = 'ABS'
+                                            then Price.FOC
+                                        else Price.FOC * RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else RequestedVolume 
+                        end
+                    ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    
+                    ),2)
+            else null
+        end as NetPriceFOC:Double,
+        case   
+            when UnitPerPack = 'Pack'
+                then Cogs.COGS
+            else round(Cogs.COGS / SKU.PACKFACTOR,2)
+        end as cogsUoM :Double,
+        case   
+            when Price.NetofferPrice is not null
+                then 
+                    Price.NetofferPrice * (
+                        case 
+                            when Offer.FOCType = 'FOC 1'
+                                then RequestedVolume - (
+                                    case
+                                        when Price.FOC_ABS_PCT = 'ABS'
+                                            then Price.FOC
+                                        else Price.FOC * RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else RequestedVolume 
+                        end
+                    ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+            else null
+        end as GrossSales:Double,
+        case   
+            when Price.NetofferPrice is not null
+                then 
+                    (Price.NetofferPrice * 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 1'
+                                    then RequestedVolume - (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    ) - (
+                        (
+                            case   
+                                when UnitPerPack = 'Pack'
+                                    then Cogs.COGS
+                                else round(Cogs.COGS / SKU.PACKFACTOR,2)
+                            end
+                        ) //=$self.cogsUoM but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future) 
+                    * 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 2'
+                                    then RequestedVolume + (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    )
+            else null
+        end as GrossProfit:Double,
+        case   
+            when (Price.NetofferPrice is not null and Price.NetofferPrice <> 0) 
+            and (RequestedVolume is not null and RequestedVolume <> 0) 
+            and (RequestedVolume <> Price.FOC)
+                then 
+                    round(1 - ((
+                        (
+                            case   
+                                when UnitPerPack = 'Pack'
+                                    then Cogs.COGS
+                                else round(Cogs.COGS / SKU.PACKFACTOR,2)
+                            end
+                        ) //=$self.cogsUoM but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    * 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 2'
+                                    then RequestedVolume + (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    ) / (Price.NetofferPrice * 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 1'
+                                    then RequestedVolume - (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    ) ),2) 
+            else null
+        end as GrossMargin:Double,
+        SKU.ProductType
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     type copyOfferResponse {
@@ -398,7 +552,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         case when PricingPolicy.Type = 'BudgetedProfitability'
             then PricingPolicy.Value 
             else 0
-        end as VwBudgetedProfitability:Double
+        end as VwBudgetedProfitability:Double,
+        SKU.ProductType
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
@@ -1186,8 +1341,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             cd.SKU.PACKFACTOR,
             cd.WholesalerPurchasePrice,
             cd.WholesalerContractPrice,
-            cf.WholesalerPurchaseAmount, 
-            cf.NetSales,
+            cf.WholesalerPurchaseAmount,
             cd.Product.RequestedVolume,
             cd.BrandContractVolume,
             cd.BrandUsedVolume,
@@ -1287,4 +1441,103 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inst.InstituteType,
         cd.ProductPackID,
         cd.BrandId;
+
+    entity ProfitabilityCalcParamView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;
+    entity Settlements                                  as projection on MasterData.Settlements;
+    entity DiscountCondition @(cds.redirection.target:false) as projection on TransactionalData.DiscountCondition;
+    entity DiscountConditionView as Select from TransactionalData.DiscountCondition as dc
+        inner join TransactionalDataViews.StandardTenderPriceConditionView as pc on dc.PriceCondition.ID = pc.PriceConditionID{
+            key dc.ID,
+            pc.CountryCode,
+            pc.Region,
+            pc.Currency,
+            pc.OfferID,
+            pc.ProductCode,
+            pc.PriceConditionID,
+            dc.Volume,
+            dc.Discount,
+            dc.NetPriceWithoutTax,
+            dc.NetPriceWithTax, 
+            pc.Tax
+    }where pc.ConditionType = 'Rappel';
+    entity PriceConditionRappelView as Select from TransactionalDataViews.StandardTenderPriceConditionView as std
+        left outer join TransactionalDataViews.StandardTenderPriceConditionView as main
+            on std.CountryCode = main.CountryCode
+            and std.OfferID = main.OfferID
+            and std.ProductCode = main.ProductCode
+            and main.isMain = true
+            and main.PriceConditionID is not null{
+                key std.TenderID,
+                key std.OfferID,
+                key std.ProductCode,
+                std.RequestedVolume,
+                std.hasPriceCondition,
+                std.PriceConditionID,
+                std.ClassificationID,
+                std.Classification,
+                key std.ConditionType,
+                std.Division,
+                std.isMain,
+                main.ConfidentialPrice,
+                main.PVL,
+                main.RoyalDecree,
+                main.Tax,
+                std.Liquidation,
+                std.RefundDate,
+                std.Settlement_ID,
+                std.PriceConditionCode,
+                std.ESDiscount,
+                std.RoyalDecreeValue,
+                std.RoyalDecreeIncl,
+                std.StandardDiscount,
+                std.AdditionalDiscount,
+                std.NetPriceWithoutTaxBeforeDeductionRD,
+                std.NetPriceWithoutTaxAfterDeductionRD,
+                std.NetPriceWithTaxAfterDeductionRD,
+                std.NetPriceWithoutTax,
+                std.NetPriceWithTax,
+                std.MaximumPrice,
+                std.ConfidentialDiscount,
+                std.RoyalDecreePercentage_1,
+                std.MonthlyRentPerUnit,
+                std.AnnualValue
+            };
+    entity CCMPriceConditionView                   as select from TransactionalData.CCMPriceCondition{
+        CountryCode,
+        key OfferID,
+        key TenderID,
+        key ProductCode,
+        MaterialNumber,
+        InstituteID,
+        CustomerID,
+        Currency,
+        YP00,
+        YP04,
+        YP10,
+        YD75,
+        YD06,
+        YD02,
+        YD30,
+        SAPBaseGrossPrice,  
+        SAPTAX,
+        SAPPriceWithTax,
+        RoyalDecree,
+        RoyalDecreeValue,
+        RoyalDecreeIncl,
+        ConfidentialPrice,
+        NETPRICEWITHOUTTAXAFTERDEDUCTIONRD,
+        NETPRICEWITHTAXAFTERDEDUCTIONRD,
+        NETPRICEWITHOUTTAX,
+        NETPRICEWITHTAX,
+        key ConditionType
+    };
+    entity PriceConditionDescuentoComercialView         as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionPVLView                        as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionPrecioNetoView                 as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionDescuentoEspecialView          as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionRentalView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+
+    action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String) returns String;
+
+    entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees
 }

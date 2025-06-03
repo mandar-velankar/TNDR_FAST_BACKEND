@@ -352,7 +352,9 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     entity LatestCOGSView as select from PT_TMCOGS {
         max(COGSID) as maxCOGSID: Integer
     };
-
+    entity LatestPriceView as select from PT_TMREGPR {
+        max(RegisteredPriceID) as maxRegisteredPriceID: Integer
+    };
     action ApproveWPP(ID: String, ProductCode: Integer) returns String;
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
     action SoftDeleteProductPrices(productPackID: Integer, countryCode: String) returns String;

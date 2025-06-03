@@ -37,6 +37,7 @@ service AccessService @(path: 'access') @(requires:['authenticated-user']){
         standardtender:Boolean;
         whc:Boolean;
         claims:Boolean;
+        conditioncontract: Boolean;
     };
 
     function getAccess() returns Access;
