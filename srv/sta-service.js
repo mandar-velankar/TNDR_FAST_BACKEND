@@ -7554,6 +7554,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		!req.data.Reference && req.error({ code: 404, message: "Bank guarantee ID is required", target: "Reference" });
 		!req.data.IssueDate && req.error({ code: 404, message: "Bank guarantee issue date is required", target: "IssueDate" });
 	});
+
+	srv.on('updateFinalContractStartEndDate', async (req) => {
+		const { OfferID, ContractStartDate, ContractEndDate } = req.data;
+
+		if (!OfferID) {
+			return req.error(400, 'OfferID is required');
+		}
+
+		await UPDATE(PT_TMTRRES).set({ContractStartDate,ContractEndDate}).where({ OfferID });
+
+		return req.reply("Contract Start and End Date Updated Successfully");
+  	});
 	  
 	  
 
