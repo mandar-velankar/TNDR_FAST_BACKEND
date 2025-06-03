@@ -581,6 +581,8 @@ entity PriceCondition: cuid, managed {
     CurrentTotalYearlyValueBranch       : Double;
     CurrentTotalDiscountNHI             : Double;
     CurrentTotalDiscountInvoice         : Double;
+    ConfidentialDiscount                : Double;
+    RoyalDecreePercentage_1             : Double;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
@@ -864,6 +866,7 @@ entity OutgoingMails : managed, cuid {
     Subject: LargeString;
     MailBody: LargeString;
     Sent: Boolean;
+    RecipientCC: String;
 }
 
 entity CountrySpecificTenderInfo: managed {
@@ -991,4 +994,34 @@ type MEAApprovalUpdatedFields {
     FOC         : Integer default 0;
     Price       : Integer default 0;
     Deductions  : Integer default 0;
+}
+entity CCMPriceCondition: cuid, managed{
+    CountryCode                         : String;
+    OfferID                             : String;
+    TenderID                            : String;
+    ProductCode                         : Integer;
+    MaterialNumber                      : Integer;
+    InstituteID                          : Integer;
+    CustomerID                          : Integer;
+    Currency                            : String;
+    YP00                                : Decimal; //PVL
+    YP04                                : Decimal; //Confidential Discount
+    YP10                                : Decimal; //NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD
+    YD75                                : Double;  //ADDITIONALDISCOUNT
+    YD06                                : Double; //ROYALDECREE
+    YD02                                : Double; //Commercial Discount 
+    YD30                                : Double; //Special Discount (100%) 
+    SAPBaseGrossPrice                   : Decimal;  
+    SAPTAX                              : Decimal;
+    SAPPriceWithTax                     : Decimal;
+    RoyalDecree                         : String;
+    RoyalDecreeValue                    : Decimal;
+    RoyalDecreeIncl                     : Boolean default false;
+    ConfidentialPrice                   : Decimal;
+    NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD : Decimal;
+    NETPRICEWITHOUTTAXAFTERDEDUCTIONRD  : Decimal;
+    NETPRICEWITHTAXAFTERDEDUCTIONRD     : Decimal;
+    NETPRICEWITHOUTTAX                  : Decimal;
+    NETPRICEWITHTAX                     : Decimal;
+    ConditionType                       : String;
 }

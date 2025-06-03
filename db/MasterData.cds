@@ -86,6 +86,7 @@ entity PT_TMINST{
 	KAM_Territory: String;
 	External_InstituteId: String(50);
 	Class: Integer;
+	SAPGroupId: String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -210,7 +211,7 @@ entity COUNTRY_LEGAL_ENTITY_SIGNATORIES {
 
 //Registered Prices
 entity PT_TMREGPR{
-	RegisteredPriceID:Integer;//TODO: check if needed?
+	key RegisteredPriceID:Integer;//TODO: check if needed?
 	key CountryCode:String not null;
 	key ProductPackID:Integer not null;
 	key EffDate:Date not null;
