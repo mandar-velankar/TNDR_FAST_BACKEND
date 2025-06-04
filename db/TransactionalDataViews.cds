@@ -691,7 +691,8 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
     offerProduct.Comment,
     offerProduct.AlternateOfferYN,
-    offerProduct.Custom.Integer_1 as ItemNumber
+    offerProduct.Custom.Integer_1 as ItemNumber,
+    offerProduct.Price.COGS as COGS_EUR: Double
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
