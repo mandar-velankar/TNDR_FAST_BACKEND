@@ -5424,7 +5424,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let offerPrice = product.OFFER_PRICE;
 		let netOfferPrice = product.NET_OFFER_PRICE;
 		let netPrice = product.NET_PRICE;
-		let cogs = product.COGS;
+		let cogs = product.COGS_EUR;
 
 		let offerPriceUnit = offerPrice / toUnitFactor;
 		let offerPricePack = offerPrice / toPackFactor;
@@ -5443,7 +5443,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
 
-		let totalCostEur = totalVolume * cogs / product.SPOT_RATE;
+		let totalCostEur = totalVolume * cogs;
 		if (product.FOC_BUNDLED_1 !== 0) {
 			if (product.FOC_BUNDLED_1_ABS_PCT === "PCT") {
 				totalCostEur = totalCostEur + Math.round(product.FOC_BUNDLED_1 * requestedVolume) * product.FOC_BUNDLED_1_COGS / product.SPOT_RATE;
