@@ -1046,6 +1046,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     and i.ActiveRecord = 'Yes';
 
     entity StandardTenderHistory as projection on TransactionalDataViews.StandardTenderHistory;
+    entity StandardTenderHistorySpain as projection on TransactionalDataViews.TenderHistorySpain;
 
     entity PriceConditionCurrentSectionTaiwanView as projection on TransactionalDataViews.PriceConditionCurrentSectionTaiwanView;
     
