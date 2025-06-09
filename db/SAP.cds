@@ -748,14 +748,14 @@ entity StorageSpec: cuid{
     HazardousMaterialID: String; 
     ProductLabelTypeCode: String; 
     ProductLabelFormCode: String;  
-    MinimumRemainingShelfLifeCode: Integer;
+    MinimumRemainingShelfLifeCode: Decimal;
     NumberOfGoodsReceiptIssueSlipsToPrintValue: String; 
     ExpirationDateCode: String;
     ShelfLifeExpirationDatePeriod: String;  
-    TotalShelfLifeStoragePercent: Integer;
+    TotalShelfLifeStoragePercent: Decimal;
     StorageBinInstructionCode: String;  
     ShelfLifeExpirationDateRoundingRuleCode: String; 
-    TotalShelfLife: Integer;
+    TotalShelfLife: Decimal;
     parent: Association to FASTCoreMaterial;
 }
 
@@ -766,8 +766,8 @@ entity DistChainIndependentSalesSpec: cuid{
     PricingReferenceProductID: String;  // Nullable field
     TaxClassificationID: String;  // Nullable field
     AllowedPackagingVolumeQuantity: String;  // Nullable field
-    VolumeMaximumLevel: Integer;
-    StackingFactor: Integer;
+    VolumeMaximumLevel: Decimal;
+    StackingFactor: Decimal;
     ClosedPackagingProductIndicator: Boolean;
     ExcessWeightTolerance: Double;
     ExcessVolumeTolerance: Double;
@@ -789,7 +789,7 @@ entity PlantIndependentProcSpec: cuid{
 }
 
 entity PrdSCMAdvPlan: cuid{
-    RequiredMaximumShelfLife:Integer;
+    RequiredMaximumShelfLife:String;
     MaturationTime:String;
     parent: Association to FASTCoreMaterial;
 }
@@ -1540,7 +1540,7 @@ entity PrdnResTool: cuid {
 entity PlntSCMDmndPenlty: cuid {
     DemandType                    : String;
     DelayPenaltyAmount                : Double;
-    MaximumDelayInDays                : Integer;
+    MaximumDelayInDays                : String;
     NonDeliveryPenaltyAmount          : Double;
 	parentPrdPlant: Association to PrdPlant;
 }
@@ -1562,8 +1562,8 @@ entity EmbeddedCmdtyQty: cuid{
 entity PlntSPPPrd: cuid {
     ESPPIsUsed                              : String; // nullable
     ProductAlertRelevanceCode               : String; // nullable
-    LocProdGoodsReceiptProcHours            : Integer;
-    LocProdGoodsIssueProcHours              : Integer;
+    LocProdGoodsReceiptProcHours            : String;
+    LocProdGoodsIssueProcHours              : String;
     ParLocSafetyStockQuantity              : Double; // nullable
     RepairSafetyStockQuantity              : Double;// nullable
     VCLSafetyStockQuantity                 : Double;// nullable
@@ -1576,7 +1576,7 @@ entity PlntSPPPrd: cuid {
     GoodsIssueHandlingCost                 : Double;
     CostFactorForStockHoldingVal           : Double;
     ThirdPartyOrderProcessing              : String; // nullable
-    SrvcPartsThroughputTimeDurn            : Integer;
+    SrvcPartsThroughputTimeDurn            : String;
 	parentPrdPlant: Association to PrdPlant;
 }
 
@@ -1833,9 +1833,9 @@ entity CustMktgAttrs: cuid{
     CustomerNielsenRegionCode                      : String; 
     FiscalYearVariantCode                          : String;  
     AnnualSalesVolumeAmount                        : Decimal; 
-    AnnualSalesVolumeAmountReportedYear            : Integer;   
+    AnnualSalesVolumeAmountReportedYear            : String;   
     EmployeeNumberValue                            : Integer;   
-    EmployeeNumberValueReportedYear                : Integer; 
+    EmployeeNumberValueReportedYear                : String; 
     parentCustData: Association to CustData;
 }
 
@@ -1888,7 +1888,7 @@ entity CustAcctInfo: cuid{
     PlanningGroupCode                          : String;
     ExportCreditInsuranceInstitutionID         : String;
     InsuredAmount                              : Double;
-    InsuranceLeadDuration                      : Integer;
+    InsuranceLeadDuration                      : String;
     DeductiblePercent                          : Double;
     InsuranceID                                : String;
     InsuranceValidityDate                      : String;
@@ -1901,7 +1901,7 @@ entity CustAcctInfo: cuid{
     LastInterestCalculationRunDate             : String;
     RecordPaymentHistoryIndicator              : Boolean;
     BusinessPartnerToleranceGroupCode          : String;
-    ProbableCheckPaidDuration                  : Integer;
+    ProbableCheckPaidDuration                  : String;
     HouseBankInternalID                        : String;
     PayItemsSeparatelyIndicator                : Boolean;
     ReductionRatesDeterminationCode            : String;
@@ -2030,7 +2030,7 @@ entity CustSalesArrgmnt: cuid{
     MeasureUnitGroupCode                      : String;
     ProductProposalCustomerProcedureCode      : String;
     PODRelevanceIndicator                     : Boolean;
-    PODConfirmationTimeframeDuration          : Integer;
+    PODConfirmationTimeframeDuration          : String;
     DocumentIndexAllowedIndicator             : Boolean;
     FifthAdditionalCustomerDefinedGroupCode   : String;
     SixthAdditionalCustomerDefinedGroupCode   : String;
@@ -2359,7 +2359,7 @@ entity SupplierData: cuid {
     IndustryTypeName                            : String;
     RelatedCustomerInternalID                   : String;
     CollectiveNumberingRelevancyIndicator       : Boolean;
-    StagingDuration                             : Integer;
+    StagingDuration                             : String;
     SchedulingProcedureCode                     : String;
     TransportationChainCode                     : String;
     AcceptanceAtOriginIndicator                 : Boolean;
@@ -2454,7 +2454,7 @@ entity ProcuremntArrgmnt: cuid {
     SellerPartyContactPersonName                : String;
     ActivityProfileCode                         : String;
     TransportationChainCode                     : String;
-    StagingDuration                             : Integer;
+    StagingDuration                             : String;
     ValueAddedServiceDeterminationModeCode      : String;
     CharacteristicValueConversionCode           : String;
     AcceptanceAtOriginIndicator: Boolean;
@@ -2507,7 +2507,7 @@ entity PurchsngTerm: cuid {
     RackJobbingIncludedIndicator                : Boolean;
     PriceMakingAgreementTypeCode                : String;
     OrderMinimumAmount                          : Double;
-    PlannedDeliveryDuration                     : Integer;
+    PlannedDeliveryDuration                     : String;
     SalesVolumeFulfillmentPercent               : Double;
     PurchaseOrderConfirmationRequirementCode    : String;
     Inncoterms: Composition of many Inncoterms on Inncoterms.parentPurchsngTerm = $self;
@@ -2546,7 +2546,7 @@ entity AcctInfo: cuid {
     PlanningGroupCode                          : String;
     ExportCreditInsuranceInstitutionID         : String;
     InsuredAmount                              : Double;
-    InsuranceLeadDuration                      : Integer;
+    InsuranceLeadDuration                      : String;
     DeductiblePercent                          : Double;
     InsuranceID                                : String;
     InsuranceValidityDate                      : String;
@@ -2559,7 +2559,7 @@ entity AcctInfo: cuid {
     LastInterestCalculationRunDate             : String;
     RecordPaymentHistoryIndicator              : Boolean;
     BusinessPartnerToleranceGroupCode          : String;
-    ProbableCheckPaidDuration                  : Integer;
+    ProbableCheckPaidDuration                  : String;
     HouseBankInternalID                        : String;
     PayItemsSeparatelyIndicator                : Boolean;
     ReductionRatesDeterminationCode            : String;
@@ -3087,8 +3087,8 @@ entity AddrDepTaxNum: cuid{
 
 entity CredMgmtProf: cuid {
     CreditLimitAndScoreCalculatingRuleCode : String;
-    Score                                  : Integer;
-    CalculatedScore                        : Integer;
+    Score                                  : String;
+    CalculatedScore                        : String;
     ScoreValidityEndDate                    : Date;
     ScoreChangeDate: Date;
     CreditRiskClassCode                    : String;
@@ -3145,10 +3145,10 @@ entity FinServCommPerson: cuid {
     ChildrenNumberValue                    : Integer;
     HouseholdMembersNumberValue            : Integer;
     AnnualNetIncomeAmount                  : Decimal;
-    AnnualNetIncomeYear                    : Integer;
+    AnnualNetIncomeYear                    : String;
     MonthlyNetIncomeAmount                 : Decimal;
-    MonthlyNetIncomeMonth                  : Integer;
-    MonthlyNetIncomeYear                   : Integer;
+    MonthlyNetIncomeMonth                  : String;
+    MonthlyNetIncomeYear                   : String;
     NetIncomeCurrencyCode                  : String;
     DeathPlaceName                         : String;
     EmployeeIndicator                      : Boolean;
@@ -3166,7 +3166,7 @@ entity FinServCommOrganisation {
     RegisteredOfficeCityName               : String;
     BalanceSheetDisclosureFormCode         : String;
     EquityCapitalIncreaseAmount            : Decimal;
-    EquityCapitalIncreaseFiscalYearID      : Integer;
+    EquityCapitalIncreaseFiscalYearID      : String;
     MaxSizeOfOrderingFile                  : Integer;
     parentFinServComm: Association to FinServComm;
 }
