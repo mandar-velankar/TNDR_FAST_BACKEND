@@ -835,7 +835,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.Comment,
     offerProduct.AlternateOfferYN,
     offerProduct.Custom.Integer_1 as ItemNumber,
-    offerProduct.Price.COGS as COGS_EUR: Double
+    offerProduct.Price.COGS * (case when offerProduct.UnitPerPack = 'Unit' then 1 / offerProduct.SKU.PACKFACTOR else 1 end) as COGS_EUR: Double
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
