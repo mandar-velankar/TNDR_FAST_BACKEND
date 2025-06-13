@@ -405,6 +405,9 @@ module.exports = (srv) => {
 	}*/
 
 	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer) {//MEA (and default)
+		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
+		const latestUpdatedField = product.MEA_APPROVAL_LATEST_UPDATED_FIELD || product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
+		const splitedLatestUpdatedFields = latestUpdatedField.split(",").filter(Boolean);
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
 		//1: Optional
@@ -440,6 +443,30 @@ module.exports = (srv) => {
 			controlling = 2;
 		}
 
+		if (offerLatestApprStatus[0].approvedStatus == 2) {
+			if (splitedLatestUpdatedFields.includes("VOLUME_UOM_FOC_UPDATED") || splitedLatestUpdatedFields.includes("PRICE_DEDUCTIONS_UPDATED")) {
+				switch (offer.INSTITUTE_TYPE) {
+					case "Private":
+						legal = 3;
+						break;
+					case "NGO-NPO":
+						legal = 3;
+						break;	
+					case "Semi-Governmental":
+						legal = 2;
+						break
+					default:
+						break;
+				}
+
+				controlling = 2;
+			}else {
+				legal = 1;
+				controlling = 1;
+			}
+			
+		}
+
 		//Country Business
 		//Optional if business approved
 		//Mandatory otherwise
@@ -461,9 +488,7 @@ module.exports = (srv) => {
 		// 		regionalBusiness = 3;
 		// 	}
 		// }
-
-		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
-		const latestUpdatedField = product.MEA_APPROVAL_LATEST_UPDATED_FIELD || product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
+	
 		
 		//Supply
 		//Optional if supply approved
@@ -520,7 +545,7 @@ module.exports = (srv) => {
 			}
 		};
 
-		const updates = latestUpdatedField.split(",").filter(Boolean).map(el => validationUpdates[el]);
+		const updates = splitedLatestUpdatedFields.map(el => validationUpdates[el]);
 		if (updates && updates.length > 0) {
 			const result = updates.reduce((acc, obj) => {
 				for (const key in obj) {
@@ -581,7 +606,7 @@ module.exports = (srv) => {
 				if (ctryApproverType && ctryApproverType.Nucleus === offerProductPack.Nucleus) {
 					oApproverType.ValidationType = !product.HAS_UPDATED_SUPPLY_PAYMENT_PRICE_VALUES && offerLatestApprStatus[0].approvedStatus == 2 ? 1 : nucleus;
 					if (isSomeProductAddedForPreviousApproval) {
-						oApproverType.ValidationType = latestUpdatedField.includes("IS_NEW_PRODUCT") ? nucleus : 1;
+						oApproverType.ValidationType = splitedLatestUpdatedFields.includes("IS_NEW_PRODUCT") ? nucleus : 1;
 					}
 				}
 			}
