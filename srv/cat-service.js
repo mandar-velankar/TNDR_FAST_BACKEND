@@ -449,6 +449,9 @@ module.exports = (srv) => {
 					case "Private":
 						legal = 3;
 						break;
+					case "NGO-NPO":
+						legal = 3;
+						break;	
 					case "Semi-Governmental":
 						legal = 2;
 						break
@@ -457,6 +460,9 @@ module.exports = (srv) => {
 				}
 
 				controlling = 2;
+			}else {
+				legal = 1;
+				controlling = 1;
 			}
 			
 		}
