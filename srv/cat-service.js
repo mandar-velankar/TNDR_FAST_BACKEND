@@ -406,7 +406,7 @@ module.exports = (srv) => {
 
 	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer) {//MEA (and default)
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
-		const latestUpdatedField = product.MEA_APPROVAL_LATEST_UPDATED_FIELD || product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
+		const latestUpdatedField = product.MEA_APPROVAL_LATEST_UPDATED_FIELD || "";
 		const splitedLatestUpdatedFields = latestUpdatedField.split(",").filter(Boolean);
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
@@ -431,7 +431,7 @@ module.exports = (srv) => {
 			if (offer.INSTITUTE_TYPE === "Private" || offer.INSTITUTE_TYPE === "NGO-NPO" || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
 				legal = 3;
 			}
-			else if (offer.INSTITUTE_TYPE === "Semi-Governmental") {
+			if (offer.INSTITUTE_TYPE === "Semi-Governmental") {
 				legal = 2;
 			}
 		}
@@ -443,7 +443,7 @@ module.exports = (srv) => {
 			controlling = 2;
 		}
 
-		if (offerLatestApprStatus[0].approvedStatus == 2) {
+		if (offerLatestApprStatus[0].approvedStatus == 1 || offerLatestApprStatus[0].approvedStatus == 2) {
 			if (splitedLatestUpdatedFields.includes("VOLUME_UOM_FOC_UPDATED") || splitedLatestUpdatedFields.includes("PRICE_DEDUCTIONS_UPDATED")) {
 				switch (offer.INSTITUTE_TYPE) {
 					case "Private":
@@ -562,10 +562,10 @@ module.exports = (srv) => {
 		}
 
 
-		if (initialOffer.PreviousApprovalHas_Deleted_DeclinedProduct) {
+		if (initialOffer.PreviousApprovalHasDeclinedProduct || initialOffer.PreviousApprovalHasDeletedProduct) {
 			supply = 2;
 			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : 1;
-			nucleus = offer.TENDER_CHANNEL === "Direct" ? 1 : 2; // Check how to set notification only updated ptl
+			nucleus = offer.TENDER_CHANNEL === "Direct" ? 1 : 2; 
 			creditManager = 1;
 		}
 
@@ -608,6 +608,10 @@ module.exports = (srv) => {
 					if (isSomeProductAddedForPreviousApproval) {
 						oApproverType.ValidationType = splitedLatestUpdatedFields.includes("IS_NEW_PRODUCT") ? nucleus : 1;
 					}
+				}
+
+				if (initialOffer.PreviousApprovalHasDeletedProduct) {
+					oApproverType.ValidationType = initialOffer.PreviousApprovalHas_Deleted_Products_PTL.includes(ctryApproverType.Nucleus) ? nucleus : 1;
 				}
 			}
 			
