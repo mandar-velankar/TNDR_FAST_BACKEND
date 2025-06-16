@@ -70,6 +70,7 @@ entity PT_TMOFRS { //Offers
         PreviousApprovalHasDeletedProduct: Boolean default false; //MEA specific
         PreviousApprovalHasDeclinedProduct: Boolean default false; //MEA specific
         PreviousApprovalHas_Deleted_DeclinedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHas_Deleted_Products_PTL: String; //MEA specific
         Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND
