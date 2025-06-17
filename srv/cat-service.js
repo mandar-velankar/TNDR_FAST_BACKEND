@@ -404,9 +404,13 @@ module.exports = (srv) => {
 		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
 	}*/
 
-	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer) {//MEA (and default)
+	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalProduct) {//MEA (and default)
+		const isOfferReApproved = initialOffer.APPROVALS_SENT > 0 && (originalProduct.SUPPLY_UPDATE > 0 || originalProduct.PAYMENT_UPDATE > 0 || originalProduct.PRICE_UPDATE > 0 || initialOffer.PreviousApprovalHasAddedProduct || initialOffer.PreviousApprovalHasDeletedProduct || initialOffer.PreviousApprovalHasDeclinedProduct);
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
-		const latestUpdatedField = product.MEA_APPROVAL_LATEST_UPDATED_FIELD || "";
+		const latestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
+		const deleted_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeletedProduct : initialOffer.ApprovalHasDeletedProduct_Previous_State;
+		const declined_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeclinedProduct : initialOffer.ApprovalHasDeclinedProduct_Previous_State;
+		const deleted_product_ptl= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHas_Deleted_Products_PTL : initialOffer.ApprovalHas_Deleted_Products_PTL_Previous_State || "";
 		const splitedLatestUpdatedFields = latestUpdatedField.split(",").filter(Boolean);
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
@@ -443,7 +447,7 @@ module.exports = (srv) => {
 			controlling = 2;
 		}
 
-		if (offerLatestApprStatus[0].approvedStatus == 1 || offerLatestApprStatus[0].approvedStatus == 2) {
+		if (isOfferReApproved) {
 			if (splitedLatestUpdatedFields.includes("VOLUME_UOM_FOC_UPDATED") || splitedLatestUpdatedFields.includes("PRICE_DEDUCTIONS_UPDATED")) {
 				switch (offer.INSTITUTE_TYPE) {
 					case "Private":
@@ -541,7 +545,9 @@ module.exports = (srv) => {
 				supply: 3,
 				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
-				creditManager: 1
+				creditManager: 1,
+				legal: 1,
+				controlling: 1,
 			}
 		};
 
@@ -562,11 +568,13 @@ module.exports = (srv) => {
 		}
 
 
-		if (initialOffer.PreviousApprovalHasDeclinedProduct || initialOffer.PreviousApprovalHasDeletedProduct) {
+		if (declined_state || deleted_state) {
 			supply = 2;
 			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : 1;
 			nucleus = offer.TENDER_CHANNEL === "Direct" ? 1 : 2; 
 			creditManager = 1;
+			legal = 1;
+			controlling = 1;
 		}
 
 
@@ -610,8 +618,8 @@ module.exports = (srv) => {
 					}
 				}
 
-				if (initialOffer.PreviousApprovalHasDeletedProduct) {
-					oApproverType.ValidationType = initialOffer.PreviousApprovalHas_Deleted_Products_PTL.includes(ctryApproverType.Nucleus) ? nucleus : 1;
+				if (deleted_state || declined_state) {
+					oApproverType.ValidationType = deleted_product_ptl.includes(ctryApproverType.Nucleus) ? nucleus : 1;
 				}
 			}
 			
@@ -1612,11 +1620,11 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalProduct) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalProduct)
 		}
 		else if (offer.APPROVAL_TYPE === 3) {//Applicable for Mexico
 			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo, aApproverTypes)
@@ -1640,7 +1648,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalProduct)
 		}
 
 		return {
@@ -1673,6 +1681,7 @@ module.exports = (srv) => {
 
 		const productPackIDs = aOfferProduct.map(el => el.ProductCode);
         const offerProductPacks = await tx.run(SELECT.from(PT_TMPRDPCK).where({PRODUCTPACKID: {in: productPackIDs}}));
+        const originalOfferProducts = await tx.run(SELECT.from(PT_TMOFPR).columns("*", "Price.PRICE_UPDATE").where({OfferID: offer.OFFERID }));
 
 		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({CountryCode: offer.COUNTRYCODE}));
 		const initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offer.OFFERID }));
@@ -1689,6 +1698,7 @@ module.exports = (srv) => {
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			const offerProductPack = offerProductPacks.find(pck => pck.PRODUCTPACKID === offerProduct.ProductCode);
+			const originalProduct = originalOfferProducts.find(pr => pr.ProductCode === offerProduct.ProductCode);
 			const instituteDistributorBrandProduct = await srv.run(SELECT.one.from(InstituteDistributorBrandProduct).where({
 				COUNTRY_CODE: offer.COUNTRYCODE,
 				INSTITUTE_ID: offer.INSTITUTE_ID,
@@ -1702,7 +1712,7 @@ module.exports = (srv) => {
 
 
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalProduct);
 			
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
