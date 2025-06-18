@@ -438,8 +438,7 @@ module.exports = (srv) => {
 		if (product.LEGAL_APPROVED !== 1) {
 			if (offer.INSTITUTE_TYPE === "Private" || offer.INSTITUTE_TYPE === "NGO-NPO" || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
 				legal = 3;
-			}
-			if (offer.INSTITUTE_TYPE === "Semi-Governmental") {
+			}else if (offer.INSTITUTE_TYPE === "Semi-Governmental") {
 				legal = 2;
 			}
 		}
