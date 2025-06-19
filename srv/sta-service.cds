@@ -862,6 +862,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.Custom.Date_8 as Custom_Date_8,
         result.Custom.Date_9 as Custom_Date_9,
         result.Custom.Date_10 as Custom_Date_10,
+        result.TotalAwardedValue,
         priceCondition.ID as priceconditionID : UUID
 
     };
