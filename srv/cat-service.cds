@@ -485,5 +485,7 @@ service CatalogService @(path : 'tender')@(requires : [
     action simulateTaxes(offerID: String, productCode: Integer, lotID: Integer, conditionType: String, commercialProposal: String) returns String;
     function getTHNotificationMailTemplate(offerID:String,tenderId: String, CountryCode: String, templateId:String) returns String;
 
-    entity THQuotationDelevery  as projection on TransactionalData.THQuotationDelevery
+    entity THQuotationDelevery  as projection on TransactionalData.THQuotationDelevery;
+
+    entity OfferLatestApprovalStatusView as projection on TransactionalDataViews.OfferLatestApprovalStatus;
 }
