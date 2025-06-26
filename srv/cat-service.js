@@ -465,8 +465,10 @@ module.exports = (srv) => {
 					default:
 						break;
 				}
-
-				controlling = 2;
+				
+				// if controlling and legale were included in initial request then allowing to be mandatory notification 
+				controlling = product.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+				legal = product.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? legal : 1;
 			}else {
 				legal = 1;
 				controlling = 1;

@@ -304,6 +304,26 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
    as LEGAL_APPROVED:Integer,
    max(
        case when
+        approvals.ApproverType = 'Legal' and
+        (
+            approvals.ApprovalStatus = 'Approved' or 
+            approvals.ApprovalStatus = 'Notification Sent'
+        )
+        then 1 else 0 end
+   ) 
+   as LEGAL_APPROVED_IN_PREVIOUS_REQUEST:Integer,
+   max(
+       case when
+        approvals.ApproverType = 'Controlling' and
+        (
+            approvals.ApprovalStatus = 'Approved' or
+            approvals.ApprovalStatus = 'Notification Sent'
+        )
+        then 1 else 0 end
+   ) 
+   as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST:Integer,
+   max(
+       case when
         approvals.ApproverType = 'Regulatory' and
         approvals.ApprovalStatus = 'Approved' and
         approvals.OfferProduct.Price.PRICE_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
@@ -444,6 +464,8 @@ entity PreviousApproval as select from PreviousApprovalTemp as temp{
     temp.COUNTRY_BUSINESS_APPROVED,
     case when temp.PENDING_BUSINESS = 1 then 0 else temp.BUSINESS_APPROVED end as BUSINESS_APPROVED:Integer,
     temp.LEGAL_APPROVED,
+    temp.LEGAL_APPROVED_IN_PREVIOUS_REQUEST,
+    temp.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST,
     case when temp.BUSINESS_APPROVED = 1 then 1 else temp.REGULATORY_APPROVED end as REGULATORY_APPROVED:Integer,
     temp.NUCLEUS_HEAD_APPROVED,
     temp.CREDIT_MANAGER_APPROVED,
@@ -784,6 +806,8 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.BUSINESS_APPROVED as BUSINESS_APPROVED,
     offerProduct.PreviousApproval.COUNTRY_BUSINESS_APPROVED as COUNTRY_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.LEGAL_APPROVED as LEGAL_APPROVED,
+    offerProduct.PreviousApproval.LEGAL_APPROVED_IN_PREVIOUS_REQUEST as LEGAL_APPROVED_IN_PREVIOUS_REQUEST,
+    offerProduct.PreviousApproval.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST,
     offerProduct.PreviousApproval.REGIONAL_BUSINESS_APPROVED as REGIONAL_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.REGULATORY_APPROVED as REGULATORY_APPROVED,
     offerProduct.PreviousApproval.SUPPLY_APPROVED as SUPPLY_APPROVED,
