@@ -446,7 +446,7 @@ module.exports = (srv) => {
 		//Controlling
 		//Notification if OfferPrice below lowest price
 		let controlling = 1;
-		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE) || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
 			controlling = 2;
 		}
 
