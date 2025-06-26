@@ -446,7 +446,7 @@ module.exports = (srv) => {
 		//Controlling
 		//Notification if OfferPrice below lowest price
 		let controlling = 1;
-		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE)) {
+		if (ServiceHelper.isDoubleEqual(product.MIN_PRICE, 0) || ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, product.MIN_PRICE) || ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0)) {
 			controlling = 2;
 		}
 
@@ -465,8 +465,10 @@ module.exports = (srv) => {
 					default:
 						break;
 				}
-
-				controlling = 2;
+				
+				// if controlling and legale were included in initial request then allowing to be mandatory notification 
+				controlling = product.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+				legal = product.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? legal : 1;
 			}else {
 				legal = 1;
 				controlling = 1;
