@@ -315,20 +315,14 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
    max(
        case when
         approvals.ApproverType = 'Controlling' and
-        (
-            approvals.ApprovalStatus = 'Approved' or
-            approvals.ApprovalStatus = 'Notification Sent'
-        )
+        approvals.ApprovalStatus = 'Notification Sent'
         then 1 else 0 end
    ) 
    as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST:Integer,
    max(
        case when
         approvals.ApproverType = 'Regional Business' and
-        (
-            approvals.ApprovalStatus = 'Approved' or
-            approvals.ApprovalStatus = 'Notification Sent'
-        )
+        approvals.ApprovalStatus = 'Notification Sent'
         then 1 else 0 end
    ) 
    as REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST:Integer,
