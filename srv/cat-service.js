@@ -404,7 +404,7 @@ module.exports = (srv) => {
 		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
 	}*/
 
-	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts) {//MEA (and default)
+	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate) {//MEA (and default)
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
 		const latestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
 		const deleted_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeletedProduct : initialOffer.ApprovalHasDeletedProduct_Previous_State;
@@ -415,7 +415,7 @@ module.exports = (srv) => {
 		const maxPaymentUpdate = Math.max(...originalOfferProducts.map(pr => pr.PAYMENT_UPDATE));
 		const maxPriceUpdate = Math.max(...originalOfferProducts.map(pr => pr.PRICE_UPDATE));
 		const isOfferReApproved = initialOffer.APPROVALS_SENT > 0 && (maxSupplyUpdate > 0 || maxPaymentUpdate > 0 || maxPriceUpdate > 0 || initialOffer.PreviousApprovalHasAddedProduct || deleted_state || declined_state);
-
+		const hasNegativeMargin = ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0);
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
 		//1: Optional
@@ -454,21 +454,27 @@ module.exports = (srv) => {
 			if (splitedLatestUpdatedFields.includes("VOLUME_UOM_FOC_UPDATED") || splitedLatestUpdatedFields.includes("PRICE_DEDUCTIONS_UPDATED")) {
 				switch (offer.INSTITUTE_TYPE) {
 					case "Private":
-						legal = 3;
+						legal = 2;
 						break;
 					case "NGO-NPO":
-						legal = 3;
+						legal = 2;
 						break;	
 					case "Semi-Governmental":
 						legal = 2;
 						break
 					default:
+						legal = product.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 						break;
 				}
 				
 				// if controlling and legale were included in initial request then allowing to be mandatory notification 
 				controlling = product.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
-				legal = product.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? legal : 1;
+
+				//If there is negative margin in reapproved offer controlling and legal will always be mandatory notification/approval
+				if (hasNegativeMargin) {
+					controlling = 2;
+					legal = 3;
+				}
 			}else {
 				legal = 1;
 				controlling = 1;
@@ -534,12 +540,12 @@ module.exports = (srv) => {
 			"CREDIT_MANAGER_APPROVED": {
 				creditManager: 3,
 				supply: 1,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
 				nucleus: 2
 			},
 			"INCO_TERM_SUPPLY_UPDATED": {
 				supply: 3,
-				regionalBusiness: 2,
+				regionalBusiness: product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
 				nucleus: 2,
 				creditManager: 1
 			},
@@ -560,8 +566,8 @@ module.exports = (srv) => {
 				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1,
-				legal: 1,
-				controlling: 1,
+				legal: hasNegativeMargin ? 3 : 2,
+				controlling: hasNegativeMargin ? 2 : product.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
 			}
 		};
 
@@ -584,11 +590,11 @@ module.exports = (srv) => {
 
 		if (declined_state || deleted_state) {
 			supply = 2;
-			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : 1;
+			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 			nucleus = offer.TENDER_CHANNEL === "Direct" ? 1 : 2; 
 			creditManager = 1;
-			legal = 1;
-			controlling = 1;
+			legal = 2;
+			controlling = product.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 		}
 
 
