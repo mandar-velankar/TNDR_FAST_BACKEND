@@ -19,8 +19,12 @@ module.exports = class ProcessHematologyResultsRecordReminderMail extends BaseJo
 
         try {
             this.db = await cds.connect.to('db'); 
-            await this.processSendReminder();
+
+            const tx = this.db.tx()
+            await this.processSendReminder(tx);
+            await tx.commit();
         } catch (error) {
+            await tx.rollback();
             console.log(`JOB (${this.jobName }): ERROR - Process of sending notifications failed.`)
             console.log(error);
         }
@@ -31,9 +35,7 @@ module.exports = class ProcessHematologyResultsRecordReminderMail extends BaseJo
         console.log(`JOB (${this.jobName }): Processing Hematology Results Record status reminder finished.`);
     }
 
-    async processSendReminder () {
-        const tx = cds.tx();
-        // try {
+    async processSendReminder (tx) {
         const offers = await this.getOffers(tx);
         const users = await this.getUsers(tx);
         const template = await this.getNotificationMailTemplate(tx, "HematologyResultRecordedOfferStatusReminder");
@@ -59,7 +61,7 @@ module.exports = class ProcessHematologyResultsRecordReminderMail extends BaseJo
             if (today.isSameOrAfter(firstReminderDate) && recipient) {
                 const daysSinceFirstReminder = today.diff(firstReminderDate, 'days');
                 if (daysSinceFirstReminder % 3 === 0) {
-                    mails.push(this.mapDataToMail(template.content, {
+                    mails.push(this.mapDataToMail(template, {
                         recipient,
                         offer
                     }));
@@ -75,24 +77,18 @@ module.exports = class ProcessHematologyResultsRecordReminderMail extends BaseJo
         }else {
             console.log(`JOB (${this.jobName }): No mapped mails found`);
         }
-
-        debugger;
-        // } catch (error) {
-        //     console.log(`JOB (${this.jobName }): Processing of send reminder has failed.`);
-        //     console.log(error);
-        // }
     }
 
     /**
-    * This method fetches all the Ibiz contracts from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCONTRATOS
-    * @returns - A list of Ibiz contracts
+    * fetches all existing hematology offers which result is not recorded yet
+    * @returns - A list of offers
     */
 
     async getOffers(tx) {
         const { PT_TMOFRS } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         console.log(`JOB (${this.jobName }): Fetching offers from ${PT_TMOFRS.name} ...`);
         try {
-            return await tx.run(SELECT.from(PT_TMOFRS)
+            return tx.run(SELECT.from(PT_TMOFRS)
                 .columns('*', 'Tender.Institute.InstituteName')
                 .where({
                     CountryCode: { 
@@ -107,11 +103,16 @@ module.exports = class ProcessHematologyResultsRecordReminderMail extends BaseJo
         }
     }
 
+    /**
+    * fetches users list to identify who is the recipient
+    * @returns - A list of users
+    */
+
     async getUsers(tx) {
         const { PT_TMUSER } = this.db.entities("com.bayer.SXTENDER.AdminData");
         console.log(`JOB (${this.jobName }): Fetching users data from ${PT_TMUSER.name} ...`);
         try {
-            return await tx.run(SELECT.from(PT_TMUSER));
+            return tx.run(SELECT.from(PT_TMUSER));
         }catch (error) {
             console.error(`JOB (${this.jobName }): ERROR - Fetching users data from ${PT_TMUSER.name} failed`);
             console.error(error);
@@ -120,15 +121,14 @@ module.exports = class ProcessHematologyResultsRecordReminderMail extends BaseJo
     }
 
      /**
-    * This method fetches all the Ibiz contracts from COM_BAYER_SXTENDER_MASTERDATA_SAP_IBIZCONTRATOS
-    * @returns - A list of Ibiz contracts
+    * fetches notification mail template
     */
 
     async getNotificationMailTemplate(tx, templateId) {
         const { MailTemplate } = this.db.entities("com.bayer.SXTENDER.AdminData");
         console.log(`JOB (${this.jobName }): Fetching notification mail template from ${MailTemplate.name} ...`);
         try {
-            return await tx.run(SELECT.one.from(MailTemplate)
+            return tx.run(SELECT.one.from(MailTemplate)
 			.columns('*', 'MailTemplateFile.title', 'MailTemplateFile.content')
 			.where({ TemplateId: templateId }));
         }catch (error) {
@@ -142,7 +142,7 @@ module.exports = class ProcessHematologyResultsRecordReminderMail extends BaseJo
         const { OutgoingMails } = this.db.entities("com.bayer.SXTENDER.TransactionalData");
         console.log(`JOB (${this.jobName }): Saving mails into ${OutgoingMails.name}`);
         try {
-            return await tx.run(INSERT(mails).into(OutgoingMails));
+            return tx.run(INSERT(mails).into(OutgoingMails));
         } catch (error) {
             console.error(error);
             throw `JOB (${this.jobName }): ERROR - Failed to save data into ${OutgoingMails.name}`;

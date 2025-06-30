@@ -84,8 +84,8 @@ app.use(compression({ filter: shouldCompress }));
   // const ProcessTenderResults = require("./jobs/brasil/ProcessTenderResults");
   // new ProcessTenderResults("test","*").onTick();
 
-  const ProcessHematologyResultsRecordReminderMail = require("./jobs/ProcessHematologyResultsRecordReminderMailJob");
-  new ProcessHematologyResultsRecordReminderMail("test","*").onTick();
+  // const ProcessHematologyResultsRecordReminderMail = require("./jobs/ProcessHematologyResultsRecordReminderMailJob");
+  // new ProcessHematologyResultsRecordReminderMail("test","*").onTick();
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));
