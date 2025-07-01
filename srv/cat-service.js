@@ -2880,6 +2880,7 @@ module.exports = (srv) => {
 			TENDERID: offerValidation.TENDER_REFERENCE, //offerValidation.TENDERID,
 			OFFERID: offerValidation.OFFERID,
 			INSTITUTENAME: offerValidation.INSTITUTENAME,
+			QUOTATIONINSTITUTENAME: offerValidation.QUOTATIONINSTITUTENAME,
 			TAXCODE: offerValidation.TAXCODE,
 			VATCODE: offerValidation.VATCODE,
 			CURRENCY: offerValidation.CURRENCY,
