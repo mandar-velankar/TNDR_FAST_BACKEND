@@ -273,7 +273,6 @@ service CatalogService @(path : 'tender')@(requires : [
             TENDERID              : String(50);
         key OFFERID               : String(50);
             INSTITUTENAME         : String(500);
-            QUOTATIONINSTITUTENAME : String(500); 
             TAXCODE               : String(50);
             VATCODE               : String(50);
             CURRENCY              : String(3);
