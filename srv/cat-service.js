@@ -3005,10 +3005,14 @@ module.exports = (srv) => {
 		
 		offerApprovals = offerApprovals.filter((d) => d.ApprovalStatus === approvalStatus);
 
+		const countryApprovers = offerApprovals.length > 0 ? await tx.run(SELECT.from(CountryApprovers).where({CountryCode: offerApprovals[0].CountryCode})) : [];
+
+
 		whereOffer = ServiceHelper.buildFullWhere("OFFERID", "=", offerId);
 		let offerProductValidation = await buildOfferProductValidation(tx, whereOffer);
 
 		return offerApprovals.map((d) => {
+			const countryApprover = countryApprovers.find(ca => ca.ApproverType === d.ApproverType);
 			let statusPath = offerProductValidation.map((p) => {
 				let result = "PT_TMAPPRST(OfferId='";
 				result = result.concat(d.OfferId)
@@ -3042,7 +3046,8 @@ module.exports = (srv) => {
 				FLOW_ID: (!d.FLOW_ID) ? "" : d.FLOW_ID,
 				DIVISION: d.Division,
 				COUNTRYNAME: d.CountryName,
-				HIERARCHY: d.ApproverTypes[0].Hierarchy
+				HIERARCHY: d.ApproverTypes[0].Hierarchy,
+				Nucleus: countryApprover?.Nucleus || ""
 			}
 		})
 	}
