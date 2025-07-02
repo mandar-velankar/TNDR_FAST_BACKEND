@@ -3156,7 +3156,7 @@ entity StandardTenderHistorySpain as select from TransactionalData.PT_TMTEND as 
         key offer.OfferID,
         key product.ProductCode,
         tender.TenderName as TENDER_NAME,
-        ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFER_DATE,
+        ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFER_DATE: Date,
         key institute.InstituteID as INSTITUTE_ID,
         institute.InstituteName as INSTITUTE_NAME,
         product.SKU.PRODUCTPACKNAME as PRODUCT_NAME,
