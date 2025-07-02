@@ -3115,6 +3115,73 @@ left outer join TransactionalData.PriceCondition as priceCondition
         foc.ProductPackId,
         productTotal.TotalAmount;
 
+entity StandardTenderHistorySpain as select from TransactionalData.PT_TMTEND as tender
+    inner join TransactionalData.PT_TMOFRS as offer 
+        on offer.TenderID = tender.TenderID
+        and offer.Active = 1
+    inner join TransactionalData.PT_TMOFPR as product 
+        on product.OfferID = offer.OfferID
+        and product.Active = 1
+        and product.ActiveProduct = 1 
+    inner join MasterData.PT_TMPRDPCK as productPacks
+        on productPacks.PRODUCTPACKID = product.ProductCode
+        and productPacks.ACTIVERECORD = 'Yes' 
+    inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+        on priceConditionClassification.CountryCode = product.CountryCode
+        and priceConditionClassification.Classification = tender.Classification
+        and priceConditionClassification.Division = offer.Division
+        and priceConditionClassification.isMain = 'true' 
+        and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+    inner join MasterData.PT_TMINST as institute 
+        on tender.InstituteID = institute.InstituteID
+    inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+        on product.ProductCode = masterPrices.ProductPackId
+        and product.CountryCode = masterPrices.CountryCode    
+    inner join TransactionalData.PriceCondition as priceCondition 
+        on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+        and product.OfferID = priceCondition.OfferID
+        and product.ProductCode = priceCondition.ProductCode
+    left outer join TransactionalDataViews.TenderFOCView as tenderFOC
+        on tender.TenderID = tenderFOC.TenderID
+        and offer.OfferID = tenderFOC.OfferID
+        and product.ProductCode = tenderFOC.ProductCode
+        and institute.InstituteID = tenderFOC.INSTITUTE_ID
+    left outer join TransactionalDataViews.TenderRappelView as tenderRappel
+        on tender.TenderID = tenderRappel.TenderID
+        and offer.OfferID = tenderRappel.OfferID
+        and product.ProductCode = tenderRappel.ProductCode
+        and institute.InstituteID = tenderRappel.INSTITUTE_ID
+    {
+        key tender.TenderID,
+        key offer.OfferID,
+        key product.ProductCode,
+        tender.TenderName as TENDER_NAME,
+        ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFER_DATE,
+        key institute.InstituteID as INSTITUTE_ID,
+        institute.InstituteName as INSTITUTE_NAME,
+        product.SKU.PRODUCTPACKNAME as PRODUCT_NAME,
+        product.Price.OfferPrice *
+            case when product.UnitPerPack = 'Unit'
+                then product.SKU.PACKFACTOR
+                else 1
+            end as PACK_PRICE:Double,
+        product.Price.OfferPrice *
+            case when product.UnitPerPack = 'Unit'
+                then 1
+                else 1 / product.SKU.PACKFACTOR
+            end as UNIT_PRICE:Double,
+        priceCondition.PVL as PVL,
+        ifnull(tenderFOC.FOC, 'No') as FOC:String(10),
+        ifnull(tenderRappel.RAPPEL, 'No') as RAPPEL:String(10),
+        priceCondition.ConfidentialPrice as CONFIDENTIAL_PRICE,
+        priceCondition.PriceConditionCode as PriceConditionCode,
+        priceConditionClassification.ConditionType as PRICE_CONDITION,
+        priceCondition.RoyalDecree as ROYALDECREE,
+        priceCondition.Discount as DISCOUNT,
+        priceCondition.ConfidentialDiscount as CONFIDENTIAL_DISCOUNT,
+        ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
+};
+
 entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
                                                 and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
