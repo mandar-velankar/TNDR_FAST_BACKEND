@@ -271,12 +271,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKU.PRODUCTPACKNAME as ProductPackName,
         UnitPerPack as UoM,
         Price.NetPrice as NetPrice,
-        Price.NetPrice / 
-        case 
-            when UnitPerPack = 'Unit'
-                then Price.BudgetRate / SKU.PACKFACTOR
-            else Price.BudgetRate
-        end as NetPriceInEUR: Double,
+        Price.NetPrice / Price.BudgetRate as NetPriceInEUR: Double,
         RequestedVolume,
         Price.OfferPrice * (1 - Price.Deductions) *
         case 
@@ -305,14 +300,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                     end
                 else RequestedVolume        
             end
-        ) / 
-        (
-            case 
-                when UnitPerPack = 'Unit'
-                    then Price.BudgetRate / SKU.PACKFACTOR
-                else Price.BudgetRate
-            end
-        ) as TotalAmountInEUR:Double,
+        ) / Price.BudgetRate as TotalAmountInEUR:Double,
         Offer.Currency as Currency,
         Offer.Tender.Country.Region,
         SKUCountry.RegistrationValidUntil,
