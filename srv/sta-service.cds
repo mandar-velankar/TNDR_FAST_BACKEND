@@ -271,7 +271,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         SKU.PRODUCTPACKNAME as ProductPackName,
         UnitPerPack as UoM,
         Price.NetPrice as NetPrice,
-        Price.NetPrice * 
+        Price.NetPrice / 
         case 
             when UnitPerPack = 'Unit'
                 then Price.BudgetRate / SKU.PACKFACTOR
@@ -305,7 +305,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                     end
                 else RequestedVolume        
             end
-        ) * 
+        ) / 
         (
             case 
                 when UnitPerPack = 'Unit'
