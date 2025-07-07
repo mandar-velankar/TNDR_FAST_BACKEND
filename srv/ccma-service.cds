@@ -21,6 +21,9 @@ service ConditionContractService @(path: 'conditioncontracting')@(requires: [
     entity PT_TMBDPR                    as projection on TransactionalData.PT_TMBDPR;
     entity Country                      as projection on MasterData.PT_TMCTRY;
     entity Users                        as projection on AdminData.PT_TMUSER;
+    entity OutgoingMails                as projection on TransactionalData.OutgoingMails;
+    entity MailTemplate                 as projection on AdminData.MailTemplate;
+    entity MailTemplateFile             as projection on AdminData.MailTemplateFile;
 
     @open
     type object {};
