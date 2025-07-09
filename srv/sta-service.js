@@ -148,7 +148,15 @@ module.exports = async (srv) => {
 		ZagisUploadFile,
 		ExtractNLHistoricalInformation,
 		NLExtractOffers,
-		SalesReportsView
+		SalesReportsView,
+		AwardedProducts,
+		FastConditionContractsView,
+		ConditionContractsView,
+		CCMMaterilsView,
+		PriceConditionInvoiceView,
+		PriceConditionRebateView,
+		PriceConditionDiscountConditionsView,
+		PriceConditionFOCView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -7569,6 +7577,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
   	});
 	  
 	  
+	srv.on('createAllFastConditionContracts', async (req) => {
+		const offerID = req.data.OfferID;
+
+		try {
+			const awardedProducts = await SELECT.from(AwardedProducts).where({ OfferID: offerID });
+  			const allProductsWithOutcomeWon = awardedProducts.filter(product => product.Outcome === "Won");
+
+
+		} catch (err) {
+			req.error(400, 'Invalid JSON in ProductData');
+		return;
+		}
+
+	});
 
 
 }
