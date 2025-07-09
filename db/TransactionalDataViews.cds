@@ -3177,7 +3177,13 @@ entity StandardTenderHistorySpain as select from TransactionalData.PT_TMTEND as 
         priceCondition.PriceConditionCode as PriceConditionCode,
         priceConditionClassification.ConditionType as PRICE_CONDITION,
         priceCondition.RoyalDecree as ROYALDECREE,
-        priceCondition.Discount as DISCOUNT,
+        case 
+            when priceConditionClassification.ConditionType = 'PrecioNeto'
+                then priceCondition.AdditionalDiscount
+            when priceConditionClassification.ConditionType = 'DescuentoComercial'
+                then priceCondition.Discount
+            else priceCondition.Discount 
+        end as DISCOUNT: Double,
         priceCondition.ConfidentialDiscount as CONFIDENTIAL_DISCOUNT,
         ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
 };
