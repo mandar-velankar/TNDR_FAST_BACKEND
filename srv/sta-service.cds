@@ -1842,7 +1842,6 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
                 else False
             end as hasPriceCondition:Boolean,
             key priceCondition.ID as PriceConditionID: UUID,
-            discountCondition.ID as DiscountConditionID: UUID,
             priceConditionClassification.ID as ClassificationID: UUID,
             priceConditionClassification.Classification,
             priceConditionClassification.ConditionType,
@@ -1908,7 +1907,6 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
                 else False
             end as hasPriceCondition:Boolean,
             key priceCondition.ID as PriceConditionID: UUID,
-            foc.ID as FreeGoodsOtherID: UUID,
             priceConditionClassification.ID as ClassificationID: UUID,
             priceConditionClassification.Classification,
             priceConditionClassification.ConditionType,
