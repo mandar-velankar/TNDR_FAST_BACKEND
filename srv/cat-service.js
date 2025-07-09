@@ -464,12 +464,12 @@ module.exports = (srv) => {
 						legal = 2;
 						break
 					default:
-						legal = meaPreviousApprovalsFlags.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+						legal = meaPreviousApprovalsFlags?.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 						break;
 				}
 				
 				// if controlling and legale were included in initial request then allowing to be mandatory notification 
-				controlling = meaPreviousApprovalsFlags.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+				controlling = meaPreviousApprovalsFlags?.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 
 				//If there is negative margin in reapproved offer controlling and legal will always be mandatory notification/approval
 				if (hasNegativeMargin) {
@@ -541,34 +541,34 @@ module.exports = (srv) => {
 			"CREDIT_MANAGER_APPROVED": {
 				creditManager: 3,
 				supply: 1,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: 2
 			},
 			"INCO_TERM_SUPPLY_UPDATED": {
 				supply: 3,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: 2,
 				creditManager: 1
 			},
 			"VOLUME_UOM_FOC_UPDATED": {
 				supply: 3,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1
 			},
 			"PRICE_DEDUCTIONS_UPDATED": {
 				supply: 2,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1
 			},
 			"IS_NEW_PRODUCT": {
 				supply: 3,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1,
-				legal: hasNegativeMargin ? 3 : ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
-				controlling: hasNegativeMargin ? 2 : meaPreviousApprovalsFlags.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+				legal: hasNegativeMargin ? 3 : ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags?.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+				controlling: hasNegativeMargin ? 2 : meaPreviousApprovalsFlags?.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
 			}
 		};
 
@@ -591,11 +591,11 @@ module.exports = (srv) => {
 
 		if (declined_state || deleted_state) {
 			supply = 2;
-			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1;
+			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1;
 			nucleus = offer.TENDER_CHANNEL === "Direct" ? 1 : 2; 
 			creditManager = 1;
-			legal = ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
-			controlling = meaPreviousApprovalsFlags.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+			legal = ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags?.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+			controlling = meaPreviousApprovalsFlags?.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 		}
 
 
