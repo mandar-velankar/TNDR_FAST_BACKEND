@@ -302,7 +302,7 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
         then 1 else 0 end
    ) 
    as LEGAL_APPROVED:Integer,
-   max(
+   min(
        case when
         approvals.ApproverType = 'Legal' and
         (
@@ -312,14 +312,14 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
         then 1 else 0 end
    ) 
    as LEGAL_APPROVED_IN_PREVIOUS_REQUEST:Integer,
-   max(
+   min(
        case when
         approvals.ApproverType = 'Controlling' and
         approvals.ApprovalStatus = 'Notification Sent'
         then 1 else 0 end
    ) 
    as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST:Integer,
-   max(
+   min(
        case when
         approvals.ApproverType = 'Regional Business' and
         approvals.ApprovalStatus = 'Notification Sent'
