@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus, MEAPreviousApprovalsFlags
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -404,7 +404,7 @@ module.exports = (srv) => {
 		return (Math.abs(x - y) < doubleComparisonThreshold) ? true : false;
 	}*/
 
-	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate) {//MEA (and default)
+	function buildProductValidationForType1(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags) {//MEA (and default)
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
 		const latestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
 		const deleted_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeletedProduct : initialOffer.ApprovalHasDeletedProduct_Previous_State;
@@ -464,12 +464,12 @@ module.exports = (srv) => {
 						legal = 2;
 						break
 					default:
-						legal = product.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+						legal = meaPreviousApprovalsFlags.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 						break;
 				}
 				
 				// if controlling and legale were included in initial request then allowing to be mandatory notification 
-				controlling = product.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+				controlling = meaPreviousApprovalsFlags.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 
 				//If there is negative margin in reapproved offer controlling and legal will always be mandatory notification/approval
 				if (hasNegativeMargin) {
@@ -541,34 +541,34 @@ module.exports = (srv) => {
 			"CREDIT_MANAGER_APPROVED": {
 				creditManager: 3,
 				supply: 1,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: 2
 			},
 			"INCO_TERM_SUPPLY_UPDATED": {
 				supply: 3,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: 2,
 				creditManager: 1
 			},
 			"VOLUME_UOM_FOC_UPDATED": {
 				supply: 3,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1
 			},
 			"PRICE_DEDUCTIONS_UPDATED": {
 				supply: 2,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1
 			},
 			"IS_NEW_PRODUCT": {
 				supply: 3,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1,
-				legal: hasNegativeMargin ? 3 : 2,
-				controlling: hasNegativeMargin ? 2 : product.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+				legal: hasNegativeMargin ? 3 : ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+				controlling: hasNegativeMargin ? 2 : meaPreviousApprovalsFlags.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
 			}
 		};
 
@@ -591,11 +591,11 @@ module.exports = (srv) => {
 
 		if (declined_state || deleted_state) {
 			supply = 2;
-			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1;
 			nucleus = offer.TENDER_CHANNEL === "Direct" ? 1 : 2; 
 			creditManager = 1;
-			legal = 2;
-			controlling = product.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+			legal = ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
+			controlling = meaPreviousApprovalsFlags.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 		}
 
 
@@ -1654,11 +1654,11 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags)
 		}
 		else if (offer.APPROVAL_TYPE === 3) {//Applicable for Mexico
 			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo, aApproverTypes)
@@ -1682,7 +1682,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags)
 		}
 
 		return {
@@ -1748,9 +1748,13 @@ module.exports = (srv) => {
 				X_TYPE: 'Budget'
 			});
 
+			const meaPreviousApprovalsFlags = await SELECT.one.from(MEAPreviousApprovalsFlags).where({
+				OfferId: offer.OFFERID,
+				productcode: offerProduct.ProductCode
+			})
 
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags);
 			
 			//Get corresponding ProductPricing
 			const whereProductPricing = {

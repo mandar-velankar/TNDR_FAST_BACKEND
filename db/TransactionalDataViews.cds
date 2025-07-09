@@ -3773,3 +3773,47 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                 end as approvedStatus: Integer
     } group by  offer.OfferID,
                 maxApprTime.MaxStatusTime;
+
+entity MEAPreviousApprovalsFlags as select from TransactionalData.PT_TMAPPRST as a {
+  key OfferId,
+  key productcode,
+
+  case when count(distinct case
+    when ApproverType = 'Legal'
+      and ApprovalStatus in ('Approved', 'Notification Sent')
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as LEGAL_APPROVED_IN_PREVIOUS_REQUEST : Integer,
+
+  case when count(distinct case
+    when ApproverType = 'Controlling'
+      and ApprovalStatus = 'Notification Sent'
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST : Integer,
+
+  case when count(distinct case
+    when ApproverType = 'Regional Business'
+      and ApprovalStatus = 'Notification Sent'
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST : Integer
+
+}
+where 
+  Statustime < (
+    select max(Statustime) as StatusTime from TransactionalData.PT_TMAPPRST as b
+    where
+      b.OfferId = a.OfferId and
+      b.productcode = a.productcode and
+      b.ApproverType = a.ApproverType and
+      (b.ApprovalStatus = 'Waiting' or b.ApprovalStatus = 'Processing')
+  )
+  or not exists (
+    select from TransactionalData.PT_TMAPPRST as b
+    where
+      b.OfferId = a.OfferId and
+      b.productcode = a.productcode and
+      b.ApproverType = a.ApproverType and
+      (b.ApprovalStatus = 'Waiting' or b.ApprovalStatus = 'Processing')
+  )
+group by
+  OfferId,
+  productcode;
