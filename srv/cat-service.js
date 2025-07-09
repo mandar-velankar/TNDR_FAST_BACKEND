@@ -416,6 +416,7 @@ module.exports = (srv) => {
 		const maxPriceUpdate = Math.max(...originalOfferProducts.map(pr => pr.PRICE_UPDATE));
 		const isOfferReApproved = initialOffer.APPROVALS_SENT > 0 && (maxSupplyUpdate > 0 || maxPaymentUpdate > 0 || maxPriceUpdate > 0 || initialOffer.PreviousApprovalHasAddedProduct || deleted_state || declined_state);
 		const hasNegativeMargin = ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0);
+		const IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR = MEAOfferTotalAmountCheck(aOfferProduct, exchangeRate);
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
 		//Legend
 		//1: Optional
@@ -509,7 +510,7 @@ module.exports = (srv) => {
 		//Optional if supply approved
 		//Mandatory otherwise
 		let supply = 3;
-		let regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 3 : 2;
+		let regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 3 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1;
 		let creditManager = product.CREDIT_MANAGER_APPROVED === null ? instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1 : 1;
 		let nucleus = offer.TENDER_CHANNEL === "Direct" ? 2 : 3;
 
@@ -531,7 +532,7 @@ module.exports = (srv) => {
 
 		if (everyProductLatestFieldEmpty) {
 			supply = 3;
-			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 3 : 2;
+			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 3 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1;
 			creditManager = product.CREDIT_MANAGER_APPROVED === null ? instituteDistributorBrandProduct?.[0]?.PAYMENT_TERMS !== product.PAYMENT_TERMS ? 3 : 1 : 1;
 			nucleus = offer.TENDER_CHANNEL === "Direct" ? 2 : 3;
 		}
@@ -540,30 +541,30 @@ module.exports = (srv) => {
 			"CREDIT_MANAGER_APPROVED": {
 				creditManager: 3,
 				supply: 1,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: 2
 			},
 			"INCO_TERM_SUPPLY_UPDATED": {
 				supply: 3,
-				regionalBusiness: product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: 2,
 				creditManager: 1
 			},
 			"VOLUME_UOM_FOC_UPDATED": {
 				supply: 3,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1
 			},
 			"PRICE_DEDUCTIONS_UPDATED": {
 				supply: 2,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1
 			},
 			"IS_NEW_PRODUCT": {
 				supply: 3,
-				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : 1,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : product.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
 				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1,
 				legal: hasNegativeMargin ? 3 : 2,
@@ -675,6 +676,19 @@ module.exports = (srv) => {
 		};
 		*/
 		return results;
+	}
+
+	function MEAOfferTotalAmountCheck (products, exchangeRate) {
+		const totalAmount = products.reduce((sum, product) => {
+			let requestedVolume = product.REQUESTED_VOLUME;
+			let focAmount = (product.FOC_ABS_PCT === "PCT") ? Math.round(product.FOC * requestedVolume) : Math.round(product.FOC);
+			let paidVolume = (product.FOC_TYPE === "FOC 1") ? requestedVolume - focAmount : requestedVolume;
+			let offerPrice = product.OFFER_PRICE;
+			let grossSales = offerPrice * paidVolume;
+			return sum + grossSales;
+		}, 0);
+
+		return ServiceHelper.isDoubleXBelowY(1000000, totalAmount / (exchangeRate?.X_RATE ?? 1));
 	}
 
 	function buildProductValidationForType3(offer, product, productInfo, aApproverTypes) {//Mexico
@@ -1640,11 +1654,11 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Applicable for MEA
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate)
 		}
 		else if (offer.APPROVAL_TYPE === 3) {//Applicable for Mexico
 			productValidation = buildProductValidationForType3(offer, product, commnonProductInfo, aApproverTypes)
@@ -1668,7 +1682,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
-			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts)
+			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate)
 		}
 
 		return {
@@ -1729,9 +1743,14 @@ module.exports = (srv) => {
 				BRAND_ID: offerProduct.BRANDID
 			}));
 
+			const exchangeRate = await SELECT.one.from(ExchangeRates).where({CURRENCY_FROM: initialOffer?.Currency,
+				CURRENCY_TO: 'EUR',
+				X_TYPE: 'Budget'
+			});
+
 
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate);
 			
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
@@ -2777,15 +2796,6 @@ module.exports = (srv) => {
 			let aApproverType = approverTypes.filter((d) => d.ApproverType === approverType);
 			if (aApproval.length > 0 && aApproval[0].Hierarchy !== null) {
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
-			}
-
-			if (country.Region === "MEA") {
-				if (type.ApproverType === 'Regional Business' && offerValidation.TenderChannel === "Distributor") {
-					const validationType = type.ValidationType === 3 ? 3 : ServiceHelper.isDoubleXBelowY(1000000, offerValidation.AMOUNT_IN_NUMBERS / (exchangeRate?.X_RATE ?? 1)) ? 2 : 1;
-					type.ValidationType = validationType;
-					type.ValidationType2 = validationType;
-					requiredAction = validationType;
-				}
 			}
 
 			aResults.push({
