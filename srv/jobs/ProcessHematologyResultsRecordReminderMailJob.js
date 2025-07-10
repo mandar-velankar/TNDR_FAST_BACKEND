@@ -167,7 +167,7 @@ module.exports = class ProcessHematologyResultsRecordReminderMail extends BaseJo
                 data: { 
                     Offer: data.offer,
                     ReceipientName: data.recipient.UserName,
-                    OfferLink: `${fastUIAppHost}/app/index.html#/standardtender&/stdt/detail/${CountryCode}/All/${TenderID}/${OfferID}`
+                    OfferLink: `${fastUIAppHost}/app/index.html#/standardtender&/stdt/detail/${CountryCode}/All/${TenderID}/${OfferID}/Awards`
                 }
             }),
             Sent: false
