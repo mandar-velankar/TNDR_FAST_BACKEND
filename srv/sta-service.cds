@@ -14,6 +14,7 @@ using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {com.bayer.SXTENDER.ExternalDataViews} from '../db/ExternalDataViews';
 using {UITemplates as UITemplateSrv} from './external/UITemplates';
+using {ConditionContract as ConditionContract} from './external/ConditionContract';
 using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
 using { com.bayer.SXTENDER.ClaimsViews } from '../db/ClaimsViews';
 
@@ -74,6 +75,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity FullPropertiesView as projection on UITemplateSrv.FullPropertiesView;
     @readonly 
     entity FormFieldsView as projection on UITemplateSrv.FormFieldsView;
+
+    entity FastConditionContracts as projection on ConditionContract.FastConditionContracts;
     @readonly 
     entity BrandsInTender  as projection on TransactionalDataViews.BrandsInTender;
     @cds.redirection.target
