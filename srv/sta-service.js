@@ -7582,56 +7582,211 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
   	});
 	  
 	  
-	srv.on('createAllFastConditionContracts', async (req) => {
-		const offerID = req.data.OfferID;
+	srv.on("createAllFastConditionContracts", async (req) => {
+    const tx = cds.tx(req);
+    const offerID = req.data.OfferID;
 
-		try {
-			const awardedProducts = await SELECT.from(AwardedProducts).where({ OfferID: offerID });
-  			const allProductsWithOutcomeWon = awardedProducts.filter(product => product.Outcome === "Won");
+    try {
+      const awardedProducts = await tx.run(SELECT.from(AwardedProducts).where({ OfferID: offerID }));
+      const wonProducts = awardedProducts.filter((p) => p.Outcome === "Won");
 
-		let insertResult = await ConditionContract.run(INSERT.into(FastConditionContracts).entries({
-"BrandFilter": null,
-"ContractEndDate": "2025-06-20",
-"ContractStartDate": "2025-06-18",
-"ContractType": null,
-"CountryCode": "ES",
-"CustomerID": null,
-"DistributorID": 5678,
-"Division": "Pharma TEST WL",
-"Extension": null,
-"ExtensionPeriod": null,
-"ID": "61ebc22e-b63f-41e4-9685-579ad071414c",
-"InstituteID": 223569,
-"InstituteName": "Test",
-"OfferID": "ES-25-1018-2",
-"Owner": "Mandar",
-"ProductFilter": null,
-"Reference": "Test",
-"Status": "New Contract",
-"TenderID": "ES-25-1018",
-"createdAt": null,
-"createdBy": null,
-"hasActiveContracts": null,
-"hasCancelledContracts": null,
-"hasContractsToBeSynchronized": null,
-"hasExpiredContracts": null,
-"hasExpiringSoonContracts": null,
-"hasNetPriceAbovePVL": null,
-"hasNetPriceBelowFloorPrice": null,
-"hasNewContracts": null,
-"hasNewMaterialNumber": null,
-"hasUpdatedConfidentialPrice": null,
-"hasUpdatedPVL": null,
-"modifiedAt": null,
-"modifiedBy": null
-}));
+      if (wonProducts.length === 0) {
+        return req.error(404, 'No products with outcome "Won" found for the given OfferID');
+      }
 
-		} catch (err) {
-			req.error(400, 'Invalid JSON in ProductData');
-		return;
+      const payloads = [];
+
+      for (const product of wonProducts) {
+        const { TenderID, ProductCode, CountryCode } = product;
+
+        const [rootRow] = await tx.run(SELECT.from(FastConditionContractsView).where({OfferID: offerID}));
+        if (!rootRow) continue;
+
+		let extension = false;
+		let extensionPeriod = 0;
+
+		if (rootRow.ContractType === "Commercial Agreement") {
+			extension = true;
+
+			const start = new Date(product.ContractStartDate);
+			const end = new Date(product.ContractEndDate);
+
+			const msInDay = 1000 * 60 * 60 * 24;
+			extensionPeriod = Math.round((end - start) / msInDay);
 		}
 
-	});
+        const [contractRow] = await tx.run(SELECT.from(ConditionContractsView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
+        if (!contractRow) continue;
+
+        const [materialRow] = await tx.run(SELECT.from(CCMMaterilsView).where({ ProductCode: product.ProductCode }));
+
+        const [invoiceRow] = await tx.run(SELECT.from(PriceConditionInvoiceView).where({ OfferID: offerID, ProductCode:product.ProductCode }));
+
+		let focRows = [];
+
+		if (invoiceRow && invoiceRow.PriceConditionID) {
+			focRows = await tx.run(SELECT.from(PriceConditionFOCView).where({PriceConditionID: invoiceRow.PriceConditionID}));
+		}
+
+        const [rebateRow] = await tx.run(SELECT.from(PriceConditionRebateView).where({ OfferID: offerID, ProductCode:product.ProductCode }));
+
+        let discountRows = [];
+
+		if (rebateRow && rebateRow.PriceConditionID) {
+			discountRows = await tx.run(SELECT.from(PriceConditionDiscountConditionsView).where({PriceConditionID: rebateRow.PriceConditionID}));
+		}
+
+        const payload = {
+			TenderID: rootRow.TenderID,
+			OfferID: offerID,
+			CountryCode: rootRow.CountryCode,
+			InstituteID: rootRow.InstituteID,
+			InstituteName: rootRow.InstituteName,
+			DistributorID: rootRow.DistributorID,
+			ContractStartDate: product.ContractStartDate,
+			ContractEndDate: product.ContractEndDate,
+			ContractType: rootRow.ContractType,
+			CustomerID: rootRow.CustomerID,
+			Division: rootRow.Division,
+			Reference: rootRow.Reference,
+			Status: "New Contract",
+			Owner: rootRow.Owner,
+			BrandFilter: null,
+			ProductFilter: null,
+			Extension: extension,
+			ExtensionPeriod: extensionPeriod,
+			hasNewMaterialNumber: false,
+			hasActiveContracts: false,
+			hasUpdatedPVL: false,
+			hasUpdatedConfidentialPrice: false,
+			hasNetPriceAbovePVL: false,
+			hasNetPriceBelowFloorPrice: false,
+			hasExpiringSoonContracts: false,
+			hasExpiredContracts: false,
+			hasCancelledContracts: false,
+			hasContractsToBeSynchronized: false,
+			hasNewContracts: false,
+          	CCMContract: [
+            {
+				ProductCode:contractRow.ProductCode,
+				CountryCode: contractRow.CountryCode,
+				ProductName: contractRow.ProductName,
+				UoM: contractRow.UoM,
+				BrandID: contractRow.BrandID,
+				BrandName: contractRow.BrandName,
+				OfferPrice: contractRow.OfferPrice,
+				hasRappel: contractRow.hasRappel,
+				hasFOC: contractRow.hasFOC,
+				CCMContractStartDate: product.ContractStartDate,
+				CCMContractEndDate: product.ContractEndDate,
+				PreviousContractNumber: null,
+				ContractNumber: null,
+				Synchronized: false,
+				Notified: false,
+				Extension: extension,
+				ExtensionPeriod: extensionPeriod,
+				CreationDate: new Date().toISOString().split("T")[0],
+              	CCMCustomer: {
+					InstituteID: contractRow.InstituteID,
+					CustomerID: contractRow.CustomerID,
+					CountryCode: contractRow.CountryCode,
+					InstituteType: contractRow.InstituteType,
+					InstituteName: contractRow.InstituteName
+              	},
+              	CCMMaterial: materialRow
+                ? [{
+                    CountryCode: materialRow.CountryCode,
+                    ProductCode: materialRow.ProductCode,
+                    MaterialNumber: materialRow.SKUCode,
+                    FOCMaterialNumber: null,
+                    ActiveRecord: materialRow.ActiveRecord
+                  }]
+                : [],
+              	PriceConditionInvoice: invoiceRow
+                ? {
+                    OfferID: offerID,
+					ConditionType: invoiceRow.ConditionType,
+					Currency: invoiceRow.Currency,
+					Region: invoiceRow.Region,
+					CountryCode: invoiceRow.CountryCode,
+					YP00: invoiceRow.YP00,
+					YP04: invoiceRow.YP04,
+					YP10: invoiceRow.YP10,
+					YD75: invoiceRow.YD75,
+					YD30: null,
+					YD06: invoiceRow.YD06,
+					YD02: invoiceRow.YD02,
+					Tax: invoiceRow.Tax,
+					ConfidentialPrice: invoiceRow.ConfidentialPrice,
+					RoyalDecree: invoiceRow.RoyalDecree,
+					RoyalDecreeValue: invoiceRow.RoyalDecreeValue,
+					RoyalDecreeIncl: invoiceRow.RoyalDecreeIncl,
+					NetPriceWithoutTaxAfterDeductionRD: invoiceRow.NetPriceWithoutTaxAfterDeductionRD,
+					NetPriceWithTaxAfterDeductionRD: invoiceRow.NetPriceWithTaxAfterDeductionRD,
+					NetPriceWithoutTax: invoiceRow.NetPriceWithoutTax,
+					NetPriceWithTax: invoiceRow.NetPriceWithTax,
+					MaximumPrice: invoiceRow.MaximumPrice,
+					RequestedVolume: invoiceRow.RequestedVolume,
+					RentalPrice	: invoiceRow.RentalPrice,
+					MonthlyRentPerUnit: invoiceRow.MonthlyRentPerUnit,
+					AnnualValue : invoiceRow.AnnualValue,
+                  }
+                : null,
+              	PriceConditionRebate: rebateRow
+                ? {
+                    OfferID: offerID,
+                    ProductCode: rebateRow.ProductCode,
+                    CountryCode:rebateRow.CountryCode,
+                    YP00: rebateRow.YP00,
+					ConfidentialPrice: rebateRow.ConfidentialPrice,
+					SettlementDescription: rebateRow.SettlementDescription,
+					Tax: rebateRow.Tax,
+					RoyalDecree: rebateRow.RoyalDecree,
+					Liquidation: rebateRow.Liquidation,
+					RefundDate: rebateRow.RefundDate, 
+                    PriceConditionCode: rebateRow.PriceConditionCode,
+                    PriceConditionDiscountCondition: discountRows.map(row => ({
+						Volume: row.Volume,
+						Discount: row.Discount,
+						NetPriceWithoutTax: row.NetPriceWithoutTax,
+						NetPriceWithTax: row.NetPriceWithTax
+                    }))
+                  }
+                : null,
+              	PriceConditionFOC: focRows.map(row => ({
+					OfferID: offerID,
+					CountryCode: row.CountryCode,
+					ProductCode: row.ProductCode,
+					FreeGoodsOther: row.FreeGoodsOther,
+					FreeGoodsOther_Step: row.FreeGoodsOther_Step,
+					FreeGoodsOther_ABS_PCT: row.FreeGoodsOther_ABS_PCT,
+					VAT: row.VAT,
+					FOCMinAmount: row.FOCMinAmount,
+					FOCBonus: row.FOCBonus,
+					PotentialGeneratedSavings: row.PotentialGeneratedSavings,
+					RoyalDecree: row.RoyalDecree,
+					ADD_INCLUDE: row.ADD_INCLUDE
+              }))
+            }
+          ]
+        };
+
+        payloads.push(payload);
+      }
+
+      if (payloads.length === 0) {
+        return req.error(400, "No valid contract payloads could be built.");
+      }
+
+		await ConditionContract.run(INSERT.into(FastConditionContracts).entries(payloads));
+    //   await tx.run(INSERT.into(FastConditionContracts).entries(payloads));
+		return { message: `${payloads.length} contract(s) created.` };
+
+    } catch (err) {
+      console.error(err);
+      return req.error(500, "Internal error during contract creation.");
+    }
+  });
 
 
 }
