@@ -29,6 +29,7 @@ module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
 
 	const UITemplatesService = await cds.connect.to('UITemplates');
+	const ConditionContract = await cds.connect.to('ConditionContract');
 
 	const { 
 		CountryTemplate,
@@ -49,6 +50,10 @@ module.exports = async (srv) => {
 		MandatoryFieldsView,
 		FormFieldsView
 	} = UITemplatesService.entities;
+
+	const { 
+		FastConditionContracts
+	} = ConditionContract.entities;
 
 	// Use reflection to get the csn definition
 	const {
@@ -7584,6 +7589,42 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const awardedProducts = await SELECT.from(AwardedProducts).where({ OfferID: offerID });
   			const allProductsWithOutcomeWon = awardedProducts.filter(product => product.Outcome === "Won");
 
+		let insertResult = await ConditionContract.run(INSERT.into(FastConditionContracts).entries({
+"BrandFilter": null,
+"ContractEndDate": "2025-06-20",
+"ContractStartDate": "2025-06-18",
+"ContractType": null,
+"CountryCode": "ES",
+"CustomerID": null,
+"DistributorID": 5678,
+"Division": "Pharma TEST WL",
+"Extension": null,
+"ExtensionPeriod": null,
+"ID": "61ebc22e-b63f-41e4-9685-579ad071414c",
+"InstituteID": 223569,
+"InstituteName": "Test",
+"OfferID": "ES-25-1018-2",
+"Owner": "Mandar",
+"ProductFilter": null,
+"Reference": "Test",
+"Status": "New Contract",
+"TenderID": "ES-25-1018",
+"createdAt": null,
+"createdBy": null,
+"hasActiveContracts": null,
+"hasCancelledContracts": null,
+"hasContractsToBeSynchronized": null,
+"hasExpiredContracts": null,
+"hasExpiringSoonContracts": null,
+"hasNetPriceAbovePVL": null,
+"hasNetPriceBelowFloorPrice": null,
+"hasNewContracts": null,
+"hasNewMaterialNumber": null,
+"hasUpdatedConfidentialPrice": null,
+"hasUpdatedPVL": null,
+"modifiedAt": null,
+"modifiedBy": null
+}));
 
 		} catch (err) {
 			req.error(400, 'Invalid JSON in ProductData');
