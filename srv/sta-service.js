@@ -7686,12 +7686,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				Extension: extension,
 				ExtensionPeriod: extensionPeriod,
 				CreationDate: new Date().toISOString().split("T")[0],
+				validFrom: new Date().toISOString().split("T")[0],
+				validTo: "9999-12-31",
               	CCMCustomer: {
 					InstituteID: contractRow.InstituteID,
 					CustomerID: contractRow.CustomerID,
 					CountryCode: contractRow.CountryCode,
 					InstituteType: contractRow.InstituteType,
-					InstituteName: contractRow.InstituteName
+					InstituteName: contractRow.InstituteName,
+					validFrom: new Date().toISOString().split("T")[0],
+					validTo: "9999-12-31",
               	},
               	CCMMaterial: materialRow
                 ? [{
@@ -7699,7 +7703,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
                     ProductCode: materialRow.ProductCode,
                     MaterialNumber: materialRow.SKUCode,
                     FOCMaterialNumber: null,
-                    ActiveRecord: materialRow.ActiveRecord
+					hasNewMaterialNumber: false,
+                    ActiveRecord: materialRow.ActiveRecord,
+					validFrom: new Date().toISOString().split("T")[0],
+					validTo: "9999-12-31",
                   }]
                 : [],
               	PriceConditionInvoice: invoiceRow
@@ -7730,6 +7737,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					RentalPrice	: invoiceRow.RentalPrice,
 					MonthlyRentPerUnit: invoiceRow.MonthlyRentPerUnit,
 					AnnualValue : invoiceRow.AnnualValue,
+					validFrom: new Date().toISOString().split("T")[0],
+					validTo: "9999-12-31",
                   }
                 : null,
               	PriceConditionRebate: rebateRow
@@ -7745,6 +7754,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					Liquidation: rebateRow.Liquidation,
 					RefundDate: rebateRow.RefundDate, 
                     PriceConditionCode: rebateRow.PriceConditionCode,
+					validFrom: new Date().toISOString().split("T")[0],
+					validTo: "9999-12-31",
                     PriceConditionDiscountCondition: discountRows.map(row => ({
 						Volume: row.Volume,
 						Discount: row.Discount,
@@ -7765,7 +7776,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					FOCBonus: row.FOCBonus,
 					PotentialGeneratedSavings: row.PotentialGeneratedSavings,
 					RoyalDecree: row.RoyalDecree,
-					ADD_INCLUDE: row.ADD_INCLUDE
+					ADD_INCLUDE: row.ADD_INCLUDE,
+					validFrom: new Date().toISOString().split("T")[0],
+					validTo: "9999-12-31"
               }))
             }
           ]
