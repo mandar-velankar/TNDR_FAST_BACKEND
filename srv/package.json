@@ -72,6 +72,8 @@
       "ConditionContract": {
         "kind": "odata",
         "model": "gen/srv/csn.json",
+        "csrf": true,
+        "csrfInBatch": true,
         "credentials": {
           "destination": "fast-ccma-api",
           "path": "/odata/v4/condition-contract"
