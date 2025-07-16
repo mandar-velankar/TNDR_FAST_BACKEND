@@ -7800,7 +7800,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		await ConditionContract.run(INSERT.into(FastConditionContracts).entries(payloads));
     //   await tx.run(INSERT.into(FastConditionContracts).entries(payloads));
-		return req.reply(`${payloads.length} + FAST condition contract(s) created successfully.`);
+		return req.reply(`FAST condition contract(s) created successfully.`);
 
     } catch (err) {
       console.error(err);
