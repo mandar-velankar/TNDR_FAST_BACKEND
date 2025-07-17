@@ -1580,6 +1580,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         product.CountryCode,
         institute.InstituteID,
         institute.InstituteName,
+        institute.External_InstituteId,
         offer.Division,
         offer.DistributorID,
         institute.CustomerID,
@@ -1587,7 +1588,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.TenderName as Reference:String,
         tender.Classification as ContractType:String,
     }where tender.CountryCode = 'ES' 
-    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, offer.Division, offer.DistributorID, institute.CustomerID, tender.User.UserName, tender.TenderName, tender.Classification;
+    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, institute.External_InstituteId, offer.Division, offer.DistributorID, institute.CustomerID, tender.User.UserName, tender.TenderName, tender.Classification;
 
     entity ConditionContractsView as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer 
