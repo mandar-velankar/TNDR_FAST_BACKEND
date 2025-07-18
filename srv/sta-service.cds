@@ -77,6 +77,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity FormFieldsView as projection on UITemplateSrv.FormFieldsView;
 
     entity FastConditionContracts as projection on ConditionContract.FastConditionContracts;
+    entity CCMContract as projection on ConditionContract.CCMContract;
     @readonly 
     entity BrandsInTender  as projection on TransactionalDataViews.BrandsInTender;
     @cds.redirection.target
