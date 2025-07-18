@@ -3180,13 +3180,37 @@ entity StandardTenderHistorySpain as select from TransactionalData.PT_TMTEND as 
         case 
             when priceConditionClassification.ConditionType = 'PrecioNeto'
                 then priceCondition.AdditionalDiscount
-            when priceConditionClassification.ConditionType = 'DescuentoComercial'
+            when priceConditionClassification.ConditionType = 'DescuentoComercial' or priceConditionClassification.ConditionType = 'DescuentoEspecial'
                 then priceCondition.Discount
+            when priceConditionClassification.ConditionType = 'PVL'
+                then priceCondition.ConfidentialDiscount
             else priceCondition.Discount 
         end as DISCOUNT: Double,
         priceCondition.ConfidentialDiscount as CONFIDENTIAL_DISCOUNT,
         ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
-};
+}where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+group by tender.TenderID,
+    offer.OfferID,
+    product.ProductCode,
+    tender.TenderName,
+    offer.Quotation.OfferDate,
+    institute.InstituteID,
+    institute.InstituteName,
+    product.SKU.PRODUCTPACKNAME,
+    product.Price.OfferPrice,
+    product.SKU.PACKFACTOR,
+    product.UnitPerPack,
+    priceCondition.PVL,
+    tenderFOC.FOC,
+    tenderRappel.RAPPEL,
+    priceCondition.ConfidentialPrice,
+    priceConditionClassification.ConditionType,
+    priceCondition.RoyalDecree,
+    priceCondition.PriceConditionCode,
+    priceCondition.Discount,    
+    product.Results.Outcome,
+    priceCondition.AdditionalDiscount,
+    priceCondition.ConfidentialDiscount;
 
 entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
