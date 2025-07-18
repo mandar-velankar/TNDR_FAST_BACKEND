@@ -7591,9 +7591,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const awardedProducts = await tx.run(SELECT.from(AwardedProducts).where({ OfferID: offerID }));
 		const wonProducts = awardedProducts.filter((p) => p.Outcome === "Won");
 		const existingfastConditionContract = await ConditionContract.run(SELECT.one.from(FastConditionContracts).where({OfferID: offerID}));
-		let existingConditionContracts;
+		let existingConditionContracts = [];
 		if(existingfastConditionContract){
-			existingConditionContracts = await ConditionContract.run(SELECT.from(CCMContract).where({FastConditionContracts_ID: existingfastConditionContract.ID}));
+			existingConditionContracts = await ConditionContract.run(SELECT.from(CCMContract).where({FastConditionContracts_ID: existingfastConditionContract.ID})) || [];
 		}
 
 		if (wonProducts.length === 0) {
@@ -7605,7 +7605,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const ccmContractId = uuidv4();
 
 		const filteredWonProducts = wonProducts.filter(wonProduct => {
-			return !existingConditionContracts.some(existing => existing.ProductCode == wonProduct.ProductCode);
+			return !(existingConditionContracts?.some(existing => existing.ProductCode == wonProduct.ProductCode));
 		});
 
 		if (filteredWonProducts.length === 0) {
