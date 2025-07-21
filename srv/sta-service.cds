@@ -1604,16 +1604,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             on tender.InstituteID = institute.InstituteID
         left join TransactionalDataViews.BrandsInTender as brands 
             on brands.OFFERID = offer.OfferID
-        left outer join TransactionalDataViews.TenderFOCView as tenderFOC
-            on tender.TenderID = tenderFOC.TenderID
-            and offer.OfferID = tenderFOC.OfferID
-            and product.ProductCode = tenderFOC.ProductCode
-            and institute.InstituteID = tenderFOC.INSTITUTE_ID
-        left outer join TransactionalDataViews.TenderRappelView as tenderRappel
-            on tender.TenderID = tenderRappel.TenderID
-            and offer.OfferID = tenderRappel.OfferID
-            and product.ProductCode = tenderRappel.ProductCode
-            and institute.InstituteID = tenderRappel.INSTITUTE_ID
     {
         tender.TenderID,
         key offer.OfferID,
@@ -1627,11 +1617,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         institute.InstituteID,
         institute.InstituteName,
         institute.CustomerID,
-        institute.InstituteType,
-        ifnull(tenderFOC.FOC, 'No') as hasFOC:String(10),
-        ifnull(tenderRappel.RAPPEL, 'No') as hasRappel:String(10), 
+        institute.InstituteType
     }where tender.CountryCode = 'ES'
-    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.SKU.UOM, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType, tenderFOC.FOC, tenderRappel.RAPPEL;
+    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.SKU.UOM, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType;
 
     entity CCMMaterilsView as select from TransactionalData.PT_TMOFPR as product 
         inner join MasterData.PT_TMSKUPRDPCK as skuprdpck 
@@ -1896,7 +1884,7 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         and priceConditionClassification.Classification = tender.Classification
         and priceConditionClassification.Division = offer.Division 
         and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
-        and priceConditionClassification.isMain = false and priceConditionClassification.ConditionType = 'FOC'
+        and priceConditionClassification.isMain = true
     inner join TransactionalData.PriceCondition as priceCondition 
         on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
         and product.OfferID = priceCondition.OfferID

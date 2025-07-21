@@ -7627,8 +7627,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				const start = new Date(product.ContractStartDate);
 				const end = new Date(product.ContractEndDate);
 
-				const msInDay = 1000 * 60 * 60 * 24;
-				extensionPeriod = Math.round((end - start) / msInDay);
+				let years = end.getFullYear() - start.getFullYear();
+				let months = end.getMonth() - start.getMonth();
+				let days = end.getDate() - start.getDate();
+
+				extensionPeriod = years * 12 + months;
+
+				// If the end day is greater than or equal to the start day, count it as a full month
+				if (days >= 0) {
+					extensionPeriod += 1;
+				}
 			}
 
 			const [contractRow] = await tx.run(SELECT.from(ConditionContractsView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
@@ -7701,8 +7709,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						BrandID: toStr(contractRow.BrandID),
 						BrandName: toStr(contractRow.BrandName),
 						OfferPrice: toDecimal(contractRow.OfferPrice),
-						hasRappel: toStr(contractRow.hasRappel),
-						hasFOC: toStr(contractRow.hasFOC),
+						hasRappel: rebateRow ? 'Yes' : 'No',
+						hasFOC: focRows.length > 0 ? 'Yes' : 'No',
 						CCMContractStartDate: toStr(product.ContractStartDate),
 						CCMContractEndDate: toStr(product.ContractEndDate),
 						PreviousContractNumber: null,
@@ -7775,7 +7783,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						CountryCode: toStr(rebateRow.CountryCode),
 						YP00: toDecimal(rebateRow.YP00),
 						ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
-						SettlementDescription: toStr(rebateRow.SettlementDescription),
+						SettlementDescription: toStr(rebateRow.Description),
 						Tax: toDecimal(rebateRow.Tax),
 						RoyalDecree: toStr(rebateRow.RoyalDecree),
 						Liquidation: toStr(rebateRow.Liquidation),
