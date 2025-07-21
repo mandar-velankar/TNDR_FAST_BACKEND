@@ -1909,6 +1909,14 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
             priceConditionClassification.isMain,
             offer.Currency,
             foc.FreeGoodsOther,
+            case
+                when foc.FreeGoodsOther_ABS_PCT = 'PCT'
+                    then round(100 * foc.FreeGoodsOther, 2) || '%'
+                when foc.FreeGoodsOther_ABS_PCT = 'ABS'
+                    then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+                when foc.FreeGoodsOther_ABS_PCT = 'STP'
+                    then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+            end as Bonus:String,
             foc.FreeGoodsOther_Step,
             foc.FreeGoodsOther_ABS_PCT,
             foc.VAT,
@@ -1922,6 +1930,7 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
             tender.CountryCode,
             tender.Country.Region,
             product.TenderID,
+            product.UnitPerPack,
             offer.OfferID,
             product.ProductCode,
             product.RequestedVolume,
