@@ -7586,6 +7586,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	srv.on("createAllFastConditionContracts", async (req) => {
 		const tx = cds.tx(req);
 		const offerID = req.data.OfferID;
+		const toStr = (v) => v != null ? String(v) : null;
+		const toInt = (v) => v === "Yes" ? 1 : v === "No" ? 0 : parseInt(v) || 0;
+		const toDecimal = (v) => v != null ? Number(v) : null;
+		const today = new Date().toISOString().split("T")[0];
 
     try {
 		const awardedProducts = await tx.run(SELECT.from(AwardedProducts).where({ OfferID: offerID }));
@@ -7602,7 +7606,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const payloads = [];
 		const fastCCMContractId = uuidv4();
-		const ccmContractId = uuidv4();
 
 		const filteredWonProducts = wonProducts.filter(wonProduct => {
 			return !(existingConditionContracts?.some(existing => existing.ProductCode == wonProduct.ProductCode));
@@ -7612,32 +7615,66 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			return req.error(404, 'No New products with outcome "Won" found for the given OfferID');
 		}
 
-		for (const product of filteredWonProducts) {
-			const { TenderID, ProductCode, CountryCode } = product;
+		const [rootRow] = await tx.run(SELECT.from(FastConditionContractsView).where({OfferID: offerID}));
 
-			const [rootRow] = await tx.run(SELECT.from(FastConditionContractsView).where({OfferID: offerID}));
-			if (!rootRow) continue;
+		let extension = false;
+		let extensionPeriod = 0;
 
-			let extension = false;
-			let extensionPeriod = 0;
+		if (rootRow.ContractType === "Commercial Agreement") {
+			extension = true;
 
-			if (rootRow.ContractType === "Commercial Agreement") {
-				extension = true;
+			const start = new Date(filteredWonProducts[0].ContractStartDate);
+			const end = new Date(filteredWonProducts[0].ContractEndDate);
 
-				const start = new Date(product.ContractStartDate);
-				const end = new Date(product.ContractEndDate);
+			let years = end.getFullYear() - start.getFullYear();
+			let months = end.getMonth() - start.getMonth();
+			let days = end.getDate() - start.getDate();
 
-				let years = end.getFullYear() - start.getFullYear();
-				let months = end.getMonth() - start.getMonth();
-				let days = end.getDate() - start.getDate();
+			extensionPeriod = years * 12 + months;
 
-				extensionPeriod = years * 12 + months;
-
-				// If the end day is greater than or equal to the start day, count it as a full month
-				if (days >= 0) {
-					extensionPeriod += 1;
-				}
+			// If the end day is greater than or equal to the start day, count it as a full month
+			if (days >= 0) {
+				extensionPeriod += 1;
 			}
+		}
+
+		let payload = {
+			ID: fastCCMContractId,
+			TenderID: toStr(rootRow.TenderID),
+			OfferID: toStr(offerID),
+			CountryCode: toStr(rootRow.CountryCode),
+			InstituteID: toInt(rootRow.InstituteID),
+			InstituteName: toStr(rootRow.InstituteName),
+			DistributorID: toInt(rootRow.DistributorID),
+			ContractStartDate: toStr(filteredWonProducts[0].ContractStartDate),
+			ContractEndDate: toStr(filteredWonProducts[0].ContractEndDate),
+			ContractType: toStr(rootRow.ContractType),
+			CustomerID: toStr(rootRow.CustomerID),
+			Division: toStr(rootRow.Division),
+			Reference: toStr(rootRow.Reference),
+			Status: "New Contract",
+			Owner: toStr(rootRow.Owner),
+			BrandFilter: null,
+			ProductFilter: null,
+			Extension: extension,
+			ExtensionPeriod: toStr(extensionPeriod),
+			hasNewMaterialNumber: false,
+			hasActiveContracts: false,
+			hasUpdatedPVL: false,
+			hasUpdatedConfidentialPrice: false,
+			hasNetPriceAbovePVL: false,
+			hasNetPriceBelowFloorPrice: false,
+			hasExpiringSoonContracts: false,
+			hasExpiredContracts: false,
+			hasCancelledContracts: false,
+			hasContractsToBeSynchronized: false,
+			hasNewContracts: false,
+			CCMContract: []
+		};
+
+		for (const product of filteredWonProducts) {
+
+			const ccmContractId = uuidv4();
 
 			const [contractRow] = await tx.run(SELECT.from(ConditionContractsView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
 			if (!contractRow) continue;
@@ -7660,297 +7697,144 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				discountRows = await tx.run(SELECT.from(PriceConditionDiscountConditionsView).where({PriceConditionID: rebateRow.PriceConditionID}));
 			}
 
-			const toStr = (v) => v != null ? String(v) : null;
-			const toInt = (v) => v === "Yes" ? 1 : v === "No" ? 0 : parseInt(v) || 0;
-			const toDecimal = (v) => v != null ? Number(v) : null;
-			const today = new Date().toISOString().split("T")[0];
-
-			let payload;
-
-			if(existingConditionContracts.length === 0){
-				payload = {
-					ID: fastCCMContractId,
-					TenderID: toStr(rootRow.TenderID),
-					OfferID: toStr(offerID),
-					CountryCode: toStr(rootRow.CountryCode),
-					InstituteID: toInt(rootRow.InstituteID),
-					InstituteName: toStr(rootRow.InstituteName),
-					DistributorID: toInt(rootRow.DistributorID),
-					ContractStartDate: toStr(product.ContractStartDate),
-					ContractEndDate: toStr(product.ContractEndDate),
-					ContractType: toStr(rootRow.ContractType),
-					CustomerID: toStr(rootRow.CustomerID),
-					Division: toStr(rootRow.Division),
-					Reference: toStr(rootRow.Reference),
-					Status: "New Contract",
-					Owner: toStr(rootRow.Owner),
-					BrandFilter: null,
-					ProductFilter: null,
+			const ccmContract = {
+					ID: ccmContractId,
+					ProductCode: toStr(contractRow.ProductCode),
+					CountryCode: toStr(contractRow.CountryCode),
+					ProductName: toStr(contractRow.ProductPackName),
+					UoM: toStr(contractRow.UoM),
+					NewMaterialNumber: null,
+					BrandID: toStr(contractRow.BrandID),
+					BrandName: toStr(contractRow.BrandName),
+					OfferPrice: toDecimal(contractRow.OfferPrice),
+					hasRappel: rebateRow ? 'Yes' : 'No',
+					hasFOC: focRows.length > 0 ? 'Yes' : 'No',
+					CCMContractStartDate: toStr(product.ContractStartDate),
+					CCMContractEndDate: toStr(product.ContractEndDate),
+					PreviousContractNumber: null,
+					ContractNumber: null,
+					Synchronized: false,
+					Notified: false,
 					Extension: extension,
 					ExtensionPeriod: toStr(extensionPeriod),
-					hasNewMaterialNumber: false,
-					hasActiveContracts: false,
-					hasUpdatedPVL: false,
-					hasUpdatedConfidentialPrice: false,
-					hasNetPriceAbovePVL: false,
-					hasNetPriceBelowFloorPrice: false,
-					hasExpiringSoonContracts: false,
-					hasExpiredContracts: false,
-					hasCancelledContracts: false,
-					hasContractsToBeSynchronized: false,
-					hasNewContracts: false,
-					CCMContract: [{
-						ID: ccmContractId,
-						ProductCode: toStr(contractRow.ProductCode),
+					CreationDate: today,
+					FastConditionContracts_ID: existingConditionContracts.length === 0 ? fastCCMContractId : existingfastConditionContract.ID,
+					validFrom: today,
+					validTo: "9999-12-31",
+					CCMCustomer: {
+						InstituteID: toStr(contractRow.InstituteID),
+						AssortmentReference: toStr(rootRow.External_InstituteId),
+						CustomerID: toInt(contractRow.CustomerID),
 						CountryCode: toStr(contractRow.CountryCode),
-						ProductName: toStr(contractRow.ProductPackName),
-						UoM: toStr(contractRow.UoM),
-						NewMaterialNumber: null,
-						BrandID: toStr(contractRow.BrandID),
-						BrandName: toStr(contractRow.BrandName),
-						OfferPrice: toDecimal(contractRow.OfferPrice),
-						hasRappel: rebateRow ? 'Yes' : 'No',
-						hasFOC: focRows.length > 0 ? 'Yes' : 'No',
-						CCMContractStartDate: toStr(product.ContractStartDate),
-						CCMContractEndDate: toStr(product.ContractEndDate),
-						PreviousContractNumber: null,
-						ContractNumber: null,
-						Synchronized: false,
-						Notified: false,
-						Extension: extension,
-						ExtensionPeriod: toStr(extensionPeriod),
-						CreationDate: today,
-						FastConditionContracts_ID: fastCCMContractId,
+						InstituteType: toStr(contractRow.InstituteType),
+						InstituteName: toStr(contractRow.InstituteName),
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31"
+					},
+					CCMMaterial: materialRows.map(row => ({
+						CountryCode: toStr(row.CountryCode),
+						ProductCode: toStr(row.ProductCode),
+						MaterialNumber: toStr(row.SKUCode),
+						FOCMaterialNumber: null,
+						ActiveRecord: toInt(row.ActiveRecord),
+						isNewMaterialNumber: false,
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31"
+					})),
+					PriceConditionInvoice: invoiceRow ? {
+						OfferID: toStr(offerID),
+						ProductCode: toInt(invoiceRow.ProductCode),
+						ConditionType: toStr(invoiceRow.ConditionType),
+						Currency: toStr(invoiceRow.Currency),
+						Region: toStr(invoiceRow.Region),
+						CountryCode: toStr(invoiceRow.CountryCode),
+						YP00: toDecimal(invoiceRow.YP00),
+						YP04: toDecimal(invoiceRow.YP04),
+						YP10: toDecimal(invoiceRow.YP10),
+						YD75: toDecimal(invoiceRow.YD75),
+						YD30: toDecimal(invoiceRow.YD30),
+						YD06: toDecimal(invoiceRow.YD06),
+						YD02: toDecimal(invoiceRow.YD02),
+						Tax: toDecimal(invoiceRow.Tax),
+						ConfidentialPrice: toDecimal(invoiceRow.ConfidentialPrice),
+						RoyalDecree: toStr(invoiceRow.RoyalDecree),
+						RoyalDecreeValue: toDecimal(invoiceRow.RoyalDecreeValue),
+						RoyalDecreeIncl: invoiceRow.RoyalDecreeIncl,
+						NetPriceWithoutTaxAfterDeductionRD: toDecimal(invoiceRow.NetPriceWithoutTaxAfterDeductionRD),
+						NetPriceWithTaxAfterDeductionRD: toDecimal(invoiceRow.NetPriceWithTaxAfterDeductionRD),
+						NetPriceWithoutTax: toDecimal(invoiceRow.NetPriceWithoutTax),
+						NetPriceWithTax: toDecimal(invoiceRow.NetPriceWithTax),
+						MaximumPrice: toDecimal(invoiceRow.MaximumPrice),
+						RequestedVolume: toInt(invoiceRow.RequestedVolume),
+						RentalPrice: toDecimal(invoiceRow.RentalPrice),
+						MonthlyRentPerUnit: toDecimal(invoiceRow.MonthlyRentPerUnit),
+						AnnualValue: toDecimal(invoiceRow.AnnualValue),
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31"
+					} : null,
+					PriceConditionRebate: rebateRow ? {
+						OfferID: toStr(offerID),
+						ProductCode: toInt(rebateRow.ProductCode),
+						CountryCode: toStr(rebateRow.CountryCode),
+						YP00: toDecimal(rebateRow.YP00),
+						ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
+						SettlementDescription: toStr(rebateRow.SettlementDescription),
+						Tax: toDecimal(rebateRow.Tax),
+						RoyalDecree: toStr(rebateRow.RoyalDecree),
+						Liquidation: toStr(rebateRow.Liquidation),
+						RefundDate: toStr(rebateRow.RefundDate),
+						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
+						CCMContract_ID: ccmContractId,
 						validFrom: today,
 						validTo: "9999-12-31",
-						CCMCustomer: {
-							InstituteID: toStr(contractRow.InstituteID),
-							AssortmentReference: toStr(contractRow.External_InstituteId),
-							CustomerID: toInt(contractRow.CustomerID),
-							CountryCode: toStr(contractRow.CountryCode),
-							InstituteType: toStr(contractRow.InstituteType),
-							InstituteName: toStr(contractRow.InstituteName),
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31"
-						},
-						CCMMaterial: materialRows.map(row => ({
-							CountryCode: toStr(row.CountryCode),
-							ProductCode: toStr(row.ProductCode),
-							MaterialNumber: toStr(row.SKUCode),
-							FOCMaterialNumber: null,
-							ActiveRecord: toInt(row.ActiveRecord),
-							isNewMaterialNumber: false,
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31"
-						})),
-						PriceConditionInvoice: invoiceRow ? {
-							OfferID: toStr(offerID),
-							ProductCode: toInt(invoiceRow.ProductCode),
-							ConditionType: toStr(invoiceRow.ConditionType),
-							Currency: toStr(invoiceRow.Currency) || 'EUR',
-							Region: toStr(invoiceRow.Region),
-							CountryCode: toStr(invoiceRow.CountryCode),
-							YP00: toDecimal(invoiceRow.YP00),
-							YP04: toDecimal(invoiceRow.YP04),
-							YP10: toDecimal(invoiceRow.YP10),
-							YD75: toDecimal(invoiceRow.YD75),
-							YD30: toDecimal(invoiceRow.YD30),
-							YD06: toDecimal(invoiceRow.YD06),
-							YD02: toDecimal(invoiceRow.YD02),
-							Tax: toDecimal(invoiceRow.Tax),
-							ConfidentialPrice: toDecimal(invoiceRow.ConfidentialPrice),
-							RoyalDecree: toStr(invoiceRow.RoyalDecree),
-							RoyalDecreeValue: toDecimal(invoiceRow.RoyalDecreeValue),
-							RoyalDecreeIncl: invoiceRow.RoyalDecreeIncl,
-							NetPriceWithoutTaxAfterDeductionRD: toDecimal(invoiceRow.NetPriceWithoutTaxAfterDeductionRD),
-							NetPriceWithTaxAfterDeductionRD: toDecimal(invoiceRow.NetPriceWithTaxAfterDeductionRD),
-							NetPriceWithoutTax: toDecimal(invoiceRow.NetPriceWithoutTax),
-							NetPriceWithTax: toDecimal(invoiceRow.NetPriceWithTax),
-							MaximumPrice: toDecimal(invoiceRow.MaximumPrice),
-							RequestedVolume: toInt(invoiceRow.RequestedVolume),
-							RentalPrice: toDecimal(invoiceRow.RentalPrice),
-							MonthlyRentPerUnit: toDecimal(invoiceRow.MonthlyRentPerUnit),
-							AnnualValue: toDecimal(invoiceRow.AnnualValue),
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31"
-						} : null,
-						PriceConditionRebate: rebateRow ? {
-							OfferID: toStr(offerID),
-							ProductCode: toInt(rebateRow.ProductCode),
-							CountryCode: toStr(rebateRow.CountryCode),
-							YP00: toDecimal(rebateRow.YP00),
-							ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
-							SettlementDescription: toStr(rebateRow.Description),
-							Tax: toDecimal(rebateRow.Tax),
-							RoyalDecree: toStr(rebateRow.RoyalDecree),
-							Liquidation: toStr(rebateRow.Liquidation),
-							RefundDate: toStr(rebateRow.RefundDate),
-							PriceConditionCode: toStr(rebateRow.PriceConditionCode),
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31",
-							PriceConditionDiscountCondition: discountRows.map(row => ({
-								Volume: toInt(row.Volume),
-								Discount: toDecimal(row.Discount),
-								NetPriceWithoutTax: toDecimal(row.NetPriceWithoutTax),
-								NetPriceWithTax: toDecimal(row.NetPriceWithTax)
-							}))
-						} : null,
-						PriceConditionFOC: focRows.map(row => ({
-							OfferID: toStr(offerID),
-							CountryCode: toStr(row.CountryCode),
-							ProductCode: toInt(row.ProductCode),
-							FreeGoodsOther: toDecimal(row.FreeGoodsOther),
-							FreeGoodsOther_Step: toDecimal(row.FreeGoodsOther_Step),
-							FreeGoodsOther_ABS_PCT: toStr(row.FreeGoodsOther_ABS_PCT),
-							VAT: toDecimal(row.VAT),
-							FOCMinAmount: toInt(row.FOCMinAmount),
-							FOCBonus: toStr(row.Bonus),
-							PotentialGeneratedSavings: toDecimal(row.PotentialGeneratedSavings),
-							RoyalDecree: toStr(row.RoyalDecree),
-							ADD_INCLUDE: toStr(row.ADD_INCLUDE),
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31"
-						})),
-					}]
+						PriceConditionDiscountCondition: discountRows.map(row => ({
+							Volume: toInt(row.Volume),
+							Discount: toDecimal(row.Discount),
+							NetPriceWithoutTax: toDecimal(row.NetPriceWithoutTax),
+							NetPriceWithTax: toDecimal(row.NetPriceWithTax)
+						}))
+					} : null,
+					PriceConditionFOC: focRows.map(row => ({
+						OfferID: toStr(offerID),
+						CountryCode: toStr(row.CountryCode),
+						ProductCode: toInt(row.ProductCode),
+						FreeGoodsOther: toDecimal(row.FreeGoodsOther),
+						FreeGoodsOther_Step: toDecimal(row.FreeGoodsOther_Step),
+						FreeGoodsOther_ABS_PCT: toStr(row.FreeGoodsOther_ABS_PCT),
+						VAT: toDecimal(row.VAT),
+						FOCMinAmount: toInt(row.FOCMinAmount),
+						FOCBonus: toDecimal(row.FOCBonus),
+						PotentialGeneratedSavings: toDecimal(row.PotentialGeneratedSavings),
+						RoyalDecree: toStr(row.RoyalDecree),
+						ADD_INCLUDE: toStr(row.ADD_INCLUDE),
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31"
+					})),
 				};
-			}else{
-				payload = {
-						ID: ccmContractId,
-						ProductCode: toStr(contractRow.ProductCode),
-						CountryCode: toStr(contractRow.CountryCode),
-						ProductName: toStr(contractRow.ProductPackName),
-						UoM: toStr(contractRow.UoM),
-						NewMaterialNumber: null,
-						BrandID: toStr(contractRow.BrandID),
-						BrandName: toStr(contractRow.BrandName),
-						OfferPrice: toDecimal(contractRow.OfferPrice),
-						hasRappel: rebateRow ? 'Yes' : 'No',
-						hasFOC: focRows.length > 0 ? 'Yes' : 'No',
-						CCMContractStartDate: toStr(product.ContractStartDate),
-						CCMContractEndDate: toStr(product.ContractEndDate),
-						PreviousContractNumber: null,
-						ContractNumber: null,
-						Synchronized: false,
-						Notified: false,
-						Extension: extension,
-						ExtensionPeriod: toStr(extensionPeriod),
-						CreationDate: today,
-						FastConditionContracts_ID: existingfastConditionContract.ID,
-						validFrom: today,
-						validTo: "9999-12-31",
-						CCMCustomer: {
-							InstituteID: toStr(contractRow.InstituteID),
-							AssortmentReference: toStr(contractRow.External_InstituteId),
-							CustomerID: toInt(contractRow.CustomerID),
-							CountryCode: toStr(contractRow.CountryCode),
-							InstituteType: toStr(contractRow.InstituteType),
-							InstituteName: toStr(contractRow.InstituteName),
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31"
-						},
-						CCMMaterial: materialRows.map(row => ({
-							CountryCode: toStr(row.CountryCode),
-							ProductCode: toStr(row.ProductCode),
-							MaterialNumber: toStr(row.SKUCode),
-							FOCMaterialNumber: null,
-							ActiveRecord: toInt(row.ActiveRecord),
-							isNewMaterialNumber: false,
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31"
-						})),
-						PriceConditionInvoice: invoiceRow ? {
-							OfferID: toStr(offerID),
-							ProductCode: toInt(invoiceRow.ProductCode),
-							ConditionType: toStr(invoiceRow.ConditionType),
-							Currency: toStr(invoiceRow.Currency),
-							Region: toStr(invoiceRow.Region),
-							CountryCode: toStr(invoiceRow.CountryCode),
-							YP00: toDecimal(invoiceRow.YP00),
-							YP04: toDecimal(invoiceRow.YP04),
-							YP10: toDecimal(invoiceRow.YP10),
-							YD75: toDecimal(invoiceRow.YD75),
-							YD30: toDecimal(invoiceRow.YD30),
-							YD06: toDecimal(invoiceRow.YD06),
-							YD02: toDecimal(invoiceRow.YD02),
-							Tax: toDecimal(invoiceRow.Tax),
-							ConfidentialPrice: toDecimal(invoiceRow.ConfidentialPrice),
-							RoyalDecree: toStr(invoiceRow.RoyalDecree),
-							RoyalDecreeValue: toDecimal(invoiceRow.RoyalDecreeValue),
-							RoyalDecreeIncl: invoiceRow.RoyalDecreeIncl,
-							NetPriceWithoutTaxAfterDeductionRD: toDecimal(invoiceRow.NetPriceWithoutTaxAfterDeductionRD),
-							NetPriceWithTaxAfterDeductionRD: toDecimal(invoiceRow.NetPriceWithTaxAfterDeductionRD),
-							NetPriceWithoutTax: toDecimal(invoiceRow.NetPriceWithoutTax),
-							NetPriceWithTax: toDecimal(invoiceRow.NetPriceWithTax),
-							MaximumPrice: toDecimal(invoiceRow.MaximumPrice),
-							RequestedVolume: toInt(invoiceRow.RequestedVolume),
-							RentalPrice: toDecimal(invoiceRow.RentalPrice),
-							MonthlyRentPerUnit: toDecimal(invoiceRow.MonthlyRentPerUnit),
-							AnnualValue: toDecimal(invoiceRow.AnnualValue),
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31"
-						} : null,
-						PriceConditionRebate: rebateRow ? {
-							OfferID: toStr(offerID),
-							ProductCode: toInt(rebateRow.ProductCode),
-							CountryCode: toStr(rebateRow.CountryCode),
-							YP00: toDecimal(rebateRow.YP00),
-							ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
-							SettlementDescription: toStr(rebateRow.SettlementDescription),
-							Tax: toDecimal(rebateRow.Tax),
-							RoyalDecree: toStr(rebateRow.RoyalDecree),
-							Liquidation: toStr(rebateRow.Liquidation),
-							RefundDate: toStr(rebateRow.RefundDate),
-							PriceConditionCode: toStr(rebateRow.PriceConditionCode),
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31",
-							PriceConditionDiscountCondition: discountRows.map(row => ({
-								Volume: toInt(row.Volume),
-								Discount: toDecimal(row.Discount),
-								NetPriceWithoutTax: toDecimal(row.NetPriceWithoutTax),
-								NetPriceWithTax: toDecimal(row.NetPriceWithTax)
-							}))
-						} : null,
-						PriceConditionFOC: focRows.map(row => ({
-							OfferID: toStr(offerID),
-							CountryCode: toStr(row.CountryCode),
-							ProductCode: toInt(row.ProductCode),
-							FreeGoodsOther: toDecimal(row.FreeGoodsOther),
-							FreeGoodsOther_Step: toDecimal(row.FreeGoodsOther_Step),
-							FreeGoodsOther_ABS_PCT: toStr(row.FreeGoodsOther_ABS_PCT),
-							VAT: toDecimal(row.VAT),
-							FOCMinAmount: toInt(row.FOCMinAmount),
-							FOCBonus: toDecimal(row.FOCBonus),
-							PotentialGeneratedSavings: toDecimal(row.PotentialGeneratedSavings),
-							RoyalDecree: toStr(row.RoyalDecree),
-							ADD_INCLUDE: toStr(row.ADD_INCLUDE),
-							CCMContract_ID: ccmContractId,
-							validFrom: today,
-							validTo: "9999-12-31"
-						})),
-					};
-			}
 
 
-			payloads.push(payload);
+			payload.CCMContract.push(ccmContract);
 		}
 
-		if (payloads.length === 0) {
+		if (payload.length === 0) {
 			return req.error(400, "No valid contract payloads could be built.");
 		}
 
 		if(existingConditionContracts.length === 0){
-			await ConditionContract.run(INSERT.into(FastConditionContracts).entries(payloads));
+			await ConditionContract.run(INSERT.into(FastConditionContracts).entries(payload));
 		}else{
-			await ConditionContract.run(INSERT.into(CCMContract).entries(payloads));
+			const contracts = payload.CCMContract;
+			const onlyChildrenPayloads = Array.isArray(contracts) ? contracts : contracts ? [contracts] : [];
+			if (onlyChildrenPayloads.length === 0) {
+				return req.error(400, "No new Contract to insert under existing FAST Contract.");
+			}
+			for (const child of onlyChildrenPayloads) {
+				await ConditionContract.run(INSERT.into(CCMContract).entries(child));
+			}
 		}
 
 		return req.reply({
