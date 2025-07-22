@@ -7642,7 +7642,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const [contractRow] = await tx.run(SELECT.from(ConditionContractsView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
 			if (!contractRow) continue;
 
-			const [materialRow] = await tx.run(SELECT.from(CCMMaterilsView).where({ ProductCode: product.ProductCode }));
+			const materialRows = await tx.run(SELECT.from(CCMMaterilsView).where({ ProductCode: product.ProductCode }));
 
 			const [invoiceRow] = await tx.run(SELECT.from(PriceConditionInvoiceView).where({ OfferID: offerID, ProductCode:product.ProductCode }));
 
@@ -7734,17 +7734,17 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							validFrom: today,
 							validTo: "9999-12-31"
 						},
-						CCMMaterial: materialRow ? [{
-							CountryCode: toStr(materialRow.CountryCode),
-							ProductCode: toStr(materialRow.ProductCode),
-							MaterialNumber: toStr(materialRow.SKUCode),
+						CCMMaterial: materialRows.map(row => ({
+							CountryCode: toStr(row.CountryCode),
+							ProductCode: toStr(row.ProductCode),
+							MaterialNumber: toStr(row.SKUCode),
 							FOCMaterialNumber: null,
-							ActiveRecord: toInt(materialRow.ActiveRecord),
+							ActiveRecord: toInt(row.ActiveRecord),
 							isNewMaterialNumber: false,
 							CCMContract_ID: ccmContractId,
 							validFrom: today,
 							validTo: "9999-12-31"
-						}] : [],
+						})),
 						PriceConditionInvoice: invoiceRow ? {
 							OfferID: toStr(offerID),
 							ProductCode: toInt(invoiceRow.ProductCode),
@@ -7777,44 +7777,44 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							validFrom: today,
 							validTo: "9999-12-31"
 						} : null,
-					PriceConditionRebate: rebateRow ? {
-						OfferID: toStr(offerID),
-						ProductCode: toInt(rebateRow.ProductCode),
-						CountryCode: toStr(rebateRow.CountryCode),
-						YP00: toDecimal(rebateRow.YP00),
-						ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
-						SettlementDescription: toStr(rebateRow.Description),
-						Tax: toDecimal(rebateRow.Tax),
-						RoyalDecree: toStr(rebateRow.RoyalDecree),
-						Liquidation: toStr(rebateRow.Liquidation),
-						RefundDate: toStr(rebateRow.RefundDate),
-						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
-						CCMContract_ID: ccmContractId,
-						validFrom: today,
-						validTo: "9999-12-31",
-						PriceConditionDiscountCondition: discountRows.map(row => ({
-							Volume: toInt(row.Volume),
-							Discount: toDecimal(row.Discount),
-							NetPriceWithoutTax: toDecimal(row.NetPriceWithoutTax),
-							NetPriceWithTax: toDecimal(row.NetPriceWithTax)
-						}))
-					} : null,
-					PriceConditionFOC: focRows.map(row => ({
-						OfferID: toStr(offerID),
-						CountryCode: toStr(row.CountryCode),
-						ProductCode: toInt(row.ProductCode),
-						FreeGoodsOther: toDecimal(row.FreeGoodsOther),
-						FreeGoodsOther_Step: toDecimal(row.FreeGoodsOther_Step),
-						FreeGoodsOther_ABS_PCT: toStr(row.FreeGoodsOther_ABS_PCT),
-						VAT: toDecimal(row.VAT),
-						FOCMinAmount: toInt(row.FOCMinAmount),
-						FOCBonus: toStr(row.Bonus),
-						PotentialGeneratedSavings: toDecimal(row.PotentialGeneratedSavings),
-						RoyalDecree: toStr(row.RoyalDecree),
-						ADD_INCLUDE: toStr(row.ADD_INCLUDE),
-						CCMContract_ID: ccmContractId,
-						validFrom: today,
-						validTo: "9999-12-31"
+						PriceConditionRebate: rebateRow ? {
+							OfferID: toStr(offerID),
+							ProductCode: toInt(rebateRow.ProductCode),
+							CountryCode: toStr(rebateRow.CountryCode),
+							YP00: toDecimal(rebateRow.YP00),
+							ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
+							SettlementDescription: toStr(rebateRow.Description),
+							Tax: toDecimal(rebateRow.Tax),
+							RoyalDecree: toStr(rebateRow.RoyalDecree),
+							Liquidation: toStr(rebateRow.Liquidation),
+							RefundDate: toStr(rebateRow.RefundDate),
+							PriceConditionCode: toStr(rebateRow.PriceConditionCode),
+							CCMContract_ID: ccmContractId,
+							validFrom: today,
+							validTo: "9999-12-31",
+							PriceConditionDiscountCondition: discountRows.map(row => ({
+								Volume: toInt(row.Volume),
+								Discount: toDecimal(row.Discount),
+								NetPriceWithoutTax: toDecimal(row.NetPriceWithoutTax),
+								NetPriceWithTax: toDecimal(row.NetPriceWithTax)
+							}))
+						} : null,
+						PriceConditionFOC: focRows.map(row => ({
+							OfferID: toStr(offerID),
+							CountryCode: toStr(row.CountryCode),
+							ProductCode: toInt(row.ProductCode),
+							FreeGoodsOther: toDecimal(row.FreeGoodsOther),
+							FreeGoodsOther_Step: toDecimal(row.FreeGoodsOther_Step),
+							FreeGoodsOther_ABS_PCT: toStr(row.FreeGoodsOther_ABS_PCT),
+							VAT: toDecimal(row.VAT),
+							FOCMinAmount: toInt(row.FOCMinAmount),
+							FOCBonus: toStr(row.Bonus),
+							PotentialGeneratedSavings: toDecimal(row.PotentialGeneratedSavings),
+							RoyalDecree: toStr(row.RoyalDecree),
+							ADD_INCLUDE: toStr(row.ADD_INCLUDE),
+							CCMContract_ID: ccmContractId,
+							validFrom: today,
+							validTo: "9999-12-31"
 						})),
 					}]
 				};
@@ -7854,17 +7854,17 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							validFrom: today,
 							validTo: "9999-12-31"
 						},
-						CCMMaterial: materialRow ? [{
-							CountryCode: toStr(materialRow.CountryCode),
-							ProductCode: toStr(materialRow.ProductCode),
-							MaterialNumber: toStr(materialRow.SKUCode),
+						CCMMaterial: materialRows.map(row => ({
+							CountryCode: toStr(row.CountryCode),
+							ProductCode: toStr(row.ProductCode),
+							MaterialNumber: toStr(row.SKUCode),
 							FOCMaterialNumber: null,
-							ActiveRecord: toInt(materialRow.ActiveRecord),
+							ActiveRecord: toInt(row.ActiveRecord),
 							isNewMaterialNumber: false,
 							CCMContract_ID: ccmContractId,
 							validFrom: today,
 							validTo: "9999-12-31"
-						}] : [],
+						})),
 						PriceConditionInvoice: invoiceRow ? {
 							OfferID: toStr(offerID),
 							ProductCode: toInt(invoiceRow.ProductCode),
@@ -7897,46 +7897,46 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							validFrom: today,
 							validTo: "9999-12-31"
 						} : null,
-					PriceConditionRebate: rebateRow ? {
-						OfferID: toStr(offerID),
-						ProductCode: toInt(rebateRow.ProductCode),
-						CountryCode: toStr(rebateRow.CountryCode),
-						YP00: toDecimal(rebateRow.YP00),
-						ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
-						SettlementDescription: toStr(rebateRow.SettlementDescription),
-						Tax: toDecimal(rebateRow.Tax),
-						RoyalDecree: toStr(rebateRow.RoyalDecree),
-						Liquidation: toStr(rebateRow.Liquidation),
-						RefundDate: toStr(rebateRow.RefundDate),
-						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
-						CCMContract_ID: ccmContractId,
-						validFrom: today,
-						validTo: "9999-12-31",
-						PriceConditionDiscountCondition: discountRows.map(row => ({
-							Volume: toInt(row.Volume),
-							Discount: toDecimal(row.Discount),
-							NetPriceWithoutTax: toDecimal(row.NetPriceWithoutTax),
-							NetPriceWithTax: toDecimal(row.NetPriceWithTax)
-						}))
-					} : null,
-					PriceConditionFOC: focRows.map(row => ({
-						OfferID: toStr(offerID),
-						CountryCode: toStr(row.CountryCode),
-						ProductCode: toInt(row.ProductCode),
-						FreeGoodsOther: toDecimal(row.FreeGoodsOther),
-						FreeGoodsOther_Step: toDecimal(row.FreeGoodsOther_Step),
-						FreeGoodsOther_ABS_PCT: toStr(row.FreeGoodsOther_ABS_PCT),
-						VAT: toDecimal(row.VAT),
-						FOCMinAmount: toInt(row.FOCMinAmount),
-						FOCBonus: toDecimal(row.FOCBonus),
-						PotentialGeneratedSavings: toDecimal(row.PotentialGeneratedSavings),
-						RoyalDecree: toStr(row.RoyalDecree),
-						ADD_INCLUDE: toStr(row.ADD_INCLUDE),
-						CCMContract_ID: ccmContractId,
-						validFrom: today,
-						validTo: "9999-12-31"
+						PriceConditionRebate: rebateRow ? {
+							OfferID: toStr(offerID),
+							ProductCode: toInt(rebateRow.ProductCode),
+							CountryCode: toStr(rebateRow.CountryCode),
+							YP00: toDecimal(rebateRow.YP00),
+							ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
+							SettlementDescription: toStr(rebateRow.SettlementDescription),
+							Tax: toDecimal(rebateRow.Tax),
+							RoyalDecree: toStr(rebateRow.RoyalDecree),
+							Liquidation: toStr(rebateRow.Liquidation),
+							RefundDate: toStr(rebateRow.RefundDate),
+							PriceConditionCode: toStr(rebateRow.PriceConditionCode),
+							CCMContract_ID: ccmContractId,
+							validFrom: today,
+							validTo: "9999-12-31",
+							PriceConditionDiscountCondition: discountRows.map(row => ({
+								Volume: toInt(row.Volume),
+								Discount: toDecimal(row.Discount),
+								NetPriceWithoutTax: toDecimal(row.NetPriceWithoutTax),
+								NetPriceWithTax: toDecimal(row.NetPriceWithTax)
+							}))
+						} : null,
+						PriceConditionFOC: focRows.map(row => ({
+							OfferID: toStr(offerID),
+							CountryCode: toStr(row.CountryCode),
+							ProductCode: toInt(row.ProductCode),
+							FreeGoodsOther: toDecimal(row.FreeGoodsOther),
+							FreeGoodsOther_Step: toDecimal(row.FreeGoodsOther_Step),
+							FreeGoodsOther_ABS_PCT: toStr(row.FreeGoodsOther_ABS_PCT),
+							VAT: toDecimal(row.VAT),
+							FOCMinAmount: toInt(row.FOCMinAmount),
+							FOCBonus: toDecimal(row.FOCBonus),
+							PotentialGeneratedSavings: toDecimal(row.PotentialGeneratedSavings),
+							RoyalDecree: toStr(row.RoyalDecree),
+							ADD_INCLUDE: toStr(row.ADD_INCLUDE),
+							CCMContract_ID: ccmContractId,
+							validFrom: today,
+							validTo: "9999-12-31"
 						})),
-				};
+					};
 			}
 
 
