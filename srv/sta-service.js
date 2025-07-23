@@ -3699,6 +3699,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			NLHospitalManagerEmail: NLHospitalManagerEmail,
             NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
 			TotalPNM_Value				: totalPnmValue,
+			COUNTRY_NAME: offer.COUNTRY_NAME,
 		};
 		return results;
 	
