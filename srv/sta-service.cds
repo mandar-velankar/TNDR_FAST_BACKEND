@@ -1242,6 +1242,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             inst.KAM_Territory,
             offer.TenderID,
 	        CountryCurrency.Currency,
+            cd.Date,
             CASE 
                 WHEN cd.BrandContractCalculatedVolume != 0 
                     THEN cd.Product.RequestedVolume 
@@ -1284,7 +1285,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             offer.TenderID,
 	        CountryCurrency.Currency,
             cd.BrandId,
-            cd.BrandContractCalculatedVolume;
+            cd.BrandContractCalculatedVolume,
+            cd.Date;
 
     entity OverviewSectionsView as select from SalesReportsView as ow{
             key ow.ID,
