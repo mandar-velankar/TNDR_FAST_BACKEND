@@ -908,7 +908,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Country.Region,
     offer.InternalBidDueDate,
     offer.Tender.Custom.Integer_2 as Contract_Length2,
-    offer.Tender.Custom.Integer_3 as Contract_Length3
+    offer.Tender.Custom.Integer_3 as Contract_Length3,
+    offer.Country.CountryName as COUNTRY_NAME
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -1000,7 +1001,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region,
           offer.InternalBidDueDate,
-          offer.Tender.Custom.String_5;
+          offer.Tender.Custom.String_5,
+          offer.Country.CountryName;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -2435,6 +2437,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NLHospitalManagerEmail: String;
             NLHospitalManagerContactNumber : String;
             TotalPNM_Value               : Double;
+            COUNTRY_NAME              : String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
