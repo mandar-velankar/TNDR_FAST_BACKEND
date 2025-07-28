@@ -6738,7 +6738,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			
 			// // Format Date
 			ed.ExcelDate = new Date(ed.FilePeriod);
-			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
+			ed.FilePeriod = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'DD-MM-YYYY');
 
 			//Format Percentage
 			ed.ContractBrandUsage = ed.ContractBrandUsage ? ed.ContractBrandUsage : 0; 
