@@ -1065,3 +1065,27 @@ entity WholesalePurchasePriceApprovalsNotification {
 	SelectedWppApprover: WPPApprovers;
 	WholesalePurchasePriceApprovalPageLink: String;
 }
+
+entity INTERIM_SPAINMATERIALS : cuid, managed {
+    EAN_UPC                : String;
+    MaterialNumber         : Integer;
+    SAPName                : String;
+    CommercialName         : String;
+    ProductType            : String;
+    PackFactor             : Double;
+    Presentation           : String;
+    Strength               : Double;
+    UOM                    : String;
+    SalesUnitOfMeasure     : String;
+    ProductHierarchy       : String;
+    DivisionCode           : Integer;
+    Division               : String;
+    BrandID                : String;
+    MaterialGroup1         : String;
+    MaterialGroup4         : String;
+    MaterialGroup5         : String;
+    ItemCategoryGroup      : String;
+    MaterialStatus         : String;
+    Status                 : String;
+    Comments               : String;
+};
