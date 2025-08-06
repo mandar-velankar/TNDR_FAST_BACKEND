@@ -1089,3 +1089,9 @@ entity INTERIM_SPAINMATERIALS : cuid, managed {
     Status                 : String;
     Comments               : String;
 };
+
+entity MarketIncentive: managed{
+    CountryCode: String;
+    MarketIncentiveID: String;
+    Description: String;
+}

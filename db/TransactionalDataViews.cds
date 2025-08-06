@@ -1598,7 +1598,8 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     priceCondition.ConfidentialDiscount,
     priceCondition.RoyalDecreePercentage_1,
     priceCondition.MonthlyRentPerUnit,
-    priceCondition.AnnualValue
+    priceCondition.AnnualValue,
+    priceCondition.MarketIncentiveID
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 

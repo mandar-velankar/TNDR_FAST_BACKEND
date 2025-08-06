@@ -7204,8 +7204,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			RefundDate                          : req.data.RefundDate ? req.data.RefundDate : standardTenderPriceConditionView?.RefundDate,
 			PriceConditionCode                  : req.data.PriceConditionCode ? req.data.PriceConditionCode : standardTenderPriceConditionView?.PriceConditionCode,
 			LotID                               : 1,
+			MarketIncentiveID				  	: req.data.MarketIncentiveID ? req.data.MarketIncentiveID : standardTenderPriceConditionView?.MarketIncentiveID,		
 			Settlement_ID						: req.data.Settlement_ID ? req.data.Settlement_ID : standardTenderPriceConditionView?.Settlement_ID,
-			PriceConditionClassification_ID        : standardTenderPriceConditionView?.ClassificationID,
+			PriceConditionClassification_ID     : standardTenderPriceConditionView?.ClassificationID,
 		}
 	}
 
@@ -7788,6 +7789,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						Liquidation: toStr(rebateRow.Liquidation),
 						RefundDate: toStr(rebateRow.RefundDate),
 						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
+						MarketIncentiveID: toStr(rebateRow.MarketIncentiveID),
 						CCMContract_ID: ccmContractId,
 						validFrom: today,
 						validTo: "9999-12-31",

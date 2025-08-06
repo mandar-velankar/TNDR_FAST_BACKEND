@@ -1529,7 +1529,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 std.ConfidentialDiscount,
                 std.RoyalDecreePercentage_1,
                 std.MonthlyRentPerUnit,
-                std.AnnualValue
+                std.AnnualValue,
+                std.MarketIncentiveID
             };
     entity CCMPriceConditionView                   as select from TransactionalData.CCMPriceCondition{
         CountryCode,
@@ -1775,7 +1776,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.RefundDate,
             priceCondition.Settlement.ID as Settlement_ID: UUID,
             priceCondition.Settlement.Description,
-            priceCondition.Tax
+            priceCondition.Tax,
+            priceCondition.MarketIncentiveID
         }where tender.Active = 1 and tender.CountryCode = 'ES'
         group by 
             tender.CountryCode,
@@ -1801,7 +1803,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.RefundDate,
             priceCondition.Settlement.ID,
             priceCondition.Settlement.Description,
-            priceCondition.Tax; 
+            priceCondition.Tax,
+            priceCondition.MarketIncentiveID; 
 
 entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_TMTEND as tender 
     inner join TransactionalData.PT_TMOFRS as offer 
@@ -1957,5 +1960,6 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     action createAllFastConditionContracts(OfferID: String) returns String;
 
-    entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees
+    entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees;
+    entity MarketIncentive                              as projection on MasterData.MarketIncentive;  
 }
