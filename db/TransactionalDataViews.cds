@@ -724,6 +724,11 @@ left outer join TransactionalData.ProductPricing as productPricing
     on offerProduct.OfferID = productPricing.OfferID
     and offerProduct.ProductCode = productPricing.ProductCode
     and offerProduct.CountryCode = productPricing.CountryCode
+left outer join MasterData.PricingPolicy as pricingPolicy
+    on offerProduct.ProductCode = pricingPolicy.ProductPackID
+    and offerProduct.CountryCode = pricingPolicy.CountryCode
+    and offerProduct.INSTITUTE_ID = pricingPolicy.InstituteID
+    and offerProduct.DISTRIBUTOR_ID = pricingPolicy.DistributorID
 {
     offerProduct.TenderID as TENDERID,
     offerProduct.ProductCode,
@@ -858,7 +863,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     productPricing.MinAnnPurch as MinAnnPurch,
     offerProduct.SKU.ProductClass as ProductClass,
     offerProduct.SKU.ProductDescription as ProductDescription,
-    ifnull(offerProduct.PricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
+    ifnull(pricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
     case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
