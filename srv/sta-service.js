@@ -29,6 +29,7 @@ module.exports = async (srv) => {
 	const { mkConfig, generateCsv, asString  } = await import("export-to-csv");
 
 	const UITemplatesService = await cds.connect.to('UITemplates');
+	const ConditionContract = await cds.connect.to('ConditionContract');
 
 	const { 
 		CountryTemplate,
@@ -49,6 +50,11 @@ module.exports = async (srv) => {
 		MandatoryFieldsView,
 		FormFieldsView
 	} = UITemplatesService.entities;
+
+	const { 
+		FastConditionContracts,
+		CCMContract
+	} = ConditionContract.entities;
 
 	// Use reflection to get the csn definition
 	const {
@@ -148,7 +154,15 @@ module.exports = async (srv) => {
 		ZagisUploadFile,
 		ExtractNLHistoricalInformation,
 		NLExtractOffers,
-		SalesReportsView
+		SalesReportsView,
+		AwardedProducts,
+		FastConditionContractsView,
+		ConditionContractsView,
+		CCMMaterilsView,
+		PriceConditionInvoiceView,
+		PriceConditionRebateView,
+		PriceConditionDiscountConditionsView,
+		PriceConditionFOCView
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -1465,6 +1479,7 @@ module.exports = async (srv) => {
 			LotID: req.data.LotID,
 			SubmittedOn: new Date().toISOString(),
         	SubmittedBy: req.user.id,
+			TotalAwardedValue: req.data.TotalAwardedValue,
 			Custom_String_1: req.data.Custom_String_1,
 			Custom_String_2: req.data.Custom_String_2,
 			Custom_String_3: req.data.Custom_String_3,
@@ -7238,8 +7253,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			RefundDate                          : req.data.RefundDate ? req.data.RefundDate : standardTenderPriceConditionView?.RefundDate,
 			PriceConditionCode                  : req.data.PriceConditionCode ? req.data.PriceConditionCode : standardTenderPriceConditionView?.PriceConditionCode,
 			LotID                               : 1,
+			MarketIncentiveID				  	: req.data.MarketIncentiveID ? req.data.MarketIncentiveID : standardTenderPriceConditionView?.MarketIncentiveID,		
 			Settlement_ID						: req.data.Settlement_ID ? req.data.Settlement_ID : standardTenderPriceConditionView?.Settlement_ID,
-			PriceConditionClassification_ID        : standardTenderPriceConditionView?.ClassificationID,
+			PriceConditionClassification_ID     : standardTenderPriceConditionView?.ClassificationID,
 		}
 	}
 
@@ -7603,8 +7619,287 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		!req.data.Reference && req.error({ code: 404, message: "Bank guarantee ID is required", target: "Reference" });
 		!req.data.IssueDate && req.error({ code: 404, message: "Bank guarantee issue date is required", target: "IssueDate" });
 	});
+
+	srv.on('updateFinalContractStartEndDate', async (req) => {
+		const { OfferID, ContractStartDate, ContractEndDate } = req.data;
+
+		if (!OfferID) {
+			return req.error(400, 'OfferID is required');
+		}
+
+		await UPDATE(PT_TMTRRES).set({ContractStartDate,ContractEndDate}).where({ OfferID });
+
+		return req.reply("Contract Start and End Date Updated Successfully");
+  	});
 	  
 	  
+	srv.on("createAllFastConditionContracts", async (req) => {
+		const tx = cds.tx(req);
+		const offerID = req.data.OfferID;
+		const toStr = (v) => v != null ? String(v) : null;
+		const toInt = (v) => v === "Yes" ? 1 : v === "No" ? 0 : parseInt(v) || 0;
+		const toDecimal = (v) => v != null ? Number(v) : null;
+		const today = new Date().toISOString().split("T")[0];
+
+    try {
+		const awardedProducts = await tx.run(SELECT.from(AwardedProducts).where({ OfferID: offerID }));
+		const wonProducts = awardedProducts.filter((p) => p.Outcome === "Won");
+		const existingfastConditionContract = await ConditionContract.run(SELECT.one.from(FastConditionContracts).where({OfferID: offerID}));
+		let existingConditionContracts = [];
+		if(existingfastConditionContract){
+			existingConditionContracts = await ConditionContract.run(SELECT.from(CCMContract).where({FastConditionContracts_ID: existingfastConditionContract.ID})) || [];
+		}
+
+		if (wonProducts.length === 0) {
+			return req.error(404, 'No products with outcome "Won" found for the given OfferID');
+		}
+
+		const payloads = [];
+		const fastCCMContractId = uuidv4();
+
+		const filteredWonProducts = wonProducts.filter(wonProduct => {
+			return !(existingConditionContracts?.some(existing => existing.ProductCode == wonProduct.ProductCode));
+		});
+
+		if (filteredWonProducts.length === 0) {
+			return req.error(404, 'No New products with outcome "Won" found for the given OfferID');
+		}
+
+		const [rootRow] = await tx.run(SELECT.from(FastConditionContractsView).where({OfferID: offerID}));
+
+		let extension = false;
+		let extensionPeriod = 0;
+
+		if (rootRow.ContractType === "Commercial Agreement") {
+			extension = true;
+
+			const start = new Date(filteredWonProducts[0].ContractStartDate);
+			const end = new Date(filteredWonProducts[0].ContractEndDate);
+
+			let years = end.getFullYear() - start.getFullYear();
+			let months = end.getMonth() - start.getMonth();
+			let days = end.getDate() - start.getDate();
+
+			extensionPeriod = years * 12 + months;
+
+			// If the end day is greater than or equal to the start day, count it as a full month
+			if (days >= 0) {
+				extensionPeriod += 1;
+			}
+		}
+
+		let payload = {
+			ID: fastCCMContractId,
+			TenderID: toStr(rootRow.TenderID),
+			OfferID: toStr(offerID),
+			CountryCode: toStr(rootRow.CountryCode),
+			InstituteID: toInt(rootRow.InstituteID),
+			InstituteName: toStr(rootRow.InstituteName),
+			DistributorID: toInt(rootRow.DistributorID),
+			ContractStartDate: toStr(filteredWonProducts[0].ContractStartDate),
+			ContractEndDate: toStr(filteredWonProducts[0].ContractEndDate),
+			ContractType: toStr(rootRow.ContractType),
+			CustomerID: toStr(rootRow.CustomerID),
+			Division: toStr(rootRow.Division),
+			Reference: toStr(rootRow.Reference),
+			Status: "New Contract",
+			Owner: toStr(rootRow.Owner),
+			BrandFilter: null,
+			ProductFilter: null,
+			Extension: extension,
+			ExtensionPeriod: toStr(extensionPeriod),
+			SAPID: toStr(rootRow.SAPID),
+			ExternalID: toStr(rootRow.ExternalID),
+			hasNewMaterialNumber: false,
+			hasActiveContracts: false,
+			hasUpdatedPVL: false,
+			hasUpdatedConfidentialPrice: false,
+			hasNetPriceAbovePVL: false,
+			hasNetPriceBelowFloorPrice: false,
+			hasExpiringSoonContracts: false,
+			hasExpiredContracts: false,
+			hasCancelledContracts: false,
+			hasContractsToBeSynchronized: false,
+			hasNewContracts: false,
+			CCMContract: []
+		};
+
+		for (const product of filteredWonProducts) {
+
+			const ccmContractId = uuidv4();
+
+			const [contractRow] = await tx.run(SELECT.from(ConditionContractsView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
+			if (!contractRow) continue;
+
+			const materialRows = await tx.run(SELECT.from(CCMMaterilsView).where({ ProductCode: product.ProductCode }));
+
+			const [invoiceRow] = await tx.run(SELECT.from(PriceConditionInvoiceView).where({ OfferID: offerID, ProductCode:product.ProductCode }));
+
+			let focRows = [];
+
+			if (invoiceRow && invoiceRow.PriceConditionID) {
+				focRows = await tx.run(SELECT.from(PriceConditionFOCView).where({PriceConditionID: invoiceRow.PriceConditionID}));
+			}
+
+			const [rebateRow] = await tx.run(SELECT.from(PriceConditionRebateView).where({ OfferID: offerID, ProductCode:product.ProductCode }));
+
+			let discountRows = [];
+
+			if (rebateRow && rebateRow.PriceConditionID) {
+				discountRows = await tx.run(SELECT.from(PriceConditionDiscountConditionsView).where({PriceConditionID: rebateRow.PriceConditionID}));
+			}
+
+			const ccmContract = {
+					ID: ccmContractId,
+					ProductCode: toStr(contractRow.ProductCode),
+					CountryCode: toStr(contractRow.CountryCode),
+					ProductName: toStr(contractRow.ProductPackName),
+					UoM: toStr(contractRow.UoM),
+					NewMaterialNumber: null,
+					BrandID: toStr(contractRow.BrandID),
+					BrandName: toStr(contractRow.BrandName),
+					OfferPrice: toDecimal(contractRow.OfferPrice),
+					hasRappel: rebateRow ? 'Yes' : 'No',
+					hasFOC: focRows.length > 0 ? 'Yes' : 'No',
+					CCMContractStartDate: toStr(product.ContractStartDate),
+					CCMContractEndDate: toStr(product.ContractEndDate),
+					PreviousContractNumber: null,
+					ContractNumber: null,
+					Synchronized: false,
+					Notified: false,
+					Extension: extension,
+					ExtensionPeriod: toStr(extensionPeriod),
+					CreationDate: today,
+					FastConditionContracts_ID: existingConditionContracts.length === 0 ? fastCCMContractId : existingfastConditionContract.ID,
+					validFrom: today,
+					validTo: "9999-12-31",
+					CCMCustomer: {
+						InstituteID: toStr(contractRow.InstituteID),
+						AssortmentReference: toStr(rootRow.External_InstituteId),
+						CustomerID: toInt(contractRow.CustomerID),
+						CountryCode: toStr(contractRow.CountryCode),
+						InstituteType: toStr(contractRow.InstituteType),
+						InstituteName: toStr(contractRow.InstituteName),
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31"
+					},
+					CCMMaterial: materialRows.map(row => ({
+						CountryCode: toStr(row.CountryCode),
+						ProductCode: toStr(row.ProductCode),
+						MaterialNumber: toStr(row.SKUCode),
+						FOCMaterialNumber: null,
+						ActiveRecord: toInt(row.ActiveRecord),
+						isNewMaterialNumber: false,
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31"
+					})),
+					PriceConditionInvoice: invoiceRow ? {
+						OfferID: toStr(offerID),
+						ProductCode: toInt(invoiceRow.ProductCode),
+						ConditionType: toStr(invoiceRow.ConditionType),
+						Currency: toStr(invoiceRow.Currency),
+						Region: toStr(invoiceRow.Region),
+						CountryCode: toStr(invoiceRow.CountryCode),
+						YP00: toDecimal(invoiceRow.YP00),
+						YP04: toDecimal(invoiceRow.YP04),
+						YP10: toDecimal(invoiceRow.YP10),
+						YD75: toDecimal(invoiceRow.YD75),
+						YD30: toDecimal(invoiceRow.YD30),
+						YD06: toDecimal(invoiceRow.YD06),
+						YD02: toDecimal(invoiceRow.YD02),
+						Tax: toDecimal(invoiceRow.Tax),
+						ConfidentialPrice: toDecimal(invoiceRow.ConfidentialPrice),
+						RoyalDecree: toStr(invoiceRow.RoyalDecree),
+						RoyalDecreeValue: toDecimal(invoiceRow.RoyalDecreeValue),
+						RoyalDecreeIncl: invoiceRow.RoyalDecreeIncl,
+						NetPriceWithoutTaxAfterDeductionRD: toDecimal(invoiceRow.NetPriceWithoutTaxAfterDeductionRD),
+						NetPriceWithTaxAfterDeductionRD: toDecimal(invoiceRow.NetPriceWithTaxAfterDeductionRD),
+						NetPriceWithoutTax: toDecimal(invoiceRow.NetPriceWithoutTax),
+						NetPriceWithTax: toDecimal(invoiceRow.NetPriceWithTax),
+						MaximumPrice: toDecimal(invoiceRow.MaximumPrice),
+						RequestedVolume: toInt(invoiceRow.RequestedVolume),
+						RentalPrice: toDecimal(invoiceRow.RentalPrice),
+						MonthlyRentPerUnit: toDecimal(invoiceRow.MonthlyRentPerUnit),
+						AnnualValue: toDecimal(invoiceRow.AnnualValue),
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31"
+					} : null,
+					PriceConditionRebate: rebateRow ? {
+						OfferID: toStr(offerID),
+						ProductCode: toInt(rebateRow.ProductCode),
+						CountryCode: toStr(rebateRow.CountryCode),
+						YP00: toDecimal(rebateRow.YP00),
+						ConfidentialPrice: toDecimal(rebateRow.ConfidentialPrice),
+						SettlementDescription: toStr(rebateRow.SettlementDescription),
+						Tax: toDecimal(rebateRow.Tax),
+						RoyalDecree: toStr(rebateRow.RoyalDecree),
+						Liquidation: toStr(rebateRow.Liquidation),
+						RefundDate: toStr(rebateRow.RefundDate),
+						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
+						MarketIncentiveID: toStr(rebateRow.MarketIncentiveID),
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31",
+						PriceConditionDiscountCondition: discountRows.map(row => ({
+							Volume: toInt(row.Volume),
+							Discount: toDecimal(row.Discount),
+							NetPriceWithoutTax: toDecimal(row.NetPriceWithoutTax),
+							NetPriceWithTax: toDecimal(row.NetPriceWithTax)
+						}))
+					} : null,
+					PriceConditionFOC: focRows.map(row => ({
+						OfferID: toStr(offerID),
+						CountryCode: toStr(row.CountryCode),
+						ProductCode: toInt(row.ProductCode),
+						FreeGoodsOther: toDecimal(row.FreeGoodsOther),
+						FreeGoodsOther_Step: toDecimal(row.FreeGoodsOther_Step),
+						FreeGoodsOther_ABS_PCT: toStr(row.FreeGoodsOther_ABS_PCT),
+						VAT: toDecimal(row.VAT),
+						FOCMinAmount: toInt(row.FOCMinAmount),
+						FOCBonus: toDecimal(row.FOCBonus),
+						PotentialGeneratedSavings: toDecimal(row.PotentialGeneratedSavings),
+						RoyalDecree: toStr(row.RoyalDecree),
+						ADD_INCLUDE: toStr(row.ADD_INCLUDE),
+						CCMContract_ID: ccmContractId,
+						validFrom: today,
+						validTo: "9999-12-31"
+					})),
+				};
+
+
+			payload.CCMContract.push(ccmContract);
+		}
+
+		if (payload.length === 0) {
+			return req.error(400, "No valid contract payloads could be built.");
+		}
+
+		if(existingConditionContracts.length === 0){
+			await ConditionContract.run(INSERT.into(FastConditionContracts).entries(payload));
+		}else{
+			const contracts = payload.CCMContract;
+			const onlyChildrenPayloads = Array.isArray(contracts) ? contracts : contracts ? [contracts] : [];
+			if (onlyChildrenPayloads.length === 0) {
+				return req.error(400, "No new Contract to insert under existing FAST Contract.");
+			}
+			for (const child of onlyChildrenPayloads) {
+				await ConditionContract.run(INSERT.into(CCMContract).entries(child));
+			}
+		}
+
+		return req.reply({
+			message: `FAST condition contract created successfully.`,
+			fastCCMContractId: existingConditionContracts.length === 0 ? fastCCMContractId : existingfastConditionContract.ID
+		});
+
+    } catch (err) {
+      console.error(err);
+      return req.error(500, "Internal error during contract creation.");
+    }
+  });
 
 
 }

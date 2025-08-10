@@ -29,4 +29,8 @@ module.exports = (srv) => {
 		MailTemplate
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
 
+
+    srv.on('getBackendData', async(req)=>{
+        return {PriceCondition:[{CountryCode: 'ES', Price:89.4} , {CountryCode:'ES', OfferPrice:900}], PriceConditionClassification:{CountryCode: 'ES', ConditionType:'PrecioNeto'}};
+    })
 };
