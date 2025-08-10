@@ -9,8 +9,8 @@
     "@sap-cloud-sdk/http-client": "^3.9.0",
     "@sap/approuter": "^14.4.3",
     "@sap/cds": "~6.3.0",
+    "@sap/cds-dk": "^7.9.10",
     "@sap/cds-odata-v2-adapter-proxy": "^1.9.7",
-    "compression": "1.7.4",
     "@sap/hana-client": "2.14.22",
     "@sap/logging": "^6.1.1",
     "@sap/xsenv": "^3.4.0",
@@ -18,6 +18,7 @@
     "angular-expressions": "^1.1.4",
     "axios": "^0.21.1",
     "cfenv": "^1.2.4",
+    "compression": "1.7.4",
     "cron": "^1.8.2",
     "cron-es6": "^1.0.3",
     "cron-job-manager": "^2.2.1",
@@ -91,6 +92,16 @@
         "credentials": {
           "destination": "fast-templates-api",
           "path": "/UITemplates"
+        }
+      },
+      "ConditionContract": {
+        "kind": "odata",
+        "model": "srv/external/ConditionContract",
+        "csrf": true,
+        "csrfInBatch": true,
+        "credentials": {
+          "destination": "fast-ccma-api",
+          "path": "/odata/v4/condition-contract"
         }
       }
     },
