@@ -1095,3 +1095,15 @@ entity MarketIncentive: managed{
     MarketIncentiveID: String;
     Description: String;
 }
+
+entity INTERIM_SPAINCUSTOMERS : cuid, managed {
+    CustomerID     	   : Integer;
+    CustomerName       : String;
+    CustomerGroup      : String;
+    CustomerType       : String;
+    Address            : String;
+    Region             : String;
+    Province           : String;
+    Taxcode            : String;
+    PaymentTerm        : String;
+}
