@@ -2343,6 +2343,16 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Offer_Custom_String_18: String;
             Offer_Custom_String_19: String;
             Offer_Custom_String_20: String;
+            Offer_Custom_String_21: String;
+            Offer_Custom_String_22: String;
+            Offer_Custom_String_23: String;
+            Offer_Custom_String_24: String;
+            Offer_Custom_String_25: String;
+            Offer_Custom_String_26: String;
+            Offer_Custom_String_27: String;
+            Offer_Custom_String_28: String;
+            Offer_Custom_String_29: String;
+            Offer_Custom_String_30: String;
             Offer_Custom_Double_1: Double;
             Offer_Custom_Double_2: Double;
             Offer_Custom_Double_3: Double;
