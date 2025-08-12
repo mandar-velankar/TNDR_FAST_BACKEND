@@ -682,7 +682,7 @@ module.exports = (srv) => {
 				CountryCode: 'NL',
 				PRODUCTPACKID: uniqueWPP.PRODUCTPACKID,
 				DistributorID: uniqueWPP.DistributorID,
-				MaterialNumbers: uniqueWPP.MaterialNumbers,
+				MaterialNumbers: uniqueWPP.MaterialNumbers.split(",")?.[0],
 				GOV_CODE: newNLPPP.GOV_CODE || null,
 				Type: 'Margin',
 				CurrentType: null,
