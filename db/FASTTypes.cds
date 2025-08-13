@@ -29,6 +29,16 @@ type Custom : {
     String_18: String;
     String_19: String;
     String_20: String;
+    String_21: String;
+    String_22: String;
+    String_23: String;
+    String_24: String;
+    String_25: String;
+    String_26: String;
+    String_27: String;
+    String_28: String;
+    String_29: String;
+    String_30: String;
     Double_1: Double;
     Double_2: Double;
     Double_3: Double;
