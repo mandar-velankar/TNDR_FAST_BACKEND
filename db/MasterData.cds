@@ -87,6 +87,10 @@ entity PT_TMINST{
 	External_InstituteId: String(50);
 	Class: Integer;
 	SAPGroupId: String;
+	CG1_Description: String;
+	CG2_Description: String;
+	CG1_Code: String;
+	CG2_Code: String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
