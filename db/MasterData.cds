@@ -1103,7 +1103,10 @@ entity MarketIncentive: managed{
 entity INTERIM_SPAINCUSTOMERS : cuid, managed {
     CustomerID     	   : Integer;
     CustomerName       : String;
-    CustomerGroup      : String;
+	CG1_Description	   : String;
+	CG2_Description	   : String;
+	CG1_Code	       : String;
+	CG2_Code	       : String;
     CustomerType       : String;
     Address            : String;
     Region             : String;
