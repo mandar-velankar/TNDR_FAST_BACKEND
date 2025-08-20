@@ -96,6 +96,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.City,
         Institute.CifCode,
         Institute.RegionalHealthSystem,
+        Institute.CG1_Description,
+        Institute.CG2_Description,
         Country.Region
     }; 
 
