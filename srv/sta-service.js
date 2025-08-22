@@ -7502,12 +7502,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		// Iterate through the pricing elements to collect necessary conditions
 		for (const elem of pricingElements) {
-		  const { ConditionType, PricingProcedureStep, ConditionRateValue, ConditionAmount } = elem;
+		  const { ConditionType, PricingProcedureStep, ConditionRateValue, ConditionAmount, ConditionQuantity } = elem;
 	  
 		  if (ConditionType) {
 			conditions[ConditionType] = {
 			  ConditionRateValue: parseFloat(ConditionRateValue || 0),
-			  ConditionAmount: parseFloat(ConditionAmount || 0)
+			  ConditionAmount: parseFloat(ConditionAmount || 0),
+			  ConditionQuantity: parseFloat(ConditionQuantity || 1)
 			};
 		  }
 	  
@@ -7517,7 +7518,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
-			result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
+			result.SAPPriceWithTax = parseFloat((ConditionAmount * ConditionQuantity) || 0);
 		  }
 
 		  if (PricingProcedureStep === "306") {
