@@ -992,10 +992,11 @@ module.exports = (srv) => {
 						(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
 						(!sku.ValidTo ||validDate <= sku.ValidTo)).map(el => el.SKUCode).join(",");
 
-				ed.PPP = formatNLPPPPrices(ed.PPP);
-				ed.StartDate = ed.StartDate && ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY');
-				ed.EndDate = ed.EndDate && ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY');
-				ed.MaterialNumbers = productSKUs;
+				ed.PPP = ServiceHelper.forceExcelText(formatNLPPPPrices(ed.PPP));
+				ed.StartDate = ed.StartDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY'));
+				ed.EndDate = ed.EndDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY'));
+				ed.MaterialNumbers = ServiceHelper.forceExcelText(productSKUs);
+				ed.GOV_CODE = ServiceHelper.forceExcelText(ed.GOV_CODE);
 			});
 
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content, { excelData }, 1);
@@ -1039,7 +1040,9 @@ module.exports = (srv) => {
 
 		excelData.forEach(item => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
-			item.Value = formatterDistributonArrangement(item.Value, item.Type);
+			item.Value = ServiceHelper.forceExcelText(formatterDistributonArrangement(item.Value, item.Type));
+			item.MaterialNumbers = ServiceHelper.forceExcelText(item.MaterialNumbers);
+			item.GOV_CODE = ServiceHelper.forceExcelText(item.GOV_CODE);
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
@@ -1096,14 +1099,15 @@ module.exports = (srv) => {
 				(!sku.ValidTo || validDate <= sku.ValidTo)).map(el => el.SKUCode).join(",");
 
 			// Assuming 'Type' and 'Currency' fields are part of the item
-			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
-			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
+			item.PPP = ServiceHelper.forceExcelText(ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true));
+			item.WPPWithoutTax = ServiceHelper.forceExcelText(ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false));
 			item.Margin = formatPercentage(item.Margin);
 			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Netto Prijs`;
 			item.EndDate = item.StartDate && ServiceHelper.formatDate(item.EndDate, 'DD/MM/YYYY');
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
-			item.MaterialNumbers = productSKUs;
+			item.MaterialNumbers = ServiceHelper.forceExcelText(productSKUs);
+			item.GOV_CODE = ServiceHelper.forceExcelText(item.GOV_CODE);
 		});
 		const formatedValidDate = validDate && ServiceHelper.formatDate(validDate, '', 'DD/MM/YYYY');
 		const formatedValidEndDate = validDate &&  moment(validDate).add(5, 'months').endOf('month').format('DD/MM/YYYY');
