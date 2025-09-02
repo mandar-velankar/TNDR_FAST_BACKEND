@@ -1812,7 +1812,7 @@ module.exports = (srv) => {
 		else if (offer.APPROVAL_TYPE === 11) { //Applicable for Brazil
 			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
-		if (offer.APPROVAL_TYPE === 19) {//Applicable for MEA
+		else if (offer.APPROVAL_TYPE === 19) {//Applicable for MEA
 			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
