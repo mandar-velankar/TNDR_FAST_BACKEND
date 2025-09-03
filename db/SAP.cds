@@ -1037,12 +1037,14 @@ entity RetailArticle: cuid{
 }
 
 entity QtyConversion: cuid {
+    UnitCode: String;
 	Quantity: Double;
 	CorrespondingQuantity: Double;
 	parent: Association to FASTCoreMaterial;
 }
 
 entity QtyCharacteristic: cuid{
+    UnitCode: String;
 	Quantity: Double;
 	CharacteristicQuantity: Double;
 	CharacteristicQuantityTypeCode: String;
