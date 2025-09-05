@@ -724,6 +724,7 @@ entity CountryProvinces: cuid {
 entity CountryRegions: cuid {
 	CountryCode     	: String;
 	Name				: String;
+	RegionCode		    : String;
 	Tenders				: Composition of many Tenders_in_Regions on Tenders.Region = $self;
 }
 
