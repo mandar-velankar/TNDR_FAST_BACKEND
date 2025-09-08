@@ -7508,7 +7508,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			conditions[ConditionType] = {
 			  ConditionRateValue: parseFloat(ConditionRateValue || 0),
 			  ConditionAmount: parseFloat(ConditionAmount || 0),
-			  ConditionQuantity: parseFloat(ConditionQuantity || 1)
+			  ConditionQuantity: parseFloat(ConditionQuantity || 1) 
 			};
 		  }
 	  
@@ -7518,7 +7518,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
-			result.SAPPriceWithTax = parseFloat((ConditionAmount * ConditionQuantity) || 0);
+			if(conditions["YP10"]){
+				result.SAPPriceWithTax = parseFloat((ConditionAmount * conditions["YP10"]?.ConditionQuantity) || 0);
+			}else{
+				result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
+			}
 		  }
 
 		  if (PricingProcedureStep === "306") {
