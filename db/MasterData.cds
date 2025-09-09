@@ -928,6 +928,7 @@ entity UserTerritory {
 
 
 entity PaymentTerms {
+	CountryCode	: String not null;
     E1KNVVM_ZTERM : String(6) not null;
     Description : String;
 }
@@ -1114,4 +1115,6 @@ entity INTERIM_SPAINCUSTOMERS : cuid, managed {
     Province           : String;
     Taxcode            : String;
     PaymentTerm        : String;
+	Status             : String;
+    Comments           : String;
 }
