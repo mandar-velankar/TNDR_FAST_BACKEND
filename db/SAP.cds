@@ -1040,6 +1040,7 @@ entity QtyConversion: cuid {
     UnitCode: String;
 	Quantity: Double;
 	CorrespondingQuantity: Double;
+    CorrespondingQuantityUnitCode: String;
 	parent: Association to FASTCoreMaterial;
 }
 
@@ -1047,6 +1048,7 @@ entity QtyCharacteristic: cuid{
     UnitCode: String;
 	Quantity: Double;
 	CharacteristicQuantity: Double;
+    CharacteristicQuantityUnitCode: String;
 	CharacteristicQuantityTypeCode: String;
     PrdRetlUoMTxts: Composition of many PrdRetlUoMTxts on PrdRetlUoMTxts.parentQtyCharacteristic = $self;
 	parent: Association to FASTCoreMaterial;
