@@ -226,6 +226,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     entity PT_TMINST   as projection on MasterData.PT_TMINST;
+    entity PT_TMINSHIER   as projection on MasterData.PT_TMINSHIER;
     entity PT_TMTEND as projection on TransactionalData.PT_TMTEND;
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
     entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
