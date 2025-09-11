@@ -877,6 +877,8 @@ module.exports = async (srv) => {
 		delete req.data.OfferPrice_2;
 		delete req.data.ContractDuration_3;
 		delete req.data.OfferPrice_3;
+		delete req.data.NetPriceInEUR;
+		delete req.data.TotalAmountInEUR;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');
@@ -3584,6 +3586,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             Offer_Custom_String_18: offerInformation?.Custom_String_18,
             Offer_Custom_String_19: offerInformation?.Custom_String_19,
             Offer_Custom_String_20: offerInformation?.Custom_String_20,
+            Offer_Custom_String_21: offerInformation?.Custom_String_21,
+            Offer_Custom_String_22: offerInformation?.Custom_String_22,
+            Offer_Custom_String_23: offerInformation?.Custom_String_23,
+            Offer_Custom_String_24: offerInformation?.Custom_String_24,
+            Offer_Custom_String_25: offerInformation?.Custom_String_25,
+            Offer_Custom_String_26: offerInformation?.Custom_String_26,
+            Offer_Custom_String_27: offerInformation?.Custom_String_27,
+            Offer_Custom_String_28: offerInformation?.Custom_String_28,
+            Offer_Custom_String_29: offerInformation?.Custom_String_29,
+            Offer_Custom_String_30: offerInformation?.Custom_String_30,
             Offer_Custom_Double_1: offerInformation?.Custom_Double_1,
             Offer_Custom_Double_2: offerInformation?.Custom_Double_2,
             Offer_Custom_Double_3: offerInformation?.Custom_Double_3,
@@ -3697,6 +3709,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			NLHospitalManagerEmail: NLHospitalManagerEmail,
             NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
 			TotalPNM_Value				: totalPnmValue,
+			COUNTRY_NAME: offer.COUNTRY_NAME.replace(/Hematology|Consumer Health/g, "").trim(),
 		};
 		return results;
 	
@@ -6735,7 +6748,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			
 			// // Format Date
 			ed.ExcelDate = new Date(ed.FilePeriod);
-			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
+			ed.FilePeriod = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'DD-MM-YYYY');
 
 			//Format Percentage
 			ed.ContractBrandUsage = ed.ContractBrandUsage ? ed.ContractBrandUsage : 0; 

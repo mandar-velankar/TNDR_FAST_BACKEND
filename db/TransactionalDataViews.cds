@@ -302,7 +302,7 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
         then 1 else 0 end
    ) 
    as LEGAL_APPROVED:Integer,
-   max(
+   min(
        case when
         approvals.ApproverType = 'Legal' and
         (
@@ -312,23 +312,17 @@ left join OfferLatestApprovalStatus as offerLatestApprStatus
         then 1 else 0 end
    ) 
    as LEGAL_APPROVED_IN_PREVIOUS_REQUEST:Integer,
-   max(
+   min(
        case when
         approvals.ApproverType = 'Controlling' and
-        (
-            approvals.ApprovalStatus = 'Approved' or
-            approvals.ApprovalStatus = 'Notification Sent'
-        )
+        approvals.ApprovalStatus = 'Notification Sent'
         then 1 else 0 end
    ) 
    as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST:Integer,
-   max(
+   min(
        case when
         approvals.ApproverType = 'Regional Business' and
-        (
-            approvals.ApprovalStatus = 'Approved' or
-            approvals.ApprovalStatus = 'Notification Sent'
-        )
+        approvals.ApprovalStatus = 'Notification Sent'
         then 1 else 0 end
    ) 
    as REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST:Integer,
@@ -736,6 +730,11 @@ left outer join TransactionalData.ProductPricing as productPricing
     on offerProduct.OfferID = productPricing.OfferID
     and offerProduct.ProductCode = productPricing.ProductCode
     and offerProduct.CountryCode = productPricing.CountryCode
+left outer join MasterData.PricingPolicy as pricingPolicy
+    on offerProduct.ProductCode = pricingPolicy.ProductPackID
+    and offerProduct.CountryCode = pricingPolicy.CountryCode
+    and offerProduct.INSTITUTE_ID = pricingPolicy.InstituteID
+    and offerProduct.DISTRIBUTOR_ID = pricingPolicy.DistributorID
 {
     offerProduct.TenderID as TENDERID,
     offerProduct.ProductCode,
@@ -870,7 +869,7 @@ left outer join TransactionalData.ProductPricing as productPricing
     productPricing.MinAnnPurch as MinAnnPurch,
     offerProduct.SKU.ProductClass as ProductClass,
     offerProduct.SKU.ProductDescription as ProductDescription,
-    ifnull(offerProduct.PricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
+    ifnull(pricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
     case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
@@ -1093,7 +1092,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Country.Region,
     offer.InternalBidDueDate,
     offer.Tender.Custom.Integer_2 as Contract_Length2,
-    offer.Tender.Custom.Integer_3 as Contract_Length3
+    offer.Tender.Custom.Integer_3 as Contract_Length3,
+    offer.Country.CountryName as COUNTRY_NAME
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -1185,7 +1185,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region,
           offer.InternalBidDueDate,
-          offer.Tender.Custom.String_5;
+          offer.Tender.Custom.String_5,
+          offer.Country.CountryName;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -2507,6 +2508,16 @@ left outer join TransactionalData.PriceCondition as priceCondition
             Offer_Custom_String_18: String;
             Offer_Custom_String_19: String;
             Offer_Custom_String_20: String;
+            Offer_Custom_String_21: String;
+            Offer_Custom_String_22: String;
+            Offer_Custom_String_23: String;
+            Offer_Custom_String_24: String;
+            Offer_Custom_String_25: String;
+            Offer_Custom_String_26: String;
+            Offer_Custom_String_27: String;
+            Offer_Custom_String_28: String;
+            Offer_Custom_String_29: String;
+            Offer_Custom_String_30: String;
             Offer_Custom_Double_1: Double;
             Offer_Custom_Double_2: Double;
             Offer_Custom_Double_3: Double;
@@ -2620,6 +2631,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NLHospitalManagerEmail: String;
             NLHospitalManagerContactNumber : String;
             TotalPNM_Value               : Double;
+            COUNTRY_NAME              : String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -3763,3 +3775,47 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                 end as approvedStatus: Integer
     } group by  offer.OfferID,
                 maxApprTime.MaxStatusTime;
+
+entity MEAPreviousApprovalsFlags as select from TransactionalData.PT_TMAPPRST as a {
+  key OfferId,
+  key productcode,
+
+  case when count(distinct case
+    when ApproverType = 'Legal'
+      and ApprovalStatus in ('Approved', 'Notification Sent')
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as LEGAL_APPROVED_IN_PREVIOUS_REQUEST : Integer,
+
+  case when count(distinct case
+    when ApproverType = 'Controlling'
+      and ApprovalStatus = 'Notification Sent'
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST : Integer,
+
+  case when count(distinct case
+    when ApproverType = 'Regional Business'
+      and ApprovalStatus = 'Notification Sent'
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST : Integer
+
+}
+where 
+  Statustime < (
+    select max(Statustime) as StatusTime from TransactionalData.PT_TMAPPRST as b
+    where
+      b.OfferId = a.OfferId and
+      b.productcode = a.productcode and
+      b.ApproverType = a.ApproverType and
+      (b.ApprovalStatus = 'Waiting' or b.ApprovalStatus = 'Processing')
+  )
+  or not exists (
+    select from TransactionalData.PT_TMAPPRST as b
+    where
+      b.OfferId = a.OfferId and
+      b.productcode = a.productcode and
+      b.ApproverType = a.ApproverType and
+      (b.ApprovalStatus = 'Waiting' or b.ApprovalStatus = 'Processing')
+  )
+group by
+  OfferId,
+  productcode;
