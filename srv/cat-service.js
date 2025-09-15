@@ -4473,4 +4473,22 @@ module.exports = (srv) => {
 		}		
 	}
 
+	srv.on("READ", "CountryRegisteredPrice", async (req, next) => {
+		 try {
+            const price = await next();
+			const {COUNTRY_CODE, PRODUCT_ID, CURRENCY} = req.data;
+
+			if (!price) return {
+				COUNTRY_CODE,
+    			PRODUCT_ID,
+    			CURRENCY,
+    			REGISTERED_PRICE: 0,
+			}
+
+			return price
+        } catch (error) {
+            console.error('Error in CountryRegisteredPrice READ');
+			return req.reject(403, error?.message||"Error in CountryRegisteredPrice READ");
+        }
+	});
 }
