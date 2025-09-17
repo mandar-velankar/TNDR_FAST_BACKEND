@@ -1989,7 +1989,7 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     {
         BaseInstituteID,
         ChildInstituteID as CandidateInstituteID,
-        'CHILD' as RelationType
+        'CHILD' as RelationType:String
     }
     where ChildInstituteID is not null
 
@@ -1997,7 +1997,7 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     {
         BaseInstituteID,
         ParentInstituteID as CandidateInstituteID,
-        'PARENT' as RelationType
+        'PARENT' as RelationType:String
     }
     where ParentInstituteID is not null
 
@@ -2005,7 +2005,7 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     {
         BaseInstituteID,
         BaseInstituteID as CandidateInstituteID,
-        'SELF' as RelationType
+        'SELF' as RelationType:String
     };
 
     entity ContractMatching as select from IdentifyExistingContract as c
