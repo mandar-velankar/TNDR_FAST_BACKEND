@@ -79,6 +79,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity FastConditionContracts as projection on ConditionContract.FastConditionContracts;
     
     entity CCMContract as projection on ConditionContract.CCMContract;
+
+    entity CCMMaterial as projection on ConditionContract.CCMMaterial;
+
+    entity IdentifyExistingContract as projection on ConditionContract.IdentifyExistingContract;
     @readonly 
     entity BrandsInTender  as projection on TransactionalDataViews.BrandsInTender;
     @cds.redirection.target
@@ -1966,4 +1970,57 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
 
     entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees;
     entity MarketIncentive                              as projection on MasterData.MarketIncentive;  
+
+    entity RelatedInstitutes as select from PT_TMINST as inst
+        left join PT_TMINSHIER as childRel
+            on childRel.ParentInstituteID = inst.InstituteID
+        left join PT_TMINSHIER as parentRel
+            on parentRel.InstituteID = inst.InstituteID
+    {
+        inst.InstituteID as BaseInstituteID,
+        inst.External_InstituteId as AssortmentReference,
+        inst.CustomerID,
+
+        childRel.InstituteID  as ChildInstituteID,
+        parentRel.ParentInstituteID as ParentInstituteID
+    };
+
+    entity CandidateInstitutes as select from RelatedInstitutes
+    {
+        BaseInstituteID,
+        ChildInstituteID as CandidateInstituteID,
+        'CHILD' as RelationType
+    }
+    where ChildInstituteID is not null
+
+    union all select from RelatedInstitutes
+    {
+        BaseInstituteID,
+        ParentInstituteID as CandidateInstituteID,
+        'PARENT' as RelationType
+    }
+    where ParentInstituteID is not null
+
+    union all select from RelatedInstitutes
+    {
+        BaseInstituteID,
+        BaseInstituteID as CandidateInstituteID,
+        'SELF' as RelationType
+    };
+
+    entity ContractMatching as select from IdentifyExistingContract as c
+        inner join CandidateInstitutes as ci
+            on c.InstituteID = ci.CandidateInstituteID
+    {
+        ci.BaseInstituteID,              
+        ci.CandidateInstituteID,         
+        ci.RelationType,                 // SELF, PARENT, CHILD
+        c.CCMContractID,
+        c.ContractNumber,
+        c.ContractType,
+        c.Customer,
+        c.AssortmentReference,
+        c.CndnContrValidFrom,
+        c.CndnContrValidTo
+    };
 }
