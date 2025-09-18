@@ -28,9 +28,12 @@ module.exports = (srv) => {
 	const {
 		MailTemplate
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
+    const {
+        CandidateInstitutes
+    } = cds.entities("StandardAppService");
 
-
-    srv.on('getBackendData', async(req)=>{
-        return {PriceCondition:[{CountryCode: 'ES', Price:89.4} , {CountryCode:'ES', OfferPrice:900}], PriceConditionClassification:{CountryCode: 'ES', ConditionType:'PrecioNeto'}};
+    srv.on('getInstituteData', async(req)=>{
+        const candidateInstituteData = await cds.run(SELECT.from(CandidateInstitutes));
+        return {candidateInstituteData};
     })
 };

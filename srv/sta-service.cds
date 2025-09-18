@@ -1964,18 +1964,14 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
             foc.RoyalDecree,
             foc.ADD_INCLUDE;
 
-    action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String) returns String;
-    action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
-    action createAllFastConditionContracts(OfferID: String) returns String;
-
     entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees;
     entity MarketIncentive                              as projection on MasterData.MarketIncentive;  
 
     entity RelatedInstitutes as select from PT_TMINST as inst
         left join PT_TMINSHIER as childRel
-            on childRel.ParentInstituteID = inst.InstituteID
+            on childRel.ParentInstituteID = inst.InstituteID and childRel.ActiveRecord = 'Yes'
         left join PT_TMINSHIER as parentRel
-            on parentRel.InstituteID = inst.InstituteID
+            on parentRel.InstituteID = inst.InstituteID and parentRel.ActiveRecord = 'Yes'
     {
         inst.InstituteID as BaseInstituteID,
         inst.External_InstituteId as AssortmentReference,
@@ -1983,7 +1979,7 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
 
         childRel.InstituteID  as ChildInstituteID,
         parentRel.ParentInstituteID as ParentInstituteID
-    };
+    } where inst.CountryCode = 'ES' and inst.ActiveRecord = 'Yes';
 
     entity CandidateInstitutes as select from RelatedInstitutes
     {
@@ -2007,20 +2003,8 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         BaseInstituteID as CandidateInstituteID,
         'SELF' as RelationType:String
     };
-
-    entity ContractMatching as select from IdentifyExistingContract as c
-        inner join CandidateInstitutes as ci
-            on c.InstituteID = ci.CandidateInstituteID
-    {
-        ci.BaseInstituteID,              
-        ci.CandidateInstituteID,         
-        ci.RelationType,                 // SELF, PARENT, CHILD
-        c.CCMContractID,
-        c.ContractNumber,
-        c.ContractType,
-        c.Customer,
-        c.AssortmentReference,
-        c.CndnContrValidFrom,
-        c.CndnContrValidTo
-    };
+    
+    action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String) returns String;
+    action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
+    action createAllFastConditionContracts(OfferID: String) returns String;
 }
