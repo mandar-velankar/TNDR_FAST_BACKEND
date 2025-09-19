@@ -987,18 +987,22 @@ module.exports = (srv) => {
 
 			// Formatting
 			excelData = excelData.map(ed => {
-				const productSKUs = skuCodes.filter(sku => 
-						sku.ProductPackID === ed.PRODUCTPACKID && 
+				const productSKUs = skuCodes.filter(sku => sku.ProductPackID === ed.PRODUCTPACKID);
+				const productValidSKUs = ed.ACTIVERECORD === "No" && ed.RegistrationValidUntil ? 
+					productSKUs.map(el => el.SKUCode) : 
+					productSKUs.filter(sku => 
 						(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
 						(!sku.ValidTo ||validDate <= sku.ValidTo)).map(el => el.SKUCode);
 
 				ed.PPP = ServiceHelper.forceExcelText(formatNLPPPPrices(ed.PPP));
 				ed.StartDate = ed.StartDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY'));
 				ed.EndDate = ed.EndDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY'));
-				ed.MaterialNumbers = ServiceHelper.forceExcelText(productSKUs.join(","));
+				ed.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
 				ed.GOV_CODE = ServiceHelper.forceExcelText(ed.GOV_CODE);
 
-				if (skuCodes?.length === 0 || (productSKUs && productSKUs.length > 0)) { // display product if sku is valid or no skus found from db
+				if (ed.ACTIVERECORD === "No" && ed.RegistrationValidUntil && validDate <= ed.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
+					return ed;
+				}else if (ed.ACTIVERECORD === "Yes" && !ed.RegistrationValidUntil && (productSKUs?.length === 0 || (productValidSKUs && productValidSKUs.length > 0))) { // display product if sku is valid or no skus found from db
 					return ed;
 				}else {
 					return null;
@@ -1094,15 +1098,14 @@ module.exports = (srv) => {
 		query.orderBy("PRODUCTPACKNAME asc");
 		let excelData = await tx.run(query);
 
-		excelData = excelData.filter(wpp => {
-			return wpp.ACTIVERECORD === "Yes" ? true : validDate <= wpp.RegistrationValidUntil;
-		});
 
 		excelData = excelData.map(item => {
-			const productSKUs = skuCodes.filter(sku => 
-				sku.ProductPackID === item.PRODUCTPACKID && 
-				(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
-				(!sku.ValidTo || validDate <= sku.ValidTo)).map(el => el.SKUCode);
+			const productSKUs = skuCodes.filter(sku => sku.ProductPackID === item.PRODUCTPACKID);
+			const productValidSKUs = item.ACTIVERECORD === "No" && item.RegistrationValidUntil ? 
+				productSKUs.map(el => el.SKUCode) : 
+				productSKUs.filter(sku => 
+					(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
+					(!sku.ValidTo || validDate <= sku.ValidTo)).map(el => el.SKUCode);
 
 			// Assuming 'Type' and 'Currency' fields are part of the item
 			item.PPP = ServiceHelper.forceExcelText(ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true));
@@ -1112,10 +1115,12 @@ module.exports = (srv) => {
 			item.EndDate = item.StartDate && ServiceHelper.formatDate(item.EndDate, 'DD/MM/YYYY');
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
-			item.MaterialNumbers = ServiceHelper.forceExcelText(productSKUs.join(","));
+			item.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
 			item.GOV_CODE = ServiceHelper.forceExcelText(item.GOV_CODE);
 
-			if (skuCodes?.length === 0 || (productSKUs && productSKUs.length > 0)) { // display product if sku is valid or no skus found from db
+			if (item.ACTIVERECORD === "No" && item.RegistrationValidUntil && validDate <= item.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
+				return item;
+			}else if (item.ACTIVERECORD === "Yes" && !item.RegistrationValidUntil && (productSKUs?.length === 0 || (productValidSKUs && productValidSKUs.length > 0))) { // display product if sku is valid or no skus found from db
 				return item;
 			}else {
 				return null;
