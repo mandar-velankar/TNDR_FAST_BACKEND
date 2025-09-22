@@ -880,7 +880,7 @@ inner join ApprovalRequests as approvalRequest
 	and approvalRequest.CountryCode = offer.CountryCode
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
-    and approvalRequest.ApprovalStatus = 'Approved'
+    and approvalRequest.REQUIRED_ACTION = 'Approval'
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
@@ -905,7 +905,7 @@ inner join ApprovalRequests as approvalRequest
 	and approvalRequest.CountryCode = offer.CountryCode
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
-    and approvalRequest.ApprovalStatus = 'Approved'
+    and approvalRequest.REQUIRED_ACTION = 'Approval'
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
