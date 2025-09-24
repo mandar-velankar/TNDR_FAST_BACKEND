@@ -1783,7 +1783,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.Liquidation,
             priceCondition.RefundDate,
             priceCondition.Settlement.ID as Settlement_ID: UUID,
-            priceCondition.Settlement.Description,
+            priceCondition.Settlement.Description as SettlementDescription: String,
             priceCondition.Tax,
             priceCondition.MarketIncentiveID
         }where tender.Active = 1 and tender.CountryCode = 'ES'
