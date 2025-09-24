@@ -1,4 +1,4 @@
-/* checksum : e0cd328d6048c100919f7433d39dfd8b */
+/* checksum : 878e5d8109f009aff9d5a39302f7d971 */
 @cds.external : true
 function ConditionContract.getBackendData() returns LargeString;
 
@@ -7,6 +7,11 @@ action ConditionContract.createCCMContract(
   FastCCMContractId : UUID,
   CCMContractID : UUID,
   ProductCode : LargeString
+) returns LargeString;
+
+@cds.external : true
+action ConditionContract.createAllCCMContract(
+  FastCCMContractId : UUID
 ) returns LargeString;
 
 @cds.external : true
@@ -67,6 +72,8 @@ entity ConditionContract.FastConditionContracts {
   ProductFilter : LargeString;
   Extension : Boolean;
   ExtensionPeriod : LargeString;
+  SAPID : LargeString;
+  ExternalID : LargeString;
   hasNewMaterialNumber : Boolean;
   hasActiveContracts : Boolean;
   hasUpdatedPVL : Boolean;
@@ -122,6 +129,7 @@ entity ConditionContract.CCMContract {
   @odata.Type : 'Edm.DateTimeOffset'
   validTo : Timestamp;
   ProductCode : LargeString;
+  EANUPCCode : LargeString;
   CountryCode : LargeString;
   ProductName : LargeString;
   UoM : LargeString;
@@ -135,6 +143,7 @@ entity ConditionContract.CCMContract {
   CCMContractEndDate : Date;
   PreviousContractNumber : LargeString;
   ContractNumber : LargeString;
+  ItemGUID : LargeString;
   Synchronized : Boolean;
   Notified : Boolean;
   Extension : Boolean;
@@ -146,6 +155,8 @@ entity ConditionContract.CCMContract {
   CCMMaterial : Composition of many ConditionContract.CCMMaterial;
   @cds.ambiguous : 'missing on condition?'
   CurrentInvoicePrice : Composition of one ConditionContract.CurrentInvoicePrice on CurrentInvoicePrice.CCMContract_ID = ID;
+  @cds.ambiguous : 'missing on condition?'
+  ContractItemGUID : Composition of many ConditionContract.ContractItemGUID;
   @cds.ambiguous : 'missing on condition?'
   PriceConditionInvoice : Composition of one ConditionContract.PriceConditionInvoice;
   @cds.ambiguous : 'missing on condition?'
@@ -428,6 +439,7 @@ entity ConditionContract.PriceConditionRebate {
   Liquidation : LargeString;
   RefundDate : Date;
   PriceConditionCode : LargeString;
+  MarketIncentiveID : LargeString;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
   CCMContract_ID : UUID;
@@ -524,13 +536,51 @@ entity ConditionContract.PriceConditionFOC {
   FreeGoodsOther_ABS_PCT : String(4);
   VAT : Double;
   FOCMinAmount : Integer;
-  FOCBonus : Decimal;
+  FOCBonus : LargeString;
   PotentialGeneratedSavings : Decimal;
   RoyalDecree : LargeString;
   ADD_INCLUDE : LargeString;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
   CCMContract_ID : UUID;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.SettlementsDate {
+  @odata.Precision : 7
+  @odata.Type : 'Edm.DateTimeOffset'
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Immutable : true
+  @Core.Computed : true
+  @Common.Label : 'Created On'
+  createdAt : Timestamp;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Immutable : true
+  @Core.Computed : true
+  @Common.Label : 'Created By'
+  createdBy : String(255);
+  @odata.Precision : 7
+  @odata.Type : 'Edm.DateTimeOffset'
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed On'
+  modifiedAt : Timestamp;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed By'
+  modifiedBy : String(255);
+  @Core.ComputedDefaultValue : true
+  key CCMContractID : UUID not null;
+  key FromDate : Date not null;
+  ToDate : Date;
+  SettlementID : LargeString;
 };
 
 @cds.external : true
@@ -577,6 +627,48 @@ entity ConditionContract.APIBody {
   @cds.ambiguous : 'missing on condition?'
   APIDefinition : Association to one ConditionContract.APIDefinition on APIDefinition.ID = APIDefinition_ID;
   APIDefinition_ID : UUID;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.ContractItemGUID {
+  @Core.ComputedDefaultValue : true
+  key ID : UUID not null;
+  @odata.Precision : 7
+  @odata.Type : 'Edm.DateTimeOffset'
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Immutable : true
+  @Core.Computed : true
+  @Common.Label : 'Created On'
+  createdAt : Timestamp;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Immutable : true
+  @Core.Computed : true
+  @Common.Label : 'Created By'
+  createdBy : String(255);
+  @odata.Precision : 7
+  @odata.Type : 'Edm.DateTimeOffset'
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed On'
+  modifiedAt : Timestamp;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed By'
+  modifiedBy : String(255);
+  ConditionDocument : LargeString;
+  CustomerID : LargeString;
+  FieldCombination : LargeString;
+  ItemGUID : LargeString;
+  @cds.ambiguous : 'missing on condition?'
+  CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
+  CCMContract_ID : UUID;
 };
 
 @cds.external : true
@@ -630,6 +722,8 @@ entity ConditionContract.FastConditionContractsView {
   ProductFilter : LargeString;
   Extension : Boolean;
   ExtensionPeriod : LargeString;
+  SAPID : LargeString;
+  ExternalID : LargeString;
   hasNewMaterialNumber : Boolean;
   hasActiveContracts : Boolean;
   hasUpdatedPVL : Boolean;
@@ -725,6 +819,8 @@ entity ConditionContract.CCMContractInformationDetailView {
   ProductFilter : LargeString;
   Extension : Boolean;
   ExtensionPeriod : LargeString;
+  SAPID : LargeString;
+  ExternalID : LargeString;
   hasNewMaterialNumber : Boolean;
   hasActiveContracts : Boolean;
   hasUpdatedPVL : Boolean;
@@ -780,6 +876,7 @@ entity ConditionContract.CCMContractProductsView {
   @odata.Type : 'Edm.DateTimeOffset'
   validTo : Timestamp;
   ProductCode : LargeString;
+  EANUPCCode : LargeString;
   CountryCode : LargeString;
   ProductName : LargeString;
   UoM : LargeString;
@@ -793,6 +890,7 @@ entity ConditionContract.CCMContractProductsView {
   CCMContractEndDate : Date;
   PreviousContractNumber : LargeString;
   ContractNumber : LargeString;
+  ItemGUID : LargeString;
   Synchronized : Boolean;
   Notified : Boolean;
   Extension : Boolean;
@@ -804,6 +902,8 @@ entity ConditionContract.CCMContractProductsView {
   CCMMaterial : Composition of many ConditionContract.CCMMaterial;
   @cds.ambiguous : 'missing on condition?'
   CurrentInvoicePrice : Composition of one ConditionContract.CurrentInvoicePrice;
+  @cds.ambiguous : 'missing on condition?'
+  ContractItemGUID : Composition of many ConditionContract.ContractItemGUID;
   @cds.ambiguous : 'missing on condition?'
   PriceConditionInvoice : Composition of one ConditionContract.PriceConditionInvoice;
   @cds.ambiguous : 'missing on condition?'
@@ -858,6 +958,7 @@ entity ConditionContract.CCMContractInformationDetailDetailView {
   @odata.Type : 'Edm.DateTimeOffset'
   validTo : Timestamp;
   ProductCode : LargeString;
+  EANUPCCode : LargeString;
   CountryCode : LargeString;
   ProductName : LargeString;
   UoM : LargeString;
@@ -871,6 +972,7 @@ entity ConditionContract.CCMContractInformationDetailDetailView {
   CCMContractEndDate : Date;
   PreviousContractNumber : LargeString;
   ContractNumber : LargeString;
+  ItemGUID : LargeString;
   Synchronized : Boolean;
   Notified : Boolean;
   Extension : Boolean;
@@ -882,6 +984,8 @@ entity ConditionContract.CCMContractInformationDetailDetailView {
   CCMMaterial : Composition of many ConditionContract.CCMMaterial;
   @cds.ambiguous : 'missing on condition?'
   CurrentInvoicePrice : Composition of one ConditionContract.CurrentInvoicePrice;
+  @cds.ambiguous : 'missing on condition?'
+  ContractItemGUID : Composition of many ConditionContract.ContractItemGUID;
   @cds.ambiguous : 'missing on condition?'
   PriceConditionInvoice : Composition of one ConditionContract.PriceConditionInvoice;
   @cds.ambiguous : 'missing on condition?'
@@ -901,6 +1005,7 @@ entity ConditionContract.ContractPayloadView {
   @Core.ComputedDefaultValue : true
   key CCMContractID : UUID not null;
   key ProductCode : LargeString not null;
+  AssortmentReference : LargeString;
   CndnContrValidFrom : Date;
   CndnContrValidTo : Date;
   Customer : LargeString;
@@ -914,6 +1019,57 @@ entity ConditionContract.ContractPayloadView {
   ConditionValidityEndDate : Date;
   ConditionRateAmount : Double;
   Product : LargeString;
+  SAPID : LargeString;
+  ExternalID : LargeString;
+  Reference : LargeString;
+  TenderID : LargeString;
+  ContractType : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.ContractRebatePayloadView {
+  @Core.ComputedDefaultValue : true
+  key FastConditionContractID : UUID not null;
+  @Core.ComputedDefaultValue : true
+  key CCMContractID : UUID not null;
+  key ProductCode : LargeString not null;
+  AssortmentReference : LargeString;
+  CndnContrValidFrom : Date;
+  CndnContrValidTo : Date;
+  Customer : LargeString;
+  Division : LargeString;
+  Volume : Integer;
+  Discount : Double;
+  @Core.Computed : true
+  MaxDiscount : Double;
+  YP00 : Double;
+  ConfidentialPrice : Decimal;
+  SettlementDescription : LargeString;
+  Tax : Double;
+  RoyalDecree : LargeString;
+  Liquidation : LargeString;
+  RefundDate : Date;
+  PriceConditionCode : LargeString;
+  MarketIncentiveID : LargeString;
+  ConditionValidityStartDate : Date;
+  ConditionValidityEndDate : Date;
+  ConditionRateAmount : Double;
+  EANUPCCode : LargeString;
+  SAPID : LargeString;
+  ExternalID : LargeString;
+  Reference : LargeString;
+  TenderID : LargeString;
+  ContractType : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.MaxDiscountView {
+  key ProductCode : Integer not null;
+  key OfferID : LargeString not null;
+  @Core.Computed : true
+  MaxDiscount : Double;
 };
 
 @cds.external : true
@@ -962,7 +1118,7 @@ entity ConditionContract.CCMContractFOCTableView {
   FreeGoodsOther_ABS_PCT : String(4);
   VAT : Double;
   FOCMinAmount : Integer;
-  FOCBonus : Decimal;
+  FOCBonus : LargeString;
   PotentialGeneratedSavings : Decimal;
   RoyalDecree : LargeString;
   ADD_INCLUDE : LargeString;
@@ -985,6 +1141,7 @@ entity ConditionContract.CCMContractRebateFormView {
   Liquidation : LargeString;
   RefundDate : Date;
   PriceConditionCode : LargeString;
+  MarketIncentiveID : LargeString;
 };
 
 @cds.external : true
@@ -998,6 +1155,33 @@ entity ConditionContract.CCMContractRebateDiscountConditionTableView {
   NetPriceWithoutTax : Decimal;
   NetPriceWithTax : Decimal;
   Tax : Double;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.IdentifyExistingContract {
+  FastConditionContractID : UUID;
+  CCMContractID : UUID;
+  ContractNumber : LargeString;
+  PreviousContractNumber : LargeString;
+  ItemGUID : LargeString;
+  ProductCode : LargeString;
+  AssortmentReference : LargeString;
+  InstituteID : LargeString;
+  CndnContrValidFrom : Date;
+  CndnContrValidTo : Date;
+  key Customer : LargeString not null;
+  Division : LargeString;
+  ConditionValidityStartDate : Date;
+  ConditionValidityEndDate : Date;
+  ConditionRateAmount : Double;
+  key Product : LargeString not null;
+  SAPID : LargeString;
+  ExternalID : LargeString;
+  Reference : LargeString;
+  TenderID : LargeString;
+  OfferID : LargeString;
+  ContractType : LargeString;
 };
 
 @cds.external : true

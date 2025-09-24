@@ -79,6 +79,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity FastConditionContracts as projection on ConditionContract.FastConditionContracts;
     
     entity CCMContract as projection on ConditionContract.CCMContract;
+
+    entity CCMMaterial as projection on ConditionContract.CCMMaterial;
+
+    entity IdentifyExistingContract as projection on ConditionContract.IdentifyExistingContract;
     @readonly 
     entity BrandsInTender  as projection on TransactionalDataViews.BrandsInTender;
     @cds.redirection.target
@@ -96,6 +100,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.City,
         Institute.CifCode,
         Institute.RegionalHealthSystem,
+        Institute.CG1_Description,
+        Institute.CG2_Description,
         Country.Region
     }; 
 
@@ -224,6 +230,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     entity PT_TMINST   as projection on MasterData.PT_TMINST;
+    entity PT_TMINSHIER   as projection on MasterData.PT_TMINSHIER;
     entity PT_TMTEND as projection on TransactionalData.PT_TMTEND;
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
     entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
@@ -1782,7 +1789,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.Liquidation,
             priceCondition.RefundDate,
             priceCondition.Settlement.ID as Settlement_ID: UUID,
-            priceCondition.Settlement.Description,
+            priceCondition.Settlement.Description as SettlementDescription: String,
             priceCondition.Tax,
             priceCondition.MarketIncentiveID
         }where tender.Active = 1 and tender.CountryCode = 'ES'
@@ -1963,10 +1970,47 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
             foc.RoyalDecree,
             foc.ADD_INCLUDE;
 
+    entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees;
+    entity MarketIncentive                              as projection on MasterData.MarketIncentive;  
+
+    entity RelatedInstitutes as select from PT_TMINST as inst
+        left join PT_TMINSHIER as childRel
+            on childRel.ParentInstituteID = inst.InstituteID and childRel.ActiveRecord = 'Yes'
+        left join PT_TMINSHIER as parentRel
+            on parentRel.InstituteID = inst.InstituteID and parentRel.ActiveRecord = 'Yes'
+    {
+        inst.InstituteID as BaseInstituteID,
+        inst.External_InstituteId as AssortmentReference,
+        inst.CustomerID,
+
+        childRel.InstituteID  as ChildInstituteID,
+        parentRel.ParentInstituteID as ParentInstituteID
+    } where inst.CountryCode = 'ES' and inst.ActiveRecord = 'Yes';
+
+    entity CandidateInstitutes as select from RelatedInstitutes
+    {
+        BaseInstituteID,
+        ChildInstituteID as CandidateInstituteID,
+        'CHILD' as RelationType:String
+    }
+    where ChildInstituteID is not null
+
+    union all select from RelatedInstitutes
+    {
+        BaseInstituteID,
+        ParentInstituteID as CandidateInstituteID,
+        'PARENT' as RelationType:String
+    }
+    where ParentInstituteID is not null
+
+    union all select from RelatedInstitutes
+    {
+        BaseInstituteID,
+        BaseInstituteID as CandidateInstituteID,
+        'SELF' as RelationType:String
+    };
+    
     action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String) returns String;
     action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     action createAllFastConditionContracts(OfferID: String) returns String;
-
-    entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees;
-    entity MarketIncentive                              as projection on MasterData.MarketIncentive;  
 }

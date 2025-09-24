@@ -87,6 +87,10 @@ entity PT_TMINST{
 	External_InstituteId: String(50);
 	Class: Integer;
 	SAPGroupId: String;
+	CG1_Description: String;
+	CG2_Description: String;
+	CG1_Code: String;
+	CG2_Code: String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -721,6 +725,7 @@ entity CountryProvinces: cuid {
 entity CountryRegions: cuid {
 	CountryCode     	: String;
 	Name				: String;
+	RegionCode		    : String;
 	Tenders				: Composition of many Tenders_in_Regions on Tenders.Region = $self;
 }
 
@@ -924,6 +929,7 @@ entity UserTerritory {
 
 
 entity PaymentTerms {
+	CountryCode	: String not null;
     E1KNVVM_ZTERM : String(6) not null;
     Description : String;
 }
@@ -1095,4 +1101,21 @@ entity MarketIncentive: managed{
     CountryCode: String;
     MarketIncentiveID: String;
     Description: String;
+}
+
+entity INTERIM_SPAINCUSTOMERS : cuid, managed {
+    CustomerID     	   : Integer;
+    CustomerName       : String;
+	CG1_Description	   : String;
+	CG2_Description	   : String;
+	CG1_Code	       : String;
+	CG2_Code	       : String;
+    CustomerType       : String;
+    Address            : String;
+    Region             : String;
+    Province           : String;
+    Taxcode            : String;
+    PaymentTerm        : String;
+	Status             : String;
+    Comments           : String;
 }

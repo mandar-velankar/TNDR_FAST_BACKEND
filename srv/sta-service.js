@@ -742,6 +742,8 @@ module.exports = async (srv) => {
 		delete req.data.City;
 		delete req.data.CifCode;
 		delete req.data.RegionalHealthSystem;
+		delete req.data.CG1_Description;
+		delete req.data.CG2_Description;
 		}
 		catch(error){
             console.error('Error in TenderFormView CREATE');
@@ -7549,12 +7551,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		// Iterate through the pricing elements to collect necessary conditions
 		for (const elem of pricingElements) {
-		  const { ConditionType, PricingProcedureStep, ConditionRateValue, ConditionAmount } = elem;
+		  const { ConditionType, PricingProcedureStep, ConditionRateValue, ConditionAmount, ConditionQuantity } = elem;
 	  
 		  if (ConditionType) {
 			conditions[ConditionType] = {
 			  ConditionRateValue: parseFloat(ConditionRateValue || 0),
-			  ConditionAmount: parseFloat(ConditionAmount || 0)
+			  ConditionAmount: parseFloat(ConditionAmount || 0),
+			  ConditionQuantity: parseFloat(ConditionQuantity || 1) 
 			};
 		  }
 	  
@@ -7564,7 +7567,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
-			result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
+			if(conditions["YP10"]){
+				result.SAPPriceWithTax = parseFloat((ConditionAmount * conditions["YP10"]?.ConditionQuantity) || 0);
+			}else{
+				result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
+			}
 		  }
 
 		  if (PricingProcedureStep === "306") {
