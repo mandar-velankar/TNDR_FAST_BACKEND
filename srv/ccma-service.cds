@@ -3,6 +3,7 @@ using {com.bayer.SXTENDER.TransactionalDataViews} from '../db/TransactionalDataV
 using {com.bayer.SXTENDER.MasterData} from '../db/MasterData';
 using {com.bayer.SXTENDER.MasterDataViews} from '../db/MasterDataViews';
 using {com.bayer.SXTENDER.AdminData} from '../db/AdminData';
+using {StandardAppService} from './sta-service';
 
 @protocol: 'rest'
 service ConditionContractService @(path: 'conditioncontracting')@(requires: [
@@ -24,10 +25,11 @@ service ConditionContractService @(path: 'conditioncontracting')@(requires: [
     entity OutgoingMails                as projection on TransactionalData.OutgoingMails;
     entity MailTemplate                 as projection on AdminData.MailTemplate;
     entity MailTemplateFile             as projection on AdminData.MailTemplateFile;
+    entity CandidateInstitutes          as projection on StandardAppService.CandidateInstitutes;
 
     @open
     type object {};
 
-    function getBackendData(CountryCode : String) returns object;
+    function getInstituteData() returns object;
 
 }
