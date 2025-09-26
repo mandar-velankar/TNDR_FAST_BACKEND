@@ -1119,3 +1119,12 @@ entity INTERIM_SPAINCUSTOMERS : cuid, managed {
 	Status             : String;
     Comments           : String;
 }
+
+entity CustomerGroups: cuid, managed {
+	CountryCode			: String;
+	CGR1			 	: String;
+	CG1_Description  	: String;
+	CGR2			 	: String;
+	CG2_Description  	: String;
+	FastInstituteType	: String;
+}
