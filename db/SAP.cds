@@ -727,7 +727,7 @@ entity TxtColl: cuid{
 }
 
 entity PrdTxt: cuid{
-    ID: String;
+    PrdTxtID: String;
     TypeCode: String;
     LanguageCode: String;
     SAPScrptLn: Composition of many SAPScrptLn on SAPScrptLn.parentPrdTxt = $self;
