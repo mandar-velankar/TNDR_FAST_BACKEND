@@ -7744,6 +7744,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					FastConditionContracts_ID: existingConditionContracts.length === 0 ? fastCCMContractId : existingfastConditionContract.ID,
 					validFrom: today,
 					validTo: "9999-12-31",
+					Expired: false,
+					EANUPCCode: toStr(contractRow.EAN),
 					CCMCustomer: {
 						InstituteID: toStr(contractRow.InstituteID),
 						AssortmentReference: toStr(rootRow.External_InstituteId),
