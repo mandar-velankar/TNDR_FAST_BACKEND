@@ -7873,7 +7873,22 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
       console.error(err);
       return req.error(500, "Internal error during contract creation.");
     }
+
+	
   });
+
+  srv.on("getFastContractForOffer", async (req) => {
+	
+		try {
+			const { offerID, tenderID} = req.data;
+			const fastConditionContract = await ConditionContract.run(SELECT.one.from(FastConditionContracts).where({OfferID: offerID, TenderID: tenderID}));
+
+			return fastConditionContract || {};
+		} catch (err) {
+			console.error("Error reading FastConditionContracts:", err)
+      		return {};
+		}
+	});
 
 
 }
