@@ -1633,9 +1633,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         institute.InstituteID,
         institute.InstituteName,
         institute.CustomerID,
-        institute.InstituteType
+        institute.InstituteType,
+        product.SKUCountry.EAN
     }where tender.CountryCode = 'ES'
-    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.SKU.UOM, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType;
+    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.SKU.UOM, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType, product.SKUCountry.EAN;
 
     entity CCMMaterilsView as select from TransactionalData.PT_TMOFPR as product 
         inner join MasterData.PT_TMSKUPRDPCK as skuprdpck 
