@@ -84,7 +84,8 @@ module.exports = async (srv) => {
 		PT_TMINSHIER,
 		UserTerritory,
 		InstituteTerritory,
-		PricingPolicy
+		PricingPolicy,
+		MarketIncentive
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
 		OfferConsolidation, 
@@ -7761,9 +7762,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const [rebateRow] = await tx.run(SELECT.from(PriceConditionRebateView).where({ OfferID: offerID, ProductCode:product.ProductCode }));
 
 			let discountRows = [];
+			let marketIncentiveInfo = null;
 
 			if (rebateRow && rebateRow.PriceConditionID) {
 				discountRows = await tx.run(SELECT.from(PriceConditionDiscountConditionsView).where({PriceConditionID: rebateRow.PriceConditionID}));
+				marketIncentiveInfo = await tx.run(SELECT.one.from(MarketIncentive).where({MarketIncentiveID: rebateRow.MarketIncentiveID, CountryCode: rebateRow.CountryCode}));
 			}
 
 			const ccmContract = {
@@ -7790,6 +7793,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					FastConditionContracts_ID: existingConditionContracts.length === 0 ? fastCCMContractId : existingfastConditionContract.ID,
 					validFrom: today,
 					validTo: "9999-12-31",
+					Expired: false,
+					EANUPCCode: toStr(contractRow.EAN),
 					CCMCustomer: {
 						InstituteID: toStr(contractRow.InstituteID),
 						AssortmentReference: toStr(rootRow.External_InstituteId),
@@ -7857,6 +7862,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						RefundDate: toStr(rebateRow.RefundDate),
 						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
 						MarketIncentiveID: toStr(rebateRow.MarketIncentiveID),
+						MarketIncentiveDescription: toStr(marketIncentiveInfo.Description),
 						CCMContract_ID: ccmContractId,
 						validFrom: today,
 						validTo: "9999-12-31",
