@@ -639,7 +639,7 @@ module.exports = async (srv) => {
 		try{
 		const today = new Date().toISOString().slice(0, 10);
 
-		let mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
+		let mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.Custom_String_6}));
 
 		if(req?.data?.CountryCode === 'ES'){
 			// Exclude specific fields based on Classification
