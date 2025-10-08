@@ -1600,7 +1600,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.SAPID,
         tender.ExternalID
     }where tender.CountryCode = 'ES' 
-    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, institute.External_InstituteId, offer.Division, offer.DistributorID, institute.CustomerID, tender.User.UserName, tender.TenderName, tender.Classification, tender.SAPID, tender.ExternalID;
+    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, institute.External_InstituteId, offer.Division, offer.DistributorID, institute.CustomerID, tender.SubmittedBy, tender.TenderName, tender.Classification, tender.SAPID, tender.ExternalID;
 
     entity ConditionContractsView as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer 
