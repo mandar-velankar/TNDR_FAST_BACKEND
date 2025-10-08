@@ -53,7 +53,9 @@ module.exports = async (srv) => {
 
 	const { 
 		FastConditionContracts,
-		CCMContract
+		CCMContract,
+		IdentifyExistingContract,
+		ExistingContractInvoicePrices
 	} = ConditionContract.entities;
 
 	// Use reflection to get the csn definition
@@ -1332,6 +1334,25 @@ module.exports = async (srv) => {
         }
 	});
 
+	srv.after("READ", "OfferProductsDetailView", async (data) => {
+		if (!data || (Array.isArray(data) && data.length === 0)) {
+			return data;
+		}
+
+		const product = Array.isArray(data) ? data?.[0] : data;
+		const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: product?.TenderID});
+
+		if (tender?.CountryCode === 'ES') {
+			if (product?.Custom_String_1 && product?.Custom_String_2) return data;
+
+			if (product?.ProductCode && tender?.InstituteID) {
+				const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode, InstituteID: tender?.InstituteID}));
+				product.Custom_String_1 = existingContracts?.map(contract => contract.ContractNumber).join(',') || null
+				product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
+			}
+		}
+	});
+
 	srv.before(
 		['CREATE','UPDATE'], 
 		[
@@ -1407,6 +1428,52 @@ module.exports = async (srv) => {
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
 			return req.reject(403, error?.message||"Error in AwardedProducts before CREATE");
+		}
+	});
+
+	srv.after("READ", "AwardedProducts", async (data) => {
+		if (!data || (Array.isArray(data) && data.length === 0)) {
+			return data;
+		}
+
+		if (data?.[0]?.CountryCode === "ES") {
+			if (Array.isArray(data) && data.every(el => el.ContractStartDate && el.ContractEndDate)) return data;
+
+			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: data?.[0]?.TenderID});
+			const priceConditions = await SELECT.from(PriceCondition).columns("*", "PriceConditionClassification.isMain").where({OfferID: data?.[0]?.OfferID});
+
+
+			const productPackIds = data.map(item => item.ProductCode);
+
+			if (productPackIds.length > 0 && tender.InstituteID) {
+				const existingContract = await ConditionContract.run(
+					SELECT.one.from(ExistingContractInvoicePrices)
+					.where({
+						ProductCode: {in: productPackIds}, 
+						InstituteID: tender.InstituteID
+					})
+					.orderBy({ ConditionValidityEndDate: "desc" }));
+
+				const priceCondition = priceConditions.find(pc => pc.ProductCode == existingContract?.ProductCode && !!pc.isMain);
+
+				data.forEach(item => {
+					if (existingContract.ContractType === "Tender" && 
+						(
+							tender.Classification === "Tender" ||
+							(
+								parseFloat(priceCondition.NetPriceWithoutTaxBeforeDeductionRD) == parseFloat(existingContract.YP10) &&
+								parseFloat(priceCondition.NetPriceWithoutTaxAfterDeductionRD) == parseFloat(existingContract.NetPriceWithoutTaxAfterDeductionRD) &&
+								parseFloat(priceCondition.NetPriceWithTaxAfterDeductionRD) == parseFloat(existingContract.NetPriceWithTaxAfterDeductionRD) &&
+								parseFloat(priceCondition.NetPriceWithoutTax) == parseFloat(existingContract.NetPriceWithoutTax) &&
+								parseFloat(priceCondition.NetPriceWithTax) == parseFloat(existingContract.NetPriceWithTax)
+							)
+						) && existingContract?.ConditionValidityEndDate) {
+						const nextDay = new Date(existingContract.ConditionValidityEndDate);
+						nextDay.setDate(nextDay.getDate() + 1);
+						item.ContractStartDate = nextDay.toISOString().split('T')[0];
+					}
+				});
+			}
 		}
 	});
 
