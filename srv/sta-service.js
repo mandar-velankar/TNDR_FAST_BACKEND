@@ -1456,23 +1456,25 @@ module.exports = async (srv) => {
 
 				const priceCondition = priceConditions.find(pc => pc.ProductCode == existingContract?.ProductCode && !!pc.isMain);
 
-				data.forEach(item => {
-					if (existingContract.ContractType === "Tender" && 
-						(
-							tender.Classification === "Tender" ||
+				if (existingContract && priceCondition) {
+					data.forEach(item => {
+						if (existingContract.ContractType === "Tender" && 
 							(
-								parseFloat(priceCondition.NetPriceWithoutTaxBeforeDeductionRD) == parseFloat(existingContract.YP10) &&
-								parseFloat(priceCondition.NetPriceWithoutTaxAfterDeductionRD) == parseFloat(existingContract.NetPriceWithoutTaxAfterDeductionRD) &&
-								parseFloat(priceCondition.NetPriceWithTaxAfterDeductionRD) == parseFloat(existingContract.NetPriceWithTaxAfterDeductionRD) &&
-								parseFloat(priceCondition.NetPriceWithoutTax) == parseFloat(existingContract.NetPriceWithoutTax) &&
-								parseFloat(priceCondition.NetPriceWithTax) == parseFloat(existingContract.NetPriceWithTax)
-							)
-						) && existingContract?.ConditionValidityEndDate) {
-						const nextDay = new Date(existingContract.ConditionValidityEndDate);
-						nextDay.setDate(nextDay.getDate() + 1);
-						item.ContractStartDate = nextDay.toISOString().split('T')[0];
-					}
-				});
+								tender.Classification === "Tender" ||
+								(
+									parseFloat(priceCondition.NetPriceWithoutTaxBeforeDeductionRD) == parseFloat(existingContract.YP10) &&
+									parseFloat(priceCondition.NetPriceWithoutTaxAfterDeductionRD) == parseFloat(existingContract.NetPriceWithoutTaxAfterDeductionRD) &&
+									parseFloat(priceCondition.NetPriceWithTaxAfterDeductionRD) == parseFloat(existingContract.NetPriceWithTaxAfterDeductionRD) &&
+									parseFloat(priceCondition.NetPriceWithoutTax) == parseFloat(existingContract.NetPriceWithoutTax) &&
+									parseFloat(priceCondition.NetPriceWithTax) == parseFloat(existingContract.NetPriceWithTax)
+								)
+							) && existingContract?.ConditionValidityEndDate) {
+							const nextDay = new Date(existingContract.ConditionValidityEndDate);
+							nextDay.setDate(nextDay.getDate() + 1);
+							item.ContractStartDate = nextDay.toISOString().split('T')[0];
+						}
+					});
+				}
 			}
 		}
 	});
