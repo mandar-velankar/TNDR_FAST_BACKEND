@@ -475,6 +475,13 @@ service CatalogService @(path : 'tender')@(requires : [
             content   : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType : String      @Core.IsMediaType;
     }
+    type MEANotificationNotRequiredApproverTypes {
+        ApprovalStatus: String;
+        ApproverName: String;
+        ApproverEmailID: String;
+        Statustime: DateTime;
+        ApproverType: String;
+    }
 
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail(sRecipient : String, sSubject : String, sTemplate : String) returns Boolean;
@@ -488,4 +495,6 @@ service CatalogService @(path : 'tender')@(requires : [
     entity THQuotationDelevery  as projection on TransactionalData.THQuotationDelevery;
 
     entity OfferLatestApprovalStatusView as projection on TransactionalDataViews.OfferLatestApprovalStatus;
+
+    function getMEANotificatioNotRequiredApproverTypes(OfferID: String) returns many MEANotificationNotRequiredApproverTypes;
 }
