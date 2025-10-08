@@ -9,7 +9,8 @@ using {StandardAppService} from './sta-service';
 service ConditionContractService @(path: 'conditioncontracting')@(requires: [
     'f_tndr_cag_admin',
     'f_tndr_cag_technical_user',
-    'authenticated-user'
+    'authenticated-user',
+    'f_tndr_cag_ccma_user'
 ]) {
 
     entity PriceCondition               as projection on TransactionalData.PriceCondition;

@@ -39,7 +39,7 @@ module.exports = (srv) => {
 			standardtender: req.user.is('f_tndr_cag_standardtender_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
 			whc: req.user.is('f_tndr_cag_whc_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user') || req.user.is('f_tndr_cag_whcapprover_user') || req.user.is('f_tndr_cag_whcproposalcreator_user'),
 			claims: req.user.is('f_tndr_cag_claims_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user'),
-			conditioncontract: req.user.is(true) || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user')
+			conditioncontract: req.user.is('f_tndr_cag_ccma_user') || req.user.is('f_tndr_cag_admin') || req.user.is('f_tndr_cag_technical_user')
 		};
     });
 };
