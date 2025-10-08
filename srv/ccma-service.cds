@@ -30,6 +30,7 @@ service ConditionContractService @(path: 'conditioncontracting')@(requires: [
     @open
     type object {};
 
+    function getUserCountries() returns object;
     function getInstituteData() returns object;
 
 }

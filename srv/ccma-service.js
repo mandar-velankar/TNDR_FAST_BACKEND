@@ -29,8 +29,14 @@ module.exports = (srv) => {
 		MailTemplate
 	} = cds.entities("com.bayer.SXTENDER.AdminData");
     const {
-        CandidateInstitutes
+        CandidateInstitutes,
+        UserCountries
     } = cds.entities("StandardAppService");
+
+    srv.on('getUserCountries', async(req)=>{
+        const userCountries = await cds.run(SELECT.from(UserCountries));
+        return {userCountries};
+    })
 
     srv.on('getInstituteData', async(req)=>{
         const candidateInstituteData = await cds.run(SELECT.from(CandidateInstitutes));

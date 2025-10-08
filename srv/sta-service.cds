@@ -1594,7 +1594,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.Division,
         offer.DistributorID,
         institute.CustomerID,
-        tender.User.UserName as Owner:String,
+        tender.SubmittedBy as Owner:String,
         tender.TenderName as Reference:String,
         tender.Classification as ContractType:String,
         tender.SAPID,
