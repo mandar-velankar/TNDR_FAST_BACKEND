@@ -1621,16 +1621,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key product.ProductCode,
         product.Price.OfferPrice,
         product.SKU.PRODUCTPACKNAME as ProductPackName:String,
-        product.SKU.UOM as UoM:String,
+        product.UnitPerPack as UoM:String,
         max(brands.BRANDID) as BrandID:String,
         max(brands.BRANDNAME) as BrandName:String,
+        product.SKU.PACKFACTOR,
         institute.InstituteID,
         institute.InstituteName,
         institute.CustomerID,
         institute.InstituteType,
         product.SKUCountry.EAN
     }where tender.CountryCode = 'ES'
-    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.SKU.UOM, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType, product.SKUCountry.EAN;
+    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.UnitPerPack, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType, product.SKUCountry.EAN, product.SKU.PACKFACTOR;
 
     entity CCMMaterilsView as select from TransactionalData.PT_TMOFPR as product 
         inner join MasterData.PT_TMSKUPRDPCK as skuprdpck 

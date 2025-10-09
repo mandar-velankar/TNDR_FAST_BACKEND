@@ -7815,6 +7815,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					validTo: "9999-12-31",
 					Expired: false,
 					EANUPCCode: toStr(contractRow.EAN),
+					PackFactor: toDecimal(contractRow.PACKFACTOR),
 					CCMCustomer: {
 						InstituteID: toStr(contractRow.InstituteID),
 						AssortmentReference: toStr(rootRow.External_InstituteId),
