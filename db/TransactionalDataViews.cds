@@ -3753,7 +3753,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
     entity OfferLatestApprovalStatus as select from TransactionalData.PT_TMOFRS as offer
         left join TransactionalData.PT_TMAPPRST as approvals
             on approvals.OfferId = offer.OfferID
-            and approvals.ApprovalStatus in ('Waiting', 'Processing', 'Cancelled', 'Cancelling', 'Not Sent')
+            and approvals.ApprovalStatus in ('Rejected', 'Waiting', 'Processing', 'Cancelled', 'Cancelling', 'Not Sent')
         left join MaxOfferApprovalStatusTime as maxApprTime
             on maxApprTime.OfferId = offer.OfferID {
                 key offer.OfferID,
