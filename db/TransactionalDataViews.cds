@@ -3884,13 +3884,12 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                             then 0
                     when
                         count(approvals.ApprovalStatus) > 0
-                        and sum(
-                            case when approvals.ApprovalStatus = 'Rejected' then 1 else 0 end
-                        ) > 0
-                        then 2
-                    when
-                        count(approvals.ApprovalStatus) > 0
-                        then 1
+                        then
+                            case 
+                                when sum(case when approvals.ApprovalStatus = 'Rejected' then 1 else 0 end) > 0
+                                then 2
+                                else 1
+                            end
                     else 2	
                 end as approvedStatus: Integer
     } group by  offer.OfferID,
