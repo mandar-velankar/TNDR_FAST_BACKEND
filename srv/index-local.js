@@ -28,6 +28,10 @@ function shouldCompress(req, res) {
   if (type && typeof type === "string" && type.startsWith("text/csv")) {
     return false;
   }
+
+  if (type && typeof type === "string" && (type.startsWith("text/plain") && req.url.includes("TaiwanFASTData"))) {
+    return false;
+  }
   
   // fallback to standard filter function
   return compression.filter(req, res);
@@ -79,6 +83,9 @@ app.use(compression({ filter: shouldCompress }));
 
   // const ProcessTenderResults = require("./jobs/brasil/ProcessTenderResults");
   // new ProcessTenderResults("test","*").onTick();
+
+  // const ProcessHematologyResultsRecordReminderMail = require("./jobs/ProcessHematologyResultsRecordReminderMailJob");
+  // new ProcessHematologyResultsRecordReminderMail("test","*").onTick();
   
   const server = app.listen(port, host, () => console.info(`app is listing at ${host}:${port}`));
   server.on("error", error => console.error(error.stack));

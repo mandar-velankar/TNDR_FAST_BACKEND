@@ -410,6 +410,7 @@ service CatalogService @(path : 'tender')@(requires : [
             DIVISION           : String(500);
             COUNTRYNAME        : String(50);
             HIERARCHY          : Integer;
+            Nucleus            : String(100);
     };
 
     //SALES OPPORTUNINTY
@@ -474,7 +475,6 @@ service CatalogService @(path : 'tender')@(requires : [
             content   : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType : String      @Core.IsMediaType;
     }
-
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail(sRecipient : String, sSubject : String, sTemplate : String) returns Boolean;
     function getMailTemplate(countryCode : String, language : String, offerId : String) returns LargeString;
@@ -482,7 +482,9 @@ service CatalogService @(path : 'tender')@(requires : [
     action notifyIbiz(ibizWorkflowID: Integer, directIndirect: Integer, lineNumbers: array of Integer) returns String; //  (0 = direct; 1 = indirect)
     action sendApprovalToIbiz(ibizWorkflowID: Integer, offerStatus: Integer, comment: String) returns String;
     action simulateTaxes(offerID: String, productCode: Integer, lotID: Integer, conditionType: String, commercialProposal: String) returns String;
-    action sendTHNotificationMailTemplate(offerID:String,tenderId: String, CountryCode: String) returns String;
+    function getTHNotificationMailTemplate(offerID:String,tenderId: String, CountryCode: String, templateId:String) returns String;
 
-    entity THQuotationDelevery  as projection on TransactionalData.THQuotationDelevery
+    entity THQuotationDelevery  as projection on TransactionalData.THQuotationDelevery;
+
+    entity OfferLatestApprovalStatusView as projection on TransactionalDataViews.OfferLatestApprovalStatus;
 }

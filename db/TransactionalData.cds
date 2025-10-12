@@ -66,6 +66,15 @@ entity PT_TMOFRS { //Offers
         AffiliateOffer         : Boolean default false; 
         QuotationInstituteID   : Integer;
         DifferentAwardPriceParentOfferID : String(30); // Is applicable for Taiwan Different award price Copying option
+        PreviousApprovalHasAddedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHasDeletedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHasDeclinedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHas_Deleted_DeclinedProduct: Boolean default false; //MEA specific
+        PreviousApprovalHas_Deleted_Products_PTL: String; //MEA specific
+        ApprovalHasDeletedProduct_Previous_State: Boolean default false; //MEA specific
+        ApprovalHasDeclinedProduct_Previous_State: Boolean default false; //MEA specific
+        ApprovalHas_Deleted_DeclinedProduct_Previous_State: Boolean default false; //MEA specific
+        ApprovalHas_Deleted_Products_PTL_Previous_State: String; //MEA specific
         Custom                 : Custom; // Custom attributes for templates usage
         //Associations
         Tender                : Association to PT_TMTEND
@@ -333,6 +342,7 @@ entity PT_TMOFPR {
         DEFAULT_COMMISSION_RATE  : Double;
         SUPPLY_UPDATE            : Integer;
         PAYMENT_UPDATE           : Integer;
+        VOLUME_UOM_UPDATE        : Integer;
         Line                     : String;
         DeliveryConditions       : String;
         MinInvoiceAmount         : Double;
@@ -344,6 +354,11 @@ entity PT_TMOFPR {
     key LotID                    : Integer default 1;
         WorkflowProductID        : Integer;
         IbizWorkflowID           : Integer;
+        MEAApprovalUpdatedFields : MEAApprovalUpdatedFields;
+        MEAApprovalLatestUpdatedField: String;
+        MEAApprovalLatestUpdatedFieldPreviousState: String;
+        hasUpdatedSupplyPaymentPriceValues : Boolean default false;
+        IsProductAddedForPreviousApproval : Boolean default false;
         Custom                   : Custom; // Custom attributes for templates usage
         //Associations
         Offer                    : Association to PT_TMOFRS
@@ -577,7 +592,7 @@ entity PriceCondition: cuid, managed {
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
-    NLPriceConditions                   : Association to many NLPriceConditions on NLPriceConditions.PriceCondition = $self;
+    NLPriceConditions                   : Composition of many NLPriceConditions on NLPriceConditions.PriceCondition = $self;
 }
 
 //EHQUT-INC18178128-FAST - Error decimals discounts
@@ -635,6 +650,7 @@ entity PT_TMQUTO {
         I_Q_2             : String(255);
         I_Q_3             : String(255);
         Comment           : String;
+        PLComment         : LargeString;
         UPDATED           : Integer;
         EffectiveDate     : Date;
         ExpiryDate        : Date;
@@ -971,7 +987,6 @@ entity ContractInfomation : cuid, managed {
         on OfferProduct.OfferID = OfferID
         and OfferProduct.ProductCode = ProductCode;
 }
-        
 entity THQuotationDelevery : cuid {
     OfferID                   : String;
     QuotationDeliverymethod   : String;
@@ -1008,4 +1023,12 @@ entity CCMPriceCondition: cuid, managed{
     NETPRICEWITHOUTTAX                  : Decimal;
     NETPRICEWITHTAX                     : Decimal;
     ConditionType                       : String;
+}
+
+type MEAApprovalUpdatedFields {
+    Volume      : Integer default 0;
+    UOM         : Integer default 0;
+    FOC         : Integer default 0;
+    Price       : Integer default 0;
+    Deductions  : Integer default 0;
 }

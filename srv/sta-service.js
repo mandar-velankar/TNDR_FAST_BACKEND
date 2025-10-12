@@ -519,6 +519,13 @@ module.exports = async (srv) => {
 		//const result = await next(); // Allow the original query to run
 		// Check if the result contains $count
 		const tx = cds.tx(req);
+
+		const instituteHierarchy = await SELECT.from(PT_TMINSHIER);
+
+		const DEFAULT_SORTING = [
+			{ ref: ["TenderID"], sort: "desc" },
+			{ ref: ["OfferID"], sort: "desc" }
+		];
 		
 		let result = [];
         let tmvQuery = SELECT.from(req.query.SELECT.from);
@@ -526,10 +533,37 @@ module.exports = async (srv) => {
             tmvQuery.columns(req.query.SELECT.columns);
         }
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
+		let instituteID =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'InstituteID');
+		
+		// Deleting Institute filter in order to create custom filter logic
+		instituteID && ServiceHelper.deleteFilter(req, "InstituteID");
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
-        req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
         //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
+
+		// Function to check if sorting matches the default
+		const isDefaultSorting = (orderBy) => {
+			return JSON.stringify(orderBy) === JSON.stringify(DEFAULT_SORTING);
+		};
+
+		// Function to check if sorting is applied only on TenderID or OfferID in descending order
+		const isTenderOrOfferDescSorting = (orderBy) => {
+			return orderBy.some(order => 
+				(order.ref[0] === "TenderID" || order.ref[0] === "OfferID") && order.sort === "desc"
+			);
+		};
+		
+		// Determine sorting behavior
+		const hasOrderBy = req.query.SELECT.orderBy && req.query.SELECT.orderBy.length > 0;
+		const isUserSorting = hasOrderBy && !isDefaultSorting(req.query.SELECT.orderBy);
+		const isDescTenderOfferSorting = hasOrderBy && isTenderOrOfferDescSorting(req.query.SELECT.orderBy);
+
+		// Ensure both TenderID & OfferID are in DESC if either is DESC
+        if (isDescTenderOfferSorting) {
+            req.query.SELECT.orderBy = DEFAULT_SORTING;
+        }
+
+		req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
 
         result = await tx.run(tmvQuery);
 
@@ -554,9 +588,27 @@ module.exports = async (srv) => {
 			});
 		};
 
+		if (instituteID) {
+			const selectedParentInstitute = instituteHierarchy.find(inst => inst.ParentInstituteID === instituteID);
+			const selectedChildInstitutes = instituteHierarchy.filter(inst => inst.InstituteID === instituteID);
+
+			if (selectedParentInstitute) {
+				result = result.filter(tender => tender.InstituteID === instituteID);
+			}else if (selectedChildInstitutes && selectedChildInstitutes.length > 0) {
+				result = result.filter(tender => {
+					const selectedChildInstituteIndex = selectedChildInstitutes.findIndex(inst => inst.ParentInstituteID === tender.InstituteID);
+
+					return tender.InstituteID === instituteID || 
+					selectedChildInstituteIndex > -1
+				});
+			}else {
+				result = result.filter(tender => tender.InstituteID === instituteID);
+			}
+		}
+
 		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
-			return applyCustomSorting(result);
+			return (isUserSorting && !isDescTenderOfferSorting) ? result : applyCustomSorting(result);
 		}
 		
 		const cwid = req.user.id;
@@ -574,7 +626,7 @@ module.exports = async (srv) => {
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
 		  // If no user territories found, return all items
-		  return applyCustomSorting(result);
+		  return (isUserSorting && !isDescTenderOfferSorting) ? result : applyCustomSorting(result);
 		}
 
 		let resultsArray = Array.isArray(result) ? result : [result];
@@ -621,13 +673,10 @@ module.exports = async (srv) => {
 			return [];
 		}
 			
-		if (finalFilteredResults.length > 0) {
-			// Return the final filtered results
-			return applyCustomSorting(finalFilteredResults);
-		}else{
-			// If no territory matches, return an empty array
-			return applyCustomSorting(territoryMatches);
-		}
+		return finalFilteredResults.length > 0
+            ? (isUserSorting && !isDescTenderOfferSorting ? finalFilteredResults : applyCustomSorting(finalFilteredResults))
+            : (isUserSorting && !isDescTenderOfferSorting ? territoryMatches : applyCustomSorting(territoryMatches));
+
 		}
 		catch(error){
             console.error('Error in TenderMasterView READ');
@@ -893,6 +942,8 @@ module.exports = async (srv) => {
 		delete req.data.GrossProfit;
 		delete req.data.GrossMargin;
 		delete req.data.ProductType;
+		delete req.data.NetPriceInEUR;
+		delete req.data.TotalAmountInEUR;
 		}
 		catch(error){
             console.error('Error in OfferProductsTableView CREATE');
@@ -1375,7 +1426,19 @@ module.exports = async (srv) => {
 					if(req.data.ConditionType === 'Price' || req.data.ConditionType === 'Discount'){
 						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : roundToDecimalPlaces(req.data.BasePrice,2);
 					}
+					if (req.data.CountryCode?.includes("HM")) {
+						if (!req.data.BasePrice) return;
+					}
 					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
+				}
+
+				if (req.data.CountryCode === "PL") {
+					if (req.data.ConditionType === "WithMaximumPrice") {
+						!req.data.Price1 && req.error({ code: 404, message: "Please select value greater than 0", target: "Price1" });
+					}else {
+						!req.data.SpecialPrice && req.error({ code: 404, message: "Please select value greater than 0", target: "SpecialPrice" });
+					}
+					
 				}
 			}
 			catch(error){
@@ -3056,6 +3119,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			I_Q_2             : null,
 			I_Q_3             : null,
 			Comment           : data.CUSTOM_REMARKS,
+			PLComment         : data.PL_CUSTOM_REMARKS,
 			UPDATED           : 1,
 			EffectiveDate     : data.EffectiveDate,
 			ExpiryDate        : data.ExpiryDate
@@ -3637,6 +3701,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			DISTRIBUTOREMAIL: offer.TENDER_CHANNEL === "Direct" ? distributor?.CONTACT_EMAIL : offer.DISTRIBUTOREMAIL,
 			REMARKS: offer.SELLING_COMPANY_REMARKS,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
+			PL_CUSTOM_REMARKS: quotation ? quotation.PLComment : "",
 			DELIVERYTERMS: deliveryTerms,
 			PAYMENTTERMS: paymentTerms,
 			SHIPMENTTERMS: shipmentTerms,
@@ -3905,6 +3970,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			NLHospitalManagerEmail: NLHospitalManagerEmail,
             NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
 			TotalPNM_Value				: totalPnmValue,
+			COUNTRY_NAME: offer.COUNTRY_NAME.replace(/Hematology|Consumer Health/g, "").trim(),
 		};
 		return results;
 	
@@ -5152,7 +5218,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({'OfferID': lastHistoryPriceCondition?.OfferID, 'ProductCode': lastHistoryPriceCondition?.ProductCode}));
 		let currentDiscount = null;
 
-		if (lastHistoryPriceCondition) {
+		if (lastHistoryPriceCondition && awardedProduct) {
 			currentDiscount = (lastHistoryPriceCondition.Price0 - awardedProduct.AwardedPrice) / lastHistoryPriceCondition.Price0;
 		}
 		
@@ -5485,7 +5551,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let offerPrice = product.OFFER_PRICE;
 		let netOfferPrice = product.NET_OFFER_PRICE;
 		let netPrice = product.NET_PRICE;
-		let cogs = product.COGS;
+		let cogs = product.COGS_EUR;
 
 		let offerPriceUnit = offerPrice / toUnitFactor;
 		let offerPricePack = offerPrice / toPackFactor;
@@ -5504,7 +5570,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let netSalesEurSpot = netSales / product.SPOT_RATE;
 		let netSalesEurBudget = netSales / product.BUDGET_RATE;
 
-		let totalCostEur = totalVolume * cogs / product.SPOT_RATE;
+		let totalCostEur = totalVolume * cogs;
 		if (product.FOC_BUNDLED_1 !== 0) {
 			if (product.FOC_BUNDLED_1_ABS_PCT === "PCT") {
 				totalCostEur = totalCostEur + Math.round(product.FOC_BUNDLED_1 * requestedVolume) * product.FOC_BUNDLED_1_COGS / product.SPOT_RATE;
@@ -5704,6 +5770,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							return input.split("-").reverse().join("-").replaceAll("-","/");
 						},
 						dateFormatHEM: (input) => {
+							if(input==="" || input=== null){
+								return "";
+							}
 							return input.split("-").reverse().join("-").replaceAll("-",".");
 						},
 						currentdatePK: (input) => {
@@ -6061,7 +6130,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			console.log("Duration: ", `(${endTime.diff(startTime, 'seconds')} seconds)`);
 			
 			if (mappedTaiwanFASTData.length === 0) return req.reject(404, "No Zuellig Extracts were found");
-			
+			req._.res.setHeader('Content-type', 'text/plain');
 			req._.res.json({
 				data: mappedTaiwanFASTData
 			});
@@ -6620,7 +6689,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 			req._.res.setHeader('Content-disposition', `attachment; filename= Extract History.xlsx`);
 			req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			return excelStreamValue;
+			excelStreamValue.value.pipe(req._.res);
+			return;
 		}
 		catch(error){
             console.error('Error in ExcelAttachments READ');
@@ -6633,6 +6703,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ed.OfferPrice_1 = ed.OfferPrice_1 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_1), 'nl-NL', 2, 2);
 			ed.OfferPrice_2 = ed.OfferPrice_2 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_2), 'nl-NL', 2, 2);
 			ed.OfferPrice_3 = ed.OfferPrice_3 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_3), 'nl-NL', 2, 2);
+			ed.AcceptedPrice = ed.AcceptedPrice && ServiceHelper.formatCurrency(Number(ed.AcceptedPrice), 'nl-NL', 2, 2);
 			ed.NetPrice = ed.NetPrice && ServiceHelper.formatCurrency(Number(ed.NetPrice), 'nl-NL', 2, 2);
 			ed.EffectiveDate = ed.EffectiveDate && ServiceHelper.formatDate(ed.EffectiveDate, '', 'DD-MM-YYYY');
 			ed.ExpiryDate = ed.ExpiryDate && ServiceHelper.formatDate(ed.ExpiryDate, '', 'DD-MM-YYYY');
@@ -6705,7 +6776,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				!awardedOfferDistributors.some(nlo => 
 					el.OfferID == nlo.OfferID && 
 					el.ProductPackID == nlo.ProductPackID && 
-					el.DistributorID == nlo.DistributorID
+					el.DistributorID == nlo.DistributorID && 
+					nlo.AssignedProductCode == AssignedProductCode
 				)
 			);
 			let insertPromise;
@@ -7090,7 +7162,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		excelStreamValue.value.pipe(req._.res);
+		return;
 		}
 		catch(error){
             console.error('Error in ExtractClaimsSales READ');
@@ -7149,7 +7222,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			
 			// // Format Date
 			ed.ExcelDate = new Date(ed.FilePeriod);
-			ed.FilePeriod = ed.FilePeriod && ServiceHelper.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
+			ed.FilePeriod = ed.Date && ServiceHelper.formatDate(ed.Date, '', 'DD-MM-YYYY');
 
 			//Format Percentage
 			ed.ContractBrandUsage = ed.ContractBrandUsage ? ed.ContractBrandUsage : 0; 
@@ -7961,4 +8034,177 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	});
 
 
+
+	srv.on('copyTender', async (req) => {
+		try{
+			const { data: {TenderID} } = req;
+
+			!TenderID && req.error({ code: 404, message: "TenderID was not provided", target: "TenderID" });
+
+			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: TenderID, Active: 1});
+
+			// checks 
+			if(!tender){
+				return req.error({ code: 403, message: `Tender "${TenderID}" is not active. Only active tender can be copied.`, target: "PT_TMTEND"});
+			}
+
+			const latestTenderID = await SELECT.one.from(PT_TMTEND).columns('max(TenderID) as TenderID').where({ CountryCode: tender.CountryCode })
+			const offers = await SELECT.from(PT_TMOFRS).where({TenderID: TenderID, ActiveOffer: 1});
+			const offerIDs = offers.map(o => o.OfferID);
+			const offerProducts = offerIDs.length > 0 ?await SELECT.from(PT_TMOFPR).where({OfferID: {in: offerIDs}, Active: 1}) : [];
+			const offerProductIDs = offerProducts.map(o => o.ProductCode);
+			const productPricing = offerIDs.length > 0 && offerProductIDs.length > 0 ? await SELECT.from(PT_TMBDPR).where({OfferID: {in: offerIDs}, ProductCode: {in: offerProductIDs},  Active: 1, ActiveTier: 0, LotID: 1 }) : [];
+			const priceCondtions = offerIDs.length > 0 && offerProductIDs.length > 0 ? await SELECT.from(PriceCondition).where({OfferID: {in: offerIDs}, ProductCode: {in: offerProductIDs}}) : [];
+			const priceConditionIDs = priceCondtions.map(pc => pc.ID);
+			const nlPriceConditions = priceConditionIDs.length > 0 ? await SELECT.from(NLPriceConditions).where({PriceCondition_ID: {in: priceConditionIDs}}) : [];
+			const freeGoodsOther = priceConditionIDs.length > 0 ? await SELECT.from(FreeGoodsOther).where({PriceCondition_ID: {in: priceConditionIDs}}) : [];
+
+			const newTenderInformation = getNewCopiedTenderInformation(offers, latestTenderID);
+
+			return createNewTender({tender, offers, newTenderInformation, offerProducts, productPricing, priceCondtions, nlPriceConditions, freeGoodsOther, req});
+		}
+		catch(error){
+            console.error('Error in copyTender');
+            return req.reject(403, error?.message||"Error in copyTender");
+        }
+	});
+
+	function getNewCopiedTenderInformation (offers, latestTenderID) {
+		const splitedTenderID = latestTenderID.TenderID.split("-");
+		splitedTenderID[splitedTenderID.length-1] = Number(splitedTenderID[splitedTenderID.length - 1]) + 1;
+		const newTenderID = splitedTenderID.join("-");
+
+		const offerIDs = offers.map((offer, index) => {
+			const newTenderOfferNo = index + 1;
+			return {
+				oldOfferID: offer.OfferID,
+				newOfferID: newTenderID + "-" + newTenderOfferNo,
+				newTenderOfferNo: newTenderOfferNo
+			}
+		});
+
+		return {
+			newTenderID,
+			newTenderNo: splitedTenderID[splitedTenderID.length - 1],
+			offerIDs
+		}
+	}
+
+
+	async function createNewTender({tender, offers, newTenderInformation, offerProducts, productPricing, priceCondtions, nlPriceConditions, freeGoodsOther, req}){
+		const todaysDate = new Date().toISOString().substring(0,10);
+
+		// mapping new tender 
+		const newTender = {...tender};
+		newTender.TenderID = newTenderInformation.newTenderID;
+		newTender.TenderNo = newTenderInformation.newTenderNo
+		newTender.SubmittedOn = todaysDate;
+
+		// mapping new offers
+		const newOffers = offers.map(offer => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === offer.OfferID);
+			const newOffer = {...offer};
+
+			newOffer.TenderID = newTenderInformation.newTenderID;
+			newOffer.OfferID = NEW_OFFER_ID.newOfferID;
+			newOffer.CreationDate = todaysDate;
+			newOffer.InternalBidDueDate = todaysDate;
+			newOffer.NewOfferDueDate = todaysDate;	
+			newOffer.TenderOfferNo = NEW_OFFER_ID.newTenderOfferNo;
+			newOffer.SubmittedOn = todaysDate;
+
+			return newOffer;
+		});
+
+		// mapping new offer statuses
+		const newOfferStatuses = newOffers.map(newOffer => {
+			return {
+				TenderID: newOffer.TenderID,
+				OfferID: newOffer.OfferID,
+				CountryCode: newOffer.CountryCode,
+				Active: 1,
+				STATUS: "Offer Created",
+				TableStatus: null,
+				Date: todaysDate,
+			};
+		});
+
+		// mapping new offer products
+		const newOfferProducts = offerProducts.map(product => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === product.OfferID);
+			const newOfferProduct = {...product};
+
+			newOfferProduct.TenderID = newTenderInformation.newTenderID;
+			newOfferProduct.OfferID = NEW_OFFER_ID.newOfferID;
+			newOfferProduct.SubmittedOn = todaysDate;
+			newOfferProduct.Active = 1;
+
+			return newOfferProduct;
+		});
+
+		// mapping new offer product pricing
+		const newProductsPricings = productPricing.map(pr => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === pr.OfferID);
+			const newProductPricing = {...pr};
+
+			newProductPricing.TenderID = newTenderInformation.newTenderID;
+			newProductPricing.OfferID = NEW_OFFER_ID.newOfferID;
+			newProductPricing.SubmittedOn = todaysDate;
+
+			return newProductPricing;
+		});
+
+		// mapping new offer product price conditions and free goods other
+		const newProductsPriceCondtions = priceCondtions.map(pc => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === pc.OfferID);
+			const existingNlPriceConditions = nlPriceConditions.filter(nlpc => nlpc.PriceCondition_ID === pc.ID);
+			const freeGoods = freeGoodsOther.filter(fg => fg.PriceCondition_ID === pc.ID);
+
+			const newPriceCondition = {...pc};
+
+			newPriceCondition.OfferID = NEW_OFFER_ID.newOfferID;
+			newPriceCondition.ID = uuidv4();
+
+			// mapping price conditions specific for NL
+			const newNLPriceConditions = existingNlPriceConditions.map(nlpc => {
+				const newNLPriceCondition= {...nlpc};
+				newNLPriceCondition.ID = uuidv4();
+				newNLPriceCondition.PriceCondition_ID = newPriceCondition.ID;
+				return newNLPriceCondition;
+			});
+
+			// mapping free good of each price condition
+			const newFreeGoodsOthers = freeGoods.map(fg => {
+				const newFreeGoodsOther= {...fg};
+				newFreeGoodsOther.ID = uuidv4();
+				newFreeGoodsOther.PriceCondition_ID = newPriceCondition.ID;
+				return newFreeGoodsOther;
+			});
+
+			// returns associated free goods and NL priceconditions with pricecondition to cascade insert them
+			return {
+				...newPriceCondition,
+				NLPriceConditions: newNLPriceConditions,
+				FreeGoodsOther: newFreeGoodsOthers
+			};
+		});
+
+		// 1. create new tender
+		newTender && await INSERT.into(PT_TMTEND).entries(newTender);
+		// 2. create new offer
+		newOffers.length > 0 && await INSERT.into(PT_TMOFRS).entries(newOffers);
+		// 3. create new offer status
+		newOfferStatuses.length > 0 && await INSERT.into(PT_TMTNOFST).entries(newOfferStatuses);
+		// 4. create new products
+		newOfferProducts.length > 0 && await INSERT.into(PT_TMOFPR).entries(newOfferProducts);
+		// 5. create new product pricing
+		newProductsPricings.length > 0 && await INSERT.into(PT_TMBDPR).entries(newProductsPricings);
+		// 6. create new price condtions
+		newProductsPriceCondtions.length > 0 && await INSERT.into(PriceCondition).entries(newProductsPriceCondtions);
+
+		return {
+			TenderID: newTender.TenderID,
+			OfferID: newOffers.length > 0 ? newOffers[0].OfferID : "NA"
+		};
+	};
 }

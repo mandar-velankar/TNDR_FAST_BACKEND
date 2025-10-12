@@ -47,6 +47,7 @@ entity PT_TMUSER {
 entity PT_TMUSERCTRY {
     key CWID         : String(5);
     key CountryCode  : String;
+    key Application  : String default 'ALL';
         ActiveRecord : String(3);
         //Associations
         User         : Association to PT_TMUSER

@@ -276,6 +276,7 @@ entity CountryApprovers : managed {
 	//Hierarchy:Integer not null;
 	Enabled                 : Boolean; //TODO Boolean not null;
 	key BU: String default 'All';
+	Nucleus: String;
 	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode
 }
@@ -447,6 +448,8 @@ entity PT_TMSKUPRDPCK{
     key ActiveRecord:String(10) not null;
     key ProductPackID:Integer not null;
     key SKUCode:Integer not null;
+	ValidFrom : Date;
+    ValidTo : Date;
 	//Associations
     Country:Association to PT_TMCTRY on Country.CountryCode = CountryCode;
 	ProductPack:Association to PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackID;
@@ -937,6 +940,7 @@ entity NLPPP: cuid, managed{
 	CountryCode: String;
 	PRODUCTPACKID:Integer;
 	MaterialNumbers: Integer;
+	GOV_CODE: String;
 	StartDate: Date;
 	EndDate: Date;
 	Comment: String;
@@ -998,6 +1002,7 @@ entity WholesalePurchasePrice: cuid, managed {
 	PRODUCTPACKID: Integer;
 	DistributorID: Integer;
 	MaterialNumbers: Integer;
+	GOV_CODE: String;
 	Type: String;
 	CurrentType: String;
 	Margin: Double;

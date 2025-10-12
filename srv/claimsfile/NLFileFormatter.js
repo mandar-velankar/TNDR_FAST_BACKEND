@@ -49,7 +49,10 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			// Map sales data to claim data
 			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, this.cwid, claimsData, { dateFrom, dateTo, filePeriodDate });
 
-            const result = {contrastAgentSalesData, claimFile, claimData};
+			const mappedclaimsData = claimData.mappedclaimsData;
+			const mappedFASTOfferClaims = claimData.mappedFASTOfferClaims;
+
+            const result = {contrastAgentSalesData, claimFile, mappedclaimsData, mappedFASTOfferClaims};
 
             return result;
 
@@ -197,9 +200,10 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 	 * @returns {Object} claimData
 	 */
 	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, wPPS, distributionAgreements, UUID, CWID, claimsData, { dateFrom, dateTo, filePeriodDate }) {
-
+		const mappedFASTOfferClaims = [];
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
+			const claimID = this.generateUUID();
 			const productpack = countryProductPacks.find(item => item.GOV_CODE == curr.ZIndexNumber);
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
 			const productPack = productPacks.find(i => i.PRODUCTPACKID == productCode);
@@ -231,21 +235,39 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 																item.ProductCode === productCode &&
 																item.ContractStartDate <= dateFrom &&
 																item.ContractEndDate >= dateFrom);
-			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
+			filteredItems.forEach(item => {
+				mappedFASTOfferClaims.push({
+					ClaimFileID: UUID,
+					CountryCode: this.countryCode,
+					ClaimDataID: claimID,
+					OfferID: item.OfferID,
+					ProductCode: item.ProductCode,
+					FASTContractPrice: item.OfferPrice,
+					FASTWholesalerPurchasePrice: wppValue,
+					FASTDistributionArrangement: daValue,
+					FASTDistributionAgreementType: daType
+				});
+			});		
+			//const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
+			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((latest, item) => !latest || new Date(item.CreationDate) > new Date(latest.CreationDate) ? item : latest, null) : null;
 			const offerID = fastOffer && fastOffer.OfferID || null;
 			let fastContractClaim = fastOffer && ((wppValue - fastOffer.OfferPrice) * curr.TotalDelivered) || 0;
 			fastContractClaim = Math.round(fastContractClaim * 100) / 100;
 			let fastDistributionArrangementClaim = fastOffer ? (distributionAgreement?.Type === 'Fixed' ? ((fastOffer.OfferPrice - daValue) * curr.TotalDelivered) : ((fastOffer.OfferPrice * daValue) * curr.TotalDelivered)) : 0;
 			fastDistributionArrangementClaim = Math.round(fastDistributionArrangementClaim * 100) / 100;
 			let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
-			const wholesalerDisArPrice = (curr.FixedPrice - curr.Claim2Amount) / curr.TotalDelivered;
-			const wholesalerDistributionArrangement = distributionAgreement && distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(3)) : Number((Math.floor(((1 - wholesalerDisArPrice) / curr.FixedPrice)*1000)/1000).toFixed(3)) || null;
-			const percentageDifference = fastOffer && Number((Math.floor(((curr.ClaimTotal - totalFASTClaim) /totalFASTClaim)*1000)/1000).toFixed(3)) || 0;
+			totalFASTClaim = Math.round(totalFASTClaim * 100) / 100;
+			const finalTotalFASTClaim = Number(totalFASTClaim && totalFASTClaim >= 0 ? totalFASTClaim : 0)
+			const wholesalerDisArPricePerUnit = curr.Claim2Amount / curr.TotalDelivered;
+			const wholesalerDisArPrice = curr.FixedPrice - wholesalerDisArPricePerUnit;
+			const wholesalerDistributionArrangement = distributionAgreement && distributionAgreement?.Type === 'Fixed' ? parseFloat(wholesalerDisArPrice.toFixed(3)) : Number((Math.round((wholesalerDisArPricePerUnit / curr.FixedPrice)*1000)/1000).toFixed(3)) || null;
+			const percentageDifference = fastOffer && finalTotalFASTClaim !== 0 ? Number((Math.round(((curr.ClaimTotal - finalTotalFASTClaim) /finalTotalFASTClaim)*1000)/1000).toFixed(3)) || 0 : 0;
 			const filteredClaimsData = claimsData.filter(item => item.OfferID == offerID && item.MainInstituteID == instituteId && item.ProductPackID == productCode);
 			const fastPendingCorrection = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + (row.TotalWholesalerClaim - row.TotalFASTClaim), 0) : 0;
 			const usageCalculation = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.Quantity, 0) : 0;
 			prev.push(
 				{
+					ID										: claimID,
 					CountryCode                             : this.countryCode,
 					createdBy           					: CWID,
 					modifiedBy         						: CWID,
@@ -283,9 +305,9 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 					TotalWholesalerClaim                    : (!curr.ClaimTotal && curr.ClaimTotal !== 0) ? null : Number(curr.ClaimTotal || 0),
 					FASTContractClaim                       : Number(fastContractClaim || 0),
 					FASTDistributionArrangementClaim        : Number(fastDistributionArrangementClaim || 0),
-					TotalFASTClaim                          : Number(totalFASTClaim || 0),
+					TotalFASTClaim                          : finalTotalFASTClaim,
 					PercentageDifference                    : percentageDifference,
-					Status                                  : instituteName === 'Customer Not Found' ? 'CustomerNotFound' : (fastOffer ? (totalFASTClaim == curr.ClaimTotal) ? 'Passed' : 'Failed' :'Failed'),
+					Status                                  : instituteName === 'Customer Not Found' ? 'CustomerNotFound' : (fastOffer ? (finalTotalFASTClaim == curr.ClaimTotal) ? 'Passed' : 'Failed' :'Failed'),
 					Comment                                 : null,
 					FASTWholesalerPurchasePrice             : Number(wppValue || 0),
 					FASTContractPrice                       : fastOffer && Number(fastOffer.OfferPrice) || 0,
@@ -309,7 +331,10 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			);
 			return prev;
 		}, []);
-		return salesData;
+		return {
+			mappedclaimsData: salesData,
+			mappedFASTOfferClaims
+		};
 	}
 
 	
@@ -412,10 +437,12 @@ module.exports = class NLFileFormatter extends BaseCountryFileFormatter {
 			columnNames.forEach((col, index) => {
 				let value = row[index];
 				
+				/*
 				if (['FixedPrice', 'PurchasePrice', 'Claim1Amount', 'Claim2Amount','ClaimTotal'].includes(col)) {
 					// Convert last two digits to decimal
 					value = parseFloat(String(value).replace(/^\+?0+/, '')) / 100;
-				}
+				}*/
+				
 				obj[col] = value;
 			});
 			return obj;

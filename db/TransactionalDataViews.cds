@@ -11,12 +11,10 @@ using { com.bayer.SXTENDER.BrazilContractingData } from './BrazilContractingData
 
 entity LatestApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals{
     key approvals.OfferId,
-    key approvals.ApproverEmailID,
     key approvals.ApproverType,
     max(approvals.Statustime) as MaxStatusTime:DateTime
 }where approvals.Active = 1
 group by approvals.OfferId,
-    approvals.ApproverEmailID,
     approvals.ApproverType;
 
 entity ApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals
@@ -24,7 +22,6 @@ inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
-    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 inner join MasterData.PT_TMCTRY as country
     on country.CountryCode = approvals.CountryCode
@@ -239,8 +236,9 @@ inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
-    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
+left join OfferLatestApprovalStatus as offerLatestApprStatus
+    on offerLatestApprStatus.OfferID = approvals.OfferId
 {
    approvals.OfferId as OFFER_ID,
    approvals.productcode as PRODUCT_ID,
@@ -300,6 +298,30 @@ inner join LatestApprovalRequests as latestApprovals
         then 1 else 0 end
    ) 
    as LEGAL_APPROVED:Integer,
+   min(
+       case when
+        approvals.ApproverType = 'Legal' and
+        (
+            approvals.ApprovalStatus = 'Approved' or 
+            approvals.ApprovalStatus = 'Notification Sent'
+        )
+        then 1 else 0 end
+   ) 
+   as LEGAL_APPROVED_IN_PREVIOUS_REQUEST:Integer,
+   min(
+       case when
+        approvals.ApproverType = 'Controlling' and
+        approvals.ApprovalStatus = 'Notification Sent'
+        then 1 else 0 end
+   ) 
+   as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST:Integer,
+   min(
+       case when
+        approvals.ApproverType = 'Regional Business' and
+        approvals.ApprovalStatus = 'Notification Sent'
+        then 1 else 0 end
+   ) 
+   as REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST:Integer,
    max(
        case when
         approvals.ApproverType = 'Regulatory' and
@@ -307,7 +329,130 @@ inner join LatestApprovalRequests as latestApprovals
         approvals.OfferProduct.Price.PRICE_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
         then 1 else 0 end
    ) 
-   as REGULATORY_APPROVED:Integer
+   as REGULATORY_APPROVED:Integer,
+   max(
+        case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 3
+            when
+                (approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.PAYMENT_UPDATE <= approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT ))
+            then 2
+            when
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                ((offerLatestApprStatus.approvedStatus = 2 and approvals.OfferProduct.SUPPLY_UPDATE <= approvals.OfferProduct.Offer.APPROVALS_SENT) or 
+                (offerLatestApprStatus.approvedStatus = 1 and approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT))
+            then 2
+        end
+    ) 
+    as NUCLEUS_HEAD_APPROVED:Integer,
+    max(
+        case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 0
+            when
+                offerLatestApprStatus.approvedStatus = 1 and
+                approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0 and 
+                approvals.OfferProduct.PAYMENT_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                approvals.OfferProduct.PAYMENT_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0 and 
+                approvals.OfferProduct.PAYMENT_UPDATE <= approvals.OfferProduct.Offer.APPROVALS_SENT
+            then 1 
+        else 0 end
+    ) 
+    as CREDIT_MANAGER_APPROVED:Integer,
+    max(
+       case 
+            when
+                offerLatestApprStatus.approvedStatus = 0
+            then 0
+            when
+                offerLatestApprStatus.approvedStatus = 2 and
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.SUPPLY_UPDATE = approvals.OfferProduct.Offer.APPROVALS_SENT
+        then 1 else 0 end
+   ) 
+   as CONTROLLING_NOT_REQUIRED:Integer,
+    max(
+       case 
+            when offerLatestApprStatus.approvedStatus = 1 and 
+                (approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0) and 
+                approvals.OfferProduct.SUPPLY_UPDATE < approvals.OfferProduct.Offer.APPROVALS_SENT and
+                (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT and
+                approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                then 1
+            when offerLatestApprStatus.approvedStatus = 2 and 
+                approvals.OfferProduct.SUPPLY_UPDATE > 0 and approvals.OfferProduct.Offer.APPROVALS_SENT > 0 and 
+                approvals.OfferProduct.SUPPLY_UPDATE <= approvals.OfferProduct.Offer.APPROVALS_SENT and
+                (approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT and
+                approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT)
+                then 1 
+       else 0 end
+   ) 
+   as INCO_TERM_SUPPLY_UPDATED:Integer,
+   max(
+        case 
+            when
+               offerLatestApprStatus.approvedStatus = 2 and 
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Volume > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.UOM > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.FOC > 0
+                ) and
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Volume <= approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.UOM <= approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.FOC <= approvals.OfferProduct.Offer.APPROVALS_SENT
+                )
+            then 2
+            when
+               offerLatestApprStatus.approvedStatus = 1 and 
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Volume > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.UOM > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.FOC > 0
+                ) and
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Volume < approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.UOM < approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.FOC < approvals.OfferProduct.Offer.APPROVALS_SENT
+                )
+            then 2
+        else 1 end
+   ) 
+   as VOLUME_UOM_FOC_UPDATED:Integer,
+   max(
+        case 
+            when
+               offerLatestApprStatus.approvedStatus = 2 and
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Price > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions > 0
+                ) and
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Price <= approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions <= approvals.OfferProduct.Offer.APPROVALS_SENT
+                )
+            then 2
+            when
+               offerLatestApprStatus.approvedStatus = 1 and 
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Price > 0 or
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions > 0
+                ) and
+                (
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Price < approvals.OfferProduct.Offer.APPROVALS_SENT or 
+                    approvals.OfferProduct.MEAApprovalUpdatedFields.Deductions < approvals.OfferProduct.Offer.APPROVALS_SENT
+                )
+            then 2
+        else 1 end
+   ) 
+   as PRICE_DEDUCTIONS_UPDATED:Integer
 }group by approvals.OfferId, approvals.productcode;
 
 entity PreviousApproval as select from PreviousApprovalTemp as temp{
@@ -319,7 +464,16 @@ entity PreviousApproval as select from PreviousApprovalTemp as temp{
     temp.COUNTRY_BUSINESS_APPROVED,
     case when temp.PENDING_BUSINESS = 1 then 0 else temp.BUSINESS_APPROVED end as BUSINESS_APPROVED:Integer,
     temp.LEGAL_APPROVED,
-    case when temp.BUSINESS_APPROVED = 1 then 1 else temp.REGULATORY_APPROVED end as REGULATORY_APPROVED:Integer
+    temp.LEGAL_APPROVED_IN_PREVIOUS_REQUEST,
+    temp.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST,
+    temp.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST,
+    case when temp.BUSINESS_APPROVED = 1 then 1 else temp.REGULATORY_APPROVED end as REGULATORY_APPROVED:Integer,
+    temp.NUCLEUS_HEAD_APPROVED,
+    temp.CREDIT_MANAGER_APPROVED,
+    temp.CONTROLLING_NOT_REQUIRED,
+    temp.INCO_TERM_SUPPLY_UPDATED,
+    temp.VOLUME_UOM_FOC_UPDATED,
+    temp.PRICE_DEDUCTIONS_UPDATED
 };
 
 entity InstituteMap as select from MasterData.PT_TMINST as institute{
@@ -411,6 +565,8 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                                 and offer.Product.ApprovalStatus.ApproverTypeSection = 1
                             then 1 else 0 end) <> 0 then 'Offer Created'
                     when count(offer.Product.ApprovalStatus.ApprovalStatus) = 0 then 'Offer Created'
+                    when offer.OfferStatusTable.STATUS = 'Offer Created' and offer.Tender.Country.Region = 'MEA' and (offer.PreviousApprovalHasAddedProduct = 'true' or offer.PreviousApprovalHasDeletedProduct = 'true' or offer.PreviousApprovalHasDeclinedProduct = 'true')
+                        then 'Offer Created'
                     else 'Offer Approved'
                 end
         when offer.OfferStatusTable.STATUS = 'Results Recorded'
@@ -424,7 +580,7 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
         else offer.OfferStatusTable.STATUS 
     end as STATUS:String(255)
 }where offer.OfferStatusTable.Active = 1
-group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus; //group by missing?
+group by offer.OfferID, offer.WholesaleOffer, offer.OfferStatusTable.STATUS, offer.OfferStatusTable.CountryCode, offer.OfferStatusTable.TableStatus, offer.Tender.Country.Region, offer.PreviousApprovalHasAddedProduct, offer.PreviousApprovalHasDeletedProduct, offer.PreviousApprovalHasDeclinedProduct; //group by missing?
 
 entity OfferValues as select from TransactionalData.PT_TMOFRS as offer{
     offer.TenderID as TENDER_ID,
@@ -564,6 +720,11 @@ left outer join TransactionalData.ProductPricing as productPricing
     on offerProduct.OfferID = productPricing.OfferID
     and offerProduct.ProductCode = productPricing.ProductCode
     and offerProduct.CountryCode = productPricing.CountryCode
+left outer join MasterData.PricingPolicy as pricingPolicy
+    on offerProduct.ProductCode = pricingPolicy.ProductPackID
+    and offerProduct.CountryCode = pricingPolicy.CountryCode
+    and offerProduct.INSTITUTE_ID = pricingPolicy.InstituteID
+    and offerProduct.DISTRIBUTOR_ID = pricingPolicy.DistributorID
 {
     offerProduct.TenderID as TENDERID,
     offerProduct.ProductCode,
@@ -651,9 +812,22 @@ left outer join TransactionalData.ProductPricing as productPricing
     offerProduct.PreviousApproval.BUSINESS_APPROVED as BUSINESS_APPROVED,
     offerProduct.PreviousApproval.COUNTRY_BUSINESS_APPROVED as COUNTRY_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.LEGAL_APPROVED as LEGAL_APPROVED,
+    offerProduct.PreviousApproval.LEGAL_APPROVED_IN_PREVIOUS_REQUEST as LEGAL_APPROVED_IN_PREVIOUS_REQUEST,
+    offerProduct.PreviousApproval.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST,
+    offerProduct.PreviousApproval.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST as REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST,
     offerProduct.PreviousApproval.REGIONAL_BUSINESS_APPROVED as REGIONAL_BUSINESS_APPROVED,
     offerProduct.PreviousApproval.REGULATORY_APPROVED as REGULATORY_APPROVED,
     offerProduct.PreviousApproval.SUPPLY_APPROVED as SUPPLY_APPROVED,
+    offerProduct.PreviousApproval.NUCLEUS_HEAD_APPROVED as NUCLEUS_HEAD_APPROVED,
+    offerProduct.PreviousApproval.CREDIT_MANAGER_APPROVED as CREDIT_MANAGER_APPROVED,
+    offerProduct.PreviousApproval.CONTROLLING_NOT_REQUIRED as CONTROLLING_NOT_REQUIRED,
+    offerProduct.PreviousApproval.INCO_TERM_SUPPLY_UPDATED as INCO_TERM_SUPPLY_UPDATED,
+    offerProduct.PreviousApproval.VOLUME_UOM_FOC_UPDATED as VOLUME_UOM_FOC_UPDATED,
+    offerProduct.PreviousApproval.PRICE_DEDUCTIONS_UPDATED as PRICE_DEDUCTIONS_UPDATED,
+    offerProduct.IsProductAddedForPreviousApproval as IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL,
+    offerProduct.MEAApprovalLatestUpdatedFieldPreviousState as MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE,
+    offerProduct.MEAApprovalLatestUpdatedField as MEA_APPROVAL_LATEST_UPDATED_FIELD,
+    offerProduct.hasUpdatedSupplyPaymentPriceValues as HAS_UPDATED_SUPPLY_PAYMENT_PRICE_VALUES,
     ifnull(approved.APPROVED_PRICE
     * case when approved.UOM = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end
     / case when offerProduct.UnitPerPack = 'Unit' then offerProduct.SKU.PACKFACTOR else 1 end, 0) as APPROVED_PRICE,
@@ -685,13 +859,14 @@ left outer join TransactionalData.ProductPricing as productPricing
     productPricing.MinAnnPurch as MinAnnPurch,
     offerProduct.SKU.ProductClass as ProductClass,
     offerProduct.SKU.ProductDescription as ProductDescription,
-    ifnull(offerProduct.PricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
+    ifnull(pricingPolicy.Value,0) as UK_BUDGETED_PROFITABILITY:Double,
     case when offerProduct.Channel = '1' then 'Bayer' else 'Distributor' end as CHANNEL:String,
     offerProduct.Custom.Integer_1 as PackSizeRequired,
     offerProduct.Custom.Date_1 as EARLIEST_DATE,
     offerProduct.Comment,
     offerProduct.AlternateOfferYN,
-    offerProduct.Custom.Integer_1 as ItemNumber
+    offerProduct.Custom.Integer_1 as ItemNumber,
+    offerProduct.Price.COGS * (case when offerProduct.UnitPerPack = 'Unit' then 1 / offerProduct.SKU.PACKFACTOR else 1 end) as COGS_EUR: Double
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
@@ -701,6 +876,8 @@ inner join ApprovalRequests as approvalRequest
 	and approvalRequest.CountryCode = offer.CountryCode
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
+    and approvalRequest.REQUIRED_ACTION = 'Approval'
+    and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
     and offer.CountryCode = signatory.COUNTRY_CODE
@@ -712,10 +889,10 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     and quotation.AS1 = signatory.AUTHORIZED_SIGNATORY
 {
     offer.OfferID,
-    ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
-    ifnull(quotation.Signatory1.NAME, signatory.NAME) as NAME:String,
-    ifnull(quotation.Signatory1.TITLE, signatory.TITLE) as TITLE:String
-};
+    max(ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY)) as AUTHORIZED_SIGNATORY:String,
+    max(ifnull(quotation.Signatory1.NAME, signatory.NAME)) as NAME:String,
+    max(ifnull(quotation.Signatory1.TITLE, signatory.TITLE)) as TITLE:String
+} group by offer.OfferID;
 
 entity OfferSignatory2 as select from TransactionalData.PT_TMOFRS as offer
 inner join ApprovalRequests as approvalRequest
@@ -724,6 +901,8 @@ inner join ApprovalRequests as approvalRequest
 	and approvalRequest.CountryCode = offer.CountryCode
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
+    and approvalRequest.REQUIRED_ACTION = 'Approval'
+    and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
     and offer.CountryCode = signatory.COUNTRY_CODE
@@ -735,10 +914,10 @@ left outer join TransactionalData.PT_TMQUTO as quotation
     and quotation.AS2 = signatory.AUTHORIZED_SIGNATORY
 {
     offer.OfferID,
-    ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY) as AUTHORIZED_SIGNATORY:String,
-    ifnull(quotation.Signatory2.NAME, signatory.NAME) as NAME:String,
-    ifnull(quotation.Signatory2.TITLE, signatory.TITLE) as TITLE:String
-};
+    max(ifnull(quotation.AS2, signatory.AUTHORIZED_SIGNATORY)) as AUTHORIZED_SIGNATORY:String,
+    max(ifnull(quotation.Signatory2.NAME, signatory.NAME)) as NAME:String,
+    max(ifnull(quotation.Signatory2.TITLE, signatory.TITLE)) as TITLE:String
+} group by offer.OfferID;
 
 //EHQUT-RITM12706398-OfferValidity for SEWA
 entity OfferConsolidation as select from TransactionalData.PT_TMOFRS as offer
@@ -907,7 +1086,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
     offer.Tender.Country.Region,
     offer.InternalBidDueDate,
     offer.Tender.Custom.Integer_2 as Contract_Length2,
-    offer.Tender.Custom.Integer_3 as Contract_Length3
+    offer.Tender.Custom.Integer_3 as Contract_Length3,
+    offer.Country.CountryName as COUNTRY_NAME
 }where offer.Active = 1 and offer.Tender.Active = 1
  group by offer.TenderID,
           offer.OfferID,
@@ -999,7 +1179,8 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
           offer.Tender.Custom.String_2,
           offer.Tender.Country.Region,
           offer.InternalBidDueDate,
-          offer.Tender.Custom.String_5;
+          offer.Tender.Custom.String_5,
+          offer.Country.CountryName;
 
 entity QuotationUpdates as select from TransactionalData.PT_TMQUTO as quotation
 inner join TransactionalDataViews.OfferStatus as status on quotation.OfferID = status.OFFER_ID{
@@ -2185,6 +2366,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             TENDER_SUBMITTED_BY   : String; // Chile
             REMARKS               : String(5000);
             CUSTOM_REMARKS        : String not null;
+            PL_CUSTOM_REMARKS     : LargeString;
             DELIVERYTERMS         : String(5000);
             PAYMENTTERMS          : String(5000);
             SHIPMENTTERMS         : String(5000);
@@ -2466,6 +2648,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             NLHospitalManagerEmail: String;
             NLHospitalManagerContactNumber : String;
             TotalPNM_Value               : Double;
+            COUNTRY_NAME              : String;
             ApproverTypes         : Association to many MasterData.ApproverTypes
                                         on ApproverTypes.CountryCode = $self.COUNTRYCODE;
     };
@@ -3682,3 +3865,76 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                 else RequestedVolume        
         end as TotalAmount:Double
     };
+    entity MaxOfferApprovalStatusTime as select from TransactionalData.PT_TMAPPRST {
+        key OfferId,
+        max(Statustime) as MaxStatusTime: DateTime
+    }group by OfferId;
+
+    entity OfferLatestApprovalStatus as select from TransactionalData.PT_TMOFRS as offer
+        left join TransactionalData.PT_TMAPPRST as approvals
+            on approvals.OfferId = offer.OfferID
+            and approvals.ApprovalStatus in ('Rejected', 'Waiting', 'Processing', 'Cancelled', 'Cancelling', 'Not Sent')
+        left join MaxOfferApprovalStatusTime as maxApprTime
+            on maxApprTime.OfferId = offer.OfferID {
+                key offer.OfferID,
+                maxApprTime.MaxStatusTime,
+                case 
+                    when 
+                        max(approvals.ApprovalStatus) is null and maxApprTime.MaxStatusTime is null
+                            then 0
+                    when
+                        count(approvals.ApprovalStatus) > 0
+                        then
+                            case 
+                                when sum(case when approvals.ApprovalStatus = 'Rejected' then 1 else 0 end) > 0
+                                then 2
+                                else 1
+                            end
+                    else 2	
+                end as approvedStatus: Integer
+    } group by  offer.OfferID,
+                maxApprTime.MaxStatusTime;
+
+entity MEAPreviousApprovalsFlags as select from TransactionalData.PT_TMAPPRST as a {
+  key OfferId,
+  key productcode,
+
+  case when count(distinct case
+    when ApproverType = 'Legal'
+      and ApprovalStatus in ('Approved', 'Notification Sent')
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as LEGAL_APPROVED_IN_PREVIOUS_REQUEST : Integer,
+
+  case when count(distinct case
+    when ApproverType = 'Controlling'
+      and ApprovalStatus = 'Notification Sent'
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST : Integer,
+
+  case when count(distinct case
+    when ApproverType = 'Regional Business'
+      and ApprovalStatus = 'Notification Sent'
+    then ApproverEmailID end) > 0
+  then 1 else 0 end as REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST : Integer
+
+}
+where 
+  Statustime < (
+    select max(Statustime) as StatusTime from TransactionalData.PT_TMAPPRST as b
+    where
+      b.OfferId = a.OfferId and
+      b.productcode = a.productcode and
+      b.ApproverType = a.ApproverType and
+      (b.ApprovalStatus = 'Waiting' or b.ApprovalStatus = 'Processing')
+  )
+  or not exists (
+    select from TransactionalData.PT_TMAPPRST as b
+    where
+      b.OfferId = a.OfferId and
+      b.productcode = a.productcode and
+      b.ApproverType = a.ApproverType and
+      (b.ApprovalStatus = 'Waiting' or b.ApprovalStatus = 'Processing')
+  )
+group by
+  OfferId,
+  productcode;

@@ -1179,6 +1179,12 @@ inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = 
 	ifnull(offerProducts.Offer.Tender.Origin.NAME, 'Not Specified') as Origin:String,
 	ifnull(offerProducts.Offer.Tender.PROCUREMENT_METHOD_ID, 'Not Specified') as ProcurementMethod:String,
 	ifnull(offerProducts.Offer.Tender.ExternalID, '') as ExternalID:String,
+	ifnull(offerProducts.Offer.Tender.Custom.String_1, '') as HEM_TenderComment:String,
+	ifnull(offerProducts.Offer.Tender.Custom.String_4, '') as HEM_TenderPriceAvailability:String,
+	ifnull(offerProducts.Offer.Tender.Custom.String_5, '') as HEM_SplitType:String,
+	ifnull(offerProducts.Offer.Tender.Custom.String_6, '') as HEM_TenderSizeClustering:String,
+	ifnull(offerProducts.Offer.Tender.Custom.String_7, '') as HEM_SMSupport:String,
+	ifnull(offerProducts.Offer.Tender.Custom.Integer_1, 0) as HEM_NumberAwardedSuppliers:Integer,
 	offerProducts.OfferID as OfferID:String,
 	ifnull(offerProducts.Offer.PfiNumber.PFINo, offerProducts.OfferID) as OfferNumber:String,
 	case when offerProducts.Offer.ActiveOffer=1 then true else false end as ActiveOffer:Boolean,
@@ -1269,13 +1275,33 @@ inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = 
 	offerProducts.Offer.Division as Division:String,
 	offerProducts.Offer.Division as BU:String,
 	ifnull(offerProducts.Offer.WholesaleOffer, 'No') as WholesaleOffer:String,
+    ifnull(offerProducts.Offer.Custom.Integer_1, 0) as HEM_RemainingShelfLifeRequirements:Integer,
+    ifnull(offerProducts.Offer.Custom.Integer_2, 0) as HEM_IntervalBtwShipments:Integer,
+    ifnull(offerProducts.Offer.Custom.String_2, '') as HEM_DeliveryComment:String,
+    ifnull(offerProducts.Offer.Custom.String_3, '') as HEM_ProbabilitySecuringTender:String,
+    ifnull(offerProducts.Offer.Custom.String_4, '') as HEM_PaymentTerms:String,
+    ifnull(offerProducts.Offer.Custom.String_19, '') as HEM_TenderStatus:String,
+    ifnull(offerProducts.Offer.Custom.String_20, '') as HEM_OfferReference:String,
+    ifnull(offerProducts.Offer.Custom.Date_1, to_date('1900-01-01')) as HEM_FirstDeliveryDate:Date,
+    ifnull(offerProducts.Offer.Custom.Date_2, to_date('1900-01-01')) as HEM_SecondDeliveryDate:Date,
+    ifnull(offerProducts.Offer.Custom.Date_3, to_date('1900-01-01')) as HEM_ExpectedAwardDate:Date,
+    ifnull(offerProducts.Offer.Custom.Date_4, to_date('1900-01-01')) as HEM_ContractStartDate:Date,
+    ifnull(offerProducts.Offer.Custom.Date_5, to_date('1900-01-01')) as HEM_ContractEndDate:Date,
 	offerProducts.ProductCode as FastProductID:Integer,
 	case when offerProducts.ActiveProduct=1 then true else false end as ActiveProduct:Boolean,
+    ifnull(offerProducts.Custom.Integer_1, 0) as HEM_VolumeIUPerYear:Integer,
+    ifnull(offerProducts.Custom.String_1, '') as HEM_AmountOfAwardedVolume:String,
+    ifnull(offerProducts.Custom.String_2, '') as HEM_SKUMix:String,
+    ifnull(offerProducts.Custom.Double_1, 0) as HEM_PotentialSalesPerYear:Double,
+    ifnull(offerProducts.SampleQuantity, 0) as SampleQuantity:Integer,
+    ifnull(offerProducts.SampleYN, '') as SampleYesNo:String,
+    ifnull(offerProducts.Comment, '') as ProductComment:String,
 	offerProducts.SKU.Product.TA.TA as TherapeuticArea:String,
     offerProducts.SKU.Product.HLEVEL4_NAME as Brand:String,
     offerProducts.SKU.PRODUCTPACKNAME as Product:String,
 	offerProducts.SKU.PACKFACTOR as PackSize:Integer,
 	offerProducts.SKU.CONCENTRATION as Strength:Double,
+    ifnull(offerProducts.SKU.Nucleus, '') as Nucleus:String,
 	offerProducts.UnitPerPack as OfferUoM:String,
 	ifnull(offerProducts.AnticipatedRequestedQuantity, 'Requested') as RequestedOrAnticipated:String,
 
@@ -1337,6 +1363,9 @@ inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = 
     end as AwardedValue_USD:Double,
 
     offerProducts.Results.ResultDate as ActualAwardDate:DateTime,
+    ifnull(offerProducts.Results.Comment, '') as AwardComment:String,
+    ifnull(offerProducts.Results.Custom.String_1, '') as HEM_FromConfidentialToPublic:String,
+    ifnull(offerProducts.Results.Reason, '') as Awardreason:String,
 	
     offerProducts.Results.CompetitorResult.AWARDEDCOMPANY as Competitor:String,
 	offerProducts.Results.CompetitorResult.AWARDEDPRODUCT as CompetitorProduct:String,
@@ -1373,7 +1402,8 @@ inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = 
 	case when offerProducts.Deliveries.PaidOrFree='Free' then false else true end as PaidGoodsDelivery:Boolean,
 	
 	ifnull(offerProducts.Offer.Tender.Criteria.AwardCriteria, 'Not Specified') as AwardCriteria:String,
-	ifnull(offerProducts.Offer.Tender.Criteria.Weight, 1) as AwardCriteriaWeight:Double
+	ifnull(offerProducts.Offer.Tender.Criteria.Weight, 1) as AwardCriteriaWeight:Double,
+	ifnull(offerProducts.Offer.Quotation.Comment, '') as QuotationRemarks:String
 }
 where
     offerProducts.Offer.Tender.Active = 1 and

@@ -171,14 +171,28 @@ module.exports = {
         };
 
         if (truncate) {
-            num = Number((Math.floor(num * 100) / 100).toFixed(2));
+            const fixed = (num * 100).toFixed(10); // Fix the precision issue
+            num = Number(Math.floor(fixed) / 100); 
         }
 
         return num.toLocaleString(locale, {
             minimumFractionDigits: minDigits, 
             maximumFractionDigits: maxDigits
         });
-	}
+	},
+
+    /**
+     * Ensures a value is treated as text in Excel by appending a zero-width space (\u200B).
+     * This prevents Excel from showing the "number stored as text" warning.
+     *
+     * @param {string} value - The value to preserve as text.
+     * @returns {string} The same value with a trailing invisible character.
+     */
+    forceExcelText (value) {
+        if (value == null) return value;
+        return String(value) + "\u200B";
+    }
+
 
 
 /*

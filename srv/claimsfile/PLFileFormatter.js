@@ -57,7 +57,11 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			// Map sales data to claim data
 			const claimData = this.mapSalesDataToClaimData(this.data, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, UUID, this.cwid, claimsData);
 
-            const result = {contrastAgentSalesData, claimFile, claimData};
+			const mappedclaimsData = claimData.mappedclaimsData;
+			const mappedFASTOfferClaims = claimData.mappedFASTOfferClaims;
+			 
+
+            const result = {contrastAgentSalesData, claimFile, mappedclaimsData, mappedFASTOfferClaims};
 
             return result;
 
@@ -145,9 +149,10 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 	 * @returns {Object} claimData
 	 */
 	mapSalesDataToClaimData(salesData, countryProductPacks, productPacks, productPackSKUs, brands, institutes, instituteHierarcis, fastOfferData, UUID, CWID, claimsData) {
-
+		const mappedFASTOfferClaims = [];
 		console.log(`JOB (${this.jobName }): Mapping SalesData to Claims Data ...`);
 		salesData = salesData.reduce((prev, curr, idx, salesData) => {
+			const claimID = this.generateUUID();
 			const kodeAnArtykulu = typeof curr.KODEANARTYKUŁU === 'string' ? curr.KODEANARTYKUŁU.trim() : String(curr.KODEANARTYKUŁU);
 			const productpack = countryProductPacks.find(item => item.GOV_CODE == kodeAnArtykulu);
 			const productCode = productpack && productpack?.PRODUCTPACKID || null;
@@ -159,7 +164,8 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const brandId = brand && brand?.HLEVEL4_CODE || null;
 			const productPackSKU = productPackSKUs.find(item => item.ProductPackID == productCode);
 			const sKUCode = productPackSKU && productPackSKU?.SKUCode || null;
-			const institute = institutes.find(item => item.External_InstituteId == curr.KODKLIENTAwgBAYERSpzoo);
+			const kODKLIENTAwgBAYERSpzoo = typeof curr.KODKLIENTAwgBAYERSpzoo === 'string' ? curr.KODKLIENTAwgBAYERSpzoo.trim() : String(curr.KODKLIENTAwgBAYERSpzoo);
+			const institute = institutes.find(item => item.External_InstituteId == kODKLIENTAwgBAYERSpzoo);
 			const instituteId = institute && institute.InstituteID || null;
 			const instituteName = institute && institute?.InstituteName || null;
 			const externalInstituteId = institute && institute.External_InstituteId || null;
@@ -171,6 +177,20 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 																item.ProductCode === productCode &&
 																item.ContractStartDate <= this.excelDateToJSDate(curr.DATASPRZEDAŻY) &&
 																item.ContractEndDate >= this.excelDateToJSDate(curr.DATASPRZEDAŻY));
+			filteredItems.forEach(item => {
+				mappedFASTOfferClaims.push({
+					ClaimFileID: UUID,
+					CountryCode: this.countryCode,
+					ClaimDataID: claimID,
+					OfferID: item.OfferID,
+					ProductCode: item.ProductCode,
+					PackageNumber: item.PackageNumber,
+					FASTContractPrice: item.OfferPrice,
+					FASTWholesalerPurchasePrice: item.RegPrice,
+					RequestedVolume: item.RequestedVolume,
+					CONCENTRATION: item.CONCENTRATION
+				});
+			});													
 			const fastOffer = filteredItems.length > 0 ? filteredItems.reduce((lowest, item) => !lowest || item.OfferPrice < lowest.OfferPrice ? item : lowest, null) : null;
 			const offerID = fastOffer && fastOffer.OfferID || null;
 			const fastContractClaim = fastOffer && ((fastOffer.RegPrice - fastOffer.OfferPrice) * curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI) || 0;
@@ -180,9 +200,13 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			const brandUsedVolume = fastOffer && (curr.ILOŚĆSZTUKARTYKUŁUSPRZEDANYCHKLIENTOWI * fastOffer.CONCENTRATION) || 0;
 			const brandContractCalculatedVolume = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.BrandContractVolume, 0) : 0;
 			const brandUsedCalculatedVolume = filteredClaimsData.length > 0 ? filteredClaimsData.reduce((sum, row) => sum + row.BrandUsedVolume, 0) : 0;
+			const wholesalerContractPrice = Number(curr.PODSTAWANALICZENIAMARŻYNETTOPNM || 0);
+			const fastContractPrice = fastOffer ? Number(fastOffer.OfferPrice) : 0;
+			const contractPriceDifference = fastOffer ? Math.abs(wholesalerContractPrice-fastContractPrice) <= 0.01 : false;
 		
 			prev.push(
 				{
+					ID										: claimID,
 					CountryCode                             : this.countryCode,
 					createdBy           					: CWID,
 					modifiedBy         						: CWID,
@@ -222,7 +246,7 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 					FASTDistributionArrangementClaim        : 0,
 					TotalFASTClaim                          : Number(fastContractClaim || 0),
 					PercentageDifference                    : percentageDifference,
-					Status                                  : fastOffer ? (fastContractClaim == curr.Wartośćdowyrównania ? 'Passed' : 'Failed') : 'NoContract',
+					Status                                  : !fastOffer ? 'NoContract' : contractPriceDifference ? 'Passed' : (Number(fastContractClaim) >= Number(curr.Wartośćdowyrównania) ? 'Passed' : 'Failed'),
 					Comment                                 : null,
 					FASTWholesalerPurchasePrice             : fastOffer && Number(fastOffer.RegPrice) || 0,
 					FASTContractPrice                       : fastOffer && Number(fastOffer.OfferPrice) || 0,
@@ -246,9 +270,11 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 			);
 			return prev;
 		}, []);
-		return salesData;
+		return {
+			mappedclaimsData: salesData,
+			mappedFASTOfferClaims
+		};
 	}
-
 	
 	getDateFromAndTo(salesData, filePeriod) {
 		// Assuming all dates are in the same month/year, we extract year and month from the first date

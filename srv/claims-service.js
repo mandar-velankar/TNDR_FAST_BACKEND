@@ -16,7 +16,8 @@ module.exports = (srv) => {
         ClaimData,
         ContrastAgentSalesData,
 		ContrastAgentSalesDataNL,
-        SalesReportFile
+        SalesReportFile,
+		MappedFASTOfferClaims
     } = cds.entities("com.bayer.SXTENDER.ClaimsData");
     const {
         PT_TMPRDHIER,
@@ -81,7 +82,8 @@ module.exports = (srv) => {
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		excelStreamValue.value.pipe(req._.res);
+		return;
 		}
 		catch(error){
             console.error('Error in ExtractClaimsSales READ');
@@ -98,8 +100,8 @@ module.exports = (srv) => {
 				"includepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`, `'Pending'`],
 			},
 			"PL": {
-				"excludepending": [`'Approved (All QC Passed)'`],
-				"includepending": [`'Approved (All QC Passed)'`, `'Pending'`],
+				"excludepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`],
+				"includepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`, `'Pending'`],
 			}
 		};
 
@@ -175,7 +177,7 @@ module.exports = (srv) => {
 			// Format Prices
 			ed.WholesalerContractPrice = formatClaimPrices(ed.WholesalerContractPrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerPurchasedAmount = formatClaimPrices(ed.WholesalerPurchasedAmount, countryCodeLocals[CountryCode], CountryCode);
-			ed.FASTContractPrice = formatClaimPrices(ed.FASTContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTContractPrice = CountryCode === 'PL' ? formatClaimPrices(ed.FASTContractPrice, 'en-US', CountryCode) : formatClaimPrices(ed.OfferPrice, 'nl-NL', CountryCode);
 			ed.WholesalerPurchasePrice = formatClaimPrices(ed.WholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTWholesalerPurchasePrice = formatClaimPrices(ed.FASTWholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerClaim1 = formatClaimPrices(ed.WholesalerClaim1, countryCodeLocals[CountryCode], CountryCode);
@@ -258,7 +260,8 @@ module.exports = (srv) => {
 
 		req._.res.setHeader('Content-disposition', `attachment; filename=${template.filename}`);
 		req._.res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		return excelStreamValue;
+		excelStreamValue.value.pipe(req._.res);
+		return;
 		}
 		catch(error){
             console.error('Error in ExtractApprovedClaim READ');
@@ -282,13 +285,12 @@ module.exports = (srv) => {
 			ed.RoznicaCenaZakupuPNM = formatClaimPrices(ed.RoznicaCenaZakupuPNM, countryCodeLocals[CountryCode], CountryCode);
 			ed.IloscSztukDoWyrownania = formatClaimPrices(ed.IloscSztukDoWyrownania, countryCodeLocals[CountryCode], CountryCode);
 			ed.TotalWholesalerClaim = formatClaimPrices(ed.TotalWholesalerClaim, countryCodeLocals[CountryCode], CountryCode);
-			ed.FASTContractPrice = formatClaimPrices(ed.FASTContractPrice, countryCodeLocals[CountryCode], CountryCode);
+			ed.FASTContractPrice = CountryCode === 'PL' ? formatClaimPrices(ed.FASTContractPrice, 'en-US', CountryCode) : formatClaimPrices(ed.OfferPrice, 'nl-NL', CountryCode);
 			ed.FASTWholesalerPurchasePrice = formatClaimPrices(ed.FASTWholesalerPurchasePrice, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerClaim1 = formatClaimPrices(ed.WholesalerClaim1, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTClaim1 = formatClaimPrices(ed.FASTClaim1, countryCodeLocals[CountryCode], CountryCode);
 			ed.WholesalerClaim2 = formatClaimPrices(ed.WholesalerClaim2, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTClaim2 = formatClaimPrices(ed.FASTClaim2, countryCodeLocals[CountryCode], CountryCode);
-			ed.TotalFASTClaim = formatClaimPrices(ed.TotalFASTClaim, countryCodeLocals[CountryCode], CountryCode);
 			ed.TotalFASTClaim = formatClaimPrices(ed.TotalFASTClaim, countryCodeLocals[CountryCode], CountryCode);
 			ed.Balance = formatClaimPrices(ed.Balance, countryCodeLocals[CountryCode], CountryCode);
 			ed.FASTContractClaim = formatClaimPrices(ed.FASTContractClaim, countryCodeLocals[CountryCode], CountryCode);
@@ -303,7 +305,7 @@ module.exports = (srv) => {
 		 * @param {Object} file - This is uploaded excel file
 		 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
 		 */
-		// try {
+		try {
 			let CWID = res.user.id;
 			const file = await SELECT.one.from(SalesReportFile).where({DistributorID: req.DistributorID});
 
@@ -330,17 +332,24 @@ module.exports = (srv) => {
 			await INSERT.into(ClaimFiles).entries(result.claimFile);
 
 			//Insert metadata into ClaimData
-			await INSERT.into(ClaimData).entries(result.claimData);
+			await INSERT.into(ClaimData).entries(result.mappedclaimsData);
+
+			//Insert mapped FAST Offer Claims Data
+			if (result.mappedFASTOfferClaims?.length > 0) {
+				await INSERT.into(MappedFASTOfferClaims).entries(result.mappedFASTOfferClaims);
+			  }
 
 			//Insert Claim Approvals
 			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
 
 			await DELETE.from(SalesReportFile).where({DistributorID: req.DistributorID});
-		// } catch (error) {
-		// 	console.error('Error in SalesReportUploadFile');
-		// 	return res.reject(400, error.message || 'An unexpected error occurred.')
-		// }		
-		return res.reply("Sales Data uploaded successfully");
+
+			return res.reply("Sales Data uploaded successfully");
+
+		} catch (error) {
+			console.error('Error in SalesReportUploadFile');
+			return res.reject(400, error.message || 'An unexpected error occurred.')
+		}				
 	});
 
 	srv.on('approveRejectClaimFiles', async (req) => {
@@ -482,4 +491,130 @@ module.exports = (srv) => {
 			return req.reject(403, error.message || 'An unexpected error occurred.')
 		}
 	});
+
+	srv.on('reCalculateClaimData', async (req) => {
+		try {
+			const { claimFile_ID, countryCode, claimData_ID, offerID, packageNumber } = req.data;
+
+			const claimFile = await SELECT.one.from(ClaimFiles).where({ID: claimFile_ID});
+			const claimData = await SELECT.one.from(ClaimData).where({ID: claimData_ID});
+			let mappedReCalculatedValuestoClaimsData = [];
+			let mappedFASTOfferClaims = [];
+
+			if (packageNumber === null || packageNumber === undefined) {
+				mappedFASTOfferClaims = await SELECT.one.from(MappedFASTOfferClaims).where({ OfferID: offerID });
+			} else {
+				mappedFASTOfferClaims = await SELECT.one.from(MappedFASTOfferClaims).where({ OfferID: offerID, PackageNumber: packageNumber });
+			}
+			
+			// recalculating the values
+			if(countryCode === 'NL'){
+				let fastContractClaim = mappedFASTOfferClaims && ((mappedFASTOfferClaims.FASTWholesalerPurchasePrice - mappedFASTOfferClaims.FASTContractPrice) * claimData.Quantity) || 0;
+				fastContractClaim = Math.round(fastContractClaim * 100) / 100;
+				let fastDistributionArrangementClaim = mappedFASTOfferClaims ? (mappedFASTOfferClaims.FASTDistributionAgreementType === 'Fixed' ? ((mappedFASTOfferClaims.FASTContractPrice - mappedFASTOfferClaims.FASTDistributionArrangement) * claimData.Quantity) : ((mappedFASTOfferClaims.FASTContractPrice * mappedFASTOfferClaims.FASTDistributionArrangement) * claimData.Quantity)) : 0;
+				fastDistributionArrangementClaim = Math.round(fastDistributionArrangementClaim * 100) / 100;
+				let totalFASTClaim = fastContractClaim + fastDistributionArrangementClaim;
+				totalFASTClaim = Math.round(totalFASTClaim * 100) / 100;
+				const finalTotalFASTClaim = Number(totalFASTClaim && totalFASTClaim >= 0 ? totalFASTClaim : 0)
+				const percentageDifference = mappedFASTOfferClaims && finalTotalFASTClaim !== 0 ? Number((Math.round(((claimData.TotalClaim - finalTotalFASTClaim) /finalTotalFASTClaim)*1000)/1000).toFixed(3)) || 0 : 0;
+				mappedReCalculatedValuestoClaimsData = {
+					OfferID									: mappedFASTOfferClaims.OfferID,
+					FASTContractClaim                       : Number(fastContractClaim || 0),
+					FASTDistributionArrangementClaim        : Number(fastDistributionArrangementClaim || 0),
+					TotalFASTClaim                          : finalTotalFASTClaim,
+					PercentageDifference                    : percentageDifference,
+					FASTWholesalerPurchasePrice             : Number(mappedFASTOfferClaims.FASTWholesalerPurchasePrice || 0),
+					FASTContractPrice                       : Number(mappedFASTOfferClaims.FASTContractPrice) || 0,
+					QC1Passed                               : fastContractClaim == claimData.WholesalerClaim1 ? true : false,
+					QC2Passed                               : fastDistributionArrangementClaim == claimData.WholesalerClaim2 ? true : false,
+					FASTClaim1                              : Number(fastContractClaim || 0),
+					FASTClaim2                              : Number(fastDistributionArrangementClaim || 0),
+					Status                                  : (finalTotalFASTClaim == claimData.TotalWholesalerClaim) ? 'Passed' : 'Failed',
+				}
+			}
+			else{
+				const fastContractClaim = ((mappedFASTOfferClaims.FASTWholesalerPurchasePrice - mappedFASTOfferClaims.FASTContractPrice) * claimData.Quantity) || 0;
+				const percentageDifference = (fastContractClaim && fastContractClaim !== 0) ? ((claimData.TotalClaim - fastContractClaim) / fastContractClaim) : 0;
+				const brandContractVolume = (mappedFASTOfferClaims.RequestedVolume * mappedFASTOfferClaims.CONCENTRATION) || 0;
+				const brandUsedVolume = (claimData.Quantity * mappedFASTOfferClaims.CONCENTRATION) || 0;
+				const fastContractPrice = Number(mappedFASTOfferClaims.FASTContractPrice) || 0;
+				const contractPriceDifference = Math.abs(claimData.WholesalerContractPrice-fastContractPrice) <= 0.01 ;
+				mappedReCalculatedValuestoClaimsData = {
+					OfferID									: mappedFASTOfferClaims.OfferID,
+					FASTContractClaim                       : Number(fastContractClaim || 0),
+					TotalFASTClaim                          : Number(fastContractClaim || 0),
+					PercentageDifference                    : percentageDifference,
+					FASTWholesalerPurchasePrice             : Number(mappedFASTOfferClaims.FASTWholesalerPurchasePrice || 0),
+					FASTContractPrice                       : Number(mappedFASTOfferClaims.FASTContractPrice) || 0,
+					BrandContractVolume                     : brandContractVolume,
+					BrandUsedVolume                         : brandUsedVolume,
+					Status                                  : contractPriceDifference ? 'Passed' : (Number(fastContractClaim) >= Number(claimData.TotalWholesalerClaim) ? 'Passed' : 'Failed'),
+				}
+			}
+
+			await UPDATE(ClaimData).with(mappedReCalculatedValuestoClaimsData).where({ID: claimData_ID});
+
+			return "Claim data has been refreshed and recalculated successfully";
+			
+		} catch (error) {
+			console.error('Error in reCalculateClaimData');
+			return req.reject(400, error.message || 'An unexpected error occurred.')
+		}
+	});
+
+	/**
+	 * Handler for the READ operation on the 'ClaimFilesView' entity.
+	 *
+	 * This function handles both normal read queries and `$count` queries.
+	 * If a custom filter (`BrandFilter`) is present, it extracts and applies it to the query,
+	 * then removes it from the request to avoid errors.
+	 *
+	 * For `$count` queries, it constructs a custom `SELECT` with a distinct count on the `ID` field.
+	 * For standard reads, it respects `SELECT` properties such as `columns`, `limit`, `orderBy`, and `where`,
+	 * applying the brand ID filter when applicable.
+	 *
+	 */
+	srv.on('READ', 'ClaimFilesView', async (req, next) => {
+		try {
+			const tx = cds.tx(req);
+			let result = [];
+	
+			const isCountQuery = req.query.SELECT?.columns?.[0]?.func === 'count';
+			const brandID = req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'BrandFilter');
+			
+			//Delete BrandFilter to create new filter logic
+			if (brandID) {
+				ServiceHelper.deleteFilter(req, 'BrandFilter');
+			}
+	
+			// Handle $count query with correct DISTINCT count
+			if (isCountQuery) {
+				let countQuery = SELECT.from(req.query.SELECT.from)
+				.columns([{ func: 'count', as: '$count', args: [{ xpr: ['distinct', { ref: ['ID'] }] }] }]);
+	
+				req.query.SELECT.where && countQuery.where(req.query.SELECT.where);
+				brandID && countQuery.where({ 'ClaimData.BrandId': brandID });
+	
+				return await tx.run(countQuery);
+			}
+	
+			let tmvQuery = SELECT.distinct.from(req.query.SELECT.from);
+
+			// Copying standart query parameters 
+			req.query.SELECT.columns && tmvQuery.columns(req.query.SELECT.columns);
+			req.query.SELECT.limit && tmvQuery.limit(req.query.SELECT.limit);
+			req.query.SELECT.orderBy && tmvQuery.orderBy(req.query.SELECT.orderBy);
+			req.query.SELECT.where && tmvQuery.where(req.query.SELECT.where);
+			
+			//Filtering Claim Data BrandId using selected brand
+			brandID && tmvQuery.where({ 'ClaimData.BrandId': brandID });
+			
+			result = await tx.run(tmvQuery);
+			return result;
+		} catch (error) {
+			console.error('Error in ClaimFilesView READ');
+			return req.reject(403, error?.message || "Error in ClaimFilesView");
+		}
+	});
+		
 };

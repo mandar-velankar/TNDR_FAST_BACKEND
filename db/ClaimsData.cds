@@ -22,6 +22,7 @@ entity ClaimFiles : managed, cuid {
     TotalClaimAmount        : Double;
     Status                  : String;//Pending upon upload, then as per status set through approvals on screen
     ApprovalsCount          : Integer;
+    BrandFilter             : String;//Only needed to be able to send brandid for the filtering to the backend srv handler
     ClaimData               : Association to many ClaimData on ClaimData.ClaimFiles = $self;
     ContrastAgentSalesDataNL: Association to many ContrastAgentSalesDataNL on ContrastAgentSalesDataNL.ClaimFiles = $self;
     ContrastAgentSalesData  : Association to many ContrastAgentSalesData on ContrastAgentSalesData.ClaimFiles = $self;    
@@ -233,5 +234,20 @@ entity SalesReportFileFieldMetaData {
     Wholesaler              : String;
     FieldName               : String;
     FieldLength             : Integer;
+}
+
+entity MappedFASTOfferClaims {
+    key ClaimFileID: UUID;
+    key CountryCode: String;
+    key ClaimDataID: UUID;
+    key OfferID: String;
+    key PackageNumber: String default 1;
+    ProductCode: Integer;
+    FASTContractPrice: Double;
+    FASTWholesalerPurchasePrice: Double;
+    FASTDistributionArrangement: Double;
+    FASTDistributionAgreementType: String;
+    RequestedVolume: Integer;
+    CONCENTRATION: Double;
 }
 
