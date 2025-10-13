@@ -12,9 +12,11 @@ using { com.bayer.SXTENDER.BrazilContractingData } from './BrazilContractingData
 entity LatestApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals{
     key approvals.OfferId,
     key approvals.ApproverType,
+    key approvals.ApproverEmailID,
     max(approvals.Statustime) as MaxStatusTime:DateTime
 }where approvals.Active = 1
 group by approvals.OfferId,
+    approvals.ApproverEmailID,
     approvals.ApproverType;
 
 entity ApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals
@@ -22,6 +24,7 @@ inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
+    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 inner join MasterData.PT_TMCTRY as country
     on country.CountryCode = approvals.CountryCode
