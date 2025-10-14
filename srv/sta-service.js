@@ -7896,7 +7896,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					CCMCustomer: {
 						InstituteID: toStr(contractRow.InstituteID),
 						AssortmentReference: toStr(rootRow.External_InstituteId),
-						CustomerID: toInt(contractRow.CustomerID),
+						CustomerID: toStr(contractRow.CustomerID),
 						CountryCode: toStr(contractRow.CountryCode),
 						InstituteType: toStr(contractRow.InstituteType),
 						InstituteName: toStr(contractRow.InstituteName),
