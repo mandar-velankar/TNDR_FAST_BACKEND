@@ -7365,21 +7365,25 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 	}
 
-	srv.on(['CREATE','UPDATE'], 'DiscountConditionView' , async (req) => {
+	srv.on(['CREATE','UPDATE','DELETE'], 'DiscountConditionView' , async (req) => {
 		try{
 			const discountConditions = await SELECT.from(DiscountCondition).where({
 				ID: req.data.ID
 			});
 			if (discountConditions.length > 0){
-				for (const discountCondition of discountConditions) {
-					await UPDATE(DiscountCondition)
-						.with({
-							Volume: req.data.Volume,
-							Discount: req.data.Discount,
-							NetPriceWithoutTax: req.data.NetPriceWithoutTax,
-							NetPriceWithTax: req.data.NetPriceWithTax
-						})
-						.where({ ID: discountCondition.ID });
+				if (req.method === 'DELETE' || req.event === 'DELETE') {
+						await DELETE.from(DiscountCondition).where({ ID: req.data.ID });
+				}else{
+					for (const discountCondition of discountConditions) {
+						await UPDATE(DiscountCondition)
+							.with({
+								Volume: req.data.Volume,
+								Discount: req.data.Discount,
+								NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+								NetPriceWithTax: req.data.NetPriceWithTax
+							})
+							.where({ ID: discountCondition.ID });
+					}
 				}
 			}else{
 				const mappedDiscountCondition = mapDiscountCondition(req);
