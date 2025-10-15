@@ -7665,11 +7665,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
-			if(conditions["YP10"]){
-				result.SAPPriceWithTax = parseFloat((ConditionAmount * conditions["YP10"]?.ConditionQuantity) || 0);
-			}else{
-				result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
-			}
+			// if(conditions["YP10"]){
+			// 	result.SAPPriceWithTax = parseFloat((ConditionAmount * conditions["YP10"]?.ConditionQuantity) || 0);
+			// }else{
+			// 	result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
+			// }
+			result.SAPPriceWithTax = parseFloat(ConditionRateValue || 0);
 		  }
 
 		  if (PricingProcedureStep === "306") {
@@ -7688,19 +7689,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		
 
-		result.YP00 = YP00;
+		result.YP00 = YP00 ? UoM === 'Pack' ? YP00 : (YP00 / packFactor) : 0;
 		result.YP04 = YP04;
-		result.ConfidentialPrice = YP04 ? YP00 * (1 - YP04) : YP00;
+		result.ConfidentialPrice = YP04 ? result.YP00 * (1 - YP04) : result.YP00;
 		result.YD02 = YD02;
 		result.RoyalDecree = YD06 ? "Yes" : "No";
 		result.YD06 = YD06;
-		result.RoyalDecreeValue = YD06 && YP10 ? YD06 * YP10 : 0;
+
 		result.RoyalDecreeIncl = YD06 ? false : true;
 		result.YD30 = YD30;
 		result.YP10 = YP10 ? UoM === 'Pack' ? (YP10 / 10000) : (YP10 / 10000 / packFactor) : null;
+		result.RoyalDecreeValue = YD06 && YP10 ? YD06 * result.YP10 : 0;
 
 		const useConfidential = YP04 !== 0;
-		const basePrice = useConfidential ? result.ConfidentialPrice : YP00;
+		const basePrice = useConfidential ? result.ConfidentialPrice : result.YP00;
 
 		result.YD75 = (basePrice - result.YP10) / basePrice;
 	  
@@ -7710,7 +7712,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
 		result.NETPRICEWITHOUTTAX = YD02 ? result.ConfidentialPrice * (1 - result.YD02) * (1 - result.YD06) : null;  
 		result.NETPRICEWITHTAX = result.SAPPriceWithTax;
-		result.SAPBaseGrossPrice = YP00;
+		result.SAPBaseGrossPrice = result.YP00;
 	  
 		// Determine the condition type
 		if (YP10) {
