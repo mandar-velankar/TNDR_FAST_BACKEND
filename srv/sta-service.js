@@ -7475,7 +7475,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const tx = cds.tx(req);
 	
 			try {
-				const { offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode } = req.data;
+				const { offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode, packFactor, UoM } = req.data;
 				const ccmPriceCondition = await tx.run(SELECT.one.from(CCMPriceCondition).where({
 					OfferID: offerID,
 					TenderID: tenderID,
@@ -7491,7 +7491,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					return req.reject(404, "No Pricing Exist in SAP");
 				}
 				
-				const mappedData = mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode);
+				const mappedData = mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode, packFactor, UoM);
 
 				if (!mappedData.ConditionType) {
 					return req.reject(422, "SAP response does not match any FAST ConditionType");
@@ -7606,14 +7606,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			"to_Item": [
 				{
 					"Material": "66040304",
-					"RequestedQuantity": "1",
+					"RequestedQuantity": "10000",
 					"to_PricingElement": []
 				}
 			]
 		}
     }
 
-	function mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode) {
+	function mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode, packFactor, UoM) {
 		const result = {
 		  CountryCode: countryCode,
 		  OfferID: offerID,
@@ -7697,16 +7697,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.RoyalDecreeValue = YD06 && YP10 ? YD06 * YP10 : 0;
 		result.RoyalDecreeIncl = YD06 ? false : true;
 		result.YD30 = YD30;
-		result.YP10 = YP10;
+		result.YP10 = YP10 ? UoM === 'Pack' ? (YP10 / 10000) : (YP10 / 10000 / packFactor) : null;
 
 		const useConfidential = YP04 !== 0;
 		const basePrice = useConfidential ? result.ConfidentialPrice : YP00;
 
-		result.YD75 = (basePrice - YP10) / basePrice;
+		result.YD75 = (basePrice - result.YP10) / basePrice;
 	  
 		// Mapped values for NETPRICE fields
-		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = YP10;
-		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = YP10 ? (YD06 ? YP10 * (1 - YD06) : YP10) : null;
+		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = result.YP10;
+		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = result.YP10 ? (YD06 ? result.YP10 * (1 - YD06) : result.YP10) : null;
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
 		result.NETPRICEWITHOUTTAX = YD02 ? result.ConfidentialPrice * (1 - result.YD02) * (1 - result.YD06) : null;  
 		result.NETPRICEWITHTAX = result.SAPPriceWithTax;
