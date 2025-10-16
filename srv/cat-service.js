@@ -905,6 +905,13 @@ module.exports = (srv) => {
                     }
                 });
 		 }
+
+		// Only for Radilogy products no need to display CDH
+		const CDHApproverTypeIndex = aApproverTypes.findIndex(type => type.ApproverType === "CDH");
+		if (CDHApproverTypeIndex > -1) {
+			aApproverTypes.splice(CDHApproverTypeIndex, 1);
+		}
+		
 		} else if (product.DIVISION === 'Pharma') {
 			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
 			aApproverTypes.map(async function (oApproverType) {
@@ -1312,7 +1319,7 @@ module.exports = (srv) => {
 		let requiredApprovalLevel = 0;//0: No business approval required; 1:SM/PCEA; 2: PoH/CEH; 3: CDH; 4: Approval not allowed
 		if (//This means it's first offer for account or offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountOfferPrice, 0) ||
-			ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, preApprovedAccountOfferPrice)
+			ServiceHelper.isDoubleXBelowEqualY(product.OFFER_PRICE, preApprovedAccountOfferPrice)
 		) {
 			if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)) {//SM/PCEA can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
@@ -1330,7 +1337,7 @@ module.exports = (srv) => {
 		//EHQUT-INC18040340-Please change price approval authority tracking system - Offer Management Application (FAST)
 		if (//This means it's first offer for account or net offer price is new lowest for account
 			ServiceHelper.isDoubleEqual(preApprovedAccountNetOfferPrice, 0) ||
-			ServiceHelper.isDoubleXBelowY(product.NET_PRICE, preApprovedAccountNetOfferPrice)
+			ServiceHelper.isDoubleXBelowEqualY(product.NET_PRICE, preApprovedAccountNetOfferPrice)
 		) {
 			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_PRICE)) {//SM/PCEA can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
@@ -1346,14 +1353,16 @@ module.exports = (srv) => {
 			};
 		}
 
-		if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 30000)) {
-			requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
-		}else if (ServiceHelper.isDoubleXBelowY(30000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 200000)) {
-			requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
-		}else if (ServiceHelper.isDoubleXBelowY(200000, FOCValue)) {
-			requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
-		}else {
-			requiredApprovalLevel = 4;
+		if (FOCValue) {
+			if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 30000)) {
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+			}else if (ServiceHelper.isDoubleXBelowY(30000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 200000)) {
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+			}else if (ServiceHelper.isDoubleXBelowY(200000, FOCValue)) {
+				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+			}else {
+				requiredApprovalLevel = 4;
+			}
 		}
 
 		switch (requiredApprovalLevel) {
@@ -1803,7 +1812,7 @@ module.exports = (srv) => {
 		else if (offer.APPROVAL_TYPE === 11) { //Applicable for Brazil
 			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
         }
-		if (offer.APPROVAL_TYPE === 19) {//Applicable for MEA
+		else if (offer.APPROVAL_TYPE === 19) {//Applicable for MEA
 			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
@@ -4272,54 +4281,53 @@ module.exports = (srv) => {
         }
     });
 
-	srv.on('sendTHNotificationMailTemplate', async (req) => {
+	srv.on('getTHNotificationMailTemplate', async (req) => {
 		try {
-			const { data: {tenderId, offerID, CountryCode} } = req;
+			const { data: {tenderId, offerID, CountryCode, templateId} } = req;
 			const tx = cds.tx(req);
-			const mailTemplate = await getMailTemplate('THNotificationMailTemplate');
 			const checkOfferForBrand = await tx.run(SELECT.from(BrandsInTender).where({ OfferID: offerID }));
 			const tender = await tx.run(SELECT.one.from(PT_TMTEND).where({ TenderID: tenderId }))
+			let institute = await tx.run(SELECT.one.from(PT_TMINST).where({InstituteID: tender.InstituteID}));
+			const {UserName} = await tx.run(SELECT.one.from(PT_TMUSER).where({UserID : req.user.id}));
+			const approverList = await tx.run(SELECT.from(PT_TMAPPRST).where({OfferId : offerID, Active : 1, ApprovalStatus : 'Approved'}));
+			const mailTemplate = await getMailTemplate(templateId);
 			let recipient;
 			let brandNames = checkOfferForBrand.map(el => el.BRANDNAME.toLowerCase())
 			if (brandNames.includes('xofigo')) {
 				if (tender.Classification === "Tender") {
-					recipient = "quotation.hec.th@ipservices.co.th"
-				} else {
 					recipient = "tender.hec.th@ipservices.co.th"
+				} else {
+					recipient = "quotation.hec.th@ipservices.co.th"
 				}
 			} else {
 				recipient = "nutthawuth.nainanont@globalmedicalsolutions.com"
 			}
-			const THNotificationData = mappedTHNotificationData(mailTemplate, req, recipient);
-			await INSERT.into(OutgoingMails).entries(THNotificationData);
-			return "Notification mail sent successfully";
+			const tenderClassification = tender.Classification === "RFQ" ? "Quotation" : "Tender";
+			const mappedData = mappedTHNotificationData(offerID, mailTemplate, institute, UserName, tenderClassification)
+			const NotificationData = {
+				Recipients:  recipient,
+				mappedData: mappedData,
+				approverList: approverList,
+				TenderClassification: tenderClassification,
+			}
+			return  NotificationData;
 		}catch (error) {
 				console.error('Error in sendTHNotificationMailTemplate');
 				return req.reject(400, error.message || 'An unexpected error occurred.');
 		}
 
 	});
-	function mappedTHNotificationData (mailTemplate, req, recipient){
-		return {
-			CountryCode: 'TH',
-			TenderID: req.tenderId,
-			OfferID: req.offerID,
-			Sender: 'FAST-Admin@bayer.com',
-			Recipients:  recipient,
-			Subject: `New TH Tender Created for`,
-			MailBody: generateMailBody(mailTemplate, {
-				data: { 
-					content:{
-						UserName: 'Test',
-						CountryName: 'Test',
-						Offer: 'Test',
-						DirectURLToOffer: 'Test',
-						TenderCreator: 'Test',
-					}
-				}
-			}),
-			Sent: false,
+	function mappedTHNotificationData (offerID, mailTemplate, institute, UserName, tenderClassification){
+		const data = {
+			Reference: offerID,
+			CustomerID: institute.CustomerID,
+			CustomerName: institute.InstituteName,
+			RequesterName: UserName,
+			TenderClassification: tenderClassification,
 		}
+		return generateMailBody(mailTemplate, {
+			data
+		})
 	}
     const getMailTemplate = async function (templateId) {
         try{

@@ -100,8 +100,8 @@ module.exports = (srv) => {
 				"includepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`, `'Pending'`],
 			},
 			"PL": {
-				"excludepending": [`'Approved (All QC Passed)'`],
-				"includepending": [`'Approved (All QC Passed)'`, `'Pending'`],
+				"excludepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`],
+				"includepending": [`'Approved (All QC Passed)'`, `'Approved (Some QC Failed)'`, `'Pending'`],
 			}
 		};
 
@@ -305,7 +305,7 @@ module.exports = (srv) => {
 		 * @param {Object} file - This is uploaded excel file
 		 * @param {Function} bufferToArrayBuffer - Converting Content of Excel file from Buffer to Array buffer 
 		 */
-		// try {
+		try {
 			let CWID = res.user.id;
 			const file = await SELECT.one.from(SalesReportFile).where({DistributorID: req.DistributorID});
 
@@ -335,17 +335,21 @@ module.exports = (srv) => {
 			await INSERT.into(ClaimData).entries(result.mappedclaimsData);
 
 			//Insert mapped FAST Offer Claims Data
-			await INSERT.into(MappedFASTOfferClaims).entries(result.mappedFASTOfferClaims);
+			if (result.mappedFASTOfferClaims?.length > 0) {
+				await INSERT.into(MappedFASTOfferClaims).entries(result.mappedFASTOfferClaims);
+			  }
 
 			//Insert Claim Approvals
 			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
 
 			await DELETE.from(SalesReportFile).where({DistributorID: req.DistributorID});
-		// } catch (error) {
-		// 	console.error('Error in SalesReportUploadFile');
-		// 	return res.reject(400, error.message || 'An unexpected error occurred.')
-		// }		
-		return res.reply("Sales Data uploaded successfully");
+
+			return res.reply("Sales Data uploaded successfully");
+
+		} catch (error) {
+			console.error('Error in SalesReportUploadFile');
+			return res.reject(400, error.message || 'An unexpected error occurred.')
+		}				
 	});
 
 	srv.on('approveRejectClaimFiles', async (req) => {

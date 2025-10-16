@@ -592,7 +592,7 @@ entity PriceCondition: cuid, managed {
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
-    NLPriceConditions                   : Association to many NLPriceConditions on NLPriceConditions.PriceCondition = $self;
+    NLPriceConditions                   : Composition of many NLPriceConditions on NLPriceConditions.PriceCondition = $self;
 }
 
 //EHQUT-INC18178128-FAST - Error decimals discounts
@@ -1030,4 +1030,12 @@ entity CCMPriceCondition: cuid, managed{
     NETPRICEWITHOUTTAX                  : Decimal;
     NETPRICEWITHTAX                     : Decimal;
     ConditionType                       : String;
+}
+
+type MEAApprovalUpdatedFields {
+    Volume      : Integer default 0;
+    UOM         : Integer default 0;
+    FOC         : Integer default 0;
+    Price       : Integer default 0;
+    Deductions  : Integer default 0;
 }

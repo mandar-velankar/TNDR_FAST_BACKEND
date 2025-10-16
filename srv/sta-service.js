@@ -53,7 +53,9 @@ module.exports = async (srv) => {
 
 	const { 
 		FastConditionContracts,
-		CCMContract
+		CCMContract,
+		IdentifyExistingContract,
+		ExistingContractInvoicePrices
 	} = ConditionContract.entities;
 
 	// Use reflection to get the csn definition
@@ -518,6 +520,8 @@ module.exports = async (srv) => {
 		// Check if the result contains $count
 		const tx = cds.tx(req);
 
+		const instituteHierarchy = await SELECT.from(PT_TMINSHIER);
+
 		const DEFAULT_SORTING = [
 			{ ref: ["TenderID"], sort: "desc" },
 			{ ref: ["OfferID"], sort: "desc" }
@@ -529,6 +533,10 @@ module.exports = async (srv) => {
             tmvQuery.columns(req.query.SELECT.columns);
         }
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
+		let instituteID =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'InstituteID');
+		
+		// Deleting Institute filter in order to create custom filter logic
+		instituteID && ServiceHelper.deleteFilter(req, "InstituteID");
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
@@ -579,6 +587,24 @@ module.exports = async (srv) => {
 				return b.OfferID.localeCompare(a.OfferID);
 			});
 		};
+
+		if (instituteID) {
+			const selectedParentInstitute = instituteHierarchy.find(inst => inst.ParentInstituteID === instituteID);
+			const selectedChildInstitutes = instituteHierarchy.filter(inst => inst.InstituteID === instituteID);
+
+			if (selectedParentInstitute) {
+				result = result.filter(tender => tender.InstituteID === instituteID);
+			}else if (selectedChildInstitutes && selectedChildInstitutes.length > 0) {
+				result = result.filter(tender => {
+					const selectedChildInstituteIndex = selectedChildInstitutes.findIndex(inst => inst.ParentInstituteID === tender.InstituteID);
+
+					return tender.InstituteID === instituteID || 
+					selectedChildInstituteIndex > -1
+				});
+			}else {
+				result = result.filter(tender => tender.InstituteID === instituteID);
+			}
+		}
 
 		if (isCountQuery || (countryCode[0] !== 'TW' && countryCode[0] !== 'PL') || countryCode.length <= 0) {
 		// If $count is present, return the original result
@@ -662,7 +688,7 @@ module.exports = async (srv) => {
 		try{
 		const today = new Date().toISOString().slice(0, 10);
 
-		let mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.ExternalID}));
+		let mandatoryFielddata = await UITemplatesService.run(SELECT.from(MandatoryFieldsView).where({Section: 'Tender', CountryCode: req?.data?.CountryCode, ProductScope: req?.data?.Custom_String_6}));
 
 		if(req?.data?.CountryCode === 'ES'){
 			// Exclude specific fields based on Classification
@@ -1359,6 +1385,25 @@ module.exports = async (srv) => {
         }
 	});
 
+	srv.after("READ", "OfferProductsDetailView", async (data) => {
+		if (!data || (Array.isArray(data) && data.length === 0)) {
+			return data;
+		}
+
+		const product = Array.isArray(data) ? data?.[0] : data;
+		const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: product?.TenderID});
+
+		if (tender?.CountryCode === 'ES') {
+			// if (product?.Custom_String_1 && product?.Custom_String_2) return data;
+
+			if (product?.ProductCode && tender?.InstituteID) {
+				const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode, InstituteID: tender?.InstituteID}));
+				product.Custom_String_1 = existingContracts?.map(contract => contract.ContractNumber).join(',') || null
+				product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
+			}
+		}
+	});
+
 	srv.before(
 		['CREATE','UPDATE'], 
 		[
@@ -1380,6 +1425,9 @@ module.exports = async (srv) => {
 					}
 					if(req.data.ConditionType === 'Price' || req.data.ConditionType === 'Discount'){
 						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : roundToDecimalPlaces(req.data.BasePrice,2);
+					}
+					if (req.data.CountryCode?.includes("HM")) {
+						if (!req.data.BasePrice) return;
 					}
 					req.data.OfferPrice && Number(req.data.OfferPrice) > Number(req.data.BasePrice) && req.error({ code: 404, message: "OfferPrice should not be greater than BasePrice.", target: "OfferPrice" });
 				}
@@ -1443,6 +1491,54 @@ module.exports = async (srv) => {
 		catch(error){
 			console.error('Error in AwardedProducts before CREATE');
 			return req.reject(403, error?.message||"Error in AwardedProducts before CREATE");
+		}
+	});
+
+	srv.after("READ", "AwardedProducts", async (data) => {
+		if (!data || (Array.isArray(data) && data.length === 0)) {
+			return data;
+		}
+
+		if (data?.[0]?.CountryCode === "ES") {
+			if (Array.isArray(data) && data.every(el => el.ContractStartDate && el.ContractEndDate)) return data;
+
+			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: data?.[0]?.TenderID});
+			const priceConditions = await SELECT.from(PriceCondition).columns("*", "PriceConditionClassification.isMain").where({OfferID: data?.[0]?.OfferID});
+
+
+			const productPackIds = data.map(item => item.ProductCode);
+
+			if (productPackIds.length > 0 && tender.InstituteID) {
+				const existingContract = await ConditionContract.run(
+					SELECT.one.from(ExistingContractInvoicePrices)
+					.where({
+						ProductCode: {in: productPackIds}, 
+						InstituteID: tender.InstituteID
+					})
+					.orderBy({ ConditionValidityEndDate: "desc" }));
+
+				const priceCondition = priceConditions.find(pc => pc.ProductCode == existingContract?.ProductCode && !!pc.isMain);
+
+				if (existingContract && priceCondition) {
+					data.forEach(item => {
+						if (existingContract.ContractType === "Tender" && 
+							(
+								tender.Classification === "Tender" ||
+								(
+									parseFloat(priceCondition.NetPriceWithoutTaxBeforeDeductionRD) !== parseFloat(existingContract.YP10) ||
+									parseFloat(priceCondition.NetPriceWithoutTaxAfterDeductionRD) !== parseFloat(existingContract.NetPriceWithoutTaxAfterDeductionRD) ||
+									parseFloat(priceCondition.NetPriceWithTaxAfterDeductionRD) !== parseFloat(existingContract.NetPriceWithTaxAfterDeductionRD) ||
+									parseFloat(priceCondition.NetPriceWithoutTax) !== parseFloat(existingContract.NetPriceWithoutTax) ||
+									parseFloat(priceCondition.NetPriceWithTax) !== parseFloat(existingContract.NetPriceWithTax)
+								)
+							) && existingContract?.ConditionValidityEndDate) {
+							const nextDay = new Date(existingContract.ConditionValidityEndDate);
+							nextDay.setDate(nextDay.getDate() + 1);
+							item.ContractStartDate = nextDay.toISOString().split('T')[0];
+						}
+					});
+				}
+			}
 		}
 	});
 
@@ -5122,7 +5218,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const awardedProduct = await tx.run(SELECT.one.from(PT_TMTRRES).where({'OfferID': lastHistoryPriceCondition?.OfferID, 'ProductCode': lastHistoryPriceCondition?.ProductCode}));
 		let currentDiscount = null;
 
-		if (lastHistoryPriceCondition) {
+		if (lastHistoryPriceCondition && awardedProduct) {
 			currentDiscount = (lastHistoryPriceCondition.Price0 - awardedProduct.AwardedPrice) / lastHistoryPriceCondition.Price0;
 		}
 		
@@ -6607,6 +6703,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ed.OfferPrice_1 = ed.OfferPrice_1 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_1), 'nl-NL', 2, 2);
 			ed.OfferPrice_2 = ed.OfferPrice_2 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_2), 'nl-NL', 2, 2);
 			ed.OfferPrice_3 = ed.OfferPrice_3 && ServiceHelper.formatCurrency(Number(ed.OfferPrice_3), 'nl-NL', 2, 2);
+			ed.AcceptedPrice = ed.AcceptedPrice && ServiceHelper.formatCurrency(Number(ed.AcceptedPrice), 'nl-NL', 2, 2);
 			ed.NetPrice = ed.NetPrice && ServiceHelper.formatCurrency(Number(ed.NetPrice), 'nl-NL', 2, 2);
 			ed.EffectiveDate = ed.EffectiveDate && ServiceHelper.formatDate(ed.EffectiveDate, '', 'DD-MM-YYYY');
 			ed.ExpiryDate = ed.ExpiryDate && ServiceHelper.formatDate(ed.ExpiryDate, '', 'DD-MM-YYYY');
@@ -7202,10 +7299,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             return req.reject(403, error?.message||"Error in OfferFormView");
         }
 	});
-
-	srv.on('copyTender', async (req) => {
-		
-	});
 		
 	srv.on('UPDATE', 'ProfitabilityCalcParamView', async (req) => {
 		
@@ -7272,21 +7365,25 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 	}
 
-	srv.on(['CREATE','UPDATE'], 'DiscountConditionView' , async (req) => {
+	srv.on(['CREATE','UPDATE','DELETE'], 'DiscountConditionView' , async (req) => {
 		try{
 			const discountConditions = await SELECT.from(DiscountCondition).where({
 				ID: req.data.ID
 			});
 			if (discountConditions.length > 0){
-				for (const discountCondition of discountConditions) {
-					await UPDATE(DiscountCondition)
-						.with({
-							Volume: req.data.Volume,
-							Discount: req.data.Discount,
-							NetPriceWithoutTax: req.data.NetPriceWithoutTax,
-							NetPriceWithTax: req.data.NetPriceWithTax
-						})
-						.where({ ID: discountCondition.ID });
+				if (req.method === 'DELETE' || req.event === 'DELETE') {
+						await DELETE.from(DiscountCondition).where({ ID: req.data.ID });
+				}else{
+					for (const discountCondition of discountConditions) {
+						await UPDATE(DiscountCondition)
+							.with({
+								Volume: req.data.Volume,
+								Discount: req.data.Discount,
+								NetPriceWithoutTax: req.data.NetPriceWithoutTax,
+								NetPriceWithTax: req.data.NetPriceWithTax
+							})
+							.where({ ID: discountCondition.ID });
+					}
 				}
 			}else{
 				const mappedDiscountCondition = mapDiscountCondition(req);
@@ -7378,7 +7475,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const tx = cds.tx(req);
 	
 			try {
-				const { offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode } = req.data;
+				const { offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode, packFactor, UoM } = req.data;
 				const ccmPriceCondition = await tx.run(SELECT.one.from(CCMPriceCondition).where({
 					OfferID: offerID,
 					TenderID: tenderID,
@@ -7394,7 +7491,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					return req.reject(404, "No Pricing Exist in SAP");
 				}
 				
-				const mappedData = mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode);
+				const mappedData = mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode, packFactor, UoM);
 
 				if (!mappedData.ConditionType) {
 					return req.reject(422, "SAP response does not match any FAST ConditionType");
@@ -7509,14 +7606,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			"to_Item": [
 				{
 					"Material": "66040304",
-					"RequestedQuantity": "1",
+					"RequestedQuantity": "10000",
 					"to_PricingElement": []
 				}
 			]
 		}
     }
 
-	function mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode) {
+	function mapPricingElementsToDbFormat(pricingElements, offerID, tenderID, productCode, instituteID, customerID, materialNumber, countryCode, packFactor, UoM) {
 		const result = {
 		  CountryCode: countryCode,
 		  OfferID: offerID,
@@ -7564,15 +7661,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		  // Handle PricingProcedureStep-specific values
 		  if (PricingProcedureStep === "330") {
-			result.SAPTAX = parseFloat(ConditionAmount) / 10000 || 0;
+			result.SAPTAX = parseFloat(ConditionRateValue) / 10000 || 0;
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
-			if(conditions["YP10"]){
-				result.SAPPriceWithTax = parseFloat((ConditionAmount * conditions["YP10"]?.ConditionQuantity) || 0);
-			}else{
-				result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
-			}
+			// if(conditions["YP10"]){
+			// 	result.SAPPriceWithTax = parseFloat((ConditionAmount * conditions["YP10"]?.ConditionQuantity) || 0);
+			// }else{
+			// 	result.SAPPriceWithTax = parseFloat(ConditionAmount || 0);
+			// }
+			result.SAPPriceWithTax = parseFloat(ConditionRateValue || 0);
 		  }
 
 		  if (PricingProcedureStep === "306") {
@@ -7591,29 +7689,30 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		
 
-		result.YP00 = YP00;
+		result.YP00 = YP00 ? UoM === 'Pack' ? YP00 : (YP00 / packFactor) : 0;
 		result.YP04 = YP04;
-		result.ConfidentialPrice = YP04 ? YP00 * (1 - YP04) : YP00;
+		result.ConfidentialPrice = YP04 ? result.YP00 * (1 - YP04) : result.YP00;
 		result.YD02 = YD02;
 		result.RoyalDecree = YD06 ? "Yes" : "No";
 		result.YD06 = YD06;
-		result.RoyalDecreeValue = YD06 && YP10 ? YD06 * YP10 : 0;
+
 		result.RoyalDecreeIncl = YD06 ? false : true;
 		result.YD30 = YD30;
-		result.YP10 = YP10;
+		result.YP10 = YP10 ? UoM === 'Pack' ? (YP10 / 10000) : (YP10 / 10000 / packFactor) : null;
+		result.RoyalDecreeValue = YD06 && YP10 ? YD06 * result.YP10 : 0;
 
 		const useConfidential = YP04 !== 0;
-		const basePrice = useConfidential ? result.ConfidentialPrice : YP00;
+		const basePrice = useConfidential ? result.ConfidentialPrice : result.YP00;
 
-		result.YD75 = (basePrice - YP10) / basePrice;
+		result.YD75 = (basePrice - result.YP10) / basePrice;
 	  
 		// Mapped values for NETPRICE fields
-		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = YP10;
-		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = YP10 ? (YD06 ? YP10 * (1 - YD06) : YP10) : null;
+		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = result.YP10;
+		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = result.YP10 ? (YD06 ? result.YP10 * (1 - YD06) : result.YP10) : null;
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
 		result.NETPRICEWITHOUTTAX = YD02 ? result.ConfidentialPrice * (1 - result.YD02) * (1 - result.YD06) : null;  
 		result.NETPRICEWITHTAX = result.SAPPriceWithTax;
-		result.SAPBaseGrossPrice = YP00;
+		result.SAPBaseGrossPrice = result.YP00;
 	  
 		// Determine the condition type
 		if (YP10) {
@@ -7795,10 +7894,11 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					validTo: "9999-12-31",
 					Expired: false,
 					EANUPCCode: toStr(contractRow.EAN),
+					PackFactor: toDecimal(contractRow.PACKFACTOR),
 					CCMCustomer: {
 						InstituteID: toStr(contractRow.InstituteID),
 						AssortmentReference: toStr(rootRow.External_InstituteId),
-						CustomerID: toInt(contractRow.CustomerID),
+						CustomerID: toStr(contractRow.CustomerID),
 						CountryCode: toStr(contractRow.CountryCode),
 						InstituteType: toStr(contractRow.InstituteType),
 						InstituteName: toStr(contractRow.InstituteName),
@@ -7940,4 +8040,177 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	});
 
 
+
+	srv.on('copyTender', async (req) => {
+		try{
+			const { data: {TenderID} } = req;
+
+			!TenderID && req.error({ code: 404, message: "TenderID was not provided", target: "TenderID" });
+
+			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: TenderID, Active: 1});
+
+			// checks 
+			if(!tender){
+				return req.error({ code: 403, message: `Tender "${TenderID}" is not active. Only active tender can be copied.`, target: "PT_TMTEND"});
+			}
+
+			const latestTenderID = await SELECT.one.from(PT_TMTEND).columns('max(TenderID) as TenderID').where({ CountryCode: tender.CountryCode })
+			const offers = await SELECT.from(PT_TMOFRS).where({TenderID: TenderID, ActiveOffer: 1});
+			const offerIDs = offers.map(o => o.OfferID);
+			const offerProducts = offerIDs.length > 0 ?await SELECT.from(PT_TMOFPR).where({OfferID: {in: offerIDs}, Active: 1}) : [];
+			const offerProductIDs = offerProducts.map(o => o.ProductCode);
+			const productPricing = offerIDs.length > 0 && offerProductIDs.length > 0 ? await SELECT.from(PT_TMBDPR).where({OfferID: {in: offerIDs}, ProductCode: {in: offerProductIDs},  Active: 1, ActiveTier: 0, LotID: 1 }) : [];
+			const priceCondtions = offerIDs.length > 0 && offerProductIDs.length > 0 ? await SELECT.from(PriceCondition).where({OfferID: {in: offerIDs}, ProductCode: {in: offerProductIDs}}) : [];
+			const priceConditionIDs = priceCondtions.map(pc => pc.ID);
+			const nlPriceConditions = priceConditionIDs.length > 0 ? await SELECT.from(NLPriceConditions).where({PriceCondition_ID: {in: priceConditionIDs}}) : [];
+			const freeGoodsOther = priceConditionIDs.length > 0 ? await SELECT.from(FreeGoodsOther).where({PriceCondition_ID: {in: priceConditionIDs}}) : [];
+
+			const newTenderInformation = getNewCopiedTenderInformation(offers, latestTenderID);
+
+			return createNewTender({tender, offers, newTenderInformation, offerProducts, productPricing, priceCondtions, nlPriceConditions, freeGoodsOther, req});
+		}
+		catch(error){
+            console.error('Error in copyTender');
+            return req.reject(403, error?.message||"Error in copyTender");
+        }
+	});
+
+	function getNewCopiedTenderInformation (offers, latestTenderID) {
+		const splitedTenderID = latestTenderID.TenderID.split("-");
+		splitedTenderID[splitedTenderID.length-1] = Number(splitedTenderID[splitedTenderID.length - 1]) + 1;
+		const newTenderID = splitedTenderID.join("-");
+
+		const offerIDs = offers.map((offer, index) => {
+			const newTenderOfferNo = index + 1;
+			return {
+				oldOfferID: offer.OfferID,
+				newOfferID: newTenderID + "-" + newTenderOfferNo,
+				newTenderOfferNo: newTenderOfferNo
+			}
+		});
+
+		return {
+			newTenderID,
+			newTenderNo: splitedTenderID[splitedTenderID.length - 1],
+			offerIDs
+		}
+	}
+
+
+	async function createNewTender({tender, offers, newTenderInformation, offerProducts, productPricing, priceCondtions, nlPriceConditions, freeGoodsOther, req}){
+		const todaysDate = new Date().toISOString().substring(0,10);
+
+		// mapping new tender 
+		const newTender = {...tender};
+		newTender.TenderID = newTenderInformation.newTenderID;
+		newTender.TenderNo = newTenderInformation.newTenderNo
+		newTender.SubmittedOn = todaysDate;
+
+		// mapping new offers
+		const newOffers = offers.map(offer => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === offer.OfferID);
+			const newOffer = {...offer};
+
+			newOffer.TenderID = newTenderInformation.newTenderID;
+			newOffer.OfferID = NEW_OFFER_ID.newOfferID;
+			newOffer.CreationDate = todaysDate;
+			newOffer.InternalBidDueDate = todaysDate;
+			newOffer.NewOfferDueDate = todaysDate;	
+			newOffer.TenderOfferNo = NEW_OFFER_ID.newTenderOfferNo;
+			newOffer.SubmittedOn = todaysDate;
+
+			return newOffer;
+		});
+
+		// mapping new offer statuses
+		const newOfferStatuses = newOffers.map(newOffer => {
+			return {
+				TenderID: newOffer.TenderID,
+				OfferID: newOffer.OfferID,
+				CountryCode: newOffer.CountryCode,
+				Active: 1,
+				STATUS: "Offer Created",
+				TableStatus: null,
+				Date: todaysDate,
+			};
+		});
+
+		// mapping new offer products
+		const newOfferProducts = offerProducts.map(product => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === product.OfferID);
+			const newOfferProduct = {...product};
+
+			newOfferProduct.TenderID = newTenderInformation.newTenderID;
+			newOfferProduct.OfferID = NEW_OFFER_ID.newOfferID;
+			newOfferProduct.SubmittedOn = todaysDate;
+			newOfferProduct.Active = 1;
+
+			return newOfferProduct;
+		});
+
+		// mapping new offer product pricing
+		const newProductsPricings = productPricing.map(pr => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === pr.OfferID);
+			const newProductPricing = {...pr};
+
+			newProductPricing.TenderID = newTenderInformation.newTenderID;
+			newProductPricing.OfferID = NEW_OFFER_ID.newOfferID;
+			newProductPricing.SubmittedOn = todaysDate;
+
+			return newProductPricing;
+		});
+
+		// mapping new offer product price conditions and free goods other
+		const newProductsPriceCondtions = priceCondtions.map(pc => {
+			const NEW_OFFER_ID = newTenderInformation.offerIDs.find(offerID => offerID.oldOfferID === pc.OfferID);
+			const existingNlPriceConditions = nlPriceConditions.filter(nlpc => nlpc.PriceCondition_ID === pc.ID);
+			const freeGoods = freeGoodsOther.filter(fg => fg.PriceCondition_ID === pc.ID);
+
+			const newPriceCondition = {...pc};
+
+			newPriceCondition.OfferID = NEW_OFFER_ID.newOfferID;
+			newPriceCondition.ID = uuidv4();
+
+			// mapping price conditions specific for NL
+			const newNLPriceConditions = existingNlPriceConditions.map(nlpc => {
+				const newNLPriceCondition= {...nlpc};
+				newNLPriceCondition.ID = uuidv4();
+				newNLPriceCondition.PriceCondition_ID = newPriceCondition.ID;
+				return newNLPriceCondition;
+			});
+
+			// mapping free good of each price condition
+			const newFreeGoodsOthers = freeGoods.map(fg => {
+				const newFreeGoodsOther= {...fg};
+				newFreeGoodsOther.ID = uuidv4();
+				newFreeGoodsOther.PriceCondition_ID = newPriceCondition.ID;
+				return newFreeGoodsOther;
+			});
+
+			// returns associated free goods and NL priceconditions with pricecondition to cascade insert them
+			return {
+				...newPriceCondition,
+				NLPriceConditions: newNLPriceConditions,
+				FreeGoodsOther: newFreeGoodsOthers
+			};
+		});
+
+		// 1. create new tender
+		newTender && await INSERT.into(PT_TMTEND).entries(newTender);
+		// 2. create new offer
+		newOffers.length > 0 && await INSERT.into(PT_TMOFRS).entries(newOffers);
+		// 3. create new offer status
+		newOfferStatuses.length > 0 && await INSERT.into(PT_TMTNOFST).entries(newOfferStatuses);
+		// 4. create new products
+		newOfferProducts.length > 0 && await INSERT.into(PT_TMOFPR).entries(newOfferProducts);
+		// 5. create new product pricing
+		newProductsPricings.length > 0 && await INSERT.into(PT_TMBDPR).entries(newProductsPricings);
+		// 6. create new price condtions
+		newProductsPriceCondtions.length > 0 && await INSERT.into(PriceCondition).entries(newProductsPriceCondtions);
+
+		return {
+			TenderID: newTender.TenderID,
+			OfferID: newOffers.length > 0 ? newOffers[0].OfferID : "NA"
+		};
+	};
 }

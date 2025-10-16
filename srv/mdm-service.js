@@ -4,6 +4,7 @@ const moment = require('moment');
 const XLSXHelper = require("./utils/XLSXHelper");
 const Handlebars = require("handlebars");
 const ServiceHelper = require('./utils/ServiceHelper');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = (srv) => {
 
@@ -37,6 +38,7 @@ module.exports = (srv) => {
     const{
         CurrentDistributionAgreementView,
 		CurrentWholesalePurchasePriceView,
+		WholesalePurchasePriceView,
 		CurrentNLpppView,
 		NLpppView,
 		DistributionAgreementsView
@@ -143,6 +145,20 @@ module.exports = (srv) => {
 	srv.before('CREATE', 'PT_TMINST', async (req) => {
 		req.data.InstituteID = await getNextValue(PT_TMINST, "InstituteID");
 		return req;
+	});
+
+	srv.on('READ', 'PT_TMINST', async (req) => {
+		const tx = cds.tx(req);
+		
+		let result = [];
+		let tmvQuery = SELECT.from(req.query.SELECT.from);
+		req.query.SELECT.columns && (tmvQuery.columns(req.query.SELECT.columns));
+		req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
+		req.query.SELECT.orderBy && (tmvQuery.orderBy(req.query.SELECT.orderBy));
+
+		result = await tx.run(tmvQuery);
+
+		return result;
 	});
 
 
@@ -612,9 +628,80 @@ module.exports = (srv) => {
 			if (allApproved) {
 				// If all approvals are 'Approved', update the status to 'Approved'
 				await UPDATE(NLPPP).with({ Status: 'Approved' }).where({ ID: data.NLPPP_ID });
+				await autoUpdateWPP(data.NLPPP_ID);
 			}
 
 		}
+	}
+
+	async function autoUpdateWPP (NLPPP_ID) {
+		const newNLPPP =  await SELECT.one.from(NLPPP).where({ ID: NLPPP_ID }); 
+		const existingActiveWPPs =  await SELECT.from(WholesalePurchasePriceView).where({ GOV_CODE: newNLPPP.GOV_CODE, Status: 'Approved', Type: 'Margin', EndDate: '9999-12-31',  WholesalePurchasePriceID: {"!=": null}}); 
+
+		if(existingActiveWPPs.length > 0){
+			const uniqueWPPs = Array.from(
+				new Map(existingActiveWPPs.map(item => [item.WholesalePurchasePriceID, item])).values()
+			);
+
+			let newEndDate = new Date(newNLPPP.StartDate);
+			// Subtract one day
+			newEndDate.setDate(newEndDate.getDate() - 1);
+			// Get the formatted date as 'YYYY-MM-DD'
+			let formattedEndDate = newEndDate.toISOString().split('T')[0];
+			for(const uniqueWPP of uniqueWPPs) {
+				await UPDATE(CurrentWholesalePurchasePriceView).with({EndDate: formattedEndDate}).where({
+					ID: uniqueWPP.WholesalePurchasePriceID
+				})
+			}
+			for(const uniqueWPP of uniqueWPPs) {
+				await UPDATE(WholesalePurchasePrices).with({EndDate: formattedEndDate}).where({
+					ID: uniqueWPP.WholesalePurchasePriceID
+				})
+			}
+
+			const approvers = await SELECT.from(WholesalePurchasePriceApprovers);
+			const mappedWPPs = mapWPPs(uniqueWPPs, newNLPPP, approvers);
+
+			await INSERT(mappedWPPs).into(WholesalePurchasePrice);
+
+		}
+
+	}
+
+	function mapWPPs(uniqueWPPs, newNLPPP, approvers) {
+		return uniqueWPPs.map(uniqueWPP => {
+			
+			let WPPWithoutTax = null;
+			if (newNLPPP.PPP) {
+				WPPWithoutTax = newNLPPP.PPP * (1 - uniqueWPP.Margin);				
+				WPPWithoutTax = Math.floor(WPPWithoutTax * 100) / 100;
+			}
+	
+			return {
+				ID: uuidv4(),
+				CountryCode: 'NL',
+				PRODUCTPACKID: uniqueWPP.PRODUCTPACKID,
+				DistributorID: uniqueWPP.DistributorID,
+				MaterialNumbers: uniqueWPP.MaterialNumbers.split(",")?.[0],
+				GOV_CODE: newNLPPP.GOV_CODE || null,
+				Type: 'Margin',
+				CurrentType: null,
+				Margin: uniqueWPP.Margin,
+				CurrentMargin: null,
+				WPPWithoutTax: WPPWithoutTax,
+				CurrentWPPWithoutTax: uniqueWPP.WPPWithoutTax,
+				CurrentStartDate: uniqueWPP.StartDate,
+				StartDate: newNLPPP.StartDate || null,
+				EndDate: '9999-12-31',
+				CurrentEndDate: null,
+				Comment: 'Auto Approved WPP',
+				Status: 'Approved',
+				ApprovalsCount: approvers.length,
+				PowerApproverCWID: null,
+				PowerApprovalDate: null,
+				NLPPP_ID: newNLPPP.ID || null
+			};
+		});
 	}
 
 	srv.after('UPDATE', 'WholesalePurchasePriceApprovals', async (data) => {
@@ -726,8 +813,8 @@ module.exports = (srv) => {
 			await UPDATE(NLPPPApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:nlpppapproval.ID});
 		}
 		req.data.CurrentEndDate = formattedEndDate;
-		req.data.Status = 'New';
-		req.data.ApprovalsCount = 0;
+		// req.data.Status = 'New';
+		// req.data.ApprovalsCount = 0;
 
 	});
 
@@ -751,8 +838,8 @@ module.exports = (srv) => {
 			await UPDATE(WholesalePurchasePriceApprovals).with ({ApprovalStatus: 'Waiting', ApproverComment: null, ApprovalDate: null}).where({ID:wppapproval.ID});
 		}
 		req.data.CurrentEndDate = formattedEndDate;
-		req.data.Status = 'New';
-		req.data.ApprovalsCount = 0;
+		// req.data.Status = 'New';
+		// req.data.ApprovalsCount = 0;
 		
 	});
 
@@ -792,6 +879,8 @@ module.exports = (srv) => {
 			await UPDATE(NLPPP).with(mappedPpp).where({
 				ID: ID
 			});
+
+			await autoUpdateWPP(ID);
 
 			return 'Purchase Price approved successfully';
 		} catch (error) {
@@ -866,6 +955,7 @@ module.exports = (srv) => {
 			const {templateId, validDate, status} = req.data;
 			const countryProducts = await SELECT.from(PT_TMCTPRDPCK).where({COUNTRYCODE: "NL"});
 			const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+			const skuCodes = await SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: "NL" });
 
 			if (!template || !template.content) {
 				return req.reject(404, 'No template found for templateid:' + templateId);
@@ -880,7 +970,11 @@ module.exports = (srv) => {
 			query.orderBy("PRODUCTPACKNAME asc");
 
 			//Request to the database
-			const excelData = await tx.run(query);
+			let excelData = await tx.run(query);
+
+			excelData = excelData.filter(nlppp => {
+				return nlppp.ACTIVERECORD === "Yes" ? true : validDate <= nlppp.RegistrationValidUntil;
+			});
 
 			//Delete empty PPP if there is at least one contract with the same PRODUCTPACKID 
 			countryProducts.forEach(item => {
@@ -892,11 +986,28 @@ module.exports = (srv) => {
 			});
 
 			// Formatting
-			excelData.forEach(ed => {
-				ed.PPP = formatNLPPPPrices(ed.PPP);
-				ed.StartDate = ed.StartDate && ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY');
-				ed.EndDate = ed.EndDate && ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY');
-			});
+			excelData = excelData.map(ed => {
+				const productSKUs = skuCodes.filter(sku => sku.ProductPackID === ed.PRODUCTPACKID);
+				const productValidSKUs = ed.ACTIVERECORD === "No" && ed.RegistrationValidUntil ? 
+					productSKUs.map(el => el.SKUCode) : 
+					productSKUs.filter(sku => 
+						(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
+						(!sku.ValidTo ||validDate <= sku.ValidTo)).map(el => el.SKUCode);
+
+				ed.PPP = ServiceHelper.forceExcelText(formatNLPPPPrices(ed.PPP));
+				ed.StartDate = ed.StartDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY'));
+				ed.EndDate = ed.EndDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY'));
+				ed.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
+				ed.GOV_CODE = ServiceHelper.forceExcelText(ed.GOV_CODE);
+
+				if (ed.ACTIVERECORD === "No" && ed.RegistrationValidUntil && validDate <= ed.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
+					return ed;
+				}else if (ed.ACTIVERECORD === "Yes" && !ed.RegistrationValidUntil && (productSKUs?.length === 0 || (productValidSKUs && productValidSKUs.length > 0))) { // display product if sku is valid or no skus found from db
+					return ed;
+				}else {
+					return null;
+				}
+			}).filter(el => el);
 
 			let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content, { excelData }, 1);
 
@@ -939,7 +1050,9 @@ module.exports = (srv) => {
 
 		excelData.forEach(item => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
-			item.Value = formatterDistributonArrangement(item.Value, item.Type);
+			item.Value = ServiceHelper.forceExcelText(formatterDistributonArrangement(item.Value, item.Type));
+			item.MaterialNumbers = ServiceHelper.forceExcelText(item.MaterialNumbers);
+			item.GOV_CODE = ServiceHelper.forceExcelText(item.GOV_CODE);
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
@@ -968,6 +1081,7 @@ module.exports = (srv) => {
 		const {templateId, validDate, status, distributorID} = req.data;
 
 		const template = await SELECT.one.from(ExcelTemplate).where({ templateId: templateId });
+		const skuCodes = await SELECT.from(PT_TMSKUPRDPCK).where({ CountryCode: "NL" });
 
 		if (!template || !template.content) {
 			return req.reject(404, 'No template found for templateid:' + templateId);
@@ -976,24 +1090,43 @@ module.exports = (srv) => {
 		const fullWhere = cds.parse.expr(`(StartDate <= date'${validDate}' or StartDate = null) 
 										and (EndDate >= date'${validDate}' or EndDate = null) 
 										and (PPPStartDate <= date'${validDate}' or PPPStartDate = null) 
-										and (PPPEndDate >= date'${validDate}' or PPPEndDate = null) 
-										and DistributorID = ${distributorID}`);
-		const query = SELECT.from(NLWPPExcelExtract).where(fullWhere);
+										and (PPPEndDate >= date'${validDate}' or PPPEndDate = null)`);
+		const whereWholesaler = ((distributorID && distributorID !== 'All_Wholesalers') && ServiceHelper.buildFullWhere('DistributorID', '=', distributorID)) || []
+		const query = SELECT.from(NLWPPExcelExtract).where(fullWhere).where(whereWholesaler);
 
 		//Sorting
 		query.orderBy("PRODUCTPACKNAME asc");
-		const excelData = await tx.run(query);
+		let excelData = await tx.run(query);
 
-		excelData.forEach(item => {
+
+		excelData = excelData.map(item => {
+			const productSKUs = skuCodes.filter(sku => sku.ProductPackID === item.PRODUCTPACKID);
+			const productValidSKUs = item.ACTIVERECORD === "No" && item.RegistrationValidUntil ? 
+				productSKUs.map(el => el.SKUCode) : 
+				productSKUs.filter(sku => 
+					(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
+					(!sku.ValidTo || validDate <= sku.ValidTo)).map(el => el.SKUCode);
+
 			// Assuming 'Type' and 'Currency' fields are part of the item
-			item.PPP = ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true);
-			item.WPPWithoutTax = ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false);
+			item.PPP = ServiceHelper.forceExcelText(ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true));
+			item.WPPWithoutTax = ServiceHelper.forceExcelText(ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false));
 			item.Margin = formatPercentage(item.Margin);
 			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Netto Prijs`;
 			item.EndDate = item.StartDate && ServiceHelper.formatDate(item.EndDate, 'DD/MM/YYYY');
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
-		});
+			item.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
+			item.GOV_CODE = ServiceHelper.forceExcelText(item.GOV_CODE);
+
+			if (item.ACTIVERECORD === "No" && item.RegistrationValidUntil && validDate <= item.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
+				return item;
+			}else if (item.ACTIVERECORD === "Yes" && !item.RegistrationValidUntil && (productSKUs?.length === 0 || (productValidSKUs && productValidSKUs.length > 0))) { // display product if sku is valid or no skus found from db
+				return item;
+			}else {
+				return null;
+			}
+		}).filter(el => el);
+
 		const formatedValidDate = validDate && ServiceHelper.formatDate(validDate, '', 'DD/MM/YYYY');
 		const formatedValidEndDate = validDate &&  moment(validDate).add(5, 'months').endOf('month').format('DD/MM/YYYY');
 

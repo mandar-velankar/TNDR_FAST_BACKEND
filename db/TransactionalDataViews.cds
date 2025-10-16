@@ -12,6 +12,7 @@ using { com.bayer.SXTENDER.BrazilContractingData } from './BrazilContractingData
 entity LatestApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals{
     key approvals.OfferId,
     key approvals.ApproverType,
+    key approvals.ApproverEmailID,
     max(approvals.Statustime) as MaxStatusTime:DateTime
 }where approvals.Active = 1
 group by approvals.OfferId,
