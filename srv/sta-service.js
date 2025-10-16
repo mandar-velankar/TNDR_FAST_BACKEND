@@ -7661,7 +7661,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		  // Handle PricingProcedureStep-specific values
 		  if (PricingProcedureStep === "330") {
-			result.SAPTAX = parseFloat(ConditionAmount) / 10000 || 0;
+			result.SAPTAX = parseFloat(ConditionRateValue) / 10000 || 0;
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
