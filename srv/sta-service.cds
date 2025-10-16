@@ -1122,12 +1122,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity NotificationUserList as select from AdminData.PT_TMUSERCTRY{
         key CountryCode,
         key CWID,
+        key Application,
         User: redirected to Users,
         ActiveRecord,
         User.Role,
         User.UserName,
         User.UserEmail
-    }where CountryCode = 'NL' and User.Role = 'Hospital Manager';
+    }where CountryCode = 'NL' and User.Role = 'Hospital Manager' and Application = 'STA';
     
     entity InstitutesInGroup as select from PT_TMINST as inst
     inner join MasterData.PT_TMINSHIER as hier 
@@ -1179,6 +1180,27 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         max(ContractStartDate) as ContractStartDate : Date,
         max(ContractEndDate) as ContractEndDate : Date,
     }group by OfferID, ProductCode;
+
+    entity NLExtractAcceptedPrices as select from TransactionalData.ContractInfomation as contractInformation
+        inner join TransactionalData.PriceCondition as pc
+            on pc.OfferID = contractInformation.OfferID
+		    and pc.ProductCode = contractInformation.ProductCode
+        inner join TransactionalData.NLPriceConditions as nlpc
+            on pc.ID = nlpc.PriceCondition.ID
+            and contractInformation.ContractDuration = nlpc.ContractDuration {
+        pc.ID as priceconditionID,
+        contractInformation.OfferID,
+        contractInformation.CountryCode,
+        contractInformation.Active,
+        max(contractInformation.ProductCode) as ProductCode: Integer,
+        nlpc.OfferPrice,
+        max(contractInformation.ContractDuration) as ContractDuration: Double
+    }group by pc.ID,
+        contractInformation.OfferID,
+        contractInformation.CountryCode,
+        contractInformation.Active,
+        nlpc.OfferPrice;
+
     entity NLExtractOffers as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer
             on offer.TenderID = tender.TenderID
@@ -1221,6 +1243,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         left join NLExtractOfferChildInstUnderParent as childInst
             on childInst.OfferID = offer.OfferID
             and childInst.ProductCode = product.ProductCode
+        left join NLExtractAcceptedPrices as nlProductAcceptedPrice
+            on nlProductAcceptedPrice.OfferID = offer.OfferID
+            and nlProductAcceptedPrice.ProductCode = product.ProductCode
             {
             key tender.TenderID,
             key offer.OfferID,
@@ -1247,6 +1272,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             contractdur.AvgContractDuration as secContrDur: Double,
             contractdur.MinContractDuration as minContrDur: Double,
             PT_TMBDPR.NetPrice,
+            nlProductAcceptedPrice.OfferPrice as AcceptedPrice: Double,
             res.Outcome,
             childInst.InstituteName as childInstituteName: String,
             nldist.DistributionType,
@@ -1291,6 +1317,40 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 else	
                     offerStatus.STATUS
             end as STATUS: String
+    }where tender.CountryCode = 'NL'
+    union select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        left join TransactionalData.PT_TMOFPR as product
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+        left join TransactionalDataViews.OfferStatus as offerStatus
+            on offerStatus.OFFER_ID = offer.OfferID
+        left join TransactionalData.ContractInfomation as contractinfo
+            on contractinfo.OfferID = offer.OfferID
+            and contractinfo.ProductCode = product.ProductCode {
+        	tender.TenderID,
+            key offer.OfferID,
+            key product.ProductCode,
+            contractinfo.InstituteName,
+            contractinfo.InstituteID,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Results Recorded' 
+                        then 
+                            case 
+                                when contractinfo.InstituteID is null
+                                    then 'Not Accepted'
+                                else
+                                    'Outcome Accepted'
+                            end
+                else	
+                    offerStatus.STATUS
+            end as STATUS: String
     }where tender.CountryCode = 'NL';
 
 
@@ -1309,6 +1369,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             BU,
             Countries.CountryCode
     } where Countries.CountryCode = 'PL' and Role = 'KAM';
+
     
     entity SalesReportsView as select from ClaimsData.ClaimFiles as cf 
         inner join ClaimsData.ClaimData as cd         
@@ -1600,13 +1661,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.Division,
         offer.DistributorID,
         institute.CustomerID,
-        tender.User.UserName as Owner:String,
+        tender.SubmittedBy as Owner:String,
         tender.TenderName as Reference:String,
         tender.Classification as ContractType:String,
         tender.SAPID,
         tender.ExternalID
     }where tender.CountryCode = 'ES' 
-    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, institute.External_InstituteId, offer.Division, offer.DistributorID, institute.CustomerID, tender.User.UserName, tender.TenderName, tender.Classification, tender.SAPID, tender.ExternalID;
+    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, institute.External_InstituteId, offer.Division, offer.DistributorID, institute.CustomerID, tender.SubmittedBy, tender.TenderName, tender.Classification, tender.SAPID, tender.ExternalID;
 
     entity ConditionContractsView as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer 
@@ -1627,16 +1688,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key product.ProductCode,
         product.Price.OfferPrice,
         product.SKU.PRODUCTPACKNAME as ProductPackName:String,
-        product.SKU.UOM as UoM:String,
+        product.UnitPerPack as UoM:String,
         max(brands.BRANDID) as BrandID:String,
         max(brands.BRANDNAME) as BrandName:String,
+        product.SKU.PACKFACTOR,
         institute.InstituteID,
         institute.InstituteName,
         institute.CustomerID,
         institute.InstituteType,
         product.SKUCountry.EAN
     }where tender.CountryCode = 'ES'
-    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.SKU.UOM, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType, product.SKUCountry.EAN;
+    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.UnitPerPack, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType, product.SKUCountry.EAN, product.SKU.PACKFACTOR;
 
     entity CCMMaterilsView as select from TransactionalData.PT_TMOFPR as product 
         inner join MasterData.PT_TMSKUPRDPCK as skuprdpck 
@@ -2011,7 +2073,7 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         'SELF' as RelationType:String
     };
     
-    action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String) returns String;
+    action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String, packFactor: Double, UoM: String) returns String;
     action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     action createAllFastConditionContracts(OfferID: String) returns String;
     function getFastContractForOffer(offerID: String, tenderID: String) returns String;

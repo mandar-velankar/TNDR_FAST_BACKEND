@@ -482,7 +482,7 @@ service CatalogService @(path : 'tender')@(requires : [
     action notifyIbiz(ibizWorkflowID: Integer, directIndirect: Integer, lineNumbers: array of Integer) returns String; //  (0 = direct; 1 = indirect)
     action sendApprovalToIbiz(ibizWorkflowID: Integer, offerStatus: Integer, comment: String) returns String;
     action simulateTaxes(offerID: String, productCode: Integer, lotID: Integer, conditionType: String, commercialProposal: String) returns String;
-    action sendTHNotificationMailTemplate(offerID:String,tenderId: String, CountryCode: String) returns String;
+    function getTHNotificationMailTemplate(offerID:String,tenderId: String, CountryCode: String, templateId:String) returns String;
 
     entity THQuotationDelevery  as projection on TransactionalData.THQuotationDelevery;
 
