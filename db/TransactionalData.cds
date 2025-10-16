@@ -1031,11 +1031,3 @@ entity CCMPriceCondition: cuid, managed{
     NETPRICEWITHTAX                     : Decimal;
     ConditionType                       : String;
 }
-
-type MEAApprovalUpdatedFields {
-    Volume      : Integer default 0;
-    UOM         : Integer default 0;
-    FOC         : Integer default 0;
-    Price       : Integer default 0;
-    Deductions  : Integer default 0;
-}
