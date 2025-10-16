@@ -16,13 +16,15 @@ entity LatestApprovalRequests as select from TransactionalData.PT_TMAPPRST as ap
     max(approvals.Statustime) as MaxStatusTime:DateTime
 }where approvals.Active = 1
 group by approvals.OfferId,
-    approvals.ApproverType;
+    approvals.ApproverType,
+    approvals.ApproverEmailID;
 
 entity ApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals
 inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
+    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 inner join MasterData.PT_TMCTRY as country
     on country.CountryCode = approvals.CountryCode
@@ -237,6 +239,7 @@ inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
+    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 left join OfferLatestApprovalStatus as offerLatestApprStatus
     on offerLatestApprStatus.OfferID = approvals.OfferId
