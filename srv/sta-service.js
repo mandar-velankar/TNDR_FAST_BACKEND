@@ -1394,7 +1394,7 @@ module.exports = async (srv) => {
 		const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: product?.TenderID});
 
 		if (tender?.CountryCode === 'ES') {
-			if (product?.Custom_String_1 && product?.Custom_String_2) return data;
+			// if (product?.Custom_String_1 && product?.Custom_String_2) return data;
 
 			if (product?.ProductCode && tender?.InstituteID) {
 				const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode, InstituteID: tender?.InstituteID}));
@@ -1525,11 +1525,11 @@ module.exports = async (srv) => {
 							(
 								tender.Classification === "Tender" ||
 								(
-									parseFloat(priceCondition.NetPriceWithoutTaxBeforeDeductionRD) == parseFloat(existingContract.YP10) &&
-									parseFloat(priceCondition.NetPriceWithoutTaxAfterDeductionRD) == parseFloat(existingContract.NetPriceWithoutTaxAfterDeductionRD) &&
-									parseFloat(priceCondition.NetPriceWithTaxAfterDeductionRD) == parseFloat(existingContract.NetPriceWithTaxAfterDeductionRD) &&
-									parseFloat(priceCondition.NetPriceWithoutTax) == parseFloat(existingContract.NetPriceWithoutTax) &&
-									parseFloat(priceCondition.NetPriceWithTax) == parseFloat(existingContract.NetPriceWithTax)
+									parseFloat(priceCondition.NetPriceWithoutTaxBeforeDeductionRD) !== parseFloat(existingContract.YP10) ||
+									parseFloat(priceCondition.NetPriceWithoutTaxAfterDeductionRD) !== parseFloat(existingContract.NetPriceWithoutTaxAfterDeductionRD) ||
+									parseFloat(priceCondition.NetPriceWithTaxAfterDeductionRD) !== parseFloat(existingContract.NetPriceWithTaxAfterDeductionRD) ||
+									parseFloat(priceCondition.NetPriceWithoutTax) !== parseFloat(existingContract.NetPriceWithoutTax) ||
+									parseFloat(priceCondition.NetPriceWithTax) !== parseFloat(existingContract.NetPriceWithTax)
 								)
 							) && existingContract?.ConditionValidityEndDate) {
 							const nextDay = new Date(existingContract.ConditionValidityEndDate);
