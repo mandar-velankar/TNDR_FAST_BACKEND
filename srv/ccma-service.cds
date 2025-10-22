@@ -26,6 +26,8 @@ service ConditionContractService @(path: 'conditioncontracting')@(requires: [
     entity OutgoingMails                as projection on TransactionalData.OutgoingMails;
     entity MailTemplate                 as projection on AdminData.MailTemplate;
     entity MailTemplateFile             as projection on AdminData.MailTemplateFile;
+    entity SchedulerApiConfig           as projection on AdminData.SchedulerApiConfig;
+    entity SchedulerApiConfigOAuth      as projection on AdminData.SchedulerApiConfigOAuth;
     entity CandidateInstitutes          as projection on StandardAppService.CandidateInstitutes;
 
     @open
