@@ -612,6 +612,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         *,
         Country: redirected to Country,
         User: redirected to Users,
+        Country.CountryName,
         User.UserName,
         User.UserEmail
     };
