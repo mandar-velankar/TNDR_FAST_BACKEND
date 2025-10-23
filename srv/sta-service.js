@@ -165,7 +165,9 @@ module.exports = async (srv) => {
 		PriceConditionInvoiceView,
 		PriceConditionRebateView,
 		PriceConditionDiscountConditionsView,
-		PriceConditionFOCView
+		PriceConditionFOCView,
+		RelatedInstitutes,
+		CandidateInstitutes
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -7844,9 +7846,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		for (const product of filteredWonProducts) {
 
 			const ccmContractId = uuidv4();
+			const ccmCustomerId = uuidv4();
 
 			const [contractRow] = await tx.run(SELECT.from(ConditionContractsView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
 			if (!contractRow) continue;
+
+			const customerHierarchyRows = await tx.run(SELECT.from(CandidateInstitutes).where({ BaseInstituteID: contractRow.InstituteID, RelationType: 'CHILD'}));
 
 			const materialRows = await tx.run(SELECT.from(CCMMaterilsView).where({ ProductCode: product.ProductCode }));
 
@@ -7896,6 +7901,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					EANUPCCode: toStr(contractRow.EAN),
 					PackFactor: toDecimal(contractRow.PACKFACTOR),
 					CCMCustomer: {
+						ID: ccmCustomerId,
 						InstituteID: toStr(contractRow.InstituteID),
 						AssortmentReference: toStr(rootRow.External_InstituteId),
 						CustomerID: toStr(contractRow.CustomerID),
@@ -7904,7 +7910,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						InstituteName: toStr(contractRow.InstituteName),
 						CCMContract_ID: ccmContractId,
 						validFrom: today,
-						validTo: "9999-12-31"
+						validTo: "9999-12-31",
+						CustomerHierarchy: (customerHierarchyRows?.length ? customerHierarchyRows : []).map(row => ({
+							InstituteID: toStr(row.CandidateInstituteID ?? contractRow.InstituteID),
+							ParentInstituteID: toStr(contractRow.InstituteID),
+							CustomerID: toStr(row.CustomerID ?? contractRow.CustomerID),
+							ParentCustomerID: toStr(contractRow.CustomerID),
+							InstituteName:toStr(row.InstituteName ?? contractRow.InstituteName),
+							ParentInstituteName:toStr(contractRow.InstituteName),
+							Excluded: false,
+							CCMContractID: ccmContractId,
+							CCMCustomer_ID: ccmCustomerId
+						}))
 					},
 					CCMMaterial: materialRows.map(row => ({
 						CountryCode: toStr(row.CountryCode),

@@ -34,6 +34,7 @@
           <NavigationPropertyBinding Path="FastConditionContracts" Target="FastConditionContracts"/>
         </EntitySet>
         <EntitySet Name="CCMCustomer" EntityType="ConditionContract.CCMCustomer">
+          <NavigationPropertyBinding Path="CustomerHierarchy" Target="CustomerHierarchy"/>
           <NavigationPropertyBinding Path="CCMContract" Target="CCMContract"/>
         </EntitySet>
         <EntitySet Name="CCMMaterial" EntityType="ConditionContract.CCMMaterial">
@@ -66,6 +67,12 @@
         </EntitySet>
         <EntitySet Name="ContractItemGUID" EntityType="ConditionContract.ContractItemGUID">
           <NavigationPropertyBinding Path="CCMContract" Target="CCMContract"/>
+        </EntitySet>
+        <EntitySet Name="ConditionContractsLog" EntityType="ConditionContract.ConditionContractsLog">
+          <NavigationPropertyBinding Path="CCMContract" Target="CCMContract"/>
+        </EntitySet>
+        <EntitySet Name="CustomerHierarchy" EntityType="ConditionContract.CustomerHierarchy">
+          <NavigationPropertyBinding Path="CCMCustomer" Target="CCMCustomer"/>
         </EntitySet>
         <EntitySet Name="FastConditionContractsView" EntityType="ConditionContract.FastConditionContractsView">
           <NavigationPropertyBinding Path="CCMContract" Target="CCMContract"/>
@@ -106,10 +113,16 @@
         <EntitySet Name="BrandsView" EntityType="ConditionContract.BrandsView"/>
         <EntitySet Name="BrandProductsView" EntityType="ConditionContract.BrandProductsView"/>
         <EntitySet Name="ExistingContractInvoicePrices" EntityType="ConditionContract.ExistingContractInvoicePrices"/>
+        <EntitySet Name="CurrentCCMPricingView" EntityType="ConditionContract.CurrentCCMPricingView"/>
         <FunctionImport Name="getInstituteData" Function="ConditionContract.getInstituteData"/>
+        <FunctionImport Name="getESUsers" Function="ConditionContract.getESUsers"/>
+        <FunctionImport Name="getUserCountries" Function="ConditionContract.getUserCountries"/>
         <ActionImport Name="createCCMContract" Action="ConditionContract.createCCMContract"/>
         <ActionImport Name="createAllCCMContract" Action="ConditionContract.createAllCCMContract"/>
         <ActionImport Name="sendFOCToInteractMail" Action="ConditionContract.sendFOCToInteractMail"/>
+        <ActionImport Name="terminateCCMContract" Action="ConditionContract.terminateCCMContract"/>
+        <ActionImport Name="getSAPSalesOrderSimulation" Action="ConditionContract.getSAPSalesOrderSimulation"/>
+        <ActionImport Name="ignoreCurrentCCMPrice" Action="ConditionContract.ignoreCurrentCCMPrice"/>
       </EntityContainer>
       <EntityType Name="FastConditionContracts">
         <Key>
@@ -171,6 +184,7 @@
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="ProductName" Type="Edm.String"/>
         <Property Name="UoM" Type="Edm.String"/>
+        <Property Name="PackFactor" Type="Edm.Double"/>
         <Property Name="NewMaterialNumber" Type="Edm.String"/>
         <Property Name="BrandID" Type="Edm.String"/>
         <Property Name="BrandName" Type="Edm.String"/>
@@ -188,6 +202,8 @@
         <Property Name="Extension" Type="Edm.Boolean"/>
         <Property Name="ExtensionPeriod" Type="Edm.String"/>
         <Property Name="CreationDate" Type="Edm.Date"/>
+        <Property Name="Cancelled" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="CancellationComment" Type="Edm.String"/>
         <NavigationProperty Name="CCMCustomer" Type="ConditionContract.CCMCustomer" Partner="CCMContract">
           <OnDelete Action="Cascade"/>
           <ReferentialConstraint Property="ID" ReferencedProperty="CCMContract_ID"/>
@@ -229,10 +245,13 @@
         <Property Name="validTo" Type="Edm.DateTimeOffset" Precision="7"/>
         <Property Name="InstituteID" Type="Edm.String"/>
         <Property Name="AssortmentReference" Type="Edm.String"/>
-        <Property Name="CustomerID" Type="Edm.Int32"/>
+        <Property Name="CustomerID" Type="Edm.String"/>
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="InstituteType" Type="Edm.String"/>
         <Property Name="InstituteName" Type="Edm.String"/>
+        <NavigationProperty Name="CustomerHierarchy" Type="Collection(ConditionContract.CustomerHierarchy)">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
         <NavigationProperty Name="CCMContract" Type="ConditionContract.CCMContract">
           <ReferentialConstraint Property="CCMContract_ID" ReferencedProperty="ID"/>
         </NavigationProperty>
@@ -270,6 +289,7 @@
         <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
         <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
         <Property Name="ConditionType" Type="Edm.String"/>
+        <Property Name="Currency" Type="Edm.String"/>
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="SoldToParty" Type="Edm.String"/>
         <Property Name="Material" Type="Edm.String"/>
@@ -281,6 +301,20 @@
         <Property Name="YD06" Type="Edm.Double"/>
         <Property Name="YD02" Type="Edm.Double"/>
         <Property Name="SapTax" Type="Edm.Double"/>
+        <Property Name="Tax" Type="Edm.Double"/>
+        <Property Name="ConfidentialPrice" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="RoyalDecree" Type="Edm.String"/>
+        <Property Name="RoyalDecreeValue" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="RoyalDecreeIncl" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="NetPriceWithoutTaxAfterDeductionRD" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="NetPriceWithTaxAfterDeductionRD" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="NetPriceWithoutTax" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="NetPriceWithTax" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="MaximumPrice" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="RequestedVolume" Type="Edm.Int32"/>
+        <Property Name="RentalPrice" Type="Edm.Double"/>
+        <Property Name="MonthlyRentPerUnit" Type="Edm.Double"/>
+        <Property Name="AnnualValue" Type="Edm.Double"/>
         <NavigationProperty Name="CCMContract" Type="ConditionContract.CCMContract">
           <ReferentialConstraint Property="CCMContract_ID" ReferencedProperty="ID"/>
         </NavigationProperty>
@@ -487,6 +521,46 @@
         </NavigationProperty>
         <Property Name="CCMContract_ID" Type="Edm.Guid"/>
       </EntityType>
+      <EntityType Name="ConditionContractsLog">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="ContractType" Type="Edm.String"/>
+        <Property Name="ContractReference" Type="Edm.String"/>
+        <Property Name="PayloadType" Type="Edm.String"/>
+        <Property Name="PayloadToSAP" Type="Edm.String"/>
+        <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="createdAt" Type="Edm.Date"/>
+        <Property Name="createdBy" Type="Edm.String"/>
+        <NavigationProperty Name="CCMContract" Type="ConditionContract.CCMContract">
+          <ReferentialConstraint Property="CCMContract_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="CCMContract_ID" Type="Edm.Guid"/>
+      </EntityType>
+      <EntityType Name="CustomerHierarchy">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="InstituteID" Type="Edm.String"/>
+        <Property Name="ParentInstituteID" Type="Edm.String"/>
+        <Property Name="CustomerID" Type="Edm.String"/>
+        <Property Name="ParentCustomerID" Type="Edm.String"/>
+        <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="ParentInstituteName" Type="Edm.String"/>
+        <Property Name="Excluded" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="CCMContractID" Type="Edm.Guid"/>
+        <NavigationProperty Name="CCMCustomer" Type="ConditionContract.CCMCustomer">
+          <ReferentialConstraint Property="CCMCustomer_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="CCMCustomer_ID" Type="Edm.Guid"/>
+      </EntityType>
       <EntityType Name="FastConditionContractsView">
         <Key>
           <PropertyRef Name="ID"/>
@@ -557,7 +631,7 @@
         <Property Name="InstituteName" Type="Edm.String"/>
         <Property Name="InstituteType" Type="Edm.String"/>
         <Property Name="InstituteID" Type="Edm.String"/>
-        <Property Name="CustomerID" Type="Edm.Int32"/>
+        <Property Name="CustomerID" Type="Edm.String"/>
       </EntityType>
       <EntityType Name="CCMContractInformationDetailView">
         <Key>
@@ -619,6 +693,7 @@
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="ProductName" Type="Edm.String"/>
         <Property Name="UoM" Type="Edm.String"/>
+        <Property Name="PackFactor" Type="Edm.Double"/>
         <Property Name="NewMaterialNumber" Type="Edm.String"/>
         <Property Name="BrandID" Type="Edm.String"/>
         <Property Name="BrandName" Type="Edm.String"/>
@@ -636,6 +711,8 @@
         <Property Name="Extension" Type="Edm.Boolean"/>
         <Property Name="ExtensionPeriod" Type="Edm.String"/>
         <Property Name="CreationDate" Type="Edm.Date"/>
+        <Property Name="Cancelled" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="CancellationComment" Type="Edm.String"/>
         <NavigationProperty Name="CCMCustomer" Type="ConditionContract.CCMCustomer">
           <OnDelete Action="Cascade"/>
         </NavigationProperty>
@@ -681,6 +758,7 @@
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="ProductName" Type="Edm.String"/>
         <Property Name="UoM" Type="Edm.String"/>
+        <Property Name="PackFactor" Type="Edm.Double"/>
         <Property Name="NewMaterialNumber" Type="Edm.String"/>
         <Property Name="BrandID" Type="Edm.String"/>
         <Property Name="BrandName" Type="Edm.String"/>
@@ -698,6 +776,8 @@
         <Property Name="Extension" Type="Edm.Boolean"/>
         <Property Name="ExtensionPeriod" Type="Edm.String"/>
         <Property Name="CreationDate" Type="Edm.Date"/>
+        <Property Name="Cancelled" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="CancellationComment" Type="Edm.String"/>
         <NavigationProperty Name="CCMCustomer" Type="ConditionContract.CCMCustomer">
           <OnDelete Action="Cascade"/>
         </NavigationProperty>
@@ -743,6 +823,8 @@
         <Property Name="YD02" Type="Edm.Double"/>
         <Property Name="YD06" Type="Edm.Double"/>
         <Property Name="YP10" Type="Edm.Double"/>
+        <Property Name="UoM" Type="Edm.String"/>
+        <Property Name="PackFactor" Type="Edm.Double"/>
         <Property Name="RequestedVolume" Type="Edm.Int32"/>
         <Property Name="ConditionValidityStartDate" Type="Edm.Date"/>
         <Property Name="ConditionValidityEndDate" Type="Edm.Date"/>
@@ -979,7 +1061,43 @@
         <Property Name="RentalPrice" Type="Edm.Double"/>
         <Property Name="AnnualValue" Type="Edm.Double"/>
       </EntityType>
+      <EntityType Name="CurrentCCMPricingView">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="CountryCode" Type="Edm.String"/>
+        <Property Name="ConditionType" Type="Edm.String"/>
+        <Property Name="Currency" Type="Edm.String"/>
+        <Property Name="YP00" Type="Edm.Double"/>
+        <Property Name="YP04" Type="Edm.Double"/>
+        <Property Name="YP10" Type="Edm.Double"/>
+        <Property Name="YD75" Type="Edm.Double"/>
+        <Property Name="YD30" Type="Edm.Double"/>
+        <Property Name="YD06" Type="Edm.Double"/>
+        <Property Name="YD02" Type="Edm.Double"/>
+        <Property Name="Tax" Type="Edm.Double"/>
+        <Property Name="ConfidentialPrice" Type="Edm.Double"/>
+        <Property Name="RoyalDecree" Type="Edm.String"/>
+        <Property Name="RoyalDecreeValue" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="RoyalDecreeIncl" Type="Edm.Boolean"/>
+        <Property Name="NetPriceWithoutTaxAfterDeductionRD" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="NetPriceWithTaxAfterDeductionRD" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="NetPriceWithoutTax" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="NetPriceWithTax" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="MaximumPrice" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="RequestedVolume" Type="Edm.Int32"/>
+        <Property Name="RentalPrice" Type="Edm.Double"/>
+        <Property Name="MonthlyRentPerUnit" Type="Edm.Double"/>
+        <Property Name="AnnualValue" Type="Edm.Double"/>
+      </EntityType>
       <Function Name="getInstituteData" IsBound="false" IsComposable="false">
+        <ReturnType Type="Edm.String"/>
+      </Function>
+      <Function Name="getESUsers" IsBound="false" IsComposable="false">
+        <ReturnType Type="Edm.String"/>
+      </Function>
+      <Function Name="getUserCountries" IsBound="false" IsComposable="false">
         <ReturnType Type="Edm.String"/>
       </Function>
       <Action Name="createCCMContract" IsBound="false">
@@ -998,6 +1116,22 @@
         <Parameter Name="ProductCode" Type="Edm.String"/>
         <ReturnType Type="Edm.String"/>
       </Action>
+      <Action Name="terminateCCMContract" IsBound="false">
+        <Parameter Name="FastCCMContractId" Type="Edm.Guid"/>
+        <Parameter Name="CCMContractID" Type="Edm.Guid"/>
+        <Parameter Name="ProductCode" Type="Edm.String"/>
+        <Parameter Name="TerminationDate" Type="Edm.Date"/>
+        <Parameter Name="CancellationNote" Type="Edm.String"/>
+        <ReturnType Type="Edm.String"/>
+      </Action>
+      <Action Name="getSAPSalesOrderSimulation" IsBound="false">
+        <Parameter Name="CCMContractID" Type="Edm.Guid"/>
+        <ReturnType Type="Edm.String"/>
+      </Action>
+      <Action Name="ignoreCurrentCCMPrice" IsBound="false">
+        <Parameter Name="CCMContractID" Type="Edm.Guid"/>
+        <ReturnType Type="Edm.String"/>
+      </Action>
       <Annotations Target="ConditionContract.FastConditionContracts/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
       </Annotations>
@@ -1006,28 +1140,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.FastConditionContracts/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.FastConditionContracts/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.FastConditionContracts/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContract/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1037,28 +1171,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContract/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContract/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContract/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMCustomer/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1068,28 +1202,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMCustomer/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMCustomer/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMCustomer/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMMaterial/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1099,28 +1233,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMMaterial/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMMaterial/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMMaterial/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CurrentInvoicePrice/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1130,28 +1264,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CurrentInvoicePrice/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CurrentInvoicePrice/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CurrentInvoicePrice/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionInvoice/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1161,28 +1295,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionInvoice/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionInvoice/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionInvoice/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionRebate/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1192,28 +1326,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionRebate/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionRebate/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionRebate/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionDiscountCondition/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1223,28 +1357,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionDiscountCondition/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionDiscountCondition/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionDiscountCondition/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionFOC/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1254,56 +1388,56 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionFOC/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionFOC/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.PriceConditionFOC/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.SettlementsDate/createdAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.SettlementsDate/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.SettlementsDate/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.SettlementsDate/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.SettlementsDate/CCMContractID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1325,28 +1459,62 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.ContractItemGUID/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.ContractItemGUID/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.ContractItemGUID/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.ConditionContractsLog/ID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CustomerHierarchy/ID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CustomerHierarchy/createdAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="Created On"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CustomerHierarchy/createdBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CustomerHierarchy/modifiedAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CustomerHierarchy/modifiedBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.FastConditionContractsView/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1356,28 +1524,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.FastConditionContractsView/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.FastConditionContractsView/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.FastConditionContractsView/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractView/FastConditionContractsID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1390,28 +1558,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailView/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailView/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailView/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractProductsView/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1421,28 +1589,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractProductsView/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractProductsView/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractProductsView/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailDetailView/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1452,28 +1620,28 @@
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+        <Annotation Term="Common.Label" String="Created On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailDetailView/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Created By"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailDetailView/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+        <Annotation Term="Common.Label" String="Changed On"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailDetailView/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
-        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
       <Annotations Target="ConditionContract.ContractPayloadView/FastConditionContractID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1510,6 +1678,78 @@
       </Annotations>
       <Annotations Target="ConditionContract.ExistingContractInfo/CCMContractID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/ID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/ConditionType">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/Currency">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/YP00">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/YP04">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/YP10">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/YD75">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/YD30">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/YD06">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/YD02">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/Tax">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/ConfidentialPrice">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/RoyalDecree">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/RoyalDecreeValue">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/RoyalDecreeIncl">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/NetPriceWithoutTaxAfterDeductionRD">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/NetPriceWithTaxAfterDeductionRD">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/NetPriceWithoutTax">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/NetPriceWithTax">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/MaximumPrice">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/RequestedVolume">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/RentalPrice">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/MonthlyRentPerUnit">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CurrentCCMPricingView/AnnualValue">
+        <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
     </Schema>
   </edmx:DataServices>
