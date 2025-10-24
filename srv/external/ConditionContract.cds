@@ -1,4 +1,4 @@
-/* checksum : c57bcf8f7dd768565b51d7de33a99c15 */
+/* checksum : 2d74f2f64d707d758d364a8cf85ae577 */
 @cds.external : true
 function ConditionContract.getInstituteData() returns LargeString;
 
@@ -777,6 +777,7 @@ entity ConditionContract.CustomerHierarchy {
   ParentCustomerID : LargeString;
   InstituteName : LargeString;
   ParentInstituteName : LargeString;
+  AssortmentReference : LargeString;
   Excluded : Boolean default false;
   CCMContractID : UUID;
   @cds.ambiguous : 'missing on condition?'

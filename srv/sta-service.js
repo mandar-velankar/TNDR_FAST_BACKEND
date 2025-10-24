@@ -7918,6 +7918,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							ParentCustomerID: toStr(contractRow.CustomerID),
 							InstituteName:toStr(row.InstituteName ?? contractRow.InstituteName),
 							ParentInstituteName:toStr(contractRow.InstituteName),
+							AssortmentReference: toStr(rootRow.External_InstituteId),
 							Excluded: false,
 							CCMContractID: ccmContractId,
 							CCMCustomer_ID: ccmCustomerId

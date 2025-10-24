@@ -554,6 +554,7 @@
         <Property Name="ParentCustomerID" Type="Edm.String"/>
         <Property Name="InstituteName" Type="Edm.String"/>
         <Property Name="ParentInstituteName" Type="Edm.String"/>
+        <Property Name="AssortmentReference" Type="Edm.String"/>
         <Property Name="Excluded" Type="Edm.Boolean" DefaultValue="false"/>
         <Property Name="CCMContractID" Type="Edm.Guid"/>
         <NavigationProperty Name="CCMCustomer" Type="ConditionContract.CCMCustomer">
