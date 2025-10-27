@@ -11,12 +11,10 @@ using { com.bayer.SXTENDER.BrazilContractingData } from './BrazilContractingData
 
 entity LatestApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals{
     key approvals.OfferId,
-    key approvals.ApproverEmailID,
     key approvals.ApproverType,
     max(approvals.Statustime) as MaxStatusTime:DateTime
 }where approvals.Active = 1
 group by approvals.OfferId,
-    approvals.ApproverEmailID,
     approvals.ApproverType;
 
 entity ApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals
@@ -24,7 +22,6 @@ inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
-    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 inner join MasterData.PT_TMCTRY as country
     on country.CountryCode = approvals.CountryCode
@@ -239,7 +236,6 @@ inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
-    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 left join OfferLatestApprovalStatus as offerLatestApprStatus
     on offerLatestApprStatus.OfferID = approvals.OfferId
@@ -887,6 +883,7 @@ inner join ApprovalRequests as approvalRequest
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
     and approvalRequest.ApprovalStatus = 'Approved'
+    and approvalRequest.REQUIRED_ACTION = 'Approval'
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
@@ -912,6 +909,7 @@ inner join ApprovalRequests as approvalRequest
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
     and approvalRequest.ApprovalStatus = 'Approved'
+    and approvalRequest.REQUIRED_ACTION = 'Approval'
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
@@ -3774,7 +3772,12 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                             then 0
                     when
                         count(approvals.ApprovalStatus) > 0
-                        then 1
+                        then
+                            case 
+                                when sum(case when approvals.ApprovalStatus = 'Rejected' then 1 else 0 end) > 0
+                                then 2
+                                else 1
+                            end
                     else 2	
                 end as approvedStatus: Integer
     } group by  offer.OfferID,

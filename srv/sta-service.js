@@ -4010,6 +4010,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 		let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
 		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
+		let tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: offer.TENDERID}));
 
 		//where statement
 		let whereApproverType = {
@@ -4102,7 +4103,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }));
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID}));
+				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID, ContractDuration: {in: [tender.Custom_Integer_1, tender.Custom_Integer_2, tender.Custom_Integer_3]}}));
 				return productCondition;		
 			}));
 			/*end of ProductCondition information */

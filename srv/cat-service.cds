@@ -475,7 +475,6 @@ service CatalogService @(path : 'tender')@(requires : [
             content   : LargeBinary @Core.MediaType : mediaType; //'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             mediaType : String      @Core.IsMediaType;
     }
-
     //action sendMail (sRecipient:String, sBody:String) returns Boolean;
     action sendMail(sRecipient : String, sSubject : String, sTemplate : String) returns Boolean;
     function getMailTemplate(countryCode : String, language : String, offerId : String) returns LargeString;
