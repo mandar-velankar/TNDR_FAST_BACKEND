@@ -2051,27 +2051,39 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         parentRel.ParentInstituteID as ParentInstituteID
     } where inst.CountryCode = 'ES' and inst.ActiveRecord = 'Yes';
 
-    entity CandidateInstitutes as select from RelatedInstitutes
+    entity CandidateInstitutes as select from RelatedInstitutes as rel
+        left join PT_TMINST as childInst
+            on childInst.InstituteID = rel.ChildInstituteID
     {
-        BaseInstituteID,
-        ChildInstituteID as CandidateInstituteID,
-        'CHILD' as RelationType:String
+        rel.BaseInstituteID,
+        rel.ChildInstituteID as CandidateInstituteID,
+        childInst.CustomerID,
+        childInst.InstituteName,  
+        'CHILD' as RelationType : String
     }
-    where ChildInstituteID is not null
+    where rel.ChildInstituteID is not null
 
-    union all select from RelatedInstitutes
+    union select from RelatedInstitutes as rel
+        left join PT_TMINST as parentInst
+            on parentInst.InstituteID = rel.ParentInstituteID
     {
-        BaseInstituteID,
-        ParentInstituteID as CandidateInstituteID,
-        'PARENT' as RelationType:String
+        rel.BaseInstituteID,
+        rel.ParentInstituteID as CandidateInstituteID,
+        parentInst.CustomerID,
+        parentInst.InstituteName,   
+        'PARENT' as RelationType : String
     }
-    where ParentInstituteID is not null
+    where rel.ParentInstituteID is not null
 
-    union all select from RelatedInstitutes
+    union select from RelatedInstitutes as rel
+        left join PT_TMINST as baseInst
+            on baseInst.InstituteID = rel.BaseInstituteID
     {
-        BaseInstituteID,
-        BaseInstituteID as CandidateInstituteID,
-        'SELF' as RelationType:String
+        rel.BaseInstituteID,
+        rel.BaseInstituteID as CandidateInstituteID,
+        baseInst.CustomerID, 
+        baseInst.InstituteName,
+        'SELF' as RelationType : String
     };
     
     action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String, packFactor: Double, UoM: String) returns String;
