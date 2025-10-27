@@ -1,6 +1,12 @@
-/* checksum : 6258f5a9b927797070f3d3147d1b94e6 */
+/* checksum : 2d74f2f64d707d758d364a8cf85ae577 */
 @cds.external : true
 function ConditionContract.getInstituteData() returns LargeString;
+
+@cds.external : true
+function ConditionContract.getESUsers() returns LargeString;
+
+@cds.external : true
+function ConditionContract.getUserCountries() returns LargeString;
 
 @cds.external : true
 action ConditionContract.createCCMContract(
@@ -22,6 +28,25 @@ action ConditionContract.sendFOCToInteractMail(
 ) returns LargeString;
 
 @cds.external : true
+action ConditionContract.terminateCCMContract(
+  FastCCMContractId : UUID,
+  CCMContractID : UUID,
+  ProductCode : LargeString,
+  TerminationDate : Date,
+  CancellationNote : LargeString
+) returns LargeString;
+
+@cds.external : true
+action ConditionContract.getSAPSalesOrderSimulation(
+  CCMContractID : UUID
+) returns LargeString;
+
+@cds.external : true
+action ConditionContract.ignoreCurrentCCMPrice(
+  CCMContractID : UUID
+) returns LargeString;
+
+@cds.external : true
 @cds.persistence.skip : true
 entity ConditionContract.FastConditionContracts {
   @Core.ComputedDefaultValue : true
@@ -32,27 +57,27 @@ entity ConditionContract.FastConditionContracts {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   TenderID : LargeString;
   OfferID : LargeString;
@@ -100,27 +125,27 @@ entity ConditionContract.CCMContract {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
@@ -133,6 +158,7 @@ entity ConditionContract.CCMContract {
   CountryCode : LargeString;
   ProductName : LargeString;
   UoM : LargeString;
+  PackFactor : Double;
   NewMaterialNumber : LargeString;
   BrandID : LargeString;
   BrandName : LargeString;
@@ -150,6 +176,8 @@ entity ConditionContract.CCMContract {
   Extension : Boolean;
   ExtensionPeriod : LargeString;
   CreationDate : Date;
+  Cancelled : Boolean default false;
+  CancellationComment : LargeString;
   @cds.ambiguous : 'missing on condition?'
   CCMCustomer : Composition of one ConditionContract.CCMCustomer on CCMCustomer.CCMContract_ID = ID;
   @cds.ambiguous : 'missing on condition?'
@@ -180,27 +208,27 @@ entity ConditionContract.CCMCustomer {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
@@ -210,10 +238,12 @@ entity ConditionContract.CCMCustomer {
   validTo : Timestamp;
   InstituteID : LargeString;
   AssortmentReference : LargeString;
-  CustomerID : Integer;
+  CustomerID : LargeString;
   CountryCode : LargeString;
   InstituteType : LargeString;
   InstituteName : LargeString;
+  @cds.ambiguous : 'missing on condition?'
+  CustomerHierarchy : Composition of many ConditionContract.CustomerHierarchy;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
   CCMContract_ID : UUID;
@@ -230,27 +260,27 @@ entity ConditionContract.CCMMaterial {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
@@ -280,29 +310,30 @@ entity ConditionContract.CurrentInvoicePrice {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   ConditionType : LargeString;
+  Currency : LargeString;
   CountryCode : LargeString;
   SoldToParty : LargeString;
   Material : LargeString;
@@ -314,6 +345,20 @@ entity ConditionContract.CurrentInvoicePrice {
   YD06 : Double;
   YD02 : Double;
   SapTax : Double;
+  Tax : Double;
+  ConfidentialPrice : Decimal;
+  RoyalDecree : LargeString;
+  RoyalDecreeValue : Decimal;
+  RoyalDecreeIncl : Boolean default false;
+  NetPriceWithoutTaxAfterDeductionRD : Decimal;
+  NetPriceWithTaxAfterDeductionRD : Decimal;
+  NetPriceWithoutTax : Decimal;
+  NetPriceWithTax : Decimal;
+  MaximumPrice : Decimal;
+  RequestedVolume : Integer;
+  RentalPrice : Double;
+  MonthlyRentPerUnit : Double;
+  AnnualValue : Double;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
   CCMContract_ID : UUID;
@@ -330,27 +375,27 @@ entity ConditionContract.PriceConditionInvoice {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
@@ -401,27 +446,27 @@ entity ConditionContract.PriceConditionRebate {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
@@ -460,27 +505,27 @@ entity ConditionContract.PriceConditionDiscountCondition {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   Volume : Integer;
   Discount : Double;
@@ -502,27 +547,27 @@ entity ConditionContract.PriceConditionFOC {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
@@ -556,27 +601,27 @@ entity ConditionContract.SettlementsDate {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @Core.ComputedDefaultValue : true
   key CCMContractID : UUID not null;
@@ -644,27 +689,27 @@ entity ConditionContract.ContractItemGUID {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   ConditionDocument : LargeString;
   CustomerID : LargeString;
@@ -673,6 +718,71 @@ entity ConditionContract.ContractItemGUID {
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
   CCMContract_ID : UUID;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.ConditionContractsLog {
+  @Core.ComputedDefaultValue : true
+  key ID : UUID not null;
+  ContractNumber : LargeString;
+  ContractType : LargeString;
+  ContractReference : LargeString;
+  PayloadType : LargeString;
+  PayloadToSAP : LargeString;
+  Synchronized : Boolean default false;
+  createdAt : Date;
+  createdBy : LargeString;
+  @cds.ambiguous : 'missing on condition?'
+  CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
+  CCMContract_ID : UUID;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.CustomerHierarchy {
+  @Core.ComputedDefaultValue : true
+  key ID : UUID not null;
+  @odata.Precision : 7
+  @odata.Type : 'Edm.DateTimeOffset'
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Immutable : true
+  @Core.Computed : true
+  @Common.Label : 'Created On'
+  createdAt : Timestamp;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Immutable : true
+  @Core.Computed : true
+  @Common.Label : 'Created By'
+  createdBy : String(255);
+  @odata.Precision : 7
+  @odata.Type : 'Edm.DateTimeOffset'
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed On'
+  modifiedAt : Timestamp;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed By'
+  modifiedBy : String(255);
+  InstituteID : LargeString;
+  ParentInstituteID : LargeString;
+  CustomerID : LargeString;
+  ParentCustomerID : LargeString;
+  InstituteName : LargeString;
+  ParentInstituteName : LargeString;
+  AssortmentReference : LargeString;
+  Excluded : Boolean default false;
+  CCMContractID : UUID;
+  @cds.ambiguous : 'missing on condition?'
+  CCMCustomer : Association to one ConditionContract.CCMCustomer on CCMCustomer.ID = CCMCustomer_ID;
+  CCMCustomer_ID : UUID;
 };
 
 @cds.external : true
@@ -686,27 +796,27 @@ entity ConditionContract.FastConditionContractsView {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   TenderID : LargeString;
   OfferID : LargeString;
@@ -769,7 +879,7 @@ entity ConditionContract.CCMContractView {
   InstituteName : LargeString;
   InstituteType : LargeString;
   InstituteID : LargeString;
-  CustomerID : Integer;
+  CustomerID : LargeString;
 };
 
 @cds.external : true
@@ -783,27 +893,27 @@ entity ConditionContract.CCMContractInformationDetailView {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   TenderID : LargeString;
   OfferID : LargeString;
@@ -851,27 +961,27 @@ entity ConditionContract.CCMContractProductsView {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
@@ -884,6 +994,7 @@ entity ConditionContract.CCMContractProductsView {
   CountryCode : LargeString;
   ProductName : LargeString;
   UoM : LargeString;
+  PackFactor : Double;
   NewMaterialNumber : LargeString;
   BrandID : LargeString;
   BrandName : LargeString;
@@ -901,6 +1012,8 @@ entity ConditionContract.CCMContractProductsView {
   Extension : Boolean;
   ExtensionPeriod : LargeString;
   CreationDate : Date;
+  Cancelled : Boolean default false;
+  CancellationComment : LargeString;
   @cds.ambiguous : 'missing on condition?'
   CCMCustomer : Composition of one ConditionContract.CCMCustomer;
   @cds.ambiguous : 'missing on condition?'
@@ -934,27 +1047,27 @@ entity ConditionContract.CCMContractInformationDetailDetailView {
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedAt}'
+  @Common.Label : 'Created On'
   createdAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Immutable : true
   @Core.Computed : true
-  @Common.Label : '{i18n>CreatedBy}'
+  @Common.Label : 'Created By'
   createdBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedAt}'
+  @Common.Label : 'Changed On'
   modifiedAt : Timestamp;
-  /** {i18n>UserID.Description} */
+  /** User's unique ID */
   @UI.HiddenFilter : true
   @UI.ExcludeFromNavigationContext : true
   @Core.Computed : true
-  @Common.Label : '{i18n>ChangedBy}'
+  @Common.Label : 'Changed By'
   modifiedBy : String(255);
   @odata.Precision : 7
   @odata.Type : 'Edm.DateTimeOffset'
@@ -967,6 +1080,7 @@ entity ConditionContract.CCMContractInformationDetailDetailView {
   CountryCode : LargeString;
   ProductName : LargeString;
   UoM : LargeString;
+  PackFactor : Double;
   NewMaterialNumber : LargeString;
   BrandID : LargeString;
   BrandName : LargeString;
@@ -984,6 +1098,8 @@ entity ConditionContract.CCMContractInformationDetailDetailView {
   Extension : Boolean;
   ExtensionPeriod : LargeString;
   CreationDate : Date;
+  Cancelled : Boolean default false;
+  CancellationComment : LargeString;
   @cds.ambiguous : 'missing on condition?'
   CCMCustomer : Composition of one ConditionContract.CCMCustomer;
   @cds.ambiguous : 'missing on condition?'
@@ -1021,6 +1137,8 @@ entity ConditionContract.ContractPayloadView {
   YD02 : Double;
   YD06 : Double;
   YP10 : Double;
+  UoM : LargeString;
+  PackFactor : Double;
   RequestedVolume : Integer;
   ConditionValidityStartDate : Date;
   ConditionValidityEndDate : Date;
@@ -1258,6 +1376,60 @@ entity ConditionContract.ExistingContractInvoicePrices {
   NetPriceWithTax : Decimal;
   MaximumPrice : Decimal;
   RentalPrice : Double;
+  AnnualValue : Double;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.CurrentCCMPricingView {
+  @Core.ComputedDefaultValue : true
+  key ID : UUID not null;
+  CountryCode : LargeString;
+  @Core.Computed : true
+  ConditionType : LargeString;
+  @Core.Computed : true
+  Currency : LargeString;
+  @Core.Computed : true
+  YP00 : Double;
+  @Core.Computed : true
+  YP04 : Double;
+  @Core.Computed : true
+  YP10 : Double;
+  @Core.Computed : true
+  YD75 : Double;
+  @Core.Computed : true
+  YD30 : Double;
+  @Core.Computed : true
+  YD06 : Double;
+  @Core.Computed : true
+  YD02 : Double;
+  @Core.Computed : true
+  Tax : Double;
+  @Core.Computed : true
+  ConfidentialPrice : Double;
+  @Core.Computed : true
+  RoyalDecree : LargeString;
+  @Core.Computed : true
+  RoyalDecreeValue : Decimal;
+  @Core.Computed : true
+  RoyalDecreeIncl : Boolean;
+  @Core.Computed : true
+  NetPriceWithoutTaxAfterDeductionRD : Decimal;
+  @Core.Computed : true
+  NetPriceWithTaxAfterDeductionRD : Decimal;
+  @Core.Computed : true
+  NetPriceWithoutTax : Decimal;
+  @Core.Computed : true
+  NetPriceWithTax : Decimal;
+  @Core.Computed : true
+  MaximumPrice : Decimal;
+  @Core.Computed : true
+  RequestedVolume : Integer;
+  @Core.Computed : true
+  RentalPrice : Double;
+  @Core.Computed : true
+  MonthlyRentPerUnit : Double;
+  @Core.Computed : true
   AnnualValue : Double;
 };
 
