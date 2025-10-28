@@ -29,6 +29,7 @@ service ConditionContractService @(path: 'conditioncontracting')@(requires: [
     entity SchedulerApiConfig           as projection on AdminData.SchedulerApiConfig;
     entity SchedulerApiConfigOAuth      as projection on AdminData.SchedulerApiConfigOAuth;
     entity CandidateInstitutes          as projection on StandardAppService.CandidateInstitutes;
+    entity MasterPrices                 as projection on MasterData.MasterPrices;
 
     @open
     type object {};
