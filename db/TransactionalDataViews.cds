@@ -1608,6 +1608,10 @@ left outer join MasterData.NLPPP as nlppp
 left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as curentSection
 	on curentSection.INSTITUTE_ID = tender.InstituteID
 	and curentSection.ProductCode = product.ProductCode
+left outer join MasterData.PricingPolicy as pricingPolicy 
+    on  pricingPolicy.CountryCode = product.CountryCode
+    and pricingPolicy.ProductPackID   = product.ProductCode
+    and pricingPolicy.InstituteID =  tender.InstituteID
 {
     tender.CountryCode,
     tender.Country.Region,
@@ -1783,7 +1787,9 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     priceCondition.RoyalDecreePercentage_1,
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
-    priceCondition.MarketIncentiveID
+    priceCondition.MarketIncentiveID,
+    @Core.Computed: false
+    ifnull(pricingPolicy.Value, 0) as PricingPolicyValue: Double
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 

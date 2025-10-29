@@ -1442,6 +1442,10 @@ module.exports = async (srv) => {
 					}
 					
 				}
+
+				if (req.data.Region.includes("PACA")) {
+					req.data.OfferPrice && Number(req.data.OfferPrice) < Number(req.data.PricingPolicyValue) && req.error({ code: 404, message: "Offer Price is lower than the Floor Price.", target: "OfferPrice" });
+				}
 			}
 			catch(error){
 				console.error('Error in validation of PriceCondition View before CREATE');
