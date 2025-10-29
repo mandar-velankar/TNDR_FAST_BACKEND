@@ -1605,6 +1605,10 @@ left outer join MasterData.NLPPP as nlppp
 left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as curentSection
 	on curentSection.INSTITUTE_ID = tender.InstituteID
 	and curentSection.ProductCode = product.ProductCode
+left outer join MasterData.PricingPolicy as pricingPolicy 
+    on  pricingPolicy.CountryCode = product.CountryCode
+    and pricingPolicy.ProductPackID   = product.ProductCode
+    and pricingPolicy.InstituteID =  tender.InstituteID
 {
     tender.CountryCode,
     tender.Country.Region,
@@ -1757,7 +1761,29 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     @Core.Computed: false
     ifnull(priceCondition.CurrentTotalDiscountNHI, curentSection.TotalDiscountNHI) as CurrentTotalDiscountNHI: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentTotalDiscountInvoice, curentSection.TotalDiscountInvoice) as CurrentTotalDiscountInvoice: Double
+    ifnull(priceCondition.CurrentTotalDiscountInvoice, curentSection.TotalDiscountInvoice) as CurrentTotalDiscountInvoice: Double,
+    priceCondition.ConfidentialPrice,
+    priceCondition.PVL,
+    priceCondition.RoyalDecree,
+    priceCondition.Liquidation,
+    priceCondition.RefundDate,
+    priceCondition.Settlement.ID as Settlement_ID,
+    priceCondition.PriceConditionCode,
+    priceCondition.Discount as ESDiscount:Double,
+    priceCondition.RoyalDecreeValue,
+    priceCondition.RoyalDecreeIncl,
+    priceCondition.StandardDiscount,
+    priceCondition.AdditionalDiscount,
+    priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
+    priceCondition.NetPriceWithoutTaxAfterDeductionRD,
+    priceCondition.NetPriceWithTaxAfterDeductionRD,
+    priceCondition.NetPriceWithoutTax,
+    priceCondition.NetPriceWithTax,
+    product.MaxPrice as MaximumPrice: Double,
+    priceCondition.MonthlyRentPerUnit,
+    priceCondition.AnnualValue,
+    @Core.Computed: false
+    ifnull(pricingPolicy.Value, 0) as PricingPolicyValue: Double
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
