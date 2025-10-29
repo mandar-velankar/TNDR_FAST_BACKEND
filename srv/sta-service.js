@@ -1352,7 +1352,7 @@ module.exports = async (srv) => {
 		async (req) => {
 			try{
 			// validate form
-				if(req.data.CountryCode !== "AU" && req.data.CountryCode !== "PL"){
+				if(req.data.CountryCode !== "AU" && req.data.CountryCode !== "PL" && !req.data.Region.includes("PACA")){
 					if(req.data.ConditionType === 'PriceWithFOC' || req.data.ConditionType === 'DiscountWithFOC'){
 						req.data.BasePrice = req.data.CountryCode?.includes("HM") ? roundToDecimalPlaces(req.data.BasePrice,4) : req.data.Region === 'MEA' ? roundToDecimalPlaces(req.data.BasePrice,3) : roundToDecimalPlaces(req.data.BasePrice,2);
 					}
