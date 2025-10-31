@@ -304,6 +304,7 @@ service CatalogService @(path : 'tender')@(requires : [
             SPOT_RATE             : Double;
             EFFECTIVEDATE         : Date;
             EXPIRYDATE            : Date;
+            COUNTRY_REGION        : String;
                 };
 
     entity ApprovalProducts {
