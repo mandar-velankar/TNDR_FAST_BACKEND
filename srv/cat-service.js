@@ -3050,7 +3050,8 @@ module.exports = (srv) => {
 			BUDGET_RATE: offerValidation.BUDGET_RATE,
 			SPOT_RATE: offerValidation.SPOT_RATE,
 			EFFECTIVEDATE :offerValidation.EffectiveDate,
-			EXPIRYDATE : offerValidation.ExpiryDate
+			EXPIRYDATE : offerValidation.ExpiryDate,
+			COUNTRY_REGION : offerValidation.COUNTRY_REGION
 		}
 	}
 //EHQUT-201601-INC17103555 Price per unit is rounded to 4 decimals, we need 5 decimals.
